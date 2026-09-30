@@ -328,8 +328,11 @@ def test_scope_is_read_from_the_bytes_given():
     from data_sheets_schema import scope
     assert scope.scope_in(SCOPED, "OWN")["referent_id"] == "https://example.org/own"
     assert scope.scope_in(SCOPED.decode(), "MISSING") is None
-    # As written: no strip, no cast to text (#3447); bools and None dropped.
-    assert scope.in_bundle_of({"in_bundle": ["a", " a ", True, None, 7, "a"]}) == ["a", " a ", 7]
+    # As written: no strip, no cast to text (#3447); bools and None dropped;
+    # nothing merged, so a repeat and 7.0 beside 7 are kept (#3507).
+    assert scope.in_bundle_of({"in_bundle": ["a", " a ", True, None, 7, "a", 7.0]}) \
+        == ["a", " a ", 7, "a", 7.0]
+    assert [type(v) for v in scope.in_bundle_of({"in_bundle": [7, 7.0]})] == [int, float]
     assert scope.in_bundle_of({"in_bundle": "a"}) == ["a"] and scope.in_bundle_of("a") == []
     assert scope.in_bundle_of({"in_bundle": ""}) == [] and scope.in_bundle_of({"in_bundle": 0}) == []
     with pytest.raises(ValueError, match="not readable YAML"):
@@ -382,13 +385,20 @@ def test_in_bundle_matches_sources_exactly_as_check_manifest_does(tmp_path):
 @pytest.mark.parametrize("entry, owner", [
     (b"{id: 12345, in_bundle: promoted}", "12345"),
     (b"{id: x2, manifest_key: 7, in_bundle: promoted}", "7"),
+    # The number 0 is an identifier like any other, not an absent one (#3506).
+    (b"{id: 0, in_bundle: promoted}", "0"),
+    (b"{id: x2, manifest_key: 0, in_bundle: promoted}", "0"),
+    (b"{id: 0, name: '', in_bundle: promoted}", "0"),
 ])
 def test_a_numeric_related_dataset_id_renders(entry, owner):
     inv = ri.inventory(NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - "
                        + entry + b"\n", None, "EXTERNAL")
+    assert inv["scope"]["skipped_entries"] == []
     [related] = inv["related_sources"]
     assert related["source_id"] == "promoted"
-    assert f"declared in_bundle for {owner}, not counted above" in "\n".join(ri.render(inv))
+    text = "\n".join(ri.render(inv))
+    assert f"declared in_bundle for {owner}, not counted above" in text
+    assert "an unnamed dataset" not in text
 
 
 # An entry scope.malformed_in skips -- no identifier at all, or one that is a
@@ -452,3 +462,35 @@ def test_an_entry_named_only_by_its_aliases_records_them(entry, aliases, owner):
     text = "\n".join(ri.render(inv))
     assert f"declared in_bundle for {owner}, not counted above" in text
     assert "an unnamed dataset" not in text
+
+
+# check_manifest reports every in_bundle value it cannot match, one problem
+# each: a repeat, within an entry or across entries, and 7.0 beside 7 (equal
+# to Python, written differently). The inventory's unmatched list is that
+# finding item for item, and the render shows 7.0 as written (#3507). A
+# matched source an entry names twice moves once for that entry.
+REPEATED = NEUTRAL + b"""scope:
+  EXTERNAL:
+    related_but_distinct:
+      - {id: a, in_bundle: [nope, 7, 7.0, promoted, promoted]}
+      - {id: b, in_bundle: nope}
+"""
+
+
+def test_the_unmatched_list_is_check_manifests_finding_item_for_item(tmp_path):
+    from data_sheets_schema import scope
+    inv = ri.inventory(REPEATED, None, "EXTERNAL")
+    unmatched = inv["scope"]["in_bundle_unmatched"]
+    assert unmatched == ["nope", 7, 7.0, "nope"]
+    assert [type(v) for v in unmatched] == [str, int, float, str]
+    [related] = inv["related_sources"]
+    assert related["source_id"] == "promoted"
+    assert [d["id"] for d in related["related_datasets"]] == ["a"]
+    assert "in_bundle names no source of this project: nope, 7, 7.0, nope" in "\n".join(ri.render(inv))
+    manifest = tmp_path / "manifest_3423_3507.yaml"
+    manifest.write_bytes(REPEATED)
+    claimed = sorted(p["problem"] for p in scope.check_manifest(manifest)
+                     if p["project"] == "EXTERNAL" and "claims source" in p["problem"])
+    assert len(claimed) == 4
+    assert claimed == sorted(f"related dataset claims source {v!r} is in this bundle; the "
+                             f"manifest lists no such source for EXTERNAL" for v in unmatched)

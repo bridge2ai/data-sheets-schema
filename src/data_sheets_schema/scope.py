@@ -97,17 +97,17 @@ def in_bundle_of(entry: Any) -> list[str | int | float]:
     must name none here -- a reader that normalised would move a source
     the checker reports as unmatched. A falsy `in_bundle` names nothing,
     as `check_manifest` skips it; a value that is not an identifier is
-    dropped here and reported by `check_manifest`."""
+    dropped here and reported by `check_manifest`. Nothing is merged
+    either (#3507): `check_manifest` checks every value, so a repeat is
+    kept and `7` and `7.0` -- equal to Python, written differently -- are
+    both kept, in the order written."""
     if not isinstance(entry, dict):
         return []
     src = entry.get("in_bundle")
     if not src:
         return []
-    out: list[str | int | float] = []
-    for value in (list(src) if isinstance(src, (list, tuple)) else [src]):
-        if _is_identifier(value) and value not in out:
-            out.append(value)
-    return out
+    return [value for value in (list(src) if isinstance(src, (list, tuple)) else [src])
+            if _is_identifier(value)]
 
 
 def scope_of(project: str, manifest: Path = MANIFEST) -> dict | None:

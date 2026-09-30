@@ -127,8 +127,12 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     reads), ``declared``. An ``in_bundle`` id the project lists no source
     for moves nothing and is named under ``in_bundle_unmatched`` as
     written. Ids are compared exactly as ``check_manifest`` compares them
-    -- no stripping, no cast to text (#3447) -- so this list is that
-    checker's unmatched-source finding surfaced where its effect would be.
+    -- no stripping, no cast to text (#3447) -- and nothing is merged: one
+    item per value ``check_manifest`` reports, repeats and equal-but-
+    differently-written values (``7`` and ``7.0``) included, in entry and
+    value order (#3507). So this list is that checker's unmatched-source
+    finding surfaced where its effect would be. A source an entry names
+    twice is moved for that entry once.
 
     An entry ``scope.malformed_in`` classifies as skipped (not a mapping, or
     no usable identifier) moves nothing: every other reader of the
@@ -149,6 +153,7 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
                for row in scope_decl.malformed_in(declared) if row["skipped"]}
     moved: dict[str, list[dict]] = {}
     for index, entry in enumerate(related or []):
+        claimed: set[str] = set()      # this entry's moved sources, each once
         if index in skipped:
             status["skipped_entries"].append({"index": index, "problem": skipped[index],
                                               "in_bundle": scope_decl.in_bundle_of(entry)})
@@ -163,10 +168,11 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
                        {"also_known_as": entry.get("also_known_as")}),
                    } if isinstance(entry, dict) else None
         for sid in scope_decl.in_bundle_of(entry):
-            if sid in source_ids and index not in skipped:
-                moved.setdefault(sid, []).append(dataset)
-            elif sid not in source_ids and sid not in status["in_bundle_unmatched"]:
+            if sid not in source_ids:
                 status["in_bundle_unmatched"].append(sid)
+            elif index not in skipped and sid not in claimed:
+                claimed.add(sid)
+                moved.setdefault(sid, []).append(dataset)
     return status, moved
 
 
@@ -230,12 +236,14 @@ def _owner(dataset: dict | None) -> str:
     or id, else its aliases -- an entry identified by ``also_known_as``
     alone is usable to every scope reader, and they are then all that
     names it (#3494). ``str()``: an id or manifest_key a manifest wrote as
-    a number is kept, which ``scope._is_identifier`` admits (#3446)."""
+    a number is kept, which ``scope._is_identifier`` admits (#3446) -- the
+    number 0 included: a value is passed over only when it is absent or
+    blank, never for being falsy (#3506)."""
     if dataset is None:
         return "a malformed entry"
-    named = dataset["manifest_key"] or dataset["name"] or dataset["id"]
-    if named:
-        return str(named)
+    for named in (dataset["manifest_key"], dataset["name"], dataset["id"]):
+        if named is not None and str(named).strip():
+            return str(named)
     if dataset.get("also_known_as"):
         return "a dataset also known as " + " / ".join(dataset["also_known_as"])
     return "an unnamed dataset"
