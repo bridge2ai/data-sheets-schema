@@ -12,7 +12,12 @@ does. Regenerate the table with:
 poetry run python scripts/measure_unhyphenated_line_splits.py --compare-window 10
 ```
 
-The script writes nothing. The 10-line comparison takes about a minute.
+The script writes nothing. It reads each provenance record as `credited`
+does (`attainability.provenance_bundle`, #3579); a record that cannot be
+read is listed under the table and the command exits 1. After review round
+6 the reading was checked against the one before it on the same corpus: 22
+versions named by 279 records, none unreadable, so the table is unchanged.
+The 10-line comparison takes about a minute.
 With `--compare-window 14` the result is the same, but each VOICE version
 takes 45 to 90 seconds instead of 8.
 

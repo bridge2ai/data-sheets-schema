@@ -62,8 +62,11 @@ counts those rows apart from the ones checked, whose zero is a measurement.
 A credit on an item only a route entry marks absent (E1.1, whose persistent-URI
 route no pattern settles) is listed as `credited_on_other_route` for a curator
 to read, and is neither a finding nor a `--strict` failure. An evaluation
-that cannot be read — not UTF-8, not JSON, an element with no `id` — or whose
-record's provenance cannot be read, or names a bundle version whose
+that cannot be read — not UTF-8, not JSON, an element with no `id`, a score
+on an absence item that is not a finite number (a list, a boolean, NaN, an
+integer too large for a float, #3577) — or whose record's provenance cannot
+be read, or sits at a path carrying a NUL byte (in the evaluation's project,
+method or label, #3578), or names a bundle version whose
 attainability file name cannot be looked up — a component too long for
 the file system, or a NUL byte in its path or md5 (#3469, #3541) — is reported on its own row as `unreadable`
 with the file and the error, counted apart, and fails the run with or without
