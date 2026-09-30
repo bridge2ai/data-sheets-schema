@@ -135,7 +135,9 @@ direct arms, and adds annotations that move no class:
   restates `ROR:05gq02987` (#3603); and it starts where the match does:
   before it comes the start of the text, a `mailto:` scheme or a
   character no identifier continues with, so `smith@lab.edu` is not
-  found as the tail of `j.smith@lab.edu` (#3618). A
+  found as the tail of `j.smith@lab.edu` (#3618), and the scheme itself
+  must start an identifier, so `?u=mailto:smith@lab.edu` inside a proxy
+  URL is not found either (#3623). A
   candidate under `source_caveats` is marked `change_of_standing`: the
   value is no longer a claim, only the run's commentary on one. Validated
   on a hand-labelled sample of deleted rows (`RELOCATED_VALIDATION`). No
@@ -152,7 +154,10 @@ direct arms, and adds annotations that move no class:
   judgment (`supported`, `revise`, `metadata`, `unreviewed`), and — as
   #2923 proposed — a value reviewed `supported` is founded only by a
   finding linked to it by path (`review_paths` or `remove_relationship`),
-  never by a finding's free-text `slot` alone.
+  never by a finding's free-text `slot` alone. A review whose claims are
+  not a list of mappings with string verdicts is reported `unusable`, with
+  the row, and judges nothing; the removals are classified as without it
+  (#3624).
 
 The removing phase is the first stage after the last one that still carried
 the value: `reconcile_full`, `repair_full_rN`, or `write` (the last phase
@@ -633,8 +638,11 @@ _IDENTIFIER_END = r"/?[.:]*(?:$|(?=[^" + _IDENTIFIER_CONTINUES + r"]))"
 #: mirrored: the start of the text or a character no identifier continues
 #: with — so `smith@lab.edu` is not found as the tail of `j.smith@lab.edu`,
 #: nor a path inside a longer URL — with one exception, the `mailto:` scheme,
-#: which is set aside on the carrying side as on the deleted one.
-_IDENTIFIER_START = r"(?:(?<=mailto:)|(?<![" + _IDENTIFIER_CONTINUES + r"]))"
+#: which is set aside on the carrying side as on the deleted one. The scheme
+#: is itself held to that start (#3623): `?u=mailto:smith@lab.edu` inside a
+#: proxy URL is part of a longer identifier, as `?u=https://…` is.
+_IDENTIFIER_START = (r"(?:(?<![" + _IDENTIFIER_CONTINUES + r"])mailto:|(?<!["
+                     + _IDENTIFIER_CONTINUES + r"]))")
 
 
 def _folded(text: str) -> str:
@@ -729,7 +737,12 @@ def source_review_judgments(audit: Any, snapshot_sha256: str | None = None
     where every claim is, `metadata` where it was exempted as record
     metadata. None, None where the audit carries no source review; the
     judgments None, with the reason, where it cannot be bound to the
-    snapshot read — another artifact, or other bytes than `snapshot_sha256`."""
+    snapshot read — another artifact, or other bytes than `snapshot_sha256` —
+    or cannot be read: a row whose `claims` is not a list, a claim that is
+    not a mapping, or a verdict that is not a string (#3624). A malformed
+    review is `unusable` and judges nothing; the removals are still
+    classified. A row that is not a mapping or names no pointer is skipped,
+    as before."""
     review = audit.get("source_review") if isinstance(audit, dict) else None
     if review is None:
         return None, None
@@ -748,7 +761,15 @@ def source_review_judgments(audit: Any, snapshot_sha256: str | None = None
         if "claims" not in row and "metadata_reason" in row:
             judged[path] = "metadata"
             continue
-        verdicts = {c.get("verdict") for c in row.get("claims") or [] if isinstance(c, dict)}
+        claims = row.get("claims", [])
+        why = ("its claims are a " + type(claims).__name__ + ", not a list" if not isinstance(claims, list)
+               else "a claim is not a mapping" if not all(isinstance(c, dict) for c in claims)
+               else "a claim's verdict is not a string" if not all(isinstance(c.get("verdict"), str) for c in claims)
+               else None)
+        if why is not None:
+            return {"state": "unusable", "reason": f"the source review's row {row.get('path')} is malformed: "
+                                                   f"{why}"}, None
+        verdicts = {c["verdict"] for c in claims}
         judged[path] = ("revise" if "revise" in verdicts
                         else "supported" if verdicts == {"supported"} else "unreviewed")
     return {"state": "bound" if snapshot_sha256 is not None else "unhashed", "reason": None}, judged

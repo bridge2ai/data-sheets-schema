@@ -1036,6 +1036,26 @@ class Relocation(unittest.TestCase):
         text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
         self.assertIn("starts and ends an identifier", text)
 
+    def test_a_mailto_scheme_counts_only_where_it_starts_an_identifier(self):
+        """#3623: the `mailto:` set aside on the carrying side is held to the
+        same start. Inside a proxy URL's query, after a path or a hyphen, it
+        is part of a longer identifier, as an `https://` URL is there."""
+        mail = "mailto:smith@lab.edu"
+        for hay in ("https://proxy.example.org/?u=mailto:smith@lab.edu", "x-mailto:smith@lab.edu",
+                    "see a/mailto:smith@lab.edu", "id=MAILTO:smith@lab.edu", "lab.mailto:smith@lab.edu"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail), (True, None), hay)
+        for hay in ("mailto:smith@lab.edu", "Write to mailto:smith@lab.edu.", "(mailto:smith@lab.edu)",
+                    "<MAILTO:smith@lab.edu>"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail)[1]["to"], "contact", hay)
+        # Through classify: the proxy case the review reproduced.
+        before = _record(contacts=[{"name": "Sam Smith", "email": mail}],
+                         page="https://proxy.example.org/?u=mailto:smith@lab.edu")
+        after = _record(contacts=[{"name": "Sam Smith"}], page="https://proxy.example.org/?u=mailto:smith@lab.edu")
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "contacts[0].email")
+        self.assertNotIn("relocated_candidate", row)
+        self.assertEqual(b["relocated_candidate_unfounded"], 0)
+
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
         after = _record(sampling_strategies=[{"is_sample": True}], source_caveats=self.NOTE.replace("N/A", "n/a"))
@@ -1173,6 +1193,28 @@ class SourceReview(unittest.TestCase):
         self.assertEqual(judged, {"license": "revise", "keywords[0]": "supported", "keywords[1]": "unreviewed",
                                   "keywords[2]": "unreviewed"})
 
+    def test_a_malformed_review_is_unusable_and_the_removals_are_still_classified(self):
+        """#3624: claims that are not a list, a claim that is not a mapping,
+        or a verdict that is not a string make the review unusable, named
+        with its row; the classification is the one with no review."""
+        plain = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "license"}))
+        for claims, why in ((5, "its claims are a int, not a list"), (None, "its claims are a NoneType, not a list"),
+                            (["supported"], "a claim is not a mapping"),
+                            ([{"verdict": ["supported"]}], "a claim's verdict is not a string"),
+                            ([{"verdict": "supported"}, {"text": "t"}], "a claim's verdict is not a string")):
+            audit = self._audit({"slot": "license"})
+            audit["source_review"]["values"].append({"path": "/description", "claims": claims})
+            b = rm.classify(self.BEFORE, self.AFTER, audit)
+            self.assertEqual(b["source_review"], {
+                "state": "unusable", "reason": f"the source review's row /description is malformed: {why}",
+                "deleted": None, "rewritten": None, "unfounded_supported": None,
+                "unfounded_supported_slot_only": None}, claims)
+            for key in ("removed", "deleted", "founded", "unfounded", "rewritten"):
+                self.assertEqual(b[key], plain[key], (claims, key))
+            self.assertNotIn("source_review", b["unfounded_paths"][0])
+            self.assertIn(f"source review not read: the source review's row /description is malformed: {why}",
+                          b["summary"])
+
     def test_without_a_source_review_nothing_changes(self):
         b = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "license"}))
         self.assertIsNone(b["source_review"])
@@ -1214,6 +1256,23 @@ class Evidence(unittest.TestCase):
         self.assertIn("snapshots no phase output", b["artifacts"]["phases_reason"])
         self.assertEqual(b["source_review"]["state"], "bound")
         self.assertEqual({r["path"] for r in b["unfounded_paths"]}, {"license", "keywords[1]"})
+
+    def test_a_malformed_bound_review_is_reported_not_raised(self):
+        """#3624 on the native/direct path: the review is hash-matched and
+        the audit usable, but a row's claims are not a list."""
+        for claims in (5, [{"verdict": ["revise"]}]):
+            with tempfile.TemporaryDirectory() as tmp:
+                prov = self._run(tmp)
+                path = prov.parent / "evidence" / "audit.json"
+                audit = json.loads(path.read_text())
+                audit["source_review"]["values"][0]["claims"] = claims
+                path.write_text(json.dumps(audit))
+                b = rm.for_record(prov)
+            self.assertTrue(b["checked"])
+            self.assertEqual(b["artifacts"]["audit"]["state"], "usable")
+            self.assertEqual(b["source_review"]["state"], "unusable")
+            self.assertIn("is malformed", b["source_review"]["reason"])
+            self.assertEqual((b["removed"], b["unfounded"]), (3, 0))   # founded by their slots, as with no review
 
     def test_an_edited_original_unbinds_the_review(self):
         with tempfile.TemporaryDirectory() as tmp:
