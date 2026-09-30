@@ -1377,6 +1377,17 @@ class DeriveStatus(Base):
         self.assertEqual(block["boundaries"]["derive_core"]["status_basis"], "and_chain")
         self.assertEqual(block["origin"]["phase3_backport"], 1)
 
+    def test_a_successful_derive_followed_by_arithmetic_is_the_boundary(self):
+        # Arithmetic's `((` and `))` are words, not joins, so a `$((...))`
+        # or `(( ... ))` after `&&` keeps the derive's and_chain basis (#3840).
+        for tail in (" && echo $((1+1))", " && sleep $((2))", " && (( i++ ))"):
+            with self.subTest(tail=tail):
+                self.run_ = self.new_run()
+                identity, block = self._around(lambda r: r.derive_command() + tail)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                self.assertEqual(block["boundaries"]["derive_core"]["status_basis"], "and_chain")
+
     def test_a_derive_last_after_cd_carries_its_own_status(self):
         for ok, boundary_is_first in ((True, True), (False, False)):
             with self.subTest(ok=ok):
@@ -1476,7 +1487,11 @@ class DeriveStatus(Base):
                  "a || d4d derive core --full F": "none", "d4d derive core --full F &": "none",
                  # a `#` inside a word hides nothing after it; one starting a word does (#3184)
                  "d4d derive core --full F --tag a#b | tail": "none",
-                 "d4d derive core --full F # then | tail ; echo": "command"}
+                 "d4d derive core --full F # then | tail ; echo": "command",
+                 # arithmetic's brackets are words, not joins (#3840)
+                 "d4d derive core --full F && echo $((1+1))": "and_chain",
+                 "(( n = 1 )) ; d4d derive core --full F": "command",
+                 "d4d derive core --full F && echo $(pwd)": "none"}
         for command, basis in cases.items():
             with self.subTest(command=command):
                 segments, joins, leading = ro._layout(ro._tokens(command))
@@ -2331,7 +2346,11 @@ class DeriveSpellings(Base):
                       "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs or may run as a word supplied "
                       "at run time (`eval \"$X\"`, #3815), may leave anywhere but where it "
                       "started (plain or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
-                      "`command`, #3797; one in a subshell counts, the rule's cost), such a part counts as after "
+                      "`command`, #3797; one in a subshell or in an unquoted command or process substitution, "
+                      "`$(cd x)` or `<(cd x)`, counts, the rule's cost, while one in a backquoted or "
+                      "double-quoted substitution is not read, and moves nothing, #3841; in a command the "
+                      "tokenizer cannot split, any `cd`, `pushd`, `popd` or `eval` word counts, quoted or "
+                      "substituted, #3839), such a part counts as after "
                       "a directory change and a relative `--full` cannot be placed; where the transcript records "
                       "a working directory other than its first, such a part counts as after a change too, and, "
                       "where no earlier call's change was seen, a relative `--full` resolves against the "
@@ -2355,6 +2374,13 @@ class DeriveSpellings(Base):
                       "(#3812)", flat)
         self.assertNotIn("such a part is read as after a change too, but a relative `--full` resolves", flat)
         self.assertIn("(or one `eval` runs, or may run as a word supplied at run time, `eval \"$X\"`, #3815)", flat)
+        # #3841: which substitutions are read; #3839: the unsplit command's rule.
+        self.assertIn("one in a subshell, or in an unquoted command or process substitution (`$(cd x)`, "
+                      "`<(cd x)`), counts, the rule's cost, while one in a backquoted or double-quoted "
+                      "substitution (`` `cd x` ``, `\"$(cd x)\"`) is not read, and moves nothing (#3841); in a "
+                      "command the tokenizer cannot split any `cd`, `pushd`, `popd` or `eval` word counts, "
+                      "quoted or substituted (#3839)", flat)
+        self.assertNotIn("subshell counts, the rule's cost --", flat)
         self.assertIn("In the same command, a directory change `eval` runs (or may run) leaves no known "
                       "directory for the parts after it, as one behind a brace does (#3815). A resumed run's "
                       "next transcript starts afresh. A package in the directory the session's "
@@ -3089,8 +3115,12 @@ class EarlierDirectoryChange(Base):
                         "builtin cd hack", "command cd hack", "command -p cd hack", "time cd hack",
                         "time -p cd hack", "! cd hack", "X=1 builtin cd hack", "{ pushd hack; }",
                         "true && { eval 'cd hack'; }", "builtin eval 'cd hack'",
-                        # A command the tokenizer cannot split, read by its text.
-                        "cd hack; cat <<EOF\nit's\nEOF"):
+                        # A command the tokenizer cannot split, read by its text:
+                        # a quoted cd word, or any `eval`, counts (#3839).
+                        "cd hack; cat <<EOF\nit's\nEOF", "eval 'cd hack'; cat <<EOF\nit's\nEOF",
+                        "eval \"$GO\"; cat <<EOF\nit's\nEOF", "X=`cd hack`; cat <<EOF\nit's\nEOF",
+                        # A subshell read by the arithmetic's word (#3840).
+                        "((cd hack); ls)"):
             for command in self.READ_HERE:
                 with self.subTest(earlier=earlier, command=command):
                     identity, block = self._run(earlier, command)
@@ -3308,7 +3338,12 @@ class EarlierDirectoryChange(Base):
                                 ("X=$(pwd)&&cd data", ["X=$", "(", "pwd", ")", "&&", "cd", "data"]),
                                 ("X=$(pwd)||cd d", ["X=$", "(", "pwd", ")", "||", "cd", "d"]),
                                 ("echo $(pwd)|cd d", ["echo", "$", "(", "pwd", ")", "|", "cd", "d"]),
-                                ("X=$(a $(b));cd d", ["X=$", "(", "a", "$", "(", "b", ")", ")", ";", "cd", "d"]),
+                                # Arithmetic's `))` is one word, as is one
+                                # closing two substitutions (#3840).
+                                ("X=$(a $(b));cd d", ["X=$", "(", "a", "$", "(", "b", "))", ";", "cd", "d"]),
+                                ("X=$(a $(b)));cd d", ["X=$", "(", "a", "$", "(", "b", "))", ")", ";", "cd", "d"]),
+                                ("echo $((1+2));cd d", ["echo", "$", "((", "1+2", "))", ";", "cd", "d"]),
+                                ("(( i++ ))&&ls", ["((", "i++", "))", "&&", "ls"]),
                                 ("(cd x)&&ls", ["(", "cd", "x", ")", "&&", "ls"]),
                                 ("case x in a);; esac", ["case", "x", "in", "a", ")", ";;", "esac"]),
                                 # Kept whole: bash's longest operators, and a
@@ -3389,6 +3424,56 @@ class EarlierDirectoryChange(Base):
                 # A detaching program at a part's head.
                 with self.subTest(sub=sub, op=op, rule="detacher"):
                     self.assertTrue(ro._shell(f"{sub}{op}setsid ./derive.sh", "/w", [])["detaches"])
+
+    #: An apostrophe in a here-document's body: shlex cannot split a command
+    #: carrying it (#3458).
+    UNSPLIT = "; cat <<EOF\nit's\nEOF"
+
+    def test_an_unsplit_command_reads_at_least_every_move_the_tokenised_path_reads(self):
+        # The fallback reads the text for a directory or `eval` word, with
+        # quote, escape, `$` and backquote characters as word breaks (#3839).
+        tokenised = ("cd x", "pushd x", "popd", "{ cd x; }", "builtin cd x", "! cd x", "time cd x",
+                     "eval 'cd x'", "eval \"cd x\"", "eval \"$GO\"", "eval `cat f`", "eval $GO",
+                     "{ eval \"$GO\"; }", "builtin eval 'pushd x'", "nice eval 'cd x'", "X=$(pwd);cd x",
+                     "(cd x; ls)", "echo $(cd x)", "cat <(cd x)", "((cd x); ls)", "eval \\cd x",
+                     "eval ls", "ls", "echo hi")
+        for command in tokenised:
+            with self.subTest(command=command):
+                self.assertIsNotNone(ro._tokens(command))
+                self.assertIsNone(ro._tokens(command + self.UNSPLIT))
+                if ro._shell(command, "/w", [])["moves"]:
+                    self.assertIs(ro._shell(command + self.UNSPLIT, "/w", [])["moves"], True)
+        # Any `eval`, and a quoted or substituted cd word, counts there;
+        # a false `unknown` is the cost.
+        for command, moves in (("eval 'cd x'", True), ("eval \"$GO\"", True), ("eval ls", True),
+                               ("X=`cd x`", True), ("echo \"$(cd x)\"", True), ("echo \\cd", True),
+                               ("ls", False), ("echo evaluate $HOME `date`", False), ("echo 'cdx'", False)):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command + self.UNSPLIT, "/w", [])["moves"], moves)
+
+    def test_a_cd_in_a_quoted_or_backquoted_substitution_is_not_read(self):
+        # shlex keeps such a substitution inside one word, and its cd moves
+        # nothing; the docs say so (#3841). An unquoted one, a process
+        # substitution and a subshell are read, the rule's stated cost.
+        for command, moves in (("X=`cd x; pwd`", False), ("echo \"$(cd x; pwd)\"", False),
+                               ("ls \"$(cd x)\"; ls", False), ("X=\"$(cd /tmp && pwd)\"", False),
+                               ("echo \"`cd x`\"", False),
+                               ("X=$(cd x; pwd)", True), ("(cd x; ls)", True), ("echo $(cd x)", True),
+                               ("cat <(cd x)", True), ("tee >(cd x)", True)):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], moves)
+
+    def test_arithmetic_brackets_are_words(self):
+        # `((` and `))` stay whole (#3840); a leading `((` is read as the
+        # subshells bash falls back to, so a cd behind it still counts.
+        self.assertEqual(ro._split_operators("))&&"), ["))", "&&"])
+        self.assertEqual(ro._split_operators(")))"), ["))", ")"])
+        self.assertEqual(ro._split_operators("();"), ["()", ";"])
+        self.assertEqual(ro._layout(ro._tokens("a && echo $((1+1))"))[1], [["&&"], []])
+        for command, moves in (("((cd x); ls)", True), ("(( i++ ))", False), ("echo $((1+2)); cd x", True),
+                               ("echo $((1+2))", False), ("((eval \"$GO\"); ls)", True)):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], moves)
 
     def test_a_change_after_an_unquoted_substitution_moves_the_next_call(self):
         # End to end (#3825): after `X=$(pwd); cd data` the next call starts
@@ -3745,7 +3830,10 @@ class Cli(unittest.TestCase):
                       "`-m` part imports first, nor the project there whose virtualenv a `poetry run` part "
                       "takes; after an earlier call whose `cd`, `pushd` or `popd` may have left that "
                       "directory (plain, or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
-                      "`command`, or one `eval` runs or may run), such a part counts as after a directory "
+                      "`command`, or one `eval` runs or may run; one in a subshell or an unquoted `$(...)`, "
+                      "`<(...)` or `>(...)` counts, one in a backquoted or double-quoted substitution is not "
+                      "read, and in a command the tokenizer cannot split any `cd`, `pushd`, `popd` or `eval` "
+                      "word counts), such a part counts as after a directory "
                       "change, and a relative `--full` cannot be placed, even where the transcript records a "
                       "directory for the call; where the transcript records another directory and no earlier "
                       "change was seen, such a part counts as after a change too, and a relative `--full` "

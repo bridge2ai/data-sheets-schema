@@ -155,7 +155,12 @@ may run as a word supplied at run time, `eval "$X"`, #3815) may
 leave it anywhere but where that call started -- plain, or behind a
 brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`,
 `until`, `do`), `!`, `time`, `builtin` or `command` (#3797); one in a
-subshell counts, the rule's cost -- a later call's `python -c`, `-m` or
+subshell, or in an unquoted command or process substitution (`$(cd x)`,
+`<(cd x)`), counts, the rule's cost, while one in a backquoted or
+double-quoted substitution (`` `cd x` ``, `"$(cd x)"`) is not read,
+and moves nothing (#3841); in a command the tokenizer cannot split any
+`cd`, `pushd`, `popd` or `eval` word counts, quoted or substituted
+(#3839) -- a later call's `python -c`, `-m` or
 `poetry run` part is read as after a directory change in its own
 command, and a relative `--full` in it cannot be placed. Wherever the
 transcript records a working directory other than the first it records,
@@ -365,8 +370,11 @@ NON_CHECKS = (
     "is read (#3719): after a call not denied whose builtin `cd`, `pushd` or `popd`, or one "
     "`eval` runs or may run as a word supplied at run time (`eval \"$X\"`, #3815), may leave "
     "anywhere but where it started (plain or behind a brace, a compound "
-    "keyword, `!`, `time`, `builtin` or `command`, #3797; one in a subshell counts, the rule's "
-    "cost), such a part counts as after a directory change and a relative `--full` cannot be "
+    "keyword, `!`, `time`, `builtin` or `command`, #3797; one in a subshell or in an unquoted "
+    "command or process substitution, `$(cd x)` or `<(cd x)`, counts, the rule's cost, while one "
+    "in a backquoted or double-quoted substitution is not read, and moves nothing, #3841; in a "
+    "command the tokenizer cannot split, any `cd`, `pushd`, `popd` or `eval` word counts, quoted "
+    "or substituted, #3839), such a part counts as after a directory change and a relative `--full` cannot be "
     "placed; where the transcript records a working directory other than its first, such a part "
     "counts as after a change too, and, where no earlier call's change was seen, a relative "
     "`--full` resolves against the recorded directory (#3798); where both hold the earlier "
@@ -853,6 +861,13 @@ def _process_substitutes(command: str) -> bool:
 #: quotes not read: the directory-change rule for a command the tokenizer
 #: cannot split (#3719).
 _DIRECTORY_WORD = re.compile(r"(?<![^\s;&|(){}])(?:cd|pushd|popd)(?![^\s;&|(){}])")
+#: `eval` as a whole shell word anywhere in a text, by `_DIRECTORY_WORD`'s
+#: word rule: the rule for a command the tokenizer cannot split (#3839).
+_EVAL_WORD = re.compile(r"(?<![^\s;&|(){}])eval(?![^\s;&|(){}])")
+#: Quote, escape, `$` and backquote characters, read as word breaks in a
+#: command the tokenizer cannot split, so a directory or `eval` word
+#: against one is still a word (`'cd x'`, `$(cd x)`, `` `cd x` ``, #3839).
+_UNSPLIT_BREAKS = re.compile(r"[\"'\\$`]")
 #: A `<(` or `>(` anywhere in a text, quotes not read: the rule for a
 #: command the tokenizer cannot split (#3752), and for the rest of a
 #: command once a command substitution opens.
@@ -907,15 +922,25 @@ _SHELL_OPERATORS = ("&>>", ";;&", "<<<", "&&", "||", ";;", ";&", "|&", "&>", ">&
                     "<>", "<<", "()", "(", ")", ";", "|", "&", "<", ">")
 
 
+#: Arithmetic's brackets (`$((1+1))`, `(( i++ ))`), kept whole as words
+#: as the lexer always returned them (#3840): arithmetic runs no command,
+#: so neither is a join, and splitting them made `a && echo $((1+1))` read
+#: as joins other than `&&` after `a`, which lost its `and_chain` basis.
+#: A `))` that closes two substitutions or subshells at once stays one word
+#: too; the join after it, if any, is still read.
+_ARITHMETIC_WORDS = ("((", "))")
+
+
 def _split_operators(run: str) -> list[str]:
     """A run of operator characters as the operators bash reads in it,
     each taken longest first as bash's lexer takes it, so `>&`, `&>`, `;;`
-    and a definition's `()` stay whole while `);`, `)&&`, `))` and `)|`
-    come apart (#3825)."""
+    and a definition's `()` stay whole while `);`, `)&&` and `)|` come
+    apart (#3825). Arithmetic's `((` and `))` stay whole, as words
+    (`_ARITHMETIC_WORDS`, #3840)."""
     out: list[str] = []
     i = 0
     while i < len(run):
-        op = next((o for o in _SHELL_OPERATORS if run.startswith(o, i)), run[i])
+        op = next((o for o in _ARITHMETIC_WORDS + _SHELL_OPERATORS if run.startswith(o, i)), run[i])
         out.append(op)
         i += len(op)
     return out
@@ -1406,7 +1431,11 @@ def _directory_builtin(segment: list[str]) -> str | None:
 #: this shell: a brace group's `{`, a pipeline's `!`, and the compound
 #: keywords whose body or condition the segmenter keeps in the part that
 #: follows them (`if`, `then`, `elif`, `else`, `while`, `until`, `do`).
-_COMPOUND_PREFIXES = frozenset({"{", "!", "if", "then", "elif", "else", "while", "until", "do"})
+#: A leading `((` is arithmetic's word (#3840), but where the arithmetic
+#: does not parse bash reads it as two subshells (`((cd x); ls)`), so a
+#: command behind it is read as the directory rule reads one in a
+#: subshell: it counts.
+_COMPOUND_PREFIXES = frozenset({"{", "!", "if", "then", "elif", "else", "while", "until", "do", "(("})
 
 
 def _behind_prefixes(segment: list[str]) -> tuple[list[str], bool]:
@@ -1965,8 +1994,15 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         out["detaches"] = bool(_NESTED_DETACH.search(command) or _NESTED_DETACHER.search(command)
                                or _PROCESS_SUBSTITUTION.search(command))
         # Nor are its parts read for a directory change: a `cd`, `pushd` or
-        # `popd` word anywhere in its text may be one (#3719).
-        out["moves"] = bool(_DIRECTORY_WORD.search(command))
+        # `popd` word anywhere in its text may be one (#3719), with quote,
+        # escape, `$` and backquote characters read as word breaks, so a
+        # quoted or substituted one (`eval 'cd x'`, `` `cd x` ``) counts,
+        # and so does an `eval` word anywhere, which may run one whatever
+        # its words are (`eval "$GO"`, #3839). That is at least as much as
+        # the tokenised path reads (`_eval_may_change_directory`); a false
+        # `unknown` is its cost.
+        text = _UNSPLIT_BREAKS.sub(" ", command)
+        out["moves"] = bool(_DIRECTORY_WORD.search(text) or _EVAL_WORD.search(text))
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -2203,10 +2239,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # change, wherever it stands in the command, may leave the next call
     # starting elsewhere (#3719), unless it is known to go to the directory
     # the call started in. One behind a brace, a compound keyword, `!`,
-    # `time`, `builtin` or `command` counts (#3797). One in a subshell or a
-    # command substitution does not move this shell, but it is read as one
-    # all the same, which is the rule's cost: the segmenter does not say
-    # which parts a `(` encloses. `eval` runs its words in this shell, so a
+    # `time`, `builtin` or `command` counts (#3797). One in a subshell
+    # (`(cd x; ls)`) or in an unquoted command or process substitution
+    # (`X=$(cd x; pwd)`, `<(cd x)`) does not move this shell, but it is read
+    # as one all the same, which is the rule's cost: the segmenter does not
+    # say which parts a `(` encloses. One in a backquoted or double-quoted
+    # substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
+    # tokenizer keeps it inside one word; it moves nothing, so nothing is
+    # missed (#3841). `eval` runs its words in this shell, so a
     # `cd`, `pushd` or `popd` word among them counts too, behind those
     # words as well, and so does a word supplied at run time, which may
     # be one (`_eval_may_change_directory`, #3815): the loop above sets

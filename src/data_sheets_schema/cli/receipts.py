@@ -370,7 +370,10 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     shell started in that a `python -c` or `-m` part imports first, nor the project there whose
     virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
     may have left that directory (plain, or behind a brace, a compound keyword, `!`, `time`,
-    `builtin` or `command`, or one `eval` runs or may run), such a part counts as after a
+    `builtin` or `command`, or one `eval` runs or may run; one in a subshell or an unquoted
+    `$(...)`, `<(...)` or `>(...)` counts, one in a backquoted or double-quoted substitution
+    is not read, and in a command the tokenizer cannot split any `cd`, `pushd`, `popd` or
+    `eval` word counts), such a part counts as after a
     directory change, and a relative `--full` cannot be placed, even where the transcript
     records a directory for the call; where the transcript records another directory and no
     earlier change was seen, such a part counts as after a change too, and a relative `--full`
