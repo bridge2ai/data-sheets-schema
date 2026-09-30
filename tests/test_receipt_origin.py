@@ -2398,6 +2398,34 @@ class DeriveSpellings(Base):
                       "subcommand of it is read-only (#3693)", flat)
         self.assertNotIn("and an interpreter held in a variable (`$PY -m data_sheets_schema.cli`), are read "
                          "through", flat)
+        # Round 6 (#3843-#3847): the texts name each rule and what remains unread.
+        for phrase in ("a redirection with its target and descriptor is read past (`2>/dev/null cd /tmp`, #3845)",
+                       "whose program is supplied at run time (a word starting with `$` or a backquote, `$C /tmp`) "
+                       "counts as a change",
+                       "the command `eval` runs is its words joined and tokenised again, each part read by the "
+                       "same rules (`eval '\"cd\" /tmp'`, #3844)",
+                       "every argument of a shell program given `-c` is read as a command it may run (`bash -ceo "
+                       "pipefail 'cmd'`, #3843)",
+                       "each run of `ssh`'s arguments to the end (#3846)",
+                       "both as word breaks and removed (`c\\d /tmp`, #3847)",
+                       "Still not read: a detaching program supplied at run time (`$X ./derive.sh`, `$(which "
+                       "setsid) ./derive.sh`), a command string supplied at run time to a nested shell (`bash -c "
+                       "\"$X\"`), a program word bash builds other than from a leading `$` or backquote "
+                       "(`c${X}d /tmp`, a glob, a brace expansion), and a directory change inside a function or "
+                       "alias."):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, text)
+        for phrase in ("a redirection, with its target and any descriptor before it (`2>/dev/null cd /tmp`, #3845)",
+                       "The command `eval` runs is its words joined by spaces and tokenised again, which removes a "
+                       "second level of quotes, and each part of it is read by the same rules however deep (`eval "
+                       "'\"cd\" /tmp'`, #3844); an `eval` whose command carries a word supplied at run time, or "
+                       "cannot be split, counts as a change and as open-ended (#3844, #3846)",
+                       "Every argument of a shell program given `-c` in any option cluster is read as a command it "
+                       "may run, since which word `-c` receives depends on the options that take values (`bash "
+                       "-ceo pipefail 'cmd'`, #3843)",
+                       "once as word breaks and once removed (`c\\d /tmp`, `c\"d\" /tmp`, #3847)"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, flat)
         flat = " ".join(ro.__doc__.split())
         self.assertIn("or such a part not run as its words name (a variable or relative path as its program, "
                       "an assignment before it or as an earlier part, `printf -v` included, #3689, #3700, or "
@@ -2738,7 +2766,33 @@ class UnseenDerive(Base):
                         "sh -c \"timeout 60 bash -c 'setsid ./derive.sh'\"",
                         "bash -c \"nohup bash -c 'coproc ./derive.sh'\"",
                         "bash -c \"bash -c 'cat <(./derive.sh)'\"",
-                        "bash -c \"X=1 bash -o pipefail -c 'bash -c \\\"./derive.sh&echo x\\\"'\""):
+                        "bash -c \"X=1 bash -o pipefail -c 'bash -c \\\"./derive.sh&echo x\\\"'\"",
+                        # Every argument of a shell given `-c` is read, so an
+                        # option cluster that takes a value (`-ceo pipefail`)
+                        # cannot hide the command string (#3843); a positional
+                        # argument that reads as a command is the rule's cost.
+                        "bash -c \"bash -ceo pipefail './derive.sh&echo x'\"",
+                        "bash -ceo pipefail './derive.sh&echo x'",
+                        "bash -c \"bash -eo pipefail -c './derive.sh&echo x'\"",
+                        "bash -c \"bash -c './derive.sh' 'R&D team'\"",
+                        # The command `eval` runs is its words joined, and the
+                        # command `ssh` runs is its words after its options
+                        # and host (#3846).
+                        "bash -c \"eval bash -c \\\"'./derive.sh&echo x'\\\"\"",
+                        "eval bash -c \"'./derive.sh&echo x'\"",
+                        "eval ./derive.sh '&' echo x",
+                        "bash -c \"ssh -p 22 host bash -c \\\"'./derive.sh&echo x'\\\"\"",
+                        "ssh -p 22 host bash -c \"'./derive.sh&echo x'\"",
+                        # An eval whose command is not known by its words may
+                        # start anything (#3846).
+                        "eval \"$GO\"", "bash -c 'eval \"$GO\"'", "eval `cat cmd`",
+                        # A redirection before the program is read past (#3845).
+                        "2>/dev/null setsid ./derive.sh", ">log builtin eval \"$GO\"",
+                        "bash -c '2>/dev/null setsid ./derive.sh'",
+                        # A detaching program spelled across an escape or quotes
+                        # in a command the tokenizer cannot split (#3847).
+                        "s\\etsid ./derive.sh; cat <<EOF\nit's\nEOF",
+                        "\"setsid\" ./derive.sh; cat <<EOF\nit's\nEOF"):
             with self.subTest(command=command):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -2751,12 +2805,12 @@ class UnseenDerive(Base):
                 self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
         # A `&` the nested word quotes is text, and a word with no space in
         # it keeps the narrow rule (a URL's query, `R&D`), as does any word
-        # in a shell nested in the nested shell that it does not run as a
-        # command (#3748).
+        # of a program nested in the nested shell that it does not run as a
+        # command (#3748); a shell given no `-c` runs none of its words.
         for command in ("bash -c 'echo \"R&D team\"; ./derive.sh'", "bash -c \"./derive.sh 'a=1&b=2'\"",
                         "bash -c \"bash -c 'echo \\\"R&D team\\\"; ./derive.sh'\"",
-                        "bash -c \"bash -c './derive.sh' 'R&D team'\"",
                         "bash -c \"bash -c './derive.sh && echo done'\"",
+                        "eval ./derive.sh '&&' echo x", "eval 'echo \"R&D team\"'",
                         "bash -c './derive.sh && echo done'", "bash derive.sh 'R&D'"):
             with self.subTest(command=command):
                 r = self.new_run()
@@ -2853,14 +2907,23 @@ class UnseenDerive(Base):
     def test_command_strings(self):
         # The words a nested command runs as commands of their own: a shell
         # program's `-c` argument, and `eval`'s or `ssh`'s (#3748).
-        cases = {"bash -c 'a & b' name": ["a & b"], "bash -lc x": ["x"], "sh -e -c x y": ["x"],
-                 "bash -o pipefail -c x": ["x"], "bash --norc -c x": ["x"], "/bin/zsh -c x": ["x"],
-                 "X=1 timeout 60 nohup bash -c x": ["x"], "ls; bash -c x | eval y z": ["x", "y", "z"],
-                 "ssh host 'a & b'": ["host", "a & b"], "bash x.sh 'a & b'": [], "bash -- -c x": [],
-                 "bash -c": [], "echo 'R&D team'": [], "python -c 'a & b'": [], "": [],
-                 # `--rcfile` and `--init-file` take the next word (#3813).
-                 "bash --rcfile /dev/null -c x": ["x"], "bash --init-file f -c x": ["x"],
-                 "bash --rcfile -c x": [], "bash --rcfile=f -c x": ["x"]}
+        # Every argument of a shell program given `-c` in any cluster, since
+        # which one `-c` receives depends on the options that take values
+        # (`--rcfile F`, #3813; `-ceo pipefail`, #3843); `eval`'s arguments
+        # and their join; `ssh`'s and each run of them to the end (#3846).
+        cases = {"bash -c 'a & b' name": ["-c", "a & b", "name"], "bash -lc x": ["-lc", "x"],
+                 "sh -e -c x y": ["-e", "-c", "x", "y"],
+                 "bash -o pipefail -c x": ["-o", "pipefail", "-c", "x"], "bash --norc -c x": ["--norc", "-c", "x"],
+                 "/bin/zsh -c x": ["-c", "x"], "X=1 timeout 60 nohup bash -c x": ["-c", "x"],
+                 "ls; bash -c x | eval y z": ["-c", "x", "y", "z", "y z"],
+                 "ssh host 'a & b'": ["host", "a & b", "host a & b"], "bash x.sh 'a & b'": [],
+                 "bash -- -c x": ["--", "-c", "x"], "bash -c": ["-c"], "echo 'R&D team'": [],
+                 "python -c 'a & b'": [], "": [], "bash --rcfile /dev/null -c x": ["--rcfile", "/dev/null", "-c", "x"],
+                 "bash -ceo pipefail x": ["-ceo", "pipefail", "x"], "bash -eo pipefail -c x": ["-eo", "pipefail", "-c", "x"],
+                 "eval bash -c \"'a&b c'\"": ["bash", "-c", "'a&b c'", "bash -c 'a&b c'"],
+                 "ssh -p 22 host bash -c x": ["-p", "22", "host", "bash", "-c", "x", "-p 22 host bash -c x",
+                                              "22 host bash -c x", "host bash -c x", "bash -c x", "-c x"],
+                 "2>/dev/null bash -c x": ["-c", "x"], "builtin eval x": ["x"]}
         for command, strings in cases.items():
             with self.subTest(command=command):
                 self.assertEqual(ro._command_strings(ro._tokens(command) or []), strings)
@@ -3189,6 +3252,69 @@ class EarlierDirectoryChange(Base):
                                           "resolved")
                 self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
 
+    #: Directory changes found by the Codex review of round 5 (#3844,
+    #: #3845, #3847): a cd eval runs after removing a second level of quotes,
+    #: an eval whose command cannot be split, a cd behind a leading
+    #: redirection, a builtin's name spelled across an escape or quotes in a
+    #: command the tokenizer cannot split, and a program supplied at run
+    #: time, which may be the builtin.
+    ROUND6_MOVES = ("eval '\"cd\" hack'", "eval 'c\\d hack'", "eval \"'cd' hack\"", "eval \"eval 'cd hack'\"",
+                    "eval 'if true; then cd hack; fi'", "eval \"echo 'open\"", "eval '{ cd hack; }'",
+                    "2>/dev/null cd hack", ">/dev/null cd hack", "2>&1 pushd hack", "</dev/null cd hack",
+                    "{fd}>log cd hack", "X=1 2>/dev/null cd hack", "2>/dev/null eval 'cd hack'",
+                    "{ 2>/dev/null cd hack; }", "2>/dev/null builtin cd hack",
+                    "c\\d hack; cat <<EOF\nit's\nEOF", "c\"d\" hack; cat <<EOF\nit's\nEOF",
+                    "'c'd hack; cat <<EOF\nit's\nEOF", "e\"v\"al 'cd hack'; cat <<EOF\nit's\nEOF",
+                    "2>/dev/null cd hack; cat <<EOF\nit's\nEOF",
+                    # A program supplied at run time may be the builtin (#3844).
+                    "C=cd; $C hack", "$(echo cd) hack", "`echo cd` hack", "{ $C hack; }",
+                    "C=cd; $C hack; cat <<EOF\nit's\nEOF")
+
+    def test_round6_changes_move_the_next_call(self):
+        # End to end: after each, a later `python -m` validator is unread
+        # and a later relative `--full` is not placed (Codex review, #3844,
+        # #3845, #3847).
+        for earlier in self.ROUND6_MOVES:
+            with self.subTest(earlier=earlier):
+                self.assertIs(ro._shell(earlier, "/w", [])["moves"], True)
+            for command in self.READ_HERE:
+                with self.subTest(earlier=earlier, command=command):
+                    identity, block = self._run(earlier, command)
+                    self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 8) runs a program this "
+                                              "does not read")
+            with self.subTest(earlier=earlier, rule="derive"):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(earlier.replace("hack", "data"))
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                identity = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
+                                          "resolved")
+                self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+
+    def test_round6_changes_in_the_same_command_leave_no_known_directory(self):
+        # `2>/dev/null cd sub && d4d derive core --full data/X` runs the
+        # derive in `sub`, and so does one after `eval '"cd" sub'` (#3844,
+        # #3845): neither is placed against the start.
+        for change in ("2>/dev/null cd sub", ">/dev/null cd sub", "eval '\"cd\" sub'", "eval 'c\\d sub'",
+                       "2>/dev/null eval 'cd sub'", "C=cd; $C sub", "eval \"echo 'open\""):
+            with self.subTest(change=change):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                identity = r.bash(f"{change} && d4d derive core --full {r.full.relative_to(r.root)} --out o.yaml")
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
+                                          "resolved")
+                [attempt] = block["derive_core_attempts"]
+                self.assertIsNone(attempt["targets_full"])
+                self.assertIsNone(block["boundaries"]["derive_core"])
+
     def test_a_relative_full_resolves_against_a_recorded_directory_other_than_the_start(self):
         # Where the transcript records the directory the call started in,
         # a relative `--full` resolves there, not against the start (#3798).
@@ -3436,6 +3562,11 @@ class EarlierDirectoryChange(Base):
                      "eval 'cd x'", "eval \"cd x\"", "eval \"$GO\"", "eval `cat f`", "eval $GO",
                      "{ eval \"$GO\"; }", "builtin eval 'pushd x'", "nice eval 'cd x'", "X=$(pwd);cd x",
                      "(cd x; ls)", "echo $(cd x)", "cat <(cd x)", "((cd x); ls)", "eval \\cd x",
+                     # Round 6 (#3844, #3845, #3847).
+                     "eval '\"cd\" x'", "eval 'c\\d x'", "2>/dev/null cd x", ">/dev/null cd x", "{fd}>l cd x",
+                     "c\\d x", "c\"d\" x", "'c'd x", "e\"v\"al 'cd x'", "p\\ushd x", "2>&1 eval ls",
+                     "$C x", "${C} x", "`echo cd` x", "X=1 $C x", "'$C' x", "{ $C x; }", "nice $C x",
+                     "$(echo cd) x", "2>/dev/null $C x", "echo $C",
                      "eval ls", "ls", "echo hi")
         for command in tokenised:
             with self.subTest(command=command):
@@ -3447,7 +3578,11 @@ class EarlierDirectoryChange(Base):
         # a false `unknown` is the cost.
         for command, moves in (("eval 'cd x'", True), ("eval \"$GO\"", True), ("eval ls", True),
                                ("X=`cd x`", True), ("echo \"$(cd x)\"", True), ("echo \\cd", True),
-                               ("ls", False), ("echo evaluate $HOME `date`", False), ("echo 'cdx'", False)):
+                               ("ls", False), ("echo evaluate 'cdx'", False), ("echo 'cdx'", False),
+                               # A word starting with `$` or a backquote may be a
+                               # program supplied at run time (#3844).
+                               ("echo evaluate $HOME `date`", True), ("$C x", True), ("X=1 '$C' x", True),
+                               ("echo a$b", False)):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command + self.UNSPLIT, "/w", [])["moves"], moves)
 
@@ -3840,6 +3975,14 @@ class Cli(unittest.TestCase):
                       "resolves against the recorded directory.", text)   # #3699, #3719, #3723, #3797, #3798, #3812, #3815
         self.assertIn("where every join from the change to the derive is `&&`, and after one `eval` runs or "
                       "may run it cannot be placed.", text)                                     # #3815
+        self.assertIn("A redirection before a program is read past (`2>/dev/null cd /tmp`); a program supplied at "
+                      "run time (`$C /tmp`) counts as a change; the command `eval` runs is its words joined and "
+                      "tokenised again (`eval '\"cd\" /tmp'`), and one carrying a word supplied at run time or "
+                      "that cannot be split counts as a change and as open-ended; every argument of a shell given "
+                      "`-c` (`bash -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s "
+                      "arguments to the end are read for a `&` and the like; and in a command the tokenizer "
+                      "cannot split a change is read with quote and escape characters removed as well (`c\\d "
+                      "/tmp`) and any word starting with `$` or a backquote counts.", text)  # #3843-#3847
         self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
                       "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674

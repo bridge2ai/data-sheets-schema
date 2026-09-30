@@ -377,7 +377,15 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     directory change, and a relative `--full` cannot be placed, even where the transcript
     records a directory for the call; where the transcript records another directory and no
     earlier change was seen, such a part counts as after a change too, and a relative `--full`
-    resolves against the recorded directory. A relative `--full`
+    resolves against the recorded directory. A redirection before a program is read
+    past (`2>/dev/null cd /tmp`); a program supplied at run time (`$C /tmp`) counts as a
+    change; the command `eval` runs is its words joined and tokenised again (`eval
+    '"cd" /tmp'`), and one carrying a word supplied at run time or that cannot be split
+    counts as a change and as open-ended; every argument of a shell given `-c` (`bash
+    -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s arguments to
+    the end are read for a `&` and the like; and in a command the tokenizer cannot split
+    a change is read with quote and escape characters removed as well (`c\\d /tmp`) and any
+    word starting with `$` or a backquote counts. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`, and after one `eval` runs
     or may run it cannot be placed. Where the
