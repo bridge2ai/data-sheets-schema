@@ -43,7 +43,11 @@ none a preposition or participle (#3560), nothing possessive after it and
 nothing after it that it only modifies (#3592, #3606), so "The consent
 process is prospective", "The consent process described in both
 statements", "The labels in this split" and "The split labels" are out of
-scope. A `none` cue has no further
+scope. A subject that opens on a negating determiner ("Neither statement",
+"None of the statements", "No statements") says nothing it names is
+prospective and is out of scope (`negated_subject`, #3614). A statement
+topic ("statements about/of/for ...", #3615) must itself be headed by a
+self-reference or presence term. A `none` cue has no further
 condition: `role.not_necessarily` names the container's role in its cue.
 A clause whose words
 name other people or organisations ("those individuals") never counts. In
@@ -259,10 +263,12 @@ class Lexicon:
         # Optional blocks a later version declares; absent, the code reads
         # the lexicon as v1 did.
         self._statement = self._statement_topic = self._statement_head = None
-        self._statement_tail = None
+        self._statement_tail = self._statement_negated = None
         statement = data.get("statement_subject")
         if statement is not None:
             self._statement = _word(statement["nouns"])
+            if statement.get("negated") is not None:
+                self._statement_negated = re.compile(statement["negated"], re.I)
             if statement.get("head") is not None:
                 self._statement_head = re.compile(statement["head"], re.I)
             if statement.get("tail") is not None:
@@ -877,8 +883,13 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         # prospective" (#3131); where the subject holds one, it must head it:
         # not "The labels in this split are prospective" (#3592).
         owners = _possessors_blanked(sentence, selves)
-        term = _self_reference(selves, owners, c0, m.start())
         subject = _parts(owners, c0, c1, m, sentence)["subject"]
+        # A subject that opens on a negating determiner says nothing it
+        # names is prospective: "Neither statement is prospective", "None
+        # of the statements are prospective" (#3614).
+        if lexicon._statement_negated is not None and lexicon._statement_negated.match(subject):
+            return {**out, "outcome": "out_of_scope", "reason": "negated_subject"}
+        term = _self_reference(selves, owners, c0, m.start())
         if term is not None and not _self_heads_subject(lexicon, selves, subject):
             term = None
         if term is None:

@@ -32,13 +32,14 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry three earlier byte
+#: before it first merged, so this PR's commits carry four earlier byte
 #: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 #:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
 #:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
+#:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9"}
+                2: "63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9"}
 
 
 def record(**containers):
@@ -720,6 +721,12 @@ V3_SPLIT = "Both statements are prospective on that page, and neither gives spli
     ("splits", "The holdout set itself is prospective.", "holdout set"),
     ("splits", "The holdout set, as described, is prospective.", "holdout set"),
     ("splits", "This split and its labels are prospective.", "This split"),
+    # "for" introduces a topic headed by the member (#3615); "on" is no topic
+    ("splits", "Statements for this split are prospective.", "this split"),
+    ("splits", "Statements for the holdout set are prospective.", "holdout set"),
+    # a determiner that only opens on a negating word is not negated (#3614)
+    ("splits", "Notably the holdout set is prospective.", "holdout set"),
+    ("splits", "Nonetheless both statements are prospective.", "statements"),
 ])
 def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, text, scope):
     """#3131: `presence.prospective_predicate` has `subject` scope in v2. A
@@ -770,6 +777,18 @@ def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, te
     ("splits", "The statements' authors are prospective.", "no_member_subject"),
     ("splits", "Statements about this split assignment are prospective.", "statement_about_other"),
     ("splits", "The split sizes are prospective.", "no_member_subject"),
+    # a statement topic introduced by "for" (#3615)
+    ("splits", "Statements for the consent process are prospective.", "statement_about_other"),
+    ("instances", "Descriptions for the consent materials are prospective.", "statement_about_other"),
+    # a negated subject says nothing it names is prospective (#3614)
+    ("splits", "Neither statement is prospective.", "negated_subject"),
+    ("splits", "None of the statements are prospective.", "negated_subject"),
+    ("splits", "No statements are prospective.", "negated_subject"),
+    ("splits", "Neither of the two source statements is prospective.", "negated_subject"),
+    ("splits", "Not all statements are prospective.", "negated_subject"),
+    ("splits", "No holdout set is prospective.", "negated_subject"),
+    ("splits", "The split is complete, and no statement is prospective.", "negated_subject"),
+    ("splits", "Per the page, neither statement is prospective.", "negated_subject"),
 ])
 def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
     assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
@@ -794,6 +813,15 @@ def test_without_a_tail_any_ending_counts():
         assert outcomes("splits", text, lexicon=lexicon) == [("presence.prospective_predicate", "flag", None)]
         assert outcomes("splits", text) == [
             ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
+
+
+def test_without_negated_a_negated_subject_is_read_as_before():
+    """#3614: `statement_subject.negated` is what puts a negated subject
+    out of scope. A lexicon that declares none reads "Neither statement" as
+    a statement subject, as round 3 did."""
+    lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("negated"))
+    assert outcomes("splits", "Neither statement is prospective.", lexicon=lexicon) == [
+        ("presence.prospective_predicate", "flag", None)]
 
 
 def test_the_subject_scope_needs_a_statement_subject_block():

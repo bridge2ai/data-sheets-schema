@@ -208,13 +208,21 @@ item_qualifiers:
 # split's consent process" does not, #3593) or by such a presence term;
 # otherwise the reason is `statement_about_other`. Any other subject ("The
 # consent process is prospective", "Enrollment of the pediatric arm remains
-# prospective") is out of scope with reason `no_member_subject`. The subject is a passive
+# prospective") is out of scope with reason `no_member_subject`. A subject
+# that opens on a negating determiner (`negated`: "Neither statement", "None
+# of the statements", "No statements", after an optional conjunction) says
+# that nothing it names is prospective, so it is out of scope with reason
+# `negated_subject`, whatever it names (#3614); `head` names no negating
+# quantifier. A statement topic may also be introduced by "for" ("Statements
+# for the consent process", #3615); "on" is not a topic preposition, so "The
+# statements on the program page" still names the statements. The subject is a passive
 # cue's (`_subject`: the clause before the cue, an appositive and anything
 # before its last comma left out).
 statement_subject:
   nouns: ['statements?', 'descriptions?', 'mentions?', 'references?']
-  head: '\s*(?:(?:both|all|each|either|neither|none|some|any|one|two|three) of\s+)?(?!(?:[\w''-]+\s+){0,2}?(?:in|on|of|to|by|for|from|at|with|within|across|about|under|described|mentioned|cited|listed|given|named|made|quoted)\s)(?:[\w''-]+\s+){0,3}'
-  topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing|to)\s+(?P<topic>.+)'
+  negated: '\s*(?:(?:and|but|yet|so|while|whereas)\s+)?(?:no|neither|none|not)\b'
+  head: '\s*(?:(?:both|all|each|either|some|any|one|two|three) of\s+)?(?!(?:[\w''-]+\s+){0,2}?(?:in|on|of|to|by|for|from|at|with|within|across|about|under|described|mentioned|cited|listed|given|named|made|quoted)\s)(?:[\w''-]+\s+){0,3}'
+  topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing|to|for)\s+(?P<topic>.+)'
   tail: '\s*(?:$|[,;:()\u2013\u2014]|(?:in|on|of|to|by|for|from|at|with|within|across|about|under|over|regarding|concerning|describing|as|that|which|who|whose|where|described|mentioned|cited|listed|given|named|made|quoted|reported|and|or|nor|itself|themselves|alone|all|both|also|too|still|now|remains?|is|are|was|were)\b)'
 
 # How the diff resolves two original members that `receipts.remap_path`
