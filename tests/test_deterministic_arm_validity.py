@@ -143,15 +143,40 @@ class TestRunsCheckReportsIt(unittest.TestCase):
         self.assertEqual((self.root / "data/d4d_concatenated/rocrate_static_map/ourmap-v1/"
                           "CHORUS_d4d.yaml").read_text(encoding="utf-8"), RESOLVER_DOI)
 
-    def test_the_filters_given_are_the_filters_used(self):
-        """`check` rebinds `project` and `label` in its report loops; the
-        section must see the options as given, not a loop's last value."""
+    def test_the_filters_given_are_passed_through(self):
+        """`--method/--label/--project` reach the section. This tree holds no
+        generated run, so no report loop rebinds a name here: the rebinding
+        case is the next test."""
         with mock.patch("data_sheets_schema.runs.deterministic_validity",
                         return_value=[]) as dv:
             result = CliRunner().invoke(cli, ["runs", "check", "--project", "VOICE",
                                               "--label", "ourmap-v1"])
         self.assertEqual(result.exit_code, 0, result.output)
         dv.assert_called_once_with(method=None, label="ourmap-v1", project="VOICE")
+
+    def test_a_report_loop_that_rebinds_the_names_does_not_narrow_the_section(self):
+        """`check`'s report loops rebind `project` and `label` (`for project,
+        label, n in sorted(ungrounded)`) — but only when a generated run has a
+        finding to list. The first version passed the names after those loops,
+        so an unfiltered check asked the section for a generated run's label
+        and printed nothing (#2970; review #3567). Here a complete generated
+        run with an ungrounded identifier makes that loop run, in the fast
+        lane, and the section must still see no filter."""
+        _tree(self.root, {
+            "claudecode_agent/gen_rep1/OTHER_d4d.yaml": VALID_RECORD,
+            "claudecode_agent_core/gen_rep1/OTHER_d4d_core.yaml": VALID_RECORD,
+            "claudecode_agent_core/gen_rep1/OTHER_reconciliation.md": "report\n",
+        })
+        from data_sheets_schema.runs import GROUNDED_GAPS
+        with mock.patch("data_sheets_schema.runs.grounding_status",
+                        return_value=(GROUNDED_GAPS, 1)):
+            result = CliRunner().invoke(cli, ["runs", "check"])
+        # The loop ran and bound the generated run's names …
+        self.assertTrue(any("OTHER" in l and "gen_rep1" in l and "identifier(s)" in l
+                            for l in result.output.splitlines()), result.output)
+        # … and the section still judged both deterministic records.
+        self.assertIn("2 deterministic-arm record(s) judged", result.output)
+        self.assertIn("1 valid, 1 invalid, 0 could not be checked", result.output)
 
 
 @pytest.mark.corpus   # walks the committed deterministic arms (#1203)
