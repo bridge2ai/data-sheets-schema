@@ -28,17 +28,22 @@ cue's own words and outside the member's self-references: "Unlike the
 planned splits for the next release, this split is complete" names no
 presence term but the one `presence.planned_element` spells (#3230). A
 pattern that declares `self_reference_in: [item]` also counts on a
-self-reference inside the item it reports: "No source reports this split
-as available" (#3261). A presence term with no other-marker ("The external
+self-reference that heads the item it reports: "No source reports this
+split as available" (#3261), not "the labels in this split" (#3607). A presence term with no other-marker ("The external
 test set is described as planned") is taken as possibly the member's
 unless its qualifier disagrees with the member's identity: in the prose of
 a member named "Internal validation set" it is another item, on the
 lexicon's external/internal and training/validation/test axes (#3244). A
 `subject` cue (`presence.prospective_predicate`, #3131) counts where a
-self-reference that owns nothing precedes it, as a `self` cue would, or
-where its subject names a source statement ("Both statements are
-prospective on that page") or the container's presence term; "The consent
-process is prospective" is out of scope. A `none` cue has no further
+self-reference that owns nothing precedes it, as a `self` cue would, and
+heads the subject if the subject holds one, or where its subject is headed
+by a source statement ("Both statements are prospective on that page") or
+the container's presence term. A head has at most three words before it,
+none a preposition or participle (#3560), nothing possessive after it and
+nothing after it that it only modifies (#3592, #3606), so "The consent
+process is prospective", "The consent process described in both
+statements", "The labels in this split" and "The split labels" are out of
+scope. A `none` cue has no further
 condition: `role.not_necessarily` names the container's role in its cue.
 A clause whose words
 name other people or organisations ("those individuals") never counts. In
@@ -254,11 +259,14 @@ class Lexicon:
         # Optional blocks a later version declares; absent, the code reads
         # the lexicon as v1 did.
         self._statement = self._statement_topic = self._statement_head = None
+        self._statement_tail = None
         statement = data.get("statement_subject")
         if statement is not None:
             self._statement = _word(statement["nouns"])
             if statement.get("head") is not None:
                 self._statement_head = re.compile(statement["head"], re.I)
+            if statement.get("tail") is not None:
+                self._statement_tail = re.compile(statement["tail"], re.I)
             self._statement_topic = re.compile(statement["topic"], re.I)
             if "topic" not in self._statement_topic.groupindex:
                 raise ValueError("statement_subject.topic must name its topic as a `topic` group")
@@ -699,27 +707,42 @@ def _member_presence_term(lexicon, container, member: dict, text: str,
                  if not other and (not heads or _heads(lexicon, text, found))), None)
 
 
+def _ends_phrase(lexicon, text: str, end: int) -> bool:
+    """Whether a head ending at `end` ends its noun phrase in `text`: what
+    follows matches `statement_subject.tail` (the text's end, punctuation,
+    or a word opening a postmodifier, a coordination or the predicate), so
+    in "The split labels" and "The statement authors" the term only
+    modifies the noun after it (#3606). With no `tail` declared, any
+    ending counts."""
+    return lexicon._statement_tail is None or lexicon._statement_tail.match(text, end) is not None
+
+
 def _heads(lexicon, text: str, found) -> bool:
     """Whether the match `found` heads `text`: the text before it matches
-    `statement_subject.head` and nothing possessive follows it, so "The
-    holdout set" is headed by its presence term and "The consent process for
-    the splits", "Enrollment of the pediatric arm of the split" and "The
-    split's schedule" are not (#3592). With no `head` declared, any match
+    `statement_subject.head`, nothing possessive follows it and it ends its
+    noun phrase (`_ends_phrase`), so "The holdout set" is headed by its
+    presence term and "The consent process for the splits", "Enrollment of
+    the pediatric arm of the split", "The split's schedule" (#3592) and "The
+    split labels" (#3606) are not. With no `head` declared, any match
     counts, as before."""
     if lexicon._statement_head is None:
         return True
     return (lexicon._statement_head.fullmatch(text[:found.start()]) is not None
-            and _POSSESSIVE_AFTER.match(text, found.end()) is None)
+            and _POSSESSIVE_AFTER.match(text, found.end()) is None
+            and _ends_phrase(lexicon, text, found.end()))
 
 
 def _statement_head(lexicon, subject: str):
     """The first statement noun in `subject` that heads it: the text before
-    it matches `statement_subject.head` (#3560), so "Both statements" and
-    "The references to ..." name one, and "The consent process described
-    in both statements" does not. With no `head` declared, any statement
-    noun in the subject counts."""
+    it matches `statement_subject.head` (#3560) and it ends its noun phrase
+    (`_ends_phrase`, #3606), so "Both statements" and "The references to
+    ..." name one, and "The consent process described in both statements"
+    and "The statement authors" do not. With no `head` declared, any
+    statement noun in the subject counts."""
     for noun in lexicon._statement.finditer(subject):
-        if lexicon._statement_head is None or lexicon._statement_head.fullmatch(subject[:noun.start()]):
+        if lexicon._statement_head is None or (
+                lexicon._statement_head.fullmatch(subject[:noun.start()])
+                and _ends_phrase(lexicon, subject, noun.end())):
             return noun
     return None
 
@@ -732,6 +755,20 @@ def _self_heads_subject(lexicon, selves, subject: str) -> bool:
     earlier in the sentence before an elided subject still counts."""
     found = [f for rx in selves for f in rx.finditer(subject)]
     return not found or any(_heads(lexicon, subject, f) for f in found)
+
+
+def _item_self_reference(lexicon, selves, item: str) -> str | None:
+    """The first self-reference that heads the item a cue reports
+    (`_heads`, read on the item with possessor self-references blanked):
+    "this split" in "No source reports this split as available" (#3261),
+    not in "the labels in this split" or "the labels with this split", which
+    are about the labels (#3607), as "The labels in this split" is for the
+    subject scope (#3592)."""
+    for rx in selves:
+        for found in rx.finditer(item):
+            if _heads(lexicon, item, found):
+                return found.group(0)
+    return None
 
 
 def _topic_self_reference(lexicon, selves, topic: str) -> str | None:
@@ -824,9 +861,10 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     elif pattern.scope == "presence":
         term = _self_reference(selves, sentence, c0, m.start())
         if term is None and "item" in pattern.self_in:
-            # A self-reference that owns nothing inside the item the cue
-            # reports: "No source reports this split as available" (#3261).
-            term = _search(selves, objects["item"])
+            # A self-reference that owns nothing and heads the item the cue
+            # reports: "No source reports this split as available" (#3261),
+            # not "the labels in this split" (#3607).
+            term = _item_self_reference(lexicon, selves, objects["item"])
         if term is None:
             term = _member_presence_term(lexicon, container, member,
                                          _presence_text(pattern, masked, c0, c1, m))

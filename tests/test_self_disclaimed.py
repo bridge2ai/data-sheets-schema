@@ -32,12 +32,13 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry two earlier byte
+#: before it first merged, so this PR's commits carry three earlier byte
 #: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 #:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
+#:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73"}
+                2: "15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9"}
 
 
 def record(**containers):
@@ -715,6 +716,10 @@ V3_SPLIT = "Both statements are prospective on that page, and neither gives spli
     ("instances", "It is prospective.", "It"),
     ("splits", "The holdout set is still prospective.", "holdout set"),
     ("variables", "Per the protocol, the measures are prospective.", "measures"),
+    # a head followed by what `tail` admits still ends its phrase (#3606)
+    ("splits", "The holdout set itself is prospective.", "holdout set"),
+    ("splits", "The holdout set, as described, is prospective.", "holdout set"),
+    ("splits", "This split and its labels are prospective.", "This split"),
 ])
 def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, text, scope):
     """#3131: `presence.prospective_predicate` has `subject` scope in v2. A
@@ -754,17 +759,41 @@ def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, te
      "statement_about_other"),
     ("splits", "Statements about the labels in this split are prospective.", "statement_about_other"),
     ("splits", "The labels in this split are prospective.", "no_member_subject"),
+    # a statement noun, presence term or self-reference that only modifies
+    # the noun after it heads nothing (#3606)
+    ("splits", "The split consent forms are prospective.", "no_member_subject"),
+    ("splits", "The holdout set consent process is prospective.", "no_member_subject"),
+    ("splits", "The split labels are prospective.", "no_member_subject"),
+    ("splits", "The split-level labels are prospective.", "no_member_subject"),
+    ("splits", "This split assignment is prospective.", "no_member_subject"),
+    ("splits", "The statement authors are prospective.", "no_member_subject"),
+    ("splits", "The statements' authors are prospective.", "no_member_subject"),
+    ("splits", "Statements about this split assignment are prospective.", "statement_about_other"),
+    ("splits", "The split sizes are prospective.", "no_member_subject"),
 ])
 def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
     assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
     assert outcomes(container, text) == [("presence.prospective_predicate", "out_of_scope", reason)], text
 
 
-def test_a_subject_cue_on_an_amount_is_guarded():
-    """#3131: the pattern's object is its subject, so "split sizes" is an
-    amount, not the split's presence."""
-    out = sd.scan(record(splits=[{"name": "Entry", "description": "The split sizes are prospective."}]), LEXICON)
-    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "sizes")]
+@pytest.mark.parametrize("text", ["Both 2025 statements are prospective.", "The 2025 split is prospective."])
+def test_a_subject_cue_on_a_date_is_guarded(text):
+    """#3131: the pattern's object is its subject, so a year in a subject
+    the cue counts on is a date, not the split's presence. "The split sizes
+    are prospective" is not guarded but out of scope: the split term only
+    modifies "sizes", so it heads nothing (#3606)."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "2025")]
+
+
+def test_without_a_tail_any_ending_counts():
+    """#3606: `statement_subject.tail` is what makes a head end its noun
+    phrase. A lexicon that declares none reads any ending as #3592 did."""
+    lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("tail"))
+    for text in ("The split labels are prospective.", "The statement authors are prospective."):
+        assert outcomes("splits", text, lexicon=lexicon) == [("presence.prospective_predicate", "flag", None)]
+        assert outcomes("splits", text) == [
+            ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
 
 
 def test_the_subject_scope_needs_a_statement_subject_block():
@@ -866,6 +895,8 @@ def test_the_item_qualifiers_block_is_validated():
     ("No source reports this split as available.", "this split"),
     ("No document lists it as released.", "it"),
     ("None of the pages describes this partition as complete.", "this partition"),
+    # what follows the self-reference is punctuation: it still heads (#3607)
+    ("No source reports this split, or its labels, as available.", "this split"),
 ])
 def test_a_self_reference_in_the_reported_item_licenses_the_cue(text, scope):
     """#3261: `presence.none_reports_available` declares
@@ -882,6 +913,10 @@ def test_a_self_reference_in_the_reported_item_licenses_the_cue(text, scope):
     ("For this split, the data are recorded as planned.", "presence.recorded_as_planned"),
     # a self-reference in the item that owns what is reported
     ("No source reports the consent form for this split as available.", "presence.none_reports_available"),
+    # a self-reference in the item that does not head it (#3607)
+    ("No source reports the labels in this split as available.", "presence.none_reports_available"),
+    ("No source reports the labels with this split as available.", "presence.none_reports_available"),
+    ("No source reports this split data as available.", "presence.none_reports_available"),
 ])
 def test_a_self_reference_outside_the_reported_item_or_owning_it_does_not(text, rule):
     assert outcomes("splits", text) == [(rule, "out_of_scope", "no_self_or_presence_term")]

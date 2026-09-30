@@ -195,7 +195,12 @@ item_qualifiers:
 # the same way, only as the subject's head and with nothing possessive after
 # it: "The holdout set is prospective" counts, "The consent process for the
 # splits", "Enrollment of the pediatric arm of the split" and "The split's
-# schedule" do not (#3592). A statement noun followed by `topic`
+# schedule" do not (#3592). A head also ends its noun phrase: what follows
+# it in the subject must match `tail` (the subject's end, punctuation other
+# than a hyphen, or a word that opens a postmodifier, a coordination or the
+# predicate), so a statement noun, presence term or self-reference used as
+# a modifier ("The split labels", "The holdout set consent process", "This
+# split assignment", "The statement authors") heads nothing (#3606). A statement noun followed by `topic`
 # ("statements about the consent process", "references to the consent
 # process") counts only when the topic is headed by such a self-reference
 # (read on the topic alone, so "descriptions of this split" names the split
@@ -210,6 +215,7 @@ statement_subject:
   nouns: ['statements?', 'descriptions?', 'mentions?', 'references?']
   head: '\s*(?:(?:both|all|each|either|neither|none|some|any|one|two|three) of\s+)?(?!(?:[\w''-]+\s+){0,2}?(?:in|on|of|to|by|for|from|at|with|within|across|about|under|described|mentioned|cited|listed|given|named|made|quoted)\s)(?:[\w''-]+\s+){0,3}'
   topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing|to)\s+(?P<topic>.+)'
+  tail: '\s*(?:$|[,;:()\u2013\u2014]|(?:in|on|of|to|by|for|from|at|with|within|across|about|under|over|regarding|concerning|describing|as|that|which|who|whose|where|described|mentioned|cited|listed|given|named|made|quoted|reported|and|or|nor|itself|themselves|alone|all|both|also|too|still|now|remains?|is|are|was|were)\b)'
 
 # How the diff resolves two original members that `receipts.remap_path`
 # follows to the same final entry. `identity_keys`: the one member whose
@@ -302,17 +308,22 @@ guards:
 # clause has no subject of its own ("It is derived, but is not yet
 # released"), earlier in the sentence; `presence` needs what `self` needs
 # or a presence term in the clause; `subject` needs a self-reference that
-# owns nothing, or a source-statement or presence-term subject
-# (`statement_subject`); `none` needs nothing more. A `none` cue is read as
+# owns nothing and heads the subject, or a subject headed by a source
+# statement or a presence term (`statement_subject`); `none` needs nothing
+# more. A `none` cue is read as
 # about the member's status by itself: `role.not_necessarily` names the
 # container's own role. `presence.prospective_predicate` was `none` in v1,
 # which counted whatever the clause's subject was ("the consent process is
 # prospective"); it is `subject` here (#3131), and its date/amount guard
-# reads that subject ("The split sizes are prospective"). A presence term
+# reads that subject ("Both 2025 statements are prospective"; "The split
+# sizes are prospective" is about the sizes, which the split term only
+# modifies, #3606). A presence term
 # that names another item (`item_qualifiers`) licenses no cue. A pattern's
 # `self_reference_in: [item]` also accepts a self-reference that owns
-# nothing inside the cue's `item` group ("No source reports this split as
-# available", #3261); a self-reference that a comma separates from the cue
+# nothing and heads the cue's `item` group, as `statement_subject.head` and
+# `tail` read a head ("No source reports this split as available", #3261;
+# not "the labels in this split" or "this split data", #3607); a
+# self-reference that a comma separates from the cue
 # ("For this split, the data are recorded as planned") still does not
 # count. A presence term licenses a `presence` cue only outside
 # the words the cue itself spells, and not inside one of the member's own
