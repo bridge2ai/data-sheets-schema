@@ -895,7 +895,9 @@ def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
     # Each type is tested on the value as written, before any emptiness test:
     # a falsy non-mapping `inputs` ([], '', false) or a falsy non-string
     # bundle field (0, []) is a damaged record, not one that names no bundle
-    # (#3489). Only an absent or null value, or an empty string, names none.
+    # (#3489). A record names no bundle only when `inputs` is absent, null
+    # or a mapping, and in it `bundle_path` or `bundle_md5` is absent, null
+    # or an empty string. An empty string for `inputs` itself is unreadable.
     inputs = document.get("inputs") if isinstance(document, dict) else None
     if not isinstance(document, dict) or not (inputs is None or isinstance(inputs, dict)):
         raise UnreadableEvaluation(f"the provenance record {record} is not a mapping with an inputs mapping")

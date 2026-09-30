@@ -935,11 +935,14 @@ def _broken_evaluation(tmp_path, how):
 @pytest.mark.parametrize("body", ["{}\n", "inputs: null\n", "inputs: {}\n",
                                   "inputs: {bundle_path: null, bundle_md5: abc}\n",
                                   "inputs: {bundle_path: x.txt, bundle_md5: ''}\n",
+                                  "inputs: {bundle_path: '', bundle_md5: abc}\n",
                                   "inputs: {bundle_path: x.txt}\n"])
 def test_a_record_that_names_no_bundle_is_not_unreadable(tmp_path, body):
     """#3489: the type checks look at the value as written, so a falsy
-    non-mapping or non-string is unreadable; an absent or null value, or an
-    empty string, still names no bundle and returns None rather than raising."""
+    non-mapping or non-string is unreadable. An absent, null or mapping
+    `inputs` whose `bundle_path` or `bundle_md5` is absent, null or an empty
+    string still names no bundle and returns None rather than raising; an
+    empty-string `inputs` is not among these (#3503) and is unreadable."""
     record = tmp_path / "CHORUS_provenance.yaml"
     record.write_text(body, encoding="utf-8")
     evaluation = {"project": "CHORUS", "d4d_file": "data/d4d_concatenated/claudecode_agent/L/CHORUS_d4d.yaml"}
