@@ -234,6 +234,7 @@ class NotTheModel(unittest.TestCase):
         self.assertIsInstance(old, datetime.datetime)
         self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00Z"), "temporal")
         self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00+00:00"), "temporal")
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00-00:00"), "temporal")
         self.assertIsNone(rm.normaliser_form("issued", old, "2026-05-02T00:00:00Z"))
         plus2 = yaml.safe_load("issued: 2026-05-01T10:00:00+02:00")["issued"]
         self.assertEqual(rm.normaliser_form("issued", plus2, "2026-05-01T10:00:00+02:00"), "temporal")

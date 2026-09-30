@@ -733,30 +733,19 @@ def _temporal_texts(value: Any) -> list[str]:
     parsed value has lost its text, and `normalise_temporal` keeps a zone as
     written: `2026-05-01T00:00:00Z` and `...+00:00` load as one datetime and
     are written back as two texts, so each spelling of a zero offset is
-    tried. Only texts that load back as `value` are returned."""
+    tried."""
     import datetime as _dt
     if isinstance(value, _dt.datetime):
         base = value.replace(tzinfo=None).isoformat()
         off = value.utcoffset()
         if off is None:
-            texts = [base]
-        elif not off:
-            texts = [f"{base}Z", f"{base}+00:00", f"{base}-00:00"]
-        else:
-            texts = [value.isoformat()]
-    elif isinstance(value, _dt.date):
-        texts = [value.isoformat()]
-    else:
-        return []
-    out = []
-    for t in texts:
-        try:
-            back = yaml.safe_load(f"v: {t}")
-        except yaml.YAMLError:
-            continue
-        if isinstance(back, dict) and back.get("v") == value:
-            out.append(t)
-    return out
+            return [base]
+        if not off:
+            return [f"{base}Z", f"{base}+00:00", f"{base}-00:00"]
+        return [value.isoformat()]
+    if isinstance(value, _dt.date):
+        return [value.isoformat()]
+    return []
 
 
 def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool:
