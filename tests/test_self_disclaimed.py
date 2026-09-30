@@ -1,11 +1,14 @@
 """Self-disclaimed typed-container entries (#2913): synthetic, project-neutral
 fixtures for the lexicon (check a), the receipt role predicates (check b),
-the original-to-final diff, the CLI and the module's boundaries."""
+the original-to-final diff, the CLI and the module's boundaries; and the
+three direct-arm canaries, neutralised, replayed to #3029's acceptance
+outcomes (#3515)."""
 import ast
 import copy
 import hashlib
 import inspect
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -1650,3 +1653,103 @@ def test_cli_refuses_an_audit_without_a_final_and_an_ambiguous_record(tmp_path):
     dup.write_text("name: a\nname: b\n", encoding="utf-8")
     result = CliRunner().invoke(review, ["self-disclaimed", "--original", str(dup)])
     assert result.exit_code != 0 and "duplicate" in result.output and "original" in result.output
+
+
+# ------------------------------------------------ direct-arm canaries (#3515)
+CANARIES = Path(__file__).parent / "fixtures" / "self_disclaimed"
+V3_CREATORS = {f"/creators/{i}": {"role.assignment_negated"} for i in range(1, 6)}
+V3_PRESENCE = {
+    "/instances/9": {"presence.contrast_released", "presence.not_member_of", "presence.planned_element",
+                     "presence.recorded_as_planned"},
+    "/variables/0": {"presence.contrast_released", "presence.planned_element", "presence.recorded_as_planned"},
+}
+#: #3029's acceptance replay, pinned: per canary, the original's and the
+#: final's flags with their rules, each flag's (and each check (b) flag's)
+#: classification with the findings declaring its removal, and whether it is
+#: still flagged in the final. The same under every lexicon version.
+CANARY_OUTCOMES = {
+    # v1: the maintainer's disclaimer is flagged and removed by finding 22.
+    "direct_v1": {
+        "original": {"/maintainers/0": {"role.none_assigns"}},
+        "final": {},
+        "lexicon_diff": {"/maintainers/0": ("removal_declared", [22], False)},
+        "role_predicate_diff": {"/maintainers/0": ("removal_declared", [22])},
+    },
+    # v2: no lexicon flag; check (b) flags /maintainers/0, removed by finding 0.
+    "direct_v2": {
+        "original": {},
+        "final": {},
+        "lexicon_diff": {},
+        "role_predicate_diff": {"/maintainers/0": ("removal_declared", [0])},
+    },
+    # v3: 9 original flags, all retained; 8 still flagged in the final (the
+    # maintainer's disclaiming caveat was deleted and the entry kept). The
+    # final's /splits/0 sentence ("Both statements are prospective on that
+    # page") is the one #3131 scoped (`presence.prospective_predicate`).
+    "direct_v3": {
+        "original": {**V3_CREATORS, **V3_PRESENCE, "/maintainers/0": {"role.none_assigns"},
+                     "/splits/0": {"presence.none_reports_available", "presence.planned_element",
+                                   "presence.recorded_as_planned"}},
+        "final": {**V3_CREATORS, **V3_PRESENCE, "/splits/0": {"presence.prospective_predicate"}},
+        "lexicon_diff": {**{p: ("self_disclaimed_retained", [], True) for p in (*V3_CREATORS, *V3_PRESENCE,
+                                                                               "/splits/0")},
+                         "/maintainers/0": ("self_disclaimed_retained", [], False)},
+        "role_predicate_diff": {**{p: ("role_predicate_retained", []) for p in V3_CREATORS},
+                                "/maintainers/0": ("role_predicate_retained", [])},
+    },
+}
+
+
+def canary_files(name):
+    d = CANARIES / name
+    return d / "original.yaml", d / "final.yaml", d / "audit.json", d / "receipt.yaml"
+
+
+def rules(scanned):
+    return {f["path"]: {h["rule"] for h in f["hits"]} for f in scanned["flags"]}
+
+
+@pytest.mark.parametrize("version", sorted(LEXICON_PINS))
+@pytest.mark.parametrize("name", sorted(CANARY_OUTCOMES))
+def test_the_direct_canaries_replay_to_the_acceptance_outcomes(name, version):
+    """#3515: `d4d review self-disclaimed --original O --final F --audit A
+    --receipt R` on the three direct-arm canaries, neutralised
+    (tests/fixtures/self_disclaimed/README.md), gives #3029's acceptance
+    outcomes under every lexicon version."""
+    want = CANARY_OUTCOMES[name]
+    out = sd.check_files(*canary_files(name), lexicon=sd.load_lexicon(sd.lexicon_path(version)))
+    assert (rules(out["original"]), rules(out["final"])) == (want["original"], want["final"])
+    assert {r["path"]: (r["classification"], r["findings_declaring_removal"], r["still_flagged_in_final"])
+            for r in out["lexicon_diff"]["rows"]} == want["lexicon_diff"]
+    assert {r["path"]: (r["classification"], r["findings_declaring_removal"])
+            for r in out["role_predicate_diff"]["rows"]} == want["role_predicate_diff"]
+    assert out["final_only"] == [] and out["lexicon_diff"]["audit_pointers_unreadable"] == 0
+
+
+def test_the_cli_replays_a_direct_canary(tmp_path):
+    from data_sheets_schema.cli.review import review
+    original, final, audit, rcpt = canary_files("direct_v3")
+    result = CliRunner().invoke(review, ["self-disclaimed", "--original", str(original), "--final", str(final),
+                                         "--audit", str(audit), "--receipt", str(rcpt)])
+    assert result.exit_code == 0, result.output
+    counts = json.loads(result.output)["counts"]
+    assert (counts["original_flags"], counts["final_flags"], counts["lexicon_diff"]["self_disclaimed_retained"],
+            counts["role_predicate_diff"]["role_predicate_retained"]) == (9, 8, 9, 6)
+
+
+def test_the_canary_fixtures_are_neutral_and_documented():
+    """No study name, identifier or domain word in the fixtures, and the
+    README names the source bytes of every fixture file (#3515)."""
+    readme = (CANARIES / "README.md").read_text(encoding="utf-8")
+    study = ("chorus", "ai-readi", "ai_readi", "voice", "cm4ai", "bridge2ai", "fairhub", "physionet",
+             "reporter", "nih", "icu", "pacs", "eeg", "hospital", "patient", "clinical", "ot2")
+    files = sorted(p for p in CANARIES.glob("direct_v*/*") if p.is_file())
+    assert [p.relative_to(CANARIES).as_posix() for p in files] == [
+        f"direct_v{v}/{f}" for v in (1, 2, 3) for f in ("audit.json", "final.yaml", "original.yaml", "receipt.yaml")]
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        words = set(re.findall(r"[a-z0-9_-]+", text.lower()))
+        assert not words & set(study), (path.name, words & set(study))
+        if path.suffix == ".yaml":
+            assert text.startswith("# Neutralised fixture (#3515)"), path
+    assert len(set(re.findall(r"`([0-9a-f]{64})`", readme))) == len(files)

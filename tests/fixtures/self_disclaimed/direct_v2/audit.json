@@ -1,0 +1,166 @@
+{
+ "findings": [
+  {
+   "severity": "high",
+   "slot": "maintainers",
+   "record": "both",
+   "issue": "Neutralised finding 0.",
+   "review_paths": [
+    "/maintainers/0/name"
+   ],
+   "remove_relationship": {
+    "path": "/maintainers/0",
+    "identity": "/name"
+   },
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/maintainers/0/name"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "description",
+   "record": "both",
+   "issue": "Neutralised finding 1.",
+   "review_paths": [
+    "/description",
+    "/conforms_to"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/description"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "source_caveats",
+   "record": "both",
+   "issue": "Neutralised finding 2.",
+   "review_paths": [
+    "/source_caveats",
+    "/subsets/0/description",
+    "/funders/0/grants/0/description",
+    "/participant_privacy/0/reidentification_risk",
+    "/license_and_use_terms/license_terms",
+    "/is_deidentified/deidentification_details"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/source_caveats"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/is_deidentified/deidentification_details"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/license_and_use_terms/license_terms"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "source_caveats",
+   "record": "both",
+   "issue": "Neutralised finding 3.",
+   "review_paths": [
+    "/source_caveats",
+    "/notes",
+    "/creators/0/notes",
+    "/subsets/2/notes",
+    "/subsets/6/description",
+    "/subsets/7/description",
+    "/subsets/8/description",
+    "/subsets/9/description",
+    "/participant_privacy/0/notes",
+    "/license_and_use_terms/notes"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/notes"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/source_caveats"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/subsets/6/description"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "instances",
+   "record": "both",
+   "issue": "Neutralised finding 4.",
+   "review_paths": [
+    "/instances/0/description",
+    "/instances/0/notes",
+    "/creators/0/description",
+    "/participant_privacy/0/privacy_techniques",
+    "/license_and_use_terms/license_terms",
+    "/license_and_use_terms/notes"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/instances/0/description"
+    },
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/instances/0/notes"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "subsets",
+   "record": "full",
+   "issue": "Neutralised finding 5.",
+   "review_paths": [
+    "/subsets/3/conforms_to",
+    "/subsets/3/description"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/subsets/3/conforms_to"
+    }
+   ]
+  },
+  {
+   "severity": "medium",
+   "slot": "creators",
+   "record": "both",
+   "issue": "Neutralised finding 6.",
+   "review_paths": [
+    "/creators/0/notes"
+   ],
+   "evidence": [
+    {
+     "artifact": "original_full",
+     "op": "contains",
+     "path": "/creators/0/notes"
+    }
+   ]
+  }
+ ]
+}
