@@ -224,7 +224,8 @@ class RemovalRows(unittest.TestCase):
         from data_sheets_schema.removals import classify
         rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
         self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "unfoundedrelocated": None,
-                                "receipteddeleted": None, "unfoundedrewrites": None, "unrecordedremovals": None})
+                                "lowconfidenceflat": None, "receipteddeleted": None, "unfoundedrewrites": None,
+                                "unfoundedrewritesnotmodel": None, "unrecordedremovals": None})
         self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
         self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
 
@@ -236,7 +237,8 @@ class RemovalRows(unittest.TestCase):
         block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
         rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
         self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "unfoundedrelocated": 0,
-                                "receipteddeleted": 1, "unfoundedrewrites": 0, "unrecordedremovals": 0})
+                                "lowconfidenceflat": 0, "receipteddeleted": 1, "unfoundedrewrites": 0,
+                                "unfoundedrewritesnotmodel": 0, "unrecordedremovals": 0})
 
     def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
         """`removals_unrecorded_count` is only a measurement where the report
@@ -297,9 +299,59 @@ class RemovalRows(unittest.TestCase):
                        "change of standing"):
             self.assertIn(phrase, definition)
 
+    def test_the_low_confidence_row_sizes_the_deflation_and_moves_nothing(self):
+        """#3367: flattenings by a one- or two-token needle (or the surplus
+        route) that no finding would found, beside the removals; the
+        removal count is what it was."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "keywords": ["UF", "voice biomarkers of adults"], "license": "CC-BY"}
+        after = {"id": "doi:10.1/x", "keywords": "UF; voice biomarkers of adults"}
+        rows = self._rows(classify(before, after, {"findings": []}),
+                          {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["unfoundedremovals"], rows["lowconfidenceflat"]), (1, 1))
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("lowconfidenceflat"), keys.index("unfoundedrelocated") + 1)
+        definition = self.m.METRICS["lowconfidenceflat"][3]
+        for phrase in ("#3367", "Reported only: no count moves", "bounds nothing (#3229)"):
+            self.assertIn(phrase, definition)
+
+    def test_the_not_the_models_row_counts_normaliser_forms_and_amends_within_the_rewrites(self):
+        """#3366: a sub-row of the rewrite row; the rewrite row keeps them."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "issued": "2024-05-01", "description": "old words", "title": "t"}
+        after = {"id": "doi:10.1/x", "issued": "2024-05-01T00:00:00Z", "description": "new text", "title": "u"}
+        rows = self._rows(classify(before, after, {"findings": []}, amended_paths={"title"}),
+                          {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["unfoundedrewrites"], rows["unfoundedrewritesnotmodel"]), (3, 2))
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("unfoundedrewritesnotmodel"), keys.index("unfoundedrewrites") + 1)
+        definition = self.m.METRICS["unfoundedrewritesnotmodel"][3]
+        for phrase in ("#3366", "never subtracted", "curator's recorded amend disposition", "#903"):
+            self.assertIn(phrase, definition)
+
+    def test_the_low_confidence_and_not_the_models_rows_read_the_unfounded_subsets(self):
+        """#3728: a founded low-confidence flattening, and a founded rewrite
+        of the normaliser's form or at an amend, are in the block's totals
+        and not in the rows, which are without a finding."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "keywords": ["UF", "voice biomarkers of adults"],
+                  "data_governance": {"committee_name": "DAC", "notes": "reviewed yearly by the board"},
+                  "issued": "2024-05-01", "title": "t", "description": "old words"}
+        after = {"id": "doi:10.1/x", "keywords": "UF; voice biomarkers of adults",
+                 "data_governance": "DAC reviewed yearly by the board",
+                 "issued": "2024-05-01T00:00:00Z", "title": "u", "description": "new text"}
+        block = classify(before, after, {"findings": [{"slot": "data_governance", "record": "full"},
+                                                     {"slot": "issued", "record": "full"},
+                                                     {"slot": "title", "record": "full"}]},
+                         amended_paths={"title"})
+        self.assertEqual((block["flattened_low_confidence"], block["rewritten"]), (2, 3))
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["lowconfidenceflat"], rows["unfoundedrewrites"], rows["unfoundedrewritesnotmodel"]),
+                         (1, 1, 0))
+
     def test_the_rows_are_in_the_table(self):
-        for key in ("unfoundedremovals", "unfoundedreconcile", "unfoundedrelocated", "receipteddeleted",
-                    "unfoundedrewrites", "unrecordedremovals"):
+        for key in ("unfoundedremovals", "unfoundedreconcile", "unfoundedrelocated", "lowconfidenceflat",
+                    "receipteddeleted", "unfoundedrewrites", "unfoundedrewritesnotmodel", "unrecordedremovals"):
             self.assertIn(key, self.m.METRICS)
         keys = list(self.m.METRICS)
         self.assertEqual(keys.index("unfoundedreconcile"), keys.index("unfoundedremovals") + 1)

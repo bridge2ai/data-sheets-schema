@@ -177,6 +177,267 @@ class Rewritten(unittest.TestCase):
         self.assertEqual((b["rewritten"], [r["path"] for r in b["unfounded_paths"]]), (0, ["keywords[1]"]))
 
 
+class NotTheModel(unittest.TestCase):
+    """#3366: a rewrite the API runner's write-time normaliser makes, or a
+    curator's recorded amend, is marked and counted apart — and stays in
+    `rewritten` and `rewritten_unfounded`, which do not move."""
+
+    def test_the_normalisers_enum_temporal_and_mailto_forms_are_marked_and_still_counted(self):
+        before = _record(related_datasets=[{"id": "x#r", "relationship_type": "IsDerivedFrom"}],
+                         issued="2024-05-01", collection=[{"id": "x#c", "start_date": "2024-05-01T10:00:00Z"}],
+                         contact_person={"id": "mailto:jane@lab.edu", "name": "Jane Parker"},
+                         description="Old words.")
+        after = _record(related_datasets=[{"id": "x#r", "relationship_type": "derives_from"}],
+                        issued="2024-05-01T00:00:00Z", collection=[{"id": "x#c", "start_date": "2024-05-01"}],
+                        contact_person={"id": f"{RID}#person-jane-parker", "name": "Jane Parker",
+                                        "email": "jane@lab.edu"},
+                        description="New text.")
+        b = rm.classify(before, after, _audit())
+        forms = {r["path"]: r.get("normaliser") for r in b["rewritten_paths"]}
+        self.assertEqual(forms, {"related_datasets[0].relationship_type": "enum_alias", "issued": "temporal",
+                                 "collection[0].start_date": "temporal", "contact_person.id": "mailto_id",
+                                 "description": None})
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"]), (5, 5))
+        self.assertEqual((b["rewritten_normaliser"], b["rewritten_normaliser_unfounded"]), (4, 4))
+        self.assertEqual(b["rewritten_normaliser_by"], {"enum_alias": 1, "temporal": 2, "mailto_id": 1})
+        self.assertEqual(b["rewritten_unfounded_not_model"], 4)
+        self.assertIn("of the rewrites, 4 of the write-time normaliser's form and 0 a curator's amend", b["summary"])
+
+    def test_a_value_the_normaliser_would_not_write_is_not_marked(self):
+        """Another permissible value, a date on another day, a mailto id
+        moved to a fragment on some other record's id, an enum slot's
+        free rewording: the model's rewrites."""
+        before = _record(related_datasets=[{"id": "x#r", "relationship_type": "IsDerivedFrom"}],
+                         issued="2024-05-01", contact_person={"id": "mailto:jane@lab.edu", "name": "Jane"})
+        after = _record(related_datasets=[{"id": "x#r", "relationship_type": "is_source_of"}],
+                        issued="2024-06-01T00:00:00Z", contact_person={"id": "doi:10.9/other#person-jane",
+                                                                       "name": "Jane"})
+        b = rm.classify(before, after, _audit())
+        self.assertEqual(b["rewritten"], 3)
+        self.assertEqual((b["rewritten_normaliser"], b["rewritten_unfounded_not_model"]), (0, 0))
+        self.assertNotIn("of the rewrites", b["summary"])
+
+    def test_normaliser_form_reads_parsed_dates_and_leaves_what_it_cannot_read(self):
+        import datetime
+        self.assertEqual(rm.normaliser_form("issued", datetime.date(2024, 5, 1), "2024-05-01T00:00:00Z"), "temporal")
+        self.assertIsNone(rm.normaliser_form("issued", "2024-05-01", "2024-05-01"))
+        self.assertIsNone(rm.normaliser_form("description", "IsDerivedFrom", "derives_from"))
+        self.assertIsNone(rm.normaliser_form("keywords[0]", "a", "b"))
+        self.assertIsNone(rm.normaliser_form("relationship_type", "a\nb", "derives_from"))
+
+    def test_a_parsed_tz_aware_datetime_is_read_from_the_text_the_runner_rewrote(self):
+        """#3754: `issued: 2026-05-01T00:00:00Z` unquoted loads as a UTC
+        datetime, whose `isoformat()` says `+00:00`; the runner rewrites the
+        text and keeps the `Z`. Each text YAML reads as the value is tried."""
+        import datetime
+        old = yaml.safe_load("issued: 2026-05-01T00:00:00Z")["issued"]
+        self.assertIsInstance(old, datetime.datetime)
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00Z"), "temporal")
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00+00:00"), "temporal")
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00-00:00"), "temporal")
+        self.assertIsNone(rm.normaliser_form("issued", old, "2026-05-02T00:00:00Z"))
+        plus2 = yaml.safe_load("issued: 2026-05-01T10:00:00+02:00")["issued"]
+        self.assertEqual(rm.normaliser_form("issued", plus2, "2026-05-01T10:00:00+02:00"), "temporal")
+        self.assertIsNone(rm.normaliser_form("issued", plus2, "2026-05-01T10:00:00Z"))
+        self.assertEqual(rm.normaliser_form("start_date", old, "2026-05-01"), "temporal")
+        # A final value loaded unquoted is compared by the same texts.
+        self.assertEqual(rm.normaliser_form("issued", datetime.date(2026, 5, 1), old), "temporal")
+        # End to end: the snapshot's unquoted line, the runner's quoted one.
+        before = yaml.safe_load(f"id: {RID}\ntitle: A dataset\nissued: 2026-05-01T00:00:00Z\n")
+        after = yaml.safe_load(f"id: {RID}\ntitle: A dataset\nissued: '2026-05-01T00:00:00Z'\n")
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["rewritten"], b["rewritten_normaliser"], b["rewritten_normaliser_by"]["temporal"]),
+                         (1, 1, 1))
+        self.assertEqual(b["rewritten_paths"][0]["normaliser"], "temporal")
+
+    def test_a_mailto_id_is_the_normalisers_only_under_a_person_slot_in_its_fragment_shape(self):
+        """#3756: the runner rewrites a `mailto:` id only in a mapping under
+        a Person-ranged slot, to `<own id>#person-<slug>`, and never on an
+        own id that already carries a fragment; it leaves every other one."""
+        own = frozenset({RID})
+        mail = "mailto:data@lab.edu"
+        self.assertEqual(rm.normaliser_form("contact_person.id", mail, f"{RID}#person-data-at-lab-edu", own),
+                         "mailto_id")
+        self.assertEqual(rm.normaliser_form("committee_members[1].id", mail, f"{RID}#person-jane-parker", own),
+                         "mailto_id")
+        # Not a Person-ranged slot: the runner logs `mailto_id_skipped`.
+        for path in ("file_collections[0].id", "creators[0].id", "id", "contact_person.affiliation.id"):
+            self.assertIsNone(rm.normaliser_form(path, mail, f"{RID}#person-data-at-lab-edu", own), path)
+        # Not the runner's fragment.
+        for new in (f"{RID}#anything", f"{RID}#person-", f"{RID}#person-Jane", f"{RID}#person-a#b",
+                    "doi:10.9/other#person-data-at-lab-edu"):
+            self.assertIsNone(rm.normaliser_form("contact_person.id", mail, new, own), new)
+        # An own id with a fragment of its own: the runner skips it.
+        self.assertIsNone(rm.normaliser_form("contact_person.id", mail, f"{RID}#root#person-jane",
+                                             frozenset({f"{RID}#root"})))
+        # Parity with the runner: what it writes is marked, what it leaves is not.
+        from data_sheets_schema.api_runner import normalise_mailto_ids
+        text = (f"id: {RID}\ncontact_person:\n  name: Jane Q. Parker\n  id: {mail}\n"
+                f"committee_members:\n- id: mailto:bob@x.org\n")
+        was, now = yaml.safe_load(text), yaml.safe_load(normalise_mailto_ids(text))
+        self.assertEqual(rm.normaliser_form("contact_person.id", was["contact_person"]["id"],
+                                            now["contact_person"]["id"], own), "mailto_id")
+        self.assertEqual(rm.normaliser_form("committee_members[0].id", was["committee_members"][0]["id"],
+                                            now["committee_members"][0]["id"], own), "mailto_id")
+        text = f"id: {RID}\nfile_collections:\n- id: {mail}\n"
+        self.assertEqual(normalise_mailto_ids(text), text)
+        before = _record(file_collections=[{"id": mail, "name": "Data"}])
+        after = _record(file_collections=[{"id": f"{RID}#person-data", "name": "Data"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["rewritten"], b["rewritten_normaliser"], b["rewritten_unfounded_not_model"]), (1, 0, 0))
+
+    def test_a_rewrite_at_a_curators_amended_path_is_marked_a_curators_amend(self):
+        """The 2026-09-01 v7 rep2 VOICE shape: the one `write`-phase rewrite
+        in the corpus is a `d4d review disposition --amend` (#903)."""
+        before = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."}],
+                         description="d")
+        after = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Amended."}], description="d")
+        stages = [("reconcile_full", before)]
+        b = rm.classify(before, after, _audit(), intermediates=stages,
+                        amended_paths={"acquisition_methods[0].acquisition_details"})
+        self.assertEqual(b["rewritten_paths"], [{"path": "acquisition_methods[0].acquisition_details",
+                                                 "at": "acquisition_methods[0].acquisition_details",
+                                                 "curator_amend": True, "phase": "write", "founded": False}])
+        self.assertEqual((b["rewritten_curator_amend"], b["rewritten_curator_amend_unfounded"],
+                          b["rewritten_unfounded_not_model"], b["rewritten_unfounded"]), (1, 1, 1, 1))
+        unmarked = rm.classify(before, after, _audit(), intermediates=stages)
+        self.assertEqual((unmarked["rewritten_curator_amend"], unmarked["rewritten_unfounded_not_model"]), (0, 0))
+
+    def test_a_rewrite_under_an_amended_entry_is_marked_and_a_sibling_is_not(self):
+        """#3729: an amend path that is a proper ancestor of the rewrite's
+        final path marks it; a sibling entry, or a path that merely shares
+        the string prefix, does not."""
+        before = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."},
+                                              {"id": "x#b", "acquisition_details": "Another old sentence."}])
+        after = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Amended."},
+                                             {"id": "x#b", "acquisition_details": "Changed too."}])
+        b = rm.classify(before, after, _audit(), amended_paths={"acquisition_methods[0]"})
+        marks = {r["path"]: r.get("curator_amend") for r in b["rewritten_paths"]}
+        self.assertEqual(marks, {"acquisition_methods[0].acquisition_details": True,
+                                 "acquisition_methods[1].acquisition_details": None})
+        prefix_only = rm.classify(before, after, _audit(), amended_paths={"acquisition_methods[0].acquisition"})
+        self.assertEqual(prefix_only["rewritten_curator_amend"], 0)
+
+    def test_an_amend_on_a_value_a_model_phase_already_rewrote_leaves_it_the_models(self):
+        """#3725: reconcile_full rewrote the value and a curator later
+        amended it. The phase attribution credits the model, so the row is
+        not a curator's amend and is not counted as not the model's; it is
+        marked as amended after the model's rewrite. Unattributed, the path
+        alone decides, as documented."""
+        before = _record(description="Old description words.")
+        reconciled = _record(description="Model rewording.")
+        after = _record(description="Model rewording, amended.")
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", reconciled)],
+                        amended_paths={"description"})
+        self.assertEqual(b["rewritten_paths"], [{"path": "description", "at": "description",
+                                                 "phase": "reconcile_full", "amended_after_model_rewrite": True,
+                                                 "founded": False}])
+        self.assertEqual((b["rewritten_curator_amend"], b["rewritten_unfounded_not_model"], b["rewritten_unfounded"]),
+                         (0, 0, 1))
+        unattributed = rm.classify(before, after, _audit(), amended_paths={"description"})
+        self.assertEqual((unattributed["rewritten_curator_amend"], unattributed["rewritten_unfounded_not_model"]),
+                         (1, 1))
+
+    def test_the_unfounded_counts_leave_out_rewrites_a_finding_founds(self):
+        """#3728: the `_unfounded` and `not_model` counts are subsets of
+        the rewrites without a finding, not the totals."""
+        before = _record(issued="2024-05-01", collection=[{"id": "x#c", "start_date": "2024-05-01T10:00:00Z"}],
+                         title="Old title words", description="Old description words")
+        after = _record(issued="2024-05-01T00:00:00Z", collection=[{"id": "x#c", "start_date": "2024-05-01"}],
+                        title="New", description="Fresh")
+        b = rm.classify(before, after, _audit({"slot": "issued"}, {"slot": "title"}),
+                        amended_paths={"title", "description"})
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"]), (4, 2))
+        self.assertEqual((b["rewritten_normaliser"], b["rewritten_normaliser_unfounded"]), (2, 1))
+        self.assertEqual((b["rewritten_curator_amend"], b["rewritten_curator_amend_unfounded"]), (2, 1))
+        self.assertEqual(b["rewritten_unfounded_not_model"], 2)
+
+    def test_amended_paths_reads_only_amend_dispositions(self):
+        record = {"dispositions": [{"disposition": "amend", "path": "a.b"}, {"disposition": "retain", "path": "c"},
+                                   {"disposition": "amend"}, "not a mapping"]}
+        self.assertEqual(rm.amended_paths(record), frozenset({"a.b"}))
+        self.assertEqual(rm.amended_paths({"dispositions": "x"}), frozenset())
+        self.assertEqual(rm.amended_paths(None), frozenset())
+
+    def test_no_snapshot_leaves_the_new_counts_none(self):
+        b = rm.classify(None, _record(), _audit())
+        for k in ("rewritten_normaliser", "rewritten_curator_amend", "rewritten_unfounded_not_model",
+                  "flattened_low_confidence", "flattened_low_confidence_unfounded"):
+            self.assertIsNone(b[k], k)
+
+    def test_the_published_non_check_says_a_form_is_not_a_provenance(self):
+        text = next(n for n in rm.NON_CHECKS if "normaliser's form" in n)
+        for phrase in ("a model that wrote the permissible value itself reads the same", "never subtracted",
+                       "#3366"):
+            self.assertIn(phrase, text)
+
+
+class LowConfidence(unittest.TestCase):
+    """#3367: a flattening a coincidence could make — a needle of one or two
+    tokens, or the dropped-entry surplus route — is marked, and whether a
+    finding would found it as a deletion is counted, so the deflation of
+    `unfounded` has a size. No class moves."""
+
+    def test_a_short_needle_is_marked_and_sorted_by_the_findings_a_deletion_would_have(self):
+        before = _record(keywords=["UF", "voice biomarkers of adults"], license="CC-BY",
+                         data_governance={"committee_name": "DAC", "notes": "reviewed yearly by the board"})
+        after = _record(keywords="UF; voice biomarkers of adults", license="CC-BY",
+                        data_governance="DAC reviewed yearly by the board")
+        b = rm.classify(before, after, _audit({"slot": "data_governance"}))
+        flat = {r["path"]: r for r in b["flattened_paths"]}
+        self.assertEqual({p: r.get("low_confidence") for p, r in flat.items()},
+                         {"keywords[0]": ["short_needle"], "keywords[1]": None,
+                          "data_governance.committee_name": ["short_needle"], "data_governance.notes": None})
+        self.assertEqual((flat["keywords[0]"]["founded"], flat["data_governance.committee_name"]["founded"]),
+                         (False, True))
+        self.assertNotIn("founded", flat["keywords[1]"])
+        self.assertEqual((b["flattened"], b["deleted"], b["unfounded"]), (4, 0, 0))
+        self.assertEqual((b["flattened_low_confidence"], b["flattened_low_confidence_unfounded"]), (2, 1))
+        self.assertEqual(b["flattened_low_confidence_by"], {"short_needle": 2, "surplus": 0})
+        self.assertIn("2 flattened with low confidence (a needle of one or two tokens, or the surplus route;"
+                      " 1 without a finding)", b["summary"])
+
+    def test_an_identifier_or_a_longer_needle_is_not_short(self):
+        self.assertEqual(rm.low_confidence("ROR:05gq02987", "ancestor"), [])
+        self.assertEqual(rm.low_confidence("https://ror.org/05gq02987", "ancestor"), [])
+        self.assertEqual(rm.low_confidence("three word name", "ancestor"), [])
+        self.assertEqual(rm.low_confidence("two words", "continuation"), ["short_needle"])
+        self.assertEqual(rm.low_confidence(32522, "ancestor"), ["short_needle"])
+        self.assertEqual(rm.low_confidence("three word name", "surplus"), ["surplus"])
+
+    def test_the_surplus_route_is_marked_and_a_continuation_is_not(self):
+        """The split image archives of DroppedEntries: the surplus route; the
+        CM4AI v4 rep3 creator fold: a continuation."""
+        tables = {"id": "x#tables", "name": "Tables", "formats": ["zip archive of tiff images"]}
+        before = _record(file_collections=[{"id": "x#images", "name": "Image archives",
+                                            "formats": ["zip archive of tiff images"]}, tables])
+        split = rm.classify(before, _record(file_collections=[
+            {"id": "x#img-a", "name": "img_a", "formats": ["zip archive of tiff images"]},
+            {"id": "x#img-b", "name": "img_b", "formats": ["zip archive of tiff images"]}, tables]), _audit())
+        self.assertEqual([(r["path"], r["low_confidence"]) for r in split["flattened_paths"]],
+                         [("file_collections[0].formats[0]", ["surplus"])])
+        self.assertEqual(split["flattened_low_confidence_by"], {"short_needle": 0, "surplus": 1})
+        pat = {"id": "x#1", "name": "Pat Lee Smith", "affiliations": [{"name": "University of Example"}]}
+        folded = rm.classify(_record(creators=[pat]),
+                             _record(creators=[{"id": "ORCID:1", "notes": "Pat Lee Smith, University of Example"}]),
+                             _audit())
+        self.assertTrue(folded["flattened"])
+        self.assertEqual(folded["flattened_low_confidence"], 0)
+
+    def test_without_an_audit_the_low_confidence_rows_are_not_sorted(self):
+        b = rm.classify(_record(keywords=["UF", "MGH"]), _record(keywords="UF, MGH"), None)
+        self.assertEqual((b["flattened_low_confidence"], b["flattened_low_confidence_unfounded"]), (2, None))
+        self.assertNotIn("founded", b["flattened_paths"][0])
+        self.assertIn("2 flattened with low confidence (a needle of one or two tokens, or the surplus route)",
+                      b["summary"])
+
+    def test_the_published_non_check_says_the_count_is_no_bound(self):
+        text = next(n for n in rm.NON_CHECKS if n.startswith("that a flattening marked low-confidence"))
+        for phrase in ("flattened_low_confidence_unfounded", "a longer needle can still coincide",
+                       "not a bound", "#3367"):
+            self.assertIn(phrase, text)
+
+
 class Containment(unittest.TestCase):
     """What the flattening test counts as the value's text surviving."""
 
@@ -775,6 +1036,27 @@ class OnDisk(unittest.TestCase):
         self.assertEqual([(p["phase"], p["state"]) for p in b["artifacts"]["phases"]],
                          [("reconcile_full", "absent"), ("repair_full_r1", "usable")])
 
+    def test_an_amend_disposition_in_the_provenance_record_marks_its_rewrite(self):
+        """#3366/#903: `for_record` reads the record's amend dispositions;
+        the CLI names the amend on the rewrite it made."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            final = prov.parent.parent.parent / "claudecode_api" / "L" / "VOICE_d4d.yaml"
+            final.write_text(yaml.safe_dump(_record(description="amended by hand", keywords="a1, b2")))
+            prov.write_text(yaml.safe_dump({"run": {"project": "VOICE", "label": "L"}, "dispositions": [
+                {"item": "slot-001", "disposition": "amend", "path": "description"}]}))
+            b = rm.for_record(prov)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                  "--label", "L", "--project", "VOICE", "--rewritten"])
+        self.assertEqual([(x["path"], x.get("curator_amend"), x["phase"]) for x in b["rewritten_paths"]],
+                         [("description", True, "write")])
+        self.assertEqual(b["rewritten_curator_amend"], 1)
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("≠ founded description → description (write, a curator's amend)", r.output)
+
     def test_an_unreadable_audit_is_reported_as_such_on_disk_and_by_the_cli(self):
         """#3153: the audit is there and cannot be read; neither the
         summary nor a row says the run has no audit."""
@@ -807,7 +1089,9 @@ class OnDisk(unittest.TestCase):
         self.assertEqual(r.exit_code, 0, r.output)
         self.assertIn("4 unfounded", r.output)
         self.assertIn("✗ unfounded data_governance.committee_name (reconcile_full, receipted)", r.output)
-        self.assertIn("~ keywords[0] → keywords (repair_full_r1)", r.output)
+        # A one-token member folded into its list: low confidence by its needle (#3367).
+        self.assertIn("~ keywords[0] → keywords (repair_full_r1, low confidence: short_needle, no finding covers it)",
+                      r.output)
         self.assertIn("unfounded, by the phase that removed them: reconcile_full 4", r.output)
         self.assertEqual(json.loads(j.output)["unfounded"], 4)
 
@@ -842,6 +1126,36 @@ class CliPastEnd(unittest.TestCase):
         self.assertNotIn("≠", plain.output)
         self.assertIn("≠ founded license → license (phase unattributed)", listed.output)
         self.assertIn("≠ unfounded description → description (phase unattributed)", listed.output)
+
+    def test_the_cli_names_a_rewrite_of_the_normalisers_form(self):
+        """#3366: marked on the listed row, still listed."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        block = rm.classify(_record(issued="2024-05-01"), _record(issued="2024-05-01T00:00:00Z"), _audit())
+        args = ["removals", "--method", "claudecode_api", "--label", "L", "--project", "VOICE", "--rewritten"]
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda *_: Path(__file__)), \
+                mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            listed = click.testing.CliRunner().invoke(review_cli, args)
+        self.assertEqual(listed.exit_code, 0, listed.output)
+        self.assertIn("≠ unfounded issued → issued (phase unattributed, the normaliser's temporal form)",
+                      listed.output)
+
+
+    def test_the_cli_names_an_amend_on_a_value_the_model_had_rewritten(self):
+        """#3725: listed as the model's rewrite, with the later amend named."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        block = rm.classify(_record(description="Old description words."),
+                            _record(description="Model rewording, amended."), _audit(),
+                            intermediates=[("reconcile_full", _record(description="Model rewording."))],
+                            amended_paths={"description"})
+        args = ["removals", "--method", "claudecode_api", "--label", "L", "--project", "VOICE", "--rewritten"]
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda *_: Path(__file__)), \
+                mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            listed = click.testing.CliRunner().invoke(review_cli, args)
+        self.assertEqual(listed.exit_code, 0, listed.output)
+        self.assertIn("≠ unfounded description → description (reconcile_full, amended by a curator after the model"
+                      " rewrote it)", listed.output)
 
 
 class Spelling(unittest.TestCase):

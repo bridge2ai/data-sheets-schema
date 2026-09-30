@@ -275,13 +275,22 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
     if show_flattened:
         for row in block["flattened_paths"]:
             caveat = ", source_caveats only" if row.get("into_source_caveats") else ""
+            if row.get("low_confidence"):
+                # #3367: where a coincidence is likeliest, and whether a finding would found it.
+                covered = {True: ", a finding covers it", False: ", no finding covers it"}
+                caveat += ", low confidence: " + " and ".join(row["low_confidence"]) + covered.get(row.get("founded"), "")
             click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'}{caveat})")
         if block.get("flattened_paths_truncated"):
             click.echo(f"   … and {block['flattened_paths_truncated']} more flattened value(s) not listed")
     if show_rewritten:
         for row in block["rewritten_paths"]:
             state = {True: "founded", False: "unfounded"}.get(row.get("founded"), "unsorted")
-            click.echo(f"   ≠ {state} {row['path']} → {row['at']} ({row.get('phase') or 'phase unattributed'})")
+            # #3366: a rewrite of the write-time normaliser's form, or at a curator's amend.
+            whose = "".join([f", the normaliser's {row['normaliser']} form" if row.get("normaliser") else "",
+                             ", a curator's amend" if row.get("curator_amend") else "",
+                             ", amended by a curator after the model rewrote it"
+                             if row.get("amended_after_model_rewrite") else ""])
+            click.echo(f"   ≠ {state} {row['path']} → {row['at']} ({row.get('phase') or 'phase unattributed'}{whose})")
         if block.get("rewritten_paths_truncated"):
             click.echo(f"   … and {block['rewritten_paths_truncated']} more rewritten value(s) not listed")
 

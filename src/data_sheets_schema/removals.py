@@ -159,6 +159,45 @@ direct arms, and adds annotations that move no class:
   the row, and judges nothing; the removals are classified as without it
   (#3624).
 
+Two more annotations move no class either (#3366, #3367):
+
+- **A rewrite that is not the model's** (#3366). A rewritten row whose new
+  value is what the API runner's write-time normaliser writes from the old
+  one (`normaliser_form`: an enum alias to its permissible value, a date
+  reshaped to its slot's range — a parsed date read as each text YAML
+  reads as it, since the runner keeps a `Z` as written (#3754) — and the
+  `mailto:` id of a mapping under a Person-ranged slot to the runner's
+  `#person-<slug>` fragment on the record's own id (#3756)) is marked
+  `normaliser`; one at or under a path a
+  curator's recorded `amend` disposition changed (#903) is marked
+  `curator_amend` — where phases are attributed, only if the `write`
+  phase made it, since a rewrite an earlier (model) phase made and a
+  curator then amended is still the model's (#3725). Both stay counted in
+  `rewritten`. Measured over the 87 checked records on 2026-09-30: of
+  1,349 rewrites, 459 without a finding and 53 unsorted (one record,
+  v4 rep1 VOICE, whose audit could not be read), none has the
+  normaliser's form — the runner snapshots each
+  phase output after normalising it, so a normaliser rewrite never
+  separates two stages this diff reads — and the one rewrite attributed
+  to `write` (2026-09-01 v7 rep2 VOICE
+  `acquisition_methods[0].acquisition_details`) is a curator's amend.
+- **A flattening a coincidence could make** (#3367). A flattened row whose
+  needle has at most `SHORT_NEEDLE_TOKENS` normalised tokens (not an
+  identifier) or that the dropped-entry surplus route flattened is marked
+  `low_confidence`, and, where the audit sorts, `founded` as a deletion
+  would be. `flattened_low_confidence_unfounded` is the most those routes
+  can have kept out of `unfounded`, were every one of them a coincidence:
+  a size for the count's error in that direction where #3229 could only
+  say it errs. A longer needle can still coincide, so it is not a bound.
+  Over the same 87 records: 626 of 1,725 flattenings are low-confidence
+  (597 by a short needle, 23 by the surplus route, 6 by both), 386 of
+  them without a finding and 28 unsorted (the record above) — beside 703
+  unfounded removals, which are counted on the same sorted basis. Of the 603
+  short needles, 79 are a member of a list of scalars flattened into that
+  list, 369 a value flattened into its own parent and 155 into an ancestor
+  further up; the count says how many could be coincidences, not how many
+  are.
+
 The removing phase is the first stage after the last one that still carried
 the value: `reconcile_full`, `repair_full_rN`, or `write` (the last phase
 output carried it and the written record does not). A phase output that is
@@ -188,8 +227,8 @@ import yaml
 from data_sheets_schema.receipts import (ENTRY_KEYS, _canonical_identifier, _populated, _resolve_value,
                                          dataset_identifier_forms, exempt, normalise, remap_path)
 
-INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223): phase-1 snapshot (or the native/direct "
-              "evidence/original_full.yaml) against the final full record, joined by "
+INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223; annotations #3366, #3367): phase-1 "
+              "snapshot (or the native/direct evidence/original_full.yaml) against the final full record, joined by "
               "receipts.remap_path; flattened by normalised containment under the nearest "
               "surviving ancestor, a resolver URL and its CURIE one text, a British spelling and "
               "its American form one text, a value of numbers only below five digits never and "
@@ -200,7 +239,9 @@ INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223): phase-1 snapshot (or th
               "path covering the value or an ancestor (review_paths or remove_relationship only, "
               "for a value a bound source review judged supported), an index one past the end "
               "read as the last entry, in a finding whose record is not core only; a deleted "
-              "value's relocation candidate reported at a content-word share of 0.7 or more")
+              "value's relocation candidate reported at a content-word share of 0.7 or more; "
+              "reported only, a flattening by a needle of at most two tokens or by the surplus "
+              "route, and a rewrite of the write-time normaliser's form or at a curator's amend")
 
 #: Paths kept in the block per class; the counts are never capped.
 PATH_LIMIT = 50
@@ -287,6 +328,20 @@ NON_CHECKS = (
     "substring (an extension, or a change inside a longer text that leaves the value's words "
     "in order) is not; rewrites are reported beside the removals and never counted in them "
     "(#3243)",
+    "that a rewrite marked of the normaliser's form was the normaliser's — the new value is what "
+    "the API runner's enum-alias, temporal or mailto-id normaliser writes from the old one, under "
+    "today's schema tables, and a model that wrote the permissible value itself reads the same; "
+    "a rewrite marked a curator's amend sits at or under a path a recorded amend disposition "
+    "names and, where phases are attributed, was made at write — after the last phase output; "
+    "where they are not, the path alone decides, so a model rewrite a curator later amended "
+    "reads as the amend (#3725). Both are counted in rewritten and rewritten_unfounded, never "
+    "subtracted (#3366)",
+    "that a flattening marked low-confidence was a coincidence, or that one not marked was not — "
+    "a needle of one or two normalised tokens (an identifier-shaped value aside) or the "
+    "dropped-entry surplus route is where a coincidence is likeliest, not proof of one; "
+    "flattened_low_confidence_unfounded says how many of them no finding would found were they "
+    "deletions, the most those routes can have deflated unfounded, and a longer needle "
+    "can still coincide, so not a bound on the deflation (#3367)",
     "a finding that narrows its slot in prose ('maintainers (the Emory contact)') is read at "
     "the path it names, so founded is an upper bound where findings narrow by prose",
     "that a finding's index means the entry it gives — one past the end of its list is read "
@@ -580,7 +635,14 @@ def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_li
 
 def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict[str, Any], *,
                     record_id: str | None = None, carried: frozenset[str] = frozenset()) -> str | None:
-    """The final-record path of the nearest surviving ancestor whose text
+    """`_flattening`'s path alone."""
+    return _flattening(path, value, original, final, record_id=record_id, carried=carried)[0]
+
+
+def _flattening(path: str, value: Any, original: dict[str, Any], final: dict[str, Any], *,
+                record_id: str | None = None, carried: frozenset[str] = frozenset()
+                ) -> tuple[str | None, str | None]:
+    """(path, route): the final-record path of the nearest surviving ancestor whose text
     carries the value's, normalised and on token boundaries; None when the
     nearest surviving ancestor does not carry it, or none survives short of
     the root. The root never counts: a top-level slot whose words happen to
@@ -593,9 +655,14 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
     states — nor a value of numbers only below `MIN_NUMERIC_DIGITS` digits
     (#3243), nor a longer one except by a scalar equal to it (#3130); a
     resolver URL and the CURIE it names are one text (#3129), and so are a
-    British spelling and its American form (#3038)."""
+    British spelling and its American form (#3038).
+
+    The route (#3367) is `ancestor` (the nearest surviving ancestor carries
+    it), `continuation` (a dropped entry's recognised continuation does) or
+    `surplus` (more of the list's final entries carry it than its other
+    phase-1 entries did); None with the path."""
     if not _flattenable(value):
-        return None
+        return None, None
     below = path
     for anc in _ancestors(path):
         rm = remap_path(anc, original, final)
@@ -610,8 +677,142 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
             _ok, entry = _resolve_value(original, below)
             _ok, snapshot_list = _resolve_value(original, anc)
             if isinstance(entry, dict) and isinstance(snapshot_list, list):
-                return _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
-        return rm["path"] if _kept_in(value, node) else None
+                into = _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
+                return into, (None if into is None else "surplus" if into == rm["path"] else "continuation")
+        return (rm["path"], "ancestor") if _kept_in(value, node) else (None, None)
+    return None, None
+
+
+#: A flattening whose needle — the value's normalised text — has this many
+#: tokens or fewer is low-confidence (#3367): one or two words, or a number,
+#: recur in unrelated text under a surviving ancestor by chance. Reported
+#: only; a minimum length was not adopted because real short folds exist
+#: (the CHORUS 'UF' affiliation). An identifier-shaped value (a URL, a
+#: CURIE, a `mailto:`) is one identifier, not a word, and is not counted.
+SHORT_NEEDLE_TOKENS = 2
+
+
+def low_confidence(value: Any, route: str | None) -> list[str]:
+    """Why a flattening is low-confidence (#3367), in a fixed order, or []:
+    `short_needle` where the value's normalised text has at most
+    `SHORT_NEEDLE_TOKENS` tokens and is not identifier-shaped; `surplus`
+    where it was flattened by the dropped-entry surplus route, a comparison
+    of two counts that a sibling reworded to contain the text satisfies as
+    well as the dropped entry's own copy."""
+    out = []
+    shaped = isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip())
+    if not shaped and 0 < len(_text(value).split()) <= SHORT_NEEDLE_TOKENS:
+        out.append("short_needle")
+    if route == "surplus":
+        out.append("surplus")
+    return out
+
+
+# ------------------------------------------------------------- normaliser
+#: The API runner's write-time rewrites a carried scalar can show as a
+#: rewrite (#3366; `api_runner.normalise_record_text`): an enum alias to the
+#: permissible value it names, a date or datetime reshaped to its slot's
+#: range, the `mailto:` id of a mapping under a Person-ranged slot to a
+#: `#person-<slug>` fragment on the record's own id (#981, #3756). The others are no rewrite here: a British spelling and its
+#: American form, and a resolver URL and its CURIE, are one text (#3038,
+#: #3129), and a scalar and its one-item list one value.
+NORMALISER_FORMS = ("enum_alias", "temporal", "mailto_id")
+
+
+#: A mailto: id the runner rewrites, as its line pattern reads it (#981).
+_MAILTO_ADDR = re.compile(r"mailto:(?P<addr>[^\s\"']+)")
+
+#: The fragment the runner mints for a Person's mailto: id: `person-` and a
+#: slug of the mapping's `name`, else of the address (#981, #3756).
+_PERSON_FRAGMENT = re.compile(r"person-[a-z0-9]+(?:-[a-z0-9]+)*")
+
+
+def _temporal_texts(value: Any) -> list[str]:
+    """The texts YAML could have read as `value`, a parsed date or datetime,
+    that the runner's temporal pattern reads, in a fixed order (#3754). A
+    parsed value has lost its text, and `normalise_temporal` keeps a zone as
+    written: `2026-05-01T00:00:00Z` and `...+00:00` load as one datetime and
+    are written back as two texts, so each spelling of a zero offset is
+    tried."""
+    import datetime as _dt
+    if isinstance(value, _dt.datetime):
+        base = value.replace(tzinfo=None).isoformat()
+        off = value.utcoffset()
+        if off is None:
+            return [base]
+        if not off:
+            return [f"{base}Z", f"{base}+00:00", f"{base}-00:00"]
+        return [value.isoformat()]
+    if isinstance(value, _dt.date):
+        return [value.isoformat()]
+    return []
+
+
+def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool:
+    """Whether `new` is the id the runner's `normalise_mailto_ids` writes for
+    `old` at `path` (#3756): the `id` of a mapping directly under a
+    Person-ranged slot (the runner leaves every other `mailto:` id and logs
+    it `mailto_id_skipped`), rewritten to `<own id>#person-<slug>` on an own
+    id that carries no fragment of its own. The slug is the address's where
+    it matches; a name's slug is read by its shape, since the name the
+    runner read is the phase output's, not the final record's."""
+    toks = _tokens(path)
+    owner = next((t for t in reversed(toks[:-1]) if isinstance(t, str)), None)
+    from data_sheets_schema.api_runner import _person_slots
+    if owner not in _person_slots():
+        return False
+    m = _MAILTO_ADDR.fullmatch(old.strip())
+    if not m or not isinstance(new, str):
+        return False
+    for root in own_ids:
+        if "#" in root or not new.startswith(f"{root}#"):
+            continue
+        if _PERSON_FRAGMENT.fullmatch(new[len(root) + 1:]):
+            return True
+    return False
+
+
+def normaliser_form(path: str, old: Any, new: Any, own_ids: frozenset[str] = frozenset()) -> str | None:
+    """Which write-time normaliser rewrite turns `old` into `new` at `path`,
+    or None (#3366). The enum and temporal forms run the runner's own
+    line normalisers (`normalise_enum_aliases`, `normalise_temporal`) on
+    `<leaf>: <old>` and compare what they write with `new`; a parsed date
+    or datetime is tried as each text YAML reads as it, since the runner
+    rewrites the text and keeps a `Z` as written (#3754). The mailto form
+    asks that a `mailto:` id under a Person-ranged slot became the
+    runner's `#person-<slug>` fragment on one of `own_ids` (#3756). A
+    form, not a provenance: a model that wrote the permissible value
+    itself is read the same, and the tables are today's schema's, not the
+    run's."""
+    leaf = next((t for t in reversed(_tokens(path)) if isinstance(t, str)), None)
+    if leaf is None:
+        return None
+    if isinstance(old, str) and leaf == "id" and old.strip().casefold().startswith("mailto:"):
+        return "mailto_id" if _mailto_form(path, old, new, own_ids) else None
+    import datetime as _dt
+    if isinstance(old, (_dt.date, _dt.datetime)):
+        texts = _temporal_texts(old)
+    else:
+        texts = [old]
+    wants = (set(_temporal_texts(new)) if isinstance(new, (_dt.date, _dt.datetime))
+             else {str(new)} if new is not None else set())
+    from data_sheets_schema.api_runner import normalise_enum_aliases, normalise_temporal
+    for text in texts:
+        if not isinstance(text, str) or not text.strip() or "\n" in text:
+            continue
+        line = f"{leaf}: {text}"
+        for kind, rewrite in (("temporal", normalise_temporal), ("enum_alias", normalise_enum_aliases)):
+            out = rewrite(line)
+            if out == line:
+                continue
+            try:
+                doc = yaml.safe_load(out)
+            except yaml.YAMLError:
+                break
+            written = doc.get(leaf) if isinstance(doc, dict) else None
+            if written is not None and str(written) in wants:
+                return kind
+            break
     return None
 
 
@@ -1012,6 +1213,11 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "rewritten_unfounded_phase": None, "flattened_into_source_caveats": None,
             "relocated_candidate": None, "relocated_candidate_unfounded": None,
             "relocated_candidate_standing": None, "relocated_not_assessed": None, "source_review": None,
+            "flattened_low_confidence": None, "flattened_low_confidence_by": None,
+            "flattened_low_confidence_unfounded": None,
+            "rewritten_normaliser": None, "rewritten_normaliser_unfounded": None, "rewritten_normaliser_by": None,
+            "rewritten_curator_amend": None, "rewritten_curator_amend_unfounded": None,
+            "rewritten_unfounded_not_model": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
                for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten")
                for suffix in ("", "_truncated")},
@@ -1027,7 +1233,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit: dict[str, Any] | None = None, *,
              receipt: dict[str, Any] | None = None,
              intermediates: list[tuple[str, dict[str, Any] | None]] | None = None,
-             audit_unread: str | None = None, snapshot_sha256: str | None = None) -> dict[str, Any]:
+             audit_unread: str | None = None, snapshot_sha256: str | None = None,
+             amended_paths: frozenset[str] | set[str] = frozenset()) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -1043,7 +1250,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     them, or with any output None (it is missing or could not be read),
     `phase` and `unfounded_phase` are None. `snapshot_sha256` is the hash
     of the snapshot bytes, which an audit's `source_review` must name to
-    be read (#3037); without it the review is read as `unhashed`."""
+    be read (#3037); without it the review is read as `unhashed`.
+    `amended_paths` are the final-record paths a curator's recorded
+    `amend` disposition changed (#903), which mark a rewrite at or under
+    them (#3366) — where phases are attributed, only a rewrite of the
+    `write` phase; one an earlier phase made is marked
+    `amended_after_model_rewrite` and stays the model's (#3725)."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -1051,6 +1263,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     findings = [f for f in findings if isinstance(f, dict)] if isinstance(findings, list) else None
     record_id = original.get("id") if isinstance(original.get("id"), str) else None
     carried = dataset_identifier_forms(original)
+    amended = frozenset(amended_paths)
+    own_ids = frozenset(i for i in (record_id, final.get("id")) if isinstance(i, str) and i)
     paths_receipted = receipt_paths(receipt)
     named = ([(n, via, fp) for n, f in enumerate(findings) if not _core_only(f)
               for via, fp in finding_paths(f, original)] if findings is not None else None)
@@ -1115,8 +1329,23 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
             # as its own class, never a removal.
             if list_path is None and not at_final.retains(path, value):
                 rw: dict[str, Any] = {"path": path, "at": remap_path(path, original, final)["path"]}
+                # Of the write-time normaliser's form (#3366): reported, never subtracted.
+                form = normaliser_form(path, value, _resolve_value(final, rw["at"])[1], own_ids)
+                if form is not None:
+                    rw["normaliser"] = form
                 if attributed:
                     rw["phase"] = stage_after_last(lambda p: p.carried(path, None) and p.retains(path, value))
+                # A curator's recorded amend (#903) at or above the value's
+                # final path. Where phases are attributed, only a rewrite the
+                # last phase output still did not make (`write`) is the
+                # amend's alone: one a model phase already made, which a
+                # curator then amended, stays the model's (#3725).
+                if rw["at"] is not None and (rw["at"] in amended
+                                             or any(a in amended for a in _ancestors(rw["at"]))):
+                    if not attributed or rw["phase"] == "write":
+                        rw["curator_amend"] = True
+                    else:
+                        rw["amended_after_model_rewrite"] = True
                 if paths_receipted is not None:
                     rw["receipted"] = _receipted(path, None, paths_receipted)
                 if named is not None:
@@ -1135,11 +1364,19 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if paths_receipted is not None:
             row["receipted"] = _receipted(path, list_path, paths_receipted)
             receipted["removed"] += row["receipted"]
-        into = _flattened_into(path, value, original, final, record_id=record_id, carried=carried)
+        into, route = _flattening(path, value, original, final, record_id=record_id, carried=carried)
         if into is not None:
             flat = {**row, "into": into}
             if _into_source_caveats(value, _resolve_value(final, into)[1], into):
                 flat["into_source_caveats"] = True
+            # Reported only (#3367): a flattening coincidence could make, and
+            # whether a finding would found it were it a deletion — so the
+            # deflation of the unfounded count can be stated, not guessed.
+            why = low_confidence(value, route)
+            if why:
+                flat["low_confidence"] = why
+                if named is not None:
+                    flat["founded"] = judge({}, path) is not None      # a scratch row: no field added
             rows["flattened"].append(flat)
             receipted["flattened"] += bool(row.get("receipted"))
             continue
@@ -1186,6 +1423,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     # or into an empty list, which names nothing.
     ends = [e[0] == e[1] > 0 for _n, _via, fp in (named or []) if (e := past_end(fp, original))]
     deleted = len(rows["founded"]) + len(rows["unfounded"]) + len(rows["unsorted"])
+    low = [r for r in rows["flattened"] if r.get("low_confidence")]
+    norm = [r for r in rows["rewritten"] if r.get("normaliser")]
+    amend = [r for r in rows["rewritten"] if r.get("curator_amend")]
     block: dict[str, Any] = {
         "instrument": INSTRUMENT, "checked": True, "reason": None,
         "snapshot_values": total, "exempt": exempted, "unaddressable": unaddressable,
@@ -1230,6 +1470,27 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         "relocated_candidate_standing": sum(1 for r in deleted_rows
                                             if (r.get("relocated_candidate") or {}).get("change_of_standing")),
         "relocated_not_assessed": not_assessed,
+        # Reported only (#3367): flattenings a coincidence could make — a
+        # needle of one or two tokens, or the dropped-entry surplus route —
+        # and, of those, the ones no finding would found were they deleted:
+        # how far coincidental flattening can have deflated `unfounded`.
+        "flattened_low_confidence": len(low),
+        "flattened_low_confidence_by": {k: sum(1 for r in low if k in r["low_confidence"])
+                                        for k in ("short_needle", "surplus")},
+        "flattened_low_confidence_unfounded": (sum(1 for r in low if not r["founded"]) if sorted_ else None),
+        # Reported only (#3366): rewrites of the form the API runner's
+        # write-time normaliser produces from the old value, whichever phase
+        # the row names; never subtracted from `rewritten`.
+        "rewritten_normaliser": len(norm),
+        "rewritten_normaliser_unfounded": (sum(1 for r in norm if not r["founded"]) if sorted_ else None),
+        "rewritten_normaliser_by": {k: sum(1 for r in norm if r["normaliser"] == k) for k in NORMALISER_FORMS},
+        # A curator's recorded amend (#903): a post-run edit, not the model's.
+        "rewritten_curator_amend": len(amend),
+        "rewritten_curator_amend_unfounded": (sum(1 for r in amend if not r["founded"]) if sorted_ else None),
+        # Either mark, each rewrite once: the unfounded rewrites not the model's own.
+        "rewritten_unfounded_not_model": (sum(1 for r in rows["rewritten"] if not r["founded"]
+                                              and (r.get("normaliser") or r.get("curator_amend")))
+                                          if sorted_ else None),
         # The source review's judgments on what was deleted or rewritten (#3037).
         "source_review": (None if review_state is None else {
             **review_state,
@@ -1288,6 +1549,16 @@ def _v3_summary(block: dict[str, Any]) -> str:
               f" ({block['relocated_candidate_standing']} into source_caveats)")
     if block["flattened_into_source_caveats"]:
         s += f" · {block['flattened_into_source_caveats']} flattened into source_caveats only"
+    if block["flattened_low_confidence"]:
+        # #3367: what coincidental flattening can have hidden from `deleted`.
+        s += (f" · {block['flattened_low_confidence']} flattened with low confidence (a needle of one or two "
+              f"tokens, or the surplus route"
+              + (f"; {block['flattened_low_confidence_unfounded']} without a finding"
+                 if block["flattened_low_confidence_unfounded"] is not None else "") + ")")
+    if block["rewritten_normaliser"] or block["rewritten_curator_amend"]:
+        # #3366: rewrites that are not the model's own.
+        s += (f" · of the rewrites, {block['rewritten_normaliser']} of the write-time normaliser's form"
+              f" and {block['rewritten_curator_amend']} a curator's amend")
     review = block.get("source_review")
     if review is not None and review.get("deleted") is not None:
         s += (f" · source review: {review['deleted']['supported']} deleted reviewed supported"
@@ -1381,6 +1652,15 @@ def _evidence_audit(core_dir: Path) -> tuple[str, Path | None, Any, str | None]:
     return "usable", path, doc, None
 
 
+def amended_paths(record: dict[str, Any] | None) -> frozenset[str]:
+    """The final-record paths a curator's `amend` disposition changed, from
+    the provenance record's `dispositions` (#903): each is proven by the
+    parse to change exactly one leaf, at its `path`."""
+    rows = (record or {}).get("dispositions") if isinstance(record, dict) else None
+    return frozenset(d["path"] for d in (rows if isinstance(rows, list) else [])
+                     if isinstance(d, dict) and d.get("disposition") == "amend" and isinstance(d.get("path"), str))
+
+
 def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dict[str, Any]:
     """The block for one run on disk. Read-only: nothing under the run's
     directories is written, and the provenance record is not changed.
@@ -1441,7 +1721,7 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
     block = classify(original, final, audit if a_state == "usable" else None,
                      receipt=receipt, intermediates=None if evidence else stages,
                      audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
-                     snapshot_sha256=(pin or {}).get("sha256"))
+                     snapshot_sha256=(pin or {}).get("sha256"), amended_paths=amended_paths(record))
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,
