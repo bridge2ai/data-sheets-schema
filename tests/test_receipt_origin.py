@@ -2164,7 +2164,10 @@ class DeriveSpellings(Base):
         self.assertNotIn("such a derive is not seen, and the Phase 1 / Phase 3 boundary is missed", text)
         self.assertIn("is not placed by the words (#3137, #3384) but by position (#3369): a shell call that runs a "
                       "program not read here -- neither a reader, a directory change, a d4d call of a literal "
-                      "subcommand, nor `linkml-validate` or `linkml-term-validator` with options read here -- "
+                      "subcommand, nor `linkml-validate` or `linkml-term-validator` with options read here, "
+                      "each counted only where it runs what its words name: a bare name or an absolute path as "
+                      "its program, never a variable or a relative path (`$PY`, `./python`), and no assignment "
+                      "before it or as an earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`), #3689 -- "
                       "or runs a command or process substitution, whose inner command is not read (#3675), that "
                       "had not returned when the draft was issued (one issued before the draft that returned "
                       "after it, or one whose run is open-ended, counts: #3676), was issued before the derive "
@@ -2173,10 +2176,23 @@ class DeriveSpellings(Base):
         self.assertNotIn("issued after the draft and before the derive boundary", text)
         # #3674: what makes a call's run open-ended, and the detach it cannot see
         self.assertIn("a part is started with `&` (at the top level, or ending a command inside a word a "
-                      "nested shell may run: `bash -c './derive.sh &'`), or a part's program detaches what it "
-                      "runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, `batch`, `systemd-run`, "
-                      "`start-stop-daemon`, #3674); a script or program that backgrounds or daemonises a child "
-                      "itself is not seen as open-ended", text)
+                      "nested shell may run: `bash -c './derive.sh &'`) or by `coproc` (#3690), or a part's "
+                      "program detaches what it runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, "
+                      "`batch`, `systemd-run`, `start-stop-daemon`, #3674), read through `timeout`, `env`, "
+                      "`nice`, `nohup`, `exec` and `command` and as a command's first word inside such a nested "
+                      "word (#3690); a script or program that backgrounds or daemonises a child itself, or a "
+                      "detaching program behind any other wrapper (`sudo`, `xargs`), is not seen as open-ended",
+                      text)
+        # #3689: an environment set outside the command is not read
+        self.assertIn("Nor is an environment set outside the command (exported earlier or inherited) read: a "
+                      "bare name is taken to be the program `PATH` finds, and an absolute path the program it "
+                      "names (#3689)", text)
+        flat = " ".join(ro.__doc__.split())
+        self.assertIn("or such a part not run as its words name (a variable or relative path as its program, "
+                      "or an assignment before it or as an earlier part, #3689)", flat)
+        self.assertIn("or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
+                      "like, may outlive it, so none of them has, #3674, #3690; a script that detaches a child "
+                      "itself, or a detaching program behind a wrapper not read, `sudo`, is not seen", flat)
         self.assertIn("a `derive core` run by anything other than a shell call in the transcripts given", text)
         self.assertIn("A derive whose words are not on the command line at all (a script, an alias or function, "
                       "`d4d $SUB`, `python -c` building the argument list) is placed by position instead (#3369)",
@@ -2214,7 +2230,7 @@ class UnseenDerive(Base):
     FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
     VALIDATE = ("python -c 'from linkml.validator.cli import cli; cli()' -s schema.yaml -C Dataset "
                 f"{FULL}")
-    TERMS = ("$PY -c 'from linkml_term_validator.cli import main; main()' validate-data "
+    TERMS = ("/venv/bin/python3 -c 'from linkml_term_validator.cli import main; main()' validate-data "
              f"{FULL} --schema schema.yaml --target-class Dataset")
     UNSEEN = ("bash derive.sh", "sh -c ./run", "./derive.sh", "source derive.sh", "myderive",
               "d4d $SUB --full F", f"python -c 'import sys; sys.argv[1:] = [\"de\" + \"rive\", \"core\"]' {FULL}",
@@ -2230,7 +2246,21 @@ class UnseenDerive(Base):
               "echo \"$(date)\"", "echo \"$(bash derive.sh)\"", "echo `./derive.sh`", "ls `./derive.sh`",
               "cat <(bash derive.sh)", "d4d receipts check --receipt \"$(bash derive.sh)\"",
               "linkml-validate -s s.yaml <(./derive.sh)", "linkml-validate -s s.yaml \"$(./derive.sh)\"",
-              "echo $((1 + 2))")
+              "echo $((1 + 2))",
+              # A part read here, or a validator, spelled so that it may run
+              # another program (#3689): a variable or relative-path program,
+              # an assignment before it (on the part, to `env`, or as a part
+              # of its own), or an interpreter held in a variable.
+              "PY=./derive.sh; $PY -c \"from linkml.validator.cli import cli; cli()\" -s s.yaml x.yaml",
+              "PY=./run.sh; $PY -c \"from linkml.validator.cli import cli; cli()\" -s s.yaml x.yaml",
+              "PYTHONPATH=./hack linkml-validate -s s.yaml x.yaml",
+              "env PYTHONPATH=./hack linkml-validate -s s.yaml x.yaml",
+              "./python -c \"from linkml.validator.cli import cli; cli()\" -s s.yaml x.yaml",
+              "${PY} -c 'from linkml_term_validator.cli import main; main()' validate F -s s.yaml",
+              "bin/linkml-validate -s s.yaml F", "PATH=./bin:$PATH; linkml-validate -s s.yaml F",
+              "PATH=./bin:$PATH linkml-validate -s s.yaml F", "./cat x", "$CAT x",
+              "PYTHONPATH=./hack d4d receipts check --receipt R",
+              "$PY -m data_sheets_schema.cli receipts check --receipt R", "F=x.yaml; cat $F")
 
     def _run(self, command, *, derive=True, **result):
         """Draft, the call under test, a receipt change, then (by default) the
@@ -2358,7 +2388,15 @@ class UnseenDerive(Base):
                         "setsid -f ./derive.sh", "timeout 60 setsid ./derive.sh",
                         "/usr/bin/setsid ./derive.sh", "screen -dm ./derive.sh",
                         "tmux new -d ./derive.sh", "echo ./derive.sh | at now", "daemon -- ./derive.sh",
-                        "systemd-run --user ./derive.sh", "./derive.sh; disown"):
+                        "systemd-run --user ./derive.sh", "./derive.sh; disown",
+                        # `coproc` starts its command asynchronously (#3690),
+                        # and a detaching program may stand after `nohup`,
+                        # `exec` or `command`, or first in a nested shell's word.
+                        "coproc ./derive.sh", "coproc X { ./derive.sh; }", "{ coproc ./derive.sh; }",
+                        "if true; then coproc ./derive.sh; fi", "bash -c 'coproc ./derive.sh'",
+                        "bash -c 'cd x && coproc ./derive.sh'", "nohup setsid ./derive.sh",
+                        "exec setsid ./derive.sh", "command setsid ./derive.sh",
+                        "bash -c 'setsid ./derive.sh'", "bash -c 'cd x; /usr/bin/setsid ./derive.sh'"):
             with self.subTest(command=command):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -2374,7 +2412,13 @@ class UnseenDerive(Base):
                         "bash derive.sh &>/dev/null", "bash -c './derive.sh && ls'",
                         "bash -c './derive.sh 2>&1'", "bash -c './derive.sh &>/dev/null'",
                         "bash -c './derive.sh |& cat'", "bash derive.sh 'R&D'",
-                        "curl 'https://x.org/?a=1&b=2'", "nohup ./derive.sh > log 2>&1"):
+                        "curl 'https://x.org/?a=1&b=2'", "nohup ./derive.sh > log 2>&1",
+                        # A redirection's `>&` or `<&` before a space inside
+                        # a nested shell's word (#3692), and `coproc` or a
+                        # detaching program's name as an argument.
+                        "bash -c './derive.sh >& log'", "bash -c './derive.sh <& 3'",
+                        "bash -c 'echo coproc; ./derive.sh'", "bash derive.sh coproc",
+                        "bash -c './derive.sh at now'"):
             with self.subTest(command=command):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -2441,7 +2485,14 @@ class UnseenDerive(Base):
                  "linkml-term-validator validate-data F -c oak.yaml": False,
                  "linkml-term-validator --help": False,
                  "python3.12 -c 'from linkml.validator.cli import cli; cli()' -s s.yaml F": True,
-                 "${PY} -c 'from linkml_term_validator.cli import main; main()' validate F -s s.yaml": True,
+                 "/opt/venv/bin/python3 -c 'from linkml_term_validator.cli import main; main()' "
+                 "validate F -s s.yaml": True,
+                 "/venv/bin/linkml-validate -s s.yaml F": True,
+                 # A variable or a relative path may name any program (#3689).
+                 "${PY} -c 'from linkml_term_validator.cli import main; main()' validate F -s s.yaml": False,
+                 "$PY -c 'from linkml.validator.cli import cli; cli()' -s s.yaml F": False,
+                 "./python -c 'from linkml.validator.cli import cli; cli()' -s s.yaml F": False,
+                 "bin/linkml-validate -s s.yaml F": False, "./linkml-validate -s s.yaml F": False,
                  "python -c 'from linkml.validator.cli import cli;cli()' F": False,
                  "python -c 'from linkml_term_validator.cli import main; main()' -s s.yaml F": False,
                  "python -I -c 'from linkml.validator.cli import cli; cli()' F": False,
@@ -2449,6 +2500,21 @@ class UnseenDerive(Base):
         for command, admitted in cases.items():
             with self.subTest(command=command):
                 self.assertEqual(ro._validator(ro._unwrapped(ro._tokens(command) or [])), admitted)
+
+
+    def test_plainly_run(self):
+        # Whether a part runs what its words name (#3689): no assignment
+        # before its program, on the part or to `env`, and no variable or
+        # relative path as the program or a wrapper.
+        cases = {"cat x": True, "/bin/cat x": True, "timeout 60 cat x": True, "env -u X cat x": True,
+                 "poetry run linkml-validate F": True, "nice -n 5 d4d receipts check": True,
+                 "X=1 cat x": False, "env X=1 cat x": False, "timeout 60 env X=1 cat x": False,
+                 "./cat x": False, "bin/cat x": False, "$CAT x": False, "${CAT} x": False,
+                 "`which cat` x": False, "$T 60 cat x": False, "./timeout 60 cat x": False,
+                 "timeout 60": False, "": False}
+        for command, plain in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._plainly_run(ro._tokens(command) or []), plain)
 
 
 class RuntimeDenial(Base):
@@ -2753,12 +2819,15 @@ class Cli(unittest.TestCase):
                       "supplying `derive` itself, `python -c` building the arguments) is placed by position: a "
                       "shell call that runs a program this does not read (anything but a reader, a directory "
                       "change, a d4d call of a literal subcommand, or `linkml-validate` or `linkml-term-validator` "
-                      "with the options it reads; the inner command of a command or process substitution is "
+                      "with the options it reads, each run as its words name it: a bare name or absolute path, "
+                      "no assignment before it; the inner command of a command or process substitution is "
                       "never read), that had not returned when the first full-record Write was issued (one in "
-                      "flight with it, backgrounded, or started with `&`, `setsid` and the like counts) and was "
+                      "flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the like "
+                      "counts) and was "
                       "issued before the derive, with a receipt change after it, makes the status `unknown`",
                       text)                                             # #3369, #3674, #3675, #3676
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
+        self.assertIn("nor is an environment set outside the command read", text)                  # #3689
         self.assertNotIn("issued after the first full-record Write", text)                        # #3676
         # #3478-#3480: the command-wide backstop and its cost
         self.assertIn("so does a derive call with a redirection among its words (`--full 2>/dev/null F`)", text)

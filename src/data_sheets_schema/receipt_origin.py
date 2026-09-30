@@ -110,15 +110,18 @@ instead (#3369): a shell call not denied that runs a program not read
 here -- a part that is neither a reader, a directory change, a d4d call of
 a literal subcommand, nor `linkml-validate` or `linkml-term-validator` with
 options this reads (as the console script or as the `python -c` program
-the pipeline spells each with), a command or process substitution, whose
+the pipeline spells each with), or such a part not run as its words name
+(a variable or relative path as its program, or an assignment before it
+or as an earlier part, #3689), a command or process substitution, whose
 inner command is not read (#3675), or a command the tokenizer cannot split
 -- is a possible derive where one would move the boundary: it had not
 returned before the draft was issued, so a call issued before the draft
 counts too (a backgrounded call's result is its launch, and a part started
 with `&` -- at the top level or ending a command inside a word a nested
-shell may run -- or by a program that detaches it, `setsid`, `screen`,
-`tmux` and the like, may outlive it, so none of them has, #3674; a script
-that detaches a child itself is not seen), it was issued before the derive
+shell may run -- or by `coproc`, or by a program that detaches it,
+`setsid`, `screen`, `tmux` and the like, may outlive it, so none of them
+has, #3674, #3690; a script that detaches a child itself, or a detaching
+program behind a wrapper not read, `sudo`, is not seen), it was issued before the derive
 boundary (if any), and a receipt change issued before that boundary
 returned after it was issued.
 Its cost is a false `unknown` for such a program that derived nothing. A
@@ -265,18 +268,26 @@ NON_CHECKS = (
     "or a file that an earlier call wrote the words into and a later call runs) is not placed "
     "by the words (#3137, #3384) but by position (#3369): a shell call that runs a program not "
     "read here -- neither a reader, a directory change, a d4d call of a literal subcommand, nor "
-    "`linkml-validate` or `linkml-term-validator` with options read here -- or runs a command or "
+    "`linkml-validate` or `linkml-term-validator` with options read here, each counted only where "
+    "it runs what its words name: a bare name or an absolute path as its program, never a "
+    "variable or a relative path (`$PY`, `./python`), and no assignment before it or as an "
+    "earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`), #3689 -- or runs a command or "
     "process substitution, whose inner command is not read (#3675), that had not returned "
     "when the draft was issued (one issued before the draft that returned after it, or one "
     "whose run is open-ended, counts: #3676), was issued before the derive boundary, and has a "
     "receipt change issued before that boundary returning after it, is a reason; its cost is "
     "a false `unknown` for such a program that derived nothing. A call's run is open-ended "
     "where the runtime backgrounded it, a part is started with `&` (at the top level, or ending "
-    "a command inside a word a nested shell may run: `bash -c './derive.sh &'`), or a part's "
-    "program detaches what it runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, "
-    "`batch`, `systemd-run`, `start-stop-daemon`, #3674); a script or program that backgrounds "
-    "or daemonises a child itself is not seen as open-ended, so where the call returned before "
-    "the draft was issued a derive that child ran after it is missed. The words are matched "
+    "a command inside a word a nested shell may run: `bash -c './derive.sh &'`) or by `coproc` "
+    "(#3690), or a part's program detaches what it runs (`setsid`, `daemon`, `disown`, "
+    "`screen`, `tmux`, `at`, `batch`, `systemd-run`, `start-stop-daemon`, #3674), read through "
+    "`timeout`, `env`, `nice`, `nohup`, `exec` and `command` and as a command's first word "
+    "inside such a nested word (#3690); a script or program that backgrounds or daemonises a "
+    "child itself, or a detaching program behind any other wrapper (`sudo`, `xargs`), is not "
+    "seen as open-ended, so where the call returned before the draft was issued a derive that "
+    "child ran after it is missed. Nor is an environment set outside the command (exported "
+    "earlier or inherited) read: a bare name is taken to be the program `PATH` finds, and an "
+    "absolute path the program it names (#3689). The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -1059,21 +1070,55 @@ _VALIDATORS = {
 }
 
 
+def _plain_word(word: str) -> bool:
+    """Whether a program word names the program that runs (#3689): a bare
+    name, looked up on `PATH` as the pipeline's console scripts are, or an
+    absolute path, taken to be what its name says. A variable (`$PY`,
+    `${PY}`, one the same command may assign), a substitution or a relative
+    path (`./python`, `bin/linkml-validate`) may name any program."""
+    return bool(word) and not any(c in word for c in "$`") and ("/" not in word or word.startswith("/"))
+
+
+def _plainly_run(segment: list[str]) -> bool:
+    """Whether the part runs the program its words name and nothing its
+    environment adds (#3689): no assignment precedes the program, on the
+    part itself or given to an `env` wrapper, since one (`PYTHONPATH`,
+    `PATH`, `LD_PRELOAD`, ...) can make it load other code; and the program
+    word, and every wrapper's, is a `_plain_word`. An environment set
+    outside the command (exported earlier or inherited) is not read."""
+    rest = list(segment)
+    while rest:
+        if _ASSIGNMENT.fullmatch(rest[0]):
+            return False
+        if rest[:2] == ["poetry", "run"]:
+            rest = rest[2:]
+            continue
+        skip = _wrapper_skip(rest)
+        if skip is None:
+            break
+        if not _plain_word(rest[0]) or skip >= len(rest):
+            return False
+        rest = rest[skip:]
+    return bool(rest) and _plain_word(rest[0])
+
+
 def _validator(rest: list[str]) -> bool:
     """Whether a part (from its program on) runs `linkml-validate` or
     `linkml-term-validator` with only the options `_VALIDATORS` admits: a
     program that validates the files it is given and cannot run a `derive
-    core` (#3369). Anything else, including another `python -c` program, is
-    not."""
-    if not rest:
+    core` (#3369). The program is the console script or a `python*`
+    interpreter running the exact inline program, each named by a bare word
+    or an absolute path, as the pipeline spells it: never a variable or a
+    relative path (`$PY`, `./python`), which may name any program (#3689).
+    Anything else, including another `python -c` program, is not."""
+    if not rest or not _plain_word(rest[0]):
         return False
     program = os.path.basename(rest[0])
     args = None
     for name, (inline, commands, valued, flags) in _VALIDATORS.items():
         if program == name:
             args = rest[1:]
-        elif ((_PYTHON.fullmatch(program) or _VARIABLE.fullmatch(rest[0]))
-              and rest[1:3] == ["-c", inline]):
+        elif _PYTHON.fullmatch(program) and rest[1:3] == ["-c", inline]:
             args = rest[3:]
         else:
             continue
@@ -1105,15 +1150,37 @@ _DETACHERS = frozenset({"setsid", "daemon", "disown", "screen", "tmux", "at", "b
 #: not `&&`, `|&`, a redirection's `>&`, `<&` or `&>`, nor a `&` inside a
 #: word (`R&D`, `?a=1&b=2`); followed by a space, `)`, `}`, `;` or the end.
 _NESTED_DETACH = re.compile(r"(?<![&|<>])&(?=[\s)};]|$)")
+#: Reserved words and prefixes that may stand before a command's program
+#: without changing whether it detaches (#3690): a group or compound
+#: opener, `!`, `time` (and its `-p`), and `nohup`, `exec` and `command`,
+#: which run the program in the foreground.
+_DETACH_PREFIXES = frozenset({"{", "!", "then", "do", "else", "elif", "if", "while", "until", "time", "-p",
+                              "nohup", "exec", "command"})
+#: bash's `coproc` starts its command asynchronously, and a non-interactive
+#: shell exits without waiting for it, so it may run on after the call's
+#: result as a `&` does (#3690).
+_COPROC = "coproc"
+#: The same, inside a word a nested shell may run (`bash -c 'coproc
+#: ./derive.sh'`, `bash -c 'setsid ./derive.sh'`): `coproc` or a detaching
+#: program as a command's first word, at the start of the word or after a
+#: separator, an opening bracket or one of the prefixes above. Only a word
+#: with a space in it is read so: a lone word (`grep at`) is an argument.
+_NESTED_DETACHER = re.compile(
+    r"(?:^|[;&|({\n])(?:\s*(?:[{!]|then|do|else|elif|if|while|until|time|-p|nohup|exec|command)(?=\s))*\s*"
+    r"(?:coproc|(?:[^\s;&|()]*/)?(?:" + "|".join(re.escape(d) for d in sorted(_DETACHERS)) + r"))(?=[\s;&|)}]|$)")
 
 
 def _detacher(segment: list[str]) -> bool:
-    """Whether the part's program, or one a wrapper `_unwrapped` reads runs,
-    is one of `_DETACHERS` (#3674)."""
+    """Whether the part is a `coproc`, or its program, or one a wrapper
+    `_unwrapped` reads or a prefix `_DETACH_PREFIXES` names runs, is one of
+    `_DETACHERS` (#3674, #3690)."""
     rest = _program(segment)
     while rest:
-        if os.path.basename(rest[0]) in _DETACHERS:
+        if rest[0] == _COPROC or os.path.basename(rest[0]) in _DETACHERS:
             return True
+        if rest[0] in _DETACH_PREFIXES:
+            rest = _program(rest[1:])
+            continue
         skip = _wrapper_skip(rest)
         if skip is None or skip >= len(rest):
             return False
@@ -1340,9 +1407,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # reader, a directory change, nor a d4d call of a literal subcommand --
     # or the command substitutes one (#3675), so it may run a `derive core` whose words are not on the command line
     # (#3369).
-    # `detaches`: a part is started with `&` or by a program that detaches
-    # it, so it may run on after the call's result, as a backgrounded call
-    # does (#3674).
+    # A part counts only where it runs what its words name (`_plainly_run`,
+    # after no assignment-only part: `PATH=./bin; cat x`), #3689.
+    # `detaches`: a part is started with `&`, by `coproc` or by a program
+    # that detaches it, so it may run on after the call's result, as a
+    # backgrounded call does (#3674, #3690).
     out: dict[str, Any] = {"named": [], "read_only": False, "derives": [], "runs_unread": True,
                            "detaches": True}
     if tokens is None:
@@ -1361,12 +1430,15 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # `&&`, `|&` or a redirection's `>&`, `<&` or `&>`; the same `&` ending a
     # command inside a word a nested shell may run (`bash -c './derive.sh &'`);
     # or a part whose program detaches what it runs (`setsid`, `screen`,
-    # `tmux`, ...), directly or under a wrapper `_unwrapped` reads (#3674).
+    # `tmux`, ...), directly or under a wrapper `_unwrapped` reads (#3674),
+    # or a `coproc`, at the top level or at a command's start inside such a
+    # word, as a detaching program may be there too (#3690).
     out["detaches"] = any(
         (set(t) <= _PUNCT and "&" in t.replace("&&", "").replace("|&", "").replace(
             ">&", "").replace("<&", "").replace("&>", ""))
-        or (not set(t) <= _PUNCT and _NESTED_DETACH.search(t)) for t in tokens) or any(
-        _detacher(s) for s in segments)
+        or (not set(t) <= _PUNCT and (_NESTED_DETACH.search(t) or (
+            re.search(r"\s", t) and _NESTED_DETACHER.search(t))))
+        for t in tokens) or any(_detacher(s) for s in segments)
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) for s in segments)
     for target in named:
         for token in tokens:
@@ -1413,6 +1485,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # Per part: whether it may run a `derive core` whose words are not on the
     # command line (#3369): `runs_unknown`, less the two schema validators.
     may_derive = [False] * len(segments)
+    # Whether an assignment-only part has run: it may set `PATH`,
+    # `PYTHONPATH` or another variable the environment already exports, so a
+    # later part may not run what its words name (#3689).
+    assigned = False
     mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
@@ -1421,6 +1497,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             pushed = [None] * len(pushed)
         rest = _program(segment)
         if not rest:
+            assigned = assigned or any(_ASSIGNMENT.fullmatch(word) for word in segment)
             continue
         program = os.path.basename(rest[0])
         if program in ("cd", "pushd", "popd"):
@@ -1488,7 +1565,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 read_only = False
             opaque = not reads
         runs_unknown[index] = opaque
-        may_derive[index] = opaque and not _validator(_unwrapped(segment))
+        # A part read here (a reader, a d4d call, a validator) still counts
+        # where it may not run what its words name (#3689).
+        may_derive[index] = ((opaque and not _validator(_unwrapped(segment)))
+                             or assigned or not _plainly_run(segment))
         if full is not None and _mentions_derive(segment):
             if opaque or substitutes:
                 out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
