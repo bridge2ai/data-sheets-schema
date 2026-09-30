@@ -1591,7 +1591,67 @@ def test_a_file_in_the_lexicon_directory_loads_only_through_its_pin(tmp_path, mo
     draft = tmp_path / "draft" / "self_disclaimed_v3.yaml"
     draft.parent.mkdir()
     draft.write_bytes(raw + b"# a comment\n")
-    assert sd.load_lexicon(draft).path == str(draft)
+    assert sd.load_lexicon(draft).path == str(draft.resolve())
+
+
+def test_every_spelling_of_the_lexicon_directory_loads_through_its_pin(tmp_path, monkeypatch):
+    """#3889: "in LEXICON_DIR" is decided on resolved paths. A relative
+    spelling, a `..` spelling, a symlinked directory, a link from elsewhere
+    to a file there, and a link there to a file elsewhere are each held to
+    the registry; an unpinned file is reported by its absolute path, never
+    by the repository-relative spelling a pinned load reports."""
+    raw = sd.LEXICON_PATH.read_bytes()
+    lex = tmp_path / "lex"
+    lex.mkdir()
+    (lex / "self_disclaimed_v2.yaml").write_bytes(raw)
+    (lex / "self_disclaimed_v3.yaml").write_bytes(raw)
+    _registry(lex, {2: "self_disclaimed_v2.yaml"})
+    monkeypatch.setattr(sd, "LEXICON_DIR", lex)
+    (tmp_path / "alias").symlink_to(lex, target_is_directory=True)
+    (tmp_path / "other").mkdir()
+    monkeypatch.chdir(tmp_path / "other")
+    spellings = {
+        "relative": lambda f: Path("..") / "lex" / f,
+        "dotdot": lambda f: lex / ".." / "lex" / f,
+        "symlinked directory": lambda f: tmp_path / "alias" / f,
+    }
+    for label, spell in spellings.items():
+        assert sd.load_lexicon(spell("self_disclaimed_v2.yaml")).sha256 == PINS[2], label
+        with pytest.raises(lx.LexiconError, match="self_disclaimed_v3.yaml is not registered"):
+            sd.load_lexicon(spell("self_disclaimed_v3.yaml"))
+    # A link elsewhere to a file there is the file it reaches.
+    (tmp_path / "other" / "mine.yaml").symlink_to(lex / "self_disclaimed_v3.yaml")
+    with pytest.raises(lx.LexiconError, match="self_disclaimed_v3.yaml is not registered"):
+        sd.load_lexicon(Path("mine.yaml"))
+    # A link there to a draft elsewhere is held to the pin of its name there.
+    draft = tmp_path / "other" / "draft.yaml"
+    draft.write_bytes(raw + b"# a comment\n")
+    (lex / "self_disclaimed_v2.yaml").unlink()
+    (lex / "self_disclaimed_v2.yaml").symlink_to(draft)
+    for label, spell in spellings.items():
+        with pytest.raises(lx.LexiconError, match="not the registered"):
+            sd.load_lexicon(spell("self_disclaimed_v2.yaml"))
+    assert sd.load_lexicon(Path("draft.yaml")).path == str(draft.resolve())
+
+
+def test_the_real_lexicon_directory_is_pinned_under_any_spelling(tmp_path, monkeypatch):
+    """#3889, on the shipped directory: its repository-relative spelling and
+    a `..` spelling load through the pin and report the pinned name, as
+    does `load_registered` given a non-canonical spelling of the
+    directory; an unpinned copy elsewhere never reports that name."""
+    root = sd.LEXICON_DIR.parents[2]
+    monkeypatch.chdir(root)
+    pinned = sd.load_lexicon(sd.LEXICON_PATH).describe()
+    assert pinned["path"] == sd.LEXICON_RESOURCE
+    for spelling in (Path(sd.LEXICON_RESOURCE),
+                     sd.LEXICON_DIR / ".." / "container_lexicons" / sd.LEXICON_PATH.name):
+        assert sd.load_lexicon(spelling).describe() == pinned
+    assert sd.load_registered(directory=Path(sd.LEXICON_RESOURCE_DIR)).describe() == pinned
+    elsewhere = tmp_path / "src" / "data_sheets_schema" / "container_lexicons" / sd.LEXICON_PATH.name
+    elsewhere.parent.mkdir(parents=True)
+    elsewhere.write_bytes(sd.LEXICON_PATH.read_bytes())
+    monkeypatch.chdir(tmp_path)
+    assert sd.load_lexicon(Path(sd.LEXICON_RESOURCE)).path == str(elsewhere.resolve()) != sd.LEXICON_RESOURCE
 
 
 def edited_lexicon(edit):
