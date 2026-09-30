@@ -409,7 +409,9 @@ class StructuralMappingGenerator:
 
     def _map_composition_paths(self):
         """Map nested composition structures."""
-        # Example: Creator.principal_investigator (Person) -> principalInvestigator
+        # A property is kept only where its path contains the slot name, so
+        # e.g. Creator.principal_investigator comes from the hierarchy
+        # strategy, not from here (#2976).
         for class_name, cls in self.d4d.classes.items():
             comp_paths = self.d4d.get_composition_paths(class_name)
 
@@ -797,8 +799,9 @@ def main(argv=None):
             summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
             scratch_summary = Path(tmp) / "regenerated_summary.md"
             generator.export_summary(scratch_summary)
+            summary_missing = not summary.exists()
             summary_drifted = (
-                not summary.exists()
+                summary_missing
                 or summary.read_text(encoding="utf-8")
                 != scratch_summary.read_text(encoding="utf-8"))
         # Said on a pass as well as a failure. Before #2936 a pass printed
@@ -811,7 +814,17 @@ def main(argv=None):
             print("\n✓ The committed mapping and summary regenerate exactly.")
             print(agree)
             return 0
-        print(f"\n✗ The committed mapping does not regenerate from its inputs.")
+        # The headline names what drifted. It used to blame the mapping
+        # whatever failed, so a stale summary beside a mapping that
+        # regenerates exactly read as a mapping failure (#3125).
+        mapping_drifted = bool(lost or gained or column_drift)
+        if mapping_drifted:
+            print("\n✗ The committed mapping does not regenerate from its inputs.")
+        elif summary_missing:
+            print(f"\n✗ No committed summary at {summary}.")
+        else:
+            print("\n✗ The committed summary does not regenerate from the "
+                  "mapping's inputs.")
         if lost:
             print(f"\n  {len(lost)} row(s) in the committed file that "
                   "regeneration does not produce:")
@@ -830,13 +843,23 @@ def main(argv=None):
                       f"committed {was!r}, regenerated {now!r}")
         else:
             print(agree)
-        if summary_drifted:
+        if not mapping_drifted and summary_missing:
+            print("\n  The mapping regenerates exactly; the summary beside it "
+                  "is missing.")
+        elif not mapping_drifted:
+            # Reached only with the summary stale: the pass returned above.
+            print("\n  The summary does not regenerate. The mapping beside it "
+                  "does, so only the summary is stale.")
+        elif summary_missing:
+            print(f"\n  There is no committed summary either, at {summary}.")
+        elif summary_drifted:
             print("\n  The summary does not regenerate either.")
-        elif lost or gained or column_drift:
+        else:
             print("\n  The summary regenerates exactly, so it describes the "
                   "generator's output rather than the mapping beside it (#295).")
-        print("\n  A mapping nobody can rebuild is a mapping nobody can safely "
-              "change (#234).")
+        if mapping_drifted:
+            print("\n  A mapping nobody can rebuild is a mapping nobody can "
+                  "safely change (#234).")
         return 1
 
     # Export. The directory is made here rather than up front, so `--check`
