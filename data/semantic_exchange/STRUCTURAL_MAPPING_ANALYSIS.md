@@ -140,7 +140,7 @@ make check-sssom-structural
 make gen-sssom-structural
 ```
 
-When its inputs (the merged schema, the RO-Crate context or the generator) are newer than the mapping, this rewrites both the mapping and the summary from the generator; otherwise make does nothing. To force a rewrite, run `python src/semantic_exchange/generate_structural_mapping.py`. While the
+When its inputs (the merged schema, the FAIRSCAPE RO-Crate example `data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json`, or the generator) are newer than the mapping, this rewrites both the mapping and the summary from the generator; otherwise make does nothing. To force a rewrite, run `python src/semantic_exchange/generate_structural_mapping.py`. While the
 rows above stand, a rewrite also drops them from the committed mapping, so
 review the diff before committing.
 
