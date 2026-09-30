@@ -95,6 +95,25 @@ class TestTheLoader(unittest.TestCase):
         # The cases are not all empty: the parity is over findings, merges included.
         self.assertEqual([d["key"] for d in find_duplicate_keys(PARITY[-3], loader=yaml.CSafeLoader)], ["z"])
 
+    def test_strict_raises_what_the_default_reports_as_nothing(self):
+        """#3799: a text the scan cannot check is `[]` by default and raised
+        under `strict=True`, under either loader."""
+        import inspect
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        self.assertIs(inspect.signature(find_duplicate_keys).parameters["strict"].default, False)
+        deep = "a: 1\na: 2\nb: " + "{x: " * 1200 + "1" + "}" * 1200 + "\n"
+        for loader in {yaml.SafeLoader, FAST_LOADER}:
+            with self.subTest(loader=loader.__name__):
+                self.assertEqual(find_duplicate_keys(deep, loader=loader), [])
+                with self.assertRaises(RecursionError):
+                    find_duplicate_keys(deep, loader=loader, strict=True)
+                for bad in ("id: [unterminated\n", "a: \0"):   # the composer; the reader
+                    self.assertEqual(find_duplicate_keys(bad, loader=loader), [])
+                    with self.assertRaises(yaml.YAMLError):
+                        find_duplicate_keys(bad, loader=loader, strict=True)
+                self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=loader, strict=True)],
+                                 ["a"])
+
 
 GOOD = {"pair": {"ran": True, "errors": 0}, "report": {"checked": True, "findings": [], "claims_checked": 3},
         "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},

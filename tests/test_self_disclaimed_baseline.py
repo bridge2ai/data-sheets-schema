@@ -168,14 +168,29 @@ def test_the_refusal_is_the_public_scan_on_libyaml(monkeypatch):
     m = _script()
     seen = []
 
-    def scan(text, loader=yaml.SafeLoader):
-        seen.append(loader)
+    def scan(text, loader=yaml.SafeLoader, *, strict=False):
+        seen.append((loader, strict))
         return [{"path": "$", "key": "a", "lines": [1, 2], "count": 2}]
 
     monkeypatch.setattr(duplicate_keys, "find_duplicate_keys", scan)
     with pytest.raises(ValueError, match="duplicate"):
         m.load_record(b"a: 1\n")
-    assert seen == [duplicate_keys.FAST_LOADER]
+    assert seen == [(duplicate_keys.FAST_LOADER, True)]
+
+
+@pytest.mark.parametrize("head", ["a: 1\na: 2\nb: ", "b: "])
+def test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it(head):
+    """#3799: libyaml composes and constructs a record nested past the
+    recursion limit, but the duplicate-key walk cannot reach its keys. The
+    script refuses it (ValueError) where the CLI raises; it never loads a
+    value whose first `a` the load silently dropped."""
+    from data_sheets_schema import evidence_assertions
+    m = _script()
+    text = head + "{x: " * 1200 + "1" + "}" * 1200 + "\n"
+    with pytest.raises(RecursionError):
+        evidence_assertions.load_record(text)
+    with pytest.raises(ValueError, match="recursion limit"):
+        m.load_record(text.encode())
 
 
 def test_the_note_carries_the_pr1_subtotal_and_says_which_finals_it_counted(corpus, monkeypatch):

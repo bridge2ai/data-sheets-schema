@@ -88,10 +88,18 @@ def load_record(raw: bytes) -> dict:
     The duplicate-key rule is `duplicate_keys.find_duplicate_keys` (`<<`
     merges are not duplicates; `true` and `True` are one key), run on a node
     tree libyaml composes (#3704), and the value is loaded by libyaml's safe
-    loader."""
+    loader. The scan is strict: a record it cannot check is refused, never
+    loaded. One nested past the interpreter's recursion limit is refused with
+    ValueError, where the CLI's pure-Python `safe_load` raises RecursionError
+    on the same bytes; libyaml would load it, and a non-strict scan would
+    have passed a duplicate key it never reached (#3799)."""
     try:
         text = raw.decode("utf-8")
-        if duplicate_keys.find_duplicate_keys(text, loader=_LOADER):
+        try:
+            found = duplicate_keys.find_duplicate_keys(text, loader=_LOADER, strict=True)
+        except RecursionError as exc:
+            raise ValueError("artifact nests past the recursion limit; its duplicate keys cannot be checked") from exc
+        if found:
             raise ValueError("artifact has duplicate YAML mapping keys; its location is ambiguous")
         value = yaml.load(text, Loader=_LOADER)   # noqa: S506 (a safe loader)
     except (UnicodeDecodeError, yaml.YAMLError) as exc:

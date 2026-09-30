@@ -75,7 +75,8 @@ def _walk(loader: yaml.SafeLoader, node: Any, path: str, out: list[dict[str, Any
 FAST_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
 
 
-def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader) -> list[dict[str, Any]]:
+def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
+                        strict: bool = False) -> list[dict[str, Any]]:
     """Every mapping key that appears more than once in one mapping — keys
     compared as the loader would construct them — with the mapping's path
     (`$` for the top level) and the 1-based lines. `count` is occurrences
@@ -84,7 +85,18 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader) -> list[dict[
     `loader` composes the node tree the rule walks; the rule is the same
     whichever composes it. The default is the pure-Python `SafeLoader`, as
     it always was; `FAST_LOADER` (libyaml's) gives the same findings about
-    four times faster over the corpus (#3704)."""
+    thirteen times faster (CPU time over the 1,616 YAML files under
+    `data/d4d_concatenated` on 2026-09-30: 55.3 s against 4.2 s; #3704, #3800).
+
+    A text that cannot be scanned — the reader or composer rejects it, or it
+    nests past the interpreter's recursion limit — gives `[]` by default:
+    nothing is claimed about its keys. With `strict=True` that failure is
+    raised instead (the `yaml.YAMLError` or `RecursionError` itself), for a
+    caller that must refuse what it cannot check. libyaml composes a deep
+    tree without recursing and PyYAML constructs one without recursing, so
+    under `FAST_LOADER` the walk can be the only step that fails; a caller
+    that treats `[]` as "no duplicates" and then loads the value would accept
+    a record whose duplicate keys it never looked at (#3799)."""
     out: list[dict[str, Any]] = []
     # A stream the reader rejects (a NUL byte), a document the composer
     # rejects (two documents), or one nested past the interpreter's limit
@@ -93,12 +105,16 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader) -> list[dict[
     try:
         composer = loader(text)
     except (yaml.YAMLError, RecursionError):
+        if strict:
+            raise
         return out
     try:
         node = composer.get_single_node()
         if node is not None:
             _walk(composer, node, "", out, set())
     except (yaml.YAMLError, RecursionError):
+        if strict:
+            raise
         return []
     finally:
         composer.dispose()
