@@ -43,7 +43,8 @@ Bases, stated once and printed into the output:
   report time; nothing is written back to an evaluation.
 - **removal rows** (#2923): values deleted without a finding, the share of
   them `reconcile_full` removed (#3150), receipted values deleted and values
-  rewritten in place without a finding (#3243) are
+  rewritten in place without a finding (#3243), with the low-confidence
+  flattenings (#3367) and the rewrites not the model's (#3366), are
   recomputed live and read-only (`removals.for_record`); the
   unrecorded-removal count is the record's `report_claims` block.
 - **spend is deliberately absent**: `api_usage` (billed input/output) and
@@ -266,6 +267,16 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                            "0.87, recall 0.77, #3613). A candidate "
                            "under source_caveats is a change of standing: the value is no longer a "
                            "claim. – wherever the removals row is –"),
+    "lowconfidenceflat": ("low-confidence flattenings without a finding", "live", True,
+                          "removals v3 (#3367): values the rule above reads as flattened, not "
+                          "removed, by a needle of one or two normalised tokens (an identifier "
+                          "aside) or by the dropped-entry surplus route — where a coincidental "
+                          "match is likeliest — and that no finding path would cover were they "
+                          "deleted. Reported only: no count moves. It is the most those routes "
+                          "can have kept out of the removals-without-a-finding row, were every "
+                          "one a coincidence, so it sizes that row's deflation in one direction; "
+                          "a longer needle can still coincide, so it bounds nothing (#3229). "
+                          "– wherever the removals row is –"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
                          "removals v3 (#2923): removed values a coverage receipt named (on the "
                          "value, an entry above it, or the list it was a member of) whose text "
@@ -287,6 +298,17 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                           "Every phase after phase 1, repair rounds included. A rewording that "
                           "keeps the content is counted, and an edit that keeps the old text "
                           "inside the new one is not. – where the removal rows are –"),
+    "unfoundedrewritesnotmodel": ("of those, not the model's", "live", True,
+                                  "removals v3 (#3366): the rewrites without a finding whose new "
+                                  "value is what the API runner's write-time normaliser writes "
+                                  "from the old one (an enum alias to its permissible value, a "
+                                  "date reshaped to its slot's range, a Person's mailto: id to a "
+                                  "fragment on the record's own id; a British spelling and a "
+                                  "resolver URL are no rewrite at all) or that sit at a path a "
+                                  "curator's recorded amend disposition changed (#903). Reported "
+                                  "only: counted in the row above, never subtracted. A form, not "
+                                  "a provenance — a model that wrote the permissible value itself "
+                                  "reads the same. – where the removal rows are –"),
     "unrecordedremovals": ("removals unrecorded in the report", "record", True,
                            "report_claims.removals_unrecorded (#1054): top-level slots the "
                            "phase-1 snapshot populated and the final full record does not, that "
@@ -368,7 +390,9 @@ def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
             "unfoundedreconcile": by_phase.get("reconcile_full", 0) if by_phase is not None else None,
             "unfoundedrelocated": block.get("relocated_candidate_unfounded"),
             "receipteddeleted": (block["receipted"] or {}).get("deleted"),
+            "lowconfidenceflat": block.get("flattened_low_confidence_unfounded"),
             "unfoundedrewrites": block.get("rewritten_unfounded"),
+            "unfoundedrewritesnotmodel": block.get("rewritten_unfounded_not_model"),
             "unrecordedremovals": int(unrecorded) if unrecorded is not None else None}
 
 
@@ -761,10 +785,13 @@ def render_markdown(data, scores) -> str:
              "records, The Element 4 gate resolved both ways on CM4AI until 2026-09-08; it is now stated per sub-element and those six were rescored (#1060), so the CM4AI rubric10 cells here are not comparable to any figure quoted before that date.",
              "- removals without a finding (all phases, the reconcile_full share and the "
              "share with a relocation candidate), "
-             "receipted values deleted, values rewritten in place without a finding: "
+             "low-confidence flattenings without a finding (#3367), "
+             "receipted values deleted, values rewritten in place without a finding and the "
+             "share not the model's (#3366): "
              "**recomputed live** under removals v3 "
              "from the phase-1 snapshot, the phase outputs, the final full record, the audit "
-             "and the receipt (`removals.for_record`, #2923), read-only; no record carries a "
+             "and the receipt, with the record's amend dispositions (#903) "
+             "(`removals.for_record`, #2923), read-only; no record carries a "
              "removals block. Removals unrecorded in the report: the record's `report_claims` "
              "block.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
