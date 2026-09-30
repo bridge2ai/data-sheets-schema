@@ -34,10 +34,22 @@ pre-draft snapshot carried is contemporaneous, the slots the derive-time
 snapshot added are preferred as the Phase 1 ones, and the re-addressed and
 Phase 3 labels then go in slot order.
 
-Only a successful Write, paired with its tool_result by id, changes state.
-A Write the runtime refused (the unread-file wrapper, #2285) or that
-returned an error is listed and changes nothing, and so is a shell call
-the native control denied: it never ran (#3185). So is one the runtime
+Only a successful Write, paired with its tool_result by id, changes state,
+and on the receipt a successful Edit or MultiEdit, which the agentic
+runtime's playbook permits and which is replayed exactly on the receipt as
+it last stood (#3047): each `old_string` must occur once, or at least once
+under `replace_all`, and a replay that cannot be exact is a reason -- one
+with no earlier state to apply to, a string that does not occur or occurs
+more than once without `replace_all`, a deletion the runtime may extend to
+the following newline, a replacement carrying a `$` pattern a JavaScript
+replace may expand, or a result whose metadata says the runtime applied
+something else (a different `oldString`/`newString`/`replaceAll`, an
+`originalFile` other than the replayed state, `userModified` or
+`staleRecovered`). The final-sha256 check then holds a replayed receipt to
+the file on disk as it holds a written one. A Write the runtime refused
+(the unread-file wrapper, #2285) or that returned an error is listed and
+changes nothing, and so is a shell call the native control denied: it
+never ran (#3185). So is one the runtime
 refused in `dontAsk` mode, but only where the transcript's terminal
 `result` event lists it under `permission_denials` with the call's own
 tool name and input (#3201); the refusal text alone is not evidence, and
@@ -99,7 +111,8 @@ reported when the history cannot be rebuilt: a transcript is missing,
 unreadable or malformed; a tool id is duplicated or a result has no call
 (#2077); a Write of the receipt, or of the full record before its first
 successful Write, has no result or no success evidence; the receipt is
-changed by anything other than a Write (an edit tool, or a shell command
+changed by anything other than a Write or a replayed edit (an edit whose
+success is unsettled, any other tool given its path, or a shell command
 that names it, is not known to be read-only and was not denied by the
 native control; a command substitution -- backticks, `$(...)` unquoted or
 double-quoted, `<(...)` or `>(...)` -- is never known to be read-only,
@@ -142,7 +155,7 @@ from typing import Any
 
 import yaml
 
-INSTRUMENT = "receipt_origin v1 (#2933)"
+INSTRUMENT = "receipt_origin v2 (#2933, #3047)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -151,8 +164,17 @@ UNREAD_WRITE_ERROR = ("<tool_use_error>File has not been read yet. "
                       "Read it first before writing to it.</tool_use_error>")
 
 #: Tools that only read. Any other tool given a path that names a tracked
-#: file (Edit, MultiEdit, NotebookEdit, ...) changes it other than by a Write.
+#: file (NotebookEdit, ...) changes it other than by a Write, and so does an
+#: edit of the full record or an unsettled edit of the receipt; a successful
+#: edit of the receipt is replayed instead (`EDIT_TOOLS`, #3047).
 READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
+#: The runtime's in-place edit tools, replayed on the receipt (`_replay`).
+EDIT_TOOLS = frozenset({"Edit", "MultiEdit"})
+#: A replacement pattern JavaScript's `String.prototype.replace` expands in a
+#: string replacement (`$$`, `$&`, `` $` ``, `$'`, `$1`, `$<name>`): whether
+#: the runtime passes the new string as a string or through a function is
+#: not known here, so a replacement carrying one cannot be replayed exactly.
+_JS_REPLACEMENT = re.compile(r"\$[$&`'<0-9]")
 #: Shell programs that read their operands and write only to stdout (`sed`
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
@@ -1460,6 +1482,54 @@ def _touches(target: _Target, spelled: str, cwd: str | None) -> bool:
     return hit is True or (hit is None and os.path.basename(spelled) == target.name)
 
 
+def _replace(text: str, old: Any, new: Any, replace_all: Any) -> tuple[str | None, str | None]:
+    """One edit applied exactly, or (None, why) when it cannot be (#3047)."""
+    if not isinstance(old, str) or not old or not isinstance(new, str):
+        return None, "an `old_string` that is not a non-empty string, or a `new_string` that is not a string"
+    if replace_all not in (None, True, False):
+        return None, "a `replace_all` that is not a boolean"
+    found = text.count(old)
+    if found == 0:
+        return None, "its `old_string` does not occur in the receipt as replayed"
+    if found > 1 and not replace_all:
+        return None, f"its `old_string` occurs {found} times in the receipt as replayed, without `replace_all`"
+    if new == "" and not old.endswith("\n") and old + "\n" in text:
+        return None, "a deletion the runtime may extend to the newline after it"
+    if _JS_REPLACEMENT.search(new):
+        return None, "a `new_string` carrying a `$` pattern a JavaScript replace may expand"
+    return (text.replace(old, new) if replace_all else text.replace(old, new, 1)), None
+
+
+def _replay(name: str, inputs: dict, metadata: Any, prior: str) -> tuple[str | None, str | None]:
+    """The receipt after a successful Edit or MultiEdit of `prior`, applied
+    exactly as its input says, or (None, why) when the replay cannot be
+    exact or the runtime's result metadata says it applied something else
+    (#3047). A MultiEdit's edits apply in order, each to the text the one
+    before it left."""
+    if name == "Edit":
+        edits = [{k: inputs.get(k) for k in ("old_string", "new_string", "replace_all")}]
+    else:
+        edits = inputs.get("edits")
+        if not isinstance(edits, list) or not edits or not all(isinstance(e, dict) for e in edits):
+            return None, "its `edits` is not a non-empty list of mappings"
+    if isinstance(metadata, dict):
+        if metadata.get("userModified") or metadata.get("staleRecovered"):
+            return None, "its result says the edit applied was modified or the file changed since it was read"
+        if isinstance(metadata.get("originalFile"), str) and metadata["originalFile"] != prior:
+            return None, "its result's `originalFile` is not the receipt as replayed"
+        if name == "Edit":
+            said = {"oldString": inputs.get("old_string"), "newString": inputs.get("new_string"),
+                    "replaceAll": bool(inputs.get("replace_all"))}
+            if any(metadata.get(key) is not None and metadata[key] != value for key, value in said.items()):
+                return None, "its result names a different edit from the one requested"
+    text: str | None = prior
+    for at, edit in enumerate(edits):
+        text, why = _replace(text, edit.get("old_string"), edit.get("new_string"), edit.get("replace_all"))
+        if text is None:
+            return None, (why if name == "Edit" else f"edit {at}: {why}")
+    return text, None
+
+
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
              reasons: list[str], runtime_denied: set[str] | frozenset = frozenset()) -> dict[str, Any]:
     """Every call that bears on the two files, sorted into successful Writes,
@@ -1488,7 +1558,7 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                     if target.matches(spelled, call["cwd"]) is None:
                         reasons.append(f"Write {call['id']} names the {_LABEL[target.kind]} by a relative "
                                        "path with no working directory")
-                    h["writes"][target.kind].append({**where, "content": inputs["content"],
+                    h["writes"][target.kind].append({**where, "tool": name, "content": inputs["content"],
                                                      "created": metadata.get("type")})
                 elif state == "rejected":
                     h["rejected"].append({**_where(call, result), "target": target.kind, "tool": name,
@@ -1537,6 +1607,23 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 if state == "rejected":
                     h["rejected"].append({**_where(call, result), "target": target.kind, "tool": name,
                                           "rejection": "is_error"})
+                elif state == "succeeded" and name in EDIT_TOOLS and target.kind == "receipt":
+                    # Replayed on the receipt as it last stood (#3047). With
+                    # no earlier state the row is the first change, which
+                    # `_boundaries` reports; a failed replay is a reason here.
+                    if any(target.matches(p, call["cwd"]) is None
+                           for p in spelled if _touches(target, p, call["cwd"])):
+                        reasons.append(f"{name} {call['id']} names the receipt by a relative path with no "
+                                       "working directory")
+                    earlier = h["writes"]["receipt"]
+                    prior = earlier[-1]["content"] if earlier else None
+                    content = None
+                    if prior is not None:
+                        content, why = _replay(name, inputs, result["metadata"], prior)
+                        if why is not None:
+                            reasons.append(f"{name} {call['id']} of the receipt (transcript {call['transcript']} "
+                                           f"line {call['line']}) cannot be replayed: {why}")
+                    earlier.append({**where, "tool": name, "content": content, "created": "edit"})
                 else:
                     h["mutations"].append({**where, "target": target.kind, "tool": name, "outcome": state})
     return h
@@ -1553,7 +1640,10 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     pre_draft = lambda row: draft is None or row["pos"] < draft
     for kind in ("receipt", "full"):
         opening = h["writes"][kind][0]["created"] if h["writes"][kind] else "create"
-        if opening == "update":
+        if opening == "edit":
+            reasons.append(f"the first observed change of the {_LABEL[kind]} is an edit: the text it "
+                           "edited is not in the transcripts")
+        elif opening == "update":
             reasons.append(f"the first observed Write of the {_LABEL[kind]} updated an existing file: "
                            "its earlier history is not in the transcripts")
         elif opening != "create":
@@ -1629,14 +1719,20 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     return first, derived
 
 
-def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]:
+def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run: Path | None = None,
+           full_at_run: Path | None = None) -> dict[str, Any]:
     """The receipt-origin block for one run: its transcripts in order (a
     killed-and-resumed run's files, first invocation first), its coverage
-    receipt and its full record."""
+    receipt and its full record. `receipt_at_run` and `full_at_run` name
+    the two files as the transcript spelled them, where they have moved
+    since the run (#3047): the transcript's calls are matched against those
+    spellings, and the receipt read for the final sha256 is `receipt`."""
     reasons: list[str] = []
     info, events = _load([Path(p) for p in transcripts], reasons)
     calls, results = _pair(events, reasons)
-    h = _history(calls, results, [_Target("receipt", receipt), _Target("full", full)], reasons,
+    spelled_receipt = Path(receipt_at_run) if receipt_at_run is not None else Path(receipt)
+    spelled_full = Path(full_at_run) if full_at_run is not None else Path(full)
+    h = _history(calls, results, [_Target("receipt", spelled_receipt), _Target("full", spelled_full)], reasons,
                  _runtime_denials(events, calls, results))
     first, derived = _boundaries(h, reasons)
     writes = h["writes"]["receipt"]
@@ -1646,10 +1742,10 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
         on_disk = None
         reasons.append(f"the receipt cannot be read ({type(exc).__name__})")
     last = writes[-1] if writes else None
-    rebuilt = _sha256(last["content"].encode("utf-8")) if last else None
+    rebuilt = _sha256(last["content"].encode("utf-8")) if last and last["content"] is not None else None
     if last is None:
         reasons.append("no successful Write of the receipt in the transcripts")
-    elif on_disk is not None and rebuilt != on_disk:
+    elif on_disk is not None and rebuilt is not None and rebuilt != on_disk:
         reasons.append("the receipt rebuilt from the transcripts differs from the file on disk (sha256)")
 
     def before(row: dict) -> dict | None:
@@ -1673,8 +1769,14 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
         "status": "unknown" if reasons else "checked",
         "reasons": reasons,
         "transcripts": info,
-        "receipt": {"path": str(receipt), "sha256": on_disk, "rebuilt_sha256": rebuilt, "writes": len(writes)},
-        "full": {"path": str(full), "writes": len(h["writes"]["full"])},
+        "receipt": {"path": str(receipt), "at_run": str(receipt_at_run) if receipt_at_run is not None else None,
+                    "sha256": on_disk, "rebuilt_sha256": rebuilt,
+                    "writes": sum(1 for w in writes if w["tool"] == "Write"),
+                    "edits": sum(1 for w in writes if w["tool"] != "Write")},
+        "full": {"path": str(full), "at_run": str(full_at_run) if full_at_run is not None else None,
+                 "writes": len(h["writes"]["full"])},
+        "replayed_edits": [{k: v for k, v in strip(w).items() if k != "created"}
+                           for w in writes if w["tool"] != "Write"],
         "boundaries": {"full_record_write": strip(first) if first else None,
                        "derive_core": strip(derived) if derived else None},
         "derive_core_attempts": [strip(r) for r in h["derives"]],
@@ -1703,6 +1805,9 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
 def summary(block: dict[str, Any]) -> list[str]:
     """Plain lines for the terminal: counts only."""
     lines = [f"receipt origin: {block['status']} ({block['instrument']})"]
+    edits = block["receipt"]["edits"]
+    if edits:
+        lines.append(f"receipt rebuilt from {block['receipt']['writes']} Write(s) and {edits} replayed edit(s)")
     if block["status"] != "checked":
         return lines + [f"· {r}" for r in block["reasons"]]
     s, d, o = block["snippets"], block["deltas"], block["origin"]

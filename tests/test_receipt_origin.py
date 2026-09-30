@@ -88,6 +88,17 @@ class Run:
                     metadata, is_error=not ok)
         return identity
 
+    def edit(self, name="Edit", *, metadata=None, settle=True, **inputs):
+        """An Edit or MultiEdit of the receipt. A successful one carries no
+        `is_error` and the runtime's own metadata, as observed in local
+        transcripts; the caller sets `last_receipt` to what the edit left."""
+        identity = self.call(name, file_path=str(self.receipt), **inputs)
+        if settle:
+            self.result(identity, f"The file {self.receipt} has been updated.",
+                        metadata if metadata is not None else {"filePath": str(self.receipt),
+                                                               "userModified": False})
+        return identity
+
     def derive_command(self, full=None):
         return (f"poetry run d4d derive core \\\n  --full {full or self.full.relative_to(self.root)}"
                 f" \\\n  --out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml")
@@ -484,10 +495,20 @@ class Unknown(Base):
     # A change placed between the draft and the derive can reach the
     # derive-time snapshot; one issued after every snapshot is covered by
     # the final sha256 instead (AfterEverySnapshot).
-    def test_an_edit_of_the_receipt_is_unknown(self):
+    def test_an_edit_of_the_receipt_that_cannot_be_replayed_is_unknown(self):
+        # v2 replays a successful Edit (#3047); one whose `old_string` occurs
+        # many times without `replace_all` cannot have succeeded as written.
         r = self._drafted()
         identity = r.call("Edit", file_path=str(r.receipt), old_string="a", new_string="b")
         r.result(identity, "ok", {"filePath": str(r.receipt)})
+        r.derive()
+        block = r.report()
+        self.assertUnknown(block, f"Edit {identity} of the receipt (transcript 0 line 6) cannot be replayed")
+        self.assertFalse(any("differs from the file on disk" in x for x in block["reasons"]), block["reasons"])
+
+    def test_an_edit_of_the_receipt_with_no_success_evidence_is_unknown(self):
+        r = self._drafted()
+        r.call("Edit", file_path=str(r.receipt), old_string="c002", new_string="c003")
         r.derive()
         self.assertUnknown(r.report(), "may change the receipt other than by a Write")
 
@@ -868,7 +889,7 @@ class AfterEverySnapshot(Base):
         for command in (f"git add {REL}", f"sed -i '' 's/zzz/zzz/' {REL}"):
             r.bash(command)
         identity = r.call("Edit", file_path=str(r.receipt), old_string="zzz", new_string="zzz")
-        r.result(identity, "ok", {"filePath": str(r.receipt)})
+        r.result(identity, "ok", {"filePath": str(r.receipt)}, is_error=None)   # no success evidence
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertEqual([(m["tool"], m["covered_by_final_sha256"]) for m in block["non_write_mutations"]],
@@ -926,6 +947,193 @@ class AfterEverySnapshot(Base):
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertTrue(block["non_write_mutations"][0]["covered_by_final_sha256"])
+
+
+TITLE = "  - slot: title\n    snippet: The CHORUS dataset\n"
+LICENSE = "  - slot: license\n    snippet: CC BY 4.0 license\n"
+WITH_LICENSE = receipt_text(("c001", [("title", "The CHORUS dataset"), ("license", "CC BY 4.0 license"),
+                                      ("funders[0].grant_id", "OT2OD032701")]),
+                            ("c002", [("description", "a multimodal collection")]))
+
+
+class EditReplay(Base):
+    """A successful Edit or MultiEdit of the receipt, which the agentic
+    playbook permits, is replayed exactly on the receipt as it last stood
+    (#3047), and the final sha256 still holds the rebuilt receipt to disk."""
+
+    def _drafted(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        return r
+
+    def test_the_fixture_edit_is_the_receipt_it_names(self):
+        self.assertEqual(PRE.count(TITLE), 1)
+        self.assertEqual(PRE.replace(TITLE, TITLE + LICENSE), WITH_LICENSE)
+
+    def test_an_edit_before_the_derive_is_a_phase1_correction(self):
+        r = self._drafted()
+        identity = r.edit(old_string=TITLE, new_string=TITLE + LICENSE, replace_all=False)
+        r.last_receipt = WITH_LICENSE
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["instrument"], "receipt_origin v2 (#2933, #3047)")
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
+        self.assertEqual(block["snippets"], {"pre_draft": 3, "at_derive_core": 4, "final": 4})
+        self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 1))
+        self.assertEqual(block["non_write_mutations"], [])
+        self.assertEqual([(e["tool_use_id"], e["tool"]) for e in block["replayed_edits"]], [(identity, "Edit")])
+        self.assertEqual(set(block["replayed_edits"][0]), {"tool_use_id", "transcript", "line", "result_line",
+                                                           "tool"})        # no payload
+        self.assertIn("receipt rebuilt from 1 Write(s) and 1 replayed edit(s)", ro.summary(block))
+
+    def test_an_edit_after_the_derive_is_a_phase3_backport(self):
+        r = self._drafted()
+        r.derive()
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.last_receipt = WITH_LICENSE
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 0, "phase3_backport": 1})
+        self.assertEqual(block["post_draft_entries"][0]["slot"], "license")
+
+    def test_a_multiedit_applies_its_edits_in_order(self):
+        r = self._drafted()
+        # The second edit's `old_string` exists only once the first has run.
+        r.edit("MultiEdit", edits=[{"old_string": TITLE, "new_string": TITLE + "  - slot: lic\n"},
+                                   {"old_string": "  - slot: lic\n", "new_string": LICENSE}])
+        r.last_receipt = WITH_LICENSE
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"]["phase1_correction"], 1)
+        self.assertEqual(block["replayed_edits"][0]["tool"], "MultiEdit")
+
+    def test_replace_all_replaces_every_occurrence(self):
+        r = self._drafted()
+        self.assertEqual(PRE.count("status: extracted"), 2)
+        r.edit(old_string="status: extracted", new_string="status: 'extracted'", replace_all=True)
+        r.last_receipt = PRE.replace("status: extracted", "status: 'extracted'")
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"]["contemporaneous"], 3)
+        self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
+
+    def test_a_replay_that_is_not_exact_is_unknown(self):
+        twice = PRE.replace(TITLE, TITLE + TITLE)
+        for prior, inputs, metadata, why in (
+                (PRE, {"old_string": "not in the receipt", "new_string": "x"}, None, "does not occur"),
+                (twice, {"old_string": TITLE, "new_string": LICENSE}, None, "occurs 2 times"),
+                (PRE, {"old_string": "", "new_string": "x"}, None, "not a non-empty string"),
+                (PRE, {"old_string": TITLE, "new_string": LICENSE, "replace_all": "yes"}, None, "not a boolean"),
+                (PRE, {"old_string": "OT2OD032701", "new_string": ""}, None, "may extend to the newline"),
+                (PRE, {"old_string": "OT2OD032701", "new_string": "$&-2"}, None, "`$` pattern"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "originalFile": "something else"}, "`originalFile`"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "userModified": True}, "modified"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "staleRecovered": True}, "changed since it was read"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "oldString": "The CHORUS dataset"}, "a different edit")):
+            with self.subTest(why=why):
+                r = self.new_run()
+                r.write(r.receipt, prior)
+                r.write(r.full, "id: x\n")
+                identity = r.edit(metadata=metadata, **inputs)
+                block = r.report()
+                self.assertUnknown(block, f"Edit {identity} of the receipt")
+                self.assertUnknown(block, why)
+
+    def test_matching_result_metadata_is_accepted(self):
+        r = self._drafted()
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE,
+               metadata={"filePath": str(r.receipt), "oldString": TITLE, "newString": TITLE + LICENSE,
+                         "replaceAll": False, "originalFile": PRE, "userModified": False, "staleRecovered": None})
+        r.last_receipt = WITH_LICENSE
+        self.assertEqual(r.report()["status"], "checked")
+
+    def test_a_multiedit_step_that_cannot_be_replayed_is_named(self):
+        r = self._drafted()
+        r.edit("MultiEdit", edits=[{"old_string": TITLE, "new_string": TITLE + LICENSE},
+                                   {"old_string": "absent", "new_string": "x"}])
+        self.assertUnknown(r.report(), "edit 1: its `old_string` does not occur")
+
+    def test_an_edit_with_no_earlier_state_is_unknown(self):
+        r = self.run_
+        r.receipt.write_text(PRE)
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.write(r.full, "id: x\n")
+        r.last_receipt = WITH_LICENSE
+        block = r.report()
+        self.assertUnknown(block, "the first observed change of the receipt is an edit")
+        self.assertIsNone(block["receipt"]["rebuilt_sha256"])
+
+    def test_a_replayed_receipt_that_differs_from_disk_is_unknown(self):
+        r = self._drafted()
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.receipt.write_text(PRE)                   # as if the edit had not landed
+        self.assertUnknown(r.report(sync=False), "differs from the file on disk")
+
+    def test_an_edit_in_flight_with_the_derive_is_unknown(self):
+        r = self._drafted()
+        derive = r.call("Bash", command=r.derive_command(), description="x")
+        edit = r.edit(settle=False, old_string=TITLE, new_string=TITLE + LICENSE)
+        r.result(derive, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.result(edit, "ok", {"filePath": str(r.receipt)})
+        r.last_receipt = WITH_LICENSE
+        self.assertUnknown(r.report(), f"receipt Write {edit} was in flight with the derive core boundary")
+
+    def test_an_edit_of_the_full_record_is_not_replayed(self):
+        # Only the receipt is rebuilt: an edit of the full record before its
+        # first Write is still a change the history cannot place.
+        r = self.run_
+        r.write(r.receipt, PRE)
+        identity = r.call("Edit", file_path=str(r.full), old_string="a", new_string="b")
+        r.result(identity, "ok", {"filePath": str(r.full)})
+        r.write(r.full, "id: x\n")
+        self.assertUnknown(r.report(), "may change the full record other than by a Write")
+
+
+class MovedArtifacts(Base):
+    """`receipt_at_run` / `full_at_run` name the files as the transcript
+    spelled them, for artifacts moved since the run (#3047)."""
+
+    def _moved(self):
+        r = self.run_
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.derive()
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.receipt.write_text(WITH_LICENSE)
+        r.full.write_text("id: x\n")
+        moved = r.root / "moved"
+        moved.mkdir()
+        receipt, full = moved / r.receipt.name, moved / r.full.name
+        r.receipt.rename(receipt)
+        r.full.rename(full)
+        return r, receipt, full
+
+    def test_without_the_spelling_a_moved_run_is_unknown(self):
+        r, receipt, full = self._moved()
+        self.assertUnknown(ro.origin([r.transcript()], receipt, full), "no successful Write of the full record")
+
+    def test_the_spelling_matches_the_transcript_and_the_moved_receipt_is_hashed(self):
+        r, receipt, full = self._moved()
+        block = ro.origin([r.transcript()], receipt, full, receipt_at_run=r.receipt, full_at_run=r.full)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"]["phase3_backport"], 1)
+        self.assertEqual((block["receipt"]["path"], block["receipt"]["at_run"]), (str(receipt), str(r.receipt)))
+        self.assertEqual(block["full"]["at_run"], str(r.full))
+
+    def test_the_cli_takes_the_spellings(self):
+        from data_sheets_schema.cli.receipts import receipts
+        r, receipt, full = self._moved()
+        out = CliRunner().invoke(receipts, ["origin", "--transcript", str(r.transcript()), "--receipt", str(receipt),
+                                            "--full", str(full), "--receipt-at-run", str(r.receipt),
+                                            "--full-at-run", str(r.full), "--json"])
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual(json.loads(out.output)["status"], "checked")
 
 
 class DeriveStatus(Base):
@@ -2030,7 +2238,7 @@ class Cli(unittest.TestCase):
         from data_sheets_schema.cli import cli
         out = CliRunner().invoke(cli, ["receipts", "origin", "--help"])
         self.assertEqual(out.exit_code, 0, out.output)
-        for option in ("--transcript", "--receipt", "--full", "--json"):
+        for option in ("--transcript", "--receipt", "--full", "--receipt-at-run", "--full-at-run", "--json"):
             self.assertIn(option, out.output)
 
     def test_help_states_the_derive_rule_the_code_applies(self):

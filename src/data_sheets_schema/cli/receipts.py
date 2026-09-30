@@ -285,14 +285,23 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
               help="the coverage receipt, spelled or resolving as the transcript's Writes name it")
 @click.option("--full", "full_file", required=True, type=click.Path(dir_okay=False),
               help="the full record, spelled or resolving as the transcript's Writes name it")
+@click.option("--receipt-at-run", "receipt_at_run", type=click.Path(dir_okay=False),
+              help="the receipt's path as the transcript spelled it, where the file has moved since the run; "
+                   "--receipt is then the file read for the final sha256")
+@click.option("--full-at-run", "full_at_run", type=click.Path(dir_okay=False),
+              help="the full record's path as the transcript spelled it, where the file has moved since the run")
 @click.option("--json", "as_json", is_flag=True, help="print the whole block as JSON")
-def origin(transcripts, receipt_file, full_file, as_json):
+def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as_json):
     """Report which receipt snippets were written before the full record
     existed, and which after it (#2933). Report-only: it writes nothing.
 
-    Rebuilds the receipt from the transcript's successful Writes and
-    classifies each final (chunk, snippet, slot) element as
-    `contemporaneous`, `phase1_correction` (after the first full-record
+    Rebuilds the receipt from the transcript's successful Writes, and
+    replays each successful Edit or MultiEdit of it exactly (#3047): an
+    `old_string` that does not occur, or occurs more than once without
+    `replace_all`, or any edit that cannot be replayed exactly, makes the
+    status `unknown`, and the rebuilt final receipt must still match the
+    file on disk by sha256. It then classifies each final (chunk, snippet,
+    slot) element as `contemporaneous`, `phase1_correction` (after the first full-record
     Write, before the first successful `derive core`, or to the end when
     none succeeded) or `phase3_backport`. A derive counts only where its
     call's result carries its own status: it is the command's last part, or
@@ -333,7 +342,9 @@ def origin(transcripts, receipt_file, full_file, as_json):
     import json
 
     from data_sheets_schema import receipt_origin as ro
-    block = ro.origin([Path(t) for t in transcripts], Path(receipt_file), Path(full_file))
+    block = ro.origin([Path(t) for t in transcripts], Path(receipt_file), Path(full_file),
+                      receipt_at_run=Path(receipt_at_run) if receipt_at_run else None,
+                      full_at_run=Path(full_at_run) if full_at_run else None)
     if as_json:
         click.echo(json.dumps(block, indent=2))
     else:
