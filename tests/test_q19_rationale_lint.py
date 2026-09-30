@@ -965,9 +965,10 @@ def test_a_label_clause_that_accepts_is_judged_whole_not_from_the_cut():
     result = lint_q19(rating)
     assert (result.basis, result.verdict, result.cue_unread) == (
         UNSTATED, SUBSTANTIVE_ONLY, True)
-    # "whereas complete" turns back to credit and names no gap, so it is
-    # not read with the reason (#3128, #3432).
-    assert withholding_sentences(rating) == [("score_label", "Prose accepted short of a graph")]
+    # The range before "whereas complete" names nothing read (its clause
+    # accepts), so the contrast is not cut as credit and the range is main's
+    # (#3500; #3432 had cut it).
+    assert withholding_sentences(rating) == [("score_label", label)]
 
 
 def test_a_label_cue_in_an_accepting_clause_does_not_state_the_basis():
@@ -1369,18 +1370,22 @@ def test_what_a_cue_sentence_still_reads(note, concerns):
     assert sorted(result.concerns(REPRESENTATION) + result.concerns(SUBSTANTIVE)) == concerns, note
 
 
-def test_where_nothing_says_why_a_credit_clause_sharing_a_part_with_a_gap_is_not_read():
-    """#3128: the committed CHORUS 2026-08-28b API rep1 form. A gap part with
-    no contrast word was read whole, so its credit clause ("missing data is
-    documented") gave a missing-data reason."""
+def test_where_nothing_says_why_a_gap_part_is_read_whole_as_on_main():
+    """#3501: where nothing says why, a clause rule inside a read gap part
+    (a finite clause naming no gap word is credit) dropped real reasons
+    given with no gap word ("the lineage is narrative rather than
+    graph-structured"), the cost that kept it out after a cue. It is not
+    applied: a gap part is read whole, as on main, so the committed CHORUS
+    2026-08-28b API rep1 form reads its credit clause ("missing data is
+    documented") as a missing-data reason again (#3128 stays open)."""
     result = lint_q19(item(note=(
         "Relationships are recoverable from prose, giving a partial lineage, and missing data "
         "is documented per modality.")))
     assert result.basis == UNSTATED
-    assert "missing_data" not in result.concerns(SUBSTANTIVE)
-    assert result.concerns(SUBSTANTIVE) == ["lineage_content"]
+    assert result.concerns(SUBSTANTIVE) == ["lineage_content", "missing_data"]
     aside = lint_q19(item(note="Checksums are recorded (md5 on every archive), and no PROV graph."))
-    assert (aside.verdict, aside.concerns(SUBSTANTIVE)) == (REPRESENTATION_ONLY, [])
+    assert (aside.verdict, aside.concerns(SUBSTANTIVE)) == (
+        REPRESENTATION_AND_SUBSTANTIVE, ["integrity"])
 
 
 @pytest.mark.parametrize("note, concerns", [
@@ -1548,6 +1553,70 @@ def test_a_cue_naming_nothing_after_a_contrast_points_back_across_it(note, verdi
     assert result.basis == STATED
     assert (result.verdict, [(r.concern, r.clause) for r in result.reasons]) == (
         verdict, reasons), note
+
+
+#: Every example the review rounds of PR #3417 found regressed against main
+#: (#3464, #3485, #3499, #3500, #3501), with main's basis, verdict and
+#: reasons: (issue, field, text, basis, verdict, concerns). The clause-level
+#: credit rules (#3128, #3194) are narrowed until every row reads as on main.
+#: A label row carries the neutral body note `_NEUTRAL`; every row is at 4/5.
+_MAIN_READINGS = [
+    ("#3464", "note", "Derivation is described across four fields, but this keeps it from 5. "
+     "Version history is excellent.", STATED, REPRESENTATION_ONLY, ["scattered"]),
+    ("#3464", "note", "Lineage is recorded as human-readable prose, but it is held at 4 for "
+     "that reason.", STATED, REPRESENTATION_ONLY, ["machine_form"]),
+    ("#3464", "note", "The provenance is a human-readable narrative, however, which keeps it "
+     "from 5.", STATED, REPRESENTATION_ONLY, ["machine_form"]),
+    ("#3464", "note", "Errata are recorded in the changelog, but that falls short of 5.",
+     STATED, SUBSTANTIVE_ONLY, ["version_history"]),
+    ("#3464", "note", "The provenance is a human-readable narrative, but that is why it does "
+     "not reach 5.", STATED, REPRESENTATION_ONLY, ["machine_form"]),
+    ("#3485", "label", "Held at 4 because was_derived_from is empty and no errata are recorded",
+     STATED, REPRESENTATION_AND_SUBSTANTIVE, ["empty_slot", "version_history"]),
+    ("#3485", "label", "Held at 4 because no PROV graph and no errata",
+     STATED, REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "version_history"]),
+    ("#3485", "label", "Held at 4 because no PROV graph is given and no errata are recorded",
+     STATED, REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "version_history"]),
+    ("#3485", "label", "Held at 4 because the PROV graph and the errata are both missing",
+     STATED, REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "version_history"]),
+    ("#3485", "label", "Held at 4 because of no PROV graph and no checksums",
+     STATED, REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "integrity"]),
+    ("#3499", "note", "Version history is thorough. It is held at 4 whereas a 5 requires a "
+     "typed PROV graph.", STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3499", "note", "Errata are recorded. Held at 4 however, for want of a PROV graph.",
+     STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3499", "note", "Version history is thorough. Held at 4, but for the absence of a typed "
+     "PROV graph.", STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3499", "note", "Held at 4, but for the absence of a typed PROV graph.",
+     STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3499", "note", "It is held at 4 whereas a 5 requires a typed PROV graph.",
+     STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3500", "label", "Held at 4 whereas a 5 requires a typed PROV graph",
+     STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3500", "label", "Very Good, held at 4, however, for want of a typed PROV graph",
+     STATED, REPRESENTATION_ONLY, ["graph_form"]),
+    ("#3501", "note", "No errata are recorded, and the lineage is narrative rather than "
+     "graph-structured or machine-readable.", UNSTATED, REPRESENTATION_AND_SUBSTANTIVE,
+     ["graph_form", "machine_form", "version_history"]),
+    ("#3501", "note", "Errata are not recorded, and the graph must be reconstructed by a reader.",
+     UNSTATED, REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "scattered", "version_history"]),
+    ("#3501", "note", "Held at 4 because no errata are recorded, and the lineage is narrative "
+     "rather than graph-structured or machine-readable.", STATED,
+     REPRESENTATION_AND_SUBSTANTIVE, ["graph_form", "machine_form", "version_history"]),
+]
+
+
+@pytest.mark.parametrize("issue, field, text, basis, verdict, concerns", _MAIN_READINGS,
+                         ids=[f"{row[0]}-{i}" for i, row in enumerate(_MAIN_READINGS)])
+def test_every_review_regression_reads_as_on_main(issue, field, text, basis, verdict, concerns):
+    """The regression table: rounds 2 to 4 of PR #3417's review each found a
+    major regression against main from the clause-level credit rules. Each
+    row is main's reading, checked against a git-archive copy of origin/main;
+    none of the issues says main was wrong for its row."""
+    rating = item(label=text, note=_NEUTRAL) if field == "label" else item(note=text)
+    result = lint_q19(rating)
+    assert (result.basis, result.verdict, sorted({r.concern for r in result.reasons})) == (
+        basis, verdict, concerns), (issue, text)
 
 
 # -- the committed corpus -----------------------------------------------------

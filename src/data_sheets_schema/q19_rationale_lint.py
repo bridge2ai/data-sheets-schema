@@ -61,7 +61,10 @@ machine-readable form and lineage across fields. So:
   before or after it, and names no gap or cue ("No PROV graph, but
   excellent version history", "No PROV graph whereas excellent version
   history", "No PROV graph, however, excellent version history";
-  `_label_rest`, #3128, #3432, #3486). Two cases
+  `_label_rest`, #3128, #3432, #3486), but only where the reason before
+  it names a concern: after a cue that names nothing ("Held at 4 whereas
+  a 5 requires a typed PROV graph") the part after the contrast is the
+  reason and is read (#3500). Two cases
   are read with the reason: credit in the clause that carries the first
   contrast or cue, or in a later clause that does not open with a
   contrast; and the words before a contrast
@@ -80,11 +83,15 @@ machine-readable form and lineage across fields. So:
   graph is given"). A cue that names nothing ("…, which keeps it from 5")
   points back at what comes before it, which is read, across a "but",
   "whereas" or "however" too ("Derivation is described across four
-  fields, but this keeps it from 5", #3464). Credit after the
-  cue is read: a clause rule there drops reasons the committed ratings
-  give in clauses with no gap word ("the lineage is narrative rather than
-  graph-structured or machine-readable", "so the graph must be
-  reconstructed by a reader");
+  fields, but this keeps it from 5", #3464). Where the parts read name
+  no concern at all ("It is held at 4 whereas a 5 requires a typed PROV
+  graph": the cue's part names nothing, the part after the contrast no
+  gap word), the sentence is read whole, as before #3128, so its reason
+  is not dropped and a neighbour read in its place (#3499). Credit after
+  the cue is read: a clause rule there drops reasons the committed
+  ratings give in clauses with no gap word ("the lineage is narrative
+  rather than graph-structured or machine-readable", "so the graph must
+  be reconstructed by a reader");
 - the basis is `STATED` when a quality-note or semantic-analysis sentence
   carries a cue, or the label carries a withholding cue and names a reason
   ("Held at 4 because was_derived_from is empty"). A label's contrast or
@@ -99,16 +106,16 @@ machine-readable form and lineage across fields. So:
   incomplete (`_gap_parts`). A part that names no gap is credit and is not
   read, whether it comes before a contrast or after it ("RO-Crate packages
   include provenance graphs"; "No errata are recorded, but
-  was_derived_from links every release to its parent dataset"). Inside a
-  part that is read, a clause with a finite verb of its own and no gap,
-  and its aside in parentheses, is credit and is not read
-  (`_credit_clauses`, #3128): "…recoverable from prose, giving a partial
-  lineage, and missing data is documented per modality" gives no
-  missing-data reason. A clause with no finite verb may be an item of a
-  list whose gap a neighbour states ("no version history, errata or
-  structured derivation"), so it is read; so is credit that shares a
-  clause with a gap ("Checksums are recorded and was_derived_from is
-  empty"). As in a label, a part that names a gap and nothing of its own
+  was_derived_from links every release to its parent dataset"). A part
+  that is read is read whole. The clause rule that sets apart credit
+  before a cue (below) is not applied here: it drops the same reasons
+  given with no gap word that it drops after a cue ("No errata are
+  recorded, and the lineage is narrative rather than graph-structured or
+  machine-readable" would lose its representation reasons, #3501). So
+  credit that shares a part with a gap is read ("…recoverable from prose,
+  giving a partial lineage, and missing data is documented per modality"
+  gives a missing-data reason, as on main; #3128 stays open for this
+  form). As in a label, a part that names a gap and nothing of its own
   is about the words before it in its clause, which are read with it
   ("changelog mentioned but not detailed");
 - inside what is read, a clause that accepts, concedes or disclaims names
@@ -913,7 +920,11 @@ def _label_rest(label: str, start: int) -> list[tuple[int, int]]:
     history" turns back to credit as "…, but excellent …" does. "No
     PROV graph, but excellent version history" reads "No PROV graph";
     "graph claimed but not evidenced" and "prose lineage, but no errata"
-    are read whole."""
+    are read whole. A part is cut only where the range before it names a
+    concern (#3500): after a cue that names nothing ("Held at 4 whereas a
+    5 requires a typed PROV graph", "held at 4, however, for want of a
+    typed PROV graph") the part after the contrast is the reason, as on
+    main."""
     out, lo = [], start
     pieces = [piece for span in _spans(label) for part in _label_parts(label, *span)
               for piece in _contrast_pieces(label, *part)]
@@ -925,7 +936,11 @@ def _label_rest(label: str, start: int) -> list[tuple[int, int]]:
     for a, b in pieces:
         part = label[a:b].strip()
         if (a > start and _CONTRAST_OPENS.match(part) and not _GAP.search(part)
-                and not _WITHHOLDING.search(part)):
+                and not _WITHHOLDING.search(part)
+                # Only where the reason before it names something: after a
+                # cue naming nothing ("Held at 4 whereas a 5 requires a
+                # typed PROV graph") the contrast gives the reason (#3500).
+                and _reasons([("score_label", label, (lo, a))])):
             out.append((lo, a))
             lo = b
     return out + [(lo, len(label))]
@@ -960,8 +975,9 @@ def _gap_parts(sentence: str, *, cue: bool = False) -> list[tuple[int, int]]:
     comes before a contrast ("…recoverable from prose, which exceeds the
     version-history-only anchor, but no PROV-O graph") or after one ("No
     errata are recorded, but was_derived_from links every release to its
-    parent dataset", #3146). Credit inside a part is set apart by clause
-    (`_credit_clauses`, `_credit_before_cue`), not here. As in a label, a part that names a gap
+    parent dataset", #3146). With `cue`, credit before the cue is set
+    apart by clause (`_credit_before_cue`), not here; without it a read
+    part is read whole (#3501). As in a label, a part that names a gap
     and nothing of its own ("changelog mentioned but not detailed") is about
     the words before it in its punctuation clause, which are read with it.
     With `cue`, a part whose cue names nothing of its own ("…, but this
@@ -995,9 +1011,11 @@ def _credit_clauses(text: str, lo: int, hi: int) -> frozenset[tuple[int, int]]:
     """The clauses of `text` (as `_clauses` splits it) within `lo`..`hi`
     that are credit, not a reason (#3128): each clause that is read, has a
     finite verb of its own (`_FINITE`), names no gap (`_GAP`) and carries no
-    withholding cue, and the aside in parentheses that follows one. "…from
-    prose, giving a partial lineage, and missing data is documented per
-    modality" reads no missing-data reason. A verbless clause is not
+    withholding cue, and the aside in parentheses that follows one. Used
+    only before a cue that names its own reason (`_credit_before_cue`);
+    where nothing says why it is not applied, since it drops reasons given
+    with no gap word ("the lineage is narrative rather than
+    graph-structured", #3501). A verbless clause is not
     credit on its own: it may be an item of a list whose gap a neighbour
     states ("no version history, errata or structured derivation")."""
     clauses, out, depth = _clauses(text), set(), 0
@@ -1049,7 +1067,9 @@ def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int], frozenset]
     tuples, which `_reasons` reads with the sentence's clauses judged
     whole: a label's reason is a range of the label, not a string cut from
     it (#3264). A cue sentence gives one tuple per part `_gap_parts` reads,
-    with the credit clauses before its cue (`_credit_before_cue`)."""
+    with the credit clauses before its cue (`_credit_before_cue`), or,
+    where those parts name no concern, one tuple for the whole sentence,
+    as on main (#3499)."""
     sentences = _sentences(item)
     keep = []
     for i, (name, sentence) in enumerate(sentences):
@@ -1058,6 +1078,14 @@ def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int], frozenset]
         elif _says_why(sentence):
             parts = [(part, _credit_before_cue(sentence, *part))
                      for part in _gap_parts(sentence, cue=True)]
+            if not _reasons([(name, sentence, part, credit) for part, credit in parts]):
+                # Parts that name nothing ("It is held at 4 whereas a 5
+                # requires a typed PROV graph": the cue's part names nothing
+                # and the part after the contrast names no gap word) leave
+                # the sentence read whole, as before #3128; otherwise its
+                # reason is dropped and a neighbour, credit or not, read in
+                # its place (#3499).
+                parts = [((0, len(sentence)), frozenset())]
             keep.extend((i, part, credit) for part, credit in parts)
             if not _reasons([(name, sentence, part, credit) for part, credit in parts]):
                 # A neighbour that says why is kept as its own parts, with
@@ -1130,7 +1158,10 @@ def lint_q19(item: dict) -> Q19Lint:
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
     # Nothing says why: the label's reason clauses and the body's parts that
     # name a gap are read (`_gap_parts`); a part naming no gap is not.
-    body = [(name, s, part, _credit_clauses(s, *part)) for name, s in sentences
+    # A read part is read whole: a clause rule here drops reasons given in
+    # clauses with no gap word ("the lineage is narrative rather than
+    # graph-structured", #3501), as it does after a cue.
+    body = [(name, s, part) for name, s in sentences
             if name != "score_label" for part in _gap_parts(s)]
     unread = any(accepts for _, s in sentences for accepts in _cue_clauses(s))
     return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions, unread)
