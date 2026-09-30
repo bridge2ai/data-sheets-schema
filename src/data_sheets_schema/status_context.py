@@ -18,8 +18,9 @@ Rule 1, receipt context (`receipt_context`). For each snippet a coverage
 receipt verifies in its own chunk, the snippet is located in the chunk's
 raw text through a map from `receipts.normalise` offsets back to raw
 offsets — composed, where the validator verified it only there, with the
-linewrap-joined or artifact-line-elided haystack (#3043) — and two contexts
-are read:
+linewrap-joined or artifact-line-elided haystack (#3043); the counts say
+how many located snippets each form located (`located_by_form`, #3406) —
+and two contexts are read:
 
 (a) its enclosing sentence, extended across an enumeration — inline
     `A) ... E)` / `(a)` / `1)` items or bulleted and numbered lines — back
@@ -539,6 +540,20 @@ class BundleView:
         `complete` is False when a part matches more than
         MAX_PART_MATCHES times: the matches past the cap are not read, so
         no claim about every occurrence can be made (#3266)."""
+        found = self._form_matches(cid, snippet)
+        return None if found is None else found[1:]
+
+    def located_form(self, cid: str, snippet: str) -> str | None:
+        """The haystack form (`HAYSTACK_FORMS`) the snippet is located in —
+        the form whose offset map `locate` and `lost_classes` read its spans
+        through — or None when no form locates it (#3406)."""
+        found = self._form_matches(cid, snippet)
+        return None if found is None else found[0]
+
+    def _form_matches(self, cid: str, snippet: str
+                      ) -> tuple[str, list[list[tuple[int, int]]], bool] | None:
+        """(form, matches, complete): `_part_matches` with the form that
+        located the snippet."""
         splits = [rc._ELLIPSIS.split(snippet)]
         if "\n" in snippet:
             splits.append(snippet.split("\n"))
@@ -550,7 +565,7 @@ class BundleView:
                 continue
             found = self._split_matches(cid, splits, *self._norm[key])
             if found is not None:
-                return found
+                return (form, *found)
         return None
 
     def _split_matches(self, cid: str, splits: list[list[str]], norm: str, offs: list[int]
@@ -962,7 +977,8 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     the validator reads none of them."""
     view = BundleView(bundle_text, manifest)
     counts = {"snippets": 0, "verified": 0, "not_verified": 0, "value_unresolved": 0,
-              "located": 0, "unlocated": 0, "indeterminate": 0, "malformed_entries": 0}
+              "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
+              "unlocated": 0, "indeterminate": 0, "malformed_entries": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     unlocated: list[dict[str, Any]] = []
     for entry in receipt.get("chunks") or []:
@@ -997,6 +1013,7 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                 counts["indeterminate"] += 1
             else:
                 counts["located"] += 1
+                counts["located_by_form"][view.located_form(cid, snippet)] += 1
             bucket = flags[slot_class(slot)]
             base = {"slot": slot, "chunk": cid, "snippet": snippet[:80],
                     "snippet_line": view.line_of(found[0][0][0]) if found else None}
@@ -1020,7 +1037,13 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     by_rule = {r: {k: sum(1 for f in flags[k] if f["rule"] == r) for k in ("value", "label")}
                for r in ("governor_outside_snippet", "modal_dropped")}
     slots = {k: len({f["slot"] for f in flags[k]}) for k in ("value", "label")}
+    # A snippet located only across a joined hyphen break or an elided
+    # section-number line had its context read on the raw text that holds
+    # the break or the line, so how many were is said beside the count (#3406).
+    by_form = {f: n for f, n in counts["located_by_form"].items() if f != "plain" and n}
     summary = (f"snippets {counts['verified']}/{counts['snippets']} verified · {counts['located']} located"
+               + (f" ({sum(by_form.values())} only through a joined or elided form: "
+                  + ", ".join(f"{f} {n}" for f, n in by_form.items()) + ")" if by_form else "")
                + (f" ({counts['unlocated']} unlocated)" if counts["unlocated"] else "")
                + (f" · {counts['indeterminate']} indeterminate (a part matched more than "
                   f"{MAX_PART_MATCHES} times; context not read)" if counts["indeterminate"] else "")
