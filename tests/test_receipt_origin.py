@@ -1789,6 +1789,25 @@ class UnestablishedDirectory(Base):
                                           "is not the derive's own")
                 self.assertIs(block["derive_core_attempts"][0]["targets_full"], True)
 
+    #: A cd whose argument carries a `|` inside a backquote or a `${...}`
+    #: (#3904): shlex splits the word at the `|`, which is no pipeline
+    #: join, and bash runs the cd in this shell.
+    UNSCANNABLE_CDS = ("cd `git rev-parse --show-toplevel | head -1`", "cd `ls -d d* | head -1`",
+                       "cd ${D//a|b/}")
+
+    def test_a_pipe_inside_a_backquote_or_an_expansion_is_no_child(self):
+        # The derive runs wherever the cd left it, so its relative `--full`
+        # is not placed against where the call started (#3904).
+        for cd in self.UNSCANNABLE_CDS:
+            with self.subTest(cd=cd):
+                identity, block = self._derived(f"{cd} && poetry run d4d derive core --full {self.FULL}")
+                self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+                self.assertIsNone(block["boundaries"]["derive_core"])
+        # Where the command can be read, a pipe's left side is still a child.
+        identity, block = self._derived(f"cd /elsewhere | cat && poetry run d4d derive core --full {self.FULL}")
+        self.assertIs(block["derive_core_attempts"][0]["targets_full"], True)
+
     def test_a_change_every_later_join_depends_on_is_followed(self):
         for spelling in ("cd data && cd claudecode_direct && d4d derive core --full L/CHORUS_d4d.yaml",
                          "cd data && echo a && d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
@@ -1837,7 +1856,12 @@ class UnestablishedDirectory(Base):
                  # a skipped pushd pushed nothing; a skipped popd popped nothing
                  "true || pushd /x && popd && d4d derive core --full data/F.yaml": None,
                  "pushd data && true || popd && d4d derive core --full F.yaml": None,
-                 "echo a\nd4d derive core --full /r/data/F.yaml": True}
+                 "echo a\nd4d derive core --full /r/data/F.yaml": True,
+                 # a `|` inside a backquote or a `${...}` is no pipe (#3904)
+                 "cd `git rev-parse --show-toplevel | head -1` && d4d derive core --full data/F.yaml": None,
+                 "cd `ls -d d* | head -1` && d4d derive core --full data/F.yaml": None,
+                 "cd ${D//a|b/} && d4d derive core --full data/F.yaml": None,
+                 "cd ${D} | cat && d4d derive core --full data/F.yaml": None}
         for command, expected in cases.items():
             with self.subTest(command=command):
                 derives = ro._shell(command, "/r", full)["derives"]
@@ -2384,6 +2408,9 @@ class DeriveSpellings(Base):
                       "process substitution (`(cd x)`, `$(cd x)`, `<(cd x)`), a pipe's left side or a `&` job "
                       "runs in a child: it does not count, nor reach a later part of its command outside that "
                       "child (#3810), where the command's brackets can be matched", text)
+        self.assertIn("and the command carries no here-document, backquote, `${...}`, `$'...'` or quoted `$(`, "
+                      "from inside which a `|` or `&` may be split (there no part is a child and every change "
+                      "counts, #3904)", text)
         self.assertIn("and a command the tokenizer cannot split counts, whatever its words (#3782)", text)
         self.assertIn("Still not read: a function or alias named as a program read here (`cat() { cd x; }`), "
                       "defined in the session or by the profile the session's shell started with.", text)
@@ -2394,6 +2421,9 @@ class DeriveSpellings(Base):
                 self.assertNotIn(gone, text)
         self.assertIn("The runtime's shell keeps its directory between calls (#3719)", flat := " ".join(
             ro.__doc__.split()))
+        self.assertIn("no part is read as in a child of any kind across a here-document, a backquote, a "
+                      "`${...}`, `$'...'` or a quoted `$(`, where a `|` or `&` may be split out of a word "
+                      "(#3904)", flat)
         self.assertIn("behind a brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`, `until`, "
                       "`do`), `!`, `time`, `builtin` or `command` (#3797) -- or which may run in it code not on "
                       "its command line (#3782): `source` or `.`, or a program named by a bare word this does "
@@ -3231,9 +3261,10 @@ class EarlierDirectoryChange(Base):
                     identity, block = self._run(earlier, command)
                     self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 8) runs a program this "
                                               "does not read")
-                    # An earlier call that is itself open-ended (`eval "$GO"`,
-                    # #3852) may have derived after the draft too.
-                    open_ended = ro._shell(earlier, "/w", [])["detaches"]
+                    # The one earlier call that is itself open-ended
+                    # (`eval "$GO"`, #3852) may have derived after the draft
+                    # too; named here, not read from `_shell` (#3908).
+                    open_ended = earlier.startswith('eval "$GO"')
                     self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]],
                                      ["toolu_002"] * open_ended + [identity])
 
@@ -3292,7 +3323,10 @@ class EarlierDirectoryChange(Base):
         self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be resolved")
         self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
         # So after a change behind a brace or a compound keyword (#3797).
-        for earlier in ("{ cd data; }", "if true; then cd data; fi", "builtin cd data"):
+        # A pipe inside a backquote or a `${...}` is no pipeline: the cd
+        # before it moved the shell (#3904).
+        for earlier in ("{ cd data; }", "if true; then cd data; fi", "builtin cd data",
+                        "cd `ls -d d* | head -1`", "cd ${D//a|b/}"):
             with self.subTest(earlier=earlier):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -3458,10 +3492,42 @@ class EarlierDirectoryChange(Base):
         self.assertEqual(ro._start(call, None), ("/w/sub", True))
         self.assertEqual(ro._start({**call, "cwd": "/w"}, None), ("/w", False))
         self.assertEqual(ro._start(call, 9), ("/w/sub", True))
+        # A trusted directory that is the start is still after a change: a
+        # `python -c`/`-m` or `poetry run` part is read as such (#3907).
+        self.assertEqual(ro._start({**call, "cwd": "/w"}, 9), ("/w", True))
         self.assertEqual(ro._start(call, 10), (None, True))
         self.assertEqual(ro._start(call, float("inf")), (None, True))
         self.assertEqual(ro._start({**call, "cwd_basis": "init"}, 9), (None, True))
         self.assertEqual(ro._start({**call, "cwd": "/w", "cwd_basis": "init"}, 9), (None, True))
+
+    def test_a_change_whose_result_is_in_another_transcript_never_returned_in_its_own(self):
+        # `_pair` pairs results across transcripts (a killed-and-resumed
+        # run), but a change whose result came back only in another one
+        # never returned in its own: a later call there that records its own
+        # directory may have recorded it before the change took effect, so
+        # its relative `--full` is not placed (#3824, #3906). The control
+        # has the change return in its own transcript before the derive.
+        def call(identity, command, cwd=None):
+            event = {"type": "assistant", "message": {"content": [
+                {"type": "tool_use", "id": identity, "name": "Bash", "input": {"command": command}}]}}
+            return {**event, "cwd": cwd} if cwd else event
+
+        def result(identity):
+            return {"type": "user", "message": {"content": [
+                {"type": "tool_result", "tool_use_id": identity, "content": "", "is_error": False}]}}
+
+        targets = [ro._Target("receipt", Path("/w/r.yaml")), ro._Target("full", Path("/w/data/full.yaml"))]
+        derive = call("dv", "d4d derive core --full ../data/full.yaml --out o.yaml", "/w/sub")
+        for returned, placed in (((1, 1), None), ((0, 3), True)):
+            with self.subTest(returned=returned):
+                events = sorted([(0, 1, {"type": "system", "subtype": "init", "cwd": "/w"}),
+                                 (0, 2, call("cd", "cd sub")), (0, 10, derive), (0, 11, result("dv")),
+                                 (*returned, result("cd"))], key=lambda e: e[:2])
+                reasons: list[str] = []
+                calls, results = ro._pair(events, reasons)
+                self.assertEqual(results["cd"]["transcript"], returned[0])
+                history = ro._history(calls, results, targets, reasons)
+                self.assertEqual([d["targets_full"] for d in history["derives"]], [placed])
 
     def test_the_parser_records_where_a_call_s_directory_came_from(self):
         events = [(0, 1, {"type": "system", "subtype": "init", "cwd": "/w"}),

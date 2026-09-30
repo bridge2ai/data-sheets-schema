@@ -169,9 +169,11 @@ unquoted command or process substitution (`(cd x)`, `$(cd x)`, `<(cd
 x)`), a pipe's left side or a `&` job runs in a child, so it does not
 count, and it reaches no later part of its command outside that child
 (#3810); a subshell is read only where the command's brackets can be
-matched, a case pattern's `)` opening none (not across a here-document,
-a backquote, `$'...'`, a quoted `$(`, or a bracket the tokenizer
-returned from quotes or an escape, where every such change counts). One
+matched, a case pattern's `)` opening none (not across a bracket the
+tokenizer returned from quotes or an escape), and no part is read as in
+a child of any kind across a here-document, a backquote, a `${...}`,
+`$'...'` or a quoted `$(`, where a `|` or `&` may be split out of a
+word (#3904): there every such change counts. One
 in a backquoted or double-quoted substitution (`` `cd x` ``, `"$(cd
 x)"`) is kept inside one word and not read; it moves nothing (#3841),
 though a backquoted command with a space in it is split, and its pieces
@@ -419,8 +421,10 @@ NON_CHECKS = (
     "command or process substitution (`(cd x)`, `$(cd x)`, `<(cd x)`), a pipe's left side or a `&` "
     "job runs in a child: it does not count, nor reach a later part of its command outside that "
     "child (#3810), where the command's brackets can be matched (a case pattern's `)` opens none; "
-    "across a here-document, a backquote, `$'...'`, a quoted `$(` or a bracket from quotes or an "
-    "escape, every such change counts); one in a backquoted or double-quoted substitution is kept in "
+    "across a bracket from quotes or an escape every such change counts) and the command carries no "
+    "here-document, backquote, `${...}`, `$'...'` or quoted `$(`, from inside which a `|` or `&` may "
+    "be split (there no part is a child and every change counts, #3904); one in a backquoted or "
+    "double-quoted substitution is kept in "
     "one word, not read, and moves nothing (#3841), though a backquoted command with a space is "
     "split and its pieces read as parts; and a command the tokenizer cannot split counts, whatever "
     "its words (#3782). Where the transcript records a working directory other than its first, such "
@@ -1128,6 +1132,22 @@ def _unquoted_parens(text: str) -> int:
     return count
 
 
+def _unscannable(command: str, tokens: list[str]) -> bool:
+    """Whether `command` carries text whose operators the tokenizer may
+    return from inside a word bash reads whole, so the parts' brackets and
+    joins say nothing about where a child starts or ends: a here-document,
+    a backquote, a `${...}` expansion (`${D//a|b/}`), `$'...'` or a quoted
+    `$(` whose inner quotes the scan does not follow. shlex treats none of
+    these as quoting, so a `|` or `&` inside one splits a word into two
+    parts joined by what reads as a pipe (#3904). Where this holds, neither
+    `_subshell_scopes` nor `_in_child` reads any part as in a child, and
+    every directory change counts, as before #3810 (a false `unknown`,
+    never a false `checked`)."""
+    return ("`" in command or "${" in command or "$'" in command
+            or any(t in ("<<", "<<-") for t in tokens)
+            or any("$(" in t for t in tokens if not set(t) <= _PUNCT))
+
+
 def _subshell_scopes(command: str, tokens: list[str]) -> list[tuple[int, ...]]:
     """Per part, as `_layout` splits `tokens`, the subshells bash runs it in,
     outermost first, each by the position of the `(` that opens it: an empty
@@ -1147,14 +1167,12 @@ def _subshell_scopes(command: str, tokens: list[str]) -> list[tuple[int, ...]]:
     Where the parens cannot be matched so -- a `)` with nothing open (a case
     pattern's `a)`), one left open, a `((` closed by `)` (bash's two
     subshells), a paren the tokenizer returned from quotes or an escape, or
-    a command carrying a here-document, a backquote, `$'...'` or a quoted
-    `$(` whose inner quotes the scan does not follow -- no part is read as
-    in a subshell: every cd counts, as before (a false `unknown`, never a
-    false `checked`)."""
+    a command `_unscannable` names (a here-document, a backquote, `${`,
+    `$'...'` or a quoted `$(`) -- no part is read as in a subshell: every
+    cd counts, as before (a false `unknown`, never a false `checked`)."""
     segments = _layout(tokens)[0]
     none: list[tuple[int, ...]] = [()] * len(segments)
-    if ("`" in command or "$'" in command or any(t in ("<<", "<<-") for t in tokens)
-            or any("$(" in t for t in tokens if not set(t) <= _PUNCT)):
+    if _unscannable(command, tokens):
         return none
     prepared = _newlines_as_joins(_strip_comments(command.replace("\\\n", " ")))
     if _unquoted_parens(prepared) != sum(len(t) for t in tokens if t and set(t) <= set("()")):
@@ -1230,9 +1248,17 @@ def _in_child(command: str, tokens: list[str], joins: list[list[str]]
     a child of its own, piped into a later part (every part of a pipeline
     but the last runs in its own subshell; the last may run in this shell
     under `lastpipe`) or started with `&`, so a change in it reaches no
-    later part."""
+    later part.
+
+    Where the command is `_unscannable` (a backquote, `${`, `$'`, a quoted
+    `$(` or a here-document), no part is read as alone either: a `|` or `&`
+    the tokenizer split out of one of those is no pipeline join, and a cd
+    before it runs in this shell (#3904)."""
     scopes = _subshell_scopes(command, tokens)
-    alone = [bool({"|", "|&", "&"} & set(join)) for join in joins]
+    if _unscannable(command, tokens):
+        alone = [False] * len(joins)
+    else:
+        alone = [bool({"|", "|&", "&"} & set(join)) for join in joins]
     return [bool(scopes[i]) or alone[i] for i in range(len(joins))], scopes, alone
 
 
@@ -2673,7 +2699,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # (`(cd x; ls)`), an unquoted command or process substitution (`X=$(cd
     # x; pwd)`, `<(cd x)`), a pipe's left side or a `&` job runs in a
     # child and does not count (`_in_child`, #3810), where the command's
-    # brackets can be matched. One in a backquoted or double-quoted
+    # brackets can be matched and it is not `_unscannable` (#3904). One in
+    # a backquoted or double-quoted
     # substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
     # tokenizer keeps it inside one word; it moves nothing, so nothing is
     # missed (#3841). `eval` runs its words in this shell, so a
