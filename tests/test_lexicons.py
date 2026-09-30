@@ -297,7 +297,9 @@ class Shape(unittest.TestCase):
         text = MINIMAL.replace("    counterexamples: [wordy]\n", "")
         self.assertNotEqual(text, MINIMAL)
         self._refused(text, "'a.word' lists no counterexamples, and this lexicon declares counterexamples_required")
-        self._refused(text.replace("[wordy]", "[]"), "lists no counterexamples")
+        empty = MINIMAL.replace("[wordy]", "[]")                 # the key present, its list empty
+        self.assertNotEqual(empty, MINIMAL)
+        self._refused(empty, "'a.word' lists no counterexamples, and this lexicon declares counterexamples_required")
         undeclared = text.replace("counterexamples_required: true\n", "")
         self.assertNotEqual(undeclared, text)
         self.assertEqual(lx.parse(undeclared.encode(), file="t.yaml").patterns[0].counterexamples, ())

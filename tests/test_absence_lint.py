@@ -531,6 +531,51 @@ class Baseline(unittest.TestCase):
         self.assertIn("It was drawn from the record set this note counts.", md)
         self.assertNotIn("another record set", md)
 
+    def test_judgements_naming_another_draw_lexicon_record_set_sample_or_seed_are_refused(self):
+        """#3197/#3566: the file must name each of the entry's identity fields.
+        The draw hash covers only the phrases, so a file naming another record
+        set, sample or draw would otherwise pass; each mismatch is refused."""
+        collected = self.m.collect(self.corpus)
+        checked = self.m.PRECISION[collected["lexicon"].sha256]
+        for key, value in [("draw_sha256", "0" * 64), ("lexicon_sha256", "1" * 64),
+                           ("record_set_sha256", "2" * 64), ("sample", checked["sample"] + 1),
+                           ("seed", checked["seed"] + 1)]:
+            with self.subTest(key=key):
+                self._judgements_copy(checked, **{key: value})
+                with self.assertRaisesRegex(self.m.Refused, f"{key} is {value!r}, not the precision entry's"):
+                    self.m.render_markdown(collected)
+        self._judgements_copy(checked)                   # the control: an unspoiled copy renders
+        self.assertIn("| record_self_narration | 47 | 3 | 0 |", self.m.render_markdown(collected))
+
+    def test_judgements_of_other_classes_or_of_more_phrases_than_the_sample_are_refused(self):
+        """#3566: a missing class is refused, not a KeyError; an extra class
+        is refused, not ignored; a class with more rows than the sample, or
+        rows that are not a list, is refused before its draw is hashed."""
+        collected = self.m.collect(self.corpus)
+        checked = self.m.PRECISION[collected["lexicon"].sha256]
+
+        def missing(data):
+            del data["judgements"][RSN]
+
+        def extra(data):
+            data["judgements"]["another_class"] = []
+
+        def oversized(data):
+            rows = data["judgements"][BWA]
+            rows.append(dict(rows[0]))
+
+        def not_a_list(data):
+            data["judgements"][BWA] = {"verdict": "in class"}
+
+        for edit, message in [(missing, r"judges classes \['bundle_wide_absence'\], not the precision entry's"),
+                              (extra, r"judges classes \['another_class', .*not the precision entry's"),
+                              (oversized, f"{BWA} is not a list of at most 50 judgements"),
+                              (not_a_list, f"{BWA} is not a list of at most 50 judgements")]:
+            with self.subTest(edit=edit.__name__):
+                self._judgements_copy(checked, edit)
+                with self.assertRaisesRegex(self.m.Refused, message):
+                    self.m.render_markdown(collected)
+
     def test_the_committed_judgements_bear_out_the_v1_table(self):
         """#3197: one verdict and reason per drawn phrase, whose tally is the
         table; the three borderline phrases are the ranking-vocabulary ones
