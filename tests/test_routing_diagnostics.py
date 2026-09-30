@@ -10,6 +10,7 @@ their nine core twins, each by path.
 import json
 import os
 import sys
+import time
 import unittest
 from pathlib import Path
 
@@ -408,6 +409,21 @@ def _doubling(levels, base="{name: safe}"):
                                             for i in range(1, levels + 1)]) + "\n"
 
 
+def _doubling_merges(levels):
+    """`a0` is `{name: safe}`; each later anchor merges the one before twice
+    and adds a key, so PyYAML copies twice as many pairs a level (#3259)."""
+    return "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: [*a{i - 1}, *a{i - 1}], k{i}: 1}}"
+                                                 for i in range(1, levels + 1)]) + "\n"
+
+
+def _doubling_single_merges(levels):
+    """As `_doubling_merges`, but each anchor merges the one before through
+    two single-mapping `<<` keys rather than one merge list, so the copies go
+    through the loader's other branch (#3440)."""
+    return "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: *a{i - 1}, <<: *a{i - 1}, k{i}: 1}}"
+                                                 for i in range(1, levels + 1)]) + "\n"
+
+
 class TestAMergeOverrideInsideADroppedAncestorHidesNothing(unittest.TestCase):
     """#3247 (Codex): a dropped ancestor is looked into only for the keys the
     loader would take from it, so a merged value an explicit key overrides
@@ -478,8 +494,7 @@ class TestASharedGraphIsBounded(unittest.TestCase):
     def test_doubling_merges_run_past_the_duplicate_walks_budget(self):
         """The loader flattens these by copying, so only a few levels are
         loadable at all; the duplicate walk stops at its budget either way."""
-        text = "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: [*a{i - 1}, *a{i - 1}], k{i}: 1}}"
-                                                     for i in range(1, 12)]) + "\n"
+        text = _doubling_merges(11)
         self.assertEqual(rd.unread_duplicate_keys(text), [])
         with self.assertRaises(rd.TraversalBudgetExceeded):
             rd.unread_duplicate_keys(text, max_steps=200)
@@ -506,8 +521,9 @@ MERGE_CYCLE = ("base: &a {<<: {name: benign}, <<: &b {<<: {name: embargo, name: 
 def _merge_chain(links):
     """A loadable chain of `links` anchors, each merging the one before, whose
     root repeats `name` and sits under a skipped key of one scoped slot before
-    it is aliased into another: the duplicate walk recurses a frame or more a
-    link, the loader does not (#3263)."""
+    it is aliased into another. The loader flattens it a link at a time; the
+    duplicate walk once recursed a frame or more a link (#3263) and now
+    follows it with a stack (#3272)."""
     return "\n".join(["confidential_elements:", "  source_caveats:",
                       "    a0: &a0 {name: embargo, name: safe}"]
                      + [f"    a{i}: &a{i} {{<<: *a{i - 1}}}" for i in range(1, links)]
@@ -515,9 +531,11 @@ def _merge_chain(links):
 
 
 class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
-    """#3263 (Codex): a merge cycle and a merge chain deeper than the walk can
-    recurse are reported as not checked, never as an empty list; and a
-    string shared by many aliases is matched once and charged per visit."""
+    """#3263 (Codex): a merge cycle is reported as not checked, never as an
+    empty list; a merge chain deeper than the recursion limit is no longer
+    cut by it (#3272), though one walked link by link runs past the step
+    budget (#3491); and a string shared by many aliases is matched once and
+    charged per visit."""
 
     def test_a_merge_cycle_is_not_checked(self):
         self.assertEqual(yaml.safe_load(MERGE_CYCLE)["confidential_elements"], [{"name": "safe"}])
@@ -536,16 +554,138 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
         text = "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nconfidential_elements: [{<<: [*l, *r]}]\n"
         self.assertEqual(rd.check_text(text), ([], None))
 
-    def test_a_merge_chain_past_the_recursion_limit_is_not_checked(self):
-        text = _merge_chain(sys.getrecursionlimit() + 20)
+    def test_a_merge_chain_past_the_recursion_limit_names_its_duplicate(self):
+        """#3272: the recursion limit no longer stops the chain, so the `name`
+        its root repeats is named. This chain sits under a skipped key, so
+        the walk expands it once rather than at every link; the usual shape
+        is the next test (#3491)."""
+        links = sys.getrecursionlimit() + 20
+        text = _merge_chain(links)
         record = yaml.safe_load(text)                  # the loader reads it
         self.assertEqual(record["resources"]["outer"]["sensitive_elements"], [{"name": "safe"}])
         self.assertEqual(slot_meaning_mismatch(record), [])
-        with self.assertRaises(RecursionError):
-            rd.unread_duplicate_keys(text)
+        self.assertEqual([(d["path"], d["key"]) for d in rd.unread_duplicate_keys(text)],
+                         [("resources.outer.sensitive_elements[0]" + ".<<" * (links - 1), "name")])
         found, reason = rd.check_text(text)
         self.assertIsNone(found)
-        self.assertIn("recursion", reason)
+        self.assertTrue(reason.startswith("duplicate key `name`"), reason)
+
+    def test_a_chain_walked_link_by_link_is_checked_until_its_steps_pass_the_budget(self):
+        """#3491: in the usual shape, every link a top-level anchor merging
+        the one before, the walk visits each link and expands the chain
+        below it, about L**2/2 steps for L links. 628 links are checked,
+        629 are not, and past the recursion limit the record is not checked
+        on the step budget; given steps enough the same walk finishes, so
+        the budget is what stops it. #3504: a chain whose links each add a
+        key costs the walk about L**2 steps, so 445 links are checked and
+        446 to 632 stop on the step budget while the loader still loads
+        them; only from 633 links does the loader's copy bound trip first."""
+        def chain(links, added=False):
+            return "\n".join(["a0: &a0 {name: safe}"]
+                             + [f"a{i}: &a{i} {{<<: *a{i - 1}" + (f", k{i}: 1" if added else "") + "}"
+                                for i in range(1, links)]) + "\n"
+        walk_budget = "the walk ran past its budget of 200,000 steps"
+        loader_bound = "the loader's merge keys would copy more than 200,000 pairs"
+        self.assertEqual(rd.check_text(chain(628)), ([], None))
+        self.assertTrue(rd.check_text(chain(629))[1].startswith(walk_budget))
+        self.assertEqual(rd.check_text(chain(445, added=True)), ([], None))
+        for short in (446, 632):
+            self.assertIsNotNone(rd._load(chain(short, added=True)))
+            found, reason = rd.check_text(chain(short, added=True))
+            self.assertIsNone(found)
+            self.assertTrue(reason.startswith(walk_budget), (short, reason))
+        self.assertTrue(rd.check_text(chain(633, added=True))[1].startswith(loader_bound))
+        links = sys.getrecursionlimit() + 20
+        found, reason = rd.check_text(chain(links))
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("the walk ran past its budget of 200,000 steps"), reason)
+        self.assertEqual(rd.unread_duplicate_keys(chain(links), max_steps=links * links), [])
+        found, reason = rd.check_text(chain(links, added=True))
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith("the loader's merge keys would copy more than 200,000 pairs"), reason)
+
+    def test_a_chain_the_walk_expands_once_is_checked_past_the_quadratic_bound(self):
+        """#3542: the 629- and 446-link bounds hold for the shape walked link
+        by link. A chain under a skipped key, aliased once, is expanded once
+        and costs about a step a link, so 700 and 1020 links are checked, and
+        the help confines the bound to the other shape."""
+        for links in (700, 1020):
+            text = _merge_chain(links).replace("{name: embargo, name: safe}", "{name: safe}")
+            self.assertEqual(rd.check_text(text), ([], None), links)
+            self.assertEqual(rd.unread_duplicate_keys(text, max_steps=links + 100), [])
+        from data_sheets_schema.cli.evaluate import evaluate
+        help_text = " ".join(CliRunner().invoke(evaluate, ["slot-meaning", "--help"]).output.split())
+        self.assertIn("a merge chain whose every link the walk visits", help_text)
+        self.assertIn("a chain the walk expands only once, such as one under a key the scan skips, "
+                      "costs about a step a link and is checked far beyond that (#3542)", help_text)
+        self.assertNotIn("a merge chain of a few hundred links or more costs", help_text)
+
+    def test_a_chain_the_walk_expands_once_holds_memory_in_proportion_to_its_links(self):
+        """#3582 (Codex): expanded once, the skipped-key chain costs a step a
+        link, but its paths were strings each copying every link above it,
+        about 1.5·L**2 characters: 12,000 links held 216 million, 281 MiB,
+        under a step budget they never reached. Paths are now links to their
+        parent, rendered only for a duplicate named, so three times the
+        links peak at about three times the memory, where the strings
+        peaked at over five."""
+        import tracemalloc
+
+        def peak(links):
+            text = _merge_chain(links)
+            tracemalloc.start()
+            try:
+                named = rd.unread_duplicate_keys(text)
+                return tracemalloc.get_traced_memory()[1], named
+            finally:
+                tracemalloc.stop()
+
+        small, named_small = peak(600)
+        large, named_large = peak(1_800)
+        self.assertEqual([d["path"] for d in named_large],
+                         ["resources.outer.sensitive_elements[0]" + ".<<" * 1_799])
+        self.assertEqual(len(named_small), 1)
+        self.assertLess(large / small, 4, (small, large))
+
+    def test_a_merge_path_is_a_link_to_its_parent_not_a_copy(self):
+        loader = yaml.SafeLoader(_merge_chain(50))
+        try:
+            root = loader.get_single_node()
+            top = root.value[0][1].value[0][1].value[-1][1]              # a49
+            sources = rd._merge_sources(top, "a49", rd._Budget(None))
+        finally:
+            loader.dispose()
+        labels = [label for _, label in sources]
+        self.assertEqual([str(label) for label in labels], ["a49" + ".<<" * n for n in range(49, -1, -1)])
+        for deeper, shallower in zip(labels, labels[1:]):
+            self.assertIs(deeper.parent, shallower)
+
+    def test_the_scan_charges_the_paths_it_builds(self):
+        """#3582: the loaded record's paths are strings, since each finding
+        names one; a deep record under long keys builds quadratically many
+        characters, so the scan charges them to their own budget."""
+        record = leaf = {}
+        for _ in range(50):
+            leaf["k" * 100] = leaf = {}
+        leaf["confidential_elements"] = [EMBARGO_TEXT]
+        self.assertEqual(len(slot_meaning_mismatch(record)), 1)
+        with self.assertRaises(rd.TraversalBudgetExceeded) as raised:
+            slot_meaning_mismatch(record, max_path_chars=10_000)
+        self.assertIn("paths ran past their budget of 10,000 characters", str(raised.exception))
+
+    def test_the_stack_lays_merges_out_in_the_loaders_order(self):
+        """Each merge's own merges first, a merge list last to first, each
+        mapping at its last place: the order the recursive expansion had."""
+        loader = yaml.SafeLoader("x: &x {x: 1}\ny: &y {<<: *x, y: 1}\nz: &z {z: 1}\n"
+                                 "top: {<<: [*y, *z, *x], <<: *z, t: 1}\n")
+        try:
+            top = loader.get_single_node().value[3][1]
+            sources = rd._merge_sources(top, "top", rd._Budget(None))
+        finally:
+            loader.dispose()
+        self.assertEqual([(dict((k.value, v.value) for k, v in source.value if k.value != "<<"), str(label))
+                          for source, label in sources],
+                         [({"x": "1"}, "top.<<[0].<<"), ({"y": "1"}, "top.<<[0]"),
+                          ({"z": "1"}, "top.<<"), ({"t": "1"}, "top")])
 
     def test_a_short_merge_chain_names_its_duplicate(self):
         self.assertEqual([d["key"] for d in rd.unread_duplicate_keys(_merge_chain(5))], ["name"])
@@ -565,6 +705,187 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
         text = f"t: &t {EMBARGO_TEXT}\nsensitive_elements: [*t, *t, *t]\n"
         self.assertEqual(_paths(yaml.safe_load(text)),
                          ["sensitive_elements[0]", "sensitive_elements[1]", "sensitive_elements[2]"])
+
+
+class TestTheLoaderIsBounded(unittest.TestCase):
+    """#3259: PyYAML copies merged pairs, so doubling merges stall
+    `safe_load` before either walk spends a step. The record is loaded by a
+    loader that charges each merged pair it copies, and one past the bound is
+    not checked; any other record loads exactly as `safe_load` loads it."""
+
+    def test_doubling_merges_are_not_checked_and_do_not_stall(self):
+        """Twenty-five levels, under 2 KB: unbounded, `safe_load` alone runs
+        for minutes (each level doubles it)."""
+        text = _doubling_merges(25)
+        self.assertLess(len(text), 2_000)
+        started = time.perf_counter()
+        found, reason = rd.check_text(text)
+        elapsed = time.perf_counter() - started
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
+        self.assertLess(elapsed, 10.0)
+
+    def test_the_bound_counts_the_pairs_merges_copy(self):
+        text = _doubling_merges(6)             # 2 + 6 + 14 + 30 + 62 + 126 = 240 pairs copied
+        self.assertEqual(rd._load(text, max_pairs=240), yaml.safe_load(text))
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd._load(text, max_pairs=239)
+        self.assertEqual(rd._load("a: 1\nb: [1, 2]\n", max_pairs=0), {"a": 1, "b": [1, 2]})
+
+    def test_doubling_single_mapping_merges_are_not_checked(self):
+        """The same stall through repeated single-mapping `<<` keys (#3440):
+        the copies a `<<: *x` makes are charged as a merge list's are.
+        Twenty-one levels, under 1 KB: uncharged, the loader copies
+        2**23 - 46 = 8,388,562 pairs (level i copies 2**(i+1) - 2; see
+        `test_the_copy_count_is_the_closed_form`) and the record reaches the
+        later walk budget seconds later."""
+        text = _doubling_single_merges(21)
+        self.assertLess(len(text), 1_000)
+        started = time.perf_counter()
+        found, reason = rd.check_text(text)
+        elapsed = time.perf_counter() - started
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
+        self.assertLess(elapsed, 10.0)
+
+    def test_the_bound_counts_the_pairs_single_mapping_merges_copy(self):
+        text = _doubling_single_merges(6)      # 2 + 6 + 14 + 30 + 62 + 126 = 240 pairs copied
+        self.assertEqual(rd._load(text, max_pairs=240), yaml.safe_load(text))
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd._load(text, max_pairs=239)
+
+    def test_the_copy_count_is_the_closed_form(self):
+        """Level i of either doubling fixture holds 2**(i+1) - 1 pairs and
+        copies the level before twice, 2**(i+1) - 2 pairs; an alias shares
+        the node, flattened once, so n levels copy 2**(n+2) - 4 - 2n pairs in
+        all. The figures the docstrings above quote are this sum (#3472)."""
+        for fixture in (_doubling_merges, _doubling_single_merges):
+            for levels in range(1, 9):
+                with self.subTest(fixture=fixture.__name__, levels=levels):
+                    text = fixture(levels)
+                    copied = 2 ** (levels + 2) - 4 - 2 * levels
+                    self.assertEqual(rd._load(text, max_pairs=copied), yaml.safe_load(text))
+                    with self.assertRaises(rd.TraversalBudgetExceeded):
+                        rd._load(text, max_pairs=copied - 1)
+
+    def test_a_merge_list_item_that_merges_is_flattened_first(self):
+        """A merge-list item that is not an already-flattened alias carries
+        its own `<<`, which the copy flattens before copying its pairs, as
+        PyYAML does; skipped, the inner `<<` would reach the constructor as
+        an unconstructable merge tag (#3473)."""
+        for text in ("x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "x: {<<: [{b: 2}, {<<: [{<<: {a: 1}, b: 0}], c: 4}], d: 5}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, b: 2}], c: 3}\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd._load(text), yaml.safe_load(text))
+        found, reason = rd.check_text("confidential_elements: [{<<: [{<<: {name: embargo}, k: 1}]}]\n")
+        self.assertIsNone(reason)
+        self.assertEqual([f.kinds for f in found], [(rd.EMBARGO,)])
+
+    def test_each_copy_is_charged_before_it_is_made(self):
+        """The docstring's "having copied at most the bound": every charge
+        is made while the pairs it counts are not yet in `merge`, in both
+        branches (#3473)."""
+        import sys as _sys
+        seen = []
+
+        class Spy(rd._MergeBoundedLoader):
+            def _charge(self, pairs):
+                frame = _sys._getframe(1)
+                seen.append((frame, len(frame.f_locals["merge"]), pairs))   # kept alive: ids unique
+                super()._charge(pairs)
+
+        for text in (_doubling_merges(5), _doubling_single_merges(5),
+                     "x: {<<: [{<<: {a: 1}, b: 2}, {c: 3}], d: 4}\n"):
+            with self.subTest(text=text[:40]):
+                seen.clear()
+                loader = Spy(text, rd.MAX_TRAVERSAL_STEPS)
+                try:
+                    self.assertEqual(loader.get_single_data(), yaml.safe_load(text))
+                finally:
+                    loader.dispose()
+                self.assertTrue(seen)
+                charged = {}
+                for frame, in_merge, pairs in seen:
+                    self.assertEqual(in_merge, charged.get(id(frame), 0))
+                    charged[id(frame)] = charged.get(id(frame), 0) + pairs
+                seen.clear()
+
+    def test_under_the_bound_a_record_loads_as_safe_load_loads_it(self):
+        for text in (MERGE_CYCLE, _merge_chain(50), _doubling_merges(8), _doubling_single_merges(8),
+                     "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nx: {<<: [*l, *r], k: 1}\n",
+                     "a: &a {k: 1, j: 2}\nb: {<<: *a, k: 3}\nc: {<<: [{k: 1}, {k: 2}]}\n",
+                     "a: {=: v, <<: {=: w}}\n",
+                     "x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, k: 2}, {<<: [{j: 3}]}], c: 3}\n"):
+            with self.subTest(text=text[:40]):
+                self.assertEqual(rd._load(text), yaml.safe_load(text))
+
+    def test_the_copied_flatten_is_the_installed_pyyamls(self):
+        """The bounded `flatten_mapping` is a copy of PyYAML's with a charge
+        before each copy. This pins PyYAML's side only: a PyYAML whose own
+        changes fails here, so the copy is re-read against it. A change to
+        the copy is caught by the syntax-tree comparison below (#3473)."""
+        import hashlib
+        import inspect
+        source = inspect.getsource(yaml.constructor.SafeConstructor.flatten_mapping)
+        self.assertEqual(hashlib.sha256(source.encode()).hexdigest(),
+                         "4fdacb962ce20710beec653ea805d7ab01ded4a0f68c93da55e7374aceb2b023",
+                         "PyYAML's flatten_mapping changed: re-copy it into _MergeBoundedLoader")
+
+    def test_the_copy_is_pyyamls_flatten_plus_the_charges(self):
+        """The hash above catches a change in PyYAML, not in the copy
+        (#3473). Here the copy's syntax tree, with its `self._charge(...)`
+        statements and annotations removed and `yaml.`-qualified names read
+        as PyYAML's bare ones, must be PyYAML's own tree."""
+        import ast
+        import inspect
+        import textwrap
+
+        def tree(function, strip_charges):
+            node = ast.parse(textwrap.dedent(inspect.getsource(function))).body[0]
+            node.returns = None
+            for arg in node.args.args:
+                arg.annotation = None
+
+            class Normalise(ast.NodeTransformer):
+                def visit_AnnAssign(self, assign):
+                    return ast.copy_location(ast.Assign(targets=[assign.target], value=assign.value),
+                                             assign)
+
+                def visit_Attribute(self, attribute):
+                    base = attribute.value
+                    while isinstance(base, ast.Attribute):
+                        base = base.value
+                    if isinstance(base, ast.Name) and base.id == "yaml":
+                        return ast.copy_location(ast.Name(id=attribute.attr, ctx=attribute.ctx),
+                                                 attribute)
+                    return self.generic_visit(attribute)
+
+                def visit_Expr(self, statement):
+                    call = statement.value
+                    if (strip_charges and isinstance(call, ast.Call)
+                            and isinstance(call.func, ast.Attribute) and call.func.attr == "_charge"):
+                        return None
+                    return statement
+
+            return ast.dump(Normalise().visit(node), annotate_fields=False)
+
+        self.assertEqual(tree(rd._MergeBoundedLoader.flatten_mapping, True),
+                         tree(yaml.constructor.SafeConstructor.flatten_mapping, False))
+        self.assertEqual(inspect.getsource(rd._MergeBoundedLoader.flatten_mapping).count("self._charge("), 2)
+
+    def test_a_bad_merge_is_rejected_as_safe_load_rejects_it(self):
+        for text in ("a: {<<: 1}\n", "a: {<<: [{k: 1}, 2]}\n"):
+            with self.subTest(text=text):
+                with self.assertRaises(yaml.constructor.ConstructorError) as expected:
+                    yaml.safe_load(text)
+                with self.assertRaises(yaml.constructor.ConstructorError) as got:
+                    rd._load(text)
+                self.assertEqual(str(got.exception), str(expected.exception))
+                self.assertEqual(rd.check_text(text), (None, str(expected.exception).splitlines()[0]))
 
 
 #: Deeper than the composer (two frames a level) can recurse, whatever the limit.
@@ -838,13 +1159,39 @@ class TestTheCommand(unittest.TestCase):
         self._assert_not_checked_beside_the_others(shared, "budget of")
 
     def test_a_merge_cycle_or_chain_is_not_checked_and_the_others_are_reported(self):
-        """#3263: neither is reported clean with exit 0."""
+        """#3263: neither is reported clean with exit 0; the chain is read to
+        its end and its duplicate named (#3272)."""
         for name, text, reason in (("cycle.yaml", MERGE_CYCLE, "a merge key reaches"),
-                                   ("chain.yaml", _merge_chain(sys.getrecursionlimit() + 20), "recursion")):
+                                   ("chain.yaml", _merge_chain(sys.getrecursionlimit() + 20),
+                                    "duplicate key `name`")):
             with self.subTest(name=name):
                 bad = Path(self.tmp.name) / name
                 bad.write_text(text)
                 self._assert_not_checked_beside_the_others(bad, reason)
+
+    def test_a_long_skipped_key_chain_names_its_duplicate_and_the_others_are_reported(self):
+        """#3582 (Codex): the chain's string paths grew quadratically under a
+        step budget they never reached, and an allocation failure would have
+        escaped check_text and lost every record's report. Its paths are
+        links now, so a chain three times the recursion limit is read to its
+        end and its duplicate named, beside the others."""
+        chain = Path(self.tmp.name) / "chain3420.yaml"
+        chain.write_text(_merge_chain(3 * sys.getrecursionlimit()))
+        self._assert_not_checked_beside_the_others(chain, "duplicate key `name`")
+
+    def test_a_record_whose_scan_paths_pass_their_budget_is_not_checked_and_the_others_are_reported(self):
+        """#3582: a deep record under one aliased long key builds quadratically
+        many path characters in the scan; it is named as not checked on the
+        path budget and the batch goes on. A small budget stands in for the
+        default, so the test allocates little."""
+        from unittest import mock
+        deep = Path(self.tmp.name) / "deep3420.yaml"
+        deep.write_text("\n".join(["key: &k " + "k" * 200, "root:"]
+                                  + ["  " * (d + 1) + "*k :" for d in range(40)]
+                                  + ["  " * 41 + "confidential_elements: [embargo]"]) + "\n")
+        self.assertEqual(len(rd.check_text(deep.read_text())[0]), 1)
+        with mock.patch.object(rd, "MAX_PATH_CHARS", 20_000):
+            self._assert_not_checked_beside_the_others(deep, "paths ran past their budget of 20,000 characters")
 
     def test_a_record_of_one_string_aliased_many_times_is_checked_and_the_next_is_read(self):
         """#3263: every alias reran every pattern over the string, so the

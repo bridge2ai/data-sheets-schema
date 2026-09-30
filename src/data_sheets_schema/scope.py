@@ -64,6 +64,52 @@ def all_scopes(manifest: Path = MANIFEST) -> dict[str, dict]:
     return (load_manifest(manifest).get("scope") or {})
 
 
+def scope_in(raw: bytes | str, project: str) -> Any:
+    """One project's scope declaration, read from a manifest's bytes (#3283).
+
+    The path readers above open a file; a caller that binds the manifest's
+    exact bytes (``release_inventory``) must read the declaration off those
+    same bytes, or the scope it applies and the hash it reports could name
+    two different files. Returned as written -- ``None`` when the manifest
+    has no ``scope:`` block or no entry for the project -- so the caller can
+    tell a malformed declaration from an absent one. Raises ``ValueError``
+    on bytes that are not UTF-8 YAML.
+    """
+    encoded = raw.encode("utf-8") if isinstance(raw, str) else raw
+    if not isinstance(encoded, bytes):
+        raise ValueError("source manifest must be exact bytes or text")
+    try:
+        data = yaml.safe_load(encoded.decode("utf-8"))
+    except (UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise ValueError(f"source manifest is not readable YAML: {exc}") from exc
+    scopes = data.get("scope") if isinstance(data, dict) else None
+    if not isinstance(scopes, dict):
+        return scopes
+    return scopes.get(project)
+
+
+def in_bundle_of(entry: Any) -> list[str | int | float]:
+    """The source ids a `related_but_distinct` entry says are in this
+    project's bundle: `in_bundle` as a scalar or a list, the shapes
+    `check_manifest` accepts, each exactly as written. Nothing is stripped
+    or cast to text (#3447): `check_manifest` compares the raw value with
+    the project's source ids, so `' a '` or `7` names no source there and
+    must name none here -- a reader that normalised would move a source
+    the checker reports as unmatched. A falsy `in_bundle` names nothing,
+    as `check_manifest` skips it; a value that is not an identifier is
+    dropped here and reported by `check_manifest`. Nothing is merged
+    either (#3507): `check_manifest` checks every value, so a repeat is
+    kept and `7` and `7.0` -- equal to Python, written differently -- are
+    both kept, in the order written."""
+    if not isinstance(entry, dict):
+        return []
+    src = entry.get("in_bundle")
+    if not src:
+        return []
+    return [value for value in (list(src) if isinstance(src, (list, tuple)) else [src])
+            if _is_identifier(value)]
+
+
 def scope_of(project: str, manifest: Path = MANIFEST) -> dict | None:
     return all_scopes(manifest).get(project)
 

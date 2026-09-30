@@ -17,7 +17,9 @@ One marker registry (`STATUS_MARKERS`, classes `planned`, `prospective` and
 Rule 1, receipt context (`receipt_context`). For each snippet a coverage
 receipt verifies in its own chunk, the snippet is located in the chunk's
 raw text through a map from `receipts.normalise` offsets back to raw
-offsets, and two contexts are read:
+offsets — composed, where the validator verified it only there, with the
+linewrap-joined or artifact-line-elided haystack (#3043) — and two contexts
+are read:
 
 (a) its enclosing sentence, extended across an enumeration — inline
     `A) ... E)` / `(a)` / `1)` items or bulleted and numbered lines — back
@@ -53,7 +55,13 @@ runs across a flattened table.
 `governor_outside_snippet`: that context carries a marker of a status the
 snippet's own markers do not express (`EXPRESSED_BY`: a snippet's "will"
 expresses a "Future ..." heading's status, #3232), and the value at the receipt's slot carries no
-marker expressing that status. `modal_dropped`: the snippet itself carries
+marker expressing that status, one flag per status: a sentence's "will" and
+a heading's "Future ..." are one lost status, reported at one governor with
+the other listed beside it under `equivalent_governors` (#3245, #3262). The
+reported governor is chosen by via first (a sentence or enumeration
+governor before a heading or lead-in governor, however near the heading
+sits), then by the nearer line (distance measured from the snippet's span,
+first line to last), then by class name. `modal_dropped`: the snippet itself carries
 the marker and the value does not, one flag per status (a snippet's "will"
 and "future" are one dropped status, #3252). A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
@@ -300,6 +308,86 @@ def normalised_offsets(text: str) -> tuple[str, list[int]] | None:
     return (norm, offs) if norm == rc.normalise(text) else None
 
 
+#: The haystack forms `receipts.snippet_in` searches, in the order this
+#: module locates in: the plain form first, so a snippet it located before
+#: #3043 is located exactly as it was (a joined form can hold more
+#: occurrences of it; `test_the_plain_form_is_tried_first` pins this); then the linewrap-joined (#789),
+#: artifact-line-elided (#887) and both-transform forms the validator also
+#: verifies in.
+HAYSTACK_FORMS = ("plain", "linewrap-joined", "artifact-line-elided", "joined-elided")
+_HYPHEN_BREAK = re.compile(r"(\w)-[ \t]*\n[ \t]*(\w)")
+
+
+def _elided_with_offsets(text: str) -> tuple[str, list[int]]:
+    """`receipts.elide_artifact_lines(text)` and, per character, its offset
+    in `text`. The line break that rejoins two kept lines maps to the break
+    after the first of them."""
+    out: list[str] = []
+    offs: list[int] = []
+    pos, prev_end = 0, None
+    for line in text.split("\n"):
+        if not rc._ARTIFACT_LINE.fullmatch(line):
+            if prev_end is not None:
+                out.append("\n"); offs.append(prev_end)
+            out.extend(line); offs.extend(range(pos, pos + len(line)))
+            prev_end = pos + len(line)
+        pos += len(line) + 1
+    return "".join(out), offs
+
+
+def _joined_with_offsets(text: str) -> tuple[str, list[int]]:
+    """The text `receipts.normalise_joined` folds — carriage returns
+    removed, each hyphenated line break joined ("Partic-\\nipants") — and,
+    per character, its offset in `text`."""
+    kept = [(ch, i) for i, ch in enumerate(text) if ch != "\r"]
+    s = "".join(ch for ch, _i in kept)
+    out: list[str] = []
+    offs: list[int] = []
+    pos = 0
+    for m in _HYPHEN_BREAK.finditer(s):
+        for j in list(range(pos, m.start(1) + 1)) + [m.start(2)]:
+            out.append(s[j]); offs.append(kept[j][1])
+        pos = m.end()
+    for j in range(pos, len(s)):
+        out.append(s[j]); offs.append(kept[j][1])
+    return "".join(out), offs
+
+
+def form_offsets(text: str, form: str) -> tuple[str, list[int]] | None:
+    """The normalised haystack of `form` (`HAYSTACK_FORMS`) and, per
+    character, the offset in `text` it came from — `normalised_offsets`
+    composed with the transforms the validator applies before folding
+    (#3043). None when a replay does not reproduce the validator's own
+    haystack exactly: the result is compared with the haystack `receipts`
+    itself builds for that form (`_validator_haystack`), not with this
+    module's copy of its rules, so a change to the validator's join or
+    elision rule refuses the form rather than locating in a haystack the
+    validator no longer searches (#3466)."""
+    t, m = text, list(range(len(text)))
+    if form in ("artifact-line-elided", "joined-elided"):
+        t, m = _elided_with_offsets(t)
+    if form in ("linewrap-joined", "joined-elided"):
+        t, mj = _joined_with_offsets(t)
+        m = [m[j] for j in mj]
+    mapped = normalised_offsets(t)
+    if mapped is None:
+        return None
+    norm, offs = mapped
+    if norm != _validator_haystack(text, form):
+        return None
+    return norm, [m[o] for o in offs]
+
+
+def _validator_haystack(text: str, form: str) -> str:
+    """The haystack `receipts.snippet_in` searches in `form`, built by
+    `receipts`' own functions (as `BundleView` passes them to it)."""
+    if form in ("artifact-line-elided", "joined-elided"):
+        text = rc.elide_artifact_lines(text)
+    if form in ("linewrap-joined", "joined-elided"):
+        return rc.normalise_joined(text)
+    return rc.normalise(text)
+
+
 # ------------------------------------------------------------ bundle view
 #: A sentence ends at one or more of .!? (and closing quotes or brackets)
 #: before whitespace — not after an initial, a listed abbreviation, or a
@@ -405,7 +493,7 @@ class BundleView:
             lo = self.starts[a - 1]
             hi = self.starts[b] if b < len(self.starts) else len(text)
             self.chunks[c["id"]] = (lo, hi, c.get("source"))
-        self._norm: dict[str, tuple[str, list[int]] | None] = {}
+        self._norm: dict[tuple[str, str], tuple[str, list[int]] | None] = {}
         self._hays: dict[str, tuple[str, str, str, str]] = {}
 
     # --- lines
@@ -440,23 +528,35 @@ class BundleView:
         """(every match of every part, as bundle (start, end) spans in order,
         complete) for the first way of splitting the snippet that locates
         it; None when none does. Parts split at `...`, else at the
-        snippet's own line breaks, as the validator splits them; a snippet
-        the validator verified only across a joined line break or an elided
-        artifact line is not located here (reported as unlocated).
+        snippet's own line breaks, as the validator splits them, and each
+        split is tried in every haystack form the validator searches
+        (`HAYSTACK_FORMS`): a snippet verified only across a joined
+        hyphenated line break or an elided section-number line is located
+        through that form's offset map, its span covering the break or the
+        elided line in the raw chunk (#3043). The plain form is tried for
+        every split first.
 
         `complete` is False when a part matches more than
         MAX_PART_MATCHES times: the matches past the cap are not read, so
         no claim about every occurrence can be made (#3266)."""
-        if cid not in self._norm:
-            self._norm[cid] = normalised_offsets(self.chunk_text(cid))
-        mapped = self._norm[cid]
-        if mapped is None:
-            return None
-        norm, offs = mapped
-        base = self.chunks[cid][0]
         splits = [rc._ELLIPSIS.split(snippet)]
         if "\n" in snippet:
             splits.append(snippet.split("\n"))
+        for form in HAYSTACK_FORMS:
+            key = (cid, form)
+            if key not in self._norm:
+                self._norm[key] = form_offsets(self.chunk_text(cid), form)
+            if self._norm[key] is None:
+                continue
+            found = self._split_matches(cid, splits, *self._norm[key])
+            if found is not None:
+                return found
+        return None
+
+    def _split_matches(self, cid: str, splits: list[list[str]], norm: str, offs: list[int]
+                       ) -> tuple[list[list[tuple[int, int]]], bool] | None:
+        """`_part_matches` in one haystack form."""
+        base = self.chunks[cid][0]
         for raw_parts in splits:
             parts = [p for p in (rc.normalise(x) for x in raw_parts) if p]
             if not parts:
@@ -905,13 +1005,18 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                                **({"equivalent_markers": equivalent} if equivalent else {}),
                                "source_line": base["snippet_line"],
                                **_final(final, record, slot, cls)})
-            for cls, d in (lost or {}).items():
-                if not expresses(value_classes, cls):
-                    bucket.append({"rule": "governor_outside_snippet", **base, "class": cls,
-                                   "marker": d["term"], "via": d["via"], "source_line": d["source_line"],
-                                   **({"governor": d["governor"]} if "governor" in d else {}),
-                                   **({"occurrences": occurrences} if occurrences > 1 else {}),
-                                   **_final(final, record, slot, cls)})
+            # The snippet's span, first line to last, over the occurrence
+            # `snippet_line` reports: a governor's distance is measured from
+            # the span, not from its first line alone (#3488).
+            span = ((base["snippet_line"], view.line_of(max(b for _a, b in found[0]) - 1))
+                    if found else None)
+            for cls, d, equivalent in _lost_statuses(lost or {}, value_classes, span):
+                bucket.append({"rule": "governor_outside_snippet", **base, "class": cls,
+                               "marker": d["term"], "via": d["via"], "source_line": d["source_line"],
+                               **({"governor": d["governor"]} if "governor" in d else {}),
+                               **({"equivalent_governors": equivalent} if equivalent else {}),
+                               **({"occurrences": occurrences} if occurrences > 1 else {}),
+                               **_final(final, record, slot, cls)})
     by_rule = {r: {k: sum(1 for f in flags[k] if f["rule"] == r) for k in ("value", "label")}
                for r in ("governor_outside_snippet", "modal_dropped")}
     slots = {k: len({f["slot"] for f in flags[k]}) for k in ("value", "label")}
@@ -951,6 +1056,46 @@ def _dropped_statuses(snippet_classes: dict[str, str], value_classes
         else:
             out.append((cls, term, {}))
     return out
+
+
+#: A governor in the part's own sentence or enumeration is nearer than one
+#: in a heading or lead-in above it (`BundleView.context` reads the heading
+#: only for classes its sentence does not carry).
+_VIA_RANK = {"sentence": 0, "enumeration": 0, "lead-in": 1, "heading": 1}
+
+
+def _lost_statuses(lost: dict[str, dict[str, Any]], value_classes, span: tuple[int, int] | None
+                   ) -> list[tuple[str, dict[str, Any], list[dict[str, Any]]]]:
+    """[(class, detail, [equivalent governor])] for each status the lost
+    context classes carry and the value does not express, one per status.
+
+    As in `_dropped_statuses`, a status is a class of `EXPRESSED_BY`: a
+    sentence's "will" (planned) and a heading's "Future ..." (prospective)
+    lost from one marker-less snippet are one not-yet status, so one
+    `governor_outside_snippet` (#3245, #3262). The nearest governor is
+    reported — one in the part's own sentence or enumeration before one in
+    a heading or lead-in, then the smaller line distance from the snippet's
+    span (`span` is its first and last bundle line: 0 on a line the snippet
+    covers, else the lines to its nearer end, #3488), then the class name —
+    and every other is listed beside it with its class, marker, via, source
+    line and heading text, so no governor is dropped from the output."""
+    def rank(item: tuple[str, dict[str, Any]]) -> tuple[int, int, str]:
+        cls, d = item
+        line = d["source_line"]
+        dist = (max(0, span[0] - line, line - span[1]) if span is not None else 0)
+        return _VIA_RANK.get(d["via"], 2), dist, cls
+    out: list[tuple[str, dict[str, Any], list[dict[str, Any]]]] = []
+    for cls, d in sorted(lost.items(), key=rank):
+        if expresses(value_classes, cls):
+            continue
+        prior = next((e for e in out if cls in EXPRESSED_BY[e[0]]), None)
+        if prior is not None:
+            prior[2].append({"class": cls, "marker": d["term"], "via": d["via"],
+                             "source_line": d["source_line"],
+                             **({"governor": d["governor"]} if "governor" in d else {})})
+        else:
+            out.append((cls, d, []))
+    return sorted(out, key=lambda e: e[0])
 
 
 def _final(final: dict[str, Any] | None, record: dict[str, Any], slot: str, cls: str) -> dict[str, Any]:

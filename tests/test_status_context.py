@@ -611,6 +611,198 @@ def test_a_dropped_status_is_one_modal_dropped_whichever_equivalent_markers_carr
     assert _rules(ongoing) == [("modal_dropped", "x", "planned"), ("modal_dropped", "x", "in_progress")]
 
 
+def test_a_lost_status_is_one_governor_flag_whichever_equivalent_governors_carry_it():
+    # #3245/#3262: a marker-less snippet whose sentence carries "will"
+    # (planned) under a "Future ..." heading (prospective) lost one status.
+    # One flag, at the nearer governor (the sentence); the heading is listed
+    # beside it, so neither governor is dropped from the output.
+    doc = "Future Data Releases\nThe consortium will release the imaging waveforms.\n"
+    record = {"x": "The consortium releases the imaging waveforms."}
+    out = _run(doc, [("x", "release the imaging waveforms")], record)
+    text, _m = _bundle(doc)
+    assert _rules(out) == [("governor_outside_snippet", "x", "planned")]
+    [flag] = out["flags"]
+    assert (flag["marker"], flag["via"], flag["source_line"]) == ("will", "sentence", _line(text, "The consortium"))
+    assert flag["equivalent_governors"] == [{"class": "prospective", "marker": "future", "via": "heading",
+                                             "source_line": _line(text, "Future Data"),
+                                             "governor": "Future Data Releases"}]
+    assert out["counts"]["flags"]["governor_outside_snippet"]["value"] == 1
+    # Two governors of one class were one flag already, with nothing beside it.
+    [same] = _run(doc.replace("Future", "Planned"), [("x", "release the imaging waveforms")], record)["flags"]
+    assert (same["class"], same["via"]) == ("planned", "sentence") and "equivalent_governors" not in same
+    # A distinct status is still its own flag.
+    ongoing = _run(doc.replace("Future", "Ongoing"), [("x", "release the imaging waveforms")], record)
+    assert _rules(ongoing) == [("governor_outside_snippet", "x", "in_progress"),
+                               ("governor_outside_snippet", "x", "planned")]
+    assert not any("equivalent_governors" in f for f in ongoing["flags"])
+    # A value expressing either equivalent class keeps the status.
+    assert _run(doc, [("x", "release the imaging waveforms")],
+                {"x": "Future releases include the imaging waveforms."})["flags"] == []
+
+
+@pytest.mark.parametrize("doc,reported,beside", [
+    (("In future the consortium,\nafter review by the board,\nwill release\n"
+      "the imaging waveforms to approved users."), ("planned", "will"), ("prospective", "future")),
+    # #3435: the nearer governor's class ("prospective") sorts after the
+    # farther one's ("planned"), so only the line distance reports it; with
+    # the distance tiebreak removed the class name would pick "will".
+    (("The consortium will,\nafter review by the board,\nin future release\n"
+      "the imaging waveforms to approved users."), ("prospective", "future"), ("planned", "will")),
+])
+def test_equivalent_governors_in_one_sentence_report_the_nearer_line(doc, reported, beside):
+    # Both classes in the snippet's own sentence: the governor on the line
+    # nearer the snippet is reported, the other listed beside it.
+    out = _run(doc, [("x", "the imaging waveforms to approved users")], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
+    [flag] = out["flags"]
+    assert (flag["class"], flag["marker"]) == reported
+    assert flag["source_line"] == _line(text, "in future release" if reported[1] == "future" else "will release")
+    assert [(e["class"], e["marker"], e["via"]) for e in flag["equivalent_governors"]] == [
+        (*beside, "sentence")]
+
+
+@pytest.mark.parametrize("doc,reported,beside", [
+    # #3488: the governor right after the snippet's last line is nearer than
+    # one three lines above its first; measured from the first line alone it
+    # was the farther. Its class ("prospective") sorts after the other's, so
+    # the class name cannot be what reports it.
+    (("The consortium will,\nafter careful review\nby the board,\nthe imaging waveforms\n"
+      "and the labels\nand the reports\nand the codes\nin future to approved users."),
+     ("prospective", "future", "in future to"), ("planned", "will", "The consortium will")),
+    # The mirror: the governor above is the farther, the one below nearer.
+    (("In future,\nafter careful review\nby the board,\nthe imaging waveforms\n"
+      "and the labels\nand the reports\nand the codes\nwill go to approved users."),
+     ("planned", "will", "will go to"), ("prospective", "future", "In future")),
+])
+@pytest.mark.parametrize("snippet", [
+    "the imaging waveforms and the labels and the reports and the codes",
+    # A quote in parts: the span ends at its last part's end, not its first's.
+    "the imaging waveforms ... and the codes",
+])
+def test_line_distance_is_measured_from_the_snippets_span(doc, reported, beside, snippet):
+    out = _run(doc, [("x", snippet)], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
+    [flag] = out["flags"]
+    assert flag["snippet_line"] == _line(text, "the imaging")
+    assert (flag["class"], flag["marker"], flag["via"], flag["source_line"]) == (
+        reported[0], reported[1], "sentence", _line(text, reported[2]))
+    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": "sentence",
+                                             "source_line": _line(text, beside[2])}]
+
+
+@pytest.mark.parametrize("heading,sentence_tail,reported,beside,via", [
+    ("Future Data Releases", "will be released to approved users.",
+     ("planned", "will"), ("prospective", "future"), "heading"),
+    # The heading's class ("planned") also sorts first: only the via rank
+    # reports the sentence's governor.
+    ("Planned Data Releases", "are released in future to approved users.",
+     ("prospective", "future"), ("planned", "planned"), "heading"),
+    # #3468: the lead-in half of rule 1, a ':' clause above the snippet in
+    # place of the heading, in both class orders.
+    ("Future work includes:", "will be released to approved users.",
+     ("planned", "will"), ("prospective", "future"), "lead-in"),
+    ("The planned releases include:", "are released in future to approved users.",
+     ("prospective", "future"), ("planned", "planned"), "lead-in"),
+])
+def test_a_sentence_governor_beats_a_nearer_heading_governor(heading, sentence_tail, reported, beside, via):
+    # #3437: rule 1 of the ordering. The heading (or lead-in) sits one line
+    # above the snippet and the sentence's marker two lines below it, so
+    # line distance alone would report the heading; the sentence governor
+    # is reported and the heading listed beside it.
+    doc = f"{heading}\nThe imaging waveforms\nand the labels\n{sentence_tail}\n"
+    out = _run(doc, [("x", "The imaging waveforms")], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
+    [flag] = out["flags"]
+    snippet_line = _line(text, "The imaging")
+    assert flag["snippet_line"] == snippet_line
+    assert (flag["class"], flag["marker"], flag["via"], flag["source_line"]) == (
+        *reported, "sentence", snippet_line + 2)
+    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": via,
+                                             "source_line": snippet_line - 1, "governor": heading}]
+
+
+def test_the_plain_form_is_tried_first():
+    # #3467: a snippet the plain form locates is located there, exactly as
+    # before #3043, even where the linewrap-joined form holds a second
+    # occurrence of it. Here the second (hyphen-wrapped) sentence carries no
+    # marker, so trying the joined form first would find it, read it as an
+    # unmarked occurrence and drop the flag the plain occurrence raises.
+    doc = ("The consortium will release the imaging waveforms to approved users.\n"
+           "Today the consortium releases the imag-\ning waveforms to approved users.")
+    snippet = "the imaging waveforms to approved users"
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert sc.HAYSTACK_FORMS[0] == "plain"
+    [[(a, b)]] = view.locate("c002", snippet)
+    assert text[a:b] == snippet
+    assert text.index(snippet) == a
+    out = _run(doc, [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert _rules(out) == [("governor_outside_snippet", "x", "planned")]
+
+
+@pytest.mark.parametrize("form", ["linewrap-joined", "joined-elided"])
+def test_a_form_the_validator_would_not_build_is_refused(form, monkeypatch):
+    # #3466: form_offsets checks its replay against the haystack receipts
+    # itself builds, not against this module's copy of the join rule. Were
+    # the validator to join an en-dash break too, the replay (which joins
+    # hyphens only) no longer reproduces it and the form is refused.
+    raw = "Partic\u2013\nipants were enrolled\n6.\nat two sites."
+    real = rc.normalise_joined
+
+    def joins_en_dash(text):
+        return real(re.sub(r"(\w)\u2013[ \t]*\n[ \t]*(\w)", r"\1\2", text))
+    assert sc.form_offsets(raw, form) is not None
+    monkeypatch.setattr(rc, "normalise_joined", joins_en_dash)
+    assert sc.form_offsets(raw, form) is None
+    # The forms that do not join are unaffected.
+    assert sc.form_offsets(raw, "plain") is not None
+    assert sc.form_offsets(raw, "artifact-line-elided") is not None
+
+
+@pytest.mark.parametrize("doc,form", [
+    # #789: a PDF extractor's hyphenated wrap inside the quoted words.
+    ("The consortium will release the imag-\ning waveforms to approved users.", "linewrap-joined"),
+    # #887: a lone section-number line inside the quoted words.
+    ("The consortium will release the\n7.\nimaging waveforms to approved users.", "artifact-line-elided"),
+    # Both at once.
+    ("The consortium will release the\n7.\nimag-\ning waveforms to approved users.", "artifact-line-elided"),
+])
+def test_a_snippet_verified_only_across_a_joined_break_or_an_elided_line_is_located(doc, form):
+    # #3043: such a snippet was counted unlocated, so its context was never
+    # read; it is now located through that form's offset map, its raw span
+    # covering the break or the elided line.
+    snippet = "the imaging waveforms to approved users"
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert rc.snippet_in(snippet, view.chunk_text("c002")) == (True, form)
+    [[(a, b)]] = view.locate("c002", snippet)
+    assert text[a:b] == doc[doc.rindex("the", 0, doc.index("imag")):doc.index(" users") + len(" users")]
+    out = _run(doc, [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert (out["counts"]["located"], out["counts"]["unlocated"]) == (1, 0)
+    [flag] = out["flags"]
+    assert (flag["rule"], flag["class"], flag["marker"], flag["via"]) == (
+        "governor_outside_snippet", "planned", "will", "sentence")
+    # The negative control: a value keeping the status is located, unflagged.
+    kept = _run(doc, [("x", snippet)], {"x": "The consortium will release the imaging waveforms."})
+    assert (kept["counts"]["located"], kept["flags"]) == (1, [])
+
+
+@pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
+def test_each_haystack_form_maps_to_the_validators_own_haystack(form):
+    raw = ("Partic-\r\nipants were   enrolled\n6.\nat SITE-\n  One; “data” \\n were\n 12. \n"
+           "shared-\nwith 100. partners\n7.")
+    hay = {"plain": rc.normalise(raw), "linewrap-joined": rc.normalise_joined(raw),
+           "artifact-line-elided": rc.normalise(rc.elide_artifact_lines(raw)),
+           "joined-elided": rc.normalise_joined(rc.elide_artifact_lines(raw))}[form]
+    norm, offs = sc.form_offsets(raw, form)
+    assert norm == hay and len(offs) == len(norm)
+    assert offs == sorted(offs)
+    # Every folded word character comes from a raw character that folds to it.
+    for ch, o in zip(norm, offs):
+        if ch != " ":
+            assert rc.normalise(raw[o]) == ch, (ch, raw[o])
+
+
 @pytest.mark.parametrize("leaf", sorted(sc.LABEL_LEAVES))
 def test_label_slots_are_reported_in_their_own_bucket(leaf):
     doc = "Anticipated Final Dataset\nContributing sites\nNorthern Hospital Network\n"
