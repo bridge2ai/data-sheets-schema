@@ -2309,23 +2309,28 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
         if kind in ("named_absence", "placement"):
             assert not [r for r in lint_q19(item(note=f"Held at 4. {sentence}")).reasons
                         if r.concern == "empty_slot"], sentence
-    classified = []
+    classified, misses = [], []
     for fragment in _UNRECOGNISED_NAMED_ABSENCES:
         # The second "remain the gaps" sentence is the whole of one.
         hits = [s for s in read if (s == fragment if fragment.startswith("doi,") else fragment in s)]
         assert len(hits) == 1, fragment
         classified += hits
+        misses += hits
     for fragment in _UNRECOGNISED_PLACEMENTS:
         hits = [s for s in read if fragment in s]
         assert len(hits) == 1, fragment
         classified += hits
+        misses += hits
     for kind, fragments in _HAND_READ_NOT_CREDIT.items():
         for fragment in fragments:
             # A bare name is the whole sentence; the others are part of one.
             hits = [s for s in read if (s == fragment if kind == "bare_name" else fragment in s)]
             assert len(hits) == 1, (kind, fragment)
             classified += hits
+            if kind == "unrecognised_absence":
+                misses += hits
     assert len(set(classified)) == len(classified) == 46
+    assert len(set(misses)) == len(misses) == 31
     # 109 left are credit: 155 less the 11, 18 and 17 pinned above (#3838).
     assert len(read) - len(classified) == 109
     # The classes are the module docstring's counts, so a pin moved from one
@@ -2334,9 +2339,11 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     assert {kind: len(fragments) for kind, fragments in _HAND_READ_NOT_CREDIT.items()} == {
         "unrecognised_absence": 2, "count": 2, "criticism": 5, "qualification": 4,
         "bare_name": 2, "criterion": 2}
-    # None of them is read as an empty-slot reason: the gate reads
-    # `_EMPTINESS` words only, as on main.
-    for sentence in classified[:len(_UNRECOGNISED_NAMED_ABSENCES)]:
+    # The 31 misses are misses: the gate reads none of them — the named
+    # absences, the placements or the unrecognised absences — as an
+    # empty-slot reason, as it reads none of the 64 above; it reads
+    # `_EMPTINESS` words only, as on main (#3872).
+    for sentence in misses:
         assert not [r for r in lint_q19(item(note=f"Held at 4. {sentence}")).reasons
                     if r.concern == "empty_slot"], sentence
     # The words these absences are named in: without an `_EMPTINESS` word

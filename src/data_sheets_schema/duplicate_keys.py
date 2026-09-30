@@ -200,17 +200,28 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     first (`_unencodable`, #3834). Every other code point is rejected, or
     accepted, alike by both readers.
 
-    The findings are the same wherever both implementations can scan the
-    text. Their scanners are not the same grammar at the edges: PyYAML's
-    pure-Python scanner rejects a tab inside a plain scalar (`b: x<TAB>y`)
-    and a byte-order mark after the start of the stream, both of which
-    libyaml accepts. On such a text the default gives `[]` (or raises under
-    `strict`) and `FAST_LOADER` reports the keys it scanned — what
-    `yaml.load(..., Loader=FAST_LOADER)` would load from the same text.
-    None of the 1,616 YAML files under `data/d4d_concatenated` is scannable
-    by one and not the other (checked 2026-09-30). The scan does not paper
-    over the difference: neither answer misreads what its own loader would
-    load."""
+    The two scanners are not the same grammar at the edges, and the
+    difference runs both ways (#3855). PyYAML's pure-Python scanner rejects
+    a tab inside a plain scalar (`b: x<TAB>y`) and a byte-order mark after
+    the last token (`a: 1\\n<BOM>`), both of which libyaml accepts: there
+    the default gives `[]` (or raises under `strict`) and `FAST_LOADER`
+    reports the keys it scanned. libyaml rejects a byte-order mark at the
+    start of a later line (`a: 1\\n<BOM>b: 2\\n`, a `ParserError`), which the
+    pure-Python loader reads as part of the key (`'<BOM>b'`): there
+    `FAST_LOADER` gives `[]` (or raises) and the default reports what it
+    scanned. A stream opening with two byte-order marks is scanned by both
+    to different keys: libyaml drops both (`a`), the pure-Python reader
+    only the first (`'<BOM>a'`), so the two can name one duplicate by
+    different keys, or disagree on whether there is one
+    (`<BOM><BOM>a: 1\\na: 2\\n` is two distinct keys to the default and a
+    `ParserError` to libyaml). A caller that switches loaders can therefore
+    refuse, or read differently, a text the other loader reads. Each answer
+    is still the one its own loader would load (`yaml.load(...,
+    Loader=loader)` on the same text); the scan does not paper over the
+    difference. None of the 1,616 YAML files under `data/d4d_concatenated`
+    is scannable by one and not the other, none carries a byte-order mark
+    past its first character, and on every one the two loaders give
+    identical findings (checked 2026-09-30)."""
     out: list[dict[str, Any]] = []
     if _CParser is not None and isinstance(loader, type) and issubclass(loader, _CParser):
         unencodable = _unencodable(text)
