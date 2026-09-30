@@ -185,17 +185,17 @@ class NotTheModel(unittest.TestCase):
     def test_the_normalisers_enum_temporal_and_mailto_forms_are_marked_and_still_counted(self):
         before = _record(related_datasets=[{"id": "x#r", "relationship_type": "IsDerivedFrom"}],
                          issued="2024-05-01", collection=[{"id": "x#c", "start_date": "2024-05-01T10:00:00Z"}],
-                         creators=[{"id": "mailto:jane@lab.edu", "name": "Jane Parker"}],
+                         contact_person={"id": "mailto:jane@lab.edu", "name": "Jane Parker"},
                          description="Old words.")
         after = _record(related_datasets=[{"id": "x#r", "relationship_type": "derives_from"}],
                         issued="2024-05-01T00:00:00Z", collection=[{"id": "x#c", "start_date": "2024-05-01"}],
-                        creators=[{"id": f"{RID}#person-jane-parker", "name": "Jane Parker",
-                                   "email": "jane@lab.edu"}],
+                        contact_person={"id": f"{RID}#person-jane-parker", "name": "Jane Parker",
+                                        "email": "jane@lab.edu"},
                         description="New text.")
         b = rm.classify(before, after, _audit())
         forms = {r["path"]: r.get("normaliser") for r in b["rewritten_paths"]}
         self.assertEqual(forms, {"related_datasets[0].relationship_type": "enum_alias", "issued": "temporal",
-                                 "collection[0].start_date": "temporal", "creators[0].id": "mailto_id",
+                                 "collection[0].start_date": "temporal", "contact_person.id": "mailto_id",
                                  "description": None})
         self.assertEqual((b["rewritten"], b["rewritten_unfounded"]), (5, 5))
         self.assertEqual((b["rewritten_normaliser"], b["rewritten_normaliser_unfounded"]), (4, 4))
@@ -208,9 +208,10 @@ class NotTheModel(unittest.TestCase):
         moved to a fragment on some other record's id, an enum slot's
         free rewording: the model's rewrites."""
         before = _record(related_datasets=[{"id": "x#r", "relationship_type": "IsDerivedFrom"}],
-                         issued="2024-05-01", creators=[{"id": "mailto:jane@lab.edu", "name": "Jane"}])
+                         issued="2024-05-01", contact_person={"id": "mailto:jane@lab.edu", "name": "Jane"})
         after = _record(related_datasets=[{"id": "x#r", "relationship_type": "is_source_of"}],
-                        issued="2024-06-01T00:00:00Z", creators=[{"id": "doi:10.9/other#jane", "name": "Jane"}])
+                        issued="2024-06-01T00:00:00Z", contact_person={"id": "doi:10.9/other#person-jane",
+                                                                       "name": "Jane"})
         b = rm.classify(before, after, _audit())
         self.assertEqual(b["rewritten"], 3)
         self.assertEqual((b["rewritten_normaliser"], b["rewritten_unfounded_not_model"]), (0, 0))
@@ -223,6 +224,66 @@ class NotTheModel(unittest.TestCase):
         self.assertIsNone(rm.normaliser_form("description", "IsDerivedFrom", "derives_from"))
         self.assertIsNone(rm.normaliser_form("keywords[0]", "a", "b"))
         self.assertIsNone(rm.normaliser_form("relationship_type", "a\nb", "derives_from"))
+
+    def test_a_parsed_tz_aware_datetime_is_read_from_the_text_the_runner_rewrote(self):
+        """#3754: `issued: 2026-05-01T00:00:00Z` unquoted loads as a UTC
+        datetime, whose `isoformat()` says `+00:00`; the runner rewrites the
+        text and keeps the `Z`. Each text YAML reads as the value is tried."""
+        import datetime
+        old = yaml.safe_load("issued: 2026-05-01T00:00:00Z")["issued"]
+        self.assertIsInstance(old, datetime.datetime)
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00Z"), "temporal")
+        self.assertEqual(rm.normaliser_form("issued", old, "2026-05-01T00:00:00+00:00"), "temporal")
+        self.assertIsNone(rm.normaliser_form("issued", old, "2026-05-02T00:00:00Z"))
+        plus2 = yaml.safe_load("issued: 2026-05-01T10:00:00+02:00")["issued"]
+        self.assertEqual(rm.normaliser_form("issued", plus2, "2026-05-01T10:00:00+02:00"), "temporal")
+        self.assertIsNone(rm.normaliser_form("issued", plus2, "2026-05-01T10:00:00Z"))
+        self.assertEqual(rm.normaliser_form("start_date", old, "2026-05-01"), "temporal")
+        # A final value loaded unquoted is compared by the same texts.
+        self.assertEqual(rm.normaliser_form("issued", datetime.date(2026, 5, 1), old), "temporal")
+        # End to end: the snapshot's unquoted line, the runner's quoted one.
+        before = yaml.safe_load(f"id: {RID}\ntitle: A dataset\nissued: 2026-05-01T00:00:00Z\n")
+        after = yaml.safe_load(f"id: {RID}\ntitle: A dataset\nissued: '2026-05-01T00:00:00Z'\n")
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["rewritten"], b["rewritten_normaliser"], b["rewritten_normaliser_by"]["temporal"]),
+                         (1, 1, 1))
+        self.assertEqual(b["rewritten_paths"][0]["normaliser"], "temporal")
+
+    def test_a_mailto_id_is_the_normalisers_only_under_a_person_slot_in_its_fragment_shape(self):
+        """#3756: the runner rewrites a `mailto:` id only in a mapping under
+        a Person-ranged slot, to `<own id>#person-<slug>`, and never on an
+        own id that already carries a fragment; it leaves every other one."""
+        own = frozenset({RID})
+        mail = "mailto:data@lab.edu"
+        self.assertEqual(rm.normaliser_form("contact_person.id", mail, f"{RID}#person-data-at-lab-edu", own),
+                         "mailto_id")
+        self.assertEqual(rm.normaliser_form("committee_members[1].id", mail, f"{RID}#person-jane-parker", own),
+                         "mailto_id")
+        # Not a Person-ranged slot: the runner logs `mailto_id_skipped`.
+        for path in ("file_collections[0].id", "creators[0].id", "id", "contact_person.affiliation.id"):
+            self.assertIsNone(rm.normaliser_form(path, mail, f"{RID}#person-data-at-lab-edu", own), path)
+        # Not the runner's fragment.
+        for new in (f"{RID}#anything", f"{RID}#person-", f"{RID}#person-Jane", f"{RID}#person-a#b",
+                    "doi:10.9/other#person-data-at-lab-edu"):
+            self.assertIsNone(rm.normaliser_form("contact_person.id", mail, new, own), new)
+        # An own id with a fragment of its own: the runner skips it.
+        self.assertIsNone(rm.normaliser_form("contact_person.id", mail, f"{RID}#root#person-jane",
+                                             frozenset({f"{RID}#root"})))
+        # Parity with the runner: what it writes is marked, what it leaves is not.
+        from data_sheets_schema.api_runner import normalise_mailto_ids
+        text = (f"id: {RID}\ncontact_person:\n  name: Jane Q. Parker\n  id: {mail}\n"
+                f"committee_members:\n- id: mailto:bob@x.org\n")
+        was, now = yaml.safe_load(text), yaml.safe_load(normalise_mailto_ids(text))
+        self.assertEqual(rm.normaliser_form("contact_person.id", was["contact_person"]["id"],
+                                            now["contact_person"]["id"], own), "mailto_id")
+        self.assertEqual(rm.normaliser_form("committee_members[0].id", was["committee_members"][0]["id"],
+                                            now["committee_members"][0]["id"], own), "mailto_id")
+        text = f"id: {RID}\nfile_collections:\n- id: {mail}\n"
+        self.assertEqual(normalise_mailto_ids(text), text)
+        before = _record(file_collections=[{"id": mail, "name": "Data"}])
+        after = _record(file_collections=[{"id": f"{RID}#person-data", "name": "Data"}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["rewritten"], b["rewritten_normaliser"], b["rewritten_unfounded_not_model"]), (1, 0, 0))
 
     def test_a_rewrite_at_a_curators_amended_path_is_marked_a_curators_amend(self):
         """The 2026-09-01 v7 rep2 VOICE shape: the one `write`-phase rewrite

@@ -164,8 +164,11 @@ Two more annotations move no class either (#3366, #3367):
 - **A rewrite that is not the model's** (#3366). A rewritten row whose new
   value is what the API runner's write-time normaliser writes from the old
   one (`normaliser_form`: an enum alias to its permissible value, a date
-  reshaped to its slot's range, a Person's `mailto:` id to a fragment on
-  the record's own id) is marked `normaliser`; one at or under a path a
+  reshaped to its slot's range — a parsed date read as each text YAML
+  reads as it, since the runner keeps a `Z` as written (#3754) — and the
+  `mailto:` id of a mapping under a Person-ranged slot to the runner's
+  `#person-<slug>` fragment on the record's own id (#3756)) is marked
+  `normaliser`; one at or under a path a
   curator's recorded `amend` disposition changed (#903) is marked
   `curator_amend` — where phases are attributed, only if the `write`
   phase made it, since a rewrite an earlier (model) phase made and a
@@ -709,43 +712,118 @@ def low_confidence(value: Any, route: str | None) -> list[str]:
 #: The API runner's write-time rewrites a carried scalar can show as a
 #: rewrite (#3366; `api_runner.normalise_record_text`): an enum alias to the
 #: permissible value it names, a date or datetime reshaped to its slot's
-#: range, a Person's `mailto:` id to a fragment on the record's own id
-#: (#981). The others are no rewrite here: a British spelling and its
+#: range, the `mailto:` id of a mapping under a Person-ranged slot to a
+#: `#person-<slug>` fragment on the record's own id (#981, #3756). The others are no rewrite here: a British spelling and its
 #: American form, and a resolver URL and its CURIE, are one text (#3038,
 #: #3129), and a scalar and its one-item list one value.
 NORMALISER_FORMS = ("enum_alias", "temporal", "mailto_id")
+
+
+#: A mailto: id the runner rewrites, as its line pattern reads it (#981).
+_MAILTO_ADDR = re.compile(r"mailto:(?P<addr>[^\s\"']+)")
+
+#: The fragment the runner mints for a Person's mailto: id: `person-` and a
+#: slug of the mapping's `name`, else of the address (#981, #3756).
+_PERSON_FRAGMENT = re.compile(r"person-[a-z0-9]+(?:-[a-z0-9]+)*")
+
+
+def _temporal_texts(value: Any) -> list[str]:
+    """The texts YAML could have read as `value`, a parsed date or datetime,
+    that the runner's temporal pattern reads, in a fixed order (#3754). A
+    parsed value has lost its text, and `normalise_temporal` keeps a zone as
+    written: `2026-05-01T00:00:00Z` and `...+00:00` load as one datetime and
+    are written back as two texts, so each spelling of a zero offset is
+    tried. Only texts that load back as `value` are returned."""
+    import datetime as _dt
+    if isinstance(value, _dt.datetime):
+        base = value.replace(tzinfo=None).isoformat()
+        off = value.utcoffset()
+        if off is None:
+            texts = [base]
+        elif not off:
+            texts = [f"{base}Z", f"{base}+00:00", f"{base}-00:00"]
+        else:
+            texts = [value.isoformat()]
+    elif isinstance(value, _dt.date):
+        texts = [value.isoformat()]
+    else:
+        return []
+    out = []
+    for t in texts:
+        try:
+            back = yaml.safe_load(f"v: {t}")
+        except yaml.YAMLError:
+            continue
+        if isinstance(back, dict) and back.get("v") == value:
+            out.append(t)
+    return out
+
+
+def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool:
+    """Whether `new` is the id the runner's `normalise_mailto_ids` writes for
+    `old` at `path` (#3756): the `id` of a mapping directly under a
+    Person-ranged slot (the runner leaves every other `mailto:` id and logs
+    it `mailto_id_skipped`), rewritten to `<own id>#person-<slug>` on an own
+    id that carries no fragment of its own. The slug is the address's where
+    it matches; a name's slug is read by its shape, since the name the
+    runner read is the phase output's, not the final record's."""
+    toks = _tokens(path)
+    owner = next((t for t in reversed(toks[:-1]) if isinstance(t, str)), None)
+    from data_sheets_schema.api_runner import _person_slots
+    if owner not in _person_slots():
+        return False
+    m = _MAILTO_ADDR.fullmatch(old.strip())
+    if not m or not isinstance(new, str):
+        return False
+    for root in own_ids:
+        if "#" in root or not new.startswith(f"{root}#"):
+            continue
+        if _PERSON_FRAGMENT.fullmatch(new[len(root) + 1:]):
+            return True
+    return False
 
 
 def normaliser_form(path: str, old: Any, new: Any, own_ids: frozenset[str] = frozenset()) -> str | None:
     """Which write-time normaliser rewrite turns `old` into `new` at `path`,
     or None (#3366). The enum and temporal forms run the runner's own
     line normalisers (`normalise_enum_aliases`, `normalise_temporal`) on
-    `<leaf>: <old>` and compare what they write with `new`; the mailto form
-    asks that a `mailto:` id became a fragment on one of `own_ids`. A form,
-    not a provenance: a model that wrote the permissible value itself is
-    read the same, and the tables are today's schema's, not the run's."""
+    `<leaf>: <old>` and compare what they write with `new`; a parsed date
+    or datetime is tried as each text YAML reads as it, since the runner
+    rewrites the text and keeps a `Z` as written (#3754). The mailto form
+    asks that a `mailto:` id under a Person-ranged slot became the
+    runner's `#person-<slug>` fragment on one of `own_ids` (#3756). A
+    form, not a provenance: a model that wrote the permissible value
+    itself is read the same, and the tables are today's schema's, not the
+    run's."""
     leaf = next((t for t in reversed(_tokens(path)) if isinstance(t, str)), None)
     if leaf is None:
         return None
     if isinstance(old, str) and leaf == "id" and old.strip().casefold().startswith("mailto:"):
-        ok = isinstance(new, str) and any(new.startswith(f"{i}#") for i in own_ids)
-        return "mailto_id" if ok else None
+        return "mailto_id" if _mailto_form(path, old, new, own_ids) else None
     import datetime as _dt
-    text = old.isoformat() if isinstance(old, (_dt.date, _dt.datetime)) else old
-    if not isinstance(text, str) or not text.strip() or "\n" in text:
-        return None
+    if isinstance(old, (_dt.date, _dt.datetime)):
+        texts = _temporal_texts(old)
+    else:
+        texts = [old]
+    wants = (set(_temporal_texts(new)) if isinstance(new, (_dt.date, _dt.datetime))
+             else {str(new)} if new is not None else set())
     from data_sheets_schema.api_runner import normalise_enum_aliases, normalise_temporal
-    line = f"{leaf}: {text}"
-    for kind, rewrite in (("temporal", normalise_temporal), ("enum_alias", normalise_enum_aliases)):
-        out = rewrite(line)
-        if out == line:
+    for text in texts:
+        if not isinstance(text, str) or not text.strip() or "\n" in text:
             continue
-        try:
-            doc = yaml.safe_load(out)
-        except yaml.YAMLError:
-            return None
-        written = doc.get(leaf) if isinstance(doc, dict) else None
-        return kind if written is not None and str(written) == str(new) else None
+        line = f"{leaf}: {text}"
+        for kind, rewrite in (("temporal", normalise_temporal), ("enum_alias", normalise_enum_aliases)):
+            out = rewrite(line)
+            if out == line:
+                continue
+            try:
+                doc = yaml.safe_load(out)
+            except yaml.YAMLError:
+                break
+            written = doc.get(leaf) if isinstance(doc, dict) else None
+            if written is not None and str(written) in wants:
+                return kind
+            break
     return None
 
 
