@@ -787,6 +787,67 @@ def test_a_snippet_verified_only_across_a_joined_break_or_an_elided_line_is_loca
     assert (kept["counts"]["located"], kept["flags"]) == (1, [])
 
 
+@pytest.mark.parametrize("doc,form", [
+    ("The consortium will release the imaging waveforms to approved users.", "plain"),
+    ("The consortium will release the imag-\ning waveforms to approved users.", "linewrap-joined"),
+    ("The consortium will release the\n7.\nimaging waveforms to approved users.", "artifact-line-elided"),
+    # Both at once: this module tries the forms in `HAYSTACK_FORMS` order,
+    # so the one that locates it is the both-transform form.
+    ("The consortium will release the\n7.\nimag-\ning waveforms to approved users.", "joined-elided"),
+])
+def test_the_counts_say_which_haystack_form_located_each_snippet(doc, form):
+    # #3406: a snippet located only across a joined break or an elided line
+    # had its context read on the raw text holding the break or the line;
+    # the counts and the summary say how many were.
+    snippet = "the imaging waveforms to approved users"
+    text, manifest = _bundle(doc)
+    assert sc.BundleView(text, manifest).located_form("c002", snippet) == form
+    out = _run(doc, [("x", snippet), ("x", "not in the chunk at all")],
+               {"x": "The consortium releases the imaging waveforms."})
+    assert out["counts"]["located_by_form"] == {f: int(f == form) for f in sc.HAYSTACK_FORMS}
+    if form == "plain":
+        assert "joined or elided" not in out["summary"]
+    else:
+        assert f"1 located (1 only through a joined or elided form: {form} 1)" in out["summary"]
+
+
+def test_the_summary_totals_snippets_not_forms_when_several_need_a_non_plain_form():
+    # #3738: every other fixture has one non-plain snippet in one form, where
+    # the snippet total and the number of distinct forms coincide. Here two
+    # snippets need the joined form and one the elided form, beside one plain
+    # snippet: the total is 3 (snippets), not 2 (forms), and each form keeps
+    # its own count.
+    doc = ("The consortium will release the imag-\ning waveforms to approved users. "
+           "Each site will de-\nidentify the retinal photographs before transfer. "
+           "The team will store the\n7.\ncalibration logs on a secure server. "
+           "Plain text locates this sentence directly.")
+    snippets = ["the imaging waveforms to approved users",
+                "will deidentify the retinal photographs",
+                "store the calibration logs on a secure server",
+                "Plain text locates this sentence directly"]
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert [view.located_form("c002", s) for s in snippets] == [
+        "linewrap-joined", "linewrap-joined", "artifact-line-elided", "plain"]
+    out = _run(doc, [("x", s) for s in snippets], {"x": "Released."})
+    assert out["counts"]["located_by_form"] == {
+        "plain": 1, "linewrap-joined": 2, "artifact-line-elided": 1, "joined-elided": 0}
+    assert ("4 located (3 only through a joined or elided form: "
+            "linewrap-joined 2, artifact-line-elided 1)") in out["summary"]
+
+
+def test_only_located_snippets_are_counted_by_form():
+    # Unlocated, indeterminate and unverified snippets name no form: the
+    # tally sums to `located`.
+    doc = "The team will harmonise records to a common model. " * (sc.MAX_PART_MATCHES + 1)
+    out = _run(doc, [("x", "harmonise records to a common model"), ("x", "absent from the chunk")],
+               {"x": "Records are harmonised."})
+    assert out["counts"]["indeterminate"] == 1 and out["counts"]["not_verified"] == 1
+    assert out["counts"]["located_by_form"] == dict.fromkeys(sc.HAYSTACK_FORMS, 0)
+    text, manifest = _bundle("Nothing here.")
+    assert sc.BundleView(text, manifest).located_form("c002", "absent from the chunk") is None
+
+
 @pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
 def test_each_haystack_form_maps_to_the_validators_own_haystack(form):
     raw = ("Partic-\r\nipants were   enrolled\n6.\nat SITE-\n  One; “data” \\n were\n 12. \n"
@@ -1413,6 +1474,35 @@ def test_replay_flags_the_planned_preprocessing_the_v8_rep1_chorus_receipt_quote
     assert all(len(line.splitlines()) == 1 and line.startswith("   ") for line in lines)
     assert len(lines) == (3 + len(out["flags"]) + len(out["unlocated"])
                           + (1 + len(out["label_slot"]) if out["label_slot"] else 0))
+
+
+#: The five committed receipt snippets that were unlocated before #3043:
+#: each verifies only across a hyphenated line break (#3406).
+JOINED_BEFORE_3043 = [
+    ("claudecode_agent", "2026-08-28d_claude-opus-5-api-generic-v7_rep1", "AI_READI"),
+    ("claudecode_agent", "2026-09-01_claude-opus-5-api-generic-v7_rep2", "VOICE"),
+    ("claudecode_api", "2026-09-04d_claude-opus-5-api-generic-v8_rep1", "VOICE"),
+    ("claudecode_api", "2026-09-04e_claude-opus-5-api-generic-v8_rep1", "VOICE"),
+    ("claudecode_api", "2026-09-04f_claude-opus-5-api-generic-v8_rep2", "VOICE"),
+]
+
+
+@pytest.mark.corpus   # reads committed runs, two of them from git blobs; the main-branch lane (#1203)
+@pytest.mark.parametrize("method,label,project", JOINED_BEFORE_3043)
+def test_replay_the_snippets_unlocated_before_3043_report_the_joined_form(method, label, project):
+    core = ROOT / "data" / "d4d_concatenated" / f"{method}_core" / label
+    receipt = core / f"{project}_coverage_receipt.yaml"
+    if not receipt.exists():
+        pytest.skip(f"{label} not on disk")
+    out = sc.run_status_context(core / f"{project}_provenance.yaml", receipt,
+                                ROOT / "data" / "d4d_concatenated" / method / label / f"{project}_d4d.yaml")
+    assert out["checked"], out.get("reason")
+    by_form = out["counts"]["located_by_form"]
+    assert out["counts"]["unlocated"] == 0
+    assert {f: n for f, n in by_form.items() if f != "plain"} == {
+        "linewrap-joined": 1, "artifact-line-elided": 0, "joined-elided": 0}
+    assert sum(by_form.values()) == out["counts"]["located"]
+    assert "(1 only through a joined or elided form: linewrap-joined 1)" in out["summary"]
 
 
 V8_REP3 = "2026-09-04f_claude-opus-5-api-generic-v8_rep3"
