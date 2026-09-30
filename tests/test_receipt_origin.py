@@ -1025,6 +1025,7 @@ class EditReplay(Base):
                 (PRE, {"old_string": "not in the receipt", "new_string": "x"}, None, "does not occur"),
                 (twice, {"old_string": TITLE, "new_string": LICENSE}, None, "occurs 2 times"),
                 (PRE, {"old_string": "", "new_string": "x"}, None, "not a non-empty string"),
+                (PRE, {"old_string": TITLE, "new_string": 7}, None, "`new_string` that is not a string"),
                 (PRE, {"old_string": TITLE, "new_string": LICENSE, "replace_all": "yes"}, None, "not a boolean"),
                 (PRE, {"old_string": "OT2OD032701", "new_string": ""}, None, "may extend to the newline"),
                 (PRE, {"old_string": "OT2OD032701", "new_string": "$&-2"}, None, "`$` pattern"),
@@ -1035,8 +1036,12 @@ class EditReplay(Base):
                 (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
                  {"filePath": "x", "staleRecovered": True}, "changed since it was read"),
                 (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
-                 {"filePath": "x", "oldString": "The CHORUS dataset"}, "a different edit")):
-            with self.subTest(why=why):
+                 {"filePath": "x", "oldString": "The CHORUS dataset"}, "a different edit"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "newString": TITLE}, "a different edit"),
+                (PRE, {"old_string": TITLE, "new_string": TITLE + LICENSE},
+                 {"filePath": "x", "replaceAll": True}, "a different edit")):
+            with self.subTest(why=why, metadata=metadata):
                 r = self.new_run()
                 r.write(r.receipt, prior)
                 r.write(r.full, "id: x\n")
@@ -1082,7 +1087,72 @@ class EditReplay(Base):
         r.result(derive, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
         r.result(edit, "ok", {"filePath": str(r.receipt)})
         r.last_receipt = WITH_LICENSE
-        self.assertUnknown(r.report(), f"receipt Write {edit} was in flight with the derive core boundary")
+        reasons = r.report()["reasons"]
+        self.assertTrue(any(f"receipt Edit {edit} was in flight with the derive core boundary" in x
+                            for x in reasons), reasons)
+        self.assertFalse(any(f"receipt Write {edit}" in x for x in reasons), reasons)   # #3556
+
+    def test_an_edit_in_flight_with_a_receipt_write_names_both_tools(self):
+        # #3556: the pairwise reason names each call's own tool.
+        r = self._drafted()
+        edit = r.edit(settle=False, old_string=TITLE, new_string=TITLE + LICENSE)
+        write = r.call("Write", file_path=str(r.receipt), content=WITH_LICENSE)
+        r.result(edit, "ok", {"filePath": str(r.receipt)})
+        r.result(write, "ok", {"type": "update", "filePath": str(r.receipt), "content": WITH_LICENSE})
+        r.last_receipt = WITH_LICENSE
+        self.assertUnknown(r.report(), f"receipt Edit {edit} and receipt Write {write} were in flight together")
+
+    def test_a_dollar_amount_in_new_string_is_replayed(self):
+        # #3555: with a string search pattern JavaScript expands only `$$`,
+        # `$&`, `` $` `` and `$'`; `$1` and `$<name>` stay literal.
+        for amount in ("awarded $10 million", "grant $1 of $<n>", "$0 cost"):
+            with self.subTest(amount=amount):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                added = f"  - slot: funders[0].amount\n    snippet: {amount}\n"
+                r.edit(old_string=TITLE, new_string=TITLE + added)
+                r.last_receipt = PRE.replace(TITLE, TITLE + added)
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
+
+    def test_every_expanding_dollar_pattern_is_unknown(self):
+        for pattern in ("$$", "$&", "$`", "$'"):
+            with self.subTest(pattern=pattern):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.edit(old_string="OT2OD032701", new_string=f"OT2OD032701 {pattern}")
+                self.assertUnknown(r.report(), "`$` pattern")
+
+    def test_a_relative_edit_with_no_working_directory_is_unknown(self):
+        # #3558: the edit branch's own relative-path reason.
+        for name, inputs in (("Edit", {"old_string": TITLE, "new_string": TITLE + LICENSE}),
+                             ("MultiEdit", {"edits": [{"old_string": TITLE, "new_string": TITLE + LICENSE}]})):
+            with self.subTest(tool=name):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                del r.events[0]["cwd"]
+                rel = str(r.receipt.relative_to(r.root))
+                identity = r.call(name, file_path=rel, **inputs)
+                r.result(identity, "ok", {"filePath": rel, "userModified": False})
+                r.last_receipt = WITH_LICENSE
+                self.assertUnknown(r.report(), f"{name} {identity} names the receipt by a relative path "
+                                               "with no working directory")
+
+    def test_a_malformed_multiedit_is_unknown(self):
+        # #3558: the `edits` shape guard.
+        for edits in (None, "x", [], [{"old_string": TITLE, "new_string": TITLE + LICENSE}, "x"]):
+            with self.subTest(edits=edits):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                identity = r.edit("MultiEdit", edits=edits)
+                block = r.report(sync=False)
+                self.assertUnknown(block, f"MultiEdit {identity} of the receipt")
+                self.assertUnknown(block, "its `edits` is not a non-empty list of mappings")
 
     def test_an_edit_of_the_full_record_is_not_replayed(self):
         # Only the receipt is rebuilt: an edit of the full record before its

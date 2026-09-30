@@ -335,8 +335,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,
-    and nothing is classified; that includes a receipt Write in flight
-    together with another receipt Write, the draft or the derive. Prints counts, chunk ids, slot paths and hashes, never
+    and nothing is classified; that includes a receipt Write (or replayed
+    Edit/MultiEdit) in flight together with another receipt change, the
+    draft or the derive. Prints counts, chunk ids, slot paths and hashes, never
     snippet text.
     """
     import json

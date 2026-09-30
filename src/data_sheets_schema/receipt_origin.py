@@ -170,11 +170,15 @@ UNREAD_WRITE_ERROR = ("<tool_use_error>File has not been read yet. "
 READ_TOOLS = frozenset({"Read", "Grep", "Glob", "LS", "NotebookRead"})
 #: The runtime's in-place edit tools, replayed on the receipt (`_replay`).
 EDIT_TOOLS = frozenset({"Edit", "MultiEdit"})
-#: A replacement pattern JavaScript's `String.prototype.replace` expands in a
-#: string replacement (`$$`, `$&`, `` $` ``, `$'`, `$1`, `$<name>`): whether
-#: the runtime passes the new string as a string or through a function is
-#: not known here, so a replacement carrying one cannot be replayed exactly.
-_JS_REPLACEMENT = re.compile(r"\$[$&`'<0-9]")
+#: A replacement pattern JavaScript's `String.prototype.replace` (and
+#: `replaceAll`) expands in a string replacement when the search pattern is
+#: a string: `$$`, `$&`, `` $` `` and `$'`. `$1`..`$99` and `$<name>` refer
+#: to capture groups, which a string pattern has none of, so they stay
+#: literal ("ab".replace("a", "$1x") is "$1xb"; #3555). Whether the runtime
+#: passes the new string as a string or through a function (which expands
+#: nothing) is not known here, so a replacement carrying one of the four
+#: cannot be replayed exactly; a dollar amount such as "$10 million" can.
+_JS_REPLACEMENT = re.compile(r"\$[$&`']")
 #: Shell programs that read their operands and write only to stdout (`sed`
 #: only when `_sed_reads_only` admits its options and script: no in-place
 #: flag, no script file, and no `w`/`W`/`e` command or `s///w`/`s///e`
@@ -1696,14 +1700,19 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     # full record existed before it was issued, and one existed once it had
     # returned.
     in_flight = lambda a, b: not (a["_settled"] < b["_at"] or b["_settled"] < a["_at"])
+    # A replayed Edit/MultiEdit sits among the receipt's Writes; each reason
+    # names the tool the call used (#3556).
     for i, row in enumerate(receipt_writes):
         for other in receipt_writes[i + 1:]:
             if in_flight(row, other):
-                reasons.append(f"receipt Writes {row['tool_use_id']} and {other['tool_use_id']} were in flight "
-                               "together: which landed last cannot be told")
+                pair = (f"receipt Writes {row['tool_use_id']} and {other['tool_use_id']}"
+                        if row["tool"] == other["tool"] == "Write" else
+                        f"receipt {row['tool']} {row['tool_use_id']} and receipt {other['tool']} "
+                        f"{other['tool_use_id']}")
+                reasons.append(f"{pair} were in flight together: which landed last cannot be told")
         for label, boundary in (("the first full-record Write", first), ("the derive core boundary", derived)):
             if boundary is not None and in_flight(row, boundary):
-                reasons.append(f"receipt Write {row['tool_use_id']} was in flight with {label} "
+                reasons.append(f"receipt {row['tool']} {row['tool_use_id']} was in flight with {label} "
                                f"({boundary['tool_use_id']}): which took effect first cannot be told")
     settled = [row["_settled"] for row in (first, receipt_writes[-1] if receipt_writes else None, derived)
                if row is not None]
