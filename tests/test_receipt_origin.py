@@ -2429,7 +2429,8 @@ class DeriveSpellings(Base):
                       "builds at run time behind `nohup`, `exec` or `command` (`nohup $X ./derive.sh`), which is "
                       "not read as detaching; and, in a command the tokenizer cannot split, a program word built "
                       "other than from a leading `$` or backquote (`set${X}sid`, a glob, a brace expansion), "
-                      "which is not read as detaching there (#3923).", text)
+                      "which is not read as detaching there (#3923); a brace expansion with a quoted or escaped "
+                      "space in it", text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
                      "Still not read: a detaching program supplied at run time",
                      "runs in a child: it does not count", "unless the call's own event records",
