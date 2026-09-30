@@ -39,6 +39,14 @@ its own, and do not cross a full stop.
   The counts are a one-off census of the pinned records' free text. The counterexample "The higher-ranked source gives
   Washington University in St. Louis. Both values are recorded above." shows
   the full stop after "Louis" still ends the sentence.
+- No character of the gap can be taken two ways (#3894). An abbreviation's
+  `.` is its own alternative only when whitespace follows it; a `.` followed
+  by anything else ("e.g.,", "U.S.-based") is taken by the general
+  `\.(?!\s)`. The first form of v4 let both alternatives take such a dot, so
+  a sentence with k of them and a term with no partner was tried 2^k ways
+  (about 6 s at 20 "e.g.," items). The two forms match the same text; the
+  file was fixed and re-pinned before v4 merged, and no count in this note
+  moved. A test holds the lint's time on such a sentence to linear growth.
 
 **Which change this is.** Crossing `;` "with no length bound", as the issue
 put it, is the change table's cumulative "Widen the window and cross `;`"

@@ -241,13 +241,19 @@ patterns:
     # excepted: "FDA Regulated: No." ends a sentence, and "et al." ends the
     # author list of a citation as often as it runs on. A `.` not followed
     # by whitespace, as in `v3.1.0`, never ended one.
+    # No character can be taken two ways (#3894): an abbreviation's `.` is
+    # an alternative of its own only when whitespace follows it, where
+    # `\.(?!\s)` does not match; the five lookbehinds end in different
+    # letters; and `[^.]` takes no `.`. With the alternatives overlapping,
+    # a sentence with many "e.g.," and no partner for its term was tried
+    # 2^k ways, where k is the number of such dots.
     # With the verb after the term, the match is the term alone; with the
     # verb before it, the match runs from the verb to the term (Python's re
     # has no variable-width lookbehind), so a phrase's text can be longer
     # than v2's for the same words, and with no length bound it can span
     # the sentence up to the term.
     regex: |-
-      \b(?:source manifest|input manifest|source ranking|declared (?:source )?ranking)\b|\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b|\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b(?=(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b)
+      \b(?:source manifest|input manifest|source ranking|declared (?:source )?ranking)\b|\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b(?:[^.]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?=\s)|(?<=\bi\.e)\.(?=\s)|(?<=\bU\.S)\.(?=\s))*?\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b|\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b(?=(?:[^.]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?=\s)|(?<=\bi\.e)\.(?=\s)|(?<=\bU\.S)\.(?=\s))*?\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b)
     examples:
       - The higher-ranked source is preferred.
       - the two tier-2 sources cannot be separated by rank

@@ -8,6 +8,7 @@ A changed v1 pin in this file is the edit a reviewer must refuse; a new
 version is a new line.
 """
 import hashlib
+import re
 import shutil
 import tempfile
 import unittest
@@ -23,8 +24,17 @@ REGISTERED = {
     ("absence_self_narration", 1): "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e",
     ("absence_self_narration", 2): "e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708",
     ("absence_self_narration", 3): "f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6",
-    ("absence_self_narration", 4): "483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f",
+    ("absence_self_narration", 4): "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec",
 }
+
+#: v4's `rsn.source-ranking` gap between verb and term (#3791, #3792): any
+#: character but a full stop, where an abbreviation's `.` before whitespace
+#: is not one. Each `.` has exactly one alternative that can take it (#3894).
+V4_GAP = (r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?=\s)|(?<=\bi\.e)\.(?=\s)"
+          r"|(?<=\bU\.S)\.(?=\s))*?")
+#: The gap as first written, whose abbreviation alternatives also took a `.`
+#: that `\.(?!\s)` takes: the same language, matched in exponential time.
+V4_GAP_OVERLAPPING = r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?"
 
 #: The v1 precision sample's three borderline phrases (#3520), in their
 #: sentences: source conflicts worded with the ranking vocabulary.
@@ -291,9 +301,32 @@ class TheRegistry(unittest.TestCase):
         v3, v4 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
                   for v in (3, 4))
         v3_gap = r"(?:[^.;]|\.(?!\s)){0,80}?"
-        v4_gap = (r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?")
         self.assertEqual(v3.regex.pattern.count(v3_gap), 2)
-        self.assertEqual(v4.regex.pattern, v3.regex.pattern.replace(v3_gap, v4_gap))
+        self.assertEqual(v4.regex.pattern, v3.regex.pattern.replace(v3_gap, V4_GAP))
+
+    def test_no_character_of_the_v4_gap_can_be_taken_two_ways(self):
+        """#3894: at every position of text dense with abbreviations, dots in
+        tokens and full stops, at most one of the gap's alternatives matches.
+        Where two could take one `.` ("e.g.,"), a failing match was tried 2^k
+        ways. The disjoint form matches what the overlapping one did."""
+        alternatives = [re.compile(a) for a in V4_GAP[len("(?:"):-len(")*?")].split("|")]
+        self.assertEqual(len(alternatives), 7)
+        texts = ("See e.g., x and i.e., y; U.S.-based St. Louis, Dr. Smith, v3.1.0 and No. 5 et al. end. "
+                 "U.S. data, e.g. these, i.e. those.\nSt.\tDr.  e.g.x i.e.x U.S.x St.x Dr.x",)
+        for text in texts:
+            for i in range(len(text)):
+                with self.subTest(i=i, at=text[max(0, i - 5):i + 2]):
+                    self.assertLessEqual(sum(bool(a.match(text, i)) for a in alternatives), 1)
+        v4 = {p.id: p for p in lx.load("absence_self_narration", 4).patterns}["rsn.source-ranking"]
+        overlapping = re.compile(v4.regex.pattern.replace(V4_GAP, V4_GAP_OVERLAPPING), v4.regex.flags)
+        self.assertNotEqual(overlapping.pattern, v4.regex.pattern)
+        samples = v4.examples + v4.counterexamples + texts + tuple(
+            f"The higher-ranked source gives {a} Smith{p} and that value is used."
+            for a in ("St.", "Dr.", "e.g.", "i.e.", "U.S.", "No.", "et al.") for p in (",", ".", "-x", ""))
+        for text in samples:
+            with self.subTest(text=text):
+                self.assertEqual([m.span() for m in v4.regex.finditer(text)],
+                                 [m.span() for m in overlapping.finditer(text)])
 
     def test_v4_source_ranking_finds_the_verb_anywhere_in_the_sentence_and_never_past_it(self):
         """The rule the v4 pattern's comment states, one boundary at a time,

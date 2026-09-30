@@ -135,6 +135,45 @@ class Counting(unittest.TestCase):
         self.assertEqual(_hits({"notes": "No\n  source in the\tbundle states it."})[0][2], "No source in the bundle")
 
 
+class Time(unittest.TestCase):
+    """#3894: the lint's time on one sentence grows linearly with the
+    abbreviation dots in it. The first form of v4's `rsn.source-ranking`
+    gap let two alternatives take the `.` of "e.g.," and tried a sentence
+    with no partner for its verb or term 2^k ways: about 6 s at 20 items,
+    so the n=20 call below fails its ceiling before n=40 is tried."""
+
+    #: Verb with no term, term with no verb (each branch of the pattern
+    #: fails), and a term whose verb closes the sentence (it matches).
+    SENTENCES = {
+        "verb, no term": ("The source was used, ", "e.g., x i.e., y U.S.-based ", "and nothing else."),
+        "term, no verb": ("The higher-ranked source lists items, ", "e.g., x i.e., y U.S.-based ", "and more."),
+        "term, then verb": ("The higher-ranked source lists items, ", "e.g., x i.e., y U.S.-based ",
+                            "and that value is used."),
+    }
+    CEILING = 1.0       # seconds for one call; the fixed pattern takes about a millisecond
+
+    def _lint(self, n):
+        import time
+        record = {"source_caveats": [head + item * n + tail for head, item, tail in self.SENTENCES.values()]}
+        start = time.perf_counter()
+        result = al.lint(record)
+        return time.perf_counter() - start, result
+
+    def test_time_grows_linearly_and_the_counts_do_not_move(self):
+        results = {}
+        for n in (20, 40):                                  # each call bounded before the next
+            elapsed, results[n] = self._lint(n)
+            self.assertLess(elapsed, self.CEILING, f"one lint call at n={n} took {elapsed:.2f} s")
+        for n in (20, 40):
+            hits = [(h["pointer"], h["patterns"]) for h in results[n]["hits"]]
+            self.assertEqual(hits, [("/source_caveats/2", ["rsn.source-ranking"])])
+        self.assertEqual(results[20]["by_pattern"], results[40]["by_pattern"])
+        # Best of five against best of five: linear growth doubles the time,
+        # quadratic quadruples it, and 2^k would multiply it by about a million.
+        best = {n: min(self._lint(n)[0] for _ in range(5)) for n in (20, 40)}
+        self.assertLess(best[40], 8 * best[20] + 0.005, best)
+
+
 class Identity(unittest.TestCase):
     def test_the_result_names_the_instrument_version_and_lexicon_bytes(self):
         """The newest registered version unless one is passed (#3132)."""

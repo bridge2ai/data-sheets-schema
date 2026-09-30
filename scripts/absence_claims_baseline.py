@@ -115,7 +115,7 @@ PRECISION: dict[str, dict[str, Any]] = {
                 "phrase; its verdicts are carried over from the v1 judgements, not re-read.",
         "judgements": "notes/absence_precision_judgements_bd0c63ed.yaml",
     },
-    "483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f": {     # v4 (#3791)
+    "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec": {     # v4 (#3791)
         "checked": "2026-09-30",
         "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",   # 303 records
         "sample": 50, "seed": SAMPLE_SEED,

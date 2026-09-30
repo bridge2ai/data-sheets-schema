@@ -142,7 +142,7 @@ RECALL: dict[str, Any] = {
     "draw_sha256": "241e910ec4781ea3467152b31e89aa6a302a2385370544d69ac5f427a47641aa",
     "classes": {RSN: (35, 50, 3)},
     "judgements": "notes/absence_v3_recall_judgements_241e910e.yaml",
-    "next_lexicon_sha256": "483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f",   # v4 (#3791)
+    "next_lexicon_sha256": "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec",   # v4 (#3791)
 }
 
 

@@ -21,8 +21,11 @@
 # second rating is #3197's open part).
 # Written by a one-off script; never edited except to add a judgement's
 # correction with its reason.
+# Correction (#3894, before v4 was merged): `lexicon_sha256` names the v4 file
+# after its pattern's gap was made unambiguous. That edit changes no match,
+# so the draw, its sha256 and every verdict below are unchanged.
 draw_sha256: 574f03c232ebf949de942601a97403b977ff193144cd8f4c453f868c7e1695c5
-lexicon_sha256: 483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f
+lexicon_sha256: 8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec
 record_set_sha256: cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711
 sample: 50
 seed: 2919

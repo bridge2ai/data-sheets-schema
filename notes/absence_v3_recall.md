@@ -5,7 +5,7 @@ to regenerate it, or `--check` to ask whether it still matches its records and j
 
 - **Lexicons:** absence_self_narration v2 (sha256 `e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708`),
   v3 (sha256 `f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6`) and
-  v4 (sha256 `483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f`, #3791), all registered; this note
+  v4 (sha256 `8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec`, #3791), all registered; this note
   registers nothing and moves no count in `notes/absence_claims_baseline.md`.
 - **Records:** the 303 records that note pins, record-set sha256
   `cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711`.
