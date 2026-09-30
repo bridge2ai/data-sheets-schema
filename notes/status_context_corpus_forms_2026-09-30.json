@@ -1,0 +1,194 @@
+{
+  "instrument": "status_context v1 (#2917)",
+  "vocabulary": {
+    "version": 1,
+    "sha256": "59184b2d2ff47c54b231deefeb030369d5ebb4d956f44e9b1e96b27ccdf3efcc"
+  },
+  "rule": "receipt status context (governor_outside_snippet, modal_dropped)",
+  "checked": true,
+  "gating": false,
+  "root": "data/d4d_concatenated",
+  "projects": {
+    "AI_READI": {
+      "receipts": 13,
+      "checked": 13,
+      "snippets": 3907,
+      "verified": 3800,
+      "not_verified": 107,
+      "value_unresolved": 1,
+      "malformed_entries": 0,
+      "located": 3799,
+      "located_by_form": {
+        "plain": 3798,
+        "linewrap-joined": 1,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated": 0,
+      "indeterminate": 0,
+      "flags_by_located_form": {
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
+      "unchecked": [],
+      "unlocated_snippets": [],
+      "form_located_snippets": [
+        {
+          "receipt": "claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml",
+          "chunk": "c002",
+          "slot": "known_biases[0].bias_description",
+          "snippet": "Participants are volunteers; therefore, there is selection b",
+          "form": "linewrap-joined"
+        }
+      ]
+    },
+    "CHORUS": {
+      "receipts": 12,
+      "checked": 12,
+      "snippets": 1230,
+      "verified": 1217,
+      "not_verified": 13,
+      "value_unresolved": 0,
+      "malformed_entries": 0,
+      "located": 1217,
+      "located_by_form": {
+        "plain": 1217,
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated": 0,
+      "indeterminate": 0,
+      "flags_by_located_form": {
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
+      "unchecked": [],
+      "unlocated_snippets": [],
+      "form_located_snippets": []
+    },
+    "CM4AI": {
+      "receipts": 12,
+      "checked": 12,
+      "snippets": 2439,
+      "verified": 2162,
+      "not_verified": 277,
+      "value_unresolved": 3,
+      "malformed_entries": 0,
+      "located": 2159,
+      "located_by_form": {
+        "plain": 2159,
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated": 0,
+      "indeterminate": 0,
+      "flags_by_located_form": {
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
+      "unchecked": [],
+      "unlocated_snippets": [],
+      "form_located_snippets": []
+    },
+    "VOICE": {
+      "receipts": 11,
+      "checked": 11,
+      "snippets": 2194,
+      "verified": 2125,
+      "not_verified": 69,
+      "value_unresolved": 2,
+      "malformed_entries": 0,
+      "located": 2123,
+      "located_by_form": {
+        "plain": 2119,
+        "linewrap-joined": 4,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated": 0,
+      "indeterminate": 0,
+      "flags_by_located_form": {
+        "linewrap-joined": 0,
+        "artifact-line-elided": 0,
+        "joined-elided": 0
+      },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
+      "unchecked": [],
+      "unlocated_snippets": [],
+      "form_located_snippets": [
+        {
+          "receipt": "claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_coverage_receipt.yaml",
+          "chunk": "c005",
+          "slot": "addressing_gaps[2].response",
+          "snippet": "datasets are often private, limiting the ability to audit ML",
+          "form": "linewrap-joined"
+        },
+        {
+          "receipt": "claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml",
+          "chunk": "c005",
+          "slot": "purposes[3].response",
+          "snippet": "gathered 50 multidisciplinary experts from 12 North American",
+          "form": "linewrap-joined"
+        },
+        {
+          "receipt": "claudecode_api_core/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml",
+          "chunk": "c005",
+          "slot": "addressing_gaps[2].response",
+          "snippet": "datasets are often private, limiting the ability to audit ML",
+          "form": "linewrap-joined"
+        },
+        {
+          "receipt": "claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_coverage_receipt.yaml",
+          "chunk": "c005",
+          "slot": "creators[2].description",
+          "snippet": "gathered 50 multidisciplinary experts from 12 North American",
+          "form": "linewrap-joined"
+        }
+      ]
+    }
+  },
+  "totals": {
+    "receipts": 48,
+    "checked": 48,
+    "snippets": 9770,
+    "verified": 9304,
+    "not_verified": 466,
+    "value_unresolved": 6,
+    "malformed_entries": 0,
+    "located": 9298,
+    "located_by_form": {
+      "plain": 9293,
+      "linewrap-joined": 5,
+      "artifact-line-elided": 0,
+      "joined-elided": 0
+    },
+    "unlocated": 0,
+    "indeterminate": 0,
+    "flags_by_located_form": {
+      "linewrap-joined": 0,
+      "artifact-line-elided": 0,
+      "joined-elided": 0
+    },
+    "unlocated_snippets_omitted": 0,
+    "form_located_snippets_omitted": 0
+  },
+  "summary": [
+    "AI_READI: 13/13 receipts read · snippets 3907 · located 3799 (plain 3798, linewrap-joined 1, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 107 · value unresolved 1 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "CHORUS: 12/12 receipts read · snippets 1230 · located 1217 (plain 1217, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 13 · value unresolved 0 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "CM4AI: 12/12 receipts read · snippets 2439 · located 2159 (plain 2159, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 277 · value unresolved 3 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "VOICE: 11/11 receipts read · snippets 2194 · located 2123 (plain 2119, linewrap-joined 4, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 69 · value unresolved 2 · malformed receipt entries 0 · flags through a joined or elided form 0"
+  ],
+  "assurance": "Lexical and non-gating: this detects the loss of a registered status marker between a source passage and a value. A flag is not a defect — another passage can independently support the unqualified value, and a marker in the context need not govern the quoted words. The absence of a flag establishes neither semantic support nor the absence of a status defect."
+}

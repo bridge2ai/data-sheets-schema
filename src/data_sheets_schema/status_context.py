@@ -19,8 +19,10 @@ receipt verifies in its own chunk, the snippet is located in the chunk's
 raw text through a map from `receipts.normalise` offsets back to raw
 offsets — composed, where the validator verified it only there, with the
 linewrap-joined or artifact-line-elided haystack (#3043); the counts say
-how many located snippets each form located (`located_by_form`, #3406) —
-and two contexts are read:
+how many located snippets each form located (`located_by_form`, #3406),
+and a flag raised from a snippet located through a form other than
+`plain` names it (`located_form`, counted under `flags_by_located_form`,
+#3708) — and two contexts are read:
 
 (a) its enclosing sentence, extended across an enumeration — inline
     `A) ... E)` / `(a)` / `1)` items or bulleted and numbered lines — back
@@ -88,6 +90,7 @@ What a flag is, and what it is not, is `ASSURANCE`.
 from __future__ import annotations
 
 import bisect
+import copy
 import hashlib
 import json
 import re
@@ -961,8 +964,15 @@ def _ordered(per: list[list[tuple[int, int]]], k: int, *, first: int | None = No
 
 
 # ------------------------------------------------------------------ rule 1
+#: At most this many unlocated and form-located snippets are listed per
+#: receipt; the counts are always complete, and `unlocated_omitted` /
+#: `form_located_omitted` say how many a list left out (#3809).
+LISTED_PER_RECEIPT = 20
+
+
 def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_text: str,
-                    record: dict[str, Any], *, final: dict[str, Any] | None = None) -> dict[str, Any]:
+                    record: dict[str, Any], *, final: dict[str, Any] | None = None,
+                    view: BundleView | None = None) -> dict[str, Any]:
     """Rule 1 over a receipt, its chunk manifest, the bundle and the record
     the receipt addresses (the API path's phase-1 snapshot, else the full
     record). With `final` as well, each flag says whether the final value,
@@ -974,13 +984,23 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     `malformed_entry` — one that is not a mapping with a string id, or an
     `extracted` entry whose `extracted` is not a list of mappings — are
     counted under `malformed_entries` and none of their pairs is read, as
-    the validator reads none of them."""
-    view = BundleView(bundle_text, manifest)
+    the validator reads none of them.
+
+    `unlocated` and `form_located` list at most `LISTED_PER_RECEIPT`
+    snippets each; `unlocated_omitted` and `form_located_omitted` count the
+    ones a list left out, so a cut list is never read as complete (#3809).
+
+    `view`, when given, is a `BundleView` of this text and manifest to read
+    through, so a caller reading many receipts of one bundle builds each
+    chunk's offset maps once (#3709)."""
+    if view is None:
+        view = BundleView(bundle_text, manifest)
     counts = {"snippets": 0, "verified": 0, "not_verified": 0, "value_unresolved": 0,
               "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
               "unlocated": 0, "indeterminate": 0, "malformed_entries": 0}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     unlocated: list[dict[str, Any]] = []
+    form_located: list[dict[str, Any]] = []
     for entry in receipt.get("chunks") or []:
         pairs = entry.get("extracted") if isinstance(entry, dict) else None
         if (not isinstance(entry, dict) or not isinstance(entry.get("id"), str)
@@ -1006,6 +1026,9 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
             value_classes = classes(_value_text(value))
             found = view.locate(cid, snippet)
             lost, occurrences, complete = view.lost_classes(cid, snippet)
+            # The form whose offset map the snippet's line and context were
+            # read through; None where neither was read.
+            form = view.located_form(cid, snippet) if found or lost is not None else None
             if lost is None and complete:
                 counts["unlocated"] += 1
                 unlocated.append({"chunk": cid, "slot": slot, "snippet": snippet[:60]})
@@ -1013,10 +1036,17 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                 counts["indeterminate"] += 1
             else:
                 counts["located"] += 1
-                counts["located_by_form"][view.located_form(cid, snippet)] += 1
+                counts["located_by_form"][form] += 1
+                if form != "plain":
+                    form_located.append({"chunk": cid, "slot": slot, "snippet": snippet[:60], "form": form})
             bucket = flags[slot_class(slot)]
+            # A flag read across a joined hyphen break or an elided
+            # section-number line names that form, so a reviewer can weigh
+            # it: `_sentence_start` and `_continues` read the raw text, where
+            # the break or the line is not prose (#3708).
             base = {"slot": slot, "chunk": cid, "snippet": snippet[:80],
-                    "snippet_line": view.line_of(found[0][0][0]) if found else None}
+                    "snippet_line": view.line_of(found[0][0][0]) if found else None,
+                    **({"located_form": form} if form not in (None, "plain") else {})}
             for cls, term, equivalent in _dropped_statuses(classes(snippet), value_classes):
                 bucket.append({"rule": "modal_dropped", **base, "class": cls, "marker": term,
                                **({"equivalent_markers": equivalent} if equivalent else {}),
@@ -1037,6 +1067,7 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     by_rule = {r: {k: sum(1 for f in flags[k] if f["rule"] == r) for k in ("value", "label")}
                for r in ("governor_outside_snippet", "modal_dropped")}
     slots = {k: len({f["slot"] for f in flags[k]}) for k in ("value", "label")}
+    flags_by_form = _flags_by_form(flags["value"] + flags["label"])
     # A snippet located only across a joined hyphen break or an elided
     # section-number line had its context read on the raw text that holds
     # the break or the line, so how many were is said beside the count (#3406).
@@ -1045,6 +1076,7 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                + (f" ({sum(by_form.values())} only through a joined or elided form: "
                   + ", ".join(f"{f} {n}" for f, n in by_form.items()) + ")" if by_form else "")
                + (f" ({counts['unlocated']} unlocated)" if counts["unlocated"] else "")
+               + _omitted_summary(len(unlocated), len(form_located))
                + (f" · {counts['indeterminate']} indeterminate (a part matched more than "
                   f"{MAX_PART_MATCHES} times; context not read)" if counts["indeterminate"] else "")
                + (f" · {counts['malformed_entries']} malformed receipt entr"
@@ -1052,11 +1084,51 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                + f" · governor_outside_snippet {by_rule['governor_outside_snippet']['value']}"
                + f" (+{by_rule['governor_outside_snippet']['label']} label)"
                + f" · modal_dropped {by_rule['modal_dropped']['value']} (+{by_rule['modal_dropped']['label']} label)"
-               + f" · {slots['value']} slot(s) flagged (+{slots['label']} label)")
+               + f" · {slots['value']} slot(s) flagged (+{slots['label']} label)"
+               + _flags_by_form_summary(flags_by_form))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_RECEIPT, "checked": True,
-            "gating": False, "counts": {**counts, "flags": by_rule, "slots_flagged": slots},
-            "flags": flags["value"], "label_slot": flags["label"], "unlocated": unlocated[:20],
-            "summary": summary, "assurance": ASSURANCE}
+            "gating": False, "counts": {**counts, "flags": by_rule, "slots_flagged": slots,
+                                        "flags_by_located_form": flags_by_form},
+            "flags": flags["value"], "label_slot": flags["label"],
+            "unlocated": unlocated[:LISTED_PER_RECEIPT], "unlocated_omitted": _omitted(len(unlocated)),
+            "form_located": form_located[:LISTED_PER_RECEIPT],
+            "form_located_omitted": _omitted(len(form_located)), "summary": summary, "assurance": ASSURANCE}
+
+
+def _omitted(n: int) -> int:
+    """How many of `n` snippets a list capped at `LISTED_PER_RECEIPT` leaves out (#3809)."""
+    return max(0, n - LISTED_PER_RECEIPT)
+
+
+def _omitted_summary(unlocated: int, form_located: int) -> str:
+    """The summary clause naming a cut list, empty when neither was cut (#3809)."""
+    cut = [f"{_omitted(n)} {what}" for n, what in ((unlocated, "unlocated"), (form_located, "form-located"))
+           if _omitted(n)]
+    return (f" · {' and '.join(cut)} snippet(s) not listed (at most {LISTED_PER_RECEIPT} of each per receipt)"
+            if cut else "")
+
+
+def _flags_by_form(flags: list[dict[str, Any]]) -> dict[str, int]:
+    """{non-plain haystack form: flags naming it as their `located_form`},
+    every non-plain form listed (#3708)."""
+    return {f: sum(1 for x in flags if x.get("located_form") == f) for f in HAYSTACK_FORMS if f != "plain"}
+
+
+def _flags_by_form_summary(by_form: dict[str, int]) -> str:
+    named = {f: n for f, n in by_form.items() if n}
+    if not named:
+        return ""
+    total = sum(named.values())
+    return (f" · {total} flag{'' if total == 1 else 's'} read through a joined or elided form: "
+            + ", ".join(f"{f} {n}" for f, n in named.items()))
+
+
+def _quotes_by_form_summary(by_form: dict[str, int]) -> str:
+    named = {f: n for f, n in by_form.items() if f != "plain" and n}
+    if not named:
+        return ""
+    return (f", {sum(named.values())} read only through a joined or elided form: "
+            + ", ".join(f"{f} {n}" for f, n in named.items()))
 
 
 def _dropped_statuses(snippet_classes: dict[str, str], value_classes
@@ -1155,7 +1227,9 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
     `quotes_chunk_not_in_bundle` and one that cannot be located under
     `unlocated_quotes`, and one a part of which matches more than
     MAX_PART_MATCHES times under `indeterminate_quotes`; none of these
-    has its context read. Evidence on any other
+    has its context read; each quote whose context is read is counted
+    under `quotes_located_by_form`, and a hit read through a form other
+    than `plain` names it (`located_form`, #3708). Evidence on any other
     claim is not examined, so a bad `chunk` there is not counted: these
     counts are not a check of the review's evidence, which
     `source_review.check` makes (#3168)."""
@@ -1173,7 +1247,8 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
         value_texts = {row["path"]: row["text"] for row in inv["values"]}
     counts = {"claims": 0, "supported": 0, "declared": {}, "expressed": 0,
               "expressed_elsewhere_in_value": 0, "fact_claims": 0, "quotes_examined_for_context": 0,
-              "unlocated_quotes": 0, "indeterminate_quotes": 0, "quotes_chunk_not_in_bundle": 0}
+              "unlocated_quotes": 0, "indeterminate_quotes": 0, "quotes_chunk_not_in_bundle": 0,
+              "quotes_located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0)}
     flags: dict[str, list[dict[str, Any]]] = {"value": [], "label": []}
     for row in review["values"]:
         if not isinstance(row, dict) or not isinstance(row.get("claims"), list):
@@ -1221,7 +1296,8 @@ def review_status_expression(audit: dict[str, Any], *, record_raw: str | None = 
                   f"claims examined, {counts['quotes_chunk_not_in_bundle']} naming no chunk of the bundle, "
                   f"{counts['unlocated_quotes']} unlocated"
                   + (f", {counts['indeterminate_quotes']} indeterminate (a part matched more than "
-                     f"{MAX_PART_MATCHES} times)" if counts["indeterminate_quotes"] else "")))
+                     f"{MAX_PART_MATCHES} times)" if counts["indeterminate_quotes"] else "")
+                  + _quotes_by_form_summary(counts["quotes_located_by_form"])))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_REVIEW, "checked": True,
             "gating": False, "artifact": review.get("artifact"), "sha256": review.get("sha256"),
             "value_text_read": value_texts is not None, "evidence_context_read": view is not None,
@@ -1251,12 +1327,17 @@ def _planned_evidence(evidence: Any, view: BundleView | None, counts: dict[str, 
         if lost is None:
             counts["unlocated_quotes" if complete else "indeterminate_quotes"] += 1
             continue
+        # The form the quote's context was read through, counted and, where
+        # it is not plain, named on the hit, as rule 1 names it (#3708).
+        form = view.located_form(e["chunk"], e["quote"])
+        counts["quotes_located_by_form"][form] += 1
         cls = next((c for c in PLANNED_EVIDENCE_CLASSES if c in lost), None)
         if cls:
             d = lost[cls]
             return {"evidence": i, "chunk": e.get("chunk"), "class": cls, "marker": d["term"],
                     "via": d["via"], "source_line": d["source_line"],
-                    **({"governor": d["governor"]} if "governor" in d else {})}
+                    **({"governor": d["governor"]} if "governor" in d else {}),
+                    **({"located_form": form} if form != "plain" else {})}
     return None
 
 
@@ -1323,6 +1404,11 @@ def file_status_context(receipt: Path, bundle: Path, record: Path, *, chunk_mani
     return out
 
 
+#: The provenance inputs that name the bundle and its bytes, each a string
+#: when present (#3823).
+_STRING_INPUTS = ("bundle_path", "bundle", "bundle_md5", "bundle_sha256")
+
+
 def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str, Any]:
     """Rule 1 for a run, from its provenance record: the bundle the record
     hashed (on disk, else the committed version with its hashes, #1140),
@@ -1342,6 +1428,12 @@ def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str,
     if not isinstance(record, dict) or not isinstance(record.get("inputs") or {}, dict):
         return _unchecked(RULE_RECEIPT, f"{provenance} is not a provenance record with an inputs mapping")
     inputs = record.get("inputs") or {}
+    # A path or hash that is not a string cannot name a file or bytes; it
+    # would raise building a Path or asking git (#3823).
+    for field in _STRING_INPUTS:
+        if inputs.get(field) is not None and not isinstance(inputs[field], str):
+            return _unchecked(RULE_RECEIPT, f"{provenance}: inputs.{field} is a {type(inputs[field]).__name__}, "
+                                            "not a string")
     bundle = bc.declared_bundle(record, provenance)
     raw, basis, why = _record_bytes(bundle, inputs)
     if raw is None:
@@ -1351,7 +1443,7 @@ def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str,
         if chunks_in.get("rule"):
             name = chunks_in.get("bundle_name") or (canonical_name(bundle) if bundle is not None
                                                     else Path(str(inputs.get("bundle_path"))).name)
-            manifest = manifest_from_bytes(raw, name, chunks_in["rule"])
+            manifest = _chunked(raw, name, chunks_in["rule"], manifest_from_bytes)
             basis["manifest"] = "chunked in memory under the record's own inputs.chunks.rule"
             if chunks_in.get("chunk_count") is not None and manifest["chunk_count"] != chunks_in["chunk_count"]:
                 return _unchecked(RULE_RECEIPT, f"the record's rule chunks these bytes to {manifest['chunk_count']}, "
@@ -1377,10 +1469,187 @@ def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str,
         addressed, fin, value_basis = final, None, f"record {full}"
     else:
         return _unchecked(RULE_RECEIPT, f"no record at {full} and no phase-1 snapshot")
-    out = receipt_context(rec, manifest, raw.decode("utf-8"), addressed, final=fin)
+    text = raw.decode("utf-8")
+    out = receipt_context(rec, manifest, text, addressed, final=fin, view=_shared_view(raw, text, manifest))
     out["value_basis"] = value_basis
     out["bundle_basis"] = basis
     return out
+
+
+#: Within one process, what a drifted bundle was recovered as, keyed on
+#: (declared path, md5, sha256), and the manifest in-memory chunking built,
+#: keyed on (md5 of the bytes, bundle name, rule) (#3709). Many records of
+#: a corpus walk read one committed version of one bundle; without these
+#: each re-ran `git show` and re-chunked it. A recovered version is fixed
+#: by the hashes it matched and a manifest by the bytes, name and rule, so
+#: a hit is the answer a fresh call gives; `GitUnavailable` and a rule
+#: that cannot chunk are raised, never cached. `clear_caches` empties them.
+_RECOVERED: dict[tuple[str, ...], tuple[bytes, dict[str, Any]] | None] = {}
+_MANIFESTS: dict[tuple[str, ...], dict[str, Any]] = {}
+#: And the `BundleView` of those bytes under that chunk layout, which holds
+#: each chunk's haystack forms and offset maps once built: the larger cost
+#: of a corpus walk (#3709). A view changes after construction only by
+#: filling those memos, which are functions of the chunk text.
+_VIEWS: dict[tuple[str, ...], BundleView] = {}
+
+
+def _key(*values: Any) -> tuple[str, ...]:
+    """A cache key over record fields of any YAML shape: a list or a
+    mapping, even one whose keys mix types, is hashable here."""
+    def one(v: Any) -> str:
+        try:
+            return json.dumps(v, sort_keys=True, default=str)
+        except (TypeError, ValueError):        # keys of mixed types; a recursive alias
+            return f"repr:{v!r}"
+    return tuple(one(v) for v in values)
+
+
+def clear_caches() -> None:
+    """Forget every recovered bundle, in-memory manifest and shared view (#3709)."""
+    _RECOVERED.clear()
+    _MANIFESTS.clear()
+    _VIEWS.clear()
+
+
+def _shared_view(raw: bytes, text: str, manifest: dict[str, Any]) -> BundleView:
+    """The process's `BundleView` of these bytes under this manifest's
+    chunk layout — each chunk's id, line range and source, all a view reads."""
+    layout = [(c.get("id"), c.get("lines"), c.get("source")) if isinstance(c, dict) else None
+              for c in manifest.get("chunks") or []]
+    key = (hashlib.md5(raw).hexdigest(), *_key(layout))
+    if key not in _VIEWS:
+        _VIEWS[key] = BundleView(text, manifest)
+    return _VIEWS[key]
+
+
+def _chunked(raw: bytes, name: str, rule: Any, build) -> dict[str, Any]:
+    """`build(raw, name, rule)` (`chunking.manifest_from_bytes`), once per
+    (bytes, name, rule) in this process; the caller gets its own copy."""
+    key = (hashlib.md5(raw).hexdigest(), *_key(name, rule))
+    if key not in _MANIFESTS:
+        _MANIFESTS[key] = build(raw, name, rule)
+    return copy.deepcopy(_MANIFESTS[key])
+
+
+def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
+    """Rule 1 over every coverage receipt under `concat_dir`
+    (`{method}_core/{label}/{P}_coverage_receipt.yaml`, each read as
+    `run_status_context` reads a run), tallied per project: how many
+    snippets each haystack form located, how many were unlocated or
+    indeterminate, and how many flags name a non-plain form (#3709). A
+    receipt that cannot be read is listed under `unchecked` with its
+    reason, never raised: that includes a record or receipt of a shape the
+    reader does not expect, so one malformed record never stops the walk
+    (#3823). Read-only and non-gating, like every rule here.
+
+    Every snippet a read receipt carries is counted once: `snippets` equals
+    `located + unlocated + indeterminate + not_verified + value_unresolved`
+    (a snippet not verified in its chunk, or whose slot does not resolve in
+    the record, is not located at all), and `malformed_entries` counts the
+    receipt entries none of whose pairs was read (#3822).
+
+    The snippet lists carry at most `LISTED_PER_RECEIPT` of each kind per
+    receipt, while the counts are complete; `unlocated_snippets_omitted`
+    and `form_located_snippets_omitted`, per project and in the totals,
+    count what the lists left out (#3809)."""
+    import yaml
+    non_plain = [f for f in HAYSTACK_FORMS if f != "plain"]
+
+    def tally() -> dict[str, Any]:
+        return {"receipts": 0, "checked": 0, "snippets": 0, "verified": 0, "not_verified": 0,
+                "value_unresolved": 0, "malformed_entries": 0,
+                "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
+                "unlocated": 0, "indeterminate": 0, "flags_by_located_form": dict.fromkeys(non_plain, 0),
+                "unlocated_snippets_omitted": 0, "form_located_snippets_omitted": 0}
+
+    projects: dict[str, dict[str, Any]] = {}
+    totals = tally()
+    for receipt in sorted(Path(concat_dir).glob("*_core/*/*_coverage_receipt.yaml")):
+        core, project = receipt.parent, receipt.name[:-len("_coverage_receipt.yaml")]
+        method, where = core.parent.name[:-len("_core")], str(receipt.relative_to(concat_dir))
+        entry = projects.setdefault(project, {**tally(), "unchecked": [], "unlocated_snippets": [],
+                                              "form_located_snippets": []})
+        try:
+            out = run_status_context(core / f"{project}_provenance.yaml", receipt,
+                                     Path(concat_dir) / method / core.name / f"{project}_d4d.yaml")
+        except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError,
+                TypeError, AttributeError, KeyError) as exc:
+            # A field of a shape no reader expects is this receipt's
+            # problem, not the walk's (#3823).
+            out = _unchecked(RULE_RECEIPT, f"{type(exc).__name__}: {exc}")
+        for t in (entry, totals):
+            t["receipts"] += 1
+        if not out.get("checked"):
+            entry["unchecked"].append({"receipt": where, "reason": out.get("reason")})
+            continue
+        c = out["counts"]
+        for t in (entry, totals):
+            t["checked"] += 1
+            for k in _CORPUS_COUNTS:
+                t[k] += c[k]
+            t["unlocated_snippets_omitted"] += out["unlocated_omitted"]
+            t["form_located_snippets_omitted"] += out["form_located_omitted"]
+            for k in ("located_by_form", "flags_by_located_form"):
+                for f, n in c[k].items():
+                    t[k][f] += n
+        entry["unlocated_snippets"] += [{"receipt": where, **u} for u in out["unlocated"]]
+        entry["form_located_snippets"] += [{"receipt": where, **u} for u in out["form_located"]]
+    lines = []
+    for project, t in sorted(projects.items()):
+        forms = ", ".join(f"{f} {t['located_by_form'][f]}" for f in HAYSTACK_FORMS)
+        lines.append(f"{project}: {t['checked']}/{t['receipts']} receipts read · {_corpus_snippets(t)} ({forms})"
+                     f" · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_unread(t)
+                     + f" · flags through a joined or elided form {sum(t['flags_by_located_form'].values())}"
+                     + _corpus_omitted(t))
+    return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_RECEIPT, "checked": True,
+            "gating": False, "root": str(concat_dir), "projects": dict(sorted(projects.items())),
+            "totals": totals, "summary": lines, "assurance": ASSURANCE}
+
+
+#: The per-receipt counts a corpus walk sums (#3822): every snippet, and
+#: where each one went.
+_CORPUS_COUNTS = ("snippets", "verified", "not_verified", "value_unresolved", "located", "unlocated",
+                  "indeterminate", "malformed_entries")
+
+
+def _corpus_snippets(t: dict[str, Any]) -> str:
+    return f"snippets {t['snippets']} · located {t['located']}"
+
+
+def _corpus_unread(t: dict[str, Any]) -> str:
+    """The snippets whose context was not read because they were not
+    verified or their slot did not resolve, and the malformed receipt
+    entries none of whose pairs was read (#3822): always shown, zero or not."""
+    return (f" · not verified {t['not_verified']} · value unresolved {t['value_unresolved']}"
+            f" · malformed receipt entries {t['malformed_entries']}")
+
+
+def _corpus_omitted(t: dict[str, Any]) -> str:
+    """The clause naming snippets the per-receipt lists left out (#3809)."""
+    cut = [f"{t[k]} {what}" for k, what in (("unlocated_snippets_omitted", "unlocated"),
+                                           ("form_located_snippets_omitted", "form-located")) if t[k]]
+    return (f" · {' and '.join(cut)} snippet(s) not listed below (at most {LISTED_PER_RECEIPT} "
+            "of each per receipt)" if cut else "")
+
+
+def corpus_report_lines(out: dict[str, Any]) -> list[str]:
+    """The human-readable form of `corpus_status_context`, one line each."""
+    t = out["totals"]
+    lines = [f"   {out['instrument']} · {out['rule']} · corpus under {out['root']} · non-gating",
+             f"   {t['checked']}/{t['receipts']} receipts read · {_corpus_snippets(t)} ("
+             + ", ".join(f"{f} {n}" for f, n in t["located_by_form"].items())
+             + f") · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_unread(t)
+             + _corpus_omitted(t)]
+    lines += [f"   {line}" for line in out["summary"]]
+    for project, p in out["projects"].items():
+        for u in p["unchecked"]:
+            lines.append(f"   · unchecked {project}: {u['receipt']}: {u['reason']}")
+        for u in p["unlocated_snippets"]:
+            lines.append(f"   · unlocated {project}: {u['receipt']} chunk={u['chunk']} slot={u['slot']}")
+        for u in p["form_located_snippets"]:
+            lines.append(f"   · {u['form']} {project}: {u['receipt']} chunk={u['chunk']} slot={u['slot']}")
+    lines.append(f"   · assurance: {out['assurance']}")
+    return [_one_line(line) for line in lines]
 
 
 def _record_bytes(bundle: Path | None, inputs: dict[str, Any]) -> tuple[bytes | None, dict[str, Any], str | None]:
@@ -1398,8 +1667,11 @@ def _record_bytes(bundle: Path | None, inputs: dict[str, Any]) -> tuple[bytes | 
     if not rel:
         return None, {}, "the bundle on disk is not the bytes the record hashed, and the record declares no path"
     from data_sheets_schema.provenance import GitUnavailable, bundle_bytes_for
+    key = _key(rel, md5 or None, sha or None)
     try:
-        recovered = bundle_bytes_for(rel, md5=md5, sha256=sha)
+        if key not in _RECOVERED:
+            _RECOVERED[key] = bundle_bytes_for(rel, md5=md5, sha256=sha)
+        recovered = _RECOVERED[key]
     except GitUnavailable as exc:
         return None, {}, f"the bundle drifted and git could not supply the version the record hashed: {exc}"
     if recovered is None:
@@ -1474,5 +1746,8 @@ def _report_lines(out: dict[str, Any]) -> list[str]:
             lines.append(f"   flag {f['rule']} {where}: {detail}")
     for u in out.get("unlocated") or []:
         lines.append(f"   · unlocated: chunk={u['chunk']} slot={u['slot']}")
+    if out.get("unlocated_omitted"):
+        lines.append(f"   · {out['unlocated_omitted']} more unlocated not listed "
+                     f"(at most {LISTED_PER_RECEIPT} per receipt)")
     lines.append(f"   · assurance: {out['assurance']}")
     return lines
