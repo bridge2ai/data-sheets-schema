@@ -348,19 +348,20 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     derive whose words are not on the command line (a script, an alias, a variable supplying
     `derive` itself, `python -c` building the arguments) is placed by position: a
     shell call that runs a program this does not read (anything but a reader, a
-    directory change, a d4d call of a literal subcommand, or `linkml-validate` or
+    builtin `cd`, `pushd` or `popd` -- not `./cd` or `poetry run cd` -- a d4d call of a literal subcommand, or `linkml-validate` or
     `linkml-term-validator` with the options it reads, each run as its words name it: a bare
     name or absolute path, no assignment before it, `printf -v` included, and no directory
     change before a `python -c` or `-m` part or a `poetry run` part, a `derive core` call
     aimed at another record included; the inner command of a command or
     process substitution is never read), that had not returned when the first full-record Write was
     issued (one in flight with it, backgrounded by its `run_in_background` input or its result,
-    or started with `&`, `coproc`, `setsid` and the like counts, a `&` inside a nested shell's
+    or started with `&`, `coproc`, `setsid` and the like, or by a process substitution
+    `<(...)` or `>(...)`, which bash does not wait for, counts, a `&` inside a nested shell's
     word read as that shell splits a word with a space in it) and was issued before the derive, with a receipt change returning after both
     it and the first full-record Write were issued,
     makes the status `unknown`; its cost is a false `unknown` for such a program that
     derived nothing. A command the tokenizer cannot split is such a call, open-ended where its
-    text carries a `&`, `coproc` or `setsid` and the like. A script that detaches a child itself
+    text carries a `&`, `coproc`, `setsid` and the like, `<(` or `>(`. A script that detaches a child itself
     is not seen as open-ended, nor is an
     environment set outside the command read, nor a package in the call's own starting
     directory that a `python -c` or `-m` part imports first, nor the project there whose

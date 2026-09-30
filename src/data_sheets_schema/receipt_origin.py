@@ -107,8 +107,10 @@ notes.md`, the recorder's `--phase 'derive core'`). A derive whose words
 are not on the command line at all (a script, an alias or function, `d4d
 $SUB`, `python -c` building the argument list) is placed by position
 instead (#3369): a shell call not denied that runs a program not read
-here -- a part that is neither a reader, a directory change, a d4d call of
-a literal subcommand, nor `linkml-validate` or `linkml-term-validator` with
+here -- a part that is neither a reader, a directory change (the builtin
+`cd`, `pushd` or `popd` as the part's first word after its assignments; a
+path-qualified lookalike, `./cd`, or `poetry run cd`, is a program not
+read, #3753), a d4d call of a literal subcommand, nor `linkml-validate` or `linkml-term-validator` with
 options this reads (as the console script or as the `python -c` program
 the pipeline spells each with), or such a part not run as its words name
 (a variable or relative path as its program, an assignment before it or
@@ -130,10 +132,14 @@ the word has a space in it, `bash -c './derive.sh&echo started'`, #3745,
 a shell nested in that one not split again, and otherwise only where a
 space, `)`, `}`, `;`, `#` or the end follows the `&`, so `R&D` is text --
 or by `coproc`, or by a program that detaches it, `setsid`, `screen`,
-`tmux` and the like, may outlive it, so none of them has, #3674, #3690; a
+`tmux` and the like, may outlive it, so none of them has, #3674, #3690;
+nor has a call that starts a process substitution, which bash does not
+wait for (`true <(bash step.sh)`): a `<(` or `>(` outside quotes, one
+anywhere after a command substitution opens, or one in a nested shell's
+word with a space in it, #3752; a
 command the tokenizer cannot split is open-ended where its whole text
-carries such a `&`, by the rule for a word with no space, `coproc` or
-detaching program, #3698; a script that detaches a child itself, or a
+carries such a `&`, by the rule for a word with no space, `coproc`,
+detaching program or `<(` / `>(`, #3698, #3752; a script that detaches a child itself, or a
 detaching program behind a wrapper not read, `sudo`, is not seen), it
 was issued before the
 derive boundary (if any), and a receipt change issued before that
@@ -283,7 +289,9 @@ NON_CHECKS = (
     "supplying the word `derive` itself (`d4d $SUB`), `python -c` building the argument list, "
     "or a file that an earlier call wrote the words into and a later call runs) is not placed "
     "by the words (#3137, #3384) but by position (#3369): a shell call that runs a program not "
-    "read here -- neither a reader, a directory change, a d4d call of a literal subcommand, nor "
+    "read here -- neither a reader, a directory change (the builtin `cd`, `pushd` or `popd`; a "
+    "path-qualified lookalike, `./cd`, or `poetry run cd`, is a program not read, #3753), a d4d "
+    "call of a literal subcommand, nor "
     "`linkml-validate` or `linkml-term-validator` with options read here, each counted only where "
     "it runs what its words name: a bare name or an absolute path as its program, never a "
     "variable or a relative path (`$PY`, `./python`), and no assignment before it or as an "
@@ -310,8 +318,11 @@ NON_CHECKS = (
     "(#3690), or a part's program detaches what it runs (`setsid`, `daemon`, `disown`, "
     "`screen`, `tmux`, `at`, `batch`, `systemd-run`, `start-stop-daemon`, #3674), read through "
     "`timeout`, `env`, `nice`, `nohup`, `exec` and `command` and as a command's first word "
-    "inside such a nested word (#3690), and a command the tokenizer cannot split is open-ended "
-    "where its whole text carries such a `&`, `coproc` or detaching program (#3698); a script "
+    "inside such a nested word (#3690), or a part starts a process substitution, which bash does "
+    "not wait for (`true <(bash step.sh)`: a `<(` or `>(` outside quotes, anywhere after a "
+    "command substitution opens, or in a nested shell's word with a space in it, #3752), and a "
+    "command the tokenizer cannot split is open-ended where its whole text carries such a `&`, "
+    "`coproc`, detaching program, `<(` or `>(` (#3698, #3752); a script "
     "or program that backgrounds or daemonises a "
     "child itself, or a detaching program behind any other wrapper (`sudo`, `xargs`), is not "
     "seen as open-ended, so where the call returned before the draft was issued a derive that "
@@ -739,6 +750,54 @@ def _substitutes(command: str) -> bool:
             quote = ch
         i += 1
     return False
+
+
+def _process_substitutes(command: str) -> bool:
+    """Whether the (comment-free) command may start a process substitution
+    (`<(...)` or `>(...)`), which bash does not wait for: the substituted
+    process can run on after the call's result (`true <(bash step.sh)`,
+    #3752), as a part started with `&` does. That is a `<(` or `>(` outside
+    quotes, as `_substitutes` reads it, or one anywhere after a command
+    substitution opens (a backtick or `$(`), since the substitution's own
+    command, quoted or not, may start one (`echo "$(cat <(./derive.sh))"`).
+    Conservative: `$((a<(b)))` arithmetic and a quoted `'<('` inside a
+    command substitution count too."""
+    i, n = 0, len(command)
+    quote: str | None = None
+    while i < n:
+        ch = command[i]
+        if quote in ("'", "$'"):
+            if ch == "\\" and quote == "$'" and i + 1 < n:
+                i += 2
+                continue
+            if ch == "'":
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            i += 2
+            continue
+        if ch == "`" or (ch == "$" and command[i + 1:i + 2] == "("):
+            return bool(_PROCESS_SUBSTITUTION.search(command, i))
+        if quote == '"':
+            if ch == '"':
+                quote = None
+        elif ch in "<>" and command[i + 1:i + 2] == "(":
+            return True
+        elif ch == "$" and command[i + 1:i + 2] == "'":
+            quote = "$'"
+            i += 2
+            continue
+        elif ch in "'\"":
+            quote = ch
+        i += 1
+    return False
+
+
+#: A `<(` or `>(` anywhere in a text, quotes not read: the rule for a
+#: command the tokenizer cannot split (#3752), and for the rest of a
+#: command once a command substitution opens.
+_PROCESS_SUBSTITUTION = re.compile(r"[<>]\(")
 
 
 def _newlines_as_joins(command: str) -> str:
@@ -1179,6 +1238,20 @@ def _poetry_run(segment: list[str]) -> bool:
     return False
 
 
+def _directory_builtin(segment: list[str]) -> str | None:
+    """The directory-changing builtin a part runs -- `cd`, `pushd` or
+    `popd` -- or None. It is that builtin only where the word, after the
+    part's leading assignments, is exactly the builtin's name: bash finds a
+    builtin before `PATH`, but `./cd`, `bin/pushd` or `/usr/bin/cd` names a
+    file it runs as a program, and `poetry run cd` runs whatever `cd` its
+    virtualenv's `PATH` finds (#3753). Such a lookalike changes no directory
+    and runs a program not read here."""
+    rest = list(segment)
+    while rest and _ASSIGNMENT.fullmatch(rest[0]):
+        rest.pop(0)
+    return rest[0] if rest[:1] in (["cd"], ["pushd"], ["popd"]) else None
+
+
 def _chosen_by_cwd(segment: list[str]) -> bool:
     """Whether the working directory may choose the code a part runs: a
     `python -c` or `-m` interpreter (`_imports_from_cwd`, #3699) or a program
@@ -1530,7 +1603,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     tokens = _tokens(command)
     named = [x for x in targets if x.name in command]
     # `runs_unread`: some part runs a program this does not read -- neither a
-    # reader, a directory change, nor a d4d call of a literal subcommand --
+    # reader, a builtin directory change (#3753), nor a d4d call of a literal subcommand --
     # or the command substitutes one (#3675), so it may run a `derive core` whose words are not on the command line
     # (#3369).
     # A part counts only where it runs what its words name (`_plainly_run`,
@@ -1556,8 +1629,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         # or `coproc` or a detaching program where a command may start (a
         # here-document body fed to a shell may carry either). Where neither
         # is there, a call that returned before the draft was issued could
-        # not have derived after it (#3698).
-        out["detaches"] = bool(_NESTED_DETACH.search(command) or _NESTED_DETACHER.search(command))
+        # not have derived after it (#3698). A `<(` or `>(` anywhere in it
+        # may start a process substitution bash does not wait for (#3752).
+        out["detaches"] = bool(_NESTED_DETACH.search(command) or _NESTED_DETACHER.search(command)
+                               or _PROCESS_SUBSTITUTION.search(command))
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -1568,12 +1643,16 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # or a part whose program detaches what it runs (`setsid`, `screen`,
     # `tmux`, ...), directly or under a wrapper `_unwrapped` reads (#3674),
     # or a `coproc`, at the top level or at a command's start inside such a
-    # word, as a detaching program may be there too (#3690).
+    # word, as a detaching program may be there too (#3690); or a process
+    # substitution, which bash does not wait for (`true <(bash step.sh)`),
+    # at the top level or in a word with a space in it that a nested shell
+    # may run (`bash -c 'cat <(./derive.sh)'`), #3752.
     out["detaches"] = any(
         _lone_ampersand(t)
         or (not set(t) <= _PUNCT and (_nested_detaches(t) or (
-            re.search(r"\s", t) and _NESTED_DETACHER.search(t))))
-        for t in tokens) or any(_detacher(s) for s in segments)
+            re.search(r"\s", t) and (_NESTED_DETACHER.search(t) or _process_substitutes(t)))))
+        for t in tokens) or any(_detacher(s) for s in segments) or _process_substitutes(
+        _strip_comments(command))
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) for s in segments)
     for target in named:
         for token in tokens:
@@ -1641,12 +1720,17 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             assigned = assigned or any(_ASSIGNMENT.fullmatch(word) for word in segment)
             continue
         program = os.path.basename(rest[0])
-        if program in ("cd", "pushd", "popd"):
+        # Only the builtin moves the directory, and only it leaves the loop
+        # here: a path-qualified lookalike (`./cd`, `/usr/bin/cd`) or one run
+        # through `poetry run` is a program like any other, read below as
+        # one not read (#3753).
+        change = _directory_builtin(segment)
+        if change is not None:
             reached = not newline and before in ([], [";"], ["&&"])
             unsettled = True
             moved = True
-        if program in ("cd", "pushd"):
-            if program == "pushd":
+        if change in ("cd", "pushd"):
+            if change == "pushd":
                 pushed.append(local)
                 if not reached:
                     pushed = [None] * len(pushed)
@@ -1658,7 +1742,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             else:
                 local = os.path.join(local, where) if local is not None else None
             continue
-        if program == "popd":
+        if change == "popd":
             local = pushed.pop() if pushed and len(rest) == 1 and reached else None
             if len(rest) > 1 or not reached:
                 pushed = [None] * len(pushed)
