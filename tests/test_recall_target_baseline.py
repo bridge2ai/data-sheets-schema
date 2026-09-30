@@ -528,12 +528,15 @@ def test_the_committed_baseline_is_what_the_records_reproduce():
 #: The shape of a parenthesised version citation in a bundle (#3571, #3611):
 #: `(v3.20.0)`, `(v 1.7.3)`, `(v.1.21.6)`, `(v.gpt-4-1106-preview)`,
 #: `(Version 3.0.0)`, `(version 1.1)`, `(Version: 2.1)`, `(ver. 2.1)`, and
-#: any of these with more text before the close, as in `(version 3,
-#: released fall 2025)`; any case. A bare `v` must be followed by a digit
+#: any of these with any amount of text before the close, as in `(version
+#: 3, released fall 2025)` or `(v.12, NDEx uuid 0b04e9eb-...; Extended Data
+#: Fig. 2b,e )` (#3617: the tail was bounded at 60 characters, and two
+#: CM4AI citations ran past it unexamined); any case. The tail stops at the
+#: first parenthesis, so it never spans a nested or a later citation. A bare `v` must be followed by a digit
 #: and a `v.` by a token carrying one, so abbreviations such as `(VNNs)`,
 #: `(VHI-10)` and `(VUMC)` are not citations.
 VERSION_CITATION = __import__("re").compile(
-    r"\((?:v\s?(?=\d)|v\.\s?(?=[\w.-]*\d)|ver\.?\s?(?=\d)|version:?\s?(?=\d))[\w.-]+[^()]{0,60}\)",
+    r"\((?:v\s?(?=\d)|v\.\s?(?=[\w.-]*\d)|ver\.?\s?(?=\d)|version:?\s?(?=\d))[\w.-]+[^()]*\)",
     __import__("re").IGNORECASE)
 
 #: Parenthesised version citations in the bundles that are not software:
@@ -547,6 +550,8 @@ NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT", "a license versi
                 ("CM4AI", "HPA", "a database release"),
                 ("CM4AI", "CORUM", "a database release"),
                 ("CM4AI", "STRING interactome", "a database release"),
+                ("CM4AI", "STRING 78 , 79", "a reference database release (#3617)"),
+                ("CM4AI", "CORUM 25 complex", "a reference database release (#3617)"),
                 ("VOICE", "diverse voice dataset linked to health information", "the dataset's own releases"),
                 ("VOICE", "Bridge2AI-Voice Pediatric Dataset", "the related pediatric dataset's release"),
                 ("VOICE", "Discovery DOI", "a dataset release's DOI"))
@@ -554,11 +559,13 @@ NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT", "a license versi
 
 @pytest.mark.parametrize("text", [
     "(v3.20.0)", "(v 1.7.3)", "(v.1.21.6)", "(v.gpt-4-1106-preview)", "(Version 3.0.0)", "(version 1.1)",
-    "(VERSION 2)", "(Version: 2.1)", "(ver. 2.1)", "(Ver 2.1)", "(version 3, released fall 2025)"])
+    "(VERSION 2)", "(Version: 2.1)", "(ver. 2.1)", "(Ver 2.1)", "(version 3, released fall 2025)",
+    "(v.9.9, NDEx uuid 0b04e9eb-8e60-11ee-8a13-005056ae23aa; Extended Data Fig. 2b,e )"])
 def test_the_citation_shape_sees_every_spelling_of_a_version(text):
     """#3611: the shape was case-sensitive on `Version` and wanted a digit
     straight after the prefix, so `(version 1.1)`, `(Version: 2.1)`, `(ver.
-    2.1)` and `(v.gpt-4-1106-preview)` were never examined."""
+    2.1)` and `(v.gpt-4-1106-preview)` were never examined. #3617: a tail
+    longer than 60 characters before the close was never examined either."""
     assert VERSION_CITATION.fullmatch(text), text
 
 
