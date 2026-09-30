@@ -84,13 +84,34 @@ listed verb it brings into reach that is not the one the sentence turns on.
 A verb the list lacks is not a bound: the 10 `no_verb` rows are admitted by none of
 these, and what adding verbs would admit depends on which verbs.
 
+## Precision of the kept matches
+
+- **Draw:** `--kept-sample 50 --seed 2919`, sha256 `ec97ce4b8e0f6d135c9b6ed1a7d55adbad1cdc3b9805c4c8b8dd14e6aaf8e61f`: 50 of the 248 matches v3 keeps (#3793).
+- **Judgements:** `notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml`, recorded 2026-09-30. One rater, the agent
+  implementing #3793, reading each phrase with the readings above: not an independent review.
+
+| reading | verdict | kept, drawn |
+|---|---|---:|
+| construction | in_class | 44 |
+| referent | in_class | 1 |
+| source | borderline | 5 |
+| absence | not_in_class | 0 |
+| **all** | | 50 |
+
+45 of the 50 drawn are in class: a precision of 90.0% (Wilson 95% interval 78.6% to 95.7%)
+for the matches v3 keeps of this pattern. The rest are borderline: sentences that report what a source, or the manifest,
+states and say nothing of what the record did.
+
 ## Recall
 
 Of the 88 dropped matches, 35 are in class, 50 borderline and 3 not in class.
 v3 therefore gives up 35 in-class matches of `rsn.source-ranking`. If all 248 of v3's matches
-are in class it keeps 248 of 283 (87.6%) of the in-class matches v2 had;
-the kept matches' precision for this pattern is not measured here, so that figure is an upper
-bound on the pattern's recall relative to v2.
+were in class it would keep 248 of 283 (87.6%) of the in-class matches v2 had; that is the upper bound.
+At the measured precision it keeps an estimated 223 in-class matches (248 × 45/50),
+so its recall of this pattern relative to v2 is an estimated **86.4%**
+(84.8% to 87.1% over the precision's interval, which carries only the
+sampling error of the kept draw: the dropped matches are a census). Borderline phrases are counted
+in class on neither side, kept or dropped.
 
 By sentence the loss is smaller. 30 of the 35 in-class phrases sit in a sentence another v3
 record_self_narration phrase still flags; 5 do not, and v3 counts nothing in their

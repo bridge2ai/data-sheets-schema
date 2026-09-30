@@ -13,6 +13,12 @@ record's construction, and so how much recall v3 gave up for its precision.
 It is a measurement of v3, not a change to it. It registers no lexicon, and
 the counts in the baseline note do not move.
 
+The note also measures the precision of the 248 matches v3 keeps (#3793):
+a seeded draw of them (`--kept-sample`), judged per phrase in the file its
+`KEPT` entry names with the same readings, turns the recall the note reports
+from an upper bound (every kept match in class) into a point estimate with
+an interval.
+
 A *dropped match* is a v2 match of the pattern that no v3 match of the same
 pattern ends at, in the same leaf. Every v3 match ends at a term v2 matched
 (the v3 file says so, and `dropped` refuses a record where one does not), so
@@ -54,12 +60,15 @@ Usage:
     poetry run python scripts/absence_v3_recall.py --sample 88 --seed 2919
         # read-only: print the seeded draw with each phrase's sentence and its
         # computed cause, for judging, and the draw's sha256 last
+    poetry run python scripts/absence_v3_recall.py --kept-sample 50 --seed 2919
+        # read-only: the same for a seeded draw of the matches v3 keeps (#3793)
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import importlib.util
+import math
 import random
 import re
 import sys
@@ -128,6 +137,20 @@ RECALL: dict[str, Any] = {
     "classes": {RSN: (35, 50, 3)},
     "judgements": "notes/absence_v3_recall_judgements_241e910e.yaml",
 }
+#: The judged draw of the matches v3 keeps (#3793), keyed like RECALL: a
+#: seeded sample of them, in the order `random.Random(seed).sample` puts
+#: them, judged with `READINGS`. One rater, the agent implementing #3793: not
+#: an independent review.
+KEPT: dict[str, Any] = {
+    "lexicon_sha256": RECALL["lexicon_sha256"],                                                  # v3
+    "record_set_sha256": RECALL["record_set_sha256"],                                            # 303 records
+    "sample": 50, "seed": baseline.SAMPLE_SEED,
+    "draw_sha256": "ec97ce4b8e0f6d135c9b6ed1a7d55adbad1cdc3b9805c4c8b8dd14e6aaf8e61f",
+    "classes": {RSN: (45, 5, 0)},
+    "judgements": "notes/absence_v3_precision_source_ranking_judgements_ec97ce4b.yaml",
+}
+#: The normal quantile of the Wilson interval the precision is reported with.
+_Z95 = 1.959963984540054
 
 
 class Refused(Exception):
@@ -231,6 +254,7 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
     variants = _variants(p3)
     scope = absence_lint._scope(v3)
     rows: list[tuple[str, dict]] = []
+    kept_rows: list[tuple[str, dict]] = []
     totals = {"v2": 0, "v3": 0}
     records, changed, missing = [], [], []
     for rel in sorted(pins):
@@ -264,6 +288,10 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
             if any(e not in ends for _, e in new):
                 raise Refused(f"{rel} {pointer}: a v3 match ends where no v2 match does")
             kept = {e for _, e in new}
+            for s, e in new:
+                ss, se = _sentence(text, s, e)
+                kept_rows.append((rel, {"pointer": pointer, "start": s, "end": e, "text": text[s:e],
+                                        "patterns": [PATTERN], "sentence": (ss, se)}))
             for s, e in old:
                 if e in kept:
                     continue
@@ -280,21 +308,25 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
     if changed or missing:
         raise baseline.Stale(f"{len(changed)} pinned record(s) changed and {len(missing)} gone", changed, missing)
     digest = hashlib.sha256("".join(f"{r['path']} {r['sha256']}\n" for r in records).encode()).hexdigest()
-    return {"corpus": corpus, "records": len(records), "record_set_sha256": digest, "rows": rows, "totals": totals}
+    return {"corpus": corpus, "records": len(records), "record_set_sha256": digest, "rows": rows,
+            "kept": kept_rows, "totals": totals}
 
 
-def draw(found: dict[str, Any], n: int, seed: int) -> dict[str, tuple[int, list[tuple[str, dict]]]]:
-    """The seeded draw, shaped as the baseline's so its `draw_sha256` names it."""
-    rows = found["rows"]
+def draw(found: dict[str, Any], n: int, seed: int, population: str = "rows"
+         ) -> dict[str, tuple[int, list[tuple[str, dict]]]]:
+    """The seeded draw, shaped as the baseline's so its `draw_sha256` names it:
+    of the dropped matches (`rows`), or of the matches v3 keeps (`kept`)."""
+    rows = found[population]
     return {RSN: (len(rows), random.Random(seed).sample(rows, min(n, len(rows))))}
 
 
-def sample(found: dict[str, Any], n: int, seed: int) -> list[str]:
+def sample(found: dict[str, Any], n: int, seed: int, population: str = "rows") -> list[str]:
     """The draw with each phrase's sentence and a margin, for judging."""
     out, texts = [], {}
-    drawn = draw(found, n, seed)
+    drawn = draw(found, n, seed, population)
     total, picked = drawn[RSN]
-    out.append(f"## {RSN}: {len(picked)} of {total} dropped {PATTERN} matches")
+    kept = population == "kept"
+    out.append(f"## {RSN}: {len(picked)} of {total} {'kept' if kept else 'dropped'} {PATTERN} matches")
     for i, (path, h) in enumerate(picked, 1):
         if path not in texts:
             texts[path] = yaml.safe_load((found["corpus"] / path).read_text(encoding="utf-8"))
@@ -302,9 +334,10 @@ def sample(found: dict[str, Any], n: int, seed: int) -> list[str]:
         ss, se = h["sentence"]
         lo, hi = max(0, ss - 160), min(len(text), se + 80)
         shown = text[lo:h["start"]] + "[[" + h["text"] + "]]" + text[h["end"]:hi]
-        out.append(f"{i}. {path} {h['pointer']} {h['start']}-{h['end']} cause={h['cause']} "
-                   f"flagged={h['flagged']}\n   …{shown}…")
-    out.append(f"draw sha256 {baseline.draw_sha256(drawn)} (--sample {n} --seed {seed})")
+        computed = "" if kept else f" cause={h['cause']} flagged={h['flagged']}"
+        out.append(f"{i}. {path} {h['pointer']} {h['start']}-{h['end']}{computed}\n   …{shown}…")
+    flag = "--kept-sample" if kept else "--sample"
+    out.append(f"draw sha256 {baseline.draw_sha256(drawn)} ({flag} {n} --seed {seed})")
     return out
 
 
@@ -332,8 +365,38 @@ def read_judgements(found: dict[str, Any]) -> dict[str, Any]:
     return data
 
 
+def read_kept_judgements(found: dict[str, Any]) -> dict[str, Any]:
+    """The kept-match judgement file, checked by the baseline's reader against
+    `KEPT`, with each reading carrying its verdict and each phrase a match v3
+    keeps (the draw's hash already names them; this says which one is not)."""
+    if found["record_set_sha256"] != KEPT["record_set_sha256"]:
+        raise Refused("the pinned record set is not the one the kept-match judgements were drawn from")
+    try:
+        data = baseline.read_judgements(KEPT["lexicon_sha256"], KEPT)
+    except baseline.Refused as exc:
+        raise Refused(str(exc)) from exc
+    kept = {(p, h["pointer"], h["start"], h["end"]) for p, h in found["kept"]}
+    for row in data["judgements"][RSN]:
+        if (row["record"], row["pointer"], row["start"], row["end"]) not in kept:
+            raise Refused(f"{KEPT['judgements']} #{row.get('n')}: not a match v3 keeps")
+        if READINGS.get(row.get("reading")) != row["verdict"]:
+            raise Refused(f"{KEPT['judgements']} #{row.get('n')}: reading {row.get('reading')!r} does not carry "
+                          f"the verdict {row['verdict']!r}")
+    return data
+
+
+def wilson(k: int, n: int, z: float = _Z95) -> tuple[float, float]:
+    """The Wilson score interval for k successes in n draws."""
+    p = k / n
+    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
+    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
+    return max(0.0, centre - half), min(1.0, centre + half)
+
+
 def render_markdown(found: dict[str, Any]) -> str:
     data = read_judgements(found)
+    kept_data = read_kept_judgements(found)
+    kept_rows = kept_data["judgements"][RSN]
     rows = data["judgements"][RSN]
     totals, n_dropped, kept = found["totals"], len(found["rows"]), found["totals"]["v3"]
     in_class = [r for r in rows if r["verdict"] == "in_class"]
@@ -437,6 +500,36 @@ def render_markdown(found: dict[str, Any]) -> str:
         f"{sum(r['cause'] == 'no_verb' for r in rows)} `no_verb` rows are admitted by none of",
         "these, and what adding verbs would admit depends on which verbs.",
     ]
+    n_kept = len(kept_rows)
+    k_in = sum(r["verdict"] == "in_class" for r in kept_rows)
+    lo, hi = wilson(k_in, n_kept)
+    kept_census = n_kept == kept
+    lines += [
+        "",
+        "## Precision of the kept matches",
+        "",
+        f"- **Draw:** `--kept-sample {KEPT['sample']} --seed {KEPT['seed']}`, sha256 `{KEPT['draw_sha256']}`"
+        + (": every kept match." if kept_census else f": {n_kept} of the {kept} matches v3 keeps (#3793)."),
+        f"- **Judgements:** `{KEPT['judgements']}`, recorded {kept_data['recorded']}. One rater, the agent",
+        "  implementing #3793, reading each phrase with the readings above: not an independent review.",
+        "",
+        "| reading | verdict | kept, drawn |",
+        "|---|---|---:|",
+    ]
+    for reading, verdict in READINGS.items():
+        lines.append(f"| {reading} | {verdict} | {sum(r['reading'] == reading for r in kept_rows)} |")
+    lines += [
+        f"| **all** | | {n_kept} |",
+        "",
+        f"{k_in} of the {n_kept} drawn are in class: a precision of {100 * k_in / n_kept:.1f}% "
+        f"(Wilson 95% interval {100 * lo:.1f}% to {100 * hi:.1f}%)",
+        "for the matches v3 keeps of this pattern.",
+    ]
+    if all(r["reading"] == "source" for r in kept_rows if r["verdict"] != "in_class"):
+        lines[-1] += (" The rest are borderline: sentences that report what a source, or the manifest,"
+                      "\nstates and say nothing of what the record did.")
+    est, est_lo, est_hi = (kept * p for p in (k_in / n_kept, lo, hi))
+    recall = lambda x: 100 * x / (x + len(in_class))  # noqa: E731
     lines += [
         "",
         "## Recall",
@@ -445,10 +538,13 @@ def render_markdown(found: dict[str, Any]) -> str:
         f"{sum(r['verdict'] == 'borderline' for r in rows)} borderline and "
         f"{sum(r['verdict'] == 'not_in_class' for r in rows)} not in class.",
         f"v3 therefore gives up {len(in_class)} in-class matches of `{PATTERN}`. If all {kept} of v3's matches",
-        f"are in class it keeps {kept} of {kept + len(in_class)} ({100 * kept / (kept + len(in_class)):.1f}%) "
-        "of the in-class matches v2 had;",
-        "the kept matches' precision for this pattern is not measured here, so that figure is an upper",
-        "bound on the pattern's recall relative to v2.",
+        f"were in class it would keep {kept} of {kept + len(in_class)} "
+        f"({recall(kept):.1f}%) of the in-class matches v2 had; that is the upper bound.",
+        f"At the measured precision it keeps an estimated {est:.0f} in-class matches ({kept} × {k_in}/{n_kept}),",
+        f"so its recall of this pattern relative to v2 is an estimated **{recall(est):.1f}%**",
+        f"({recall(est_lo):.1f}% to {recall(est_hi):.1f}% over the precision's interval, which carries only the",
+        "sampling error of the kept draw: the dropped matches are a census). Borderline phrases are counted",
+        "in class on neither side, kept or dropped.",
         "",
         f"By sentence the loss is smaller. {len(in_class) - len(lost)} of the {len(in_class)} in-class "
         "phrases sit in a sentence another v3",
@@ -470,18 +566,25 @@ def main(argv: list[str] | None = None) -> int:
     mode.add_argument("--check", action="store_true", help="read-only: exit 1 when the note is stale")
     mode.add_argument("--sample", type=baseline._count, metavar="N",
                       help="read-only: print N dropped matches with context, and the draw's sha256")
+    mode.add_argument("--kept-sample", type=baseline._count, metavar="N",
+                      help="read-only: print N of the matches v3 keeps with context, and the draw's sha256")
     ap.add_argument("--seed", type=int, metavar="S",
-                    help=f"the --sample draw's seed (default {baseline.SAMPLE_SEED}); refused without --sample")
+                    help=f"the draw's seed (default {baseline.SAMPLE_SEED}); refused without --sample "
+                         "or --kept-sample")
     args = ap.parse_args(argv)
-    if args.seed is not None and args.sample is None:
-        ap.error("--seed applies only with --sample")
+    if args.seed is not None and args.sample is None and args.kept_sample is None:
+        ap.error("--seed applies only with --sample or --kept-sample")
     try:
         found = dropped(baseline.CORPUS, baseline.read_pins(baseline.PINS))
     except (baseline.Stale, Refused) as exc:
         print(f"refused: {exc}", file=sys.stderr)
         return 1
+    seed = baseline.SAMPLE_SEED if args.seed is None else args.seed
     if args.sample is not None:
-        print("\n".join(sample(found, args.sample, baseline.SAMPLE_SEED if args.seed is None else args.seed)))
+        print("\n".join(sample(found, args.sample, seed)))
+        return 0
+    if args.kept_sample is not None:
+        print("\n".join(sample(found, args.kept_sample, seed, "kept")))
         return 0
     try:
         text = render_markdown(found)
