@@ -648,6 +648,24 @@ class UnspacedScriptTest(unittest.TestCase):
         self.assertEqual(cls("ザトウ", "ザトウ", "担当サトウ"), "diacritic_dropped")
         self.assertEqual(cls("サトウ", "サトウ", "担当ザトウ"), "diacritic_dropped")
 
+    def test_each_script_listed_is_read_as_one(self):
+        """Every range the module lists, by a name inside a longer run of
+        its script (#3671). Without the range the bundle's run is one token
+        and the name reads `absent`; NFKC alone does not rescue half-width
+        katakana here, since `ﾔﾏﾀﾞﾀﾛｳ` composes to `ヤマダタロウ`, not `ヤマダ`."""
+        for script, name, bundle in (
+                ("half-width katakana", "ﾔﾏﾀﾞ", "担当ﾔﾏﾀﾞﾀﾛｳ様"),
+                ("iteration mark 々", "佐々木", "担当は佐々木さんです"),
+                ("Lao", "ສົມພອນ", "ທ່ານສົມພອນເປັນຫົວໜ້າ"),
+                ("Myanmar", "အောင်ဆန်း", "ဦးအောင်ဆန်းသည်"),
+                ("Khmer", "ដារ៉ា", "លោកដារ៉ាសុខ")):
+            with self.subTest(script=script):
+                self.assertEqual(name_tokens(name), [name])
+                self.assertEqual(cls(name, name, bundle), "grounded")
+        # The iteration marks are letters of the ideograph run they sit in,
+        # not a run of their own that would cut `佐々木` in two.
+        self.assertEqual(name_tokens("〆木"), ["〆木"])
+
     def test_latin_letters_beside_such_a_script_are_a_token_of_their_own(self):
         """In the bundle too: `研究员Tim Clark` writes `Tim`, which v1 read
         as part of one run with `研究员`."""
@@ -661,9 +679,13 @@ class UnspacedScriptTest(unittest.TestCase):
         self.assertEqual(cls("王小明 Metallo", "王小明", "Metallo 王"), "absent")
 
     def test_v2_does_not_judge_them(self):
-        """v2 reads capitalised words (#2978), which these scripts have none of."""
-        p = prox("王小明", "本研究由王小明教授负责。")
-        self.assertEqual((p["judged"], p["not_judged"], p["demoted"]), (0, 1, 0))
+        """v2 reads capitalised words (#2978), which these scripts have none of.
+
+        A two-token name, because a one-token part is not judged whatever
+        its case (a part needs two distinct words): only the case test
+        keeps `山田 太郎` from being judged, and demoted, here (#3670)."""
+        p = prox("山田 太郎", "責任者は山田 太郎です。")
+        self.assertEqual((p["judged"], p["not_judged"], p["demoted"]), (0, 2, 0))
 
 
 def prox(name: str, bundle: str) -> dict:
