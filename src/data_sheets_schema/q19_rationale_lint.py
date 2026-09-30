@@ -123,8 +123,12 @@ machine-readable form and lineage across fields. So:
   gives `REASON_NOT_DETERMINED`, where the same sentence with a comma
   before "and" gives the empty-slot reason. Such a rating is marked
   `cue_unread`, and the report says a withholding cue was not read rather
-  than that nothing says why (#3205). A clause that opens with "but", "whereas" or "however", and
-  disclaims without naming a concern of its own, is about the clause
+  than that nothing says why (#3205). A label clause left unread because
+  it names both kinds (above) is marked `label_ambiguous`, and the report
+  says so rather than that nothing says why (#3404); a clause read after
+  all, before a contrast that names nothing of its own ("… errata not
+  recorded but thin"), is not so marked (#3681). A clause that opens
+  with "but", "whereas" or "however", and disclaims without naming a concern of its own, is about the clause
   before it, which is not read either ("the empty was_derived_from is
   noted but not penalised"). A clause that is not read keeps its scope
   across the commas and parentheses that split what it is about (#3248):
@@ -233,7 +237,80 @@ sentence or label range, carries one of the words `_EMPTINESS` lists
 because errata are thin; was_derived_from links every release to its
 parent" gives no empty-slot reason. An absence stated in other words
 ("was_derived_from is left out") is not recognised, and the slot is then
-not read as a reason: the list is closed, as `_FINITE` is. The
+not read as a reason: the list is closed, as `_FINITE` is.
+
+Its recall was measured on 2026-09-30 (#3544), and is a measurement, not a
+change: the list is main's. In-sample it misses nothing: of the 121
+sentences in the Q19 fields of the 133 committed ratings that name a
+slot, 119 carry an `_EMPTINESS` word, and the other two say the slot is
+populated (CHORUS 2026-09-04f API rep1's "was_derived_from is explicit
+rather than implied", superseded VOICE 2026-09-01 API rep2's "with
+was_derived_from populated"). The gate drops none of the 88 empty-slot
+reasons read. The vocabulary was written against those fields, so the
+measure is the text it was not written against: the 1,046 distinct
+sentences outside them that name a slot, anywhere in the committed
+evaluation outputs (other rubric20 questions, rubric10 semantic). Of
+those, 769 carry an `_EMPTINESS` word; 277 carry none. 122 of the 277
+open with one of a list of imperative verbs ("Populate was_derived_from
+…", "Mirror … into parent_datasets"). They were set aside by that
+leading-verb regex and not read, and they are not free of absences: some
+state one or a placement of the kinds counted below ("Fill the
+structural gaps: … populate discouraged_uses, parent_datasets and
+compression", "Populate the dedicated slots that currently hold their
+content elsewhere: download_url …", "… the ancestry that
+related_datasets currently holds alone", "the negative findings
+currently buried in notes"; #3742). The other 155 were read by hand,
+and 29 of them state an absence the list misses:
+
+- 11 name the absence as a noun or a state: "two absences: resources, and
+  parent_datasets", "the four genuine absences (doi, variables,
+  parent_datasets, confidentiality_level)", "two of the four absences are
+  functionally covered by sibling slots", "parent_datasets is the sole
+  absentee", "The one gap, parent_datasets, …", "parent_datasets is the
+  only gap", "The two gaps are structural rather than informational",
+  "The three gaps are slot-selection rather than information gaps", "doi,
+  variables, resources and parent_datasets remain the gaps" (two
+  sentences), "The dedicated provenance field is therefore silent".
+- 16 say a slot is unused by saying where its content is instead
+  ("derivation in related_datasets rather than was_derived_from", "four
+  is_new_version_of related_datasets stand in for parent_datasets",
+  "recorded outside the derivation slots", "covered by semantic
+  equivalents: parent_datasets by …"). No word marks them: "rather than"
+  and "instead" as often say a slot is used ("was_derived_from is explicit
+  rather than implied", the credit the gate was written to drop).
+- 2 state it otherwise: "parent_datasets logged as a low-severity
+  completeness gap" and "5 of 6 creators unnamed in structured fields".
+
+Of the other 126: two say how many of the designated fields are populated
+("Four of the five …") and name no absent slot; five criticise what a
+populated slot holds ("Institutional attribution is contested in the
+structured fields themselves", "left unresolved in the structured slots",
+"the structured field understates the standards landscape", "a FAIRhub
+data-entry error propagated into two structured slots", "was_derived_from
+is present but as prose … rather than an identifier"); four say what
+was_derived_from records rather than a parent dataset ("describes source
+systems rather than a parent dataset"); two are a slot's bare name, as a
+list item; two define the criterion ("Proportion of mandatory schema
+fields populated (…)"); the other 111 credit a slot or describe one that
+is populated. Every class but the 111 is pinned by a fragment of each
+sentence in the test. The 29 are a floor on the misses, not a bound
+and not a recall ratio: the 122 recommendations were not read and hold
+more, and which of the 769 carry their word about the slot, rather than
+a negation about something else, was not read either.
+
+The list is left as it is. Forms that read the 11 were tried on PR #3654
+and withdrawn: in three review rounds each (the bare "gap" and "silent";
+a gap a slot fills with a quantifier between or in the passive; the
+perfect, modal and two-adverb passive and a numeral quantifier) turned a
+slot a sentence names as credit ("was_derived_from fills the two gaps",
+"the two gaps have been filled by was_derived_from") into an empty-slot
+reason where this list gives none (#3668, #3680, #3694). "Gap" and
+"silent" name other concerns as often as an absent slot ("errata leave
+gaps in the history", "errata are silent on the Snellen removal"), and
+the gate is sentence-level (below), so a word added here licenses every
+slot its sentence names. Widening it is a design decision (#3544), as is
+recognising a placement, which needs the gate to tell a slot named as
+unused from one named as credit, which a word list cannot. The
 requirement is sentence-level, not clause-level, because 10 of the 88
 empty-slot reasons read from the 133 committed ratings name the slot in a
 list or parenthesis whose emptiness a neighbouring clause of the same
@@ -512,6 +589,13 @@ class Q19Lint:
     #: not read (#3205). The rationale may say why;
     #: the lint could not tell which words were the reason.
     cue_unread: bool = False
+    #: Where the basis is UNSTATED: a score-label clause says something is
+    #: absent or "not" but names both kinds of concern, so it was not read
+    #: (#3146): its words do not say which is absent and which is credit.
+    #: The label may name a gap; the lint could not tell which (#3404). Not
+    #: set where the clause is read after all, with a contrast after it
+    #: that names nothing of its own (#3681).
+    label_ambiguous: bool = False
 
     def concerns(self, kind: str) -> list[str]:
         return sorted({r.concern for r in self.reasons if r.kind == kind})
@@ -864,25 +948,64 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
     recorded"), its words do not say which is absent and which is credit,
     and the answer would decide the flag, so it is not read (#3146).
     """
-    out = []
+    return _label_reading(label)[0]
+
+
+def _label_reading(label: str) -> tuple[list[tuple[int, int]], bool]:
+    """`_label_reasons`, and whether a clause was left unread because it
+    names both kinds of concern (#3146): a clause whose "not" or absence
+    word stands inside it, in a clause that is read (not in a concession's
+    or an acceptance's), and whose words do not say which concern is
+    absent. The lint report says so rather than that nothing says why
+    (#3404). Such a clause is unread only where no range returned covers
+    it: a contrast that names nothing of its own reads the clause before it
+    ("Typed PROV graph with errata not recorded but thin"), and a clause so
+    read is not reported as unread (#3681). The absence word is noted part
+    by part as "not" is, so a contrast that names a reason of its own
+    ("Typed PROV graph with errata missing but version history not
+    detailed") does not return before it is (#3749)."""
+    def said_absent(pattern, lo, hi):
+        return any(_read_in(label, m.start(), m.end()) for m in pattern.finditer(label, lo, hi))
+
+    def unread(spans):
+        return any(not any(lo <= fa and fb <= hi for lo, hi in spans) for fa, fb in flagged)
+
+    # The clauses that name both kinds of concern: unread unless a range
+    # returned covers them.
+    out, flagged = [], []
     for a, b in _spans(label):
         cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
         for i, start in enumerate(cuts):
             part = label[start:cuts[i + 1] if i + 1 < len(cuts) else b].strip()
             end = cuts[i + 1] if i + 1 < len(cuts) else b
-            if _read_in(label, start, end) and (
+            read = _read_in(label, start, end)
+            if read and (
                     _LABEL_OPENS.search(part)
                     or any(not accepts for accepts in _cue_clauses(label, start, end))
                     or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
                 if i and not _names_reason([("score_label", label, (start, b))]):
                     start = cuts[i - 1]
-                return [(lo, hi) for lo, hi in out + [(start, len(label))]
-                        if label[lo:hi].strip()]
+                spans = [(lo, hi) for lo, hi in out + [(start, len(label))]
+                         if label[lo:hi].strip()]
+                return spans, unread(spans)
+            if read and said_absent(_LABEL_NOT, start, end):
+                flagged.append((start, end))
+            # An absence word inside a part that names both kinds is as
+            # ambiguous as a "not" there, and is noted before a later
+            # contrast returns ("Typed PROV graph with errata missing but
+            # version history not detailed", #3749). Bookkeeping only: the
+            # ranges returned are unchanged.
+            absent = _ABSENCE.search(part)
+            if (read and absent and absent.start() != 0 and len(_kinds(part)) >= 2
+                    and said_absent(_ABSENCE, start, end)):
+                flagged.append((start, end))
         clause = label[a:b].strip()
         absent = _ABSENCE.search(clause)
         if absent and (absent.start() == 0 or len(_kinds(clause)) < 2):
             out.append((a, b))
-    return out
+        elif absent and said_absent(_ABSENCE, a, b):
+            flagged.append((a, b))
+    return out, unread(out)
 
 
 def _gap_parts(sentence: str) -> list[tuple[int, int]]:
@@ -1022,7 +1145,8 @@ def lint_q19(item: dict) -> Q19Lint:
     body = [(name, s, part) for name, s in sentences if name != "score_label"
             for part in _gap_parts(s)]
     unread = any(accepts for _, s in sentences for accepts in _cue_clauses(s))
-    return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions, unread)
+    ambiguous = any(_label_reading(s)[1] for name, s in sentences if name == "score_label")
+    return Q19Lint(score, maximum, UNSTATED, _reasons(label + body), mentions, unread, ambiguous)
 
 
 def lint_file(path: Path | str) -> Q19Lint:
@@ -1291,9 +1415,13 @@ def lint_report(paths=(), inspections=(), *, show: bool = False) -> tuple[list[s
             # gap were read; a part naming no gap was not (#3070, #3146). A
             # cue in a clause that accepts or concedes, or in its aside or
             # list, was not read either, so "nothing says why" would be
-            # false there (#3205, #3264).
-            said = ("a withholding cue stands in the scope of an acceptance or concession and "
-                    "was not read" if r.cue_unread else "nothing says why")
+            # false there (#3205, #3264). Nor where a label clause naming
+            # both kinds of concern was left unread as ambiguous (#3404).
+            said = "; ".join(text for flag, text in (
+                (r.cue_unread, "a withholding cue stands in the scope of an acceptance or "
+                               "concession and was not read"),
+                (r.label_ambiguous, "a label clause names both kinds of concern and was left "
+                                    "unread as ambiguous")) if flag) or "nothing says why"
             line += f"  ({said}: label reason clauses and body gaps read)"
         doc, status = recorded.get(f.resolve(), (None, None))
         if status is not None:

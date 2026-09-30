@@ -1283,6 +1283,130 @@ def test_the_report_says_a_cue_was_not_read_rather_than_that_nothing_says_why(tm
     assert result.exit_code == 0, result.output
 
 
+@pytest.mark.parametrize("label", [
+    "Typed was_derived_from links and errata missing",
+    "Machine-readable PROV graph lacking errata",
+    "Typed PROV graph with errata not recorded",
+    "Good; typed PROV graph with errata not recorded",
+])
+def test_a_label_clause_left_unread_as_ambiguous_is_reported_as_such(tmp_path, label):
+    """#3404: a label clause whose "not" or absence word stands inside it,
+    naming both kinds of concern, is not read (#3146). Where nothing else
+    says why, the report said "nothing says why", as if the label named
+    nothing; it says the clause was left unread as ambiguous. The verdict
+    is unchanged, and --strict still exits 0."""
+    from data_sheets_schema.cli import cli
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.basis, result.verdict, result.reasons) == (UNSTATED, REASON_NOT_DETERMINED, ())
+    assert result.label_ambiguous and not result.cue_unread
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, flagged = lint_report([tmp_path])
+    assert flagged == 0 and lines[0].startswith(REASON_NOT_DETERMINED)
+    assert ("(a label clause names both kinds of concern and was left unread as ambiguous: "
+            "label reason clauses and body gaps read)") in lines[0]
+    assert "nothing says why" not in lines[0]
+    run = CliRunner().invoke(cli, ["evaluate", "q19-lint", "--strict", str(tmp_path)])
+    assert run.exit_code == 0, run.output
+
+
+@pytest.mark.parametrize("label, note, basis", [
+    # A comma makes the absent one a clause of its own, which is read.
+    ("Typed was_derived_from links, errata missing", _NEUTRAL, UNSTATED),
+    # A clause of one kind is read.
+    ("Textual lineage; version history and missingness absent", _NEUTRAL, UNSTATED),
+    # The absence word stands in a concession, which is not read for its own
+    # reason, not for ambiguity.
+    ("Good despite typed PROV graph with errata not recorded", _NEUTRAL, UNSTATED),
+    # The same with an absence word rather than "not" (#3683).
+    ("Good despite typed was_derived_from links and errata missing", _NEUTRAL, UNSTATED),
+    ("Good despite machine-readable PROV graph lacking errata", _NEUTRAL, UNSTATED),
+    # A body sentence says why: the report does not say "nothing says why".
+    ("Typed PROV graph with errata not recorded", "Held at 4 because no checksums are recorded.",
+     STATED),
+    # The issue's example: since review round 5 of PR #3417 reverted the
+    # #3194 cue rule, a label cue clause naming both kinds is read.
+    ("Held at 4 because the typed PROV graph lacks errata", _NEUTRAL, STATED),
+])
+def test_a_label_read_or_unread_for_another_reason_is_not_called_ambiguous(label, note, basis):
+    result = lint_q19(item(label=label, note=note))
+    assert (result.basis, result.label_ambiguous) == (basis, False), label
+
+
+@pytest.mark.parametrize("label, verdict", [
+    ("Typed PROV graph with errata not recorded but thin", REPRESENTATION_AND_SUBSTANTIVE),
+    ("Typed PROV graph with errata not recorded but otherwise strong",
+     REPRESENTATION_AND_SUBSTANTIVE),
+    ("Typed PROV graph with errata not recorded without more", REPRESENTATION_AND_SUBSTANTIVE),
+])
+def test_a_both_kinds_clause_read_before_an_empty_contrast_is_not_called_unread(tmp_path, label,
+                                                                                verdict):
+    """#3681: a contrast that names nothing of its own reads the clause
+    before it, so a clause naming both kinds is read there after all, and
+    its concerns are the reasons; the report does not say it was left
+    unread."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.basis, result.verdict, result.label_ambiguous) == (UNSTATED, verdict, False)
+    assert all(r.sentence == label for r in result.reasons)
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert "left unread as ambiguous" not in lines[0]
+
+
+@pytest.mark.parametrize("label", [
+    "Typed PROV graph with errata not recorded but version history not detailed",
+    # #3749: an absence word rather than "not". The contrast returns before
+    # the clause-level absence check, so the part is noted in the loop.
+    "Typed PROV graph with errata missing but version history not detailed",
+    "Machine-readable PROV graph lacking errata but version history not detailed",
+])
+def test_a_both_kinds_clause_left_before_a_contrast_that_names_its_own_reason_is_unread(
+        tmp_path, label):
+    """#3681's contrast: where the contrast names a reason of its own, the
+    clause before it stays unread, and is reported so, whether its word is
+    "not" or an absence word (#3749). The reasons are the contrast's only."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.verdict, result.concerns(SUBSTANTIVE), result.label_ambiguous) == (
+        SUBSTANTIVE_ONLY, ["version_history"], True)
+    assert [r.sentence for r in result.reasons] == ["but version history not detailed"]
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert "left unread as ambiguous" in lines[0]
+    assert "nothing says why" not in lines[0]
+
+
+@pytest.mark.parametrize("label", [
+    # The absence word opens the part: it says what is absent (#3146).
+    "Missing errata with typed PROV graph but version history not detailed",
+    # One kind only.
+    "errata missing but version history not detailed",
+    # In a concession: unread for that, not for ambiguity.
+    "Good despite typed PROV graph with errata missing but version history not detailed",
+])
+def test_an_absence_word_before_a_contrast_is_not_called_ambiguous_when_its_part_is_clear(label):
+    """#3749's bounds: the part before the contrast is noted only where its
+    absence word stands inside it, in a part that is read, naming both
+    kinds."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.concerns(SUBSTANTIVE), result.label_ambiguous) == (["version_history"], False)
+
+
+def test_both_unread_notes_are_reported_together(tmp_path):
+    """A rating can leave a cue unread in an acceptance and a label clause
+    unread as ambiguous; the report names both."""
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(
+            label="Typed PROV graph with errata not recorded",
+            note="Held at 4 because was_derived_from is empty and the rubric accepts prose "
+                 "for lineage.")]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert ("(a withholding cue stands in the scope of an acceptance or concession and was not "
+            "read; a label clause names both kinds of concern and was left unread as ambiguous: "
+            "label reason clauses and body gaps read)") in lines[0]
+
+
 def test_the_report_refuses_an_inspection_whose_evaluation_is_gone(tmp_path):
     doc = tmp_path / "semantic_review.md"
     doc.write_text(_section("A", "requires_adjudication", "gone_evaluation.json"))
@@ -1409,6 +1533,100 @@ def test_an_absence_stated_as_absence_omits_or_unset_is_an_empty_slot_reason(fie
     result = lint_q19(rating)
     assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
         basis, REPRESENTATION_ONLY, ["empty_slot"]), text
+
+
+@pytest.mark.parametrize("note", [
+    "Held at 4: two absences, was_derived_from and parent_datasets.",
+    "Held at 4 because parent_datasets is the sole absentee.",
+    "Held at 4 because was_derived_from and parent_datasets remain the gaps.",
+    "Held at 4: the one gap is parent_datasets.",
+    "Held at 4 because the dedicated provenance field is silent.",
+    "Held at 4 because the dedicated provenance field is therefore silent.",
+    "Held at 4 because parent_datasets is the only gap.",
+    "Held at 4: the three gaps are resources, variables and parent_datasets.",
+    "Held at 4: the four genuine absences are doi, variables and parent_datasets.",
+])
+def test_an_absence_named_as_a_noun_or_state_is_not_recognised(note):
+    """#3544, a measurement: committed evaluation text the vocabulary was
+    not written against says a slot is absent in these forms, and the
+    closed list does not read them (11 of the 29 misses the module
+    docstring counts). Forms that read them were withdrawn from PR #3654
+    after three review rounds each found a slot named as credit read as an
+    empty-slot reason (#3668, #3680, #3694); widening the list is a design
+    decision. Main's reading stands."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.reasons) == (STATED, REASON_NOT_DETERMINED, ()), note
+
+
+_CREDIT = "was_derived_from links every release to its parent."
+
+
+@pytest.mark.parametrize("note, verdict, concerns", [
+    # A slot named as credit beside a gap in something else: main's gate
+    # drops the slot, and the bare words "gap" and "silent" re-admitted it.
+    (f"Held at 4 because errata are thin, a gap; {_CREDIT}", SUBSTANTIVE_ONLY, ["version_history"]),
+    (f"Held at 4 because errata leave gaps in the history; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because the errata are silent on the Snellen removal; {_CREDIT}",
+     SUBSTANTIVE_ONLY, ["version_history"]),
+    (f"Held at 4 because errata are thin, a documentation gap; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because two integrity gaps remain; {_CREDIT}", REASON_NOT_DETERMINED, []),
+    # A slot said to fill the gap is not absent.
+    ("Held at 4 because was_derived_from fills the gap.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from fills the one gap.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because related_datasets covers the one gap.", REASON_NOT_DETERMINED, []),
+    # With an article or quantifier between, or in the passive (#3680).
+    ("Held at 4 because was_derived_from fills the two gaps.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from closes the two remaining gaps.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from fills both of the two gaps.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the two gaps are filled by was_derived_from.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the one gap is closed by parent_datasets.", REASON_NOT_DETERMINED, []),
+    # The perfect, modal and two-adverb passive and a numeral quantifier
+    # (#3694).
+    ("Held at 4 because the one gap has been closed by parent_datasets.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the two gaps have been filled by was_derived_from.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the two gaps will be filled by was_derived_from.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the two gaps are now fully filled by was_derived_from.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from fills two of the three gaps.", REASON_NOT_DETERMINED, []),
+    # "silent" modifying something other than a slot (#3684). The bare
+    # "silent" of this PR's first commit read both as empty-slot reasons; the
+    # later "is/are ... silent" form did not, and neither does main's list,
+    # which reads "silent" in no form. All those forms are withdrawn.
+    (f"Held at 4 because errata are thin, with silent corrections; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because of silent errata; {_CREDIT}", SUBSTANTIVE_ONLY, ["version_history"]),
+])
+def test_a_gap_or_silence_about_something_else_licenses_no_slot(note, verdict, concerns):
+    """#3668, #3680, #3694: "gap" and "silent" as often name a concern other
+    than a slot, or a slot filling one, and the gate is sentence-level;
+    main's reading of each of these stands. On all but one of them some
+    form PR #3654 tried and withdrew (#3544) read a slot as an empty-slot
+    reason: on the two #3684 cases only the bare "silent" of the first
+    commit did, and on "related_datasets covers the one gap" none did; it
+    pins that a slot filling a gap is not absent."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
+        STATED, verdict, concerns), note
+
+
+@pytest.mark.parametrize("note", [
+    # The issue's example, and the placements the #3544 measurement found:
+    # the list is closed and does not recognise them.
+    "Held at 4 because was_derived_from is left out.",
+    "Held at 4 because derivation is recorded in related_datasets rather than was_derived_from.",
+    "Held at 4 because related_datasets entries stand in for parent_datasets.",
+])
+def test_an_absence_phrased_otherwise_is_still_not_recognised(note):
+    """The documented limit (#3544): the words are a closed list, so an
+    absence stated otherwise gives no empty-slot reason."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, result.reasons) == (STATED, REASON_NOT_DETERMINED, ())
 
 
 #: Every example the review rounds of PR #3417 found regressed against main
@@ -1615,3 +1833,202 @@ def test_every_empty_slot_reason_in_the_committed_ratings_is_said_to_be_empty():
     chorus = lint_file(base / "label_aware/CHORUS_2026-09-04fapi_rep1_evaluation.json")
     assert chorus.basis == UNSTATED
     assert [r for r in chorus.reasons if "explicit rather than implied" in r.sentence] == []
+
+
+#: The placements the #3544 measurement found by hand among the committed
+#: evaluation sentences that name a slot outside the Q19 fields and carry
+#: no absence word: each says a slot is unused by saying where its content
+#: is instead, and none is recognised. A fragment of each sentence.
+_UNRECOGNISED_PLACEMENTS = [
+    "placed in descriptive fields rather than structured fields",
+    "in narrative fields rather than structured fields",
+    "recorded under used_software rather than the dedicated slot",
+    "inside the citation rather than a dedicated slot",
+    "sit outside their dedicated slots",
+    "derivation in related_datasets rather than was_derived_from",
+    "only in prose or in adjacent slots rather than in their dedicated structured fields",
+    "carried in notes rather than structured slots",
+    "Substituted rather than named",
+    "Covered by semantic equivalents: parent_datasets",
+    "sit in prose rather than in the structured slots",
+    "derivation recorded outside the derivation slots",
+    "live in free-text notes rather than structured slots",
+    "stand in for parent_datasets",
+    "residing in prose rather than in the designated structured fields",
+    "parent_datasets is arguably satisfied semantically",
+]
+
+#: The absences the #3544 measurement found named as a noun or a state
+#: among the same sentences: "absences", "absentee", a counted or sole
+#: "gap", "silent". The closed list does not recognise them. Forms that did
+#: (`_ABSENCE_NAMED`) were tried on PR #3654 and withdrawn after three
+#: review rounds each found a slot named as credit read as an empty-slot
+#: reason (#3668, #3680, #3694); widening the list is a design decision
+#: (#3544). A fragment of each sentence; the last is the whole sentence.
+_UNRECOGNISED_NAMED_ABSENCES = [
+    "Falls short of the 90% threshold on two absences: resources, and parent_datasets",
+    "the four genuine absences (doi, variables, parent_datasets, confidentiality_level)",
+    "two of the four absences are functionally covered by sibling slots",
+    "parent_datasets is the sole absentee",
+    "The one gap, parent_datasets, is functionally covered",
+    "parent_datasets is the only gap, and the derivation",
+    "The two gaps are structural rather than informational",
+    "The three gaps are slot-selection rather than information gaps",
+    "The dedicated provenance field is therefore silent",
+    "confidentiality_level is now populated (an improvement over sibling records); doi, variables, "
+    "resources and parent_datasets remain the gaps",
+    "doi, variables, resources and parent_datasets remain the gaps.",
+]
+
+#: The rest of the hand-read sentences that are not credit or a description
+#: of a populated slot (#3669), by class: a fragment of each.
+_HAND_READ_NOT_CREDIT = {
+    # An absence the list does not recognise that is not a placement.
+    "unrecognised_absence": [
+        "5 of 6 creators unnamed in structured fields",
+        "parent_datasets logged as a low-severity completeness gap",
+    ],
+    # How many designated fields are populated, naming no absent slot.
+    "count": [
+        "Four of the five designated fields are populated and the guidance",
+        "Four of the five designated fields are populated with genuinely",
+    ],
+    # A criticism of what a populated slot holds.
+    "criticism": [
+        "Institutional attribution is contested in the structured fields themselves",
+        "Responsible-institution conflict is recorded but left unresolved",
+        "the structured field understates the standards landscape",
+        "FAIRhub data-entry error propagated into two structured slots",
+        "was_derived_from is present but as prose",
+    ],
+    # What was_derived_from records, rather than a parent dataset.
+    "qualification": [
+        "was_derived_from carries source-system provenance rather than",
+        "was_derived_from describes source systems rather than a parent dataset",
+        "was_derived_from points to clinical source systems rather than to datasets",
+        "was_derived_from records derivation from source clinical systems",
+    ],
+    # A slot's bare name, as a list item.
+    "bare_name": ["parent_datasets", "was_derived_from"],
+    # The criterion's definition.
+    "criterion": [
+        "Proportion of mandatory schema fields populated (id, title, description, keywords, "
+        "license, doi, page, creators, purposes, instances, resources, parent_datasets, "
+        "variables, confidentiality level)",
+        "Proportion of mandatory schema fields populated (id, title, description, keywords, "
+        "license, doi, page, creators, purposes, instances, resources, parent_datasets, "
+        "variables, confidentiality_level)",
+    ],
+}
+
+
+#: Sentences the leading-verb regex put among the 122 recommendations
+#: that state what the hand-read classes count as a miss (#3742). They
+#: are examples found after the fact, not a reading of the bucket: the
+#: 122 were not read, so the misses they hold are not counted.
+_UNREAD_RECOMMENDATIONS_NOT_CREDIT = [
+    # A named absence, in the noun form of the 11.
+    "Fill the structural gaps: record the Snellen variable removal",
+    # Placements, of the kind the 16 count.
+    "Populate the dedicated slots that currently hold their content elsewhere: download_url",
+    "the ancestry that related_datasets currently holds alone",
+    "the negative findings currently buried in notes",
+]
+
+
+@pytest.mark.corpus
+def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
+    """The module docstring's #3544 measurement. In the Q19 fields of the
+    133 committed ratings, every sentence naming a slot carries an
+    `_EMPTINESS` word but two, which say the slot is populated. Outside
+    them, in text the vocabulary was not written against, the sentences
+    naming a slot with no `_EMPTINESS` word are 122 set aside by a
+    leading-verb regex and 155 read by hand: 29 absences the list misses
+    (the 11 named absences and 16 placements above, and the two of
+    `_HAND_READ_NOT_CREDIT`), the other classes of `_HAND_READ_NOT_CREDIT`,
+    each pinned by a fragment, and 111 that are credit (#3669). The 122
+    were not read, and some of them state an absence or a placement
+    (`_UNREAD_RECOMMENDATIONS_NOT_CREDIT`), so the 29 are a floor on the
+    misses, not a bound (#3742). The list is main's; this measures it and
+    changes nothing (#3544)."""
+    from data_sheets_schema import q19_rationale_lint as lint
+    listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
+                            capture_output=True, text=True, check=True).stdout.split("\0")
+    documents = []
+    for f in listed:
+        if f.endswith(".json"):
+            try:
+                documents.append(json.loads((ROOT / f).read_text(encoding="utf-8")))
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                continue
+    slot = lint.REPRESENTATION_CONCERNS["empty_slot"]
+    ratings = [d for d in documents if isinstance(d, dict) and d.get("rubric") == "rubric20-semantic"]
+    assert len(ratings) == 133
+    q19 = [s for d in ratings for _, s in lint._sentences(q19_item(d)) if slot.search(s)]
+    unmarked = [s for s in q19 if not lint._EMPTINESS.search(s)]
+    assert (len(q19), len(unmarked)) == (121, 2)
+    assert all("was_derived_from" in s and ("explicit rather than implied" in s or "populated" in s)
+               for s in unmarked)
+
+    def strings(value):
+        if isinstance(value, str):
+            yield value
+        elif isinstance(value, dict):
+            for v in value.values():
+                yield from strings(v)
+        elif isinstance(value, list):
+            for v in value:
+                yield from strings(v)
+
+    inside = {s for d in ratings for _, s in lint._sentences(q19_item(d))}
+    outside = {s.strip() for d in documents for text in strings(d)
+               for s in lint._SENTENCE.split(text)
+               if s.strip() and slot.search(s) and s.strip() not in inside}
+    recommendation = re.compile(
+        r"^(?:populate|add|mirror|record|express|link|use|include|consider|document|fill|emit"
+        r"|expose|publish|wire|instantiate|promote|set|move|provide|state|replace|encode|model"
+        r"|capture|declare|convert|represent|reference|attach|list|map|split|clarify|name|keep"
+        r"|resolve|attribute)\b", re.I)
+    marked = [s for s in outside if lint._EMPTINESS.search(s)]
+    rest = [s for s in outside if not lint._EMPTINESS.search(s)]
+    recommendations = [s for s in rest if recommendation.match(s)]
+    assert (len(outside), len(marked), len(recommendations)) == (1046, 769, 122)
+    read = [s for s in rest if not recommendation.match(s)]
+    assert len(read) == 155
+    # The regex sorts by the first word only, and the bucket was not read:
+    # it holds absences and placements of the kinds counted below (#3742).
+    for fragment in _UNREAD_RECOMMENDATIONS_NOT_CREDIT:
+        hits = [s for s in recommendations if fragment in s]
+        assert len(hits) == 1, fragment
+        assert not [s for s in read if fragment in s], fragment
+    classified = []
+    for fragment in _UNRECOGNISED_NAMED_ABSENCES:
+        # The second "remain the gaps" sentence is the whole of one.
+        hits = [s for s in read if (s == fragment if fragment.startswith("doi,") else fragment in s)]
+        assert len(hits) == 1, fragment
+        classified += hits
+    for fragment in _UNRECOGNISED_PLACEMENTS:
+        hits = [s for s in read if fragment in s]
+        assert len(hits) == 1, fragment
+        classified += hits
+    for kind, fragments in _HAND_READ_NOT_CREDIT.items():
+        for fragment in fragments:
+            # A bare name is the whole sentence; the others are part of one.
+            hits = [s for s in read if (s == fragment if kind == "bare_name" else fragment in s)]
+            assert len(hits) == 1, (kind, fragment)
+            classified += hits
+    assert len(set(classified)) == len(classified) == 44
+    # None of them is read as an empty-slot reason: the gate reads
+    # `_EMPTINESS` words only, as on main.
+    for sentence in classified[:len(_UNRECOGNISED_NAMED_ABSENCES)]:
+        assert not [r for r in lint_q19(item(note=f"Held at 4. {sentence}")).reasons
+                    if r.concern == "empty_slot"], sentence
+    # The words these absences are named in: without an `_EMPTINESS` word
+    # they occur in 13 slot sentences outside the Q19 fields, the 11 above,
+    # a recommendation and the completeness gap of `_HAND_READ_NOT_CREDIT`.
+    bare = re.compile(r"\b(?:absences|absentees?|gaps?|silent)\b", re.I)
+    worded = [s for s in rest if bare.search(s)]
+    named = classified[:len(_UNRECOGNISED_NAMED_ABSENCES)]
+    assert len(worded) == 13 and set(named) <= set(worded)
+    left = sorted(set(worded) - set(named))
+    assert [s[:24] for s in left] == ["Fill the structural gaps", "parent_datasets logged a"]
