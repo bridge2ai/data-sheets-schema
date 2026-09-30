@@ -70,28 +70,38 @@ def _walk(loader: yaml.SafeLoader, node: Any, path: str, out: list[dict[str, Any
             _walk(loader, item, f"{path}[{i}]", out, seen_nodes)
 
 
-def find_duplicate_keys(text: str) -> list[dict[str, Any]]:
+#: libyaml's safe loader where PyYAML was built with it, else the pure-Python
+#: one: what a caller scanning many files passes as `loader=` (#3704).
+FAST_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+
+def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader) -> list[dict[str, Any]]:
     """Every mapping key that appears more than once in one mapping — keys
     compared as the loader would construct them — with the mapping's path
     (`$` for the top level) and the 1-based lines. `count` is occurrences
-    of that key; the gate counts distinct duplicated keys."""
+    of that key; the gate counts distinct duplicated keys.
+
+    `loader` composes the node tree the rule walks; the rule is the same
+    whichever composes it. The default is the pure-Python `SafeLoader`, as
+    it always was; `FAST_LOADER` (libyaml's) gives the same findings about
+    four times faster over the corpus (#3704)."""
     out: list[dict[str, Any]] = []
     # A stream the reader rejects (a NUL byte), a document the composer
     # rejects (two documents), or one nested past the interpreter's limit
     # is not scannable here; `safe_load` fails on the same text and the
     # validator reports that. Nothing is claimed about its keys.
     try:
-        loader = yaml.SafeLoader(text)
+        composer = loader(text)
     except (yaml.YAMLError, RecursionError):
         return out
     try:
-        node = loader.get_single_node()
+        node = composer.get_single_node()
         if node is not None:
-            _walk(loader, node, "", out, set())
+            _walk(composer, node, "", out, set())
     except (yaml.YAMLError, RecursionError):
         return []
     finally:
-        loader.dispose()
+        composer.dispose()
     out.sort(key=lambda d: d["lines"][0])
     return out
 

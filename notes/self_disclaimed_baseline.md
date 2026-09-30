@@ -39,6 +39,11 @@ version's effect on the corpus.
 
 ### By method
 
+#3029 (#2913 PR1) counted only the `claudecode_agent` and `claudecode_api` finals
+(34 flagged members, 26 guarded, 90 out of scope on the corpus as it stood then); its
+figures compare with the `claudecode_agent + claudecode_api` row, not with `**all**`, which
+counts every method's finals (#3703).
+
 | method | records | unreadable | members read | flagged members | records flagged | guarded | out of scope |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | claudecode | 4 | 0 | 12 | 0 | 0 | 0 | 0 |
@@ -52,6 +57,7 @@ version's effect on the corpus.
 | gpt5 | 4 | 0 | 91 | 0 | 0 | 0 | 0 |
 | rocrate_mapped | 2 | 0 | 48 | 0 | 0 | 0 | 0 |
 | rocrate_static_map | 6 | 0 | 330 | 0 | 0 | 0 | 0 |
+| *claudecode_agent + claudecode_api* | 212 | 1 | 7260 | 34 | 10 | 26 | 90 |
 | **all** | 303 | 1 | 10989 | 34 | 10 | 27 | 96 |
 
 ### By label

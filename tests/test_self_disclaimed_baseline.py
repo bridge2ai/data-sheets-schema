@@ -161,6 +161,39 @@ def test_a_record_is_refused_exactly_where_the_cli_refuses_it(text):
     assert refused == bool(find_duplicate_keys(text))
 
 
+def test_the_refusal_is_the_public_scan_on_libyaml(monkeypatch):
+    """`load_record` asks `duplicate_keys.find_duplicate_keys` with the fast
+    loader, not a private walk (#3704)."""
+    from data_sheets_schema import duplicate_keys
+    m = _script()
+    seen = []
+
+    def scan(text, loader=yaml.SafeLoader):
+        seen.append(loader)
+        return [{"path": "$", "key": "a", "lines": [1, 2], "count": 2}]
+
+    monkeypatch.setattr(duplicate_keys, "find_duplicate_keys", scan)
+    with pytest.raises(ValueError, match="duplicate"):
+        m.load_record(b"a: 1\n")
+    assert seen == [duplicate_keys.FAST_LOADER]
+
+
+def test_the_note_carries_the_pr1_subtotal_and_says_which_finals_it_counted(corpus, monkeypatch):
+    """#3029's figures counted two methods' finals; the note says so and
+    carries their subtotal beside the all-methods total (#3703). A method
+    with no records adds nothing to the subtotal."""
+    m = _script()
+    dump(corpus / "method_c" / "S_d4d.yaml", {"id": "s", "maintainers": [maintainer("Person F")]})
+    monkeypatch.setattr(m, "PR1_METHODS", ("method_a", "method_c", "method_absent"))
+    md = m.render_markdown(m.collect(corpus))
+    assert "counted only the `method_a` and `method_c` and `method_absent` finals" in md
+    assert "compare with the `method_a + method_c + method_absent` row, not with `**all**`" in md
+    rows = [line for line in md.splitlines() if line.startswith("| *method_a + method_c + method_absent* |")]
+    # method_a: 1 record, 2 flagged; method_c: 1 record, 1 flagged; method_b (Q) is left out.
+    assert rows == ["| *method_a + method_c + method_absent* | 2 | 0 | 4 | 3 | 2 | 0 | 0 |"]
+    assert "| **all** | 3 | 0 | 5 | 4 | 3 | 0 | 0 |" in md
+
+
 def test_an_unreadable_file_is_listed_and_its_pair_is_not_diffed(corpus):
     m = _script()
     dump(corpus / "method_a_core" / LABEL / "intermediate" / "P_full_2.yaml", "a: 1\na: 2\n")

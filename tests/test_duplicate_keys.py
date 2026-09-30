@@ -53,6 +53,49 @@ class TestDetection(unittest.TestCase):
         self.assertEqual(yaml.safe_load(DUPED)["source_caveats"], "second")
 
 
+PARITY = [
+    DUPED, "id: x\nnotes: y\n", "id: [unterminated\n", "", "a: \0", "loop: &loop {self: *loop}\n",
+    "a: &x {k: 1, k: 2}\nb: *x\nc: *x\n", "true: a\nTrue: b\n", "1: a\n\"1\": b\n", "true: a\n1: b\n1.0: c\n",
+    "base: &b {x: 1}\nother: &o {y: 2}\nm:\n  <<: *b\n  <<: *o\n  z: 3\n",
+    "x: &x {k: 1}\nz:\n  <<: *x\n  k: 2\n", "x: &x {k: 1}\ny: &y {k: 2}\nz:\n  <<: [*x, *y]\n  z: 1\n  z: 2\n",
+    "a: 1\n---\nb: 2\n", "a:\n- b: 1\n  b: 2\n",
+]
+
+
+class TestTheLoader(unittest.TestCase):
+    """#3704: the node tree may be composed by libyaml; the rule does not move."""
+
+    def test_the_default_is_the_pure_python_safe_loader(self):
+        import inspect
+        from data_sheets_schema import duplicate_keys
+        self.assertIs(inspect.signature(find_duplicate_keys).parameters["loader"].default, yaml.SafeLoader)
+        self.assertIn(duplicate_keys.FAST_LOADER, (getattr(yaml, "CSafeLoader", None), yaml.SafeLoader))
+
+    def test_the_given_loader_composes_the_tree(self):
+        made = []
+
+        class Recording(yaml.SafeLoader):
+            def __init__(self, stream):
+                made.append(stream)
+                super().__init__(stream)
+
+        self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=Recording)], ["a"])
+        self.assertEqual(made, ["a: 1\na: 2\n"])
+
+    def test_libyaml_and_the_pure_python_loader_give_the_same_findings(self):
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        self.assertIs(FAST_LOADER, yaml.CSafeLoader)
+        for text in PARITY:
+            with self.subTest(text=text):
+                self.assertEqual(find_duplicate_keys(text, loader=yaml.CSafeLoader),
+                                 find_duplicate_keys(text, loader=yaml.SafeLoader))
+                self.assertEqual(find_duplicate_keys(text), find_duplicate_keys(text, loader=yaml.SafeLoader))
+        # The cases are not all empty: the parity is over findings, merges included.
+        self.assertEqual([d["key"] for d in find_duplicate_keys(PARITY[-3], loader=yaml.CSafeLoader)], ["z"])
+
+
 GOOD = {"pair": {"ran": True, "errors": 0}, "report": {"checked": True, "findings": [], "claims_checked": 3},
         "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},
         "form": {"ran": True, "organisational_fragments": 0, "undeclared_prefix_occurrences": 0, "british_spellings": 0}}

@@ -67,10 +67,13 @@ RECORD_GLOB = "*_d4d.yaml"
 LEXICON_VERSION = 2
 #: The companions a final record is paired with, in the pins and the note.
 COMPANIONS = ("snapshot", "receipt")
+#: The methods #3029 (#2913 PR1) counted: its figures are this subtotal, not
+#: the all-methods total (#3703).
+PR1_METHODS = ("claudecode_agent", "claudecode_api")
 RETAINED = "self_disclaimed_retained"
 RP_RETAINED = "role_predicate_retained"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+_LOADER = duplicate_keys.FAST_LOADER
 
 
 class Stale(Exception):
@@ -82,20 +85,13 @@ def load_record(raw: bytes) -> dict:
     """A record parsed as the CLI parses it (`evidence_assertions.load_record`),
     or ValueError: not UTF-8, not YAML, a repeated key, or not a mapping.
 
-    The duplicate-key rule is `duplicate_keys`' own walk (`<<` merges are not
-    duplicates; `true` and `True` are one key), run on a node tree libyaml
-    composes, and the value is loaded by libyaml's safe loader."""
+    The duplicate-key rule is `duplicate_keys.find_duplicate_keys` (`<<`
+    merges are not duplicates; `true` and `True` are one key), run on a node
+    tree libyaml composes (#3704), and the value is loaded by libyaml's safe
+    loader."""
     try:
         text = raw.decode("utf-8")
-        loader = _LOADER(text)
-        try:
-            node = loader.get_single_node()
-            found: list[dict] = []
-            if node is not None:
-                duplicate_keys._walk(loader, node, "", found, set())
-        finally:
-            loader.dispose()
-        if found:
+        if duplicate_keys.find_duplicate_keys(text, loader=_LOADER):
             raise ValueError("artifact has duplicate YAML mapping keys; its location is ambiguous")
         value = yaml.load(text, Loader=_LOADER)   # noqa: S506 (a safe loader)
     except (UnicodeDecodeError, yaml.YAMLError) as exc:
@@ -456,9 +452,16 @@ def render_markdown(collected: dict[str, Any]) -> str:
     lines += _table(["lexicon", "sha256", "final: flagged members", "records flagged", "guarded", "out of scope",
                      "snapshot flags", "removed", "retained", "identity_unresolved", "final_only",
                      "check (b) flagged"], vrows, text=2)
-    lines += ["", "## Check (a) on the final records", "", "### By method", ""]
+    lines += ["", "## Check (a) on the final records", "", "### By method", "",
+              f"#3029 (#2913 PR1) counted only the {' and '.join(f'`{m}`' for m in PR1_METHODS)} finals",
+              "(34 flagged members, 26 guarded, 90 out of scope on the corpus as it stood then); its",
+              f"figures compare with the `{' + '.join(PR1_METHODS)}` row, not with `**all**`, which",
+              "counts every method's finals (#3703).", ""]
+    sub = [s["methods"].get(m, _empty()) for m in PR1_METHODS]
+    subtotal = [sum(cells) for cells in zip(*(_scan_cells(m) for m in sub))]
     lines += _table(["method", *SCAN_HEAD],
-                    [[n, *_scan_cells(m)] for n, m in s["methods"].items()] + [["**all**", *_scan_cells(t)]])
+                    [[n, *_scan_cells(m)] for n, m in s["methods"].items()]
+                    + [[f"*{' + '.join(PR1_METHODS)}*", *subtotal], ["**all**", *_scan_cells(t)]])
     lines += ["", "### By label", "", "Labels with at least one flagged, guarded or out-of-scope match.", ""]
     lines += _table(["method", "label", *SCAN_HEAD],
                     [[m, lab, *_scan_cells(c)] for (m, lab), c in s["labels"].items()
