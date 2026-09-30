@@ -2425,7 +2425,11 @@ class DeriveSpellings(Base):
                       "records the directory on every event", text)
         self.assertIn("and a command the tokenizer cannot split counts, whatever its words (#3782)", text)
         self.assertIn("Still not read: a function or alias named as a program read here (`cat() { cd x; }`), "
-                      "defined in the session or by the profile the session's shell started with.", text)
+                      "defined in the session or by the profile the session's shell started with; a program bash "
+                      "builds at run time behind `nohup`, `exec` or `command` (`nohup $X ./derive.sh`), which is "
+                      "not read as detaching; and, in a command the tokenizer cannot split, a program word built "
+                      "other than from a leading `$` or backquote (`set${X}sid`, a glob, a brace expansion), "
+                      "which is not read as detaching there (#3923).", text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
                      "Still not read: a detaching program supplied at run time",
                      "runs in a child: it does not count", "unless the call's own event records",
