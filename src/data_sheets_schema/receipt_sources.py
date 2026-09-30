@@ -579,6 +579,17 @@ def source_manifest_basis(record: dict[str, Any], raw: bytes) -> dict[str, Any]:
             "same_bytes": all(here[k] == v for k, v in hashes.items()) if hashes else None}
 
 
+def basis_label(basis: dict[str, Any]) -> str:
+    """Where bytes were read from, for a text line. A `git blob` basis
+    carries the *commit* the blob was found at, not the blob's own hash, so
+    the line says `git blob at commit <hash>` (#3476): `git cat-file blob`
+    on a commit hash fails. The JSON keeps the basis as it is."""
+    source = basis.get("source", "?")
+    if not basis.get("commit"):
+        return source
+    return f"{source} at commit {basis['commit'][:12]}"
+
+
 def render(report: dict[str, Any]) -> list[str]:
     """The report as terminal lines (`d4d receipts sources`)."""
     n = report["paths"]
@@ -588,7 +599,7 @@ def render(report: dict[str, Any]) -> list[str]:
 
     run = report.get("run") or {}
     basis = run.get("bundle_basis") or {}
-    where = basis.get("source", "?") + (f" {basis['commit'][:12]}" if basis.get("commit") else "")
+    where = basis_label(basis)
     tiers_from = run.get("source_manifest", "the source manifest")
     same = (run.get("source_manifest_basis") or {}).get("same_bytes")
     note = {True: "the bytes the run recorded", False: "not the bytes the run recorded",

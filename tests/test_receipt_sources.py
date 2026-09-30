@@ -187,6 +187,16 @@ def test_preamble_unranked_undeclared_and_every_screen_outcome():
                     "title": "no_higher_tier_chunk",       # cited by the release: nothing ranks above it
                     "notes": "exempt", "keywords": "preamble_only"}
     assert [e["path"] for e in screen["examples"]] == ["description"]
+    # nothing here is superseded, and a preamble-only path cites no document:
+    # it keeps `preamble_only` and is not screened. Without that pass-through
+    # its empty document set reads as "all superseded" and it would be counted
+    # as having no replacement chunk (#3475)
+    s_rows = {r["path"]: r["supersession_screen"] for r in out["by_path"]}
+    assert s_rows["keywords"] == "preamble_only" and s_rows["notes"] == "exempt"
+    assert out["superseded_with_replacement_token_match"]["outcomes"] == {
+        "replacement_match": 0, "no_replacement_match": 0, "below_floor": 0, "no_replacement_chunk": 0,
+        "cites_a_current_source": 5, "exempt": 1, "preamble_only": 1}
+    assert "· 0 with no replacement chunk in the bundle ·" in "\n".join(rs.render({**out, "run": {}}))
 
 
 def test_a_chunk_without_text_is_listed_and_never_read_as_a_match():
@@ -585,6 +595,20 @@ def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
             rs.run_source_manifest(record, prov)
 
 
+def test_a_git_blob_basis_is_labelled_with_the_commit_it_was_found_at():
+    """The basis keys the hash as `commit`; the text line must not present a
+    commit hash as a blob's (#3476)."""
+    assert rs.basis_label({"source": "git blob", "path": "m.yaml", "commit": "a" * 40}) == \
+        f"git blob at commit {'a' * 12}"
+    assert rs.basis_label({"source": "bundle on disk", "path": "b.txt"}) == "bundle on disk"
+    assert rs.basis_label({}) == "?"
+    manifest, texts = _manifest(BUNDLE3)
+    out = rs.source_dependence(_acceptance_receipt(manifest["bundle_md5"]), manifest, SOURCE_MANIFEST, "P",
+                               FULL, texts)
+    text = "\n".join(rs.render({**out, "run": {"bundle_basis": {"source": "git blob", "commit": "c" * 40}}}))
+    assert f"chunks from the git blob at commit {'c' * 12}" in text
+
+
 def test_run_source_manifest_refuses_a_run_that_recorded_no_path_or_no_hash(tmp_path):
     prov = tmp_path / "P_provenance.yaml"
     unselected = {"inputs": {"source_manifest": {"path": None, "basis": "the bundle is not the one it declares"}}}
@@ -682,6 +706,14 @@ def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, 
     assert "recovered by hash rather than from the run's commit" in default["non_checks"][-1]
     text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
     assert f"tiers: {recorded} (manifest on disk) sha256" in text and "(the bytes the run recorded)" in text
+    # recovered from git, the hash on the line is the commit the blob was
+    # found at, and the line says so (#3476)
+    entry = {"commit": "b" * 40, "date": "2026-09-01", "md5": "x", "sha256": "y", "matched_on": ["md5"]}
+    recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
+        text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
+    assert f"tiers: {recorded} (git blob at commit {'b' * 12}) sha256" in text, text
+    recorded.write_bytes(SOURCE_MANIFEST)
     with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
         recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
         result = CliRunner().invoke(cli, args + ["--at-run-commit"])
