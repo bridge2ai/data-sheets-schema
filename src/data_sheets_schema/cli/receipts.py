@@ -346,7 +346,13 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     `d4d`, `data_sheets_schema` or `$`-variable invocation, cannot be placed;
     its cost is a false `unknown` (`grep 'd4d derive core' notes.md`). A
     derive whose words are not on the command line (a script, an alias, a variable supplying
-    `derive` itself) is not seen. A relative `--full`
+    `derive` itself, `python -c` building the arguments) is placed by position: a
+    shell call that runs a program this does not read (anything but a reader, a
+    directory change, a d4d call of a literal subcommand, or `linkml-validate` or
+    `linkml-term-validator` with the options it reads), issued after the first
+    full-record Write and before the derive, with a receipt change after it, makes the
+    status `unknown`; its cost is a false `unknown` for such a program that derived
+    nothing. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

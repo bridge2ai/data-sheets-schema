@@ -978,7 +978,7 @@ class EditReplay(Base):
         r.derive()
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
-        self.assertEqual(block["instrument"], "receipt_origin v2 (#2933, #3047)")
+        self.assertEqual(block["instrument"], "receipt_origin v3 (#2933, #3047, #3369)")
         self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
         self.assertEqual(block["snippets"], {"pre_draft": 3, "at_derive_core": 4, "final": 4})
         self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 1))
@@ -2118,7 +2118,7 @@ class DeriveSpellings(Base):
 
     def test_the_route_it_cannot_see_is_named(self):
         text = " ".join(ro.NON_CHECKS)
-        self.assertIn("a `derive core` run without the words `derive core` on the command line", text)
+        self.assertIn("One run without the words `derive core` on the command line", text)
         self.assertIn("`python -c` building the argument list", text)
         doc = " ".join(ro.__doc__.split())
         self.assertIn("carries the words `derive core` and is neither a d4d call of another subcommand "
@@ -2157,8 +2157,21 @@ class DeriveSpellings(Base):
                       "notes.md`", text)
         self.assertIn("A derive call with a redirection among its words (`--full 2>/dev/null F`) cannot be "
                       "placed (#3478)", text)
-        self.assertIn("what no rule sees is a command with no whole word `derive`, or with one but no such "
-                      "invocation", text)
+        self.assertIn("what no word rule sees is a command with no whole word `derive`, or with one but no such "
+                      "invocation (a script, alias or program under another name: `run.sh derive core`), which is "
+                      "left to the position rule", text)
+        # #3369: a derive with no words on the command line is placed by position
+        self.assertNotIn("such a derive is not seen, and the Phase 1 / Phase 3 boundary is missed", text)
+        self.assertIn("is not placed by the words (#3137, #3384) but by position (#3369): a shell call that runs a "
+                      "program not read here -- neither a reader, a directory change, a d4d call of a literal "
+                      "subcommand, nor `linkml-validate` or `linkml-term-validator` with options read here -- "
+                      "issued after the draft and before the derive boundary, with a receipt change after it, is "
+                      "a reason; its cost is a false `unknown` for such a program that derived nothing", text)
+        self.assertIn("a `derive core` run by anything other than a shell call in the transcripts given", text)
+        self.assertIn("A derive whose words are not on the command line at all (a script, an alias or function, "
+                      "`d4d $SUB`, `python -c` building the argument list) is placed by position instead (#3369)",
+                      doc)
+        self.assertIn("or a shell call may have run one unseen where it would move the boundary (#3369)", doc)
         self.assertNotIn("A word the shell builds some other way (a glob, `derive c*`) is not seen", text)
         self.assertNotIn("nor is a word xargs appends to a `derive` that neither ends", text)
         self.assertIn("Last, a command-wide backstop (#3478-#3480): a call whose raw text carries more "
@@ -2177,6 +2190,227 @@ class DeriveSpellings(Base):
         self.assertIn("as does one carrying any replacement string an `xargs` in the command sets", doc)
         self.assertIn("The words are matched after quote and escape characters are removed, as the shell "
                       "running a nested string removes them", doc)
+
+
+class UnseenDerive(Base):
+    """A `derive core` run without the words on the command line (a script,
+    an alias or function, `d4d $SUB`, `python -c` building the argument list)
+    left the block `checked` with a Phase 3 entry read as Phase 1 (#3369). A
+    shell call that runs a program this does not read, issued after the draft
+    and before the derive boundary with a receipt change after it, is now a
+    reason. The two schema validators the playbook runs are read."""
+
+    FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
+    VALIDATE = ("python -c 'from linkml.validator.cli import cli; cli()' -s schema.yaml -C Dataset "
+                f"{FULL}")
+    TERMS = ("$PY -c 'from linkml_term_validator.cli import main; main()' validate-data "
+             f"{FULL} --schema schema.yaml --target-class Dataset")
+    UNSEEN = ("bash derive.sh", "sh -c ./run", "./derive.sh", "source derive.sh", "myderive",
+              "d4d $SUB --full F", f"python -c 'import sys; sys.argv[1:] = [\"de\" + \"rive\", \"core\"]' {FULL}",
+              "python scripts/fix.py", "make core", "cat x | bash", "timeout 60 cat x",
+              "echo ok && python tools/step.py", "python - <<'EOF'\nprint(1)\nEOF",
+              "poetry run linkml-validate --config c.yaml F",
+              "linkml-validate -m datamodel.py F", "linkml-validate -s s.yaml --legacy-mode F",
+              "linkml-term-validator validate-data F -s s.yaml -a pronto:x.obo",
+              "linkml-term-validator validate-data F -s s.yaml --config oak.yaml",
+              "linkml-term-validator F -s s.yaml",
+              "python -c 'from linkml.validator.cli import cli; cli(); import os' F")
+
+    def _run(self, command, *, derive=True, **result):
+        """Draft, the call under test, a receipt change, then (by default) the
+        recognised derive and a later receipt change."""
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.bash(command, **result)
+        r.write(r.receipt, Boundaries.C003)
+        if derive:
+            r.derive()
+            r.write(r.receipt, Boundaries.C004)
+        return identity, r.report()
+
+    def test_a_program_not_read_between_the_draft_and_a_receipt_change_is_unknown(self):
+        for command in self.UNSEEN:
+            for derive in (True, False):
+                with self.subTest(command=command, derive=derive):
+                    identity, block = self._run(command, derive=derive)
+                    where = "the derive core boundary" if derive else "the end of the transcripts"
+                    self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program this "
+                                              f"does not read after the full record's first Write, before {where}, "
+                                              "with a receipt change after it: a `derive core` it ran without the "
+                                              "words on its command line would move the Phase 1 / Phase 3 "
+                                              "boundary (#3369)")
+                    self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+                    self.assertEqual(set(block["possible_unseen_derives"][0]),
+                                     {"tool_use_id", "transcript", "line", "result_line", "outcome"})
+
+    def test_a_failed_call_may_still_have_derived(self):
+        identity, block = self._run("bash derive.sh", ok=False)
+        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program this does not read")
+        self.assertEqual(block["possible_unseen_derives"][0]["outcome"], "failed")
+
+    def test_a_call_that_can_run_nothing_unseen_is_not_a_possible_derive(self):
+        for command in ("cat CHORUS_d4d.yaml", "grep -n title x.md | head -3", "cd data && ls",
+                        "d4d receipts check --receipt R", "d4d bundle chunk --check",
+                        "python -m data_sheets_schema.cli receipts check --receipt R",
+                        "cat x > /tmp/out.txt", "echo \"$(date)\"",
+                        self.VALIDATE, self.TERMS, "poetry run linkml-validate -s s.yaml -C Dataset F",
+                        "linkml-validate --schema=s.yaml --target-class=Dataset --exit-on-first-failure -D F",
+                        "linkml-term-validator validate-data F -s s.yaml -t Dataset --no-labels --bindings",
+                        "/venv/bin/linkml-validate -s s.yaml F && /venv/bin/linkml-term-validator validate "
+                        "F -s s.yaml"):
+            with self.subTest(command=command):
+                _, block = self._run(command)
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["possible_unseen_derives"], [])
+                self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1,
+                                                   "phase3_backport": 1})
+
+    def test_only_a_call_that_could_move_the_boundary_counts(self):
+        # After the boundary, the first successful derive has already run.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        r.bash("bash derive.sh")
+        r.write(r.receipt, Boundaries.C004)
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 1})
+        # With no receipt change after it, the snapshots are the same either way.
+        for derive in (True, False):
+            with self.subTest(derive=derive):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.bash("bash derive.sh")
+                if derive:
+                    r.derive()
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["possible_unseen_derives"], [])
+        # Before the draft was issued there was no full record to derive.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash("bash derive.sh")
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["possible_unseen_derives"], [])
+
+    def test_a_call_in_flight_with_the_draft_or_backgrounded_before_it_counts(self):
+        # Issued before the draft but returned after it was issued: it may
+        # have run once the full record existed.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        identity = r.call("Bash", command="bash derive.sh", description="x")
+        draft = r.call("Write", file_path=str(r.full), content="id: x\n")
+        r.result(identity, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.result(draft, f"File written at: {r.full}", {"type": "create", "filePath": str(r.full)})
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # A backgrounded call's result is its launch: it may run on after the draft.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        identity = r.bash("bash derive.sh", metadata={"stdout": "", "stderr": "", "interrupted": False,
+                                                       "backgroundTaskId": "bg1"})
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # So may a part the command started with `&`, whatever the result says.
+        for command in ("bash derive.sh &", "(bash derive.sh &)", "bash derive.sh & wait",
+                        "bash derive.sh > /tmp/log 2>&1 &"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # A `&&`, `|&` or a redirection's `&` detaches nothing.
+        for command in ("bash derive.sh && ls", "bash derive.sh |& cat", "bash derive.sh 2>&1",
+                        "bash derive.sh &>/dev/null"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+        # A receipt Write issued before the call but returned after it was
+        # issued may have landed after a derive the call ran.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        update = InFlight.start(r, r.receipt, Boundaries.C003)
+        identity = r.call("Bash", command="bash derive.sh", description="x")
+        InFlight.finish(r, update, r.receipt, Boundaries.C003)
+        r.result(identity, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.derive()
+        block = r.report()
+        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 7) runs a program")
+        self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+
+    def test_a_call_after_the_boundary_is_not_listed_even_beside_a_write_in_flight_with_it(self):
+        # The receipt Write in flight with the boundary is the reason; the
+        # call issued after the boundary cannot move it (the first derive ran).
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        update = InFlight.start(r, r.receipt, Boundaries.C003)
+        derive = r.derive()
+        r.bash("bash derive.sh")
+        InFlight.finish(r, update, r.receipt, Boundaries.C003)
+        block = r.report()
+        self.assertUnknown(block, f"was in flight with the derive core boundary ({derive})")
+        self.assertEqual(block["possible_unseen_derives"], [])
+
+    def test_a_command_the_tokenizer_cannot_split_is_not_read(self):
+        # An apostrophe in a here-document body (#3458): its parts are not read.
+        identity, block = self._run("cat <<EOF\nit's\nEOF")
+        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program")
+
+    def test_a_denied_call_never_ran(self):
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.bash("bash derive.sh", ok=False, content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+               metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        r.write(r.receipt, Boundaries.C003)
+        r.derive()
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["possible_unseen_derives"], [])
+
+    def test_validator(self):
+        cases = {"linkml-validate -s s.yaml -C Dataset F": True,
+                 "linkml-validate --schema=s.yaml F G": True,
+                 "linkml-validate -s": False,                       # a valued option with no value
+                 "linkml-validate --config c.yaml F": False,
+                 "linkml-validate --config=c.yaml F": False,
+                 "linkml-validate -m m.py F": False,
+                 "linkml-term-validator validate-schema s.yaml": True,
+                 "linkml-term-validator validate-data F --adapter x": False,
+                 "linkml-term-validator validate-data F -c oak.yaml": False,
+                 "linkml-term-validator --help": False,
+                 "python3.12 -c 'from linkml.validator.cli import cli; cli()' -s s.yaml F": True,
+                 "${PY} -c 'from linkml_term_validator.cli import main; main()' validate F -s s.yaml": True,
+                 "python -c 'from linkml.validator.cli import cli;cli()' F": False,
+                 "python -c 'from linkml_term_validator.cli import main; main()' -s s.yaml F": False,
+                 "python -I -c 'from linkml.validator.cli import cli; cli()' F": False,
+                 "bash -c 'linkml-validate F'": False, "": False}
+        for command, admitted in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._validator(ro._unwrapped(ro._tokens(command) or [])), admitted)
 
 
 class RuntimeDenial(Base):
@@ -2476,8 +2710,13 @@ class Cli(unittest.TestCase):
                       text)                                                               # #3426, #3453, #3457
         self.assertIn("A command the tokenizer cannot split (an apostrophe in a heredoc body) is tested "
                       "whole for the same words, and a match cannot be placed", text)      # #3458
+        self.assertNotIn("supplying `derive` itself) is not seen", text)
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
-                      "supplying `derive` itself) is not seen", text)
+                      "supplying `derive` itself, `python -c` building the arguments) is placed by position: a "
+                      "shell call that runs a program this does not read (anything but a reader, a directory "
+                      "change, a d4d call of a literal subcommand, or `linkml-validate` or `linkml-term-validator` "
+                      "with the options it reads), issued after the first full-record Write and before the "
+                      "derive, with a receipt change after it, makes the status `unknown`", text)   # #3369
         # #3478-#3480: the command-wide backstop and its cost
         self.assertIn("so does a derive call with a redirection among its words (`--full 2>/dev/null F`)", text)
         self.assertIn("Last, a command-wide backstop: a call carrying more `derive` words than these rules gave "

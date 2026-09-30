@@ -103,8 +103,22 @@ substitution, an assignment, a `cd` part or an `xargs` argument included
 one derive that cannot be placed. It does not depend on how the command
 is spelled, and its cost is a false `unknown` for a call that only
 mentions the word beside such an invocation (`grep 'd4d derive core'
-notes.md`, the recorder's `--phase 'derive core'`). A call the runtime
-backgrounded is ambiguous too: its result is the launch, not the end. A
+notes.md`, the recorder's `--phase 'derive core'`). A derive whose words
+are not on the command line at all (a script, an alias or function, `d4d
+$SUB`, `python -c` building the argument list) is placed by position
+instead (#3369): a shell call not denied that runs a program not read
+here -- a part that is neither a reader, a directory change, a d4d call of
+a literal subcommand, nor `linkml-validate` or `linkml-term-validator` with
+options this reads (as the console script or as the `python -c` program
+the pipeline spells each with), or a command the tokenizer cannot split --
+is a possible derive where one would move the boundary: it had not
+returned before the draft was issued (a backgrounded call's result is its
+launch, and a part started with `&` may outlive it, so neither has), it was issued before the derive boundary (if
+any), and a receipt change issued before that boundary returned after it
+was issued.
+Its cost is a false `unknown` for such a program that derived nothing. A
+call the runtime backgrounded is ambiguous too: its result is the launch,
+not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
 start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
 moves the directory a later part's `--full` resolves against only where
@@ -126,7 +140,8 @@ since the inner command is not parsed, #3240) where the change can reach
 the pre-draft or derive-time snapshot, or the full record is changed that
 way before its first Write; the first observed Write of either file updated
 an existing file, or carries no create/update metadata to say it did not; a
-`derive core` of the full record cannot be placed; a receipt Write was in
+`derive core` of the full record cannot be placed, or a shell call may have
+run one unseen where it would move the boundary (#3369); a receipt Write was in
 flight (issued before the other had returned) together with another
 receipt Write, the first full-record Write or the derive boundary, so which
 took effect first cannot be told (#3268); or the rebuilt final receipt's
@@ -162,7 +177,7 @@ from typing import Any
 
 import yaml
 
-INSTRUMENT = "receipt_origin v2 (#2933, #3047)"
+INSTRUMENT = "receipt_origin v3 (#2933, #3047, #3369)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -238,11 +253,17 @@ NON_CHECKS = (
     "the command (exported earlier or inherited), or a hostname helper (`--hostname-bin`) set "
     "there: `rg` is read-only only when neither its arguments nor its own assignments set "
     "either (#3256, #3268)",
-    "a `derive core` run without the words `derive core` on the command line (a script, an "
-    "alias or function, a variable or substitution supplying the word `derive` itself (`d4d "
-    "$SUB`), `python -c` building the argument list, or a file that an earlier call wrote the "
-    "words into and a later call runs): such a derive is not seen, and the Phase 1 / Phase 3 "
-    "boundary is missed (#3137, #3384). The words are matched after quote and escape "
+    "a `derive core` run by anything other than a shell call in the transcripts given (a "
+    "subagent's own calls, which are in its own transcript). One run without the words `derive "
+    "core` on the command line (a script, an alias or function, a variable or substitution "
+    "supplying the word `derive` itself (`d4d $SUB`), `python -c` building the argument list, "
+    "or a file that an earlier call wrote the words into and a later call runs) is not placed "
+    "by the words (#3137, #3384) but by position (#3369): a shell call that runs a program not "
+    "read here -- neither a reader, a directory change, a d4d call of a literal subcommand, nor "
+    "`linkml-validate` or `linkml-term-validator` with options read here -- issued after the "
+    "draft and before the derive boundary, with a receipt change after it, is a reason; its "
+    "cost is a false `unknown` for such a program that derived nothing. The words are matched "
+    "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
     "placed (#3397), as does a word carrying any replacement string an `xargs` in the command "
@@ -260,9 +281,10 @@ NON_CHECKS = (
     "`data_sheets_schema` or `$`-variable invocation, is one derive that cannot be placed; its "
     "cost is a false `unknown` (`grep 'd4d derive core' notes.md`, the recorder's `--phase "
     "'derive core'`). So a word the shell builds some other way (a glob, `derive c*`), or one "
-    "xargs appends after a `derive` mid-command, is left to the backstop, and what no rule sees "
+    "xargs appends after a `derive` mid-command, is left to the backstop, and what no word rule sees "
     "is a command with no whole word `derive`, or with one but no such invocation (a script, "
-    "alias or program under another name: `run.sh derive core`)",
+    "alias or program under another name: `run.sh derive core`), which is left to the position "
+    "rule",
 )
 
 _ABSENT = object()
@@ -1005,6 +1027,59 @@ def _xargs_supplies_derive_word(text: str) -> bool:
     return False
 
 
+#: The two schema validators the playbook runs, as the console script or as
+#: the `python -c` program the pipeline itself spells them with
+#: (`resources.linkml_validate`, `agentic_runtime.portable_text`), and the
+#: options each may carry: `(valued, flags)`. An option outside them (a
+#: `--config` file, `linkml-validate -m` loading a Python datamodel, an OAK
+#: `--adapter`) is not admitted, since it may load code (#3369).
+_VALIDATORS = {
+    "linkml-validate": ("from linkml.validator.cli import cli; cli()", None,
+                        frozenset({"-s", "--schema", "-C", "--target-class"}),
+                        frozenset({"--exit-on-first-failure", "-D", "--include-context", "--no-include-context"})),
+    "linkml-term-validator": ("from linkml_term_validator.cli import main; main()",
+                              frozenset({"validate-data", "validate-schema", "validate"}),
+                              frozenset({"-s", "--schema", "-t", "--target-class"}),
+                              frozenset({"--bindings", "--no-bindings", "--dynamic-enums", "--no-dynamic-enums",
+                                         "--labels", "--no-labels"})),
+}
+
+
+def _validator(rest: list[str]) -> bool:
+    """Whether a part (from its program on) runs `linkml-validate` or
+    `linkml-term-validator` with only the options `_VALIDATORS` admits: a
+    program that validates the files it is given and cannot run a `derive
+    core` (#3369). Anything else, including another `python -c` program, is
+    not."""
+    if not rest:
+        return False
+    program = os.path.basename(rest[0])
+    args = None
+    for name, (inline, commands, valued, flags) in _VALIDATORS.items():
+        if program == name:
+            args = rest[1:]
+        elif ((_PYTHON.fullmatch(program) or _VARIABLE.fullmatch(rest[0]))
+              and rest[1:3] == ["-c", inline]):
+            args = rest[3:]
+        else:
+            continue
+        if commands is not None:
+            if not args or args[0] not in commands:
+                return False
+            args = args[1:]
+        i = 0
+        while i < len(args):
+            a = args[i]
+            if a in valued:
+                i += 2
+            elif a in flags or not a.startswith("-") or a.split("=", 1)[0] in valued:
+                i += 1
+            else:
+                return False
+        return i == len(args)
+    return False
+
+
 def _subcommand(args: list[str]) -> tuple[tuple[str, ...], list[str]]:
     rest = list(args)
     if rest[:1] == ["--manifest"]:
@@ -1220,7 +1295,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     says about that part)."""
     tokens = _tokens(command)
     named = [x for x in targets if x.name in command]
-    out: dict[str, Any] = {"named": [], "read_only": False, "derives": []}
+    # `runs_unread`: some part runs a program this does not read -- neither a
+    # reader, a directory change, nor a d4d call of a literal subcommand --
+    # so it may run a `derive core` whose words are not on the command line
+    # (#3369).
+    # `detaches`: a part is started with `&`, so it may run on after the
+    # call's result, as a backgrounded call does.
+    out: dict[str, Any] = {"named": [], "read_only": False, "derives": [], "runs_unread": True,
+                           "detaches": True}
     if tokens is None:
         # A command shlex cannot split (an apostrophe in a here-document's
         # body, #3458) is not read part by part, but the words may still be
@@ -1233,6 +1315,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
+    # A lone `&` (the lexer may join it to a closing bracket: `&)`), never
+    # `&&`, `|&` or a redirection's `>&`, `<&` or `&>`.
+    out["detaches"] = any(set(t) <= _PUNCT and "&" in t.replace("&&", "").replace("|&", "").replace(
+        ">&", "").replace("<&", "").replace("&>", "") for t in tokens)
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) for s in segments)
     for target in named:
         for token in tokens:
@@ -1276,6 +1362,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # Per part: whether it runs a program not read here (`runs_unknown`),
     # and the reader parts that carry the words `derive core` without a row.
     runs_unknown = [False] * len(segments)
+    # Per part: whether it may run a `derive core` whose words are not on the
+    # command line (#3369): `runs_unknown`, less the two schema validators.
+    may_derive = [False] * len(segments)
     mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
@@ -1351,6 +1440,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 read_only = False
             opaque = not reads
         runs_unknown[index] = opaque
+        may_derive[index] = opaque and not _validator(_unwrapped(segment))
         if full is not None and _mentions_derive(segment):
             if opaque or substitutes:
                 out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
@@ -1373,6 +1463,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
     out["derives"].sort(key=lambda row: row["segment"])
     out["read_only"] = read_only
+    out["runs_unread"] = any(may_derive)
     return out
 
 
@@ -1571,10 +1662,11 @@ def _creates(name: str, inputs: dict) -> bool:
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
              reasons: list[str], runtime_denied: set[str] | frozenset = frozenset()) -> dict[str, Any]:
     """Every call that bears on the two files, sorted into successful Writes,
-    unsettled Writes, refusals, other mutations and `derive core` runs.
+    unsettled Writes, refusals, other mutations, `derive core` runs and the
+    shell calls that ran a program not read here (`unread`, #3369).
     `runtime_denied` names the shell calls `_runtime_denials` corroborated."""
     h: dict[str, Any] = {"writes": {"receipt": [], "full": []}, "unsettled": {"receipt": [], "full": []},
-                         "mutations": [], "rejected": [], "derives": []}
+                         "mutations": [], "rejected": [], "derives": [], "unread": []}
     for call in calls:
         name, inputs, result = call["name"], call["input"], results.get(call["id"])
         if not isinstance(inputs, dict):
@@ -1623,6 +1715,18 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                                  "outcome": _derive_outcome(result, part["basis"], denial is not None),
                                  "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
                                 for part in shell["derives"])
+            if shell["runs_unread"] and denial is None:
+                # A call that ran a program this does not read may have run
+                # a `derive core` whose words are not on its command line
+                # (#3369); `_boundaries` decides whether that could matter.
+                # A backgrounded call's result is its launch, and a part
+                # started with `&` may outlive the result: either may still
+                # be running after it, so `_ran_until` is then open.
+                background = shell["detaches"] or isinstance(result, dict) and isinstance(
+                    result["metadata"], dict) and bool(result["metadata"].get("backgroundTaskId")
+                                                       or result["metadata"].get("background_task_id"))
+                h["unread"].append({**where, "outcome": _shell_outcome(result),
+                                    "_ran_until": None if background else where["_settled"]})
             if shell["read_only"]:
                 continue
             if denial is not None:
@@ -1759,6 +1863,30 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
             if boundary is not None and in_flight(row, boundary):
                 reasons.append(f"receipt {row['tool']} {row['tool_use_id']} was in flight with {label} "
                                f"({boundary['tool_use_id']}): which took effect first cannot be told")
+    # A `derive core` whose words are not on the command line (a script, an
+    # alias or function, `d4d $SUB`, `python -c` building the argument list)
+    # is not seen by the rules above (#3369). A shell call that ran a program
+    # not read here could have run one, and that moves the boundary only
+    # where it could have run once the full record existed (it had not
+    # returned before the draft was issued), was issued before the derive
+    # boundary (after it, the first derive has run), and a receipt change
+    # issued before the boundary could have landed after it (settled after
+    # it was issued). Anywhere else the snapshots are the same whether it
+    # derived or not.
+    h["possible_derives"] = []
+    for row in h["unread"] if first is not None else []:
+        if row["_ran_until"] is not None and row["_ran_until"] < first["_at"]:
+            continue
+        if derived is not None and not row["_at"] < derived["_at"]:
+            continue
+        if any(w["_settled"] > row["_at"] and (derived is None or w["pos"] < derived["pos"])
+               for w in receipt_writes):
+            h["possible_derives"].append(row)
+            reasons.append(f"Bash call {row['tool_use_id']} (transcript {row['transcript']} line {row['line']}) "
+                           "runs a program this does not read after the full record's first Write, before "
+                           + ("the derive core boundary" if derived is not None else "the end of the transcripts")
+                           + ", with a receipt change after it: a `derive core` it ran without the words on "
+                           "its command line would move the Phase 1 / Phase 3 boundary (#3369)")
     settled = [row["_settled"] for row in (first, receipt_writes[-1] if receipt_writes else None, derived)
                if row is not None]
     for row in h["mutations"]:
@@ -1841,6 +1969,7 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
         "boundaries": {"full_record_write": strip(first) if first else None,
                        "derive_core": strip(derived) if derived else None},
         "derive_core_attempts": [strip(r) for r in h["derives"]],
+        "possible_unseen_derives": [strip(r) for r in h["possible_derives"]],
         "rejected_writes": h["rejected"],
         "non_write_mutations": [strip(r) for r in h["mutations"]],
         "non_checks": list(NON_CHECKS),
