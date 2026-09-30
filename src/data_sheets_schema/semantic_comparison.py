@@ -496,3 +496,57 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
                   "than once and left out: "
                   + ", ".join(f"{p} `{l}` ({r})" for r, p, l in cross["partner_duplicated"]) + ".", ""]
     return lines
+
+
+# --- The legacy summarizers' own cohorts (#3281) ------------------------------
+#
+# scripts/summarize_rubric{10,20}_results.py read data/evaluation_llm/rubric10
+# and rubric20: the presence/direct-API evaluations, whose items already have
+# the shape item_scores() reads (rubric10 `elements[].sub_elements[]`, rubric20
+# `questions[]` with `max_score`). What they lack is a generation label, and
+# they mix evaluators, record kinds and — for rubric20 — maxima in one
+# directory, so the block is measured per cohort rather than over the folder.
+
+def legacy_record(result: dict[str, Any]) -> dict[str, Any]:
+    """A legacy evaluation as discrimination() reads it. It names no
+    generation label; the record it rated is `d4d_file`, so that is its label
+    where it names none, and a file rated twice in one cohort is a duplicate
+    rather than two records. The evaluation itself is not modified."""
+    if record_label(result) is not None or not result.get("d4d_file"):
+        return result
+    return {**result, "label": str(result["d4d_file"])}
+
+
+def legacy_cohorts(results: Iterable[dict[str, Any]]
+                   ) -> list[tuple[tuple[str, str | None, float], list[dict[str, Any]]]]:
+    """((evaluation type, evaluator, fixed maximum), evaluations), sorted.
+
+    An individual (single-source) record and a concatenated synthesis are
+    different kinds of record; an evaluator is an instrument (#1058); and a
+    total over another maximum is not a distinct total of this one (#275). Any
+    of the three pooled would count its offset as separation."""
+    groups: dict[tuple[str, str | None, float], list[dict[str, Any]]] = {}
+    for result in results:
+        maximum = score_bases(result, _rubric_default_max(result.get("rubric", "unknown"))).fixed_max
+        key = (str(result.get("evaluation_type") or "unknown"), evaluator_key(result), maximum)
+        groups.setdefault(key, []).append(result)
+    return sorted(groups.items(), key=lambda item: (item[0][0], item[0][1] or "", item[0][2]))
+
+
+def render_legacy_discrimination(results: Iterable[dict[str, Any]],
+                                 heading: str = "##") -> list[str]:
+    """The #2927 block for each of a legacy summarizer's cohorts (#3281)."""
+    lines: list[str] = []
+    for (kind, evaluator, maximum), members in legacy_cohorts(results):
+        who = evaluator or "an unrecorded evaluator"
+        block = discrimination(legacy_record(result) for result in members)
+        lines += render_discrimination(
+            block, heading, scope=f", {kind} evaluations by {who} scored out of {maximum:g}",
+            evaluator=evaluator)
+        lines += [f"This cohort is the {len(members)} {kind} evaluation"
+                  f"{'s' if len(members) != 1 else ''} by {who} scored out of {maximum:g}, "
+                  "each record named by the D4D file it rated. Evaluations of another kind "
+                  "(individual or concatenated), by another evaluator or over another maximum "
+                  "are measured in a block of their own: pooled, their offsets would be counted "
+                  "as distinct totals (#1058, #275).", ""]
+    return lines

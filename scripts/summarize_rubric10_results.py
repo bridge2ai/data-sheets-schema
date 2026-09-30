@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import List, Dict
 from datetime import datetime
 from data_sheets_schema.rubric_pooling import reported_percentage
+from data_sheets_schema.semantic_comparison import render_legacy_discrimination
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -241,6 +242,11 @@ def create_detailed_report(results: List[Dict]):
             report += f"### {project}\n"
             report += f"- Files evaluated: {len(project_results)}\n"
             report += f"- Average score: {avg_score:.1f}/50 ({avg_pct:.1f}%)\n\n"
+
+    # Item discrimination per cohort (#3281), as the semantic reports have
+    # had since #2927: which items separate no record, and which projects
+    # have too few distinct totals to order their records at all.
+    report += "\n" + "\n".join(render_legacy_discrimination(results))
 
     # Save report
     report_path = EVAL_DIR / "summary_report.md"

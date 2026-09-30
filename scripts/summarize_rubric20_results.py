@@ -25,6 +25,7 @@ from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 from data_sheets_schema.rubric_pooling import (
     denominator_label, group_by_denominator, pooling_warning,
     reported_percentage)
+from data_sheets_schema.semantic_comparison import render_legacy_discrimination
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -315,6 +316,11 @@ def create_detailed_report(results: List[Dict]):
             avg_cat_score = sum(cat_scores) / len(cat_scores)
             report += f"### {cat_name}\n"
             report += f"- Average score: {avg_cat_score:.1f}\n\n"
+
+    # Item discrimination per cohort (#3281), as the semantic reports have
+    # had since #2927: which items separate no record, and which projects
+    # have too few distinct totals to order their records at all.
+    report += "\n" + "\n".join(render_legacy_discrimination(results))
 
     # Save report
     report_path = EVAL_DIR / "summary_report.md"
