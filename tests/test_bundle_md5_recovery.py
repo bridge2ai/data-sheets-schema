@@ -211,10 +211,6 @@ class OnTheCorpus(unittest.TestCase):
         self.assertEqual(bad, [])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class TestNeutralNames(unittest.TestCase):
     """#3412. The lookups recover any committed file by path and hash; the
     neutral names are the same functions, so one memo cache serves both."""
@@ -249,3 +245,7 @@ class TestNeutralNames(unittest.TestCase):
         self.assertEqual(raw, blobs["a" * 40])
         self.assertEqual((entry["commit"], entry["matched_on"]), ("a" * 40, ["sha256"]))
         self.assertIsNone(none)
+
+
+if __name__ == "__main__":
+    unittest.main()
