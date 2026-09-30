@@ -144,11 +144,12 @@ class Time(unittest.TestCase):
 
     #: Verb with no term, term with no verb (each branch of the pattern
     #: fails), and a term whose verb closes the sentence (it matches).
+    #: One "e.g.," per item, so the first form fails at n=20 in seconds
+    #: rather than hanging (k such dots cost it 2^k).
     SENTENCES = {
-        "verb, no term": ("The source was used, ", "e.g., x i.e., y U.S.-based ", "and nothing else."),
-        "term, no verb": ("The higher-ranked source lists items, ", "e.g., x i.e., y U.S.-based ", "and more."),
-        "term, then verb": ("The higher-ranked source lists items, ", "e.g., x i.e., y U.S.-based ",
-                            "and that value is used."),
+        "verb, no term": ("The source was used, ", "e.g., x ", "and nothing else."),
+        "term, no verb": ("The higher-ranked source lists items, ", "e.g., x ", "and more."),
+        "term, then verb": ("The higher-ranked source lists items, ", "e.g., x ", "and that value is used."),
     }
     CEILING = 1.0       # seconds for one call; the fixed pattern takes about a millisecond
 
