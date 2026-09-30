@@ -246,8 +246,14 @@ item_qualifiers:
 # so a first clause whose only verb is a lexical one ("The page lists no
 # sizes and this split ...") is not cut. A conjunct with no subject of its
 # own ("The holdout set was announced and remains prospective") inherits
-# the governing subject, the earlier conjunct's text before its first
-# `clause_verb` ("The holdout set"), and every check reads that (#3627).
+# the governing subject, and every check reads that (#3627): walking back
+# over the pieces before it, split at commas and at conjunctions a
+# `clause_verb` precedes, the first piece whose text before its first
+# `clause_verb` has words of its own ("The holdout set"). A piece with no
+# `clause_verb` (an appositive such as "planned for 2025") is passed over
+# unless it opens the sentence, so "This split, planned for 2025, was
+# announced and remains prospective" is about "This split", and "The
+# holdout set was announced, and remains prospective" about the set.
 # `correlative` is an affirmative coordination, not a negation: in "Not
 # only this split but also the holdout set are prospective" its `open`
 # words are blanked and its `join` is read as "and" before the negation and

@@ -58,8 +58,9 @@ these checks and the date/amount guard read is the cue's own conjunct: a
 comma-less clause joined before it by a conjunction after an auxiliary or
 copula ("Its release is pending and this split remains prospective") is
 left out (`statement_subject.conjunction`, `clause_verb`, #3619), and a
-conjunct with no subject of its own inherits the governing one ("The
-holdout set was announced and remains prospective", #3627). "Not only
+conjunct with no subject of its own inherits the governing one, across
+a comma too ("The holdout set was announced and remains prospective",
+"The holdout set was announced, and remains prospective", #3627). "Not only
 this split but also the holdout set" is affirmative coordination, not a
 negated subject (`statement_subject.correlative`, #3628). A statement
 topic ("statements about/of/for ...", #3615) must itself be headed by a
@@ -592,35 +593,58 @@ def _elided(text: str) -> bool:
     return _ELIDED.fullmatch(text.lstrip()) is not None and _PRONOUN.search(text) is None
 
 
-def _clause_cut(lexicon, subject: str) -> tuple[int, int]:
-    """Where the cue's own subject lies in `subject` (a `_subject` stretch,
-    unmasked), as (start, end). The cue's own conjunct starts after the
-    last `statement_subject.conjunction` whose stretch before it (from the
-    previous cut) holds a `statement_subject.clause_verb`, so the
-    conjunction joins two clauses and the earlier one is not the cue's
-    subject: "Its release is pending and this split" -> "this split"; "This
-    split and its labels" is one noun phrase and is kept whole (#3619).
-    A conjunct with no subject of its own (`_elided`) inherits the
-    governing subject, the nearest earlier conjunct's text before its first
-    clause verb: "The holdout set was announced and " -> "The holdout set",
-    "It was announced in 2024 and " -> "It" (#3627). (0, len) when the
-    lexicon declares no conjunction."""
+def _clause_cut(lexicon, subject: str) -> int:
+    """Where the cue's own conjunct starts in `subject` (a `_subject`
+    stretch, unmasked): after the last `statement_subject.conjunction` whose
+    stretch before it (from the previous cut) holds a
+    `statement_subject.clause_verb`, so the conjunction joins two clauses
+    and the earlier one is not the cue's subject. "Its release is pending
+    and this split" -> "this split"; "It was announced in 2024 and " -> ""
+    (an elided subject, `_governing`); "This split and its labels" is one
+    noun phrase and is kept whole (#3619). 0 when the lexicon declares no
+    conjunction."""
     if lexicon is None or lexicon._clause_conjunction is None:
-        return 0, len(subject)
-    cuts = [(0, 0)]  # (conjunct start, previous conjunct end)
+        return 0
+    cut = 0
     for found in lexicon._clause_conjunction.finditer(subject):
-        if lexicon._clause_verb.search(subject, cuts[-1][0], found.start()):
-            cuts.append((found.end(), found.start()))
-    start = cuts[-1][0]
-    if len(cuts) == 1 or not _elided(subject[start:]):
-        return start, len(subject)
-    for k in range(len(cuts) - 2, -1, -1):
-        c0, c1 = cuts[k][0], cuts[k + 1][1]
-        verb = lexicon._clause_verb.search(subject, c0, c1)
-        end = verb.start() if verb else c1
-        if not _elided(subject[c0:end]):
-            return c0, end
-    return start, len(subject)
+        if lexicon._clause_verb.search(subject, cut, found.start()):
+            cut = found.end()
+    return cut
+
+
+def _governing(lexicon, text: str, end: int) -> tuple[int, int] | None:
+    """The subject an elided conjunct ending at `end` inherits (#3627):
+    `text` up to `end` is split at commas and at each conjunction a clause
+    verb precedes within its piece, and walking back from the conjunct
+    before the cue's, the first piece whose text before its first
+    `clause_verb` is not elided (`_elided`) gives it. A piece with no clause
+    verb (an appositive, "planned for 2025") is passed over unless it opens
+    the sentence. "The holdout set was announced and ", "The holdout set
+    was announced, and ", "The holdout set was announced, was delayed and "
+    and "This split, planned for 2025, was announced and " give "The holdout
+    set" and "This split". None when no piece gives one."""
+    pieces, p = [], 0
+    for comma in re.finditer(",", text[:end]):
+        pieces.append((p, comma.start()))
+        p = comma.end()
+    pieces.append((p, end))
+    segments = []
+    for p0, p1 in pieces:
+        cut = p0
+        for found in lexicon._clause_conjunction.finditer(text, p0, p1):
+            if lexicon._clause_verb.search(text, cut, found.start()):
+                segments.append((cut, found.start()))
+                cut = found.end()
+        segments.append((cut, p1))
+    for k in range(len(segments) - 2, -1, -1):
+        q0, q1 = segments[k]
+        verb = lexicon._clause_verb.search(text, q0, q1)
+        if verb is None and k:
+            continue
+        q1 = verb.start() if verb else q1
+        if not _elided(text[q0:q1]):
+            return q0, q1
+    return None
 
 
 def _affirmed(lexicon, sentence: str, before: int) -> str:
@@ -647,7 +671,8 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
     from the masked sentence: `clause`, `before_cue`, `subject` (a passive
     cue's subject, `_subject`, located on `raw`, the unmasked sentence, and,
     given a `lexicon` that declares clause conjunctions, cut to the cue's
-    own conjunct or the subject that conjunct inherits, `_clause_cut`),
+    own conjunct, `_clause_cut`, or the subject that conjunct inherits
+    when it has none of its own, `_governing`, which may lie before `c0`),
     `cue`, `item` (the cue's named `item` group: the item a cue that cites
     its source reports, empty when the cue has none), `after_phrase` (after
     the cue up to the phrase's end,
@@ -657,13 +682,15 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
     end = _PHRASE_END.search(after)
     phrase = after[:end.start()] if end else after
     before = masked[c0:m.start()]
-    text = (raw if raw is not None else masked)[c0:m.start()]
-    s0, s1 = _subject(text)
-    a, b = _clause_cut(lexicon, text[s0:s1])
-    s0, s1 = s0 + a, s0 + b
+    full = raw if raw is not None else masked
+    s0, s1 = _subject(full[c0:m.start()])
+    s0, s1 = c0 + s0, c0 + s1
+    s0 += _clause_cut(lexicon, full[s0:s1])
+    if lexicon is not None and lexicon._clause_conjunction is not None and _elided(full[s0:s1]):
+        s0, s1 = _governing(lexicon, full, s0) or (s0, s1)
     item = (masked[m.start("item"):m.end("item")]
             if "item" in m.re.groupindex and m.start("item") >= 0 else "")
-    return {"clause": masked[c0:c1], "before_cue": before, "subject": before[s0:s1],
+    return {"clause": masked[c0:c1], "before_cue": before, "subject": masked[s0:s1],
             "cue": masked[m.start():m.end()], "item": item, "after_phrase": phrase,
             "as_phrase": phrase if re.match(r"\s*as\b", phrase, re.I) else ""}
 
@@ -1021,6 +1048,10 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         if lexicon._statement_negated is not None and lexicon._statement_negated.match(subject):
             return {**out, "outcome": "out_of_scope", "reason": "negated_subject"}
         term = _self_reference(selves, owners, c0, m.start())
+        if term is None:
+            # a subject inherited from before a comma ("This split, planned
+            # for 2025, was announced and remains prospective", #3627)
+            term = _item_self_reference(lexicon, selves, subject)
         if term is not None and not _self_heads_subject(lexicon, selves, subject):
             term = None
         elif term is not None:

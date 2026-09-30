@@ -32,7 +32,7 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry six earlier byte
+#: before it first merged, so this PR's commits carry seven earlier byte
 #: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 #:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
@@ -40,8 +40,9 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
 #:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
 #:   2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24 (348526f6e, review round 5)
+#:   560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757 (f59a0827d, review round 6)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757"}
+                2: "741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888"}
 
 
 def record(**containers):
@@ -1059,6 +1060,13 @@ DIFFERENTIAL = [
     ("splits", "Both statements have been published and remain prospective.", "Entry", None),
     ("splits", "The holdout set was announced and was delayed and remains prospective.", "Entry", None),
     ("splits", "The holdout set was announced and still remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced, and remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced, was delayed and remains prospective.", "Entry", None),
+    ("splits", "This split was announced, and remains prospective.", "Entry", None),
+    ("splits", "This split, planned for 2025, was announced and remains prospective.", "Entry", None),
+    ("splits", "Per the page, the holdout set was announced, and remains prospective.", "Entry", None),
+    ("splits", "Its release is pending and this split was announced, and remains prospective.", "Entry", None),
+    ("splits", "The consent process was announced, and remains prospective.", "Entry", "no_member_subject"),
     ("splits", "The consent process was announced and it remains prospective.", "Entry", None),
     ("splits", "It was announced in 2024 and remains prospective.", "Entry", None),
     ("splits", "The consent process was announced and remains prospective.", "Entry", "no_member_subject"),
@@ -1166,6 +1174,12 @@ def test_an_item_naming_the_member_is_not_vetoed_by_a_coordinated_other_item():
     # an adverb is no subject of its own; a pronoun is
     ("The holdout set was announced and still remains prospective.", "holdout set"),
     ("The consent process was announced and it remains prospective.", "it"),
+    # across a comma, past an appositive (#3627)
+    ("The holdout set was announced, and remains prospective.", "holdout set"),
+    ("The holdout set was announced, was delayed and remains prospective.", "holdout set"),
+    ("This split was announced, and remains prospective.", "This split"),
+    ("This split, planned for 2025, was announced and remains prospective.", "This split"),
+    ("Its release is pending and this split was announced, and remains prospective.", "this split"),
 ])
 def test_an_elided_conjunct_inherits_the_governing_subject(text, scope):
     """#3627: the scope is the governing subject's head."""
