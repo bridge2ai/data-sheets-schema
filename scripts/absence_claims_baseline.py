@@ -65,9 +65,10 @@ OUT_MD = ROOT / "notes" / "absence_claims_baseline.md"
 PINS = ROOT / "notes" / "absence_claims_baseline_records.yaml"
 RECORD_GLOB = "*_d4d.yaml"
 SAMPLE_SEED = 2919
-#: The registered version of the lexicon the note counts under (#3132): v3
-#: since #3520, whose precision sample is judged in its own file below.
-LEXICON_VERSION = 3
+#: The registered version of the lexicon the note counts under (#3132): v4
+#: since #3791 (v3 from #3520), whose precision sample is judged in its own
+#: file below.
+LEXICON_VERSION = 4
 #: A judgement's verdicts, in the order a precision entry's counts give them.
 VERDICTS = ("in_class", "borderline", "not_in_class")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -113,6 +114,18 @@ PRECISION: dict[str, dict[str, Any]] = {
         "note": "v3 changes no bundle_wide_absence pattern, and that class's draw is the v1 draw phrase for "
                 "phrase; its verdicts are carried over from the v1 judgements, not re-read.",
         "judgements": "notes/absence_precision_judgements_bd0c63ed.yaml",
+    },
+    "483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f": {     # v4 (#3791)
+        "checked": "2026-09-30",
+        "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",   # 303 records
+        "sample": 50, "seed": SAMPLE_SEED,
+        "draw_sha256": "574f03c232ebf949de942601a97403b977ff193144cd8f4c453f868c7e1695c5",
+        "classes": {"bundle_wide_absence": (50, 0, 0), "record_self_narration": (49, 1, 0)},
+        "note": "v4 changes no bundle_wide_absence pattern, and that class's draw is the v1 and v3 draw phrase "
+                "for phrase; its verdicts are carried over, not re-read. The borderline record_self_narration "
+                "phrase is a name of the declared ranking in a sentence that reports the sources, which v2 to v4 "
+                "all match without a verb (#3706).",
+        "judgements": "notes/absence_precision_judgements_574f03c2.yaml",
     },
 }
 

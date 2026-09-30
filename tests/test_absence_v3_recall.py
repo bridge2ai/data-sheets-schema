@@ -53,6 +53,21 @@ ADMITTED = {
     "/source_caveats/7": ["cumulative_full_stop", "cumulative_semicolon"],
 }
 
+#: What the registered v4 pattern does with each fixture leaf's dropped term
+#: (#3791): its window runs to the end of the sentence across `;`, so the
+#: `window` and `semicolon` rows are recovered; a full stop still ends it; an
+#: absorbed name stays inside a longer match; a consumed verb stays consumed.
+V4 = {
+    "/source_caveats/1": "dropped",        # no_verb
+    "/source_caveats/2": "recovered",      # window
+    "/source_caveats/3": "recovered",      # semicolon
+    "/source_caveats/4": "dropped",        # other_sentence
+    "/source_caveats/5": "inside",         # absorbed
+    "/source_caveats/6": "dropped",        # consumed
+    "/source_caveats/7": "recovered",      # semicolon, past the window too
+    "/notes": "dropped",                   # no_verb
+}
+
 
 def _script():
     spec = importlib.util.spec_from_file_location("absence_v3_recall", SCRIPT)
@@ -103,6 +118,30 @@ class Causes(unittest.TestCase):
         got = {p: rows[p]["admitted_by"] for p in ADMITTED}
         self.assertEqual(got, ADMITTED)
         self.assertEqual(rows["/notes"]["admitted_by"], [])
+
+    def test_v4_recovers_the_window_and_semicolon_rows_and_nothing_past_a_full_stop(self):
+        found = self.m.dropped(self.corpus, self.pins)
+        self.assertEqual({h["pointer"]: h["v4"] for _, h in found["rows"]}, V4)
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 0)
+        self.assertEqual(found["totals"]["v4"], found["totals"]["v3"] + 3)
+
+    def test_v4_recovers_a_term_past_an_abbreviation_that_no_lift_of_v3_admits_short_of_a_full_stop(self):
+        """#3792: v3 and every lift short of crossing a full stop take the
+        `.` of "St." for one; v4 does not, and the note tells that recovery
+        apart from the window-and-`;` lift's."""
+        path = self.corpus / "m_a" / "label" / "P_d4d.yaml"
+        path.write_text(yaml.safe_dump({"source_caveats": [
+            "The higher-ranked source names Washington University in St. Louis as the sponsor, and that name "
+            "is used.",
+            "The higher-ranked source gives Washington University in St. Louis. Both values are recorded above."]}),
+            encoding="utf-8")
+        found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
+        rows = {h["pointer"]: h for _, h in found["rows"]}
+        self.assertEqual({p: (h["cause"], h["v4"]) for p, h in rows.items()}, {
+            "/source_caveats/0": ("other_sentence", "recovered"),
+            "/source_caveats/1": ("other_sentence", "dropped")})
+        self.assertNotIn("cumulative_semicolon", rows["/source_caveats/0"]["admitted_by"])
+        self.assertIn("cumulative_full_stop", rows["/source_caveats/0"]["admitted_by"])
 
     def test_a_pattern_without_the_window_is_refused(self):
         v3 = lx.load(al.LEXICON, 3)
@@ -168,6 +207,17 @@ class Judgements(unittest.TestCase):
         self.assertIn("| Widen the window, cross `;` and cross a full stop | 4 | 4 | 0 | 0 | 0 |", md)
         self.assertIn(f"v3 therefore gives up {len(self.rows) - 1} in-class matches", md)
 
+    def test_the_note_says_what_v4_recovers_from_the_same_judgements(self):
+        md = self.m.render_markdown(self.found)
+        self.assertIn("## What v4 recovers (#3791)", md)
+        self.assertIn("| construction | in_class | 6 | 3 | 1 | 2 |", md)
+        self.assertIn("| source | borderline | 1 | 0 | 0 | 1 |", md)
+        self.assertIn("| **all** | | 7 | 3 | 1 | 3 |", md)
+        self.assertIn("v4 recovers 3 of the 7 dropped matches: 3 in class, 0 borderline and\n0 not in class.", md)
+        self.assertIn("none needs an abbreviation's `.`.", md)
+        self.assertIn("by reading and cause: 1 construction `absorbed`, 1 construction `consumed`, "
+                      "1 construction `other_sentence`.", md)
+
     def test_a_row_whose_cause_is_not_the_computed_one_is_refused(self):
         rows = copy.deepcopy(self.rows)
         rows[0]["cause"] = "window" if rows[0]["cause"] != "window" else "no_verb"
@@ -223,6 +273,8 @@ def test_the_committed_recall_note_is_what_its_records_and_judgements_reproduce(
     m = _script()
     found = m.dropped(m.baseline.CORPUS, m.baseline.read_pins(m.baseline.PINS))
     assert (found["totals"]["v2"], found["totals"]["v3"], len(found["rows"])) == (336, 248, 88)
+    assert (found["totals"]["v4"], found["totals"]["v3_not_ended_by_v4"]) == (276, 0)
+    assert sum(h["v4"] == "recovered" for _, h in found["rows"]) == 28
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(found), (
         "notes/absence_v3_recall.md does not match its records and judgements: run scripts/absence_v3_recall.py")
 

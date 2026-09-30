@@ -23,3 +23,8 @@ lexicons:
       sha256: f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6
       registered: "2026-09-30"
       issue: 3520
+    - version: 4
+      file: absence_self_narration_v4.yaml
+      sha256: 483950709a000f4f13c3f8f7638acd1baa06d6acd1be68edd9279721ec1bd83f
+      registered: "2026-09-30"
+      issue: 3791
