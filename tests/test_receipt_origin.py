@@ -1555,6 +1555,26 @@ class DeriveSpellings(Base):
                 self.assertEqual(block["status"], "checked", block["reasons"])
                 self.assertEqual([a["tool_use_id"] for a in block["derive_core_attempts"]], [identity])
 
+    def test_xargs_supplies_derive_word(self):
+        # #3426: the replacement string xargs sets, whatever it is, or the word it
+        # appends where it sets none; read on its own, apart from the `{}` rule.
+        cases = {"xargs -I% d4d derive %": True, "xargs -I % d4d derive %": True,
+                 "xargs -J % d4d derive %": True, "xargs -0I@ d4d derive @": True,
+                 "xargs -i d4d derive {}": True, "xargs -iSUB d4d derive SUB": True,
+                 "xargs --replace d4d derive {}": True, "xargs --replace=@ d4d derive @": True,
+                 "xargs -L 1 -I @ sh -c d4d derive @": True, "xargs -I% timeout 5 d4d derive x%": True,
+                 "xargs d4d derive": True, "xargs -n 1 -P 4 d4d derive": True,
+                 "/usr/bin/xargs -r d4d derive": True,
+                 # with a replacement string set, xargs appends nothing
+                 "xargs -I% d4d derive": False, "xargs -i d4d derive": False, "xargs -i d4d derive full": False,
+                 "xargs -I% d4d derive full %": False, "xargs -I% d4d receipts check %": False,
+                 "xargs d4d derive full": False, "xargs -n 1 d4d derive --full F": False,
+                 "xargs -I% echo % | d4d derive %": False, "xargs -I% echo %; d4d derive": False,
+                 "d4d derive %": False, "d4d derive": False}
+        for command, expected in cases.items():
+            with self.subTest(command=command):
+                self.assertIs(ro._xargs_supplies_derive_word(command), expected)
+
     def test_wrapper_skip(self):
         cases = {"timeout 600 d4d": 2, "timeout -v -s TERM -k 5 10s d4d": 7, "timeout --signal=HUP 1d d4d": 3,
                  "timeout -sKILL 5 d4d": 3, "timeout 5": 2, "timeout x d4d": None, "timeout --x 5 d4d": None,
