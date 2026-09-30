@@ -111,19 +111,26 @@ here -- a part that is neither a reader, a directory change, a d4d call of
 a literal subcommand, nor `linkml-validate` or `linkml-term-validator` with
 options this reads (as the console script or as the `python -c` program
 the pipeline spells each with), or such a part not run as its words name
-(a variable or relative path as its program, or an assignment before it
-or as an earlier part, #3689), a command or process substitution, whose
-inner command is not read (#3675), or a command the tokenizer cannot split
--- is a possible derive where one would move the boundary: it had not
+(a variable or relative path as its program, an assignment before it or
+as an earlier part, `printf -v` included, #3689, #3700, or for a `python
+-c` or `python -m` part a directory change before it in the command, as
+the interpreter imports from the directory it starts in first, #3699), a
+command or process substitution, whose inner command is not read (#3675),
+or a command the tokenizer cannot split -- is a possible derive where one
+would move the boundary: it had not
 returned before the draft was issued, so a call issued before the draft
 counts too (a backgrounded call's result is its launch, and a part started
 with `&` -- at the top level or ending a command inside a word a nested
 shell may run -- or by `coproc`, or by a program that detaches it,
 `setsid`, `screen`, `tmux` and the like, may outlive it, so none of them
-has, #3674, #3690; a script that detaches a child itself, or a detaching
-program behind a wrapper not read, `sudo`, is not seen), it was issued before the derive
-boundary (if any), and a receipt change issued before that boundary
-returned after it was issued.
+has, #3674, #3690; a command the tokenizer cannot split is open-ended
+where its whole text carries such a `&`, `coproc` or detaching program,
+#3698; a script that detaches a child itself, or a detaching program
+behind a wrapper not read, `sudo`, is not seen), it was issued before the
+derive boundary (if any), and a receipt change issued before that
+boundary returned after both it and the draft were issued (#3697). A
+package in the call's own starting directory that such a `python -c` or
+`-m` part imports first is not read.
 Its cost is a false `unknown` for such a program that derived nothing. A
 call the runtime backgrounded is ambiguous too: its result is the launch,
 not the end. A
@@ -271,23 +278,31 @@ NON_CHECKS = (
     "`linkml-validate` or `linkml-term-validator` with options read here, each counted only where "
     "it runs what its words name: a bare name or an absolute path as its program, never a "
     "variable or a relative path (`$PY`, `./python`), and no assignment before it or as an "
-    "earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`), #3689 -- or runs a command or "
-    "process substitution, whose inner command is not read (#3675), that had not returned "
+    "earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`, `printf -v PATH`), #3689, #3700, "
+    "nor, for a `python -c` or `python -m` part, a directory change before it in the command, "
+    "since the interpreter imports from the directory it starts in first (#3699) -- or runs a "
+    "command or process substitution, whose inner command is not read (#3675), or cannot be "
+    "split by the tokenizer, that had not returned "
     "when the draft was issued (one issued before the draft that returned after it, or one "
     "whose run is open-ended, counts: #3676), was issued before the derive boundary, and has a "
-    "receipt change issued before that boundary returning after it, is a reason; its cost is "
+    "receipt change issued before that boundary returning after both it and the draft were "
+    "issued (#3697), is a reason; its cost is "
     "a false `unknown` for such a program that derived nothing. A call's run is open-ended "
     "where the runtime backgrounded it, a part is started with `&` (at the top level, or ending "
     "a command inside a word a nested shell may run: `bash -c './derive.sh &'`) or by `coproc` "
     "(#3690), or a part's program detaches what it runs (`setsid`, `daemon`, `disown`, "
     "`screen`, `tmux`, `at`, `batch`, `systemd-run`, `start-stop-daemon`, #3674), read through "
     "`timeout`, `env`, `nice`, `nohup`, `exec` and `command` and as a command's first word "
-    "inside such a nested word (#3690); a script or program that backgrounds or daemonises a "
+    "inside such a nested word (#3690), and a command the tokenizer cannot split is open-ended "
+    "where its whole text carries such a `&`, `coproc` or detaching program (#3698); a script "
+    "or program that backgrounds or daemonises a "
     "child itself, or a detaching program behind any other wrapper (`sudo`, `xargs`), is not "
     "seen as open-ended, so where the call returned before the draft was issued a derive that "
     "child ran after it is missed. Nor is an environment set outside the command (exported "
     "earlier or inherited) read: a bare name is taken to be the program `PATH` finds, and an "
-    "absolute path the program it names (#3689). The words are matched "
+    "absolute path the program it names (#3689); nor is a package in the directory the call "
+    "started in that a `python -c` or `python -m` part imports before the installed one "
+    "(a `linkml` or `data_sheets_schema` directory there, #3699). The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -1102,6 +1117,26 @@ def _plainly_run(segment: list[str]) -> bool:
     return bool(rest) and _plain_word(rest[0])
 
 
+def _imports_from_cwd(rest: list[str]) -> bool:
+    """Whether a part (from its program on) is a `python*` interpreter run
+    with `-c` or `-m`, which puts the directory it starts in first on
+    `sys.path`: a `linkml` or `data_sheets_schema` package there is imported
+    before the installed one (#3699). The console scripts put their own
+    `bin` directory there instead."""
+    return bool(rest) and bool(_PYTHON.fullmatch(os.path.basename(rest[0]))) and rest[1:2] in (["-c"], ["-m"])
+
+
+def _printf_assigns(args: list[str]) -> bool:
+    """Whether `printf`'s options carry `-v NAME` (or `-vNAME`), with which
+    bash's builtin assigns the variable instead of printing (#3700)."""
+    for word in args:
+        if word == "--" or not word.startswith("-"):
+            return False
+        if word.startswith("-v"):
+            return True
+    return False
+
+
 def _validator(rest: list[str]) -> bool:
     """Whether a part (from its program on) runs `linkml-validate` or
     `linkml-term-validator` with only the options `_VALIDATORS` admits: a
@@ -1423,6 +1458,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         full = next((x for x in targets if x.kind == "full"), None)
         if full is not None and (_mentions_derive([command]) or _backstop(command)):
             out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
+        # Its run is open-ended by the same text rules a nested shell's word
+        # is read by, applied to the whole command: a `&` ending a command,
+        # or `coproc` or a detaching program where a command may start (a
+        # here-document body fed to a shell may carry either). Where neither
+        # is there, a call that returned before the draft was issued could
+        # not have derived after it (#3698).
+        out["detaches"] = bool(_NESTED_DETACH.search(command) or _NESTED_DETACHER.search(command))
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -1489,6 +1531,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # `PYTHONPATH` or another variable the environment already exports, so a
     # later part may not run what its words name (#3689).
     assigned = False
+    # Whether a directory change has run: `python -c` and `python -m` put
+    # the directory they start in first on `sys.path`, so after one the
+    # interpreter may import a `linkml` or `data_sheets_schema` package the
+    # new directory holds rather than the installed one (#3699).
+    moved = False
     mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
@@ -1503,6 +1550,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         if program in ("cd", "pushd", "popd"):
             reached = not newline and before in ([], [";"], ["&&"])
             unsettled = True
+            moved = True
         if program in ("cd", "pushd"):
             if program == "pushd":
                 pushed.append(local)
@@ -1568,7 +1616,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         # A part read here (a reader, a d4d call, a validator) still counts
         # where it may not run what its words name (#3689).
         may_derive[index] = ((opaque and not _validator(_unwrapped(segment)))
-                             or assigned or not _plainly_run(segment))
+                             or assigned or not _plainly_run(segment)
+                             or (moved and _imports_from_cwd(_unwrapped(segment))))
+        # `printf -v NAME` assigns a shell variable, which a later part runs
+        # under as it would after `NAME=...;` (`printf -v PATH %s ./bin;
+        # linkml-validate`, #3700).
+        if program == "printf" and _printf_assigns(rest[1:]):
+            assigned = True
         if full is not None and _mentions_derive(segment):
             if opaque or substitutes:
                 out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
@@ -2003,16 +2057,19 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     # where it could have run once the full record existed (it had not
     # returned before the draft was issued), was issued before the derive
     # boundary (after it, the first derive has run), and a receipt change
-    # issued before the boundary could have landed after it (settled after
-    # it was issued). Anywhere else the snapshots are the same whether it
-    # derived or not.
+    # issued before the boundary could have landed after a derive it ran:
+    # settled after the call was issued and after the draft was issued,
+    # since no derive ran before the full record existed (#3697). A receipt
+    # change that returned before the draft was issued is in `pre_draft` and
+    # `at_derive_core` alike whether the call derived or not. Anywhere else
+    # the snapshots are the same whether it derived or not.
     h["possible_derives"] = []
     for row in h["unread"] if first is not None else []:
         if row["_ran_until"] is not None and row["_ran_until"] < first["_at"]:
             continue
         if derived is not None and not row["_at"] < derived["_at"]:
             continue
-        if any(w["_settled"] > row["_at"] and (derived is None or w["pos"] < derived["pos"])
+        if any(w["_settled"] > max(row["_at"], first["_at"]) and (derived is None or w["pos"] < derived["pos"])
                for w in receipt_writes):
             h["possible_derives"].append(row)
             reasons.append(f"Bash call {row['tool_use_id']} (transcript {row['transcript']} line {row['line']}) "

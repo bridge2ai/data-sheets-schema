@@ -2167,11 +2167,15 @@ class DeriveSpellings(Base):
                       "subcommand, nor `linkml-validate` or `linkml-term-validator` with options read here, "
                       "each counted only where it runs what its words name: a bare name or an absolute path as "
                       "its program, never a variable or a relative path (`$PY`, `./python`), and no assignment "
-                      "before it or as an earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`), #3689 -- "
-                      "or runs a command or process substitution, whose inner command is not read (#3675), that "
+                      "before it or as an earlier part (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`, `printf -v "
+                      "PATH`), #3689, #3700, nor, for a `python -c` or `python -m` part, a directory change "
+                      "before it in the command, since the interpreter imports from the directory it starts in "
+                      "first (#3699) -- or runs a command or process substitution, whose inner command is not "
+                      "read (#3675), or cannot be split by the tokenizer, that "
                       "had not returned when the draft was issued (one issued before the draft that returned "
                       "after it, or one whose run is open-ended, counts: #3676), was issued before the derive "
-                      "boundary, and has a receipt change issued before that boundary returning after it, is a "
+                      "boundary, and has a receipt change issued before that boundary returning after both it "
+                      "and the draft were issued (#3697), is a "
                       "reason; its cost is a false `unknown` for such a program that derived nothing", text)
         self.assertNotIn("issued after the draft and before the derive boundary", text)
         # #3674: what makes a call's run open-ended, and the detach it cannot see
@@ -2180,19 +2184,29 @@ class DeriveSpellings(Base):
                       "program detaches what it runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, "
                       "`batch`, `systemd-run`, `start-stop-daemon`, #3674), read through `timeout`, `env`, "
                       "`nice`, `nohup`, `exec` and `command` and as a command's first word inside such a nested "
-                      "word (#3690); a script or program that backgrounds or daemonises a child itself, or a "
+                      "word (#3690), and a command the tokenizer cannot split is open-ended where its whole text "
+                      "carries such a `&`, `coproc` or detaching program (#3698); a script or program that "
+                      "backgrounds or daemonises a child itself, or a "
                       "detaching program behind any other wrapper (`sudo`, `xargs`), is not seen as open-ended",
                       text)
         # #3689: an environment set outside the command is not read
         self.assertIn("Nor is an environment set outside the command (exported earlier or inherited) read: a "
                       "bare name is taken to be the program `PATH` finds, and an absolute path the program it "
-                      "names (#3689)", text)
+                      "names (#3689); nor is a package in the directory the call started in that a `python -c` "
+                      "or `python -m` part imports before the installed one (a `linkml` or `data_sheets_schema` "
+                      "directory there, #3699)", text)
         flat = " ".join(ro.__doc__.split())
         self.assertIn("or such a part not run as its words name (a variable or relative path as its program, "
-                      "or an assignment before it or as an earlier part, #3689)", flat)
+                      "an assignment before it or as an earlier part, `printf -v` included, #3689, #3700, or "
+                      "for a `python -c` or `python -m` part a directory change before it in the command, as "
+                      "the interpreter imports from the directory it starts in first, #3699)", flat)
         self.assertIn("or by `coproc`, or by a program that detaches it, `setsid`, `screen`, `tmux` and the "
-                      "like, may outlive it, so none of them has, #3674, #3690; a script that detaches a child "
+                      "like, may outlive it, so none of them has, #3674, #3690; a command the tokenizer cannot "
+                      "split is open-ended where its whole text carries such a `&`, `coproc` or detaching "
+                      "program, #3698; a script that detaches a child "
                       "itself, or a detaching program behind a wrapper not read, `sudo`, is not seen", flat)
+        self.assertIn("and a receipt change issued before that boundary returned after both it and the draft "
+                      "were issued (#3697)", flat)
         self.assertIn("a `derive core` run by anything other than a shell call in the transcripts given", text)
         self.assertIn("A derive whose words are not on the command line at all (a script, an alias or function, "
                       "`d4d $SUB`, `python -c` building the argument list) is placed by position instead (#3369)",
@@ -2260,7 +2274,15 @@ class UnseenDerive(Base):
               "bin/linkml-validate -s s.yaml F", "PATH=./bin:$PATH; linkml-validate -s s.yaml F",
               "PATH=./bin:$PATH linkml-validate -s s.yaml F", "./cat x", "$CAT x",
               "PYTHONPATH=./hack d4d receipts check --receipt R",
-              "$PY -m data_sheets_schema.cli receipts check --receipt R", "F=x.yaml; cat $F")
+              "$PY -m data_sheets_schema.cli receipts check --receipt R", "F=x.yaml; cat $F",
+              # `printf -v NAME` assigns as `NAME=...;` does (#3700).
+              "printf -v PATH '%s' ./bin; linkml-validate -s s.yaml F",
+              "printf -vPATH ./bin; linkml-validate -s s.yaml F",
+              # `python -c` and `-m` import from the directory they start in
+              # first, so after a directory change they may run a package
+              # it holds (#3699).
+              f"cd hack && {VALIDATE}", f"cd hack; {TERMS}", f"pushd hack && {VALIDATE}",
+              "cd hack && python -m data_sheets_schema.cli receipts check --receipt R")
 
     def _run(self, command, *, derive=True, **result):
         """Draft, the call under test, a receipt change, then (by default) the
@@ -2305,7 +2327,12 @@ class UnseenDerive(Base):
                         "linkml-validate --schema=s.yaml --target-class=Dataset --exit-on-first-failure -D F",
                         "linkml-term-validator validate-data F -s s.yaml -t Dataset --no-labels --bindings",
                         "/venv/bin/linkml-validate -s s.yaml F && /venv/bin/linkml-term-validator validate "
-                        "F -s s.yaml"):
+                        "F -s s.yaml",
+                        # A `printf` without `-v` prints; a console script
+                        # after a directory change runs from its own `bin`
+                        # (#3699, #3700).
+                        "printf '%s' -v; linkml-validate -s s.yaml F", "printf -- -v x; linkml-validate F",
+                        "cd hack && linkml-validate -s s.yaml F", "cd hack && d4d receipts check --receipt R"):
             with self.subTest(command=command):
                 _, block = self._run(command)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -2460,6 +2487,71 @@ class UnseenDerive(Base):
         # An apostrophe in a here-document body (#3458): its parts are not read.
         identity, block = self._run("cat <<EOF\nit's\nEOF")
         self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program")
+
+    def test_an_unsplit_command_that_returned_before_the_draft_is_open_ended_only_as_its_text_says(self):
+        # Returned before the draft was issued: it could not have derived
+        # after it, unless its text starts something that outlives it (#3698).
+        for command, open_ended in (("cat <<EOF\nit's\nEOF", False),
+                                    ("bash <<EOF\n./derive.sh &\nit's\nEOF", True),
+                                    ("bash <<EOF\nsetsid ./derive.sh\nit's\nEOF", True),
+                                    ("bash <<EOF\ncoproc ./derive.sh\nit's\nEOF", True),
+                                    ("bash <<EOF\n./derive.sh 2>&1 && ls\nit's\nEOF", False)):
+            with self.subTest(command=command):
+                self.assertEqual(ro._shell(command, None, [])["detaches"], open_ended)
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                block = r.report()
+                if open_ended:
+                    self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 4) runs a program")
+                else:
+                    self.assertEqual(block["status"], "checked", block["reasons"])
+                    self.assertEqual(block["possible_unseen_derives"], [])
+
+    def test_a_receipt_change_that_returned_before_the_draft_was_issued_cannot_be_reordered(self):
+        # The call is in flight across the draft, but the only receipt change
+        # before the boundary returned before the draft was issued: no derive
+        # ran before the full record existed, so it lands before any derive
+        # the call ran (#3697).
+        r = self.new_run()
+        identity = r.call("Bash", command="bash derive.sh", description="x")
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.result(identity, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.derive()
+        r.write(r.receipt, Boundaries.C003)
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["possible_unseen_derives"], [])
+        # One returning after the draft was issued may land after it.
+        r = self.new_run()
+        identity = r.call("Bash", command="bash derive.sh", description="x")
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.result(identity, "out", {"stdout": "", "stderr": "", "interrupted": False}, is_error=False)
+        r.derive()
+        block = r.report()
+        self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 2) runs a program")
+        self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+
+    def test_printf_assigns(self):
+        cases = {("-v", "PATH", "%s", "x"): True, ("-vPATH", "x"): True, ("%s", "-v"): False,
+                 ("--", "-v", "x"): False, (): False, ("x",): False}
+        for args, assigns in cases.items():
+            with self.subTest(args=args):
+                self.assertEqual(ro._printf_assigns(list(args)), assigns)
+
+    def test_imports_from_cwd(self):
+        cases = {"python -c 'pass'": True, "/venv/bin/python3.12 -m data_sheets_schema.cli": True,
+                 "python script.py": False, "python -I -c 'pass'": False, "linkml-validate F": False,
+                 "d4d receipts check": False, "": False}
+        for command, imports in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._imports_from_cwd(ro._unwrapped(ro._tokens(command) or [])), imports)
 
     def test_a_denied_call_never_ran(self):
         r = self.new_run()
@@ -2820,12 +2912,18 @@ class Cli(unittest.TestCase):
                       "shell call that runs a program this does not read (anything but a reader, a directory "
                       "change, a d4d call of a literal subcommand, or `linkml-validate` or `linkml-term-validator` "
                       "with the options it reads, each run as its words name it: a bare name or absolute path, "
-                      "no assignment before it; the inner command of a command or process substitution is "
+                      "no assignment before it, `printf -v` included, and no directory change before a "
+                      "`python -c` or `-m` part; the inner command of a command or process substitution is "
                       "never read), that had not returned when the first full-record Write was issued (one in "
                       "flight with it, backgrounded, or started with `&`, `coproc`, `setsid` and the like "
                       "counts) and was "
-                      "issued before the derive, with a receipt change after it, makes the status `unknown`",
-                      text)                                             # #3369, #3674, #3675, #3676
+                      "issued before the derive, with a receipt change returning after both it and the first "
+                      "full-record Write were issued, makes the status `unknown`",
+                      text)                               # #3369, #3674, #3675, #3676, #3697, #3699, #3700
+        self.assertIn("A command the tokenizer cannot split is such a call, open-ended where its text carries "
+                      "a `&`, `coproc` or `setsid` and the like.", text)                         # #3698
+        self.assertIn("nor a package in the call's own starting directory that a `python -c` or `-m` part "
+                      "imports first", text)                                                   # #3699
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
         self.assertIn("nor is an environment set outside the command read", text)                  # #3689
         self.assertNotIn("issued after the first full-record Write", text)                        # #3676
