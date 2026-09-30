@@ -525,36 +525,70 @@ def test_the_committed_baseline_is_what_the_records_reproduce():
         assert any((r.get("facts") or {}).get(fact["id"], {}).get("stated") for r in collected["rows"]), fact["id"]
 
 
+#: The shape of a parenthesised version citation in a bundle (#3571, #3611):
+#: `(v3.20.0)`, `(v 1.7.3)`, `(v.1.21.6)`, `(v.gpt-4-1106-preview)`,
+#: `(Version 3.0.0)`, `(version 1.1)`, `(Version: 2.1)`, `(ver. 2.1)`, and
+#: any of these with more text before the close, as in `(version 3,
+#: released fall 2025)`; any case. A bare `v` must be followed by a digit
+#: and a `v.` by a token carrying one, so abbreviations such as `(VNNs)`,
+#: `(VHI-10)` and `(VUMC)` are not citations.
+VERSION_CITATION = __import__("re").compile(
+    r"\((?:v\s?(?=\d)|v\.\s?(?=[\w.-]*\d)|ver\.?\s?(?=\d)|version:?\s?(?=\d))[\w.-]+[^()]{0,60}\)",
+    __import__("re").IGNORECASE)
+
 #: Parenthesised version citations in the bundles that are not software:
-#: (project, the text the hit sits in). Everything else of that shape must
-#: be some fact of its project: the version in the parentheses, one of the
-#: fact's names in the citation text just before it.
-NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT (Version 2.0)"),   # a license version
-                ("CM4AI", "HPA (v.23)"))                                        # a database release
+#: (project, the text the citation follows, what it versions). A hit whose
+#: preceding text ends with that phrase (a closing quote allowed) is not a
+#: software statement. Everything else of that shape must be some fact of
+#: its project: the version in the parentheses, one of the fact's names in
+#: the citation text just before it.
+NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT", "a license version"),
+                ("AI_READI", "current version of the dataset", "the dataset's own release"),
+                ("CM4AI", "HPA", "a database release"),
+                ("CM4AI", "CORUM", "a database release"),
+                ("CM4AI", "STRING interactome", "a database release"),
+                ("VOICE", "diverse voice dataset linked to health information", "the dataset's own releases"),
+                ("VOICE", "Bridge2AI-Voice Pediatric Dataset", "the related pediatric dataset's release"),
+                ("VOICE", "Discovery DOI", "a dataset release's DOI"))
+
+
+@pytest.mark.parametrize("text", [
+    "(v3.20.0)", "(v 1.7.3)", "(v.1.21.6)", "(v.gpt-4-1106-preview)", "(Version 3.0.0)", "(version 1.1)",
+    "(VERSION 2)", "(Version: 2.1)", "(ver. 2.1)", "(Ver 2.1)", "(version 3, released fall 2025)"])
+def test_the_citation_shape_sees_every_spelling_of_a_version(text):
+    """#3611: the shape was case-sensitive on `Version` and wanted a digit
+    straight after the prefix, so `(version 1.1)`, `(Version: 2.1)`, `(ver.
+    2.1)` and `(v.gpt-4-1106-preview)` were never examined."""
+    assert VERSION_CITATION.fullmatch(text), text
+
+
+@pytest.mark.parametrize("text", ["(VNNs)", "(VHI-10)", "(VUMC)", "(v)", "(version)", "(very 2)", "(vs. 2)", "(v. above)", "(v.s.)"])
+def test_the_citation_shape_skips_abbreviations(text):
+    assert not VERSION_CITATION.search(text), text
 
 
 @pytest.mark.corpus   # reads the committed bundles
 def test_every_parenthesised_version_citation_in_the_bundles_is_a_fact_or_named_as_not_software():
-    """Review of #3534 (#3571): the adjudication says its facts hold every
-    versioned software statement in the bundles, and the first reading
+    """Review of #3534 (#3571, #3611): the adjudication says its facts hold
+    every versioned software statement in the bundles, and the first reading
     missed two citations of this shape, "Name (v3.20.0)" and "Name (Version
-    3.0.0)". A citation of that shape no fact covers fails here."""
+    3.0.0)". A citation of the `VERSION_CITATION` shape that no fact covers
+    and `NOT_SOFTWARE` does not name fails here. Versions stated outside
+    parentheses ("b2aiprep v3.0.0", "package version 2.18") are not this
+    test's business: the adjudication's own search found those."""
     m = _script()
     facts = m.load_adjudication(m.ADJUDICATION)["facts"]
-    shape = __import__("re").compile(r"\((?:v\.?\s?|Version\s)\d[\w.-]*\)")
+    re = __import__("re")
     uncovered = []
     for project in m.PROJECTS:
         path = ROOT / "data" / "preprocessed" / "concatenated" / f"{project}_preprocessed.txt"
         text = " ".join(path.read_text(encoding="utf-8").split())
-        spans = []
-        for s, at in [(" ".join(s.split()), 0) for p, s in NOT_SOFTWARE if p == project]:
-            while (at := text.find(s, at)) >= 0:
-                spans.append((at, at + len(s)))
-                at += 1
+        excused = [re.compile(re.escape(phrase) + r"""["'”’]?\s*$""")
+                   for p, phrase, _ in NOT_SOFTWARE if p == project]
         patterns = [m._fact_patterns(f) for f in facts if f["project"] == project]
-        for hit in shape.finditer(text):
+        for hit in VERSION_CITATION.finditer(text):
             before = text[max(0, hit.start() - 60):hit.start()]
-            if any(a <= hit.start() and hit.end() <= b for a, b in spans) or any(
+            if any(e.search(before) for e in excused) or any(
                     names.search(before) and version.search(hit.group(0)) for names, version in patterns):
                 continue
             uncovered.append(f"{project}: …{before}{hit.group(0)}")
