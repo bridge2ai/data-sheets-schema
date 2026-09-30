@@ -1566,14 +1566,28 @@ _NESTED_DETACHER = re.compile(
     r"(?:coproc|(?:[^\s;&|()]*/)?(?:" + "|".join(re.escape(d) for d in sorted(_DETACHERS)) + r"))(?=[\s;&|)}]|$)")
 
 
+#: Every operator of more than one character that carries a `&` and starts
+#: nothing in the background: `&&`, `|&`, a case clause's `;;&` and `;&`,
+#: and a redirection's `>&`, `<&`, `&>` and `&>>`. Derived from
+#: `_SHELL_OPERATORS`, so an operator added there is excluded here too
+#: (#3832: `;&` was missed when `;;&` was excluded by hand). They are
+#: matched in one pass, left to right and longest first, as the lexer
+#: reads them: `|&&` is `|&` then a background `&`, where removing `&&`
+#: first, as a chain of replacements may, would leave no `&`.
+_AMPERSAND_JOINS = re.compile("|".join(
+    re.escape(op) for op in sorted((op for op in _SHELL_OPERATORS if "&" in op and len(op) > 1),
+                                   key=len, reverse=True)))
+
+
 def _lone_ampersand(token: str) -> bool:
     """An operator token that carries a `&` starting what precedes it in the
-    background: never `&&`, `|&`, a case clause's `;;&` or a redirection's
-    `>&`, `<&` or `&>`. `_tokens` splits an unquoted run into single
-    operators (#3825), so a run such as `&)` reaches here only as a quoted
-    word, which is read as the operators in it, conservatively."""
-    return set(token) <= _PUNCT and "&" in token.replace(";;&", "").replace("&&", "").replace(
-        "|&", "").replace(">&", "").replace("<&", "").replace("&>", "")
+    background: never one of `_AMPERSAND_JOINS`, the operators of more than
+    one character in `_SHELL_OPERATORS` that carry a `&` (`&&`, `|&`, a
+    case clause's `;;&` or `;&`, a redirection's `>&`, `<&`, `&>` or
+    `&>>`). `_tokens` splits an unquoted run into single operators (#3825),
+    so a run such as `&)` reaches here only as a quoted word, which is read
+    as the operators in it, conservatively."""
+    return set(token) <= _PUNCT and "&" in _AMPERSAND_JOINS.sub("", token)
 
 
 def _nested_detaches(word: str) -> bool:
@@ -1956,8 +1970,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
-    # A lone `&` (`_lone_ampersand`), never `&&`, `|&`, `;;&` or a
-    # redirection's `>&`, `<&` or `&>`; the same `&` ending a
+    # A lone `&` (`_lone_ampersand`), never `&&`, `|&`, a case clause's
+    # `;;&` or `;&`, or a redirection's `>&`, `<&`, `&>` or `&>>`; the same `&` ending a
     # command inside a word a nested shell may run (`bash -c './derive.sh &'`,
     # and `bash -c './derive.sh&echo started'` as that shell splits it, #3745);
     # or a part whose program detaches what it runs (`setsid`, `screen`,

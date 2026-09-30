@@ -3336,6 +3336,29 @@ class EarlierDirectoryChange(Base):
         self.assertFalse(ro._shell("case x in a) ls;;& *) ls;; esac", "/w", [])["detaches"])
         self.assertTrue(ro._shell("(sleep 1&)", "/w", [])["detaches"])
 
+    def test_no_multi_character_ampersand_operator_reads_as_a_background_ampersand(self):
+        # Every operator of more than one character in the lexer's table
+        # that carries a `&` is a join, a case terminator or a redirection,
+        # never a background `&`: the exclusions are derived from the table,
+        # so none can be missed (#3832: `;&` was, beside a hand-listed `;;&`).
+        multi = [op for op in ro._SHELL_OPERATORS if "&" in op and len(op) > 1]
+        self.assertIn(";&", multi)
+        for op in multi:
+            with self.subTest(operator=op):
+                self.assertFalse(ro._lone_ampersand(op))
+        self.assertTrue(ro._lone_ampersand("&"))
+        # A quoted word is read as the operators in it: a `&` left once the
+        # multi-character operators are removed is still a background `&`.
+        self.assertTrue(ro._lone_ampersand("&;&"))
+        self.assertTrue(ro._lone_ampersand("&&&"))
+        # Read left to right in one pass, as bash's lexer reads `|&&` as
+        # `|&` then `&`: removing `&&` first would leave no `&`.
+        self.assertTrue(ro._lone_ampersand("|&&"))
+        # `;&` falls through to the next case clause; nothing is detached.
+        self.assertEqual(ro._tokens("case x in a) ls;& b) ls;; esac").count(";&"), 1)
+        self.assertFalse(ro._shell("case x in a) ls;& b) ls;; esac", "/w", [])["detaches"])
+        self.assertTrue(ro._shell("case x in a) ls& b) ls;; esac", "/w", [])["detaches"])
+
     def test_every_part_head_rule_reads_the_command_after_an_unquoted_substitution(self):
         # A `;`, `&&`, `||` or `|` straight after a substitution's closing
         # `)` is a join, so the command after it heads its own part for
