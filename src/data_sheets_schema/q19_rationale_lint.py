@@ -251,10 +251,10 @@ measure is the text it was not written against: the 1,046 distinct
 sentences outside them that name a slot, anywhere in the committed
 evaluation outputs (other rubric20 questions, rubric10 semantic). Of
 those, 769 carry an `_EMPTINESS` word; 277 carry none, and all 277 were
-read by hand. 93 of them state an absence the list misses. 122 of the 277
+read by hand. 95 of them state an absence the list misses. 122 of the 277
 open with one of a list of imperative verbs ("Populate was_derived_from
 …", "Mirror … into parent_datasets") and are counted apart below (#3747).
-The other 155 hold 29 of the misses:
+The other 155 hold 31 of the misses:
 
 - 11 name the absence as a noun or a state: "two absences: resources, and
   parent_datasets", "the four genuine absences (doi, variables,
@@ -265,17 +265,18 @@ The other 155 hold 29 of the misses:
   "The three gaps are slot-selection rather than information gaps", "doi,
   variables, resources and parent_datasets remain the gaps" (two
   sentences), "The dedicated provenance field is therefore silent".
-- 16 say a slot is unused by saying where its content is instead
+- 18 say a slot is unused by saying where its content is instead
   ("derivation in related_datasets rather than was_derived_from", "four
   is_new_version_of related_datasets stand in for parent_datasets",
   "recorded outside the derivation slots", "covered by semantic
-  equivalents: parent_datasets by …"). No word marks them: "rather than"
+  equivalents: parent_datasets by …", "related_datasets with typed
+  is_new_version_of edges … in place of a parent_datasets slot"). No word marks them: "rather than"
   and "instead" as often say a slot is used ("was_derived_from is explicit
   rather than implied", the credit the gate was written to drop).
 - 2 state it otherwise: "parent_datasets logged as a low-severity
   completeness gap" and "5 of 6 creators unnamed in structured fields".
 
-Of the other 126: two say how many of the designated fields are populated
+Of the other 124: two say how many of the designated fields are populated
 ("Four of the five …") and name no absent slot; five criticise what a
 populated slot holds ("Institutional attribution is contested in the
 structured fields themselves", "left unresolved in the structured slots",
@@ -285,9 +286,19 @@ is present but as prose … rather than an identifier"); four say what
 was_derived_from records rather than a parent dataset ("describes source
 systems rather than a parent dataset"); two are a slot's bare name, as a
 list item; two define the criterion ("Proportion of mandatory schema
-fields populated (…)"); the other 111 credit a slot or describe one that
-is populated. Every class but the 111 is pinned by a fragment of each
+fields populated (…)"); the other 109 credit a slot or describe one that
+is populated. Every class but the 109 is pinned by a fragment of each
 sentence in the test.
+
+These 155 were classed before the ordered test below existed. Its steps 1
+and 2, named absence and then placement, were re-asked of all of them
+against their own ratings (#3838): of the 111 then read as credit, two say
+where a slot's content is instead ("The derivation is carried instead by
+was_derived_from (narrative) and related_datasets …", after "parent_datasets
+is absent."; the "in place of a parent_datasets slot" above) and are
+placements; no other class moved. "was_derived_from is present but as prose
+… rather than an identifier" stays a criticism: it says what form the
+slot's own value takes, and names no other holder of its content.
 
 The 122 recommendations hold the other 64 misses. Each is classed by an
 ordered test, and the first question it answers yes to decides its class
@@ -350,7 +361,7 @@ own rating.
    Whether the gate should read a request as an absence is part of #3544.
 
 Every one of the 122 is pinned by a fragment to its class in the test.
-The 93 are a count, not a recall ratio: which of the 769 carry their word
+The 95 are a count, not a recall ratio: which of the 769 carry their word
 about the slot, rather than a negation about something else, was not
 read.
 
