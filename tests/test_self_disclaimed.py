@@ -1646,7 +1646,8 @@ def test_the_real_lexicon_directory_is_pinned_under_any_spelling(tmp_path, monke
     for spelling in (Path(sd.LEXICON_RESOURCE),
                      sd.LEXICON_DIR / ".." / "container_lexicons" / sd.LEXICON_PATH.name):
         assert sd.load_lexicon(spelling).describe() == pinned
-    assert sd.load_registered(directory=Path(sd.LEXICON_RESOURCE_DIR)).describe() == pinned
+    for directory in (Path(sd.LEXICON_RESOURCE_DIR), sd.LEXICON_DIR / ".." / "container_lexicons"):
+        assert sd.load_registered(directory=directory).describe() == pinned
     elsewhere = tmp_path / "src" / "data_sheets_schema" / "container_lexicons" / sd.LEXICON_PATH.name
     elsewhere.parent.mkdir(parents=True)
     elsewhere.write_bytes(sd.LEXICON_PATH.read_bytes())
