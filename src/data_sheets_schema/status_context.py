@@ -306,7 +306,8 @@ def normalised_offsets(text: str) -> tuple[str, list[int]] | None:
 
 #: The haystack forms `receipts.snippet_in` searches, in the order this
 #: module locates in: the plain form first, so a snippet it located before
-#: #3043 is located exactly as it was; then the linewrap-joined (#789),
+#: #3043 is located exactly as it was (a joined form can hold more
+#: occurrences of it; `test_the_plain_form_is_tried_first` pins this); then the linewrap-joined (#789),
 #: artifact-line-elided (#887) and both-transform forms the validator also
 #: verifies in.
 HAYSTACK_FORMS = ("plain", "linewrap-joined", "artifact-line-elided", "joined-elided")
@@ -353,23 +354,34 @@ def form_offsets(text: str, form: str) -> tuple[str, list[int]] | None:
     character, the offset in `text` it came from — `normalised_offsets`
     composed with the transforms the validator applies before folding
     (#3043). None when a replay does not reproduce the validator's own
-    haystack exactly, as `normalised_offsets` refuses."""
+    haystack exactly: the result is compared with the haystack `receipts`
+    itself builds for that form (`_validator_haystack`), not with this
+    module's copy of its rules, so a change to the validator's join or
+    elision rule refuses the form rather than locating in a haystack the
+    validator no longer searches (#3466)."""
     t, m = text, list(range(len(text)))
     if form in ("artifact-line-elided", "joined-elided"):
         t, m = _elided_with_offsets(t)
-        if t != rc.elide_artifact_lines(text):
-            return None
     if form in ("linewrap-joined", "joined-elided"):
-        base = t
-        t, mj = _joined_with_offsets(base)
-        if t != _HYPHEN_BREAK.sub(r"\1\2", base.replace("\r", "")):
-            return None
+        t, mj = _joined_with_offsets(t)
         m = [m[j] for j in mj]
     mapped = normalised_offsets(t)
     if mapped is None:
         return None
     norm, offs = mapped
+    if norm != _validator_haystack(text, form):
+        return None
     return norm, [m[o] for o in offs]
+
+
+def _validator_haystack(text: str, form: str) -> str:
+    """The haystack `receipts.snippet_in` searches in `form`, built by
+    `receipts`' own functions (as `BundleView` passes them to it)."""
+    if form in ("artifact-line-elided", "joined-elided"):
+        text = rc.elide_artifact_lines(text)
+    if form in ("linewrap-joined", "joined-elided"):
+        return rc.normalise_joined(text)
+    return rc.normalise(text)
 
 
 # ------------------------------------------------------------ bundle view

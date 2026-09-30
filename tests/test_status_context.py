@@ -661,19 +661,25 @@ def test_equivalent_governors_in_one_sentence_report_the_nearer_line(doc, report
         (*beside, "sentence")]
 
 
-@pytest.mark.parametrize("heading,sentence_tail,reported,beside", [
+@pytest.mark.parametrize("heading,sentence_tail,reported,beside,via", [
     ("Future Data Releases", "will be released to approved users.",
-     ("planned", "will"), ("prospective", "future")),
+     ("planned", "will"), ("prospective", "future"), "heading"),
     # The heading's class ("planned") also sorts first: only the via rank
     # reports the sentence's governor.
     ("Planned Data Releases", "are released in future to approved users.",
-     ("prospective", "future"), ("planned", "planned")),
+     ("prospective", "future"), ("planned", "planned"), "heading"),
+    # #3468: the lead-in half of rule 1, a ':' clause above the snippet in
+    # place of the heading, in both class orders.
+    ("Future work includes:", "will be released to approved users.",
+     ("planned", "will"), ("prospective", "future"), "lead-in"),
+    ("The planned releases include:", "are released in future to approved users.",
+     ("prospective", "future"), ("planned", "planned"), "lead-in"),
 ])
-def test_a_sentence_governor_beats_a_nearer_heading_governor(heading, sentence_tail, reported, beside):
-    # #3437: rule 1 of the ordering. The heading sits one line above the
-    # snippet and the sentence's marker two lines below it, so line distance
-    # alone would report the heading; the sentence governor is reported and
-    # the heading listed beside it.
+def test_a_sentence_governor_beats_a_nearer_heading_governor(heading, sentence_tail, reported, beside, via):
+    # #3437: rule 1 of the ordering. The heading (or lead-in) sits one line
+    # above the snippet and the sentence's marker two lines below it, so
+    # line distance alone would report the heading; the sentence governor
+    # is reported and the heading listed beside it.
     doc = f"{heading}\nThe imaging waveforms\nand the labels\n{sentence_tail}\n"
     out = _run(doc, [("x", "The imaging waveforms")], {"x": "Waveforms are released."})
     text, _m = _bundle(doc)
@@ -682,8 +688,46 @@ def test_a_sentence_governor_beats_a_nearer_heading_governor(heading, sentence_t
     assert flag["snippet_line"] == snippet_line
     assert (flag["class"], flag["marker"], flag["via"], flag["source_line"]) == (
         *reported, "sentence", snippet_line + 2)
-    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": "heading",
+    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": via,
                                              "source_line": snippet_line - 1, "governor": heading}]
+
+
+def test_the_plain_form_is_tried_first():
+    # #3467: a snippet the plain form locates is located there, exactly as
+    # before #3043, even where the linewrap-joined form holds a second
+    # occurrence of it. Here the second (hyphen-wrapped) sentence carries no
+    # marker, so trying the joined form first would find it, read it as an
+    # unmarked occurrence and drop the flag the plain occurrence raises.
+    doc = ("The consortium will release the imaging waveforms to approved users.\n"
+           "Today the consortium releases the imag-\ning waveforms to approved users.")
+    snippet = "the imaging waveforms to approved users"
+    text, manifest = _bundle(doc)
+    view = sc.BundleView(text, manifest)
+    assert sc.HAYSTACK_FORMS[0] == "plain"
+    [[(a, b)]] = view.locate("c002", snippet)
+    assert text[a:b] == snippet
+    assert text.index(snippet) == a
+    out = _run(doc, [("x", snippet)], {"x": "The consortium releases the imaging waveforms."})
+    assert _rules(out) == [("governor_outside_snippet", "x", "planned")]
+
+
+@pytest.mark.parametrize("form", ["linewrap-joined", "joined-elided"])
+def test_a_form_the_validator_would_not_build_is_refused(form, monkeypatch):
+    # #3466: form_offsets checks its replay against the haystack receipts
+    # itself builds, not against this module's copy of the join rule. Were
+    # the validator to join an en-dash break too, the replay (which joins
+    # hyphens only) no longer reproduces it and the form is refused.
+    raw = "Partic\u2013\nipants were enrolled\n6.\nat two sites."
+    real = rc.normalise_joined
+
+    def joins_en_dash(text):
+        return real(re.sub(r"(\w)\u2013[ \t]*\n[ \t]*(\w)", r"\1\2", text))
+    assert sc.form_offsets(raw, form) is not None
+    monkeypatch.setattr(rc, "normalise_joined", joins_en_dash)
+    assert sc.form_offsets(raw, form) is None
+    # The forms that do not join are unaffected.
+    assert sc.form_offsets(raw, "plain") is not None
+    assert sc.form_offsets(raw, "artifact-line-elided") is not None
 
 
 @pytest.mark.parametrize("doc,form", [
