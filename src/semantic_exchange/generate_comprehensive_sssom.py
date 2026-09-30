@@ -619,7 +619,10 @@ class ComprehensiveSSSOMGenerator:
         The path class, then its ancestors, then the top-level slot, then every
         other class by name; within a class, ``slot_usage`` before
         ``attributes``. The first external target in this order is the schema's
-        primary mapping, so a row's mapping is the one its path class sees.
+        primary mapping. That is the one its path class sees unless the class's
+        own attribute carries no external target and a hidden top-level slot
+        does, in which case the row takes the top-level slot's (#3424; no slot
+        in the committed schema is shaped so).
 
         Where the path class or an ancestor declares the name as its own
         attribute, that attribute replaces the top-level slot for the class,
