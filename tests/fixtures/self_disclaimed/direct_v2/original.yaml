@@ -1,0 +1,43 @@
+# Neutralised fixture (#3515): see tests/fixtures/self_disclaimed/README.md. Not a real record.
+creators:
+- name: EXAMPLE data generation project team
+  description: Placeholder 1e754568.
+  principal_investigator:
+    id: https://example.org/#person-evan-rowland
+    name: Evan T. Rowland
+    affiliation:
+    - name: Organisation A
+  affiliations:
+  - name: Organisation A
+  - name: Organisation D
+  - name: Organisation C
+  - name: Organisation B
+  notes: Placeholder 4b054bab. Placeholder 0915850d. Placeholder f59b6899.
+subsets:
+- name: Item 9bef3702
+- name: Item c5270468
+- instances:
+  - name: Entry N
+    instance_type: Entry N kind
+    counts: 709
+    description: Placeholder c4d185af.
+- name: Item e71e2384
+- name: Item eccf2cab
+- name: Item 0c34952b
+- name: Item f6cd93a1
+- name: Item caffecd3
+- name: Item aec14ac3
+- name: Item dca7208c
+instances:
+- name: Entry M
+  instance_type: Entry L kind
+  counts: 323
+  description: Placeholder 53bbf0f1. Placeholder 4a536f7e.
+  notes: Placeholder 5c75f99e. Placeholder 857da7d9. Placeholder 849383a7. Placeholder 7bf4be4c.
+data_collectors:
+- name: EXAMPLE Consortium
+  role: Contributing centres
+  collector_details: Placeholder 2c4723c8. Placeholder 6620cfdc.
+maintainers:
+- name: Cora Mercer
+  maintainer_details: Placeholder 6fff3b90.

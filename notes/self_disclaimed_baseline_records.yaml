@@ -1,0 +1,1487 @@
+# The records notes/self_disclaimed_baseline.md counts (#3041): each full record's path under
+# data/d4d_concatenated/ and the sha256 of its bytes, with the phase-1 snapshot and the
+# coverage receipt it was paired with. Written by scripts/self_disclaimed_baseline.py
+# --repin; never edited by hand.
+records:
+  claudecode/AI_READI_d4d.yaml:
+    sha256: a3aac8949701be17b1f9ebaa17afe861f78bf17aaa6b7123a468f2371dfc0d95
+    snapshot: null
+    receipt: null
+  claudecode/CHORUS_d4d.yaml:
+    sha256: 80d9061abbf1213db5f172a91f14f7410671631696e7979631d0039bec48d887
+    snapshot: null
+    receipt: null
+  claudecode/CM4AI_d4d.yaml:
+    sha256: 933135ec746fc55a7255cdf0de33daddd42c96a177962ef625d279ca9fc917a0
+    snapshot: null
+    receipt: null
+  claudecode/VOICE_d4d.yaml:
+    sha256: 8d4a25ca08dbbc196828ab356feba9b23e4d60d49123607a1c153411f4d2e81d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep1/AI_READI_d4d.yaml:
+    sha256: dc429ba4d9e62c9abe28247b4fe89c9b25f57c0d4ee6948a02faf25fb36e4657
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep1/CHORUS_d4d.yaml:
+    sha256: 10e69b8dfb4013a216720d825cd184239c0737b04d35a5541bf617db5121ed87
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep1/CM4AI_d4d.yaml:
+    sha256: 2debc8b7ccf4034dc1011557329347378c4974e7232892f71ee426af7d11306f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml:
+    sha256: 3b51c806b733513755914b6671a8c831da27105196b34c7336a240ee3833e294
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep2/AI_READI_d4d.yaml:
+    sha256: 34f7ecbb1b98f5bae7a388aab1942ec1d04718c66a4502f8d0d2b10729f2c545
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep2/CHORUS_d4d.yaml:
+    sha256: cc70c1b7c11b99b145d06429f5ed85a4a6d56933ffe3cc1904a34764acdf75b2
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep2/CM4AI_d4d.yaml:
+    sha256: 061b2020a3af9ecbc8dce94886b6b5a206ed839d3ca4bb51c0af88aceed7263c
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep2/VOICE_d4d.yaml:
+    sha256: 341542e0e3d5d1eefc05a04a1faf8881a092bfc8131ff6a3e95f6e7aac1ce40b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep3/AI_READI_d4d.yaml:
+    sha256: cc4010bafbca58bdd31de4bdf24e13f3efa23021713ce0e082ab07cba70e5795
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep3/CHORUS_d4d.yaml:
+    sha256: 8beba2fb5d3cf895589c949df50f88456c3c4d8bbfb898627cba84f46edbd631
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep3/CM4AI_d4d.yaml:
+    sha256: 51569260d34bda980da1c861b6330bd6f1465d89e1af7475b9d95379b8198cfa
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-27_claude-opus-5_rep3/VOICE_d4d.yaml:
+    sha256: 73bd96af3984f061219a67b8c54616bcbb5153b50ab9652d519d782e4fde575d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_d4d.yaml:
+    sha256: d3ac11fc25f887c3ed538faea59f5039ad88cffc2a89f05f846bc7b14188cf4a
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep1/CHORUS_d4d.yaml:
+    sha256: c306d501015dbc7659f1d4e038b5bab99b4e1bbd2ed617f15c3489e8a9c5ece3
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_d4d.yaml:
+    sha256: 2141eca158881ea56ad4793838be3c4a44c4be66ecd0c7d8c8b5754d5a34a366
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_d4d.yaml:
+    sha256: 14c90360d0470c67a603583b42d5fd8c725cab1dcd55dfa9700d46a263a3a8cf
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_d4d.yaml:
+    sha256: a3c055369b76886bcc1fcd60695fd6b3387bef307923a6c71496bac93d007f89
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_d4d.yaml:
+    sha256: 205d6806ddda84ce97b69850e723f86964c6fe0134700a8a6728ae6a0a0876c9
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d.yaml:
+    sha256: 4fd3f232252c308223381d80ed21567c93f6fda98d69425763baa9cf8c97b259
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep3/CHORUS_d4d.yaml:
+    sha256: 135af27eb0871c0c22277efa6983e1442f691409c664e767e839001b45db4cc0
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_d4d.yaml:
+    sha256: 5feb15bc48e13dbb1684ec6b3015195ecb962fd1042f2aff3a99734aba8f913f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml:
+    sha256: a5fa7b8bb3adb699913157ae9f42e2b03482f42207c297f355bbf4b18c03b76e
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/CHORUS_d4d.yaml:
+    sha256: 52180589edeed3928bbd82f48e0f625adfc533bdbd7c0ecf5fb2f735b4abf525
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/CM4AI_d4d.yaml:
+    sha256: 9caee8875df034151ed7c5eb1657831bc45f2e40202c1d4b7a767be97c7b4f90
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep1/VOICE_d4d.yaml:
+    sha256: 9fb09858808071f6317658e4f484590cd419fc0656994d76fca864033c86f47b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d.yaml:
+    sha256: 2088430a546fbc14d79908805fc6146e9578e4001747932a9209d6ba432c7966
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CHORUS_d4d.yaml:
+    sha256: b377fcec307d0e6d77a3fd00433277b573a7b9be7614fbcbb5618e757dce05dc
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CM4AI_d4d.yaml:
+    sha256: 1bf736aa622453b3b4984076f7c945e78d1cacbadedc6350a5e98d5e12cd8c95
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/VOICE_d4d.yaml:
+    sha256: e0971890d44667d8e960e15b349f0f29b176da3dab4907199d302a390f43b095
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/AI_READI_d4d.yaml:
+    sha256: ef3c2db3a04a40e155cc8beeb703a376f6b649492dab07282cc2d2ceaa946cb1
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CHORUS_d4d.yaml:
+    sha256: 17833926f1a11aac59b190fd344cef57be7055ad1738888bcd7c96229479317b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/CM4AI_d4d.yaml:
+    sha256: 6cb9ca3834993f43bc2babc954234463f694d46e92e1ccd53e081cd270294696
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-generic_rep3/VOICE_d4d.yaml:
+    sha256: e1f5dabde20fc9d5813898bfcec865b6bf4006ade404cf5beab326a8c1e32f6f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml:
+    sha256: 39788989e9cc58f00ee823fbf750477f968c0989eb3ceb8330601e3b26c6ee4b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep2/CM4AI_d4d.yaml:
+    sha256: 81d6282f65768bb69e1d19cd9f9774111ebabcafe663dc2d3d99c0e2aed30e5a
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d.yaml:
+    sha256: e649e1119bc0145ead6113100845ebbf28c494931ab7e4ef2a7d8387ce29ec17
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-29_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: 4e21643adacbfb963cd4f2db843acc3bbbb3c113d75e58ed386833a44f02cf3e
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_canary_rep1/CHORUS_d4d.yaml:
+    sha256: e5e59d22b83d4d81d96c29a24c9909be430cc01be25317696bff01ccd6a16a01
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml:
+    sha256: 40a9a61103323bd7fe69fb1f06db43683aa75431bb79ccdd0c42a4fba275fb28
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: 432d1385cfe632cc3526527e8dc91e8ea5178bcece49c0cd15e3fc780176f488
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml:
+    sha256: 5c5dee4bcb0d758c562b63765f1cea0e45b34ecddab642c371624685be3e80a3
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml:
+    sha256: c497ec3d03b5a336e07c69fb9091b399e633cfa50a1121f2fab5ea058444bdef
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d.yaml:
+    sha256: 389f90ecc74f0859342ec72112f375ca4fc78768ce1c30c46898a94554cd2992
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d.yaml:
+    sha256: a281dd0a760b28ba42efd211bc0d0b0c2233a6132efa8158490bd937cac0bfb8
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml:
+    sha256: fbeda0fd6aeca7d4d567ea8275aa52ed9f3fa3599fc6cf301baec1c0240ec6b6
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml:
+    sha256: 0d0aba53c7124bcbf838dbb583fc8da017abb270f942b35360abc24f796c5e18
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml:
+    sha256: 718875cb43011454e80871656a1d3b7a18c4e3e65112e2c4c60895e9e9518c60
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d.yaml:
+    sha256: f72ea32ce5bc1cbdbcf58c1d4643b1ee7d81d8deb0f6c5ebf300a6d4f5290f13
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d.yaml:
+    sha256: a8f816a677cb774951ec6ab7f0aefae164eed2b65a487184fac2eb09bc967929
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml:
+    sha256: 17418ae86e50e63d7afe7459bbb4e7bdb2b2b0f5b4313f9a17d68f4c6761e67d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/AI_READI_d4d.yaml:
+    sha256: 53bb01baf48750289dfef12093c3e07c7e5f30be1729553b25708227e4e9d2b3
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CHORUS_d4d.yaml:
+    sha256: 1e2d12edfcbfb3a0df232712dc877cb69cfdc8f0ad97deefb8128050dcd2db88
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d.yaml:
+    sha256: 435d19b72c7df63390756ce83173490db5522930c3ceecd44805441d09aa97b8
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/VOICE_d4d.yaml:
+    sha256: d948c4c41d2b9af6e59fdf3f1222e504e1905396763a0cd5d2c8e38fa20bcf74
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml:
+    sha256: e3816d86e374d83385ab1f24e497cc742f99b8eea0368ed152cf1e58ec5db39e
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/CHORUS_d4d.yaml:
+    sha256: 3a33f87aaea3f9fc30f6bbc298bcb44c45dbaf05795ab069a49b7297da08e798
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/CM4AI_d4d.yaml:
+    sha256: 5342dd3d164f8e1e49cef9bf9ed48a54729818c559a1729aa3a84e59d3a8da24
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/VOICE_d4d.yaml:
+    sha256: 61cf333e7f90a0ed203078d4c6389527e1b26d061eed24d4918cd627ab68727d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/AI_READI_d4d.yaml:
+    sha256: 9c0005feebf36fad188086b4ba2f0df208bc7bbb1ccb47f4e78e803301598c95
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/CHORUS_d4d.yaml:
+    sha256: 77534f992f83bfaf89d6099a2dbb11b4f16122e2bbe3b89dcadb9a9b17933fb9
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_d4d.yaml:
+    sha256: a8d6ed7c9825993813dd9a0d79e786d9625629f2858a60e45c356f0fb36cf26d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/VOICE_d4d.yaml:
+    sha256: ca2f5744a5d9f50aa23693aac91281d1086be764718078c4afe7b68a2dea183b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-02_claude-opus-5-bare_rep1/CHORUS_d4d.yaml:
+    sha256: 34d47fe784991855e97983a9944e76773671ec68ea378f6990a90f26762475b7
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-02_claude-opus-5-bare_rep2/CHORUS_d4d.yaml:
+    sha256: 5e48e87b4b08beb6ab424224ae7fe415b5ed338fc9431594ec5f5d0bc7f53770
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-02_claude-opus-5-bare_rep3/CHORUS_d4d.yaml:
+    sha256: 7707ea4361c0cc3fde3addbafd39800f0232adaef3b4d757be05d5c4c6a7fe35
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/AI_READI_d4d.yaml:
+    sha256: 3b21520a912f6e92bafa7fc665668c2cf27b6680296e6d4fec4383d23bf437d0
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep1/CHORUS_d4d.yaml:
+    sha256: 9cd8c856acee367e2b9ca2541c306680ce20d2fe47a142f74343b4790e5ec5da
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep2/AI_READI_d4d.yaml:
+    sha256: 14f1471263e0ddbc744155568326292c8dbfafb6eaab1940f251e37f195207c6
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-1m-generic-v3_rep3/AI_READI_d4d.yaml:
+    sha256: 30272da7131e18901b06378f3aa0cf1492d315c86d3e4b249a125ba5130a4445
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/AI_READI_d4d.yaml:
+    sha256: acdc5e37c7345c7a1daf879718182e9ee9a38525b9977ed9401915aa0ea82117
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-05_claude-opus-5-generic-v3_rep1/CHORUS_d4d.yaml:
+    sha256: 3d49e4004739d27963b0f110e65046c1bd30e502cc72199444849127fcef4c3c
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/AI_READI_d4d.yaml:
+    sha256: e5dc8a12c5584b4b0bc21aba9fc62a65bea1288d9f4042662ebe3e01202bd380
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/intermediate/AI_READI_full.yaml
+      sha256: 9c8fd35243190fc065e825564a5947067a618a827b0bea1ee354977151d09e06
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/CHORUS_d4d.yaml:
+    sha256: be2646dbe460cae84334c334bdc41ac787f485902e44e422240e026b2f8c9283
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1/intermediate/CHORUS_full.yaml
+      sha256: de9f47861f0f51050ed3ebbd8f1b1020a4aaf72a150847a21f166cb2b3e7d645
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/AI_READI_d4d.yaml:
+    sha256: 065f88c4fbf93a266bcd09ced0e8a0eb31b41e5abde969cae72f60ff842c4314
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/intermediate/AI_READI_full.yaml
+      sha256: c8fa2fc033da7c5ff92aa39f315b18a99b4fdb4bf3f286faa60df0d4c8958b6a
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/CHORUS_d4d.yaml:
+    sha256: dad5ed52b9a65dc1ee2e1409a8583b0ea692253bb3b70a0165b12cb976203840
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep2/intermediate/CHORUS_full.yaml
+      sha256: 9df505a4585888ad071f082101e71b689689169c5b1472211c482784450f5a71
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d.yaml:
+    sha256: d06e4e458e85a648908fc68bab6709069fd9af5ae8a042f23137973bc3a3ab5c
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/intermediate/AI_READI_full.yaml
+      sha256: a3313bd2512c25108219de8ec0fafa08c578be620cb89b33c0fab9595e0d1ba1
+    receipt: null
+  claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/CHORUS_d4d.yaml:
+    sha256: 2017d0466b0aae78121fac65791aa378a47a03ea1cd43c15c4c366e028970e51
+    snapshot:
+      path: claudecode_agent_core/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/intermediate/CHORUS_full.yaml
+      sha256: 14c497791f546665d292c021f30753b1683f0b9eed34387b7e4d5938c3a2e27a
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/AI_READI_d4d.yaml:
+    sha256: fccd6f007a353be8719313ceab24ba7645c933310ed06f6c08f42edd005a7c8a
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CHORUS_d4d.yaml:
+    sha256: 587ed89d160c996776193f3dc599cf8f58ce94ff24c53dfe6fc1fae2b9d9ed7d
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CM4AI_d4d.yaml:
+    sha256: d66616c8074f7ac499405e8b33e2b61dc6451dad1bd0fc00ef8ab1cad715d574
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: a659f3bc742554d4a87922c3ec5177082032de28b5a85a1f56e2dca294eda3c0
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_d4d.yaml:
+    sha256: 9e12a1de36f0b8672fc7bcf87b76e9bdf7165e2f80225b0b5e22eaa35662378f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_d4d.yaml:
+    sha256: 553797dbcbb5f036ed4fe7aaa0e72b407345ba1706193badc4c0265b1c486912
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CHORUS_d4d.yaml:
+    sha256: 419d7a6f8c34594b92470bf38c6c06389bc46ab64925298a151606af1b10d2cd
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CM4AI_d4d.yaml:
+    sha256: fa644e1bb79bb2d235d0b18582bcf959de55aa1413fe551dba46012c5de436d7
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: 7c1cb0ba7277e0eee44377a54019053b2f5e9c40f03ca5865b31ad9a19ee3762
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/VOICE_d4d.yaml:
+    sha256: 331c8def2fa47eff00b2512c32038e196371ad325637a315ab4530a3bbab549c
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/AI_READI_d4d.yaml:
+    sha256: c10716bcfe709ef15efec5ecb07f27ef1b015a20ea10ad1d35e449b2f5634d13
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CHORUS_d4d.yaml:
+    sha256: 0ad687f0121e20831ce6386d95a0e7d64f4631b45e47294f160ff3812fb836cd
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CM4AI_d4d.yaml:
+    sha256: 5ccac3564d44366491507e288fe2b8d79d10749428cdbdb3a7e7023a37192a18
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: 3cc51cdbe04ef22389006688420f6b3dd736ee9fcaccbd43d276328033d7a0a9
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/VOICE_d4d.yaml:
+    sha256: 90b459d690f2c5854baccf830db37744b3f208371e5a3878f85fe920fbcae125
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml:
+    sha256: 2436c403824918b52cf07beb11bb3fa7312e9b91c1ec1ce0219c014ff48a987d
+    snapshot:
+      path: claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/AI_READI_full.yaml
+      sha256: 9299b8279e05fd161b2ff2ec2b17f4db33df26366b5bf4d7ee932fc2071ccdf1
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: 20135183c05e6c30b109b83275c3ee14969711ba2be3e982be35bb0536db86cc
+    snapshot:
+      path: claudecode_agent_core/2026-08-11_claude-opus-5-api-generic_rep1/intermediate/CHORUS_full.yaml
+      sha256: 1433be2460f29cf49d5a134e38c98e3d33ad9a1d3b01d19586fc979edb94ba11
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/AI_READI_d4d.yaml:
+    sha256: f88e9521dc29907b4868976e943b15b83f863835cea02bffdc3ef43e36c86111
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d.yaml:
+    sha256: a1cb9717e85e75f10955acdb79749bc0ef5902f731c6377e35444a484bbcb7f0
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CM4AI_d4d.yaml:
+    sha256: b6872adcf6e36b4bb68d46b0b00a5e42001bf137246dd19b82a279000f421f44
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: 4e74a668278128b754138426e652178bbe3fd8f40edda06ccfe82ca909717a4c
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d.yaml:
+    sha256: 78e41a7bb9b5768a4477f367daa565d0094318ac3ed74a522d010bb6e51adb7f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/AI_READI_d4d.yaml:
+    sha256: 834848d1ed3e91aab7a960b511611aee0fad40a623db494da790f666620f7f36
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_d4d.yaml:
+    sha256: 6525ad746c26514d5ad99e4660adcc6a05890057a223bf8f00a3a9f832eaa477
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CM4AI_d4d.yaml:
+    sha256: 91a6cd75fd9255828e2a8df0882830f8079077c6705978ad5fdd949b66d79f6b
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: 7b519ca3e9bbafbcefbf2164998db98b1fa42317d65cfe64b586a012f84e4070
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_d4d.yaml:
+    sha256: 47722686d67bd4b79a7e3d64e4a9bef53a84fa59abb302de43ca4c0ae0ee7356
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/AI_READI_d4d.yaml:
+    sha256: 7c1157567582a75b7d15fc4654e09b5f042227e0c942493acb1374d8a28e94cf
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_d4d.yaml:
+    sha256: 4996728d2dd9c8674fa1de963ff191991869c8bf5be15296e4ec60494efb3c15
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/CM4AI_d4d.yaml:
+    sha256: a71077e7747711bb4e65196286011f14ae1efb63dc6128f7cdef85d7c9132b45
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/VOICE_PEDIATRIC_d4d.yaml:
+    sha256: 81ef8d4f685371c2ed7685c75ec022766f896a892810210afff97ec7b6b389f9
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/VOICE_d4d.yaml:
+    sha256: 1fde3450ad5c5f57689a2f76fe488eb841ae4ed6e3440410d08e387f0ffa0005
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/AI_READI_d4d.yaml:
+    sha256: 592930ceb5aa7538c9c92c8c36e9ad4bf1ab49cdc5de3769f1e12cc668790085
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/AI_READI_full.yaml
+      sha256: 6daa0cde00858219f7e4600d6d6cfdf8c2f2ca85719e29188547dd219907a7c1
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/CHORUS_d4d.yaml:
+    sha256: f67a870938f266047c8a004a3e80cfdb0e6bd03d5e0e6a1259f36b1f9b6ba916
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/CHORUS_full.yaml
+      sha256: aecd9231e2f5c73ff83ccf59e17784f92c3342ad4825775346aee5ae0a788925
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/CM4AI_d4d.yaml:
+    sha256: 5f6cf4ea82cdff5a18918369519d397addbff6ee5f7a1fb2d694a2d9f37ea1f5
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/CM4AI_full.yaml
+      sha256: 3318f601902ebddc525df9601a080aeff348ac00ae5ec3fb6152153e9553506d
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml:
+    sha256: d9b61234d2ac09f393bb79531a5e7390ba74fb510bb1103f255dbb7b1ab53729
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/intermediate/VOICE_full_2.yaml
+      sha256: edadf4990d7fae972bb3741a2272c8b203b63b950b025eb5593e3e0e57e8a336
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/AI_READI_d4d.yaml:
+    sha256: 1bfa78e351aea2db3e7d2b63f04c328d2974462578bf2ccb5aabd105a573517f
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/AI_READI_full.yaml
+      sha256: 0c86fed06418b1de36ed3978f43b46791daac6db77b6e163a45fb4e30130a99e
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_d4d.yaml:
+    sha256: d59440ce1295f458ed8a2ed9baf6dc799a81c5dcee89f86a00c21d17b407c33b
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/CHORUS_full.yaml
+      sha256: d646ed653601bfa98db6aac7d78e1b910a3fa9757827910694558510547de51c
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/CM4AI_d4d.yaml:
+    sha256: f3bbf763ff2337cc93e87dab519f7cc1c7687c38d042f5640754cdbe58ccf2ed
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/CM4AI_full.yaml
+      sha256: 88e9f4207e693bca5436e8c94e2689808b7ccbe72bf69b0d07790d0e8bd9ef8a
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/VOICE_d4d.yaml:
+    sha256: 49ef9bac348ff2130add529d09f1ee7bbd8bdb924461cbd852a9e13d8928bbd1
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep2/intermediate/VOICE_full.yaml
+      sha256: 831033f2f27812272e676764c5d48d7b049cba47934e9b5b27e8aa8589b56383
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/AI_READI_d4d.yaml:
+    sha256: df4ac95d787f9952f0c15fa1edf705c6bf35015fdf0dc7c514d4449cb7d8523f
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/AI_READI_full.yaml
+      sha256: 5f80561d22958d1a711516cad8b770caa7b898bfa318c35ad4cca8ca6e519835
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CHORUS_d4d.yaml:
+    sha256: 2c1ebd0f7dbaeda5a09e3df1f15d2ff136c7c24d1d335777adb5b6802e411051
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/CHORUS_full.yaml
+      sha256: 5d64315e2ade8d0eb778ba5b22a311d321de94a78bc71dc0af221b6df92129d5
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d.yaml:
+    sha256: b7c8debddbcf2f4ab382e54a694b0799c14482a9d3d29d850350484c7e6215d7
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/CM4AI_full.yaml
+      sha256: 54e38996a750073beb135e6440cdb1803c3ee69518d371dde244f5c861a500bf
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/VOICE_d4d.yaml:
+    sha256: a31492ff4bff3fb82fa5a5d34b5c55d69a6f456ade991f2710da7f35b646b359
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep3/intermediate/VOICE_full.yaml
+      sha256: d501716d43c944dd2eda51d6729716e3cf5307cbb3d65a312659181c9f4f8449
+    receipt: null
+  claudecode_agent/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: 0de3e03dfcfcb65f3c1de18958112c799edac7e7ca51a45d10803c198f740a83
+    snapshot:
+      path: claudecode_agent_core/2026-08-13_claude-opus-5-api-generic_rep1/intermediate/CHORUS_full.yaml
+      sha256: 09a53d3740018951f888cdce8ba37fbf215bdb57167b40c65f807c2ce0f72e50
+    receipt: null
+  claudecode_agent/2026-08-16_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: 0b311b4dca4e2ff7917d243331bb23ec5915a72777918f1bc17e8c7261084fb3
+    snapshot:
+      path: claudecode_agent_core/2026-08-16_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 403dbd85c94f8bc4a44c03e681b62929227f74669cbe61a0da02a92a90b20cab
+    receipt: null
+  claudecode_agent/2026-08-19_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: 669def853e573ff6fa9d31b5584409587cf602687d23621fdae10ff4c5166b02
+    snapshot:
+      path: claudecode_agent_core/2026-08-19_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 1c4ed748901cfdc732974206a1d8179e79c55998f8e89140a3f3fabd9ac9c1c0
+    receipt: null
+  claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: acbb3ed5126a2a94e673c48eecc53c7d18e3cfa20b169f70cc4652d602a80667
+    snapshot:
+      path: claudecode_agent_core/2026-08-20_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: ce07d4ba122a4f623a04eeba98e09c0b69f05ac3b214f841ebe55e31166a73fc
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: d055cd62374d1fa285224b2e72f43948b4bffc30f15b8f0a5c14e9356fb1f580
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 4b0f60fdba01792a3292616b13326f0af750b234f015c7d461a29071c30659e8
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d.yaml:
+    sha256: 311add06c9fc1db42c0eeba86679013cdf9cf17db8af42b7cfdc07b55f01bdf0
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CHORUS_full.yaml
+      sha256: 18ff7e88f9184d1b1ac55391ea6dc0fa60f68cbe181032ba078f075012c2e7ca
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml:
+    sha256: cef45c06225a364b9464d3cad1b5c7bb201a57df6ca5273ba29ae7e9f2c3aff7
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_full.yaml
+      sha256: df301b372a4f1dd635b0f5f4fe13536a20cb57a095ecca1f33d07652d999df19
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml:
+    sha256: 9cc874cbc45364cb8ce7651b4d6f20cc6a97e1b1c94a1a2ceb264d60675a1250
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep1/intermediate/VOICE_full.yaml
+      sha256: a2083cd3a69e8c56b1784cec9d5390d822af722d02b1c8151402d74de36e6f67
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml:
+    sha256: 4f8ef711641ea7567991ae22d0da01891f7c388c16bc9ddbc93fbe0c7cde9f7a
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_full.yaml
+      sha256: ec09a5146ef396a5f6a9d0ddbbf301943284344afa5fb800bfaf95d2038d976e
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml:
+    sha256: 633b996f492daefad5e576e88c8b435bd3e0aaaf9e6691a9e347b19713f42352
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/CHORUS_full.yaml
+      sha256: f451217ece32f8b0cd47ce31e817a871dcc4e81c8422f4206ef5a0be2c2e61fa
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml:
+    sha256: aa2097ea77a1d036931276fe274ccdd0e778715818e1b270a248bbc0c85a23b6
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/CM4AI_full.yaml
+      sha256: f5edffac3b7e2c7529c7d91e40d24a6f54169ea6416afb6e3cf74d9a671ea1d2
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml:
+    sha256: 2cc6d73ee84643bb4b9f152faa13330f5fceda6e7a3de1d8ce669c8462799dd9
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_full.yaml
+      sha256: 52402c3964a010369d7074d85250317afb9df882a14dbd175ac5e4cbba10eeff
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml:
+    sha256: 7aa10eb134b73792d7e189dc0fcd0f1fea94c83c8f4b24f0b37e48241382127e
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/AI_READI_full.yaml
+      sha256: 63e32d16d94336ef56cac377875f831b1302415a984059229720a8a5a1f7f44d
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d.yaml:
+    sha256: 3b66585a5d8a42bac5d96231e47144848f1d4b6f4510c656e71254472375eb2f
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/CHORUS_full.yaml
+      sha256: b22aba38ddd0826673f318726303e17770efc13a19d8fb0451b123c1705cfa3d
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml:
+    sha256: f2c39123a6b7bd7e264190fd3a597a94ccd36c3a48d077b0fc70d205f9de9794
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/CM4AI_full.yaml
+      sha256: aa35c3207e984b26f706de212003bf6015d47d6e7420d5f8740231a2fcf4ff81
+    receipt: null
+  claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml:
+    sha256: 36c0a8902cade6e93f97b3aa8544ec42672f48b311c7947f7437c5025ee99910
+    snapshot:
+      path: claudecode_agent_core/2026-08-20b_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_full.yaml
+      sha256: f439468ad80e3c9e23b26ad971edc35dd2f51d00de5e6e13fe7f34bc422004c3
+    receipt: null
+  claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: 42b1ed084e285eaa08a0c27a0d6d9a6c18625c050a3d4944bd05096d720df460
+    snapshot:
+      path: claudecode_agent_core/2026-08-22_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 6e2802cb806948f3c33510dd33040e42a7a6e017ac39f74b58399d6570c5d3b5
+    receipt: null
+  claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: 60ab0ad6cf657fa1bbf87e28e2d8a06fd6525b8494e032bcbb6a9a676baac7ba
+    snapshot:
+      path: claudecode_agent_core/2026-08-22b_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 1b65d4325196a939aca845587072dac8f93647071f6939dd8d589b63fa9253af
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: 6bc5f7ae4b94ff8cf5830a0301903932547687efb3bfa998c982814b6263f6b4
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/intermediate/AI_READI_full.yaml
+      sha256: 63d98786ced145289e42e91cd85960080bcabfde9515aedab508da670eaed8f8
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d.yaml:
+    sha256: f04509101c1d8f2b7f5242bc165f67927d1b5064b1bd56752f6d01462e62a30b
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/intermediate/CHORUS_full.yaml
+      sha256: 9d4d6cd8c40b5128fcf5b056c8d1af2df905c17ceba875f187e469f6252a1700
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml:
+    sha256: c43c96b59466d2d20bed98287ae612c423921f57f1a5b01148b1deaf1b5f229f
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/intermediate/CM4AI_full.yaml
+      sha256: 53f255c84d8baf3c2adfbf79746f1814cac52d684c207e34133e38c7c7687627
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml:
+    sha256: 8cda227b6fd47656ee749ff2536cf967d0812a97849603f0a941fe86d3c6354d
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep1/intermediate/VOICE_full.yaml
+      sha256: b6fed4baec768a7971f24f773f4d639026bc6f9941a14a2bd1ca185809b8c51a
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml:
+    sha256: f9cc6d589aa4ae8851e93e123f3c52f38eb63888e998c893fd3b3bae4ce3e566
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/AI_READI_full.yaml
+      sha256: e24e09ee07607969346752e31fd1b377e565983714ffc103fddb3101f805774e
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml:
+    sha256: 646235ee190ea281f2c2e3431fe9fea97dd0dc948eebc16c48ff1b0fa6f9c8b0
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/CHORUS_full.yaml
+      sha256: 3a353b32e314a4dd8d43e51143de6cfa7561c55747abb5ea70b7eb21b1d9b6dc
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/CM4AI_d4d.yaml:
+    sha256: 2411d9b30070b1ed6b003307f5ba119d3612d5582ca8471ff5e6927325c5bf88
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/CM4AI_full.yaml
+      sha256: bc357d96104a6fc6efd10850fdc5dc0ba2a5ebd236818d9e0a411020e84a9eaf
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/VOICE_d4d.yaml:
+    sha256: a00f40beb0f9c5ace718ddcc5f9a579b717ea8aa93e03fb9ab3ac6c2b687e0ce
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_full.yaml
+      sha256: 0d49aea0ef3abaaec428ce7c840b95b06100356060f045ff94008fdfe6334a1f
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/AI_READI_d4d.yaml:
+    sha256: b5bba0f9f054ca108d4262a5f87c847acd53a42d5a538c9280c19d9a51d8c0bd
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/intermediate/AI_READI_full.yaml
+      sha256: 44f6f38a325d0e4d86f8290deba8e86ffa0dc976ed729576972c94dad881e722
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d.yaml:
+    sha256: 7f96465eabf9fa9ea89f5d32755699df9daf95df5678c368b08e40ee999602e0
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/intermediate/CHORUS_full.yaml
+      sha256: 4e453f168bdd67ab2a6912854dba5e99534bd5736c5f2537b7c53d88d43f6d84
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml:
+    sha256: 0e74396e7d125d4a23c885a4638f47804417e30b4f0b6aee643db131e7bb42a5
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/intermediate/CM4AI_full.yaml
+      sha256: 18cb78112aff2618d3372032ccaf35c4d256c902853caebee9e514012cf02bad
+    receipt: null
+  claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml:
+    sha256: 996e0e7dcc1a6cd7521564ddf94c8c501175821079849583abf636502f22f622
+    snapshot:
+      path: claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep3/intermediate/VOICE_full.yaml
+      sha256: 49b8549c9a1fd9a24bae81d5abef48b840d0fe634770b6bd3825601f97757049
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml:
+    sha256: b66a96db24b41775b51bc3b24d1c1c4f3a63025502a8846e662245966d19708f
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CHORUS_d4d.yaml:
+    sha256: e0e2502aeb0de33e3fea3742a370704d59233cf20e1c433433b7a7aa9095ddaa
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CM4AI_d4d.yaml:
+    sha256: 51ef53ae9255674feb258a70e38d394f188e84119cc94890de5e0c5594d6d308
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/VOICE_d4d.yaml:
+    sha256: 60f6b4fce0d1ce7e305abce8ca0bfaefe0150e9dbf1d2b9b399121ee040492f0
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/AI_READI_d4d.yaml:
+    sha256: 671f2b6e9752a61eb3c47d6dc365eabc9002072df5d3b6bb1069f946f482e9cb
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CHORUS_d4d.yaml:
+    sha256: 81c5114e8905aeb3adbad4a3402eaad921f0741f91b114e88a8e7fec32be7106
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/CM4AI_d4d.yaml:
+    sha256: 046bbc1e7e50119bc11689fbd706826157781ac903cda0a18d12b8768ea38d18
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml:
+    sha256: 25bd9379a520dd2c1eca14c0e5feefbde9220d91d5ef45196c6e5cdc31f1fe95
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d.yaml:
+    sha256: 7310bb31cf1da8a5e225912bbb88411944e62180e6fc753d81c929e62126944a
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CHORUS_d4d.yaml:
+    sha256: 9e424c609d030a8ea83715d0f2153ba8ddafb0d3d0e658488b7d70a6227085da
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CM4AI_d4d.yaml:
+    sha256: f1041257a87ee19cc5bb1beca69738b3b4baa569c3b62dd112cdb2b75f1a6343
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/VOICE_d4d.yaml:
+    sha256: 2afd29e9ce63cef48c1ff11377bc5dcc8bfbe1f9dbc733c16753648b2b5db6ff
+    snapshot: null
+    receipt: null
+  claudecode_agent/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml:
+    sha256: 81770bd1b57ffabc7b9a0cfe0bcbd2702eaf2aab83b374182b13e113aa3ebf0f
+    snapshot:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/intermediate/CHORUS_full.yaml
+      sha256: 280b393eb57e95034e630a04cf8af0db8853cd190ffe3469bfc796a9f497172c
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 1670314dfd14bf1ad4a5e6a7be85cacd8e607f66637aeb6541f1723652855cd1
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_d4d.yaml:
+    sha256: 6c652885f6b9181d1d0f6c16292d5ae9af841c9fa060211734e780d26c58c432
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/AI_READI_coverage_receipt.yaml
+      sha256: 40614b6d8174a7fbb6fc1662813e6b5ee46ee519e8caf4e50087e3e3919651f0
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_d4d.yaml:
+    sha256: bbecb5ebd892631ce8ed932f61b82afba7474543c8af12444d4dcbd56fe88198
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 2115a373b7223e58adc8cbaa4d40b493e2aba0fb86ad27be219982d1cf054372
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_d4d.yaml:
+    sha256: df678aa32c9535c931b7d75969b02fb0cd5eafb0410802fef91e73e212310ea4
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/CM4AI_coverage_receipt.yaml
+      sha256: f1b7f836a90c61b057353269724f631e83e64449d271cbfd88daff75a163d1db
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_d4d.yaml:
+    sha256: 193d2829b2fa5576bafd5d351a2f2914c11eabdaddbdd0d53aaf531028cfe5c7
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep1/VOICE_coverage_receipt.yaml
+      sha256: ff7aba02530aad2b64e84a7f522f4df89ee8878f0bcd77aa840a0acc17c2c51d
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_d4d.yaml:
+    sha256: 1891651e3288f8ebbd085e90c52532fefc9e67ef643241700c2c4e3544f0e182
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/AI_READI_coverage_receipt.yaml
+      sha256: 1c7c463b35144b07971529f722d02604e896864cc19b80aeb007537ba51e03cf
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_d4d.yaml:
+    sha256: 64d7cecc738b9622297b21a80868a06f1291aa3ac3f2273d095e9732e0b5dd3c
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CHORUS_coverage_receipt.yaml
+      sha256: dac227fe029053a7483031e624a86b81baaac7f324a2b8a7c7f1cba0dc1cef5e
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_d4d.yaml:
+    sha256: d23ae643e98847f6dcd5fb2411de869728b38e1aca2950de97d3afb7ef4f87f3
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/CM4AI_coverage_receipt.yaml
+      sha256: deef0a610c38699aaf6690c48e3fa4d9552b9b299b84021d0a12ab39a5d0e96d
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml:
+    sha256: 32cf1c025fd73c203215838dffda53143bf47ea92e86ed21c0b4e218b08191f4
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_coverage_receipt.yaml
+      sha256: aa72cbbc3bbaa293ef51a4bbad12a3c9ed46dfa6657f104cc4d796d3a41e9dbf
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_d4d.yaml:
+    sha256: 15ff936ecc4d6b3ba8e4644368b6169925d52935ce85adf90fa9af24818ead07
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/AI_READI_coverage_receipt.yaml
+      sha256: ece5d981773e19f19e626b4bd50e10aa948904719f8b71a5e853e026909b6131
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_d4d.yaml:
+    sha256: 70000ac23c3505c081490843552685ea85252cd28de66c8f07f2da6a244602b4
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CHORUS_coverage_receipt.yaml
+      sha256: cf6b3ffe3c8c1275e1569a1b2feddd84180f1ef595ca6bfc69f8438e12cadb67
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_d4d.yaml:
+    sha256: 329e7a7038fcc4649c5fca88033d879207a2873f5b178967ec026e23d7122709
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/CM4AI_coverage_receipt.yaml
+      sha256: 326d82ca17a1d5cefa0b9730de0fa840d5d3eb48f53b8e04a4c3784bc922852f
+  claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_d4d.yaml:
+    sha256: e4b5ce387976a884c024850ab49c37a724512bdaa7317ff4bed2f2825a0e6178
+    snapshot: null
+    receipt:
+      path: claudecode_agent_core/2026-08-28_claude-opus-5-claudecode-generic-v6_rep3/VOICE_coverage_receipt.yaml
+      sha256: 24e599f4bacb3922b355badb4d178f73c60d956faaded67db03093ff46e4449d
+  claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml:
+    sha256: f223439e02a3921b6e4bcbf850880a9151fd5ade3de3ed7803bf45b54e0fa0a7
+    snapshot:
+      path: claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_full.yaml
+      sha256: 153cf2222b98ee140c0b3c97b0eb8e8b13ee179dae3b6366902baba0e15d3791
+    receipt:
+      path: claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: ab0a7c665fe10f86384a7d61d77294bcdc3671606adc3a4f4fe4dabdd1c9ad65
+  claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml:
+    sha256: 17316200fe09550d45c5432e29b4c5a8c1ba8a685ec543bcb64e05461261172d
+    snapshot:
+      path: claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/intermediate/CHORUS_full.yaml
+      sha256: d0e1e39d8d41a520523babb72767429a1549dedfa9bd40c80ab993383585f35b
+    receipt:
+      path: claudecode_agent_core/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 63514c6bc3b3ad154a7296f75e121a23ed3e86459f0f8e051138bbe4e9d058d7
+  claudecode_agent/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml:
+    sha256: d4d29f75a12b8c14a653dc1001d142de03543c9389d25c18e93381f76a0386d0
+    snapshot:
+      path: claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_full.yaml
+      sha256: 9c7041a537253bbb768237ec85d5dbb01d381f2638c5b3a973ffcb4acae08ca1
+    receipt:
+      path: claudecode_agent_core/2026-08-28c_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: 04076d861d45ca26145883a2be6713b02c09f8e614a501d1c957a795afcfff5f
+  claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml:
+    sha256: 1ef0bce6b18328f6855c64da39a2aac442b5fc25285aec9dd26b044cee68c8d9
+    snapshot:
+      path: claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_full.yaml
+      sha256: 832c45c6f1823096045dfc8edfe275cb5b32a758c7261128f1cec980c407dc2e
+    receipt:
+      path: claudecode_agent_core/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: e89ed1343899f406e1685d2050d432896cee7cff3a0131d264098216109b90da
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml:
+    sha256: dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/AI_READI_full.yaml
+      sha256: 87f8cc28a27e5a916ebe6aea240fd8e2853538c27f3e40c7cbdb1a4f52d14e51
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_coverage_receipt.yaml
+      sha256: b2fff0a9c710d8ed28c07aee22ee132e0e0ba2667ee9feb5792b6926f6be3573
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml:
+    sha256: e5c0f47198cd20ea47158959f6cfb4d25648965eb8c063ac977e2b5b9aba355d
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/CHORUS_full.yaml
+      sha256: 2e301d409b69c93a0f31f750930cbc4748ae9a01c1868824ec20f3fa723580d8
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 8fe35d47fe001118b84b47bda1dd144cb914003ef4a6dd4cef20ab6b25a6d818
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_d4d.yaml:
+    sha256: 4ed78cb10f8d8d5b18f601ea82e38f7ab620a1fa05bc81977d9fa944ab0d47f9
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/CM4AI_full.yaml
+      sha256: ebc58c84f7e04cf30b39850e1455b2093e794d8550dd473515b47b70f2fc74fe
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/CM4AI_coverage_receipt.yaml
+      sha256: 18639d83f4ff0301c3c936748687bc1087a9629b52d7f6a3b96fc92556394487
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_d4d.yaml:
+    sha256: 7660c4d93ccf05a12ebdd26c6c960e8f5d07455b3088cd3b2e909e95c802d048
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/intermediate/VOICE_full.yaml
+      sha256: 4cef9daaeb6abc0045cba9404bc586928e791e4d43236005e5529e87ae6ae183
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep1/VOICE_coverage_receipt.yaml
+      sha256: b0a962d207c7bb1e352edca294f8debdcfb0d59c4aaf7be7b139e32dc1390b0d
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml:
+    sha256: c56d8261656557a68a8d94045593dd5c6b1b408d84f6aa98af5745955ef67f61
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/AI_READI_full.yaml
+      sha256: 0d33b2f6ec1eab78a079315578fbaba7b029c687295c1e6363f6fc9bab16dc8d
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_coverage_receipt.yaml
+      sha256: b57266fed8d787ef9d5c287ef8586e727f5e178b5edf5d5631db7d1e2e6d1ba1
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml:
+    sha256: d96b8b8fb1dbc2748fc5cfcab49aa2eb745a8bcd3c8e83978ca4226b93922379
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CHORUS_full.yaml
+      sha256: cd9b8dd91479503eece90ef3a89ad6cd03429ba8d10516c4bc540bd0f7eab9e9
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_coverage_receipt.yaml
+      sha256: 9c93ca4fa646371bee4d5a514d21cb59eb339c57d7453df084b6e82081320364
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_d4d.yaml:
+    sha256: af41bfae4fd0cea107b3468ad46e9a1a1599e297bfa5dd92739c48e6008f30b1
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/CM4AI_full.yaml
+      sha256: 1bac5b03ca03453bccf95234b3e461c10ad4f5eaec20bdcec560bb726f1c2192
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/CM4AI_coverage_receipt.yaml
+      sha256: 6a1039825fd28c078d6c484df4a51ce1d9738680676611bb8a491421916b915d
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_d4d.yaml:
+    sha256: 9b103567b3c018761b67ea065d6e6e7c336b1866ed5d161a36d890566e1e9459
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/intermediate/VOICE_full.yaml
+      sha256: 5d4df0d9ca6196a0e1aae0e15219b2962aa70fb232b5d02d1e56edcec279a737
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep2/VOICE_coverage_receipt.yaml
+      sha256: 65096bef398a5fe791c679f588089af83e99982698f4e22a755e9875cd7ccf06
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_d4d.yaml:
+    sha256: d221e2b36c2a98ebe21f57bc72039e6b840323b37d5155053e592fe9fb247409
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/AI_READI_full.yaml
+      sha256: 5f1ca450c88e8bf4759154bdc772b277dc326982b0883221cdf3c8d6daa6defc
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/AI_READI_coverage_receipt.yaml
+      sha256: ce72b1539686000fb1687209b153c5ea393d69d00d6afcb038b489623cfe9126
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_d4d.yaml:
+    sha256: 90bc2010147407e66842a5504cdd6b9883bc987263e313ff60a28ca4f4963881
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/CHORUS_full.yaml
+      sha256: d602d68519046c629e2dd96bd63769fe6ecac6e406d9d9127d4d2a591e4e25fa
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CHORUS_coverage_receipt.yaml
+      sha256: a5630ab75e0239a612e4be7ec7a3911b86c468971b48fad6031b825a17b4d505
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_d4d.yaml:
+    sha256: 206c62821db4d7dc688ccff5de23020294dca149aa36de7682cafdfd9a083ad6
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/CM4AI_full.yaml
+      sha256: e455c55b4370b3f34421ddb120465908bdeb8f09a0b69a0ca9a931ff328593f4
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/CM4AI_coverage_receipt.yaml
+      sha256: a564ccfc5920d70247d038a1f969d4cdda11a316496ab24c164da4feead55549
+  claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml:
+    sha256: 48a64a4e950a1ed59daf3d4efed662513451e2a0d192fd0b381031684efe2275
+    snapshot:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/intermediate/VOICE_full.yaml
+      sha256: 78d28790da92487930505938e3eef35109be308e1a5a563d153c7c739287b9f3
+    receipt:
+      path: claudecode_agent_core/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_coverage_receipt.yaml
+      sha256: 5dc0bacb319cbabeaa960129ebc700ab30256e77453ad1f7626adf530af4e981
+  claudecode_agent/gate_test/CHORUS_d4d.yaml:
+    sha256: 7939013e7d8fd490fb08af39ce226a8a8f486da4b19d35aaa47a5a9eee43cec1
+    snapshot:
+      path: claudecode_agent_core/gate_test/intermediate/CHORUS_full.yaml
+      sha256: 0533cf02ea62649c451fd1bc0bf294a9ead0f1a4accd2ae9ddf038c35b948c6f
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/CHORUS_d4d.yaml:
+    sha256: eade292263ba8e1183d2220b27833bb13c1a6beb4156c76207e655ee23f3590b
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/CM4AI_d4d.yaml:
+    sha256: c96cb124d3e0f728999f596cf73226cc78045a6b8766a80704e91d991ef0fc3d
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep1/VOICE_d4d.yaml:
+    sha256: 80e933389002259765fd49ced5b4f50c39bdc2aeacc3953afaad9308f6ce781b
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/CHORUS_d4d.yaml:
+    sha256: f9397a894b5b775c4bf7f53dae2cbeec91406690547edb4eb1e87a17473dbde4
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/CM4AI_d4d.yaml:
+    sha256: 3c4a755015324a95154aa33739ed73c212be4d6e5dcc5b1d7d8cfd9a6ce367a2
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/VOICE_d4d.yaml:
+    sha256: c30f57c57f8f2a60b9dbcad4bd7ef18b3e1f84a9a470fc7c0b06e1bff8971596
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep3/CHORUS_d4d.yaml:
+    sha256: 2633dd5df711555f438465d3f06a2dbd247c319a72984705b43deceee13443a4
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep3/CM4AI_d4d.yaml:
+    sha256: 9f47e98de69f02d7160c66752c89074eab6459e225bbcc261275b16d978f32b7
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-27_claude-opus-5_rep3/VOICE_d4d.yaml:
+    sha256: 6f5ae67c107870d93b25a2f9c4d22a3b0d401dcc95cb7e2ab9d58c8fb72ccd36
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep1/CHORUS_d4d.yaml:
+    sha256: 5cb210c018bbeec14db66c518a0fe4a815efc7f0828b2ec24ee479c9a28d2be2
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep1/VOICE_d4d.yaml:
+    sha256: 1c973d1fbcde459585ea2c2790cfc0e2f3f47f048e899e27aa42b3d0c2a87565
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep2/CHORUS_d4d.yaml:
+    sha256: 76766543e9105c9428120648c6a810f0c689d328c9988345aa15472d9c4668da
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep2/VOICE_d4d.yaml:
+    sha256: af1a136ac70e5e67faf240ffa2237c06ea543f9098a01b3876a4ce880d2e8f05
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep3/CHORUS_d4d.yaml:
+    sha256: 096104d63c9bfc0fa7bf48d06d7002b5497c925db51349428eed61ad22674c93
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-deprimed_rep3/VOICE_d4d.yaml:
+    sha256: bbfe722e65f81f34481209788b44cda2c9023f2ca3889334549f1ca2238f77fe
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-programme-deprimed_rep1/CM4AI_d4d.yaml:
+    sha256: 1abb7d75506ccf4f51fbe8a3c49c6d8d93d16df1805484e559d7475cf2cd6a49
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-programme-deprimed_rep2/CM4AI_d4d.yaml:
+    sha256: e7d70ca888519ec15e158ba098a5cb8f8f371469a08cc7acaf5830a2ca1b2883
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-28_claude-opus-5-programme-deprimed_rep3/CM4AI_d4d.yaml:
+    sha256: 70b9ffbfe11bffbb70242e56224530612153120c1eed691235fb9c787eed9680
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: b6449c88b2387bc3e2865704a1f9606796f2192b7bf809b2087b74db6143f561
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml:
+    sha256: 61a1d2348b37bb69633f8d03af6df9ebde3e9d7c289b7ec09a64ceb94915979f
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml:
+    sha256: e946a8dfcadc02a8aab17ea7c9b181d0e285c64c6ddbf265cdc4e8f97747ae82
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d.yaml:
+    sha256: 718f7cdbb91ff4fa8700fac4d35953a66a33a164b4157d964d038d8d28ef1e13
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml:
+    sha256: 7cd1f8e25b4120398f864c5d5cf1ac1a61cbab1ba88598133841f688ffbbd737
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml:
+    sha256: a4fc4c533b90a168b3450cb211fe6f6a0c295a9a10b183463242f9e071ae8f73
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d.yaml:
+    sha256: 2bce643af45d8acf5269bc9eeef38981e449e84be0f6dbc692f70bbbac602603
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d.yaml:
+    sha256: b5aba48e373d4cd834d907fed2ce94aa145970c1b8c0fb025d4e395fa29f7182
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml:
+    sha256: 468978e400a3eb51bed71598c2c8922920a602623fb8fb4507aea6f474cd017c
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-denoised_rep1/CM4AI_d4d.yaml:
+    sha256: dcc6d6198ee70f395f01a0a5ebdff9055c0ca9baa6d7b9ffafb1c79fbd179cdf
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-denoised_rep2/CM4AI_d4d.yaml:
+    sha256: 519801be1a4fa57def2195c75f242ffddf43bb655a26b6a1121d0c8301b52580
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-denoised_rep3/CM4AI_d4d.yaml:
+    sha256: 7a7324bf7e4ec9170dc92ff0f524f31cfb053a23c273bb9f89de84337cbeea75
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CHORUS_d4d.yaml:
+    sha256: 19c4142a5582309a4e98afefec3fcd947aabf51b8859b2474dddf51ec54c7781
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/CM4AI_d4d.yaml:
+    sha256: 6d001f4b81ac9455b75d21c0c6aa24c192a61a85760221d8fbdb0f0df29a2886
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep1/VOICE_d4d.yaml:
+    sha256: 593951780db7e2051512a162cc1cdf779af6ce41d5829e4daf4a27fb76f6e147
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/CHORUS_d4d.yaml:
+    sha256: 1a95c8c52ea3c1e7c0436f24fbdab11bb30ebc9aab42dc75822e4ed3f250f1d3
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/CM4AI_d4d.yaml:
+    sha256: 6851d32be09665f369722391afd755b7d41372765f207fd2d165187ebcc93d28
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep2/VOICE_d4d.yaml:
+    sha256: ff1c8521162a9d04d0e7433865e3bf427a0f8eb24c5ee57e269f52f9a59e6fc3
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CHORUS_d4d.yaml:
+    sha256: 3ce0daacbd41b1870b671a7675d8cfa7026f3b1aaeb83d9713398b329841ac6b
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/CM4AI_d4d.yaml:
+    sha256: 0588539ae4938a116bcf48865d15cd7745b65803cc8428f33aaa7b40a8825b15
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly-deprimed_rep3/VOICE_d4d.yaml:
+    sha256: 8874deeba7364285686d73336cdde2dde06f80608242ff98e338e905eb142551
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/CHORUS_d4d.yaml:
+    sha256: d471ae50e19c597410f1db22cd81434dfdaa7b299e441ad5dcf14da075daca77
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep1/VOICE_d4d.yaml:
+    sha256: 45c9c743c42f16c5055c89bfc7a9a178358bf3e62abc117c3f957332e166b1ac
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep2/CHORUS_d4d.yaml:
+    sha256: 224439aa37a01b7b80c9c6ab2ec9f5bf5aeda08275e154be5315e4a3d23235a2
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep2/VOICE_d4d.yaml:
+    sha256: 3d4306f32697810fdcd1feb5cdfc655c2a0db818ebfadeb3b51de6502847458a
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep3/CHORUS_d4d.yaml:
+    sha256: cd744863d970e3a7eaec611829620576d8d2c24a35dc7797ae629debcabc0e48
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-28_claude-opus-5-crateonly_rep3/VOICE_d4d.yaml:
+    sha256: 55a7fe6cc4142c361bec9af839dd0d521b66abdcb94a9ed3a786a18f2736e923
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml:
+    sha256: a20ae2d76ac77a5aeb437588cd454ede47a72fa94b84e0bc835fe148061f014e
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml:
+    sha256: 1b6b8a3435ddc327e4d6efafd36ad5a5012170ae941323f26f8b52deb1e4f837
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml:
+    sha256: 61bf55203ac29635ab2403c5aaa3abec5857be8df6b90ae952e8809f45cb0f59
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d.yaml:
+    sha256: e563059229b2e3db2de8dddd37b3052ba55ec6ece0ffc93c9051b00c11999085
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml:
+    sha256: 1b27518060151f6a4e8023dd760fc7e3cf46daf774ea1e6c0ee823bc9b74fd12
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml:
+    sha256: 615398eec98a7ab7180f54bf550a65e19a568eebedae18aedc2459af4b3a34f2
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d.yaml:
+    sha256: 258c601db0052efcfd1cfbe148da7101f98904b39ed5606145d236517418b297
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep3/CM4AI_d4d.yaml:
+    sha256: a8ed3ed628f82c860f2b79e1871a0ed3b544a9254a42e8ed6a644c9181347696
+    snapshot: null
+    receipt: null
+  claudecode_agent_crate_only/2026-07-31_claude-opus-5-api-generic_rep3/VOICE_d4d.yaml:
+    sha256: 3a7703a09f13649267f29f7e89a6e744cc76d4f41db4b2e31ce7a4ad163e3ea5
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-27_claude-opus-5_rep1/AI_READI_d4d.yaml:
+    sha256: 1433b9c2c63bd6c691c7f5d29215d0fdb95ecedf6cdf94fdc45997aad6b6eccb
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-27_claude-opus-5_rep2/AI_READI_d4d.yaml:
+    sha256: 2a776123994855706c87d82d00c452a40310b9d1b8ac02bbd3d105a907241e76
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-27_claude-opus-5_rep3/AI_READI_d4d.yaml:
+    sha256: 8ac65c0363b5acebca2a07c58f52d032365316218b2fa6ebe865c533661f69da
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-deprimed_rep1/AI_READI_d4d.yaml:
+    sha256: c230354445997abe82568fdf8f87cdac4339ad27b447f9e319b7910105967519
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-deprimed_rep2/AI_READI_d4d.yaml:
+    sha256: aa70b0921e13603f96df681920cdff0c7511af8e1f56d10f004deb078f13f7e1
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-deprimed_rep3/AI_READI_d4d.yaml:
+    sha256: c72636b1348c8e4034690278aa30af15a64024cb57c66cae3ef1b5d2b7295341
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-generic_rep1/AI_READI_d4d.yaml:
+    sha256: beb99f181c7577b0129a3aa219e27f477e96b7dc8d3e7a90abe2a8edb65bdcfc
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-generic_rep2/AI_READI_d4d.yaml:
+    sha256: 8a6839773650a4a486d032798fc5d65bff840861d08edb06411e276cbad640e5
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-28_claude-opus-5-generic_rep3/AI_READI_d4d.yaml:
+    sha256: 874608f4feac3a548c58766870668a2bd9b2f78bed9387d4b11ab8e26428b4d8
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep1/AI_READI_d4d.yaml:
+    sha256: f95b4b36f438f8d74eb20a1d92af8877107c0eddc841cd751ed0d06406bc17ef
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d.yaml:
+    sha256: 49d60c7e830b6a4091d1643e760c47a8b529df4a21e0cf046ff7d4985437c6d0
+    snapshot: null
+    receipt: null
+  claudecode_agent_healthsheet/2026-07-31_claude-opus-5-api-generic_rep3/AI_READI_d4d.yaml:
+    sha256: 5a310ed461234f4628ac724b7ba705bc453f44f5cc8a93a27c8d1730f7695728
+    snapshot: null
+    receipt: null
+  claudecode_agent_merged/2026-07-29_coverage-union/CM4AI_d4d.yaml:
+    sha256: 24398dd7b9a9ce8942f64473c75e446427c912ecea572bb2150bbb3ad9e45619
+    snapshot: null
+    receipt: null
+  claudecode_agent_merged/2026-07-29_guarded-union/AI_READI_d4d.yaml:
+    sha256: 2dff2f76ded4ac97e825af69df9e2ec26ed75f5fc3927d5191ba2778f17d1eaf
+    snapshot: null
+    receipt: null
+  claudecode_agent_merged/2026-07-29_guarded-union/CHORUS_d4d.yaml:
+    sha256: 88ab3adaa8ba1b9f1036c312ae6588b5e7086c93c0e0ed0ec5b0a83664d37f24
+    snapshot: null
+    receipt: null
+  claudecode_agent_merged/2026-07-29_guarded-union/CM4AI_d4d.yaml:
+    sha256: e7db836a4b6202f443731798c84c5b11ff923748544ad2566f470414f9fd1af8
+    snapshot: null
+    receipt: null
+  claudecode_agent_merged/2026-07-29_guarded-union/VOICE_d4d.yaml:
+    sha256: 98013bb3b1df8ac3090842ad2dce87ecf9d5dd6eb1944211e1e03a0fc880cdb2
+    snapshot: null
+    receipt: null
+  claudecode_api/2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml:
+    sha256: 7ae4c033440904a12c58379b9162030254eaa1059ee88f63d3b353ad7fda4e6b
+    snapshot:
+      path: claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: 19a6b2cae97fbecfafb90e8a5826f8206a2e2283d4c0d02d44f3676bd03c4016
+    receipt:
+      path: claudecode_api_core/2026-09-04_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml
+      sha256: 828d7157b71cccc72241e838826ac9097a32ab90ed6104ba323017cd4e404f5c
+  claudecode_api/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml:
+    sha256: a8b8bbfe23a83f22dc0549067c5b2c6b17337312923a2a9bf2faac4b1011cfae
+    snapshot:
+      path: claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: f9f5194c69cd88e25c89b2581c648a27ebd5ff3798617971148510f6a5ef6f3b
+    receipt:
+      path: claudecode_api_core/2026-09-04b_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml
+      sha256: ee1a80e320115f73ace71ad5ead5833334c90de1adf781421eaaae0581f04a1f
+  claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml:
+    sha256: fb296d9de5bd1de8adb3bbcdbb443bb8551c44eb5a1033f953f1ce6ca135ef4a
+    snapshot:
+      path: claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: 224cebc4ab6139afb37148fb37b324f02883b9afbc5cabb19d70d1453fdff172
+    receipt:
+      path: claudecode_api_core/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml
+      sha256: 606b7aea70ee6871a10f4cbf43af2cc85693380d720fb6e1b0758931a2626782
+  claudecode_api/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml:
+    sha256: 44e2bb65b8a2dd3dae5e86ca1c2cf5059fcec67c60f0e206d590fdcd8ad4b41a
+    snapshot:
+      path: claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_full.yaml
+      sha256: 759b07942fe54a4f7d47b63a00cd3e435dc165f770e3ff729fbfe8de473ca12e
+    receipt:
+      path: claudecode_api_core/2026-09-04d_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml
+      sha256: f2fa24ceecff80a90daa9e9b9d702d3e3c6a13349d5c731422e2425e8ad46a4a
+  claudecode_api/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml:
+    sha256: d46c2ed0f28d527e4ed7d19b9bb754f69738a2e493de3bea315be3a5a29e9a7a
+    snapshot:
+      path: claudecode_api_core/2026-09-04e_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_full.yaml
+      sha256: 43fa86ae8b0998bfeb487efef99d5378368f45eeaa2a0ac5faa83985d52945fb
+    receipt:
+      path: claudecode_api_core/2026-09-04e_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml
+      sha256: a46880adfa212df1414037f6e48ddcbbd13100940afc9514b97126e855e3fbf9
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml:
+    sha256: ca383dc0a57b9ccf3c2ab615a82c57963d1672a014c9cbd152742c077ad7533d
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/AI_READI_full.yaml
+      sha256: 0ba8fd470f03fe3168bb2e8a7d28098188b7941a85726514ab9c79177b110c61
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_coverage_receipt.yaml
+      sha256: 2a5281982bdc83b6a12fffc573630d7f121ceecc459de538534a4b11adffdbb6
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml:
+    sha256: f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/CHORUS_full.yaml
+      sha256: 19df166133ad8aaa1acb1a782b3b7f8518ff7b164cb42b43d30eb8c84d9a0328
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 4849792f64b7c3178c3484ac751bf3816882775aa4f59260645893509080cd24
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml:
+    sha256: 6ad8a47eab05cc4fe6015485d79d8601bc26a03c90d2c86711c1ff511a13030f
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/intermediate/VOICE_full.yaml
+      sha256: 1670797ec8565ef8f666f99ce1bb244ee5396ee9cd0034fd040d2a727c97f1a3
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_coverage_receipt.yaml
+      sha256: 9ffe181580be46bc8eb1475c63ccb66c49c859e1dee3542f08c33647b09aed89
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml:
+    sha256: 960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/intermediate/CHORUS_full.yaml
+      sha256: 23666cbed894b89decff10e0ce85fa8bdbf5a70c75f00ed3690f36aa0d2c8c79
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_coverage_receipt.yaml
+      sha256: fe640454761c9ba88b645ba44b36ec49bb6b15128cfa95cfac623bcb5fc5ae7b
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml:
+    sha256: 0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/intermediate/VOICE_full.yaml
+      sha256: 569055b746dabe6170e3900a6958e118e39c50404f45bc578e89ff8e6fdafb06
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_coverage_receipt.yaml
+      sha256: 663009757730ecd8fb5ee5a79ed8f5d1e492985a76247338ef12df019835ef06
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_d4d.yaml:
+    sha256: 82963f6ea262f9cff93d4216ba18dacef48c4a6b7286445f83e195782e162759
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/intermediate/CHORUS_full.yaml
+      sha256: 804c66a472db56805173b1271fd7645eefa025db09fbd1ffb65e075e436b48eb
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/CHORUS_coverage_receipt.yaml
+      sha256: 861d0abb5b679952236a994c0eab1d2c9ed6ce0c007ebb15020c8c2275f03f2b
+  claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml:
+    sha256: ba8876a62b15682af22bae93fe16f4ee6d229afca706435d4595064ad1d8b55c
+    snapshot:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/intermediate/VOICE_full.yaml
+      sha256: dc26dfdbfff48e3fc59c6c5e9848c5498799ac5ed6f3e82f6e0b52d208e504a1
+    receipt:
+      path: claudecode_api_core/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_coverage_receipt.yaml
+      sha256: 1aef6730cd90233dc4fa82faef2d63cedc7f3035fbc416570cd6492ac5f449c0
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml:
+    sha256: 4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/AI_READI_full.yaml
+      sha256: e9684f1ee04308fd94a0688647ea73faadc5a6630e8a1955327c36c0dd70e741
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_coverage_receipt.yaml
+      sha256: 645b00ded6ebbce5a5bca529592ef84669938b41655bb77377d70b4642b6d947
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml:
+    sha256: b14858313cb86f692a326c76764505a6d3c1f64a92ee452638eedd3636baba41
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/intermediate/CM4AI_full.yaml
+      sha256: 7b2e57949317d2bffb43ed283b288a99ab663133bd00e2f192cc4db49d275593
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_coverage_receipt.yaml
+      sha256: 09a51cae6cd21a4b561e4c1d53ceae8474278cecb1b6d089b458381ef3f7b6d7
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml:
+    sha256: 225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/AI_READI_full.yaml
+      sha256: bdcc90bb7f9ad66e6100dcaa8a1ff31e574e294b6f7a257f02e4e6b75d169c3f
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_coverage_receipt.yaml
+      sha256: eb9c2737178609f642dd5db98965c864860bd7d562d047fc201e22c8636bb0a7
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml:
+    sha256: 9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/intermediate/CM4AI_full.yaml
+      sha256: cb1bc69f4150b13095fbff0b345552368344dca91997c43cfe9aadd0c9dbdd1f
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_coverage_receipt.yaml
+      sha256: a9e8d454a16f655d20a3a2e33c12d9088ef521a8dcc56531e210bf398d4d4513
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml:
+    sha256: 01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/intermediate/AI_READI_full.yaml
+      sha256: 631665f7c0b3588da69cadd7ef3f8f9ecfe5bb34233388bced73dfa9f37fe399
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_coverage_receipt.yaml
+      sha256: cca232f11853fc7efeef3db98f8d9407e16e1c2bd277dd491c60dafd101cea06
+  claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml:
+    sha256: e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800
+    snapshot:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/intermediate/CM4AI_full.yaml
+      sha256: fe856330c0974c900c1a388d731405d271be0d596b69854a08364ed922121082
+    receipt:
+      path: claudecode_api_core/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_coverage_receipt.yaml
+      sha256: 7218afd40dde3572e7ea2563d4d7c10c532ae4f3660307827b7717e112cfbad6
+  claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml:
+    sha256: e5ed1b70d6b1f620540e01a8077ab2906cf4936518f2a5b10e4dda747d88c8e9
+    snapshot:
+      path: claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/intermediate/CHORUS_full.yaml
+      sha256: 81dabcdda36c4fb38631c3fa1f300901b5efdb2d7007e9be105039c4d351cab6
+    receipt:
+      path: claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_coverage_receipt.yaml
+      sha256: 5619e50e6720194b1cd837efa38caaa60da8f72495ae460a8bcad6b0041b3950
+  claudecode_assistant/AI_READI_d4d.yaml:
+    sha256: f17b14c162f62ffda9e4546e75e313bd9af2ec3c1c99b42658a64176c8c32d8d
+    snapshot: null
+    receipt: null
+  claudecode_assistant/CHORUS_d4d.yaml:
+    sha256: 28e33d579fb73d674b92ed28d4506e8a314d3138868bcb31e0f9bb87a8698ab9
+    snapshot: null
+    receipt: null
+  claudecode_assistant/CM4AI_d4d.yaml:
+    sha256: 61a0375093a6178b628e1c826586f8455c87056cae2fb1df6813ae38da59b5cf
+    snapshot: null
+    receipt: null
+  claudecode_assistant/VOICE_d4d.yaml:
+    sha256: 28dfa9d9ba5f37061508610d88ea1d6791009148f3b28202a72b43b2c1b47871
+    snapshot: null
+    receipt: null
+  gpt5/AI_READI_d4d.yaml:
+    sha256: ccfae8134988b6589d7df7abe1343383fdfa10eaed9c09111c8cb7dc55f6182a
+    snapshot: null
+    receipt: null
+  gpt5/CHORUS_d4d.yaml:
+    sha256: 2a1e0fbc838ee4e4d8555e6cb0a4465105cb710b729d34a77aedfd6125b59d72
+    snapshot: null
+    receipt: null
+  gpt5/CM4AI_d4d.yaml:
+    sha256: 2cde1284ac94a2bcce2b1073f43534db57522cde5d2152ed792243376b7fd578
+    snapshot: null
+    receipt: null
+  gpt5/VOICE_d4d.yaml:
+    sha256: 8258639458576ad5b2b96ae10ac08ea1e1e53f5dabae38d24a00a4c690560711
+    snapshot: null
+    receipt: null
+  rocrate_mapped/2026-07-24_deterministic-v1/CHORUS_d4d.yaml:
+    sha256: 4827e3c425b27470fea3980dc3f124f27e08fa3b483f5c2610d58534dbc36057
+    snapshot: null
+    receipt: null
+  rocrate_mapped/2026-07-24_deterministic-v1/CM4AI_d4d.yaml:
+    sha256: b4b67e584d6a293d30b44304aa439cde70dddd84eeae8870e7b48f8a474c2f0e
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v1/CHORUS_d4d.yaml:
+    sha256: 1a4e47e43030521d188565e27097faa9628d46116d9763525af6b9ed5275ea49
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v1/CM4AI_d4d.yaml:
+    sha256: 5a7bf2ae5ff034081f1fb7fee704ce7bcd709f96582db1b76a096f2f7f63ca54
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v1/VOICE_d4d.yaml:
+    sha256: 7b97bc66f40d5ab38e63b036041a6da7b7c2a92e84b44166042513c9c3a670a3
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v2/CHORUS_d4d.yaml:
+    sha256: 22f819fac531970520d8b099a658938ae76bf5e34b03736d57fa63e1a4e32af9
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v2/CM4AI_d4d.yaml:
+    sha256: c26cd8441a3db2b6c7df11a7e4c9d10ae15467c6cd850c27c23b6f3452ceb0ed
+    snapshot: null
+    receipt: null
+  rocrate_static_map/2026-07-27_ourmap-v2/VOICE_d4d.yaml:
+    sha256: 11697fbc646381152bc32842f2abb8937131bacb34b6e6f99896adca9847eb75
+    snapshot: null
+    receipt: null

@@ -1,0 +1,89 @@
+# Neutralised fixture (#3515): see tests/fixtures/self_disclaimed/README.md. Not a real record.
+creators:
+- name: Evan T. Rowland
+  description: Placeholder 217e0ca8. Placeholder 1791898b. Placeholder 366e1c9e.
+  principal_investigator:
+    id: https://example.org/#person-evan-t-rowland
+    name: Evan T. Rowland
+  affiliations:
+  - name: Organisation A
+- name: Alma Brandt
+  description: Placeholder 8e58896e. The webinar does not assign this member a project title.
+  affiliations:
+  - name: Organisation D
+- name: Xavier Janek
+  description: Placeholder 4a66e1d1. The webinar does not assign this member a project title.
+  affiliations:
+  - name: Organisation C
+- name: Yvonne Stratton
+  description: Placeholder 8e58896e. The webinar does not assign this member a project title.
+  affiliations:
+  - name: Organisation D
+- name: Paula Reston
+  description: Placeholder 8e58896e. The webinar does not assign this member a project title.
+  affiliations:
+  - name: Organisation D
+- name: Morgan Kells
+  description: Placeholder 41952905. The webinar does not assign this member a project title.
+  affiliations:
+  - name: Organisation B
+instances:
+- name: Entry A
+  instance_type: Entry A
+  description: Placeholder a26c4ad3.
+- name: Entry B
+  instance_type: Placeholder 7a22470d.
+  description: Placeholder a26c4ad3. Placeholder bf4b94c2.
+- name: Entry C
+  instance_type: Entry C kind
+  description: Placeholder a26c4ad3. Placeholder 8219be83.
+- name: Entry E
+  instance_type: Entry E kind
+  description: Placeholder a26c4ad3. Placeholder a4feea0a.
+- name: Entry D
+  instance_type: Entry D kind
+  description: Placeholder a26c4ad3. Placeholder 8219be83.
+- name: Entry F
+  instance_type: Entry F kind
+  description: Placeholder 179d90c9. Placeholder daa64ffe.
+- name: Entry G
+  instance_type: Entry G kind
+  counts: 213
+  description: Placeholder a4feb648. Placeholder 684064a1. Placeholder 305fbb13. Placeholder 4d6a82b4.
+  source_caveats: Placeholder fb40e642. Placeholder cbfe7c03. Placeholder 6e8204df.
+- name: Entry H
+  instance_type: Entry H kind
+  description: Placeholder 7f84816c. Placeholder 8f08deed. Placeholder fe8e19e6.
+- name: Entry J
+  instance_type: Entry J kind
+  description: Placeholder bfa9bd56. Placeholder 3d0e97c1. Placeholder c4259dc7.
+- name: Entry K
+  description: 'Placeholder 36b62ea1. This is stated as a planned data element of the project rather than
+    as a released data type: it is not one of the nine data types in the webinar''s data table.'
+- name: Entry L
+  instance_type: Entry L kind
+  counts: 323
+  description: Placeholder d8a522b3. Placeholder 41a36094. Placeholder 256f16e1.
+  source_caveats: Placeholder 17693228. Placeholder d63e2fe0.
+splits:
+- name: Holdout test set for external validation
+  split_details: 'Placeholder ca619d31. This is recorded as a planned provision: no source in the bundle
+    reports the holdout set as available, and none gives split sizes or a splitting procedure.'
+data_collectors:
+- name: Contributing organisations within the EXAMPLE consortium
+  role: Placeholder ffb54892.
+  collector_details: Placeholder bfad208a. Placeholder dd795cc9.
+maintainers:
+- name: Cora Mercer
+  maintainer_details: Placeholder 4a53ef69. Placeholder 5e3e63d3. The EXAMPLE GitHub organization overview
+    directs access requests to "contact-a@example.org or contact-b@example.org" without naming the holders
+    of those addresses.
+  source_caveats: No source in the bundle states who hosts or maintains the dataset as an institution,
+    and none assigns a creator-or-maintainer category, so `role` is left empty.
+variables:
+- variable_name: derived value one
+  description: Placeholder 9d03fa41.
+  derivation: Placeholder 785257ba. This is stated as planned work rather than as a variable present in
+    the released data.
+  measurement_technique: Placeholder 7fd7dd19.
+  source_caveats: Placeholder e69e27de.

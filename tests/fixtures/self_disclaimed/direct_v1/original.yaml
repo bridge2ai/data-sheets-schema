@@ -1,0 +1,47 @@
+# Neutralised fixture (#3515): see tests/fixtures/self_disclaimed/README.md. Not a real record.
+creators:
+- name: EXAMPLE data generation project
+  description: Placeholder ad8b4b84. Placeholder b4b00138. No source names a further creating team, assigns
+    CRediT roles, or states which individuals performed the work.
+  principal_investigator:
+    id: https://example.org/#person-evan-t-rowland
+    name: Evan T. Rowland
+    description: Placeholder 52ad0210.
+    affiliation:
+    - name: Organisation A
+      description: Placeholder 40d0fd59.
+  affiliations:
+  - name: Organisation A
+    description: The awardee organization of record for award EX-0001.
+instances:
+- instance_type: Entry M
+  counts: 323
+  description: Placeholder 91d057f1. Placeholder ac34313e. Placeholder 8f59c7d4. Placeholder 33ec4026.
+    Placeholder a27d95ef.
+- instance_type: Entry A
+  description: Placeholder 579853ae.
+- instance_type: Placeholder 7a22470d.
+  description: Placeholder 58755d5e.
+- instance_type: Entry C kind
+  description: Placeholder 58755d5e.
+- instance_type: Entry E kind
+  description: Placeholder 58755d5e.
+- instance_type: Entry D kind
+  description: Placeholder 58755d5e.
+- instance_type: Entry F kind
+  description: Placeholder 58755d5e. Placeholder 7e3f406e.
+- instance_type: Entry G kind
+  description: Placeholder c9d2d7c2. Placeholder 99378023. Placeholder 5abc19bb.
+- instance_type: Entry H kind
+  description: Placeholder 824764d0.
+- instance_type: Entry J kind
+  description: Placeholder fff6e8d0. Placeholder 23f4ddd3.
+splits:
+- split_details: Placeholder dae4126a. Placeholder 6a7f39e5. Placeholder e9fd1fcc.
+data_collectors:
+- role: Acquisition centres
+  collector_details: Placeholder fc377798. No source names the individual contributing sites.
+maintainers:
+- name: Cora Mercer
+  maintainer_details: Placeholder b9b131eb. Placeholder 53bccbf9. No source states what maintenance responsibilities
+    the role carries.
