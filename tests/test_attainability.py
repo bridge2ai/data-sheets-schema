@@ -917,15 +917,23 @@ def _broken_evaluation(tmp_path, how):
                                {"inputs": {"bundle_path": CHORUS, "bundle_md5": "a" * 400}}),
                            "a bundle path too long for a file name": yaml.safe_dump(
                                {"inputs": {"bundle_path": "data/" + "b" * 400 + ".txt",
-                                           "bundle_md5": CHORUS_MD5}})}[how],
+                                           "bundle_md5": CHORUS_MD5}}),
+                           "a bundle md5 with a NUL byte": yaml.safe_dump(
+                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": "ab\0cd"}}),
+                           "a bundle path with a NUL byte": yaml.safe_dump(
+                               {"inputs": {"bundle_path": "data/x\0y.txt", "bundle_md5": CHORUS_MD5}})}[how],
                           encoding="utf-8")
+        with_nul = (f"the provenance record {record} names a bundle version whose attainability file "
+                    "cannot be looked up: the bundle_path or bundle_md5 carries a NUL byte, which no file name can")
         not_a_string = f"the provenance record {record} names a bundle_path or bundle_md5 that is not a string"
         why = {"provenance not YAML": f"the provenance record {record} is not YAML: while parsing",
                "a bundle md5 that is not a string": not_a_string,
                "a bundle md5 of zero": not_a_string,
                "a bundle path that is an empty list": not_a_string,
                "a bundle md5 too long for a file name": too_long,
-               "a bundle path too long for a file name": too_long}.get(
+               "a bundle path too long for a file name": too_long,
+               "a bundle md5 with a NUL byte": with_nul,
+               "a bundle path with a NUL byte": with_nul}.get(
             how, f"the provenance record {record} is not a mapping with an inputs mapping")
     if body is not None:
         path.write_text(body, encoding="utf-8")
@@ -956,7 +964,8 @@ def test_a_record_that_names_no_bundle_is_not_unreadable(tmp_path, body):
                                  "inputs an empty list", "inputs an empty string", "inputs false",
                                  "a bundle md5 that is not a string", "a bundle md5 of zero",
                                  "a bundle path that is an empty list", "a bundle md5 too long for a file name",
-                                 "a bundle path too long for a file name"])
+                                 "a bundle path too long for a file name", "a bundle md5 with a NUL byte",
+                                 "a bundle path with a NUL byte"])
 def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checked(tmp_path, capsys, how):
     """#3200: `credited_report` read each evaluation with a bare `json.loads`,
     keyed its elements by `element['id']` and read the record's provenance
@@ -982,6 +991,7 @@ def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checke
         None, None, [], [])
     out = capsys.readouterr().out
     assert f"{broken}: bundle unknown — unreadable: {why}" in out
+    assert "\0" not in out                   # a NUL in the record is never printed raw (#3541)
     assert out.count(" — rubric10 checked against E1.1 route doi_rrid, E4.4, E10.2\n") == 2   # the one after it too
     assert out.rstrip().endswith("3 evaluation(s), 1 that could not be read, 2 on a bundle version with an "
                                  "attainability file, 2 checked against at least one absence, 0 finding(s)")

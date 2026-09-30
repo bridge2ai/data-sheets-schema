@@ -64,7 +64,8 @@ route no pattern settles) is listed as `credited_on_other_route` for a curator
 to read, and is neither a finding nor a `--strict` failure. An evaluation
 that cannot be read — not UTF-8, not JSON, an element with no `id` — or whose
 record's provenance cannot be read, or names a bundle version whose
-attainability file name cannot be looked up (#3469), is reported on its own row as `unreadable`
+attainability file name cannot be looked up — a component too long for
+the file system, or a NUL byte in its path or md5 (#3469, #3541) — is reported on its own row as `unreadable`
 with the file and the error, counted apart, and fails the run with or without
 `--strict`; the evaluations after it are still reported.
 

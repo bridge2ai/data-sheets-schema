@@ -751,9 +751,14 @@ def document_for(bundle_path: str, md5: str, directory: Path = ATTAINABILITY_DIR
     """The attainability file for one bundle version, if there is one.
     Raises `OSError` when the name the version gives cannot be looked up —
     a component longer than the file system allows, say, from a record
-    whose md5 or path is malformed; `credited_report` reports that row as
+    whose md5 or path is malformed — and `ValueError` when the path or md5
+    carries a NUL byte, which no file name can: `Path.is_file` would answer
+    False for it rather than raise, and the row would read as a bundle
+    version with no file (#3541). `credited_report` reports either row as
     unreadable (#3469)."""
     from data_sheets_schema.corpus import anchored
+    if "\0" in bundle_path or "\0" in md5:
+        raise ValueError("the bundle_path or bundle_md5 carries a NUL byte, which no file name can")
     candidate = anchored(Path(directory)) / f"{Path(bundle_path).stem}_{md5}.yaml"
     return candidate if candidate.is_file() else None
 
@@ -955,8 +960,9 @@ def credited_report(evaluation_paths: Iterable[Path], directory: Path = ATTAINAB
                 doc = document_for(bundle["path"], bundle["md5"], directory) if bundle else None
             except (OSError, ValueError) as exc:
                 # A bundle_path or bundle_md5 that is a string but names no
-                # file the system can look up: too long a component, a NUL
-                # byte (#3469).
+                # file the system can look up: too long a component
+                # (OSError, #3469), a NUL byte (`document_for` refuses it
+                # with ValueError, #3541).
                 raise UnreadableEvaluation(
                     f"the provenance record {bundle['record']} names a bundle version whose "
                     f"attainability file cannot be looked up: {getattr(exc, 'strerror', None) or exc}") from exc
