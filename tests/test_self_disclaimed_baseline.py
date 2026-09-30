@@ -150,7 +150,7 @@ def test_pins_round_trip_and_a_malformed_pin_is_stale(corpus, tmp_path):
     "x: &x {k: 1}\nz:\n  <<: *x\n  <<: *x\n",
 ])
 def test_a_record_is_refused_exactly_where_the_cli_refuses_it(text):
-    """The script's fast parse refuses the duplicate keys
+    """The script refuses the duplicate keys
     `duplicate_keys.find_duplicate_keys` finds, and no merge key (`<<`)."""
     m = _script()
     try:
@@ -161,27 +161,100 @@ def test_a_record_is_refused_exactly_where_the_cli_refuses_it(text):
     assert refused == bool(find_duplicate_keys(text))
 
 
-def test_the_refusal_is_the_public_scan_on_libyaml(monkeypatch):
-    """`load_record` asks `duplicate_keys.find_duplicate_keys` with the fast
-    loader, not a private walk (#3704)."""
-    from data_sheets_schema import duplicate_keys
+def test_the_parse_is_the_clis_own_function(monkeypatch):
+    """`load_record` calls `evidence_assertions.load_record`, the function
+    `d4d review self-disclaimed` parses a record with, on the UTF-8 text: it
+    keeps no parser of its own to drift from the CLI's (#3837)."""
+    from data_sheets_schema import evidence_assertions
     m = _script()
     seen = []
 
-    def scan(text, loader=yaml.SafeLoader, *, strict=False):
-        seen.append((loader, strict))
-        return [{"path": "$", "key": "a", "lines": [1, 2], "count": 2}]
+    def parse(text):
+        seen.append(text)
+        return {"parsed": True}
 
-    monkeypatch.setattr(duplicate_keys, "find_duplicate_keys", scan)
-    with pytest.raises(ValueError, match="duplicate"):
-        m.load_record(b"a: 1\n")
-    assert seen == [(duplicate_keys.FAST_LOADER, True)]
+    monkeypatch.setattr(evidence_assertions, "load_record", parse)
+    assert m.load_record("a: é\n".encode()) == {"parsed": True}
+    assert seen == ["a: é\n"]
+
+
+#: Texts on the YAML grammar's edges, where libyaml and PyYAML's pure-Python
+#: scanner disagree or where a parse is refused for another reason (#3837).
+_EDGE_TEXTS = {
+    "tab in a plain scalar": "a: 1\nb: x\ty\n",
+    "tab in a flow plain scalar": "a: [x\ty]\n",
+    "mid-stream byte-order mark": "a: 1\n\ufeff\n",
+    "mid-stream byte-order mark after a document end": "\ufeffa: 1\n...\n\ufeff",
+    "byte-order mark before a key": "a: 1\n\ufeffb: 2\n",
+    "byte-order mark in a scalar": "a: x\ufeffy\n",
+    "leading byte-order mark": "\ufeffa: 1\n",
+    "two leading byte-order marks": "\ufeff\ufeffa: 1\n",
+    "tab in a quoted scalar": "a: \"x\ty\"\n",
+    "tab as separation": "a:\t1\n",
+    "duplicate key": "a: 1\na: 2\n",
+    "merge key": "x: &x {k: 1}\nz:\n  <<: *x\n  k: 2\n",
+    "two documents": "a: 1\n---\nb: 2\n",
+    "not a mapping": "- a\n",
+    "empty": "",
+    "NUL byte": "a: 1\x00\n",
+    "unclosed flow": "a: [1\n",
+    "nested past the recursion limit": "b: " + "[" * 1200 + "]" * 1200 + "\n",
+}
+
+
+def _cli_parse(text):
+    from data_sheets_schema import evidence_assertions
+    try:
+        return ("parsed", evidence_assertions.load_record(text))
+    except RecursionError:
+        return ("refused", "artifact nests past the recursion limit; its duplicate keys cannot be checked")
+    except yaml.YAMLError as exc:
+        return ("refused", type(exc).__name__)
+    except ValueError as exc:
+        return ("refused", str(exc))
+
+
+@pytest.mark.parametrize("text", list(_EDGE_TEXTS.values()), ids=list(_EDGE_TEXTS))
+def test_the_baseline_parses_each_edge_text_as_the_cli_does(text):
+    """Parity: on every edge text the script loads the value the CLI loads,
+    or refuses where the CLI refuses, with the reason the note would list."""
+    m = _script()
+    try:
+        got = ("parsed", m.load_record(text.encode()))
+    except ValueError as exc:
+        got = ("refused", str(exc))
+    assert got == _cli_parse(text)
+
+
+@pytest.mark.parametrize("text", ["a: 1\nb: x\ty\n", "a: 1\n\ufeff\n"],
+                         ids=["tab in a plain scalar", "mid-stream byte-order mark"])
+def test_a_record_libyaml_loads_and_the_cli_rejects_is_refused(text):
+    """#3837: libyaml loads these two, and PyYAML's pure-Python scanner, which
+    the CLI parses with, rejects them. The script refuses them too."""
+    from data_sheets_schema import evidence_assertions
+    if hasattr(yaml, "CSafeLoader"):
+        assert isinstance(yaml.load(text, Loader=yaml.CSafeLoader), dict)   # noqa: S506 (a safe loader)
+    with pytest.raises(yaml.YAMLError):
+        evidence_assertions.load_record(text)
+    with pytest.raises(ValueError, match="^ScannerError$"):
+        _script().load_record(text.encode())
+
+
+def test_a_record_the_cli_loads_and_libyaml_rejects_is_loaded():
+    """The edges run both ways: libyaml rejects a byte-order mark before a
+    key and PyYAML's pure-Python scanner reads it as part of the key. The
+    script loads what the CLI loads (#3837)."""
+    text = "a: 1\n\ufeffb: 2\n"
+    if hasattr(yaml, "CSafeLoader"):
+        with pytest.raises(yaml.YAMLError):
+            yaml.load(text, Loader=yaml.CSafeLoader)   # noqa: S506 (a safe loader)
+    assert _script().load_record(text.encode()) == {"a": 1, "\ufeffb": 2}
 
 
 @pytest.mark.parametrize("head", ["a: 1\na: 2\nb: ", "b: "])
 def test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it(head):
-    """#3799: libyaml composes and constructs a record nested past the
-    recursion limit, but the duplicate-key walk cannot reach its keys. The
+    """#3799: the CLI's duplicate-key walk cannot reach the keys of a record
+    nested past the recursion limit, and its load raises RecursionError. The
     script refuses it (ValueError) where the CLI raises; it never loads a
     value whose first `a` the load silently dropped."""
     from data_sheets_schema import evidence_assertions
@@ -206,13 +279,12 @@ _DEEP_RECORDS = {
 @pytest.mark.parametrize("record", list(_DEEP_RECORDS.values()), ids=list(_DEEP_RECORDS))
 def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing(record):
     """#3817: libyaml's composer recursed on the C stack and killed the
-    process at this depth; `load_record` now refuses the record with
-    ValueError. A subprocess, so a crash cannot take pytest down with it."""
+    process at this depth; `load_record`, on the CLI's pure-Python parse
+    (#3837), refuses the record with ValueError. A subprocess, so a crash
+    cannot take pytest down with it."""
     import os
     import subprocess
     import sys
-    if not hasattr(yaml, "CSafeLoader"):
-        pytest.skip("PyYAML built without libyaml")
     child = (
         "import importlib.util, sys\n"
         f"spec = importlib.util.spec_from_file_location('sdb', {str(SCRIPT)!r})\n"
