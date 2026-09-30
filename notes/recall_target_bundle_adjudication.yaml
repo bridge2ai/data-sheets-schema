@@ -30,7 +30,16 @@
 #                                  in text form, not a parent dataset (#1349).
 #
 # `facts`: each versioned software statement found in the four bundles,
-# searched in full, not only in the candidates. `snippet` is verbatim from
+# searched in full, not only in the candidates: every line carrying a
+# version-shaped token ("v1.2", "v. 1.2", "(Version 1.2)", "version 1.2",
+# "Name 1.2") was read, and a citation of versioned software is a fact like
+# a use of it (review of #3534 found two the first reading missed). Not facts:
+# dataset releases, standards and schemas, licenses, database releases
+# (CORUM, HPA, BioPlex, NDEx), paper titles ("TorchAudio 2.1", "SciPy 1.0"),
+# a documentation repository's badge (Python 3.12.0) and the hosting
+# platform's own version in the CM4AI Dataverse pages' footers ("Powered by
+# v. 6.6 build ...", "v. 6.9"), which is the host's software, not the
+# releases'. `snippet` is verbatim from
 # the bundle (whitespace collapsed); the script checks it is in the bytes
 # each record hashed and looks for `names` with `version` in the record.
 # `scope` takes the software_version values above other than none.
@@ -168,7 +177,9 @@ facts:
     names: [b2aiprep]
     version: 3.0.0
     snippet: This release was generated with b2aiprep v3.0.0.
-    reading: The adult release pages for v3.0.0 and v3.1.0 both state it.
+    reading: >-
+      The adult release pages for v3.0.0 and v3.1.0 both state it, and both cite the "b2aiprep library
+      (Version 3.0.0)" in their references.
   - id: voice-redcap-3.23.0
     project: VOICE
     scope: cited
@@ -176,6 +187,25 @@ facts:
     version: 3.23.0
     snippet: Bridge2AI Voice REDCap (v3.23.0)
     reading: A reference to the Zenodo deposit of the REDCap instruments; no stated use for the release.
+  - id: voice-redcap-3.20.0
+    project: VOICE
+    scope: cited
+    names: [Bridge2AI Voice REDCap, bridge2ai-redcap]
+    version: 3.20.0
+    snippet: Bridge2AI Voice REDCap (v3.20.0)
+    reading: >-
+      The v1.1 page's reference to an earlier Zenodo deposit of the REDCap instruments, in the same
+      reference list as the b2aiprep 0.21.0 citation; no stated use for the release.
+  - id: voice-pediatric-data-processing-library-3.0.0
+    project: VOICE
+    scope: cited
+    names: [Bridge2AI Data Processing Library]
+    version: 3.0.0
+    snippet: Bridge2AI Data Processing Library (Version 3.0.0)
+    reading: >-
+      The pediatric dataset's page (c021) cites the b2aiprep repository under this title. The
+      pediatric dataset is related but distinct, so the citation is not the referent's; a record
+      naming b2aiprep 3.0.0 is counted under voice-b2aiprep-3.0.0, and this row counts the title.
   - id: voice-b2aiprep-0.21.0
     project: VOICE
     scope: cited
@@ -272,7 +302,8 @@ bundles:
       Every stated software version belongs to the companion U2OS analyses (the Nature paper and the
       preprint's exploratory structure modelling), not to the releases' processing; recording one as
       the releases' software would move a fact across scope. Software named for the releases without a
-      version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline.
+      version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline. The Dataverse pages' footers give
+      the hosting platform's version (v. 6.6, v. 6.9), the host's software, not the releases'.
     parent_dataset: >-
       None. The releases are "derived from commercially available de-identified human cell lines", a
       biological source; the lineage graphs are files the bundle names but does not contain.

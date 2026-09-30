@@ -743,7 +743,9 @@ def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
                     else "none") + ".")
     lines += [
         "", "### Versioned software the bundles state, and where the records carry it", "",
-        "Every versioned software statement found in the four bundles, searched in full. Per arm,",
+        "Every versioned software statement found in the four bundles, searched in full, citations",
+        "included; what is not one (releases, standards, database versions, paper titles, the",
+        "Dataverse host's footer) is listed in the adjudication file's header. Per arm,",
         "over the records of the fact's project: **stated** is the records whose hashed bundle bytes",
         "contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a",
         "`used_software` entry naming the software with that `version`, or a `tools` string with",

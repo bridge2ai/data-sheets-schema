@@ -146,7 +146,7 @@ Not counted, declared invalid by their own validation block: `claudecode_api/202
 
 ## Bundle adjudication (#3289)
 
-A hand reading, `notes/recall_target_bundle_adjudication.yaml` (sha256 `02b09cdbbc5b6476f05bff33a6989f194d72f31350cb9d0d17f9e68fc7d80f10`), rendered here: edit that file, not
+A hand reading, `notes/recall_target_bundle_adjudication.yaml` (sha256 `bf39cfee630d22f3b5ab3bce54d38fd7e242b90d55447728107054ee4e3cce21`), rendered here: edit that file, not
 this note. It asks whether the zeros above are bundle facts or omissions. Keep #1349 in
 view: lineage stated in text form is valid, so a biological or clinical source written as
 prose is not a missing parent dataset. Variables are not adjudicated (#2079: whether a row
@@ -159,7 +159,7 @@ coverage, the snippet checks and the carriage counts below are measured.
 |---|---|---|
 | AI_READI | No processing software is stated with a version. The one software version is FAIRSCAPE 1.2.1, recorded in the RO-Crate as the metadata packager. Every other version cue is a dataset release, a standard (CDS v0.1.1) or a license version. Software named without a version: the OMOP Data Quality Dashboard, REDCap and the MoCA Duo app. | None. Versions 1.0.0 and 2.0.0 are earlier releases of the same dataset, and the subcrates are its parts. |
 | CHORUS | None. The bundle's only version-like tokens are a row count ("1.6 Billion") and a license (Apache-2.0). Software named without a version: the OHNLP toolkit, the OHDSI tool stack and the chorus-ai GitHub repositories. | None. The bundle names clinical source systems (EHR, PACS, bedside monitors, EEG databases), which is lineage in text form (#1349). |
-| CM4AI | Every stated software version belongs to the companion U2OS analyses (the Nature paper and the preprint's exploratory structure modelling), not to the releases' processing; recording one as the releases' software would move a fact across scope. Software named for the releases without a version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline. | None. The releases are "derived from commercially available de-identified human cell lines", a biological source; the lineage graphs are files the bundle names but does not contain. |
+| CM4AI | Every stated software version belongs to the companion U2OS analyses (the Nature paper and the preprint's exploratory structure modelling), not to the releases' processing; recording one as the releases' software would move a fact across scope. Software named for the releases without a version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline. The Dataverse pages' footers give the hosting platform's version (v. 6.6, v. 6.9), the host's software, not the releases'. | None. The releases are "derived from commercially available de-identified human cell lines", a biological source; the lineage graphs are files the bundle names but does not contain. |
 | VOICE | One: b2aiprep v3.0.0 generated the v3.0.0 and v3.1.0 releases. Tools named without a version: openSMILE, Praat, parselmouth, torchaudio, sparc, ppgs, Whisper Large and SenseLab. "TorchAudio 2.1" is a paper title, BIDS v1.9.0 a standard, and Python 3.12.0 a badge on the documentation repository. | None. The pediatric dataset is related but distinct (source manifest scope), and the features are derived from raw audio inside the dataset. |
 
 ### Lexical candidates with a version or lineage cue
@@ -197,7 +197,9 @@ Adjudicated but matching no candidate: none.
 
 ### Versioned software the bundles state, and where the records carry it
 
-Every versioned software statement found in the four bundles, searched in full. Per arm,
+Every versioned software statement found in the four bundles, searched in full, citations
+included; what is not one (releases, standards, database versions, paper titles, the
+Dataverse host's footer) is listed in the adjudication file's header. Per arm,
 over the records of the fact's project: **stated** is the records whose hashed bundle bytes
 contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a
 `used_software` entry naming the software with that `version`, or a `tools` string with
@@ -220,6 +222,18 @@ right, and a `companion` or `cited` fact carried is not thereby in scope.
 | `voice-redcap-3.23.0` | cited | c017, c019 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
 | `voice-redcap-3.23.0` | cited | c017, c019 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 1 | 2 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v4 API (2026-08-13) | 3 | 3 | 0 | 2 | 1 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 1 | 1 | 1 |
+| `voice-redcap-3.20.0` | cited | c015 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 1 | 2 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v6 agentic (2026-08-28) | 3 | 3 | 1 | 0 | 0 | 2 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
 | `voice-b2aiprep-0.21.0` | cited | c015 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 3 | 0 |
 | `voice-b2aiprep-0.21.0` | cited | c015 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
 | `voice-b2aiprep-0.21.0` | cited | c015 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 3 | 0 |
@@ -284,8 +298,10 @@ right, and a `companion` or `cited` fact carried is not thereby in scope.
 
 Where each fact is stated, as read:
 
-- `voice-b2aiprep-3.0.0`: The adult release pages for v3.0.0 and v3.1.0 both state it.
+- `voice-b2aiprep-3.0.0`: The adult release pages for v3.0.0 and v3.1.0 both state it, and both cite the "b2aiprep library (Version 3.0.0)" in their references.
 - `voice-redcap-3.23.0`: A reference to the Zenodo deposit of the REDCap instruments; no stated use for the release.
+- `voice-redcap-3.20.0`: The v1.1 page's reference to an earlier Zenodo deposit of the REDCap instruments, in the same reference list as the b2aiprep 0.21.0 citation; no stated use for the release.
+- `voice-pediatric-data-processing-library-3.0.0`: The pediatric dataset's page (c021) cites the b2aiprep repository under this title. The pediatric dataset is related but distinct, so the citation is not the referent's; a record naming b2aiprep 3.0.0 is counted under voice-b2aiprep-3.0.0, and this row counts the title.
 - `voice-b2aiprep-0.21.0`: The v1.1 page's reference to the b2aiprep repository; v1.1 is an earlier release.
 - `ai-readi-fairscape-1.2.1`: The root RO-Crate records the FAIRSCAPE version that packaged the metadata, not a processing step.
 - `cm4ai-dia-nn-1.8.1.0`: SEC-MS search for the U2OS map in the companion paper.

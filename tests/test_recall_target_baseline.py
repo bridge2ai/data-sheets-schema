@@ -312,6 +312,23 @@ class Carriage(unittest.TestCase):
             {"name": "b2aiprep", "version": "3.0.0"}]}]}), "structured")
         self.assertEqual(self.carried({"machine_annotation_tools": [{"tools": ["b2aiprep v3.0.0"]}]}), "structured")
 
+    def test_structured_needs_the_fact_s_name_and_version_in_one_entry(self):
+        # Review of #3534 (#3573): every positive case above names b2aiprep
+        # with 3.0.0, so dropping either check survived. Another tool at the
+        # fact's version, the fact's tool at another version, or the two
+        # split across entries is not structured carriage of the fact.
+        cases = [
+            ({"used_software": [{"name": "openSMILE", "version": "3.0.0"}]}, "absent"),
+            ({"used_software": [{"name": "b2aiprep", "version": "2.0.0"}]}, "name_only"),
+            ({"used_software": [{"name": "b2aiprep", "version": "2.0.0"},
+                                {"name": "openSMILE", "version": "3.0.0"}]}, "name_only"),
+            ({"tools": ["openSMILE v3.0.0"]}, "absent"),
+            ({"tools": ["b2aiprep v2.0.0"]}, "name_only"),
+            ({"tools": ["b2aiprep v2.0.0", "openSMILE v3.0.0"]}, "name_only"),
+        ]
+        for record, expected in cases:
+            self.assertEqual(self.carried(record), expected, record)
+
     def test_prose_or_one_mapping_s_own_values_is_elsewhere(self):
         self.assertEqual(self.carried({"description": "Generated with the b2aiprep library, version 3.0.0."}),
                          "elsewhere")
@@ -451,6 +468,42 @@ def test_the_committed_baseline_is_what_the_records_reproduce():
     assert (cov["missing"], cov["unmatched"]) == ([], [])
     for fact in collected["adjudication"]["facts"]:
         assert any((r.get("facts") or {}).get(fact["id"], {}).get("stated") for r in collected["rows"]), fact["id"]
+
+
+#: Parenthesised version citations in the bundles that are not software:
+#: (project, the text the hit sits in). Everything else of that shape must
+#: be some fact of its project: the version in the parentheses, one of the
+#: fact's names in the citation text just before it.
+NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT (Version 2.0)"),   # a license version
+                ("CM4AI", "HPA (v.23)"))                                        # a database release
+
+
+@pytest.mark.corpus   # reads the committed bundles
+def test_every_parenthesised_version_citation_in_the_bundles_is_a_fact_or_named_as_not_software():
+    """Review of #3534 (#3571): the adjudication says its facts hold every
+    versioned software statement in the bundles, and the first reading
+    missed two citations of this shape, "Name (v3.20.0)" and "Name (Version
+    3.0.0)". A citation of that shape no fact covers fails here."""
+    m = _script()
+    facts = m.load_adjudication(m.ADJUDICATION)["facts"]
+    shape = __import__("re").compile(r"\((?:v\.?\s?|Version\s)\d[\w.-]*\)")
+    uncovered = []
+    for project in m.PROJECTS:
+        path = ROOT / "data" / "preprocessed" / "concatenated" / f"{project}_preprocessed.txt"
+        text = " ".join(path.read_text(encoding="utf-8").split())
+        spans = []
+        for s, at in [(" ".join(s.split()), 0) for p, s in NOT_SOFTWARE if p == project]:
+            while (at := text.find(s, at)) >= 0:
+                spans.append((at, at + len(s)))
+                at += 1
+        patterns = [m._fact_patterns(f) for f in facts if f["project"] == project]
+        for hit in shape.finditer(text):
+            before = text[max(0, hit.start() - 60):hit.start()]
+            if any(a <= hit.start() and hit.end() <= b for a, b in spans) or any(
+                    names.search(before) and version.search(hit.group(0)) for names, version in patterns):
+                continue
+            uncovered.append(f"{project}: …{before}{hit.group(0)}")
+    assert uncovered == []
 
 
 if __name__ == "__main__":
