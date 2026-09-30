@@ -124,11 +124,11 @@ class TestTheInstrument(unittest.TestCase):
             self.assertEqual(len(findings), 1)
             self.assertIn("duplicate mapping key", findings[0])
 
-    def test_the_duplicate_scan_is_libyaml_and_not_strict(self):
-        """#3786: the walk asks `find_duplicate_keys` with `FAST_LOADER`, not
-        `duplicate_keys_in`'s pure-Python default, and not strictly — a text
-        that cannot be scanned claims no duplicate, as before. Its findings
-        are the default loader's, word for word."""
+    def test_the_duplicate_scan_is_libyaml_and_strict(self):
+        """#3786, review #3902: the walk asks `find_duplicate_keys` with
+        `FAST_LOADER`, strictly, so a text libyaml cannot scan raises instead
+        of claiming no duplicate. On text libyaml scans that is the only call,
+        and its findings are the default loader's, word for word."""
         from data_sheets_schema import duplicate_keys
         real = duplicate_keys.find_duplicate_keys
         seen = []
@@ -147,10 +147,69 @@ class TestTheInstrument(unittest.TestCase):
             seen_fast = list(seen)
             seen.clear()
             expected = [duplicate_keys.describe(duplicate_keys.duplicate_keys_in(dup))]
-        self.assertEqual(seen_fast, [(duplicate_keys.FAST_LOADER, False)])
+        self.assertEqual(seen_fast, [(duplicate_keys.FAST_LOADER, True)])
         self.assertEqual(seen, [(yaml.SafeLoader, False)])      # the default is untouched
         self.assertIsNone(failure)
         self.assertEqual(findings, expected)
+
+    def test_text_only_the_pure_python_scanner_reads_keeps_its_duplicate(self):
+        """Review #3902: libyaml rejects an unknown directive and `%YAML 1.3`,
+        which the pure-Python scanner (and so the validator's loader) accepts,
+        keeping the last value of a duplicate. The walk falls back to the
+        pure-Python scan and reports exactly what origin/main's scan reported:
+        the row is INVALID, never VALID."""
+        from data_sheets_schema import duplicate_keys
+        body = VALID_RECORD + "title: Another\ntitle: Third\n"
+        for directive in ("%FOO bar\n---\n", "%YAML 1.3\n---\n"):
+            text = directive + body
+            with self.subTest(directive=directive), tempfile.TemporaryDirectory() as tmp, \
+                    mock.patch("data_sheets_schema.api_runner._validator_lines",
+                               return_value=([], None)):
+                with self.assertRaises(yaml.YAMLError):          # libyaml cannot scan it
+                    duplicate_keys.find_duplicate_keys(text, loader=duplicate_keys.FAST_LOADER,
+                                                       strict=True)
+                self.assertEqual(yaml.safe_load(text)["title"], "Third")   # what the validator reads
+                rec = Path(tmp) / "directive.yaml"
+                rec.write_text(text, encoding="utf-8")
+                expected = [duplicate_keys.describe(duplicate_keys.duplicate_keys_in(rec))]
+                self.assertTrue(expected[0])
+                findings, failure = _validate_deterministic(rec)
+                concat = _tree(Path(tmp), {"rocrate_mapped/det-v1/A_d4d.yaml": text})
+                rows = deterministic_validity(concat)
+            self.assertIsNone(failure)
+            self.assertEqual(findings, expected)
+            self.assertEqual([r["status"] for r in rows], [INVALID])
+
+    def test_text_only_libyaml_reads_reports_its_duplicate(self):
+        """Review #3890/#3902, the other direction: a tab inside a plain scalar
+        and a byte-order mark after the start of the stream are text libyaml
+        scans and the pure-Python scanner rejects. The walk reports the
+        duplicate libyaml finds, where the default reported none."""
+        from data_sheets_schema import duplicate_keys
+        for name, text in (("tab", "id: x\ntitle: a\tb\ntitle: c\n"),
+                           ("bom", "id: x\ntitle: a\ntitle: c\n\ufeff")):
+            with self.subTest(name), tempfile.TemporaryDirectory() as tmp, \
+                    mock.patch("data_sheets_schema.api_runner._validator_lines",
+                               return_value=([], None)):
+                rec = Path(tmp) / "edge.yaml"
+                rec.write_text(text, encoding="utf-8")
+                self.assertEqual(duplicate_keys.duplicate_keys_in(rec), [])   # the default
+                findings, failure = _validate_deterministic(rec)
+            self.assertIsNone(failure)
+            self.assertEqual(len(findings), 1)
+            self.assertIn("title", findings[0])
+
+    def test_text_neither_scanner_reads_claims_no_duplicate(self):
+        """Not strict overall, as before: a text neither loader can scan
+        claims no duplicate, and the validator says why it cannot load it."""
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch("data_sheets_schema.api_runner._validator_lines",
+                           return_value=([], "linkml-validate did not run: boom")):
+            rec = Path(tmp) / "broken.yaml"
+            rec.write_text("a: [1, 2\na: 3\n", encoding="utf-8")
+            findings, failure = _validate_deterministic(rec)
+        self.assertIsNone(findings)
+        self.assertEqual(failure, "linkml-validate did not run: boom")
 
     def test_the_grammar_edge_moves_an_unverified_row_to_invalid(self):
         """Review #3890: a tab inside a plain scalar is text libyaml scans and

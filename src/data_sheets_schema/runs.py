@@ -497,26 +497,41 @@ def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
     #3786), about nine times faster than `duplicate_keys_in`'s pure-Python
     default, which stays as it is for the callers that pin it. The findings
     are the same wherever both scanners can read the text, but the two are
-    not the same grammar at the edges (`find_duplicate_keys`'s docstring):
-    libyaml accepts a tab inside a plain scalar (`title: a<TAB>b`) and a
-    byte-order mark after the start of the stream, which the pure-Python
-    scanner rejects. On such a text the default found no duplicate and
-    libyaml reports the ones it scans, so a record of that shape carrying a
-    duplicate key, whose validator could not run, now reads INVALID (with
-    `failure` set) where it read UNVERIFIED before (review #3890). That is
-    what `yaml.load(..., Loader=FAST_LOADER)` loads from the same text.
-    None of the 1,616 YAML files under `data/d4d_concatenated` hits the
-    edge: every one gives identical findings under both loaders (checked
-    2026-09-30). Not strict, as before: a text neither loader can scan
-    claims no duplicate, and the validator reports why it cannot be loaded.
+    not the same grammar at the edges (`find_duplicate_keys`'s docstring),
+    and the difference runs both ways:
+
+    - libyaml accepts a tab inside a plain scalar (`title: a<TAB>b`) and a
+      byte-order mark after the start of the stream, which the pure-Python
+      scanner rejects. On such a text the default found no duplicate and
+      libyaml reports the ones it scans, so a record of that shape carrying
+      a duplicate key, whose validator could not run, now reads INVALID
+      (with `failure` set) where it read UNVERIFIED before (review #3890).
+      That is what `yaml.load(..., Loader=FAST_LOADER)` loads from the text.
+    - The pure-Python scanner accepts an unknown directive (`%FOO bar`) and
+      `%YAML 1.3`, which libyaml rejects. The validator loads records with
+      the pure-Python loader, so it would read such a text and keep the
+      last value of each duplicate. The libyaml scan is therefore strict,
+      and when it cannot scan the text the walk falls back to the
+      pure-Python scan (review #3902): a duplicate the default finds is
+      never lost, and the row stays INVALID.
+
+    So the walk never reports fewer duplicates than the pure-Python scan
+    alone. None of the 1,616 YAML files under `data/d4d_concatenated` hits
+    either edge: every one gives identical findings under both loaders
+    (checked 2026-09-30). A text neither loader can scan claims no
+    duplicate, as before, and the validator reports why it cannot be loaded.
     """
     from data_sheets_schema.api_runner import _validator_lines
     from data_sheets_schema.duplicate_keys import FAST_LOADER, describe, find_duplicate_keys
     try:
-        text_dups = find_duplicate_keys(Path(path).read_text(encoding="utf-8", errors="replace"),
-                                        loader=FAST_LOADER)
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
     except OSError as exc:
         return None, f"record could not be read: {exc}"
+    try:
+        text_dups = find_duplicate_keys(text, loader=FAST_LOADER, strict=True)
+    except (yaml.YAMLError, RecursionError):
+        # libyaml cannot scan it; the pure-Python scanner may (review #3902).
+        text_dups = find_duplicate_keys(text)
     dups = [describe(d) for d in [text_dups] if d]
     lines, failure = _validator_lines(path, DETERMINISTIC_SCHEMA, DETERMINISTIC_CLASS)
     if failure is not None:
