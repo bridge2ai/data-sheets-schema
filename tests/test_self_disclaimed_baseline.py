@@ -161,6 +161,92 @@ def test_a_record_is_refused_exactly_where_the_cli_refuses_it(text):
     assert refused == bool(find_duplicate_keys(text))
 
 
+def test_the_refusal_is_the_public_scan_on_libyaml(monkeypatch):
+    """`load_record` asks `duplicate_keys.find_duplicate_keys` with the fast
+    loader, not a private walk (#3704)."""
+    from data_sheets_schema import duplicate_keys
+    m = _script()
+    seen = []
+
+    def scan(text, loader=yaml.SafeLoader, *, strict=False):
+        seen.append((loader, strict))
+        return [{"path": "$", "key": "a", "lines": [1, 2], "count": 2}]
+
+    monkeypatch.setattr(duplicate_keys, "find_duplicate_keys", scan)
+    with pytest.raises(ValueError, match="duplicate"):
+        m.load_record(b"a: 1\n")
+    assert seen == [(duplicate_keys.FAST_LOADER, True)]
+
+
+@pytest.mark.parametrize("head", ["a: 1\na: 2\nb: ", "b: "])
+def test_a_record_too_deep_to_scan_is_refused_as_the_cli_refuses_it(head):
+    """#3799: libyaml composes and constructs a record nested past the
+    recursion limit, but the duplicate-key walk cannot reach its keys. The
+    script refuses it (ValueError) where the CLI raises; it never loads a
+    value whose first `a` the load silently dropped."""
+    from data_sheets_schema import evidence_assertions
+    m = _script()
+    text = head + "{x: " * 1200 + "1" + "}" * 1200 + "\n"
+    with pytest.raises(RecursionError):
+        evidence_assertions.load_record(text)
+    with pytest.raises(ValueError, match="recursion limit"):
+        m.load_record(text.encode())
+
+
+#: The records the child builds, as expressions of `n`. The byte-order mark
+#: case is #3826's: `decode('utf-8')` keeps the mark and libyaml skips it, so
+#: a column count put this record's depth at 2 and handed it to the composer.
+_DEEP_RECORDS = {
+    "flow mappings": "'a: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n'",
+    "byte-order mark, block sequence": "'\\ufeff' + '- ' * n + 'x\\n'",
+    "byte-order mark, flow mappings": "'\\ufeffa: 1\\na: 2\\nb: ' + '{x: ' * n + '1' + '}' * n + '\\n'",
+}
+
+
+@pytest.mark.parametrize("record", list(_DEEP_RECORDS.values()), ids=list(_DEEP_RECORDS))
+def test_a_record_nested_fifty_thousand_deep_is_refused_without_crashing(record):
+    """#3817: libyaml's composer recursed on the C stack and killed the
+    process at this depth; `load_record` now refuses the record with
+    ValueError. A subprocess, so a crash cannot take pytest down with it."""
+    import os
+    import subprocess
+    import sys
+    if not hasattr(yaml, "CSafeLoader"):
+        pytest.skip("PyYAML built without libyaml")
+    child = (
+        "import importlib.util, sys\n"
+        f"spec = importlib.util.spec_from_file_location('sdb', {str(SCRIPT)!r})\n"
+        "m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)\n"
+        "n = 50_000\n"
+        f"raw = ({record}).encode()\n"
+        "try:\n"
+        "    m.load_record(raw)\n"
+        "except ValueError as exc:\n"
+        "    print('refused:', exc)\n"
+    )
+    env = dict(os.environ)
+    env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+    proc = subprocess.run([sys.executable, "-c", child], capture_output=True, text=True, env=env, timeout=300)
+    assert proc.returncode == 0, proc.stderr[-2000:]
+    assert proc.stdout.startswith("refused: artifact nests past the recursion limit"), proc.stdout
+
+
+def test_the_note_carries_the_pr1_subtotal_and_says_which_finals_it_counted(corpus, monkeypatch):
+    """#3029's figures counted two methods' finals; the note says so and
+    carries their subtotal beside the all-methods total (#3703). A method
+    with no records adds nothing to the subtotal."""
+    m = _script()
+    dump(corpus / "method_c" / "S_d4d.yaml", {"id": "s", "maintainers": [maintainer("Person F")]})
+    monkeypatch.setattr(m, "PR1_METHODS", ("method_a", "method_c", "method_absent"))
+    md = m.render_markdown(m.collect(corpus))
+    assert "counted only the `method_a` and `method_c` and `method_absent` finals" in md
+    assert "compare with the `method_a + method_c + method_absent` row, not with `**all**`" in md
+    rows = [line for line in md.splitlines() if line.startswith("| *method_a + method_c + method_absent* |")]
+    # method_a: 1 record, 2 flagged; method_c: 1 record, 1 flagged; method_b (Q) is left out.
+    assert rows == ["| *method_a + method_c + method_absent* | 2 | 0 | 4 | 3 | 2 | 0 | 0 |"]
+    assert "| **all** | 3 | 0 | 5 | 4 | 3 | 0 | 0 |" in md
+
+
 def test_an_unreadable_file_is_listed_and_its_pair_is_not_diffed(corpus):
     m = _script()
     dump(corpus / "method_a_core" / LABEL / "intermediate" / "P_full_2.yaml", "a: 1\na: 2\n")

@@ -53,6 +53,316 @@ class TestDetection(unittest.TestCase):
         self.assertEqual(yaml.safe_load(DUPED)["source_caveats"], "second")
 
 
+PARITY = [
+    DUPED, "id: x\nnotes: y\n", "id: [unterminated\n", "", "a: \0", "loop: &loop {self: *loop}\n",
+    "a: &x {k: 1, k: 2}\nb: *x\nc: *x\n", "true: a\nTrue: b\n", "1: a\n\"1\": b\n", "true: a\n1: b\n1.0: c\n",
+    "base: &b {x: 1}\nother: &o {y: 2}\nm:\n  <<: *b\n  <<: *o\n  z: 3\n",
+    "x: &x {k: 1}\nz:\n  <<: *x\n  k: 2\n", "x: &x {k: 1}\ny: &y {k: 2}\nz:\n  <<: [*x, *y]\n  z: 1\n  z: 2\n",
+    "a: 1\n---\nb: 2\n", "a:\n- b: 1\n  b: 2\n",
+]
+
+
+class TestTheLoader(unittest.TestCase):
+    """#3704: the node tree may be composed by libyaml; the rule does not move."""
+
+    def test_the_default_is_the_pure_python_safe_loader(self):
+        import inspect
+        from data_sheets_schema import duplicate_keys
+        self.assertIs(inspect.signature(find_duplicate_keys).parameters["loader"].default, yaml.SafeLoader)
+        self.assertIn(duplicate_keys.FAST_LOADER, (getattr(yaml, "CSafeLoader", None), yaml.SafeLoader))
+
+    def test_the_given_loader_composes_the_tree(self):
+        made = []
+
+        class Recording(yaml.SafeLoader):
+            def __init__(self, stream):
+                made.append(stream)
+                super().__init__(stream)
+
+        self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=Recording)], ["a"])
+        self.assertEqual(made, ["a: 1\na: 2\n"])
+
+    def test_libyaml_and_the_pure_python_loader_give_the_same_findings(self):
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        self.assertIs(FAST_LOADER, yaml.CSafeLoader)
+        for text in PARITY:
+            with self.subTest(text=text):
+                self.assertEqual(find_duplicate_keys(text, loader=yaml.CSafeLoader),
+                                 find_duplicate_keys(text, loader=yaml.SafeLoader))
+                self.assertEqual(find_duplicate_keys(text), find_duplicate_keys(text, loader=yaml.SafeLoader))
+        # The cases are not all empty: the parity is over findings, merges included.
+        self.assertEqual([d["key"] for d in find_duplicate_keys(PARITY[-3], loader=yaml.CSafeLoader)], ["z"])
+
+    def test_strict_raises_what_the_default_reports_as_nothing(self):
+        """#3799: a text the scan cannot check is `[]` by default and raised
+        under `strict=True`, under either loader."""
+        import inspect
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        self.assertIs(inspect.signature(find_duplicate_keys).parameters["strict"].default, False)
+        deep = "a: 1\na: 2\nb: " + "{x: " * 1200 + "1" + "}" * 1200 + "\n"
+        for loader in {yaml.SafeLoader, FAST_LOADER}:
+            with self.subTest(loader=loader.__name__):
+                self.assertEqual(find_duplicate_keys(deep, loader=loader), [])
+                with self.assertRaises(RecursionError):
+                    find_duplicate_keys(deep, loader=loader, strict=True)
+                for bad in ("id: [unterminated\n", "a: \0"):   # the composer; the reader
+                    self.assertEqual(find_duplicate_keys(bad, loader=loader), [])
+                    with self.assertRaises(yaml.YAMLError):
+                        find_duplicate_keys(bad, loader=loader, strict=True)
+                self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=loader, strict=True)],
+                                 ["a"])
+
+
+class TestUnencodableText(unittest.TestCase):
+    """#3834: a lone surrogate is unscannable under either loader, alike."""
+
+    SURROGATE = "a: 1\na: 2\nb: \udcff\n"
+
+    def _scan(self, text, loader, strict):
+        try:
+            return ("found", find_duplicate_keys(text, loader=loader, strict=strict))
+        except Exception as exc:                                  # noqa: BLE001
+            return ("raised", type(exc), getattr(exc, "position", None), getattr(exc, "character", None))
+
+    def test_a_lone_surrogate_is_nothing_by_default_and_a_reader_error_under_strict(self):
+        from data_sheets_schema.duplicate_keys import FAST_LOADER
+        for loader in {yaml.SafeLoader, FAST_LOADER}:
+            for text in (self.SURROGATE, "\ud800a: 1\na: 2\n", "a: 1\na: 2\nb: \"x\udfffy\"\n",
+                         "a: 1\na: 2\n# \udcff\n", "a: \0\nb: \udcff\n"):
+                with self.subTest(loader=loader.__name__, text=text.encode("utf-8", "backslashreplace")):
+                    self.assertEqual(find_duplicate_keys(text, loader=loader), [])
+                    with self.assertRaises(yaml.reader.ReaderError):
+                        find_duplicate_keys(text, loader=loader, strict=True)
+
+    def test_both_loaders_raise_the_same_reader_error(self):
+        """The same class, position and character: the pure-Python reader's
+        error, naming the first character it rejects (the NUL before the
+        surrogate in the second text)."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        for text, position in ((self.SURROGATE, 13), ("a: \0\nb: \udcff\n", 3)):
+            with self.subTest(position=position):
+                pure = self._scan(text, yaml.SafeLoader, True)
+                self.assertEqual(pure[:3], ("raised", yaml.reader.ReaderError, position))
+                self.assertEqual(self._scan(text, yaml.CSafeLoader, True), pure)
+
+    def test_code_points_at_every_reader_boundary_are_accepted_or_rejected_alike(self):
+        """In a double-quoted scalar, strict and not, over the code points
+        around each boundary of the readers' printable set (C0 and C1
+        controls, NEL, NBSP, the surrogates, U+FEFF, U+FFFE/U+FFFF, the astral
+        planes): before #3834 the surrogates raised UnicodeEncodeError under
+        libyaml. Outcomes compare by class — each reader words its own
+        `ReaderError`. All 1,114,112 code points were compared once, outside
+        the suite: the surrogates were the only difference."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        differ = []
+        for cp in list(range(0x0, 0x200)) + list(range(0x2020, 0x2030)) + list(range(0xD7F0, 0xE010)) + list(range(0xFFF0, 0x10010)) \
+                + [0x10FFFF]:
+            text = 'a: 1\na: 2\nb: "x' + chr(cp) + 'y"\n'
+            for strict in (False, True):
+                pure = self._scan(text, yaml.SafeLoader, strict)
+                fast = self._scan(text, yaml.CSafeLoader, strict)
+                if pure[:2] != fast[:2]:
+                    differ.append((hex(cp), strict, pure[:2], fast[:2]))
+        self.assertEqual(differ, [])
+
+    def test_the_depth_guard_does_not_raise_on_an_unencodable_text(self):
+        from data_sheets_schema.duplicate_keys import nesting_exceeds
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        self.assertIs(nesting_exceeds(self.SURROGATE, yaml.CSafeLoader, 10), False)
+
+    def test_the_scanners_differ_on_a_tab_in_a_plain_scalar(self):
+        """Pinned as documented, not as desired: PyYAML's pure-Python scanner
+        rejects a tab inside a plain scalar and a byte-order mark after the
+        start of the stream; libyaml accepts both and loads the text, so the
+        libyaml scan reports what that load would drop."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        for text in ("a: 1\na: 2\nb: x\ty\n", "a: 1\na: 2\n\ufeff"):
+            with self.subTest(text=text):
+                self.assertEqual(find_duplicate_keys(text, loader=yaml.SafeLoader), [])
+                with self.assertRaises(yaml.YAMLError):
+                    yaml.load(text, Loader=yaml.SafeLoader)   # noqa: S506
+                self.assertEqual([d["key"] for d in find_duplicate_keys(text, loader=yaml.CSafeLoader,
+                                                                         strict=True)], ["a"])
+                self.assertEqual(yaml.load(text, Loader=yaml.CSafeLoader)["a"], 2)   # noqa: S506
+
+
+#: A child process that scans texts nested 50,000 deep with libyaml. Before
+#: #3817 the flow case killed the interpreter with SIGSEGV (exit 139), which
+#: is why it runs in a subprocess and not in pytest's own process.
+_DEEP_CHILD = """
+import sys, yaml
+from data_sheets_schema.duplicate_keys import FAST_LOADER, find_duplicate_keys
+n = 50_000
+bom = "\\ufeff"
+texts = {
+    "flow": "a: 1\\na: 2\\nb: " + "{x: " * n + "1" + "}" * n + "\\n",
+    "block sequence": "- " * n + "x\\n",
+    "key position": "? " * n + "x\\n",
+    # #3826: libyaml skips a byte-order mark; a column count did not.
+    "BOM, block sequence": bom + "- " * n + "x\\n",
+    "BOM, flow mappings": bom + "a: 1\\na: 2\\nb: " + "{x: " * n + "1" + "}" * n + "\\n",
+    "BOM, flow sequences": bom + "[" * n + "]" * n + "\\n",
+    "flow single-pair mappings": "[a: " * n + "1" + "]" * n + "\\n",
+    "mixed block and flow": "- " * (n // 2) + "[" * (n // 2) + "]" * (n // 2) + "\\n",
+    "BOM, mixed with properties": bom + "- &a !!seq\\n  " + "- " * n + "[{k: " * 10 + "x" + "}]" * 10 + "\\n",
+}
+for name, text in texts.items():
+    assert find_duplicate_keys(text, loader=FAST_LOADER) == [], name
+    try:
+        find_duplicate_keys(text, loader=FAST_LOADER, strict=True)
+    except RecursionError as exc:
+        assert "#3817" in str(exc), (name, str(exc))
+    else:
+        raise SystemExit(f"{name}: strict scan returned instead of raising")
+print("refused", len(texts))
+"""
+
+
+#: The same texts where PyYAML has no libyaml (`yaml._yaml` cannot be
+#: imported): `FAST_LOADER` is then the pure-Python `SafeLoader`, the guard is
+#: not consulted, and the composer raises RecursionError itself.
+_NO_LIBYAML_CHILD = "import sys\nsys.modules['yaml._yaml'] = None\n" + _DEEP_CHILD.replace(
+    "import sys, yaml\n",
+    "import sys, yaml\nfrom data_sheets_schema import duplicate_keys\n"
+    "assert duplicate_keys.FAST_LOADER is yaml.SafeLoader and duplicate_keys._CParser is None\n", 1).replace(
+    "assert \"#3817\" in str(exc)", "assert \"#3817\" not in str(exc)", 1)
+
+def _event_depth(text: str) -> int:
+    """The nesting depth, from the pure-Python parser's event stream."""
+    depth = deepest = 0
+    for event in yaml.parse(text, Loader=yaml.SafeLoader):
+        if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
+            depth += 1
+            deepest = max(deepest, depth)
+        elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
+            depth -= 1
+    return deepest
+
+
+def _block(depth: int) -> str:
+    """Block mappings nested `depth` deep, a duplicate key in the innermost."""
+    pad = "  " * (depth - 1)
+    return "".join("  " * i + "k:\n" for i in range(depth - 1)) + pad + "a: 1\n" + pad + "a: 2\n"
+
+
+def _flow(depth: int) -> str:
+    """Flow mappings under a top-level mapping with a duplicate key: `depth` deep."""
+    return "a: 1\na: 2\nb: " + "{x: " * (depth - 1) + "1" + "}" * (depth - 1) + "\n"
+
+
+class TestTheLibyamlDepthGuard(unittest.TestCase):
+    """#3817: libyaml's composer recurses on the C stack, so a deep enough
+    tree crashed the process instead of raising. It is never handed one."""
+
+    def setUp(self):
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+
+    def test_a_scan_of_a_tree_nested_fifty_thousand_deep_raises_and_does_not_crash(self):
+        import os
+        import subprocess
+        import sys
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+        proc = subprocess.run([sys.executable, "-c", _DEEP_CHILD], capture_output=True, text=True,
+                              env=env, timeout=300)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        self.assertEqual(proc.stdout.strip(), "refused 9")
+
+    def test_without_libyaml_the_fallback_raises_cleanly_on_the_same_texts(self):
+        """The pure-Python fallback: no guard, and a RecursionError from the
+        composer rather than a crash, byte-order marks included (#3826)."""
+        import os
+        import subprocess
+        import sys
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(ROOT / "src"), str(ROOT), env.get("PYTHONPATH", "")])
+        proc = subprocess.run([sys.executable, "-c", _NO_LIBYAML_CHILD], capture_output=True, text=True,
+                              env=env, timeout=600)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
+        self.assertEqual(proc.stdout.strip(), "refused 9")
+
+    def test_the_guard_refuses_one_level_past_the_limit_and_scans_at_it(self):
+        """With the limit lowered, the boundary is testable without deep text:
+        the refusal is the guard's (its message), not the walk's."""
+        from data_sheets_schema import duplicate_keys
+        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 6):
+            for make in (_flow, _block):
+                with self.subTest(form=make.__name__):
+                    self.assertEqual(_event_depth(make(6)), 6)
+                    self.assertEqual(len(find_duplicate_keys(make(6), loader=yaml.CSafeLoader, strict=True)), 1)
+                    self.assertEqual(find_duplicate_keys(make(7), loader=yaml.CSafeLoader), [])
+                    with self.assertRaisesRegex(RecursionError, "more than 6 deep.*#3817"):
+                        find_duplicate_keys(make(7), loader=yaml.CSafeLoader, strict=True)
+                    # The pure-Python loader is not guarded: the default path is unchanged.
+                    self.assertEqual(len(find_duplicate_keys(make(7), strict=True)), 1)
+
+    def test_the_default_loader_never_consults_the_guard(self):
+        from data_sheets_schema import duplicate_keys
+        with unittest.mock.patch.object(duplicate_keys, "nesting_exceeds", side_effect=AssertionError):
+            self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n")], ["a"])
+            self.assertEqual([d["key"] for d in find_duplicate_keys("a: 1\na: 2\n", loader=yaml.SafeLoader)], ["a"])
+
+    def test_the_guard_counts_the_depth_the_composer_reaches(self):
+        """#3826: the guard's depth is libyaml's own event stream, so no
+        spelling of the nesting (a byte-order mark, flow or block style,
+        properties, aliases) moves it off the depth the composer reaches. Each
+        text is refused exactly one level below its depth and passed at it."""
+        from data_sheets_schema.duplicate_keys import nesting_exceeds
+        bom = "\ufeff"
+        skipped = ("id: [unterminated\n", "a: \0", "a: 1\n---\nb: 2\n", "")   # unparseable, or no collection
+        texts = [t for t in PARITY if t not in skipped] + [
+            _block(40), _flow(40), "- - - - - x\n", "? - - a\n: - - b\n", "- a:\n  - b:\n    - c: 1\n",
+            "a:\n- b:\n  - c\n", "[a: [b: [c: [d: 1]]]]\n", "{a: [{b: [x]}]}\n", "- &x !!map\n  k: [1, [2]]\n- *x\n",
+            "k: |\n  [[[[\n", "a:\r\n  b:\r\n    - [c]\r\n", "a:\u2028  b: 1\n",
+            "".join(" " * i + "a:\n" + " " * i + "-\n" for i in range(20)) + " " * 20 + "x: 1\n",
+            bom + "- - - - - - x\n", bom + _flow(12), bom + "[" * 9 + "]" * 9 + "\n", bom + "? - - a\n: - - b\n",
+            bom + "- [a: [{b: [c]}]]\n", bom + _block(8), "- " * 5 + "[" * 5 + "{k: v}" + "]" * 5 + "\n",
+        ]
+        for text in texts:
+            depth = _event_depth(text)
+            with self.subTest(text=text[:60], depth=depth):
+                self.assertGreater(depth, 0)
+                self.assertTrue(nesting_exceeds(text, yaml.CSafeLoader, depth - 1))
+                self.assertFalse(nesting_exceeds(text, yaml.CSafeLoader, depth))
+        self.assertFalse(nesting_exceeds("", yaml.CSafeLoader, 0))
+        # A stream the parser rejects is too deep only if it passed the limit
+        # first; otherwise the composer reports the error at the same place.
+        self.assertTrue(nesting_exceeds("id: [unterminated\n", yaml.CSafeLoader, 1))
+        self.assertFalse(nesting_exceeds("id: [unterminated\n", yaml.CSafeLoader, 2))
+        self.assertFalse(nesting_exceeds("a: \0", yaml.CSafeLoader, 0))
+
+    def test_a_leading_byte_order_mark_is_refused_at_the_limit_like_any_other_text(self):
+        """#3826: the case the column count missed, at a lowered limit."""
+        from data_sheets_schema import duplicate_keys
+        bom = "\ufeff"
+        with unittest.mock.patch.object(duplicate_keys, "LIBYAML_MAX_DEPTH", 6):
+            for text in (bom + "- " * 7 + "x\n", bom + _flow(7), bom + "[" * 7 + "]" * 7 + "\n"):
+                with self.subTest(text=text[:30]):
+                    with self.assertRaisesRegex(RecursionError, "more than 6 deep.*#3817"):
+                        find_duplicate_keys(text, loader=yaml.CSafeLoader, strict=True)
+            self.assertEqual(len(find_duplicate_keys(bom + _flow(6), loader=yaml.CSafeLoader, strict=True)), 1)
+
+    def test_every_libyaml_scan_parses_its_text_for_depth_first(self):
+        """No text is cleared without the event pass: a libyaml scan opens the
+        loader twice, the pass and the composer."""
+        opened = []
+
+        class Counting(yaml.CSafeLoader):
+            def __init__(self, stream):
+                opened.append(1)
+                super().__init__(stream)
+
+        self.assertEqual(len(find_duplicate_keys("a: 1\na: 2\nb: [[1]]\n", loader=Counting)), 1)
+        self.assertEqual(len(opened), 2)
+
+
 GOOD = {"pair": {"ran": True, "errors": 0}, "report": {"checked": True, "findings": [], "claims_checked": 3},
         "grounding": {"ran": True, "distinct": {"absent": 0}, "findings": []},
         "form": {"ran": True, "organisational_fragments": 0, "undeclared_prefix_occurrences": 0, "british_spellings": 0}}

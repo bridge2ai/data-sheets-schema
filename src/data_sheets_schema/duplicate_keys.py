@@ -18,6 +18,7 @@ merge.
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -70,28 +71,179 @@ def _walk(loader: yaml.SafeLoader, node: Any, path: str, out: list[dict[str, Any
             _walk(loader, item, f"{path}[{i}]", out, seen_nodes)
 
 
-def find_duplicate_keys(text: str) -> list[dict[str, Any]]:
+#: libyaml's safe loader where PyYAML was built with it, else the pure-Python
+#: one: what a caller scanning many files passes as `loader=` (#3704).
+FAST_LOADER = getattr(yaml, "CSafeLoader", yaml.SafeLoader)
+
+#: The deepest collection nesting a libyaml loader is asked to compose.
+#: libyaml's composer recurses on the C stack, where the interpreter's
+#: recursion limit does not apply: at 50,000 nested flow mappings it kills
+#: the process with SIGSEGV instead of raising (#3817). A tree deeper than
+#: the recursion limit cannot be walked anyway, so it is refused before
+#: libyaml composes it; the bound is the smaller of the two.
+LIBYAML_MAX_DEPTH = 1000
+
+try:                                                       # PyYAML built without libyaml has none
+    from yaml._yaml import CParser as _CParser
+except ImportError:                                        # pragma: no cover
+    _CParser = None
+
+_COLLECTION_START = (yaml.MappingStartEvent, yaml.SequenceStartEvent)
+_COLLECTION_END = (yaml.MappingEndEvent, yaml.SequenceEndEvent)
+
+
+def nesting_exceeds(text: str, loader: type, limit: int) -> bool:
+    """Whether `text` nests collections more than `limit` deep, decided
+    without composing it (#3817, #3826): the loader's own event stream
+    (`yaml.parse`), whose collection start and end events are counted. libyaml
+    parses with explicit stacks rather than recursion, and its composer
+    consumes exactly these events, so the count is the depth the composer
+    would reach, whatever the text spells it with: a leading byte-order
+    mark, flow or block style, indentation, anchors, tags or aliases (an
+    alias is one event and nests nothing). A stream the parser rejects before
+    passing the limit is not too deep here; the composer then reports its
+    error at the same place. There is no textual shortcut: two of them were
+    defeated in review (#3817, #3826), so every text is parsed once here and
+    once more by the composer. A text libyaml cannot take at all — a lone
+    surrogate, which libyaml's `CParser` fails to UTF-8-encode with
+    `UnicodeEncodeError` before reading a byte (#3834) — is rejected before
+    any collection opens, so it is not too deep either."""
+    depth = 0
+    try:
+        for event in yaml.parse(text, Loader=loader):
+            if isinstance(event, _COLLECTION_START):
+                depth += 1
+                if depth > limit:
+                    return True
+            elif isinstance(event, _COLLECTION_END):
+                depth -= 1
+    except (yaml.YAMLError, UnicodeEncodeError):
+        return False
+    return False
+
+
+def _unencodable(text: Any) -> yaml.YAMLError | None:
+    """The error the pure-Python reader raises for a `str` that libyaml
+    cannot be handed, or None when it can (#3834).
+
+    libyaml's `CParser` UTF-8-encodes a `str` before reading it, and a lone
+    surrogate (`'\\udcff'`, which `errors='surrogateescape'` decoding produces)
+    has no UTF-8 form, so it raises `UnicodeEncodeError` — not a
+    `yaml.YAMLError`. The pure-Python reader rejects every surrogate as a
+    non-printable character with a `yaml.reader.ReaderError`. So the text is
+    checked here and that same `ReaderError` is returned: the one the
+    pure-Python reader builds for the text, naming the first character it
+    rejects, so both loaders fail alike. Every other code point, including
+    the non-printable ones both readers reject, is encodable, and libyaml's
+    reader rejects it with a `ReaderError` of its own."""
+    if not isinstance(text, str):
+        return None
+    try:
+        text.encode("utf-8")
+        return None
+    except UnicodeEncodeError as exc:
+        try:
+            yaml.reader.Reader(text)
+        except yaml.reader.ReaderError as reader_error:
+            return reader_error
+        # Unreachable while the pure-Python reader rejects surrogates; built
+        # by hand so a PyYAML that stopped doing so still gets a YAMLError.
+        return yaml.reader.ReaderError("<unicode string>", exc.start, ord(text[exc.start]),
+                                       "unicode", "special characters are not allowed")
+
+
+def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
+                        strict: bool = False) -> list[dict[str, Any]]:
     """Every mapping key that appears more than once in one mapping — keys
     compared as the loader would construct them — with the mapping's path
     (`$` for the top level) and the 1-based lines. `count` is occurrences
-    of that key; the gate counts distinct duplicated keys."""
+    of that key; the gate counts distinct duplicated keys.
+
+    `loader` composes the node tree the rule walks; the rule is the same
+    whichever composes it. The default is the pure-Python `SafeLoader`, as
+    it always was; `FAST_LOADER` (libyaml's) gives the same findings about
+    nine times faster (CPU time over the 1,616 YAML files under
+    `data/d4d_concatenated` on 2026-09-30, the depth guard below included:
+    58.4 s against 6.7 s, of which the guard's event pass is 2.3 s; #3704,
+    #3800, #3817, #3826).
+
+    A text that cannot be scanned — the reader or composer rejects it, or it
+    nests past the interpreter's recursion limit — gives `[]` by default:
+    nothing is claimed about its keys. With `strict=True` that failure is
+    raised instead (the `yaml.YAMLError` or `RecursionError` itself), for a
+    caller that must refuse what it cannot check. Under `FAST_LOADER` the walk
+    can be the only step that fails: libyaml composes a tree deeper than the
+    recursion limit (on the C stack) and PyYAML constructs one without
+    recursing, so a caller that treats `[]` as "no duplicates" and then loads
+    the value would accept a record whose duplicate keys it never looked at
+    (#3799).
+
+    libyaml's composer is never handed a tree nested more than
+    `min(sys.getrecursionlimit(), LIBYAML_MAX_DEPTH)` deep: past some tens of
+    thousands of levels its C recursion overflows the stack and the process
+    dies with SIGSEGV, which no `except` can catch (#3817). Such a text is
+    refused as one nested past the recursion limit — `[]`, or under `strict`
+    a `RecursionError` — before libyaml composes it. The depth is counted on
+    the loader's own event stream (`nesting_exceeds`), which libyaml builds
+    without recursing, so it is the depth the composer would reach however
+    the text spells it: a byte-order mark, flow or block style, properties.
+    The walk could not have reached its keys; a tree nested that deep only in
+    key position, which the walk does not enter, is refused too, as the
+    pure-Python loader refuses it.
+    The pure-Python `SafeLoader` is not checked: it raises `RecursionError`
+    itself, so the default path is unchanged.
+
+    A `str` holding a lone surrogate is unscannable under either loader and
+    is treated like any other unscannable text: `[]`, or under `strict` the
+    `yaml.reader.ReaderError` the pure-Python reader raises for it. libyaml
+    would raise `UnicodeEncodeError` on encoding it, so the text is checked
+    first (`_unencodable`, #3834). Every other code point is rejected, or
+    accepted, alike by both readers.
+
+    The findings are the same wherever both implementations can scan the
+    text. Their scanners are not the same grammar at the edges: PyYAML's
+    pure-Python scanner rejects a tab inside a plain scalar (`b: x<TAB>y`)
+    and a byte-order mark after the start of the stream, both of which
+    libyaml accepts. On such a text the default gives `[]` (or raises under
+    `strict`) and `FAST_LOADER` reports the keys it scanned — what
+    `yaml.load(..., Loader=FAST_LOADER)` would load from the same text.
+    None of the 1,616 YAML files under `data/d4d_concatenated` is scannable
+    by one and not the other (checked 2026-09-30). The scan does not paper
+    over the difference: neither answer misreads what its own loader would
+    load."""
     out: list[dict[str, Any]] = []
+    if _CParser is not None and isinstance(loader, type) and issubclass(loader, _CParser):
+        unencodable = _unencodable(text)
+        if unencodable is not None:
+            if strict:
+                raise unencodable
+            return out
+        limit = min(sys.getrecursionlimit(), LIBYAML_MAX_DEPTH)
+        if nesting_exceeds(text, loader, limit):
+            if strict:
+                raise RecursionError(f"the text nests collections more than {limit} deep; "
+                                     "libyaml is not asked to compose it (#3817)")
+            return out
     # A stream the reader rejects (a NUL byte), a document the composer
     # rejects (two documents), or one nested past the interpreter's limit
     # is not scannable here; `safe_load` fails on the same text and the
     # validator reports that. Nothing is claimed about its keys.
     try:
-        loader = yaml.SafeLoader(text)
+        composer = loader(text)
     except (yaml.YAMLError, RecursionError):
+        if strict:
+            raise
         return out
     try:
-        node = loader.get_single_node()
+        node = composer.get_single_node()
         if node is not None:
-            _walk(loader, node, "", out, set())
+            _walk(composer, node, "", out, set())
     except (yaml.YAMLError, RecursionError):
+        if strict:
+            raise
         return []
     finally:
-        loader.dispose()
+        composer.dispose()
     out.sort(key=lambda d: d["lines"][0])
     return out
 
