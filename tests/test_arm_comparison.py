@@ -223,8 +223,8 @@ class RemovalRows(unittest.TestCase):
     def test_a_record_with_no_snapshot_is_unmeasured_on_every_removal_row(self):
         from data_sheets_schema.removals import classify
         rows = self._rows(classify(None, {}), {"snapshot_checked": False, "removals_unrecorded_count": None})
-        self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "receipteddeleted": None,
-                                "unfoundedrewrites": None, "unrecordedremovals": None})
+        self.assertEqual(rows, {"unfoundedremovals": None, "unfoundedreconcile": None, "unfoundedrelocated": None,
+                                "receipteddeleted": None, "unfoundedrewrites": None, "unrecordedremovals": None})
         self.assertEqual({self.m.fmt(rows, k) for k in rows}, {"–"})
         self.assertEqual(self.m.cell([rows] * 3, "unfoundedremovals", "reps"), "– [–,–,–]")
 
@@ -235,8 +235,8 @@ class RemovalRows(unittest.TestCase):
                                "extracted": [{"slot": "data_governance.committee_name", "snippet": "the DAC"}]}]}
         block = classify(before, {"id": "doi:10.1/x", "license": "CC-BY"}, {"findings": []}, receipt=receipt)
         rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
-        self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "receipteddeleted": 1,
-                                "unfoundedrewrites": 0, "unrecordedremovals": 0})
+        self.assertEqual(rows, {"unfoundedremovals": 1, "unfoundedreconcile": None, "unfoundedrelocated": 0,
+                                "receipteddeleted": 1, "unfoundedrewrites": 0, "unrecordedremovals": 0})
 
     def test_an_unrecorded_count_the_block_did_not_measure_is_not_read(self):
         """`removals_unrecorded_count` is only a measurement where the report
@@ -252,14 +252,16 @@ class RemovalRows(unittest.TestCase):
         call them upper bounds."""
         for key in ("unfoundedremovals", "receipteddeleted"):
             text = self.m.METRICS[key][3]
-            self.assertIn("removals v2", text)
+            self.assertIn("removals v3", text)
             self.assertIn("reworded", text)
             self.assertNotIn("upper bound", text)        # #3229: the counts err both ways
             self.assertIn("#3207", text)
             self.assertIn("#3229", text)
         definition = self.m.METRICS["unfoundedremovals"][3]
         for phrase in ("a resolver URL and the CURIE it names read as one text, #3129",
-                       "a value of numbers only below five digits never survives that way, #3243",
+                       "a British spelling and its American form, #3038",
+                       "a value of numbers only survives only as a scalar equal to it, never quoted in prose, "
+                       "and never below five digits, #3243, #3130",
                        "counted on its own row below (#3243)"):
             self.assertIn(phrase, definition)
 
@@ -276,9 +278,28 @@ class RemovalRows(unittest.TestCase):
         self.assertEqual(keys.index("unfoundedrewrites"), keys.index("receipteddeleted") + 1)
         self.assertIn("#3243", self.m.METRICS["unfoundedrewrites"][3])
 
+    def test_the_relocation_row_counts_unfounded_removals_with_a_candidate_and_moves_nothing(self):
+        """#3223: a reported-only row under the removals, counting those
+        whose words recur in one final scalar; the removal count beside it
+        is what it was without the row."""
+        from data_sheets_schema.removals import classify
+        note = "The healthsheet answers N/A to the sampling strategy question for this release."
+        before = {"id": "doi:10.1/x", "sampling": {"notes": note, "is_sample": True}, "license": "CC-BY"}
+        after = {"id": "doi:10.1/x", "sampling": {"is_sample": True, "source_caveats":
+                                                   "For this release's sampling strategy question the healthsheet answers N/A."}}
+        rows = self._rows(classify(before, after, {"findings": []}),
+                          {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["unfoundedremovals"], rows["unfoundedrelocated"]), (2, 1))
+        keys = list(self.m.METRICS)
+        self.assertEqual(keys.index("unfoundedrelocated"), keys.index("unfoundedreconcile") + 1)
+        definition = self.m.METRICS["unfoundedrelocated"][3]
+        for phrase in ("#3223", "Reported only: no count above moves", "removals_relocated_sample_2026-09-29.yaml",
+                       "change of standing"):
+            self.assertIn(phrase, definition)
+
     def test_the_rows_are_in_the_table(self):
-        for key in ("unfoundedremovals", "unfoundedreconcile", "receipteddeleted", "unfoundedrewrites",
-                    "unrecordedremovals"):
+        for key in ("unfoundedremovals", "unfoundedreconcile", "unfoundedrelocated", "receipteddeleted",
+                    "unfoundedrewrites", "unrecordedremovals"):
             self.assertIn(key, self.m.METRICS)
         keys = list(self.m.METRICS)
         self.assertEqual(keys.index("unfoundedreconcile"), keys.index("unfoundedremovals") + 1)

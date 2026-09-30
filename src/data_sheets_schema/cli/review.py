@@ -208,7 +208,11 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
     as deleted (#3207), while a lost word or long number can list as
     flattened by coincidental containment: the counts are not bounds on
     content lost (#3229). A scalar rewritten in place is not a removal; the
-    summary counts it and --rewritten lists it (#3243). Read-only:
+    summary counts it and --rewritten lists it (#3243). Removals v3
+    names, beside each deleted value, the final path its words recur at
+    (a relocation candidate, reported only, #3223), reads the native and
+    direct arms from their evidence/original_full.yaml, and gives a bound
+    source review's judgment on each deleted value (#3037). Read-only:
     nothing is
     written, and a run with no phase-1 snapshot prints that it was not
     checked rather than zero. Where the audit is missing, or present but
@@ -238,6 +242,8 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
                    f" {block['founded_past_end']} value(s) founded so)")
     if block["phase"] is not None:
         click.echo("   removed at: " + (", ".join(f"{k} {v}" for k, v in block["phase"].items()) or "nothing"))
+    elif (block.get("artifacts") or {}).get("phases_reason"):
+        click.echo(f"   removed at: not attributed ({block['artifacts']['phases_reason']})")
     else:
         click.echo("   removed at: not attributed (a phase output is missing or unreadable)")
     if block.get("unfounded_phase"):
@@ -253,6 +259,14 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
             notes.append("named by a core-only finding")
         if row.get("mentioned_in_finding_text"):
             notes.append("its slot is mentioned in a finding's text")
+        if row.get("source_review"):
+            notes.append(f"source review: {row['source_review']}"
+                         + (", only a finding's free-text slot names it" if row.get("supported_slot_only") else ""))
+        where = row.get("relocated_candidate")
+        if where:
+            # Reported only (#3223): where its words recur, not proof they survive.
+            notes.append(f"its words recur at {where['to']} ({where['share']:.0%}"
+                         + (", source_caveats: a change of standing" if where["change_of_standing"] else "") + ")")
         # Unsorted: the summary says why — no audit, or one that could not be read (#3153).
         click.echo(f"   {'✗ unfounded' if sorted_ else '? deleted, unsorted'} {row['path']} ({', '.join(notes)})")
     for cls in ("unfounded", "unsorted"):
@@ -260,7 +274,8 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
             click.echo(f"   … and {block[f'{cls}_paths_truncated']} more {cls} value(s) not listed")
     if show_flattened:
         for row in block["flattened_paths"]:
-            click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'})")
+            caveat = ", source_caveats only" if row.get("into_source_caveats") else ""
+            click.echo(f"   ~ {row['path']} → {row['into']} ({row.get('phase') or 'phase unattributed'}{caveat})")
         if block.get("flattened_paths_truncated"):
             click.echo(f"   … and {block['flattened_paths_truncated']} more flattened value(s) not listed")
     if show_rewritten:

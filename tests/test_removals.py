@@ -12,7 +12,9 @@ that keeps a reorder or a stripped key from reading as a removal, and the
 #899 convention that a run with no snapshot measures nothing rather than 0.
 """
 import hashlib
+import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -99,7 +101,7 @@ class Classes(unittest.TestCase):
         self.assertEqual(b["receipted"]["deleted"], 1)
         text = next(n for n in b["non_checks"] if n.startswith("that a deleted value's content is gone"))
         for phrase in ("reworded", "source_caveats", "split across several list members", "coincidental containment",
-                       "under five digits no longer is", "bound nothing"):
+                       "though a number no longer is", "bound nothing"):
             self.assertIn(phrase, text)
         self.assertNotIn("upper bound", text)
         rewritten = next(n for n in b["non_checks"] if n.startswith("that a rewritten value lost its content"))
@@ -199,23 +201,39 @@ class Containment(unittest.TestCase):
         self.assertNotIn("file_collections[0].file_count", [r["path"] for r in b["flattened_paths"]])
         self.assertIn("file_collections[0].file_count", [r["path"] for r in b["unfounded_paths"]])
 
-    def test_a_long_number_or_a_date_or_a_word_still_flattens(self):
-        """The numbers the corpus flattens for real are long: a count of
-        recording-feature sets (v4 VOICE rep1 `instances[1].counts` 29278, not
-        a participant count; #3396) and a date (CM4AI v4 collection
-        timeframes)."""
-        before = _record(instances=[{"name": "Recording features", "counts": 29278}],
-                         collection_timeframes=[{"start_date": "2022-09-01", "notes": "enrolment"}])
-        after = _record(instances=[{"name": "Recording features", "notes": "29278 feature sets"}],
-                        collection_timeframes=[{"notes": "enrolment from 2022-09-01"}])
+    def test_a_long_number_or_a_date_quoted_in_prose_is_deleted_but_one_carried_whole_is_flattened(self):
+        """#3130: a number is carried whole or not at all. The v4 VOICE rep1
+        count 32522 survived within its entry only as one per-feature count
+        in the entry's `source_caveats` (elsewhere in the record it is also
+        quoted in `file_collections[0].description`, outside the entry the
+        test is scoped to, #3552), and the CM4AI collection dates only as the award
+        period beside "the sources give no start or end date" — v2 read both
+        as flattened. The v3 AI_READI release date, carried as itself in
+        its list, still is; and a word still flattens by containment."""
+        before = _record(instances=[{"name": "Recording features", "counts": 32522}],
+                         collection_timeframes=[{"start_date": "2022-09-01", "notes": "enrolment"}],
+                         distribution_dates=[{"id": "x#a", "release_dates": ["2024-11-08"]},
+                                             {"id": "x#b", "release_dates": ["2025-11-17"]}],
+                         keywords=["voice", "speech"])
+        after = _record(instances=[{"name": "Recording features",
+                                    "source_caveats": "Row counts differ by feature: pitch n 32522, loudness n 31855."}],
+                        collection_timeframes=[{"notes": "enrolment; the award period runs from 2022-09-01"}],
+                        distribution_dates=[{"id": "x#a", "release_dates": ["2024-11-08", "2025-11-17"]}],
+                        keywords="voice and speech")
         b = rm.classify(before, after, _audit())
         self.assertEqual({r["path"] for r in b["flattened_paths"]},
-                         {"instances[0].counts", "collection_timeframes[0].start_date"})
-        self.assertEqual(b["deleted"], 0)
+                         {"distribution_dates[1].release_dates[0]", "keywords[0]", "keywords[1]"})
+        self.assertEqual({r["path"] for r in b["unfounded_paths"]},
+                         {"instances[0].counts", "collection_timeframes[0].start_date", "distribution_dates[1].id"})
         for value, want in ((3, False), ("1,024", False), ("2023", False), (12345, True), ("3 files", True),
                             (True, False), ("", False)):
             with self.subTest(value=value):
                 self.assertIs(rm._flattenable(value), want)
+        for value, node, want in ((12345, {"a": 12345}, True), (12345, {"a": "12345 sets"}, False),
+                                  ("2022-09-01", {"a": "2022-09-01"}, True), ("2022-09-01", ["from 2022-09-01"], False),
+                                  ("3 files", {"a": "3 files, 2 GB"}, True)):
+            with self.subTest(value=value, node=node):
+                self.assertIs(rm._kept_in(value, node), want)
 
     def test_a_resolver_url_whose_curie_survives_is_flattened_not_deleted(self):
         """#3129, the AI_READI v4 rep1 shape: the single phase-1 creator
@@ -826,6 +844,469 @@ class CliPastEnd(unittest.TestCase):
         self.assertIn("≠ unfounded description → description (phase unattributed)", listed.output)
 
 
+class Spelling(unittest.TestCase):
+    """#3038: a British spelling and the American form the #1002 normaliser
+    writes are one text, so a member or a scalar respelled at write time is
+    neither removed nor rewritten."""
+
+    def test_a_member_respelled_at_write_time_is_carried_not_removed(self):
+        """The 22c AI_READI rep2 shape: its one `restrictions` member said
+        'licence' at phase 1 and 'license' in the written record."""
+        before = _record(external_resources=[{"name": "Zenodo", "restrictions": ["Open access under CC BY-NC 4.0 licence."]}])
+        after = _record(external_resources=[{"name": "Zenodo", "restrictions": ["Open access under CC BY-NC 4.0 license."]}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["removed"], b["rewritten"]), (0, 0))
+
+    def test_a_scalar_respelled_in_place_is_not_rewritten(self):
+        b = rm.classify(_record(description="Versions are not updated to correct labelling errors."),
+                        _record(description="Versions are not updated to correct labeling errors."), _audit())
+        self.assertEqual((b["removed"], b["rewritten"]), (0, 0))
+
+    def test_an_identifier_keeps_its_spelling_and_a_reworded_member_is_still_removed(self):
+        self.assertIn("programme", rm._member("https://example.org/programme/"))
+        self.assertEqual(rm._member("The Organisation Centre"), rm._member("the organization center"))
+        b = rm.classify(_record(keywords=["voice biomarkers", "speech"]),
+                        _record(keywords=["vocal biomarkers", "speech"]), _audit())
+        self.assertEqual([r["path"] for r in b["unfounded_paths"]], ["keywords[0]"])
+
+
+class Relocation(unittest.TestCase):
+    """#3223: where a deleted value's words went, reported beside the classes
+    and never moving one."""
+
+    NOTE = "The healthsheet answers N/A to the sampling strategy question for this release."
+
+    def test_a_value_reworded_into_its_entrys_source_caveats_has_a_candidate_marked_a_change_of_standing(self):
+        """The AI_READI 04g rep2 shape (#3207): still unfounded and deleted,
+        and the candidate names the caveat."""
+        before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
+        after = _record(sampling_strategies=[{"is_sample": True, "source_caveats":
+                                              "For the sampling strategy question the healthsheet answers N/A."}])
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["deleted"], b["unfounded"]), (1, 1))
+        self.assertEqual(b["unfounded_paths"][0]["relocated_candidate"],
+                         {"to": "sampling_strategies[0].source_caveats", "share": 0.833, "change_of_standing": True})
+        self.assertEqual((b["relocated_candidate"], b["relocated_candidate_unfounded"],
+                          b["relocated_candidate_standing"]), (1, 1, 1))
+        self.assertIn("1 deleted with a relocation candidate (1 into source_caveats)", b["summary"])
+
+    def test_a_member_split_across_several_members_is_found_in_the_list_taken_whole(self):
+        """The VOICE 04f rep1 `special_protections[0]` shape: one member
+        split and reworded into two, neither of which carries its share."""
+        before = _record(at_risk_populations={"special_protections": [
+            "Participants with mood disorders, depression and anxiety receive additional safeguards.", "Minors excluded."]})
+        after = _record(at_risk_populations={"special_protections": [
+            "Minors excluded.", "Additional safeguards apply to participants", "with mood disorders, depression and anxiety."]})
+        b = rm.classify(before, after, _audit())
+        row = b["unfounded_paths"][0]
+        self.assertEqual(row["path"], "at_risk_populations.special_protections[0]")
+        self.assertEqual(row["relocated_candidate"]["to"], "at_risk_populations.special_protections")
+        self.assertFalse(row["relocated_candidate"]["change_of_standing"])
+
+    def test_an_identifier_is_found_by_its_own_text_elsewhere_and_a_near_miss_is_not(self):
+        """A fragment id on the landing page is not the page, though ten of
+        its twelve content words are the page's (the CM4AI v8 creator ids)."""
+        pi = "https://orcid.org/0000-0002-1825-0097"
+        page = "https://dataverse.example.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C"
+        before = _record(creators=[{"name": "Consortium", "principal_investigator": {"name": "Pat Lee", "id": pi}}],
+                         contact={"email": "mailto:dac@example.org"}, publisher={"id": page + "#creator-khaliq-h"})
+        after = _record(creators=[{"name": "Consortium"}], maintainers=[{"id": "ORCID:0000-0002-1825-0097"}],
+                        notes="Requests go to dac@example.org.", page=page)
+        b = rm.classify(before, after, _audit())
+        where = {r["path"]: r.get("relocated_candidate") for r in b["unfounded_paths"]}
+        self.assertEqual(where["creators[0].principal_investigator.id"]["to"], "maintainers[0].id")
+        self.assertEqual(where["contact.email"]["to"], "notes")
+        self.assertIsNone(where["publisher.id"])                   # the page is not the fragment
+
+    def test_a_short_value_is_not_assessed_and_a_low_share_has_no_candidate(self):
+        before = _record(license="CC-BY", description="Collected at three sites over two years by trained staff.")
+        after = _record(notes="Staff were trained.")
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["unfounded"], b["relocated_candidate"], b["relocated_not_assessed"]), (2, 0, 1))
+
+    def test_a_short_identifier_is_assessed_and_the_non_check_says_so(self):
+        """#3553: an identifier-shaped value is assessed by its own text
+        whatever its word count, and the non-check says it."""
+        value = "ROR:05gq02987"
+        self.assertLess(len(rm._words(value)), rm.RELOCATED_MIN_WORDS)
+        assessed, where = rm._Relocation(_record(notes="Hosted by ror:05gq02987.")).candidate(value)
+        self.assertTrue(assessed)
+        self.assertEqual(where["to"], "notes")
+        b = rm.classify(_record(license="CC-BY"), _record(), _audit())
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("is not assessed unless it is identifier-shaped", text)
+
+    def test_an_identifier_quoted_in_prose_is_found_as_survives_finds_it(self):
+        """#3585: the needle as written and as `_member` reads it, against
+        each scalar read both ways, as `_survives` does — a resolver URL
+        quoted verbatim in prose (the orcid.org URLs moved into
+        `creators[i].notes`) is found; a CURIE is found in prose that quotes
+        it and in a scalar that is its URL, and not in prose quoting its
+        URL, which `_survives` does not find either."""
+        url, curie = "https://orcid.org/0000-0002-1825-0097", "ORCID:0000-0002-1825-0097"
+        hays = {"url in prose": f"PI ORCID {url}.", "curie in prose": f"PI ORCID {curie}.",
+                "url alone": url, "curie alone": curie}
+        found = {(v, k): rm._Relocation(_record(notes=h)).candidate(v) for v in (url, curie) for k, h in hays.items()}
+        for (v, k), (assessed, where) in found.items():
+            self.assertTrue(assessed, (v, k))
+            self.assertEqual(where is not None, rm._survives(v, hays[k]), (v, k))
+        self.assertEqual({key for key, (_a, where) in found.items() if where is None}, {(curie, "url in prose")})
+        # Token boundaries still hold: a longer ORCID is not this one.
+        self.assertEqual(rm._Relocation(_record(notes=f"PI ORCID {url}1.")).candidate(url), (True, None))
+        # Through classify: a creator's ORCID URL deleted, quoted in another
+        # entry's notes (outside the entry, so deleted rather than flattened).
+        before = _record(creators=[{"name": "Pat Lee", "id": url}, {"name": "Consortium"}])
+        after = _record(creators=[{"name": "Pat Lee"}, {"name": "Consortium", "notes": f"PI ORCID {url}."}])
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "creators[0].id")
+        self.assertEqual(row["relocated_candidate"]["to"], "creators[1].notes")
+
+    def test_an_identifier_is_not_found_as_the_prefix_of_a_longer_identifier(self):
+        """#3603: normalisation makes `/`, `#`, `-` and `.` token boundaries,
+        so containment found a site root inside a deeper page URL and `#pi`
+        inside `#pi-record`. A match must now end where an identifier
+        ends; where it ends a sentence, sits in brackets or is a CURIE
+        written with a space in prose (the 22b/22c AI_READI "(ROR
+        00cvxb145)") it is still found."""
+        root, pi = "https://chorus4ai.org/", "https://reporter.nih.gov/project-details/10472824#pi"
+        for hay in ("Files at https://chorus4ai.org/data/v2 are listed.", "https://chorus4ai.org/#dataset"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root), (True, None), hay)
+        self.assertEqual(rm._Relocation(_record(notes=pi + "-record")).candidate(pi), (True, None))
+        for hay in ("Home: https://chorus4ai.org.", "(see https://chorus4ai.org/)", root.rstrip("/"),
+                    "Mirrors: https://mirror.example.org/,https://chorus4ai.org/"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root)[1]["to"], "notes", hay)
+        self.assertEqual(rm._Relocation(_record(notes=f"PI record <{pi}>; see the award.")).candidate(pi)[1]["to"],
+                         "notes")
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145, itself listed)")).candidate(
+            "ROR:00cvxb145")[1]["to"], "notes")
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145x)")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        # And it starts where an identifier starts: another scheme ending
+        # in the same letters is not this one.
+        self.assertEqual(rm._Relocation(_record(notes="See MIRROR:00cvxb145.")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        # A `mailto:` scheme is set aside on the carrying side too.
+        self.assertEqual(rm._Relocation(_record(notes="Write to mailto:dac@example.org.")).candidate(
+            "mailto:dac@example.org")[1]["to"], "notes")
+        # Through classify: the 2026-08-13 shape, a PI id deleted where a
+        # sibling's id extends it.
+        before = _record(creators=[{"name": "Consortium", "principal_investigator": {"name": "Pat Lee", "id": pi}},
+                                   {"name": "Pat Lee", "id": pi + "-record"}])
+        after = _record(creators=[{"name": "Consortium"}, {"name": "Pat Lee", "id": pi + "-record"}])
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "creators[0].principal_investigator.id")
+        self.assertNotIn("relocated_candidate", row)
+        self.assertEqual(b["relocated_candidate"], 0)
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("never as the prefix or the tail of a longer one", text)
+        self.assertIn("those figures are over both routes", text)
+        self.assertNotIn("not measured", text)
+
+    def test_an_identifier_is_not_found_as_the_tail_of_a_longer_identifier(self):
+        """#3618: the start mirrors `_IDENTIFIER_END`. A needle that begins
+        after a character continuing an identifier (`.`, `-`, `/`, `:`, `@`
+        and the rest) is the tail of a longer, different one — another
+        person's address, a path inside a deeper URL. Where it begins the
+        text, follows a space or bracket, or follows the `mailto:` scheme
+        set aside on both sides, it is still found."""
+        mail = "mailto:smith@lab.edu"
+        for hay in ("Write to j.smith@lab.edu for access", "Write to jo-smith@lab.edu.",
+                    "Write to mailto:j.smith@lab.edu.", "id=smith@lab.edu", "a/smith@lab.edu"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail), (True, None), hay)
+        for hay in ("Write to smith@lab.edu for access", "smith@lab.edu", "(smith@lab.edu)",
+                    "Write to mailto:smith@lab.edu.", "Write to MAILTO:Smith@Lab.edu."):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail)[1]["to"], "contact", hay)
+        # A URL quoted as a query value or after a proxy prefix is a
+        # different identifier; a CURIE's scheme must not be the tail of a
+        # longer one either.
+        root = "https://chorus4ai.org/"
+        for hay in ("https://proxy.example.org/?u=https://chorus4ai.org/", "see x.https://chorus4ai.org/"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root), (True, None), hay)
+        self.assertEqual(rm._Relocation(_record(notes="See lab.ror:00cvxb145 here.")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145, itself listed)")).candidate(
+            "ROR:00cvxb145")[1]["to"], "notes")
+        # Through classify: a contact's address deleted where another
+        # person's address ends in the same letters.
+        before = _record(contacts=[{"name": "Sam Smith", "email": mail}], contact="Write to j.smith@lab.edu.")
+        after = _record(contacts=[{"name": "Sam Smith"}], contact="Write to j.smith@lab.edu.")
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "contacts[0].email")
+        self.assertNotIn("relocated_candidate", row)
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("starts and ends an identifier", text)
+
+    def test_a_mailto_scheme_counts_only_where_it_starts_an_identifier(self):
+        """#3623: the `mailto:` set aside on the carrying side is held to the
+        same start. Inside a proxy URL's query, after a path or a hyphen, it
+        is part of a longer identifier, as an `https://` URL is there."""
+        mail = "mailto:smith@lab.edu"
+        for hay in ("https://proxy.example.org/?u=mailto:smith@lab.edu", "x-mailto:smith@lab.edu",
+                    "see a/mailto:smith@lab.edu", "id=MAILTO:smith@lab.edu", "lab.mailto:smith@lab.edu"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail), (True, None), hay)
+        for hay in ("mailto:smith@lab.edu", "Write to mailto:smith@lab.edu.", "(mailto:smith@lab.edu)",
+                    "<MAILTO:smith@lab.edu>"):
+            self.assertEqual(rm._Relocation(_record(contact=hay)).candidate(mail)[1]["to"], "contact", hay)
+        # Through classify: the proxy case the review reproduced.
+        before = _record(contacts=[{"name": "Sam Smith", "email": mail}],
+                         page="https://proxy.example.org/?u=mailto:smith@lab.edu")
+        after = _record(contacts=[{"name": "Sam Smith"}], page="https://proxy.example.org/?u=mailto:smith@lab.edu")
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "contacts[0].email")
+        self.assertNotIn("relocated_candidate", row)
+        self.assertEqual(b["relocated_candidate_unfounded"], 0)
+
+    def test_a_candidate_moves_no_class_count(self):
+        before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
+        after = _record(sampling_strategies=[{"is_sample": True}], source_caveats=self.NOTE.replace("N/A", "n/a"))
+        with mock.patch.object(rm, "RELOCATED_THRESHOLD", 1.01):
+            none = rm.classify(before, after, _audit())
+        some = rm.classify(before, after, _audit())
+        self.assertEqual((none["relocated_candidate"], some["relocated_candidate"]), (0, 1))
+        for key in ("removed", "flattened", "deleted", "founded", "unfounded", "rewritten"):
+            self.assertEqual(none[key], some[key], key)
+
+    def test_a_value_flattened_only_into_source_caveats_keeps_its_class_and_is_marked(self):
+        """The 2026-08-20 v5 AI_READI `confidentiality_level` shape: the enum
+        value's text survives only in the caveat saying the slot is omitted."""
+        before = _record(regulatory_restrictions={"confidentiality_level": "restricted", "notes": "x"})
+        after = _record(regulatory_restrictions={"notes": "x", "source_caveats":
+                                                 "The slot is omitted: the source value does not map onto restricted."})
+        b = rm.classify(before, after, _audit())
+        self.assertEqual((b["flattened"], b["flattened_into_source_caveats"]), (1, 1))
+        self.assertTrue(b["flattened_paths"][0]["into_source_caveats"])
+        kept = rm.classify(before, _record(regulatory_restrictions={"notes": "x; restricted access"}), _audit())
+        self.assertEqual((kept["flattened"], kept["flattened_into_source_caveats"]), (1, 0))
+        # "Only" (#3550): text a claim still carries is not marked, even
+        # where a caveat beside the claim carries it too.
+        both = rm.classify(before, _record(regulatory_restrictions={
+            "notes": "x; restricted access", "source_caveats": "The source says the data are restricted."}), _audit())
+        self.assertEqual((both["flattened"], both["flattened_into_source_caveats"]), (1, 0))
+        self.assertNotIn("into_source_caveats", both["flattened_paths"][0])
+
+
+def _review(original, judgments, sha=None):
+    """An original_full source review: {path: 'supported'|'revise'|'metadata'}."""
+    rows = []
+    for pointer, j in judgments.items():
+        if j == "metadata":
+            rows.append({"path": pointer, "metadata_reason": "record metadata"})
+        else:
+            rows.append({"path": pointer, "claims": [{"text": "t", "verdict": j}]})
+    return {"artifact": "original_full", "sha256": sha, "values": rows}
+
+
+class SourceReview(unittest.TestCase):
+    """#3037: a bound source review's judgment on each deleted value, and a
+    value reviewed supported founded only by a finding linked to it."""
+
+    BEFORE = _record(license="CC-BY", keywords=["voice", "speech"], description="d")
+    AFTER = _record(description="d")
+    JUDGED = {"/license": "supported", "/keywords/0": "revise", "/keywords/1": "supported", "/id": "metadata"}
+
+    def _audit(self, *findings, sha=None):
+        a = _audit(*findings)
+        a["source_review"] = _review(self.BEFORE, self.JUDGED, sha)
+        return a
+
+    def test_a_supported_value_a_free_text_slot_names_is_unfounded_and_a_revise_one_is_founded(self):
+        b = rm.classify(self.BEFORE, self.AFTER, self._audit({"slot": "license"}, {"slot": "keywords"}))
+        rows = {r["path"]: r for r in b["founded_paths"] + b["unfounded_paths"]}
+        self.assertEqual({p for p in rows if p in {r["path"] for r in b["unfounded_paths"]}}, {"license", "keywords[1]"})
+        self.assertTrue(rows["license"]["supported_slot_only"])
+        self.assertEqual(rows["keywords[0]"]["source_review"], "revise")
+        self.assertEqual(b["source_review"]["deleted"], {"supported": 2, "revise": 1, "metadata": 0, "unreviewed": 0})
+        self.assertEqual((b["source_review"]["unfounded_supported"], b["source_review"]["unfounded_supported_slot_only"]),
+                         (2, 2))
+        self.assertEqual(b["source_review"]["state"], "unhashed")
+
+    def test_a_linked_finding_founds_a_supported_value(self):
+        b = rm.classify(self.BEFORE, self.AFTER, self._audit(
+            {"slot": "license", "remove_relationship": {"path": "/license"}},
+            {"slot": "keywords", "review_paths": ["/keywords/1"]}))
+        self.assertEqual({r["path"]: r["by"] for r in b["founded_paths"]},
+                         {"license": "remove_relationship", "keywords[0]": "slot", "keywords[1]": "review_paths"})
+
+    def test_a_value_exempted_as_metadata_is_judged_metadata_when_deleted_or_rewritten(self):
+        """#3587: a row the review exempted as record metadata reads
+        `metadata`, not `unreviewed`, on deleted and rewritten rows."""
+        before = _record(publisher="Example University", version="1.0", license="CC-BY")
+        after = _record(version="2.0")
+        audit = _audit()
+        audit["source_review"] = _review(before, {"/publisher": "metadata", "/version": "metadata",
+                                                  "/license": "supported"})
+        b = rm.classify(before, after, audit)
+        judged = {r["path"]: r["source_review"] for r in b["unfounded_paths"] + b["rewritten_paths"]}
+        self.assertEqual(judged, {"publisher": "metadata", "version": "metadata", "license": "supported"})
+        self.assertEqual(b["source_review"]["deleted"], {"supported": 1, "revise": 0, "metadata": 1, "unreviewed": 0})
+        self.assertEqual(b["source_review"]["rewritten"], {"supported": 0, "revise": 0, "metadata": 1, "unreviewed": 0})
+
+    def test_unfounded_supported_counts_only_the_unfounded_supported_values(self):
+        """#3587: a supported value a linked finding founds is not counted
+        in `unfounded_supported`; one a free-text slot alone names is."""
+        b = rm.classify(self.BEFORE, self.AFTER, self._audit(
+            {"slot": "license", "remove_relationship": {"path": "/license"}}, {"slot": "keywords"}))
+        self.assertEqual(b["source_review"]["deleted"]["supported"], 2)
+        self.assertEqual({r["path"] for r in b["unfounded_paths"]}, {"keywords[1]"})
+        self.assertEqual((b["source_review"]["unfounded_supported"],
+                          b["source_review"]["unfounded_supported_slot_only"]), (1, 1))
+
+    def test_a_review_bound_to_other_bytes_is_not_read_and_says_so(self):
+        b = rm.classify(self.BEFORE, self.AFTER, self._audit({"slot": "license"}, sha="a" * 64),
+                        snapshot_sha256="b" * 64)
+        self.assertEqual(b["source_review"]["state"], "unbound")
+        self.assertIsNone(b["source_review"]["deleted"])
+        self.assertIn("license", {r["path"] for r in b["founded_paths"]})     # the v2 rule, unchanged
+        self.assertIn("source review not read", b["summary"])
+
+    def test_a_rewritten_value_reviewed_supported_is_founded_only_by_a_linked_finding(self):
+        """#3551: the linked-only rule holds on rewritten rows too — a
+        free-text slot does not found a supported value rewritten in place."""
+        before, after = _record(license="CC-BY 4.0 International"), _record(license="MIT")
+        audit = _audit({"slot": "license"})
+        audit["source_review"] = _review(before, {"/license": "supported"})
+        b = rm.classify(before, after, audit)
+        row = b["rewritten_paths"][0]
+        self.assertEqual((row["path"], row["source_review"], row["founded"]), ("license", "supported", False))
+        self.assertTrue(row["supported_slot_only"])
+        self.assertEqual(b["rewritten_unfounded"], 1)
+        audit = _audit({"slot": "license", "review_paths": ["/license"]})
+        audit["source_review"] = _review(before, {"/license": "supported"})
+        row = rm.classify(before, after, audit)["rewritten_paths"][0]
+        self.assertEqual((row["founded"], row["by"]), (True, "review_paths"))
+        audit = _audit({"slot": "license"})
+        audit["source_review"] = _review(before, {"/license": "revise"})
+        self.assertTrue(rm.classify(before, after, audit)["rewritten_paths"][0]["founded"])
+
+    def test_revise_on_any_claim_wins_and_supported_needs_every_claim(self):
+        """#3551: a value is judged revise where any claim on it is, and
+        supported only where every claim is."""
+        before = _record(license="CC-BY", keywords=["voice", "speech", "audio"])
+        review = {"artifact": "original_full", "sha256": None, "values": [
+            {"path": "/license", "claims": [{"verdict": "supported"}, {"verdict": "revise"}]},
+            {"path": "/keywords/0", "claims": [{"verdict": "supported"}, {"verdict": "supported"}]},
+            {"path": "/keywords/1", "claims": [{"verdict": "supported"}, {"verdict": "unclear"}]}]}
+        audit = _audit()
+        audit["source_review"] = review
+        b = rm.classify(before, _record(), audit)
+        judged = {r["path"]: r["source_review"] for r in b["unfounded_paths"]}
+        self.assertEqual(judged, {"license": "revise", "keywords[0]": "supported", "keywords[1]": "unreviewed",
+                                  "keywords[2]": "unreviewed"})
+
+    def test_a_malformed_review_is_unusable_and_the_removals_are_still_classified(self):
+        """#3624: claims that are not a list, a claim that is not a mapping,
+        or a verdict that is not a string make the review unusable, named
+        with its row; the classification is the one with no review."""
+        plain = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "license"}))
+        for claims, why in ((5, "its claims are a int, not a list"), (None, "its claims are a NoneType, not a list"),
+                            (["supported"], "a claim is not a mapping"),
+                            ([{"verdict": ["supported"]}], "a claim's verdict is not a string"),
+                            ([{"verdict": "supported"}, {"text": "t"}], "a claim's verdict is not a string")):
+            audit = self._audit({"slot": "license"})
+            audit["source_review"]["values"].append({"path": "/description", "claims": claims})
+            b = rm.classify(self.BEFORE, self.AFTER, audit)
+            self.assertEqual(b["source_review"], {
+                "state": "unusable", "reason": f"the source review's row /description is malformed: {why}",
+                "deleted": None, "rewritten": None, "unfounded_supported": None,
+                "unfounded_supported_slot_only": None}, claims)
+            for key in ("removed", "deleted", "founded", "unfounded", "rewritten"):
+                self.assertEqual(b[key], plain[key], (claims, key))
+            self.assertNotIn("source_review", b["unfounded_paths"][0])
+            self.assertIn(f"source review not read: the source review's row /description is malformed: {why}",
+                          b["summary"])
+
+    def test_without_a_source_review_nothing_changes(self):
+        b = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "license"}))
+        self.assertIsNone(b["source_review"])
+        self.assertNotIn("source_review", b["founded_paths"][0])
+
+
+class Evidence(unittest.TestCase):
+    """#3037: the native and direct arms freeze `evidence/original_full.yaml`
+    and write `evidence/audit.json`, and no phase output."""
+
+    def _run(self, tmp, *, method="claudecode_direct", records=("CHORUS",), intermediate=False):
+        base = Path(tmp)
+        core_dir = base / f"{method}_core" / "L"
+        (core_dir / "evidence").mkdir(parents=True)
+        (base / method / "L").mkdir(parents=True)
+        for p in records:
+            (core_dir / f"{p}_provenance.yaml").write_text(yaml.safe_dump({"run": {"project": p, "label": "L"}}))
+        raw = yaml.safe_dump(SourceReview.BEFORE).encode()
+        (core_dir / "evidence" / "original_full.yaml").write_bytes(raw)
+        audit = _audit({"slot": "license"}, {"slot": "keywords"})
+        audit["source_review"] = _review(SourceReview.BEFORE, SourceReview.JUDGED, hashlib.sha256(raw).hexdigest())
+        (core_dir / "evidence" / "audit.json").write_text(json.dumps(audit))
+        (base / method / "L" / "CHORUS_d4d.yaml").write_text(yaml.safe_dump(SourceReview.AFTER))
+        if intermediate:
+            (core_dir / "intermediate").mkdir()
+            (core_dir / "intermediate" / "CHORUS_full.yaml").write_text(yaml.safe_dump(_record(description="d")))
+        return core_dir / "CHORUS_provenance.yaml"
+
+    def test_a_direct_run_is_read_from_its_evidence_and_nothing_is_written(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            before = OnDisk._tree(tmp)
+            b = rm.for_record(prov)
+            self.assertEqual(OnDisk._tree(tmp), before)
+        self.assertTrue(b["checked"])
+        self.assertEqual(b["artifacts"]["phase1_snapshot"]["source"], "evidence")
+        self.assertEqual(b["artifacts"]["audit"]["state"], "usable")
+        self.assertEqual((b["artifacts"]["phases"], b["phase"]), ([], None))
+        self.assertIn("snapshots no phase output", b["artifacts"]["phases_reason"])
+        self.assertEqual(b["source_review"]["state"], "bound")
+        self.assertEqual({r["path"] for r in b["unfounded_paths"]}, {"license", "keywords[1]"})
+
+    def test_a_malformed_bound_review_is_reported_not_raised(self):
+        """#3624 on the native/direct path: the review is hash-matched and
+        the audit usable, but a row's claims are not a list."""
+        for claims in (5, [{"verdict": ["revise"]}]):
+            with tempfile.TemporaryDirectory() as tmp:
+                prov = self._run(tmp)
+                path = prov.parent / "evidence" / "audit.json"
+                audit = json.loads(path.read_text())
+                audit["source_review"]["values"][0]["claims"] = claims
+                path.write_text(json.dumps(audit))
+                b = rm.for_record(prov)
+            self.assertTrue(b["checked"])
+            self.assertEqual(b["artifacts"]["audit"]["state"], "usable")
+            self.assertEqual(b["source_review"]["state"], "unusable")
+            self.assertIn("is malformed", b["source_review"]["reason"])
+            self.assertEqual((b["removed"], b["unfounded"]), (3, 0))   # founded by their slots, as with no review
+
+    def test_an_edited_original_unbinds_the_review(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            path = prov.parent / "evidence" / "original_full.yaml"
+            path.write_text(path.read_text() + "# edited\n")
+            b = rm.for_record(prov)
+        self.assertEqual(b["source_review"]["state"], "unbound")
+
+    def test_the_api_snapshot_wins_and_an_evidence_directory_two_records_share_is_no_ones(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            b = rm.for_record(self._run(tmp, method="claudecode_api", intermediate=True))
+        self.assertTrue(b["artifacts"]["phase1_snapshot"]["path"].endswith("intermediate/CHORUS_full.yaml"))
+        self.assertEqual(b["removed"], 0)
+        with tempfile.TemporaryDirectory() as tmp:
+            b = rm.for_record(self._run(tmp, records=("CHORUS", "VOICE")))
+        self.assertFalse(b["checked"])
+        self.assertIn("2 records share this label directory", b["artifacts"]["phase1_snapshot"]["reason"])
+
+    def test_the_cli_says_why_a_direct_run_is_unattributed_and_shows_the_annotations(self):
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_direct",
+                                                                  "--label", "L", "--project", "CHORUS"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("removed at: not attributed (the native/direct evidence protocol snapshots no phase output)",
+                      r.output)
+        self.assertIn("✗ unfounded license (phase unattributed, its slot is mentioned in a finding's text, "
+                      "source review: supported, only a finding's free-text slot names it)", r.output)
+
+
 # ------------------------------------------------------------ corpus replay
 CONCAT = Path(__file__).resolve().parents[1] / "data" / "d4d_concatenated"
 
@@ -1014,21 +1495,163 @@ def test_the_v4_ai_readi_rep1_identifiers_that_survive_as_curies_are_flattened(m
 
 
 @pytest.mark.corpus
-def test_the_one_five_digit_count_the_corpus_flattens_is_v4_voice_rep1_recording_features(monkeypatch):
-    """#3396: the count MIN_NUMERIC_DIGITS is justified by. It is 29278 on the
-    recording-features instance of v4 VOICE rep1 — a count of derived feature
-    sets, not participants (the participant instance beside it holds 833) —
-    and it still flattens under the 5-digit guard."""
+def test_the_five_digit_count_v2_flattened_is_32522_in_the_pinned_snapshot_and_now_deleted(monkeypatch):
+    """#3130, and a correction to #3396: the snapshot the removals read for
+    v4 VOICE rep1 is the one its run pins, `VOICE_full_2.yaml`, where
+    `instances[1].counts` is 32522 — not the 29278 of `VOICE_full.yaml`,
+    which #3396 read. Within its entry, `instances[1]`, its only surviving
+    trace is one per-feature count in the entry's `source_caveats` (the
+    final record also quotes it in `file_collections[0].description`,
+    outside that entry, #3552), so v3, which carries a number only as a
+    scalar equal to it under the nearest surviving ancestor, reads it deleted (unsorted: this run's audit is
+    ambiguous, #3153)."""
     monkeypatch.chdir(CONCAT.parents[1])
+    monkeypatch.setattr(rm, "PATH_LIMIT", 10 ** 6)
     label = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
     b = _replay(label, "VOICE", method="claudecode_agent")
-    assert "instances[1].counts" in {r["path"] for r in b["flattened_paths"]}
-    snapshot = yaml.safe_load((CONCAT / "claudecode_agent_core" / label / "intermediate" / "VOICE_full.yaml")
-                              .read_text())
-    entry = snapshot["instances"][1]
-    assert entry["counts"] == 29278
-    assert entry["id"].endswith("/recording-features")
-    assert len(str(entry["counts"])) >= rm.MIN_NUMERIC_DIGITS
+    pinned = Path(b["artifacts"]["phase1_snapshot"]["path"])
+    assert pinned.name == "VOICE_full_2.yaml"
+    assert yaml.safe_load(pinned.read_text())["instances"][1]["counts"] == 32522
+    assert "instances[1].counts" not in {r["path"] for r in b["flattened_paths"]}
+    assert "instances[1].counts" in {r["path"] for r in b["unsorted_paths"]}
+    final = yaml.safe_load((CONCAT / "claudecode_agent" / label / "VOICE_d4d.yaml").read_text())
+    assert "32522" in " ".join(str(final["instances"][1]["source_caveats"]).split())
+
+
+#: #3130: every numeric-only value removals v2 flattened over the 87 checked
+#: records — (label, project, path, flattened under v3).
+NUMERIC_FLATTENINGS_V2 = [
+    ("2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep1", "AI_READI", "distribution_dates[2].release_dates[0]", True),
+    ("2026-08-13_claude-opus-5-api-generic-v4_rep1", "VOICE", "instances[1].counts", False),
+    *[(label, "CM4AI", f"collection_timeframes[0].{k}", False)
+      for label in ("2026-08-13_claude-opus-5-api-generic-v4_rep2", "2026-08-13_claude-opus-5-api-generic-v4_rep3",
+                    "2026-09-01_claude-opus-5-api-generic-v7_rep2", "2026-09-01_claude-opus-5-api-generic-v7_rep3")
+      for k in ("start_date", "end_date")],
+]
+
+
+@pytest.mark.corpus
+def test_a_number_v2_flattened_into_prose_is_deleted_and_the_date_carried_whole_is_not(monkeypatch):
+    """#3130: of the ten, nine were a count or a date quoted in the prose
+    that disowned it; the release date carried as itself stays flattened."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    monkeypatch.setattr(rm, "PATH_LIMIT", 10 ** 6)
+    for label, project, path, flattened in NUMERIC_FLATTENINGS_V2:
+        b = _replay(label, project, method="claudecode_agent")
+        classes = {cls for cls in ("flattened", "founded", "unfounded", "unsorted")
+                   if path in {r["path"] for r in b[f"{cls}_paths"]}}
+        assert len(classes) == 1 and ("flattened" in classes) is flattened, (label, path, classes)
+
+
+@pytest.mark.corpus
+def test_the_22c_ai_readi_member_respelled_licence_to_license_is_not_removed(monkeypatch):
+    """#3038 on the corpus: v2 read the one `restrictions` member of
+    `external_resources[5]` as removed; the written record respells it."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    monkeypatch.setattr(rm, "PATH_LIMIT", 10 ** 6)
+    b = _replay("2026-08-22c_claude-opus-5-api-generic-v5_rep2", "AI_READI", method="claudecode_agent")
+    removed = {r["path"] for cls in ("flattened", "founded", "unfounded", "unsorted") for r in b[f"{cls}_paths"]}
+    assert "external_resources[5].restrictions[0]" not in removed
+    assert (b["unfounded"], b["rewritten_unfounded"]) == (3, 4)
+
+
+_NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+
+
+def _stated_relocation_measurement() -> dict[str, tuple[int, int, int]]:
+    """(tp, fp, fn) as the labelled sample's header states them at the
+    declared threshold — over the whole sample, and split by the route
+    `_Relocation.candidate` decides a row on (#3613) — after checking that
+    the header's precision and recall follow from its counts, that the
+    routes add up to the whole, and that the published definitions — the
+    removals non-check and the arm table's row — state the same
+    measurement in words (#3549) and the content-word route's own figures."""
+    root = Path(__file__).resolve().parents[1]
+    header = " ".join(line.lstrip("# ").strip() for line in
+                      (root / rm.RELOCATED_VALIDATION).read_text().splitlines() if line.startswith("#"))
+    m = re.search(r"At RELOCATED_THRESHOLD ([\d.]+) on this sample: (\d+) candidates, (\d+) correct "
+                  r"\(precision ([\d.]+)\); (\d+) relocations labelled, (\d+) found \(recall ([\d.]+)\)", header)
+    assert m, "the sample header no longer states the measurement in the form this test reads"
+    threshold, candidates, tp, precision, labelled, found, recall = m.groups()
+    assert float(threshold) == rm.RELOCATED_THRESHOLD
+    tp, candidates, labelled = int(tp), int(candidates), int(labelled)
+    assert int(found) == tp
+    assert f"{tp / candidates:.2f}" == precision and f"{tp / labelled:.2f}" == recall
+    ident = re.search(r"Identifier route: (\d+) rows, (\d+) candidates, (\d+) correct; (\d+) relocations "
+                      r"labelled, (\d+) found \((\d+) false positives, (\d+) missed\)", header)
+    content = re.search(r"Content-word route: (\d+) rows, (\d+) candidates, (\d+) correct \(precision "
+                        r"([\d.]+)\); (\d+) relocations labelled, (\d+) found \(recall ([\d.]+)\)", header)
+    assert ident and content, "the sample header no longer states the split by route in the form this test reads"
+    i_rows, i_cand, i_tp, i_lab, i_found, i_fp, i_fn = map(int, ident.groups())
+    assert (i_found, i_fp, i_fn) == (i_tp, i_cand - i_tp, i_lab - i_tp)
+    c_rows, c_cand, c_tp, c_prec, c_lab, c_found, c_rec = content.groups()
+    c_rows, c_cand, c_tp, c_lab = int(c_rows), int(c_cand), int(c_tp), int(c_lab)
+    assert int(c_found) == c_tp
+    assert f"{c_tp / c_cand:.2f}" == c_prec and f"{c_tp / c_lab:.2f}" == c_rec
+    sample_rows = len(yaml.safe_load((root / rm.RELOCATED_VALIDATION).read_text())["rows"])
+    assert i_rows + c_rows == sample_rows
+    assert (i_tp + c_tp, i_cand + c_cand, i_lab + c_lab) == (tp, candidates, labelled)
+    in_ten = f"about {_NUMBER_WORDS[round(10 * tp / candidates)]} times in ten"
+    in_five = f"about {_NUMBER_WORDS[round(5 * tp / labelled)]} relocations in five"
+    spec = importlib.util.spec_from_file_location("arm_comparison_3549", root / "scripts" / "arm_comparison.py")
+    arm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(arm)
+    for name, text in (("removals NON_CHECKS", " ".join(rm.NON_CHECKS)),
+                       ("arm table unfoundedrelocated", " ".join(arm.METRICS["unfoundedrelocated"][3].split()))):
+        assert in_ten in text and in_five in text, (name, in_ten, in_five)
+        # #3613: the published figures are over both routes, and each
+        # definition states the content-word route's own.
+        assert "not measured" not in text, name
+        for figure in (f"{i_rows} of", f"{sample_rows} rows", f"{c_rows} content-word rows",
+                       f"{i_tp} found", c_prec, c_rec):
+            assert figure in text, (name, figure)
+    return {"all": (tp, candidates - tp, labelled - tp),
+            "identifier": (i_tp, i_cand - i_tp, i_lab - i_tp),
+            "content": (c_tp, c_cand - c_tp, c_lab - c_tp)}
+
+
+def test_the_relocation_measurement_the_sample_states_is_the_one_the_definitions_publish():
+    """#3549: the header's counts, its precision and recall, and the words
+    the non-check and the arm table use for them agree; #3613: so do the
+    counts by route."""
+    assert _stated_relocation_measurement() == {"all": (25, 3, 6), "identifier": (5, 0, 0),
+                                                "content": (20, 3, 6)}
+
+
+@pytest.mark.corpus
+def test_the_relocation_threshold_measures_what_the_labelled_sample_says(monkeypatch):
+    """#3223: precision and recall of the candidate at the declared
+    threshold, recomputed on the hand-labelled sample and compared with
+    what the sample file's header states (whose figures the published
+    definitions are checked against, #3549) — over the whole sample and
+    by the route `_Relocation.candidate` takes, identifier-shaped or
+    content-word (#3613)."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    sample = yaml.safe_load((CONCAT.parents[1] / rm.RELOCATED_VALIDATION).read_text())
+    assert (sample["threshold"], sample["min_content_words"]) == (rm.RELOCATED_THRESHOLD, rm.RELOCATED_MIN_WORDS)
+    records: dict = {}
+    counts = {route: [0, 0, 0] for route in ("all", "identifier", "content")}
+    for row in sample["rows"]:
+        key = (row["label"], row["project"])
+        if key not in records:
+            core = next(CONCAT.glob(f"*_core/{row['label']}/{row['project']}_provenance.yaml"), None)
+            if core is None:
+                pytest.skip(f"{key} is not in this checkout")
+            b = rm.for_record(core)
+            snapshot = yaml.safe_load(Path(b["artifacts"]["phase1_snapshot"]["path"]).read_text())
+            records[key] = (snapshot, rm._Relocation(yaml.safe_load(Path(b["artifacts"]["final"]).read_text())))
+        snapshot, relocation = records[key]
+        ok, value = rm._resolve_value(snapshot, row["path"])
+        assert ok, row
+        where = relocation.candidate(value)[1]
+        assert (where or {}).get("to") == row["candidate"], row
+        route = ("identifier" if isinstance(value, str) and rm._IDENTIFIER_SHAPED.fullmatch(value.strip())
+                 else "content")
+        for tally in (counts["all"], counts[route]):
+            tally[0] += bool(where) and row["relocated"]
+            tally[1] += bool(where) and not row["relocated"]
+            tally[2] += (not where) and row["relocated"]
+    assert {route: tuple(c) for route, c in counts.items()} == _stated_relocation_measurement()
 
 
 @pytest.mark.corpus
