@@ -649,8 +649,9 @@ class UnspacedScriptTest(unittest.TestCase):
         self.assertEqual(cls("サトウ", "サトウ", "担当ザトウ"), "diacritic_dropped")
 
     def test_each_script_listed_is_read_as_one(self):
-        """Every range the module lists, by a name inside a longer run of
-        its script (#3671). Without the range the bundle's run is one token
+        """The ranges not otherwise tested, by a name inside a longer run of
+        its script (#3671); the four that extend the main CJK and kana
+        blocks are pinned by the next test (#3685). Without the range the bundle's run is one token
         and the name reads `absent`; NFKC alone does not rescue half-width
         katakana here, since `ﾔﾏﾀﾞﾀﾛｳ` composes to `ヤマダタロウ`, not `ヤマダ`."""
         for script, name, bundle in (
@@ -665,6 +666,25 @@ class UnspacedScriptTest(unittest.TestCase):
         # The iteration marks are letters of the ideograph run they sit in,
         # not a run of their own that would cut `佐々木` in two.
         self.assertEqual(name_tokens("〆木"), ["〆木"])
+
+    def test_each_range_beside_the_main_blocks_joins_their_run(self):
+        """The four ranges no other test reaches (#3685): each character
+        sits beside a main-block ideograph in one run. Without its range the
+        character is a run of its own, so the name splits into two
+        one-letter tokens that are not judged, and nothing is grounded.
+
+        The compatibility ideograph is U+FA0E, one of the few in its block
+        that NFKC leaves as itself: most map to a unified ideograph, which
+        would pass without the range."""
+        for script, ch in (
+                ("katakana phonetic extensions", "ㇰ"),
+                ("CJK extension A", "㐀"),
+                ("CJK compatibility ideographs", "﨎"),
+                ("CJK extensions B onwards", "\U00020000")):
+            name, bundle = ch + "明", "作者" + ch + "明教授"
+            with self.subTest(script=script):
+                self.assertEqual(name_tokens(name), [name])
+                self.assertEqual(cls(name, name, bundle), "grounded")
 
     def test_latin_letters_beside_such_a_script_are_a_token_of_their_own(self):
         """In the bundle too: `研究员Tim Clark` writes `Tim`, which v1 read

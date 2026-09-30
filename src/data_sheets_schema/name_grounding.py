@@ -262,8 +262,10 @@ import yaml
 #: Named so a result says which instrument produced it (#907). v1.1 moved
 #: classes only, never whether a token is a finding (#3026, #3126). v1.2
 #: reads scripts written without spaces (#3401), which moves findings on
-#: text in those scripts only: on the committed corpus, none (286
-#: provenance records, the same findings, classes and v2 readings as v1.1).
+#: text in those scripts and on letters of any other script written
+#: against them (`研究员Tim Clark` now writes `Tim`): on the committed
+#: corpus, none (286 provenance records, the same findings, classes and
+#: v2 readings as v1.1).
 INSTRUMENT = "name_grounding v1.2 (#2918, #3026, #3126, #3401)"
 
 #: The proximity reading beside it (#2978): report-only, never a finding.
