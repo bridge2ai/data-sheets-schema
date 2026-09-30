@@ -129,25 +129,38 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     written. Ids are compared exactly as ``check_manifest`` compares them
     -- no stripping, no cast to text (#3447) -- so this list is that
     checker's unmatched-source finding surfaced where its effect would be.
+
+    An entry ``scope.malformed_in`` classifies as skipped (not a mapping, or
+    no usable identifier) moves nothing: every other reader of the
+    declaration skips it and the generation scope block omits it, so the
+    model is never told its sources belong to another dataset (#3477). It
+    is listed under ``skipped_entries`` with that classifier's problem and
+    its ``in_bundle`` as written; its unmatched ids are still named, as
+    ``check_manifest`` names them.
     """
     declared = scope_decl.scope_in(raw, project)
-    status = {"status": "declared", "in_bundle_unmatched": []}
+    status = {"status": "declared", "in_bundle_unmatched": [], "skipped_entries": []}
     if declared is None:
         return {**status, "status": "undeclared"}, {}
     related = declared.get("related_but_distinct") if isinstance(declared, dict) else None
     if not isinstance(declared, dict) or not isinstance(related or [], list):
         return {**status, "status": "malformed"}, {}
+    skipped = {row["index"]: row["problem"]
+               for row in scope_decl.malformed_in(declared) if row["skipped"]}
     moved: dict[str, list[dict]] = {}
-    for entry in related or []:
+    for index, entry in enumerate(related or []):
+        if index in skipped:
+            status["skipped_entries"].append({"index": index, "problem": skipped[index],
+                                              "in_bundle": scope_decl.in_bundle_of(entry)})
         dataset = {"id": entry.get("id") if scope_decl._is_identifier(entry.get("id")) else None,
                    "name": entry.get("name") if isinstance(entry.get("name"), str) else None,
                    "manifest_key": (entry.get("manifest_key")
                                     if scope_decl._is_identifier(entry.get("manifest_key")) else None)
                    } if isinstance(entry, dict) else None
         for sid in scope_decl.in_bundle_of(entry):
-            if sid in source_ids:
+            if sid in source_ids and index not in skipped:
                 moved.setdefault(sid, []).append(dataset)
-            elif sid not in status["in_bundle_unmatched"]:
+            elif sid not in source_ids and sid not in status["in_bundle_unmatched"]:
                 status["in_bundle_unmatched"].append(sid)
     return status, moved
 
@@ -235,6 +248,10 @@ def render(inv: dict) -> list[str]:
     scope = inv["scope"]
     if scope["status"] == "malformed":
         lines.append("   scope              declaration is malformed; no source moved")
+    for row in scope["skipped_entries"]:
+        lines.append(f"   scope              related_but_distinct[{row['index']}]: {row['problem']}"
+                     + (f"; its in_bundle moves nothing: {', '.join(_written(v) for v in row['in_bundle'])}"
+                        if row["in_bundle"] else ""))
     if scope["in_bundle_unmatched"]:
         lines.append(f"   scope              in_bundle names no source of this project: "
                      f"{', '.join(_written(v) for v in scope['in_bundle_unmatched'])}")

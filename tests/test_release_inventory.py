@@ -256,7 +256,7 @@ scope:
 def test_voice_counts_only_its_own_releases_and_names_the_pediatric_one():
     inv = committed("VOICE")
     assert inv["instrument"] == ri.INSTRUMENT and "v2" in ri.INSTRUMENT
-    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": []}
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [], "skipped_entries": []}
     own = [e["source_id"] for e in inv["release_records"]]
     assert "physionet_pediatric_1_1_0" not in own and "physionet_3_1_0" in own
     assert "physionet_pediatric_1_1_0" not in [e["source_id"] for e in inv["tier1"]]
@@ -281,7 +281,8 @@ def test_a_related_release_is_not_this_datasets_release_evidence():
     assert set(moved) == {"companion_release", "companion_terms"}
     assert [d["id"] for d in moved["companion_release"]] == ["https://example.org/companion",
                                                             "https://example.org/umbrella"]
-    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": ["not_a_source"]}
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": ["not_a_source"],
+                            "skipped_entries": []}
     assert ri.lacking_release_evidence([inv]) == ["OWN"]
     # The companion's own inventory counts the same source as its release.
     assert ri.inventory(SCOPED, None, "COMPANION")["release_record_in_document_corpus"] is True
@@ -363,7 +364,8 @@ def test_in_bundle_matches_sources_exactly_as_check_manifest_does(tmp_path):
     assert inv["related_sources"] == []
     assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
     assert [e["source_id"] for e in inv["governance"]["license"]] == ["terms", "7"]
-    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [" promoted ", 7, "promoted2"]}
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [" promoted ", 7, "promoted2"],
+                            "skipped_entries": []}
     assert "in_bundle names no source of this project: ' promoted ', 7, promoted2" \
         in "\n".join(ri.render(inv))
     manifest = tmp_path / "manifest_3423.yaml"
@@ -387,3 +389,40 @@ def test_a_numeric_related_dataset_id_renders(entry, owner):
     [related] = inv["related_sources"]
     assert related["source_id"] == "promoted"
     assert f"declared in_bundle for {owner}, not counted above" in "\n".join(ri.render(inv))
+
+
+# An entry scope.malformed_in skips -- no identifier at all, or one that is a
+# list or a bool -- is skipped by every other reader and left out of the
+# generation scope block, so its in_bundle must move nothing here either
+# (#3477). The usable control beside it in the same declaration still moves
+# its own source, and the skipped entry's unmatched id is still named, as
+# check_manifest names it.
+@pytest.mark.parametrize("entry", [
+    b"{in_bundle: promoted}",
+    b"{id: [a, b], in_bundle: promoted}",
+    b"{id: true, in_bundle: promoted}",
+    b"{name: Unnamed, in_bundle: [promoted, not_a_source_3477]}",
+])
+def test_an_entry_malformed_in_skips_moves_nothing(entry, tmp_path):
+    from data_sheets_schema import scope
+    raw = (NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - " + entry
+           + b"\n      - {id: https://example.org/control, in_bundle: terms}\n")
+    [row] = [r for r in scope.malformed_in(scope.scope_in(raw, "EXTERNAL")) if r["skipped"]]
+    inv = ri.inventory(raw, None, "EXTERNAL")
+    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
+    assert [e["source_id"] for e in inv["related_sources"]] == ["terms"]
+    assert inv["scope"]["status"] == "declared"
+    [skipped] = inv["scope"]["skipped_entries"]
+    assert skipped["index"] == 0 and skipped["problem"] == row["problem"]
+    assert "promoted" in skipped["in_bundle"]
+    text = "\n".join(ri.render(inv))
+    assert f"related_but_distinct[0]: {row['problem']}; its in_bundle moves nothing: promoted" in text
+    assert "declared in_bundle for https://example.org/control, not counted above" in text
+    assert "an unnamed dataset" not in text
+    manifest = tmp_path / "manifest_3423_3477.yaml"
+    manifest.write_bytes(raw)
+    claimed = sorted(p["problem"] for p in scope.check_manifest(manifest)
+                     if p["project"] == "EXTERNAL" and "claims source" in p["problem"])
+    assert claimed == sorted(f"related dataset claims source {v!r} is in this bundle; the "
+                             f"manifest lists no such source for EXTERNAL"
+                             for v in inv["scope"]["in_bundle_unmatched"])
