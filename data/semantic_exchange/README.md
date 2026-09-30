@@ -16,8 +16,8 @@ The **canonical** SKOS TTL and the label-level / URI-level SSSOM TSVs live under
 
 | File | Description |
 |---|---|
-| `d4d_rocrate_structural_mapping_summary.md` | Human-readable summary of structural mapping coverage |
-| `STRUCTURAL_MAPPING_ANALYSIS.md` | Type-compatibility analysis between LinkML ranges and RO-Crate value types |
+| `d4d_rocrate_structural_mapping_summary.md` | Human-readable summary of the rows `generate_structural_mapping.py` produces, written by the same run as the mapping. It is not a listing of them: for each justification group it gives the group's row count and only the group's first 10 rows, then `... and N more`, so it shows 17 of the 155 regenerated rows. Compare the TSVs, not the summary, to see which rows exist. It is rendered from the generator's regenerated rows, not from the committed `d4d_rocrate_structural_mapping.sssom.tsv` beside it, and the two differ: the committed file carries rows regeneration does not produce (#295), enumerated as `KNOWN_UNDERIVABLE` in `tests/test_semantic_exchange/test_structural_mapping_drift.py`, whose docstring states both row counts and is checked against the files. |
+| `STRUCTURAL_MAPPING_ANALYSIS.md` | How the structural mapping is produced (its mapping strategies and type-compatibility rules) and checked (`make check-sssom-structural`). It states no counts; read them from the files. |
 | `uri_mapping_recommendations.md` | URI-level mapping rationale and recommendations for unmapped slots |
 
 ## Where the other artifacts live

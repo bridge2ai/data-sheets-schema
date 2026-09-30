@@ -13,7 +13,7 @@ This report analyzes URI (Uniform Resource Identifier) coverage in the D4D (Data
 ### Key Findings
 
 - **Current URI Coverage**: 112/270 attributes (41.5%)
-- **Attributes that COULD have URIs**: 97 (35.9%)
+- **Attributes that COULD have URIs**: 97 (35.9%) — as of this report; some suggestions were withdrawn later (#2974, see [Withdrawn suggestions](#withdrawn-suggestions-and-the-review_note-column-2974-3362))
 - **Novel D4D concepts**: 47 (17.4%) - domain-specific terms without standard equivalents
 - **Free text fields**: 17 (6.3%) - narrative fields that don't require URIs
 - **Missing descriptions**: 66 attributes (24.4%) - documentation gap
@@ -68,6 +68,37 @@ These are standard metadata attributes that have equivalents in common vocabular
 - May require extending existing vocabularies or creating D4D-specific URIs
 
 **See**: `notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv` for complete list with suggestions
+
+#### Withdrawn suggestions and the `review_note` column (#2974, #3362)
+
+The counts in this section are this report's snapshot of 2026-03-19. The
+TSV still has one row for each of the 97 attributes, but #2974 later
+withdrew most of the high- and medium-confidence suggestions after review
+found them wrong (for example `schema:date`, which is not a schema.org
+term, for `start_date` and `end_date`). A withdrawn row is **kept, not
+deleted**:
+
+- `suggested_uri` and `confidence` are cleared;
+- the `review_note` column (added by #2974, empty on every other row)
+  records what was withdrawn and why, in the form
+  `withdrawn <uri> (was <confidence>, #2974): <reason>`, sometimes naming
+  a candidate a curator should consider instead.
+
+Every reader treats a withdrawn row as having no suggestion:
+`src/semantic_exchange/generate_comprehensive_sssom.py` (whose resolver
+the URI-level table also uses) falls through to its keyword heuristics,
+and `src/semantic_exchange/add_slot_uris.py` selects rows by
+`confidence`, which a withdrawn row no longer has. No URI in a
+`review_note` reaches a mapping table or the schema. For the current
+split rather than this report's (the file has multi-line descriptions,
+so read it as TSV, not line by line):
+
+```bash
+python -c "import csv, collections; rows = csv.DictReader(open('notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv'), delimiter='\t'); print(collections.Counter('withdrawn' if r['review_note'] else (r['confidence'] or 'none') + (' with URI' if r['suggested_uri'] else ' without URI') for r in rows))"
+```
+
+Whether a withdrawn row should eventually be deleted, once a curator has
+reviewed the candidates its note points to, is open in #3362.
 
 ### 3. Novel D4D Concepts (47 attributes, 17.4%)
 
@@ -274,6 +305,9 @@ Add descriptions to undocumented attributes to improve schema quality:
 
 1. **D4D_MISSING_URI_RECOMMENDATIONS.tsv** (97 attributes)
    - Attributes that could map to standard vocabularies
+   - Suggestions withdrawn since keep their row, with `suggested_uri`
+     and `confidence` cleared and the reason in `review_note` (see
+     [Withdrawn suggestions](#withdrawn-suggestions-and-the-review_note-column-2974-3362))
    - Suggested URIs with confidence levels
    - Primary action list for improving coverage
 

@@ -210,9 +210,6 @@ class TestSSSOMValidation(unittest.TestCase):
             'owl:equivalentProperty',
             'rdfs:subClassOf',
             'rdfs:subPropertyOf',
-            # SEMAPV extension predicates for unmapped/unmappable properties
-            'semapv:UnmappedProperty',
-            'semapv:UnmappableProperty',
         }
 
         for name, path in self.sssom_files.items():

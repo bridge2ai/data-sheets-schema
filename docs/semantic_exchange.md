@@ -19,6 +19,8 @@ The **canonical source** of the exchange layer.
 | `d4d_rocrate_sssom_uri_comprehensive.tsv` | SSSOM | URI-level variant covering all D4D attributes (auto-derived) |
 | `d4d_rocrate_sssom_comprehensive.tsv` | SSSOM | Comprehensive label-level mapping for every D4D attribute |
 
+The two comprehensive tables also read [`notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv), the URI suggestions for slots without a curated mapping. A suggestion withdrawn after review keeps its row with `suggested_uri` and `confidence` cleared and the reason in `review_note`, and is read as no suggestion; see [`notes/D4D_URI_COVERAGE_REPORT.md`](https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_URI_COVERAGE_REPORT.md). A slot with no mapping from any source is written in SSSOM's no-match form, `skos:exactMatch sssom:NoTermFound` under `semapv:UnspecifiedMatching`, with its status (`free_text`, `novel_d4d`, `unmapped`) in `mapping_status`.
+
 ### `data/semantic_exchange/`
 
 sssom-py-compatible variants and analysis docs.
@@ -26,8 +28,8 @@ sssom-py-compatible variants and analysis docs.
 | File | Description |
 |---|---|
 | [`d4d_rocrate_structural_mapping.sssom.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv) | 17-column structural SSSOM (sssom-py compatible) — typed/range/multivalued metadata for every mapped slot |
-| `d4d_rocrate_structural_mapping_summary.md` | Human-readable structural mapping summary |
-| `STRUCTURAL_MAPPING_ANALYSIS.md` | Type-compatibility analysis between LinkML ranges and RO-Crate value types |
+| `d4d_rocrate_structural_mapping_summary.md` | Human-readable summary of the rows the structural generator produces: each justification group's row count and its first 10 rows only (17 of 155), so not a listing of them — rendered from its regenerated rows, not from the committed structural TSV, which carries rows regeneration does not produce (see the folder's `README.md`) |
+| `STRUCTURAL_MAPPING_ANALYSIS.md` | How the structural mapping is produced (mapping strategies, type-compatibility rules) and checked (`make check-sssom-structural`); states no counts |
 | `uri_mapping_recommendations.md` | URI-level mapping rationale and edge-case decisions |
 | `README.md` | Per-file conventions and column documentation |
 

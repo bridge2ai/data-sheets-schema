@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent))
 from generate_comprehensive_sssom import (  # noqa: E402
     ComprehensiveSSSOMGenerator, add_common_arguments, committed_date,
-    report_drift,
+    report_drift, sssom_object_id,
 )
 
 #: The slot_uri-flavoured comment for each (status, source).
@@ -109,7 +109,7 @@ class ComprehensiveURISSSOMGenerator:
                 'subject_source': self._get_vocab_source(current_slot_uri),
                 'predicate_id': res.predicate,
                 'd4d_slot_uri_recommended': target_uri,
-                'object_id': target_uri,
+                'object_id': sssom_object_id(res),
                 'object_label': target_uri.split(':', 1)[1] if ':' in target_uri else target_uri,
                 'object_source': self._get_vocab_source(target_uri),
                 'confidence': res.confidence,
