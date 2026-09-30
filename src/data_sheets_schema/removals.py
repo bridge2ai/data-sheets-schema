@@ -178,11 +178,14 @@ Two more annotations move no class either (#3366, #3367):
   would otherwise read as the model's deletion — and counted under
   `deleted_curator_amend`, never subtracted from `deleted` or `unfounded`;
   a member of a list of scalars, which has no address once gone, is marked
-  by an amend at or above its list, or by an amend on one member whose
-  recorded edit (`replace` -> `with`) turns this member, and no other
-  deleted member of the list, into what that path now holds — a recorded
-  amend changes one leaf and is no evidence for a sibling (#3802). Where
-  the edit is not recorded or fits more than one deleted member, the row
+  by an amend above its list, or by an amend at the list's own path — the
+  only form #903 records for a change to one member, since its parse check
+  reads such a list as one leaf (#3828) — whose recorded edit (`replace` ->
+  `with`), read against the list's value in the final record, turns this
+  member, and no other deleted member of the list, into one of the final
+  list's members (#3802). Where the edit is not recorded, fits more than
+  one deleted member, or cannot be read against the final list (no list
+  there, or several amends of which it attests only the last), the row
   is `curator_amend_ambiguous`, counted under
   `deleted_curator_amend_ambiguous` and attributed to no one. Where phases
   are attributed, a member a model phase already removed is neither marked
@@ -359,8 +362,9 @@ NON_CHECKS = (
     "where they are not, the path alone decides, so a model rewrite a curator later amended "
     "reads as the amend (#3725). Both are counted in rewritten and rewritten_unfounded, never "
     "subtracted (#3366); a deletion marked a curator's amend is read by the same path test, a "
-    "member of a list of scalars by an amend at or above its list or by an amend on one member "
-    "whose recorded edit fits this deleted member and no other (#3802) — that the edit's text "
+    "member of a list of scalars by an amend above its list or by an amend at the list's path "
+    "(the only form #903 records for one member, #3828) whose recorded edit, read against the "
+    "final list, fits this deleted member and no other (#3802) — that the edit's text "
     "fits is not proof the curator's amend, rather than a model, removed it — and it is never "
     "subtracted from deleted or unfounded (#3702, #3805); a list member an amend on its list "
     "cannot be told apart for is marked ambiguous and attributed to no one "
@@ -1420,9 +1424,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     reads as the model's deletion. `enum_aliases` is the run's schema's
     enum-alias table for `normaliser_form` (`run_enum_aliases`, #3702);
     None reads today's. `amended_edits` is each amended path's recorded
-    (`replace`, `with`) pairs (`amend_edits`): an amend on one member of a
-    list of scalars marks only the deleted member its edit identifies, and
-    without them such a member is `curator_amend_ambiguous` (#3802) —
+    (`replace`, `with`) pairs (`amend_edits`): #903 records an amend on
+    one member of a list of scalars at the list's path (#3828), and it
+    marks only the deleted member its edit, read against the final list,
+    identifies; without them such a member is `curator_amend_ambiguous`
+    (#3802) —
     where phases are attributed, only one the `write` phase deleted, and
     a member a model phase removed is no rival fit (#3818)."""
     if not isinstance(original, dict):
@@ -1484,61 +1490,82 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     def amended_at(at: str | None) -> bool:
         return at is not None and (at in amended or any(a in amended for a in _ancestors(at)))
 
-    def edit_explains(value: Any, amend_path: str, old: str, new: str) -> bool:
-        # The amend's recorded edit, applied to this value as #903 proves it
-        # (whitespace runs collapsed, the first occurrence replaced), gives
-        # the value now at the amended path; nothing there reads as "".
-        # An edit whose text is not in the value leaves it whole, and a
-        # value still at the amended path is carried, never deleted.
-        v, o = _ws(value), _ws(old)
+    def list_edit_fits(value: Any, amend_path: str, old: str, new: str) -> bool:
+        # An amend on a list of scalars is recorded at the list's path: #903
+        # proves an edit by `populated_leaves`, which reads such a list as
+        # one leaf, so `--path keywords[1]` is refused and only `keywords`
+        # can be recorded (#3828). Its parse check is that the list's text
+        # (`str`, whitespace runs collapsed) before the edit, with the first
+        # occurrence of `replace` turned into `with`, is the list's text
+        # after it. The list after is what the final record holds at the
+        # path; the list before is not recorded, but an edit that cannot add
+        # or drop a member changed exactly one, so this deleted member was
+        # the one it changed where putting it back at some index of the
+        # list after reproduces that check.
         found, now = _resolve_value(final, amend_path)
-        return v.replace(o, _ws(new), 1) == (_ws(now) if found and now is not None else "")
+        if not found or not isinstance(now, list):
+            return False
+        after, o, n = _ws(now), _ws(old), _ws(new)
+        for i in range(len(now)):
+            before = _ws([value if j == i else m for j, m in enumerate(now)])
+            if o in before and before.replace(o, n, 1) == after:
+                return True
+        return False
 
     def amended_deletion(path: str, value: Any, list_path: str | None) -> str | None:
         # "amend", "ambiguous" or None. A scalar under a key: an amend at or
         # above where the join puts it in the final record, where the key an
         # emptied value leaves is still found. A member of a list of scalars
-        # has no final address of its own once gone: an amend at or above
-        # the list marks it, and an amend on one member marks only the
-        # member its recorded edit identifies — the one deleted member of
-        # that list whose value the edit turns into what the amended path
-        # now holds (#3802). A recorded amend changes one leaf, so it is no
-        # evidence for a sibling; where the edit is not recorded, or fits
-        # more than one deleted member, the member is "ambiguous" and not
-        # attributed to the curator (#3702). Where phases are attributed, a
-        # sibling a model phase already deleted is no rival: the amend,
-        # recorded after the run, cannot have emptied it (#3818).
+        # has no final address of its own once gone, and #903 records an
+        # amend on one member at the list's own path (#3828): its parse
+        # check (`populated_leaves`) reads a list of scalars as one leaf and
+        # never reads a scalar member of any list as a leaf, so no
+        # `keywords[1]` can be recorded. The path cannot say which member
+        # the amend changed; its recorded edit (`replace` -> `with`), read
+        # against the list's value in the final record (`list_edit_fits`),
+        # can, and the amend marks only the one deleted member of the list
+        # it identifies. Where the edit is not recorded, fits more than one
+        # deleted member, the path holds no list to read it against, or the
+        # list carries more than one recorded amend (the final list attests
+        # only the last) and the last does not name this member alone, the
+        # member is "ambiguous" and not attributed to the curator (#3702,
+        # #3802). An amend above the list marks every member. Where phases
+        # are attributed, a sibling a model phase already deleted is no
+        # rival: the amend, recorded after the run, cannot have emptied it
+        # (#3818).
         if not amended:
             return None
         at = remap_path(list_path or path, original, final)["path"]
         if list_path is None or at is None:
             return "amend" if amended_at(at) else None
-        if amended_at(at):
+        if any(a in amended for a in _ancestors(at)):
             return "amend"
-        on_members = [a for a in amended if re.fullmatch(re.escape(at) + r"\[\d+\]", a)]
-        if not on_members:
+        if at not in amended:
             return None
+        edits = amended_edits.get(at) or []
+        if not edits:
+            return "ambiguous"                 # which member it changed is not recorded
+        if not isinstance(_resolve_value(final, at)[1], list):
+            return "ambiguous"                 # no list at the path to read the edit against
         found, members = _resolve_value(original, list_path)
-        siblings = [(f"{list_path}[{j}]", m) for j, m in enumerate(members if found and isinstance(members, list)
-                                                                    else [])
+        siblings = [m for j, m in enumerate(members if found and isinstance(members, list) else [])
                     if f"{list_path}[{j}]" != path and not isinstance(m, (dict, list)) and _populated(m)
                     and not at_final.carried(f"{list_path}[{j}]", list_path)
                     and (not attributed
                          or stage_after_last(lambda p, q=f"{list_path}[{j}]": p.carried(q, list_path)) == "write")]
-        verdict = None
-        for a in on_members:
-            edits = amended_edits.get(a) or []
-            if not edits:
-                verdict = "ambiguous"          # which member it changed is not recorded
-                continue
-            for old, new in edits:
-                if not edit_explains(value, a, old, new):
-                    continue
-                if any(edit_explains(m, a, old, new) for _p, m in siblings):
-                    verdict = "ambiguous"      # the edit fits another deleted member too
-                else:
-                    return "amend"
-        return verdict
+        if len(edits) > 1:
+            # The final list attests only the last of several amends at its
+            # path; the earlier edits changed a list nothing records.
+            last = edits[-1]
+            if list_edit_fits(value, at, *last) and not any(list_edit_fits(m, at, *last) for m in siblings):
+                return "amend"
+            return "ambiguous"
+        old, new = edits[0]
+        if not list_edit_fits(value, at, old, new):
+            return None                        # the edit names another member
+        if any(list_edit_fits(m, at, old, new) for m in siblings):
+            return "ambiguous"                 # the edit fits another deleted member too
+        return "amend"
 
     total = exempted = unaddressable = not_assessed = 0
     rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": [],
@@ -1928,7 +1955,8 @@ def amended_paths(record: dict[str, Any] | None) -> frozenset[str]:
 def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str]]]:
     """amended path -> the (`replace`, `with`) pairs its `amend`
     dispositions recorded (#903): what `classify` needs to tell which
-    member of a list of scalars an amend on one member changed (#3802).
+    member of a list of scalars an amend changed, since #903 records such
+    an amend at the list's path, never a member's (#3802, #3828).
     An entry without both strings, or with an empty `replace` (which #903
     refuses), contributes no pair."""
     rows = (record or {}).get("dispositions") if isinstance(record, dict) else None
