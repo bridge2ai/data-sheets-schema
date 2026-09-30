@@ -181,12 +181,17 @@ Two more annotations move no class either (#3366, #3367):
   by an amend above its list, or by an amend at the list's own path — the
   only form #903 records for a change to one member, since its parse check
   reads such a list as one leaf (#3828) — whose recorded edit (`replace` ->
-  `with`), read against the list's value in the final record, turns this
-  member, and no other deleted member of the list, into one of the final
-  list's members (#3802). Where the edit is not recorded, fits more than
-  one deleted member, or cannot be read against the final list (no list
-  there, or several amends of which it attests only the last), the row
-  is `curator_amend_ambiguous`, counted under
+  `with`), read against the list's value in the final record, removed
+  this member in every list before the edit it admits (#3802). That
+  check compares the list's text, not its length, so on a flow list an
+  edit can drop members or empty the list as well as change one: each
+  list it admits is rebuilt from the final list and the edit, and
+  counted only where every member it says the edit removed is a deleted
+  member the amend can have removed (#3835). Where the edit is not
+  recorded, can be read as removing another deleted member instead
+  (one sharing this member's text included), or cannot be read against
+  the final list (no list there, or several amends of which it attests
+  only the last), the row is `curator_amend_ambiguous`, counted under
   `deleted_curator_amend_ambiguous` and attributed to no one. Where phases
   are attributed, a member a model phase already removed is neither marked
   ambiguous nor counted as a rival fit (#3818). The enum-alias
@@ -237,9 +242,11 @@ absent snapshot is not a clean diff.
 """
 from __future__ import annotations
 
+import ast
 import hashlib
 import json
 import re
+from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -364,7 +371,9 @@ NON_CHECKS = (
     "subtracted (#3366); a deletion marked a curator's amend is read by the same path test, a "
     "member of a list of scalars by an amend above its list or by an amend at the list's path "
     "(the only form #903 records for one member, #3828) whose recorded edit, read against the "
-    "final list, fits this deleted member and no other (#3802) — that the edit's text "
+    "final list, removed this deleted member in every list before the edit it admits — a "
+    "changed member, or on a flow list dropped members or an emptied list, since #903's check "
+    "compares the list's text and not its length (#3802, #3835) — that the edit's text "
     "fits is not proof the curator's amend, rather than a model, removed it — and it is never "
     "subtracted from deleted or unfounded (#3702, #3805); a list member an amend on its list "
     "cannot be told apart for is marked ambiguous and attributed to no one "
@@ -1490,7 +1499,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     def amended_at(at: str | None) -> bool:
         return at is not None and (at in amended or any(a in amended for a in _ancestors(at)))
 
-    def list_edit_fits(value: Any, amend_path: str, old: str, new: str) -> bool:
+    def list_edit_reading(value: Any, amend_path: str, old: str, new: str, rivals: list[Any]) -> str | None:
         # An amend on a list of scalars is recorded at the list's path: #903
         # proves an edit by `populated_leaves`, which reads such a list as
         # one leaf, so `--path keywords[1]` is refused and only `keywords`
@@ -1498,19 +1507,50 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # (`str`, whitespace runs collapsed) before the edit, with the first
         # occurrence of `replace` turned into `with`, is the list's text
         # after it. The list after is what the final record holds at the
-        # path; the list before is not recorded, but an edit that cannot add
-        # or drop a member changed exactly one, so this deleted member was
-        # the one it changed where putting it back at some index of the
-        # list after reproduces that check.
+        # path; the list before is not recorded. That check does not keep
+        # the list's length: on a flow list the edit can drop members
+        # (`'voice', 'clinic'` -> `'clinic'`) or empty the list (`[...]` ->
+        # `[]`), as well as change one (#3835). So every list before the
+        # edit it admits is rebuilt — the final list with one deleted
+        # member put back at an index (a list whose text Python cannot read
+        # back, a date among them, is rebuilt only this way), and the final
+        # list's text with one occurrence of the edit's `with` turned back
+        # into its `replace` (with an empty `with`, at every place), read
+        # back as a list — and a rebuild counts only
+        # where every member it says the edit removed is a deleted member
+        # this amend can have removed (this one or a rival). "amend" where
+        # every rebuild removes this member (and, of the members sharing its
+        # text, all of them), None where none removes it ("the edit names
+        # another member"), "ambiguous" otherwise.
         found, now = _resolve_value(final, amend_path)
         if not found or not isinstance(now, list):
-            return False
+            return None
         after, o, n = _ws(now), _ws(old), _ws(new)
-        for i in range(len(now)):
-            before = _ws([value if j == i else m for j, m in enumerate(now)])
-            if o in before and before.replace(o, n, 1) == after:
-                return True
-        return False
+        pool = Counter(_ws(m) for m in [value, *rivals])
+        mine = _ws(value)
+        befores: list[list[Any]] = [[c if j == i else m for j, m in enumerate(now)]
+                                    for c in (value, *rivals) for i in range(len(now))]
+        k = after.find(n)
+        while k != -1:
+            try:
+                parsed = ast.literal_eval(after[:k] + o + after[k + len(n):])
+            except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
+                parsed = None
+            if isinstance(parsed, list):
+                befores.append(parsed)
+            k = after.find(n, k + 1) if n else (k + 1 if k < len(after) else -1)
+        readings, seen = [], set()
+        for before in befores:
+            text = _ws(before)
+            if text in seen or o not in text or text.replace(o, n, 1) != after:
+                continue
+            seen.add(text)
+            removed = Counter(_ws(m) for m in before) - Counter(_ws(m) for m in now)
+            if all(pool[t] >= c for t, c in removed.items()):
+                readings.append(removed[mine])
+        if not readings or not any(readings):
+            return None
+        return "amend" if all(r >= pool[mine] for r in readings) else "ambiguous"
 
     def amended_deletion(path: str, value: Any, list_path: str | None) -> str | None:
         # "amend", "ambiguous" or None. A scalar under a key: an amend at or
@@ -1522,10 +1562,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # never reads a scalar member of any list as a leaf, so no
         # `keywords[1]` can be recorded. The path cannot say which member
         # the amend changed; its recorded edit (`replace` -> `with`), read
-        # against the list's value in the final record (`list_edit_fits`),
-        # can, and the amend marks only the one deleted member of the list
-        # it identifies. Where the edit is not recorded, fits more than one
-        # deleted member, the path holds no list to read it against, or the
+        # against the list's value in the final record (`list_edit_reading`),
+        # can, and the amend marks only the deleted members of the list it
+        # removed in every reading (one changed member, or, on a flow list,
+        # the members it dropped, #3835). Where the edit is not recorded, can
+        # be read as removing another deleted member instead, the path holds
+        # no list to read it against, or the
         # list carries more than one recorded amend (the final list attests
         # only the last) and the last does not name this member alone, the
         # member is "ambiguous" and not attributed to the curator (#3702,
@@ -1553,19 +1595,15 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                     and not at_final.carried(f"{list_path}[{j}]", list_path)
                     and (not attributed
                          or stage_after_last(lambda p, q=f"{list_path}[{j}]": p.carried(q, list_path)) == "write")]
+        reading = list_edit_reading(value, at, *edits[-1], siblings)
         if len(edits) > 1:
             # The final list attests only the last of several amends at its
             # path; the earlier edits changed a list nothing records.
-            last = edits[-1]
-            if list_edit_fits(value, at, *last) and not any(list_edit_fits(m, at, *last) for m in siblings):
-                return "amend"
-            return "ambiguous"
-        old, new = edits[0]
-        if not list_edit_fits(value, at, old, new):
-            return None                        # the edit names another member
-        if any(list_edit_fits(m, at, old, new) for m in siblings):
-            return "ambiguous"                 # the edit fits another deleted member too
-        return "amend"
+            return "amend" if reading == "amend" else "ambiguous"
+        # None: the edit names another member. "ambiguous": it can be read
+        # as removing another deleted member instead of, or as well as, one
+        # that shares this member's text.
+        return reading
 
     total = exempted = unaddressable = not_assessed = 0
     rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": [],

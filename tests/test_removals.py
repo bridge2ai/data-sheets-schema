@@ -11,6 +11,7 @@ founded (a finding's path covers the value), unfounded — the identity join
 that keeps a reorder or a stripped key from reading as a removal, and the
 #899 convention that a run with no snapshot measures nothing rather than 0.
 """
+import datetime
 import hashlib
 import importlib.util
 import json
@@ -649,6 +650,84 @@ class RecordedListAmends(unittest.TestCase):
                 self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write",
                                                        "curator_amend": True})
                 self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+
+    def _flow_list_amend(self, old: str, new: str):
+        """A flow list the model wrote without 'audio' (its own deletion),
+        amended by the curator through #903; the snapshot still has it."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: ['speech', 'voice', 'clinic']\n"
+        out, record, final = self._amend(text, "keywords", old, new)
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": ["speech", "voice", "clinic", "audio"]}
+        model = yaml.safe_load(text)
+        return record, final, snapshot, model
+
+    def test_a_recorded_amend_that_drops_a_flow_list_member_marks_it(self):
+        """#3835: #903 accepts an edit that shortens a flow list — its check
+        compares the list's text, not its length — so the member the edit
+        dropped is the curator's, and the model's own deletion is not."""
+        record, final, snapshot, model = self._flow_list_amend("'voice', 'clinic'", "'clinic'")
+        self.assertEqual(final["keywords"], ["speech", "clinic"])
+        self.assertEqual(rm.amend_edits(record), {"keywords": [("'voice', 'clinic'", "'clinic'")]})
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[3]": None})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", model)], **kw)
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[3]"], {"path": "keywords[3]", "phase": "reconcile_full"})
+
+    def test_a_recorded_amend_that_empties_a_flow_list_marks_every_member_it_held(self):
+        """#3835: `[...]` -> `[]` is accepted by #903; every member the
+        written list held is the curator's deletion, the model's is not."""
+        record, final, snapshot, model = self._flow_list_amend("['speech', 'voice', 'clinic']", "[]")
+        self.assertEqual(final["keywords"], [])
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[0]": True, "keywords[1]": True, "keywords[2]": True, "keywords[3]": None})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (3, 0))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", model)], **kw)
+        self.assertEqual({r["path"]: (r["phase"], r.get("curator_amend")) for r in b["unfounded_paths"]},
+                         {"keywords[0]": ("write", True), "keywords[1]": ("write", True),
+                          "keywords[2]": ("write", True), "keywords[3]": ("reconcile_full", None)})
+
+    def test_a_drop_to_nothing_and_a_list_python_cannot_read_back(self):
+        """#3835: an empty `with` puts the dropped text back anywhere in
+        the final list's text, so every place is tried; a list holding a
+        date has no text Python reads back, and its one changed member is
+        found by putting the deleted member back at an index."""
+        record, final, snapshot, _ = self._flow_list_amend(", 'clinic'", "")
+        self.assertEqual(final["keywords"], ["speech", "voice"])
+        b = rm.classify(snapshot, final, _audit(), amended_paths=rm.amended_paths(record),
+                        amended_edits=rm.amend_edits(record))
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[2]": True, "keywords[3]": None})
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: [2020-01-01, 'voice']\n"
+        out, record, final = self._amend(text, "keywords", "'voice'", "''")
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": [datetime.date(2020, 1, 1), "voice", "audio"]}
+        b = rm.classify(snapshot, final, _audit(), amended_paths=rm.amended_paths(record),
+                        amended_edits=rm.amend_edits(record))
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[2]": None})
+
+    def test_a_dropped_member_that_shares_its_text_with_another_deleted_member_is_ambiguous(self):
+        """#3835 with the rival rule: the edit drops one 'voice', and a
+        second deleted 'voice' could be the one it dropped; unattributed,
+        both are ambiguous. With phases, the model's is no rival (#3818)."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: ['speech', 'voice', 'clinic']\n"
+        out, record, final = self._amend(text, "keywords", "'voice', 'clinic'", "'clinic'")
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": ["speech", "voice", "clinic", "voice"]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[3]"], {"path": "keywords[3]", "phase": "reconcile_full"})
 
     def test_no_scalar_member_path_can_be_recorded_even_in_a_mixed_list(self):
         """`populated_leaves` never reads a scalar member of a list as a
