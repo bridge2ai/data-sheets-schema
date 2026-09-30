@@ -532,9 +532,6 @@ def check_cmd(method, label, project, strict):
     Use `--strict` after a generation run so a missing record fails the step
     rather than being noticed later.
     """
-    # The report loops below rebind `project` and `label`; the deterministic
-    # section needs the filters as given (#2970).
-    selected = {"method": method, "label": label, "project": project}
     from data_sheets_schema.runs import (canonical_prompt_status,
                                          check_provenance,
                                          condition_contradiction,
@@ -868,8 +865,8 @@ def check_cmd(method, label, project, strict):
                    f"({grounds[GROUNDED_ALL]} fully grounded, "
                    f"{grounds[GROUNDED_NOT_RUN]} not checked, "
                    f"{grounds[GROUNDED_UNRECORDED]} predate the check):")
-        for project, label, n in sorted(ungrounded)[:8]:
-            click.echo(f"     {project:9} {label:44} {n} identifier(s)")
+        for proj_, label_, n in sorted(ungrounded)[:8]:       # never the options' names (#3521)
+            click.echo(f"     {proj_:9} {label_:44} {n} identifier(s)")
         if len(ungrounded) > 8:
             click.echo(f"     … and {len(ungrounded) - 8} more")
         click.echo("   These are generally correct values. Correct is not the "
@@ -902,8 +899,8 @@ def check_cmd(method, label, project, strict):
                    f"{claims[CLAIMS_NOT_RUN]} not checked, "
                    f"{claims[CLAIMS_STALE]} stale, "
                    f"{claims[CLAIMS_UNRECORDED]} predate the check):")
-        for project, label, n in sorted(contradicted)[:8]:
-            click.echo(f"     {project:9} {label:44} {n} claim(s)")
+        for proj_, label_, n in sorted(contradicted)[:8]:
+            click.echo(f"     {proj_:9} {label_:44} {n} claim(s)")
         if len(contradicted) > 8:
             click.echo(f"     … and {len(contradicted) - 8} more")
         click.echo("   A report is the audit trail read instead of the diff. "
@@ -921,8 +918,8 @@ def check_cmd(method, label, project, strict):
                    f"pair that disagrees ({pairs[PAIR_CONSISTENT]} agree, "
                    f"{pairs[PAIR_NOT_RUN]} could not be checked, "
                    f"{pairs[PAIR_UNRECORDED]} predate the check):")
-        for project, label, errs in sorted(divergent)[:8]:
-            click.echo(f"     {project:9} {label:44} {errs} error(s)")
+        for proj_, label_, errs in sorted(divergent)[:8]:
+            click.echo(f"     {proj_:9} {label_:44} {errs} error(s)")
         if len(divergent) > 8:
             click.echo(f"     … and {len(divergent) - 8} more")
         click.echo("   Both files validate alone. This is a property of the "
@@ -980,7 +977,8 @@ def check_cmd(method, label, project, strict):
         if len(behind) > 40:
             click.echo(f"     … {len(behind) - 40} more")
 
-    _report_deterministic_validity(**selected)
+    # The options as given: no loop in this command rebinds them (#2970, #3521).
+    _report_deterministic_validity(method=method, label=label, project=project)
 
     # Reported separately from the provenance verdict, and never fatal. A
     # label naming a condition its prompt does not match is a real defect
@@ -1062,11 +1060,11 @@ def check_cmd(method, label, project, strict):
             for ln in h["lines"]:
                 key = (h["label"], ln["field"], ln["header"], ln["record"])
                 grouped.setdefault(key, {}).setdefault(h["project"], set()).add(ln.get("artifact", "full"))
-        for (label, field, header, record), by_project in sorted(grouped.items()):
+        for (label_, field, header, record), by_project in sorted(grouped.items()):
             arts = sorted({a for arts in by_project.values() for a in arts})
             tag = "+".join(arts) if all(by_project[p] == set(arts) for p in by_project) else "/".join(arts)
             what = (f"header `{field}: {header}` · record {record}" if field else f"{record}")
-            click.echo(f"   {label}  [{tag}] {what}  ×{len(by_project)} "
+            click.echo(f"   {label_}  [{tag}] {what}  ×{len(by_project)} "
                        f"({', '.join(sorted(by_project))})")
         click.echo("   Reported, not failed — the datasheet is wrong about itself, not "
                    "about the dataset. Records written or repaired since #1027 stamp "

@@ -571,13 +571,13 @@ def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
     sm.write_bytes(SOURCE_MANIFEST)
     prov = tmp_path / "P_provenance.yaml"
     record = {"inputs": {"source_manifest": {"path": str(sm), "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest()}}}
-    with mock.patch.object(pv, "bundle_bytes_for") as git:
+    with mock.patch.object(pv, "committed_bytes_for") as git:
         assert rs.run_source_manifest(record, prov) == (SOURCE_MANIFEST, {"source": "manifest on disk",
                                                                           "path": str(sm)})
     git.assert_not_called()
     sm.write_bytes(SOURCE_MANIFEST + b"# edited since the run\n")
     entry = {"commit": "b" * 40, "date": "2026-09-01", "md5": "x", "sha256": "y", "matched_on": ["md5"]}
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)) as git:
+    with mock.patch.object(pv, "committed_bytes_for", return_value=(SOURCE_MANIFEST, entry)) as git:
         raw, basis = rs.run_source_manifest(record, prov)
     assert git.call_args.args == (str(sm),)
     assert git.call_args.kwargs == {"md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(), "sha256": None}
@@ -587,19 +587,19 @@ def test_run_source_manifest_reads_the_bytes_the_run_recorded(tmp_path):
     sm.write_bytes(SOURCE_MANIFEST)
     both = {"inputs": {"source_manifest": {"path": str(sm), "md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(),
                                            "sha256": "0" * 64}}}
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=None) as git:
+    with mock.patch.object(pv, "committed_bytes_for", return_value=None) as git:
         with pytest.raises(ValueError, match="no committed version .* md5 and sha256"):
             rs.run_source_manifest(both, prov)
     assert git.call_args.kwargs == {"md5": hashlib.md5(SOURCE_MANIFEST).hexdigest(), "sha256": "0" * 64}
     both["inputs"]["source_manifest"]["sha256"] = hashlib.sha256(SOURCE_MANIFEST).hexdigest()
-    with mock.patch.object(pv, "bundle_bytes_for") as git:
+    with mock.patch.object(pv, "committed_bytes_for") as git:
         assert rs.run_source_manifest(both, prov)[1] == {"source": "manifest on disk", "path": str(sm)}
     git.assert_not_called()
     sm.write_bytes(SOURCE_MANIFEST + b"# edited since the run\n")
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=None):
+    with mock.patch.object(pv, "committed_bytes_for", return_value=None):
         with pytest.raises(ValueError, match="no committed version .* md5"):
             rs.run_source_manifest(record, prov)
-    with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
+    with mock.patch.object(pv, "committed_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
         with pytest.raises(pv.GitUnavailable, match="shallow"):
             rs.run_source_manifest(record, prov)
 
@@ -622,7 +622,7 @@ def test_run_source_manifest_anchors_a_relative_path_on_the_records_tree(tmp_pat
     elsewhere = tmp_path / "elsewhere"
     elsewhere.mkdir()
     monkeypatch.chdir(elsewhere)
-    with mock.patch.object(pv, "bundle_bytes_for") as git:
+    with mock.patch.object(pv, "committed_bytes_for") as git:
         assert rs.run_source_manifest(record, prov) == (SOURCE_MANIFEST, {"source": "manifest on disk",
                                                                           "path": str(sm)})
     git.assert_not_called()
@@ -631,7 +631,7 @@ def test_run_source_manifest_anchors_a_relative_path_on_the_records_tree(tmp_pat
     decoy = elsewhere / rel
     decoy.parent.mkdir(parents=True)
     decoy.write_bytes(SOURCE_MANIFEST)
-    with mock.patch.object(pv, "bundle_bytes_for") as git:
+    with mock.patch.object(pv, "committed_bytes_for") as git:
         assert rs.run_source_manifest(record, prov)[1] == {"source": "manifest on disk", "path": str(sm)}
     git.assert_not_called()
     # A record outside any corpus tree has no base for a relative path: the
@@ -639,7 +639,7 @@ def test_run_source_manifest_anchors_a_relative_path_on_the_records_tree(tmp_pat
     # the bytes are looked for in git under the path as recorded.
     loose = tmp_path / "loose" / "P_provenance.yaml"
     loose.parent.mkdir()
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=None) as git:
+    with mock.patch.object(pv, "committed_bytes_for", return_value=None) as git:
         with pytest.raises(ValueError, match="no committed version of data/preprocessed/source_manifest.yaml"):
             rs.run_source_manifest(record, loose)
     assert git.call_args.args == (rel,)
@@ -764,16 +764,16 @@ def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, 
     # found at, and the line says so (#3476)
     entry = {"commit": "b" * 40, "date": "2026-09-01", "md5": "x", "sha256": "y", "matched_on": ["md5"]}
     recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
+    with mock.patch.object(pv, "committed_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
         text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
     assert f"tiers: {recorded} (git blob at commit {'b' * 12}) sha256" in text, text
-    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
+    with mock.patch.object(pv, "committed_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
         report = json.loads(CliRunner().invoke(cli, args + ["--at-run-commit", "--json"]).output)
     assert report["run"]["source_manifest"] == str(recorded)                   # a path, not a label (#3492)
     assert report["run"]["source_manifest_bytes"] == {"source": "git blob", "path": str(recorded),
                                                       "commit": "b" * 40}
     recorded.write_bytes(SOURCE_MANIFEST)
-    with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
+    with mock.patch.object(pv, "committed_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
         recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
         result = CliRunner().invoke(cli, args + ["--at-run-commit"])
     assert result.exit_code != 0 and "shallow clone" in result.output

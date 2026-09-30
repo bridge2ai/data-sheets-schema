@@ -213,3 +213,39 @@ class OnTheCorpus(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNeutralNames(unittest.TestCase):
+    """#3412. The lookups recover any committed file by path and hash; the
+    neutral names are the same functions, so one memo cache serves both."""
+
+    def test_the_neutral_names_are_the_same_functions(self):
+        self.assertIs(pv.committed_bytes_for, pv.bundle_bytes_for)
+        self.assertIs(pv.committed_blob_history, pv.bundle_blob_history)
+
+    def test_a_file_that_is_not_a_bundle_is_recovered_by_hash(self):
+        """A source manifest, as `d4d receipts sources --at-run-commit`
+        recovers one (#3050): the newest version whose hash matches."""
+        path = "data/preprocessed/source_manifest.yaml"
+        blobs = {"c" * 40: b"projects: {B: []}\n", "a" * 40: b"projects: {A: []}\n"}
+
+        def fake(args, **kw):
+            if args[:2] == ["git", "rev-parse"]:
+                return subprocess.CompletedProcess(args, 0, stdout="false\n", stderr="")
+            if args[:2] == ["git", "log"]:
+                assert args[-1] == path, args
+                return subprocess.CompletedProcess(
+                    args, 0, stdout=f"{'c' * 40} 2026-09-20\n{'a' * 40} 2026-09-01\n", stderr="")
+            if args[:2] == ["git", "show"]:
+                commit, shown = args[2].split(":", 1)
+                assert shown == path, args
+                return subprocess.CompletedProcess(args, 0, stdout=blobs[commit], stderr=b"")
+            raise AssertionError(args)
+        pv.committed_blob_history.cache_clear()
+        self.addCleanup(pv.committed_blob_history.cache_clear)
+        with mock.patch.object(pv.subprocess, "run", fake):
+            raw, entry = pv.committed_bytes_for(path, sha256=hashlib.sha256(blobs["a" * 40]).hexdigest())
+            none = pv.committed_bytes_for(path, md5=hashlib.md5(b"never committed").hexdigest())
+        self.assertEqual(raw, blobs["a" * 40])
+        self.assertEqual((entry["commit"], entry["matched_on"]), ("a" * 40, ["sha256"]))
+        self.assertIsNone(none)

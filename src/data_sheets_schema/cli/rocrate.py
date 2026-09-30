@@ -10,6 +10,15 @@ import sys
 from pathlib import Path
 
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
+
+
+def _outcome_line(refused: int, invalid: int) -> str:
+    """One summary line counting refused crates apart from records that failed
+    validation: a crate that could not be read was never validated (#3359)."""
+    return (f"{refused} crate(s) refused (missing or unreadable), "
+            f"{invalid} validation failure(s)")
+
+
 @click.group()
 def rocrate():
     """RO-Crate integration commands."""
@@ -180,14 +189,14 @@ def normalize(project, packages_dir):
 
     from data_sheets_schema.resources import resource_path
     sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
-    failures = 0
+    refused = invalid = 0                                  # counted apart (#3359)
     for name in targets:
         click.echo(f"\n📦 {name}")
         try:
             res = normalize_project(name, root, sv=sv)
         except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
             click.echo(f"  ⚠️  {e}", err=True)
-            failures += 1
+            refused += 1
             continue
         for label, path in res.outputs.items():
             click.echo(f"  → {label}: {path}")
@@ -196,13 +205,13 @@ def normalize(project, packages_dir):
             icon = "✓" if head == "PASS" else "❌"
             click.echo(f"  {icon} {fname}: {head}")
             if head != "PASS":
-                failures += 1
+                invalid += 1
                 for line in status.splitlines()[1:6]:
                     click.echo(f"      {line}")
         click.echo(f"  {len(res.changes)} change(s) recorded")
 
-    if failures:
-        click.echo(f"\n❌ {failures} validation failure(s)", err=True)
+    if refused or invalid:
+        click.echo(f"\n❌ {_outcome_line(refused, invalid)}", err=True)
         sys.exit(1)
     click.echo("\n✅ Normalization complete")
 
@@ -322,14 +331,14 @@ def map_cmd(project, packages_dir):
     sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     rows = load_mapping()
     click.echo(f"Mapping table: {len(rows)} rows")
-    failures = 0
+    refused = invalid = 0                                  # counted apart (#3359)
     for name in targets:
         click.echo(f"\n📦 {name}")
         try:
             res = map_project(name, root, sv=sv, rows=rows)
         except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
             click.echo(f"  ❌ {e}", err=True)
-            failures += 1
+            refused += 1
             continue
         c = res.counts()
         click.echo(f"  filled {c.get('filled',0)} | subsumed {c.get('subsumed',0)} | "
@@ -341,11 +350,12 @@ def map_cmd(project, packages_dir):
         head = res.validation.splitlines()[0]
         click.echo(f"  {'✓' if head == 'PASS' else '❌'} validation: {head}")
         if head != 'PASS':
-            failures += 1
+            invalid += 1
             for line in res.validation.splitlines()[1:6]:
                 click.echo(f"      {line}")
 
-    if failures:
+    if refused or invalid:
+        click.echo(f"\n❌ {_outcome_line(refused, invalid)}", err=True)
         sys.exit(1)
     click.echo("\n✅ Static mapping complete")
 

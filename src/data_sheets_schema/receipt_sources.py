@@ -535,12 +535,12 @@ def run_source_manifest(record: dict[str, Any], provenance: Path) -> tuple[bytes
     The bytes are the manifest on disk at the recorded path when they hash to
     every hash the run kept, else the newest committed version of that path
     that does — recovered by hash, as `run_chunks` recovers a bundle
-    (`provenance.bundle_bytes_for`, #1140), not by the record's commit. Raises
+    (`provenance.committed_bytes_for`, #1140/#3412), not by the record's commit. Raises
     `ValueError` naming why when the run recorded no path or no hash or no
     version matches, and `provenance.GitUnavailable` when git cannot answer
     (a shallow clone among them).
     """
-    from data_sheets_schema.provenance import bundle_bytes_for, resolve_record_input
+    from data_sheets_schema.provenance import committed_bytes_for, resolve_record_input
 
     inputs = record.get("inputs") if isinstance(record.get("inputs"), dict) else {}
     recorded = inputs.get("source_manifest") if isinstance(inputs.get("source_manifest"), dict) else {}
@@ -559,7 +559,7 @@ def run_source_manifest(record: dict[str, Any], provenance: Path) -> tuple[bytes
         raw = disk.read_bytes()
         if all(digest[k](raw) == v for k, v in hashes.items()):
             return raw, {"source": "manifest on disk", "path": str(disk)}
-    found = bundle_bytes_for(rel, md5=hashes.get("md5"), sha256=hashes.get("sha256"))
+    found = committed_bytes_for(rel, md5=hashes.get("md5"), sha256=hashes.get("sha256"))
     if found is None:
         raise ValueError(f"no committed version of {rel} hashes to the run's recorded "
                          f"{' and '.join(hashes)}")

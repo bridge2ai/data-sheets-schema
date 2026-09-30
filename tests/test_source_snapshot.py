@@ -11,6 +11,18 @@ from data_sheets_schema import schema_sync
 from tests import running_interpreter
 
 
+def generate_directly(source, output):
+    """`gen-linkml` straight from `source`, the reference the snapshot rebuild
+    must match. A failure carries the command and the generator's stderr, so
+    an environment failure (a missing module, a bad import spelling) reads as
+    such rather than as a bare CalledProcessError (#3413)."""
+    command = running_interpreter.gen_linkml("-f", "yaml", "-o", str(output), str(source))
+    done = subprocess.run(command, capture_output=True, text=True)
+    if done.returncode != 0:
+        pytest.fail(f"direct generation failed (exit {done.returncode}): {command}\n{done.stderr}",
+                    pytrace=False)
+
+
 def source_text(word):
     return ("id: https://example.org/source\nname: source\ndefault_range: string\n"
             "classes:\n  Dataset:\n    attributes:\n      title:\n"
@@ -135,8 +147,7 @@ def test_snapshot_matches_direct_generation_for_supported_source_paths(tmp_path,
     else:
         source.write_text(source_text("country"))
     direct = tmp_path / "direct.yaml"
-    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
-                   check=True, capture_output=True, text=True)
+    generate_directly(source, direct)
     rebuilt = tmp_path / "rebuilt.yaml"
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
@@ -149,8 +160,7 @@ def test_package_import_spellings_match_direct_generation(tmp_path, spelling):
     source.write_text(source_text("country") + "prefixes: {lm: https://w3id.org/linkml/}\n"
                       + f"imports: [{spelling}]\n")
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
-                   check=True, capture_output=True, text=True)
+    generate_directly(source, direct)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
 
@@ -209,8 +219,7 @@ def test_source_prefix_override_matches_direct_generation(tmp_path):
     from tests.test_schema_snapshot_compatibility import selection_root
     source = selection_root(tmp_path)
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
-                   check=True, capture_output=True, text=True)
+    generate_directly(source, direct)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
 
@@ -219,7 +228,18 @@ def test_source_name_inferred_by_the_generator_is_preserved(tmp_path):
     source = tmp_path / "source.yaml"
     source.write_text(source_text("country").replace("name: source\n", ""))
     direct, rebuilt = tmp_path / "direct.yaml", tmp_path / "rebuilt.yaml"
-    subprocess.run(running_interpreter.gen_linkml("-f", "yaml", "-o", str(direct), str(source)),
-                   check=True, capture_output=True, text=True)
+    generate_directly(source, direct)
     assert schema_sync._regenerate(source, rebuilt, False) == (True, None)
     assert rebuilt.read_bytes() == direct.read_bytes()
+
+
+def test_a_failed_direct_generation_reports_the_generators_stderr(tmp_path):
+    """#3413. With check=True a failure read as a bare CalledProcessError and
+    the reason the generator printed was lost."""
+    source = tmp_path / "source.yaml"
+    source.write_text(source_text("country") + "imports: [no_such_module_3413]\n")
+    with pytest.raises(pytest.fail.Exception) as caught:
+        generate_directly(source, tmp_path / "direct.yaml")
+    message = str(caught.value)
+    assert "direct generation failed (exit " in message
+    assert "no_such_module_3413" in message.split("\n", 1)[1], message
