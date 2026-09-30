@@ -6,12 +6,15 @@ judgements that are the draw it names. The fixture tests build their own
 corpus; the corpus-marked test reproduces the committed note from the pinned
 records.
 """
+import contextlib
 import copy
+import dataclasses
 import importlib.util
 import re
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import pytest
@@ -52,6 +55,47 @@ ADMITTED = {
     # past a `;` and more than 80 characters away: crossing `;` alone is not enough
     "/source_caveats/7": ["cumulative_full_stop", "cumulative_semicolon"],
 }
+
+#: What the registered v4 pattern does with each fixture leaf's dropped term
+#: (#3791): its window runs to the end of the sentence across `;`, so the
+#: `window` and `semicolon` rows are recovered; a full stop still ends it; an
+#: absorbed name stays inside a longer match; a consumed verb stays consumed.
+V4 = {
+    "/source_caveats/1": "dropped",        # no_verb
+    "/source_caveats/2": "recovered",      # window
+    "/source_caveats/3": "recovered",      # semicolon
+    "/source_caveats/4": "dropped",        # other_sentence
+    "/source_caveats/5": "inside",         # absorbed
+    "/source_caveats/6": "dropped",        # consumed
+    "/source_caveats/7": "recovered",      # semicolon, past the window too
+    "/notes": "dropped",                   # no_verb
+}
+
+
+#: A `;` sentence whose dropped term no other v3 phrase shares a sentence
+#: with: an in-class row v3 counts nothing in, which v4 recovers (#3896).
+UNFLAGGED_SEMICOLON = "The higher-ranked source gives 19 July 2023; that date is used."
+
+
+@contextlib.contextmanager
+def _v4_without_prefer(m):
+    """The script's v4, with the preference verbs taken out of the pattern's
+    verb list and its bytes' identity kept, so a v3 match resting on
+    "preferred" is ended by no v4 match (#3896)."""
+    load = m.lx.load
+
+    def narrowed(name, version=None, **kw):
+        lexicon = load(name, version, **kw)
+        if version != m.NEXT_VERSION:
+            return lexicon
+        patterns = tuple(dataclasses.replace(p, regex=re.compile(p.regex.pattern.replace(
+                             "prefer(?:s|red|ring)?|", ""), p.regex.flags)) if p.id == m.PATTERN else p
+                         for p in lexicon.patterns)
+        assert patterns != tuple(lexicon.patterns)
+        return dataclasses.replace(lexicon, patterns=type(lexicon.patterns)(patterns))
+
+    with mock.patch.object(m.lx, "load", narrowed):
+        yield
 
 
 def _script():
@@ -104,6 +148,43 @@ class Causes(unittest.TestCase):
         self.assertEqual(got, ADMITTED)
         self.assertEqual(rows["/notes"]["admitted_by"], [])
 
+    def test_v4_recovers_the_window_and_semicolon_rows_and_nothing_past_a_full_stop(self):
+        found = self.m.dropped(self.corpus, self.pins)
+        self.assertEqual({h["pointer"]: h["v4"] for _, h in found["rows"]}, V4)
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 0)
+        self.assertEqual(found["totals"]["v4"], found["totals"]["v3"] + 3)
+
+    def test_a_v3_match_no_v4_match_ends_at_is_counted(self):
+        """#3896: the registered v4 ends every v3 match, so the fixture's
+        count is 0; a v4 without the preference verbs does not end the two
+        v3 matches that rest on "preferred", and the counter says so."""
+        with _v4_without_prefer(self.m):
+            found = self.m.dropped(self.corpus, self.pins)
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 2)
+        self.assertEqual(self.m.dropped(self.corpus, self.pins)["totals"]["v3_not_ended_by_v4"], 0)
+
+    def test_v4_recovers_a_term_past_an_abbreviation_that_no_lift_of_v3_admits_short_of_a_full_stop(self):
+        """#3792: v3 and every lift short of crossing a full stop take the
+        `.` of "St." for one; v4 does not, and the note tells that recovery
+        apart from the window-and-`;` lift's. A verb-first v4 match starts
+        before the term, and ending at it is what makes it a recovery."""
+        path = self.corpus / "m_a" / "label" / "P_d4d.yaml"
+        path.write_text(yaml.safe_dump({"source_caveats": [
+            "The higher-ranked source names Washington University in St. Louis as the sponsor, and that name "
+            "is used.",
+            "The higher-ranked source gives Washington University in St. Louis. Both values are recorded above.",
+            # verb first: the v4 match starts at the verb and ends at the term, and that is a recovery
+            "Both dates are recorded; two tier-1 sources disagree."]}),
+            encoding="utf-8")
+        found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
+        rows = {h["pointer"]: h for _, h in found["rows"]}
+        self.assertEqual({p: (h["cause"], h["v4"]) for p, h in rows.items()}, {
+            "/source_caveats/0": ("other_sentence", "recovered"),
+            "/source_caveats/1": ("other_sentence", "dropped"),
+            "/source_caveats/2": ("semicolon", "recovered")})
+        self.assertNotIn("cumulative_semicolon", rows["/source_caveats/0"]["admitted_by"])
+        self.assertIn("cumulative_full_stop", rows["/source_caveats/0"]["admitted_by"])
+
     def test_a_pattern_without_the_window_is_refused(self):
         v3 = lx.load(al.LEXICON, 3)
         pattern = next(p for p in v3.patterns if p.id == self.m.PATTERN)
@@ -148,11 +229,16 @@ class Judgements(unittest.TestCase):
         self.m = _script()
         self.dir = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.dir)
-        corpus = self.dir / "d4d_concatenated"
-        path = corpus / "m_a" / "label" / "P_d4d.yaml"
-        path.parent.mkdir(parents=True)
-        path.write_text(yaml.safe_dump({"source_caveats": [text for text, _, _ in LEAVES]}), encoding="utf-8")
-        self.found = self.m.dropped(corpus, self.m.baseline.current_records(corpus))
+        self._build([text for text, _, _ in LEAVES])
+
+    def _build(self, leaves):
+        """Write the fixture record with these leaves, and judgements that
+        are the draw over it: every row in class but the `no_verb` one."""
+        self.corpus = self.dir / "d4d_concatenated"
+        path = self.corpus / "m_a" / "label" / "P_d4d.yaml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump({"source_caveats": leaves}), encoding="utf-8")
+        self.found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
         drawn = self.m.draw(self.found, 10, 7)
         _, picked = drawn[RSN]
         self.rows = [{"n": i, "record": p, "pointer": h["pointer"], "start": h["start"], "end": h["end"],
@@ -211,6 +297,43 @@ class Judgements(unittest.TestCase):
         self.assertIn("| Widen the window, cross `;` and cross a full stop | 4 | 4 | 0 | 0 | 0 |", md)
         self.assertIn(f"v3 therefore gives up {len(self.rows) - 1} in-class matches", md)
 
+    def test_the_note_says_what_v4_recovers_from_the_same_judgements(self):
+        md = self.m.render_markdown(self.found)
+        self.assertIn("## What v4 recovers (#3791)", md)
+        self.assertIn("| construction | in_class | 6 | 3 | 1 | 2 |", md)
+        self.assertIn("| source | borderline | 1 | 0 | 0 | 1 |", md)
+        self.assertIn("| **all** | | 7 | 3 | 1 | 3 |", md)
+        self.assertIn("v4 recovers 3 of the 7 dropped matches: 3 in class, 0 borderline and\n0 not in class.", md)
+        self.assertIn("none needs an abbreviation's `.`.", md)
+        self.assertIn("by reading and cause: 1 construction `absorbed`, 1 construction `consumed`, "
+                      "1 construction `other_sentence`.", md)
+
+    def test_the_note_says_how_many_lost_in_class_phrases_v4_recovers(self):
+        """#3896: "lost" rows are in-class dropped terms in sentences v3
+        counts nothing in. In the fixture one is lost and v4 does not recover
+        it; an added `;` sentence with no other phrase is lost and recovered."""
+        md = self.m.render_markdown(self.found)
+        self.assertIn("It recovers 0 of the 1 in-class phrases in sentences v3 counts nothing in.", md)
+        self._build([text for text, _, _ in LEAVES] + [UNFLAGGED_SEMICOLON])
+        rows = {h["pointer"]: h for _, h in self.found["rows"]}
+        self.assertEqual((rows["/source_caveats/8"]["cause"], rows["/source_caveats/8"]["flagged"],
+                          rows["/source_caveats/8"]["v4"]), ("semicolon", [], "recovered"))
+        md = self.m.render_markdown(self.found)
+        self.assertIn("It recovers 1 of the 2 in-class phrases in sentences v3 counts nothing in.", md)
+
+    def test_the_note_counts_the_v3_matches_no_v4_match_ends_at(self):
+        """#3896: with a v4 that lacks the verb one v3 match rests on, that
+        match is counted as ended by no v4 match, the note says so, and the
+        in-class share v4 keeps loses it."""
+        md = self.m.render_markdown(self.found)
+        self.assertIn("0 of v3's 3 matches end where no v4 match does.", md)
+        self.assertIn("v4 keeps 6 of 9 (66.7%) of the in-class matches v2 had", md)
+        with _v4_without_prefer(self.m):
+            found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 2)
+        md = self.m.render_markdown(found)
+        self.assertIn("2 of v3's 3 matches end where no v4 match does.", md)
+        self.assertIn("v4 keeps 4 of 9 (44.4%) of the in-class matches v2 had", md)
     def test_the_note_reports_the_kept_precision_and_the_recall_estimate(self):
         """The kept draw's precision replaces the all-in-class upper bound
         with a point estimate (#3793)."""
@@ -227,6 +350,49 @@ class Judgements(unittest.TestCase):
         self.assertIn(f"an estimated **{100 * est / (est + lost):.1f}%**", md)
         self.assertIn("that is the upper bound", md)
         self.assertNotIn("is not measured here", md)
+
+    def test_the_note_restates_v4_at_the_measured_precision(self):
+        """v4's matches are v3's at the kept draw's precision plus the
+        recovered rows as judged; the "not measured here" sentence is gone
+        (#3895)."""
+        md = self.m.render_markdown(self.found)
+        t = self.found["totals"]
+        n_in, n_kept, kept = len(self.kept_rows) - 1, len(self.kept_rows), t["v3"]
+        retained, rec_in, lost = kept - t["v3_not_ended_by_v4"], 3, len(self.rows) - 1
+        self.assertEqual((t["v4"], retained), (6, 3))
+        est, v3_est = retained * n_in / n_kept + rec_in, kept * n_in / n_kept
+        lo, hi = self.m.wilson(n_in, n_kept)
+        self.assertIn("### v4 at the measured precision", md)
+        self.assertIn("the 3 v3 matches it still ends at, the 3 judged dropped rows it\nrecovers, and nothing else.",
+                      md)
+        self.assertIn(f"v4 keeps an estimated {est:.1f} in-class matches ({retained} × {n_in}/{n_kept} + {rec_in}): "
+                      f"a precision of {100 * est / t['v4']:.1f}%", md)
+        self.assertIn(f"over those {t['v4']} matches ({100 * (retained * lo + rec_in) / t['v4']:.1f}% to "
+                      f"{100 * (retained * hi + rec_in) / t['v4']:.1f}% over the kept draw's interval)", md)
+        self.assertIn(f"an estimated **{100 * est / (v3_est + lost):.1f}%** ("
+                      f"{100 * (retained * lo + rec_in) / (kept * lo + lost):.1f}% to "
+                      f"{100 * (retained * hi + rec_in) / (kept * hi + lost):.1f}%), against v3's "
+                      f"{100 * v3_est / (v3_est + lost):.1f}%.", md)
+        self.assertIn("As for v3, that is the upper bound.", md)
+        self.assertNotIn("not measured here", md)
+
+    def test_v4_matches_no_judgement_covers_are_named_and_left_out(self):
+        found = {**self.found, "totals": {**self.found["totals"], "v4": self.found["totals"]["v4"] + 2}}
+        md = self.m.render_markdown(found)
+        self.assertIn("recovers, and 2 that neither judgement file covers, left out below.", md)
+        self.assertIn("over those 6 matches", md)
+
+    def test_v4_at_the_measured_precision_counts_only_the_v3_matches_it_still_ends_at(self):
+        with _v4_without_prefer(self.m):
+            found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
+        retained = found["totals"]["v3"] - found["totals"]["v3_not_ended_by_v4"]
+        self.assertEqual(retained, 1)
+        md = self.m.render_markdown(found)
+        self.assertIn(f"are the {retained} v3 matches it still ends at", md)
+        self.assertIn(f"({retained} × 1/2 + ", md)
+        # The figure itself, not only its label: 1 retained x 1/2 + 3 recovered
+        # in class = 3.5, where counting every v3 match (3) would give 4.5 (#3916).
+        self.assertIn("v4 keeps an estimated 3.5 in-class matches (1 × 1/2 + 3): a precision of 87.5%", md)
 
     def test_a_kept_tally_that_is_not_the_entry_is_refused(self):
         self.m.KEPT["classes"] = {RSN: (len(self.kept_rows), 0, 0)}
@@ -291,6 +457,9 @@ class Judgements(unittest.TestCase):
         self.assertIn(": every kept match.", md)
         self.assertNotIn("Wilson", md)
         self.assertNotIn("over the precision's interval", md)
+        self.assertNotIn("over the kept draw's interval", md)
+        self.assertNotIn("sampling error alone", md)
+        self.assertIn("in-class matches (3 × 2/3 + 3): a precision of 83.3%\nover those 6 matches,", md)
 
     def test_wilson_interval(self):
         lo, hi = self.m.wilson(45, 50)
@@ -384,6 +553,8 @@ def test_the_committed_recall_note_is_what_its_records_and_judgements_reproduce(
     m = _script()
     found = m.dropped(m.baseline.CORPUS, m.baseline.read_pins(m.baseline.PINS))
     assert (found["totals"]["v2"], found["totals"]["v3"], len(found["rows"])) == (336, 248, 88)
+    assert (found["totals"]["v4"], found["totals"]["v3_not_ended_by_v4"]) == (276, 0)
+    assert sum(h["v4"] == "recovered" for _, h in found["rows"]) == 28
     assert len(found["kept"]) == 248
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(found), (
         "notes/absence_v3_recall.md does not match its records and judgements: run scripts/absence_v3_recall.py")
@@ -391,3 +562,24 @@ def test_the_committed_recall_note_is_what_its_records_and_judgements_reproduce(
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_a_recovered_consumed_row_is_not_credited_to_the_abbreviations(tmp_path):
+    """#3917: an absorbed or consumed row carries no `admitted_by`, so its
+    recovery is named on its own, never as one v4 owes to an abbreviation."""
+    m = _script()
+    corpus = tmp_path / "d4d_concatenated"
+    record = corpus / "m_a" / "label" / "P_d4d.yaml"
+    record.parent.mkdir(parents=True)
+    record.write_text(yaml.safe_dump({"source_caveats": [
+        "Both are recorded as the higher-ranked and the lower-ranked sources; the date is used."]}))
+    found = m.dropped(corpus, m.baseline.current_records(corpus))
+    consumed = [(rel, h) for rel, h in found["rows"] if h["cause"] == "consumed" and h["v4"] == "recovered"]
+    assert consumed, found["rows"]
+    rel, h = consumed[0]
+    rows = [{"n": 1, "record": rel, "pointer": h["pointer"], "start": h["start"], "end": h["end"],
+             "verdict": "in_class", "reading": "construction", "cause": h["cause"]}]
+    text = "\n".join(m._v4_section(rows, {(rel, h["pointer"], h["start"], h["end"]): h}, [],
+                                   found["totals"]["v3"], found["totals"], (1, 1, 1.0, 1.0, True)))
+    assert "judgement #1 (construction, `consumed`) the change table does not classify (#3917)" in text
+    assert "past an abbreviation" not in text

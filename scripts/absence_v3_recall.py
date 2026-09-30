@@ -11,13 +11,19 @@ file its `RECALL` entry names: how many of the dropped matches do narrate the
 record's construction, and so how much recall v3 gave up for its precision.
 
 It is a measurement of v3, not a change to it. It registers no lexicon, and
-the counts in the baseline note do not move.
+the counts in the baseline note do not move. Since the owner opened v4
+(#3791), which lets the pattern's window run to the end of the sentence
+across `;` and past the `.` of a few abbreviations (#3792), the note also
+says which of the dropped matches v4 recovers, from the same judgements.
 
 The note also measures the precision of the 248 matches v3 keeps (#3793):
 a seeded draw of them (`--kept-sample`), judged per phrase in the file its
 `KEPT` entry names with the same readings, turns the recall the note reports
 from an upper bound (every kept match in class) into a point estimate with
 an interval.
+The v4 section restates v4's recall on that precision (#3895): v4's matches
+are v3's that it still ends at, which the kept draw covers, and the dropped
+rows it recovers, which the dropped judgements cover.
 
 A *dropped match* is a v2 match of the pattern that no v3 match of the same
 pattern ends at, in the same leaf. Every v3 match ends at a term v2 matched
@@ -43,6 +49,16 @@ records two things it computes rather than judges:
             dropped term's sentence, to its full stop (a `.` followed by
             whitespace; a clause after `;` is part of it, as it is when the
             phrase is judged). Empty when v3 counts nothing in that sentence.
+  v4        what the registered v4 pattern does with the term (#3791):
+              recovered       a v4 match of the pattern ends at it
+              inside          it lies inside a v4 match that ends later
+              dropped         neither
+            A recovered row that the cumulative window-and-`;` lift of v3
+            (`cumulative_semicolon` in `admitted_by`) does not admit is one
+            v4 owes to its abbreviations (#3792): that lift is v4's rule
+            without them. An absorbed or consumed row is the exception: the
+            change table does not classify it, so its recovery is named on
+            its own (#3917).
 
 The judgement file is in the form of the precision judgements
 (`notes/absence_precision_judgements_bd0c63ed.yaml`) and is checked by the
@@ -102,6 +118,10 @@ OUT_MD = ROOT / "notes" / "absence_v3_recall.md"
 PATTERN = "rsn.source-ranking"
 RSN = "record_self_narration"
 FROM_VERSION, TO_VERSION = 2, 3
+#: The version the owner opened to recover what v3 gave up (#3791).
+NEXT_VERSION = 4
+#: What a dropped term becomes under v4 (see the module docstring).
+V4_OUTCOMES = ("recovered", "inside", "dropped")
 #: A judged reading of a dropped phrase's sentence, and the verdict it
 #: carries (the judgement file's header defines each).
 READINGS = {"construction": "in_class", "referent": "in_class", "source": "borderline", "absence": "not_in_class"}
@@ -138,6 +158,7 @@ RECALL: dict[str, Any] = {
     "draw_sha256": "241e910ec4781ea3467152b31e89aa6a302a2385370544d69ac5f427a47641aa",
     "classes": {RSN: (35, 50, 3)},
     "judgements": "notes/absence_v3_recall_judgements_241e910e.yaml",
+    "next_lexicon_sha256": "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec",   # v4 (#3791)
 }
 #: The judged draw of the matches v3 keeps (#3793), keyed like RECALL: a
 #: seeded sample of them, in the order `random.Random(seed).sample` puts
@@ -246,18 +267,20 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
     """Every v2 match of the pattern that no v3 match ends at, over the
     pinned records, in record then leaf then offset order, with its cause and
     the v3 phrases in its sentence."""
-    v2, v3 = (lx.load(absence_lint.LEXICON, v) for v in (FROM_VERSION, TO_VERSION))
-    for have, want in ((v2.sha256, RECALL["from_lexicon_sha256"]), (v3.sha256, RECALL["lexicon_sha256"])):
+    v2, v3, v4 = (lx.load(absence_lint.LEXICON, v) for v in (FROM_VERSION, TO_VERSION, NEXT_VERSION))
+    for have, want in ((v2.sha256, RECALL["from_lexicon_sha256"]), (v3.sha256, RECALL["lexicon_sha256"]),
+                       (v4.sha256, RECALL["next_lexicon_sha256"])):
         if have != want:
             raise Refused(f"a registered lexicon hashes to {have[:12]}…, not the {want[:12]}… "
                           "this measurement names")
     p2 = next(p for p in v2.patterns if p.id == PATTERN).regex
     p3 = next(p for p in v3.patterns if p.id == PATTERN)
+    p4 = next(p for p in v4.patterns if p.id == PATTERN).regex
     variants = _variants(p3)
     scope = absence_lint._scope(v3)
     rows: list[tuple[str, dict]] = []
+    totals = {"v2": 0, "v3": 0, "v4": 0, "v3_not_ended_by_v4": 0}
     kept_rows: list[tuple[str, dict]] = []
-    totals = {"v2": 0, "v3": 0}
     records, changed, missing = [], [], []
     for rel in sorted(pins):
         try:
@@ -284,8 +307,11 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
             text = " ".join(leaf.split())
             old = [(m.start(), m.end()) for m in p2.finditer(text)]
             new = [(m.start(), m.end()) for m in p3.regex.finditer(text)]
+            v4_spans = [(m.start(), m.end()) for m in p4.finditer(text)]
             totals["v2"] += len(old)
             totals["v3"] += len(new)
+            totals["v4"] += len(v4_spans)
+            totals["v3_not_ended_by_v4"] += len({e for _, e in new} - {e for _, e in v4_spans})
             ends = {e for _, e in old}
             if any(e not in ends for _, e in new):
                 raise Refused(f"{rel} {pointer}: a v3 match ends where no v2 match does")
@@ -304,9 +330,11 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
                 admitted = sorted({key for name, _, key in LIFTS
                                    if why not in ("absorbed", "consumed")
                                    and _admits(variants[name], text, s, e)})
+                v4 = ("recovered" if any(ve == e for _, ve in v4_spans) else
+                      "inside" if any(vs <= s and e <= ve for vs, ve in v4_spans) else "dropped")
                 rows.append((rel, {"pointer": pointer, "start": s, "end": e, "text": text[s:e],
                                    "patterns": [PATTERN], "cause": why, "admitted_by": admitted,
-                                   "flagged": flagged, "sentence": (ss, se)}))
+                                   "flagged": flagged, "sentence": (ss, se), "v4": v4}))
     if changed or missing:
         raise baseline.Stale(f"{len(changed)} pinned record(s) changed and {len(missing)} gone", changed, missing)
     digest = hashlib.sha256("".join(f"{r['path']} {r['sha256']}\n" for r in records).encode()).hexdigest()
@@ -426,9 +454,10 @@ def render_markdown(found: dict[str, Any]) -> str:
         "Generated by `scripts/absence_v3_recall.py` (#3705). Do not edit by hand: run the script",
         "to regenerate it, or `--check` to ask whether it still matches its records and judgements.",
         "",
-        f"- **Lexicons:** absence_self_narration v2 (sha256 `{RECALL['from_lexicon_sha256']}`) and",
-        f"  v3 (sha256 `{RECALL['lexicon_sha256']}`), both registered; this note registers nothing",
-        "  and moves no count in `notes/absence_claims_baseline.md`.",
+        f"- **Lexicons:** absence_self_narration v2 (sha256 `{RECALL['from_lexicon_sha256']}`),",
+        f"  v3 (sha256 `{RECALL['lexicon_sha256']}`) and",
+        f"  v4 (sha256 `{RECALL['next_lexicon_sha256']}`, #3791), all registered; this note",
+        "  registers nothing and moves no count in `notes/absence_claims_baseline.md`.",
         f"- **Records:** the {found['records']} records that note pins, record-set sha256",
         f"  `{found['record_set_sha256']}`.",
         f"- **Dropped matches:** v2 matches `{PATTERN}` {totals['v2']} times and v3 {kept} times; the "
@@ -574,13 +603,120 @@ def render_markdown(found: dict[str, Any]) -> str:
         f"record_self_narration phrase still flags; {len(lost)} do not, and v3 counts nothing in their",
         "sentences.",
         "",
-        "Whether a v4 should widen the window, cross `;` or add verbs is the owner's call (#3705). The",
-        "cause table and the change table are the evidence for it: what each lifted bound would",
-        "recover in class, on its own and on top of the others, and what it would also admit.",
-        "`absorbed` terms are still inside a flagged span, and `consumed` ones are",
+        "The cause table and the change table were the evidence for v4 (#3705, #3791): what each",
+        "lifted bound would recover in class, on its own and on top of the others, and what it would",
+        "also admit. `absorbed` terms are still inside a flagged span, and `consumed` ones are",
         "the non-overlap `notes/absence_lexicon_v3_2026-09-30.md` describes (#3732).",
+        *_v4_section(rows, computed, lost, kept, totals, (k_in, n_kept, lo, hi, kept_census)),
     ]
     return "\n".join(lines) + "\n"
+
+
+def _v4_section(rows: list[dict], computed: dict, lost: list[dict], kept: int, totals: dict,
+               precision: tuple[int, int, float, float, bool]) -> list[str]:
+    """What the registered v4 pattern recovers of the dropped matches (#3791),
+    tallied from the same judgements: v4 lets the window run to the end of
+    the sentence, across `;`, and past the `.` of St., Dr., e.g., i.e. and
+    U.S. (#3792).
+
+    v4's matches of the pattern are v3's matches it still ends at, the
+    dropped rows it recovers, and any other (`unjudged`). The kept draw's
+    precision (#3793), `precision` = (in class, drawn, Wilson low, Wilson
+    high, census), carries to the first stratum, since the kept judgements
+    read each term in its sentence and v4 ends at the same term; the census
+    of the dropped rows judges the second. Neither covers the third, which
+    is left out of the estimate and named when there is any."""
+    v4 = {r["n"]: computed[(r["record"], r["pointer"], r["start"], r["end"])] for r in rows}
+    recovered = [r for r in rows if v4[r["n"]]["v4"] == "recovered"]
+    # An absorbed or consumed row carries no `admitted_by` (the change table
+    # does not classify it), so its recovery is not evidence about the
+    # abbreviations and is named on its own (#3917).
+    unclassified = [r for r in recovered if r["cause"] in ("absorbed", "consumed")]
+    by_abbreviation = [r for r in recovered if r not in unclassified
+                       and "cumulative_semicolon" not in v4[r["n"]]["admitted_by"]]
+    in_class = [r for r in recovered if r["verdict"] == "in_class"]
+    all_in_class = sum(r["verdict"] == "in_class" for r in rows)
+    lines = [
+        "",
+        "## What v4 recovers (#3791)",
+        "",
+        "v4 (`absence_self_narration_v4.yaml`) lets the pattern's verb lie anywhere in the term's",
+        "sentence: no 80-character bound, `;` crossed, a full stop not crossed, and the `.` of",
+        "St., Dr., e.g., i.e. and U.S. not taken for a full stop (#3792). Each dropped row is",
+        "*recovered* when a v4 match of the pattern ends at it, and *inside* when it lies inside a v4",
+        f"match that ends later. v4 matches the pattern {totals['v4']} times over the same records, and",
+        f"{totals['v3_not_ended_by_v4']} of v3's {kept} matches end where no v4 match does.",
+        "",
+        "| reading | verdict | dropped | recovered by v4 | inside a v4 match | still dropped |",
+        "|---|---|---:|---:|---:|---:|",
+    ]
+    for reading, verdict in [*READINGS.items(), ("**all**", None)]:
+        rs = rows if verdict is None else [r for r in rows if r["reading"] == reading]
+        tally = Counter(v4[r["n"]]["v4"] for r in rs)
+        head = f"| {reading} | {verdict} |" if verdict else f"| {reading} | |"
+        lines.append(f"{head} {len(rs)} | " + " | ".join(str(tally[k]) for k in V4_OUTCOMES) + " |")
+    lost_recovered = sum(1 for r in lost if v4[r["n"]]["v4"] == "recovered")
+    admitted_lift = [r for r in rows if "cumulative_semicolon" in v4[r["n"]]["admitted_by"]]
+    missed = Counter((r["reading"], r["cause"]) for r in rows
+                     if r["verdict"] == "in_class" and v4[r["n"]]["v4"] != "recovered")
+    # v4 keeps every v3 match it still ends at, and adds the in-class rows it recovers.
+    retained = kept - totals["v3_not_ended_by_v4"]
+    v4_kept = retained + len(in_class)
+    whole = kept + all_in_class
+    k_in, n_kept, lo, hi, kept_census = precision
+    unjudged = totals["v4"] - retained - len(recovered)
+    judged = totals["v4"] - unjudged
+    # The v3 stratum at the kept draw's precision, the recovered stratum as judged.
+    v3_in = [kept * p for p in (k_in / n_kept, lo, hi)]
+    v4_in = [retained * p + len(in_class) for p in (k_in / n_kept, lo, hi)]
+    recall = lambda v3_est, v4_est: 100 * v4_est / (v3_est + all_in_class)  # noqa: E731
+    lines += [
+        "",
+        f"v4 recovers {len(recovered)} of the {len(rows)} dropped matches: {len(in_class)} in class, "
+        f"{sum(r['verdict'] == 'borderline' for r in recovered)} borderline and",
+        f"{sum(r['verdict'] == 'not_in_class' for r in recovered)} not in class. "
+        f"{len(recovered) - len(by_abbreviation) - len(unclassified)} of them are among the {len(admitted_lift)} rows the change "
+        "table's \"Widen the window",
+        "and cross `;`\" admits"
+        + ("; " + ", ".join(f"judgement #{r['n']} ({r['reading']}, `{r['cause']}`)" for r in unclassified)
+           + " the change table does not classify (#3917)" if unclassified else "")
+        + ("; the rest are admitted only past an abbreviation's `.` (#3792): "
+           + ", ".join(f"judgement #{r['n']} ({r['reading']}, `{r['cause']}`)" for r in by_abbreviation) + "."
+           if by_abbreviation else "; none needs an abbreviation's `.`."),
+        f"It recovers {lost_recovered} of the {len(lost)} in-class phrases in sentences v3 counts nothing in.",
+        "",
+        f"If all {kept} of v3's matches are in class, v4 keeps {v4_kept} of {whole} "
+        f"({100 * v4_kept / whole:.1f}%) of the in-class matches v2 had,",
+        f"against v3's {kept} ({100 * kept / whole:.1f}%). As for v3, that is the upper bound.",
+        "The in-class rows v4 does not recover, by reading and cause: "
+        + ", ".join(f"{n} {reading} `{cause}`" for (reading, cause), n in sorted(missed.items())) + ".",
+        "",
+        "### v4 at the measured precision",
+        "",
+        f"v4's {totals['v4']} matches of the pattern are the {retained} v3 matches it still ends at, the "
+        f"{len(recovered)} judged dropped rows it",
+        "recovers" + (f", and {unjudged} that neither judgement file covers, left out below."
+                       if unjudged else ", and nothing else."),
+        f"The kept draw's precision ({k_in} of {n_kept} in class, above) carries to the {retained}: each kept "
+        "judgement read",
+        "its term in its sentence, and v4 ends a match at the same term, whatever verb it starts at. The",
+        f"{len(recovered)} recovered rows are judged with the dropped matches, {len(in_class)} of them in class. "
+        "What does not carry:",
+        "the kept draw is of v3's matches, not of v4's, so v4's precision is estimated by stratum (the",
+        f"{retained} at the kept draw's rate, the {len(recovered)} as judged) rather than drawn"
+        + ("." if kept_census else ", and the interval is the kept\ndraw's sampling error alone."),
+        "",
+        f"v4 keeps an estimated {v4_in[0]:.1f} in-class matches ({retained} × {k_in}/{n_kept} + {len(in_class)}): "
+        f"a precision of {100 * v4_in[0] / judged:.1f}%",
+        f"over those {judged} matches"
+        + ("" if kept_census else f" ({100 * v4_in[1] / judged:.1f}% to {100 * v4_in[2] / judged:.1f}% over "
+           "the kept draw's interval)") + ",",
+        f"and a recall of this pattern relative to v2 of an estimated **{recall(v3_in[0], v4_in[0]):.1f}%**"
+        + ("" if kept_census else f" ({recall(v3_in[1], v4_in[1]):.1f}% to {recall(v3_in[2], v4_in[2]):.1f}%)")
+        + f", against v3's {100 * v3_in[0] / (v3_in[0] + all_in_class):.1f}%.",
+        "Borderline phrases are counted in class on neither side.",
+    ]
+    return lines
 
 
 def main(argv: list[str] | None = None) -> int:
