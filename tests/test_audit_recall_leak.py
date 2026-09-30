@@ -41,6 +41,8 @@ named neither ``prompts`` nor ``initial_requests`` (the per-attempt
 ``prompt.txt`` files of the 2026-09-11/12 reference rescores, for example,
 which predate the ground truth). Those are the operator's to keep clean. Not found: an observation paraphrased, or assembled
 at run time from pieces that are not string literals in the scanned source.
+tests/test_audit_recall_leak_rendered.py renders the notes/ builders and scans
+their output, which covers the second case for the builders it calls (#3198).
 """
 import ast
 import json

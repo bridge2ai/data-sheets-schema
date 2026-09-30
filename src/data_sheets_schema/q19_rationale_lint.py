@@ -139,10 +139,23 @@ machine-readable form and lineage across fields. So:
   noted, but that is not a reason to withhold 5"). The scope ends at a
   semicolon, colon or dash, at a conjunction, and at a fragment with a
   finite verb of its own after a complete clause. A verbless fragment
-  may be an item of an outer list instead, and the lint does not guess,
-  so it is not read: the committed 09-11 CHORUS v7 rep1 rating loses "and
-  no structured was_derived_from or parent_datasets linkage" after a
-  concession, its verdict unchanged. A withholding cue in such a scope
+  may be an item of an outer list instead, and the lint does not guess
+  but by parallel structure (`_outer_item`, #3260): after a clause that
+  concedes or accepts, a fragment that opens with the word the clause
+  before the concession opens with, where that word says something is
+  absent ("no", "without", `_EMPTINESS`) and the concession carries it
+  nowhere, is that outer list's item and is read ("no errata channel, no
+  missing_data_documentation despite known_limitations confirming …, and
+  no structured was_derived_from or parent_datasets linkage", the
+  committed 09-11 CHORUS v7 rep1 rating). Otherwise it is not read, and
+  a disclaimer's list is never an outer list. A shared article is no
+  evidence (#3575): in "the errata are missing, although we accept the
+  empty was_derived_from, the empty parent_datasets and the absent PROV
+  graph" the last two objects are the acceptance's. `_FINITE` is a closed list
+  of auxiliaries: widening it with lexical verbs ("links", "names",
+  "records") would make plural nouns in a list ("no typed links") read as
+  clauses of their own, and moved nothing on the committed ratings. A
+  withholding cue in such a scope
   does not say why either (#3264): in the scope of an acceptance or
   concession it is reported as `cue_unread`, and in a disclaimer's it is
   disclaimed, so it neither states the basis nor sends the lint to its
@@ -211,21 +224,39 @@ rubric20 semantic outputs, which no inspection labels (plural "graphs", a
 label's ", no …", a bare "Short of 5.", a passive "one point withheld" came
 from those). Its precision and recall on unseen ratings are unmeasured.
 An empty-slot match is the slot's name, not a check that the slot is
-empty (#2982). Where nothing says why, a part of a sentence that names no
-gap is not read, so credit naming a populated slot is not read there unless
-it shares a part with a gap. Before that rule the committed CHORUS
-2026-09-04f API rep1 rating (UNSTATED) gave an empty-slot reason, and a
-missing-data one, from "was_derived_from is explicit rather than implied,
-and missing data is documented with reasons at instance level", which says
-the slot is populated. A sentence that says why the score is below 5 is
-still read whole, less the clauses that accept, concede or disclaim. So a
-sentence that names a populated slot as credit beside its reason would be
-read as giving that reason (#3128). Of the 87 empty-slot reasons read from
-the 133 committed ratings, 77 name the slot in a clause saying something is
-empty, absent or negated; the other 10 name it in a list or parenthesis
-whose emptiness a neighbouring clause of the same sentence states ("the dedicated derivation
-fields (was_derived_from, parent_datasets) are empty", "No version history,
-errata or structured derivation"). None is credit.
+empty. So it is a reason only where a clause read with it, in the same
+sentence or label range, carries one of the words `_EMPTINESS` lists
+(#2982): "empty", "absent", "absence", "unpopulated", "unfilled",
+"unused", "unset", "blank", "null", "missing" (not "missing-data"),
+"omits"/"omitted", "lacks"/"lacking", "without", and the negations "no",
+"not", "none", "nor", "neither", "never", "nothing" and "n't". "Held at 4
+because errata are thin; was_derived_from links every release to its
+parent" gives no empty-slot reason. An absence stated in other words
+("was_derived_from is left out") is not recognised, and the slot is then
+not read as a reason: the list is closed, as `_FINITE` is. The
+requirement is sentence-level, not clause-level, because 10 of the 88
+empty-slot reasons read from the 133 committed ratings name the slot in a
+list or parenthesis whose emptiness a neighbouring clause of the same
+sentence states ("the dedicated derivation fields (was_derived_from,
+parent_datasets) are empty", "No version history, errata or structured
+derivation"); the other 78 name it in a clause carrying one of those
+words. The requirement moved none of them. It does not tell which slot a
+negation is about, so credit naming a populated slot beside a gap in the
+same sentence is still read. Where nothing says why, a part of a sentence
+that names no gap is not read, so credit naming a populated slot is not
+read there unless it shares a part with a gap. Before that rule the
+committed CHORUS 2026-09-04f API rep1 rating (UNSTATED) gave an
+empty-slot reason, and a missing-data one, from "was_derived_from is
+explicit rather than implied, and missing data is documented with reasons
+at instance level", which says the slot is populated. A sentence that
+says why the score is below 5 is still read whole, less the clauses that
+accept, concede or disclaim. So a sentence that names a populated slot as
+credit beside its reason, and says something is absent, would be read as
+giving that reason (#3128). The requirement filters reasons and never
+chooses what is read: where a label's reason starts, and whether a
+sentence's neighbours or a part's preceding words are read, are decided
+with every empty-slot match counted (`_names_reason`, #3576), so a
+filtered match does not send the lint to credit around it.
 """
 from __future__ import annotations
 
@@ -415,6 +446,20 @@ _GAP = re.compile(
     r"|\b(?:rather than|instead of) (?:being )?(?:represented|expressed|encoded|instantiated)"
     r"|\bscattered\b|\breader must (?:re)?assemble|\b(?:re)?assembled by (?:a|the) reader"
     r"|\b(?:could|would) benefit\b", _I)
+#: The words that say a slot is empty or absent. An empty-slot match
+#: (`REPRESENTATION_CONCERNS['empty_slot']`) names a slot; it is read as a
+#: reason only where the words read with it, in the same sentence or label
+#: range, carry one of these (#2982). Sentence-level on purpose: a clause-level
+#: requirement loses the ten committed reasons that name the slot in a list
+#: or parenthesis and say it is empty in a neighbouring clause ("the
+#: dedicated derivation fields (was_derived_from, parent_datasets) are
+#: empty"). "missing-data documentation" names content, not an absence.
+#: "absence", "omits" and "unset" state an absence too (#3539). The list is
+#: closed: an absence phrased otherwise is not recognised.
+_EMPTINESS = re.compile(
+    r"\b(?:empty|absent|absence|unpopulated|unfilled|unused|unset|blank|null|no|not|none|nor"
+    r"|neither|never|nothing|without|lacks?|lacking|lacked|omits?|omitted|omitting)\b"
+    r"|\bmissing\b(?![-_ ]data)|n't\b", _I)
 #: What divides a sentence's credit from its gap: "… is recoverable from
 #: prose, which exceeds the version-history-only anchor, but no PROV-O graph".
 _BODY_CONTRAST = re.compile(r"\b(?:but|whereas|however)\b", _I)
@@ -650,7 +695,9 @@ def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
     - it opens or stands inside a parenthesis opened in that scope, or ends
       one: an aside is about what it follows, verb or not;
     - it has no finite verb (`_FINITE`): a list item or an aside of the
-      clause ("was_derived_from", "parent_datasets or PROV graph");
+      clause ("was_derived_from", "parent_datasets or PROV graph"), unless
+      parallel structure makes it an item of an outer list
+      (`_outer_item`, #3260);
     - the clause is a disclaimer with no finite verb of its own, so it has
       not yet said what it disclaims ("not because was_derived_from"): the
       fragment that supplies the verb ("parent_datasets and the PROV graph
@@ -670,7 +717,7 @@ def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
             depth += {"(": 1, ")": -1}.get(seps[k], 0)
             clause[2] = False
         elif not _FINITE.search(fragment):
-            clause[2] = False
+            clause[2] = read and _outer_item(text, clauses, k)
         elif pending:
             clause[2], pending = False, False
         if not clause[2] and _disclaims(fragment) and not _FINITE.search(fragment):
@@ -678,6 +725,51 @@ def _in_scope(text: str, clauses: list[list], seps: list[str]) -> None:
         if read and not clause[2]:
             # Not read for its predecessor's words, not its own.
             clause[3] = clauses[k - 1][3]
+
+
+#: The word a list item opens with, after any "and", "or" or "nor".
+_LIST_LEAD = re.compile(r"\s*(?:(?:and|or|nor)\s+)?(?P<word>\w+)", _I)
+
+
+def _outer_item(text: str, clauses: list[list], k: int) -> bool:
+    """Whether the verbless fragment `clauses[k]`, in the scope of a clause
+    that is not read, is an item of an outer list instead (#3260).
+
+    It is where all of these hold:
+
+    - the clause whose words put it out of scope concedes or accepts (a
+      disclaimer's list stays disclaimed), and the clause before that one
+      is read;
+    - the fragment opens, after any "and", "or" or "nor", with the word
+      that clause opens with, and that word says something is absent
+      (`_EMPTINESS`: "no", "without", "missing" …). A shared article or
+      any other shared word is not evidence of a list (#3575): in "the
+      errata are missing, although we accept the empty was_derived_from,
+      the empty parent_datasets and the absent PROV graph" every object
+      opens with "the", and the last two are the acceptance's;
+    - the conceding or accepting clause does not carry that word anywhere,
+      so the fragment cannot be coordinated with an object of its own
+      ("although we accept no was_derived_from, no parent_datasets").
+
+    "no version_access, no errata channel, no missing_data_documentation
+    despite known_limitations confirming modality availability is uneven,
+    and no structured was_derived_from or parent_datasets linkage" reads
+    its last item. "no errata despite no version history, no changelog"
+    does not: the concession's own list opens with "no" too, so the words
+    do not say whose item it is."""
+    origin = clauses[k - 1][3]
+    if origin < 1 or not clauses[origin - 1][2]:
+        return False
+    governing = text[clauses[origin][0]:clauses[origin][1]]
+    if not _accepts(governing) or _disclaims(governing):
+        return False
+    lead = _LIST_LEAD.match(text, clauses[origin - 1][0], clauses[origin - 1][1])
+    item = _LIST_LEAD.match(text, clauses[k][0], clauses[k][1])
+    if not (lead and item and item["word"].lower() == lead["word"].lower()):
+        return False
+    word = lead["word"]
+    return bool(_EMPTINESS.fullmatch(word)) and not re.search(
+        rf"\b{re.escape(word)}\b", governing, _I)
 
 
 #: A fragment opening with one of these was split at a conjunction and
@@ -782,7 +874,7 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
                     _LABEL_OPENS.search(part)
                     or any(not accepts for accepts in _cue_clauses(label, start, end))
                     or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
-                if i and not _reasons([("score_label", label, (start, b))]):
+                if i and not _names_reason([("score_label", label, (start, b))]):
                     start = cuts[i - 1]
                 return [(lo, hi) for lo, hi in out + [(start, len(label))]
                         if label[lo:hi].strip()]
@@ -815,7 +907,7 @@ def _gap_parts(sentence: str) -> list[tuple[int, int]]:
             continue
         if lo:
             a, b = next((a, b) for a, b in _spans(sentence) if a <= lo <= b)
-            if not _reasons([("", sentence, (lo, min(b, hi)))]):
+            if not _names_reason([("", sentence, (lo, min(b, hi)))]):
                 lo = a
         if out and lo <= out[-1][1]:
             lo = out.pop()[0]
@@ -845,7 +937,7 @@ def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int]]]:
             keep.extend((i, span) for span in _label_reasons(sentence))
         elif _says_why(sentence):
             keep.append((i, (0, len(sentence))))
-            if not _reasons([(name, sentence)]):
+            if not _names_reason([(name, sentence)]):
                 keep.extend((j, (0, len(sentences[j][1]))) for j in (i - 1, i + 1)
                             if 0 <= j < len(sentences) and sentences[j][0] == name)
     seen, out = set(), []
@@ -855,24 +947,51 @@ def _withholding(item: dict) -> list[tuple[str, str, tuple[int, int]]]:
     return out
 
 
-def _reasons(pairs, *, accepting: bool = True) -> tuple[Reason, ...]:
+def _names_reason(pairs) -> bool:
+    """Whether the clauses read in `pairs` name any concern, an empty-slot
+    match counted whether or not anything says the slot is empty: concern
+    detection, as `_reasons` read before #2982.
+
+    The decisions that choose what text is read use this, not `_reasons`
+    (#3576): where a label's reason starts, whether a body part is about
+    the words before it, whether a cue sentence's neighbours are read, and
+    whether a label says why. The #2982 emptiness gate only filters what
+    that text gives as a reason. Were it to steer those decisions, a
+    filtered empty-slot match would read as a text naming nothing and send
+    the lint to the words around it, which may be credit: "Excellent
+    version history but held at 4 for incomplete was_derived_from" would
+    give "Excellent version history" as its reason."""
+    return bool(_reasons(pairs, emptiness=False))
+
+
+def _reasons(pairs, *, accepting: bool = True, emptiness: bool = True) -> tuple[Reason, ...]:
     """The concerns named in the clauses of each (field, text) pair that are
     read (`_clauses`; every clause when not `accepting`). A (field, text,
     (start, end)) triple reads only that range of `text`, its clauses judged
     in the whole of it, so a range that stops before "but not penalised"
-    still does not read what that clause disclaims."""
+    still does not read what that clause disclaims. Where `emptiness`, an
+    empty-slot match counts only where a clause read in the range says
+    something is empty (`_EMPTINESS`, #2982); `_names_reason` reads with
+    it off to decide what text is read (#3576)."""
     found = {}
     for name, text, *within in pairs:
         lo, hi = within[0] if within else (0, len(text))
         shown = text[lo:hi].strip()
-        for a, b, read in _clauses(text):
-            a, b = max(a, lo), min(b, hi)
-            if a >= b or (accepting and not read):
+        clauses = [(max(a, lo), min(b, hi), read)
+                   for a, b, read in _clauses(text) if max(a, lo) < min(b, hi)]
+        # An empty-slot match is a slot's name; it is a reason only where the
+        # words read say something is empty or absent (#2982).
+        emptied = not (accepting and emptiness) or any(
+            read and _EMPTINESS.search(text[a:b]) for a, b, read in clauses)
+        for a, b, read in clauses:
+            if accepting and not read:
                 continue
             clause = text[a:b].strip()
             for kind, table in ((REPRESENTATION, REPRESENTATION_CONCERNS),
                                 (SUBSTANTIVE, SUBSTANTIVE_CONCERNS)):
                 for concern, pattern in table.items():
+                    if concern == "empty_slot" and not emptied:
+                        continue
                     m = pattern.search(clause)
                     if m:
                         found.setdefault((concern, name, shown),
@@ -895,7 +1014,7 @@ def lint_q19(item: dict) -> Q19Lint:
     # gap the record has without saying that is what held the score, and a
     # bare "Short of 5" names none, so both leave the body to say it.
     label_says_why = any(not accepts for _, s, span in label
-                         for accepts in _cue_clauses(s, *span)) and bool(_reasons(label))
+                         for accepts in _cue_clauses(s, *span)) and _names_reason(label)
     if label_says_why or any(name != "score_label" for name, *_ in stated):
         return Q19Lint(score, maximum, STATED, _reasons(stated), mentions)
     # Nothing says why: the label's reason clauses and the body's parts that
