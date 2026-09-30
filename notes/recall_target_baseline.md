@@ -202,7 +202,8 @@ included; what is not one (releases, standards, database versions, paper titles,
 Dataverse host's footer) is listed in the adjudication file's header. Per arm,
 over the records of the fact's project: **stated** is the records whose hashed bundle bytes
 contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a
-`used_software` entry naming the software with that `version`, or a `tools` string with
+`used_software` entry whose `name`, `id` or `url` names the software, with that `version`
+(a name only in its description counts as elsewhere), or a `tools` string with
 both; **elsewhere** is any other string, or one mapping's own values (its scalars and the
 items of its lists other than `used_software` and `tools`), holding the name and the version
 (prose, a resource entry); **name only** is the name without the version; **absent** is
@@ -233,7 +234,7 @@ a `companion` or `cited` fact carried is not thereby in scope.
 | `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
 | `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 1 | 2 |
 | `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
-| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v6 agentic (2026-08-28) | 3 | 3 | 1 | 0 | 0 | 2 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 1 | 0 | 2 |
 | `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
 | `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
 | `voice-b2aiprep-0.21.0` | cited | c015 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 3 | 0 |

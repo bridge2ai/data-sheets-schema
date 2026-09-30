@@ -329,6 +329,21 @@ class Carriage(unittest.TestCase):
         for record, expected in cases:
             self.assertEqual(self.carried(record), expected, record)
 
+    def test_structured_takes_the_name_from_the_entry_s_naming_fields(self):
+        """Review of #3534 (#3620): a used_software entry for another tool at
+        the fact's version is not the fact's structured carriage because its
+        description or a nested mapping mentions the fact's name. The name
+        must be the entry's `name`, `id` or `url`; a name in the entry's
+        description, beside its version, is still carried, as elsewhere."""
+        other = {"name": "openSMILE", "version": "3.0.0"}
+        self.assertEqual(self.carried({"used_software": [dict(other, description="Run on the output of b2aiprep.")]}),
+                         "elsewhere")
+        self.assertEqual(self.carried({"used_software": [dict(other, depends_on={"name": "b2aiprep"})]}),
+                         "name_only")
+        for k, v in (("name", "b2aiprep"), ("id", "b2aiprep"), ("url", "https://github.com/sensein/b2aiprep")):
+            entry = {"name": "Bridge2AI library", "version": "3.0.0", k: v}
+            self.assertEqual(self.carried({"used_software": [entry]}), "structured", k)
+
     def test_prose_or_one_mapping_s_own_values_is_elsewhere(self):
         self.assertEqual(self.carried({"description": "Generated with the b2aiprep library, version 3.0.0."}),
                          "elsewhere")
@@ -411,11 +426,27 @@ class Adjudication(CorpusFixture, unittest.TestCase):
                 self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", chunks=[bad]))
         with self.assertRaises(ValueError):
             self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", chunks=[good, dict(good, chunk="c009")]))
-        for bad in (dict(FACT, scope="none"), dict(FACT, snippet=""), dict(FACT, names="toolkit")):
+        for bad in (dict(FACT, scope="none"), dict(FACT, snippet=""), dict(FACT, names="toolkit"),
+                    dict(FACT, names=[]), dict(FACT, names=["toolkit", 2])):
             with self.assertRaises(ValueError):
                 self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[bad]))
         with self.assertRaises(ValueError):
             self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[FACT, FACT]))
+
+    def test_an_unquoted_version_is_refused_not_read_as_a_number(self):
+        """Review of #3534 (#3621): YAML reads `version: 2.10` as the float
+        2.1, so every match would look for 2.1. A version or snippet that is
+        not a string is an error."""
+        path = self.dir / "unquoted.yaml"
+        text = _adjudication(path).read_text(encoding="utf-8")
+        self.assertIn("version: 2.4.1", text)
+        path.write_text(text.replace("version: 2.4.1", "version: 2.10"), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "version must be a quoted string, not float 2.1"):
+            self.m.load_adjudication(path)
+        path.write_text(text.replace("version: 2.4.1", "version: '2.10'"), encoding="utf-8")
+        self.assertEqual(self.m.load_adjudication(path)["facts"][0]["version"], "2.10")
+        with self.assertRaises(ValueError):
+            self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[dict(FACT, snippet=3)]))
 
     def test_candidates_are_matched_by_chunk_text_sha256(self):
         cov = self.m.adjudication_coverage(self._collect(), arms=self.arms)

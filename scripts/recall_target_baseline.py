@@ -346,8 +346,15 @@ def load_adjudication(path: Path) -> dict[str, Any]:
             raise ValueError(f"{where}: needs id, project, names, version and snippet")
         if f.get("scope") not in SOFTWARE_VERDICTS[1:]:
             raise ValueError(f"{where}: scope must be one of {', '.join(SOFTWARE_VERDICTS[1:])}")
-        if not isinstance(f["names"], list):
-            raise ValueError(f"{where}: names must be a list")
+        if not isinstance(f["names"], list) or not f["names"] or not all(isinstance(n, str) and n for n in f["names"]):
+            raise ValueError(f"{where}: names must be a list of non-empty strings")
+        # A YAML version left unquoted loads as a number, and `2.10` becomes
+        # the float 2.1: every match would then look for another version
+        # with no error (#3621). The version and the snippet must be written
+        # as strings.
+        for k in ("version", "snippet"):
+            if not isinstance(f[k], str):
+                raise ValueError(f"{where}: {k} must be a quoted string, not {type(f[k]).__name__} {f[k]!r}")
         if f["id"] in ids:
             raise ValueError(f"{where}: duplicate id {f['id']}")
         ids.add(f["id"])
@@ -397,12 +404,18 @@ def _mappings(node: Any):
 
 #: The slots `fact_carriage` reads as structured carriage, entry by entry.
 STRUCTURED_KEYS = ("used_software", "tools")
+#: The fields of a `used_software` entry (`Software`, a `NamedThing`) that
+#: name the software it records. A `description`, a `license` or a nested
+#: mapping may mention other software ("run on the output of b2aiprep"), so
+#: a name found only there does not make the entry that software's (#3620);
+#: the entry's own values can still carry the fact as `elsewhere`.
+NAMING_KEYS = ("name", "id", "url")
 
 
 def fact_carriage(record: Any, fact: dict[str, Any]) -> str:
     """How the record carries a versioned software fact (`CARRIAGE`):
-    `structured` is a `used_software` entry naming it with that `version`,
-    or a `tools` string holding both; `elsewhere` is any other string, or
+    `structured` is a `used_software` entry naming it (in its own
+    `NAMING_KEYS`) with that `version`, or a `tools` string holding both; `elsewhere` is any other string, or
     one mapping's own values (its scalars and the scalar items of its
     lists other than `STRUCTURED_KEYS`), holding both (prose, a resource
     entry);
@@ -414,7 +427,8 @@ def fact_carriage(record: Any, fact: dict[str, Any]) -> str:
             for sw in entries(value):
                 if (isinstance(sw, dict) and _populated(sw.get("version"))
                         and version.search(_collapse(str(sw["version"])))
-                        and any(names.search(s) for s in _strings(sw))):
+                        and any(names.search(_collapse(str(sw[k]))) for k in NAMING_KEYS
+                                if isinstance(sw.get(k), str))):
                     return "structured"
         elif key == "tools":
             for tool in entries(value):
@@ -765,7 +779,8 @@ def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
         "Dataverse host's footer) is listed in the adjudication file's header. Per arm,",
         "over the records of the fact's project: **stated** is the records whose hashed bundle bytes",
         "contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a",
-        "`used_software` entry naming the software with that `version`, or a `tools` string with",
+        "`used_software` entry whose `name`, `id` or `url` names the software, with that `version`",
+        "(a name only in its description counts as elsewhere), or a `tools` string with",
         "both; **elsewhere** is any other string, or one mapping's own values (its scalars and the",
         "items of its lists other than `used_software` and `tools`), holding the name and the version",
         "(prose, a resource entry); **name only** is the name without the version; **absent** is",
