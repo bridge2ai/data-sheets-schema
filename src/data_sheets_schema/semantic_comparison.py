@@ -424,9 +424,12 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
                 "block's cohort, one rating per record. Left out, and in no count below: "
                 + ", ".join(f"`{name}`" for name in left_out) + ".")
     if evaluator is not None:
-        measured += (" Evaluations by any other evaluator are in no count below: an evaluator "
-                     "is an instrument (#1058), and pooling two would count their offset as "
-                     "distinct totals.")
+        # "In this block", not "below": every caller that names an evaluator
+        # renders one block per evaluator, and the blocks after this one do
+        # count the other evaluators' evaluations (#3598).
+        measured += (" Evaluations by any other evaluator are in no count in this block: an "
+                     "evaluator is an instrument (#1058), and pooling two would count their "
+                     "offset as distinct totals.")
     lines = [f"{heading} Item discrimination and within-project orderings{scope} (#2927)", "",
              measured + " An item at ceiling "
              "(or floor) scored its maximum (or 0) on every record where it was scored, so it "
@@ -511,8 +514,10 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
 # and rubric20: the presence/direct-API evaluations, whose items already have
 # the shape item_scores() reads (rubric10 `elements[].sub_elements[]`, rubric20
 # `questions[]` with `max_score`). What they lack is a generation label, and
-# they mix evaluators, record kinds and — for rubric20 — maxima in one
-# directory, so the block is measured per cohort rather than over the folder.
+# each directory mixes evaluators and record kinds, so the block is measured
+# per cohort rather than over the folder. The cohort is also split by fixed
+# maximum as a safeguard (#275): a rubric20 directory could hold two maxima,
+# though the committed one holds only 84 (#3599).
 
 def legacy_record(result: dict[str, Any]) -> dict[str, Any]:
     """A legacy evaluation as discrimination() reads it. It names no
@@ -554,8 +559,8 @@ def render_legacy_discrimination(results: Iterable[dict[str, Any]],
         others = len(results) - len(members)
         measured_on = (f"{len(members)} of the {len(results)} evaluations above: the {kind} "
                        f"evaluations by {who} scored out of {maximum:g}"
-                       + (f". The other {others} are in no count below; each is measured in "
-                          "a block of its own" if others else ""))
+                       + (f". The other {others} are in no count in this block; each is "
+                          "measured in a block of its own" if others else ""))
         lines += render_discrimination(
             block, heading, scope=f", {kind} evaluations by {who} scored out of {maximum:g}",
             evaluator=evaluator, measured_on=measured_on)

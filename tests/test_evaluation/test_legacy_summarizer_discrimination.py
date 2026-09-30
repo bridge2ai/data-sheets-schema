@@ -10,6 +10,7 @@ folder. The summarizers are run, not grepped (#278), with their output
 redirected so no committed report is touched.
 """
 import io
+import re
 import sys
 import tempfile
 from contextlib import redirect_stdout
@@ -183,13 +184,30 @@ def test_each_block_counts_its_cohort_against_every_evaluation_above():
     assert "Measured on the hybrid-heuristic-evaluator evaluations above" not in text
     assert "Measured on the claude-fable-5 evaluations above" not in text
     assert ("Measured on 2 of the 4 evaluations above: the concatenated evaluations by "
-            "hybrid-heuristic-evaluator scored out of 50. The other 2 are in no count below; "
-            "each is measured in a block of its own, one rating per record.") in text
+            "hybrid-heuristic-evaluator scored out of 50. The other 2 are in no count in this "
+            "block; each is measured in a block of its own, one rating per record.") in text
     assert ("Measured on 1 of the 4 evaluations above: the individual evaluations by "
-            "hybrid-heuristic-evaluator scored out of 50. The other 3 are in no count below") in text
+            "hybrid-heuristic-evaluator scored out of 50. The other 3 are in no count in this "
+            "block") in text
     assert ("Measured on 1 of the 4 evaluations above: the concatenated evaluations by "
             "claude-fable-5 scored out of 50. The other 3") in text
-    assert text.count("Evaluations by any other evaluator are in no count below") == 3
+    assert text.count("Evaluations by any other evaluator are in no count in this block") == 3
+    assert "no count below" not in text
+
+
+def test_no_block_denies_a_count_that_a_later_block_makes():
+    """Cohort blocks are rendered one after another, so a block above another
+    must not say the other cohorts' evaluations are "in no count below": the
+    next block counts them (#3598). Every block but the last is checked
+    against what follows it."""
+    docs = [legacy10("P", "a.yaml", [1, 1]), legacy10("P", "b.yaml", [0, 1]),
+            legacy10("P", "c.yaml", [1, 0], kind="individual"),
+            legacy10("P", "d.yaml", [1, 1], model=JUDGE)]
+    text = "\n".join(render_legacy_discrimination(docs))
+    blocks = re.split(r"(?m)^## Item discrimination", text)[1:]
+    assert len(blocks) == 3
+    for block in blocks[:-1]:
+        assert "no count below" not in block
 
 
 def test_a_single_cohort_names_no_others():

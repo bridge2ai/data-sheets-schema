@@ -286,7 +286,8 @@ def test_the_comparison_report_measures_each_evaluator_apart(tmp_path):
     assert "## Item discrimination and within-project orderings, B evaluations (#2927)" in text
     assert "Measured on the A evaluations above, one rating per record." in text
     assert "Measured on the evaluations above," not in text
-    assert "Evaluations by any other evaluator are in no count below" in text
+    assert "Evaluations by any other evaluator are in no count in this block" in text
+    assert "no count below" not in text
     # A cohort narrower than the table names only that evaluator's left-outs.
     narrowed = report(paths, [paths[0], paths[1], paths[3], paths[4]])
     assert (f"Measured on the A evaluations above except the 1 left out of this block's cohort, "
