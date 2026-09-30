@@ -804,7 +804,12 @@ class CommandSubstitution(Base):
             with self.subTest(command=command):
                 block = self._before_draft(command)
                 self.assertUnknown(block, "may change the receipt other than by a Write")
-                self.assertEqual(len(block["non_write_mutations"]), 1)
+                # The call under test is the first. A program in a process
+                # substitution may be a function that changes directory, as
+                # which parts a child runs is not read (#3782, #3810), so the
+                # derive's relative `--out` after it may name the receipt too.
+                self.assertEqual(block["non_write_mutations"][0]["tool_use_id"], "toolu_002")
+                self.assertEqual(len(block["non_write_mutations"]), 2 if "(rm" in command or "(tee" in command else 1)
 
     def test_a_quoted_or_escaped_substitution_is_text(self):
         for command in (f"echo '$(rm x)' {REL}",
@@ -1771,42 +1776,47 @@ class UnestablishedDirectory(Base):
                          f"pushd /elsewhere; popd; poetry run d4d derive core --full {self.FULL}",
                          f"cd data && echo a ; poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
                          f"cd /elsewhere\npoetry run d4d derive core --full {self.FULL}",
-                         "cd data\npoetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml"):
+                         "cd data\npoetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml",
+                         # A change in a subshell, a pipe's left side or a `&`
+                         # job does not move this shell, but which parts a child
+                         # runs is not read, so it counts (#3810, #3830).
+                         f"(cd /elsewhere) && poetry run d4d derive core --full {self.FULL}",
+                         f"cd /elsewhere & poetry run d4d derive core --full {self.FULL}",
+                         f"cd /elsewhere | cat && poetry run d4d derive core --full {self.FULL}"):
             with self.subTest(spelling=spelling):
                 identity, block = self._derived(spelling)
                 # Not dropped as another record's: the derive cannot be placed
                 # (by its --full, or also by its status where that is not its own).
                 self.assertUnknown(block, f"derive core {identity} cannot be placed")
                 self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
-        # A change in a subshell, or in a `&` job, never reaches the derive,
-        # which runs where the call started (#3810): its `--full` names the
-        # record, and only its status, not its own, leaves it unplaced.
-        for spelling in (f"(cd /elsewhere) && poetry run d4d derive core --full {self.FULL}",
-                         f"cd /elsewhere & poetry run d4d derive core --full {self.FULL}"):
-            with self.subTest(spelling=spelling):
-                identity, block = self._derived(spelling)
-                self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but its status "
-                                          "is not the derive's own")
-                self.assertIs(block["derive_core_attempts"][0]["targets_full"], True)
 
-    #: A cd whose argument carries a `|` inside a backquote or a `${...}`
-    #: (#3904): shlex splits the word at the `|`, which is no pipeline
-    #: join, and bash runs the cd in this shell.
-    UNSCANNABLE_CDS = ("cd `git rev-parse --show-toplevel | head -1`", "cd `ls -d d* | head -1`",
-                       "cd ${D//a|b/}")
+    #: Commands in which reading a part as run in a child, or as a case
+    #: pattern, placed a relative `--full` after a change bash runs in this
+    #: shell (#3904, #3911, #3912): a `|` split out of a backquote, a
+    #: `${...}` or an arithmetic `$((...))`, and a here-document body line
+    #: read as a case clause. None of them may be placed.
+    SPLIT_CDS = ("cd `git rev-parse --show-toplevel | head -1`", "cd `ls -d d* | head -1`", "cd ${D//a|b/}",
+                 "cd sub$((0|cat))", "cd $((1|false))", "cd $((1|cat))", "cd $((x|head))",
+                 "cat > notes.md <<EOF\ncase in point: the run\nEOF\n{ cd sub; }",
+                 "cat > notes.md <<EOF\ncase in point: the run\nEOF\neval \"cd $D\"",
+                 "cat > notes.md <<EOF\ncase in point: the run\nEOF\n$GO sub",
+                 "cat > notes.md <<EOF\ncase in point: the run\nEOF\nsource env.sh",
+                 "cat > notes.md <<EOF\ncase in point: the run\nEOF\nmyfunc")
 
-    def test_a_pipe_inside_a_backquote_or_an_expansion_is_no_child(self):
-        # The derive runs wherever the cd left it, so its relative `--full`
-        # is not placed against where the call started (#3904).
-        for cd in self.UNSCANNABLE_CDS:
+    def test_a_change_read_through_a_split_word_or_a_case_line_still_counts(self):
+        # The derive runs wherever the change left it, so its relative
+        # `--full` is placed neither in this call nor in the next (#3904,
+        # #3911, #3912).
+        target = [ro._Target("full", "/w/data/F.yaml")]
+        for cd in self.SPLIT_CDS:
             with self.subTest(cd=cd):
+                out = ro._shell(f"{cd} && d4d derive core --full data/F.yaml", "/w", target)
+                self.assertIs(out["moves"], True)
+                self.assertEqual([row["targets_full"] for row in out["derives"]], [None])
                 identity, block = self._derived(f"{cd} && poetry run d4d derive core --full {self.FULL}")
                 self.assertUnknown(block, f"derive core {identity} cannot be placed")
                 self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
                 self.assertIsNone(block["boundaries"]["derive_core"])
-        # Where the command can be read, a pipe's left side is still a child.
-        identity, block = self._derived(f"cd /elsewhere | cat && poetry run d4d derive core --full {self.FULL}")
-        self.assertIs(block["derive_core_attempts"][0]["targets_full"], True)
 
     def test_a_change_every_later_join_depends_on_is_followed(self):
         for spelling in ("cd data && cd claudecode_direct && d4d derive core --full L/CHORUS_d4d.yaml",
@@ -1834,18 +1844,16 @@ class UnestablishedDirectory(Base):
                  "true || cd /x && d4d derive core --full data/F.yaml": None,
                  "cd /x || true && d4d derive core --full data/F.yaml": None,
                  # a change in a subshell, a pipe's left side or a `&` job
-                 # reaches no later part outside it (#3810)
-                 "(cd /x) && d4d derive core --full data/F.yaml": True,
-                 "cd /x | d4d derive core --full data/F.yaml": True,
-                 "cd /x & d4d derive core --full data/F.yaml": True,
-                 "X=$(cd /x; pwd) && d4d derive core --full data/F.yaml": True,
-                 "(cd /x) ; (cd /y) && d4d derive core --full data/F.yaml": True,
-                 # one inside a subshell reaches the parts after it there, and
-                 # a join through a bracket is not followed, conservatively
+                 # does not move this shell, but which parts a child runs is
+                 # not read, so it counts (#3810, #3830)
+                 "(cd /x) && d4d derive core --full data/F.yaml": None,
+                 "cd /x | d4d derive core --full data/F.yaml": None,
+                 "cd /x & d4d derive core --full data/F.yaml": None,
+                 "X=$(cd /x; pwd) && d4d derive core --full data/F.yaml": None,
+                 "(cd /x) ; (cd /y) && d4d derive core --full data/F.yaml": None,
                  "(cd /x && d4d derive core --full data/F.yaml)": None,
                  "(cd /x; (d4d derive core --full data/F.yaml))": None,
                  "cd data && (cd /x) && d4d derive core --full F.yaml": None,
-                 # a case pattern's `)` opens nothing: the cd runs here
                  "case x in a) cd /x;; esac; d4d derive core --full data/F.yaml": None,
                  "pushd /x; popd && d4d derive core --full data/F.yaml": None,
                  "pushd data && pushd /x ; popd && d4d derive core --full F.yaml": None,
@@ -1861,7 +1869,9 @@ class UnestablishedDirectory(Base):
                  "cd `git rev-parse --show-toplevel | head -1` && d4d derive core --full data/F.yaml": None,
                  "cd `ls -d d* | head -1` && d4d derive core --full data/F.yaml": None,
                  "cd ${D//a|b/} && d4d derive core --full data/F.yaml": None,
-                 "cd ${D} | cat && d4d derive core --full data/F.yaml": None}
+                 "cd ${D} | cat && d4d derive core --full data/F.yaml": None,
+                 # nor inside an arithmetic `$((...))` (#3912)
+                 "cd $((1|false)) && d4d derive core --full data/F.yaml": None}
         for command, expected in cases.items():
             with self.subTest(command=command):
                 derives = ro._shell(command, "/r", full)["derives"]
@@ -2391,8 +2401,9 @@ class DeriveSpellings(Base):
                       "`poetry run` part takes (#3723)", text)
         # #3719: a directory an earlier call left the shell in is read; #3782:
         # so is code a sourced script, a function or an alias may run there;
-        # #3810: a change in a child counts for nothing; #3824: a directory
-        # the call's own event records after the change is trusted.
+        # #3810 and #3824 stay open: a change in a child counts, and a
+        # directory the call's own event records after a change is not
+        # trusted.
         self.assertIn("A directory an earlier call left the shell in is read (#3719): after a call not denied "
                       "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs or may run as a word supplied "
                       "at run time (`eval \"$X\"`, #3815), may leave anywhere but where it started (plain or "
@@ -2400,43 +2411,46 @@ class DeriveSpellings(Base):
                       "which may run in that shell code not on its command line (#3782: `source` or `.`, or a "
                       "program named by a bare word not read here, which may be a function or an alias -- not "
                       "a path, a reader, a reserved word or builtin that changes no directory, `poetry run` or "
-                      "a wrapper read here, a d4d call, a validator, a case pattern or arithmetic), such a part "
-                      "counts as after a directory change and a relative `--full` cannot be placed, unless the "
-                      "call's own event records its directory and was issued after every such change had "
-                      "returned, where the `--full` resolves there (#3824); a directory inherited from the init "
-                      "event is not trusted after a change (#3812). One in a subshell, an unquoted command or "
-                      "process substitution (`(cd x)`, `$(cd x)`, `<(cd x)`), a pipe's left side or a `&` job "
-                      "runs in a child: it does not count, nor reach a later part of its command outside that "
-                      "child (#3810), where the command's brackets can be matched", text)
-        self.assertIn("and the command carries no here-document, backquote, `${...}`, `$'...'` or quoted `$(`, "
-                      "from inside which a `|` or `&` may be split (there no part is a child and every change "
-                      "counts, #3904)", text)
+                      "a wrapper read here, a d4d call, a validator or arithmetic), such a part counts as after "
+                      "a directory change and a relative `--full` cannot be placed. One in a subshell, an "
+                      "unquoted command or process substitution (`(cd x)`, `$(cd x)`, `<(cd x)`), a pipe's left "
+                      "side or a `&` job does not move the shell but counts all the same, the rule's cost: "
+                      "which parts a child runs is not read from the tokenizer's brackets and joins, where a "
+                      "`)`, `|` or `&` may come from a case pattern, a here-document body, a backquote, a "
+                      "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell "
+                      "grammar, #3830), and a case pattern is read as a command, so its word may count", text)
+        self.assertIn("where both hold the earlier change decides and the `--full` is not placed, as a recorded "
+                      "directory may be inherited from the init event and is not trusted after a change (#3812), "
+                      "even one the call's own event records (#3824), a false `unknown` in a transcript that "
+                      "records the directory on every event", text)
         self.assertIn("and a command the tokenizer cannot split counts, whatever its words (#3782)", text)
         self.assertIn("Still not read: a function or alias named as a program read here (`cat() { cd x; }`), "
                       "defined in the session or by the profile the session's shell started with.", text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
-                     "counts, the rule's cost", "where both hold the earlier change decides",
-                     "Still not read: a detaching program supplied at run time"):
+                     "Still not read: a detaching program supplied at run time",
+                     "runs in a child: it does not count", "unless the call's own event records",
+                     "a case pattern or arithmetic", "no part is a child"):
             with self.subTest(gone=gone):
                 self.assertNotIn(gone, text)
         self.assertIn("The runtime's shell keeps its directory between calls (#3719)", flat := " ".join(
             ro.__doc__.split()))
-        self.assertIn("no part is read as in a child of any kind across a here-document, a backquote, a "
-                      "`${...}`, `$'...'` or a quoted `$(`, where a `|` or `&` may be split out of a word "
-                      "(#3904)", flat)
         self.assertIn("behind a brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`, `until`, "
                       "`do`), `!`, `time`, `builtin` or `command` (#3797) -- or which may run in it code not on "
                       "its command line (#3782): `source` or `.`, or a program named by a bare word this does "
                       "not read, which may be a function or an alias", flat)
-        self.assertIn("unless the call's own event records its directory and was issued after every such change "
-                      "had returned: that is where the shell was, and the `--full` resolves there (#3824)", flat)
         self.assertIn("One in a subshell, an unquoted command or process substitution (`(cd x)`, `$(cd x)`, "
-                      "`<(cd x)`), a pipe's left side or a `&` job runs in a child, so it does not count, and it "
-                      "reaches no later part of its command outside that child (#3810)", flat)
+                      "`<(cd x)`), a pipe's left side or a `&` job does not move the shell, but it counts all the "
+                      "same, the rule's cost", flat)
+        self.assertIn("that waits for a shell grammar (#3830). A case pattern is read as a command too", flat)
         self.assertIn("such a part is read as after a change too, and, where no earlier call's change was seen, "
                       "a relative `--full` resolves against the recorded directory, where the call started "
-                      "(#3798). A directory inherited from the transcript's init event is not trusted after a "
-                      "change, since an earlier `cd` does not update it (#3812)", flat)
+                      "(#3798). Where both hold, the earlier change decides and the `--full` is not placed "
+                      "(#3812)", flat)
+        self.assertIn("even where the call's own event records it (#3824 stays open", flat)
+        for gone in ("runs in a child, so it does not count", "that is where the shell was",
+                     "no part is read as in a child of any kind"):
+            with self.subTest(gone=gone):
+                self.assertNotIn(gone, flat)
         self.assertIn("(or one `eval` runs, or may run as a word supplied at run time, `eval \"$X\"`, #3815)", flat)
         # #3841: which substitutions are read.
         self.assertIn("One in a backquoted or double-quoted substitution (`` `cd x` ``, `\"$(cd x)\"`) is kept "
@@ -3255,7 +3269,13 @@ class EarlierDirectoryChange(Base):
                         # A subshell read by the arithmetic's word (#3840).
                         "((cd hack); ls)",
                         # A change in a case clause's body runs here (#3810).
-                        "case x in a) cd hack;; esac", "case x in (a) cd hack;; esac"):
+                        "case x in a) cd hack;; esac", "case x in (a) cd hack;; esac",
+                        # A subshell, a substitution, a pipe's left side or a
+                        # `&` job is a child, and its change dies with it, but
+                        # which parts a child runs is not read: it counts, the
+                        # rule's cost (#3810, #3830).
+                        "(cd hack; ls)", "(cd hack); ls", "echo $(cd hack)", "X=$(cd hack; pwd)",
+                        "cd hack | cat", "cd hack &", "(source env.sh)", "if (cd hack); then ls; fi"):
             for command in self.READ_HERE:
                 with self.subTest(earlier=earlier, command=command):
                     identity, block = self._run(earlier, command)
@@ -3282,11 +3302,6 @@ class EarlierDirectoryChange(Base):
                         # `command -v` describes `cd` without running it, and
                         # a function body being defined is not run (#3797).
                         "command -v cd", "echo builtin cd hack", "f() { cd hack; }",
-                        # A subshell, a substitution, a pipe's left side or a
-                        # `&` job is a child: its change dies with it (#3810).
-                        "(cd hack; ls)", "(cd hack); ls", "echo $(cd hack)", "X=$(cd hack; pwd)",
-                        "cd hack | cat", "(source env.sh)",
-                        "X=$(myfunc)", "myfunc | cat", "if (cd hack); then ls; fi",
                         # A program named by a path is a file run in a child,
                         # never a function or an alias (#3782).
                         "./tool.sh", "/usr/bin/python3 fix.py", "poetry run pytest",
@@ -3323,10 +3338,11 @@ class EarlierDirectoryChange(Base):
         self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be resolved")
         self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
         # So after a change behind a brace or a compound keyword (#3797).
-        # A pipe inside a backquote or a `${...}` is no pipeline: the cd
-        # before it moved the shell (#3904).
+        # And after each change read through a split word or a here-document
+        # line that starts with `case` (#3904, #3911, #3912): the derive in
+        # the next call is not placed either.
         for earlier in ("{ cd data; }", "if true; then cd data; fi", "builtin cd data",
-                        "cd `ls -d d* | head -1`", "cd ${D//a|b/}"):
+                        *UnestablishedDirectory.SPLIT_CDS):
             with self.subTest(earlier=earlier):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -3425,12 +3441,15 @@ class EarlierDirectoryChange(Base):
                     self.assertEqual(attempt["status_basis"], "command")
                     self.assertIsNotNone(block["boundaries"]["derive_core"])
 
-    def test_after_an_earlier_change_a_directory_the_call_s_own_event_records_places_a_relative_full(self):
-        # Where the call's own event records its directory, and was issued
-        # after every earlier change had returned, the runtime recorded
-        # where the shell then was: a relative `--full` resolves there
-        # (#3824), as it does with no earlier change (#3798).
-        for spelled, placed in (("../FULL", True), ("FULL", False)):
+    def test_after_an_earlier_change_a_recorded_directory_does_not_place_a_relative_full(self):
+        # Where an earlier call's change was seen and the transcript also
+        # records the call's directory, the earlier change decides: the
+        # recorded directory may be inherited from the init event, so the
+        # `--full` is not placed, whichever record it would name (#3812).
+        # That holds where the call's own event records it too: no
+        # transcript here records a per-event directory to check the
+        # runtime's against, so it is not trusted (#3824 stays open).
+        for spelled in ("../FULL", "FULL"):
             for earlier in ("cd sub", "eval 'cd sub'", "source env.sh", "myfunc"):
                 with self.subTest(spelled=spelled, earlier=earlier):
                     r = self.new_run()
@@ -3443,11 +3462,11 @@ class EarlierDirectoryChange(Base):
                     r.events[-2]["cwd"] = str(r.root / "sub")
                     r.write(r.receipt, Boundaries.C004)
                     block = r.report()
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot "
+                                              "be resolved")
                     [attempt] = block["derive_core_attempts"]
-                    self.assertIs(attempt["targets_full"], placed)
-                    if placed:
-                        self.assertEqual(block["status"], "checked", block["reasons"])
-                        self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+                    self.assertIsNone(attempt["targets_full"])
+                    self.assertIsNone(block["boundaries"]["derive_core"])
 
     def test_after_an_earlier_change_an_inherited_or_earlier_directory_does_not_place_a_relative_full(self):
         # A directory inherited from the init event is where the shell
@@ -3486,27 +3505,13 @@ class EarlierDirectoryChange(Base):
                     self.assertIsNone(attempt["targets_full"])
                     self.assertIsNone(block["boundaries"]["derive_core"])
 
-    def test_start(self):
-        # The call's starting directory as `_history` reads it (#3824).
-        call = {"cwd": "/w/sub", "start_cwd": "/w", "cwd_basis": "event", "line": 10}
-        self.assertEqual(ro._start(call, None), ("/w/sub", True))
-        self.assertEqual(ro._start({**call, "cwd": "/w"}, None), ("/w", False))
-        self.assertEqual(ro._start(call, 9), ("/w/sub", True))
-        # A trusted directory that is the start is still after a change: a
-        # `python -c`/`-m` or `poetry run` part is read as such (#3907).
-        self.assertEqual(ro._start({**call, "cwd": "/w"}, 9), ("/w", True))
-        self.assertEqual(ro._start(call, 10), (None, True))
-        self.assertEqual(ro._start(call, float("inf")), (None, True))
-        self.assertEqual(ro._start({**call, "cwd_basis": "init"}, 9), (None, True))
-        self.assertEqual(ro._start({**call, "cwd": "/w", "cwd_basis": "init"}, 9), (None, True))
-
-    def test_a_change_whose_result_is_in_another_transcript_never_returned_in_its_own(self):
-        # `_pair` pairs results across transcripts (a killed-and-resumed
-        # run), but a change whose result came back only in another one
-        # never returned in its own: a later call there that records its own
-        # directory may have recorded it before the change took effect, so
-        # its relative `--full` is not placed (#3824, #3906). The control
-        # has the change return in its own transcript before the derive.
+    def test_a_recorded_directory_is_not_trusted_after_a_change_wherever_its_result_came_back(self):
+        # After a change, a relative `--full` is not placed against the
+        # directory a later call's own event records, wherever and whenever
+        # the change's result came back (#3812; #3824 stays open): not where
+        # it came back only in another transcript (#3906), nor where it came
+        # back in its own before the derive was issued, nor where another
+        # change was still in flight (#3914).
         def call(identity, command, cwd=None):
             event = {"type": "assistant", "message": {"content": [
                 {"type": "tool_use", "id": identity, "name": "Bash", "input": {"command": command}}]}}
@@ -3518,7 +3523,7 @@ class EarlierDirectoryChange(Base):
 
         targets = [ro._Target("receipt", Path("/w/r.yaml")), ro._Target("full", Path("/w/data/full.yaml"))]
         derive = call("dv", "d4d derive core --full ../data/full.yaml --out o.yaml", "/w/sub")
-        for returned, placed in (((1, 1), None), ((0, 3), True)):
+        for returned in ((1, 1), (0, 3)):
             with self.subTest(returned=returned):
                 events = sorted([(0, 1, {"type": "system", "subtype": "init", "cwd": "/w"}),
                                  (0, 2, call("cd", "cd sub")), (0, 10, derive), (0, 11, result("dv")),
@@ -3527,19 +3532,16 @@ class EarlierDirectoryChange(Base):
                 calls, results = ro._pair(events, reasons)
                 self.assertEqual(results["cd"]["transcript"], returned[0])
                 history = ro._history(calls, results, targets, reasons)
-                self.assertEqual([d["targets_full"] for d in history["derives"]], [placed])
-
-    def test_the_parser_records_where_a_call_s_directory_came_from(self):
+                self.assertEqual([d["targets_full"] for d in history["derives"]], [None])
+        # Two changes, the earlier still in flight when the derive is issued
+        # and the later back before it: the #3914 case.
         events = [(0, 1, {"type": "system", "subtype": "init", "cwd": "/w"}),
-                  (0, 2, {"type": "assistant", "message": {"content": [
-                      {"type": "tool_use", "id": "a", "name": "Bash", "input": {}}]}}),
-                  (0, 3, {"type": "assistant", "cwd": "/w/sub", "message": {"content": [
-                      {"type": "tool_use", "id": "b", "name": "Bash", "input": {}}]}}),
-                  (1, 1, {"type": "assistant", "message": {"content": [
-                      {"type": "tool_use", "id": "c", "name": "Bash", "input": {}}]}})]
-        calls, _ = ro._pair(events, [])
-        self.assertEqual([(c["cwd"], c["cwd_basis"]) for c in calls],
-                         [("/w", "init"), ("/w/sub", "event"), (None, None)])
+                  (0, 2, call("a", "cd sub")), (0, 3, call("b", "cd sub")), (0, 4, result("b")),
+                  (0, 10, derive), (0, 11, result("dv")), (0, 20, result("a"))]
+        reasons = []
+        calls, results = ro._pair(events, reasons)
+        history = ro._history(calls, results, targets, reasons)
+        self.assertEqual([d["targets_full"] for d in history["derives"]], [None])
 
     def test_a_relative_full_after_an_eval_d_change_in_the_same_command_is_not_placed(self):
         # `eval 'cd sub' && d4d derive core --full data/...` runs the derive
@@ -3572,7 +3574,9 @@ class EarlierDirectoryChange(Base):
                                     ("cd . && ls", "/w", False), ("cd hack/..", "/w", False), ("cd /w", None, True),
                                     ("pushd /w && popd", "/w", False), ("pushd hack && popd", "/w", True),
                                     ("popd", "/w", True), ("cd -", "/w", True), ("cd", "/w", True),
-                                    ("false || cd /w", "/w", True), ("(cd hack; ls)", "/w", False),
+                                    # A child's change counts, as which parts a child
+                                    # runs is not read (#3810, #3830).
+                                    ("false || cd /w", "/w", True), ("(cd hack; ls)", "/w", True),
                                     ("ls", "/w", False), ("./cd hack", "/w", False),
                                     # `bash` may be a function or an alias (#3782).
                                     ("poetry run cd hack", "/w", False), ("bash -c 'cd hack'", "/w", True),
@@ -3599,7 +3603,12 @@ class EarlierDirectoryChange(Base):
                                     ("nice eval 'cd hack'", "/w", True),
                                     ("command -v cd", "/w", False), ("command -V cd", "/w", False),
                                     ("echo builtin cd", "/w", False), ("f() { cd x; }", "/w", False),
-                                    ("{ ls; }", "/w", False), ("time ls", "/w", False)):
+                                    ("{ ls; }", "/w", False), ("time ls", "/w", False),
+                                    # Arithmetic runs no command for the #3782 rule,
+                                    # but a word supplied at run time behind `((`
+                                    # still counts as it did (#3844).
+                                    ("(( i++ ))", "/w", False), ("(( $x ))", "/w", True),
+                                    ("(( cd x ))", "/w", True)):
             with self.subTest(command=command, cwd=cwd):
                 self.assertEqual(ro._shell(command, cwd, [])["moves"], moves)
         # In the same command, a change behind those words leaves no known
@@ -3641,16 +3650,18 @@ class EarlierDirectoryChange(Base):
     RUNS_CODE_HERE = ("source env.sh", ". ./env.sh", "myfunc", "git status", "python fix.py",
                       "bash -c 'cd hack'", "{ source env.sh; }", "if myfunc; then ls; fi", "eval myfunc",
                       "X=1 myfunc", "2>/dev/null source env.sh", "ls && myfunc", "true; . env.sh",
-                      "trap 'cd /tmp' DEBUG", "ls | myfunc", "case x in *) myfunc;; esac")
-    #: Parts that do not: a path is a file bash runs in a child, the names
-    #: read here are taken as what they name, and a child shell's change
-    #: dies with it (#3782, #3810).
+                      "trap 'cd /tmp' DEBUG", "ls | myfunc", "case x in *) myfunc;; esac",
+                      # A child's change dies with it, but which parts a
+                      # child runs is not read, so these count (#3810, #3830).
+                      "myfunc | cat", "myfunc &", "(myfunc)", "(source env.sh)", "X=$(myfunc)",
+                      "echo $(myfunc)", "cat <(myfunc)")
+    #: Parts that do not: a path is a file bash runs in a child, and the
+    #: names read here are taken as what they name (#3782).
     RUNS_NOTHING_HERE = ("./tool.sh", "/usr/bin/python3 fix.py", "poetry run pytest", "nice -n 5 ls",
                          "timeout 5 cat x", "env X=1 ls", "d4d receipts check --receipt R",
                          "linkml-validate -s s.yaml F", "f() { cd x; }", "export X=1", ":", "false",
                          "for f in a b; do echo $f; done", "case x in *) ls;; esac", "(( i++ ))",
-                         "myfunc | cat", "myfunc &", "(myfunc)", "(source env.sh)", "X=$(myfunc)",
-                         "echo $(myfunc)", "cat <(myfunc)", "[ -f x ]", "test -f x", "echo \"$(myfunc)\"")
+                         "[ -f x ]", "test -f x", "echo \"$(myfunc)\"")
 
     def test_code_run_in_this_shell_may_move_it(self):
         for command in self.RUNS_CODE_HERE:
@@ -3665,7 +3676,7 @@ class EarlierDirectoryChange(Base):
         self.assertTrue(ro._may_run_code_here(["{", "myfunc"]))
         for part in (["./x"], ["/bin/x"], ["$X"], ["cat", "x"], ["cd", "x"], ["eval", "x"], ["f", "()", "{", "x"],
                      ["function", "f"], ["poetry", "run", "x"], ["timeout", "5", "x"], ["d4d", "x", "y"],
-                     ["export", "X"], ["((", "i++", "))"], ["command", "-v", "x"]):
+                     ["export", "X"], ["((", "i++", "))"], ["if", "((", "x", "))"], ["command", "-v", "x"]):
             with self.subTest(part=part):
                 self.assertFalse(ro._may_run_code_here(part))
 
@@ -3673,7 +3684,8 @@ class EarlierDirectoryChange(Base):
         # End to end (#3782): after each, a later `python -m` or `poetry run`
         # part is unread and a later relative `--full` is not placed.
         for earlier in ("source env.sh", ". ./env.sh", "myfunc", "git status", "{ source env.sh; }",
-                        "eval myfunc", "if myfunc; then ls; fi"):
+                        "eval myfunc", "if myfunc; then ls; fi", "myfunc | cat", "(source env.sh)",
+                        "X=$(myfunc)"):
             for command in self.READ_HERE:
                 with self.subTest(earlier=earlier, command=command):
                     identity, block = self._run(earlier, command)
@@ -3690,8 +3702,7 @@ class EarlierDirectoryChange(Base):
                 block = r.report()
                 self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
                                           "resolved")
-        for earlier in ("./tool.sh", "/usr/bin/python3 fix.py", "myfunc | cat", "(source env.sh)",
-                        "X=$(myfunc)", "case x in *) ls;; esac"):
+        for earlier in ("./tool.sh", "/usr/bin/python3 fix.py", "case x in *) ls;; esac", "(( i++ ))"):
             with self.subTest(earlier=earlier):
                 _, block = self._run(earlier, UnseenDerive.VALIDATE)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -3701,44 +3712,40 @@ class EarlierDirectoryChange(Base):
         derive = "d4d derive core --full data/X_d4d.yaml --out o.yaml"
         for change, placed in (("source env.sh", None), (". env.sh", None), ("myfunc", None),
                                ("git status", None), ("eval myfunc", None), ("ls", True), ("./tool.sh", True),
-                               ("(source env.sh)", True), ("X=$(myfunc)", True), ("myfunc | cat", True)):
+                               ("(source env.sh)", None), ("X=$(myfunc)", None), ("myfunc | cat", None)):
             with self.subTest(change=change):
                 [row] = ro._shell(f"{change} && {derive}", "/w", target)["derives"]
                 self.assertIs(row["targets_full"], placed)
         # A `python -m` part after a change reads as after it in its command,
-        # unless the change was in a child (#3810).
+        # a change in a child included, as which parts a child runs is not
+        # read (#3810, #3830).
         self.assertTrue(ro._shell(f"cd hack && {UnseenDerive.VALIDATE}", "/w", [])["runs_unread"])
         for child in ("(cd hack) && ", "cd hack | cat && ", "cd hack & "):
             with self.subTest(child=child):
-                self.assertFalse(ro._shell(child + UnseenDerive.VALIDATE, "/w", [])["runs_unread"])
+                self.assertTrue(ro._shell(child + UnseenDerive.VALIDATE, "/w", [])["runs_unread"])
         self.assertTrue(ro._shell(f"(cd hack && {UnseenDerive.VALIDATE})", "/w", [])["runs_unread"])
 
-    def test_subshell_scopes(self):
-        # #3810: which parts bash runs in a subshell, by the `(` opening it.
-        for command, scopes in (("(cd x; ls)", [(0,), (0,)]), ("(cd x); cd y", [(0,), ()]),
-                                ("$(cd x) && cd y", [(), (1,), ()]), ("echo $(cd x)", [(), (2,)]),
-                                ("X=$(a $(b)); cd y", [(), (1,), (1, 4), ()]),
-                                ("cat <(cd x) >(ls)", [(), (2,), (), (7,)]), ("if (cd x); then ls; fi", [(), (1,), (), ()]),
-                                ("((cd x); ls)", [(), ()]), ("(( i++ )) && cd x", [(), ()]),
-                                ("echo $((1+2)); cd x", [(), ()]), ("case x in (a) cd y;; esac", [(), (), (), ()]),
-                                ("case x in a) cd y;; esac", [(), (), ()]), ("f() { cd x; }", [(), ()]),
-                                ("a=(1 2); cd x", [(), (), ()]),
-                                # Not matched, so read as before: every part here.
-                                ("echo '(' ; (cd x)", [(), ()]), ("echo \\( ; (cd x)", [(), ()]),
-                                ("(cd x; cat <<EOF\nhi\nEOF\n)", [()] * 4), ("X=`ls`; (cd x)", [(), ()]),
-                                ("echo $'a' ; (cd x)", [(), ()]), ("echo \"$(pwd)\"; (cd x)", [(), ()])):
-            with self.subTest(command=command):
-                self.assertEqual(ro._subshell_scopes(command, ro._tokens(command)), scopes)
-        # The four spellings #3810 names.
+    def test_a_change_in_a_child_still_counts(self):
+        # #3810 stays open: which parts a child runs is not read from the
+        # tokenizer's brackets and joins, so every change counts, wherever
+        # it runs (#3830). The four spellings #3810 names, and the children
+        # and case lines whose reading placed a `--full` (#3904, #3911,
+        # #3912). Only a function being defined changes nothing.
         for command, moves in (("case x in a) cd y;; esac", True), ("f() { cd x; }", False),
-                               ("(cd x); cd y", True), ("$(cd x) && cd y", True), ("(cd x)", False),
-                               ("$(cd x)", True), ("X=$(cd x)", False), ("cd x | cat", False), ("cd x &", False),
-                               ("ls | cd x", True), ("(cd x) | cat; cd y", True),
-                               # A quoted or escaped bracket is a word to bash:
-                               # the cd between them runs here.
-                               ("'(' ; cd x ; ')'", True), ("\\( ; cd x ; \\)", True)):
+                               ("(cd x); cd y", True), ("$(cd x) && cd y", True), ("(cd x)", True),
+                               ("$(cd x)", True), ("X=$(cd x)", True), ("cd x | cat", True), ("cd x &", True),
+                               ("ls | cd x", True), ("(cd x) | cat; cd y", True), ("(source env.sh)", True),
+                               ("X=$(myfunc)", True), ("myfunc | cat", True), ("myfunc &", True),
+                               ("'(' ; cd x ; ')'", True), ("\\( ; cd x ; \\)", True),
+                               ("case x in *) myfunc;; esac", True), ("cat <(myfunc)", True),
+                               ("echo $(myfunc)", True),
+                               ("cat <<EOF\ncase in point\nEOF\n{ cd sub; }", True),
+                               ("cd sub$((0|cat))", True), ("cd $((1|false))", True)):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], moves)
+        for gone in ("_subshell_scopes", "_in_child", "_case_patterns", "_unscannable", "_start"):
+            with self.subTest(gone=gone):
+                self.assertFalse(hasattr(ro, gone))
 
     def test_a_program_word_built_at_run_time_is_open_ended(self):
         # #3852: at a command's head, such a word may name a detaching program.
@@ -3769,18 +3776,11 @@ class EarlierDirectoryChange(Base):
                 self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 4) runs a program")
                 self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
 
-    def test_case_patterns(self):
-        for command, patterns in (("case x in a) ls;; *) ls;; esac", {2}),
-                                  ("case x in (a) ls;; (*) ls;; esac", {1, 3}),
-                                  ("case x in\na) ls;;\n*) ls;;\nesac", {1, 3}),
-                                  ("case x in a) case y in b) ls;; esac;; *) ls;; esac", {4}),
-                                  ("echo case x in a; ls", set()), ("ls; *) x", set())):
-            with self.subTest(command=command):
-                self.assertEqual(ro._case_patterns(ro._tokens(command)), patterns)
-
     #: An unquoted command substitution, a nested one and a backquoted one,
     #: each ending right before an operator with no space (#3825).
-    SUBSTITUTIONS = ("X=$(pwd)", "ls $(pwd)", "D=$(git rev-parse --show-toplevel)", "X=$(a $(b))", "X=`pwd`")
+    #: (Readers inside: a bare word not read here may be a function, which
+    #: counts wherever it runs, #3782, #3810.)
+    SUBSTITUTIONS = ("X=$(pwd)", "ls $(pwd)", "D=$(git rev-parse --show-toplevel)", "X=$(ls $(pwd))", "X=`pwd`")
 
     def test_tokens_split_an_operator_run_as_bash_does(self):
         # shlex returned `);`, `)&&`, `))` as one token, which the layout
@@ -3819,7 +3819,10 @@ class EarlierDirectoryChange(Base):
         self.assertEqual(ro._spaced_operators("echo $'it\\'s);' x);cd y"), "echo $'it\\'s);' x) ;cd y")
         # `;;&` ends a case clause, a join; it starts nothing in the background.
         self.assertEqual(ro._layout(ro._tokens("a;;&b"))[0], [["a"], ["b"]])
-        self.assertFalse(ro._shell("case x in a) ls;;& *) ls;; esac", "/w", [])["detaches"])
+        self.assertFalse(ro._shell("case x in a) ls;;& b) ls;; esac", "/w", [])["detaches"])
+        # A case pattern is read as a command (#3911): a glob there may be a
+        # program built at run time, so it is open-ended, the rule's cost.
+        self.assertTrue(ro._shell("case x in a) ls;;& *) ls;; esac", "/w", [])["detaches"])
         self.assertTrue(ro._shell("(sleep 1&)", "/w", [])["detaches"])
 
     def test_no_multi_character_ampersand_operator_reads_as_a_background_ampersand(self):
@@ -3860,14 +3863,18 @@ class EarlierDirectoryChange(Base):
                              "eval 'cd data'", "eval \"$GO\"", "{ eval \"$GO\"; }"):
                     with self.subTest(sub=sub, op=op, tail=tail):
                         self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], True)
+                # `git` is a bare word not read here, which may be a
+                # function; in a substitution it runs in a child, but which
+                # parts a child runs is not read, so it counts (#3782, #3810).
+                unread = "git" in sub
                 for tail in ("ls", "echo cd data", "command -v cd", "f() { cd data; }", "eval ls"):
                     with self.subTest(sub=sub, op=op, tail=tail):
-                        self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], False)
+                        self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], unread)
                 # A derive heads its own part, and a change before it in the
                 # command leaves its relative `--full` unplaced.
                 with self.subTest(sub=sub, op=op, rule="derive"):
                     [row] = ro._shell(f"{sub}{op}{derive}", "/w", target)["derives"]
-                    self.assertIs(row["targets_full"], True)
+                    self.assertIs(row["targets_full"], None if unread else True)
                     self.assertNotEqual(row.get("basis"), "unparsed")
                     for change in ("cd data", "{ cd data; }", "eval 'cd data'"):
                         [row] = ro._shell(f"{sub}{op}{change} && {derive}", "/w", target)["derives"]
@@ -3914,16 +3921,17 @@ class EarlierDirectoryChange(Base):
     def test_a_cd_in_a_quoted_or_backquoted_substitution_is_not_read(self):
         # shlex keeps such a substitution inside one word, and its cd moves
         # nothing; the docs say so (#3841). An unquoted one, a process
-        # substitution and a subshell run in a child too, so their cd moves
-        # nothing either (#3810).
+        # substitution and a subshell run in a child too, and their cd moves
+        # nothing either, but which parts a child runs is not read, so they
+        # count, the rule's cost (#3810, #3830).
         # A backquoted command with a space in it is split by the tokenizer,
         # so its fragments are read as parts (`x`, `` pwd` ``), which may be
         # a function or a program built at run time: counted (#3782, #3852).
         for command, moves in (("X=`cd x; pwd`", True), ("X=`pwd`", False), ("echo \"$(cd x; pwd)\"", False),
                                ("ls \"$(cd x)\"; ls", False), ("X=\"$(cd /tmp && pwd)\"", False),
                                ("echo \"`cd x`\"", False),
-                               ("X=$(cd x; pwd)", False), ("(cd x; ls)", False), ("echo $(cd x)", False),
-                               ("cat <(cd x)", False), ("echo >(cd x)", False)):
+                               ("X=$(cd x; pwd)", True), ("(cd x; ls)", True), ("echo $(cd x)", True),
+                               ("cat <(cd x)", True), ("echo >(cd x)", True)):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], moves)
 
@@ -3964,7 +3972,7 @@ class EarlierDirectoryChange(Base):
                                               "resolved")
                     self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
         # A substitution followed by no change leaves the next call as it was.
-        for earlier in ("X=$(pwd);ls", "X=$(a $(b))&&ls", "X=`pwd`;ls"):
+        for earlier in ("X=$(pwd);ls", "X=$(ls $(pwd))&&ls", "X=`pwd`;ls"):
             with self.subTest(earlier=earlier):
                 _, block = self._run(earlier, UnseenDerive.VALIDATE)
                 self.assertEqual(block["status"], "checked", block["reasons"])
@@ -4298,15 +4306,13 @@ class Cli(unittest.TestCase):
                       "line in that shell (`source`, `.`, or a program named by a bare word this does not "
                       "read, which may be a function or an alias; not a path, a reader or a d4d call), such a "
                       "part counts as after a directory change, and a relative `--full` cannot be placed, "
-                      "unless the call's own event records its directory and was issued after that change "
-                      "returned; one inherited from the init event is not trusted.", text)
-        # #3699, #3719, #3723, #3782, #3797, #3812, #3815, #3824
+                      "even where the transcript records a directory for the call.", text)
+        # #3699, #3719, #3723, #3782, #3797, #3812, #3815; #3824 stays open
         self.assertIn("A change in a subshell, an unquoted `$(...)`, `<(...)` or `>(...)`, a pipe's left side "
-                      "or a `&` job runs in a child and does not count, where the brackets can be matched and "
-                      "the command carries no here-document, backquote, `${`, `$'` or quoted `$(` (#3904); one "
-                      "in a backquoted or double-quoted substitution is not read; and a command the tokenizer "
-                      "cannot split counts. Where the transcript records another directory and no earlier "
-                      "change was seen, such a part counts as after a change too, and a relative `--full` "
+                      "or a `&` job counts too, though it runs in a child: which parts a child runs is not read "
+                      "(#3830); one in a backquoted or double-quoted substitution is not read; and a command the "
+                      "tokenizer cannot split counts. Where the transcript records another directory and no "
+                      "earlier change was seen, such a part counts as after a change too, and a relative `--full` "
                       "resolves against the recorded directory.", text)          # #3782, #3798, #3810, #3841
         self.assertIn("where every join from the change to the derive is `&&`, and after one `eval` runs or "
                       "may run it cannot be placed.", text)                                     # #3815
@@ -4319,8 +4325,10 @@ class Cli(unittest.TestCase):
                       "arguments to the end are read for a `&` and the like, and one carrying a word supplied "
                       "at run time is open-ended (`bash -c \"$X\"`); and a command the tokenizer cannot split "
                       "is open-ended where any word in it starts with `$` or a backquote.", text)  # #3843-#3847, #3852
-        self.assertNotIn("even where the transcript records a directory for the call", text)       # #3824
-        self.assertNotIn("one in a subshell or an unquoted `$(...)`, `<(...)` or `>(...)` counts", text)  # #3810
+        for gone in ("unless the call's own event records", "runs in a child and does not count",   # #3824, #3810
+                     "where the brackets can be matched"):
+            with self.subTest(gone=gone):
+                self.assertNotIn(gone, text)
         self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
                       "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674

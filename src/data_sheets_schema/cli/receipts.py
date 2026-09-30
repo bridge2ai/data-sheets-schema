@@ -394,15 +394,13 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     command line in that shell (`source`, `.`, or a program named by a bare word this does
     not read, which may be a function or an alias; not a path, a reader or a d4d call),
     such a part counts as after a directory change, and a relative `--full` cannot be
-    placed, unless the call's own event records its directory and was issued after that
-    change returned; one inherited from the init event is not trusted. A change in a
+    placed, even where the transcript records a directory for the call. A change in a
     subshell, an unquoted `$(...)`, `<(...)` or `>(...)`, a pipe's left side or a `&` job
-    runs in a child and does not count, where the brackets can be matched and the command
-    carries no here-document, backquote, `${`, `$'` or quoted `$(` (#3904); one in a
-    backquoted or double-quoted substitution is not read; and a command the tokenizer
-    cannot split counts. Where the transcript records another directory and no earlier
-    change was seen, such a part counts as after a change too, and a relative `--full`
-    resolves against the recorded directory. A redirection before a program is read
+    counts too, though it runs in a child: which parts a child runs is not read (#3830);
+    one in a backquoted or double-quoted substitution is not read; and a command the
+    tokenizer cannot split counts. Where the transcript records another directory and no
+    earlier change was seen, such a part counts as after a change too, and a relative
+    `--full` resolves against the recorded directory. A redirection before a program is read
     past (`2>/dev/null cd /tmp`); a program word built at run time (`$C /tmp`, `c${X}d`,
     a glob) counts as a change and, at a part's head, as open-ended (`$X ./derive.sh`);
     the command `eval` runs is its words joined and tokenised again (`eval

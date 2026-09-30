@@ -159,35 +159,36 @@ may run in it code not on its command line (#3782): `source` or `.`, or
 a program named by a bare word this does not read, which may be a
 function or an alias (not a path, a reader, a reserved word or builtin
 that changes no directory, `poetry run` or a wrapper read here, a d4d
-call or a validator; nor a case pattern, `*)`, nor arithmetic, `(( i++
-))`) -- a later call's `python -c`, `-m` or `poetry run` part is read as
-after a directory change in its own command, and a relative `--full` in
-it cannot be placed, unless the call's own event records its directory
-and was issued after every such change had returned: that is where the
-shell was, and the `--full` resolves there (#3824). One in a subshell, an
-unquoted command or process substitution (`(cd x)`, `$(cd x)`, `<(cd
-x)`), a pipe's left side or a `&` job runs in a child, so it does not
-count, and it reaches no later part of its command outside that child
-(#3810); a subshell is read only where the command's brackets can be
-matched, a case pattern's `)` opening none (not across a bracket the
-tokenizer returned from quotes or an escape), and no part is read as in
-a child of any kind across a here-document, a backquote, a `${...}`,
-`$'...'` or a quoted `$(`, where a `|` or `&` may be split out of a
-word (#3904): there every such change counts. One
-in a backquoted or double-quoted substitution (`` `cd x` ``, `"$(cd
-x)"`) is kept inside one word and not read; it moves nothing (#3841),
-though a backquoted command with a space in it is split, and its pieces
-are read as parts. A command the tokenizer cannot split counts,
-whatever its words (#3782). Wherever the
-transcript records a working directory other than the first it records,
-such a part is read as after a change too, and, where no earlier call's
-change was seen, a relative `--full` resolves against the recorded
-directory, where the call started (#3798). A directory inherited from
-the transcript's init event is not trusted after a change, since an
-earlier `cd` does not update it (#3812). In the same command, a
-directory change `eval` runs (or may run), or code run in this shell as
-above, leaves no known directory for the parts after it, as one behind a
-brace does (#3815).
+call, a validator or arithmetic, `(( i++ ))`) -- a later call's `python
+-c`, `-m` or `poetry run` part is read as after a directory change in
+its own command, and a relative `--full` in it cannot be placed. One in
+a subshell, an unquoted command or process substitution (`(cd x)`,
+`$(cd x)`, `<(cd x)`), a pipe's left side or a `&` job does not move
+the shell, but it counts all the same, the rule's cost: which parts a
+child runs is not read from the tokenizer's brackets and joins, since a
+`)` or `|` it returns may come from a case pattern, a here-document
+body, a backquote, a `${...}` or an arithmetic `$((...))`, where reading
+it so placed a `--full` after a real change (#3810, #3904, #3911,
+#3912); that waits for a shell grammar (#3830). A case pattern is read
+as a command too (`a)`, `*)`), so its word may count. One in a
+backquoted or double-quoted substitution (`` `cd x` ``, `"$(cd x)"`) is
+kept inside one word and not read; it moves nothing (#3841), though a
+backquoted command with a space in it is split, and its pieces are read
+as parts. A command the tokenizer cannot split counts, whatever its
+words (#3782). Wherever the transcript records a working directory
+other than the first it records, such a part is read as after a change
+too, and, where no earlier call's change was seen, a relative `--full`
+resolves against the recorded directory, where the call started
+(#3798). Where both hold, the earlier change decides and the `--full` is
+not placed (#3812): a call's recorded directory may be one inherited
+from the transcript's init event, which an earlier `cd` does not update,
+so it is not trusted after one, even where the call's own event records
+it (#3824 stays open: no transcript here records a per-event directory
+to check the runtime's against); the cost is a false `unknown` in a
+transcript that records the directory on every event. In the same
+command, a directory change `eval` runs (or may run), or code run in
+this shell as above, leaves no known directory for the parts after it,
+as one behind a brace does (#3815).
 A resumed run's next transcript starts afresh. A package in the
 directory the session's shell started in that such a part imports first
 is not read, nor a function or alias named as a program read here
@@ -413,24 +414,25 @@ NON_CHECKS = (
     "keyword, `!`, `time`, `builtin` or `command`, #3797), or which may run in that shell code not "
     "on its command line (#3782: `source` or `.`, or a program named by a bare word not read here, "
     "which may be a function or an alias -- not a path, a reader, a reserved word or builtin that "
-    "changes no directory, `poetry run` or a wrapper read here, a d4d call, a validator, a case "
-    "pattern or arithmetic), such a part counts as after a directory change and a relative `--full` "
-    "cannot be placed, unless the call's own event records its directory and was issued after every "
-    "such change had returned, where the `--full` resolves there (#3824); a directory inherited "
-    "from the init event is not trusted after a change (#3812). One in a subshell, an unquoted "
-    "command or process substitution (`(cd x)`, `$(cd x)`, `<(cd x)`), a pipe's left side or a `&` "
-    "job runs in a child: it does not count, nor reach a later part of its command outside that "
-    "child (#3810), where the command's brackets can be matched (a case pattern's `)` opens none; "
-    "across a bracket from quotes or an escape every such change counts) and the command carries no "
-    "here-document, backquote, `${...}`, `$'...'` or quoted `$(`, from inside which a `|` or `&` may "
-    "be split (there no part is a child and every change counts, #3904); one in a backquoted or "
+    "changes no directory, `poetry run` or a wrapper read here, a d4d call, a validator or "
+    "arithmetic), such a part counts as after a directory change and a relative `--full` cannot be "
+    "placed. One in a subshell, an unquoted command or process substitution (`(cd x)`, `$(cd x)`, "
+    "`<(cd x)`), a pipe's left side or a `&` job does not move the shell but counts all the same, "
+    "the rule's cost: which parts a child runs is not read from the tokenizer's brackets and joins, "
+    "where a `)`, `|` or `&` may come from a case pattern, a here-document body, a backquote, a "
+    "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell grammar, "
+    "#3830), and a case pattern is read as a command, so its word may count; one in a backquoted or "
     "double-quoted substitution is kept in "
     "one word, not read, and moves nothing (#3841), though a backquoted command with a space is "
     "split and its pieces read as parts; and a command the tokenizer cannot split counts, whatever "
     "its words (#3782). Where the transcript records a working directory other than its first, such "
     "a part counts as after a change too, and, where no earlier call's change was seen, a relative "
-    "`--full` resolves against the recorded directory (#3798); in the same command a change `eval` "
-    "runs, or code run in this shell as above, leaves no known directory for the parts after it "
+    "`--full` resolves against the recorded directory (#3798); where both hold the earlier change "
+    "decides and the `--full` is not placed, as a recorded directory may be inherited from the init "
+    "event and is not trusted after a change (#3812), even one the call's own event records (#3824), "
+    "a false `unknown` in a transcript that records the directory on every event; in the same "
+    "command a change `eval` runs, or code run in this shell as above, leaves no known directory "
+    "for the parts after it "
     "(#3815). Before a command's program a "
     "redirection with its target and descriptor is read past (`2>/dev/null cd /tmp`, #3845), and a part "
     "whose program word bash builds at run time (a `$` or backquote anywhere in it, a glob or a brace "
@@ -609,10 +611,6 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
             malformed.append(f"transcript {t} line {n}: message content is not a list")
             continue
         cwd = event.get("cwd") if isinstance(event.get("cwd"), str) else cwd_of.get(t)
-        # Where that directory came from (#3824): the call's own event, or
-        # inherited from the transcript's init, which a later `cd` does not
-        # update; None where neither records one.
-        basis = "event" if isinstance(event.get("cwd"), str) else "init" if t in cwd_of else None
         blocks = [b for b in content if isinstance(b, dict) and b.get("type") == "tool_result"]
         # Result metadata is per event: it describes a result only when the
         # event carries exactly one.
@@ -631,7 +629,7 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
                     duplicated.add(identity)
                     continue
                 call = {"id": identity, "name": block.get("name"), "input": block.get("input"),
-                        "transcript": t, "line": n, "pos": len(calls), "cwd": cwd, "cwd_basis": basis,
+                        "transcript": t, "line": n, "pos": len(calls), "cwd": cwd,
                         "start_cwd": start_of.get(t)}
                 calls.append(call)
                 by_id[identity] = call
@@ -1106,162 +1104,6 @@ def _layout(tokens: list[str]) -> tuple[list[list[str]], list[list[str]], list[s
     return segments, joins, leading
 
 
-#: Words after which a `(` opens a subshell: a command starts there
-#: (#3810). An operator is one too; any other word before a `(` makes it
-#: something else (a case pattern's, an array's, an extended glob's).
-_SUBSHELL_AFTER = frozenset({"{", "!", "if", "then", "elif", "else", "while", "until", "do", "time"})
-
-
-def _unquoted_parens(text: str) -> int:
-    """How many `(` and `)` in `text` stand outside quotes and escapes, as
-    `_spaced_operators` scans them: the parens the tokenizer may return as
-    operators."""
-    count, i, quote = 0, 0, None
-    while i < len(text):
-        ch = text[i]
-        if ch == "\\" and quote != "'" and i + 1 < len(text):
-            i += 2
-            continue
-        if quote is not None:
-            quote = None if ch == quote else quote
-        elif ch in "'\"":
-            quote = ch
-        elif ch in "()":
-            count += 1
-        i += 1
-    return count
-
-
-def _unscannable(command: str, tokens: list[str]) -> bool:
-    """Whether `command` carries text whose operators the tokenizer may
-    return from inside a word bash reads whole, so the parts' brackets and
-    joins say nothing about where a child starts or ends: a here-document,
-    a backquote, a `${...}` expansion (`${D//a|b/}`), `$'...'` or a quoted
-    `$(` whose inner quotes the scan does not follow. shlex treats none of
-    these as quoting, so a `|` or `&` inside one splits a word into two
-    parts joined by what reads as a pipe (#3904). Where this holds, neither
-    `_subshell_scopes` nor `_in_child` reads any part as in a child, and
-    every directory change counts, as before #3810 (a false `unknown`,
-    never a false `checked`)."""
-    return ("`" in command or "${" in command or "$'" in command
-            or any(t in ("<<", "<<-") for t in tokens)
-            or any("$(" in t for t in tokens if not set(t) <= _PUNCT))
-
-
-def _subshell_scopes(command: str, tokens: list[str]) -> list[tuple[int, ...]]:
-    """Per part, as `_layout` splits `tokens`, the subshells bash runs it in,
-    outermost first, each by the position of the `(` that opens it: an empty
-    tuple for a part this shell runs (#3810). A subshell is a `( ... )`
-    opened where a command starts, or an unquoted `$( ... )`, `<( ... )` or
-    `>( ... )`. A cd in one does not move the shell that runs the next call,
-    nor a part after the subshell closes.
-
-    A `(` is a subshell's where a command starts (the start, after an
-    operator, or after a word in `_SUBSHELL_AFTER`) or after a word ending
-    in `$` or a `<`/`>` redirection; after any other word it is something
-    else (`case x in (a)`, `a=(1 2)`, `@(x|y)`) and opens none. A case
-    pattern's `(` where a command may start (`;; (b) cd y;;`) encloses only
-    the pattern, which is no command. Arithmetic's `((` and `))` are one
-    context, and a `))` closing two substitutions closes two.
-
-    Where the parens cannot be matched so -- a `)` with nothing open (a case
-    pattern's `a)`), one left open, a `((` closed by `)` (bash's two
-    subshells), a paren the tokenizer returned from quotes or an escape, or
-    a command `_unscannable` names (a here-document, a backquote, `${`,
-    `$'...'` or a quoted `$(`) -- no part is read as in a subshell: every
-    cd counts, as before (a false `unknown`, never a false `checked`)."""
-    segments = _layout(tokens)[0]
-    none: list[tuple[int, ...]] = [()] * len(segments)
-    if _unscannable(command, tokens):
-        return none
-    prepared = _newlines_as_joins(_strip_comments(command.replace("\\\n", " ")))
-    if _unquoted_parens(prepared) != sum(len(t) for t in tokens if t and set(t) <= set("()")):
-        return none
-    stack: list[tuple[str, int]] = []
-    out: list[tuple[int, ...]] = []
-    starting, prev = True, None
-    for position, token in enumerate(tokens):
-        if token in _OPERATORS:
-            if token == "(":
-                opens = (prev is None or prev in _OPERATORS or prev in _SUBSHELL_AFTER or prev.endswith("$")
-                         or (set(prev) <= _PUNCT and prev[-1] in "<>"))
-                stack.append(("subshell" if opens else "other", position))
-            elif token == ")":
-                if not stack or stack[-1][0] == "arithmetic":
-                    return none
-                stack.pop()
-            starting = True
-        else:
-            if starting:
-                out.append(tuple(at for kind, at in stack if kind == "subshell"))
-                starting = False
-            if token == "((":
-                stack.append(("arithmetic", position))
-            elif token == "))":
-                if stack and stack[-1][0] == "arithmetic":
-                    stack.pop()
-                elif len(stack) >= 2 and all(kind != "arithmetic" for kind, _ in stack[-2:]):
-                    del stack[-2:]
-                else:
-                    return none
-        prev = token
-    return out if not stack and len(out) == len(segments) else none
-
-
-def _case_patterns(tokens: list[str]) -> set[int]:
-    """The parts, as `_layout` splits `tokens`, that are a case clause's
-    pattern rather than a command: from the `in` after a `case` word that
-    starts a part, and after each `;;`, `;&` or `;;&` (an optional `(`
-    included), up to the `)` that ends the pattern, until `esac`. The rules
-    that read a part's head as a program run in this shell (#3782) or built
-    at run time (#3852) skip them, so `*)` is no glob run as a program. A
-    pattern this does not find is read as a command, the conservative side."""
-    patterns: set[int] = set()
-    modes: list[str] = []
-    part, starting, opening = -1, True, False
-    for token in tokens:
-        if token in _OPERATORS:
-            if modes and token in (";;", ";&", ";;&"):
-                modes[-1] = "pattern"
-            elif modes and token == ")" and modes[-1] == "pattern":
-                modes[-1] = "body"
-            starting = True
-            continue
-        if starting:
-            part, starting = part + 1, False
-            opening = token == "case"
-            if modes and token == "esac":
-                modes.pop()
-            elif modes and modes[-1] == "pattern":
-                patterns.add(part)
-        elif opening and token == "in":
-            modes.append("pattern")
-            opening = False
-    return patterns
-
-
-def _in_child(command: str, tokens: list[str], joins: list[list[str]]
-              ) -> tuple[list[bool], list[tuple[int, ...]], list[bool]]:
-    """Per part: whether bash runs it in a child of the shell that runs the
-    next call, so no directory change in it outlives the call (#3810); the
-    subshells it runs in (`_subshell_scopes`); and whether it runs alone in
-    a child of its own, piped into a later part (every part of a pipeline
-    but the last runs in its own subshell; the last may run in this shell
-    under `lastpipe`) or started with `&`, so a change in it reaches no
-    later part.
-
-    Where the command is `_unscannable` (a backquote, `${`, `$'`, a quoted
-    `$(` or a here-document), no part is read as alone either: a `|` or `&`
-    the tokenizer split out of one of those is no pipeline join, and a cd
-    before it runs in this shell (#3904)."""
-    scopes = _subshell_scopes(command, tokens)
-    if _unscannable(command, tokens):
-        alone = [False] * len(joins)
-    else:
-        alone = [bool({"|", "|&", "&"} & set(join)) for join in joins]
-    return [bool(scopes[i]) or alone[i] for i in range(len(joins))], scopes, alone
-
-
 def _status_basis(index: int, joins: list[list[str]], leading: list[str], newline: bool) -> str:
     """What the command's status tells about part `index` (#3113): `command`
     when it is that part's status, `and_chain` when a success is (every
@@ -1659,9 +1501,8 @@ def _directory_builtin(segment: list[str]) -> str | None:
 #: follows them (`if`, `then`, `elif`, `else`, `while`, `until`, `do`).
 #: A leading `((` is arithmetic's word (#3840), but where the arithmetic
 #: does not parse bash reads it as two subshells (`((cd x); ls)`), so a
-#: command behind it is read as run here: its brackets cannot be matched
-#: (`_subshell_scopes`), and it counts (#3810). A `((` whose `))` is in
-#: the same part is arithmetic, which runs no command (#3782).
+#: command behind it is read as the directory rule reads one in a
+#: subshell: it counts.
 _COMPOUND_PREFIXES = frozenset({"{", "!", "if", "then", "elif", "else", "while", "until", "do", "(("})
 
 
@@ -1706,8 +1547,6 @@ def _behind_prefixes(segment: list[str]) -> tuple[list[str], bool]:
         if not rest:
             break
         head = rest[0]
-        if head == "((" and "))" in rest:
-            return [], True                         # `(( i++ ))`: arithmetic, no command (#3782)
         if head in _COMPOUND_PREFIXES or head == "builtin":
             rest = rest[1:]
         elif (skip := _redirection_skip(rest)) is not None:
@@ -1799,7 +1638,11 @@ def _may_run_code_here(segment: list[str]) -> bool:
     reader, a reserved word or builtin in `_STAYS_PUT`, a directory builtin
     or `eval` (read by their own rules), `poetry run` or a wrapper
     `_wrapper_skip` reads, whose program runs in a child, a d4d call or a
-    validator. A function or alias named as one of those is not seen."""
+    validator. A function or alias named as one of those is not seen. Nor
+    is arithmetic (`(( i++ ))`), which runs no command; that exemption is
+    this rule's alone, and the directory rules read the part as before."""
+    if "((" in segment and "))" in segment[segment.index("(("):]:
+        return False
     rest = _behind_prefixes(segment)[0]
     if not rest:
         return False
@@ -2363,7 +2206,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     part is then read as after a directory change in the command. A
     relative `--full` resolves against `cwd`; the caller passes None where
     that is not known (an earlier call's change) and the recorded directory
-    where it is (#3798, #3824: `_start`). `moves`
+    where it is (#3798). `moves`
     in the result says the command itself may change the directory the next
     call starts in."""
     tokens = _tokens(command)
@@ -2437,20 +2280,15 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # or in a command string a nested shell runs, which counts whole where
     # it carries a word supplied at run time (`bash -c "$X"`, #3852). Any
     # other word is an argument: `echo "$(bash derive.sh)"` is not.
-    patterns = _case_patterns(tokens)
     out["detaches"] = any(
         _lone_ampersand(t)
         or (not set(t) <= _PUNCT and (_nested_open_ended(t) or _substituted_runtime_program(t)))
-        for t in tokens) or any(_detacher(s) or (i not in patterns and _dynamic_program(s))
-                                for i, s in enumerate(segments)) or _process_substitutes(
+        for t in tokens) or any(_detacher(s) or _dynamic_program(s)
+                                for s in segments) or _process_substitutes(
         _strip_comments(command)) or _opaque_eval(tokens) or any(
         _nested_open_ended(w, command=True) for w in _command_strings(tokens))
-    changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) or (i not in patterns and (
-        _changes_directory(s) or _may_run_code_here(s))) for i, s in enumerate(segments))
-    # Per part, whether it runs in a child of the shell the next call runs
-    # in (a subshell, a substitution, a pipe's left side or a `&` job), so
-    # that no change in it outlives the call (#3810).
-    child, scopes, alone = _in_child(command, tokens, joins)
+    changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) or _changes_directory(s)
+                            or _may_run_code_here(s) for s in segments)
     for target in named:
         for token in tokens:
             if target.name not in token:
@@ -2511,29 +2349,7 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # to that directory (`cd /repo` run from `/repo`) does not.
     leaves = False
     mentioning_readers: list[int] = []
-    # A subshell runs with a copy of this shell's state and drops it on
-    # exit, and a part piped into a later one or started with `&` runs in
-    # a child of its own (#3810): what the command knew of its directory
-    # before either is what it knows after (`(cd x) && d4d derive core
-    # ...`, `D=$(git rev-parse --show-toplevel) && ...`, `cd x | cat`).
-    # Only the parts inside a subshell see a change made there.
-    entered: dict[tuple[int, ...], tuple] = {}
-    scope: tuple[int, ...] = ()
-    resume = None                                   # the state before a part run alone
     for index, segment in enumerate(segments):
-        if resume is not None:
-            local, pushed, unsettled, moved = resume
-            resume = None
-        common = 0
-        while common < min(len(scope), len(scopes[index])) and scope[common] == scopes[index][common]:
-            common += 1
-        if common < len(scope):
-            local, pushed, unsettled, moved = entered[scope[:common + 1]]
-        for depth in range(common, len(scopes[index])):
-            entered[scopes[index][:depth + 1]] = (local, list(pushed), unsettled, moved)
-        scope = scopes[index]
-        if alone[index]:
-            resume = (local, list(pushed), unsettled, moved)
         before = leading if index == 0 else joins[index - 1]
         if unsettled and before != ["&&"]:
             local = None
@@ -2565,10 +2381,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         # So is a part that may run, in this shell, code not on the command
         # line (`_may_run_code_here`, #3782): `source`, `.`, or a program
         # not read here, which may be a function or an alias.
-        if change is None and index not in patterns and (_changes_directory(segment)
-                                                         or _may_run_code_here(segment)):
-            unsettled = moved = True
-            leaves = leaves or not child[index]
+        if change is None and (_changes_directory(segment) or _may_run_code_here(segment)):
+            unsettled = moved = leaves = True
             local = None
             pushed = [None] * len(pushed)
         if change is not None:
@@ -2587,13 +2401,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 local = where
             else:
                 local = os.path.join(local, where) if local is not None else None
-            leaves = leaves or not (child[index] or _same_directory(local, cwd))
+            leaves = leaves or not _same_directory(local, cwd)
             continue
         if change == "popd":
             local = pushed.pop() if pushed and len(rest) == 1 and reached else None
             if len(rest) > 1 or not reached:
                 pushed = [None] * len(pushed)
-            leaves = leaves or not (child[index] or _same_directory(local, cwd))
+            leaves = leaves or not _same_directory(local, cwd)
             continue
         # Whether the part may not run what its words name (#3689, #3699,
         # #3700, #3723): an assignment before it (on the part, to `env`, as an
@@ -2697,11 +2511,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # the call started in. One behind a brace, a compound keyword, `!`,
     # `time`, `builtin` or `command` counts (#3797). One in a subshell
     # (`(cd x; ls)`), an unquoted command or process substitution (`X=$(cd
-    # x; pwd)`, `<(cd x)`), a pipe's left side or a `&` job runs in a
-    # child and does not count (`_in_child`, #3810), where the command's
-    # brackets can be matched and it is not `_unscannable` (#3904). One in
-    # a backquoted or double-quoted
-    # substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
+    # x; pwd)`, `<(cd x)`), a pipe's left side or a `&` job does not move
+    # this shell, but it is read as one all the same, which is the rule's
+    # cost: the segmenter does not say which parts a child runs, and
+    # reading that from shlex's tokens has placed a `--full` after a real
+    # parent-shell change more than once (#3810, #3904, #3911, #3912); it
+    # waits for a shell grammar (#3830). One in a backquoted or
+    # double-quoted substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
     # tokenizer keeps it inside one word; it moves nothing, so nothing is
     # missed (#3841). `eval` runs its words in this shell, so a
     # `cd`, `pushd` or `popd` word among them counts too, behind those
@@ -2915,32 +2731,6 @@ def _creates(name: str, inputs: dict) -> bool:
     return isinstance(first, dict) and first.get("old_string") == ""
 
 
-def _start(call: dict, moved_by: float | None) -> tuple[str | None, bool]:
-    """Where a shell call started, as far as the transcript says, and
-    whether it may have started anywhere but where its session's shell did:
-    (the directory a relative path in it resolves against, or None where
-    that is not known; `moved` for `_shell`). `moved_by` is the line by
-    which every earlier call in its transcript that may have changed the
-    directory had returned, or None where none may have (#3719).
-
-    Where the transcript records a directory other than where its shell
-    started, the call started there, and a relative `--full` resolves
-    against it (#3798). After an earlier change the call's `cwd` is trusted
-    only where its own event records it (`cwd_basis: event`) and was issued
-    after every such change had returned (#3824): one inherited from the
-    init event is where the shell started, which an earlier `cd` does not
-    update (#3812), and one recorded before a change had returned may
-    predate it. Either way a `python -c`/`-m` or `poetry run` part is read
-    as after a change: the rule does not rest on the recorded directory
-    being the start."""
-    elsewhere = (call["cwd"] is not None and call["start_cwd"] is not None
-                 and os.path.normpath(call["cwd"]) != os.path.normpath(call["start_cwd"]))
-    if moved_by is None:
-        return call["cwd"], elsewhere
-    trusted = call.get("cwd_basis") == "event" and moved_by < call["line"]
-    return (call["cwd"] if trusted else None), True
-
-
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
              reasons: list[str], runtime_denied: set[str] | frozenset = frozenset()) -> dict[str, Any]:
     """Every call that bears on the two files, sorted into successful Writes,
@@ -2952,10 +2742,7 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
     # Transcripts in which a shell call not denied may have changed the
     # directory: the runtime's shell keeps it, so every later call there may
     # start elsewhere (#3719). A resumed run's next transcript starts afresh.
-    # Each maps to the line by which every such call's result had come back
-    # (infinite while one has none): a call issued after it that records its
-    # own directory records where the shell was then (#3824).
-    moved_in: dict[int, float] = {}
+    moved_in: set[int] = set()
     for call in calls:
         name, inputs, result = call["name"], call["input"], results.get(call["id"])
         if not isinstance(inputs, dict):
@@ -2991,17 +2778,29 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
             if not isinstance(command, str):
                 reasons.append(f"shell call {call['id']} has no command string")
                 continue
-            cwd, moved = _start(call, moved_in.get(call["transcript"]))
-            shell = _shell(command, cwd, targets, moved=moved)
+            # Where an earlier call changed directory the call's starting
+            # directory is not known, whatever the transcript inherited from
+            # its init; where the transcript records one other than where its
+            # shell started, the call started there (#3719). Either way a
+            # `python -c`/`-m` or `poetry run` part may take its code from it.
+            # Only in the first is a relative `--full` unresolved: in the
+            # second the recorded directory is where the call started, and
+            # it resolves there (#3798). Where both hold, the first decides
+            # (#3812): a call's `cwd` falls back to the init event's where
+            # its own event records none, and an earlier `cd` does not move
+            # that, so after one it is not trusted. The cost is a false
+            # `unknown` where every event records the directory.
+            earlier = call["transcript"] in moved_in
+            elsewhere = (call["cwd"] is not None and call["start_cwd"] is not None
+                         and os.path.normpath(call["cwd"]) != os.path.normpath(call["start_cwd"]))
+            shell = _shell(command, None if earlier else call["cwd"], targets, moved=earlier or elsewhere)
             # A call the native control refused (#3185), or the runtime in
             # `dontAsk` mode with its terminal listing to say so (#3201),
             # never ran.
             denial = ("native_denial" if _denied(result) else
                       "runtime_denial" if call["id"] in runtime_denied else None)
             if shell["moves"] and denial is None:
-                back = (result["line"] if result is not None and result["transcript"] == call["transcript"]
-                        else float("inf"))
-                moved_in[call["transcript"]] = max(moved_in.get(call["transcript"], back), back)
+                moved_in.add(call["transcript"])
             # One row per part that derives the core, with that part's own
             # outcome (#3113): `targets_full` is None when its `--full`
             # cannot be placed.
