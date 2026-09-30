@@ -2003,12 +2003,25 @@ _RECOMMENDATIONS_READ = {
         "provenance already packaged with the release",
         "provenance shipped with the release",
     ],
-    # A criticism of what a populated slot holds. was_derived_from holds the
-    # study's name in prose in the two AI_READI ratings the first three come
-    # from, as their own evidence quotes; the other four are about a
-    # populated method, institution or confidentiality level. The last asks
-    # for a different value of confidentiality_level, which its rating says
-    # is 'restricted' where the sources give 'HL7:2N' (#3808).
+    # A criticism of what a populated slot holds: the sentence asks for a
+    # different or fuller value of a slot its rating says is populated and
+    # criticises, whatever else it asks for (#3808, #3819). was_derived_from
+    # holds the study's name in prose in the two AI_READI ratings the first
+    # three come from, as their own evidence quotes; the next four are about
+    # a populated method, institution or confidentiality level, the last of
+    # them asking for a different value of confidentiality_level, which its
+    # rating says is 'restricted' where the sources give 'HL7:2N' (#3808).
+    # In the three after that, publisher holds 'https://fairhub.io/', which
+    # each rating criticises as a URL where the organisation name belongs;
+    # beside the requests for empty slots, each asks for the name (#3819).
+    # The citation holds RRID:SCR_007345, which its rating says identifies
+    # PhysioNet and not the dataset, and the sentence asks for the citation
+    # to say so; "Keep the RRID in the citation as published", a placement
+    # above, keeps the value. related_datasets holds one is_new_version_of
+    # link, which its rating criticises as "only one predecessor rather than
+    # the five listed in version_access"; the sentence asks for the full
+    # chain (#3820). A criticism is not a miss: it says what a populated
+    # slot holds, not that a slot is empty.
     "criticism": [
         "reference its per-sub-crate derivation edges from was_derived_from",
         "set was_derived_from to the same identifier, keeping the study-name prose in notes",
@@ -2017,12 +2030,25 @@ _RECOMMENDATIONS_READ = {
         "keeping the divergent platform and RO-Crate values in the details prose",
         "rather than asserting a method in the structured slot that the platform metadata contradicts",
         "Keep the caveat but consider a value nearer",
+        "Set publisher to the organization name FAIRhub",
+        "Populate confidentiality_level ('HL7:2N'), parent_datasets/was_derived_from",
+        "Populate data_protection_impacts (truthful status)",
+        "Clarify in the citation or a dedicated field",
+        "Add was_derived_from or parent_datasets links",
     ],
     # A request: the imperative names a slot to fill and nothing beside it
-    # says the slot is empty or where its content is. Not counted as a miss:
-    # a request presupposes an unfilled slot without stating one, and some
-    # are conditional ("if part of larger collection") or ask for a finer
-    # grain ("per file collection") of a slot the rating does not call empty.
+    # says the slot is empty, where its content is, or that a value a
+    # populated slot holds is wrong or incomplete. Not counted as a miss: a
+    # request presupposes an unfilled slot without stating one, and some are
+    # conditional ("if part of larger collection") or ask for a finer grain
+    # ("per file collection") of a slot the rating does not call empty. Two
+    # name an RO-Crate beside the imperative and stay requests: "consider
+    # embedding the RO-Crate lineage as a provenance graph" gives the slots'
+    # content as doi:10.60775/fairhub.2 and the lineage a graph of its own,
+    # where "provenance already packaged with the release" above is the
+    # derivation path the slot is to hold; and "the shipped RO-Crate
+    # provenance graphs" is asked about for processing parameters, not said
+    # to hold the was_generated_by link the sentence asks for.
     "request": [
         "Add a was_derived_from link to the raw audio",
         "Add explicit deidentification method",
@@ -2037,9 +2063,7 @@ _RECOMMENDATIONS_READ = {
         "mirror the version lineage into parent_datasets",
         "a was_derived_from link to the raw audio source",
         "Add was_derived_from field for provenance",
-        "Add was_derived_from or parent_datasets links",
         "Add was_derived_from per file collection",
-        "Clarify in the citation or a dedicated field",
         "Consider adding hierarchical resources or",
         "Consider adding parent_datasets field linking",
         "Document FAIRSCAPE provenance graph structure",
@@ -2061,8 +2085,6 @@ _RECOMMENDATIONS_READ = {
         "Mirror the v2.0.0 predecessor into parent_datasets/was_derived_from",
         "Mirror the version lineage into was_derived_from",
         "Populate a top-level version field, document",
-        "Populate confidentiality_level ('HL7:2N'), parent_datasets/was_derived_from",
-        "Populate data_protection_impacts (truthful status)",
         "Populate download_url with the FAIRhub access",
         "Populate parent_datasets / was_derived_from",
         "Populate parent_datasets with the 3.0.0 DOI",
@@ -2077,7 +2099,6 @@ _RECOMMENDATIONS_READ = {
         "Populate was_derived_from to type the derivation",
         "Populate was_derived_from with the Synapse raw-audio entity and bind",
         "Record the publisher as a URI",
-        "Set publisher to the organization name FAIRhub",
         "State character encoding (presumably UTF-8)",
         "Wire the provenance explicitly: give each",
     ],
@@ -2101,7 +2122,7 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 111 that are
     credit (#3669); and 122 a leading-verb regex sorts as recommendations,
     read by hand too (#3747): 60 more misses (a named absence and 59
-    placements), seven criticisms and 55 requests, each pinned by a fragment
+    placements), 12 criticisms and 50 requests, each pinned by a fragment
     in `_RECOMMENDATIONS_READ`. 89 of the 277 state an absence the list
     misses. The list is main's; this measures it and changes nothing
     (#3544)."""
@@ -2159,8 +2180,8 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             assert hits[0] not in sorted_, (kind, fragment)
             sorted_[hits[0]] = kind
     assert set(sorted_) == set(recommendations)
-    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 59, "criticism": 7,
-                                         "request": 55}
+    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 59, "criticism": 12,
+                                         "request": 50}
     # The 60 misses are misses: in a Q19 note the gate reads none of them
     # as an empty-slot reason, as on main.
     for sentence, kind in sorted_.items():

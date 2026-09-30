@@ -303,19 +303,25 @@ says beside the imperative.
   addition to the related_datasets typed links", "rather than only
   related_datasets prose", "from the is_new_version_of relations", "the
   RO-Crate/FAIRscape provenance shipped with the release").
-- 7 criticise what a populated slot holds ("keep the alternative reading
-  in source_caveats rather than in the structured slot", "consider a
-  value nearer the sources' meaning" for a populated
-  confidentiality_level; three name was_derived_from, which their
-  ratings quote as holding the study's name in prose).
-- 55 are requests: the imperative names a slot to fill ("Add
+- 12 criticise what a populated slot holds: each asks for a different or
+  fuller value of a slot its rating says is populated and criticises,
+  whatever else it asks for ("keep the alternative reading in
+  source_caveats rather than in the structured slot", "consider a value
+  nearer the sources' meaning" for a populated confidentiality_level;
+  three name was_derived_from, which their ratings quote as holding the
+  study's name in prose; three ask for the name "FAIRhub" where publisher
+  holds a URL; one asks the citation to say that the RRID it carries
+  names the repository; one asks for "the full five-release chain" in a
+  related_datasets its rating criticises for naming one predecessor).
+- 50 are requests: the imperative names a slot to fill ("Add
   was_derived_from field for provenance chain", "Mirror the predecessors
   into parent_datasets/was_derived_from …") and nothing beside it says the
-  slot is empty or where its content is. They are not counted as misses:
-  a request presupposes an unfilled slot without stating one, and some
-  are conditional ("if part of larger collection") or ask for a finer
-  grain ("per file collection"). Whether the gate should read a request
-  as an absence is part of #3544.
+  slot is empty, where its content is, or that a value a populated slot
+  holds is wrong or incomplete. They are not counted as misses: a request
+  presupposes an unfilled slot without stating one, and some are
+  conditional ("if part of larger collection") or ask for a finer grain
+  ("per file collection"). Whether the gate should read a request as an
+  absence is part of #3544.
 
 Every one of the 122 is pinned by a fragment to its class in the test.
 The 89 are a count, not a recall ratio: which of the 769 carry their word
