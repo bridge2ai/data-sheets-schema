@@ -1922,18 +1922,162 @@ _HAND_READ_NOT_CREDIT = {
 }
 
 
-#: Sentences the leading-verb regex put among the 122 recommendations
-#: that state what the hand-read classes count as a miss (#3742). They
-#: are examples found after the fact, not a reading of the bucket: the
-#: 122 were not read, so the misses they hold are not counted.
-_UNREAD_RECOMMENDATIONS_NOT_CREDIT = [
+#: The 122 sentences the leading-verb regex puts among the recommendations,
+#: read by hand (#3747) with the classes of the 155 and one more, a request.
+#: A fragment of each; a fragment that is a whole sentence matches only that
+#: sentence (one is the opening of another). A recommendation's imperative
+#: is not the absence: a sentence is a named absence or a placement only for
+#: what it says beside the imperative.
+_RECOMMENDATIONS_READ = {
     # A named absence, in the noun form of the 11.
-    "Fill the structural gaps: record the Snellen variable removal",
-    # Placements, of the kind the 16 count.
-    "Populate the dedicated slots that currently hold their content elsewhere: download_url",
-    "the ancestry that related_datasets currently holds alone",
-    "the negative findings currently buried in notes",
-]
+    "named_absence": [
+        "Fill the structural gaps: record the Snellen variable removal",
+    ],
+    # A placement, of the kind the 16 count: where the slot's content is
+    # instead, in another slot, a relation, prose, notes or a file.
+    "placement": [
+        "in addition to the typed related_datasets entry",
+        "revision history currently held in related_datasets notes",
+        "rather than reconstructed from three others",
+        "make the provenance chain machine-readable rather than inferable from prose",
+        "evidenced by structured fields rather than prose alone",
+        "now carried only by raw_data_sources prose",
+        "record version predecessors as parent_datasets in addition to the related_datasets",
+        "express the version predecessors as parent_datasets in addition to the related_datasets",
+        "(large-v3 mentioned in descriptions)",
+        "Instantiate the provenance graph the notes describe",
+        "Keep the RRID in the citation as published",
+        "Mirror the is_new_version_of targets into parent_datasets and list",
+        "or state that the relation is expressed only through related_datasets",
+        "rather than only related_datasets prose",
+        "out of source_caveats into structured slots",
+        "regulatory_restrictions.confidentiality_level with the values already present in prose",
+        "from the prior-version and source DOIs already in related_datasets",
+        "Populate parent_datasets from the two is_new_version_of edges",
+        "so version derivation resolves through the derivation slots as well as related_datasets",
+        "with the predecessor release DOIs already present in related_datasets",
+        "with the prior version DOIs in addition to related_datasets",
+        "making the derivation graph queryable rather than inferable from prose",
+        "Populate parent_datasets with the is_new_version_of targets",
+        "Synapse raw-audio accession already named in related_datasets",
+        "Synapse raw-audio accession already recorded in related_datasets",
+        "Health Data Nexus records already named in related_datasets",
+        "source dataset DOIs already listed in related_datasets",
+        "keeping the descriptive related_datasets entry alongside it",
+        "(duplicating related_datasets is acceptable)",
+        "machine-discoverable through the derivation slots as well as through related_datasets",
+        "already carried in related_datasets (doi:10.13026/k81f-qr68 for v3.0.0",
+        "already named in related_datasets (doi:10.13026/k81f-qr68, doi:10.57764/qb6h-em84)",
+        "all of which have prose or external equivalents today",
+        "Populate parent_datasets/was_derived_from from related_datasets",
+        "from information already present in the record",
+        "parent_datasets/was_derived_from from the is_new_version_of relations.",
+        "from the is_new_version_of relations; add an errata entry",
+        "the ancestry that related_datasets currently holds alone",
+        "Populate the dedicated slots that currently hold their content elsewhere: download_url",
+        "Populate the dedicated slots with the values already present in prose",
+        "the negative findings currently buried in notes",
+        "mirror the derives_from edge into parent_datasets",
+        "so the documented lineage becomes traversable rather than narrative",
+        "keeping the related_datasets entries as the typed expression of the same relations",
+        "deposition archives and external repository deposits already named in raw_data_sources",
+        "ATCC, HipSci and MassIVE sources already described in prose",
+        "the typed links that related_datasets already implies",
+        "so the provenance graph asserted in notes is realised in the datasheet",
+        "so the lineage already present in prose becomes an entity-activity-agent structure",
+        "deposition-archive and external-repository sources already named in raw_data_sources",
+        "device-export-to-standard conversions already described",
+        "device-export-to-standard-format conversions already described in prose",
+        "release chain already typed in related_datasets, so lineage is machine-readable",
+        "release chain already typed in related_datasets.",
+        "Promote information already present in prose into its structured field",
+        "the October 2025 release DOI that related_datasets already names as the predecessor",
+        "expressing the FAIRSCAPE provenance lineage as was_derived_from/parent_datasets links",
+    ],
+    # A criticism of what a populated slot holds. was_derived_from holds the
+    # study's name in prose in the two AI_READI ratings the first three come
+    # from, as their own evidence quotes; the other three are about a
+    # populated method or institution.
+    "criticism": [
+        "reference its per-sub-crate derivation edges from was_derived_from",
+        "set was_derived_from to the same identifier, keeping the study-name prose in notes",
+        "reference its sub-crate derivation edges from was_derived_from, converting the prose lineage",
+        "keep the alternative reading in source_caveats rather than in the structured slot",
+        "keeping the divergent platform and RO-Crate values in the details prose",
+        "rather than asserting a method in the structured slot that the platform metadata contradicts",
+    ],
+    # A request: the imperative names a slot to fill and nothing beside it
+    # says the slot is empty or where its content is. Not counted as a miss:
+    # a request presupposes an unfilled slot without stating one, and some
+    # are conditional ("if part of larger collection") or ask for a finer
+    # grain ("per file collection") of a slot the rating does not call empty.
+    "request": [
+        "Add a was_derived_from link to the raw audio",
+        "Add explicit deidentification method",
+        "Add parent_datasets field linking to Bridge2AI",
+        "Add parent_datasets or hierarchical relationship",
+        "Add parent_datasets/was_derived_from pointing",
+        "Add provenance information (was_derived_from, release_notes)",
+        "Add related_datasets/parent_datasets entries",
+        "Add related_datasets/parent_datasets with",
+        "Add release_notes or was_derived_from for",
+        "populate publisher and was_derived_from, and cite the feasibility publication",
+        "mirror the version lineage into parent_datasets",
+        "a was_derived_from link to the raw audio source",
+        "Add was_derived_from field for provenance",
+        "Add was_derived_from or parent_datasets links",
+        "Add was_derived_from per file collection",
+        "Clarify in the citation or a dedicated field",
+        "Consider adding hierarchical resources or",
+        "Consider adding parent_datasets field linking",
+        "Document FAIRSCAPE provenance graph structure",
+        "Express the conversion and QC chain as PROV-O",
+        "Express the feature-from-audio derivation",
+        "Express typed related_datasets entries for",
+        "Include provenance chain using was_derived_from",
+        "Include was_derived_from to document provenance",
+        "Keep the caveat but consider a value nearer",
+        "Link to related datasets: parent_datasets",
+        "Mirror doi:10.60775/fairhub.1 and doi:10.60775/fairhub.2",
+        "Mirror the fairhub.1/fairhub.2 predecessors into parent_datasets/was_derived_from and "
+        "record the Snellen change as an erratum",
+        "record the Snellen change as an erratum so provenance slots are machine-readable",
+        "record the Snellen visual-acuity change as an erratum",
+        "record the Snellen drop as an erratum so lineage and changes",
+        "Mirror the predecessor versions into parent_datasets/was_derived_from so lineage",
+        "Mirror the predecessors into parent_datasets/was_derived_from",
+        "Mirror the two predecessor releases into",
+        "Mirror the v2.0.0 predecessor into parent_datasets/was_derived_from",
+        "Mirror the version lineage into was_derived_from",
+        "Populate a top-level version field, document",
+        "Populate confidentiality_level ('HL7:2N'), parent_datasets/was_derived_from",
+        "Populate data_protection_impacts (truthful status)",
+        "Populate download_url with the FAIRhub access",
+        "Populate parent_datasets / was_derived_from",
+        "Populate parent_datasets with the 3.0.0 DOI",
+        "Populate parent_datasets with the controlled-access",
+        "Populate parent_datasets with the prior version DOIs",
+        "Populate parent_datasets/was_derived_from for",
+        "Populate regulatory_restrictions.confidentiality_level ('HL7:2N'), publisher ('FAIRhub')",
+        "Populate was_derived_from and parent_datasets so each",
+        "Populate was_derived_from and parent_datasets so the",
+        "Populate was_derived_from linking each processed",
+        "Populate was_derived_from to link each released",
+        "Populate was_derived_from to type the derivation",
+        "Populate was_derived_from with the Synapse raw-audio entity and bind",
+        "provenance already packaged with the release",
+        "provenance shipped with the release",
+        "Record the publisher as a URI",
+        "Set publisher to the organization name FAIRhub",
+        "State character encoding (presumably UTF-8)",
+        "Wire the provenance explicitly: give each",
+    ],
+}
+
+
+def _pinned(fragment, sentences):
+    """The sentences a fragment pins: the one it is, else those holding it."""
+    return [s for s in sentences if s == fragment] or [s for s in sentences if fragment in s]
 
 
 @pytest.mark.corpus
@@ -1942,15 +2086,16 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     133 committed ratings, every sentence naming a slot carries an
     `_EMPTINESS` word but two, which say the slot is populated. Outside
     them, in text the vocabulary was not written against, the sentences
-    naming a slot with no `_EMPTINESS` word are 122 set aside by a
-    leading-verb regex and 155 read by hand: 29 absences the list misses
-    (the 11 named absences and 16 placements above, and the two of
-    `_HAND_READ_NOT_CREDIT`), the other classes of `_HAND_READ_NOT_CREDIT`,
-    each pinned by a fragment, and 111 that are credit (#3669). The 122
-    were not read, and some of them state an absence or a placement
-    (`_UNREAD_RECOMMENDATIONS_NOT_CREDIT`), so the 29 are a floor on the
-    misses, not a bound (#3742). The list is main's; this measures it and
-    changes nothing (#3544)."""
+    naming a slot with no `_EMPTINESS` word are 155 read by hand: 29
+    absences the list misses (the 11 named absences and 16 placements
+    above, and the two of `_HAND_READ_NOT_CREDIT`), the other classes of
+    `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 111 that are
+    credit (#3669); and 122 a leading-verb regex sorts as recommendations,
+    read by hand too (#3747): 58 more misses (a named absence and 57
+    placements), six criticisms and 58 requests, each pinned by a fragment
+    in `_RECOMMENDATIONS_READ`. 87 of the 277 state an absence the list
+    misses. The list is main's; this measures it and changes nothing
+    (#3544)."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
@@ -1995,12 +2140,24 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     assert (len(outside), len(marked), len(recommendations)) == (1046, 769, 122)
     read = [s for s in rest if not recommendation.match(s)]
     assert len(read) == 155
-    # The regex sorts by the first word only, and the bucket was not read:
-    # it holds absences and placements of the kinds counted below (#3742).
-    for fragment in _UNREAD_RECOMMENDATIONS_NOT_CREDIT:
-        hits = [s for s in recommendations if fragment in s]
-        assert len(hits) == 1, fragment
-        assert not [s for s in read if fragment in s], fragment
+    # The regex sorts by the first word only; the 122 are read by hand like
+    # the 155, and every one is pinned by one fragment to one class (#3747).
+    sorted_ = {}
+    for kind, fragments in _RECOMMENDATIONS_READ.items():
+        for fragment in fragments:
+            hits = _pinned(fragment, recommendations)
+            assert len(hits) == 1, (kind, fragment)
+            assert hits[0] not in sorted_, (kind, fragment)
+            sorted_[hits[0]] = kind
+    assert set(sorted_) == set(recommendations)
+    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 57, "criticism": 6,
+                                         "request": 58}
+    # The 58 misses are misses: in a Q19 note the gate reads none of them
+    # as an empty-slot reason, as on main.
+    for sentence, kind in sorted_.items():
+        if kind in ("named_absence", "placement"):
+            assert not [r for r in lint_q19(item(note=f"Held at 4. {sentence}")).reasons
+                        if r.concern == "empty_slot"], sentence
     classified = []
     for fragment in _UNRECOGNISED_NAMED_ABSENCES:
         # The second "remain the gaps" sentence is the whole of one.

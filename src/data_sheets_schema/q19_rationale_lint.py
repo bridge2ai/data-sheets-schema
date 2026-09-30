@@ -250,17 +250,11 @@ reasons read. The vocabulary was written against those fields, so the
 measure is the text it was not written against: the 1,046 distinct
 sentences outside them that name a slot, anywhere in the committed
 evaluation outputs (other rubric20 questions, rubric10 semantic). Of
-those, 769 carry an `_EMPTINESS` word; 277 carry none. 122 of the 277
+those, 769 carry an `_EMPTINESS` word; 277 carry none, and all 277 were
+read by hand. 87 of them state an absence the list misses. 122 of the 277
 open with one of a list of imperative verbs ("Populate was_derived_from
-…", "Mirror … into parent_datasets"). They were set aside by that
-leading-verb regex and not read, and they are not free of absences: some
-state one or a placement of the kinds counted below ("Fill the
-structural gaps: … populate discouraged_uses, parent_datasets and
-compression", "Populate the dedicated slots that currently hold their
-content elsewhere: download_url …", "… the ancestry that
-related_datasets currently holds alone", "the negative findings
-currently buried in notes"; #3742). The other 155 were read by hand,
-and 29 of them state an absence the list misses:
+…", "Mirror … into parent_datasets") and are counted apart below (#3747).
+The other 155 hold 29 of the misses:
 
 - 11 name the absence as a noun or a state: "two absences: resources, and
   parent_datasets", "the four genuine absences (doi, variables,
@@ -293,10 +287,38 @@ systems rather than a parent dataset"); two are a slot's bare name, as a
 list item; two define the criterion ("Proportion of mandatory schema
 fields populated (…)"); the other 111 credit a slot or describe one that
 is populated. Every class but the 111 is pinned by a fragment of each
-sentence in the test. The 29 are a floor on the misses, not a bound
-and not a recall ratio: the 122 recommendations were not read and hold
-more, and which of the 769 carry their word about the slot, rather than
-a negation about something else, was not read either.
+sentence in the test.
+
+The 122 recommendations hold the other 58 misses. A recommendation's
+imperative is not read as the absence: a sentence counts only for what it
+says beside the imperative.
+
+- 1 names the absence as a noun: "Fill the structural gaps: … populate
+  discouraged_uses, parent_datasets and compression".
+- 57 are placements: they say where the slot's content is instead ("the
+  ancestry that related_datasets currently holds alone", "Populate the
+  dedicated slots that currently hold their content elsewhere:
+  download_url …", "the negative findings currently buried in notes",
+  "the predecessor release DOIs already present in related_datasets", "in
+  addition to the related_datasets typed links", "rather than only
+  related_datasets prose", "from the is_new_version_of relations").
+- 6 criticise what a populated slot holds ("keep the alternative reading
+  in source_caveats rather than in the structured slot"; three name
+  was_derived_from, which their ratings quote as holding the study's name
+  in prose).
+- 58 are requests: the imperative names a slot to fill ("Add
+  was_derived_from field for provenance chain", "Mirror the predecessors
+  into parent_datasets/was_derived_from …") and nothing beside it says the
+  slot is empty or where its content is. They are not counted as misses:
+  a request presupposes an unfilled slot without stating one, and some
+  are conditional ("if part of larger collection") or ask for a finer
+  grain ("per file collection"). Whether the gate should read a request
+  as an absence is part of #3544.
+
+Every one of the 122 is pinned by a fragment to its class in the test.
+The 87 are a count, not a recall ratio: which of the 769 carry their word
+about the slot, rather than a negation about something else, was not
+read.
 
 The list is left as it is. Forms that read the 11 were tried on PR #3654
 and withdrawn: in three review rounds each (the bare "gap" and "silent";
