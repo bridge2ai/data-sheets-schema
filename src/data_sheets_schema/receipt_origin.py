@@ -169,8 +169,10 @@ child runs is not read from the tokenizer's brackets and joins, since a
 `)` or `|` it returns may come from a case pattern, a here-document
 body, a backquote, a `${...}` or an arithmetic `$((...))`, where reading
 it so placed a `--full` after a real change (#3810, #3904, #3911,
-#3912); that waits for a shell grammar (#3830). A case pattern is read
-as a command too (`a)`, `*)`), so its word may count. One in a
+#3912); that waits for a shell grammar (#3830). A case pattern after
+the first on a `case ... in` line, or on a line of its own, is read as a
+command too (`a)`, `*)`), so its word may count; the first is read with
+its `case` word. One in a
 backquoted or double-quoted substitution (`` `cd x` ``, `"$(cd x)"`) is
 kept inside one word and not read; it moves nothing (#3841), though a
 backquoted command with a space in it is split, and its pieces are read
@@ -1639,12 +1641,17 @@ def _may_run_code_here(segment: list[str]) -> bool:
     or `eval` (read by their own rules), `poetry run` or a wrapper
     `_wrapper_skip` reads, whose program runs in a child, a d4d call or a
     validator. A function or alias named as one of those is not seen. Nor
-    is arithmetic (`(( i++ ))`), which runs no command; that exemption is
-    this rule's alone, and the directory rules read the part as before."""
-    if "((" in segment and "))" in segment[segment.index("(("):]:
-        return False
+    is an arithmetic command (`(( i++ ))`), which runs no command; only a
+    part whose program position is `((` is exempt, so `source env.sh
+    $((1))` still counts (#3920). That exemption is this rule's alone, and
+    the directory rules read the part as before."""
     rest = _behind_prefixes(segment)[0]
     if not rest:
+        return False
+    # `((` is read as a compound prefix, so an arithmetic command is the one
+    # whose last prefix read is `((` (or whose head is, where it is not).
+    read = segment[:len(segment) - len(rest)]
+    if (read and read[-1] == "((") or rest[0] == "((":
         return False
     head = rest[0]
     if head in ("source", "."):

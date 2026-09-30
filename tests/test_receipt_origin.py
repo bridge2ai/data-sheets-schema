@@ -2441,7 +2441,7 @@ class DeriveSpellings(Base):
         self.assertIn("One in a subshell, an unquoted command or process substitution (`(cd x)`, `$(cd x)`, "
                       "`<(cd x)`), a pipe's left side or a `&` job does not move the shell, but it counts all the "
                       "same, the rule's cost", flat)
-        self.assertIn("that waits for a shell grammar (#3830). A case pattern is read as a command too", flat)
+        self.assertIn("that waits for a shell grammar (#3830). A case pattern after the first on a `case ... in` line, or on a line of its own, is read as a command too", flat)
         self.assertIn("such a part is read as after a change too, and, where no earlier call's change was seen, "
                       "a relative `--full` resolves against the recorded directory, where the call started "
                       "(#3798). Where both hold, the earlier change decides and the `--full` is not placed "
@@ -3674,6 +3674,14 @@ class EarlierDirectoryChange(Base):
         self.assertTrue(ro._may_run_code_here([".", "x"]))
         self.assertTrue(ro._may_run_code_here(["myfunc"]))
         self.assertTrue(ro._may_run_code_here(["{", "myfunc"]))
+        # #3920: an arithmetic argument does not exempt the part; only `((`
+        # at the program position does.
+        for command in ("source env.sh $((1))", "myfunc $((1))", "myfunc x $(( n + 1 ))", ". ./env.sh $((1+2))"):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+                full = ro._Target("full", "/w/data/X_full.yaml")
+                shell = ro._shell(command + " && d4d derive core --full data/X_full.yaml", "/w", [full])
+                self.assertEqual([d["targets_full"] for d in shell["derives"]], [None])
         for part in (["./x"], ["/bin/x"], ["$X"], ["cat", "x"], ["cd", "x"], ["eval", "x"], ["f", "()", "{", "x"],
                      ["function", "f"], ["poetry", "run", "x"], ["timeout", "5", "x"], ["d4d", "x", "y"],
                      ["export", "X"], ["((", "i++", "))"], ["if", "((", "x", "))"], ["command", "-v", "x"]):
