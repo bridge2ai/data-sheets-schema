@@ -165,15 +165,20 @@ class Judgements(unittest.TestCase):
                          "seed": 7, "draw_sha256": self.m.baseline.draw_sha256(drawn),
                          "classes": {RSN: (len(self.rows) - 1, 1, 0)}, "judgements": str(self.file)}
         self._write(self.rows)
-        kept_drawn = self.m.draw(self.found, 3, 7, "kept")
+        self.kept_file = self.dir / "kept.yaml"
+        self._kept(2)
+
+    def _kept(self, n):
+        """A judged kept draw of `n`: the first phrase a source statement,
+        the rest construction."""
+        kept_drawn = self.m.draw(self.found, n, 7, "kept")
         _, kept_picked = kept_drawn[RSN]
         self.kept_rows = [{"n": i, "record": p, "pointer": h["pointer"], "start": h["start"], "end": h["end"],
                            "patterns": h["patterns"], "text": h["text"],
                            "reading": "construction" if i > 1 else "source",
                            "verdict": "in_class" if i > 1 else "borderline", "reason": "fixture"}
                           for i, (p, h) in enumerate(kept_picked, 1)]
-        self.kept_file = self.dir / "kept.yaml"
-        self.m.KEPT = {**self.m.KEPT, "record_set_sha256": self.found["record_set_sha256"], "sample": 3,
+        self.m.KEPT = {**self.m.KEPT, "record_set_sha256": self.found["record_set_sha256"], "sample": n,
                        "seed": 7, "draw_sha256": self.m.baseline.draw_sha256(kept_drawn),
                        "classes": {RSN: (len(self.kept_rows) - 1, 1, 0)}, "judgements": str(self.kept_file)}
         self._write_kept(self.kept_rows)
@@ -212,7 +217,8 @@ class Judgements(unittest.TestCase):
         md = self.m.render_markdown(self.found)
         n_in, n_kept, kept = len(self.kept_rows) - 1, len(self.kept_rows), self.found["totals"]["v3"]
         lost = len(self.rows) - 1
-        self.assertIn("| construction | in_class | 2 |", md)
+        self.assertLess(n_kept, kept)
+        self.assertIn("| construction | in_class | 1 |", md)
         self.assertIn("| source | borderline | 1 |", md)
         lo, hi = self.m.wilson(n_in, n_kept)
         self.assertIn(f"{n_in} of the {n_kept} drawn are in class: a precision of {100 * n_in / n_kept:.1f}% "
@@ -244,6 +250,14 @@ class Judgements(unittest.TestCase):
         self._write_kept(rows)
         with self.assertRaisesRegex(self.m.Refused, "not a match v3 keeps"):
             self.m.render_markdown(self.found)
+
+    def test_a_census_of_the_kept_matches_reports_no_interval(self):
+        """A kept draw of every kept match has no sampling error."""
+        self._kept(self.found["totals"]["v3"])
+        md = self.m.render_markdown(self.found)
+        self.assertIn(": every kept match.", md)
+        self.assertNotIn("Wilson", md)
+        self.assertNotIn("over the precision's interval", md)
 
     def test_wilson_interval(self):
         lo, hi = self.m.wilson(45, 50)

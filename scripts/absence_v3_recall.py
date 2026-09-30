@@ -502,8 +502,10 @@ def render_markdown(found: dict[str, Any]) -> str:
     ]
     n_kept = len(kept_rows)
     k_in = sum(r["verdict"] == "in_class" for r in kept_rows)
-    lo, hi = wilson(k_in, n_kept)
     kept_census = n_kept == kept
+    # A census has no sampling error; a sample's interval ignores the finite
+    # population, so it is wider than it need be.
+    lo, hi = (k_in / n_kept,) * 2 if kept_census else wilson(k_in, n_kept)
     lines += [
         "",
         "## Precision of the kept matches",
@@ -522,10 +524,10 @@ def render_markdown(found: dict[str, Any]) -> str:
         f"| **all** | | {n_kept} |",
         "",
         f"{k_in} of the {n_kept} drawn are in class: a precision of {100 * k_in / n_kept:.1f}% "
-        f"(Wilson 95% interval {100 * lo:.1f}% to {100 * hi:.1f}%)",
+        + ("" if kept_census else f"(Wilson 95% interval {100 * lo:.1f}% to {100 * hi:.1f}%)"),
         "for the matches v3 keeps of this pattern.",
     ]
-    if all(r["reading"] == "source" for r in kept_rows if r["verdict"] != "in_class"):
+    if k_in < n_kept and all(r["reading"] == "source" for r in kept_rows if r["verdict"] != "in_class"):
         lines[-1] += (" The rest are borderline: sentences that report what a source, or the manifest,"
                       "\nstates and say nothing of what the record did.")
     est, est_lo, est_hi = (kept * p for p in (k_in / n_kept, lo, hi))
@@ -541,9 +543,12 @@ def render_markdown(found: dict[str, Any]) -> str:
         f"were in class it would keep {kept} of {kept + len(in_class)} "
         f"({recall(kept):.1f}%) of the in-class matches v2 had; that is the upper bound.",
         f"At the measured precision it keeps an estimated {est:.0f} in-class matches ({kept} × {k_in}/{n_kept}),",
-        f"so its recall of this pattern relative to v2 is an estimated **{recall(est):.1f}%**",
+        f"so its recall of this pattern relative to v2 is an estimated **{recall(est):.1f}%**"
+        + (". Borderline phrases are counted" if kept_census else ""),
+    ] + ([] if kept_census else [
         f"({recall(est_lo):.1f}% to {recall(est_hi):.1f}% over the precision's interval, which carries only the",
         "sampling error of the kept draw: the dropped matches are a census). Borderline phrases are counted",
+    ]) + [
         "in class on neither side, kept or dropped.",
         "",
         f"By sentence the loss is smaller. {len(in_class) - len(lost)} of the {len(in_class)} in-class "
