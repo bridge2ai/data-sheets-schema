@@ -44,8 +44,9 @@ substring membership, the fallback the issue allows, and it errs toward
 grounding: a name that is only part of another word grounds (`张三` in
 `张三丰`), and a one-character token (`王` of `王 小明`) is not checked, as a
 single Latin letter is not. It has no case, so no such token is
-`initial_expanded`, and v2 (below) does not judge it. Identifier-shaped spans in a string leaf — a URL, an email
-address, a CURIE such as `ORCID:0000-…` — are removed first. Tokens compare
+`initial_expanded`, and v2 (below) does not judge it. Identifier-shaped
+spans in a string leaf — a URL, an email address, a CURIE such as
+`ORCID:0000-…` — are removed first. Tokens compare
 casefolded and NFKC-composed; the *folded* form used for
 `diacritic_dropped` also decomposes (NFKD) and drops the combining marks.
 The bundle is tokenised the same way, so a name the bundle wraps across a
