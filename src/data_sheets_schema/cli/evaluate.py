@@ -344,7 +344,8 @@ def slot_meaning_cmd(records, as_json):
     scan and does not stop the record being checked. A record is not checked
     either when its walk runs past a fixed step budget: aliases can load a
     small text as a graph with exponentially many paths (#3247), and a merge
-    chain of about 650 links or more costs quadratically many steps (#3491);
+    chain of a few hundred links or more costs quadratically many steps
+    (629 links, or 446 where each link adds a key; #3491, #3504);
     when its merge keys would copy more pairs in the loader than the same
     bound (#3259); or when a merge key reaches the mapping it is written in
     (#3263). A record that is not checked has none of its findings reported, not even those its kept

@@ -573,16 +573,28 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
     def test_a_chain_walked_link_by_link_is_checked_until_its_steps_pass_the_budget(self):
         """#3491: in the usual shape, every link a top-level anchor merging
         the one before, the walk visits each link and expands the chain
-        below it, about L**2/2 steps for L links. 500 links are checked;
-        past the recursion limit the record is not checked on the step
-        budget, and given steps enough the same walk finishes, so the
-        budget is what stops it. A chain whose links each add a key trips
-        the loader's copy bound instead."""
+        below it, about L**2/2 steps for L links. 628 links are checked,
+        629 are not, and past the recursion limit the record is not checked
+        on the step budget; given steps enough the same walk finishes, so
+        the budget is what stops it. #3504: a chain whose links each add a
+        key costs the walk about L**2 steps, so 445 links are checked and
+        446 to 632 stop on the step budget while the loader still loads
+        them; only from 633 links does the loader's copy bound trip first."""
         def chain(links, added=False):
             return "\n".join(["a0: &a0 {name: safe}"]
                              + [f"a{i}: &a{i} {{<<: *a{i - 1}" + (f", k{i}: 1" if added else "") + "}"
                                 for i in range(1, links)]) + "\n"
-        self.assertEqual(rd.check_text(chain(500)), ([], None))
+        walk_budget = "the walk ran past its budget of 200,000 steps"
+        loader_bound = "the loader's merge keys would copy more than 200,000 pairs"
+        self.assertEqual(rd.check_text(chain(628)), ([], None))
+        self.assertTrue(rd.check_text(chain(629))[1].startswith(walk_budget))
+        self.assertEqual(rd.check_text(chain(445, added=True)), ([], None))
+        for short in (446, 632):
+            self.assertIsNotNone(rd._load(chain(short, added=True)))
+            found, reason = rd.check_text(chain(short, added=True))
+            self.assertIsNone(found)
+            self.assertTrue(reason.startswith(walk_budget), (short, reason))
+        self.assertTrue(rd.check_text(chain(633, added=True))[1].startswith(loader_bound))
         links = sys.getrecursionlimit() + 20
         found, reason = rd.check_text(chain(links))
         self.assertIsNone(found)

@@ -124,10 +124,13 @@ with an explicit stack, so the interpreter's recursion limit no longer stops
 it (#3272); the step budget still does. Each mapping the duplicate check
 visits expands the whole chain below it, so a chain whose links are each
 visited — the usual shape, every link a top-level anchor merging the one
-before — costs about L²/2 steps for L links: one of about 600 links is
-checked, one of 650 or more is not checked on the budget. Where each link
-also adds a key, the loader copies about L²/2 pairs and its bound trips
-first, from about 630 links (#3491).
+before — costs about L²/2 steps for L links: one of 628 links is checked,
+one of 629 or more is not checked on the budget. Where each link also adds
+a key, that key is a child the walk visits below every link above it, so
+the walk costs about L² steps: one of 445 links is checked, one of 446 or
+more is not checked on the budget. The loader copies about L²/2 pairs for
+that shape, so its bound is reached only from 633 links; it trips before
+the walk starts, so from there the reason is the loader's (#3491, #3504).
 
 The loader is bounded too. PyYAML flattens a merge by copying the merged
 pairs, so a text whose anchors each merge the one before twice grows
@@ -636,8 +639,9 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     nothing, and saying so would read as clean (#3263). A merge chain is
     not cut at the recursion limit (#3272), but every mapping visited
     expands the chain below it, so a chain whose links are each visited
-    costs about L²/2 steps and one of about 650 links or more raises
-    TraversalBudgetExceeded (#3491)."""
+    costs about L²/2 steps and one of 629 links or more raises
+    TraversalBudgetExceeded; where each link also adds a key the walk costs
+    about L² steps and raises from 446 links (#3491, #3504)."""
     budget = _Budget(max_steps)
     holds_memo: dict[int, bool] = {}
     try:
