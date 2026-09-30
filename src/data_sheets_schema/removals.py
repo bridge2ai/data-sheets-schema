@@ -184,7 +184,9 @@ Two more annotations move no class either (#3366, #3367):
   amend changes one leaf and is no evidence for a sibling (#3802). Where
   the edit is not recorded or fits more than one deleted member, the row
   is `curator_amend_ambiguous`, counted under
-  `deleted_curator_amend_ambiguous` and attributed to no one. The enum-alias
+  `deleted_curator_amend_ambiguous` and attributed to no one. Where phases
+  are attributed, a member a model phase already removed is neither marked
+  ambiguous nor counted as a rival fit (#3818). The enum-alias
   form is read against the tables of the merged schema the run recorded
   (`run_enum_aliases`: the file on disk where its bytes hash to the
   record's `schema.full_sha256` or `full_md5`, else the committed version
@@ -361,7 +363,9 @@ NON_CHECKS = (
     "whose recorded edit fits this deleted member and no other (#3802) — that the edit's text "
     "fits is not proof the curator's amend, rather than a model, removed it — and it is never "
     "subtracted from deleted or unfounded (#3702, #3805); a list member an amend on its list "
-    "cannot be told apart for is marked ambiguous and attributed to no one",
+    "cannot be told apart for is marked ambiguous and attributed to no one "
+    "(where phases are attributed, only a member the write phase deleted; one a model phase "
+    "removed is neither marked nor a rival fit, #3818)",
     "that a flattening marked low-confidence was a coincidence, or that one not marked was not — "
     "a needle of one or two normalised tokens (an identifier-shaped value aside) or the "
     "dropped-entry surplus route is where a coincidence is likeliest, not proof of one; "
@@ -1418,7 +1422,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     None reads today's. `amended_edits` is each amended path's recorded
     (`replace`, `with`) pairs (`amend_edits`): an amend on one member of a
     list of scalars marks only the deleted member its edit identifies, and
-    without them such a member is `curator_amend_ambiguous` (#3802)."""
+    without them such a member is `curator_amend_ambiguous` (#3802) —
+    where phases are attributed, only one the `write` phase deleted, and
+    a member a model phase removed is no rival fit (#3818)."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -1499,7 +1505,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # now holds (#3802). A recorded amend changes one leaf, so it is no
         # evidence for a sibling; where the edit is not recorded, or fits
         # more than one deleted member, the member is "ambiguous" and not
-        # attributed to the curator (#3702).
+        # attributed to the curator (#3702). Where phases are attributed, a
+        # sibling a model phase already deleted is no rival: the amend,
+        # recorded after the run, cannot have emptied it (#3818).
         if not amended:
             return None
         at = remap_path(list_path or path, original, final)["path"]
@@ -1514,7 +1522,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         siblings = [(f"{list_path}[{j}]", m) for j, m in enumerate(members if found and isinstance(members, list)
                                                                     else [])
                     if f"{list_path}[{j}]" != path and not isinstance(m, (dict, list)) and _populated(m)
-                    and not at_final.carried(f"{list_path}[{j}]", list_path)]
+                    and not at_final.carried(f"{list_path}[{j}]", list_path)
+                    and (not attributed
+                         or stage_after_last(lambda p, q=f"{list_path}[{j}]": p.carried(q, list_path)) == "write")]
         verdict = None
         for a in on_members:
             edits = amended_edits.get(a) or []
@@ -1607,8 +1617,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         mark = amended_deletion(path, value, list_path)
         if mark == "ambiguous":
             # An amend on its list names no member it can be told apart as
-            # (#3802): reported, attributed to no one.
-            row["curator_amend_ambiguous"] = True
+            # (#3802): reported, attributed to no one. Where phases are
+            # attributed, only a `write` deletion can be one the amend
+            # emptied; a member a model phase already removed is the
+            # model's and carries no mark (#3818, the #3725 rule).
+            if not attributed or row["phase"] == "write":
+                row["curator_amend_ambiguous"] = True
         elif mark == "amend":
             if not attributed or row["phase"] == "write":
                 row["curator_amend"] = True

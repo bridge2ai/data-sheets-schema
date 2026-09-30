@@ -472,6 +472,36 @@ class AmendedDeletions(unittest.TestCase):
                          {"keywords[0]": True, "keywords[2]": None})
         self.assertEqual(b["deleted_curator_amend_ambiguous"], 0)
 
+    def test_a_member_a_model_phase_deleted_is_not_ambiguous(self):
+        """#3818: an amend recorded after the run cannot have emptied a
+        member reconcile_full had already removed. Unrecorded edit: only
+        the write-phase member is ambiguous; the model's carries no mark."""
+        before = _record(keywords=["speech", "voice", "clinic"])
+        after = _record(keywords=["", "voice"])
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", _record(keywords=["speech", "voice"]))],
+                        amended_paths={"keywords[0]"})
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write",
+                                               "curator_amend_ambiguous": True})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 1))
+        # Unattributed, nothing tells the two apart: both stay ambiguous.
+        bare = rm.classify(before, after, _audit(), amended_paths={"keywords[0]"})
+        self.assertEqual(bare["deleted_curator_amend_ambiguous"], 2)
+
+    def test_a_sibling_a_model_phase_deleted_is_no_rival_fit(self):
+        """#3818: the edit 'voice' -> '' fits keywords[0] and keywords[2],
+        but reconcile_full had already removed keywords[2], so the phases
+        and the edit together name keywords[0] as the curator's."""
+        before = _record(keywords=["voice", "a", "voice"])
+        after = _record(keywords=["", "a"])
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", _record(keywords=["voice", "a"]))],
+                        amended_paths={"keywords[0]"}, amended_edits={"keywords[0]": [("voice", "")]})
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+
     def test_amend_edits_reads_the_recorded_replacement(self):
         record = {"dispositions": [
             {"disposition": "amend", "path": "keywords[0]", "replace": "speech", "with": "speech data"},
