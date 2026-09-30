@@ -631,8 +631,10 @@ class TestTheLoaderIsBounded(unittest.TestCase):
     def test_doubling_single_mapping_merges_are_not_checked(self):
         """The same stall through repeated single-mapping `<<` keys (#3440):
         the copies a `<<: *x` makes are charged as a merge list's are.
-        Twenty-one levels, under 1 KB: uncharged, the loader copies ~4M pairs
-        and the record reaches the later walk budget seconds later."""
+        Twenty-one levels, under 1 KB: uncharged, the loader copies
+        2**23 - 46 = 8,388,562 pairs (level i copies 2**(i+1) - 2; see
+        `test_the_copy_count_is_the_closed_form`) and the record reaches the
+        later walk budget seconds later."""
         text = _doubling_single_merges(21)
         self.assertLess(len(text), 1_000)
         started = time.perf_counter()
@@ -649,24 +651,126 @@ class TestTheLoaderIsBounded(unittest.TestCase):
         with self.assertRaises(rd.TraversalBudgetExceeded):
             rd._load(text, max_pairs=239)
 
+    def test_the_copy_count_is_the_closed_form(self):
+        """Level i of either doubling fixture holds 2**(i+1) - 1 pairs and
+        copies the level before twice, 2**(i+1) - 2 pairs; an alias shares
+        the node, flattened once, so n levels copy 2**(n+2) - 4 - 2n pairs in
+        all. The figures the docstrings above quote are this sum (#3472)."""
+        for fixture in (_doubling_merges, _doubling_single_merges):
+            for levels in range(1, 9):
+                with self.subTest(fixture=fixture.__name__, levels=levels):
+                    text = fixture(levels)
+                    copied = 2 ** (levels + 2) - 4 - 2 * levels
+                    self.assertEqual(rd._load(text, max_pairs=copied), yaml.safe_load(text))
+                    with self.assertRaises(rd.TraversalBudgetExceeded):
+                        rd._load(text, max_pairs=copied - 1)
+
+    def test_a_merge_list_item_that_merges_is_flattened_first(self):
+        """A merge-list item that is not an already-flattened alias carries
+        its own `<<`, which the copy flattens before copying its pairs, as
+        PyYAML does; skipped, the inner `<<` would reach the constructor as
+        an unconstructable merge tag (#3473)."""
+        for text in ("x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "x: {<<: [{b: 2}, {<<: [{<<: {a: 1}, b: 0}], c: 4}], d: 5}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, b: 2}], c: 3}\n"):
+            with self.subTest(text=text):
+                self.assertEqual(rd._load(text), yaml.safe_load(text))
+        found, reason = rd.check_text("confidential_elements: [{<<: [{<<: {name: embargo}, k: 1}]}]\n")
+        self.assertIsNone(reason)
+        self.assertEqual([f.kinds for f in found], [(rd.EMBARGO,)])
+
+    def test_each_copy_is_charged_before_it_is_made(self):
+        """The docstring's "having copied at most the bound": every charge
+        is made while the pairs it counts are not yet in `merge`, in both
+        branches (#3473)."""
+        import sys as _sys
+        seen = []
+
+        class Spy(rd._MergeBoundedLoader):
+            def _charge(self, pairs):
+                frame = _sys._getframe(1)
+                seen.append((frame, len(frame.f_locals["merge"]), pairs))   # kept alive: ids unique
+                super()._charge(pairs)
+
+        for text in (_doubling_merges(5), _doubling_single_merges(5),
+                     "x: {<<: [{<<: {a: 1}, b: 2}, {c: 3}], d: 4}\n"):
+            with self.subTest(text=text[:40]):
+                seen.clear()
+                loader = Spy(text, rd.MAX_TRAVERSAL_STEPS)
+                try:
+                    self.assertEqual(loader.get_single_data(), yaml.safe_load(text))
+                finally:
+                    loader.dispose()
+                self.assertTrue(seen)
+                charged = {}
+                for frame, in_merge, pairs in seen:
+                    self.assertEqual(in_merge, charged.get(id(frame), 0))
+                    charged[id(frame)] = charged.get(id(frame), 0) + pairs
+                seen.clear()
+
     def test_under_the_bound_a_record_loads_as_safe_load_loads_it(self):
         for text in (MERGE_CYCLE, _merge_chain(50), _doubling_merges(8), _doubling_single_merges(8),
                      "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nx: {<<: [*l, *r], k: 1}\n",
                      "a: &a {k: 1, j: 2}\nb: {<<: *a, k: 3}\nc: {<<: [{k: 1}, {k: 2}]}\n",
-                     "a: {=: v, <<: {=: w}}\n"):
+                     "a: {=: v, <<: {=: w}}\n",
+                     "x: {<<: [{<<: {a: 1}, b: 2}], c: 3}\n",
+                     "m: &m {a: 1}\nx: {<<: [{<<: *m, k: 2}, {<<: [{j: 3}]}], c: 3}\n"):
             with self.subTest(text=text[:40]):
                 self.assertEqual(rd._load(text), yaml.safe_load(text))
 
     def test_the_copied_flatten_is_the_installed_pyyamls(self):
         """The bounded `flatten_mapping` is a copy of PyYAML's with a charge
-        before each copy. A PyYAML whose own changes fails here, so the copy
-        is compared with it again rather than left to drift."""
+        before each copy. This pins PyYAML's side only: a PyYAML whose own
+        changes fails here, so the copy is re-read against it. A change to
+        the copy is caught by the syntax-tree comparison below (#3473)."""
         import hashlib
         import inspect
         source = inspect.getsource(yaml.constructor.SafeConstructor.flatten_mapping)
         self.assertEqual(hashlib.sha256(source.encode()).hexdigest(),
                          "4fdacb962ce20710beec653ea805d7ab01ded4a0f68c93da55e7374aceb2b023",
                          "PyYAML's flatten_mapping changed: re-copy it into _MergeBoundedLoader")
+
+    def test_the_copy_is_pyyamls_flatten_plus_the_charges(self):
+        """The hash above catches a change in PyYAML, not in the copy
+        (#3473). Here the copy's syntax tree, with its `self._charge(...)`
+        statements and annotations removed and `yaml.`-qualified names read
+        as PyYAML's bare ones, must be PyYAML's own tree."""
+        import ast
+        import inspect
+        import textwrap
+
+        def tree(function, strip_charges):
+            node = ast.parse(textwrap.dedent(inspect.getsource(function))).body[0]
+            node.returns = None
+            for arg in node.args.args:
+                arg.annotation = None
+
+            class Normalise(ast.NodeTransformer):
+                def visit_AnnAssign(self, assign):
+                    return ast.copy_location(ast.Assign(targets=[assign.target], value=assign.value),
+                                             assign)
+
+                def visit_Attribute(self, attribute):
+                    base = attribute.value
+                    while isinstance(base, ast.Attribute):
+                        base = base.value
+                    if isinstance(base, ast.Name) and base.id == "yaml":
+                        return ast.copy_location(ast.Name(id=attribute.attr, ctx=attribute.ctx),
+                                                 attribute)
+                    return self.generic_visit(attribute)
+
+                def visit_Expr(self, statement):
+                    call = statement.value
+                    if (strip_charges and isinstance(call, ast.Call)
+                            and isinstance(call.func, ast.Attribute) and call.func.attr == "_charge"):
+                        return None
+                    return statement
+
+            return ast.dump(Normalise().visit(node), annotate_fields=False)
+
+        self.assertEqual(tree(rd._MergeBoundedLoader.flatten_mapping, True),
+                         tree(yaml.constructor.SafeConstructor.flatten_mapping, False))
+        self.assertEqual(inspect.getsource(rd._MergeBoundedLoader.flatten_mapping).count("self._charge("), 2)
 
     def test_a_bad_merge_is_rejected_as_safe_load_rejects_it(self):
         for text in ("a: {<<: 1}\n", "a: {<<: [{k: 1}, 2]}\n"):
