@@ -35,7 +35,16 @@ class TestTheAnalysisDocDoesNotDrift(unittest.TestCase):
 
     def test_it_states_no_counts(self):
         """A count in prose is a count nothing regenerates. The old metrics
-        table ("| **Total mappings** | 142 | 100% |") is the shape caught."""
+        table ("| **Total mappings** | 142 | 100% |") is the shape that was
+        there. This is a heuristic, not a proof: it fails on a percentage,
+        the phrase "total mappings", a table cell that is only a number, a
+        number directly before "mappings" or "rows", and any integer of two
+        or more digits that is not an issue reference (`#2936`) or part of a
+        decimal (`0.85`), so "20 of 165" and "10 hand-written rows" fail. It
+        does not catch a single-digit count ("5 are flagged") or a number
+        spelled out ("sixteen rows"); the doc legitimately carries section
+        numbers and similarity thresholds, so those cannot be banned (#3395).
+        """
         self.assertNotRegex(self.doc, r"\d+(\.\d+)?\s*%",
                             "the doc states a percentage")
         self.assertNotRegex(self.doc, r"(?i)total mappings",
@@ -44,6 +53,9 @@ class TestTheAnalysisDocDoesNotDrift(unittest.TestCase):
                             "the doc has a table cell that is a number")
         self.assertNotRegex(self.doc, r"(?i)\b\d+\s+(mappings|rows)\b",
                             "the doc states a number of mappings or rows")
+        self.assertNotRegex(self.doc, r"(?<![#\w.])\d{2,}(?!\d|\.\d)",
+                            "the doc states a multi-digit number that is not "
+                            "an issue reference or a decimal")
 
     def test_it_points_at_the_check_that_exists(self):
         self.assertIn("make check-sssom-structural", self.doc)
@@ -89,6 +101,43 @@ class TestTheAnalysisDocDoesNotDrift(unittest.TestCase):
         self.assertTrue(composition)
         self.assertEqual([p for p in composition if p.count(".") > 1], [],
                          "the doc says no composition path has two dots")
+
+    def test_the_cardinality_rule_it_states_holds(self):
+        """The doc once said a composition row's range *and cardinality* are
+        the end of the path's. The generator takes the range from the last
+        segment but marks the row multivalued when any segment is
+        (`D4DSchemaParser.resolve_path`), which is why every committed
+        `anomalies.*` row is multivalued and flagged (#3393)."""
+        import io
+        import sys
+        from contextlib import redirect_stdout
+        prose = " ".join(self.doc.split())
+        self.assertNotIn("range and cardinality are those the schema gives "
+                         "the end of the path", prose)
+        self.assertIn("the row is multivalued when *any* segment of the path "
+                      "is", prose)
+        row = {r["subject_id"]: r for r in self.rows}.get(
+            "d4d:Dataset/anomalies.name")
+        self.assertIsNotNone(row, "the doc's example row is gone")
+        self.assertEqual((row["d4d_subject_range"], row["subject_multivalued"]),
+                         ("string", "True"))
+        self.assertEqual(
+            {r["subject_multivalued"] for r in self.rows
+             if r["composition_path"]}, {"True"},
+            "the doc says every composition row is multivalued via anomalies")
+        schema = (REPO / "src" / "data_sheets_schema" / "schema"
+                  / "data_sheets_schema_all.yaml")
+        sys.path.insert(0, str(REPO / "src" / "semantic_exchange"))
+        from generate_structural_mapping import D4DSchemaParser  # noqa: E402
+        with redirect_stdout(io.StringIO()):
+            parser = D4DSchemaParser(schema)
+        self.assertFalse(parser.classes["DataAnomaly"].attributes["name"]
+                         .multivalued,
+                         "the doc says a name is one string per anomaly")
+        self.assertTrue(parser.classes["Dataset"].attributes["anomalies"]
+                        .multivalued, "the doc says `anomalies` is a list")
+        self.assertTrue(parser.resolve_path("Dataset", "anomalies.name")
+                        .multivalued)
 
     def test_it_does_not_claim_the_class_level_rows_are_checked(self):
         """TestRowsStateTheSchema checks only rows whose subject names a slot;

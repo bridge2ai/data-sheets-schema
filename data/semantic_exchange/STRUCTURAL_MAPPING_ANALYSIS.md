@@ -75,8 +75,11 @@ a class (`anomalies.used_software` is the deepest path; nothing under it is
 traced). Each path is matched to RO-Crate properties whose path contains the
 slot name. The subject carries the whole
 path, so `anomalies.id` is `d4d:Dataset/anomalies.id` and no longer shares a
-subject with `Dataset`'s own `id` slot (#410). The range and cardinality are
-those the schema gives the end of the path (#2936). Before
+subject with `Dataset`'s own `id` slot (#410). The range is the one the schema
+gives the end of the path, but the row is multivalued when *any* segment of
+the path is (#2936): `anomalies.name` is one string per anomaly, yet
+`d4d:Dataset/anomalies.name` is multivalued, because `anomalies` is a list and
+the path reaches one name per entry. Before
 #2936 these rows were written with range `string`, multivalued `False` and
 `type_compatible` `True` whatever the path reached, and none was validated.
 Today the only composition rows go through `anomalies` on `Dataset` and
