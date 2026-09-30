@@ -289,39 +289,61 @@ fields populated (…)"); the other 111 credit a slot or describe one that
 is populated. Every class but the 111 is pinned by a fragment of each
 sentence in the test.
 
-The 122 recommendations hold the other 60 misses. A recommendation's
-imperative is not read as the absence: a sentence counts only for what it
-says beside the imperative.
+The 122 recommendations hold the other 60 misses. Each is classed by an
+ordered test, and the first question it answers yes to decides its class
+(#3829). A recommendation's imperative is never itself the answer: a
+sentence is read for what it says beside the imperative, and against its
+own rating.
 
-- 1 names the absence as a noun: "Fill the structural gaps: … populate
-  discouraged_uses, parent_datasets and compression".
-- 59 are placements: they say where the slot's content is instead ("the
-  ancestry that related_datasets currently holds alone", "Populate the
-  dedicated slots that currently hold their content elsewhere:
-  download_url …", "the negative findings currently buried in notes",
-  "the predecessor release DOIs already present in related_datasets", "in
-  addition to the related_datasets typed links", "rather than only
-  related_datasets prose", "from the is_new_version_of relations", "the
-  RO-Crate/FAIRscape provenance shipped with the release").
-- 12 criticise what a populated slot holds: each asks for a different or
-  fuller value of a slot its rating says is populated and criticises,
-  whatever else it asks for ("keep the alternative reading in
-  source_caveats rather than in the structured slot", "consider a value
-  nearer the sources' meaning" for a populated confidentiality_level;
-  three name was_derived_from, which their ratings quote as holding the
-  study's name in prose; three ask for the name "FAIRhub" where publisher
-  holds a URL; one asks the citation to say that the RRID it carries
-  names the repository; one asks for "the full five-release chain" in a
-  related_datasets its rating criticises for naming one predecessor).
-- 50 are requests: the imperative names a slot to fill ("Add
-  was_derived_from field for provenance chain", "Mirror the predecessors
-  into parent_datasets/was_derived_from …") and nothing beside it says the
-  slot is empty, where its content is, or that a value a populated slot
-  holds is wrong or incomplete. They are not counted as misses: a request
-  presupposes an unfilled slot without stating one, and some are
-  conditional ("if part of larger collection") or ask for a finer grain
-  ("per file collection"). Whether the gate should read a request as an
-  absence is part of #3544.
+1. Does it name a slot's absence as a noun or a state? A named absence
+   (1): "Fill the structural gaps: … populate discouraged_uses,
+   parent_datasets and compression".
+2. Does it say where a slot's content is instead: in another slot, a
+   relation, prose, notes or a file? A placement (59): "the ancestry that
+   related_datasets currently holds alone", "Populate the dedicated slots
+   that currently hold their content elsewhere: download_url …", "the
+   negative findings currently buried in notes", "the predecessor release
+   DOIs already present in related_datasets", "in addition to the
+   related_datasets typed links", "rather than only related_datasets
+   prose", "from the is_new_version_of relations", "the RO-Crate/FAIRscape
+   provenance shipped with the release".
+   These two are misses. They are asked first, so a sentence that states
+   an absence is a miss whatever else it asks for.
+3. Does it name a populated value and object to it? Both parts must hold:
+   a. it names a value the record holds (a populated slot, or an entry or
+      item in one, by the slot's name, the entry's name or a value quoted
+      from it) and asks for that value to be different, or for more of it:
+      more entries, or more on an entry it holds. Re-expressing content in
+      another slot or structure ("mirror … into parent_datasets", "express
+      … as PROV-O activities") leaves the value it comes from as it is,
+      and a release artifact a value points at (the RO-Crate) is not a
+      value the record holds;
+   b. its own rating faults that value in that respect: a weakness, issue,
+      deduction, warning or quality note says the value is wrong or lacks
+      what the sentence asks for. A fault found with another slot's
+      absence does not count.
+   If so, a criticism (22): "keep the alternative reading in source_caveats
+   rather than in the structured slot"; "consider a value nearer the
+   sources' meaning" for a populated confidentiality_level; three name
+   was_derived_from, which their ratings quote as holding the study's name
+   in prose; three ask for the name "FAIRhub" where publisher holds a URL;
+   one asks the citation to say that the RRID it carries names the
+   repository; one asks for "the full five-release chain" in a
+   related_datasets faulted for naming one predecessor; "add at least one
+   more keyword" to 7; "an expanded variables list" where variables holds
+   four columns; versions for tools that preprocessing_strategies names
+   without them (two sentences); "a conflicts-of-interest statement under
+   ethical_reviews"; the processing pipeline that a one-entry
+   preprocessing_strategies leaves unnamed; character encoding on the
+   listed text formats; a was_generated_by on each listed file_collection;
+   which listed archive carries the RO-Crate that conforms_to claims; an
+   attribution for the byte residual that source_caveats discloses.
+4. Otherwise it is a request (40): the imperative names a slot to fill
+   ("Add was_derived_from field for provenance chain", "Mirror the
+   predecessors into parent_datasets/was_derived_from …"). Requests are
+   not counted as misses: a request presupposes an unfilled slot without
+   stating one, and some are conditional ("if part of larger collection").
+   Whether the gate should read a request as an absence is part of #3544.
 
 Every one of the 122 is pinned by a fragment to its class in the test.
 The 89 are a count, not a recall ratio: which of the 769 carry their word
