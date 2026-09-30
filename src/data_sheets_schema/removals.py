@@ -126,7 +126,9 @@ direct arms, and adds annotations that move no class:
   `RELOCATED_THRESHOLD` of them occur in one final-record scalar (or one
   list of scalars taken whole): the best such path and the share. An
   identifier-shaped value (a URL, CURIE or `mailto:`) is assessed by its
-  own text on token boundaries instead, its scheme `mailto:` aside. A
+  own text on token boundaries instead, its scheme `mailto:` aside, as
+  written or as the CURIE a resolver URL names, as `_survives` reads it
+  (#3585). A
   candidate under `source_caveats` is marked `change_of_standing`: the
   value is no longer a claim, only the run's commentary on one. Validated
   on a hand-labelled sample of deleted rows (`RELOCATED_VALIDATION`). No
@@ -609,19 +611,28 @@ class _Relocation:
         for _p, v, lp in scalars:
             if lp is not None:
                 lists.setdefault(lp, []).append(v)
-        self.members = [(p, _member(v)) for p, v, _lp in scalars]
+        # Each scalar as written and as `_member` reads it, as `_survives`
+        # reads its hay: a resolver URL quoted inside prose keeps its URL
+        # form there, while `_member` rewrites a URL scalar to its CURIE.
+        self.members = [(p, (_text(v), _member(v))) for p, v, _lp in scalars]
         self.words = ([(p, _words(v)) for p, v, _lp in scalars]
                       + [(lp, frozenset().union(*map(_words, vs))) for lp, vs in lists.items()])
 
     def candidate(self, value: Any) -> tuple[bool, dict[str, Any] | None]:
         """(assessed, candidate or None). An identifier-shaped value is
         assessed by its own text on token boundaries (a `mailto:` scheme
-        aside); any other by the share of its content words one candidate
+        aside), as written or as `_member` reads it, against each scalar
+        read both ways, as `_survives` does (#3585): a resolver URL quoted
+        in prose is found, and so is a CURIE where a scalar is its URL
+        (though not where prose quotes the URL, which `_survives` does not
+        find either); any other by the share of its content words one candidate
         carries, where it has `RELOCATED_MIN_WORDS` of them. The first
         path in record order wins a tie, a scalar before a list."""
         if isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip()):
-            needle = _member(re.sub(r"^mailto:", "", value.strip(), flags=re.I))
-            hit = next((p for p, m in self.members if _carries(m, needle)), None)
+            bare = re.sub(r"^mailto:", "", value.strip(), flags=re.I)
+            needles = {_text(bare), _member(bare)} - {""}
+            hit = next((p for p, forms in self.members
+                        if any(_carries(h, n) for n in needles for h in forms)), None)
             return True, (self._row(hit, 1.0) if hit is not None else None)
         want = _words(value)
         if isinstance(value, bool) or len(want) < RELOCATED_MIN_WORDS:

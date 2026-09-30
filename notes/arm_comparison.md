@@ -89,9 +89,9 @@ Arms: **v4 API (2026-08-13)** — `2026-08-13_claude-opus-5-api-generic-v4_rep{1
 | of those, removed at reconcile_full | CHORUS | 0.3 ± 0.6 [0,1,0] worst 1 | 1.0 ± 1.7 [0,3,0] | – [–,–,–] | – [–,–,–] | 0.0 ± 0.0 [0,0] | 0.7 ± 0.6 [0,1,1] | 1.7 ± 1.5 [0,2,3] |
 | of those, removed at reconcile_full | CM4AI | 1.7 ± 2.1 [0,4,1] worst 4 | 3.0 ± 3.6 [7,2,0] | – [–,–,–] | – [–,–,–] | – | 2.3 ± 2.5 [0,2,5] | 0.0 ± 0.0 [0,0,0] |
 | of those, removed at reconcile_full | VOICE | 0.0 ± 0.0 [–,0,0] (n=2) worst 0 | 1.0 ± 1.0 [0,1,2] | – [–,–,–] | – [–,–,–] | – | 2.0 ± 1.0 [1,3,2] | 3.7 ± 4.7 [2,9,0] |
-| of those, with a relocation candidate | AI_READI | 9.3 ± 15.3 [27,0,1] worst 27 | 2.0 ± 1.0 [1,3,2] | – [–,–,–] | – [–,–,–] | 1.3 ± 1.5 [1,0,3] | 1.3 ± 1.5 [1,3,0] | 1.0 ± 1.0 [1,2,0] |
+| of those, with a relocation candidate | AI_READI | 14.3 ± 13.6 [27,0,16] worst 27 | 2.0 ± 1.0 [1,3,2] | – [–,–,–] | – [–,–,–] | 1.3 ± 1.5 [1,0,3] | 1.3 ± 1.5 [1,3,0] | 1.0 ± 1.0 [1,2,0] |
 | of those, with a relocation candidate | CHORUS | 0.7 ± 0.6 [1,0,1] worst 1 | 0.3 ± 0.6 [0,1,0] | – [–,–,–] | – [–,–,–] | 0.0 ± 0.0 [0,0] | 0.3 ± 0.6 [0,0,1] | 0.0 ± 0.0 [0,0,0] |
-| of those, with a relocation candidate | CM4AI | 1.7 ± 2.1 [1,0,4] worst 4 | 15.0 ± 21.8 [5,40,0] | – [–,–,–] | – [–,–,–] | – | 2.3 ± 2.5 [0,5,2] | 0.0 ± 0.0 [0,0,0] |
+| of those, with a relocation candidate | CM4AI | 3.0 ± 1.7 [1,4,4] worst 4 | 15.0 ± 21.8 [5,40,0] | – [–,–,–] | – [–,–,–] | – | 2.3 ± 2.5 [0,5,2] | 0.0 ± 0.0 [0,0,0] |
 | of those, with a relocation candidate | VOICE | 0.0 ± 0.0 [–,0,0] (n=2) worst 0 | 1.3 ± 1.5 [1,0,3] | – [–,–,–] | – [–,–,–] | – | 1.3 ± 0.6 [1,1,2] | 1.3 ± 1.2 [2,2,0] |
 | receipted values deleted, not flattened | AI_READI | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 2.7 ± 2.5 [0,5,3] | 16.3 ± 14.5 [9,33,7] | 3.7 ± 2.5 [4,6,1] |
 | receipted values deleted, not flattened | CHORUS | – [–,–,–] | – [–,–,–] | – [–,–,–] | – [–,–,–] | 1.5 ± 2.1 [0,3] | 4.3 ± 4.2 [9,3,1] | 3.0 ± 1.7 [1,4,4] |

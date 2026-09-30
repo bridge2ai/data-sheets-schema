@@ -936,6 +936,31 @@ class Relocation(unittest.TestCase):
         text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
         self.assertIn("is not assessed unless it is identifier-shaped", text)
 
+    def test_an_identifier_quoted_in_prose_is_found_as_survives_finds_it(self):
+        """#3585: the needle as written and as `_member` reads it, against
+        each scalar read both ways, as `_survives` does — a resolver URL
+        quoted verbatim in prose (the orcid.org URLs moved into
+        `creators[i].notes`) is found; a CURIE is found in prose that quotes
+        it and in a scalar that is its URL, and not in prose quoting its
+        URL, which `_survives` does not find either."""
+        url, curie = "https://orcid.org/0000-0002-1825-0097", "ORCID:0000-0002-1825-0097"
+        hays = {"url in prose": f"PI ORCID {url}.", "curie in prose": f"PI ORCID {curie}.",
+                "url alone": url, "curie alone": curie}
+        found = {(v, k): rm._Relocation(_record(notes=h)).candidate(v) for v in (url, curie) for k, h in hays.items()}
+        for (v, k), (assessed, where) in found.items():
+            self.assertTrue(assessed, (v, k))
+            self.assertEqual(where is not None, rm._survives(v, hays[k]), (v, k))
+        self.assertEqual({key for key, (_a, where) in found.items() if where is None}, {(curie, "url in prose")})
+        # Token boundaries still hold: a longer ORCID is not this one.
+        self.assertEqual(rm._Relocation(_record(notes=f"PI ORCID {url}1.")).candidate(url), (True, None))
+        # Through classify: a creator's ORCID URL deleted, quoted in another
+        # entry's notes (outside the entry, so deleted rather than flattened).
+        before = _record(creators=[{"name": "Pat Lee", "id": url}, {"name": "Consortium"}])
+        after = _record(creators=[{"name": "Pat Lee"}, {"name": "Consortium", "notes": f"PI ORCID {url}."}])
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "creators[0].id")
+        self.assertEqual(row["relocated_candidate"]["to"], "creators[1].notes")
+
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
         after = _record(sampling_strategies=[{"is_sample": True}], source_caveats=self.NOTE.replace("N/A", "n/a"))
@@ -1006,6 +1031,30 @@ class SourceReview(unittest.TestCase):
             {"slot": "keywords", "review_paths": ["/keywords/1"]}))
         self.assertEqual({r["path"]: r["by"] for r in b["founded_paths"]},
                          {"license": "remove_relationship", "keywords[0]": "slot", "keywords[1]": "review_paths"})
+
+    def test_a_value_exempted_as_metadata_is_judged_metadata_when_deleted_or_rewritten(self):
+        """#3587: a row the review exempted as record metadata reads
+        `metadata`, not `unreviewed`, on deleted and rewritten rows."""
+        before = _record(publisher="Example University", version="1.0", license="CC-BY")
+        after = _record(version="2.0")
+        audit = _audit()
+        audit["source_review"] = _review(before, {"/publisher": "metadata", "/version": "metadata",
+                                                  "/license": "supported"})
+        b = rm.classify(before, after, audit)
+        judged = {r["path"]: r["source_review"] for r in b["unfounded_paths"] + b["rewritten_paths"]}
+        self.assertEqual(judged, {"publisher": "metadata", "version": "metadata", "license": "supported"})
+        self.assertEqual(b["source_review"]["deleted"], {"supported": 1, "revise": 0, "metadata": 1, "unreviewed": 0})
+        self.assertEqual(b["source_review"]["rewritten"], {"supported": 0, "revise": 0, "metadata": 1, "unreviewed": 0})
+
+    def test_unfounded_supported_counts_only_the_unfounded_supported_values(self):
+        """#3587: a supported value a linked finding founds is not counted
+        in `unfounded_supported`; one a free-text slot alone names is."""
+        b = rm.classify(self.BEFORE, self.AFTER, self._audit(
+            {"slot": "license", "remove_relationship": {"path": "/license"}}, {"slot": "keywords"}))
+        self.assertEqual(b["source_review"]["deleted"]["supported"], 2)
+        self.assertEqual({r["path"] for r in b["unfounded_paths"]}, {"keywords[1]"})
+        self.assertEqual((b["source_review"]["unfounded_supported"],
+                          b["source_review"]["unfounded_supported_slot_only"]), (1, 1))
 
     def test_a_review_bound_to_other_bytes_is_not_read_and_says_so(self):
         b = rm.classify(self.BEFORE, self.AFTER, self._audit({"slot": "license"}, sha="a" * 64),
