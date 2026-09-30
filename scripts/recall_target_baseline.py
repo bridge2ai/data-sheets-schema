@@ -366,18 +366,63 @@ def _collapse(text: str) -> str:
     return " ".join(text.split())
 
 
-def _fact_patterns(fact: dict[str, Any]) -> tuple[re.Pattern, re.Pattern]:
+#: What a version token may carry attached on either side (#3629): a word
+#: character, or a run of `.`, `+`, `-` separators joined to one.
+_VERSION_SEPARATORS = ".+-"
+#: A version-shaped segment: a digit, optionally after a `v` or `v.`.
+_VERSION_SHAPED = re.compile(r"(?:v\.?)?\d", re.IGNORECASE)
+
+
+class _VersionToken:
+    """The fact's version as a complete version token (#3583, #3629).
+
+    `search(text)` returns the first occurrence that is the whole token and
+    None where every occurrence is part of a longer one. A version token is
+    the version with everything attached to it: on the right a word
+    character, or any run of `.`, `+`, `-` followed by one (`3.0.0-rc1`,
+    `3.0.0--rc1`, `3.0.0.post1`, `3.0.0+build.1`, `3.0.0a1`); on the left a
+    word character or `.` (`x3.0.0`, `1.3.0.0`), a `+` joined to a word
+    (`2.0.0+3.0.0`, the version's build part), or a `-` joined to a
+    version-shaped segment (`2.0.0-3.0.0`, `v2-3.0.0`: a prerelease part).
+    A `-` after a name (`b2aiprep-3.0.0`) is the conventional name-version
+    join and does not attach. Separators with nothing attached beyond them
+    are sentence punctuation (`3.0.0.`, `3.0.0-` before a space, ` +3.0.0`)."""
+
+    def __init__(self, version: str):
+        self.version = version
+        self.pattern = re.compile(r"(?<![\w.])(?:v\.?\s?|version\s)?" + re.escape(version)
+                                  + r"(?!\w|[.+-]+[^\W_])", re.IGNORECASE)
+
+    @staticmethod
+    def _attached_before(before: str) -> bool:
+        sep = len(before) - len(before.rstrip(_VERSION_SEPARATORS))
+        if not sep:
+            return False
+        joined = re.search(r"[\w.+-]*$", before[:-sep]).group(0).lstrip(_VERSION_SEPARATORS)
+        if not joined:
+            return False            # punctuation after a space or at the start
+        if set(before[-sep:]) - {"-"}:
+            return True             # a `.` or `+` joined to a word
+        return bool(_VERSION_SHAPED.match(joined))
+
+    def search(self, text: str):
+        for m in self.pattern.finditer(text):
+            if not self._attached_before(text[:m.start()]):
+                return m
+        return None
+
+
+def _fact_patterns(fact: dict[str, Any]) -> tuple[re.Pattern, _VersionToken]:
     """The fact's name (any of `names`) and its version, each as a whole
-    token; the version may carry a `v`, `v.` or `version` prefix. A version
-    token ends where no further component or suffix is attached: `3.0.0.1`,
-    `3.0.0-rc1`, `3.0.0.post1`, `3.0.0.dev1`, `3.0.0+build.1` and `3.0.0a1`
-    are other versions, while sentence punctuation (`3.0.0.`, `3.0.0,`,
-    `3.0.0)`, `3.0.0-` before a space) ends the token (#3583)."""
+    token; the version may carry a `v`, `v.` or `version` prefix. The
+    version must be a complete version token (`_VersionToken`): `3.0.0.1`,
+    `3.0.0-rc1`, `3.0.0--rc1`, `3.0.0.post1`, `3.0.0.dev1`, `3.0.0+build.1`,
+    `3.0.0a1`, `2.0.0+3.0.0` and `2.0.0-3.0.0` are other versions, while
+    sentence punctuation (`3.0.0.`, `3.0.0,`, `3.0.0)`, `3.0.0-` before a
+    space) ends the token (#3583, #3629)."""
     names = re.compile(r"(?<![\w-])(?:" + "|".join(re.escape(str(n)) for n in fact["names"]) + r")(?![\w-])",
                        re.IGNORECASE)
-    version = re.compile(r"(?<![\w.])(?:v\.?\s?|version\s)?" + re.escape(str(fact["version"])) + r"(?!\w|[.+-][^\W_])",
-                         re.IGNORECASE)
-    return names, version
+    return names, _VersionToken(str(fact["version"]))
 
 
 def _strings(node: Any):
@@ -784,8 +829,10 @@ def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
         "both; **elsewhere** is any other string, or one mapping's own values (its scalars and the",
         "items of its lists other than `used_software` and `tools`), holding the name and the version",
         "(prose, a resource entry); **name only** is the name without the version; **absent** is",
-        "neither. A version is a whole token: an attached suffix (`-rc1`, `.post1`, `+build`) is",
-        "another version. Lexical, like the cues: a match does not check that the value is right, and",
+        "neither. A version is a whole version token: anything attached to it (`-rc1`, `--rc1`,",
+        "`.post1`, `+build`, or a leading `2.0.0+` or `2.0.0-`) makes another version, while a name",
+        "joined by a hyphen (`b2aiprep-3.0.0`) and sentence punctuation do not. Lexical, like the",
+        "cues: a match does not check that the value is right, and",
         "a `companion` or `cited` fact carried is not thereby in scope.", "",
         "| fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere "
         "| name only | absent |",

@@ -207,8 +207,10 @@ contain the snippet (`–` where the bytes are not recovered); **used_software/t
 both; **elsewhere** is any other string, or one mapping's own values (its scalars and the
 items of its lists other than `used_software` and `tools`), holding the name and the version
 (prose, a resource entry); **name only** is the name without the version; **absent** is
-neither. A version is a whole token: an attached suffix (`-rc1`, `.post1`, `+build`) is
-another version. Lexical, like the cues: a match does not check that the value is right, and
+neither. A version is a whole version token: anything attached to it (`-rc1`, `--rc1`,
+`.post1`, `+build`, or a leading `2.0.0+` or `2.0.0-`) makes another version, while a name
+joined by a hyphen (`b2aiprep-3.0.0`) and sentence punctuation do not. Lexical, like the
+cues: a match does not check that the value is right, and
 a `companion` or `cited` fact carried is not thereby in scope.
 
 | fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere | name only | absent |

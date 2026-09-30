@@ -367,7 +367,7 @@ class Carriage(unittest.TestCase):
         """Review of #3534 (#3583): a prerelease, post-release, development
         or build suffix is another version on every carriage path, whatever
         prefix the version carries; sentence punctuation still ends it."""
-        suffixed = ("3.0.0-rc1", "3.0.0.post1", "3.0.0.dev1", "3.0.0+build.1", "3.0.0a1", "3.0.0-1")
+        suffixed = ("3.0.0-rc1", "3.0.0--rc1", "3.0.0.post1", "3.0.0.dev1", "3.0.0+build.1", "3.0.0a1", "3.0.0-1")
         for suffix in suffixed:
             for prefix in ("", "v", "v.", "version "):
                 v = prefix + suffix
@@ -384,6 +384,28 @@ class Carriage(unittest.TestCase):
                                  (v, tail))
         self.assertEqual(self.carried({"used_software": [{"name": "b2aiprep", "version": "v3.0.0."}]}),
                          "structured")
+
+    def test_the_version_matches_only_as_a_complete_version_token(self):
+        """Review of #3534 (#3629): the fact's version inside a longer version
+        token, as its build part (`2.0.0+3.0.0`), its prerelease part
+        (`2.0.0-3.0.0`) or before a suffix joined by several separators
+        (`3.0.0--rc1`), is another version on every carriage path; a name
+        joined by a hyphen, a lone separator after a space and sentence
+        punctuation are not part of the token."""
+        paths = (lambda v: {"used_software": [{"name": "b2aiprep", "version": v}]},
+                 lambda v: {"tools": [f"b2aiprep {v}"]},
+                 lambda v: {"description": f"Uses b2aiprep {v}."},
+                 lambda v: {"external_resources": [{"name": "b2aiprep", "version": v}]})
+        longer = ("2.0.0+3.0.0", "2.0.0+v3.0.0", "x+3.0.0", "2.0.0-3.0.0", "v2-3.0.0", "3.0.0--rc1",
+                  "3.0.0.-rc1", "3.0.0+-build", "v3.0.0--rc1", "version 3.0.0--rc1")
+        for v in longer:
+            for path in paths:
+                self.assertEqual(self.carried(path(v)), "name_only", v)
+        whole = ("b2aiprep-3.0.0", "b2aiprep-v3.0.0", " +3.0.0", "(3.0.0)", "3.0.0--", "3.0.0.",
+                 "2.0.0+3.0.0 and 3.0.0", "3.0.0 not 2.0.0+3.0.0")
+        for v in whole:
+            for path, expected in zip(paths, ("structured", "structured", "elsewhere", "elsewhere")):
+                self.assertEqual(self.carried(path(v)), expected, (v, expected))
 
     def test_the_name_is_a_whole_token(self):
         """Review of #3534 (#3601): the name, like the version, matches only
