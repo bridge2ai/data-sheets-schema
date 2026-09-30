@@ -1962,7 +1962,7 @@ def test_the_corpus_flag_refuses_every_other_option(option, tmp_path, monkeypatc
     assert f"--corpus reads every committed receipt; {option} would be ignored" in bad.output
 
 
-@pytest.mark.corpus   # walks every committed coverage receipt; the main-branch lane (#1203)
+@pytest.mark.corpus   # walks every committed coverage receipt; run on every PR and merge (#1361)
 def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_ones():
     concat = ROOT / "data" / "d4d_concatenated"
     if not any(concat.glob("*_core/*/*_coverage_receipt.yaml")):
