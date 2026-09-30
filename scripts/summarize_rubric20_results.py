@@ -57,6 +57,52 @@ def load_evaluation_results() -> List[Dict]:
     return results
 
 
+def categories_by_name(result: Dict) -> Dict[str, Dict]:
+    """The evaluation's categories as a mapping keyed on category name.
+
+    The hybrid evaluator writes `categories` as that mapping; the
+    claude-fable-5 evaluations write a list of entries that each carry their
+    `name` (#3524). Every reader below goes through this, so neither shape is
+    special-cased where a score is read. An entry with no name, or a name
+    listed twice, is refused rather than dropped: a category the summary
+    cannot address would otherwise vanish from every table without a trace.
+    """
+    categories = result.get('categories') or {}
+    if isinstance(categories, dict):
+        return categories
+    by_name: Dict[str, Dict] = {}
+    for entry in categories:
+        name = entry.get('name')
+        if name is None or name in by_name:
+            problem = "a category with no name" if name is None else f"category {name!r} twice"
+            raise ValueError(f"{result.get('d4d_file', '<no d4d_file>')}: "
+                             f"the evaluation lists {problem}")
+        by_name[name] = entry
+    return by_name
+
+
+def questions_of(result: Dict) -> List[Dict]:
+    """The evaluation's questions, each once.
+
+    The hybrid evaluator lists them at the top level and again under their
+    category; the list-shaped evaluations only under their category (#3524).
+    Where there is a top-level list it is read alone, as this summary always
+    read the mapping-shaped evaluations, so their output is unchanged and no
+    question is counted twice; the category lists are read only where there
+    is no top-level list.
+
+    This is not how `semantic_comparison.item_scores()` resolves the two
+    copies: it reads the union keyed on question id, so where both copies
+    of a question exist the category copy wins, and a question listed only
+    under a category is kept. The two agree whenever the copies agree, as
+    they do in every mapping-shaped evaluation committed at #3524 (#3661).
+    """
+    if result.get('questions'):
+        return list(result['questions'])
+    return [q for category in categories_by_name(result).values()
+            for q in category.get('questions') or []]
+
+
 def create_csv_summary(results: List[Dict]):
     """Create CSV file with all scores."""
 
@@ -86,14 +132,14 @@ def create_csv_summary(results: List[Dict]):
             percentage = reported_percentage({'overall_score': overall})
 
             # Category scores
-            categories = result.get('categories', {})
+            categories = categories_by_name(result)
             cat1 = categories.get('Structural Completeness', {}).get('category_score', 0)
             cat2 = categories.get('Metadata Quality & Content', {}).get('category_score', 0)
             cat3 = categories.get('Technical Documentation', {}).get('category_score', 0)
             cat4 = categories.get('FAIRness & Accessibility', {}).get('category_score', 0)
 
             # Question scores string
-            questions = result.get('questions', [])
+            questions = questions_of(result)
             question_scores_str = ','.join([
                 f"Q{q['id']}:{q.get('score', 0)}/{q.get('max_score', 5)}"
                 for q in sorted(questions, key=lambda x: x.get('id', 0))[:20]
@@ -151,14 +197,14 @@ def create_markdown_table(results: List[Dict]):
                 pct = reported_percentage({'overall_score': overall})
 
                 # Category scores
-                categories = result.get('categories', {})
+                categories = categories_by_name(result)
                 cat1 = categories.get('Structural Completeness', {}).get('category_score', 0)
                 cat2 = categories.get('Metadata Quality & Content', {}).get('category_score', 0)
                 cat3 = categories.get('Technical Documentation', {}).get('category_score', 0)
                 cat4 = categories.get('FAIRness & Accessibility', {}).get('category_score', 0)
 
                 # Find top and weakest questions
-                questions = result.get('questions', [])
+                questions = questions_of(result)
                 if questions:
                     top_q = max(questions, key=lambda x: x.get('score', 0) / max(x.get('max_score', 1), 1))
                     weak_q = min(questions, key=lambda x: x.get('score', 0) / max(x.get('max_score', 1), 1))
@@ -194,10 +240,10 @@ def create_markdown_table(results: List[Dict]):
                 # so say so rather than average across them (#274).
                 denom = denominator_label(results_list)
 
-                avg_cat1 = sum(r.get('categories', {}).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat2 = sum(r.get('categories', {}).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat3 = sum(r.get('categories', {}).get('Technical Documentation', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat4 = sum(r.get('categories', {}).get('FAIRness & Accessibility', {}).get('category_score', 0) for r in results_list) / file_count
+                avg_cat1 = sum(categories_by_name(r).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
+                avg_cat2 = sum(categories_by_name(r).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
+                avg_cat3 = sum(categories_by_name(r).get('Technical Documentation', {}).get('category_score', 0) for r in results_list) / file_count
+                avg_cat4 = sum(categories_by_name(r).get('FAIRness & Accessibility', {}).get('category_score', 0) for r in results_list) / file_count
 
                 md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
 
@@ -308,7 +354,7 @@ def create_detailed_report(results: List[Dict]):
     for cat_name in categories:
         cat_scores = []
         for r in results:
-            cat_data = r.get('categories', {}).get(cat_name, {})
+            cat_data = categories_by_name(r).get(cat_name, {})
             if cat_data:
                 cat_scores.append(cat_data.get('category_score', 0))
 
