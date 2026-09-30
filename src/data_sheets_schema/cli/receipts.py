@@ -204,7 +204,7 @@ def sources(method, label, project, examples, at_run_commit, as_json):
         run = rs.run_chunks(p["provenance"])
         if at_run_commit:
             raw, manifest_basis = rs.run_source_manifest(run["record"], p["provenance"])
-            tiers_from = f"{manifest_basis['path']} ({rs.basis_label(manifest_basis)})"
+            tiers_from = str(manifest_basis["path"])   # a path in both modes; the text line adds the basis (#3492)
         else:
             raw, manifest_basis, tiers_from = Path(selected).read_bytes(), None, str(selected)
         full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}

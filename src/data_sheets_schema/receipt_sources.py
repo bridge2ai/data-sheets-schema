@@ -601,6 +601,8 @@ def render(report: dict[str, Any]) -> list[str]:
     basis = run.get("bundle_basis") or {}
     where = basis_label(basis)
     tiers_from = run.get("source_manifest", "the source manifest")
+    if run.get("source_manifest_bytes"):              # --at-run-commit: say where the recorded bytes came from
+        tiers_from = f"{tiers_from} ({basis_label(run['source_manifest_bytes'])})"
     same = (run.get("source_manifest_basis") or {}).get("same_bytes")
     note = {True: "the bytes the run recorded", False: "not the bytes the run recorded",
             None: "the run recorded no hash to compare"}[same]
@@ -661,7 +663,8 @@ def render(report: dict[str, Any]) -> list[str]:
                  "only by superseded documents while a replacement's chunk holds every token of the value "
                  f"(same floors) · {so['cites_a_current_source']} cite a current source · "
                  f"{so['no_replacement_chunk']} with no replacement chunk in the bundle · "
-                 f"{so['below_floor']} below the floors")
+                 f"{so['below_floor']} below the floors · {so['exempt']} exempt · "
+                 f"{so['preamble_only']} preamble only")
     for ex in s["examples"]:
         cited = "; ".join(f"{c['document']} (tier {c['tier']}, superseded by {c['superseded_by']}, "
                           f"{', '.join(c['chunks'])})" for c in ex["cited"])

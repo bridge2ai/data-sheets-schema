@@ -196,7 +196,16 @@ def test_preamble_unranked_undeclared_and_every_screen_outcome():
     assert out["superseded_with_replacement_token_match"]["outcomes"] == {
         "replacement_match": 0, "no_replacement_match": 0, "below_floor": 0, "no_replacement_chunk": 0,
         "cites_a_current_source": 5, "exempt": 1, "preamble_only": 1}
-    assert "· 0 with no replacement chunk in the bundle ·" in "\n".join(rs.render({**out, "run": {}}))
+    lines = rs.render({**out, "run": {}})
+    assert "· 0 with no replacement chunk in the bundle ·" in "\n".join(lines)
+    # the supersession line prints every unscreened outcome, as the tier line
+    # does, so its figures and "screened" add up to the path count (#3493)
+    s_line = next(ln for ln in lines if "superseded, replacement token match" in ln)
+    assert s_line.endswith("· 0 below the floors · 1 exempt · 1 preamble only"), s_line
+    so = out["superseded_with_replacement_token_match"]
+    printed = (so["screened"] + so["outcomes"]["cites_a_current_source"] + so["outcomes"]["no_replacement_chunk"]
+               + so["outcomes"]["below_floor"] + so["outcomes"]["exempt"] + so["outcomes"]["preamble_only"])
+    assert printed == out["paths"]
 
 
 def test_a_chunk_without_text_is_listed_and_never_read_as_a_match():
@@ -698,6 +707,10 @@ def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, 
     assert report["lower_tier_with_higher_tier_token_match"]["count"] == 1
     assert report["source_manifest_sha256"] == hashlib.sha256(SOURCE_MANIFEST).hexdigest()
     assert report["run"]["source_manifest_bytes"] == {"source": "manifest on disk", "path": str(recorded)}
+    # run.source_manifest is a path in both modes; the basis is in
+    # source_manifest_bytes, and only the text line joins the two (#3492)
+    assert report["run"]["source_manifest"] == str(recorded)
+    assert default["run"]["source_manifest"] == str(today)
     assert report["run"]["source_manifest_basis"]["same_bytes"] is True
     assert report["non_checks"][-1] == rs.NON_CHECK_AT_RUN_COMMIT and report["non_checks"] != default["non_checks"]
     # the default non-check names what the flag reads: the recorded bytes, by
@@ -713,6 +726,11 @@ def test_at_run_commit_reads_tiers_from_the_manifest_the_run_recorded(tmp_path, 
     with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
         text = CliRunner().invoke(cli, args + ["--at-run-commit"]).output
     assert f"tiers: {recorded} (git blob at commit {'b' * 12}) sha256" in text, text
+    with mock.patch.object(pv, "bundle_bytes_for", return_value=(SOURCE_MANIFEST, entry)):
+        report = json.loads(CliRunner().invoke(cli, args + ["--at-run-commit", "--json"]).output)
+    assert report["run"]["source_manifest"] == str(recorded)                   # a path, not a label (#3492)
+    assert report["run"]["source_manifest_bytes"] == {"source": "git blob", "path": str(recorded),
+                                                      "commit": "b" * 40}
     recorded.write_bytes(SOURCE_MANIFEST)
     with mock.patch.object(pv, "bundle_bytes_for", side_effect=pv.GitUnavailable("shallow clone")):
         recorded.write_bytes(SOURCE_MANIFEST + b"# edited\n")
