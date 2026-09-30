@@ -402,7 +402,8 @@ def instruments_of(block: dict[str, Any], rubric: str) -> list[str]:
 
 
 def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str = "",
-                          left_out: Sequence[str] = (), evaluator: str | None = None) -> list[str]:
+                          left_out: Sequence[str] = (), evaluator: str | None = None,
+                          measured_on: str | None = None) -> list[str]:
     """Markdown lines for a discrimination block; the basis is named on every
     figure that depends on one. `scope` qualifies the heading. `left_out` names
     the evaluations listed above the block that it does not measure (a report
@@ -410,8 +411,14 @@ def render_discrimination(block: dict[str, Any], heading: str = "##", scope: str
     block never claims to measure every evaluation above it. `evaluator`
     scopes the block to one evaluator's evaluations where the tables above
     hold more than one evaluator's (#3309, #3310): the block then says it
-    measured that evaluator's evaluations only."""
-    whose = "the evaluations above" if evaluator is None else f"the {evaluator} evaluations above"
+    measured that evaluator's evaluations only. `measured_on` replaces the
+    phrase naming what was measured ("Measured on <measured_on>, one rating
+    per record.") where the cohort is a counted part of the evaluations above
+    that names too many left out to list (#3570); it excludes `left_out`."""
+    if measured_on is not None and left_out:
+        raise ValueError("measured_on states the cohort itself; pass it or left_out, not both")
+    whose = ("the evaluations above" if evaluator is None else f"the {evaluator} evaluations above"
+             ) if measured_on is None else measured_on
     measured = (f"Measured on {whose}, one rating per record." if not left_out else
                 f"Measured on {whose} except the {len(left_out)} left out of this "
                 "block's cohort, one rating per record. Left out, and in no count below: "
@@ -536,13 +543,22 @@ def legacy_cohorts(results: Iterable[dict[str, Any]]
 def render_legacy_discrimination(results: Iterable[dict[str, Any]],
                                  heading: str = "##") -> list[str]:
     """The #2927 block for each of a legacy summarizer's cohorts (#3281)."""
+    results = list(results)
     lines: list[str] = []
     for (kind, evaluator, maximum), members in legacy_cohorts(results):
         who = evaluator or "an unrecorded evaluator"
         block = discrimination(legacy_record(result) for result in members)
+        # The report above lists every evaluation the summarizer loaded, of
+        # every kind, evaluator and maximum; the block measures one cohort of
+        # them, so it counts what it measures against what is above (#3570).
+        others = len(results) - len(members)
+        measured_on = (f"{len(members)} of the {len(results)} evaluations above: the {kind} "
+                       f"evaluations by {who} scored out of {maximum:g}"
+                       + (f". The other {others} are in no count below; each is measured in "
+                          "a block of its own" if others else ""))
         lines += render_discrimination(
             block, heading, scope=f", {kind} evaluations by {who} scored out of {maximum:g}",
-            evaluator=evaluator)
+            evaluator=evaluator, measured_on=measured_on)
         lines += [f"This cohort is the {len(members)} {kind} evaluation"
                   f"{'s' if len(members) != 1 else ''} by {who} scored out of {maximum:g}, "
                   "each record named by the D4D file it rated. Evaluations of another kind "

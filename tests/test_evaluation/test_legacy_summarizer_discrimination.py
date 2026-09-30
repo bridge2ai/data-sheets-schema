@@ -167,3 +167,51 @@ def test_rubric20_report_carries_the_block_per_maximum(summarizer):
     assert "concatenated evaluations by hybrid-heuristic-evaluator scored out of 84 (#2927)" in text
     assert "concatenated evaluations by hybrid-heuristic-evaluator scored out of 88 (#2927)" in text
     assert "At ceiling: 1/2 (Q1)" in text
+
+
+# --- what each block says it measured (#3570) --------------------------------
+
+def test_each_block_counts_its_cohort_against_every_evaluation_above():
+    """The report above pools every evaluation loaded, of both kinds; a block
+    measures one cohort, so it must not claim all of an evaluator's
+    evaluations above. It says how many of the total it measured and that the
+    rest are in no count."""
+    docs = [legacy10("P", "a.yaml", [1, 1]), legacy10("P", "b.yaml", [0, 1]),
+            legacy10("P", "c.yaml", [1, 0], kind="individual"),
+            legacy10("P", "d.yaml", [1, 1], model=JUDGE)]
+    text = "\n".join(render_legacy_discrimination(docs))
+    assert "Measured on the hybrid-heuristic-evaluator evaluations above" not in text
+    assert "Measured on the claude-fable-5 evaluations above" not in text
+    assert ("Measured on 2 of the 4 evaluations above: the concatenated evaluations by "
+            "hybrid-heuristic-evaluator scored out of 50. The other 2 are in no count below; "
+            "each is measured in a block of its own, one rating per record.") in text
+    assert ("Measured on 1 of the 4 evaluations above: the individual evaluations by "
+            "hybrid-heuristic-evaluator scored out of 50. The other 3 are in no count below") in text
+    assert ("Measured on 1 of the 4 evaluations above: the concatenated evaluations by "
+            "claude-fable-5 scored out of 50. The other 3") in text
+    assert text.count("Evaluations by any other evaluator are in no count below") == 3
+
+
+def test_a_single_cohort_names_no_others():
+    docs = [legacy10("P", "a.yaml", [1, 1]), legacy10("P", "b.yaml", [0, 1])]
+    text = "\n".join(render_legacy_discrimination(docs))
+    assert ("Measured on 2 of the 2 evaluations above: the concatenated evaluations by "
+            "hybrid-heuristic-evaluator scored out of 50, one rating per record.") in text
+    assert "The other" not in text
+
+
+def test_measured_on_and_left_out_are_exclusive():
+    from data_sheets_schema.semantic_comparison import render_discrimination
+    block = discrimination([legacy_record(legacy10("P", "a.yaml", [1]))])
+    with pytest.raises(ValueError):
+        render_discrimination(block, measured_on="1 of 2", left_out=["x"])
+
+
+@pytest.mark.parametrize("summarizer", ["summarize_rubric10_results"], indirect=True)
+def test_rubric10_report_block_counts_against_the_report_total(summarizer):
+    docs = [legacy10("AI_READI", "a.yaml", [1, 1, 0]), legacy10("AI_READI", "b.yaml", [1, 1, 0]),
+            legacy10("AI_READI", "c.yaml", [1, 0, 0], kind="individual")]
+    text = _report(summarizer, docs)
+    assert "**Total Evaluations:** 3" in text
+    assert "Measured on 2 of the 3 evaluations above: the concatenated evaluations" in text
+    assert "Measured on 1 of the 3 evaluations above: the individual evaluations" in text
