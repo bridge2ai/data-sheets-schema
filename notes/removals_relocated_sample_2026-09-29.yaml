@@ -1,7 +1,11 @@
 # Hand-labelled sample for the removals v3 relocation candidate (#3223).
 #
 # Each row is a value removals v2 counted deleted (founded, unfounded or unsorted)
-# on a record the arm table reads. `relocated` is the label: true where the final
+# on one of the 87 records the removals check reads (every *_core record it
+# checked, the population the 1,280 below counts), not only those the arm table
+# reads: the 64 rows come from 35 records under 27 labels, many outside the arms
+# notes/arm_comparison.md shows, and one is 2026-09-04f v8 rep1 AI_READI, which
+# that table excludes as invalid (#3548). `relocated` is the label: true where the final
 # full record restates the value's content (reworded, moved or split), whatever
 # its role or standing there; false where it does not. Labelled by the implementer
 # while the prototype's scores were visible, so not blind. Drawn at random

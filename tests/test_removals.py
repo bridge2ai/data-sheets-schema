@@ -12,7 +12,9 @@ that keeps a reorder or a stripped key from reading as a removal, and the
 #899 convention that a run with no snapshot measures nothing rather than 0.
 """
 import hashlib
+import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -201,8 +203,10 @@ class Containment(unittest.TestCase):
 
     def test_a_long_number_or_a_date_quoted_in_prose_is_deleted_but_one_carried_whole_is_flattened(self):
         """#3130: a number is carried whole or not at all. The v4 VOICE rep1
-        count 32522 survived only as one per-feature count in the entry's
-        `source_caveats`, and the CM4AI collection dates only as the award
+        count 32522 survived within its entry only as one per-feature count
+        in the entry's `source_caveats` (elsewhere in the record it is also
+        quoted in `file_collections[0].description`, outside the entry the
+        test is scoped to, #3552), and the CM4AI collection dates only as the award
         period beside "the sources give no start or end date" — v2 read both
         as flattened. The v3 AI_READI release date, carried as itself in
         its list, still is; and a word still flattens by containment."""
@@ -920,6 +924,18 @@ class Relocation(unittest.TestCase):
         b = rm.classify(before, after, _audit())
         self.assertEqual((b["unfounded"], b["relocated_candidate"], b["relocated_not_assessed"]), (2, 0, 1))
 
+    def test_a_short_identifier_is_assessed_and_the_non_check_says_so(self):
+        """#3553: an identifier-shaped value is assessed by its own text
+        whatever its word count, and the non-check says it."""
+        value = "ROR:05gq02987"
+        self.assertLess(len(rm._words(value)), rm.RELOCATED_MIN_WORDS)
+        assessed, where = rm._Relocation(_record(notes="Hosted by ror:05gq02987.")).candidate(value)
+        self.assertTrue(assessed)
+        self.assertEqual(where["to"], "notes")
+        b = rm.classify(_record(license="CC-BY"), _record(), _audit())
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("is not assessed unless it is identifier-shaped", text)
+
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
         after = _record(sampling_strategies=[{"is_sample": True}], source_caveats=self.NOTE.replace("N/A", "n/a"))
@@ -941,6 +957,12 @@ class Relocation(unittest.TestCase):
         self.assertTrue(b["flattened_paths"][0]["into_source_caveats"])
         kept = rm.classify(before, _record(regulatory_restrictions={"notes": "x; restricted access"}), _audit())
         self.assertEqual((kept["flattened"], kept["flattened_into_source_caveats"]), (1, 0))
+        # "Only" (#3550): text a claim still carries is not marked, even
+        # where a caveat beside the claim carries it too.
+        both = rm.classify(before, _record(regulatory_restrictions={
+            "notes": "x; restricted access", "source_caveats": "The source says the data are restricted."}), _audit())
+        self.assertEqual((both["flattened"], both["flattened_into_source_caveats"]), (1, 0))
+        self.assertNotIn("into_source_caveats", both["flattened_paths"][0])
 
 
 def _review(original, judgments, sha=None):
@@ -992,6 +1014,40 @@ class SourceReview(unittest.TestCase):
         self.assertIsNone(b["source_review"]["deleted"])
         self.assertIn("license", {r["path"] for r in b["founded_paths"]})     # the v2 rule, unchanged
         self.assertIn("source review not read", b["summary"])
+
+    def test_a_rewritten_value_reviewed_supported_is_founded_only_by_a_linked_finding(self):
+        """#3551: the linked-only rule holds on rewritten rows too — a
+        free-text slot does not found a supported value rewritten in place."""
+        before, after = _record(license="CC-BY 4.0 International"), _record(license="MIT")
+        audit = _audit({"slot": "license"})
+        audit["source_review"] = _review(before, {"/license": "supported"})
+        b = rm.classify(before, after, audit)
+        row = b["rewritten_paths"][0]
+        self.assertEqual((row["path"], row["source_review"], row["founded"]), ("license", "supported", False))
+        self.assertTrue(row["supported_slot_only"])
+        self.assertEqual(b["rewritten_unfounded"], 1)
+        audit = _audit({"slot": "license", "review_paths": ["/license"]})
+        audit["source_review"] = _review(before, {"/license": "supported"})
+        row = rm.classify(before, after, audit)["rewritten_paths"][0]
+        self.assertEqual((row["founded"], row["by"]), (True, "review_paths"))
+        audit = _audit({"slot": "license"})
+        audit["source_review"] = _review(before, {"/license": "revise"})
+        self.assertTrue(rm.classify(before, after, audit)["rewritten_paths"][0]["founded"])
+
+    def test_revise_on_any_claim_wins_and_supported_needs_every_claim(self):
+        """#3551: a value is judged revise where any claim on it is, and
+        supported only where every claim is."""
+        before = _record(license="CC-BY", keywords=["voice", "speech", "audio"])
+        review = {"artifact": "original_full", "sha256": None, "values": [
+            {"path": "/license", "claims": [{"verdict": "supported"}, {"verdict": "revise"}]},
+            {"path": "/keywords/0", "claims": [{"verdict": "supported"}, {"verdict": "supported"}]},
+            {"path": "/keywords/1", "claims": [{"verdict": "supported"}, {"verdict": "unclear"}]}]}
+        audit = _audit()
+        audit["source_review"] = review
+        b = rm.classify(before, _record(), audit)
+        judged = {r["path"]: r["source_review"] for r in b["unfounded_paths"]}
+        self.assertEqual(judged, {"license": "revise", "keywords[0]": "supported", "keywords[1]": "unreviewed",
+                                  "keywords[2]": "unreviewed"})
 
     def test_without_a_source_review_nothing_changes(self):
         b = rm.classify(self.BEFORE, self.AFTER, _audit({"slot": "license"}))
@@ -1260,9 +1316,11 @@ def test_the_five_digit_count_v2_flattened_is_32522_in_the_pinned_snapshot_and_n
     """#3130, and a correction to #3396: the snapshot the removals read for
     v4 VOICE rep1 is the one its run pins, `VOICE_full_2.yaml`, where
     `instances[1].counts` is 32522 — not the 29278 of `VOICE_full.yaml`,
-    which #3396 read. Its only surviving trace is one per-feature count in
-    the entry's `source_caveats`, so v3, which carries a number only as a
-    scalar equal to it, reads it deleted (unsorted: this run's audit is
+    which #3396 read. Within its entry, `instances[1]`, its only surviving
+    trace is one per-feature count in the entry's `source_caveats` (the
+    final record also quotes it in `file_collections[0].description`,
+    outside that entry, #3552), so v3, which carries a number only as a
+    scalar equal to it under the nearest surviving ancestor, reads it deleted (unsorted: this run's audit is
     ambiguous, #3153)."""
     monkeypatch.chdir(CONCAT.parents[1])
     monkeypatch.setattr(rm, "PATH_LIMIT", 10 ** 6)
@@ -1314,11 +1372,49 @@ def test_the_22c_ai_readi_member_respelled_licence_to_license_is_not_removed(mon
     assert (b["unfounded"], b["rewritten_unfounded"]) == (3, 4)
 
 
+_NUMBER_WORDS = ("zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+
+
+def _stated_relocation_measurement() -> tuple[int, int, int]:
+    """(tp, fp, fn) as the labelled sample's header states them at the
+    declared threshold, after checking that the header's precision and
+    recall follow from its counts and that the published definitions —
+    the removals non-check and the arm table's row — state the same
+    measurement in words (#3549)."""
+    root = Path(__file__).resolve().parents[1]
+    header = " ".join(line.lstrip("# ").strip() for line in
+                      (root / rm.RELOCATED_VALIDATION).read_text().splitlines() if line.startswith("#"))
+    m = re.search(r"At RELOCATED_THRESHOLD ([\d.]+) on this sample: (\d+) candidates, (\d+) correct "
+                  r"\(precision ([\d.]+)\); (\d+) relocations labelled, (\d+) found \(recall ([\d.]+)\)", header)
+    assert m, "the sample header no longer states the measurement in the form this test reads"
+    threshold, candidates, tp, precision, labelled, found, recall = m.groups()
+    assert float(threshold) == rm.RELOCATED_THRESHOLD
+    tp, candidates, labelled = int(tp), int(candidates), int(labelled)
+    assert int(found) == tp
+    assert f"{tp / candidates:.2f}" == precision and f"{tp / labelled:.2f}" == recall
+    in_ten = f"about {_NUMBER_WORDS[round(10 * tp / candidates)]} times in ten"
+    in_five = f"about {_NUMBER_WORDS[round(5 * tp / labelled)]} relocations in five"
+    spec = importlib.util.spec_from_file_location("arm_comparison_3549", root / "scripts" / "arm_comparison.py")
+    arm = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(arm)
+    for name, text in (("removals NON_CHECKS", " ".join(rm.NON_CHECKS)),
+                       ("arm table unfoundedrelocated", " ".join(arm.METRICS["unfoundedrelocated"][3].split()))):
+        assert in_ten in text and in_five in text, (name, in_ten, in_five)
+    return tp, candidates - tp, labelled - tp
+
+
+def test_the_relocation_measurement_the_sample_states_is_the_one_the_definitions_publish():
+    """#3549: the header's counts, its precision and recall, and the words
+    the non-check and the arm table use for them agree."""
+    assert _stated_relocation_measurement() == (25, 3, 6)
+
+
 @pytest.mark.corpus
 def test_the_relocation_threshold_measures_what_the_labelled_sample_says(monkeypatch):
     """#3223: precision and recall of the candidate at the declared
     threshold, recomputed on the hand-labelled sample and compared with
-    what the sample file and the published definitions state."""
+    what the sample file's header states (whose figures the published
+    definitions are checked against, #3549)."""
     monkeypatch.chdir(CONCAT.parents[1])
     sample = yaml.safe_load((CONCAT.parents[1] / rm.RELOCATED_VALIDATION).read_text())
     assert (sample["threshold"], sample["min_content_words"]) == (rm.RELOCATED_THRESHOLD, rm.RELOCATED_MIN_WORDS)
@@ -1341,7 +1437,7 @@ def test_the_relocation_threshold_measures_what_the_labelled_sample_says(monkeyp
         tp += bool(where) and row["relocated"]
         fp += bool(where) and not row["relocated"]
         fn += (not where) and row["relocated"]
-    assert (tp, fp, fn) == (25, 3, 6)                       # precision 0.89, recall 0.81
+    assert (tp, fp, fn) == _stated_relocation_measurement()
 
 
 @pytest.mark.corpus

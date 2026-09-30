@@ -201,8 +201,8 @@ PATH_LIMIT = 50
 #: v3 AI_READI `distribution_dates[2].release_dates[0]`); the 5-digit count
 #: of v4 VOICE rep1 — 32522 on the recording-features instance of the
 #: snapshot the run pins, `VOICE_full_2.yaml`, not the 29278 of its
-#: `VOICE_full.yaml` #3396 read — survived only as one per-feature count in
-#: the entry's `source_caveats`.
+#: `VOICE_full.yaml` #3396 read — survived within that entry only as one
+#: per-feature count in the entry's `source_caveats`.
 MIN_NUMERIC_DIGITS = 5
 
 #: A deleted value's relocation candidate (#3223): the share of its content
@@ -255,8 +255,9 @@ NON_CHECKS = (
     "value's content words recurs in one final scalar, not a semantic comparison: at the "
     "declared threshold the labelled sample measured it right about nine times in ten and "
     "found about four relocations in five (RELOCATED_VALIDATION), a value with fewer than "
-    "three content words (a number, a date, a short name) is not assessed, and a candidate "
-    "moves no count (#3223)",
+    "three content words (a number, a date, a short name) is not assessed unless it is "
+    "identifier-shaped (a CURIE or a URL, matched by its own text whatever its word count), "
+    "and a candidate moves no count (#3223, #3553)",
     "that a source review's judgment was right — a removed value reviewed supported and founded "
     "by no linked finding is unfounded on the review's word, and one reviewed revise is still "
     "founded only by a finding's path (#3037)",
