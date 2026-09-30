@@ -29,6 +29,7 @@ from data_sheets_schema import lexicon as lx
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "absence_claims_baseline.py"
 LEXICON_FILE = lx.LEXICON_DIR / "absence_self_narration_v1.yaml"
+JUDGEMENTS = ROOT / "notes" / "absence_precision_judgements_99c92000.yaml"
 
 BWA, RSN = "bundle_wide_absence", "record_self_narration"
 
@@ -136,11 +137,17 @@ class Counting(unittest.TestCase):
 
 class Identity(unittest.TestCase):
     def test_the_result_names_the_instrument_version_and_lexicon_bytes(self):
+        """The newest registered version unless one is passed (#3132)."""
         result = al.lint({"notes": POSITIVE[0][0]})
-        self.assertEqual(result["instrument"], "absence_self_narration lexicon v1 (#2919)")
-        self.assertEqual(result["lexicon"]["version"], 1)
-        self.assertEqual(result["lexicon"]["sha256"], hashlib.sha256(LEXICON_FILE.read_bytes()).hexdigest())
+        self.assertEqual(result["instrument"], "absence_self_narration lexicon v2 (#3132)")
+        self.assertEqual(result["lexicon"]["version"], 2)
+        self.assertEqual(result["lexicon"]["sha256"], hashlib.sha256(
+            (lx.LEXICON_DIR / "absence_self_narration_v2.yaml").read_bytes()).hexdigest())
         self.assertIs(result["gating"], False)
+        v1 = al.lint({"notes": POSITIVE[0][0]}, lx.load(al.LEXICON, 1))
+        self.assertEqual((v1["lexicon"]["version"], v1["lexicon"]["sha256"]),
+                         (1, hashlib.sha256(LEXICON_FILE.read_bytes()).hexdigest()))
+        self.assertEqual(v1["hits"], result["hits"])
 
     def test_a_lexicon_without_the_scope_this_reader_needs_is_refused(self):
         raw = LEXICON_FILE.read_text(encoding="utf-8").replace("  excluded_keys: [name, id, keywords]\n", "")
@@ -463,10 +470,23 @@ class Baseline(unittest.TestCase):
         self.assertNotEqual(self.m.draw_sha256({BWA: (5, [p, q]), RSN: (1, [r])}), expected)      # another order
         self.assertNotEqual(self.m.draw_sha256({BWA: (5, [q]), RSN: (1, [p, r])}), expected)      # another class
 
+    def _judgements_copy(self, checked, edit=None, **fields):
+        """Point a precision entry at a copy of the committed judgements with
+        top-level `fields` replaced and `edit` applied to the parsed file."""
+        data = yaml.safe_load(JUDGEMENTS.read_text(encoding="utf-8"))
+        data.update(fields)
+        if edit:
+            edit(data)
+        path = self.dir / f"judgements_{len(list(self.dir.glob('judgements_*')))}.yaml"
+        path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+        checked["judgements"] = str(path)
+        return path
+
     def test_precision_is_shown_only_for_the_lexicon_it_was_checked_under(self):
         """#3094: the sample is keyed by lexicon sha256, so a note under other
         lexicon bytes shows none, and a sample keyed to those other bytes is
-        not shown under v1."""
+        not shown under v1. Its judgements name the bytes they were judged
+        under too, so moving the entry alone is refused (#3197)."""
         collected = self.m.collect(self.corpus)
         v1 = collected["lexicon"]
         table = "| bundle_wide_absence | 50 | 0 | 0 |"
@@ -481,7 +501,11 @@ class Baseline(unittest.TestCase):
         self.assertIn("No precision sample has been checked under this lexicon's sha256.", md)
         self.assertNotIn(table, md)
         self.assertNotIn("| in class |", md)
-        self.m.PRECISION = {other.sha256: self.m.PRECISION[v1.sha256]}
+        entry = dict(self.m.PRECISION[v1.sha256])
+        self.m.PRECISION = {other.sha256: entry}
+        with self.assertRaisesRegex(self.m.Refused, "lexicon_sha256 is '7b5c2237"):
+            self.m.render_markdown(under_other)
+        self._judgements_copy(entry, lexicon_sha256=other.sha256)
         self.assertIn(table, self.m.render_markdown(under_other))
         md = self.m.render_markdown(collected)
         self.assertIn("No precision sample has been checked", md)
@@ -496,12 +520,114 @@ class Baseline(unittest.TestCase):
         self.assertIn(f"`{checked['record_set_sha256']}`), not the one this note counts.", md)
         self.assertIn(f"`{checked['draw_sha256']}`; `--sample` prints it last.", md)
         self.assertIn("A seeded sample (`--sample 50 --seed 2919`)", md)
-        checked.update(sample=7, seed=11)                               # the draw it names is the entry's
-        self.assertIn("A seeded sample (`--sample 7 --seed 11`)", self.m.render_markdown(collected))
+        checked.update(seed=11)                                          # the draw it names is the entry's ...
+        with self.assertRaisesRegex(self.m.Refused, "seed is 2919, not the precision entry's 11"):
+            self.m.render_markdown(collected)                            # ... and its judgements' (#3197)
+        self._judgements_copy(checked, seed=11)
+        self.assertIn("A seeded sample (`--sample 50 --seed 11`)", self.m.render_markdown(collected))
         checked["record_set_sha256"] = collected["record_set_sha256"]
+        self._judgements_copy(checked, seed=11, record_set_sha256=collected["record_set_sha256"])
         md = self.m.render_markdown(collected)
         self.assertIn("It was drawn from the record set this note counts.", md)
         self.assertNotIn("another record set", md)
+
+    def test_the_committed_judgements_bear_out_the_v1_table(self):
+        """#3197: one verdict and reason per drawn phrase, whose tally is the
+        table; the three borderline phrases are the ranking-vocabulary ones
+        the note describes."""
+        v1 = lx.load(al.LEXICON, 1)
+        checked = self.m.PRECISION[v1.sha256]
+        data = self.m.read_judgements(v1.sha256, checked)
+        rows = data["judgements"]
+        self.assertEqual({cls: len(r) for cls, r in rows.items()}, {BWA: 50, RSN: 50})
+        self.assertTrue(all(r["reason"].strip() for cls in rows for r in rows[cls]))
+        borderline = [r for r in rows[RSN] if r["verdict"] == "borderline"]
+        self.assertEqual([r["patterns"] for r in borderline], [["rsn.source-ranking"]] * 3)
+        self.assertEqual(data["recorded"], "2026-09-29")
+        self.assertIn("re-recorded", JUDGEMENTS.read_text(encoding="utf-8"))
+        md = self.m.render_markdown(self.m.collect(self.corpus))
+        self.assertIn("Each phrase's verdict and reason are in `notes/absence_precision_judgements_99c92000.yaml`", md)
+        self.assertIn("They are not the 2026-09-28 judgements", md)
+
+    def test_a_table_its_judgements_do_not_bear_out_is_refused(self):
+        """#3197: the table is rendered only beside judgements of the draw it
+        names whose tally is its counts. Each spoiled copy is refused, and
+        `main` then writes nothing and exits 1."""
+        collected = self.m.collect(self.corpus)
+        checked = self.m.PRECISION[collected["lexicon"].sha256]
+
+        def flip(data):                                  # an in-class phrase judged borderline
+            data["judgements"][BWA][0]["verdict"] = "borderline"
+
+        def drop(data):
+            data["judgements"][RSN].pop()
+
+        def move(data):
+            data["judgements"][RSN][0]["pointer"] = "/notes/9"
+
+        def swap(data):                                  # the same phrases in another order
+            rows = data["judgements"][BWA]
+            rows[0], rows[1] = rows[1], rows[0]
+
+        def unreasoned(data):
+            data["judgements"][RSN][4]["reason"] = "  "
+
+        def unknown(data):
+            data["judgements"][RSN][4]["verdict"] = "probably"
+
+        def undated(data):
+            del data["recorded"]
+
+        for edit, message in [(flip, r"verdict tally .* is not the precision entry's counts"),
+                              (drop, "its phrases are not the draw 99c92000a3c2"),
+                              (move, "its phrases are not the draw"),
+                              (swap, "its phrases are not the draw"),
+                              (unreasoned, "needs record, pointer, start, end, a reason"),
+                              (unknown, "a verdict from"),
+                              (undated, "does not say when its verdicts were recorded")]:
+            with self.subTest(edit=edit.__name__):
+                self._judgements_copy(checked, edit)
+                with self.assertRaisesRegex(self.m.Refused, message):
+                    self.m.render_markdown(collected)
+        self._judgements_copy(checked)                   # the control: an unspoiled copy renders
+        self.assertIn("| record_self_narration | 47 | 3 | 0 |", self.m.render_markdown(collected))
+        checked["classes"] = {BWA: (50, 0, 0), RSN: (48, 2, 0)}          # counts the verdicts do not give
+        with self.assertRaisesRegex(self.m.Refused, "verdict tally"):
+            self.m.render_markdown(collected)
+        checked["classes"] = {BWA: (50, 0, 0), RSN: (47, 3, 0)}
+        checked["judgements"] = str(self.dir / "absent.yaml")
+        with self.assertRaisesRegex(self.m.Refused, "could not be read"):
+            self.m.render_markdown(collected)
+        del checked["judgements"]
+        with self.assertRaisesRegex(self.m.Refused, "names no judgements file"):
+            self.m.render_markdown(collected)
+        self.m.collect = lambda *a, **k: collected       # main over the same records, without a real corpus
+        self.m.read_pins = lambda *a, **k: {}
+        self.m.unpinned = lambda *a, **k: []
+        before = self._tree()
+        status, out, err = self._run()
+        self.assertEqual((status, out), (1, ""))
+        self.assertIn("refused: the precision entry names no judgements file", err)
+        self.assertEqual(self._tree(), before)
+
+    def test_the_note_counts_under_its_named_version_and_names_later_ones(self):
+        """#3132: registering v2 does not move the note's counts; it names v2,
+        so the note is stale until regenerated. Counting under v2 is a change
+        of `LEXICON_VERSION`, and the v1 precision table is then not shown."""
+        self.assertEqual(self.m.LEXICON_VERSION, 1)
+        collected = self.m.collect(self.corpus)
+        self.assertEqual(collected["lexicon"].version, 1)
+        v2 = lx.load(al.LEXICON, 2)
+        md = self.m.render_markdown(collected)
+        self.assertIn(f"- **Later versions:** v2 (`absence_self_narration_v2.yaml`, sha256 `{v2.sha256}`). "
+                      "This note counts under v1", md)
+        self.m.LEXICON_VERSION = 2
+        under_v2 = self.m.collect(self.corpus)
+        self.assertEqual(under_v2["lexicon"].sha256, v2.sha256)
+        self.assertEqual(self.m.summarise(under_v2), self.m.summarise(collected))    # v2 changes no match
+        md = self.m.render_markdown(under_v2)
+        self.assertNotIn("Later versions", md)
+        self.assertIn("No precision sample has been checked under this lexicon's sha256.", md)
 
 
 @pytest.fixture(scope="module")

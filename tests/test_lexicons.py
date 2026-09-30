@@ -21,11 +21,13 @@ from data_sheets_schema import lexicon as lx
 #: and a change is a new version with a new line here.
 REGISTERED = {
     ("absence_self_narration", 1): "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e",
+    ("absence_self_narration", 2): "e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708",
 }
 
 MINIMAL = """name: tiny
 version: 1
 instrument: tiny lexicon v1
+counterexamples_required: true
 flags: [IGNORECASE]
 classes:
   a: the a class
@@ -101,12 +103,57 @@ class TheRegistry(unittest.TestCase):
         self.assertTrue(hits("The authors are recorded in the kickoff_webinar."))
         self.assertTrue(hits("Consent was given in the consent_form."))
 
+    def test_v2_gives_every_pattern_a_counterexample_and_declares_the_rule(self):
+        """#3132: the five v1 patterns without one gain one, and the file
+        declares the rule `parse` holds it to."""
+        lexicon = lx.load("absence_self_narration", 2)
+        self.assertTrue(lexicon.counterexamples_required)
+        self.assertEqual([p.id for p in lexicon.patterns if not p.counterexamples], [])
+        self.assertFalse(lx.load("absence_self_narration", 1).counterexamples_required)
+
+    def test_v2_matches_exactly_what_v1_matches(self):
+        """v2 changes self-test texts only: the same pattern ids, classes,
+        regexes, flags, class descriptions and scope, so a count under either
+        is the same count. A regex edit belongs in a version that says so."""
+        v1, v2 = (lx.load("absence_self_narration", v) for v in (1, 2))
+
+        def compiled(lexicon):
+            return [(p.id, p.cls, p.regex.pattern, p.regex.flags) for p in lexicon.patterns]
+
+        self.assertEqual(compiled(v2), compiled(v1))
+        self.assertEqual((v2.classes, v2.scope), (v1.classes, v1.scope))
+        for a, b in zip(v1.patterns, v2.patterns):
+            with self.subTest(pattern=a.id):
+                self.assertEqual(b.examples, a.examples)
+                if a.id != "rsn.recorded-under-slot":        # replaced in v2 (#3213)
+                    self.assertEqual(b.counterexamples[:len(a.counterexamples)], a.counterexamples)
+
+    def test_the_v2_recorded_under_slot_counterexamples_each_miss_for_their_stated_reason(self):
+        """#3213: each counterexample misses for the one reason its comment
+        names, shown by changing only that part and watching it match. The
+        pattern cannot tell a slot from another snake_case word (#3224), so
+        no counterexample claims to guard that."""
+        pattern = {p.id: p for p in lx.load("absence_self_narration", 2).patterns}["rsn.recorded-under-slot"]
+        verb_guard, shape_guard = pattern.counterexamples
+        self.assertEqual(verb_guard, "The authors are listed in related_datasets.")
+        self.assertEqual(shape_guard, "The approval was recorded in the minutes.")
+        self.assertFalse(pattern.regex.search(verb_guard))
+        self.assertTrue(pattern.regex.search(verb_guard.replace("listed", "recorded")))       # the verb decides
+        self.assertFalse(pattern.regex.search(shape_guard))
+        self.assertTrue(pattern.regex.search(shape_guard.replace("the minutes", "the meeting_minutes")))  # the shape
+        self.assertTrue(pattern.regex.search(shape_guard.replace("the minutes", "`minutes`")))
+        self.assertTrue(pattern.regex.search("Consent was given in the consent_form."))       # #3224, unchanged
+
     def test_every_result_identity_names_the_bytes(self):
-        lexicon = lx.load("absence_self_narration")
-        self.assertEqual(lexicon.identity(), {
-            "name": "absence_self_narration", "version": 1,
-            "instrument": "absence_self_narration lexicon v1 (#2919)",
-            "file": "absence_self_narration_v1.yaml", "sha256": REGISTERED[("absence_self_narration", 1)]})
+        """The newest registered version by default, and the one named."""
+        for version, want in [(None, 2), (1, 1), (2, 2)]:
+            with self.subTest(version=version):
+                lexicon = lx.load("absence_self_narration", version)
+                self.assertEqual(lexicon.identity(), {
+                    "name": "absence_self_narration", "version": want,
+                    "instrument": f"absence_self_narration lexicon v{want} (#{2919 if want == 1 else 3132})",
+                    "file": f"absence_self_narration_v{want}.yaml",
+                    "sha256": REGISTERED[("absence_self_narration", want)]})
 
 
 class Pinning(unittest.TestCase):
@@ -178,6 +225,22 @@ class Pinning(unittest.TestCase):
         problems = lx.check_registry(self.dir)
         self.assertTrue(any("'a.any' lists no examples" in p for p in problems), problems)
 
+    def test_a_registered_lexicon_without_the_declaration_is_reported(self):
+        """#3132: every lexicon registered after absence_self_narration v1
+        declares `counterexamples_required`; one that does not is reported
+        even when each of its patterns happens to carry a counterexample."""
+        raw = self.raw.replace(b"counterexamples_required: true\n", b"")
+        self.assertNotEqual(raw, self.raw)
+        (self.dir / "tiny_v1.yaml").write_bytes(raw)
+        self._register([{"version": 1, "file": "tiny_v1.yaml", "sha256": hashlib.sha256(raw).hexdigest()}])
+        self.assertEqual(lx.check_registry(self.dir), [
+            "tiny v1: does not declare `counterexamples_required: true`; every lexicon registered after "
+            "absence_self_narration v1 must (#3132)"])
+        self.assertEqual(lx.load("tiny", directory=self.dir).version, 1)     # reported, still loadable
+
+    def test_the_exemption_is_v1_of_the_absence_lexicon_alone(self):
+        self.assertEqual(lx.COUNTEREXAMPLES_OPTIONAL, frozenset({("absence_self_narration", 1)}))
+
     def test_an_unregistered_name_or_version_is_refused(self):
         with self.assertRaisesRegex(lx.LexiconError, "no lexicon 'other'"):
             lx.load("other", directory=self.dir)
@@ -228,10 +291,23 @@ class Shape(unittest.TestCase):
                 self.assertNotEqual(text, MINIMAL)
                 self._refused(text, message)
 
-    def test_a_counterexample_is_optional(self):
+    def test_a_declared_lexicon_needs_a_counterexample_for_every_pattern(self):
+        """#3132: with `counterexamples_required: true`, a pattern without a
+        counterexample is refused; without the declaration it parses."""
         text = MINIMAL.replace("    counterexamples: [wordy]\n", "")
         self.assertNotEqual(text, MINIMAL)
-        self.assertEqual(lx.parse(text.encode(), file="t.yaml").patterns[0].counterexamples, ())
+        self._refused(text, "'a.word' lists no counterexamples, and this lexicon declares counterexamples_required")
+        self._refused(text.replace("[wordy]", "[]"), "lists no counterexamples")
+        undeclared = text.replace("counterexamples_required: true\n", "")
+        self.assertNotEqual(undeclared, text)
+        self.assertEqual(lx.parse(undeclared.encode(), file="t.yaml").patterns[0].counterexamples, ())
+        self.assertFalse(lx.parse(undeclared.encode(), file="t.yaml").counterexamples_required)
+
+    def test_the_declaration_must_be_a_boolean(self):
+        for value in ("yes-please", "1", "null", "[true]"):
+            with self.subTest(value=value):
+                self._refused(MINIMAL.replace("counterexamples_required: true", f"counterexamples_required: {value}"),
+                              "counterexamples_required must be true or false")
 
 
 if __name__ == "__main__":

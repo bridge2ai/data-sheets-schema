@@ -12,6 +12,10 @@ script to regenerate it, or `--check` to ask whether it still matches its pinned
   `--repin` is reported by `--check` and not counted here; a pinned record that changed or is
   gone makes this note stale (#3045).
 - **Leaves:** `description`, `notes`, `source_caveats` and every `*_details`, at any depth; never inside `name`, `id` or `keywords`
+- **Later versions:** v2 (`absence_self_narration_v2.yaml`, sha256 `e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708`). This note counts under v1, the version
+  its precision sample was judged under; counting under a later one is a deliberate change of
+  the script's `LEXICON_VERSION`, and its precision table then reads unchecked until a sample is
+  judged under those bytes.
 
 **Regex caveat.** Every count here is a regular-expression match over whitespace-collapsed
 text, not a reviewed finding. The lexicon misses phrasings it does not list, and it matches
@@ -83,3 +87,7 @@ The draw's sha256, over each drawn phrase's class, record, pointer and span in o
 | record_self_narration | 47 | 3 | 0 |
 
 The three borderline phrases are source conflicts worded with the ranking vocabulary ("two tier-1 sources disagree").
+
+Each phrase's verdict and reason are in `notes/absence_precision_judgements_99c92000.yaml`, recorded
+2026-09-29 by reading this draw again. They are not the 2026-09-28 judgements, which
+were not written down per phrase; the table is rendered only while their tally equals it (#3197).
