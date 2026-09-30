@@ -57,7 +57,10 @@ prospective and is out of scope (`negated_subject`, #3614). The subject
 these checks and the date/amount guard read is the cue's own conjunct: a
 comma-less clause joined before it by a conjunction after an auxiliary or
 copula ("Its release is pending and this split remains prospective") is
-left out (`statement_subject.conjunction`, `clause_verb`, #3619), and a
+left out (`statement_subject.conjunction`, `clause_verb`, #3619); where
+the subject so read is out of scope, the cue is read again on the stretch
+after the subject's last conjunction ("The page lists no sizes and this
+split remains prospective", as v1 reads it); and a
 conjunct with no subject of its own inherits the governing one, across
 a comma too ("The holdout set was announced and remains prospective",
 "The holdout set was announced, and remains prospective", #3627). "Not only
@@ -612,6 +615,22 @@ def _clause_cut(lexicon, subject: str) -> int:
     return cut
 
 
+def _last_conjunct(lexicon, text: str, s0: int, s1: int) -> int:
+    """Where the stretch after the last `statement_subject.conjunction` in
+    `text[s0:s1]` starts, whatever precedes it; `s0` when there is none.
+    The retry a `subject` cue reads when its subject as cut is out of
+    scope: "The page lists no sizes and this split", whose first clause has
+    only a lexical verb (#3619 does not cut it), and "No page lists sizes
+    and this split", whose opening "No" negates the first clause only, are
+    about "this split" (#3625-#3628 design rule: v1 flags both)."""
+    if lexicon is None or lexicon._clause_conjunction is None:
+        return s0
+    found = None
+    for found in lexicon._clause_conjunction.finditer(text, s0, s1):
+        pass
+    return found.end() if found is not None else s0
+
+
 def _governing(lexicon, text: str, end: int) -> tuple[int, int] | None:
     """The subject an elided conjunct ending at `end` inherits (#3627):
     `text` up to `end` is split at commas and at each conjunction a clause
@@ -666,13 +685,14 @@ def _affirmed(lexicon, sentence: str, before: int) -> str:
 
 
 def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
-           lexicon=None) -> dict[str, str]:
+           lexicon=None, last: bool = False) -> dict[str, str]:
     """The pieces of the cue's clause a guard or an object can name, read
     from the masked sentence: `clause`, `before_cue`, `subject` (a passive
     cue's subject, `_subject`, located on `raw`, the unmasked sentence, and,
     given a `lexicon` that declares clause conjunctions, cut to the cue's
     own conjunct, `_clause_cut`, or the subject that conjunct inherits
-    when it has none of its own, `_governing`, which may lie before `c0`),
+    when it has none of its own, `_governing`, which may lie before `c0`;
+    with `last`, only what follows its last conjunction, `_last_conjunct`),
     `cue`, `item` (the cue's named `item` group: the item a cue that cites
     its source reports, empty when the cue has none), `after_phrase` (after
     the cue up to the phrase's end,
@@ -688,6 +708,8 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
     s0 += _clause_cut(lexicon, full[s0:s1])
     if lexicon is not None and lexicon._clause_conjunction is not None and _elided(full[s0:s1]):
         s0, s1 = _governing(lexicon, full, s0) or (s0, s1)
+    if last:
+        s0 = _last_conjunct(lexicon, full, s0, s1)
     item = (masked[m.start("item"):m.end("item")]
             if "item" in m.re.groupindex and m.start("item") >= 0 else "")
     return {"clause": masked[c0:c1], "before_cue": before, "subject": masked[s0:s1],
@@ -934,7 +956,7 @@ def _topic_self_reference(lexicon, selves, topic: str) -> str | None:
 
 
 def _subject_scope(lexicon, container, member, selves, sentence: str,
-                   c0: int, c1: int, m) -> tuple[str, str | None]:
+                   c0: int, c1: int, m, last: bool = False) -> tuple[str, str | None]:
     """(`scope`, term) for a `subject` cue with no self-reference of its own
     (#3131): its subject is headed by a source statement ("Both statements
     are prospective on that page"; `_statement_head`), with any topic ("statements about ...",
@@ -945,8 +967,8 @@ def _subject_scope(lexicon, container, member, selves, sentence: str,
     The presence terms are read with the member's self-references blanked,
     a topic's self-reference on the topic as written (`_topic_self_reference`,
     #3593)."""
-    raw = _parts(sentence, c0, c1, m, sentence, lexicon)["subject"]
-    subject = _parts(_masked(sentence, selves), c0, c1, m, sentence, lexicon)["subject"]
+    raw = _parts(sentence, c0, c1, m, sentence, lexicon, last)["subject"]
+    subject = _parts(_masked(sentence, selves), c0, c1, m, sentence, lexicon, last)["subject"]
     noun = _statement_head(lexicon, subject)
     if noun is not None:
         # located on the unmasked subject (the same offsets): a blanked
@@ -962,6 +984,39 @@ def _subject_scope(lexicon, container, member, selves, sentence: str,
         return "statement_about_other", " ".join(raw[noun.start():].split())
     term = _member_presence_term(lexicon, container, member, subject, heads=True)
     return ("scope", term) if term else ("no_member_subject", None)
+
+
+def _subject_verdict(lexicon, container, member, selves, sentence: str, c0: int, c1: int, m,
+                     last: bool = False) -> tuple[str, str | None]:
+    """(`scope`, term) or (`out_of_scope` reason, term) for a `subject` cue,
+    on its subject as `_parts` cuts it (with `last`, the subject's last
+    conjunct)."""
+    # A self-reference that owns nothing, read as a `self` cue reads it:
+    # "This split remains prospective", not "This split's schedule is
+    # prospective" (#3131); where the subject holds one, it must head it:
+    # not "The labels in this split are prospective" (#3592).
+    owners = _possessors_blanked(sentence, selves)
+    subject = _parts(owners, c0, c1, m, sentence, lexicon, last)["subject"]
+    # A subject that opens on a negating determiner says nothing it names
+    # is prospective: "Neither statement is prospective", "None of the
+    # statements are prospective" (#3614).
+    if lexicon._statement_negated is not None and lexicon._statement_negated.match(subject):
+        return "negated_subject", None
+    term = _self_reference(selves, owners, c0, m.start())
+    if term is None:
+        # a subject inherited from before a comma ("This split, planned
+        # for 2025, was announced and remains prospective", #3627)
+        term = _item_self_reference(lexicon, selves, subject)
+    if term is not None and not _self_heads_subject(lexicon, selves, subject):
+        term = None
+    elif term is not None:
+        # the self-reference that heads the cue's own conjunct, not one in
+        # an earlier clause: "No data from this split has been released so
+        # it remains prospective" is about "it" (#3619)
+        term = _item_self_reference(lexicon, selves, subject) or term
+    if term is not None:
+        return "scope", term
+    return _subject_scope(lexicon, container, member, selves, sentence, c0, c1, m, last)
 
 
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
@@ -1036,33 +1091,17 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_or_presence_term"}
         out["scope"] = term
     elif pattern.scope == "subject":
-        # A self-reference that owns nothing, read as a `self` cue reads it:
-        # "This split remains prospective", not "This split's schedule is
-        # prospective" (#3131); where the subject holds one, it must head it:
-        # not "The labels in this split are prospective" (#3592).
-        owners = _possessors_blanked(sentence, selves)
-        subject = _parts(owners, c0, c1, m, sentence, lexicon)["subject"]
-        # A subject that opens on a negating determiner says nothing it
-        # names is prospective: "Neither statement is prospective", "None
-        # of the statements are prospective" (#3614).
-        if lexicon._statement_negated is not None and lexicon._statement_negated.match(subject):
-            return {**out, "outcome": "out_of_scope", "reason": "negated_subject"}
-        term = _self_reference(selves, owners, c0, m.start())
-        if term is None:
-            # a subject inherited from before a comma ("This split, planned
-            # for 2025, was announced and remains prospective", #3627)
-            term = _item_self_reference(lexicon, selves, subject)
-        if term is not None and not _self_heads_subject(lexicon, selves, subject):
-            term = None
-        elif term is not None:
-            # the self-reference that heads the cue's own conjunct, not one
-            # in an earlier clause: "No data from this split has been
-            # released so it remains prospective" is about "it" (#3619)
-            term = _item_self_reference(lexicon, selves, subject) or term
-        if term is None:
-            verdict, term = _subject_scope(lexicon, container, member, selves, sentence, c0, c1, m)
-            if verdict != "scope":
-                return {**out, "outcome": "out_of_scope", "reason": verdict, **({"term": term} if term else {})}
+        verdict, term = _subject_verdict(lexicon, container, member, selves, sentence, c0, c1, m)
+        if verdict != "scope":
+            # The subject's last conjunct, whatever joins it: v1 flags "The
+            # page lists no sizes and this split remains prospective", and
+            # v2 departs from v1 only where its issues say (#3625-#3628).
+            again, found = _subject_verdict(lexicon, container, member, selves, sentence, c0, c1, m, True)
+            if again == "scope":
+                verdict, term = again, found
+                parts = _parts(masked, c0, c1, m, sentence, lexicon, True)
+        if verdict != "scope":
+            return {**out, "outcome": "out_of_scope", "reason": verdict, **({"term": term} if term else {})}
         out["scope"] = term
     elif pattern.scope == "self":
         term = _self_reference(selves, sentence, c0, m.start())

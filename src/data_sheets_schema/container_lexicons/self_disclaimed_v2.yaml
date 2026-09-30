@@ -244,7 +244,11 @@ item_qualifiers:
 # the conjunction joins noun phrases and the subject is kept whole ("This
 # split and its labels"). `clause_verb` names auxiliaries and copulas only,
 # so a first clause whose only verb is a lexical one ("The page lists no
-# sizes and this split ...") is not cut. A conjunct with no subject of its
+# sizes and this split ...") is not cut; where the subject so read is out
+# of scope, the cue is read again on the stretch after the subject's last
+# `conjunction`, whatever precedes it, so that sentence and "No page lists
+# sizes and this split remains prospective" are about "this split", as v1
+# reads them (the design rule above). A conjunct with no subject of its
 # own ("The holdout set was announced and remains prospective") inherits
 # the governing subject, and every check reads that (#3627): walking back
 # over the pieces before it, split at commas and at conjunctions a

@@ -32,7 +32,7 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry seven earlier byte
+#: before it first merged, so this PR's commits carry eight earlier byte
 #: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 #:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
@@ -41,8 +41,9 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
 #:   2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24 (348526f6e, review round 5)
 #:   560b1c55b406ad9df6e5c03dfd35c9c020f9173f2fceaf11234679acb8b03757 (f59a0827d, review round 6)
+#:   741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888 (bbd955fb9, review round 6)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "741e0834f79bc20e4a5aea65870380e8df23deefd6125b19b5d95bcefd2fe888"}
+                2: "e05cfaf00a62c042c120542b19317b286c6fa2c03223fe79d6566c6fe79834d4"}
 
 
 def record(**containers):
@@ -1091,6 +1092,14 @@ DIFFERENTIAL = [
     ("splits", "The holdout set and the test set remain prospective.", "Entry", None),
     ("splits", "This split is balanced and the consent process remains prospective.", "Entry",
      "no_member_subject"),
+    # the subject's last conjunct, whatever joins it (design rule)
+    ("splits", "The page lists no sizes and this split remains prospective.", "Entry", None),
+    ("splits", "No page lists sizes and this split remains prospective.", "Entry", None),
+    ("splits", "The consent process and this split remain prospective.", "Entry", None),
+    ("splits", "The page lists no sizes and the 2025 split remains prospective.", "Entry", "date_amount"),
+    ("splits", "The page lists no sizes and remains prospective.", "Entry", "no_member_subject"),
+    ("splits", "The split is complete, and no statement is prospective.", "Entry", "negated_subject"),
+    ("splits", "Its release is pending but neither statement is prospective.", "Entry", "negated_subject"),
     ("splits", "Its release is pending and the 2025 split is prospective.", "Entry", "date_amount"),
     # #3131 and rounds 1-4: what v2 keeps, and what it narrows
     ("splits", V3_SPLIT, "Entry", None),
@@ -1194,13 +1203,34 @@ def test_an_elided_conjunct_inherits_the_governing_subject(text, scope):
     ("Not only the holdout set but the labels are prospective.", "holdout set"),
 ])
 def test_not_only_but_also_is_affirmative_coordination(text, scope):
-    """#3628: `statement_subject.correlative`; a lexicon without it reads
-    the opening "Not" as a negated subject, as round 5 did."""
+    """#3628: `statement_subject.correlative`."""
     out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
     assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
         ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("text,scope", [
+    ("The page lists no sizes and this split remains prospective.", "this split"),
+    ("No page lists sizes and this split remains prospective.", "this split"),
+    ("The consent process and this split remain prospective.", "this split"),
+    ("The page lists no sizes and the holdout set remains prospective.", "holdout set"),
+])
+def test_an_out_of_scope_subject_is_read_again_on_its_last_conjunct(text, scope):
+    """Design rule (#3625-#3628): v1 flags these. The subject as cut is
+    not the member (a lexical-verb clause is not cut, "No" negates only the
+    first clause), so the cue is read again on the stretch after the
+    subject's last conjunction."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+def test_without_the_correlative_not_only_reads_as_a_negated_subject():
+    """#3628: a lexicon without `correlative` reads the opening "Not" as a
+    negated subject, as round 5 did, where the last conjunct does not name
+    the member either."""
     lexicon = edited_lexicon(lambda d: d["statement_subject"].pop("correlative"))
-    assert outcomes("splits", text, lexicon=lexicon) == [
+    assert outcomes("splits", "Not just this split but also its labels are prospective.", lexicon=lexicon) == [
         ("presence.prospective_predicate", "out_of_scope", "negated_subject")]
 
 
