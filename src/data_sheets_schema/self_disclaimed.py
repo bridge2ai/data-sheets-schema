@@ -253,9 +253,24 @@ def _word(terms) -> re.Pattern:
 
 class Lexicon:
     """The lexicon file, parsed and compiled. `sha256` is of its exact bytes,
-    so a run's output names the instrument that produced it."""
+    so a run's output names the instrument that produced it.
+
+    A file this cannot compile is refused with a ValueError, never another
+    exception: a missing or wrongly typed block, a pattern that does not
+    compile or bytes that are not YAML raise `lexicon.LexiconError` naming
+    the file, so `check_registry` reports a malformed pinned lexicon rather
+    than raising (#3901), as `lexicon.parse` does for the pattern lexicons.
+    The checks below that already raise a ValueError keep their messages."""
 
     def __init__(self, raw: bytes, *, path: str | None = None):
+        try:
+            self._compile(raw, path)
+        except (KeyError, IndexError, TypeError, AttributeError, re.error, yaml.YAMLError) as exc:
+            kind = "re.error" if isinstance(exc, re.error) else type(exc).__name__  # PatternError on 3.13
+            raise lx.LexiconError(f"{path or 'the lexicon'} is not a well-formed self_disclaimed "
+                                  f"lexicon ({kind}: {exc})") from exc
+
+    def _compile(self, raw: bytes, path: str | None) -> None:
         data = yaml.safe_load(raw.decode("utf-8"))
         if not isinstance(data, dict) or data.get("instrument") != "self_disclaimed":
             raise ValueError("not a self_disclaimed lexicon")

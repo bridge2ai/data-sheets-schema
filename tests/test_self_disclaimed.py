@@ -1573,6 +1573,49 @@ def test_a_registered_container_lexicon_is_refused_when_its_bytes_change(tmp_pat
         "self_disclaimed v1: file 'self_disclaimed.yaml' is not self_disclaimed_v1.yaml"]
 
 
+def test_a_pinned_container_lexicon_that_does_not_compile_is_reported_not_raised(tmp_path):
+    """#3901: `check_registry` reports every problem as a message. A pinned
+    file whose bytes match its pin but that the reader cannot compile — a
+    missing block, a pattern that is not a regex, a block of the wrong type,
+    or not a self_disclaimed lexicon at all (the plain ValueError
+    `check_pins` catches) — is one problem among the others, and the
+    unregistered-file scan still runs."""
+    data = yaml.safe_load(sd.lexicon_path(1).read_text(encoding="utf-8"))
+    cases = {
+        "missing narrative": ({k: v for k, v in data.items() if k != "narrative"},
+                              "is not a well-formed self_disclaimed lexicon (KeyError: 'narrative')"),
+        "bad regex": ({**data, "self_reference": ["(unclosed"]},
+                      "is not a well-formed self_disclaimed lexicon (re.error: missing ), unterminated subpattern at position 0)"),
+        "wrongly typed guards": ({**data, "guards": ["a list"]},
+                                 "is not a well-formed self_disclaimed lexicon (AttributeError: "),
+        "another instrument": ({**data, "instrument": "other"}, "not a self_disclaimed lexicon"),
+    }
+    for case, (content, message) in cases.items():
+        for stale in tmp_path.glob("*.yaml"):
+            stale.unlink()
+        (tmp_path / "self_disclaimed_v1.yaml").write_text(yaml.safe_dump(content, sort_keys=False),
+                                                         encoding="utf-8")
+        _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+        (tmp_path / "self_disclaimed_v9.yaml").write_text("draft: true\n", encoding="utf-8")
+        with pytest.raises(ValueError, match=re.escape(message)):
+            sd.load_registered(directory=tmp_path)
+        problems = sd.check_registry(tmp_path)
+        assert len(problems) == 2, (case, problems)
+        assert message in problems[0], (case, problems)
+        assert problems[1] == f"self_disclaimed_v9.yaml is in {tmp_path} but not registered", case
+
+
+def test_load_registered_names_a_file_outside_the_lexicon_directory_by_its_own_path(tmp_path):
+    """#3901: only a file in LEXICON_DIR takes the repository-relative name;
+    a registered file in another directory is named where it is, never as
+    the shipped file (the #3889 false identity, on `load_registered`)."""
+    (tmp_path / "self_disclaimed_v1.yaml").write_bytes(sd.lexicon_path(1).read_bytes())
+    _registry(tmp_path, {1: "self_disclaimed_v1.yaml"})
+    loaded = sd.load_registered(directory=tmp_path)
+    assert loaded.describe() == {"path": str(tmp_path / "self_disclaimed_v1.yaml"), "version": 1,
+                                 "sha256": PINS[1]}
+
+
 def test_a_file_in_the_lexicon_directory_loads_only_through_its_pin(tmp_path, monkeypatch):
     """#3040: `load_lexicon` on a file in LEXICON_DIR goes through the
     registry, so an unregistered or edited file there is refused; a file
