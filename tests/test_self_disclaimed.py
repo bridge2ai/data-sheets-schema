@@ -15,6 +15,8 @@ from click.testing import CliRunner
 from data_sheets_schema import self_disclaimed as sd
 
 LEXICON = sd.load_lexicon()
+#: v1 stays loadable for replay; this code reads it as v1's own code did.
+V1 = sd.load_lexicon(sd.lexicon_path(1))
 
 #: Pins on the lexicon's exact bytes, one per version. Changing the file
 #: without a version bump fails here; so does bumping without a pin. v1 was
@@ -28,8 +30,10 @@ LEXICON = sd.load_lexicon()
 #:   626edd8708b519819c3be5f999e638cd18467b5ea857b1beb2fd2b854ab0f0a6 (5705a4f3f, review round 4)
 #:   d1628c7e4b574b40c59113969747fc17b7155205668a1d48f28fbeb684994f4c (9607a6416, review round 5)
 #: Every output names the sha it ran under, and no committed output, record
-#: or note cites any of them (#3161).
-LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a"}
+#: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
+#: new file beside v1, whose bytes are unchanged.
+LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
+                2: "6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a"}
 
 
 def record(**containers):
@@ -330,9 +334,13 @@ def test_a_singular_address_or_a_department_is_an_attribute(container, text, ter
 
 
 def test_the_study_design_is_not_the_members_presence():
+    """v1 guards it as the study's design; v2's subject scope finds no
+    member subject first (#3131)."""
     rec = record(instances=[{"name": "Entry", "description": "The study is prospective."}])
-    out = sd.scan(rec, LEXICON)
+    out = sd.scan(rec, V1)
     assert out["flags"] == [] and [g["guard"] for g in out["guarded"]] == ["design"]
+    assert outcomes("instances", "The study is prospective.") == [
+        ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
 
 
 def test_only_the_members_own_narrative_leaves_are_read():
@@ -355,9 +363,9 @@ def test_nested_dataset_containers_are_read_with_their_pointer():
 
 
 # ------------------------------------------------------------------ scoping
-def outcomes(container, text, name="Entry"):
+def outcomes(container, text, name="Entry", lexicon=LEXICON, **leaves):
     """Each cue match in one member's description: (rule, outcome, reason)."""
-    out = sd.scan(record(**{container: [{"name": name, "description": text}]}), LEXICON)
+    out = sd.scan(record(**{container: [{"name": name, **leaves, "description": text}]}), lexicon)
     rows = [(h["rule"], "flag", None) for f in out["flags"] for h in f["hits"]]
     rows += [(g["rule"], "guarded", g["guard"]) for g in out["guarded"]]
     return rows + [(o["rule"], "out_of_scope", o["reason"]) for o in out["out_of_scope"]]
@@ -678,11 +686,160 @@ def test_a_pronoun_that_is_not_the_cues_subject_is_not_a_self_reference(containe
 
 
 def test_a_none_scope_cue_counts_whatever_its_subject():
-    """#3083: presence.prospective_predicate has no subject condition, so it
-    flags a caveat about something else that is prospective. Pinned so a
-    change to that contract is a deliberate one."""
-    assert outcomes("instances", "The consent forms are prospective.") == [
+    """#3083: in v1 presence.prospective_predicate has no subject condition,
+    so it flags a caveat about something else that is prospective. Pinned so
+    a change to that contract is a deliberate one: v2 is that change (#3131)."""
+    assert outcomes("instances", "The consent forms are prospective.", lexicon=V1) == [
         ("presence.prospective_predicate", "flag", None)]
+    assert outcomes("instances", "The consent forms are prospective.") == [
+        ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
+
+
+V3_SPLIT = "Both statements are prospective on that page, and neither gives split sizes or a splitting procedure."
+
+
+@pytest.mark.parametrize("container,text,scope", [
+    # the v3 direct canary's final /splits/0 split_details, verbatim (#3131)
+    ("splits", V3_SPLIT, "statements"),
+    ("splits", "The descriptions are all prospective.", "descriptions"),
+    ("splits", "Mentions of the holdout set remain prospective.", "holdout set"),
+    ("splits", "References to this split are prospective.", "this split"),
+    ("splits", "Descriptions of this split are prospective.", "this split"),
+    ("splits", "This split remains prospective.", "This split"),
+    ("instances", "It is prospective.", "It"),
+    ("splits", "The holdout set is still prospective.", "holdout set"),
+    ("variables", "Per the protocol, the measures are prospective.", "measures"),
+])
+def test_a_subject_cue_counts_a_statement_self_or_presence_subject(container, text, scope):
+    """#3131: `presence.prospective_predicate` has `subject` scope in v2. A
+    self-reference, a source-statement subject (with a topic that is the
+    member) or a presence-term subject licenses it."""
+    out = sd.scan(record(**{container: [{"name": "Entry", "description": text}]}), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("container,text,reason", [
+    # the three false-positive shapes #3131 names, all flagged by v1
+    ("instances", "The consent process is prospective.", "no_member_subject"),
+    ("splits", "Enrollment of the pediatric arm remains prospective.", "no_member_subject"),
+    ("variables", "The follow-up schedule is prospective.", "no_member_subject"),
+    # a self-reference that owns the subject is not the subject
+    ("splits", "This split's schedule is prospective.", "no_member_subject"),
+    ("splits", "The consent process for this split is prospective.", "no_member_subject"),
+    # a statement about something else
+    ("splits", "Statements about the consent process are prospective.", "statement_about_other"),
+    ("instances", "Descriptions of the consent materials are prospective.", "statement_about_other"),
+])
+def test_a_subject_cue_about_something_else_is_out_of_scope(container, text, reason):
+    assert outcomes(container, text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
+    assert outcomes(container, text) == [("presence.prospective_predicate", "out_of_scope", reason)], text
+
+
+def test_a_subject_cue_on_an_amount_is_guarded():
+    """#3131: the pattern's object is its subject, so "split sizes" is an
+    amount, not the split's presence."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": "The split sizes are prospective."}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "sizes")]
+
+
+def test_the_subject_scope_needs_a_statement_subject_block():
+    with pytest.raises(ValueError, match="no statement_subject"):
+        edited_lexicon(lambda d: d.pop("statement_subject"))
+    with pytest.raises(ValueError, match="`topic` group"):
+        edited_lexicon(lambda d: d["statement_subject"].update(topic=r"\s+about\s+.+"))
+    with pytest.raises(ValueError, match="outside a presence container"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.prospective_predicate").update(
+            kinds=["person_role", "presence"]))
+
+
+# ------------------------------------------------------ another item (#3244)
+EXTERNAL = "The external test set is described as planned rather than as a released split."
+
+
+@pytest.mark.parametrize("leaves", [
+    {"name": "Internal validation set"},
+    {"name": "Internal test set"},
+    {"name": "Validation split"},
+    {"name": "Entry", "id": "https://example.org/ds#internal_validation"},
+    {"name": "Entry", "id": "doi:10.1234/x#training-split"},
+])
+def test_a_presence_term_whose_qualifier_disagrees_with_the_member_is_another_item(leaves):
+    """#3244: the member's name tokens or id fragment name a qualifier on an
+    axis the presence noun phrase also names, and none is shared."""
+    rows = outcomes("splits", EXTERNAL, **leaves)
+    assert rows == [("presence.recorded_as_planned", "out_of_scope", "other_qualified_item"),
+                    ("presence.contrast_released", "out_of_scope", "other_qualified_item")], leaves
+    assert outcomes("splits", EXTERNAL, lexicon=V1, **leaves) == [
+        ("presence.recorded_as_planned", "flag", None), ("presence.contrast_released", "flag", None)]
+
+
+@pytest.mark.parametrize("leaves", [
+    {"name": "External test set"},
+    {"name": "Holdout set"},          # names test/holdout: shared on that axis
+    {"name": "Entry"},                # names no qualifier: v1's reading
+    {"name": "Entry", "id": "https://example.org/ds"},
+    {},
+])
+def test_a_presence_term_that_agrees_or_cannot_be_told_apart_still_licenses(leaves):
+    assert outcomes("splits", EXTERNAL, **leaves) == [
+        ("presence.recorded_as_planned", "flag", None), ("presence.contrast_released", "flag", None)], leaves
+
+
+def test_another_qualified_item_reported_or_in_the_clause_does_not_license():
+    """#3244: in the `item` a cue reports, and as the presence term the
+    clause fallback would read."""
+    out = sd.scan(record(splits=[{"name": "Training split",
+                                  "description": "No source reports the test set as available."}]), LEXICON)
+    assert [(r["reason"], r["term"]) for r in out["out_of_scope"]] == [("other_qualified_item", "the test set")]
+    assert outcomes("splits", "The data are recorded as planned for the external test set.",
+                    name="Internal validation set") == [
+        ("presence.recorded_as_planned", "out_of_scope", "no_self_or_presence_term")]
+    # the member's own name is a self-reference and blanked, so the agreeing
+    # phrase is another spelling of it
+    assert outcomes("splits", "The data are recorded as planned for the internal validation set.",
+                    name="Internal validation split") == [("presence.recorded_as_planned", "flag", None)]
+
+
+def test_the_item_qualifiers_block_is_validated():
+    with pytest.raises(ValueError, match="two or more alternatives"):
+        edited_lexicon(lambda d: d["item_qualifiers"].update(axes=[["external"]]))
+    with pytest.raises(ValueError, match="nonnegative integer"):
+        edited_lexicon(lambda d: d["item_qualifiers"].update(words=-1))
+
+
+# ------------------------------------------- a self-reference in the item (#3261)
+@pytest.mark.parametrize("text,scope", [
+    ("No source reports this split as available.", "this split"),
+    ("No document lists it as released.", "it"),
+    ("None of the pages describes this partition as complete.", "this partition"),
+])
+def test_a_self_reference_in_the_reported_item_licenses_the_cue(text, scope):
+    """#3261: `presence.none_reports_available` declares
+    `self_reference_in: [item]` in v2."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.none_reports_available", scope)], text
+    assert outcomes("splits", text, lexicon=V1) == [
+        ("presence.none_reports_available", "out_of_scope", "no_self_or_presence_term")]
+
+
+@pytest.mark.parametrize("text,rule", [
+    # the #3230 comma-rule case stays out of scope
+    ("For this split, the data are recorded as planned.", "presence.recorded_as_planned"),
+    # a self-reference in the item that owns what is reported
+    ("No source reports the consent form for this split as available.", "presence.none_reports_available"),
+])
+def test_a_self_reference_outside_the_reported_item_or_owning_it_does_not(text, rule):
+    assert outcomes("splits", text) == [(rule, "out_of_scope", "no_self_or_presence_term")]
+
+
+def test_self_reference_in_is_validated():
+    with pytest.raises(ValueError, match="outside item"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").update(
+            self_reference_in=["cue"]))
+    with pytest.raises(ValueError, match="outside presence scope"):
+        edited_lexicon(lambda d: pattern_row(d, "presence.none_reports_available").update(scope="self"))
 
 
 @pytest.mark.parametrize("container,text", [
@@ -899,10 +1056,11 @@ def test_a_resolver_url_and_its_curie_are_one_identity():
 
 def test_two_originals_followed_to_one_final_entry_are_not_both_retained():
     """#3265: keyless entries both joined by overlap to the one survivor.
-    Neither identity is confirmed by a key, so neither is retained."""
+    Neither identity is confirmed by a key, so under v1 neither is retained
+    (v2 lets a strictly greater overlap decide, #3273, below)."""
     one = {"split_details": "This split is recorded as a planned provision.", "size": "10"}
     two = {"split_details": one["split_details"], "size": "20"}
-    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=LEXICON)
+    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=V1)
     assert [(r["path"], r["classification"], r["identity_basis"]) for r in out["lexicon_diff"]["rows"]] == [
         ("/splits/0", "identity_unresolved", "shared_final_entry"),
         ("/splits/1", "identity_unresolved", "shared_final_entry")]
@@ -911,6 +1069,34 @@ def test_two_originals_followed_to_one_final_entry_are_not_both_retained():
     b = {"name": "Split B", "split_details": one["split_details"]}
     kept = sd._resolve_all(record(splits=[a, b]), record(splits=[{**a, "size": "1"}]), LEXICON)
     assert kept == {("splits", 0): ((("splits", 0)), "same"), ("splits", 1): (None, "identity_conflict")}
+
+
+def test_two_keyless_originals_on_one_final_entry_resolve_by_strictly_greater_overlap():
+    """#3273: in v2 the keyless member whose scalar leaves overlap the
+    survivor strictly more keeps it; v1 left both unresolved (above), and a
+    tie still does."""
+    one = {"split_details": "This split is recorded as a planned provision.", "size": "10"}
+    two = {"split_details": one["split_details"], "size": "20"}
+    out = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=LEXICON)
+    assert [(r["path"], r["classification"], r["final_path"], r["identity_basis"])
+            for r in out["lexicon_diff"]["rows"]] == [
+        ("/splits/0", "self_disclaimed_retained", "/splits/0", "shared_final_entry_by_overlap"),
+        ("/splits/1", "identity_unresolved", None, "shared_final_entry")]
+    v1 = sd.diff(record(splits=[one, two]), record(splits=[dict(one)]), lexicon=V1)
+    assert {r["identity_basis"] for r in v1["lexicon_diff"]["rows"]} == {"shared_final_entry"}
+    # the member further down wins as well; a tie leaves both unresolved
+    moved = sd._resolve_all(record(splits=[two, one]), record(splits=[dict(one)]), LEXICON)
+    assert moved == {("splits", 0): (None, "shared_final_entry"),
+                     ("splits", 1): (("splits", 0), "shared_final_entry_by_overlap")}
+    tie = sd._resolve_all(record(splits=[{**one, "size": "20"}, {**one, "size": "30"}]),
+                          record(splits=[dict(one)]), LEXICON)
+    assert set(tie.values()) == {(None, "shared_final_entry")}
+
+
+def test_shared_final_entry_resolve_by_is_validated():
+    for bad in ([], ["scalar_overlap"], ["identity_keys", "size"], ["identity_keys", "identity_keys"]):
+        with pytest.raises(ValueError, match="resolve_by"):
+            edited_lexicon(lambda d: d["shared_final_entry"].update(resolve_by=bad))
 
 
 def test_a_container_emptied_or_nulled_in_the_final_is_removed():
@@ -942,8 +1128,21 @@ def test_lexicon_bytes_are_pinned_per_version():
     assert hashlib.sha256(raw).hexdigest() == LEXICON_PINS[LEXICON.version], \
         "the lexicon changed without a version bump"
     assert sd.LEXICON_PATH.name == f"self_disclaimed_v{LEXICON.version}.yaml"
+    assert LEXICON.version == max(LEXICON_PINS), "the loader reads the newest version"
     assert LEXICON.describe() == {"path": sd.LEXICON_RESOURCE, "version": LEXICON.version,
                                   "sha256": LEXICON_PINS[LEXICON.version]}
+
+
+def test_every_lexicon_version_is_kept_pinned_and_loadable():
+    """#3131: an earlier version stays byte for byte and loads for replay,
+    named by its repository-relative spelling."""
+    files = sorted(p.name for p in sd.LEXICON_DIR.glob("*.yaml"))
+    assert files == [f"self_disclaimed_v{v}.yaml" for v in sorted(LEXICON_PINS)]
+    for version, sha in LEXICON_PINS.items():
+        loaded = sd.load_lexicon(sd.lexicon_path(version))
+        assert loaded.describe() == {"path": f"src/data_sheets_schema/container_lexicons/self_disclaimed_v{version}.yaml",
+                                     "version": version, "sha256": sha}
+    assert V1.resolve_by == ("identity_keys",) and not V1._axes and V1._statement is None
 
 
 def edited_lexicon(edit):
@@ -977,8 +1176,9 @@ def test_the_assignment_owner_block_is_validated():
         edited_lexicon(lambda d: d["assignment_owner"].update(after=r"\s+(?:of|for)\s+"))
 
 
-def test_lexicon_is_generic():
-    text = sd.LEXICON_PATH.read_text(encoding="utf-8").lower()
+@pytest.mark.parametrize("version", sorted(LEXICON_PINS))
+def test_lexicon_is_generic(version):
+    text = sd.lexicon_path(version).read_text(encoding="utf-8").lower()
     for token in ("chorus", "ai-readi", "ai_readi", "voice", "cm4ai", "bridge2ai", "fairhub",
                   "physionet", "reporter", "nih", "webinar"):
         assert token not in text, token
@@ -1024,7 +1224,7 @@ def test_cli_prints_json_and_never_gates(tmp_path):
     assert result.exit_code == 0, result.output
     out = json.loads(result.output)
     assert (out["instrument"], out["gating"]) == (sd.INSTRUMENT, False)
-    assert out["lexicon"]["sha256"] == LEXICON_PINS[1]
+    assert out["lexicon"]["sha256"] == LEXICON_PINS[LEXICON.version]
     assert out["inputs"]["original"]["sha256"] == hashlib.sha256(original.read_bytes()).hexdigest()
     assert out["counts"]["lexicon_diff"]["self_disclaimed_retained"] == 1
     assert out["counts"]["role_predicate_diff"]["role_predicate_retained"] == 1

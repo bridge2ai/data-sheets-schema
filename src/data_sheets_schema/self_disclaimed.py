@@ -4,7 +4,9 @@ A read-only lint that never gates. Each list member of a registered container
 is read: `creators`, `maintainers` and `data_collectors` record a role, and
 `variables`, `instances` and `splits` record that something is present in the
 released data. The lint reads the member's own narrative leaves against a
-versioned lexicon (`container_lexicons/self_disclaimed_v1.yaml`). It flags the member
+versioned lexicon (`container_lexicons/self_disclaimed_v2.yaml`; v1 beside it
+still loads, and this code reads it as v1 did, since every rule v2 adds is
+declared in v2's file). It flags the member
 when one of those leaves says the source does not establish that role or
 presence: check (a). The lexicon is scoped, per pattern. A `role` cue counts
 only where its clause names the container's own role, a role verb or a
@@ -25,13 +27,20 @@ where its clause names the container's own presence term outside the
 cue's own words and outside the member's self-references: "Unlike the
 planned splits for the next release, this split is complete" names no
 presence term but the one `presence.planned_element` spells (#3230). A
-presence term with no other-marker ("The external test set is described
-as planned") is taken as possibly the member's, since the lint does not
-know which item the member is. A `none` cue has
-no further condition: `role.not_necessarily` names the container's role in
-its cue, but `presence.prospective_predicate` counts whatever its clause's
-subject is, so "the consent process is prospective" in an instance's prose
-is flagged like "both statements are prospective". A clause whose words
+pattern that declares `self_reference_in: [item]` also counts on a
+self-reference inside the item it reports: "No source reports this split
+as available" (#3261). A presence term with no other-marker ("The external
+test set is described as planned") is taken as possibly the member's
+unless its qualifier disagrees with the member's identity: in the prose of
+a member named "Internal validation set" it is another item, on the
+lexicon's external/internal and training/validation/test axes (#3244). A
+`subject` cue (`presence.prospective_predicate`, #3131) counts where a
+self-reference that owns nothing precedes it, as a `self` cue would, or
+where its subject names a source statement ("Both statements are
+prospective on that page") or the container's presence term; "The consent
+process is prospective" is out of scope. A `none` cue has no further
+condition: `role.not_necessarily` names the container's role in its cue.
+A clause whose words
 name other people or organisations ("those individuals") never counts. In
 a presence container, nor does a cue whose reported item names other items
 of the container's kind ("Two other variables are not part of the public
@@ -94,7 +103,9 @@ classifies it:
   conflicting identity keys (`identity_conflict`: an overlap join on a
   caveat two people share is not the same person), or another original
   member was followed to the same final entry and it is not the one whose
-  keys agree with it (`shared_final_entry`, #3265).
+  keys agree with it (`shared_final_entry`, #3265). Where no member's keys
+  agree, the one whose scalar leaves overlap the entry strictly more than
+  every other's keeps it (`shared_final_entry_by_overlap`, #3273).
 - `self_disclaimed_retained`: none of the above.
 
 A finding that names only the member's prose, a count or an affiliation is
@@ -119,14 +130,23 @@ from typing import Any, Iterator
 
 import yaml
 
-INSTRUMENT = "self_disclaimed v1 (#2913)"
+INSTRUMENT = "self_disclaimed v2 (#2913, #3131)"
 # Not under lexicons/: that directory is the pattern-lexicon registry (#2919),
 # whose check refuses any file it does not register, and this file is a
 # container registry with its own shape and its own pins.
-LEXICON_PATH = Path(__file__).parent / "container_lexicons" / "self_disclaimed_v1.yaml"
-LEXICON_RESOURCE = "src/data_sheets_schema/container_lexicons/self_disclaimed_v1.yaml"
+LEXICON_DIR = Path(__file__).parent / "container_lexicons"
+LEXICON_RESOURCE_DIR = "src/data_sheets_schema/container_lexicons"
+#: The registered lexicon. Every earlier version stays in LEXICON_DIR and
+#: loads (`lexicon_path(1)`): the rules a later version adds are declared in
+#: its file, so an earlier file read by this code reproduces its output.
+LEXICON_PATH = LEXICON_DIR / "self_disclaimed_v2.yaml"
+LEXICON_RESOURCE = f"{LEXICON_RESOURCE_DIR}/{LEXICON_PATH.name}"
 KINDS = ("person_role", "presence")
-SCOPES = ("role", "presence", "self", "none")
+SCOPES = ("role", "presence", "self", "subject", "none")
+# Where a pattern may also find a self-reference inside its cue (#3261).
+SELF_IN_PARTS = ("item",)
+# How the diff resolves members followed to one final entry (#3273).
+RESOLVE_BY = ("identity_keys", "scalar_overlap")
 # What a guard reads, and where a pattern's object lies (the lexicon's
 # `reads` and `object` keys; see its guards comment).
 GUARD_READS = ("clause", "before_cue", "cue", "after_phrase", "object")
@@ -169,6 +189,7 @@ class Pattern:
     scope: str
     guards: tuple
     object: tuple = ()  # where the thing the cue says is unstated lies (OBJECT_PARTS)
+    self_in: tuple = ()  # cue parts where a self-reference also licenses it (SELF_IN_PARTS)
 
 
 @dataclass(frozen=True)
@@ -230,6 +251,38 @@ class Lexicon:
         self._owner_held_in = _word(owner["held_in_words"])
         if self._owner_after.groups != 1:
             raise ValueError("assignment_owner.after must capture its preposition as its one group")
+        # Optional blocks a later version declares; absent, the code reads
+        # the lexicon as v1 did.
+        self._statement = self._statement_topic = None
+        statement = data.get("statement_subject")
+        if statement is not None:
+            self._statement = _word(statement["nouns"])
+            self._statement_topic = re.compile(statement["topic"], re.I)
+            if "topic" not in self._statement_topic.groupindex:
+                raise ValueError("statement_subject.topic must name its topic as a `topic` group")
+        self._identity_fields: tuple = ()
+        self._identity_id_fields: tuple = ()
+        self._axes: tuple = ()
+        self._qualifier_words = 0
+        qualifiers = data.get("item_qualifiers")
+        if qualifiers is not None:
+            if type(qualifiers.get("words")) is not int or qualifiers["words"] < 0:
+                raise ValueError("item_qualifiers.words must be a nonnegative integer")
+            axes = qualifiers.get("axes")
+            if not isinstance(axes, list) or not axes or any(
+                    not isinstance(a, list) or len(a) < 2 for a in axes):
+                raise ValueError("item_qualifiers.axes must be a nonempty list of axes of two or more alternatives")
+            self._axes = tuple(tuple(_word([alt]) for alt in axis) for axis in axes)
+            self._identity_fields = tuple(qualifiers.get("identity_fields") or ())
+            self._identity_id_fields = tuple(qualifiers.get("identity_id_fields") or ())
+            self._qualifier_words = qualifiers["words"]
+        shared = data.get("shared_final_entry") or {"resolve_by": ["identity_keys"]}
+        resolve_by = shared.get("resolve_by")
+        if (not isinstance(resolve_by, list) or not resolve_by or resolve_by[0] != "identity_keys"
+                or set(resolve_by) - set(RESOLVE_BY) or len(set(resolve_by)) != len(resolve_by)):
+            raise ValueError(f"shared_final_entry.resolve_by must open on identity_keys and name only "
+                             f"{', '.join(RESOLVE_BY)}")
+        self.resolve_by = tuple(resolve_by)
         patterns = []
         for row in data["patterns"]:
             kinds = frozenset(row["kinds"])
@@ -244,8 +297,19 @@ class Lexicon:
                 raise ValueError(f"pattern {row['id']} has a guard that reads its object but declares none")
             if "item" in parts and "(?P<item>" not in row["cue"]:
                 raise ValueError(f"pattern {row['id']} declares its object in an `item` group its cue lacks")
+            self_in = tuple(row.get("self_reference_in") or ())
+            if set(self_in) - set(SELF_IN_PARTS):
+                raise ValueError(f"pattern {row['id']} reads a self-reference outside {', '.join(SELF_IN_PARTS)}")
+            if "item" in self_in and "(?P<item>" not in row["cue"]:
+                raise ValueError(f"pattern {row['id']} reads a self-reference in an `item` group its cue lacks")
+            if self_in and row["scope"] != "presence":
+                raise ValueError(f"pattern {row['id']} reads a self-reference in its cue outside presence scope")
+            if row["scope"] == "subject" and self._statement is None:
+                raise ValueError(f"pattern {row['id']} has subject scope and the lexicon no statement_subject")
+            if row["scope"] == "subject" and kinds != {"presence"}:
+                raise ValueError(f"pattern {row['id']} has subject scope outside a presence container")
             patterns.append(Pattern(row["id"], row["class"], kinds, row["cue"],
-                                    row["scope"], tuple(row["guards"]), parts))
+                                    row["scope"], tuple(row["guards"]), parts, self_in))
         if len({p.id for p in patterns}) != len(patterns):
             raise ValueError("pattern ids must be unique")
         self.patterns = tuple(patterns)
@@ -282,11 +346,17 @@ class Lexicon:
         return {"path": self.path, "version": self.version, "sha256": self.sha256}
 
 
+def lexicon_path(version: int) -> Path:
+    """The file of a lexicon version in LEXICON_DIR, the current one or an
+    earlier one kept for replay."""
+    return LEXICON_DIR / f"self_disclaimed_v{version}.yaml"
+
+
 def load_lexicon(path: Path = LEXICON_PATH) -> Lexicon:
-    """The registered lexicon, or another lexicon file a test names. The
-    registered one is named by its repository-relative spelling wherever
-    the package is installed."""
-    shown = LEXICON_RESOURCE if path == LEXICON_PATH else str(path)
+    """The registered lexicon, an earlier version of it (`lexicon_path`), or
+    another lexicon file a test names. A file in LEXICON_DIR is named by its
+    repository-relative spelling wherever the package is installed."""
+    shown = f"{LEXICON_RESOURCE_DIR}/{path.name}" if path.parent == LEXICON_DIR else str(path)
     return Lexicon(path.read_bytes(), path=shown)
 
 
@@ -577,6 +647,80 @@ def _presence_text(pattern, masked: str, c0: int, c1: int, m) -> str:
     return masked[c0:m.start()] + " " * (m.end() - m.start()) + masked[m.end():c1]
 
 
+def _identity_text(lexicon, member: dict) -> str:
+    """The member's identifying words for `item_qualifiers` (#3244): its
+    `identity_fields` and the fragment of its `identity_id_fields` (after
+    the last `#`, `/` or `:`), punctuation and underscores read as spaces,
+    so `internal_validation` and `#internal-validation` name `internal`."""
+    words = [member.get(k) for k in lexicon._identity_fields]
+    words += [re.split(r"[#/:]", member[k])[-1] for k in lexicon._identity_id_fields
+              if isinstance(member.get(k), str)]
+    return re.sub(r"[\W_]+", " ", " ".join(w for w in words if isinstance(w, str)))
+
+
+def _qualifiers(lexicon, text: str) -> tuple[frozenset, ...]:
+    """Per axis, the alternatives `text` names."""
+    return tuple(frozenset(i for i, rx in enumerate(axis) if rx.search(text)) for axis in lexicon._axes)
+
+
+def _presence_phrases(lexicon, container, member: dict, text: str) -> Iterator[tuple[str, str, bool]]:
+    """Each presence noun phrase in `text` (the presence term with at most
+    `item_qualifiers.words` words before it), its presence term, and whether
+    it names another item than the member's: on some axis both it and the
+    member's identity name an alternative and none is shared (#3244). Never
+    another's when the lexicon declares no `item_qualifiers` or the member's
+    identity names no qualifier."""
+    mine = _qualifiers(lexicon, _identity_text(lexicon, member)) if lexicon._axes else ()
+    for found in container.presence_scope.finditer(text):
+        lead = re.search(rf"(?:[\w-]+\s+){{0,{lexicon._qualifier_words}}}$", text[:found.start()])
+        phrase = (lead.group(0) if lead else "") + found.group(0)
+        other = any(p and q and not p & q for p, q in zip(_qualifiers(lexicon, phrase), mine))
+        yield phrase, found.group(0), other
+
+
+def _other_qualified_item(lexicon, container, member: dict, text: str) -> str | None:
+    """The first presence noun phrase in `text` that names another item than
+    the member's: "the external test set" in the prose of a member named
+    "Internal validation set" (#3244)."""
+    return next((" ".join(phrase.split()) for phrase, _t, other
+                 in _presence_phrases(lexicon, container, member, text) if other), None)
+
+
+def _member_presence_term(lexicon, container, member: dict, text: str) -> str | None:
+    """The first presence term in `text` that does not name another item,
+    for a `presence` or `subject` cue's licence."""
+    return next((term for _p, term, other in _presence_phrases(lexicon, container, member, text)
+                 if not other), None)
+
+
+def _subject_scope(lexicon, container, member, selves, sentence: str,
+                   c0: int, c1: int, m) -> tuple[str, str | None]:
+    """(`scope`, term) for a `subject` cue with no self-reference of its own
+    (#3131): its subject names a source statement ("Both statements are
+    prospective on that page"), with any topic ("statements about ...",
+    "descriptions of this split") holding a self-reference or a presence
+    term, or it names the container's presence term; else (`out_of_scope`
+    reason, term). The terms are read with the member's self-references
+    blanked, a topic's self-reference on the sentence as written."""
+    raw = _parts(sentence, c0, c1, m, sentence)["subject"]
+    subject = _parts(_masked(sentence, selves), c0, c1, m, sentence)["subject"]
+    noun = lexicon._statement.search(subject)
+    if noun is not None:
+        # located on the unmasked subject (the same offsets): a blanked
+        # self-reference would read as whitespace the topic pattern skips
+        topic = lexicon._statement_topic.match(raw, noun.end())
+        if topic is None:
+            return "scope", noun.group(0)
+        t0, t1 = topic.span("topic")
+        term = (_search(selves, raw[t0:t1])
+                or _member_presence_term(lexicon, container, member, subject[t0:t1]))
+        if term:
+            return "scope", term
+        return "statement_about_other", " ".join(raw[noun.start():].split())
+    term = _member_presence_term(lexicon, container, member, subject)
+    return ("scope", term) if term else ("no_member_subject", None)
+
+
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     """One cue match: a flag hit, a guarded hit, or out of scope, with why."""
     c0, c1 = _clause(sentence, m.start())
@@ -601,6 +745,12 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         other = _search(lexicon._other_item, _item_text(pattern, parts))
         if other:
             return {**out, "outcome": "out_of_scope", "reason": "other_subject", "term": other}
+        # An item named with no other-marker whose qualifier disagrees with
+        # the member's identity: "the external test set" in the prose of
+        # the internal validation set (#3244).
+        other = _other_qualified_item(lexicon, container, member, _item_text(pattern, parts))
+        if other:
+            return {**out, "outcome": "out_of_scope", "reason": "other_qualified_item", "term": other}
     # The object read with only the member's possessor self-references
     # blanked ("this author's institution", "the email of this author"): a
     # self-reference that is itself the object ("does not name this
@@ -615,11 +765,26 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         out["scope"] = term
     elif pattern.scope == "presence":
         term = _self_reference(selves, sentence, c0, m.start())
+        if term is None and "item" in pattern.self_in:
+            # A self-reference that owns nothing inside the item the cue
+            # reports: "No source reports this split as available" (#3261).
+            term = _search(selves, objects["item"])
         if term is None:
-            found = container.presence_scope.search(_presence_text(pattern, masked, c0, c1, m))
-            term = found.group(0) if found else None
+            term = _member_presence_term(lexicon, container, member,
+                                         _presence_text(pattern, masked, c0, c1, m))
         if term is None:
             return {**out, "outcome": "out_of_scope", "reason": "no_self_or_presence_term"}
+        out["scope"] = term
+    elif pattern.scope == "subject":
+        # A self-reference that owns nothing, read as a `self` cue reads it:
+        # "This split remains prospective", not "This split's schedule is
+        # prospective" (#3131).
+        owners = _possessors_blanked(sentence, selves)
+        term = _self_reference(selves, owners, c0, m.start())
+        if term is None:
+            verdict, term = _subject_scope(lexicon, container, member, selves, sentence, c0, c1, m)
+            if verdict != "scope":
+                return {**out, "outcome": "out_of_scope", "reason": verdict, **({"term": term} if term else {})}
         out["scope"] = term
     elif pattern.scope == "self":
         term = _self_reference(selves, sentence, c0, m.start())
@@ -825,13 +990,36 @@ def _follow(tokens: tuple, original: Any, final: Any) -> tuple[tuple | None, str
     return None, moved["basis"]
 
 
+def _entry_at(record: Any, tokens: tuple) -> Any:
+    for t in tokens:
+        record = record[t]
+    return record
+
+
+def _strongest_overlap(group: list[tuple], where: tuple, original: Any, final: Any) -> tuple | None:
+    """The member of `group` whose scalar leaves (`receipts._scalar_pairs`)
+    overlap the final entry at `where` strictly more than every other
+    member's, or None on a tie or when none overlaps (#3273)."""
+    from data_sheets_schema.receipts import _scalar_pairs
+    entry = _scalar_pairs(_entry_at(final, where))
+    scores = [len(_scalar_pairs(_entry_at(original, t)) & entry) for t in group]
+    best = max(scores)
+    if best == 0 or scores.count(best) > 1:
+        return None
+    return group[scores.index(best)]
+
+
 def _resolve_all(original: Any, final: Any, lexicon: Lexicon) -> dict[tuple, tuple[tuple | None, str]]:
     """`_follow` for every member of the original, then one survivor per
     final entry. Where two original members are followed to the same final
     entry, the one whose identity keys agree with it at every list step
-    keeps it; every other, and all of them when not exactly one agrees, is
-    `identity_unresolved` with basis `shared_final_entry` (#3265): two
-    distinct entries cannot both be retained as one."""
+    keeps it. Where none agrees and the lexicon resolves by
+    `scalar_overlap` (#3273), the one whose scalar leaves overlap the entry
+    strictly more than every other's keeps it, with basis
+    `shared_final_entry_by_overlap`. Every other, and all of them when
+    neither rule picks one, is `identity_unresolved` with basis
+    `shared_final_entry` (#3265): two distinct entries cannot both be
+    retained as one."""
     out = {tokens: _follow(tokens, original, final) for tokens, _c, _m in members(original, lexicon)}
     landed: dict[tuple, list[tuple]] = {}
     for tokens, (where, _basis) in out.items():
@@ -842,8 +1030,13 @@ def _resolve_all(original: Any, final: Any, lexicon: Lexicon) -> dict[tuple, tup
             continue
         agreed = [t for t in group
                   if set(_identity_steps(t, where, original, final)) == {"agrees"}]
+        keep = agreed[0] if len(agreed) == 1 else None
+        if not agreed and "scalar_overlap" in lexicon.resolve_by:
+            keep = _strongest_overlap(group, where, original, final)
+            if keep is not None:
+                out[keep] = (where, "shared_final_entry_by_overlap")
         for tokens in group:
-            if len(agreed) != 1 or tokens != agreed[0]:
+            if tokens != keep:
                 out[tokens] = (None, "shared_final_entry")
     return out
 
