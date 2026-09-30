@@ -299,7 +299,30 @@ def origin(transcripts, receipt_file, full_file, as_json):
     every join after it is `&&` and the call succeeded. A piped,
     backgrounded, grouped or multi-line derive, one after `||` or followed
     by `;`, or a failed `&&` chain cannot be placed, unless the native
-    control denied the call, which then never ran. A relative `--full`
+    control denied the call, or the runtime did in `dontAsk` mode and its
+    terminal `result` lists the call, which then never ran. `timeout`,
+    `env` and `nice` wrappers are read through. Three kinds of part carrying
+    the words `derive core` cannot be placed: one that is neither a d4d call
+    it reads nor a program known only to read, such as a `bash -c` or an
+    `xargs` part; a reader part in a command where a later pipe feeds a
+    program not known only to read (`echo '... derive core ...' | bash`);
+    and, in a command with a substitution anywhere, every such part. The words are matched after quote and escape
+    characters are removed (`bash -c 'd4d derive "core"'`), and `derive` followed by a word
+    supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` or any other replacement
+    string it sets, such as `-I%` or `-J %`, or the word xargs appends after a `derive` that
+    ends its command, redirections such as `2>&1` aside, or after a `derive` with a
+    redirection directly after it) cannot be placed either. A command the tokenizer
+    cannot split (an apostrophe in a heredoc body) is tested whole for the same
+    words, and a match cannot be placed, and so does a derive call with a
+    redirection among its words (`--full 2>/dev/null F`). Last, a command-wide
+    backstop: a call carrying more `derive` words than these rules gave
+    rows, whose raw text with quotes
+    and escapes removed carries the whole word `derive` anywhere (a
+    substitution, an assignment, a `cd` part, an `xargs` argument) beside a
+    `d4d`, `data_sheets_schema` or `$`-variable invocation, cannot be placed;
+    its cost is a false `unknown` (`grep 'd4d derive core' notes.md`). A
+    derive whose words are not on the command line (a script, an alias, a variable supplying
+    `derive` itself) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

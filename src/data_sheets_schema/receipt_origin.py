@@ -37,14 +37,55 @@ Phase 3 labels then go in slot order.
 Only a successful Write, paired with its tool_result by id, changes state.
 A Write the runtime refused (the unread-file wrapper, #2285) or that
 returned an error is listed and changes nothing, and so is a shell call
-the native control denied: it never ran (#3185). A `derive core` succeeded
+the native control denied: it never ran (#3185). So is one the runtime
+refused in `dontAsk` mode, but only where the transcript's terminal
+`result` event lists it under `permission_denials` with the call's own
+tool name and input (#3201); the refusal text alone is not evidence, and
+an uncorroborated one stays a possible change. A `derive core` succeeded
 only where its call's result carries the derive's own status (#3113). With
 every join in the command `&&` or `;`, the call's success or failure is the
 derive's when the derive is the last part, and its success alone is when
 every join after the derive is `&&` (a failure may be a later part's).
 Otherwise (piped, backgrounded, grouped, after `||`, followed by `;`, in a
 multi-line command, or a failed `&&` chain) the derive is ambiguous, unless
-the native control denied the call, which then never ran. A call the runtime
+the call was denied as above, and then never ran. A `timeout`, `env` or
+`nice` wrapper with options this reads, and an interpreter held in a
+variable (`$PY -m data_sheets_schema.cli`), are read through; any other
+part that carries the words `derive core` and is neither a d4d call of
+another subcommand nor a program known to read is a derive that cannot be
+placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
+option this does not read makes a part such a one (#3455). The words are matched after quote and escape
+characters are removed, as the shell running a nested string removes them
+(`bash -c 'd4d derive "core"'`), and `derive` followed by a word supplied
+at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397), as does
+one carrying any replacement string an `xargs` in the command sets (`-I%`,
+`-J %`, `-i`, `--replace`), and a `derive` that ends an `xargs` command
+setting none, where xargs appends the word (#3426) -- ends it once the
+shell's redirections are set aside (`2>&1`, `>log`, `< args`, #3453), and one with a
+redirection directly after it in an xargs command, whatever follows the
+redirection, since a quoted target holding spaces cannot be told from
+arguments there (`xargs d4d derive <<< "core ..."`, #3457). A command the
+tokenizer cannot split at all (an apostrophe in a here-document's body)
+is not read part by part: it is tested whole, quote characters removed,
+for the same words, and a match is a derive that cannot be placed (#3458),
+a reader's words included. So is a reader part that carries them where a
+pipe later in the command feeds a program not known to read (`echo '...
+derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
+substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
+carries them, readers and the recorder's `--phase` included: the parts
+inside a substitution are split out of it, so none can be shown not to be
+in one (#3385). A `derive core` call with a redirection among its words
+rather than after them (`--full 2>/dev/null F`) cannot be placed either
+(#3478). Last, a command-wide backstop (#3478-#3480): a call whose raw text
+carries more whole-word `derive`s than the rules above gave rows (so a
+`--help` row never accounts for a derive hidden beside it), where that text, quote and escape characters
+removed, carries the word `derive` as a whole word anywhere -- inside a
+substitution, an assignment, a `cd` part or an `xargs` argument included
+-- and also a `d4d`, `data_sheets_schema` or `$`-variable invocation, is
+one derive that cannot be placed. It does not depend on how the command
+is spelled, and its cost is a false `unknown` for a call that only
+mentions the word beside such an invocation (`grep 'd4d derive core'
+notes.md`, the recorder's `--phase 'derive core'`). A call the runtime
 backgrounded is ambiguous too: its result is the launch, not the end. A
 shell command is read as bash reads it: `#` starts a comment only at the
 start of a word, outside quotes (#3184), and a `cd`, `pushd` or `popd`
@@ -134,6 +175,12 @@ READ_ONLY_D4D = frozenset({("receipts", "check"), ("receipts", "invert"), ("rece
 #: The pinned native control's PreToolUse denial reason
 #: (`native_control.hook_output`): a call answered with it never ran.
 NATIVE_DENIAL_PREFIX = "Outside the registered tool policy: "
+#: The Claude Code runtime's own refusal of a Bash call in `dontAsk` mode, as
+#: `scripts/reference_rescore.py` (`denied_bash_calls`) reads it. The text
+#: alone is not evidence: a call answered with it counts as never run only
+#: where the transcript's terminal `result` event lists it (#3201).
+DONT_ASK_DENIAL_PREFIX = ("Permission to use Bash has been denied because Claude Code is running "
+                          "in don't ask mode.")
 #: Joins between the parts of a shell command after which the command's own
 #: status can still be the derive's (#3113).
 _SEQUENTIAL = frozenset({"&&", ";"})
@@ -149,6 +196,31 @@ NON_CHECKS = (
     "the command (exported earlier or inherited), or a hostname helper (`--hostname-bin`) set "
     "there: `rg` is read-only only when neither its arguments nor its own assignments set "
     "either (#3256, #3268)",
+    "a `derive core` run without the words `derive core` on the command line (a script, an "
+    "alias or function, a variable or substitution supplying the word `derive` itself (`d4d "
+    "$SUB`), `python -c` building the argument list, or a file that an earlier call wrote the "
+    "words into and a later call runs): such a derive is not seen, and the Phase 1 / Phase 3 "
+    "boundary is missed (#3137, #3384). The words are matched after quote and escape "
+    "characters are removed, and `derive` followed by a word supplied at run time (`derive "
+    "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
+    "placed (#3397), as does a word carrying any replacement string an `xargs` in the command "
+    "sets (`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`) and a `derive` ending an `xargs` "
+    "command that sets none, where xargs appends the word (#3426), redirections (`2>&1`, "
+    "`>log`, `< args`) aside, since they are the shell's (#3453), and a `derive` with a "
+    "redirection directly after it in an xargs command, whatever follows (#3457). A command "
+    "the tokenizer cannot split (an apostrophe in a here-document body) is tested whole, "
+    "quote characters removed, by the same rules (#3458). A derive call with a redirection "
+    "among its words (`--full 2>/dev/null F`) cannot be placed (#3478). Last, a command-wide "
+    "backstop (#3478-#3480): a call carrying more whole-word `derive`s than these rules gave "
+    "rows, whose raw text, quote and "
+    "escape characters removed, carries the word `derive` as a whole word anywhere (in a "
+    "substitution, an assignment, a `cd` part, an `xargs` argument) beside a `d4d`, "
+    "`data_sheets_schema` or `$`-variable invocation, is one derive that cannot be placed; its "
+    "cost is a false `unknown` (`grep 'd4d derive core' notes.md`, the recorder's `--phase "
+    "'derive core'`). So a word the shell builds some other way (a glob, `derive c*`), or one "
+    "xargs appends after a `derive` mid-command, is left to the backstop, and what no rule sees "
+    "is a command with no whole word `derive`, or with one but no such invocation (a script, "
+    "alias or program under another name: `run.sh derive core`)",
 )
 
 _ABSENT = object()
@@ -158,6 +230,22 @@ _PUNCT = frozenset("();<>|&")
 _CLEAN_PATH = re.compile(r"[A-Za-z0-9_./+@-]+")
 _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
+_VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
+_DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
+_DERIVE_CORE = re.compile(r"(?<![\w.-])derive\s+(core(?![\w.-])|[$`{])")
+#: Quote and escape characters, removed before the words are matched: the
+#: outer tokenizer removes only the outer level, so inside a nested shell or
+#: `eval` string `d4d derive "core"` still carries its quotes (#3397).
+_QUOTING = re.compile(r"[\"'\\]")
+#: A subcommand word spelled literally; anything else (`$SUB`, `{}`, a
+#: substitution) is supplied at run time.
+_LITERAL_WORD = re.compile(r"[A-Za-z0-9_-]+")
+#: The command-wide backstop (#3478-#3480): the word `derive` anywhere in a
+#: command, after quote and escape removal, and something that may invoke
+#: the CLI -- `d4d`, `data_sheets_schema`, or a `$` variable that may hold
+#: either.
+_DERIVE_WORD = re.compile(r"(?<![\w.-])derive(?![\w.-])")
+_INVOCATION = re.compile(r"(?<![\w.-])d4d(?![\w.-])|data_sheets_schema|\$\{?[A-Za-z_]")
 
 
 def _sha256(data: bytes) -> str:
@@ -349,19 +437,73 @@ def _denied(result: dict | None) -> bool:
     return isinstance(text, str) and text.startswith(NATIVE_DENIAL_PREFIX)
 
 
-def _derive_outcome(result: dict | None, basis: str) -> str:
+def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
+                     results: dict[str, dict]) -> set[str]:
+    """The Bash calls the runtime itself refused in `dontAsk` mode (#3201),
+    corroborated as `scripts/reference_rescore.py` corroborates them: the
+    call's own transcript ends in exactly one terminal `result` event, a
+    `success` with `is_error: false`, after the call's result; that event's
+    `permission_denials` lists the call once, with `tool_name` Bash and
+    `tool_input` equal to the call's input, a mapping whose `command` is a
+    string; and the call's result is an error whose content is a string
+    opening with the runtime's refusal. The refusal text without the
+    terminal listing is not evidence: a command can print it. The one
+    tool_use and one tool_result per id that `reference_rescore` requires
+    are required here by `_pair`: a duplicated id or a second result is a
+    reason, so the whole block is `unknown` (#2077) whatever the denials say."""
+    terminals: dict[int, list[tuple[int, dict]]] = defaultdict(list)
+    for t, n, event in events:
+        if event.get("type") == "result":
+            terminals[t].append((n, event))
+    by_id = {call["id"]: call for call in calls}
+    proven: set[str] = set()
+    for t, found in terminals.items():
+        if len(found) != 1:
+            continue
+        line, terminal = found[0]
+        denials = terminal.get("permission_denials")
+        if (terminal.get("subtype") != "success" or terminal.get("is_error") is not False
+                or not isinstance(denials, list)):
+            continue
+        # Only a string id is an id, as `reference_rescore` takes one: a list
+        # or mapping there corroborates nothing, and is not hashed (#3454).
+        listed = Counter(d["tool_use_id"] for d in denials
+                         if isinstance(d, dict) and isinstance(d.get("tool_use_id"), str))
+        for denial in denials:
+            if not isinstance(denial, dict) or not isinstance(denial.get("tool_use_id"), str):
+                continue
+            identity = denial["tool_use_id"]
+            call, result = by_id.get(identity), results.get(identity)
+            if (listed[identity] != 1 or call is None or result is None
+                    or call["transcript"] != t or result["transcript"] != t
+                    or not call["line"] < result["line"] < line
+                    or call["name"] != "Bash" or denial.get("tool_name") != "Bash"
+                    or not isinstance(call["input"], dict) or not isinstance(call["input"].get("command"), str)
+                    or denial.get("tool_input") != call["input"] or result["is_error"] is not True):
+                continue
+            # The content itself, a string, as `reference_rescore` reads it:
+            # a list of text blocks is not joined here (#3387).
+            content = result["content"]
+            if isinstance(content, str) and content.startswith(DONT_ASK_DENIAL_PREFIX):
+                proven.add(identity)
+    return proven
+
+
+def _derive_outcome(result: dict | None, basis: str, denied: bool = False) -> str:
     """A `derive core` part's own outcome from its call's result (#3113).
     `basis` says what the call's status tells about the part: `command` (it
     is the part's status), `and_chain` (a success is the part's; a failure
-    may be a later part's) or `none` (piped, backgrounded, grouped, after
-    `||`, followed by `;`, or in a multi-line command). A part whose status
-    the result does not carry is `ambiguous`, unless the native control
-    denied the call, which then never ran."""
+    may be a later part's), `none` (piped, backgrounded, grouped, after
+    `||`, followed by `;`, or in a multi-line command) or `unparsed` (a
+    spelling the parser does not read, #3137). A part whose status the
+    result does not carry is `ambiguous`, unless the call was `denied` --
+    by the native control or, corroborated, by the runtime (#3201) -- and
+    so never ran."""
     overall = _shell_outcome(result)
     if overall in ("pending", "ambiguous") or basis == "command":
         return overall
     if overall == "failed":
-        return "failed" if _denied(result) else "ambiguous"
+        return "failed" if denied else "ambiguous"
     return "succeeded" if basis == "and_chain" else "ambiguous"
 
 
@@ -569,16 +711,256 @@ def _program(segment: list[str]) -> list[str]:
     return rest
 
 
+def _wrapper_skip(rest: list[str]) -> int | None:
+    """How many words a `timeout`, `env` or `nice` wrapper and its options
+    take before the program it runs (#3137), or None when `rest` is not one
+    or carries an option this does not know (`env -C DIR`, `env -S STRING`,
+    ...). Each passes the program's exit status through, so the status basis
+    of a part it wraps is unchanged; `timeout`'s own 124 is a failure."""
+    head = os.path.basename(rest[0]) if rest else None
+    i = 1
+    if head == "timeout":
+        while i < len(rest) and rest[i].startswith("-"):
+            a = rest[i]
+            if a in ("--preserve-status", "--foreground", "-v", "--verbose"):
+                i += 1
+            elif a in ("-s", "-k", "--signal", "--kill-after"):
+                i += 2
+            elif a.startswith(("--signal=", "--kill-after=")) or (a[:2] in ("-s", "-k") and len(a) > 2):
+                i += 1
+            else:
+                return None
+        return i + 1 if i < len(rest) and _DURATION.fullmatch(rest[i]) else None
+    if head == "env":
+        while i < len(rest) and rest[i].startswith("-"):
+            a = rest[i]
+            if a in ("-i", "-", "--ignore-environment"):
+                i += 1
+            elif a in ("-u", "--unset"):
+                i += 2
+            elif a.startswith("--unset=") or (a.startswith("-u") and len(a) > 2):
+                i += 1
+            elif a == "--":
+                return i + 1
+            else:
+                return None
+        return i                                    # `_program` drops the assignments
+    if head == "nice":
+        if i < len(rest) and rest[i] in ("-n", "--adjustment"):
+            i += 2
+        elif i < len(rest) and re.fullmatch(r"(-n|--adjustment=|-)-?\d+", rest[i]):
+            i += 1
+        elif i < len(rest) and rest[i].startswith("-"):
+            return None
+        return i
+    return None
+
+
+def _unwrapped(segment: list[str]) -> list[str]:
+    """The segment from the program it runs: leading assignments, `poetry
+    run`, and any `timeout`, `env` or `nice` wrapper `_wrapper_skip` reads,
+    in any order and repeated. A wrapper it cannot read stays the program."""
+    rest = _program(segment)
+    while (skip := _wrapper_skip(rest)) is not None and skip < len(rest):
+        rest = _program(rest[skip:])
+    return rest
+
+
 def _cli_args(rest: list[str]) -> list[str] | None:
-    """The arguments to the d4d CLI, when the segment runs it."""
+    """The arguments to the d4d CLI, when the segment runs it: `d4d`, or
+    `python* -m data_sheets_schema.cli` with the interpreter named or held
+    in a variable (`$PY -m ...`, #3137)."""
     if not rest:
         return None
     program = os.path.basename(rest[0])
     if program == "d4d":
         return rest[1:]
-    if _PYTHON.fullmatch(program) and rest[1:3] == ["-m", "data_sheets_schema.cli"]:
+    if ((_PYTHON.fullmatch(program) or _VARIABLE.fullmatch(rest[0]))
+            and rest[1:3] == ["-m", "data_sheets_schema.cli"]):
         return rest[3:]
     return None
+
+
+def _mentions_derive(segment: list[str]) -> bool:
+    """Whether the words `derive core` appear in the segment: as adjacent
+    words, or inside one (`bash -c 'd4d derive core ...'`) (#3137), after
+    quote and escape characters are removed as the shell that runs a nested
+    string would remove them (`bash -c 'd4d derive "core"'`, `eval "d4d
+    'derive' core"`, #3397). `derive` followed by a word supplied at run time
+    (`derive $SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts too:
+    it may be `core`, so it is a derive that cannot be placed, never none.
+    So does `derive` followed by a word carrying a replacement string that an
+    `xargs` earlier in the same command sets with `-I`, `-J`, `-i` or
+    `--replace` (`xargs -I% d4d derive %`), and `derive` as the last word of
+    an `xargs` command that sets none, where xargs appends the word (#3426)."""
+    text = _QUOTING.sub("", " ".join(segment))
+    return bool(_DERIVE_CORE.search(text)) or _xargs_supplies_derive_word(text)
+
+
+#: `xargs` options whose argument is the rest of the word or the next word;
+#: `-I`/`-J` set a replacement string (GNU and BSD).
+_XARGS_WITH_ARGUMENT = frozenset("IJLnPsEdaRS")
+#: `xargs` options whose argument, if any, is only the rest of the word.
+_XARGS_OPTIONAL_ARGUMENT = frozenset("iel")
+_XARGS_LONG_WITH_ARGUMENT = frozenset({"--arg-file", "--delimiter", "--eof", "--max-lines", "--max-args",
+                                       "--max-procs", "--max-chars", "--process-slot-var"})
+#: A redirection operator, with any file-descriptor prefix (`2>`, `&>`,
+#: `{fd}>`) and any target written against it (`2>&1`, `>/tmp/log`); `<(`
+#: and `>(` are process substitutions, not redirections (#3453).
+_REDIRECTION_OPERATOR = r"(?:\d+|\{[A-Za-z_][A-Za-z0-9_]*\})?(?:&>>|&>|>&|<&|>>|>\||<>|<<<|<<-?|>|<)(?!\()"
+_REDIRECTION = re.compile(rf"({_REDIRECTION_OPERATOR})([^\s|;&()<>]*)")
+_SHELL_WORDS = re.compile(rf"[<>]\(|{_REDIRECTION_OPERATOR}[^\s|;&()<>]*|[|;&()\n]+|[^\s|;&()<>]+")
+_SEPARATOR_WORD = re.compile(r"[|;&()\n]+")
+
+
+def _without_redirections(words: list[str]) -> tuple[list[str], list[bool]]:
+    """`words` with every redirection and its target removed (#3453), and,
+    for each word kept, whether a redirection came directly after it
+    (#3457): a redirection is the shell's, so the program never sees it as
+    an argument, and a `derive` before `2>&1` or `>log` is still the last
+    word xargs receives. A bare operator (`>`, `2>`) takes the next word as
+    its target. The command reaches here as the tokenizer's words joined by
+    spaces, and shlex splits `2>&1` into `2`, `>&`, `1`, so a number or
+    `{name}` word right before an operator is taken for its descriptor;
+    where it was an argument (`derive 2 >&1`) the derive is then read as
+    unplaceable, a false `unknown` rather than a miss. A quoted target
+    holding spaces (`< "my args.txt"`, `<<< "core --full F"`) comes back
+    here as several words, of which only the first is set aside; the flag
+    is what keeps that from hiding the derive before it."""
+    kept: list[str] = []
+    redirected: list[bool] = []
+    skip_target = False
+    for at, word in enumerate(words):
+        if skip_target:
+            skip_target = False
+            if not _SEPARATOR_WORD.fullmatch(word):
+                continue
+        if (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", word) and at + 1 < len(words)
+                and _REDIRECTION.fullmatch(words[at + 1])):
+            continue                                # the operator after it flags the word
+        match = _REDIRECTION.fullmatch(word)
+        if match:
+            skip_target = not match.group(2)
+            if redirected:
+                redirected[-1] = True
+            continue
+        kept.append(word)
+        redirected.append(False)
+    return kept, redirected
+
+
+def _backstop(command: str) -> bool:
+    """The command-wide backstop (#3478-#3480): whether the raw command,
+    quote and escape characters removed, carries the word `derive` as a
+    whole word anywhere -- inside a substitution, an assignment, a `cd`
+    part, an `xargs` argument, a redirection or an option value included --
+    and also a `d4d`, `data_sheets_schema` or `$`-variable invocation.
+    `_shell` applies it last, to a call the part-by-part reading gave no
+    derive row, and a match is one derive that cannot be placed. Six review
+    rounds each found a new spelling the special cases missed; this does not
+    depend on how the command is spelled. Its cost is a false `unknown` for
+    a call that only mentions the word beside such an invocation (`grep
+    'd4d derive core' notes.md`, the recorder's `--phase 'derive core'`)."""
+    return _backstop_count(command) > 0
+
+
+def _backstop_count(command: str) -> int:
+    """How many whole-word `derive`s the raw command carries, quote and
+    escape characters removed; 0 when it names no d4d, `data_sheets_schema`
+    or `$`-variable invocation. `_shell` adds an unparsed row when this
+    exceeds the rows the part-by-part reading gave, so a row for one derive
+    (`--help`, another record's) never accounts for a second one hidden in
+    an assignment or substitution beside it (Codex review of #3374)."""
+    text = _QUOTING.sub("", command)
+    if not _INVOCATION.search(text):
+        return 0
+    return len(_DERIVE_WORD.findall(text))
+
+
+def _redirection_interleaved(words: list[str]) -> bool:
+    """Whether a redirection sits among a d4d call's words rather than after
+    them (#3478): shlex splits `--full 2>/dev/null F` into `--full`, `2`,
+    `>`, `/dev/null`, `F`, so the option would read `2` as its value. Only
+    redirections (each with one target, and any descriptor word before its
+    operator) may follow the first one; anything else means the words were
+    not read as the program receives them, and the derive cannot be placed."""
+    def operator(word: str) -> bool:
+        return bool(word) and set(word) <= _PUNCT and ("<" in word or ">" in word)
+    first = next((i for i, word in enumerate(words) if operator(word)), None)
+    if first is None:
+        return False
+    j = first
+    while j < len(words):
+        if operator(words[j]):
+            j += 2                                  # the operator and its target
+        elif (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", words[j]) and j + 1 < len(words)
+              and operator(words[j + 1])):
+            j += 1                                  # a descriptor before its operator
+        else:
+            return True
+    return False
+
+
+def _xargs_supplies_derive_word(text: str) -> bool:
+    """Whether an `xargs` in `text` supplies the word after `derive` at run
+    time (#3426): through a replacement string (`-I%`, `-I %`, `-J %`, `-i`
+    meaning `{}`, `-i%`, `--replace[=%]`, clustered as in `-0I%`) contained
+    in that word, since `{}` is only a convention, or, with no replacement
+    string, by appending it after a `derive` that ends the command -- read
+    with the command's redirections removed, since they are the shell's
+    (`xargs d4d derive 2>&1 | tail -5` still appends the word, #3453).
+    A `derive` in an xargs command with a redirection directly after it
+    counts whatever follows the redirection (#3457): a quoted target is
+    re-split here (`xargs d4d derive <<< "core --full F"`, `< "my
+    args.txt"`), so the words after it cannot be told from arguments, and
+    reading them as arguments would hide a derive; the cost is a false
+    `unknown` (`xargs d4d derive >log full`)."""
+    words, redirected = _without_redirections(_SHELL_WORDS.findall(text))
+    for start, word in enumerate(words):
+        if os.path.basename(word) != "xargs":
+            continue
+        tokens: list[str] = []
+        k = start + 1
+        while k < len(words) and words[k].startswith("-"):
+            option = words[k]
+            k += 1
+            if option == "--":
+                break
+            if option.startswith("--"):
+                name, eq, value = option.partition("=")
+                if name == "--replace":
+                    tokens.append(value if eq else "{}")
+                elif name in _XARGS_LONG_WITH_ARGUMENT and not eq:
+                    k += 1
+                continue
+            for at, flag in enumerate(option[1:], start=1):
+                rest = option[at + 1:]
+                if flag in _XARGS_WITH_ARGUMENT:
+                    if not rest:
+                        rest = words[k] if k < len(words) else ""
+                        k += 1
+                    if flag in "IJ" and rest:
+                        tokens.append(rest)
+                    break
+                if flag in _XARGS_OPTIONAL_ARGUMENT:
+                    if flag == "i":
+                        tokens.append(rest or "{}")
+                    break
+        end = k
+        while end < len(words) and not _SEPARATOR_WORD.fullmatch(words[end]):
+            end += 1
+        command = words[k:end]
+        for at, part in enumerate(command):
+            if part != "derive":
+                continue
+            if redirected[k + at]:
+                return True
+            following = command[at + 1] if at + 1 < len(command) else None
+            if following is None and not tokens:
+                return True
+            if following is not None and any(token in following for token in tokens):
+                return True
+    return False
 
 
 def _subcommand(args: list[str]) -> tuple[tuple[str, ...], list[str]]:
@@ -798,7 +1180,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     named = [x for x in targets if x.name in command]
     out: dict[str, Any] = {"named": [], "read_only": False, "derives": []}
     if tokens is None:
+        # A command shlex cannot split (an apostrophe in a here-document's
+        # body, #3458) is not read part by part, but the words may still be
+        # on it: the whole command, quote characters removed, is tested for
+        # them, and a match is a derive that cannot be placed, never none.
         out["named"] = [x.kind for x in named]
+        full = next((x for x in targets if x.kind == "full"), None)
+        if full is not None and (_mentions_derive([command]) or _backstop(command)):
+            out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -817,7 +1206,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # Read-only: no redirection except to /dev/null or a descriptor, no
     # unescaped newline (a second command), and every program known to read.
     # A command substitution hides its command inside a word (#3240).
-    read_only = not newline and not _substitutes(_strip_comments(command))
+    substitutes = _substitutes(_strip_comments(command))
+    read_only = not newline and not substitutes
     for i, token in enumerate(tokens):
         if set(token) <= _PUNCT and ">" in token:
             following = tokens[i + 1] if i + 1 < len(tokens) else ""
@@ -841,6 +1231,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
     # multi-line command a here-document's lines read as parts too
     # (`_newlines_as_joins`), so a change in one leaves none either.
     unsettled = False                               # a change was made; only `&&` keeps it
+    # Per part: whether it runs a program not read here (`runs_unknown`),
+    # and the reader parts that carry the words `derive core` without a row.
+    runs_unknown = [False] * len(segments)
+    mentioning_readers: list[int] = []
     for index, segment in enumerate(segments):
         before = leading if index == 0 else joins[index - 1]
         if unsettled and before != ["&&"]:
@@ -871,7 +1265,16 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
             if len(rest) > 1 or not reached:
                 pushed = [None] * len(pushed)
             continue
-        args = _cli_args(rest)
+        args = _cli_args(_unwrapped(segment))
+        # A part that carries the words `derive core` but is not read here as
+        # a d4d call of that subcommand, nor as a program known to read, may
+        # run the derive through a spelling this parser does not follow (a
+        # nested shell, `xargs`, a wrapper or a CLI option it does not know):
+        # a derive that cannot be placed, never none (#3137). A substitution
+        # anywhere in the command makes every such part opaque, readers and
+        # other d4d subcommands included (#3385): the segmenter splits the
+        # parts inside `$(...)` out of it, so no part can say it was not in one.
+        opaque = False
         if args is not None:
             sub, sub_args = _subcommand(args)
             outs = _option(sub_args, "--out", "-o")
@@ -880,6 +1283,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                 read_only = False
             if sub == ("derive", "core") and full is not None:
                 spelled = _option(sub_args, "--full")
+                if _redirection_interleaved(sub_args):
+                    out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+                    continue
                 if not spelled:
                     verdict = False
                 elif not _CLEAN_PATH.fullmatch(spelled[-1]):
@@ -888,13 +1294,42 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
                     verdict = full.matches(spelled[-1], local)
                 out["derives"].append({"targets_full": verdict, "segment": index,
                                        "basis": _status_basis(index, joins, leading, newline)})
-            continue
-        if program not in READ_ONLY_PROGRAMS:
-            read_only = False
-        elif program == "sed" and not _sed_reads_only(rest[1:]):
-            read_only = False
-        elif program == "rg" and not _rg_reads_only(segment):
-            read_only = False
+                continue
+            # A d4d call runs only its own subcommand: `derive core` in an
+            # option value (the recorder's `--phase`) runs nothing, unless
+            # the subcommand itself was not read (`d4d -v derive core`).
+            # Nor is a subcommand supplied at run time (`d4d derive $SUB`, #3397).
+            opaque = len(sub) < 2 or not all(_LITERAL_WORD.fullmatch(word) and not word.startswith("-")
+                                             for word in sub)
+        else:
+            reads = program in READ_ONLY_PROGRAMS and not (
+                (program == "sed" and not _sed_reads_only(rest[1:]))
+                or (program == "rg" and not _rg_reads_only(segment)))
+            if not reads:
+                read_only = False
+            opaque = not reads
+        runs_unknown[index] = opaque
+        if full is not None and _mentions_derive(segment):
+            if opaque or substitutes:
+                out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+            else:
+                mentioning_readers.append(index)
+    # A reader's words run where a pipe carries its output into a program
+    # not read here (`echo '... derive core ...' | bash`, `| xargs d4d`,
+    # #3384). Any such pipe later in the command counts, since a group
+    # (`(echo ...; echo ...) | bash`) feeds every part inside it.
+    piped_into_unknown = [j for j in range(1, len(segments))
+                          if runs_unknown[j] and {"|", "|&"} & set(joins[j - 1])]
+    for index in mentioning_readers:
+        if any(j > index for j in piped_into_unknown):
+            out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
+    # The command-wide backstop (#3478-#3480), after every rule above: a call
+    # whose raw text carries more whole-word `derive`s than it gave rows, beside a d4d,
+    # `data_sheets_schema` or `$`-variable invocation, anywhere in its raw
+    # text, is one derive that cannot be placed. A false `unknown` is its cost.
+    if full is not None and _backstop_count(command) > len(out["derives"]):
+        out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
+    out["derives"].sort(key=lambda row: row["segment"])
     out["read_only"] = read_only
     return out
 
@@ -1026,9 +1461,10 @@ def _touches(target: _Target, spelled: str, cwd: str | None) -> bool:
 
 
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
-             reasons: list[str]) -> dict[str, Any]:
+             reasons: list[str], runtime_denied: set[str] | frozenset = frozenset()) -> dict[str, Any]:
     """Every call that bears on the two files, sorted into successful Writes,
-    unsettled Writes, refusals, other mutations and `derive core` runs."""
+    unsettled Writes, refusals, other mutations and `derive core` runs.
+    `runtime_denied` names the shell calls `_runtime_denials` corroborated."""
     h: dict[str, Any] = {"writes": {"receipt": [], "full": []}, "unsettled": {"receipt": [], "full": []},
                          "mutations": [], "rejected": [], "derives": []}
     for call in calls:
@@ -1067,20 +1503,25 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                 reasons.append(f"shell call {call['id']} has no command string")
                 continue
             shell = _shell(command, call["cwd"], targets)
+            # A call the native control refused (#3185), or the runtime in
+            # `dontAsk` mode with its terminal listing to say so (#3201),
+            # never ran.
+            denial = ("native_denial" if _denied(result) else
+                      "runtime_denial" if call["id"] in runtime_denied else None)
             # One row per part that derives the core, with that part's own
             # outcome (#3113): `targets_full` is None when its `--full`
             # cannot be placed.
             h["derives"].extend({**where, "segment": part["segment"], "targets_full": part["targets_full"],
-                                 "outcome": _derive_outcome(result, part["basis"]),
+                                 "outcome": _derive_outcome(result, part["basis"], denial is not None),
                                  "command_outcome": _shell_outcome(result), "status_basis": part["basis"]}
                                 for part in shell["derives"])
             if shell["read_only"]:
                 continue
-            if _denied(result):
-                # The native control refused the call before it ran (#3185):
-                # listed like a refused Edit, never a possible change.
+            if denial is not None:
+                # Refused before it ran: listed like a refused Edit, never a
+                # possible change.
                 h["rejected"].extend({**_where(call, result), "target": kind, "tool": name,
-                                      "rejection": "native_denial"} for kind in shell["named"])
+                                      "rejection": denial} for kind in shell["named"])
             else:
                 h["mutations"].extend({**where, "target": kind, "tool": name, "outcome": _shell_outcome(result)}
                                       for kind in shell["named"])
@@ -1138,8 +1579,13 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
         if row["outcome"] in ("ambiguous", "pending") and row["command_outcome"] == row["outcome"]:
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: its result is {row['outcome']}")
         elif row["outcome"] == "ambiguous":
-            why = ("a later `&&` part may be what failed" if row["status_basis"] == "and_chain" else
-                   "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
+            why = {"and_chain": "a later `&&` part may be what failed",
+                   "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
+                               "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
+                               "among its words, a command the tokenizer cannot split, or the command-wide "
+                               "backstop: the word `derive` beside a d4d, `data_sheets_schema` or "
+                               "`$`-variable invocation)"}.get(
+                row["status_basis"], "piped, backgrounded, grouped, after `||`, followed by `;`, or multi-line")
             reasons.append(f"derive core {row['tool_use_id']} cannot be placed: the call {row['command_outcome']} "
                            f"but its status is not the derive's own ({row['status_basis']}: {why})")
         elif row["outcome"] == "succeeded":
@@ -1190,7 +1636,8 @@ def origin(transcripts: list[Path], receipt: Path, full: Path) -> dict[str, Any]
     reasons: list[str] = []
     info, events = _load([Path(p) for p in transcripts], reasons)
     calls, results = _pair(events, reasons)
-    h = _history(calls, results, [_Target("receipt", receipt), _Target("full", full)], reasons)
+    h = _history(calls, results, [_Target("receipt", receipt), _Target("full", full)], reasons,
+                 _runtime_denials(events, calls, results))
     first, derived = _boundaries(h, reasons)
     writes = h["writes"]["receipt"]
     try:
