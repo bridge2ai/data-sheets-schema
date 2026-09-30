@@ -1,6 +1,10 @@
 """Typed-container entries whose own prose disclaims their role or presence (#2913).
 
-A read-only lint that never gates. Each list member of a registered container
+A read-only lint that never gates. Design rule (#3625-#3628): v2 departs
+from v1 only in the cases #3131, #3244, #3261 and #3273 name, each with a
+named reason (the v2 lexicon's header lists them); for every other
+sentence its verdict equals v1's, and a differential table in the tests
+asserts that for every regression example. Each list member of a registered container
 is read: `creators`, `maintainers` and `data_collectors` record a role, and
 `variables`, `instances` and `splits` record that something is present in the
 released data. The lint reads the member's own narrative leaves against a
@@ -29,11 +33,15 @@ planned splits for the next release, this split is complete" names no
 presence term but the one `presence.planned_element` spells (#3230). A
 pattern that declares `self_reference_in: [item]` also counts on a
 self-reference that heads the item it reports: "No source reports this
-split as available" (#3261), not "the labels in this split" (#3607). A presence term with no other-marker ("The external
+split as available" (#3261), not "the labels in this split" (#3607), and
+not where the source-to-report span is negated (`self_reference_unless`:
+"No source fails to report this split as available", #3625). A presence term with no other-marker ("The external
 test set is described as planned") is taken as possibly the member's
 unless its qualifier disagrees with the member's identity: in the prose of
 a member named "Internal validation set" it is another item, on the
-lexicon's external/internal and training/validation/test axes (#3244). A
+lexicon's external/internal and training/validation/test axes (#3244),
+unless the item also names the member ("This split and the external test
+set are not yet released", #3626). A
 `subject` cue (`presence.prospective_predicate`, #3131) counts where a
 self-reference that owns nothing precedes it, as a `self` cue would, and
 heads the subject if the subject holds one, or where its subject is headed
@@ -49,7 +57,11 @@ prospective and is out of scope (`negated_subject`, #3614). The subject
 these checks and the date/amount guard read is the cue's own conjunct: a
 comma-less clause joined before it by a conjunction after an auxiliary or
 copula ("Its release is pending and this split remains prospective") is
-left out (`statement_subject.conjunction`, `clause_verb`, #3619). A statement
+left out (`statement_subject.conjunction`, `clause_verb`, #3619), and a
+conjunct with no subject of its own inherits the governing one ("The
+holdout set was announced and remains prospective", #3627). "Not only
+this split but also the holdout set" is affirmative coordination, not a
+negated subject (`statement_subject.correlative`, #3628). A statement
 topic ("statements about/of/for ...", #3615) must itself be headed by a
 self-reference or presence term. A `none` cue has no further
 condition: `role.not_necessarily` names the container's role in its cue.
@@ -203,6 +215,7 @@ class Pattern:
     guards: tuple
     object: tuple = ()  # where the thing the cue says is unstated lies (OBJECT_PARTS)
     self_in: tuple = ()  # cue parts where a self-reference also licenses it (SELF_IN_PARTS)
+    self_unless: re.Pattern | None = None  # negation before the item that voids that licence (#3625)
 
 
 @dataclass(frozen=True)
@@ -268,7 +281,7 @@ class Lexicon:
         # the lexicon as v1 did.
         self._statement = self._statement_topic = self._statement_head = None
         self._statement_tail = self._statement_negated = None
-        self._clause_conjunction = self._clause_verb = None
+        self._clause_conjunction = self._clause_verb = self._correlative = None
         statement = data.get("statement_subject")
         if statement is not None:
             self._statement = _word(statement["nouns"])
@@ -283,6 +296,10 @@ class Lexicon:
             if statement.get("conjunction") is not None:
                 self._clause_conjunction = re.compile(statement["conjunction"], re.I)
                 self._clause_verb = re.compile(statement["clause_verb"], re.I)
+            if statement.get("correlative") is not None:
+                self._correlative = re.compile(statement["correlative"], re.I)
+                if set(self._correlative.groupindex) != {"open", "join"}:
+                    raise ValueError("statement_subject.correlative must name its `open` and `join` groups")
             self._statement_topic = re.compile(statement["topic"], re.I)
             if "topic" not in self._statement_topic.groupindex:
                 raise ValueError("statement_subject.topic must name its topic as a `topic` group")
@@ -330,12 +347,16 @@ class Lexicon:
                 raise ValueError(f"pattern {row['id']} reads a self-reference in an `item` group its cue lacks")
             if self_in and row["scope"] != "presence":
                 raise ValueError(f"pattern {row['id']} reads a self-reference in its cue outside presence scope")
+            unless = row.get("self_reference_unless")
+            if unless is not None and "item" not in self_in:
+                raise ValueError(f"pattern {row['id']} declares self_reference_unless without self_reference_in: [item]")
             if row["scope"] == "subject" and self._statement is None:
                 raise ValueError(f"pattern {row['id']} has subject scope and the lexicon no statement_subject")
             if row["scope"] == "subject" and kinds != {"presence"}:
                 raise ValueError(f"pattern {row['id']} has subject scope outside a presence container")
             patterns.append(Pattern(row["id"], row["class"], kinds, row["cue"],
-                                    row["scope"], tuple(row["guards"]), parts, self_in))
+                                    row["scope"], tuple(row["guards"]), parts, self_in,
+                                    re.compile(unless, re.I) if unless is not None else None))
         if len({p.id for p in patterns}) != len(patterns):
             raise ValueError("pattern ids must be unique")
         self.patterns = tuple(patterns)
@@ -561,22 +582,63 @@ def _subject(before: str) -> tuple[int, int]:
     return spans[-1]
 
 
-def _clause_cut(lexicon, subject: str) -> int:
-    """Where the cue's own conjunct starts in `subject` (a `_subject`
-    stretch, unmasked): after the last `statement_subject.conjunction` whose
-    stretch before it (from the previous cut) holds a
-    `statement_subject.clause_verb`, so the conjunction joins two clauses
-    and the earlier one is not the cue's subject. "Its release is pending
-    and this split" -> "this split"; "It was announced in 2024 and " -> ""
-    (an elided subject); "This split and its labels" is one noun phrase and
-    is kept whole (#3619). 0 when the lexicon declares no conjunction."""
+_PRONOUN = re.compile(r"\b(?:it|he|she|this)\b", re.I)
+
+
+def _elided(text: str) -> bool:
+    """Whether a conjunct's stretch before its cue has no subject of its
+    own: empty, or only adverbs and auxiliaries (`_ELIDED`, a subject
+    pronoun excluded: "and it remains" has one)."""
+    return _ELIDED.fullmatch(text.strip()) is not None and _PRONOUN.search(text) is None
+
+
+def _clause_cut(lexicon, subject: str) -> tuple[int, int]:
+    """Where the cue's own subject lies in `subject` (a `_subject` stretch,
+    unmasked), as (start, end). The cue's own conjunct starts after the
+    last `statement_subject.conjunction` whose stretch before it (from the
+    previous cut) holds a `statement_subject.clause_verb`, so the
+    conjunction joins two clauses and the earlier one is not the cue's
+    subject: "Its release is pending and this split" -> "this split"; "This
+    split and its labels" is one noun phrase and is kept whole (#3619).
+    A conjunct with no subject of its own (`_elided`) inherits the
+    governing subject, the nearest earlier conjunct's text before its first
+    clause verb: "The holdout set was announced and " -> "The holdout set",
+    "It was announced in 2024 and " -> "It" (#3627). (0, len) when the
+    lexicon declares no conjunction."""
     if lexicon is None or lexicon._clause_conjunction is None:
-        return 0
-    cut = 0
+        return 0, len(subject)
+    cuts = [(0, 0)]  # (conjunct start, previous conjunct end)
     for found in lexicon._clause_conjunction.finditer(subject):
-        if lexicon._clause_verb.search(subject, cut, found.start()):
-            cut = found.end()
-    return cut
+        if lexicon._clause_verb.search(subject, cuts[-1][0], found.start()):
+            cuts.append((found.end(), found.start()))
+    start = cuts[-1][0]
+    if len(cuts) == 1 or not _elided(subject[start:]):
+        return start, len(subject)
+    for k in range(len(cuts) - 2, -1, -1):
+        c0, c1 = cuts[k][0], cuts[k + 1][1]
+        verb = lexicon._clause_verb.search(subject, c0, c1)
+        end = verb.start() if verb else c1
+        if not _elided(subject[c0:end]):
+            return c0, end
+    return start, len(subject)
+
+
+def _affirmed(lexicon, sentence: str, before: int) -> str:
+    """`sentence` with each `statement_subject.correlative` before offset
+    `before` read as affirmative coordination, offsets kept: its `open`
+    words ("Not only", "Not just") blanked and its `join` ("but also")
+    read as "and", so "Not only this split but also the holdout set" is not
+    a negated subject and "this split" heads its conjunct (#3628). The
+    sentence as it is when the lexicon declares no correlative."""
+    if lexicon._correlative is None:
+        return sentence
+    chars = list(sentence)
+    for found in lexicon._correlative.finditer(sentence, 0, before):
+        o0, o1 = found.span("open")
+        j0, j1 = found.span("join")
+        chars[o0:o1] = " " * (o1 - o0)
+        chars[j0:j1] = list("and".ljust(j1 - j0))
+    return "".join(chars)
 
 
 def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
@@ -585,7 +647,7 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
     from the masked sentence: `clause`, `before_cue`, `subject` (a passive
     cue's subject, `_subject`, located on `raw`, the unmasked sentence, and,
     given a `lexicon` that declares clause conjunctions, cut to the cue's
-    own conjunct, `_clause_cut`),
+    own conjunct or the subject that conjunct inherits, `_clause_cut`),
     `cue`, `item` (the cue's named `item` group: the item a cue that cites
     its source reports, empty when the cue has none), `after_phrase` (after
     the cue up to the phrase's end,
@@ -597,7 +659,8 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
     before = masked[c0:m.start()]
     text = (raw if raw is not None else masked)[c0:m.start()]
     s0, s1 = _subject(text)
-    s0 += _clause_cut(lexicon, text[s0:s1])
+    a, b = _clause_cut(lexicon, text[s0:s1])
+    s0, s1 = s0 + a, s0 + b
     item = (masked[m.start("item"):m.end("item")]
             if "item" in m.re.groupindex and m.start("item") >= 0 else "")
     return {"clause": masked[c0:c1], "before_cue": before, "subject": before[s0:s1],
@@ -736,6 +799,19 @@ def _other_qualified_item(lexicon, container, member: dict, text: str) -> str | 
                  in _presence_phrases(lexicon, container, member, text) if other), None)
 
 
+def _item_names_member(lexicon, container, member: dict, selves, item: str) -> bool:
+    """Whether the reported `item` (possessor self-references blanked) also
+    names the member: a self-reference to it, or a presence noun phrase that
+    does not name another item. "This split and the external test set" and
+    "The validation set and the external test set" (of an internal
+    validation set) name it; "The external test set" does not (#3626). A
+    lexicon with no `item_qualifiers` never gets here with another item."""
+    if _search(selves, item):
+        return True
+    masked = _masked(item, selves)
+    return any(not other for _p, _t, other, _f in _presence_phrases(lexicon, container, member, masked))
+
+
 def _member_presence_term(lexicon, container, member: dict, text: str,
                           heads: bool = False) -> str | None:
     """The first presence term in `text` that does not name another item,
@@ -863,6 +939,10 @@ def _subject_scope(lexicon, container, member, selves, sentence: str,
 
 def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     """One cue match: a flag hit, a guarded hit, or out of scope, with why."""
+    if pattern.scope == "subject":
+        # "Not only this split but also ..." coordinates; it negates nothing
+        # (#3628). Offsets are kept, so `m` still locates the cue.
+        sentence = _affirmed(lexicon, sentence, m.start())
     c0, c1 = _clause(sentence, m.start())
     out = {"rule": pattern.id, "class": pattern.cls, "cue": m.group(0)}
     selves = lexicon._self + _own_names(member)
@@ -892,14 +972,18 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         # An item named with no other-marker whose qualifier disagrees with
         # the member's identity: "the external test set" in the prose of
         # the internal validation set (#3244).
-        other = _other_qualified_item(lexicon, container, member, _item_text(pattern, parts))
-        if other:
-            return {**out, "outcome": "out_of_scope", "reason": "other_qualified_item", "term": other}
     # The object read with only the member's possessor self-references
     # blanked ("this author's institution", "the email of this author"): a
     # self-reference that is itself the object ("does not name this
     # maintainer") names the role, one that owns the object does not (#3251).
     objects = _parts(_possessors_blanked(sentence, selves), c0, c1, m, sentence, cut)
+    if container.kind == "presence":
+        # A reported item that names the member as well is still the
+        # member's, whatever else is coordinated with it: "This split and
+        # the external test set are not yet released" disclaims both (#3626).
+        other = _other_qualified_item(lexicon, container, member, _item_text(pattern, parts))
+        if other and not _item_names_member(lexicon, container, member, selves, _item_text(pattern, objects)):
+            return {**out, "outcome": "out_of_scope", "reason": "other_qualified_item", "term": other}
     if pattern.scope == "role":
         verdict, term = _role_scope(lexicon, container, sentence, masked, c0, c1, m,
                                     [objects[p] for p in pattern.object])
@@ -909,10 +993,14 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         out["scope"] = term
     elif pattern.scope == "presence":
         term = _self_reference(selves, sentence, c0, m.start())
-        if term is None and "item" in pattern.self_in:
+        if term is None and "item" in pattern.self_in and not (
+                pattern.self_unless is not None
+                and pattern.self_unless.search(sentence, m.start(), m.start("item"))):
             # A self-reference that owns nothing and heads the item the cue
             # reports: "No source reports this split as available" (#3261),
-            # not "the labels in this split" (#3607).
+            # not "the labels in this split" (#3607), and not where the
+            # source-to-report span is negated: "No source fails to report
+            # this split as available" affirms it (#3625).
             term = _item_self_reference(lexicon, selves, objects["item"])
         if term is None:
             term = _member_presence_term(lexicon, container, member,

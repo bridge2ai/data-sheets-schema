@@ -23,6 +23,22 @@
 #   self-reference inside the item it reports (#3261);
 # - `shared_final_entry`, how the diff resolves two original members
 #   followed to one final entry (#3273).
+#
+# Design rule (#3625-#3628): v2 departs from v1 only in the cases those four
+# issues name, each with a named reason, and for every other sentence its
+# verdict (flag, guarded or out of scope) equals v1's. The departures are:
+# - narrowings under `subject` scope (#3131 and its review rounds):
+#   `no_member_subject`, `statement_about_other` and `negated_subject`, and
+#   the date/amount guard on the cue's subject (`guarded`, `date_amount`);
+# - the narrowing `other_qualified_item` (#3244), for an item that names
+#   another qualified item and not the member;
+# - one widening, the self-reference in the reported item (#3261), which
+#   does not apply where the source-to-report span is negated
+#   (`self_reference_unless`, #3625);
+# - `shared_final_entry.resolve_by` (#3273), a diff rule, not a sentence
+#   verdict.
+# tests/test_self_disclaimed.py holds a v1/v2 differential table that
+# asserts equality or names the departure for every regression example.
 instrument: self_disclaimed
 version: 2
 issue: 2913
@@ -228,7 +244,14 @@ item_qualifiers:
 # the conjunction joins noun phrases and the subject is kept whole ("This
 # split and its labels"). `clause_verb` names auxiliaries and copulas only,
 # so a first clause whose only verb is a lexical one ("The page lists no
-# sizes and this split ...") is not cut.
+# sizes and this split ...") is not cut. A conjunct with no subject of its
+# own ("The holdout set was announced and remains prospective") inherits
+# the governing subject, the earlier conjunct's text before its first
+# `clause_verb` ("The holdout set"), and every check reads that (#3627).
+# `correlative` is an affirmative coordination, not a negation: in "Not
+# only this split but also the holdout set are prospective" its `open`
+# words are blanked and its `join` is read as "and" before the negation and
+# head checks (#3628).
 statement_subject:
   nouns: ['statements?', 'descriptions?', 'mentions?', 'references?']
   negated: '\s*(?:(?:and|but|yet|so|while|whereas)\s+)?(?:no|neither|none|not)\b'
@@ -237,6 +260,7 @@ statement_subject:
   tail: '\s*(?:$|[,;:()\u2013\u2014]|(?:in|on|of|to|by|for|from|at|with|within|across|about|under|over|regarding|concerning|describing|as|that|which|who|whose|where|described|mentioned|cited|listed|given|named|made|quoted|reported|and|or|nor|itself|themselves|alone|all|both|also|too|still|now|remains?|is|are|was|were)\b)'
   conjunction: '\b(?:and|but|so|while|whereas|yet)\s+'
   clause_verb: '\b(?:is|are|was|were|am|be|been|being|has|have|had|does|do|did|remains?|remained|will|would|can|could|may|might|must|shall|should)\b'
+  correlative: '\b(?P<open>not\s+(?:only|just|merely|simply))\s+[^,;:]*?\b(?P<join>but(?:\s+also)?)\b'
 
 # How the diff resolves two original members that `receipts.remap_path`
 # follows to the same final entry. `identity_keys`: the one member whose
@@ -454,6 +478,11 @@ patterns:
     guards: [date_amount]
     object: [item]
     self_reference_in: [item]
+    # The #3261 licence reads a disclaimer only where nothing between the
+    # cited source and the report verb negates it: "No source fails to
+    # report this split as available" affirms that it is reported (#3625).
+    # The presence-term licence is v1's and is not narrowed here.
+    self_reference_unless: '\b(?:not|never|fail(?:s|ed|ing)?|neglect(?:s|ed|ing)?|omit(?:s|ted|ting)?|cannot)\b|n[''\u2019]t\b'
   - id: presence.not_yet_released
     class: presence_disclaimer
     kinds: [presence]
