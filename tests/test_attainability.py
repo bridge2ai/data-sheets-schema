@@ -904,17 +904,26 @@ def _broken_evaluation(tmp_path, how):
         record.write_text({"provenance not YAML": "inputs: [unclosed\n",
                            "provenance not a mapping": "- inputs\n",
                            "inputs not a mapping": "inputs: [a, b]\n",
+                           "inputs an empty list": "inputs: []\n",
+                           "inputs an empty string": "inputs: ''\n",
+                           "inputs false": "inputs: false\n",
                            "a bundle md5 that is not a string": yaml.safe_dump(
                                {"inputs": {"bundle_path": CHORUS, "bundle_md5": [CHORUS_MD5]}}),
+                           "a bundle md5 of zero": yaml.safe_dump(
+                               {"inputs": {"bundle_path": CHORUS, "bundle_md5": 0}}),
+                           "a bundle path that is an empty list": yaml.safe_dump(
+                               {"inputs": {"bundle_path": [], "bundle_md5": CHORUS_MD5}}),
                            "a bundle md5 too long for a file name": yaml.safe_dump(
                                {"inputs": {"bundle_path": CHORUS, "bundle_md5": "a" * 400}}),
                            "a bundle path too long for a file name": yaml.safe_dump(
                                {"inputs": {"bundle_path": "data/" + "b" * 400 + ".txt",
                                            "bundle_md5": CHORUS_MD5}})}[how],
                           encoding="utf-8")
+        not_a_string = f"the provenance record {record} names a bundle_path or bundle_md5 that is not a string"
         why = {"provenance not YAML": f"the provenance record {record} is not YAML: while parsing",
-               "a bundle md5 that is not a string": f"the provenance record {record} names a bundle_path "
-                                                    "or bundle_md5 that is not a string",
+               "a bundle md5 that is not a string": not_a_string,
+               "a bundle md5 of zero": not_a_string,
+               "a bundle path that is an empty list": not_a_string,
                "a bundle md5 too long for a file name": too_long,
                "a bundle path too long for a file name": too_long}.get(
             how, f"the provenance record {record} is not a mapping with an inputs mapping")
@@ -923,10 +932,27 @@ def _broken_evaluation(tmp_path, how):
     return path, why
 
 
+@pytest.mark.parametrize("body", ["{}\n", "inputs: null\n", "inputs: {}\n",
+                                  "inputs: {bundle_path: null, bundle_md5: abc}\n",
+                                  "inputs: {bundle_path: x.txt, bundle_md5: ''}\n",
+                                  "inputs: {bundle_path: x.txt}\n"])
+def test_a_record_that_names_no_bundle_is_not_unreadable(tmp_path, body):
+    """#3489: the type checks look at the value as written, so a falsy
+    non-mapping or non-string is unreadable; an absent or null value, or an
+    empty string, still names no bundle and returns None rather than raising."""
+    record = tmp_path / "CHORUS_provenance.yaml"
+    record.write_text(body, encoding="utf-8")
+    evaluation = {"project": "CHORUS", "d4d_file": "data/d4d_concatenated/claudecode_agent/L/CHORUS_d4d.yaml"}
+    with mock.patch.object(pv, "record_path_for", return_value=record):
+        assert at.evaluation_bundle(evaluation) is None
+
+
 @pytest.mark.parametrize("how", ["not JSON", "not UTF-8", "not an object", "missing", "an element with no id",
                                  "a sub-element that is not an object", "provenance not YAML",
                                  "provenance not a mapping", "inputs not a mapping",
-                                 "a bundle md5 that is not a string", "a bundle md5 too long for a file name",
+                                 "inputs an empty list", "inputs an empty string", "inputs false",
+                                 "a bundle md5 that is not a string", "a bundle md5 of zero",
+                                 "a bundle path that is an empty list", "a bundle md5 too long for a file name",
                                  "a bundle path too long for a file name"])
 def test_an_evaluation_that_cannot_be_read_is_reported_and_the_next_still_checked(tmp_path, capsys, how):
     """#3200: `credited_report` read each evaluation with a bare `json.loads`,

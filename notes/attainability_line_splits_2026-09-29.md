@@ -104,8 +104,8 @@ Both columns are lower bounds. The word list and the bundle vocabulary
 leave out words neither contains, so the split-word count misses a split
 into a word neither knows. The "every break joins" column has no word-list
 limit, since it joins every break the reading could apply to, but it joins
-them one at a time: the two lines on either side of one break, every other
-break read as a space. A match that needs two breaks at once is not
+them one at a time: it searches only the two lines on either side of one
+break, joined, and reads no other line. A match that needs two breaks at once is not
 searched (#3470) — a word split over two unhyphenated breaks ('con' /
 'sen' / 't'), one join beside a hyphen's reading ('con-' / 'sen' / 't'), or
 a statement over three lines whose one break is a space and the other the

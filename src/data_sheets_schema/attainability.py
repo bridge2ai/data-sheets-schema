@@ -892,14 +892,19 @@ def evaluation_bundle(evaluation: dict[str, Any]) -> dict[str, Any] | None:
     except ValueError as exc:                  # a path the readers refuse rather than answer
         raise UnreadableEvaluation(f"the provenance record {record!r} cannot be read: {exc}") from exc
     document = {} if document is None else document
-    if not isinstance(document, dict) or not isinstance(document.get("inputs") or {}, dict):
+    # Each type is tested on the value as written, before any emptiness test:
+    # a falsy non-mapping `inputs` ([], '', false) or a falsy non-string
+    # bundle field (0, []) is a damaged record, not one that names no bundle
+    # (#3489). Only an absent or null value, or an empty string, names none.
+    inputs = document.get("inputs") if isinstance(document, dict) else None
+    if not isinstance(document, dict) or not (inputs is None or isinstance(inputs, dict)):
         raise UnreadableEvaluation(f"the provenance record {record} is not a mapping with an inputs mapping")
-    inputs = document.get("inputs") or {}
-    if not inputs.get("bundle_path") or not inputs.get("bundle_md5"):
-        return None
-    if not all(isinstance(inputs[k], str) for k in ("bundle_path", "bundle_md5")):
+    inputs = inputs or {}
+    if any(inputs.get(k) is not None and not isinstance(inputs[k], str) for k in ("bundle_path", "bundle_md5")):
         raise UnreadableEvaluation(f"the provenance record {record} names a bundle_path or bundle_md5 "
                                    "that is not a string")
+    if not inputs.get("bundle_path") or not inputs.get("bundle_md5"):
+        return None
     return {"path": inputs["bundle_path"], "md5": inputs["bundle_md5"], "record": str(record)}
 
 

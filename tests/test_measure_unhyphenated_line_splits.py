@@ -169,8 +169,8 @@ def test_a_match_that_only_touches_the_break_does_not_cross_it(m):
 
 def test_every_break_joins_is_searched_one_break_at_a_time(m):
     """#3470: the every-break column joins the two lines around one break
-    and reads every other break as a space, so a match needing two breaks at
-    once is not found. The note and README call the column a lower bound for
+    and reads no other line, so a match needing two breaks at once (or a
+    third line at all) is not found (#3490). The note and README call the column a lower bound for
     that reason; these pin the cases they name."""
     assert m.measure("Participants gave con\nsent to take part.")["moved_if_every_break_joins"] == {
         "consent_text": "status"}
