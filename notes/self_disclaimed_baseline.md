@@ -197,16 +197,19 @@ Pairs with at least one snapshot or final_only flag.
 Each person-role member no receipt snippet addressed to it names in one of its container's
 role predicates, read against the phase-1 snapshot where there is one, else the final;
 classified to the final where there is a snapshot. As #2913 predicted, it over-flags.
+`receipts checked` counts the receipts check (b) ran on; `not checked` a readable receipt
+whose final or snapshot was refused (see Unreadable), which has no check (b).
 
-| method | receipts | against snapshot | person-role members | flagged | no_receipt | no_role_predicate | removal_declared | removed | named_by_finding | identity_unresolved | retained |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| claudecode_agent | 29 | 17 | 484 | 398 | 219 | 179 | 0 | 8 | 0 | 0 | 231 |
-| claudecode_api | 19 | 18 | 463 | 429 | 68 | 361 | 0 | 15 | 0 | 1 | 413 |
-| **all** | 48 | 35 | 947 | 827 | 287 | 540 | 0 | 23 | 0 | 1 | 644 |
+| method | receipts checked | not checked | against snapshot | person-role members | flagged | no_receipt | no_role_predicate | removal_declared | removed | named_by_finding | identity_unresolved | retained |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| claudecode_agent | 29 | 0 | 17 | 484 | 398 | 219 | 179 | 0 | 8 | 0 | 0 | 231 |
+| claudecode_api | 18 | 1 | 18 | 463 | 429 | 68 | 361 | 0 | 15 | 0 | 1 | 413 |
+| **all** | 47 | 1 | 35 | 947 | 827 | 287 | 540 | 0 | 23 | 0 | 1 | 644 |
 
 ## Unreadable
 
-Refused. A final record is counted in `records` and `unreadable` only; a pair whose
+Refused. A refused final record is counted in `records` and `unreadable`, and a
+readable receipt beside it under check (b)'s `not checked`; a pair whose final or
 snapshot is refused has no diff and no check (b).
 
 - `claudecode_agent_core/2026-08-22c_claude-opus-5-api-generic-v5_rep2/intermediate/VOICE_full.yaml (artifact has duplicate YAML mapping keys; its location is ambiguous)`

@@ -94,7 +94,8 @@ def test_counts_by_method_and_label(corpus):
     # Check (b) against the snapshot (two members, not the final's three):
     # Person A is receipted with a predicate; Person B has no receipt and
     # is kept in the final.
-    assert (a["receipts"], a["rp_against_snapshot"], a["rp_members"], a["rp_flagged"]) == (1, 1, 2, 1)
+    assert (a["receipts"], a["receipts_unchecked"], a["rp_against_snapshot"], a["rp_members"],
+            a["rp_flagged"]) == (1, 0, 1, 2, 1)
     assert (a["rp_reasons"]["no_receipt"], a["rp_classes"][m.RP_RETAINED]) == (1, 1)
     assert s["labels"][("method_a", LABEL)]["flagged"] == 2 and s["labels"][("method_b", "-")]["flagged"] == 1
 
@@ -168,6 +169,27 @@ def test_an_unreadable_file_is_listed_and_its_pair_is_not_diffed(corpus):
     assert (a["records"], a["unreadable"], a["flagged"], a["pairs"], a["rp_flagged"]) == (1, 0, 2, 0, 0)
     assert s["unreadable"] == [f"method_a_core/{LABEL}/intermediate/P_full_2.yaml "
                                "(artifact has duplicate YAML mapping keys; its location is ambiguous)"]
+    # The receipt parsed, but no check (b) ran on it (#3730).
+    assert (a["receipts"], a["receipts_unchecked"], a["rp_members"]) == (0, 1, 0)
+
+
+@pytest.mark.parametrize("refused", ["final", "both"])
+def test_a_receipt_beside_a_refused_final_is_not_counted_as_checked(corpus, refused):
+    """A refused final has no check (b), even where its snapshot parses, so
+    its receipt is `receipts_unchecked`, never `receipts` (#3730)."""
+    m = _script()
+    dump(corpus / "method_a" / LABEL / "P_d4d.yaml", "a: 1\na: 2\n")
+    if refused == "both":
+        dump(corpus / "method_a_core" / LABEL / "intermediate" / "P_full_2.yaml", "a: 1\na: 2\n")
+    collected = m.collect(corpus)
+    s = m.summarise(collected, m.LEXICON_VERSION)
+    a, t = s["methods"]["method_a"], s["total"]
+    assert (a["records"], a["unreadable"], a["pairs"]) == (1, 1, 0)
+    assert (a["receipts"], a["receipts_unchecked"], a["rp_members"], a["rp_flagged"]) == (0, 1, 0, 0)
+    assert (t["receipts"], t["receipts_unchecked"]) == (0, 1)
+    md = m.render_markdown(collected)
+    assert "| method | receipts checked | not checked |" in md
+    assert "| method_a | 0 | 1 |" in md
 
 
 def test_check_is_read_only_and_fails_when_stale(corpus, tmp_path, monkeypatch):

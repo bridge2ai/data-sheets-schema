@@ -274,8 +274,12 @@ def collect(corpus: Path = CORPUS, pins: dict[str, dict[str, Any]] | None = None
 def _lint(parsed: dict[str, Any], errors: dict[str, str], lexicon: sd.Lexicon) -> dict[str, Any]:
     """Check (a) on the final record; the snapshot-to-final diff where both
     parse; check (b) against the snapshot where there is one, else the final.
-    A pinned snapshot that is unreadable is not replaced by the final: that
-    pair has no diff and no check (b)."""
+    Check (b) needs a readable final: with a snapshot it is classified to the
+    final, and without one it is read from the final. So a refused final has
+    no check (b) even where its snapshot parses, and a pinned snapshot that
+    is refused is not replaced by the final: that pair has no diff and no
+    check (b). A receipt no check (b) ran on is counted by `summarise` as
+    `receipts_unchecked`, never under `receipts`."""
     final, snapshot, receipt = parsed.get("final"), parsed.get("snapshot"), parsed.get("receipt")
     out: dict[str, Any] = {"scan": sd.scan(final, lexicon) if final is not None else None,
                            "diff": None, "role_predicate": None, "role_predicate_diff": None}
@@ -295,7 +299,7 @@ def _empty() -> dict[str, Any]:
     return {"records": 0, "unreadable": 0, "members": 0, "flagged": 0, "flagged_records": 0,
             "guarded": 0, "out_of_scope": 0,
             "pairs": 0, "pair_flags": 0, "final_only": 0, "classes": Counter(),
-            "receipts": 0, "rp_against_snapshot": 0, "rp_members": 0, "rp_flagged": 0,
+            "receipts": 0, "receipts_unchecked": 0, "rp_against_snapshot": 0, "rp_members": 0, "rp_flagged": 0,
             "rp_reasons": Counter(), "rp_classes": Counter()}
 
 
@@ -320,7 +324,9 @@ def summarise(collected: dict[str, Any], version: int) -> dict[str, Any]:
             b["records"] += 1
             b["unreadable"] += "final" in row["errors"]
             if row["files"].get("receipt") and "receipt" not in row["errors"]:
-                b["receipts"] += 1
+                # `receipts` is the receipts check (b) ran on; a readable
+                # receipt whose final or snapshot was refused is not one.
+                b["receipts" if lint["role_predicate"] is not None else "receipts_unchecked"] += 1
         if scan is not None:
             for b in buckets:
                 b["members"] += scan["members_read"]
@@ -389,7 +395,7 @@ def _diff_cells(m: dict) -> list[Any]:
 
 
 def _rp_cells(m: dict) -> list[Any]:
-    return ([m["receipts"], m["rp_against_snapshot"], m["rp_members"], m["rp_flagged"],
+    return ([m["receipts"], m["receipts_unchecked"], m["rp_against_snapshot"], m["rp_members"], m["rp_flagged"],
              m["rp_reasons"]["no_receipt"], m["rp_reasons"]["no_role_predicate"]]
             + [m["rp_classes"][c] for c in (*sd.CLASSIFICATIONS, RP_RETAINED)])
 
@@ -397,7 +403,7 @@ def _rp_cells(m: dict) -> list[Any]:
 SCAN_HEAD = ["records", "unreadable", "members read", "flagged members", "records flagged", "guarded",
              "out of scope"]
 DIFF_HEAD = ["pairs", "snapshot flags", *sd.CLASSIFICATIONS, "retained", "final_only"]
-RP_HEAD = ["receipts", "against snapshot", "person-role members", "flagged", "no_receipt",
+RP_HEAD = ["receipts checked", "not checked", "against snapshot", "person-role members", "flagged", "no_receipt",
            "no_role_predicate", *sd.CLASSIFICATIONS, "retained"]
 
 
@@ -478,12 +484,16 @@ def render_markdown(collected: dict[str, Any]) -> str:
     lines += ["", "## Check (b): coverage receipts", "",
               "Each person-role member no receipt snippet addressed to it names in one of its container's",
               "role predicates, read against the phase-1 snapshot where there is one, else the final;",
-              "classified to the final where there is a snapshot. As #2913 predicted, it over-flags.", ""]
-    rp_methods = [[n, *_rp_cells(m)] for n, m in s["methods"].items() if m["receipts"]]
+              "classified to the final where there is a snapshot. As #2913 predicted, it over-flags.",
+              "`receipts checked` counts the receipts check (b) ran on; `not checked` a readable receipt",
+              "whose final or snapshot was refused (see Unreadable), which has no check (b).", ""]
+    rp_methods = [[n, *_rp_cells(m)] for n, m in s["methods"].items()
+                  if m["receipts"] or m["receipts_unchecked"]]
     lines += _table(["method", *RP_HEAD], rp_methods + [["**all**", *_rp_cells(t)]])
     if s["unreadable"]:
         lines += ["", "## Unreadable", "",
-                  "Refused. A final record is counted in `records` and `unreadable` only; a pair whose",
+                  "Refused. A refused final record is counted in `records` and `unreadable`, and a",
+                  "readable receipt beside it under check (b)'s `not checked`; a pair whose final or",
                   "snapshot is refused has no diff and no check (b).", ""]
         lines += [f"- `{u}`" for u in s["unreadable"]]
     return "\n".join(lines) + "\n"
