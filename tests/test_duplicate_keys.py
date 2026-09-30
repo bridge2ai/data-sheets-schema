@@ -209,6 +209,10 @@ class TestTheLibyamlDepthGuard(unittest.TestCase):
             _block(40), _flow(40), "- - - - - x\n", "? - - a\n: - - b\n", "- a:\n  - b:\n    - c: 1\n",
             "a:\n- b:\n  - c\n", "[a: [b: [c: [d: 1]]]]\n", "{a: [{b: [x]}]}\n", "- &x !!map\n  k: [1, [2]]\n",
             "k: |\n  [[[[\n", "a:\r\n  b:\r\n    - [c]\r\n", "a:\u2028  b: 1\n", "",
+            # A sequence at its key's column, and a mapping one column further
+            # in on the next line: two levels per column, 41 deep at column 20,
+            # which is why block nesting is bounded by twice the column + 1.
+            "".join(" " * i + "a:\n" + " " * i + "-\n" for i in range(20)) + " " * 20 + "x: 1\n",
         ]
         for text in texts:
             with self.subTest(text=text[:60]):
