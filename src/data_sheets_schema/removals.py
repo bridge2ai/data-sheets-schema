@@ -1427,7 +1427,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     record_id = original.get("id") if isinstance(original.get("id"), str) else None
     carried = dataset_identifier_forms(original)
     amended = frozenset(amended_paths)
-    amended_edits = {p: [(o, n) for o, n in (e or []) if isinstance(o, str) and isinstance(n, str)]
+    amended_edits = {p: [(o, n) for o, n in (e or []) if isinstance(o, str) and _ws(o) and isinstance(n, str)]
                      for p, e in (amended_edits or {}).items()}
     own_ids = frozenset(i for i in (record_id, final.get("id")) if isinstance(i, str) and i)
     paths_receipted = receipt_paths(receipt)
@@ -1482,9 +1482,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # The amend's recorded edit, applied to this value as #903 proves it
         # (whitespace runs collapsed, the first occurrence replaced), gives
         # the value now at the amended path; nothing there reads as "".
+        # An edit whose text is not in the value leaves it whole, and a
+        # value still at the amended path is carried, never deleted.
         v, o = _ws(value), _ws(old)
-        if not o or o not in v:
-            return False
         found, now = _resolve_value(final, amend_path)
         return v.replace(o, _ws(new), 1) == (_ws(now) if found and now is not None else "")
 
@@ -1915,13 +1915,14 @@ def amend_edits(record: dict[str, Any] | None) -> dict[str, list[tuple[str, str]
     """amended path -> the (`replace`, `with`) pairs its `amend`
     dispositions recorded (#903): what `classify` needs to tell which
     member of a list of scalars an amend on one member changed (#3802).
-    An entry without both strings contributes no pair."""
+    An entry without both strings, or with an empty `replace` (which #903
+    refuses), contributes no pair."""
     rows = (record or {}).get("dispositions") if isinstance(record, dict) else None
     out: dict[str, list[tuple[str, str]]] = {}
     for d in (rows if isinstance(rows, list) else []):
         if isinstance(d, dict) and d.get("disposition") == "amend" and isinstance(d.get("path"), str):
             pairs = out.setdefault(d["path"], [])
-            if isinstance(d.get("replace"), str) and isinstance(d.get("with"), str):
+            if isinstance(d.get("replace"), str) and _ws(d["replace"]) and isinstance(d.get("with"), str):
                 pairs.append((d["replace"], d["with"]))
     return out
 

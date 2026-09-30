@@ -464,16 +464,28 @@ class AmendedDeletions(unittest.TestCase):
                         amended_edits={"keywords[0]": [("voice", "")]})
         self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
         self.assertTrue(all(r.get("curator_amend_ambiguous") for r in b["unfounded_paths"]))
+        # The edit's text in a second member is not a fit: applied to
+        # 'speech clinic' it leaves 'clinic', not the '' now at keywords[0].
+        b = rm.classify(_record(keywords=["speech", "voice", "speech clinic"]), _record(keywords=["", "voice"]),
+                        _audit(), amended_paths={"keywords[0]"}, amended_edits={"keywords[0]": [("speech", "")]})
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[0]": True, "keywords[2]": None})
+        self.assertEqual(b["deleted_curator_amend_ambiguous"], 0)
 
     def test_amend_edits_reads_the_recorded_replacement(self):
         record = {"dispositions": [
             {"disposition": "amend", "path": "keywords[0]", "replace": "speech", "with": "speech data"},
             {"disposition": "amend", "path": "keywords[0]", "replace": "x", "with": ""},
             {"disposition": "amend", "path": "title"},
+            {"disposition": "amend", "path": "title", "replace": " ", "with": "x"},
             {"disposition": "retain", "path": "description", "replace": "a", "with": "b"}]}
         self.assertEqual(rm.amend_edits(record), {"keywords[0]": [("speech", "speech data"), ("x", "")],
                                                   "title": []})
         self.assertEqual(rm.amend_edits(None), {})
+        # An empty edit fits nothing it could name, so the member stays ambiguous.
+        b = rm.classify(_record(keywords=["x", "y"]), _record(keywords=["ax"]), _audit(),
+                        amended_paths={"keywords[0]"}, amended_edits={"keywords[0]": [("", "a")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
 
     def test_a_founded_amended_deletion_is_marked_and_not_counted_unfounded(self):
         before = _record(description="Old description words.")
