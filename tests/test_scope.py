@@ -477,6 +477,45 @@ class TestAMalformedDeclarationIsCaught(unittest.TestCase):
                          [{"index": 0, "matched_on": sentinel, "in_bundle": ["src_a"]}])
 
 
+    def _inventoried(self, related):
+        m = self._manifest({"P": {"referent_id": "https://doi.org/10.1/p",
+                                  "related_but_distinct": related}})
+        m.write_text(yaml.safe_dump({"projects": {"P": [{"id": "src_a", "source_type": "documentation",
+                                                          "processed_file": "src_a.txt"}]},
+                                     "scope": yaml.safe_load(m.read_text())["scope"]}))
+        return m
+
+    def test_a_skipped_entry_keyed_on_the_project_is_reported_as_skipped_alone(self):
+        """#3679. An entry with no id and no alias is skipped by every
+        reader; its manifest_key naming the project made `check_manifest`
+        also call it the referent, while `release_inventory` -- which tests
+        only unskipped entries -- listed it as skipped alone. Both now say
+        the same one thing about it."""
+        from data_sheets_schema import release_inventory as ri
+        m = self._inventoried([{"manifest_key": "P", "in_bundle": "src_a"}])
+        rows = [p["problem"] for p in scope.check_manifest(m)]
+        self.assertEqual(rows, ["related_but_distinct[0]: no `id` and no usable alias; skipped"])
+        inv = ri.inventory(m.read_bytes(), None, "P")["scope"]
+        self.assertEqual([e["index"] for e in inv["skipped_entries"]], [0])
+        self.assertEqual(inv["self_referential_entries"], [])
+
+    def test_both_readers_apply_the_self_reference_test_to_the_same_entries(self):
+        """#3679, by wiring: with `names_referent` patched to match every
+        entry, the checker and the inventory name the same indexes -- the
+        unskipped entry, never the skipped one beside it."""
+        from unittest import mock
+        from data_sheets_schema import release_inventory as ri
+        m = self._inventoried([{"manifest_key": "P"}, {"id": "y"}])
+        sentinel = [{"field": "SENTINEL-3679", "value": "v"}]
+        with mock.patch.object(scope, "names_referent", lambda entry, referent, project: sentinel):
+            rows = [p["problem"] for p in scope.check_manifest(m)
+                    if "names the referent itself" in p["problem"]]
+            inv = ri.inventory(m.read_bytes(), None, "P")["scope"]
+        self.assertEqual(rows, ["related_but_distinct[1] names the referent itself (SENTINEL-3679 'v'): "
+                                "the referent is also listed as related-but-distinct"])
+        self.assertEqual([e["index"] for e in inv["self_referential_entries"]], [1])
+
+
 class TestOneReaderOfTheManifestBytes(unittest.TestCase):
     """#3415. `scope_in` (#3283) reads a declaration off the bytes
     `release_inventory` hashes; the path readers and `check_manifest` used

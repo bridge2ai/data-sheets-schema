@@ -166,7 +166,11 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     with what it matched on and its ``in_bundle`` as written; its unmatched
     ids are still named. The test is ``scope.names_referent``, the one
     ``check_manifest`` reports on (#3584): a narrower one would let an
-    alias or a ``doi:`` spelling of the referent remove the evidence.
+    alias or a ``doi:`` spelling of the referent remove the evidence. Both
+    apply it only to entries ``scope.malformed_in`` does not skip (#3679):
+    a skipped entry whose ``manifest_key`` is this project is listed under
+    ``skipped_entries`` alone, and ``check_manifest`` reports it as skipped
+    alone.
     """
     declared = scope_decl.scope_in(raw, project)
     status = {"status": "declared", "in_bundle_unmatched": [], "in_bundle_not_ids": [],

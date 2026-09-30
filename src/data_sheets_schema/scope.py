@@ -172,9 +172,11 @@ def names_referent(entry: Any, referent: Any, project: Any) -> list[dict]:
     bare-DOI form, a case change or a trailing slash all match -- and its
     `manifest_key` when that is the project itself. Empty when it names
     another dataset. The one test `check_manifest` and `release_inventory`
-    both apply: a narrower checker passed an alias of the referent that
-    `check_record` would then read, on a record carrying its own DOI, as
-    out of scope."""
+    both apply, and both apply it to the same entries -- those
+    `malformed_in` does not skip (#3679); a skipped entry is reported as
+    skipped and nothing else. A narrower checker passed an alias of the
+    referent that `check_record` would then read, on a record carrying its
+    own DOI, as out of scope."""
     if not isinstance(entry, dict):
         return []
     out = []
@@ -478,8 +480,15 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
         # spelling or by a manifest_key that is this project (#3584): the
         # exact raw id was the only case reported, so `doi:` + the
         # referent's DOI passed here while `check_record` would read a
-        # record carrying that DOI as out of scope.
+        # record carrying that DOI as out of scope. Only on the entries
+        # `malformed_in` does not skip, as `release_inventory` tests them
+        # (#3679): a skipped entry is already reported above as read by no
+        # reader, and calling it the referent as well described one entry
+        # two contradictory ways.
+        skipped = {row["index"] for row in malformed_in(scope) if row["skipped"]}
         for index, entry in enumerate(scope.get("related_but_distinct") or []):
+            if index in skipped:
+                continue
             matched = names_referent(entry, referent, project)
             if matched:
                 how = "; ".join(f"{m['field']} {m['value']!r}" for m in matched)
