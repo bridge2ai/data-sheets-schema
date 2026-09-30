@@ -1058,6 +1058,8 @@ DIFFERENTIAL = [
     ("splits", "The holdout set was announced and remains prospective.", "Entry", None),
     ("splits", "Both statements have been published and remain prospective.", "Entry", None),
     ("splits", "The holdout set was announced and was delayed and remains prospective.", "Entry", None),
+    ("splits", "The holdout set was announced and still remains prospective.", "Entry", None),
+    ("splits", "The consent process was announced and it remains prospective.", "Entry", None),
     ("splits", "It was announced in 2024 and remains prospective.", "Entry", None),
     ("splits", "The consent process was announced and remains prospective.", "Entry", "no_member_subject"),
     ("splits", "No statement was published and remains prospective.", "Entry", "negated_subject"),
@@ -1161,6 +1163,9 @@ def test_an_item_naming_the_member_is_not_vetoed_by_a_coordinated_other_item():
     ("The holdout set was announced and remains prospective.", "holdout set"),
     ("Both statements have been published and remain prospective.", "statements"),
     ("The holdout set was announced and was delayed and remains prospective.", "holdout set"),
+    # an adverb is no subject of its own; a pronoun is
+    ("The holdout set was announced and still remains prospective.", "holdout set"),
+    ("The consent process was announced and it remains prospective.", "it"),
 ])
 def test_an_elided_conjunct_inherits_the_governing_subject(text, scope):
     """#3627: the scope is the governing subject's head."""

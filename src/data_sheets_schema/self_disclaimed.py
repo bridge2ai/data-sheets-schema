@@ -589,7 +589,7 @@ def _elided(text: str) -> bool:
     """Whether a conjunct's stretch before its cue has no subject of its
     own: empty, or only adverbs and auxiliaries (`_ELIDED`, a subject
     pronoun excluded: "and it remains" has one)."""
-    return _ELIDED.fullmatch(text.strip()) is not None and _PRONOUN.search(text) is None
+    return _ELIDED.fullmatch(text.lstrip()) is not None and _PRONOUN.search(text) is None
 
 
 def _clause_cut(lexicon, subject: str) -> tuple[int, int]:
