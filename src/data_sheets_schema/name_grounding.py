@@ -34,12 +34,40 @@ Tokens and classes
 A token is a run of letters (with any combining marks) of at least two
 letters, so hyphens, apostrophes, digits and punctuation separate tokens:
 `Jean-Christophe Bélisle-Pipon` is four tokens and the initials `U` and `C`
-are none. Identifier-shaped spans in a string leaf — a URL, an email
-address, a CURIE such as `ORCID:0000-…` — are removed first. Tokens compare
-casefolded and NFKC-composed; the *folded* form used for
-`diacritic_dropped` also decomposes (NFKD) and drops the combining marks.
+are none. Chinese, Japanese, Thai, Lao, Myanmar and Khmer are written
+without spaces between words, so a run of their letters is a phrase, not a
+word (#3401). Such a run is split from letters of any other script beside
+it (`Tim王小明` is `Tim` and `王小明`), and it is in the bundle when the
+bundle writes it inside one of its own runs in those scripts: `王小明`
+against `本研究由王小明教授负责`, but not where the bundle writes a
+combining mark on its last letter: `เอ` against `เอ๋` differs by a Thai
+tone mark and is `diacritic_dropped`, in either direction (#3750). No
+segmenter is used, so this is
+substring membership, the fallback the issue allows, and it errs toward
+grounding: a name that is only part of another word grounds (`张三` in
+`张三丰`), and a one-character token (`王` of `王 小明`) is not checked, as a
+single Latin letter is not. The bundle's runs err the other way: they
+are kept apart, and there the check still over-reports. A line break or a
+space ends a run, so a name the bundle wraps across a
+line inside the name (`王小\\n明`, `สม\\nชาย`, as text extracted from a PDF
+often is) or writes with a space between surname and given name
+(`山田 太郎` against the record's `山田太郎`) reads `absent`. The reverse,
+a record that writes the space against a bundle that does not, grounds.
+It has no case, so no such token is `initial_expanded`, and v2 (below)
+does not judge it. Identifier-shaped
+spans in a string leaf — a URL, an email address, a CURIE such as
+`ORCID:0000-…` — are removed first. Tokens compare
+casefolded and NFKC-composed. A character that is not a letter but that
+NFKC composes to letters of a script written without spaces — a Kangxi
+radical, which text extracted from CJK PDFs writes for the ideograph
+(`⼭⽥` for `山田`), or a circled ideograph — is read as that letter when
+runs are cut, so `⼭⽥太郎` in the bundle grounds `山田太郎` (#3721). No
+other character is: `™` beside a Latin word still ends its run. The
+*folded* form used for `diacritic_dropped` also decomposes (NFKD) and
+drops the combining marks.
 The bundle is tokenised the same way, so a name the bundle wraps across a
-line (`Charlotte\\nMarquez`) is still two tokens of it. Each token of a
+line (`Charlotte\\nMarquez`) is still two tokens of it; in the scripts
+written without spaces a wrap inside the name is not (above). Each token of a
 name leaf is exactly one of:
 
 ``grounded``
@@ -210,9 +238,10 @@ the rest prose in person slots (`Contact Principal Investigator`). A
 source's own
 typo is grounded as written (`Ballllosero`), and a record that corrects it
 is `absent`: the check measures agreement with the bytes, not correctness.
-A script written without spaces between words (Chinese, Japanese, Thai) is
-one run of letters per phrase, so a name inside such a phrase is not a
-token of the bundle and reads `absent`: there the check over-reports.
+In a script written without spaces (Chinese, Japanese, Thai), a name the
+bundle wraps across a line inside the name, or spaces between its parts,
+reads `absent` although the bundle states it: there the check over-reports
+(#3401, see *Tokens and classes*).
 
 The issue's criterion that `Belisle-Pipon` is `diacritic_dropped` does not
 hold on its own bundle: the CM4AI bundle writes `Belisle-Pipon` without the
@@ -252,8 +281,18 @@ from typing import Any, Iterator, NamedTuple
 import yaml
 
 #: Named so a result says which instrument produced it (#907). v1.1 moved
-#: classes only, never whether a token is a finding (#3026, #3126).
-INSTRUMENT = "name_grounding v1.1 (#2918, #3026, #3126)"
+#: classes only, never whether a token is a finding (#3026, #3126). v1.2
+#: reads scripts written without spaces (#3401), which moves findings on
+#: text in those scripts and on letters of any other script written
+#: against them (`研究员Tim Clark` now writes `Tim`): on the committed
+#: corpus, none (286 provenance records, the same findings, classes and
+#: v2 readings as v1.1). It also reads a character NFKC composes to such
+#: letters (a Kangxi radical) as one of them (#3721): no bundle on disk
+#: or record carries one, and the corpus reading is the same. A substring
+#: no longer ends inside a combining sequence (#3750), and the vertical
+#: iteration marks are letters of these scripts (#3751): the corpus
+#: reading is again the same.
+INSTRUMENT = "name_grounding v1.2 (#2918, #3026, #3126, #3401)"
 
 #: The proximity reading beside it (#2978): report-only, never a finding.
 PROXIMITY_INSTRUMENT = "name_grounding v2 proximity (#2978), report-only"
@@ -294,19 +333,90 @@ class Token(NamedTuple):
     end: int
 
 
+#: Scripts written without spaces between words (#3401), as code point
+#: ranges: CJK ideographs (with `々` and `〆`, and the iteration marks of
+#: vertical text, the kana repeat marks `〱`–`〵` and `〻`, #3751), kana
+#: (half-width included), Thai, Lao, Myanmar and Khmer. Hangul is written
+#: with spaces and is not here. The marks are letters (Lm) outside these
+#: blocks: left out, one would be a run of its own and cut the name it
+#: sits in into one-letter pieces that are not checked (`佐〻木`).
+_UNSPACED_RANGES = (
+    (0x0E00, 0x0EFF),     # Thai, Lao
+    (0x1000, 0x109F),     # Myanmar
+    (0x1780, 0x17FF),     # Khmer
+    (0x3005, 0x3006),     # 々 〆
+    (0x3031, 0x3035),     # 〱 〲 〳 〴 〵 vertical kana repeat marks (#3751)
+    (0x303B, 0x303B),     # 〻 vertical ideographic iteration mark (#3751)
+    (0x3040, 0x30FF),     # Hiragana, Katakana
+    (0x31F0, 0x31FF),     # Katakana phonetic extensions
+    (0x3400, 0x4DBF),     # CJK extension A
+    (0x4E00, 0x9FFF),     # CJK unified ideographs
+    (0xF900, 0xFAFF),     # CJK compatibility ideographs
+    (0xFF66, 0xFF9F),     # half-width katakana
+    (0x20000, 0x323AF),   # CJK extensions B onwards
+)
+
+
+def _in_unspaced_ranges(ch: str) -> bool:
+    cp = ord(ch)
+    return any(lo <= cp <= hi for lo, hi in _UNSPACED_RANGES)
+
+
+@functools.lru_cache(maxsize=None)
+def _compat_unspaced(ch: str) -> bool:
+    """`ch` is not a letter, but NFKC makes it letters of a script written
+    without spaces: a Kangxi radical (U+2F2D `⼭` is `山`), one of the two
+    CJK radicals supplement characters NFKC maps, a circled ideograph
+    (`㊤`). Text extracted from CJK PDFs writes these for ordinary
+    ideographs; by category they are symbols (So) and would end a run
+    before NFKC is applied to it (#3721). Read as the letter they compose
+    to, so NFKC decides a run as it decides a token. Only into these
+    scripts: `™` (`TM`) or `㎏` (`kg`) beside a Latin word is not read as
+    letters, and Latin runs are split as before."""
+    if unicodedata.category(ch)[0] in "LM":
+        return False
+    form = unicodedata.normalize("NFKC", ch)
+    return (form != ch and bool(form)
+            and all(unicodedata.category(c)[0] == "L" and _in_unspaced_ranges(c)
+                    for c in form))
+
+
+def _unspaced(ch: str) -> bool:
+    """`ch` is a letter of a script written without spaces (#3401), or a
+    character NFKC composes to such letters (#3721)."""
+    return _in_unspaced_ranges(ch) or _compat_unspaced(ch)
+
+
+def _is_letter(ch: str) -> bool:
+    """A letter, or a character NFKC composes to letters of a script
+    written without spaces (#3721)."""
+    return unicodedata.category(ch)[0] == "L" or _compat_unspaced(ch)
+
+
 def _runs(text: str) -> list[Token]:
     """Every run of letters in `text`, with the combining marks inside it.
 
     A scan by Unicode category rather than `[^\\W\\d_]+`, which would split
-    a decomposed `e\\u0301` from its mark and cut `Bélisle` in two.
+    a decomposed `e\\u0301` from its mark and cut `Bélisle` in two. A letter
+    of a script written without spaces and one of any other script do not
+    share a run (`Tim王小明` is two, #3401); a mark stays in the run it
+    follows, whatever its script (Thai vowel and tone marks, a voicing mark).
+    A character NFKC composes to letters of such a script (a Kangxi radical)
+    is read as one of them, so `⼭⽥太郎` is one run (#3721).
     """
     out: list[Token] = []
     start = None
+    unspaced = False
     for i, ch in enumerate(text):
         cat = unicodedata.category(ch)
-        if cat[0] == "L" or (cat[0] == "M" and start is not None):
+        if cat[0] == "L" or _compat_unspaced(ch):
+            if start is not None and _unspaced(ch) != unspaced:
+                out.append(Token(text[start:i], start, i))
+                start = None
             if start is None:
-                start = i
+                start, unspaced = i, _unspaced(ch)
+        elif cat[0] == "M" and start is not None:
+            continue
         elif start is not None:
             out.append(Token(text[start:i], start, i))
             start = None
@@ -315,8 +425,32 @@ def _runs(text: str) -> list[Token]:
     return out
 
 
+def _contains_whole(haystack: str, key: str) -> bool:
+    """`key` occurs in `haystack` where the haystack's next character is
+    not a combining mark (#3750). A substring that ends before a mark would
+    take the letter without the mark the bundle writes on it: `เอ` against
+    `เอ๋` (a Thai tone mark) is a different spelling, which the folded
+    comparison then reads as `diacritic_dropped`, as it reads `เอ๋` against
+    `เอ`. A key starts with a letter, since a run does, so the start needs
+    no test."""
+    at = haystack.find(key) if key else -1
+    while at >= 0:
+        end = at + len(key)
+        if end == len(haystack) or unicodedata.category(haystack[end])[0] != "M":
+            return True
+        at = haystack.find(key, at + 1)
+    return False
+
+
+def is_unspaced(token: str) -> bool:
+    """`token` is a run in a script written without spaces (#3401): a
+    phrase rather than a word, whose membership in the bundle is read as a
+    substring of one of the bundle's runs in such a script."""
+    return bool(token) and _unspaced(token[0])
+
+
 def _letters(token: str) -> int:
-    return sum(1 for ch in token if unicodedata.category(ch)[0] == "L")
+    return sum(1 for ch in token if _is_letter(ch))
 
 
 def exact_key(token: str) -> str:
@@ -402,8 +536,27 @@ class BundleIndex:
             key = folded_key(t.text)
             self.folded.add(key)
             self.positions.setdefault(key, []).append(i)
+        # The runs in scripts written without spaces, one per line, so that
+        # a substring of this text is a substring of one run (#3401).
+        unspaced = [t.text for t in self.tokens if is_unspaced(t.text)]
+        self._unspaced_exact = "\n".join(exact_key(t) for t in unspaced)
+        self._unspaced_folded = "\n".join(folded_key(t) for t in unspaced)
         self._exact_positions: dict[str, list[int]] | None = None
         self._beside: dict[str, set[str]] = {}
+
+    def has(self, token: str) -> bool:
+        """`token` is in the bundle: a token of it, or, for a run in a
+        script written without spaces, part of one of its runs (#3401) that
+        does not end inside a combining sequence (#3750)."""
+        key = exact_key(token)
+        return key in self.exact or (is_unspaced(token)
+                                     and _contains_whole(self._unspaced_exact, key))
+
+    def has_folded(self, token: str) -> bool:
+        """`has`, compared on the folded form (`diacritic_dropped`)."""
+        key = folded_key(token)
+        return key in self.folded or (is_unspaced(token)
+                                      and _contains_whole(self._unspaced_folded, key))
 
     def _gap(self, i: int, j: int) -> str:
         return self.text[self.tokens[i].end:self.tokens[j].start]
@@ -661,9 +814,9 @@ def classify(token: str, name: list[str], index: BundleIndex,
              words: frozenset[str] = frozenset()) -> str:
     """The class of one token of a name, given the name's other tokens
     (and, from `words_in_capitals`, which of them are words)."""
-    if exact_key(token) in index.exact:
+    if index.has(token):
         return "grounded"
-    if folded_key(token) in index.folded:
+    if index.has_folded(token):
         return "diacritic_dropped"
     return expansion_class(token, name, index, words)
 
