@@ -133,7 +133,16 @@ that shape, so its bound is reached only from 633 links; it trips before
 the walk starts, so from there the reason is the loader's (#3491, #3504).
 A chain the walk expands only once — one whose links sit under a key the
 scan skips and whose last link is aliased once — costs about one step a
-link, so one of thousands of links is checked (#3542).
+link, so one of thousands of links is checked (#3542). Its memory is
+bounded by the same steps: the duplicate walk keeps each path as a link to
+its parent and renders only the paths of the duplicates it names. Built as
+strings, each path copied every link above it, about 1.5·L² characters for
+L steps, and 12,000 links held 216 million characters, 281 MiB, under a step
+budget they never reached (#3582). The scan of the loaded record builds its
+paths as strings, since each finding names one, and a deep record whose
+keys are long (an aliased key, say) builds quadratically many characters
+the same way; it charges every path it builds to `MAX_PATH_CHARS`
+characters and raises `TraversalBudgetExceeded` past it (#3582).
 
 The loader is bounded too. PyYAML flattens a merge by copying the merged
 pairs, so a text whose anchors each merge the one before twice grows
@@ -233,6 +242,15 @@ LEXICON_SHA256 = _digest(SCOPED_SLOTS, SKIPPED_KEYS, _PATTERNS)
 #: record that needs more is a shared graph, not a longer datasheet (#3247).
 MAX_TRAVERSAL_STEPS = 200_000
 
+#: The most characters of path the scan of one loaded record may build
+#: before the record is reported as not checked. A step is charged once
+#: however long the path it names, and a path names every key above it, so a
+#: record nested D deep under keys of K characters builds about K·D²/2 in D
+#: steps: 400 levels under one aliased 20,000-character key, a 183 KB text,
+#: took 1.5 GiB (#3582). Over the 1,616 YAML files under
+#: `data/d4d_concatenated` on 2026-09-29 the most any scan built was 1,374.
+MAX_PATH_CHARS = 20_000_000
+
 
 class TraversalBudgetExceeded(Exception):
     """A walk of one record ran past its step budget; the record was not
@@ -247,11 +265,24 @@ class MergeCycle(Exception):
 
 
 class _Budget:
-    __slots__ = ("limit", "spent")
+    __slots__ = ("limit", "spent", "path_limit", "path_spent")
 
-    def __init__(self, limit: int | None):
+    def __init__(self, limit: int | None, path_limit: int | None = None):
         self.limit = MAX_TRAVERSAL_STEPS if limit is None else limit
         self.spent = 0
+        self.path_limit = MAX_PATH_CHARS if path_limit is None else path_limit
+        self.path_spent = 0
+
+    def path(self, text: str) -> str:
+        """`text`, a path the scan has just built, charged its length: a path
+        names every key above it, so its characters, not only the step that
+        made it, are what a deep record under long keys costs (#3582)."""
+        self.path_spent += len(text)
+        if self.path_spent > self.path_limit:
+            raise TraversalBudgetExceeded(
+                f"the walk's paths ran past their budget of {self.path_limit:,} characters (a record "
+                "nested deep under long or aliased keys); not read in full")
+        return text
 
     def spend(self, steps: int = 1) -> None:
         self.spent += steps
@@ -402,22 +433,23 @@ def _leaves(node: Any, path: str, walk: _Walk) -> Iterator[tuple[str, str]]:
         for key, value in node.items():
             if key in SKIPPED_KEYS or not walk.may_yield(value, True):
                 continue
-            yield from _leaves(value, f"{path}.{key}", walk)
+            yield from _leaves(value, walk.budget.path(f"{path}.{key}"), walk)
     elif isinstance(node, list):
         for index, value in enumerate(node):
             if walk.may_yield(value, True):
-                yield from _leaves(value, f"{path}[{index}]", walk)
+                yield from _leaves(value, walk.budget.path(f"{path}[{index}]"), walk)
     elif isinstance(node, str):
         yield path, node
 
 
-def _entries(slot: str, value: Any, path: str) -> Iterator[tuple[str, Any, bool | None]]:
+def _entries(slot: str, value: Any, path: str,
+             budget: _Budget) -> Iterator[tuple[str, Any, bool | None]]:
     """Each entry under a slot with its path and its `<slot>_present` flag. A
     single mapping or a bare string is read as one entry: a record that breaks
     the declared list shape still says what it says."""
     items = list(enumerate(value)) if isinstance(value, list) else [(None, value)]
     for index, entry in items:
-        entry_path = path if index is None else f"{path}[{index}]"
+        entry_path = path if index is None else budget.path(f"{path}[{index}]")
         present = entry.get(f"{slot}_present") if isinstance(entry, dict) else None
         yield entry_path, entry, present if isinstance(present, bool) else None
 
@@ -438,9 +470,9 @@ def _scan(node: Any, path: str, walk: _Walk) -> Iterator[Mismatch]:
     walk.budget.spend()
     if isinstance(node, dict):
         for key, value in node.items():
-            child = f"{path}.{key}" if path else str(key)
+            child = walk.budget.path(f"{path}.{key}" if path else str(key))
             if key in SCOPED_SLOTS:
-                for entry_path, entry, present in _entries(key, value, child):
+                for entry_path, entry, present in _entries(key, value, child, walk.budget):
                     if not walk.may_yield(entry, True):
                         continue
                     for leaf_path, text in _leaves(entry, entry_path, walk):
@@ -452,10 +484,11 @@ def _scan(node: Any, path: str, walk: _Walk) -> Iterator[Mismatch]:
     elif isinstance(node, list):
         for index, value in enumerate(node):
             if walk.may_yield(value, False):
-                yield from _scan(value, f"{path}[{index}]", walk)
+                yield from _scan(value, walk.budget.path(f"{path}[{index}]"), walk)
 
 
-def slot_meaning_mismatch(record: dict[str, Any], *, max_steps: int | None = None) -> list[Mismatch]:
+def slot_meaning_mismatch(record: dict[str, Any], *, max_steps: int | None = None,
+                          max_path_chars: int | None = None) -> list[Mismatch]:
     """Every string leaf under `confidential_elements` or `sensitive_elements`,
     at any depth, whose text is about an embargo, release timing or
     availability timing — in record order, one finding per leaf.
@@ -464,12 +497,15 @@ def slot_meaning_mismatch(record: dict[str, Any], *, max_steps: int | None = Non
     read as a clean record the diagnostic never looked at. Raises
     TraversalBudgetExceeded when the walk takes more than `max_steps`
     (default `MAX_TRAVERSAL_STEPS`): a shared YAML graph whose paths outgrow
-    its text (#3247). A subtree reached through many aliases is decided
-    once, and only a branch that can hold a finding is walked.
+    its text (#3247), or when the paths it builds pass `max_path_chars`
+    characters (default `MAX_PATH_CHARS`): a deep record under long keys
+    (#3582). A subtree reached through
+    many aliases is decided once, and only a branch that can hold a finding
+    is walked.
     """
     if not isinstance(record, dict):
         raise TypeError(f"a record is a mapping, not {type(record).__name__}")
-    return list(_scan(record, "", _Walk(_Budget(max_steps))))
+    return list(_scan(record, "", _Walk(_Budget(max_steps, max_path_chars))))
 
 
 #: Where the scan stands at a node: outside every scoped slot, walking through
@@ -484,8 +520,49 @@ def _constructed(identity: tuple[str, Any]) -> Any:
     return identity[1] if identity[0] == "value" else None
 
 
-def _kept_pairs(loader: yaml.SafeLoader, node: yaml.MappingNode, path: str,
-                budget: _Budget) -> list[tuple[yaml.MappingNode, str, Any, Any, Any]]:
+class _Path:
+    """A path in the node tree as a link to its parent and its own segment,
+    rendered only when a duplicate is named. Built as strings, each path
+    copied every link above it, so a merge chain of L links held about
+    1.5·L² characters for L steps — 12,000 links held 216 million, 281 MiB,
+    under a step budget they never reached, and an allocation failure there
+    would have escaped `check_text` and lost the batch's report (#3582).
+    Linked, a path costs one small object a step, which the step budget
+    bounds. The segment keeps the key's own string, so a long key reached
+    through an alias is not copied either."""
+    __slots__ = ("parent", "sep", "segment")
+
+    def __init__(self, parent: "_Path | None", sep: str, segment: str):
+        self.parent, self.sep, self.segment = parent, sep, segment
+
+    def key(self, key: str) -> "_Path":
+        return _Path(self, "." if self else "", key)
+
+    def index(self, index: int) -> "_Path":
+        return _Path(self, "[", f"{index}]")
+
+    def __bool__(self) -> bool:
+        return self.parent is not None or bool(self.segment)
+
+    def __str__(self) -> str:
+        parts: list[str] = []
+        current: _Path | None = self
+        while current is not None:
+            parts.append(current.segment)
+            parts.append(current.sep)
+            current = current.parent
+        return "".join(reversed(parts))
+
+
+_ROOT = _Path(None, "", "")
+
+
+def _as_path(path: "_Path | str") -> _Path:
+    return path if isinstance(path, _Path) else _Path(None, "", path)
+
+
+def _kept_pairs(loader: yaml.SafeLoader, node: yaml.MappingNode, path: "_Path | str",
+                budget: _Budget) -> list[tuple[yaml.MappingNode, _Path, Any, Any, Any]]:
     """The pairs the loader reads as `node`'s — (source mapping, the path it
     is named at, key identity, key node, value node) — in the order it reads
     them: each merged mapping's (its own merges first), then `node`'s own. A
@@ -522,7 +599,7 @@ def _holds_a_scoped_slot(loader: yaml.SafeLoader, node: Any, budget: _Budget,
         seen.add(id(current))
         budget.spend()
         if isinstance(current, yaml.MappingNode):
-            for _, _, identity, _, value_node in _kept_pairs(loader, current, "", budget):
+            for _, _, identity, _, value_node in _kept_pairs(loader, current, _ROOT, budget):
                 if _constructed(identity) in SCOPED_SLOTS:
                     found = True
                     break
@@ -552,8 +629,8 @@ def _is_merge(key_node: Any) -> bool:
             and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge")
 
 
-def _merge_sources(node: yaml.MappingNode, path: str,
-                   budget: _Budget) -> list[tuple[yaml.MappingNode, str]]:
+def _merge_sources(node: yaml.MappingNode, path: "_Path | str",
+                   budget: _Budget) -> list[tuple[yaml.MappingNode, _Path]]:
     """The mappings whose pairs the loader reads as `node`'s, each with the
     path it is named at, in the order PyYAML's `flatten_mapping` lays their
     pairs out: every `<<` in turn — a merged mapping's own merges before its
@@ -571,8 +648,8 @@ def _merge_sources(node: yaml.MappingNode, path: str,
     open mapping, so the recursion limit does not cut a merge chain; each
     mapping opened is a step, so one call on a chain of L links spends L
     (#3272, #3491)."""
-    def merges(current: yaml.MappingNode, current_path: str) -> Iterator[tuple[yaml.MappingNode, str]]:
-        base = f"{current_path}.<<" if current_path else "<<"
+    def merges(current: yaml.MappingNode, current_path: _Path) -> Iterator[tuple[yaml.MappingNode, _Path]]:
+        base = current_path.key("<<")
         for key_node, value_node in current.value:
             if not _is_merge(key_node):
                 continue
@@ -581,16 +658,16 @@ def _merge_sources(node: yaml.MappingNode, path: str,
             elif isinstance(value_node, yaml.SequenceNode):
                 for index, item in reversed(list(enumerate(value_node.value))):
                     if isinstance(item, yaml.MappingNode):
-                        yield item, f"{base}[{index}]"
+                        yield item, base.index(index)
 
-    sources: list[tuple[yaml.MappingNode, str]] = []
+    sources: list[tuple[yaml.MappingNode, _Path]] = []
     # The mappings open between `node` and the one being read: a merge that
     # reaches one of them is a cycle; a mapping reached again once closed is
     # a diamond or a repeat, listed at its last place below.
     active: set[int] = set()
-    stack: list[tuple[yaml.MappingNode, str, Iterator[tuple[yaml.MappingNode, str]]]] = []
+    stack: list[tuple[yaml.MappingNode, _Path, Iterator[tuple[yaml.MappingNode, _Path]]]] = []
 
-    def enter(current: yaml.MappingNode, current_path: str) -> None:
+    def enter(current: yaml.MappingNode, current_path: _Path) -> None:
         if id(current) in active:
             raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
                              "loader keeps there is not reproduced, so the record was not read in full")
@@ -598,7 +675,7 @@ def _merge_sources(node: yaml.MappingNode, path: str,
         active.add(id(current))
         stack.append((current, current_path, merges(current, current_path)))
 
-    enter(node, path)
+    enter(node, _as_path(path))
     while stack:
         current, current_path, pending = stack[-1]
         merged = next(pending, None)
@@ -644,7 +721,10 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     expands the chain below it, so a chain whose links are each visited
     costs about L²/2 steps and one of 629 links or more raises
     TraversalBudgetExceeded; where each link also adds a key the walk costs
-    about L² steps and raises from 446 links (#3491, #3504)."""
+    about L² steps and raises from 446 links (#3491, #3504). A path is a
+    link to its parent, rendered only for a duplicate named, so a chain the
+    walk expands once costs memory in proportion to its steps, not to the
+    square of its length (#3582)."""
     budget = _Budget(max_steps)
     holds_memo: dict[int, bool] = {}
     try:
@@ -654,7 +734,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     named: dict[tuple[int, Any], dict[str, Any]] = {}
     try:
         root = loader.get_single_node()
-        stack = [(root, "", _OUTSIDE)] if root is not None else []
+        stack = [(root, _ROOT, _OUTSIDE)] if root is not None else []
         # A node is walked at most once outside the scoped slots and once
         # inside one, so a cyclic or widely shared graph neither recurses
         # forever nor is walked once per alias, as in the #1029 gate (#1032).
@@ -666,7 +746,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
             walked.add((id(node), where))
             budget.spend()
             if isinstance(node, yaml.SequenceNode):
-                stack.extend((item, f"{path}[{i}]", where) for i, item in reversed(list(enumerate(node.value))))
+                stack.extend((item, path.index(i), where) for i, item in reversed(list(enumerate(node.value))))
                 continue
             if not isinstance(node, yaml.MappingNode):
                 continue
@@ -675,7 +755,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
             # A key is kept from the last pair that writes it, so a merged key
             # an explicit key overrides, or an earlier mapping in a merge list
             # shadows, is dropped whole and never scanned (#3203).
-            groups: dict[tuple[int, Any], tuple[str, str, list[tuple[int, Any]]]] = {}
+            groups: dict[tuple[int, Any], tuple[_Path, str, list[tuple[int, Any]]]] = {}
             children = []
             for source, label_path, identity, key_node, value_node in _kept_pairs(loader, node, path, budget):
                 text_key = getattr(key_node, "value", None)
@@ -683,7 +763,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
                 groups.setdefault((id(source), identity), (label_path, label, []))[2].append(
                     (key_node.start_mark.line + 1, value_node))
                 key = _constructed(identity)
-                child = f"{label_path}.{label}" if label_path else label
+                child = label_path.key(label)
                 if where == _OUTSIDE:
                     children.append((value_node, child, _INSIDE if key in SCOPED_SLOTS else _OUTSIDE))
                 elif key not in SKIPPED_KEYS:
@@ -694,7 +774,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
                                              [value for _, value in occurrences[:-1]],
                                              budget, holds_memo)):
                     named[(source_id, identity)] = {
-                        "path": label_path or "$", "key": label,
+                        "path": str(label_path) or "$", "key": label,
                         "lines": [line for line, _ in occurrences], "count": len(occurrences)}
             stack.extend(reversed(children))
     except yaml.YAMLError:

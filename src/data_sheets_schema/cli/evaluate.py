@@ -349,7 +349,8 @@ def slot_meaning_cmd(records, as_json):
     links or more is not checked (446 where each link adds a key; #3491,
     #3504), while a chain the walk expands only once, such as one under a
     key the scan skips, costs about a step a link and is checked far beyond
-    that (#3542);
+    that (#3542); when the paths its scan builds pass a fixed character
+    budget, as a deep record under long keys does (#3582);
     when its merge keys would copy more pairs in the loader than the same
     bound (#3259); or when a merge key reaches the mapping it is written in
     (#3263). A record that is not checked has none of its findings reported, not even those its kept

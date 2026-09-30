@@ -620,6 +620,58 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
                       "costs about a step a link and is checked far beyond that (#3542)", help_text)
         self.assertNotIn("a merge chain of a few hundred links or more costs", help_text)
 
+    def test_a_chain_the_walk_expands_once_holds_memory_in_proportion_to_its_links(self):
+        """#3582 (Codex): expanded once, the skipped-key chain costs a step a
+        link, but its paths were strings each copying every link above it,
+        about 1.5·L**2 characters: 12,000 links held 216 million, 281 MiB,
+        under a step budget they never reached. Paths are now links to their
+        parent, rendered only for a duplicate named, so three times the
+        links peak at about three times the memory, where the strings
+        peaked at over five."""
+        import tracemalloc
+
+        def peak(links):
+            text = _merge_chain(links)
+            tracemalloc.start()
+            try:
+                named = rd.unread_duplicate_keys(text)
+                return tracemalloc.get_traced_memory()[1], named
+            finally:
+                tracemalloc.stop()
+
+        small, named_small = peak(600)
+        large, named_large = peak(1_800)
+        self.assertEqual([d["path"] for d in named_large],
+                         ["resources.outer.sensitive_elements[0]" + ".<<" * 1_799])
+        self.assertEqual(len(named_small), 1)
+        self.assertLess(large / small, 4, (small, large))
+
+    def test_a_merge_path_is_a_link_to_its_parent_not_a_copy(self):
+        loader = yaml.SafeLoader(_merge_chain(50))
+        try:
+            root = loader.get_single_node()
+            top = root.value[0][1].value[0][1].value[-1][1]              # a49
+            sources = rd._merge_sources(top, "a49", rd._Budget(None))
+        finally:
+            loader.dispose()
+        labels = [label for _, label in sources]
+        self.assertEqual([str(label) for label in labels], ["a49" + ".<<" * n for n in range(49, -1, -1)])
+        for deeper, shallower in zip(labels, labels[1:]):
+            self.assertIs(deeper.parent, shallower)
+
+    def test_the_scan_charges_the_paths_it_builds(self):
+        """#3582: the loaded record's paths are strings, since each finding
+        names one; a deep record under long keys builds quadratically many
+        characters, so the scan charges them to their own budget."""
+        record = leaf = {}
+        for _ in range(50):
+            leaf["k" * 100] = leaf = {}
+        leaf["confidential_elements"] = [EMBARGO_TEXT]
+        self.assertEqual(len(slot_meaning_mismatch(record)), 1)
+        with self.assertRaises(rd.TraversalBudgetExceeded) as raised:
+            slot_meaning_mismatch(record, max_path_chars=10_000)
+        self.assertIn("paths ran past their budget of 10,000 characters", str(raised.exception))
+
     def test_the_stack_lays_merges_out_in_the_loaders_order(self):
         """Each merge's own merges first, a merge list last to first, each
         mapping at its last place: the order the recursive expansion had."""
@@ -630,7 +682,7 @@ class TestAWalkThatCannotFinishIsNotChecked(unittest.TestCase):
             sources = rd._merge_sources(top, "top", rd._Budget(None))
         finally:
             loader.dispose()
-        self.assertEqual([(dict((k.value, v.value) for k, v in source.value if k.value != "<<"), label)
+        self.assertEqual([(dict((k.value, v.value) for k, v in source.value if k.value != "<<"), str(label))
                           for source, label in sources],
                          [({"x": "1"}, "top.<<[0].<<"), ({"y": "1"}, "top.<<[0]"),
                           ({"z": "1"}, "top.<<"), ({"t": "1"}, "top")])
@@ -1116,6 +1168,30 @@ class TestTheCommand(unittest.TestCase):
                 bad = Path(self.tmp.name) / name
                 bad.write_text(text)
                 self._assert_not_checked_beside_the_others(bad, reason)
+
+    def test_a_long_skipped_key_chain_names_its_duplicate_and_the_others_are_reported(self):
+        """#3582 (Codex): the chain's string paths grew quadratically under a
+        step budget they never reached, and an allocation failure would have
+        escaped check_text and lost every record's report. Its paths are
+        links now, so a chain three times the recursion limit is read to its
+        end and its duplicate named, beside the others."""
+        chain = Path(self.tmp.name) / "chain3420.yaml"
+        chain.write_text(_merge_chain(3 * sys.getrecursionlimit()))
+        self._assert_not_checked_beside_the_others(chain, "duplicate key `name`")
+
+    def test_a_record_whose_scan_paths_pass_their_budget_is_not_checked_and_the_others_are_reported(self):
+        """#3582: a deep record under one aliased long key builds quadratically
+        many path characters in the scan; it is named as not checked on the
+        path budget and the batch goes on. A small budget stands in for the
+        default, so the test allocates little."""
+        from unittest import mock
+        deep = Path(self.tmp.name) / "deep3420.yaml"
+        deep.write_text("\n".join(["key: &k " + "k" * 200, "root:"]
+                                  + ["  " * (d + 1) + "*k :" for d in range(40)]
+                                  + ["  " * 41 + "confidential_elements: [embargo]"]) + "\n")
+        self.assertEqual(len(rd.check_text(deep.read_text())[0]), 1)
+        with mock.patch.object(rd, "MAX_PATH_CHARS", 20_000):
+            self._assert_not_checked_beside_the_others(deep, "paths ran past their budget of 20,000 characters")
 
     def test_a_record_of_one_string_aliased_many_times_is_checked_and_the_next_is_read(self):
         """#3263: every alias reran every pattern over the string, so the
