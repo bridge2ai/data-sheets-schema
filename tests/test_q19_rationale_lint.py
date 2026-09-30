@@ -2328,6 +2328,12 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     assert len(set(classified)) == len(classified) == 46
     # 109 left are credit: 155 less the 11, 18 and 17 pinned above (#3838).
     assert len(read) - len(classified) == 109
+    # The classes are the module docstring's counts, so a pin moved from one
+    # class to another fails here, as a recommendation's does above.
+    assert (len(_UNRECOGNISED_NAMED_ABSENCES), len(_UNRECOGNISED_PLACEMENTS)) == (11, 18)
+    assert {kind: len(fragments) for kind, fragments in _HAND_READ_NOT_CREDIT.items()} == {
+        "unrecognised_absence": 2, "count": 2, "criticism": 5, "qualification": 4,
+        "bare_name": 2, "criterion": 2}
     # None of them is read as an empty-slot reason: the gate reads
     # `_EMPTINESS` words only, as on main.
     for sentence in classified[:len(_UNRECOGNISED_NAMED_ABSENCES)]:
