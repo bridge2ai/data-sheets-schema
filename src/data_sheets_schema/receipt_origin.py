@@ -57,7 +57,10 @@ another subcommand nor a program known to read (a nested `bash -c`,
 cannot be placed (#3137). The words are matched after quote and escape
 characters are removed, as the shell running a nested string removes them
 (`bash -c 'd4d derive "core"'`), and `derive` followed by a word supplied
-at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397). So is a reader part that carries them where a
+at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397), as does
+one carrying any replacement string an `xargs` in the command sets (`-I%`,
+`-J %`, `-i`, `--replace`), and a `derive` that ends an `xargs` command
+setting none, where xargs appends the word (#3426). So is a reader part that carries them where a
 pipe later in the command feeds a program not known to read (`echo '...
 derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
 substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
@@ -181,7 +184,11 @@ NON_CHECKS = (
     "boundary is missed (#3137, #3384). The words are matched after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
-    "placed (#3397); a word the shell builds some other way (a glob, `derive c*`) is not seen",
+    "placed (#3397), as does a word carrying any replacement string an `xargs` in the command "
+    "sets (`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`) and a `derive` ending an `xargs` "
+    "command that sets none, where xargs appends the word (#3426); a word the shell builds "
+    "some other way (a glob, `derive c*`) is not seen, nor is a word xargs appends to a "
+    "`derive` that does not end the xargs command",
 )
 
 _ABSENT = object()
@@ -740,8 +747,75 @@ def _mentions_derive(segment: list[str]) -> bool:
     string would remove them (`bash -c 'd4d derive "core"'`, `eval "d4d
     'derive' core"`, #3397). `derive` followed by a word supplied at run time
     (`derive $SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts too:
-    it may be `core`, so it is a derive that cannot be placed, never none."""
-    return bool(_DERIVE_CORE.search(_QUOTING.sub("", " ".join(segment))))
+    it may be `core`, so it is a derive that cannot be placed, never none.
+    So does `derive` followed by a word carrying a replacement string that an
+    `xargs` earlier in the same command sets with `-I`, `-J`, `-i` or
+    `--replace` (`xargs -I% d4d derive %`), and `derive` as the last word of
+    an `xargs` command that sets none, where xargs appends the word (#3426)."""
+    text = _QUOTING.sub("", " ".join(segment))
+    return bool(_DERIVE_CORE.search(text)) or _xargs_supplies_derive_word(text)
+
+
+#: `xargs` options whose argument is the rest of the word or the next word;
+#: `-I`/`-J` set a replacement string (GNU and BSD).
+_XARGS_WITH_ARGUMENT = frozenset("IJLnPsEdaRS")
+#: `xargs` options whose argument, if any, is only the rest of the word.
+_XARGS_OPTIONAL_ARGUMENT = frozenset("iel")
+_XARGS_LONG_WITH_ARGUMENT = frozenset({"--arg-file", "--delimiter", "--eof", "--max-lines", "--max-args",
+                                       "--max-procs", "--max-chars", "--process-slot-var"})
+_SHELL_WORDS = re.compile(r"[|;&()\n]+|[^\s|;&()]+")
+
+
+def _xargs_supplies_derive_word(text: str) -> bool:
+    """Whether an `xargs` in `text` supplies the word after `derive` at run
+    time (#3426): through a replacement string (`-I%`, `-I %`, `-J %`, `-i`
+    meaning `{}`, `-i%`, `--replace[=%]`, clustered as in `-0I%`) contained
+    in that word, since `{}` is only a convention, or, with no replacement
+    string, by appending it after a `derive` that ends the command."""
+    words = _SHELL_WORDS.findall(text)
+    for start, word in enumerate(words):
+        if os.path.basename(word) != "xargs":
+            continue
+        tokens: list[str] = []
+        k = start + 1
+        while k < len(words) and words[k].startswith("-"):
+            option = words[k]
+            k += 1
+            if option == "--":
+                break
+            if option.startswith("--"):
+                name, eq, value = option.partition("=")
+                if name == "--replace":
+                    tokens.append(value if eq else "{}")
+                elif name in _XARGS_LONG_WITH_ARGUMENT and not eq:
+                    k += 1
+                continue
+            for at, flag in enumerate(option[1:], start=1):
+                rest = option[at + 1:]
+                if flag in _XARGS_WITH_ARGUMENT:
+                    if not rest:
+                        rest = words[k] if k < len(words) else ""
+                        k += 1
+                    if flag in "IJ" and rest:
+                        tokens.append(rest)
+                    break
+                if flag in _XARGS_OPTIONAL_ARGUMENT:
+                    if flag == "i":
+                        tokens.append(rest or "{}")
+                    break
+        end = k
+        while end < len(words) and not re.fullmatch(r"[|;&()\n]+", words[end]):
+            end += 1
+        command = words[k:end]
+        for at, part in enumerate(command):
+            if part != "derive":
+                continue
+            following = command[at + 1] if at + 1 < len(command) else None
+            if following is None and not tokens:
+                return True
+            if following is not None and any(token in following for token in tokens):
+                return True
+    return False
 
 
 def _subcommand(args: list[str]) -> tuple[tuple[str, ...], list[str]]:

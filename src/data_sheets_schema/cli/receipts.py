@@ -308,7 +308,9 @@ def origin(transcripts, receipt_file, full_file, as_json):
     ...' | bash`), and, in a command with a substitution anywhere, every
     part carrying them cannot be placed. The words are matched after quote and escape
     characters are removed (`bash -c 'd4d derive "core"'`), and `derive` followed by a word
-    supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) cannot be placed either. A
+    supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` or any other replacement
+    string it sets, such as `-I%` or `-J %`, or the word xargs appends after a `derive` that
+    ends its command) cannot be placed either. A
     derive whose words are not on the command line (a script, an alias, a variable supplying
     `derive` itself) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only

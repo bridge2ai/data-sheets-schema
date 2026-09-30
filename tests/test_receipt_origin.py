@@ -1483,7 +1483,18 @@ class DeriveSpellings(Base):
                          f"d4d derive `echo core` --full {self.FULL} {self.OUT}",
                          f"echo core | xargs -I{{}} d4d derive {{}} --full {self.FULL} {self.OUT}",
                          f"d4d derive $SUB --full {self.FULL} {self.OUT}",
-                         f"d4d derive ${{SUB}} --full {self.FULL} {self.OUT}"):
+                         f"d4d derive ${{SUB}} --full {self.FULL} {self.OUT}",
+                         # #3426: any xargs replacement string, not only `{}`, and a
+                         # word xargs appends after a `derive` that ends its command
+                         f"echo core | xargs -I% d4d derive % --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -I % poetry run d4d derive % --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -J % d4d derive % --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -0I@ d4d derive @ --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -i d4d derive {{}} --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -iSUB d4d derive SUB --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs --replace=@ d4d derive @ --full {self.FULL} {self.OUT}",
+                         f"echo core | xargs -L 1 -I @ sh -c 'd4d derive @ --full {self.FULL} {self.OUT}'",
+                         f"echo core --full {self.FULL} {self.OUT} | xargs -n 9 d4d derive"):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
                     identity, block = self._derived(spelling, ok=ok)
@@ -1526,7 +1537,12 @@ class DeriveSpellings(Base):
                          "bash -c 'python scripts/\"re\"derive core'",
                          "bash -c 'python scripts/\"derive\" \"core.py\"'",
                          "grep -n \"derive $x\" x.md",
-                         "poetry run d4d receipts check --label \"$L\" --project CHORUS"):
+                         "poetry run d4d receipts check --label \"$L\" --project CHORUS",
+                         # #3426: an xargs replacement string or appended word that is not
+                         # the word after `derive` supplies nothing to it
+                         "ls | xargs -I% python scripts/derive corex %",
+                         "ls | xargs grep -n derive x.md",
+                         "ls | xargs -I% cat %; python scripts/derive corex %"):
             with self.subTest(spelling=spelling):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -1576,6 +1592,11 @@ class DeriveSpellings(Base):
         self.assertIn("`xargs ... derive {}`) counts as a derive that cannot be placed", text)
         self.assertIn("a variable or substitution supplying the word `derive` itself", text)
         self.assertIn("a word the shell builds some other way (a glob, `derive c*`) is not seen", text)
+        # #3426: any xargs replacement string, and the one xargs route still unseen
+        self.assertIn("as does a word carrying any replacement string an `xargs` in the command sets "
+                      "(`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`)", text)
+        self.assertIn("nor is a word xargs appends to a `derive` that does not end the xargs command", text)
+        self.assertIn("as does one carrying any replacement string an `xargs` in the command sets", doc)
         self.assertIn("The words are matched after quote and escape characters are removed, as the shell "
                       "running a nested string removes them", doc)
 
@@ -1839,8 +1860,9 @@ class Cli(unittest.TestCase):
                       text)                                                                     # #3385
         self.assertIn("The words are matched after quote and escape characters are removed "
                       "(`bash -c 'd4d derive \"core\"'`)", text)                               # #3397
-        self.assertIn("`derive` followed by a word supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) "
-                      "cannot be placed either", text)
+        self.assertIn("`derive` followed by a word supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` "
+                      "or any other replacement string it sets, such as `-I%` or `-J %`, or the word xargs "
+                      "appends after a `derive` that ends its command) cannot be placed either", text)   # #3426
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
                       "supplying `derive` itself) is not seen", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)
