@@ -783,6 +783,18 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
         self.assertIn("no digest any arm pinned tells the model that a `Software` takes", md)
         self.assertNotIn("no reproduced digest", md)
 
+    def test_a_render_that_does_not_reproduce_limits_the_conclusion_to_the_reproduced_ones(self):
+        # #3765: every counted record is measured, but one pinned digest does
+        # not reproduce, so the conclusion may not speak for it.
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        self._pin("claudecode_agent", "L_rep1", "Q", self.md5)
+        self._pin("claudecode_api", "M_rep1", "P", "0" * 32)
+        md = self._note(self._measure())
+        self.assertIn(f"Not reproduced: `{self.commit[:10]}` `00000000`.", md)
+        self.assertIn("Counted records with no render measured: none.", md)
+        self.assertIn("no reproduced digest tells the model that a `Software` takes", md)
+        self.assertNotIn("no digest any arm pinned", md)
+
     def test_a_digest_that_shows_software_is_named_and_the_conclusion_withheld(self):
         self.digest = "# Target class `Dataset`\n\n" + PREAMBLE + SOFTWARE_ENTRY
         (self.repo / "src" / "data_sheets_schema" / "schema_digest.py").write_text(
