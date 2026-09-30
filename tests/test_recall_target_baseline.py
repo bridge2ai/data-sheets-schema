@@ -766,6 +766,22 @@ class DigestMeasurement(CorpusFixture, unittest.TestCase):
         # The arm's prompt is counted and names the slot (#3760).
         self.assertIn("A prompt file that names `used_software` is counted above", md)
         self.assertLess(md.index("(#3525)"), md.index("## Lexical candidates by record"))
+        # A record went unmeasured, so the conclusion covers the reproduced
+        # renders, not every digest an arm pinned (#3764).
+        self.assertIn("no reproduced digest tells the model that a `Software` takes", md)
+        self.assertNotIn("no digest any arm pinned", md)
+
+    def test_the_conclusion_speaks_for_every_pinned_digest_only_when_all_are_measured(self):
+        # #3764: every counted record pins a digest and every render
+        # reproduces, so the conclusion may name every digest an arm pinned.
+        for method, label, project in (("claudecode_agent", "L_rep1", "P"), ("claudecode_agent", "L_rep1", "Q"),
+                                       ("claudecode_api", "M_rep1", "P")):
+            self._pin(method, label, project, self.md5)
+        md = self._note(self._measure())
+        self.assertIn("Not reproduced: none.", md)
+        self.assertIn("Counted records with no render measured: none.", md)
+        self.assertIn("no digest any arm pinned tells the model that a `Software` takes", md)
+        self.assertNotIn("no reproduced digest", md)
 
     def test_a_digest_that_shows_software_is_named_and_the_conclusion_withheld(self):
         self.digest = "# Target class `Dataset`\n\n" + PREAMBLE + SOFTWARE_ENTRY

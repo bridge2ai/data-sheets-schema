@@ -1147,8 +1147,13 @@ def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
                 "no key of `Software` is shown (`used_software` is not named only in the object-ranges",
                 "preamble in every one; the per-render table says where it is):",
             ]
+        # A claim about every pinned digest needs every one reproduced and
+        # every counted record measured (#3764); otherwise it covers the
+        # reproduced renders only.
+        whole = ("no digest any arm pinned" if not failed and not unmeasured
+                 else "no reproduced digest")
         lines += [
-            "no digest any arm pinned tells the model that a `Software` takes a `name` and a `version`.",
+            f"{whole} tells the model that a `Software` takes a `name` and a `version`.",
             "A recall rule that asks the API path for versioned software asks for a shape its digest",
             "does not show. Showing it is a digest change: `schema_digest.py` is pinned, and the change",
             "would be its own condition boundary. It is recorded here, not made.",
