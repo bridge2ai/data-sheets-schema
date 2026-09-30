@@ -576,6 +576,39 @@ class Baseline(unittest.TestCase):
                 with self.assertRaisesRegex(self.m.Refused, message):
                     self.m.render_markdown(collected)
 
+    def test_judgements_that_do_not_parse_are_not_a_mapping_or_lack_a_key_are_refused(self):
+        """#3596: a file that does not parse, whose top level is not a mapping,
+        whose `judgements` is not a mapping, or with a row missing any of
+        record, pointer, start or end is refused, not a YAMLError,
+        AttributeError or KeyError that `main` would let through as a
+        traceback."""
+        collected = self.m.collect(self.corpus)
+        checked = self.m.PRECISION[collected["lexicon"].sha256]
+        cases = []
+        for key in ("record", "pointer", "start", "end"):
+            def drop_key(data, key=key):
+                del data["judgements"][RSN][4][key]
+            cases.append((f"row without {key}", drop_key, "needs record, pointer, start, end, a reason"))
+
+        def judgements_a_list(data):
+            data["judgements"] = list(data["judgements"].values())
+        cases.append(("judgements a list", judgements_a_list, "has no `judgements` mapping"))
+        for name, edit, message in cases:
+            with self.subTest(case=name):
+                self._judgements_copy(checked, edit)
+                with self.assertRaisesRegex(self.m.Refused, message):
+                    self.m.render_markdown(collected)
+        for name, text, message in [("top level a list", "- judgements: {}\n", "has no `judgements` mapping"),
+                                    ("does not parse", "judgements: [unclosed\n", "does not parse")]:
+            with self.subTest(case=name):
+                path = self.dir / f"judgements_raw_{name.replace(' ', '_')}.yaml"
+                path.write_text(text, encoding="utf-8")
+                checked["judgements"] = str(path)
+                with self.assertRaisesRegex(self.m.Refused, message):
+                    self.m.render_markdown(collected)
+        self._judgements_copy(checked)                   # the control: an unspoiled copy renders
+        self.assertIn("| record_self_narration | 47 | 3 | 0 |", self.m.render_markdown(collected))
+
     def test_the_committed_judgements_bear_out_the_v1_table(self):
         """#3197: one verdict and reason per drawn phrase, whose tally is the
         table; the three borderline phrases are the ranking-vocabulary ones
