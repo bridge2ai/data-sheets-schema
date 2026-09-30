@@ -487,11 +487,19 @@ def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
     a known duplicate on record (#1032; review #3610): the record is then
     invalid, with `failure` saying the schema itself was not checked.
     `findings` is None exactly when the validator could not run and the
-    text shows no duplicate, which is not a record that passed.
+    text shows no duplicate, which is not a record that passed. A record
+    that cannot be read at all — permission denied, or a directory named
+    like a record — is the same: not measured, never a crash, as
+    `api_runner.validation_block`'s `_dupes` treats it (#1190; review
+    #3616), so the section stays reported and never fatal.
     """
     from data_sheets_schema.api_runner import _validator_lines
     from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
-    dups = [describe(d) for d in [duplicate_keys_in(path)] if d]
+    try:
+        text_dups = duplicate_keys_in(path)
+    except OSError as exc:
+        return None, f"record could not be read: {exc}"
+    dups = [describe(d) for d in [text_dups] if d]
     lines, failure = _validator_lines(path, DETERMINISTIC_SCHEMA, DETERMINISTIC_CLASS)
     if failure is not None:
         return (dups or None), failure
@@ -513,8 +521,8 @@ def deterministic_validity(concat_dir: Path = CONCAT_DIR, *, method: str | None 
     answer is a stated fact about those arms, never a rewrite and never a
     gate. Each row is ``{method, label, project, path, status, findings,
     failure}``; ``status`` is VALID, INVALID, or UNVERIFIED where the
-    validator could not run and the text shows no duplicate key — never
-    read as valid. An INVALID row may carry a ``failure`` too: a duplicate
+    validator could not run, or the record could not be read, and the text
+    shows no duplicate key — never read as valid. An INVALID row may carry a ``failure`` too: a duplicate
     key read off the text when the validator could not run, so its
     findings are not the schema's full account (#3610).
     """

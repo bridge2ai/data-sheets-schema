@@ -149,6 +149,35 @@ class TestTheInstrument(unittest.TestCase):
             self.assertEqual(rows["OK"]["status"], UNVERIFIED)
             self.assertEqual(rows["OK"]["findings"], [])
 
+    def test_an_unreadable_record_is_not_checked_and_does_not_crash(self):
+        """Review #3616: a `*_d4d.yaml` that cannot be read — a directory
+        with that name, or a file with no read permission — is UNVERIFIED
+        with the reason kept, not an OSError that aborts the whole check.
+        The validator is never asked about bytes nobody could read."""
+        import os
+        with tempfile.TemporaryDirectory() as tmp:
+            concat = _tree(Path(tmp), {"rocrate_static_map/v1/OK_d4d.yaml": VALID_RECORD})
+            (concat / "rocrate_static_map/v1/DIR_d4d.yaml").mkdir()
+            locked = concat / "rocrate_static_map/v1/LOCK_d4d.yaml"
+            locked.write_text(VALID_RECORD, encoding="utf-8")
+            locked.chmod(0)
+            try:
+                readable = os.access(locked, os.R_OK)   # True when run as root
+                with mock.patch("data_sheets_schema.api_runner._validator_lines",
+                                return_value=([], None)) as validator:
+                    rows = {r["project"]: r for r in deterministic_validity(concat)}
+            finally:
+                locked.chmod(0o644)
+            self.assertEqual(rows["OK"]["status"], VALID)
+            unreadable = ["DIR"] + ([] if readable else ["LOCK"])
+            for proj in unreadable:
+                with self.subTest(project=proj):
+                    self.assertEqual(rows[proj]["status"], UNVERIFIED)
+                    self.assertEqual(rows[proj]["findings"], [])
+                    self.assertIn("record could not be read", rows[proj]["failure"])
+            called = {Path(c.args[0]).name for c in validator.call_args_list}
+            self.assertEqual(called & {f"{p}_d4d.yaml" for p in unreadable}, set())
+
     def test_the_verdict_check_holds_in_both_directions(self):
         """The helper the corpus test applies, on the real validator: it
         accepts a resolver-URL `doi` judged invalid and a bare one judged
@@ -217,6 +246,21 @@ class TestRunsCheckReportsIt(unittest.TestCase):
         i = next(i for i, l in enumerate(out) if "duplicate mapping key" in l)
         self.assertIn("CHORUS", out[i])
         self.assertIn("schema not checked: linkml-validate did not run: x", out[i + 1])
+
+    def test_an_unreadable_record_is_reported_and_strict_still_exits_zero(self):
+        """Review #3616: an unreadable record is a "not checked" row, and the
+        command reaches its own verdict rather than a traceback."""
+        (self.root / "data/d4d_concatenated/rocrate_static_map/ourmap-v1/"
+         "DIR_d4d.yaml").mkdir()
+        result = CliRunner().invoke(cli, ["runs", "check", "--strict"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIsNone(result.exception, result.output)
+        self.assertIn("3 deterministic-arm record(s) judged", result.output)
+        self.assertIn("1 valid, 1 invalid, 1 could not be checked", result.output)
+        line = [l for l in result.output.splitlines() if "DIR" in l and "ourmap-v1" in l]
+        self.assertEqual(len(line), 1, result.output)
+        self.assertIn("not checked: record could not be read", line[0])
+        self.assertIn("Reported, never fatal", result.output)
 
     def test_the_filters_given_are_passed_through(self):
         """`--method/--label/--project` reach the section. This tree holds no
