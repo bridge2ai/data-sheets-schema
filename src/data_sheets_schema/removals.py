@@ -167,9 +167,13 @@ Two more annotations move no class either (#3366, #3367):
   reshaped to its slot's range, a Person's `mailto:` id to a fragment on
   the record's own id) is marked `normaliser`; one at or under a path a
   curator's recorded `amend` disposition changed (#903) is marked
-  `curator_amend`. Both stay counted in `rewritten`. Measured over the 87
-  checked records on 2026-09-30: of 1,349 rewrites (512 without a
-  finding), none has the normaliser's form — the runner snapshots each
+  `curator_amend` — where phases are attributed, only if the `write`
+  phase made it, since a rewrite an earlier (model) phase made and a
+  curator then amended is still the model's (#3725). Both stay counted in
+  `rewritten`. Measured over the 87 checked records on 2026-09-30: of
+  1,349 rewrites, 459 without a finding and 53 unsorted (one record,
+  v4 rep1 VOICE, whose audit could not be read), none has the
+  normaliser's form — the runner snapshots each
   phase output after normalising it, so a normaliser rewrite never
   separates two stages this diff reads — and the one rewrite attributed
   to `write` (2026-09-01 v7 rep2 VOICE
@@ -184,7 +188,8 @@ Two more annotations move no class either (#3366, #3367):
   say it errs. A longer needle can still coincide, so it is not a bound.
   Over the same 87 records: 626 of 1,725 flattenings are low-confidence
   (597 by a short needle, 23 by the surplus route, 6 by both), 386 of
-  them without a finding — beside 703 unfounded removals. Of the 603
+  them without a finding and 28 unsorted (the record above) — beside 703
+  unfounded removals, which are counted on the same sorted basis. Of the 603
   short needles, 79 are a member of a list of scalars flattened into that
   list, 369 a value flattened into its own parent and 155 into an ancestor
   further up; the count says how many could be coincidences, not how many
@@ -324,7 +329,10 @@ NON_CHECKS = (
     "the API runner's enum-alias, temporal or mailto-id normaliser writes from the old one, under "
     "today's schema tables, and a model that wrote the permissible value itself reads the same; "
     "a rewrite marked a curator's amend sits at or under a path a recorded amend disposition "
-    "names. Both are counted in rewritten and rewritten_unfounded, never subtracted (#3366)",
+    "names and, where phases are attributed, was made at write — after the last phase output; "
+    "where they are not, the path alone decides, so a model rewrite a curator later amended "
+    "reads as the amend (#3725). Both are counted in rewritten and rewritten_unfounded, never "
+    "subtracted (#3366)",
     "that a flattening marked low-confidence was a coincidence, or that one not marked was not — "
     "a needle of one or two normalised tokens (an identifier-shaped value aside) or the "
     "dropped-entry surplus route is where a coincidence is likeliest, not proof of one; "
@@ -1178,7 +1186,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     be read (#3037); without it the review is read as `unhashed`.
     `amended_paths` are the final-record paths a curator's recorded
     `amend` disposition changed (#903), which mark a rewrite at or under
-    them (#3366)."""
+    them (#3366) — where phases are attributed, only a rewrite of the
+    `write` phase; one an earlier phase made is marked
+    `amended_after_model_rewrite` and stays the model's (#3725)."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -1256,12 +1266,19 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                 form = normaliser_form(path, value, _resolve_value(final, rw["at"])[1], own_ids)
                 if form is not None:
                     rw["normaliser"] = form
-                # A curator's recorded amend (#903) at the value's final path.
-                if rw["at"] is not None and (rw["at"] in amended
-                                             or any(a in amended for a in _ancestors(rw["at"]))):
-                    rw["curator_amend"] = True
                 if attributed:
                     rw["phase"] = stage_after_last(lambda p: p.carried(path, None) and p.retains(path, value))
+                # A curator's recorded amend (#903) at or above the value's
+                # final path. Where phases are attributed, only a rewrite the
+                # last phase output still did not make (`write`) is the
+                # amend's alone: one a model phase already made, which a
+                # curator then amended, stays the model's (#3725).
+                if rw["at"] is not None and (rw["at"] in amended
+                                             or any(a in amended for a in _ancestors(rw["at"]))):
+                    if not attributed or rw["phase"] == "write":
+                        rw["curator_amend"] = True
+                    else:
+                        rw["amended_after_model_rewrite"] = True
                 if paths_receipted is not None:
                     rw["receipted"] = _receipted(path, None, paths_receipted)
                 if named is not None:

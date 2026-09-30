@@ -241,6 +241,55 @@ class NotTheModel(unittest.TestCase):
         unmarked = rm.classify(before, after, _audit(), intermediates=stages)
         self.assertEqual((unmarked["rewritten_curator_amend"], unmarked["rewritten_unfounded_not_model"]), (0, 0))
 
+    def test_a_rewrite_under_an_amended_entry_is_marked_and_a_sibling_is_not(self):
+        """#3729: an amend path that is a proper ancestor of the rewrite's
+        final path marks it; a sibling entry, or a path that merely shares
+        the string prefix, does not."""
+        before = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."},
+                                              {"id": "x#b", "acquisition_details": "Another old sentence."}])
+        after = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Amended."},
+                                             {"id": "x#b", "acquisition_details": "Changed too."}])
+        b = rm.classify(before, after, _audit(), amended_paths={"acquisition_methods[0]"})
+        marks = {r["path"]: r.get("curator_amend") for r in b["rewritten_paths"]}
+        self.assertEqual(marks, {"acquisition_methods[0].acquisition_details": True,
+                                 "acquisition_methods[1].acquisition_details": None})
+        prefix_only = rm.classify(before, after, _audit(), amended_paths={"acquisition_methods[0].acquisition"})
+        self.assertEqual(prefix_only["rewritten_curator_amend"], 0)
+
+    def test_an_amend_on_a_value_a_model_phase_already_rewrote_leaves_it_the_models(self):
+        """#3725: reconcile_full rewrote the value and a curator later
+        amended it. The phase attribution credits the model, so the row is
+        not a curator's amend and is not counted as not the model's; it is
+        marked as amended after the model's rewrite. Unattributed, the path
+        alone decides, as documented."""
+        before = _record(description="Old description words.")
+        reconciled = _record(description="Model rewording.")
+        after = _record(description="Model rewording, amended.")
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", reconciled)],
+                        amended_paths={"description"})
+        self.assertEqual(b["rewritten_paths"], [{"path": "description", "at": "description",
+                                                 "phase": "reconcile_full", "amended_after_model_rewrite": True,
+                                                 "founded": False}])
+        self.assertEqual((b["rewritten_curator_amend"], b["rewritten_unfounded_not_model"], b["rewritten_unfounded"]),
+                         (0, 0, 1))
+        unattributed = rm.classify(before, after, _audit(), amended_paths={"description"})
+        self.assertEqual((unattributed["rewritten_curator_amend"], unattributed["rewritten_unfounded_not_model"]),
+                         (1, 1))
+
+    def test_the_unfounded_counts_leave_out_rewrites_a_finding_founds(self):
+        """#3728: the `_unfounded` and `not_model` counts are subsets of
+        the rewrites without a finding, not the totals."""
+        before = _record(issued="2024-05-01", collection=[{"id": "x#c", "start_date": "2024-05-01T10:00:00Z"}],
+                         title="Old title words", description="Old description words")
+        after = _record(issued="2024-05-01T00:00:00Z", collection=[{"id": "x#c", "start_date": "2024-05-01"}],
+                        title="New", description="Fresh")
+        b = rm.classify(before, after, _audit({"slot": "issued"}, {"slot": "title"}),
+                        amended_paths={"title", "description"})
+        self.assertEqual((b["rewritten"], b["rewritten_unfounded"]), (4, 2))
+        self.assertEqual((b["rewritten_normaliser"], b["rewritten_normaliser_unfounded"]), (2, 1))
+        self.assertEqual((b["rewritten_curator_amend"], b["rewritten_curator_amend_unfounded"]), (2, 1))
+        self.assertEqual(b["rewritten_unfounded_not_model"], 2)
+
     def test_amended_paths_reads_only_amend_dispositions(self):
         record = {"dispositions": [{"disposition": "amend", "path": "a.b"}, {"disposition": "retain", "path": "c"},
                                    {"disposition": "amend"}, "not a mapping"]}
@@ -1028,6 +1077,23 @@ class CliPastEnd(unittest.TestCase):
         self.assertEqual(listed.exit_code, 0, listed.output)
         self.assertIn("≠ unfounded issued → issued (phase unattributed, the normaliser's temporal form)",
                       listed.output)
+
+
+    def test_the_cli_names_an_amend_on_a_value_the_model_had_rewritten(self):
+        """#3725: listed as the model's rewrite, with the later amend named."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        block = rm.classify(_record(description="Old description words."),
+                            _record(description="Model rewording, amended."), _audit(),
+                            intermediates=[("reconcile_full", _record(description="Model rewording."))],
+                            amended_paths={"description"})
+        args = ["removals", "--method", "claudecode_api", "--label", "L", "--project", "VOICE", "--rewritten"]
+        with mock.patch("data_sheets_schema.cli.review._provenance", lambda *_: Path(__file__)), \
+                mock.patch("data_sheets_schema.removals.for_record", return_value=block):
+            listed = click.testing.CliRunner().invoke(review_cli, args)
+        self.assertEqual(listed.exit_code, 0, listed.output)
+        self.assertIn("≠ unfounded description → description (reconcile_full, amended by a curator after the model"
+                      " rewrote it)", listed.output)
 
 
 class Spelling(unittest.TestCase):

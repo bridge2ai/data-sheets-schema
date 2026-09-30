@@ -287,7 +287,9 @@ def removals_cmd(method, label, project, show_flattened, show_rewritten, as_json
             state = {True: "founded", False: "unfounded"}.get(row.get("founded"), "unsorted")
             # #3366: a rewrite of the write-time normaliser's form, or at a curator's amend.
             whose = "".join([f", the normaliser's {row['normaliser']} form" if row.get("normaliser") else "",
-                             ", a curator's amend" if row.get("curator_amend") else ""])
+                             ", a curator's amend" if row.get("curator_amend") else "",
+                             ", amended by a curator after the model rewrote it"
+                             if row.get("amended_after_model_rewrite") else ""])
             click.echo(f"   ≠ {state} {row['path']} → {row['at']} ({row.get('phase') or 'phase unattributed'}{whose})")
         if block.get("rewritten_paths_truncated"):
             click.echo(f"   … and {block['rewritten_paths_truncated']} more rewritten value(s) not listed")

@@ -329,6 +329,26 @@ class RemovalRows(unittest.TestCase):
         for phrase in ("#3366", "never subtracted", "curator's recorded amend disposition", "#903"):
             self.assertIn(phrase, definition)
 
+    def test_the_low_confidence_and_not_the_models_rows_read_the_unfounded_subsets(self):
+        """#3728: a founded low-confidence flattening, and a founded rewrite
+        of the normaliser's form or at an amend, are in the block's totals
+        and not in the rows, which are without a finding."""
+        from data_sheets_schema.removals import classify
+        before = {"id": "doi:10.1/x", "keywords": ["UF", "voice biomarkers of adults"],
+                  "data_governance": {"committee_name": "DAC", "notes": "reviewed yearly by the board"},
+                  "issued": "2024-05-01", "title": "t", "description": "old words"}
+        after = {"id": "doi:10.1/x", "keywords": "UF; voice biomarkers of adults",
+                 "data_governance": "DAC reviewed yearly by the board",
+                 "issued": "2024-05-01T00:00:00Z", "title": "u", "description": "new text"}
+        block = classify(before, after, {"findings": [{"slot": "data_governance", "record": "full"},
+                                                     {"slot": "issued", "record": "full"},
+                                                     {"slot": "title", "record": "full"}]},
+                         amended_paths={"title"})
+        self.assertEqual((block["flattened_low_confidence"], block["rewritten"]), (2, 3))
+        rows = self._rows(block, {"snapshot_checked": True, "removals_unrecorded_count": 0})
+        self.assertEqual((rows["lowconfidenceflat"], rows["unfoundedrewrites"], rows["unfoundedrewritesnotmodel"]),
+                         (1, 1, 0))
+
     def test_the_rows_are_in_the_table(self):
         for key in ("unfoundedremovals", "unfoundedreconcile", "unfoundedrelocated", "lowconfidenceflat",
                     "receipteddeleted", "unfoundedrewrites", "unfoundedrewritesnotmodel", "unrecordedremovals"):

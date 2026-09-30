@@ -305,7 +305,9 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                                   "date reshaped to its slot's range, a Person's mailto: id to a "
                                   "fragment on the record's own id; a British spelling and a "
                                   "resolver URL are no rewrite at all) or that sit at a path a "
-                                  "curator's recorded amend disposition changed (#903). Reported "
+                                  "curator's recorded amend disposition changed (#903) and, where "
+                                  "phases are attributed, were made at write, after the last "
+                                  "phase output (#3725). Reported "
                                   "only: counted in the row above, never subtracted. A form, not "
                                   "a provenance — a model that wrote the permissible value itself "
                                   "reads the same. – where the removal rows are –"),
