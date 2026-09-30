@@ -21,6 +21,14 @@ synthetic inputs, and the same needle match runs over what they return:
   record and context shaped as in its own test;
 - ``native_context_control.render_system``, through the recovery conditions above.
 
+Several builders embed their inputs as JSON (the evaluation payload's
+``complete_utf8_text`` values, the audit and finalization contracts' canonical
+JSON), where a newline is the two characters ``\\n`` and a quote is ``\\"``.
+The match therefore runs over every JSON object or array the rendered text
+embeds, decoded, as well as over the text itself: each string value and key,
+and all string values of the text joined in order, so a sentence split across
+consecutive frames is found too (#3569).
+
 ``render_instruction`` is read back from the file the preparer rendered it
 into and the registration pins, rather than called a second time: each call
 replays the parent generation request, which takes seconds.
@@ -41,6 +49,7 @@ stays out of reach of any text scan.
 import importlib.util
 import json
 from pathlib import Path
+import re
 import sys
 
 import pytest
@@ -84,9 +93,57 @@ def pinned_tree_unchanged():
     assert _pinned_tree() == PINNED_BEFORE_IMPORT
 
 
+_DECODER = json.JSONDecoder()
+_OPENING = re.compile(r"[\[{]")
+
+
+def _strings(value, keys):
+    """String keys (into ``keys``) and values of a decoded JSON value, values in document order."""
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for key, item in value.items():
+            keys.append(key)
+            yield from _strings(item, keys)
+    elif isinstance(value, list):
+        for item in value:
+            yield from _strings(item, keys)
+
+
+def embedded_json_strings(text):
+    """Every string in each JSON object or array ``text`` embeds, decoded, recursively.
+
+    A rendered prompt carries its inputs JSON-escaped (``\\n``, ``\\"``), which
+    whitespace folding cannot see through (#3569). Returned: each key and
+    value, and every value joined in order, so one sentence split across
+    consecutive frames is one string again.
+    """
+    found, values, index = [], [], 0
+    while match := _OPENING.search(text, index):
+        try:
+            value, end = _DECODER.raw_decode(text, match.start())
+        except ValueError:
+            index = match.start() + 1
+            continue
+        keys = []
+        values += list(_strings(value, keys))
+        found += keys
+        index = end
+    for value in values:
+        found += [value] + embedded_json_strings(value)
+    return found + ["".join(values)] if values else found
+
+
+def scanned_views(text):
+    """The rendered text, and every string its embedded JSON decodes to."""
+    return [text] + embedded_json_strings(text)
+
+
 def _found(rendered, needles):
     assert rendered and all(isinstance(text, str) and text for text in rendered.values()), rendered.keys()
-    return {name: hit for name, text in rendered.items() if (hit := matches(text, needles))}
+    return {name: hit for name, text in rendered.items()
+            if (hit := sorted({n for view in scanned_views(text) for n in matches(view, needles)},
+                              key=needles.index))}
 
 
 def command_policy(planted=""):
@@ -166,7 +223,10 @@ def evaluation_instructions():
 
 
 def rendered_evaluation(instructions, tmp_path, planted=""):
-    """The shape of evaluation_controls/test_instructions.py: a synthetic record and context."""
+    """The shape of evaluation_controls/test_instructions.py: a synthetic record and context.
+
+    ``planted`` is the YAML text of the record's description value, as written.
+    """
     source = tmp_path / "record.yaml"
     source.write_text(f"conforms_to_class: Dataset\nname: Synthetic record\ndescription: {planted or 'x'}\n")
     context = tmp_path / "context.json"
@@ -237,3 +297,36 @@ def test_an_observation_in_a_runtime_input_reaches_the_rendered_scan(request, tm
     else:
         rendered = rendered_evaluation(request.getfixturevalue("evaluation_instructions"), tmp_path, PLANTED)
     assert list(_found(rendered, [PLANTED]).values()) == [[PLANTED]]
+
+
+#: The escapes json.dumps introduces: a quote (``\\"``) and a line break (``\\n``).
+QUOTED = 'A planted "synthetic" observation that only a runtime input carries.'
+ESCAPED_PLANTINGS = {
+    "quoted": (QUOTED, "'" + QUOTED + "'"),
+    "line-wrapped": (PLANTED, ">-\n  A planted synthetic observation\n  that only a runtime input carries."),
+}
+
+
+@pytest.mark.parametrize("planting", list(ESCAPED_PLANTINGS))
+def test_an_observation_the_instruction_embeds_json_escaped_is_found(evaluation_instructions, tmp_path, planting):
+    """The evaluation payload carries the record as a JSON string (#3569)."""
+    needle, yaml_text = ESCAPED_PLANTINGS[planting]
+    rendered = rendered_evaluation(evaluation_instructions, tmp_path, yaml_text)
+    # The escaping is real: the raw rendered text alone does not carry the needle.
+    assert matches(rendered["instruction"], [needle]) == []
+    assert list(_found(rendered, [needle]).values()) == [[needle]]
+
+
+def test_a_sentence_split_across_json_frames_is_found():
+    """Bounded JSONL frames (as the finalization context lines are) may cut a sentence in two."""
+    frames = "\n".join(json.dumps({"index": i, "text": part}) for i, part in
+                       enumerate([PLANTED[:20], PLANTED[20:]], 1))
+    assert matches(frames, [PLANTED]) == []
+    assert _found({"frames": "Frames:\n" + frames + "\nEnd."}, [PLANTED]) == {"frames": [PLANTED]}
+
+
+def test_json_nested_in_a_json_string_is_decoded_too():
+    inner = json.dumps({"evidence": QUOTED})
+    outer = "Payload:\n" + json.dumps({"complete_utf8_text": inner}, indent=2) + "\n"
+    assert matches(outer, [QUOTED]) == []
+    assert _found({"outer": outer}, [QUOTED]) == {"outer": [QUOTED]}
