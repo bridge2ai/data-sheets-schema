@@ -301,16 +301,16 @@ def origin(transcripts, receipt_file, full_file, as_json):
     by `;`, or a failed `&&` chain cannot be placed, unless the native
     control denied the call, or the runtime did in `dontAsk` mode and its
     terminal `result` lists the call, which then never ran. `timeout`,
-    `env` and `nice` wrappers are read through. A part carrying the words
-    `derive core` that is neither a d4d call it reads nor a program known
-    only to read (`bash -c`, `xargs`), a reader part carrying them in a
-    command where a later pipe feeds such a program (`echo '... derive core
-    ...' | bash`), and, in a command with a substitution anywhere, every
-    part carrying them cannot be placed. The words are matched after quote and escape
+    `env` and `nice` wrappers are read through. Three kinds of part carrying
+    the words `derive core` cannot be placed: one that is neither a d4d call
+    it reads nor a program known only to read, such as a `bash -c` or an
+    `xargs` part; a reader part in a command where a later pipe feeds a
+    program not known only to read (`echo '... derive core ...' | bash`);
+    and, in a command with a substitution anywhere, every such part. The words are matched after quote and escape
     characters are removed (`bash -c 'd4d derive "core"'`), and `derive` followed by a word
     supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` or any other replacement
     string it sets, such as `-I%` or `-J %`, or the word xargs appends after a `derive` that
-    ends its command) cannot be placed either. A
+    ends its command, redirections such as `2>&1` aside) cannot be placed either. A
     derive whose words are not on the command line (a script, an alias, a variable supplying
     `derive` itself) is not seen. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only

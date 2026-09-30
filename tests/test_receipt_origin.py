@@ -1494,7 +1494,14 @@ class DeriveSpellings(Base):
                          f"echo core | xargs -iSUB d4d derive SUB --full {self.FULL} {self.OUT}",
                          f"echo core | xargs --replace=@ d4d derive @ --full {self.FULL} {self.OUT}",
                          f"echo core | xargs -L 1 -I @ sh -c 'd4d derive @ --full {self.FULL} {self.OUT}'",
-                         f"echo core --full {self.FULL} {self.OUT} | xargs -n 9 d4d derive"):
+                         f"echo core --full {self.FULL} {self.OUT} | xargs -n 9 d4d derive",
+                         # #3453: a redirection is the shell's, so the derive still ends
+                         # the xargs command and xargs still appends the word
+                         f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive 2>&1 | tail -5",
+                         f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive >/tmp/log",
+                         f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive 2>/dev/null",
+                         f"echo core --full {self.FULL} {self.OUT} | xargs d4d derive > /tmp/log",
+                         f"xargs d4d derive < /tmp/args-3374"):
             for ok in (True, False):
                 with self.subTest(spelling=spelling, ok=ok):
                     identity, block = self._derived(spelling, ok=ok)
@@ -1565,6 +1572,15 @@ class DeriveSpellings(Base):
                  "xargs -L 1 -I @ sh -c d4d derive @": True, "xargs -I% timeout 5 d4d derive x%": True,
                  "xargs d4d derive": True, "xargs -n 1 -P 4 d4d derive": True,
                  "/usr/bin/xargs -r d4d derive": True,
+                 # #3453: redirections are the shell's, not words xargs passes on
+                 "xargs d4d derive 2>&1 | tail -5": True, "xargs d4d derive >/tmp/log": True,
+                 "xargs d4d derive > /tmp/log": True, "xargs d4d derive 2>/dev/null": True,
+                 "xargs d4d derive < args": True, "xargs d4d derive &>log": True,
+                 "xargs d4d derive >>log 2>&1": True, "xargs <args d4d derive": True,
+                 # as the segment's words arrive, split by shlex and joined by spaces
+                 "xargs d4d derive 2 >& 1": True, "xargs d4d derive 2 > /dev/null": True,
+                 "xargs d4d derive 2> err full": False, "xargs d4d derive >log full": False,
+                 "xargs d4d derive full 2>&1": False, "xargs d4d derive <(ls)": False,
                  # with a replacement string set, xargs appends nothing
                  "xargs -I% d4d derive": False, "xargs -i d4d derive": False, "xargs -i d4d derive full": False,
                  "xargs -I% d4d derive full %": False, "xargs -I% d4d receipts check %": False,
@@ -1601,7 +1617,10 @@ class DeriveSpellings(Base):
         self.assertIn("`python -c` building the argument list", text)
         doc = " ".join(ro.__doc__.split())
         self.assertIn("carries the words `derive core` and is neither a d4d call of another subcommand "
-                      "nor a program known to read", doc)
+                      "nor a program known to read is a derive that cannot be placed (#3137): a nested "
+                      "`bash -c`, an `xargs`, or a wrapper option or CLI option this does not read makes a "
+                      "part such a one (#3455)", doc)
+        self.assertNotIn("known to read (a nested `bash -c`", doc)
         self.assertIn("a reader part that carries them where a pipe later in the command feeds a program "
                       "not known to read", doc)                                    # #3384
         self.assertIn("in a command that substitutes anywhere (`$(...)`, backticks, `<(...)`), every part "
@@ -1616,6 +1635,9 @@ class DeriveSpellings(Base):
         self.assertIn("as does a word carrying any replacement string an `xargs` in the command sets "
                       "(`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`)", text)
         self.assertIn("nor is a word xargs appends to a `derive` that does not end the xargs command", text)
+        # #3453: the appended-word rule reads the command with its redirections aside
+        self.assertIn("redirections (`2>&1`, `>log`, `< args`) aside, since they are the shell's (#3453)", text)
+        self.assertIn("ends it once the shell's redirections are set aside", doc)
         self.assertIn("as does one carrying any replacement string an `xargs` in the command sets", doc)
         self.assertIn("The words are matched after quote and escape characters are removed, as the shell "
                       "running a nested string removes them", doc)
@@ -1689,6 +1711,20 @@ class RuntimeDenial(Base):
                 block = r.report()
                 self.assertUnknown(block, "may change the receipt other than by a Write")
                 self.assertEqual(block["rejected_writes"], [])
+
+    def test_a_tool_use_id_that_is_not_a_string_corroborates_nothing(self):
+        # #3454: a list or mapping id is not hashed and not an id, as in
+        # `reference_rescore`; a real listing beside it still corroborates.
+        for bad in (["x"], {"a": 1}, None, 7):
+            with self.subTest(tool_use_id=bad):
+                identity, r = self._refused()
+                listing = r.events[-1]["permission_denials"]
+                listing.insert(0, {**listing[0], "tool_use_id": bad})
+                self.assertEqual(ro._runtime_denials(*self._paired(r)), {identity})
+                self.assertEqual(r.report()["status"], "checked")
+                listing.pop(1)                        # only the malformed entry is left
+                self.assertEqual(ro._runtime_denials(*self._paired(r)), set())
+                self.assertUnknown(r.report(), "may change the receipt other than by a Write")
 
     def test_the_rule_is_reference_rescores_own(self):
         # #3387: content that is a list of text blocks, or a command that is
@@ -1875,14 +1911,21 @@ class Cli(unittest.TestCase):
         # #3137, #3201: the wrappers read through and the runtime's own refusal
         self.assertIn("`timeout`, `env` and `nice` wrappers are read through", text)
         self.assertNotIn("any other spelling that carries the words `derive core`", text)   # #3384
-        self.assertIn("a reader part carrying them in a command where a later pipe feeds such a program", text)
-        self.assertIn("in a command with a substitution anywhere, every part carrying them cannot be placed",
-                      text)                                                                     # #3385
+        # #3455: `bash -c` and `xargs` are named as parts that cannot be placed,
+        # never in a parenthetical that reads as examples of readers
+        self.assertNotIn("known only to read (`bash -c`, `xargs`)", text)
+        self.assertIn("Three kinds of part carrying the words `derive core` cannot be placed: one that is "
+                      "neither a d4d call it reads nor a program known only to read, such as a `bash -c` "
+                      "or an `xargs` part;", text)
+        self.assertIn("a reader part in a command where a later pipe feeds a program not known only to read "
+                      "(`echo '... derive core ...' | bash`)", text)                          # #3384
+        self.assertIn("and, in a command with a substitution anywhere, every such part.", text)   # #3385
         self.assertIn("The words are matched after quote and escape characters are removed "
                       "(`bash -c 'd4d derive \"core\"'`)", text)                               # #3397
         self.assertIn("`derive` followed by a word supplied at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}` "
                       "or any other replacement string it sets, such as `-I%` or `-J %`, or the word xargs "
-                      "appends after a `derive` that ends its command) cannot be placed either", text)   # #3426
+                      "appends after a `derive` that ends its command, redirections such as `2>&1` aside) "
+                      "cannot be placed either", text)                                    # #3426, #3453
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
                       "supplying `derive` itself) is not seen", text)
         self.assertIn("the runtime did in `dontAsk` mode and its terminal `result` lists the call", text)

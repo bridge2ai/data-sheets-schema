@@ -52,15 +52,16 @@ the call was denied as above, and then never ran. A `timeout`, `env` or
 `nice` wrapper with options this reads, and an interpreter held in a
 variable (`$PY -m data_sheets_schema.cli`), are read through; any other
 part that carries the words `derive core` and is neither a d4d call of
-another subcommand nor a program known to read (a nested `bash -c`,
-`xargs`, a wrapper option or CLI option it does not read) is a derive that
-cannot be placed (#3137). The words are matched after quote and escape
+another subcommand nor a program known to read is a derive that cannot be
+placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
+option this does not read makes a part such a one (#3455). The words are matched after quote and escape
 characters are removed, as the shell running a nested string removes them
 (`bash -c 'd4d derive "core"'`), and `derive` followed by a word supplied
 at run time (`$SUB`, `$(echo core)`, `xargs`'s `{}`) counts (#3397), as does
 one carrying any replacement string an `xargs` in the command sets (`-I%`,
 `-J %`, `-i`, `--replace`), and a `derive` that ends an `xargs` command
-setting none, where xargs appends the word (#3426). So is a reader part that carries them where a
+setting none, where xargs appends the word (#3426) -- ends it once the
+shell's redirections are set aside (`2>&1`, `>log`, `< args`, #3453). So is a reader part that carries them where a
 pipe later in the command feeds a program not known to read (`echo '...
 derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
 substitutes anywhere (`$(...)`, backticks, `<(...)`), every part that
@@ -186,7 +187,8 @@ NON_CHECKS = (
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
     "placed (#3397), as does a word carrying any replacement string an `xargs` in the command "
     "sets (`xargs -I% ... derive %`, `-J %`, `-i`, `--replace`) and a `derive` ending an `xargs` "
-    "command that sets none, where xargs appends the word (#3426); a word the shell builds "
+    "command that sets none, where xargs appends the word (#3426), redirections (`2>&1`, "
+    "`>log`, `< args`) aside, since they are the shell's (#3453); a word the shell builds "
     "some other way (a glob, `derive c*`) is not seen, nor is a word xargs appends to a "
     "`derive` that does not end the xargs command",
 )
@@ -427,11 +429,14 @@ def _runtime_denials(events: list[tuple[int, int, dict]], calls: list[dict],
         if (terminal.get("subtype") != "success" or terminal.get("is_error") is not False
                 or not isinstance(denials, list)):
             continue
-        listed = Counter(d.get("tool_use_id") for d in denials if isinstance(d, dict))
+        # Only a string id is an id, as `reference_rescore` takes one: a list
+        # or mapping there corroborates nothing, and is not hashed (#3454).
+        listed = Counter(d["tool_use_id"] for d in denials
+                         if isinstance(d, dict) and isinstance(d.get("tool_use_id"), str))
         for denial in denials:
-            if not isinstance(denial, dict):
+            if not isinstance(denial, dict) or not isinstance(denial.get("tool_use_id"), str):
                 continue
-            identity = denial.get("tool_use_id")
+            identity = denial["tool_use_id"]
             call, result = by_id.get(identity), results.get(identity)
             if (listed[identity] != 1 or call is None or result is None
                     or call["transcript"] != t or result["transcript"] != t
@@ -763,7 +768,41 @@ _XARGS_WITH_ARGUMENT = frozenset("IJLnPsEdaRS")
 _XARGS_OPTIONAL_ARGUMENT = frozenset("iel")
 _XARGS_LONG_WITH_ARGUMENT = frozenset({"--arg-file", "--delimiter", "--eof", "--max-lines", "--max-args",
                                        "--max-procs", "--max-chars", "--process-slot-var"})
-_SHELL_WORDS = re.compile(r"[|;&()\n]+|[^\s|;&()]+")
+#: A redirection operator, with any file-descriptor prefix (`2>`, `&>`,
+#: `{fd}>`) and any target written against it (`2>&1`, `>/tmp/log`); `<(`
+#: and `>(` are process substitutions, not redirections (#3453).
+_REDIRECTION_OPERATOR = r"(?:\d+|\{[A-Za-z_][A-Za-z0-9_]*\})?(?:&>>|&>|>&|<&|>>|>\||<>|<<<|<<-?|>|<)(?!\()"
+_REDIRECTION = re.compile(rf"({_REDIRECTION_OPERATOR})([^\s|;&()<>]*)")
+_SHELL_WORDS = re.compile(rf"[<>]\(|{_REDIRECTION_OPERATOR}[^\s|;&()<>]*|[|;&()\n]+|[^\s|;&()<>]+")
+_SEPARATOR_WORD = re.compile(r"[|;&()\n]+")
+
+
+def _without_redirections(words: list[str]) -> list[str]:
+    """`words` with every redirection and its target removed (#3453): a
+    redirection is the shell's, so the program never sees it as an argument,
+    and a `derive` before `2>&1` or `>log` is still the last word xargs
+    receives. A bare operator (`>`, `2>`) takes the next word as its target.
+    The command reaches here as the tokenizer's words joined by spaces, and
+    shlex splits `2>&1` into `2`, `>&`, `1`, so a number or `{name}` word
+    right before an operator is taken for its descriptor; where it was an
+    argument (`derive 2 >&1`) the derive is then read as unplaceable, a false
+    `unknown` rather than a miss."""
+    kept: list[str] = []
+    skip_target = False
+    for at, word in enumerate(words):
+        if skip_target:
+            skip_target = False
+            if not _SEPARATOR_WORD.fullmatch(word):
+                continue
+        if (re.fullmatch(r"\d+|\{[A-Za-z_][A-Za-z0-9_]*\}", word) and at + 1 < len(words)
+                and _REDIRECTION.fullmatch(words[at + 1])):
+            continue
+        match = _REDIRECTION.fullmatch(word)
+        if match:
+            skip_target = not match.group(2)
+            continue
+        kept.append(word)
+    return kept
 
 
 def _xargs_supplies_derive_word(text: str) -> bool:
@@ -771,8 +810,10 @@ def _xargs_supplies_derive_word(text: str) -> bool:
     time (#3426): through a replacement string (`-I%`, `-I %`, `-J %`, `-i`
     meaning `{}`, `-i%`, `--replace[=%]`, clustered as in `-0I%`) contained
     in that word, since `{}` is only a convention, or, with no replacement
-    string, by appending it after a `derive` that ends the command."""
-    words = _SHELL_WORDS.findall(text)
+    string, by appending it after a `derive` that ends the command -- read
+    with the command's redirections removed, since they are the shell's
+    (`xargs d4d derive 2>&1 | tail -5` still appends the word, #3453)."""
+    words = _without_redirections(_SHELL_WORDS.findall(text))
     for start, word in enumerate(words):
         if os.path.basename(word) != "xargs":
             continue
@@ -804,7 +845,7 @@ def _xargs_supplies_derive_word(text: str) -> bool:
                         tokens.append(rest or "{}")
                     break
         end = k
-        while end < len(words) and not re.fullmatch(r"[|;&()\n]+", words[end]):
+        while end < len(words) and not _SEPARATOR_WORD.fullmatch(words[end]):
             end += 1
         command = words[k:end]
         for at, part in enumerate(command):
