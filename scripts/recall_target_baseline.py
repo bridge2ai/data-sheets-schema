@@ -52,16 +52,35 @@ the bytes a record hashed, and whether the record carries the name with
 the version (`fact_carriage`). The reading is not re-derived; the
 measurement is.
 
+The zeros on the API arms may also be an instrument fact (#3525): the
+schema digest the API path sends names `used_software` only as a universal
+`Software[]` range and has no entry for `Software`, so never shows it a
+`name` or a `version`. `--measure-digests` re-renders, at each counted
+record's `repo.commit`, the `Dataset` digest from that commit's
+`schema_digest.py` in a `git archive` of its `src/` (nothing is checked
+out), confirms its md5 is the record's `schema.digest_md5`, and records
+what the render says about `used_software` and `Software`
+(`software_in_digest`), with whether the prompt files the record hashed
+name `used_software`, into `notes/recall_target_digest_software.yaml`. The
+note renders that file and joins it to the records by commit and md5. A
+record's tree was dirty at every run, so a render is evidence only where
+its md5 reproduces; one that does not is shown as not reproduced.
+
 Usage:
     poetry run python scripts/recall_target_baseline.py            # rewrite the note
     poetry run python scripts/recall_target_baseline.py --check    # read-only: exit 1 when stale
+    poetry run python scripts/recall_target_baseline.py --measure-digests   # re-render the digests (git)
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
+import json
+import os
 import re
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -73,6 +92,9 @@ sys.path.insert(0, str(ROOT / "src"))
 CORPUS = ROOT / "data" / "d4d_concatenated"
 OUT_MD = ROOT / "notes" / "recall_target_baseline.md"
 ADJUDICATION = ROOT / "notes" / "recall_target_bundle_adjudication.yaml"
+#: The digest measurement (#3525): the schema digest each counted record
+#: pins, re-rendered at the record's commit. Written by `--measure-digests`.
+DIGESTS = ROOT / "notes" / "recall_target_digest_software.yaml"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
 #: The two directories a generic-arm label can live in (#690): agentic and
 #: API runs through v7 under the first, the API baseline from v8 the second.
@@ -513,7 +535,8 @@ def _load(raw: bytes) -> Any:
 
 def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
             projects: tuple[str, ...] | None = None,
-            adjudication: dict[str, Any] | None = None) -> dict[str, Any]:
+            adjudication: dict[str, Any] | None = None,
+            digests: dict[str, Any] | None = None) -> dict[str, Any]:
     """One row per record of every arm: its counts, its receipt's, and the
     basis of each. `root` is what a record's repository-relative bundle path
     resolves against (the checkout by default). `adjudication` is a
@@ -524,6 +547,8 @@ def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
     projects = PROJECTS if projects is None else projects
     if adjudication is None and corpus == CORPUS and ADJUDICATION.is_file():
         adjudication = load_adjudication(ADJUDICATION)
+    if digests is None and corpus == CORPUS and DIGESTS.is_file():
+        digests = load_digests(DIGESTS)
     facts = (adjudication or {}).get("facts") or []
     bundles: dict[tuple, tuple[bytes | None, str]] = {}
     rows: list[dict[str, Any]] = []
@@ -548,6 +573,12 @@ def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
                     "sha256": hashlib.sha256(raw).hexdigest(),
                     "counts": target_counts(record if isinstance(record, dict) else {}),
                     "receipt": None, "receipt_sha256": None, "text_basis": None,
+                    "digest_md5": (prov_rec.get("schema") or {}).get("digest_md5"),
+                    "commit": (prov_rec.get("repo") or {}).get("commit"),
+                    "prompt_files": [(f.get("path"), f.get("sha256")) for f in
+                                     ((prov_rec.get("prompts") or {}).get("files") or [])
+                                     if isinstance(f, dict) and f.get("path")],
+                    "runtime": (prov_rec.get("model") or {}).get("agent_runtime"),
                 }
                 inputs = prov_rec.get("inputs") or {}
                 mine = [f for f in facts if f["project"] == project]
@@ -569,7 +600,8 @@ def collect(corpus: Path | None = None, arms=None, root: Path | None = None,
                 if mine:
                     row["facts"] = fact_rows(mine, record, bundle, texts)
                 rows.append(row)
-    return {"rows": rows, "excluded": excluded, "corpus": corpus, "adjudication": adjudication}
+    return {"rows": rows, "excluded": excluded, "corpus": corpus, "adjudication": adjudication,
+            "digests": digests}
 
 
 def fact_rows(facts: list[dict[str, Any]], record: Any, bundle: tuple[bytes | None, str] | None,
@@ -738,6 +770,8 @@ def render_markdown(collected: dict[str, Any], arms=None) -> str:
                   + "; ".join(f"`{p}`" for p in collected["excluded"]) + "."]
     if collected.get("adjudication"):
         lines += render_adjudication(collected, arms)
+    if collected.get("digests"):
+        lines += render_digests(collected, arms)
     lines += ["", "## Lexical candidates by record", "",
               "Each receipted record: the basis its chunk text was read on, then each",
               "`nothing_relevant`/`redundant_with` chunk with a cue, its cue classes and the",
@@ -855,11 +889,312 @@ def render_adjudication(collected: dict[str, Any], arms=None) -> list[str]:
     return lines
 
 
+#: What the digest measurement asks (#3525): the class the API path renders
+#: its full-phase digest for, the class `used_software` ranges over, and
+#: where that class is declared (read at each commit for its attributes).
+DIGEST_CLASS = "Dataset"
+SOFTWARE_CLASS = "Software"
+SOFTWARE_SCHEMA = "src/data_sheets_schema/schema/D4D_Base_import.yaml"
+SCHEMA_DIGEST = "src/data_sheets_schema/schema_digest.py"
+_SOFTWARE_ENTRY = f"- **{SOFTWARE_CLASS}**"
+_USED_SOFTWARE = re.compile(r"\bused_software\b")
+
+
+def software_in_digest(text: str) -> dict[str, Any]:
+    """What a rendered digest shows about `used_software` and `Software`:
+    every mention of `used_software`, whether the object-ranges preamble
+    names its range (`UNIVERSAL_RANGES`), whether it has a slot heading of
+    its own, whether `Software` has an object-ranges entry, and the
+    backticked keys that entry and its indented lines name."""
+    lines = text.splitlines()
+    block: list[str] = []
+    inside = False
+    for line in lines:
+        if line.startswith("- **"):
+            inside = line == _SOFTWARE_ENTRY or line.startswith(_SOFTWARE_ENTRY + " ")
+        elif inside and not line.startswith(" "):
+            inside = False
+        if inside:
+            block.append(line)
+    return {
+        "used_software_mentions": sum(len(_USED_SOFTWARE.findall(line)) for line in lines),
+        "in_universal_ranges": any("`used_software` is `Software[]`" in line for line in lines),
+        "own_slot_heading": any(line.startswith("## `used_software`") for line in lines),
+        "software_entry": bool(block),
+        "software_keys": sorted(set(re.findall(r"`([A-Za-z_]\w*)`", "\n".join(block)))),
+    }
+
+
+def _git(repo: Path, *args: str) -> bytes:
+    return subprocess.run(["git", "-C", str(repo), *args], check=True, capture_output=True).stdout
+
+
+#: Run inside the archive: the digest that commit's code renders. The
+#: assertion refuses a render from any other copy of the package (an
+#: editable install would otherwise answer for the checkout's code).
+_RENDER = ("import sys\n"
+           "from pathlib import Path\n"
+           "from data_sheets_schema import schema_digest as d\n"
+           "assert Path(d.__file__).resolve().is_relative_to(Path.cwd().resolve()), d.__file__\n"
+           "sys.stdout.buffer.write(d.digest_text(sys.argv[1]).encode('utf-8'))\n")
+
+
+def render_at(commit: str, repo: Path, python: str = sys.executable) -> str:
+    """The `DIGEST_CLASS` digest as `commit`'s `src/` renders it, from a
+    `git archive` in a temporary directory: nothing is checked out and the
+    environment carries no credential."""
+    with tempfile.TemporaryDirectory(prefix="recall_digest_") as tmp:
+        subprocess.run(["tar", "-x", "-C", tmp], input=_git(repo, "archive", "--format=tar", commit, "src"),
+                       check=True, capture_output=True)
+        env = {"PATH": os.environ.get("PATH", ""), "HOME": tmp, "PYTHONPATH": str(Path(tmp) / "src"),
+               "PYTHONDONTWRITEBYTECODE": "1"}
+        out = subprocess.run([python, "-c", _RENDER, DIGEST_CLASS], cwd=tmp, env=env, check=True,
+                             capture_output=True)
+    return out.stdout.decode("utf-8")
+
+
+def software_attributes_at(commit: str, repo: Path) -> list[str]:
+    """`Software`'s own attributes as the commit declares them."""
+    doc = yaml.safe_load(_git(repo, "show", f"{commit}:{SOFTWARE_SCHEMA}").decode("utf-8"))
+    cls = ((doc or {}).get("classes") or {}).get(SOFTWARE_CLASS) or {}
+    return sorted(cls.get("attributes") or {})
+
+
+def measure_digests(rows: list[dict[str, Any]], repo: Path | None = None,
+                    python: str = sys.executable, render=None) -> dict[str, Any]:
+    """Re-render each (commit, digest md5) the rows pin and read it with
+    `software_in_digest`; read each prompt file a row hashed at its commit.
+    `render(commit)` replaces `render_at` in tests."""
+    repo = repo or ROOT
+    render = render or (lambda commit: render_at(commit, repo, python))
+    texts: dict[str, str | None] = {}
+    errors: dict[str, str] = {}
+    renders = []
+    for commit, md5 in sorted({(r["commit"], r["digest_md5"]) for r in rows if r.get("commit") and r.get("digest_md5")}):
+        if commit not in texts:
+            try:
+                texts[commit] = render(commit)
+            except (subprocess.CalledProcessError, OSError, UnicodeDecodeError) as exc:
+                texts[commit] = None
+                stderr = getattr(exc, "stderr", None) or b""
+                errors[commit] = (stderr.decode("utf-8", "replace").strip().splitlines() or [str(exc)])[-1]
+        text = texts[commit]
+        entry: dict[str, Any] = {"commit": commit, "digest_md5": md5,
+                                 "rendered_md5": hashlib.md5(text.encode("utf-8")).hexdigest() if text is not None else None}
+        entry["reproduced"] = entry["rendered_md5"] == md5
+        entry["schema_digest_sha256"] = hashlib.sha256(_git(repo, "show", f"{commit}:{SCHEMA_DIGEST}")).hexdigest()
+        entry["software_attributes"] = software_attributes_at(commit, repo)
+        if text is None:
+            entry["error"] = errors[commit]
+        else:
+            entry.update(software_in_digest(text))
+        renders.append(entry)
+    prompts = []
+    for commit, path, sha in sorted({(r["commit"], p, s) for r in rows if r.get("commit")
+                                     for p, s in r.get("prompt_files") or []}, key=lambda t: (t[0], t[1], t[2] or "")):
+        try:
+            raw = _git(repo, "show", f"{commit}:{path}")
+        except subprocess.CalledProcessError:
+            raw = None
+        prompts.append({"commit": commit, "path": path, "sha256": sha,
+                        "at_commit": None if raw is None else hashlib.sha256(raw).hexdigest() == sha,
+                        "names_used_software": None if raw is None else bool(_USED_SOFTWARE.search(raw.decode("utf-8", "replace")))})
+    return {"digest_class": DIGEST_CLASS, "software_class": SOFTWARE_CLASS, "renders": renders, "prompts": prompts}
+
+
+_DIGEST_HEADER = ("# Written by `scripts/recall_target_baseline.py --measure-digests` (#3525). Do not edit\n"
+                  "# by hand. Each render is the digest the named commit's `src/` renders for\n"
+                  "# `digest_class`, read by `software_in_digest`; each prompt is a file a counted\n"
+                  "# record hashed, read at that record's commit.\n")
+
+
+def dump_digests(measured: dict[str, Any]) -> str:
+    return _DIGEST_HEADER + yaml.safe_dump(measured, sort_keys=False, allow_unicode=True, width=100)
+
+
+_RENDER_KEYS = ("commit", "digest_md5", "rendered_md5", "reproduced", "schema_digest_sha256", "software_attributes")
+_FINDING_KEYS = ("used_software_mentions", "in_universal_ranges", "own_slot_heading", "software_entry", "software_keys")
+
+
+def load_digests(path: Path) -> dict[str, Any]:
+    """The digest measurement, checked for shape: a render with no finding
+    and no error, or a duplicated render, is an error."""
+    raw = path.read_bytes()
+    data = _load(raw)
+    if not isinstance(data, dict) or not isinstance(data.get("renders"), list):
+        raise ValueError(f"{path}: needs a renders list")
+    seen = set()
+    for i, r in enumerate(data["renders"]):
+        where = f"{path}: renders[{i}]"
+        if not isinstance(r, dict) or any(k not in r for k in _RENDER_KEYS):
+            raise ValueError(f"{where}: needs {', '.join(_RENDER_KEYS)}")
+        if not (re.fullmatch(r"[0-9a-f]{40}", str(r["commit"])) and re.fullmatch(r"[0-9a-f]{32}", str(r["digest_md5"]))):
+            raise ValueError(f"{where}: commit and digest_md5 must be full hex digests")
+        if r["reproduced"] is not (r["rendered_md5"] == r["digest_md5"]):
+            raise ValueError(f"{where}: reproduced does not say whether rendered_md5 is digest_md5")
+        if "error" not in r and any(k not in r for k in _FINDING_KEYS):
+            raise ValueError(f"{where}: needs {', '.join(_FINDING_KEYS)} or an error")
+        if (r["commit"], r["digest_md5"]) in seen:
+            raise ValueError(f"{where}: {r['commit'][:10]} {r['digest_md5'][:8]} measured twice")
+        seen.add((r["commit"], r["digest_md5"]))
+    return dict(data, prompts=data.get("prompts") or [], sha256=hashlib.sha256(raw).hexdigest(), path=path)
+
+
+def _yes(values: list[bool]) -> str:
+    """`yes`, `no`, or `n of m` over a list of booleans."""
+    if not values:
+        return "–"
+    n = sum(values)
+    return "yes" if n == len(values) else "no" if n == 0 else f"{n} of {len(values)}"
+
+
+def render_digests(collected: dict[str, Any], arms=None) -> list[str]:
+    """The #3525 section: what each arm's recorded schema digest showed
+    about `used_software`, joined to the records by commit and md5."""
+    arms = ARMS if arms is None else arms
+    dig = collected["digests"]
+    path = dig["path"]
+    shown = path.relative_to(ROOT).as_posix() if path.is_relative_to(ROOT) else path.name
+    by_pair = {(r["commit"], r["digest_md5"]): r for r in dig["renders"]}
+    by_prompt = {(p["commit"], p["path"], p["sha256"]): p for p in dig["prompts"]}
+    rows = collected["rows"]
+    lines = [
+        "", "## used_software in the schema digest (#3525)", "",
+        f"Measured, `{shown}` (sha256 `{dig['sha256']}`), written by `--measure-digests`: the",
+        f"`{dig.get('digest_class', DIGEST_CLASS)}` digest each counted record pins (`schema.digest_md5`), re-rendered from",
+        "a `git archive` of its `repo.commit`'s `src/`. Every record's tree was dirty, so a render is",
+        "evidence only where its md5 **reproduces** the pinned one. Read off each render: the",
+        "`used_software` mentions, whether the object-ranges preamble names it (`On every object",
+        "below: … used_software is Software[]`), whether it has its own slot heading, and whether",
+        "`Software` has an object-ranges entry and which keys that entry names. **prompt names",
+        "used_software** is over the prompt files the records hashed, read at their commit where the",
+        "bytes still hash to the record's (`–`: no record in the arm hashed a prompt file whose bytes",
+        "reproduce at its commit, either because it hashes none or because none it hashed does). The",
+        "agentic arms pin a digest too, but their playbook names the merged schema file as the",
+        "structural source, so the digest is not the only schema text they read.", "",
+        "| arm | runtime | records | digest md5 | commits | reproduced | used_software mentions "
+        "| own slot heading | Software entry | Software keys shown | prompt names used_software | used_software entries |",
+        "|---|---|---:|---|---:|---|---|---|---|---|---|---:|",
+    ]
+    unmeasured = []
+    counted_prompt_names_slot = False
+    for key, display, _ in arms:
+        mine = [r for r in rows if r["arm"] == key]
+        if not mine:
+            continue
+        meas = []
+        for r in mine:
+            m = by_pair.get((r.get("commit"), r.get("digest_md5")))
+            if m is None:
+                unmeasured.append(r["path"])
+            meas.append(m)
+        ok = [m for m in meas if m is not None and m["reproduced"]]
+        mentions = sorted({m["used_software_mentions"] for m in ok})
+        keys = sorted({k for m in ok for k in m["software_keys"]})
+        prompt = []
+        for r in mine:
+            files = [by_prompt.get((r.get("commit"), p, s)) for p, s in r.get("prompt_files") or []]
+            files = [f for f in files if f and f["at_commit"]]
+            if files:
+                prompt.append(any(f["names_used_software"] for f in files))
+        # Only a prompt the column above counted may be said to be counted
+        # there: one whose bytes reproduce at the commit (#3760).
+        counted_prompt_names_slot = counted_prompt_names_slot or any(prompt)
+        lines.append(
+            f"| {display} | {', '.join(sorted({str(r.get('runtime')) for r in mine}))} | {len(mine)} "
+            f"| {', '.join(f'`{d[:8]}`' for d in sorted({str(r.get('digest_md5')) for r in mine}))} "
+            f"| {len({r.get('commit') for r in mine})} | {len(ok)} of {len(mine)} "
+            f"| {', '.join(map(str, mentions)) or '–'} | {_yes([m['own_slot_heading'] for m in ok])} "
+            f"| {_yes([m['software_entry'] for m in ok])} | {', '.join(f'`{k}`' for k in keys) or ('none' if ok else '–')} "
+            f"| {_yes(prompt)} | {sum(r['counts']['software'] for r in mine)} |")
+    lines += ["", "Per render:", "",
+              "| commit | digest md5 | rendered md5 | reproduced | used_software mentions | in preamble "
+              "| own slot heading | Software entry | Software keys shown | Software's attributes at the commit |",
+              "|---|---|---|---|---:|---|---|---|---|---|"]
+    for m in dig["renders"]:
+        if "error" in m:
+            lines.append(f"| `{m['commit'][:10]}` | `{m['digest_md5'][:8]}` | – | no | – | – | – | – | – "
+                         f"| {', '.join(f'`{a}`' for a in m['software_attributes'])} |")
+            continue
+        lines.append(
+            f"| `{m['commit'][:10]}` | `{m['digest_md5'][:8]}` | `{m['rendered_md5'][:8]}` "
+            f"| {'yes' if m['reproduced'] else 'no'} | {m['used_software_mentions']} "
+            f"| {'yes' if m['in_universal_ranges'] else 'no'} | {'yes' if m['own_slot_heading'] else 'no'} "
+            f"| {'yes' if m['software_entry'] else 'no'} | {', '.join(f'`{k}`' for k in m['software_keys']) or 'none'} "
+            f"| {', '.join(f'`{a}`' for a in m['software_attributes'])} |")
+    ok = [m for m in dig["renders"] if m["reproduced"]]
+    failed = [m for m in dig["renders"] if not m["reproduced"]]
+    lines.append("")
+    lines.append("Not reproduced: " + ("; ".join(f"`{m['commit'][:10]}` `{m['digest_md5'][:8]}`"
+                                                 + (f" ({_one_line(m['error'])})" if "error" in m else "")
+                                                 for m in failed) if failed else "none") + ".")
+    lines.append("Counted records with no render measured: "
+                 + ("; ".join(f"`{p}`" for p in unmeasured) if unmeasured else "none") + ".")
+    distinct = sorted({m["digest_md5"] for m in ok})
+    lines.append("")
+    shows = [m for m in ok if m["software_entry"] or m["software_keys"] or m["own_slot_heading"]]
+    if ok and not shows:
+        # "Named only in the preamble" is claimed only where every render says
+        # so: one mention, and that mention the preamble's range line (#3733).
+        if all(m["in_universal_ranges"] and m["used_software_mentions"] == 1 for m in ok):
+            lines += [
+                f"In all {len(ok)} reproduced renders ({len(distinct)} distinct digests), `used_software` is named only",
+                "in the object-ranges preamble, `Software` has no entry, and no key of `Software` is shown:",
+            ]
+        else:
+            lines += [
+                f"In all {len(ok)} reproduced renders ({len(distinct)} distinct digests), `Software` has no entry and",
+                "no key of `Software` is shown (`used_software` is not named only in the object-ranges",
+                "preamble in every one; the per-render table says where it is):",
+            ]
+        # A claim about every pinned digest needs every one reproduced and
+        # every counted record measured (#3764); otherwise it covers the
+        # reproduced renders only.
+        whole = ("no digest any arm pinned" if not failed and not unmeasured
+                 else "no reproduced digest")
+        lines += [
+            f"{whole} tells the model that a `Software` takes a `name` and a `version`.",
+            "A recall rule that asks the API path for versioned software asks for a shape its digest",
+            "does not show. Showing it is a digest change: `schema_digest.py` is pinned, and the change",
+            "would be its own condition boundary. It is recorded here, not made.",
+        ]
+        if counted_prompt_names_slot:
+            lines += ["", "A prompt file that names `used_software` is counted above; what it says of the slot is",
+                      "not read by this measurement."]
+    elif ok:
+        lines.append("Renders that show `Software`, a key of it, or a `used_software` heading of its own: "
+                     + "; ".join(f"`{m['commit'][:10]}` ({_shown(m)})" for m in shows) + ".")
+    else:
+        lines.append("No render reproduces its record's md5, so nothing here says what any arm was shown.")
+    return lines
+
+
+def _shown(m: dict) -> str:
+    """What one render shows of `Software` and `used_software`, claiming an
+    entry only where the render has one (#3761): a render can give
+    `used_software` its own heading and still have no `Software` entry."""
+    # Keys are read only from the entry (`software_in_digest`), so a render
+    # without an entry shows none.
+    what = (", ".join(m["software_keys"]) or "entry, no keys") if m["software_entry"] else "no `Software` entry"
+    if m["own_slot_heading"]:
+        what += "; `used_software` has its own heading"
+    return what
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--check", action="store_true",
                     help="read-only: exit 1 when the committed note does not match the records")
+    ap.add_argument("--measure-digests", action="store_true",
+                    help="re-render each counted record's schema digest at its commit (git archive, no model "
+                         "call) and write the measurement the note renders (#3525); then rewrite the note")
     args = ap.parse_args(argv)
+    if args.measure_digests:
+        if args.check:
+            ap.error("--measure-digests writes; it cannot be combined with --check")
+        measured = measure_digests(collect(digests={})["rows"])
+        DIGESTS.write_text(dump_digests(measured), encoding="utf-8")
+        print(f"wrote {DIGESTS.relative_to(ROOT).as_posix() if DIGESTS.is_relative_to(ROOT) else DIGESTS}")
     text = render_markdown(collect())
     shown = OUT_MD.relative_to(ROOT).as_posix() if OUT_MD.is_relative_to(ROOT) else str(OUT_MD)
     if args.check:
