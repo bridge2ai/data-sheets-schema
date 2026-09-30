@@ -38,12 +38,28 @@ The registrations come from the pinned notes/ fixtures (``ancestry``,
 construct a provider. Everything is written under ``tmp_path``; the pinned
 tree is checked unchanged after every test, imports included.
 
+The audit-batch integration instruction and the direct arm are rendered too
+(#3523):
+
+- ``audit_batch_context.render_integration_context``, which ``batch_native``
+  calls at run time with the workers' sealed proposals, on synthetic proposals
+  under every navigation selection, with the worker artifacts and canonical
+  row views it directs the integrator to Read. The proposals are model output,
+  so a proposal that echoes the ground-truth directory or an observation is
+  planted as well, and must be found;
+- the notes/claudecode_direct system prompt and launch text: a registration
+  prepared offline (``prepare_direct.build``, with the runtime and its login
+  replaced by stand-ins) into ``tmp_path``, its launch text read back from the
+  file the preparer rendered and the launcher streams, and its system prompt
+  assembled as ``run_direct_canary.main`` assembles it: the registered
+  ``system.md`` followed by the command guidance of the policy the launcher
+  rebuilds.
+
 Not rendered: the worker-checkpoint branch of ``render_parent_instruction``
 (it needs a completed, sealed batch attempt; its text is literals and hashes,
-which the literal scan covers); the audit-batch integration instruction
-(``audit_batch_context.render_integration_context``, called by ``batch_native``
-at run time with the workers' sealed proposals, which are model output); and
-the notes/claudecode_direct builders, which the issue did not name. A paraphrase
+which the literal scan covers). What the workers actually return at run time
+does not exist when this runs: the integration test shows the needle match
+finds an echo in a proposal, not that no run will produce one. A paraphrase
 stays out of reach of any text scan.
 """
 import importlib.util
@@ -51,26 +67,35 @@ import json
 from pathlib import Path
 import re
 import sys
+from types import SimpleNamespace
+import uuid
 
 import pytest
 
-from tests.test_audit_recall_leak import MATCHED, ROOT, matches, needles  # noqa: F401 (fixture)
+from data_sheets_schema import audit_batch_context, audit_batches
+from data_sheets_schema.profiles import NEUTRAL
+from tests.test_audit_recall_leak import (MATCHED, NAMES, ROOT, matches, needles,  # noqa: F401 (fixture)
+                                          staged)  # noqa: F401 (fixture)
 
 CONTROLS = ROOT / MATCHED
+DIRECT = ROOT / "notes" / "claudecode_direct"
+PINNED = (CONTROLS, DIRECT)
 
 
 def _pinned_tree():
-    """Size and mtime of every file under the pinned directory, bytecode aside."""
-    return {str(p.relative_to(CONTROLS)): (p.stat().st_size, p.stat().st_mtime_ns)
-            for p in CONTROLS.rglob("*") if p.is_file() and "__pycache__" not in p.parts}
+    """Size and mtime of every file under the pinned directories, bytecode aside."""
+    return {str(p.relative_to(ROOT)): (p.stat().st_size, p.stat().st_mtime_ns)
+            for directory in PINNED for p in directory.rglob("*")
+            if p.is_file() and "__pycache__" not in p.parts}
 
 
 #: Taken before the first import from notes/, so a write at import time is seen too.
 PINNED_BEFORE_IMPORT = _pinned_tree()
 
 # The notes/ controls import each other as top-level modules, as their own
-# tests do (their README and CI put these two directories on PYTHONPATH).
-for _path in (CONTROLS / "native_controls", CONTROLS):
+# tests do (their README and CI put these two directories on PYTHONPATH); the
+# direct arm's scripts import them the same way, from their own directory.
+for _path in (CONTROLS / "native_controls", CONTROLS, DIRECT):
     if str(_path) not in sys.path:
         sys.path.insert(0, str(_path))
 
@@ -81,6 +106,8 @@ from audit_controls.test_source_metadata_upgrade import metadata_ancestry  # noq
 from finalization_controls import contract as final_contract, prepare as final_prepare  # noqa: E402
 from finalization_controls import registration as final_registration  # noqa: E402
 import native_command_policy  # noqa: E402
+import prepare_direct as direct_preparation  # noqa: E402
+import run_direct_canary as direct_launcher  # noqa: E402
 
 BATCHES = {"kind": batch_registration.KIND, "worker_total_cap_usd": "12"}
 PLANTED = "A planted synthetic observation that only a runtime input carries."
@@ -88,7 +115,8 @@ PLANTED = "A planted synthetic observation that only a runtime input carries."
 
 @pytest.fixture(autouse=True)
 def pinned_tree_unchanged():
-    """No import or rendering here writes a registration, ledger or anything else under notes/."""
+    """No import or rendering here writes a registration, ledger or anything else under
+    the pinned notes/ directories."""
     yield
     assert _pinned_tree() == PINNED_BEFORE_IMPORT
 
@@ -244,6 +272,103 @@ def rendered_evaluation(instructions, tmp_path, planted=""):
     return {"instruction": instructions.render_instruction(manifest, job)}
 
 
+#: ``None`` is the renderer-20/21 text; the other two supply native Read payloads.
+INTEGRATION_NAVIGATION = (None, "explicit_row_reads_v1", "explicit_child_reads_v1")
+CLEAN_ISSUE = "Synthetic source-supported omission for integration consideration."
+CLEAN_REASON = "Synthetic proposed judgment, not checked source support."
+
+
+def worker_proposals(staged, tmp_path, issue=CLEAN_ISSUE, reason=CLEAN_REASON):
+    """Sealed worker proposals as ``batch_native`` hands them over: one proposal per
+    worker, its canonical row views, and the index binding them.
+
+    ``issue`` and ``reason`` are the first worker's finding and row judgment;
+    every other worker's are the clean ones. Shaped as in
+    tests/test_audit_batch_context.py, on the leak guard's staged inputs.
+    """
+    plan, out = staged["plan"], tmp_path / "proposals"
+    out.mkdir()
+    evidence = [{"source": "example.txt", "chunk": "c001", "quote": "An example source statement."}]
+    artifacts, data, rows = {}, {}, {}
+    for number, worker in enumerate(plan["workers"]):
+        values = []
+        for row in plan["inventory"]["values"]:
+            if row["path"] not in worker["paths"]:
+                continue
+            value = {"path": row["path"], "claims": [{
+                "text": row["text"], "verdict": "supported", "attributed_to": [], "claim_status": "fact",
+                "source_status": "fact", "evidence": evidence, "reason": reason if number == 0 else CLEAN_REASON}]}
+            values.append(value)
+            rows[row["path"]] = out / (audit_batches.object_sha256(value) + ".json")
+            rows[row["path"]].write_bytes(audit_batches.canonical_bytes(value))
+        proposal = {"findings": [{"severity": "low", "record": "full", "slot": "notes", "evidence": evidence,
+                                  "issue": issue if number == 0 else CLEAN_ISSUE}],
+                    "summary": "Synthetic worker proposal.",
+                    "source_review": {"artifact": "original_full", "sha256": plan["original_full_sha256"],
+                                      "values": values}}
+        data[worker["id"]] = audit_batches.canonical_bytes(proposal)
+        artifacts[worker["id"]] = out / (worker["id"] + ".json")
+        artifacts[worker["id"]].write_bytes(data[worker["id"]])
+    return artifacts, audit_batches.build_index(plan, data), rows
+
+
+def rendered_integration(staged, proposals, navigation):
+    """The integrator's instruction, and the proposals and row views it directs it to Read."""
+    artifacts, index, rows = proposals
+    rendered = {"integration context": audit_batch_context.render_integration_context(
+        inputs=staged["files"], profile=NEUTRAL, project="example", plan=staged["plan"], worker_index=index,
+        worker_artifacts=artifacts, row_artifacts=rows, audit_batch_navigation=navigation)}
+    rendered.update({f"worker artifact {key}": path.read_text(encoding="utf-8") for key, path in artifacts.items()})
+    rendered.update({f"row view {key}": path.read_text(encoding="utf-8") for key, path in rows.items()})
+    return rendered
+
+
+@pytest.fixture
+def direct_registration(tmp_path, monkeypatch):
+    """A direct-arm registration for CHORUS prepared offline into ``tmp_path``.
+
+    The shape of notes/claudecode_direct/test_direct_arm.py's ``prepared``: the
+    runtime is a script that prints its version and the login probe a
+    stand-in, so no model, login or network is reached. The cohort is unique
+    and one production never mints, so the planned output directories, which
+    the preparer refuses to find existing and never creates, are never a
+    real record's.
+    """
+    monkeypatch.chdir(ROOT)
+    for name in direct_preparation.FORBIDDEN_ENVIRONMENT:
+        monkeypatch.delenv(name, raising=False)
+    runtime = tmp_path / "claude"
+    runtime.write_text("#!/bin/sh\necho '2.1.272 (Claude Code)'\n")
+    runtime.chmod(0o700)
+    monkeypatch.setattr(direct_preparation, "auth_evidence", lambda executable, env: {
+        "loggedIn": True, "authMethod": "claude.ai", "apiProvider": "firstParty", "subscriptionType": "max"})
+    path = direct_preparation.build(SimpleNamespace(
+        output=tmp_path / "registration", project="CHORUS", claude_executable=str(runtime), condition="generic_v9",
+        render_version=17, cohort=f"test_fixture_{uuid.uuid4().hex[:8]}", label_date="2026-09-22",
+        run_date="2026-09-22", deadline_seconds=21600, runaway_guard_usd="60", context_window=200000,
+        max_output_tokens=64000))
+    registration = json.loads(path.read_text(encoding="utf-8"))
+    assert not any((ROOT / d).exists() for d in registration["generation"]["jobs"][0]["output_directories"])
+    return registration
+
+
+def rendered_direct(registration):
+    """The direct child's system prompt and launch text, as ``run_direct_canary.main`` builds them.
+
+    The system prompt is assembled inline there (``Path(runtime["system_prompt"])
+    .read_text() + command_guidance(command_policy)``, passed as
+    ``--system-prompt``), so it is assembled the same way here, from the policy
+    the launcher rebuilds and checks against the registered one. The launch
+    text is the instruction file ``execute_child`` streams to the child.
+    """
+    job = registration["generation"]["jobs"][0]
+    policy = direct_launcher.build_command_policy(job, registration["python"], registration["repository"])
+    assert policy == registration["per_job_command_policy"][job["id"]]
+    return {"system": (Path(registration["native_runtime"]["system_prompt"]).read_text(encoding="utf-8")
+                       + direct_launcher.command_guidance(policy)),
+            "launch instruction": Path(job["instruction"]).read_text(encoding="utf-8")}
+
+
 def test_the_rendered_command_guidance_quotes_nothing(needles):
     assert _found(rendered_command_guidance(), needles) == {}
 
@@ -273,6 +398,64 @@ def test_the_rendered_evaluation_instruction_quotes_nothing(evaluation_instructi
     assert _found(rendered_evaluation(evaluation_instructions, tmp_path), needles) == {}
 
 
+@pytest.mark.parametrize("navigation", INTEGRATION_NAVIGATION)
+def test_the_rendered_integration_context_quotes_nothing(staged, tmp_path, needles, navigation):
+    """The integrator's instruction on clean proposals: the renderer adds nothing (#3523)."""
+    rendered = rendered_integration(staged, worker_proposals(staged, tmp_path), navigation)
+    context = rendered["integration context"]
+    # Every worker's complete finding is inlined; the row judgments are behind the Reads.
+    assert context.count(CLEAN_ISSUE) == len(staged["plan"]["workers"]) >= 2
+    assert CLEAN_REASON not in context
+    assert len(rendered) == 1 + len(staged["plan"]["workers"]) + len(staged["plan"]["inventory"]["values"])
+    assert _found(rendered, [*needles, staged["observation"]]) == {}
+
+
+def test_the_rendered_direct_arm_prompts_quote_nothing(direct_registration, needles):
+    """The direct arm's system prompt and launch text, assembled at run time (#3523)."""
+    rendered = rendered_direct(direct_registration)
+    job = direct_registration["generation"]["jobs"][0]
+    # The launch text is the instruction the launcher re-renders and compares.
+    assert rendered["launch instruction"] == direct_launcher.spec_for(job).instruction
+    assert "# Agent runtime: Claude Code (direct)" in rendered["launch instruction"]
+    assert rendered["system"].startswith((DIRECT / "system.md").read_text(encoding="utf-8"))
+    assert len(rendered["system"]) > len((DIRECT / "system.md").read_text(encoding="utf-8"))
+    assert _found(rendered, needles) == {}
+
+
+#: A worker proposal is model output: what an echo of held-out text in one looks like.
+ECHOED_PATH = "Compare data/audit_ground_truth/EXAMPLE_v1.yaml before deciding."
+ECHOED_QUOTED = 'The reviewer "held out" a planted synthetic observation.'
+
+
+@pytest.mark.parametrize("navigation", INTEGRATION_NAVIGATION)
+@pytest.mark.parametrize("planting", ["path in a finding", "observation in a finding",
+                                      "JSON-escaped observation in a finding", "observation in a row judgment"])
+def test_a_proposal_that_echoes_held_out_text_is_found(staged, tmp_path, navigation, planting):
+    """The sealed proposals reach the integrator verbatim, as JSON (#3523).
+
+    A finding is inlined in the instruction and a row judgment is behind a
+    Read of its canonical view; the worker artifact carries both.
+    """
+    observation = staged["observation"]
+    needle, text = {"path in a finding": (NAMES[0], ECHOED_PATH),
+                    "observation in a finding": (observation, observation),
+                    "JSON-escaped observation in a finding": (ECHOED_QUOTED, ECHOED_QUOTED),
+                    "observation in a row judgment": (observation, observation)}[planting]
+    field = "reason" if planting.endswith("row judgment") else "issue"
+    proposals = worker_proposals(staged, tmp_path, **{field: text})
+    rendered = rendered_integration(staged, proposals, navigation)
+    first = staged["plan"]["workers"][0]
+    expected = {f"worker artifact {first['id']}": [needle]}
+    if field == "issue":
+        expected["integration context"] = [needle]
+    else:
+        expected.update({f"row view {path}": [needle] for path in first["paths"]})
+    assert _found(rendered, [*NAMES, observation, ECHOED_QUOTED]) == expected
+    if planting.startswith("JSON-escaped"):
+        # The escaping is real: only the decoded JSON carries the quotation.
+        assert matches(rendered["integration context"], [needle]) == []
+
+
 def _planted_protocol(manifest, tmp_path):
     """A batch child re-reads the registered protocol file when its system is rendered."""
     protocol = tmp_path / "planted_protocol.md"
@@ -283,10 +466,17 @@ def _planted_protocol(manifest, tmp_path):
 
 
 @pytest.mark.parametrize("builder", ["command guidance", "batch child system", "finalization report context",
-                                     "evaluation instruction"])
+                                     "evaluation instruction", "direct system prompt"])
 def test_an_observation_in_a_runtime_input_reaches_the_rendered_scan(request, tmp_path, builder):
     """The gap the literal scan leaves (#3198): text no scanned source carries as a literal."""
-    if builder == "command guidance":
+    if builder == "direct system prompt":
+        # The launcher reads the system prompt from the path the registration names (#3523).
+        registration = request.getfixturevalue("direct_registration")
+        planted = tmp_path / "planted_system.md"
+        planted.write_text(Path(registration["native_runtime"]["system_prompt"]).read_text() + PLANTED + "\n")
+        registration["native_runtime"]["system_prompt"] = str(planted)
+        rendered = {"system": rendered_direct(registration)["system"]}
+    elif builder == "command guidance":
         rendered = rendered_command_guidance(planted=" " + PLANTED)
     elif builder == "batch child system":
         manifest, _ = rendered_audit(request, tmp_path, "batch renderer 23")
