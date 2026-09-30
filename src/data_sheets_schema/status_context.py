@@ -56,9 +56,12 @@ runs across a flattened table.
 snippet's own markers do not express (`EXPRESSED_BY`: a snippet's "will"
 expresses a "Future ..." heading's status, #3232), and the value at the receipt's slot carries no
 marker expressing that status, one flag per status: a sentence's "will" and
-a heading's "Future ..." are one lost status, reported at the nearer
-governor (line distance measured from the snippet's span, first line to
-last) with the other listed beside it (#3245, #3262). `modal_dropped`: the snippet itself carries
+a heading's "Future ..." are one lost status, reported at one governor with
+the other listed beside it under `equivalent_governors` (#3245, #3262). The
+reported governor is chosen by via first (a sentence or enumeration
+governor before a heading or lead-in governor, however near the heading
+sits), then by the nearer line (distance measured from the snippet's span,
+first line to last), then by class name. `modal_dropped`: the snippet itself carries
 the marker and the value does not, one flag per status (a snippet's "will"
 and "future" are one dropped status, #3252). A snippet that occurs more than once in
 its chunk is flagged only when every occurrence's context carries the
