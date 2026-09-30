@@ -154,34 +154,57 @@ not denied whose builtin `cd`, `pushd` or `popd` (or one `eval` runs, or
 may run as a word supplied at run time, `eval "$X"`, #3815) may
 leave it anywhere but where that call started -- plain, or behind a
 brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`,
-`until`, `do`), `!`, `time`, `builtin` or `command` (#3797); one in a
-subshell, or in an unquoted command or process substitution (`$(cd x)`,
-`<(cd x)`), counts, the rule's cost, while one in a backquoted or
-double-quoted substitution (`` `cd x` ``, `"$(cd x)"`) is not read,
-and moves nothing (#3841); in a command the tokenizer cannot split any
-`cd`, `pushd`, `popd` or `eval` word counts, quoted or substituted
-(#3839) -- a later call's `python -c`, `-m` or
-`poetry run` part is read as after a directory change in its own
-command, and a relative `--full` in it cannot be placed. Wherever the
-transcript records a working directory other than the first it records,
-such a part is read as after a change too, and, where no earlier call's
-change was seen, a relative `--full` resolves against the recorded
-directory, where the call started (#3798). Where both hold, the earlier
-change decides and the `--full` is not placed (#3812): a call's recorded
-directory may be one inherited from the transcript's init event, which
-an earlier `cd` does not update, so it is not trusted after one; the
-cost is a false `unknown` in a transcript that records the directory on
-every event. In the same command, a directory change `eval` runs (or may
-run) leaves no known directory for the parts after it, as one behind a
-brace does (#3815).
+`until`, `do`), `!`, `time`, `builtin` or `command` (#3797) -- or which
+may run in it code not on its command line (#3782): `source` or `.`, or
+a program named by a bare word this does not read, which may be a
+function or an alias (not a path, a reader, a reserved word or builtin
+that changes no directory, `poetry run` or a wrapper read here, a d4d
+call, a validator or arithmetic, `(( i++ ))`) -- a later call's `python
+-c`, `-m` or `poetry run` part is read as after a directory change in
+its own command, and a relative `--full` in it cannot be placed. One in
+a subshell, an unquoted command or process substitution (`(cd x)`,
+`$(cd x)`, `<(cd x)`), a pipe's left side or a `&` job does not move
+the shell, but it counts all the same, the rule's cost: which parts a
+child runs is not read from the tokenizer's brackets and joins, since a
+`)` or `|` it returns may come from a case pattern, a here-document
+body, a backquote, a `${...}` or an arithmetic `$((...))`, where reading
+it so placed a `--full` after a real change (#3810, #3904, #3911,
+#3912); that waits for a shell grammar (#3830). A case pattern after
+the first on a `case ... in` line, or on a line of its own, is read as a
+command too (`a)`, `*)`), so its word may count; the first is read with
+its `case` word. One in a
+backquoted or double-quoted substitution (`` `cd x` ``, `"$(cd x)"`) is
+kept inside one word and not read; it moves nothing (#3841), though a
+backquoted command with a space in it is split, and its pieces are read
+as parts. A command the tokenizer cannot split counts, whatever its
+words (#3782). Wherever the transcript records a working directory
+other than the first it records, such a part is read as after a change
+too, and, where no earlier call's change was seen, a relative `--full`
+resolves against the recorded directory, where the call started
+(#3798). Where both hold, the earlier change decides and the `--full` is
+not placed (#3812): a call's recorded directory may be one inherited
+from the transcript's init event, which an earlier `cd` does not update,
+so it is not trusted after one, even where the call's own event records
+it (#3824 stays open: no transcript here records a per-event directory
+to check the runtime's against); the cost is a false `unknown` in a
+transcript that records the directory on every event. In the same
+command, a directory change `eval` runs (or may run), or code run in
+this shell as above, leaves no known directory for the parts after it,
+as one behind a brace does (#3815).
 A resumed run's next transcript starts afresh. A package in the
 directory the session's shell started in that such a part imports first
-is not read, nor a directory a `source`d script or a function changed
-to. The words before a command's program are read past wherever these
+is not read, nor a function or alias named as a program read here
+(`cat() { cd x; }`), defined in the session or by the profile its shell
+started with. The words before a command's program are read past wherever these
 rules look for one: a redirection, with its target and any descriptor
 before it (`2>/dev/null cd /tmp`, #3845), as well as the prefixes above.
-A part whose program is supplied at run time (a word starting with `$`
-or a backquote, `$C /tmp`) may be the builtin, and counts as a change.
+A part whose program word bash builds at run time (a `$` or backquote
+anywhere in it, a glob or a brace expansion: `$C /tmp`, `c${X}d /tmp`)
+may be the builtin, and counts as a change; it may be a detaching
+program, too, and makes the call open-ended (#3852). That is read at a
+part's head, a real command position, and in the command of a
+substitution a word carries whole (`"$($X ./derive.sh)"`), never in an
+argument: `echo "$(bash derive.sh)"` is not such a part.
 The command `eval` runs is its words joined by spaces and tokenised
 again, which removes a second level of quotes, and each part of it is
 read by the same rules however deep (`eval '"cd" /tmp'`, #3844); an
@@ -192,11 +215,12 @@ a command it may run, since which word `-c` receives depends on the
 options that take values (`bash -ceo pipefail 'cmd'`, #3843), and so is
 the command `eval` runs and each run of `ssh`'s arguments to the end,
 one of which is the command it runs remotely (#3846); a positional
-argument read so is a false open-ended run, the rule's cost. A command
-the tokenizer cannot split is read twice for a change, its quote,
-escape, `$` and backquote characters once as word breaks and once
-removed (`c\\d /tmp`, `c"d" /tmp`, #3847), and any word in it starting
-with `$` or a backquote counts as well.
+argument read so is a false open-ended run, the rule's cost. Such a
+command string that carries a word supplied at run time, or cannot be
+split, may run anything, and is open-ended as an `eval` of it is (`bash
+-c "$X"`, #3852). A command the tokenizer cannot split is open-ended
+where any word in it starts with `$` or a backquote, as well as by the
+text rules above.
 Its cost is a false `unknown` for such a program that derived nothing. A
 call the runtime backgrounded is ambiguous too: its result is the launch,
 not the end. A
@@ -258,7 +282,7 @@ from typing import Any
 
 import yaml
 
-INSTRUMENT = "receipt_origin v4 (#2933, #3047, #3369, #3693)"
+INSTRUMENT = "receipt_origin v5 (#2933, #3047, #3369, #3693, #3782)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -389,32 +413,52 @@ NON_CHECKS = (
     "is read (#3719): after a call not denied whose builtin `cd`, `pushd` or `popd`, or one "
     "`eval` runs or may run as a word supplied at run time (`eval \"$X\"`, #3815), may leave "
     "anywhere but where it started (plain or behind a brace, a compound "
-    "keyword, `!`, `time`, `builtin` or `command`, #3797; one in a subshell or in an unquoted "
-    "command or process substitution, `$(cd x)` or `<(cd x)`, counts, the rule's cost, while one "
-    "in a backquoted or double-quoted substitution is not read, and moves nothing, #3841; in a "
-    "command the tokenizer cannot split, any `cd`, `pushd`, `popd` or `eval` word counts, quoted "
-    "or substituted, #3839), such a part counts as after a directory change and a relative `--full` cannot be "
-    "placed; where the transcript records a working directory other than its first, such a part "
-    "counts as after a change too, and, where no earlier call's change was seen, a relative "
-    "`--full` resolves against the recorded directory (#3798); where both hold the earlier "
-    "change decides and the `--full` is not placed, as a recorded directory may be inherited "
-    "from the init event and is not trusted after a change (#3812), a false `unknown` in a "
-    "transcript that records the directory on every event; in the same command a change `eval` "
-    "runs leaves no known directory for the parts after it (#3815); a "
-    "directory a `source`d script or a function changed to is not seen. Before a command's program a "
+    "keyword, `!`, `time`, `builtin` or `command`, #3797), or which may run in that shell code not "
+    "on its command line (#3782: `source` or `.`, or a program named by a bare word not read here, "
+    "which may be a function or an alias -- not a path, a reader, a reserved word or builtin that "
+    "changes no directory, `poetry run` or a wrapper read here, a d4d call, a validator or "
+    "arithmetic), such a part counts as after a directory change and a relative `--full` cannot be "
+    "placed. One in a subshell, an unquoted command or process substitution (`(cd x)`, `$(cd x)`, "
+    "`<(cd x)`), a pipe's left side or a `&` job does not move the shell but counts all the same, "
+    "the rule's cost: which parts a child runs is not read from the tokenizer's brackets and joins, "
+    "where a `)`, `|` or `&` may come from a case pattern, a here-document body, a backquote, a "
+    "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell grammar, "
+    "#3830), and a case pattern is read as a command, so its word may count; one in a backquoted or "
+    "double-quoted substitution is kept in "
+    "one word, not read, and moves nothing (#3841), though a backquoted command with a space is "
+    "split and its pieces read as parts; and a command the tokenizer cannot split counts, whatever "
+    "its words (#3782). Where the transcript records a working directory other than its first, such "
+    "a part counts as after a change too, and, where no earlier call's change was seen, a relative "
+    "`--full` resolves against the recorded directory (#3798); where both hold the earlier change "
+    "decides and the `--full` is not placed, as a recorded directory may be inherited from the init "
+    "event and is not trusted after a change (#3812), even one the call's own event records (#3824), "
+    "a false `unknown` in a transcript that records the directory on every event; in the same "
+    "command a change `eval` runs, or code run in this shell as above, leaves no known directory "
+    "for the parts after it "
+    "(#3815). Before a command's program a "
     "redirection with its target and descriptor is read past (`2>/dev/null cd /tmp`, #3845), and a part "
-    "whose program is supplied at run time (a word starting with `$` or a backquote, `$C /tmp`) counts "
-    "as a change; the command `eval` runs is its words joined and tokenised again, each part read by "
+    "whose program word bash builds at run time (a `$` or backquote anywhere in it, a glob or a brace "
+    "expansion: `$C /tmp`, `c${X}d /tmp`) counts as a change and as open-ended, as it may be a "
+    "detaching program (`$X ./derive.sh`, `$(which setsid) ./derive.sh`, #3852), read at a part's "
+    "head and in the command of a substitution a word carries whole (`\"$($X ./derive.sh)\"`), never "
+    "in an argument (`echo \"$(bash derive.sh)\"`); the command `eval` runs is its words joined and "
+    "tokenised again, each part read by "
     "the same rules (`eval '\"cd\" /tmp'`, #3844), and one carrying a word supplied at run time or "
     "that cannot be split counts as a change and as open-ended (#3846); every argument of a shell "
     "program given `-c` is read as a command it may run (`bash -ceo pipefail 'cmd'`, #3843), and so "
-    "are the command `eval` runs and each run of `ssh`'s arguments to the end (#3846); in a command "
-    "the tokenizer cannot split a change is read with quote and escape characters both as word breaks "
-    "and removed (`c\\d /tmp`, #3847), and any word starting with `$` or a backquote counts. Still not "
-    "read: a detaching program supplied at run time (`$X ./derive.sh`, `$(which setsid) ./derive.sh`), "
-    "a command string supplied at run time to a nested shell (`bash -c \"$X\"`), a program word bash "
-    "builds other than from a leading `$` or backquote (`c${X}d /tmp`, a glob, a brace expansion), "
-    "and a directory change inside a function or alias. "
+    "are the command `eval` runs and each run of `ssh`'s arguments to the end (#3846), and such a "
+    "command string that carries a word supplied at run time or cannot be split is open-ended "
+    "(`bash -c \"$X\"`, #3852); a command the tokenizer cannot split is open-ended where any word "
+    "in it starts with `$` or a backquote. Still not read: a function or alias named as a program "
+    "read here (`cat() { cd x; }`), defined in the session or by the profile the session's shell "
+    "started with; a program bash builds at run time behind `nohup`, `exec` or `command` "
+    "(`nohup $X ./derive.sh`), which is not read as detaching; and, in a command the tokenizer "
+    "cannot split, a program word built other than from a leading `$` or backquote (`set${X}sid`, "
+    "a glob, a brace expansion), which is not read as detaching there (#3923); a brace expansion "
+    "with a quoted or escaped space in it (`{cd,'/tmp/a b'}`, `{setsid,'./derive script.sh'}`), "
+    "which the tokenizer splits so it is not read as built at run time (#3924); and a substitution "
+    "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
+    "command is read only up to that `)` (#3925). Both wait for a shell grammar (#3830). "
     "A d4d call whose program, "
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
@@ -890,28 +934,16 @@ def _process_substitutes(command: str) -> bool:
     return False
 
 
-#: A `cd`, `pushd` or `popd` as a whole shell word anywhere in a text,
-#: quotes not read: the directory-change rule for a command the tokenizer
-#: cannot split (#3719).
-_DIRECTORY_WORD = re.compile(r"(?<![^\s;&|(){}])(?:cd|pushd|popd)(?![^\s;&|(){}])")
-#: `eval` as a whole shell word anywhere in a text, by `_DIRECTORY_WORD`'s
-#: word rule: the rule for a command the tokenizer cannot split (#3839).
-_EVAL_WORD = re.compile(r"(?<![^\s;&|(){}])eval(?![^\s;&|(){}])")
-#: A word that starts with a `$` or a backquote, by the same word rule:
+#: A word that starts with a `$` or a backquote, as a whole shell word:
 #: in a command the tokenizer cannot split, any such word may be a
-#: program supplied at run time, which may be a directory change
-#: (`_dynamic_program`, #3844).
+#: program supplied at run time, which may detach what it runs
+#: (`_dynamic_program`, #3844, #3852).
 _DYNAMIC_WORD = re.compile(r"(?<![^\s;&|(){}])[$`]")
-#: Quote, escape, `$` and backquote characters, read as word breaks in a
-#: command the tokenizer cannot split, so a directory or `eval` word
-#: against one is still a word (`'cd x'`, `$(cd x)`, `` `cd x` ``, #3839).
-_UNSPLIT_BREAKS = re.compile(r"[\"'\\$`]")
 #: The quote and escape characters the tokenizer removes (and a `$`
-#: opening a `$'...'` or `$"..."` quote), dropped rather than read as word
-#: breaks: the second form a command the tokenizer cannot split is read
-#: in, so a builtin's name spelled across quotes or escapes (`c\d`,
-#: `c"d"`, `'c'd`, `e"v"al`) is still that name, as it is to bash and to
-#: the tokenised path (#3847).
+#: opening a `$'...'` or `$"..."` quote), dropped: a command the tokenizer
+#: cannot split is also read in this form for a detaching program, so a
+#: name spelled across quotes or escapes (`s\etsid`, `"setsid"`) is still
+#: that name, as it is to bash and to the tokenised path (#3847).
 _UNSPLIT_REMOVED = re.compile(r"\$(?=['\"])|[\"'\\]")
 #: A `<(` or `>(` anywhere in a text, quotes not read: the rule for a
 #: command the tokenizer cannot split (#3752), and for the rest of a
@@ -1566,24 +1598,89 @@ def _eval_opaque(text: str) -> bool:
     return "$" in text or "`" in text or _tokens(text) is None
 
 
+#: A brace expansion in a word (`{a,b}`, `{1..3}`), which bash expands
+#: into words before it looks the program up (#3852).
+_BRACE_EXPANSION = re.compile(r"\{[^{}\s]*(?:,|\.\.)[^{}\s]*\}")
+
+
+def _built_at_run_time(word: str) -> bool:
+    """Whether bash builds a program word at run time rather than taking it
+    as spelled (#3852): a `$` or backquote anywhere in it (`$C`, `c${X}d`,
+    the bare `$` the tokenizer leaves of `$(echo cd)`), a glob character
+    (`*`, `?`, `[`, but not the programs `[` and `[[`), or a brace
+    expansion. With `X` empty, `c${X}d` is `cd`."""
+    return (any(c in word for c in "$`") or bool(_BRACE_EXPANSION.search(word))
+            or (word not in ("[", "[[") and any(c in word for c in "*?[")))
+
+
 def _dynamic_program(segment: list[str]) -> bool:
     """Whether the program the part runs, read through assignments, the
     wrappers `_unwrapped` reads or the words `_behind_prefixes` reads, is a
-    word supplied at run time: one that starts with a `$` or a backquote
-    (`$C /tmp`, `` `echo cd` /tmp ``, and the bare `$` the tokenizer leaves
-    of `$(echo cd) /tmp`). bash expands it before it looks the name up, so
-    it may be the builtin `cd`, `pushd`, `popd` or `eval`, as the command
-    an `eval` of a word supplied at run time may be (#3844). It is read for
-    a directory change only, not for a detaching program."""
-    return any(rest[:1] and rest[0][:1] in ("$", "`")
+    word bash builds at run time (`_built_at_run_time`: `$C /tmp`, `` `echo
+    cd` /tmp ``, `$(echo cd) /tmp`, `c${X}d /tmp`, a glob or a brace
+    expansion). bash expands it before it looks the name up, so it may be
+    the builtin `cd`, `pushd`, `popd` or `eval`, as the command an `eval` of
+    a word supplied at run time may be (#3844), or a detaching program
+    (#3852). It is read at a part's head only, a real command position, so
+    `echo "$(bash derive.sh)"` is not such a part."""
+    return any(rest[:1] and _built_at_run_time(rest[0])
                for rest in (_unwrapped(segment), _behind_prefixes(segment)[0]))
+
+
+#: Reserved words and builtins that run no command a function, alias or
+#: sourced script could supply and change no directory, taken by their
+#: names as the readers are (#3782).
+_STAYS_PUT = frozenset({"for", "case", "select", "in", "esac", "done", "fi", "}", "[[", "]]", ":", "false",
+                        "alias", "unalias", "export", "set", "unset", "shift", "local", "declare", "typeset",
+                        "readonly", "read", "wait", "exit", "return", "break", "continue", "exec"})
+
+
+def _may_run_code_here(segment: list[str]) -> bool:
+    """Whether the part may run, in this shell, code that is not on the
+    command line and may change its directory (#3782): `source` or `.`
+    (a script run in this shell), or a program named by a bare word this
+    does not read, which may be a function or an alias defined earlier in
+    the session. Read behind the words `_behind_prefixes` reads. Not such a
+    part: a path (`./x`, `/usr/bin/x`), which bash runs as a file in a
+    child process; a word built at run time, `_dynamic_program`'s; a
+    function being defined (`f() { ...; }`); and a name read here -- a
+    reader, a reserved word or builtin in `_STAYS_PUT`, a directory builtin
+    or `eval` (read by their own rules), `poetry run` or a wrapper
+    `_wrapper_skip` reads, whose program runs in a child, a d4d call or a
+    validator. A function or alias named as one of those is not seen. Nor
+    is an arithmetic command (`(( i++ ))`), which runs no command; only a
+    part that is a whole arithmetic command (`((` at the program position
+    and closing with `))`, #3922) is exempt, so `source env.sh
+    $((1))` still counts (#3920). That exemption is this rule's alone, and
+    the directory rules read the part as before."""
+    rest = _behind_prefixes(segment)[0]
+    if not rest:
+        return False
+    # `((` is read as a compound prefix, so an arithmetic command is the one
+    # whose last prefix read is `((` (or whose head is, where it is not).
+    read = segment[:len(segment) - len(rest)]
+    # bash reads `((` as nested subshells unless the command closes with `))`
+    # (#3922), so a part is exempt only when it is a whole arithmetic command.
+    if ((read and read[-1] == "((") or rest[0] == "((") and segment[-1] == "))":
+        return False
+    head = rest[0]
+    if head in ("source", "."):
+        return True
+    if rest[1:2] == ["()"] or head == "function" or not _plain_word(head) or "/" in head:
+        return False
+    if head in _STAYS_PUT or head in READ_ONLY_PROGRAMS or head in ("cd", "pushd", "popd", "eval"):
+        return False
+    if rest[:2] == ["poetry", "run"] or _wrapper_skip(rest) is not None:
+        return False
+    return _cli_args(rest) is None and not _validator(rest)
 
 
 def _changes_directory(segment: list[str]) -> bool:
     """Whether the part may run a builtin `cd`, `pushd` or `popd`: plain,
     behind a word `_behind_prefixes` reads (a redirection included, #3845),
     in the command an `eval` runs (`_eval_may_change_directory`), or as a
-    program supplied at run time (`_dynamic_program`)."""
+    program word built at run time (`_dynamic_program`). Code a sourced
+    script, a function or an alias runs is `_may_run_code_here`'s (#3782)."""
     return (_directory_builtin(segment) is not None or _directory_builtin_behind(segment) is not None
             or _eval_may_change_directory(segment) or _dynamic_program(segment))
 
@@ -1596,13 +1693,16 @@ def _eval_may_change_directory(segment: list[str]) -> bool:
     the joined text is tokenised again and each part of it read by the same
     rules, however deep (`eval '"cd" /tmp'`, `eval 'c\\d /tmp'`, #3844). A
     command that is opaque (`_eval_opaque`: a word supplied at run time, or
-    text the tokenizer cannot split) may be a change (#3719, #3815). `eval`
-    runs its words in this shell, so the change holds for the parts after
-    it and the calls after this one."""
+    text the tokenizer cannot split) may be a change (#3719, #3815), and so
+    may a part of it that runs code not on the command line
+    (`_may_run_code_here`, `eval myfunc`, #3782). `eval` runs its words in
+    this shell, so the change holds for the parts after it and the calls
+    after this one."""
     for rest in (_unwrapped(segment), _behind_prefixes(segment)[0]):
         if rest[:1] == ["eval"]:
             text = " ".join(rest[1:])
-            if _eval_opaque(text) or any(_changes_directory(part) for part in _layout(_tokens(text) or [])[0]):
+            if _eval_opaque(text) or any(_changes_directory(part) or _may_run_code_here(part)
+                                         for part in _layout(_tokens(text) or [])[0]):
                 return True
     return False
 
@@ -1817,7 +1917,7 @@ def _opaque_eval(tokens: list[str]) -> bool:
     return any(rest[0] == "eval" and _eval_opaque(" ".join(rest[1:])) for rest in _command_heads(tokens))
 
 
-def _nested_open_ended(word: str) -> bool:
+def _nested_open_ended(word: str, *, command: bool = False) -> bool:
     """Whether `word`, a string a nested shell may run, may start what runs
     on after the call: a `&` ending a command in it (`_nested_detaches`),
     and, in a word with a space in it, `coproc` or a detaching program where
@@ -1828,23 +1928,67 @@ def _nested_open_ended(word: str) -> bool:
     `bash -c 'echo "R&D team"'` does not count. Its parts' programs are
     read as a top-level part's are (`_detacher`: `2>/dev/null setsid`,
     #3845), and an `eval` of a command not known by its words may start
-    anything (`_opaque_eval`, #3846)."""
-    if _nested_detaches(word):
+    anything (`_opaque_eval`, #3846). Where `command` says the word is a
+    command string a program runs (`_command_strings`), one carrying a word
+    supplied at run time or that cannot be split may run anything, as an
+    `eval` of it may (`bash -c "$X"`, `_eval_opaque`), and a program word
+    built at run time at a command's head in it may be a detaching program
+    (`_dynamic_program`, #3852); any other word is not read so, since it
+    may be no command at all (`echo "$(bash derive.sh)"`)."""
+    if _nested_detaches(word) or (command and _eval_opaque(word)):
         return True
-    if not re.search(r"\s", word):
+    if not re.search(r"\s", word) and not command:
         return False
     if _NESTED_DETACHER.search(word) or _process_substitutes(word):
         return True
     inner = _tokens(word)
-    return inner is not None and (_opaque_eval(inner) or any(_detacher(s) for s in _layout(inner)[0])
-                                  or any(_nested_open_ended(w) for w in _command_strings(inner)))
+    return inner is not None and (_opaque_eval(inner) or any(_detacher(s) or (command and _dynamic_program(s))
+                                                             for s in _layout(inner)[0])
+                                  or any(_nested_open_ended(w, command=True) for w in _command_strings(inner)))
+
+
+def _substitution_bodies(word: str) -> list[str]:
+    """The commands inside the command substitutions a word carries whole
+    (a quoted `"$(...)"` or a backquoted one, which the tokenizer keeps in
+    one word), each read to its matching `)` by counting brackets, or to the
+    end where none matches. Arithmetic's `$((` runs no command."""
+    out, i = [], 0
+    while i < len(word):
+        if word.startswith("$(", i) and not word.startswith("$((", i):
+            depth, j = 1, i + 2
+            while j < len(word) and depth:
+                depth += {"(": 1, ")": -1}.get(word[j], 0)
+                j += 1
+            out.append(word[i + 2:j - 1] if depth == 0 else word[i + 2:])
+            i = j
+        elif word[i] == "`":
+            j = word.find("`", i + 1)
+            out.append(word[i + 1:] if j < 0 else word[i + 1:j])
+            i = len(word) if j < 0 else j + 1
+        else:
+            i += 1
+    return out
+
+
+def _substituted_runtime_program(word: str) -> bool:
+    """Whether a command substitution a word carries whole runs, at a
+    command's head, a program word built at run time (`"$($X ./derive.sh)"`,
+    `_dynamic_program`), however deep, or cannot be split (#3852). Its
+    other words are arguments: `"$(bash derive.sh)"` is not such a word."""
+    for body in _substitution_bodies(word):
+        inner = _tokens(body)
+        if inner is None or any(_dynamic_program(s) for s in _layout(inner)[0]) or any(
+                _substituted_runtime_program(t) for t in inner if not set(t) <= _PUNCT):
+            return True
+    return False
 
 
 def _detacher(segment: list[str]) -> bool:
     """Whether the part is a `coproc`, or its program, or one a wrapper
     `_unwrapped` reads, a prefix `_DETACH_PREFIXES` names, `builtin` or a
     redirection (#3845) runs, is one of `_DETACHERS` (#3674, #3690). A
-    program supplied at run time (`$X ./derive.sh`) is not read so."""
+    program word built at run time (`$X ./derive.sh`) is
+    `_dynamic_program`'s, read at a part's head (#3852)."""
     rest = _program(segment)
     while rest:
         if rest[0] == _COPROC or os.path.basename(rest[0]) in _DETACHERS:
@@ -2114,28 +2258,22 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         # not have derived after it (#3698). A `<(` or `>(` anywhere in it
         # may start a process substitution bash does not wait for (#3752).
         # A detaching program's name is read in the quote-removed form too
-        # (`s\etsid ./derive.sh`, `"setsid" ./derive.sh`, #3847).
+        # (`s\etsid ./derive.sh`, `"setsid" ./derive.sh`, #3847), and any
+        # word starting with a `$` or a backquote may be a detaching program
+        # supplied at run time (#3852).
         out["detaches"] = bool(_NESTED_DETACH.search(command) or _NESTED_DETACHER.search(command)
                                or _NESTED_DETACHER.search(_UNSPLIT_REMOVED.sub("", command))
-                               or _PROCESS_SUBSTITUTION.search(command))
-        # Nor are its parts read for a directory change: a `cd`, `pushd` or
-        # `popd` word anywhere in its text may be one (#3719), with quote,
-        # escape, `$` and backquote characters read as word breaks, so a
-        # quoted or substituted one (`eval 'cd x'`, `` `cd x` ``) counts,
-        # and so does an `eval` word anywhere, which may run one whatever
-        # its words are (`eval "$GO"`, #3839). That is at least as much as
-        # the tokenised path reads (`_eval_may_change_directory`); a false
-        # `unknown` is its cost.
-        # The text is read twice (#3847): with those characters as word
-        # breaks, and with them removed, as the tokenizer removes them, so a
-        # name spelled across quotes or an escape (`c\d /tmp`, `c"d"`) is the
-        # builtin's there as it is on the tokenised path; a move either
-        # form reads counts.
-        # A word starting with a `$` or a backquote anywhere may be a program
-        # supplied at run time (`_dynamic_program`), and counts too.
-        forms = (_UNSPLIT_BREAKS.sub(" ", command), _UNSPLIT_REMOVED.sub("", command))
-        out["moves"] = any(bool(_DYNAMIC_WORD.search(text)) for text in (command, forms[1])) or any(
-            bool(_DIRECTORY_WORD.search(text) or _EVAL_WORD.search(text)) for text in forms)
+                               or _PROCESS_SUBSTITUTION.search(command)
+                               or any(_DYNAMIC_WORD.search(text)
+                                      for text in (command, _UNSPLIT_REMOVED.sub("", command))))
+        # Nor are its parts read for a directory change, so it counts as
+        # one (#3782): any word at a command's start in it -- a here-document
+        # body's line included, as the tokenised path reads one -- may be a
+        # function, an alias, `source` or a builtin spelled across quotes or
+        # an escape (`c\d /tmp`, #3847). Before #3782 its text was searched
+        # for a `cd`, `pushd`, `popd` or `eval` word (#3719, #3839); every
+        # such command now counts, which is at least that (a false
+        # `unknown` is the cost).
         return out
     newline = "\n" in command.replace("\\\n", " ")
     segments, joins, leading = _layout(tokens)
@@ -2153,14 +2291,21 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # The command an `eval` runs, its words joined, and the remote command
     # `ssh` builds are read so too (`_command_strings`, #3846), and an eval
     # of a command not known by its words (`eval "$X"`) may start anything.
+    # So may a program word bash builds at run time at a command's head
+    # (`$X ./derive.sh`, `$(which setsid) ./derive.sh`, `set${X}sid`), at
+    # the top level, in a quoted substitution's command (`"$($X ./d)"`),
+    # or in a command string a nested shell runs, which counts whole where
+    # it carries a word supplied at run time (`bash -c "$X"`, #3852). Any
+    # other word is an argument: `echo "$(bash derive.sh)"` is not.
     out["detaches"] = any(
         _lone_ampersand(t)
-        or (not set(t) <= _PUNCT and _nested_open_ended(t))
-        for t in tokens) or any(_detacher(s) for s in segments) or _process_substitutes(
+        or (not set(t) <= _PUNCT and (_nested_open_ended(t) or _substituted_runtime_program(t)))
+        for t in tokens) or any(_detacher(s) or _dynamic_program(s)
+                                for s in segments) or _process_substitutes(
         _strip_comments(command)) or _opaque_eval(tokens) or any(
-        _nested_open_ended(w) for w in _command_strings(tokens))
+        _nested_open_ended(w, command=True) for w in _command_strings(tokens))
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) or _changes_directory(s)
-                            for s in segments)
+                            or _may_run_code_here(s) for s in segments)
     for target in named:
         for token in tokens:
             if target.name not in token:
@@ -2250,7 +2395,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         # --full data/X` runs the derive in `sub`, not where the call started.
         # So is a program supplied at run time (`$C /tmp`), which may be the
         # builtin (`_dynamic_program`).
-        if change is None and _changes_directory(segment):
+        # So is a part that may run, in this shell, code not on the command
+        # line (`_may_run_code_here`, #3782): `source`, `.`, or a program
+        # not read here, which may be a function or an alias.
+        if change is None and (_changes_directory(segment) or _may_run_code_here(segment)):
             unsettled = moved = leaves = True
             local = None
             pushed = [None] * len(pushed)
@@ -2379,11 +2527,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # starting elsewhere (#3719), unless it is known to go to the directory
     # the call started in. One behind a brace, a compound keyword, `!`,
     # `time`, `builtin` or `command` counts (#3797). One in a subshell
-    # (`(cd x; ls)`) or in an unquoted command or process substitution
-    # (`X=$(cd x; pwd)`, `<(cd x)`) does not move this shell, but it is read
-    # as one all the same, which is the rule's cost: the segmenter does not
-    # say which parts a `(` encloses. One in a backquoted or double-quoted
-    # substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
+    # (`(cd x; ls)`), an unquoted command or process substitution (`X=$(cd
+    # x; pwd)`, `<(cd x)`), a pipe's left side or a `&` job does not move
+    # this shell, but it is read as one all the same, which is the rule's
+    # cost: the segmenter does not say which parts a child runs, and
+    # reading that from shlex's tokens has placed a `--full` after a real
+    # parent-shell change more than once (#3810, #3904, #3911, #3912); it
+    # waits for a shell grammar (#3830). One in a backquoted or
+    # double-quoted substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
     # tokenizer keeps it inside one word; it moves nothing, so nothing is
     # missed (#3841). `eval` runs its words in this shell, so a
     # `cd`, `pushd` or `popd` word among them counts too, behind those
@@ -2391,8 +2542,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # be one (`_eval_may_change_directory`, #3815): the loop above sets
     # `leaves` for each. The command eval runs is its words joined and
     # tokenised again, and one that is opaque counts (#3844); a redirection
-    # before the builtin is read past (#3845); and a program supplied at
-    # run time may be the builtin (`_dynamic_program`).
+    # before the builtin is read past (#3845); a program word built at run
+    # time may be the builtin (`_dynamic_program`, #3852); and `source`,
+    # `.` or a program not read here may run a sourced script, a function
+    # or an alias that changes directory (`_may_run_code_here`, #3782).
     out["moves"] = leaves
     # A substitution runs its inner command inside one word of the part that
     # carries it (`echo "$(bash derive.sh)"`, `` echo `./derive.sh` ``, `cat

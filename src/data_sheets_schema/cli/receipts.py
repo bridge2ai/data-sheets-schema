@@ -390,22 +390,26 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     shell started in that a `python -c` or `-m` part imports first, nor the project there whose
     virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
     may have left that directory (plain, or behind a brace, a compound keyword, `!`, `time`,
-    `builtin` or `command`, or one `eval` runs or may run; one in a subshell or an unquoted
-    `$(...)`, `<(...)` or `>(...)` counts, one in a backquoted or double-quoted substitution
-    is not read, and in a command the tokenizer cannot split any `cd`, `pushd`, `popd` or
-    `eval` word counts), such a part counts as after a
-    directory change, and a relative `--full` cannot be placed, even where the transcript
-    records a directory for the call; where the transcript records another directory and no
-    earlier change was seen, such a part counts as after a change too, and a relative `--full`
-    resolves against the recorded directory. A redirection before a program is read
-    past (`2>/dev/null cd /tmp`); a program supplied at run time (`$C /tmp`) counts as a
-    change; the command `eval` runs is its words joined and tokenised again (`eval
+    `builtin` or `command`, or one `eval` runs or may run), or which may run code not on its
+    command line in that shell (`source`, `.`, or a program named by a bare word this does
+    not read, which may be a function or an alias; not a path, a reader or a d4d call),
+    such a part counts as after a directory change, and a relative `--full` cannot be
+    placed, even where the transcript records a directory for the call. A change in a
+    subshell, an unquoted `$(...)`, `<(...)` or `>(...)`, a pipe's left side or a `&` job
+    counts too, though it runs in a child: which parts a child runs is not read (#3830);
+    one in a backquoted or double-quoted substitution is not read; and a command the
+    tokenizer cannot split counts. Where the transcript records another directory and no
+    earlier change was seen, such a part counts as after a change too, and a relative
+    `--full` resolves against the recorded directory. A redirection before a program is read
+    past (`2>/dev/null cd /tmp`); a program word built at run time (`$C /tmp`, `c${X}d`,
+    a glob) counts as a change and, at a part's head, as open-ended (`$X ./derive.sh`);
+    the command `eval` runs is its words joined and tokenised again (`eval
     '"cd" /tmp'`), and one carrying a word supplied at run time or that cannot be split
     counts as a change and as open-ended; every argument of a shell given `-c` (`bash
     -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s arguments to
-    the end are read for a `&` and the like; and in a command the tokenizer cannot split
-    a change is read with quote and escape characters removed as well (`c\\d /tmp`) and any
-    word starting with `$` or a backquote counts. A relative `--full`
+    the end are read for a `&` and the like, and one carrying a word supplied at run
+    time is open-ended (`bash -c "$X"`); and a command the tokenizer cannot split is
+    open-ended where any word in it starts with `$` or a backquote. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`, and after one `eval` runs
     or may run it cannot be placed. Where the
