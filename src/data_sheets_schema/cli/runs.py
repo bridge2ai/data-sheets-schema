@@ -532,6 +532,9 @@ def check_cmd(method, label, project, strict):
     Use `--strict` after a generation run so a missing record fails the step
     rather than being noticed later.
     """
+    # The report loops below rebind `project` and `label`; the deterministic
+    # section needs the filters as given (#2970).
+    selected = {"method": method, "label": label, "project": project}
     from data_sheets_schema.runs import (canonical_prompt_status,
                                          check_provenance,
                                          condition_contradiction,
@@ -977,6 +980,8 @@ def check_cmd(method, label, project, strict):
         if len(behind) > 40:
             click.echo(f"     … {len(behind) - 40} more")
 
+    _report_deterministic_validity(**selected)
+
     # Reported separately from the provenance verdict, and never fatal. A
     # label naming a condition its prompt does not match is a real defect
     # (#420) — but it is a defect in records that already exist, and failing
@@ -1080,6 +1085,42 @@ def check_cmd(method, label, project, strict):
     if strict and (failed or bad_requests or never_pinned or condition_contradictions
                    or profile_disagreements or malformed_records):
         raise SystemExit(1)
+
+
+def _report_deterministic_validity(method, label, project) -> None:
+    """The deterministic arms under today's schema (#2970), reported and
+    never fatal: the loop above skips them because they carry no generation
+    provenance, and the published labels are kept as published (#426/#520),
+    so a schema tightening is stated here rather than failed or repaired."""
+    import re
+
+    from data_sheets_schema.rocrate_map import verdict_basis
+    from data_sheets_schema.runs import (DETERMINISTIC_SCHEMA, INVALID, UNVERIFIED,
+                                         VALID, deterministic_validity)
+    rows = deterministic_validity(method=method, label=label, project=project)
+    if not rows:
+        return
+    n = {s: sum(r["status"] == s for r in rows) for s in (VALID, INVALID, UNVERIFIED)}
+    click.echo(f"\nⓘ  {len(rows)} deterministic-arm record(s) judged against the current schema "
+               f"({verdict_basis(Path(DETERMINISTIC_SCHEMA))}): {n[VALID]} valid, "
+               f"{n[INVALID]} invalid, {n[UNVERIFIED]} could not be checked (#2970):")
+    for r in rows:
+        where = f"{r['method']}/{r['label']}"
+        if r["status"] == VALID:
+            continue
+        if r["status"] == UNVERIFIED:
+            click.echo(f"     {r['project']:9} {where:44} not checked: {(r['failure'] or '')[:160]}")
+            continue
+        # The validator's `[ERROR] [<path>/0] ` prefix repeats the row.
+        first = re.sub(r"^\[ERROR\] \[[^\]]*\] ", "", r["findings"][0])
+        more = f" (+{len(r['findings']) - 1} more)" if len(r["findings"]) > 1 else ""
+        click.echo(f"     {r['project']:9} {where:44} {first[:160]}{more}")
+        if r.get("failure"):
+            # Invalid on a duplicate key read off the text; the schema
+            # itself was not checked, so this is not the full account (#3610).
+            click.echo(f"     {'':9} {'':44} schema not checked: {r['failure'][:160]}")
+    click.echo("   Reported, never fatal: these records keep the verdicts they were "
+               "published with (#426/#520); this is what today's schema says of them.")
 
 
 @runs.command('list')
