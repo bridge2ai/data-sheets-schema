@@ -1734,7 +1734,7 @@ def test_a_cached_manifest_is_a_copy_and_a_git_failure_is_not_cached(tmp_path, m
     assert sc._chunked(raw, "study.txt", chunking.DEFAULT_RULE, chunking.manifest_from_bytes)["chunks"]
     # A key over any YAML shape, keys of mixed types included, never raises.
     assert len({sc._key({1: "a", "b": 2}), sc._key(["a"]), sc._key("a")}) == 3
-    # Another name or rule is another manifest.
+    # Another name is another manifest.
     assert sc._chunked(raw, "other.txt", chunking.DEFAULT_RULE, chunking.manifest_from_bytes)["bundle"] == "other.txt"
     answers = [pv.GitUnavailable("no git here"), (raw, {"commit": "c0ffee"})]
 
@@ -1748,6 +1748,65 @@ def test_a_cached_manifest_is_a_copy_and_a_git_failure_is_not_cached(tmp_path, m
     refused = sc.run_status_context(*run)
     assert refused["checked"] is False and "no git here" in refused["reason"]
     assert sc.run_status_context(*run)["checked"] and answers == []
+
+
+def test_the_same_bytes_and_name_under_another_rule_is_another_manifest():
+    # #3775: the manifest key carries the rule. A record chunked under a
+    # narrower window than another record of the same bundle and name must
+    # not read the first record's chunk layout.
+    text, _m = _bundle(ENUMERATION, "second document\n" * 8)
+    raw = text.encode("utf-8")
+    calls = []
+
+    def build(*a):
+        calls.append(a[2])
+        return chunking.manifest_from_bytes(*a)
+    narrow = {**chunking.DEFAULT_RULE, "max_lines": 3}
+    wide = sc._chunked(raw, "study.txt", chunking.DEFAULT_RULE, build)
+    small = sc._chunked(raw, "study.txt", narrow, build)
+    assert calls == [chunking.DEFAULT_RULE, narrow]
+    assert (wide["rule"], small["rule"]) == (chunking.DEFAULT_RULE, narrow)
+    assert small["chunk_count"] > wide["chunk_count"]
+    assert small == chunking.manifest_from_bytes(raw, "study.txt", narrow)
+    # And each is still a hit under its own rule.
+    assert sc._chunked(raw, "study.txt", narrow, build) == small and len(calls) == 2
+
+
+def test_the_same_bytes_under_another_chunk_layout_is_another_view():
+    # #3776: the view key carries each chunk's line range, not the bytes
+    # alone. Two manifests of one bundle that cut it differently must each
+    # get a view that reads their own chunks.
+    text, _m = _bundle(ENUMERATION, "second document\n" * 8)
+    raw = text.encode("utf-8")
+    wide = chunking.manifest_from_bytes(raw, "study.txt", chunking.DEFAULT_RULE)
+    narrow = chunking.manifest_from_bytes(raw, "study.txt", {**chunking.DEFAULT_RULE, "max_lines": 3})
+    a, b = sc._shared_view(raw, text, wide), sc._shared_view(raw, text, narrow)
+    assert a is not b
+    for view, manifest in ((a, wide), (b, narrow)):
+        assert {c["id"]: view.chunk_text(c["id"]) for c in manifest["chunks"]} == \
+            {c["id"]: sc.BundleView(text, manifest).chunk_text(c["id"]) for c in manifest["chunks"]}
+    assert sc._shared_view(raw, text, wide) is a and sc._shared_view(raw, text, narrow) is b
+
+
+def test_records_that_differ_only_in_sha256_recover_their_bytes_separately(tmp_path, monkeypatch):
+    # #3776: the recovered-bytes key carries sha256 as well as path and md5.
+    # A record whose sha256 names other bytes must ask git again, not take
+    # the first record's answer (which `bundle_bytes_for` would refuse).
+    from data_sheets_schema import provenance as pv
+    asked = []
+
+    def recovered(rel, md5=None, sha256=None):
+        asked.append(sha256)
+        return (b"version " + sha256.encode(), {"commit": sha256[:6]})
+    monkeypatch.setattr(pv, "bundle_bytes_for", recovered)
+    absent = tmp_path / "gone.txt"
+    base = {"bundle_path": "data/study.txt", "bundle_md5": "0" * 32}
+    first = sc._record_bytes(absent, {**base, "bundle_sha256": "a" * 64})
+    second = sc._record_bytes(absent, {**base, "bundle_sha256": "b" * 64})
+    assert asked == ["a" * 64, "b" * 64]
+    assert (first[0], second[0]) == (b"version " + b"a" * 64, b"version " + b"b" * 64)
+    assert second[1]["commit"] == "bbbbbb"
+    assert sc._record_bytes(absent, {**base, "bundle_sha256": "b" * 64})[0] == second[0] and len(asked) == 2
 
 
 def test_the_corpus_diagnostic_tallies_each_project_by_form_and_lists_what_it_could_not_read(tmp_path):
@@ -1796,7 +1855,7 @@ def test_the_corpus_diagnostic_tallies_each_project_by_form_and_lists_what_it_co
     assert any(line.startswith("   · unchecked Q: m_b_core/L2/Q_coverage_receipt.yaml") for line in lines)
 
 
-def test_the_corpus_flag_reads_the_corpus_and_refuses_every_other_option(tmp_path, monkeypatch):
+def test_the_corpus_flag_reads_the_corpus(tmp_path, monkeypatch):
     from data_sheets_schema import provenance as pv
     monkeypatch.setattr(pv, "CONCAT_DIR", tmp_path)
     ok = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus"])
@@ -1804,9 +1863,31 @@ def test_the_corpus_flag_reads_the_corpus_and_refuses_every_other_option(tmp_pat
     assert f"corpus under {tmp_path}" in ok.output and "0/0 receipts read" in ok.output
     as_json = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus", "--json"])
     assert json.loads(as_json.output)["totals"]["receipts"] == 0
-    for extra in (["--label", "L"], ["--project", "P"], ["--method", "m"]):
-        bad = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus", *extra])
-        assert bad.exit_code == 2 and extra[0] in bad.output and "would be ignored" in bad.output
+
+
+#: Every status-context option `--corpus` refuses, with a value it accepts
+#: (None: an existing file). #3777: the test named three of the eight.
+CORPUS_REFUSED = {"--method": "m", "--label": "L", "--project": "P", "--receipt": None, "--bundle": None,
+                  "--record": None, "--final": None, "--chunk-manifest": None}
+
+
+def test_the_corpus_refusal_list_is_every_option_but_the_mode_and_the_output_form():
+    cmd = cli.commands["receipts"].commands["status-context"]
+    options = {o for p in cmd.params for o in p.opts if o.startswith("--")}
+    assert options - {"--corpus", "--json", "--help"} == set(CORPUS_REFUSED)
+
+
+@pytest.mark.parametrize("option", sorted(CORPUS_REFUSED))
+def test_the_corpus_flag_refuses_every_other_option(option, tmp_path, monkeypatch):
+    from data_sheets_schema import provenance as pv
+    monkeypatch.setattr(pv, "CONCAT_DIR", tmp_path)
+    value = CORPUS_REFUSED[option]
+    if value is None:
+        value = tmp_path / "given.yaml"
+        value.write_text("{}\n", encoding="utf-8")
+    bad = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus", option, str(value)])
+    assert bad.exit_code == 2, bad.output
+    assert f"--corpus reads every committed receipt; {option} would be ignored" in bad.output
 
 
 @pytest.mark.corpus   # walks every committed coverage receipt; the main-branch lane (#1203)
