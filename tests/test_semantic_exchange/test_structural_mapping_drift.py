@@ -709,5 +709,50 @@ class TestRowsStateTheSchema(unittest.TestCase):
         ).to_sssom_row()
         self.assertEqual(row["d4d_subject_range"], "")
 
+
+
+class TestTheSummaryIsDescribedAsTruncated(unittest.TestCase):
+    """The summary shows each justification group's first rows, not all of
+    them, and the two descriptions of it say so with the counts it shows
+    (#3664). A description that calls it a listing of the rows invites a
+    comparison with the TSV that would miss most of them."""
+
+    README = REPO / "data" / "semantic_exchange" / "README.md"
+    DOCS = REPO / "docs" / "semantic_exchange.md"
+
+    @classmethod
+    def setUpClass(cls):
+        import re
+        text = SUMMARY.read_text()
+        groups = [int(n) for n in re.findall(r"^## \w+ Mappings \((\d+)\)$",
+                                             text, re.M)]
+        cls.total = sum(groups)
+        cls.shown = len(re.findall(r"^- \*\*", text, re.M))
+        cls.groups = groups
+        cls.more = [int(n) for n in re.findall(r"^\.\.\. and (\d+) more$",
+                                               text, re.M)]
+
+    def test_the_summary_shows_at_most_ten_rows_per_group(self):
+        self.assertTrue(self.groups)
+        self.assertEqual(self.shown, sum(min(n, 10) for n in self.groups))
+        self.assertEqual(self.more, [n - 10 for n in self.groups if n > 10])
+        self.assertLess(self.shown, self.total)
+
+    def _row(self, path):
+        for line in path.read_text().splitlines():
+            if line.startswith("| `d4d_rocrate_structural_mapping_summary.md`"):
+                return line
+        self.fail(f"{path.name} has no row for the summary")
+
+    def test_each_description_states_the_truncation_and_its_counts(self):
+        for path in (self.README, self.DOCS):
+            with self.subTest(path=path.name):
+                row = self._row(path)
+                self.assertNotIn("listing of the rows", row)
+                self.assertIn("first 10 rows", row)
+                self.assertIn(f"{self.shown} of", row)
+                self.assertIn(f"{self.total}", row)
+
+
 if __name__ == "__main__":
     unittest.main()

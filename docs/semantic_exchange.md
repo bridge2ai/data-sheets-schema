@@ -28,7 +28,7 @@ sssom-py-compatible variants and analysis docs.
 | File | Description |
 |---|---|
 | [`d4d_rocrate_structural_mapping.sssom.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv) | 17-column structural SSSOM (sssom-py compatible) — typed/range/multivalued metadata for every mapped slot |
-| `d4d_rocrate_structural_mapping_summary.md` | Human-readable listing of the rows the structural generator produces — rendered from its regenerated rows, not from the committed structural TSV, which carries rows regeneration does not produce (see the folder's `README.md`) |
+| `d4d_rocrate_structural_mapping_summary.md` | Human-readable summary of the rows the structural generator produces: each justification group's row count and its first 10 rows only (17 of 155), so not a listing of them — rendered from its regenerated rows, not from the committed structural TSV, which carries rows regeneration does not produce (see the folder's `README.md`) |
 | `STRUCTURAL_MAPPING_ANALYSIS.md` | How the structural mapping is produced (mapping strategies, type-compatibility rules) and checked (`make check-sssom-structural`); states no counts |
 | `uri_mapping_recommendations.md` | URI-level mapping rationale and edge-case decisions |
 | `README.md` | Per-file conventions and column documentation |
