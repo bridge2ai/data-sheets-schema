@@ -257,7 +257,7 @@ def test_voice_counts_only_its_own_releases_and_names_the_pediatric_one():
     inv = committed("VOICE")
     assert inv["instrument"] == ri.INSTRUMENT and "v2" in ri.INSTRUMENT
     assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [], "in_bundle_not_ids": [],
-                            "skipped_entries": []}
+                            "skipped_entries": [], "self_referential_entries": []}
     own = [e["source_id"] for e in inv["release_records"]]
     assert "physionet_pediatric_1_1_0" not in own and "physionet_3_1_0" in own
     assert "physionet_pediatric_1_1_0" not in [e["source_id"] for e in inv["tier1"]]
@@ -283,7 +283,8 @@ def test_a_related_release_is_not_this_datasets_release_evidence():
     assert [d["id"] for d in moved["companion_release"]] == ["https://example.org/companion",
                                                             "https://example.org/umbrella"]
     assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": ["not_a_source"],
-                            "in_bundle_not_ids": [], "skipped_entries": []}
+                            "in_bundle_not_ids": [], "skipped_entries": [],
+                            "self_referential_entries": []}
     assert ri.lacking_release_evidence([inv]) == ["OWN"]
     # The companion's own inventory counts the same source as its release.
     assert ri.inventory(SCOPED, None, "COMPANION")["release_record_in_document_corpus"] is True
@@ -369,7 +370,8 @@ def test_in_bundle_matches_sources_exactly_as_check_manifest_does(tmp_path):
     assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
     assert [e["source_id"] for e in inv["governance"]["license"]] == ["terms", "7"]
     assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [" promoted ", 7, "promoted2"],
-                            "in_bundle_not_ids": [], "skipped_entries": []}
+                            "in_bundle_not_ids": [], "skipped_entries": [],
+                            "self_referential_entries": []}
     assert "in_bundle names no source of this project: ' promoted ', 7, promoted2" \
         in "\n".join(ri.render(inv))
     manifest = tmp_path / "manifest_3423.yaml"
@@ -530,3 +532,126 @@ def test_an_in_bundle_value_that_is_not_an_id_is_listed(entries, not_ids, unmatc
                      if p["project"] == "EXTERNAL" and "not a source id" in p["problem"])
     assert carried == sorted(f"related dataset's in_bundle carries a {type(v).__name__}, "
                              f"not a source id" for _, v in not_ids)
+
+
+# YAML can write values in in_bundle that JSON cannot carry -- a date, bytes
+# (!!binary), a set, a mapping with a key that is not a string. Each is still
+# "not a source id" to check_manifest and moves nothing; the inventory keeps
+# it in a JSON-safe form with the loaded type, so to_json and the CLI's --json
+# write it instead of raising (#3580), and the same bytes give the same text.
+@pytest.mark.parametrize("value, kind, safe", [
+    (b"2026-09-01", "date", {"!!timestamp": "2026-09-01"}),
+    (b"2026-09-01 10:20:30", "datetime", {"!!timestamp": "2026-09-01T10:20:30"}),
+    (b"!!binary aGk=", "bytes", {"!!binary": "aGk="}),
+    (b"!!set {zeta: null, alpha: null, mid: null}", "set", {"!!set": ["alpha", "mid", "zeta"]}),
+    (b"{1: a, b: 2026-09-01}", "dict", {"!!map": [[1, "a"], ["b", {"!!timestamp": "2026-09-01"}]]}),
+    (b"[promoted, !!binary aGk=]", "list", ["promoted", {"!!binary": "aGk="}]),
+])
+def test_a_rejected_yaml_value_is_written_as_json(value, kind, safe, tmp_path, monkeypatch):
+    from data_sheets_schema import scope
+    raw = (NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n"
+           b"      - id: x\n        in_bundle: [release, " + value + b"]\n")
+    inv = ri.inventory(raw, None, "EXTERNAL")
+    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
+    assert inv["related_sources"] == []
+    [row] = inv["scope"]["in_bundle_not_ids"]
+    assert row == {"index": 0, "type": kind, "value": safe}
+    assert inv["scope"]["in_bundle_unmatched"] == ["release"]
+    written = ri.to_json([inv])
+    assert json.loads(written)[0]["scope"]["in_bundle_not_ids"] == [row]
+    assert written == ri.to_json([ri.inventory(raw.decode(), None, "EXTERNAL")])
+    text = "\n".join(ri.render(inv))
+    shown = repr(safe) if kind in ("list", "dict") else f"a {kind} {json.dumps(safe, sort_keys=True)}"
+    assert f"related_but_distinct[0]: in_bundle carries {shown}, not a source id" in text
+    manifest = tmp_path / "manifest_3423_3580.yaml"
+    manifest.write_bytes(raw)
+    carried = [p["problem"] for p in scope.check_manifest(manifest)
+               if p["project"] == "EXTERNAL" and "not a source id" in p["problem"]]
+    assert carried == [f"related dataset's in_bundle carries a {kind}, not a source id"]
+    monkeypatch.chdir(ROOT)
+    r = CliRunner().invoke(release_inventory_cmd, ["--manifest", str(manifest), "--project",
+                                                   "EXTERNAL", "--json"])
+    assert r.exit_code == 0, r.output
+    assert r.output == written
+
+
+def test_a_set_is_written_in_one_order_whatever_the_hash_seed():
+    import subprocess
+    import sys
+    code = ("from data_sheets_schema import release_inventory as ri; import sys; "
+            "raw = sys.stdin.buffer.read(); "
+            "print(ri.to_json([ri.inventory(raw, None, 'EXTERNAL')]), end=''); "
+            "print('\\n'.join(ri.render(ri.inventory(raw, None, 'EXTERNAL'))))")
+    raw = (NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n      - id: x\n"
+           b"        in_bundle: [!!set {" + b", ".join(b"s%d: null" % i for i in range(40)) + b"}]\n")
+    outs = {subprocess.run([sys.executable, "-c", code], input=raw, capture_output=True, check=True,
+                           env={**os.environ, "PYTHONHASHSEED": seed}).stdout
+            for seed in ("1", "2", "3", "4")}
+    assert len(outs) == 1
+
+
+# An entry that names this dataset itself contradicts the declaration it sits
+# in (check_manifest: "the referent is also listed as related-but-distinct").
+# Its in_bundle must not take the project's own release record out of its
+# counts: it moves nothing, is listed with what it matched on, and the
+# project is not reported as lacking release evidence (#3581). The match is
+# on the id or an alias in any spelling scope._norm equates, or on a
+# manifest_key naming this project; a control entry beside it still moves.
+SELF = b"""version: 1
+projects:
+  OWN:
+    - id: own_release
+      source_type: data resource
+      processed_file: own_release.txt
+      priority: 1
+    - id: other_release
+      source_type: RO-Crate
+      processed_file: other_release.txt
+scope:
+  OWN:
+    referent_id: https://doi.org/10.1234/OWN
+    related_but_distinct:
+      - ENTRY
+      - {id: https://example.org/other, manifest_key: OTHER, in_bundle: other_release}
+"""
+
+
+@pytest.mark.parametrize("entry, matched", [
+    (b"{id: https://doi.org/10.1234/OWN, manifest_key: OWNX, in_bundle: own_release}",
+     [{"field": "id / also_known_as", "value": "https://doi.org/10.1234/OWN",
+       "referent_id": "https://doi.org/10.1234/OWN"}]),
+    (b"{id: https://example.org/elsewhere, also_known_as: 'doi:10.1234/own', in_bundle: [own_release]}",
+     [{"field": "id / also_known_as", "value": "doi:10.1234/own", "referent_id": "https://doi.org/10.1234/OWN"}]),
+    (b"{also_known_as: '10.1234/OWN/', in_bundle: own_release}",
+     [{"field": "id / also_known_as", "value": "10.1234/OWN/", "referent_id": "https://doi.org/10.1234/OWN"}]),
+    (b"{id: https://example.org/elsewhere, manifest_key: OWN, in_bundle: own_release}",
+     [{"field": "manifest_key", "value": "OWN"}]),
+])
+def test_an_entry_naming_this_dataset_itself_moves_nothing(entry, matched, tmp_path):
+    from data_sheets_schema import scope
+    raw = SELF.replace(b"ENTRY", entry)
+    inv = ri.inventory(raw, None, "OWN")
+    assert [e["source_id"] for e in inv["release_records"]] == ["own_release"]
+    assert [e["source_id"] for e in inv["tier1"]] == ["own_release"]
+    assert [e["source_id"] for e in inv["related_sources"]] == ["other_release"]
+    assert ri.lacking_release_evidence([inv]) == []
+    assert inv["scope"]["status"] == "declared" and inv["scope"]["skipped_entries"] == []
+    assert inv["scope"]["self_referential_entries"] == [
+        {"index": 0, "matched_on": matched, "in_bundle": ["own_release"]}]
+    text = "\n".join(ri.render(inv))
+    assert "release record     yes: own_release" in text
+    assert "related_but_distinct[0]: names this dataset itself (" in text
+    assert "; its in_bundle moves nothing: own_release" in text
+    assert "declared in_bundle for OTHER, not counted above" in text
+    json.loads(ri.to_json([inv]))
+    if entry.startswith(b"{id: https://doi.org/10.1234/OWN,"):
+        # The exact-id case is the one check_manifest itself reports.
+        manifest = tmp_path / "manifest_3423_3581.yaml"
+        manifest.write_bytes(raw)
+        assert any(p["problem"] == "the referent is also listed as related-but-distinct"
+                   for p in scope.check_manifest(manifest) if p["project"] == "OWN")
+
+
+def test_the_committed_manifest_has_no_self_referential_entry():
+    for project in ("AI_READI", "CHORUS", "CM4AI", "VOICE", "VOICE_PEDIATRIC"):
+        assert committed(project)["scope"]["self_referential_entries"] == []
