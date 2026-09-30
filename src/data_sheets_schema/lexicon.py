@@ -4,10 +4,14 @@ A lexicon is a YAML file under `lexicons/` that names itself, its version and
 the instrument it defines, declares the classes it reports, and lists
 class-tagged patterns. Each pattern has an id, a regular expression, at least
 one example it must match (`parse` refuses a pattern with none, or with a
-blank one) and, where one matters, a counterexample it must not. A
-counterexample is optional and not every registered pattern carries one; for
-a pattern without one, the self-test shows that it matches what it should,
-not that it misses anything.
+blank one) and a counterexample it must not. A lexicon that declares
+`counterexamples_required: true` has `parse` refuse a pattern without a
+counterexample, and `check_registry` requires that declaration of every
+registered lexicon except those registered before the rule
+(`COUNTEREXAMPLES_OPTIONAL`, #3132): for a pattern without a counterexample
+the self-test shows that it matches what it should, not that it misses
+anything. The rule is a declaration in the lexicon's bytes rather than a
+version number, so the file says which rule its self-test was held to.
 A lexicon may also carry a `scope` block that its reader interprets (which
 keys of a record it walks, for instance); the loader passes it through.
 
@@ -41,8 +45,16 @@ REGISTRY_FILE = "registry.yaml"
 #: matches, so it is part of the lexicon's bytes like the patterns are.
 FLAGS = {"IGNORECASE": re.IGNORECASE}
 
-_TOP_KEYS = {"name", "version", "instrument", "flags", "scope", "classes", "patterns"}
+_TOP_KEYS = {"name", "version", "instrument", "counterexamples_required", "flags", "scope", "classes",
+             "patterns"}
 _PATTERN_KEYS = {"id", "class", "regex", "examples", "counterexamples"}
+
+
+#: The registered lexicons whose patterns may lack a counterexample: those
+#: registered before #3132 made one required. Closed — a lexicon registered
+#: since declares `counterexamples_required: true`, and a version of one of
+#: these is a new registration, not a member.
+COUNTEREXAMPLES_OPTIONAL = frozenset({("absence_self_narration", 1)})
 
 
 class LexiconError(ValueError):
@@ -68,6 +80,7 @@ class Lexicon:
     classes: dict[str, str]
     patterns: tuple[Pattern, ...]
     scope: dict[str, Any] = field(default_factory=dict)
+    counterexamples_required: bool = False
 
     def identity(self) -> dict[str, Any]:
         """What a result must carry to say which lexicon produced it."""
@@ -118,6 +131,9 @@ def parse(raw: bytes, *, file: str) -> Lexicon:
         raise LexiconError(f"{file}: unknown keys {sorted(map(str, unknown))}, missing keys {sorted(missing)}")
     if type(data["version"]) is not int or data["version"] < 1:
         raise LexiconError(f"{file}: version must be a positive integer")
+    required = data.get("counterexamples_required", False)
+    if type(required) is not bool:
+        raise LexiconError(f"{file}: counterexamples_required must be true or false")
     classes = data["classes"]
     if not isinstance(classes, dict) or not classes:
         raise LexiconError(f"{file}: `classes` must map each class to its description")
@@ -149,6 +165,9 @@ def parse(raw: bytes, *, file: str) -> Lexicon:
             # that matches every string, or none, would pass `check_registry`.
             raise LexiconError(f"{file}: pattern {pid!r} lists no examples; a pattern must name at least "
                                "one text it has to match")
+        if required and not row.get("counterexamples"):
+            raise LexiconError(f"{file}: pattern {pid!r} lists no counterexamples, and this lexicon declares "
+                               "counterexamples_required")
         if not isinstance(row["regex"], str):
             raise LexiconError(f"{file}: pattern {pid!r} regex must be a string")
         try:
@@ -166,7 +185,7 @@ def parse(raw: bytes, *, file: str) -> Lexicon:
         raise LexiconError(f"{file}: `scope` must be a mapping")
     return Lexicon(name=str(data["name"]), version=data["version"], instrument=str(data["instrument"]),
                    file=file, sha256=hashlib.sha256(raw).hexdigest(), classes=dict(classes),
-                   patterns=tuple(patterns), scope=scope)
+                   patterns=tuple(patterns), scope=scope, counterexamples_required=required)
 
 
 def load(name: str, version: int | None = None, *, directory: Path = LEXICON_DIR) -> Lexicon:
@@ -208,8 +227,9 @@ def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
     counterexamples, and that no lexicon file in the directory is
     unregistered — an unregistered file is a lexicon nothing pins. Every
     pattern has at least one example, because `load` compiles through
-    `parse`, which refuses a pattern without one. A counterexample is checked
-    only where the pattern lists one; none is required.
+    `parse`, which refuses a pattern without one. Every lexicon but those in
+    `COUNTEREXAMPLES_OPTIONAL` must declare `counterexamples_required`, so
+    each of its patterns has a counterexample too (#3132).
     """
     problems: list[str] = []
     try:
@@ -231,6 +251,9 @@ def check_registry(directory: Path = LEXICON_DIR) -> list[str]:
             except LexiconError as exc:
                 problems.append(str(exc))
                 continue
+            if not lexicon.counterexamples_required and (name, lexicon.version) not in COUNTEREXAMPLES_OPTIONAL:
+                problems.append(f"{name} v{lexicon.version}: does not declare `counterexamples_required: true`; "
+                                "every lexicon registered after absence_self_narration v1 must (#3132)")
             for pattern in lexicon.patterns:
                 for text in pattern.examples:
                     if not pattern.regex.search(" ".join(text.split())):

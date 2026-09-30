@@ -16,6 +16,18 @@ that is gone, makes the note stale: its counts would no longer describe the
 bytes at that path. `--repin` selects the corpus as it stands and rewrites
 both files. It is the one act that moves the baseline to other records.
 
+The note counts under one named lexicon version, `LEXICON_VERSION`, not
+whichever is newest (#3132): its precision table was judged under that
+version's bytes. A later registered version is named in the note, so
+registering one still makes the note stale until it is regenerated; moving
+the counts to it is a deliberate change of `LEXICON_VERSION`, after which
+the precision table reads unchecked until a sample is judged under the new
+bytes.
+
+A precision table is rendered only beside its per-phrase judgements (#3197):
+the entry names a judgements file whose phrases must be the draw it names,
+and whose verdict tally must equal its counts; otherwise the note is refused.
+
 The note is regenerated, never edited by hand. A corpus-lane test rebuilds it
 from the pinned records and fails when a pinned record changed or is gone, or
 when the committed bytes differ. A new lexicon version therefore shows up as
@@ -53,6 +65,10 @@ OUT_MD = ROOT / "notes" / "absence_claims_baseline.md"
 PINS = ROOT / "notes" / "absence_claims_baseline_records.yaml"
 RECORD_GLOB = "*_d4d.yaml"
 SAMPLE_SEED = 2919
+#: The registered version of the lexicon the note counts under (#3132).
+LEXICON_VERSION = 1
+#: A judgement's verdicts, in the order a precision entry's counts give them.
+VERDICTS = ("in_class", "borderline", "not_in_class")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
 
 #: Hand-checked precision samples, keyed by the lexicon sha256 they were drawn
@@ -71,7 +87,9 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 #: records and compares it (#3173). The v1 value is the draw this code makes
 #: over the record set named beside it; that it is the draw judged on the
 #: date checked rests on the round-1 comparison of the printed sample
-#: (#3045), not on anything recorded that day.
+#: (#3045), not on anything recorded that day. `judgements` names the file
+#: of per-phrase verdicts over that draw (#3197); `read_judgements` refuses an
+#: entry whose file does not name this draw or whose tally is not `classes`.
 PRECISION: dict[str, dict[str, Any]] = {
     "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e": {     # v1
         "checked": "2026-09-28",
@@ -81,8 +99,15 @@ PRECISION: dict[str, dict[str, Any]] = {
         "classes": {"bundle_wide_absence": (50, 0, 0), "record_self_narration": (47, 3, 0)},
         "note": "The three borderline phrases are source conflicts worded with the ranking "
                 "vocabulary (\"two tier-1 sources disagree\").",
+        "judgements": "notes/absence_precision_judgements_99c92000.yaml",
     },
 }
+
+
+class Refused(Exception):
+    """A precision entry its per-phrase judgements do not bear out (#3197):
+    no judgements file, one naming another draw, or a tally that is not the
+    entry's counts. The note is not rendered over it."""
 
 
 class Stale(Exception):
@@ -162,7 +187,7 @@ def collect(corpus: Path = CORPUS, lexicon: lx.Lexicon | None = None,
     raises `Stale` naming each, rather than being counted as bytes the pins
     do not name or dropped from a count that claims it.
     """
-    lexicon = lexicon or lx.load(absence_lint.LEXICON)
+    lexicon = lexicon or lx.load(absence_lint.LEXICON, LEXICON_VERSION)
     pins = current_records(corpus) if pins is None else pins
     records, changed, missing = [], [], []
     for rel in sorted(pins):
@@ -264,6 +289,7 @@ def render_markdown(collected: dict[str, Any]) -> str:
         "  `--repin` is reported by `--check` and not counted here; a pinned record that changed or is",
         "  gone makes this note stale (#3045).",
         "- **Leaves:** " + _leaves_sentence(lexicon.scope),
+        *_later_versions(lexicon),
         "",
         "**Regex caveat.** Every count here is a regular-expression match over whitespace-collapsed",
         "text, not a reviewed finding. The lexicon misses phrasings it does not list, and it matches",
@@ -323,13 +349,89 @@ def render_markdown(collected: dict[str, Any]) -> str:
             "| class | in class | borderline | not in class |",
             "|---|---:|---:|---:|",
         ]
+        judged = read_judgements(lexicon.sha256, checked)
         for c in classes:
             if c in checked["classes"]:
                 a, b, n = checked["classes"][c]
                 lines.append(f"| {c} | {a} | {b} | {n} |")
         if checked.get("note"):
             lines += ["", checked["note"]]
+        lines += [
+            "",
+            f"Each phrase's verdict and reason are in `{checked['judgements']}`, recorded",
+            f"{judged['recorded']} by reading this draw again. They are not the {checked['checked']} judgements, which",
+            "were not written down per phrase; the table is rendered only while their tally equals it (#3197).",
+        ]
     return "\n".join(lines) + "\n"
+
+
+def _later_versions(lexicon: lx.Lexicon) -> list[str]:
+    """The note's line naming registered versions newer than the one it
+    counts under, or none: a new version makes the note stale without
+    moving its counts (#3132)."""
+    later = [e for e in lx.registered().get(lexicon.name, []) if e["version"] > lexicon.version]
+    if not later:
+        return []
+    named = "; ".join(f"v{e['version']} (`{e['file']}`, sha256 `{e['sha256']}`)"
+                      for e in sorted(later, key=lambda e: e["version"]))
+    return [f"- **Later versions:** {named}. This note counts under v{lexicon.version}, the version",
+            "  its precision sample was judged under; counting under a later one is a deliberate change of",
+            "  the script's `LEXICON_VERSION`, and its precision table then reads unchecked until a sample is",
+            "  judged under those bytes."]
+
+
+def read_judgements(lexicon_sha256: str, checked: dict[str, Any]) -> dict[str, Any]:
+    """The per-phrase judgements a precision entry names, checked against it.
+
+    Refused unless the file names the entry's draw, lexicon, record set,
+    sample and seed; its phrases, in its order, hash to the entry's
+    `draw_sha256`; every phrase has a verdict from `VERDICTS` and a reason;
+    and each class's verdict tally is the entry's counts (#3197).
+    """
+    rel = checked.get("judgements")
+    if not rel:
+        raise Refused("the precision entry names no judgements file")
+    path = ROOT / rel
+    try:
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except OSError as exc:
+        raise Refused(f"{_shown(path)} could not be read ({exc.strerror})") from exc
+    except yaml.YAMLError as exc:
+        raise Refused(f"{_shown(path)} does not parse") from exc
+    if not isinstance(data, dict) or not isinstance(data.get("judgements"), dict):
+        raise Refused(f"{_shown(path)} has no `judgements` mapping")
+    if not isinstance(data.get("recorded"), str):
+        raise Refused(f"{_shown(path)} does not say when its verdicts were recorded")
+    for key, want in (("draw_sha256", checked["draw_sha256"]), ("lexicon_sha256", lexicon_sha256),
+                      ("record_set_sha256", checked["record_set_sha256"]), ("sample", checked["sample"]),
+                      ("seed", checked["seed"])):
+        if data.get(key) != want:
+            raise Refused(f"{_shown(path)}: {key} is {data.get(key)!r}, not the precision entry's {want!r}")
+    if set(data["judgements"]) != set(checked["classes"]):
+        raise Refused(f"{_shown(path)} judges classes {sorted(data['judgements'])}, "
+                      f"not the precision entry's {sorted(checked['classes'])}")
+    drawn: dict[str, tuple[int, list[tuple[str, dict]]]] = {}
+    tally: dict[str, tuple[int, ...]] = {}
+    for cls in checked["classes"]:
+        rows = data["judgements"][cls]
+        if not isinstance(rows, list) or len(rows) > checked["sample"]:
+            raise Refused(f"{_shown(path)}: {cls} is not a list of at most {checked['sample']} judgements")
+        counts = dict.fromkeys(VERDICTS, 0)
+        for row in rows:
+            if (not isinstance(row, dict) or row.get("verdict") not in VERDICTS
+                    or not isinstance(row.get("reason"), str) or not row["reason"].strip()
+                    or not {"record", "pointer", "start", "end"} <= set(row)):
+                raise Refused(f"{_shown(path)}: a {cls} judgement needs record, pointer, start, end, a reason "
+                              f"and a verdict from {list(VERDICTS)}")
+            counts[row["verdict"]] += 1
+        drawn[cls] = (len(rows), [(row["record"], row) for row in rows])
+        tally[cls] = tuple(counts[v] for v in VERDICTS)
+    if draw_sha256(drawn) != checked["draw_sha256"]:
+        raise Refused(f"{_shown(path)}: its phrases are not the draw {checked['draw_sha256'][:12]}… it names")
+    counted = {cls: tuple(v) for cls, v in checked["classes"].items()}
+    if tally != counted:
+        raise Refused(f"{_shown(path)}: the verdict tally {tally} is not the precision entry's counts {counted}")
+    return data
 
 
 def _leaves_sentence(scope: dict[str, Any]) -> str:
@@ -433,7 +535,11 @@ def main(argv: list[str] | None = None) -> int:
     if args.sample is not None:
         print("\n".join(sample(collected, args.sample, SAMPLE_SEED if args.seed is None else args.seed)))
         return 0
-    text = render_markdown(collected)
+    try:
+        text = render_markdown(collected)
+    except Refused as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 1
     if args.check:
         if not OUT_MD.exists() or OUT_MD.read_text(encoding="utf-8") != text:
             print(f"stale: {_shown(OUT_MD)} does not match its {len(pins)} pinned records; "
