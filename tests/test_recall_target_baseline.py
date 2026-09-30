@@ -163,7 +163,7 @@ class CorpusFixture:
         self._record("claudecode_agent", "L_rep2", "P", {"was_derived_from": "y"}, passed=False)
         self._record("claudecode_api", "M_rep1", "P", {"parent_datasets": [{"id": "p"}]})
 
-    def _record(self, method, label, project, record, receipt=None, passed=True, chunks=None):
+    def _record(self, method, label, project, record, receipt=None, passed=True, chunks=None, provenance=None):
         full = self.corpus / method / label / f"{project}_d4d.yaml"
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(yaml.safe_dump(record), encoding="utf-8")
@@ -172,7 +172,8 @@ class CorpusFixture:
         inputs = {"bundle_path": self.bundle_rel, "bundle_md5": self.md5,
                   "chunks": chunks if chunks is not None else {"rule": RULE, "chunk_count": 4}}
         (core / f"{project}_provenance.yaml").write_text(
-            yaml.safe_dump({"inputs": inputs, "validation": {"passed": passed}}), encoding="utf-8")
+            yaml.safe_dump({"inputs": inputs, "validation": {"passed": passed}, **(provenance or {})}),
+            encoding="utf-8")
         if receipt is not None:
             (core / f"{project}_coverage_receipt.yaml").write_text(yaml.safe_dump(receipt), encoding="utf-8")
 
@@ -255,6 +256,7 @@ class Baseline(CorpusFixture, unittest.TestCase):
     def test_check_is_read_only_and_reports_staleness(self):
         self.m.CORPUS, self.m.OUT_MD, self.m.ROOT, self.m.ARMS = self.corpus, self.dir / "note.md", self.dir, self.arms
         self.m.PROJECTS, self.m.ADJUDICATION = ("P", "Q"), self.dir / "no_adjudication.yaml"
+        self.m.DIGESTS = self.dir / "no_digests.yaml"
         err = io.StringIO()
         with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(self.m.main(["--check"]), 1)
@@ -576,6 +578,11 @@ def test_the_committed_baseline_is_what_the_records_reproduce():
     assert (cov["missing"], cov["unmatched"]) == ([], [])
     for fact in collected["adjudication"]["facts"]:
         assert any((r.get("facts") or {}).get(fact["id"], {}).get("stated") for r in collected["rows"]), fact["id"]
+    # #3525: every counted record's pinned digest was re-rendered at its
+    # commit, and the render reproduced the md5 the record pins.
+    renders = {(d["commit"], d["digest_md5"]): d for d in collected["digests"]["renders"]}
+    for r in collected["rows"]:
+        assert renders[(r["commit"], r["digest_md5"])]["reproduced"], r["path"]
 
 
 #: The shape of a parenthesised version citation in a bundle (#3571, #3611):
@@ -625,6 +632,166 @@ def test_the_citation_shape_sees_every_spelling_of_a_version(text):
 @pytest.mark.parametrize("text", ["(VNNs)", "(VHI-10)", "(VUMC)", "(v)", "(version)", "(very 2)", "(vs. 2)", "(v. above)", "(v.s.)"])
 def test_the_citation_shape_skips_abbreviations(text):
     assert not VERSION_CITATION.search(text), text
+
+
+#: The object-ranges part of a digest, as `schema_digest.render` writes it.
+PREAMBLE = ("# Object ranges — required keys\n\n"
+            "On every object below: `id` is `uriorcurie`; `used_software` is `Software[]`. A value of the "
+            "wrong kind for its declared range is a defect even when it reads well.\n\n")
+TOOLS = ("- **MachineAnnotationTools** — required: none\n"
+         "    - also accepts: `notes`, `tool_accuracy`, `tools`, `version`\n")
+SOFTWARE_ENTRY = ("- **Software** — required: none\n"
+                  "    - also accepts: `license`, `url`, `version`\n")
+
+
+def _git(repo, *args):
+    import subprocess
+    subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@example.invalid",
+                    "-c", "commit.gpgsign=false", *args], check=True, capture_output=True)
+
+
+class SoftwareInDigest(unittest.TestCase):
+    """#3525: what a rendered digest says about `used_software` and `Software`."""
+
+    def setUp(self):
+        self.m = _script()
+
+    def test_a_preamble_only_digest_names_no_key_of_software(self):
+        got = self.m.software_in_digest("## `keywords` — *string* [many]\n\n" + PREAMBLE + TOOLS)
+        self.assertEqual(got, {"used_software_mentions": 1, "in_universal_ranges": True, "own_slot_heading": False,
+                               "software_entry": False, "software_keys": []})
+
+    def test_a_software_entry_and_its_keys_are_read_and_only_its_own(self):
+        text = "## `used_software` — *Software* [many]\nTools.\n\n" + PREAMBLE + SOFTWARE_ENTRY + TOOLS
+        got = self.m.software_in_digest(text)
+        self.assertEqual(got, {"used_software_mentions": 2, "in_universal_ranges": True, "own_slot_heading": True,
+                               "software_entry": True, "software_keys": ["license", "url", "version"]})
+
+    def test_a_class_whose_name_starts_with_software_is_not_its_entry(self):
+        got = self.m.software_in_digest(PREAMBLE + "- **SoftwareTool** — required: `name`\n")
+        self.assertEqual((got["software_entry"], got["software_keys"]), (False, []))
+
+    def test_the_entry_ends_at_the_first_unindented_line(self):
+        got = self.m.software_in_digest(PREAMBLE + "- **Software** — required: `name`\n\nSee `version` below.\n")
+        self.assertEqual(got["software_keys"], ["name"])
+
+
+class DigestMeasurement(CorpusFixture, unittest.TestCase):
+    """#3525: re-rendering at a commit, and the note section it feeds."""
+
+    def setUp(self):
+        super().setUp()
+        self.repo = self.dir / "repo"
+        pkg = self.repo / "src" / "data_sheets_schema"
+        (pkg / "schema").mkdir(parents=True)
+        (pkg / "__init__.py").write_text("", encoding="utf-8")
+        self.digest = "# Target class `Dataset`\n\n" + PREAMBLE + TOOLS
+        (pkg / "schema_digest.py").write_text(
+            f"def digest_text(class_name):\n    assert class_name == 'Dataset'\n    return {self.digest!r}\n",
+            encoding="utf-8")
+        (pkg / "schema" / "D4D_Base_import.yaml").write_text(yaml.safe_dump(
+            {"classes": {"Software": {"is_a": "NamedThing", "attributes": {"version": {}, "license": {}}}}}),
+            encoding="utf-8")
+        prompt = self.repo / "src" / "download" / "prompts" / "arm.md"
+        prompt.parent.mkdir(parents=True)
+        prompt.write_text("Name the tools under `used_software`.\n", encoding="utf-8")
+        _git(self.repo, "init", "-q")
+        _git(self.repo, "add", ".")
+        _git(self.repo, "commit", "-qm", "fixture")
+        import subprocess
+        self.commit = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                                     capture_output=True, text=True).stdout.strip()
+        self.md5 = hashlib.md5(self.digest.encode()).hexdigest()
+        self.prompt_sha = hashlib.sha256(prompt.read_bytes()).hexdigest()
+
+    def _pin(self, method, label, project, md5, record=None):
+        self._record(method, label, project, record or {}, provenance={
+            "schema": {"digest_md5": md5}, "repo": {"commit": self.commit},
+            "model": {"agent_runtime": "Claude API (direct)"},
+            "prompts": {"files": [{"path": "src/download/prompts/arm.md", "sha256": self.prompt_sha}]}})
+
+    def _measure(self, **kw):
+        rows = self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"))["rows"]
+        path = self.dir / "digests.yaml"
+        path.write_text(self.m.dump_digests(self.m.measure_digests(rows, repo=self.repo, **kw)), encoding="utf-8")
+        return self.m.load_digests(path)
+
+    def _note(self, digests):
+        c = self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"), digests=digests)
+        return self.m.render_markdown(c, arms=self.arms)
+
+    def test_the_commit_s_own_code_renders_the_digest_and_its_md5_is_confirmed(self):
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        dig = self._measure()
+        [r] = dig["renders"]
+        self.assertEqual((r["commit"], r["rendered_md5"], r["reproduced"]), (self.commit, self.md5, True))
+        self.assertEqual((r["software_entry"], r["software_keys"], r["used_software_mentions"]), (False, [], 1))
+        self.assertEqual(r["software_attributes"], ["license", "version"])
+        self.assertEqual(dig["prompts"], [{"commit": self.commit, "path": "src/download/prompts/arm.md",
+                                           "sha256": self.prompt_sha, "at_commit": True,
+                                           "names_used_software": True}])
+
+    def test_a_render_that_does_not_reproduce_the_pin_is_not_evidence(self):
+        self._pin("claudecode_agent", "L_rep1", "P", "0" * 32)
+        dig = self._measure()
+        self.assertFalse(dig["renders"][0]["reproduced"])
+        md = self._note(dig)
+        self.assertIn(f"Not reproduced: `{self.commit[:10]}` `00000000`.", md)
+        self.assertIn("| Arm one | Claude API (direct), None | 2 | `00000000`, `None` | 2 | 0 of 2 | – |", md)
+        self.assertIn("No render reproduces its record's md5", md)
+
+    def test_a_render_that_fails_is_recorded_with_its_error(self):
+        import subprocess
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+
+        def broken(commit):
+            raise subprocess.CalledProcessError(1, ["python"], stderr=b"Traceback\nImportError: no linkml\n")
+        dig = self._measure(render=broken)
+        self.assertEqual((dig["renders"][0]["reproduced"], dig["renders"][0]["error"]),
+                         (False, "ImportError: no linkml"))
+        self.assertIn("(ImportError: no linkml)", self._note(dig))
+
+    def test_the_note_says_no_digest_shows_software_s_keys_and_lists_unmeasured_records(self):
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        self._pin("claudecode_api", "M_rep1", "P", self.md5, {"used_software": [{"name": "x", "version": "1"}]})
+        dig = self._measure()
+        md = self._note(dig)
+        self.assertIn("## used_software in the schema digest (#3525)", md)
+        self.assertIn("| Arm two | Claude API (direct) | 1 | `" + self.md5[:8] + "` | 1 | 1 of 1 | 1 | no | no "
+                      "| none | yes | 1 |", md)
+        # L_rep1 Q pins no digest, so it has no render.
+        self.assertIn("Counted records with no render measured: `claudecode_agent/L_rep1/Q_d4d.yaml`.", md)
+        self.assertIn("In all 1 reproduced renders (1 distinct digests), `used_software` is named only", md)
+        self.assertLess(md.index("(#3525)"), md.index("## Lexical candidates by record"))
+
+    def test_a_digest_that_shows_software_is_named_and_the_conclusion_withheld(self):
+        self.digest = "# Target class `Dataset`\n\n" + PREAMBLE + SOFTWARE_ENTRY
+        (self.repo / "src" / "data_sheets_schema" / "schema_digest.py").write_text(
+            f"def digest_text(class_name):\n    return {self.digest!r}\n", encoding="utf-8")
+        _git(self.repo, "commit", "-qam", "show Software")
+        import subprocess
+        self.commit = subprocess.run(["git", "-C", str(self.repo), "rev-parse", "HEAD"], check=True,
+                                     capture_output=True, text=True).stdout.strip()
+        md5 = hashlib.md5(self.digest.encode()).hexdigest()
+        self._pin("claudecode_api", "M_rep1", "P", md5)
+        md = self._note(self._measure())
+        self.assertIn(f"Renders that show `Software` or a key of it: `{self.commit[:10]}` (license, url, version).", md)
+        self.assertNotIn("is named only", md)
+
+    def test_a_malformed_measurement_is_refused(self):
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        good = self._measure()["renders"][0]
+        for bad in ([dict(good, reproduced=False)], [good, good], [dict(good, commit="abc")],
+                    [{k: v for k, v in good.items() if k != "software_keys"}],
+                    [{k: v for k, v in good.items() if k != "rendered_md5"}]):
+            path = self.dir / "bad_digests.yaml"
+            path.write_text(yaml.safe_dump({"renders": bad}), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                self.m.load_digests(path)
+
+    def test_without_a_measurement_the_note_has_no_section(self):
+        self._pin("claudecode_agent", "L_rep1", "P", self.md5)
+        self.assertNotIn("(#3525)", self._note(None))
 
 
 @pytest.mark.corpus   # reads the committed bundles

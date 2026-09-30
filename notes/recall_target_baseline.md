@@ -318,6 +318,73 @@ Where each fact is stated, as read:
 - `cm4ai-mutsigcv-1.4`: Mutation analysis of the pediatric cancer cohort in the companion paper.
 - `cm4ai-imp-2.18`: The project preprint's structure modelling, which it calls exploratory ("We are currently exploring the feasibility"); the companion paper states the same version for the U2OS map.
 
+## used_software in the schema digest (#3525)
+
+Measured, `notes/recall_target_digest_software.yaml` (sha256 `c991eb35dd28ee37f501dc227f025e5fa31b2ee9b02656385581139d822aa5b3`), written by `--measure-digests`: the
+`Dataset` digest each counted record pins (`schema.digest_md5`), re-rendered from
+a `git archive` of its `repo.commit`'s `src/`. Every record's tree was dirty, so a render is
+evidence only where its md5 **reproduces** the pinned one. Read off each render: the
+`used_software` mentions, whether the object-ranges preamble names it (`On every object
+below: … used_software is Software[]`), whether it has its own slot heading, and whether
+`Software` has an object-ranges entry and which keys that entry names. **prompt names
+used_software** is over the prompt files the records hashed, read at their commit where the
+bytes still hash to the record's (`–`: the record hashes no prompt file). The agentic arms
+pin a digest too, but their playbook names the merged schema file as the structural source,
+so the digest is not the only schema text they read.
+
+| arm | runtime | records | digest md5 | commits | reproduced | used_software mentions | own slot heading | Software entry | Software keys shown | prompt names used_software | used_software entries |
+|---|---|---:|---|---:|---|---|---|---|---|---|---:|
+| v4 API (2026-08-13) | Claude API (direct) | 12 | `622e6d03` | 1 | 12 of 12 | 1 | no | no | none | no | 0 |
+| v5 API (2026-08-22c) | Claude API (direct) | 12 | `580992ed` | 2 | 12 of 12 | 1 | no | no | none | no | 0 |
+| v5 agentic (2026-08-24) | Claude Code | 12 | `580992ed` | 2 | 12 of 12 | 1 | no | no | none | no | 13 |
+| v6 agentic (2026-08-28) | Claude Code | 12 | `580992ed` | 5 | 12 of 12 | 1 | no | no | none | no | 29 |
+| v7 API canaries (2026-08-28…d, exploratory) | Claude API (direct) | 5 | `580992ed` | 5 | 5 of 5 | 1 | no | no | none | no | 0 |
+| v7 API production (2026-09-01) | Claude API (direct) | 12 | `580992ed` | 5 | 12 of 12 | 1 | no | no | none | no | 0 |
+| v8 API production (2026-09-04f/g) | Claude API (direct) | 12 | `ffe03dd4` | 4 | 12 of 12 | 1 | no | no | none | no | 0 |
+| v9 API canary (2026-09-12, CHORUS only) | Claude API (direct) | 1 | `a91bad8b` | 1 | 1 of 1 | 1 | no | no | none | yes | 0 |
+
+Per render:
+
+| commit | digest md5 | rendered md5 | reproduced | used_software mentions | in preamble | own slot heading | Software entry | Software keys shown | Software's attributes at the commit |
+|---|---|---|---|---:|---|---|---|---|---|
+| `21e78d1b52` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `2226e6c88c` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `26f7e4cd0b` | `ffe03dd4` | `ffe03dd4` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `4892fcd3a5` | `622e6d03` | `622e6d03` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `4d9ef58526` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `5b5b330cb6` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `63d6d41c9f` | `ffe03dd4` | `ffe03dd4` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `77beef2837` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `7a424690b7` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `7c07883c78` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `92283efd33` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `a2a3e157b6` | `ffe03dd4` | `ffe03dd4` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `a433de98ed` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `ab78bc96a1` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `b01b7d6037` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `b8f2aa4616` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `c83c893182` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `caf74cacaa` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `d70b60ac3c` | `a91bad8b` | `a91bad8b` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `d8e9a4d2bb` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `debe40eac6` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `e970d5be84` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `ee01585ecb` | `580992ed` | `580992ed` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+| `f294aeba3d` | `ffe03dd4` | `ffe03dd4` | yes | 1 | yes | no | no | none | `license`, `url`, `version` |
+
+Not reproduced: none.
+Counted records with no render measured: none.
+
+In all 24 reproduced renders (4 distinct digests), `used_software` is named only
+in the object-ranges preamble, `Software` has no entry, and no key of `Software` is shown:
+no digest any arm pinned tells the model that a `Software` takes a `name` and a `version`.
+A recall rule that asks the API path for versioned software asks for a shape its digest
+does not show. Showing it is a digest change: `schema_digest.py` is pinned, and the change
+would be its own condition boundary. It is recorded here, not made.
+
+A prompt file that names `used_software` is counted above; what it says of the slot is
+not read by this measurement.
+
 ## Lexical candidates by record
 
 Each receipted record: the basis its chunk text was read on, then each
