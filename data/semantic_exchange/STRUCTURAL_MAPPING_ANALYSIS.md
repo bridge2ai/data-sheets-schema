@@ -45,7 +45,7 @@ df["composition_path"].notna().sum()             # composition rows
 
 ## Mapping strategies
 
-`StructuralMappingGenerator.generate_mappings` runs four strategies, then keeps
+`StructuralMappingGenerator.generate_mappings` runs three strategies, then keeps
 one row per (class, slot, RO-Crate property), the one with the highest
 confidence. Each row's `structural_notes` names the strategy that produced it.
 
@@ -86,14 +86,19 @@ Today the only composition rows go through `anomalies` on `Dataset` and
 `DataSubset`, a multivalued slot mapped to a single value, so every one of them
 is **kept and flagged** with a cardinality warning.
 
-### 4. Module semantic grouping
+### No module strategy
 
-Meant to match the attributes of classes in the Motivation, Composition,
-Collection, Preprocessing and Uses modules to properties in each module's
-RO-Crate namespaces. It emits nothing: the parser assigns a class to a module
-from the `id` of the schema file it reads, and the merged schema it is given
-has one `id`, so every class lands in a single `Core` module that the strategy
-does not map. No row in the committed file comes from it.
+There was a fourth strategy, meant to match the attributes of classes in the
+Motivation, Composition, Collection, Preprocessing and Uses modules to
+properties in each module's RO-Crate namespaces. It never emitted a row and
+was removed (#3363). The parser gave every class of the merged schema one
+module, and assigning modules would not have helped: every class in the merged
+schema carries the root schema's `from_schema`, and with each class given the
+module the source schema declares it in, the strategy still matched nothing.
+Its name-similarity cut admits only an exact match, and every candidate kept
+its namespace prefix in the comparison, so `LabelingStrategy`'s
+`data_annotation_protocol` did not match `rai:dataAnnotationProtocol`. No
+row in the committed file comes from it.
 
 ## Type-compatibility validation
 
@@ -108,10 +113,10 @@ does not map. No row in the committed file comes from it.
 
 What happens on a failure depends on the strategy (above): the `slot_uri` and
 composition strategies keep the row with `type_compatible` `False` and the
-failed rule in `warnings`; the hierarchy and module strategies drop the
-candidate. So the share of compatible rows is not a quality measure of the
-mapping. It is how many rows came from the strategies that keep failures, and
-how many of those failed.
+failed rule in `warnings`; the hierarchy strategy drops the candidate. So the
+share of compatible rows is not a quality measure of the mapping. It is how
+many rows came from the strategies that keep failures, and how many of those
+failed.
 
 ## Rows the generator does not produce
 
@@ -120,11 +125,14 @@ generator reads `class_uri` and never emits a row from it), `schema:hasPart`,
 `dcat:byteSize`, and `d4d:` targets that are absent from the RO-Crate input.
 They are listed, each with its reason, in `KNOWN_UNDERIVABLE` in
 `tests/test_semantic_exchange/test_structural_mapping_drift.py` (#234), and
-that test fails if the set changes. Those that name a slot still have their
-range and cardinality columns checked against the schema
-(`TestRowsStateTheSchema`). The class-level rows are not checked: they name a
-class, not a slot, so the values in their range and cardinality columns are
-stated by hand and nothing compares them with the schema.
+that test fails if the set changes. Their range and cardinality columns are
+still checked against the schema (`TestRowsStateTheSchema`). A row that names
+a slot states that slot's range and cardinality. A class-level row names a
+class, not a slot, so its range is the class itself and it is not
+multivalued (#3388): the check requires the class to exist in the merged full
+schema or the merged core schema, `d4d_subject_range` to name it, and
+`subject_multivalued` to be `False`. `d4d:DataSubset` once gave its parent,
+`Dataset`, as its range.
 
 ## Usage
 

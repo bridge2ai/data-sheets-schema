@@ -3,7 +3,7 @@
 Generate schema-structure-aware mappings between D4D and RO-Crate.
 
 This script:
-1. Parses D4D schema structure (inheritance, composition, modules)
+1. Parses D4D schema structure (inheritance, composition)
 2. Parses RO-Crate schema structure (properties, nesting, types)
 3. Generates mappings that respect structural relationships
 4. Validates type compatibility
@@ -41,7 +41,6 @@ class SchemaClass:
     name: str
     description: str = ""
     is_a: Optional[str] = None  # Parent class
-    module: Optional[str] = None
     attributes: Dict[str, 'SchemaSlot'] = field(default_factory=dict)
     class_uri: Optional[str] = None
 
@@ -151,7 +150,6 @@ class D4DSchemaParser:
 
         self.classes: Dict[str, SchemaClass] = {}
         self.slots: Dict[str, SchemaSlot] = {}
-        self.modules: Dict[str, List[str]] = {}  # module -> class names
 
         self._parse_schema()
 
@@ -181,30 +179,6 @@ class D4DSchemaParser:
                 self.slots[f"{class_name}.{attr_name}"] = slot
 
             self.classes[class_name] = schema_class
-
-        # Parse module organization from imports and id
-        schema_id = self.schema.get("id", "")
-        if "motivation" in schema_id:
-            module = "Motivation"
-        elif "composition" in schema_id:
-            module = "Composition"
-        elif "collection" in schema_id:
-            module = "Collection"
-        elif "preprocessing" in schema_id:
-            module = "Preprocessing"
-        elif "uses" in schema_id:
-            module = "Uses"
-        elif "distribution" in schema_id:
-            module = "Distribution"
-        elif "maintenance" in schema_id:
-            module = "Maintenance"
-        else:
-            module = "Core"
-
-        for class_name in self.classes.keys():
-            if module not in self.modules:
-                self.modules[module] = []
-            self.modules[module].append(class_name)
 
     def get_dataset_property_subclasses(self) -> List[SchemaClass]:
         """Get all classes that inherit from DatasetProperty."""
@@ -338,10 +312,15 @@ class StructuralMappingGenerator:
         # 3. Map based on composition paths
         self._map_composition_paths()
 
-        # 4. Map based on module semantics
-        self._map_module_semantics()
+        # There is no module strategy (#3363). One mapped every attribute of
+        # the classes in a D4D module to the properties of that module's
+        # RO-Crate namespaces, and never emitted a row: the merged schema gave
+        # every class one module, and with each class given its own module it
+        # still emits none, because its 0.85 name-similarity cut admits only
+        # an exact match and every candidate's name keeps its namespace
+        # prefix (`rai:dataBiases` compares as `raidatabiases`).
 
-        # 5. Deduplicate mappings (keep highest confidence)
+        # 4. Deduplicate mappings (keep highest confidence)
         self._deduplicate_mappings()
 
         return self.mappings
@@ -431,8 +410,8 @@ class StructuralMappingGenerator:
                     for rocrate_prop in rocrate_candidates:
                         type_compat, warnings = self._validate_type_compatibility(slot, rocrate_prop)
                         # Kept and flagged when incompatible, as `_map_slot_uris`
-                        # does, rather than skipped as the hierarchy and module
-                        # strategies do: skipping would silently delete rows the
+                        # does, rather than skipped as the hierarchy strategy
+                        # does: skipping would silently delete rows the
                         # committed file carries.
                         mapping = StructuralMapping(
                             d4d_class=class_name,
@@ -460,62 +439,6 @@ class StructuralMappingGenerator:
                             warnings=warnings,
                         )
                         self.mappings.append(mapping)
-
-    def _map_module_semantics(self):
-        """Map entire D4D modules to RO-Crate sections."""
-        module_to_namespace = {
-            "Motivation": ["d4d", "schema"],
-            "Composition": ["d4d", "schema"],
-            "Collection": ["rai", "schema"],
-            "Preprocessing": ["rai"],
-            "Uses": ["d4d", "schema"],
-        }
-
-        for module, namespaces in module_to_namespace.items():
-            if module not in self.d4d.modules:
-                continue
-
-            for namespace in namespaces:
-                rocrate_props = self.rocrate.get_properties_by_namespace(namespace)
-
-                # Create module-level mappings
-                for class_name in self.d4d.modules[module]:
-                    if class_name not in self.d4d.classes:
-                        continue
-
-                    cls = self.d4d.classes[class_name]
-                    for attr in cls.attributes.values():
-                        # Try to match with namespace properties
-                        for rocrate_prop in rocrate_props:
-                            similarity = self._semantic_similarity(attr.name, rocrate_prop.name)
-
-                            # Require high similarity for module-based mappings
-                            if similarity < 0.85:
-                                continue
-
-                            type_compat, warnings = self._validate_type_compatibility(attr, rocrate_prop)
-
-                            # Skip if types incompatible
-                            if not type_compat:
-                                continue
-
-                            mapping = StructuralMapping(
-                                d4d_class=class_name,
-                                d4d_slot=attr.name,
-                                d4d_slot_uri=attr.slot_uri,
-                                d4d_range=attr.range,
-                                d4d_multivalued=attr.multivalued,
-                                rocrate_property=rocrate_prop.name,
-                                rocrate_path=rocrate_prop.path,
-                                rocrate_type=rocrate_prop.value_type,
-                                predicate=MappingPredicate.EXACT_MATCH if similarity >= 0.95 else MappingPredicate.CLOSE_MATCH,
-                                justification=MappingJustification.STRUCTURAL,
-                                confidence=similarity,
-                                structural_notes=f"Module mapping: {module} -> {namespace} namespace",
-                                type_compatible=type_compat,
-                                warnings=warnings,
-                            )
-                            self.mappings.append(mapping)
 
     def _map_slot_uris(self):
         """Map based on existing slot_uri annotations."""
@@ -764,7 +687,6 @@ def main(argv=None):
     d4d_parser = D4DSchemaParser(d4d_schema)
     print(f"  Found {len(d4d_parser.classes)} classes")
     print(f"  Found {len(d4d_parser.slots)} slots")
-    print(f"  Found {len(d4d_parser.modules)} modules")
 
     print("\nParsing RO-Crate schema structure...")
     rocrate_parser = ROCrateSchemaParser(rocrate_example)

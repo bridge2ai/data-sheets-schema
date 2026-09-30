@@ -139,16 +139,50 @@ class TestTheAnalysisDocDoesNotDrift(unittest.TestCase):
         self.assertTrue(parser.resolve_path("Dataset", "anomalies.name")
                         .multivalued)
 
-    def test_it_does_not_claim_the_class_level_rows_are_checked(self):
-        """TestRowsStateTheSchema checks only rows whose subject names a slot;
-        the doc once said every hand-written row's range and cardinality were
-        checked, class-level rows included (#3380)."""
+    def test_what_it_says_about_the_class_level_rows_holds(self):
+        """The doc said the class-level rows were checked when nothing read
+        them (#3380), then that they were not; since #3388 they are, under
+        the convention it states. `TestRowsStateTheSchema` holds them to the
+        schema; this holds the doc to the rows."""
         prose = " ".join(self.doc.split())
-        self.assertIn("The class-level rows are not checked", prose)
-        self.assertNotIn("Their range and cardinality columns are still "
-                         "checked", prose)
-        self.assertTrue([r for r in self.rows if "/" not in r["subject_id"]],
+        self.assertNotIn("The class-level rows are not checked", prose)
+        self.assertIn("its range is the class itself and it is not "
+                      "multivalued (#3388)", prose)
+        class_rows = [r for r in self.rows if "/" not in r["subject_id"]]
+        self.assertTrue(class_rows,
                         "the doc describes class-level rows the file lacks")
+        self.assertEqual(
+            [(r["subject_id"], r["d4d_subject_range"], r["subject_multivalued"])
+             for r in class_rows
+             if (r["d4d_subject_range"], r["subject_multivalued"])
+             != (r["subject_id"][len("d4d:"):], "False")], [],
+            "a class-level row does not follow the convention the doc states")
+
+    def test_there_is_no_module_strategy(self):
+        """#3363. The doc described a module strategy that never emitted a
+        row; the strategy was removed. The doc says so, and neither the
+        generator nor the committed file has one."""
+        import io
+        import sys
+        from contextlib import redirect_stdout
+        prose = " ".join(self.doc.split())
+        self.assertIn("runs three strategies", prose)
+        self.assertIn("It never emitted a row and was removed (#3363).", prose)
+        self.assertNotIn("Module semantic grouping", prose)
+        sys.path.insert(0, str(REPO / "src" / "semantic_exchange"))
+        import generate_structural_mapping as g  # noqa: E402
+        self.assertFalse(hasattr(g.StructuralMappingGenerator,
+                                 "_map_module_semantics"))
+        with redirect_stdout(io.StringIO()):
+            gen = g.StructuralMappingGenerator(
+                g.D4DSchemaParser(REPO / "src/data_sheets_schema/schema/"
+                                  "data_sheets_schema_all.yaml"),
+                g.ROCrateSchemaParser(REPO / "data/ro-crate/profiles/"
+                                      "fairscape/full-ro-crate-metadata.json"))
+            gen.generate_mappings()
+        self.assertEqual(
+            [m for m in gen.mappings
+             if m.structural_notes.startswith("Module mapping")], [])
 
 
 if __name__ == "__main__":
