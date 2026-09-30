@@ -126,7 +126,8 @@ spelled out takes the next entry's initial (`Christian Metallo, T.
 Clark` gives Metallo `T`: only single capitals before it show where its
 entry starts, and `Ballllosero Navarro, F.` is laid out the same way), and
 so does one after initials written as a run of capitals (`MA Levinson, T.
-Clark`, `JC Bélisle-Pipon, T. Clark`); a single capital before
+Clark`, `JC Bélisle-Pipon, T. Clark`, and on the next line too, `MA
+Levinson\\nT. Clark`); a single capital before
 capitalised words on one line reads as a compound surname's initials
 whatever the words are (`A Common Fund Metallo C` gives Metallo no `C`); a
 surname with a lower-case particle (`J. van der Berg, T. Clark`) is not
@@ -158,11 +159,15 @@ leaf written `Clark, Tim`). A judged token stays grounded when the
 bundle writes it near another word of its part — at most
 `PROXIMITY_WINDOW` capitalised tokens (or words the leaf itself writes,
 `de`, `of`) between them, only whitespace (line breaks included:
-`Charlotte\\nMarquez`), periods, hyphens, apostrophes or digits inside a
-word (`Bridge2AI`) between tokens, and one comma only where the bundle
+`Charlotte\\nMarquez`), periods after an initial (not after a word,
+where a sentence ends: `Emma Lundberg. Clark J`, unless the leaf writes
+that word with a period too, `St. Louis`; so `Tim St John` against `Tim
+St. John` demotes `John`, a cost), hyphens, apostrophes
+or digits inside a word (`Bridge2AI`) between tokens, and one comma only where the bundle
 inverts the record's order (`Clark, Tim`) — or beside that word's
 initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C` keep
-`Metallo` for `Christian Metallo`). A digit before a comma is an
+`Metallo` for `Christian Metallo`; a suffix or `The` has no initial
+there). A digit before a comma is an
 affiliation mark and ends the entry (`Levinson1, Charlotte`). A demoted
 token carries the class it would have were it absent (`initial_expanded`
 where the other word has its initial beside it: `Jing Gao` against
@@ -339,10 +344,11 @@ _SPACES = " \t"
 
 #: What may sit between two tokens of one name in one entry (#2978):
 #: spaces and line breaks, joiners and periods (`J.-C.`, `M. D.`) and
-#: apostrophes (`O'Brien`). A comma only under the rule in `_one_entry`,
-#: and digits only inside one word (`Bridge2AI`): a digit beside anything
-#: else (an affiliation mark, `Levinson1, Charlotte`), a semicolon or a
-#: bracket ends the entry.
+#: apostrophes (`O'Brien`). A period only after an initial: after a word
+#: it ends a sentence, and so the entry (`Emma Lundberg. Clark J`, #3427).
+#: A comma only under the rule in `_one_entry`, and digits only inside one
+#: word (`Bridge2AI`): a digit beside anything else (an affiliation mark,
+#: `Levinson1, Charlotte`), a semicolon or a bracket ends the entry.
 _IN_ENTRY = _JOINERS + "'\u2019"
 
 #: What may sit between the words of one compound surname, on one line:
@@ -502,13 +508,18 @@ class BundleIndex:
                 out.update(folded_key(self.tokens[j].text))
         return out
 
-    def _one_entry(self, i: int, j: int, comma_ok: bool, between: frozenset[str]) -> bool:
+    def _one_entry(self, i: int, j: int, comma_ok: bool, between: frozenset[str],
+                   abbreviated: frozenset[str] = frozenset()) -> bool:
         """Tokens `i` < `j` read as one entry (#2978): every token between
         them capitalised (a middle name, an initial) or one the record's
         own leaf writes (`de` in `Michael de Riesthal`, `of` in `University
         of Alabama`), and between tokens only whitespace, line breaks
         included (`Charlotte\\nMarquez`), `_IN_ENTRY` characters, or digits
-        inside one word (`Bridge2AI`). One comma where `comma_ok`, the
+        inside one word (`Bridge2AI`). A period only after an initial
+        (`Mark D. Wilkinson`) or after a word in `abbreviated`, one the
+        leaf itself writes with a period after it (`St.` in `Washington
+        University in St. Louis`): after any other word it ends a sentence
+        (`Emma Lundberg. Clark J`, #3427). One comma where `comma_ok`, the
         `Surname, Given` form."""
         if any(not self.tokens[m].text[:1].isupper() and exact_key(self.tokens[m].text) not in between
                for m in range(i + 1, j)):
@@ -520,11 +531,15 @@ class BundleIndex:
                 continue
             if not all(ch.isspace() or ch in _IN_ENTRY or ch == "," for ch in gap):
                 return False
+            if ("." in gap and not _is_initial(self.tokens[m].text)
+                    and exact_key(self.tokens[m].text) not in abbreviated):
+                return False                 # a sentence ends here (#3427)
             commas += gap.count(",")
         return commas == 0 or (comma_ok and commas == 1)
 
     def near(self, token: str, partner: str, token_first: bool | None = None,
-             between: frozenset[str] = frozenset()) -> bool:
+             between: frozenset[str] = frozenset(),
+             abbreviated: frozenset[str] = frozenset()) -> bool:
         """`token` occurs in the bundle within `PROXIMITY_WINDOW` tokens of
         `partner`, in one entry. `token` is matched exactly (it is a v1
         `grounded` token), `partner` folded. `token_first` is whether the
@@ -532,7 +547,9 @@ class BundleIndex:
         where the bundle inverts that order, the `Surname, Given` form
         (`Clark, Tim` for `Tim Clark`, not `Tim, Clark`), and never when
         `token_first` is None. `between` are the exact keys of the record
-        leaf's tokens, which may sit between the two in any case."""
+        leaf's tokens, which may sit between the two in any case;
+        `abbreviated` those it writes with a period after them, which may
+        be followed by one in the bundle too (`abbreviations`)."""
         if self._exact_positions is None:
             self._exact_positions = {}
             for i, t in enumerate(self.tokens):
@@ -542,7 +559,8 @@ class BundleIndex:
         for a in self._exact_positions.get(exact_key(token), ()):
             for b in range(a - reach, a + reach + 1):
                 inverted = token_first is not None and (a < b) != token_first
-                if b != a and b in others and self._one_entry(min(a, b), max(a, b), inverted, between):
+                if b != a and b in others and self._one_entry(min(a, b), max(a, b), inverted,
+                                                                   between, abbreviated):
                     return True
         return False
 
@@ -615,6 +633,15 @@ def classify_name(name: str, index: BundleIndex) -> list[tuple[str, str]]:
 _PART_BREAK = re.compile(r"[;,:()\[\]/|]")
 
 
+def abbreviations(name: str) -> frozenset[str]:
+    """Exact keys of the tokens `name` writes with a period right after
+    them (`St` in `St. Louis`): where the leaf abbreviates a word, a period
+    after it in the bundle is the abbreviation's, not a sentence end
+    (#3427)."""
+    text = _NOT_A_NAME.sub(" ", name)
+    return frozenset(exact_key(t.text) for t in _runs(text) if text[t.end:t.end + 1] == ".")
+
+
 def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[str]]:
     """The name words of each part of a leaf, split at `_PART_BREAK`, that
     v2 judges together: capitalised tokens that are not initials. A part of
@@ -631,21 +658,26 @@ def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[st
 
 def proximity(token: str, name: list[str], index: BundleIndex,
               words: frozenset[str] = frozenset(),
-              between: frozenset[str] = frozenset()) -> str | None:
+              between: frozenset[str] = frozenset(),
+              abbreviated: frozenset[str] = frozenset()) -> str | None:
     """The v2 reading of a v1-`grounded` token (#2978): None where it sits
     near another token of its name — `near` it, or written beside that
     token's initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C`
     for `Christian Metallo` grounds `Metallo`) — else the class it would
     have were it not in the bundle (`expansion_class`). A name of one
-    distinct token is not judged: the caller skips it. `between` is as
-    `BundleIndex.near` takes it."""
+    distinct token is not judged: the caller skips it. A suffix or a
+    function word (`_NO_STAND_IN`: `Jr`, `The`) has no initial to be
+    written beside `token`, as in `expansion_class` (#3428). `between` and
+    `abbreviated` are as `BundleIndex.near` takes them."""
     here = name.index(token)
     for at, other in enumerate(name):
         if exact_key(other) == exact_key(token):
             continue
-        if index.near(token, other, token_first=here < at, between=between):
+        if index.near(token, other, token_first=here < at, between=between,
+                      abbreviated=abbreviated):
             return None
         if (other[:1].isupper() and not _initials_like(other, words)
+                and folded_key(other) not in _NO_STAND_IN      # not `Jr`, `The` (#3428)
                 and folded_key(other)[:1] in index.initials_beside(token)):
             return None
     return expansion_class(token, name, index, words)
@@ -730,6 +762,7 @@ def check_record(record: Any, bundle: str | BundleIndex,
         grounded = {exact_key(t) for t, cls in classes if cls == "grounded"}
         counts_grounded = sum(1 for _, cls in classes if cls == "grounded")
         leaf_keys = frozenset(exact_key(t) for t in tokens)
+        dotted = abbreviations(name)
         listed: set[str] = set()
         judged = 0
         for part in person_parts(name, words):
@@ -740,7 +773,7 @@ def check_record(record: Any, bundle: str | BundleIndex,
                     continue
                 judged += 1
                 prox["judged"] += 1
-                v2 = proximity(token, part, index, words, leaf_keys)
+                v2 = proximity(token, part, index, words, leaf_keys, dotted)
                 if v2 is None:
                     prox["near"] += 1
                     continue
