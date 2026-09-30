@@ -1569,22 +1569,74 @@ JOINED_BEFORE_3043 = [
 ]
 
 
-@pytest.mark.corpus   # reads committed runs, two of them from git blobs; the main-branch lane (#1203)
-@pytest.mark.parametrize("method,label,project", JOINED_BEFORE_3043)
-def test_replay_the_snippets_unlocated_before_3043_report_the_joined_form(method, label, project):
-    core = ROOT / "data" / "d4d_concatenated" / f"{method}_core" / label
-    receipt = core / f"{project}_coverage_receipt.yaml"
-    if not receipt.exists():
-        pytest.skip(f"{label} not on disk")
-    out = sc.run_status_context(core / f"{project}_provenance.yaml", receipt,
-                                ROOT / "data" / "d4d_concatenated" / method / label / f"{project}_d4d.yaml")
-    assert out["checked"], out.get("reason")
-    by_form = out["counts"]["located_by_form"]
-    assert out["counts"]["unlocated"] == 0
-    assert {f: n for f, n in by_form.items() if f != "plain"} == {
-        "linewrap-joined": 1, "artifact-line-elided": 0, "joined-elided": 0}
-    assert sum(by_form.values()) == out["counts"]["located"]
-    assert "(1 only through a joined or elided form: linewrap-joined 1)" in out["summary"]
+CONCAT = ROOT / "data" / "d4d_concatenated"
+
+
+def _walk_committed_corpus():
+    """One walk of every committed coverage receipt (#3770): its result,
+    each receipt's `run_status_context` output as the walk made it, the
+    shared view it read through, and how many of its context pieces were
+    memo hits (#3769). One test reads it: CI spreads a file's tests over
+    xdist workers (`--dist load`), so a fixture shared by several tests is
+    built again on every worker that runs one, and the walk is the cost."""
+    runs, views, hits, current = {}, {}, {}, []
+    real_run, real_view, real_markers = sc.run_status_context, sc._shared_view, sc.BundleView._piece_markers
+
+    def run(provenance, receipt, full):
+        current[:] = [str(receipt.relative_to(CONCAT))]
+        hits[current[0]] = 0
+        runs[current[0]] = real_run(provenance, receipt, full)
+        return runs[current[0]]
+
+    def shared(raw, text, manifest):
+        views[current[0]] = real_view(raw, text, manifest)
+        return views[current[0]]
+
+    def markers(view, lo, hi):
+        hits[current[0]] += (lo, hi) in view._pieces
+        return real_markers(view, lo, hi)
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr(sc, "run_status_context", run)
+        mp.setattr(sc, "_shared_view", shared)
+        mp.setattr(sc.BundleView, "_piece_markers", markers)
+        out = sc.corpus_status_context(CONCAT)
+    return {"out": out, "runs": runs, "views": views, "hits": hits}
+
+
+def _assert_the_snippets_unlocated_before_3043_report_the_joined_form(runs):
+    """Each of the five receipts, read as the corpus walk read it, locates
+    its one joined snippet through the linewrap-joined form and says so. It
+    was a test of its own that re-read the five receipts (#3770)."""
+    for method, label, project in JOINED_BEFORE_3043:
+        out = runs[f"{method}_core/{label}/{project}_coverage_receipt.yaml"]
+        assert out["checked"], (label, out.get("reason"))
+        by_form = out["counts"]["located_by_form"]
+        assert out["counts"]["unlocated"] == 0, label
+        assert {f: n for f, n in by_form.items() if f != "plain"} == {
+            "linewrap-joined": 1, "artifact-line-elided": 0, "joined-elided": 0}, label
+        assert sum(by_form.values()) == out["counts"]["located"], label
+        assert "(1 only through a joined or elided form: linewrap-joined 1)" in out["summary"], label
+
+
+def _assert_a_memo_hit_reads_what_a_fresh_view_reads(walk):
+    """#3769: every piece a shared view memoised reads as a fresh view reads
+    it, and the receipt with the most memo hits gives the output a fresh
+    process gives, flag for flag. One receipt, not one per view: each
+    re-read rebuilds a view, which is the cost #3770 took out."""
+    runs, views, hits = walk["runs"], walk["views"], walk["hits"]
+    assert len({id(v) for v in views.values()}) < len(views)       # some view served several receipts
+    for view in {id(v): v for v in views.values()}.values():
+        blank = sc.BundleView(view.text, {})
+        assert {k: blank._piece_markers(*k) for k in view._pieces} == view._pieces
+    where = max(hits, key=lambda w: (hits[w], w))
+    assert hits[where] > 0
+    core, project = (CONCAT / where).parent, where.split("/")[-1][:-len("_coverage_receipt.yaml")]
+    method = core.parent.name[:-len("_core")]
+    sc.clear_caches()
+    fresh = sc.run_status_context(core / f"{project}_provenance.yaml", CONCAT / where,
+                                  CONCAT / method / core.name / f"{project}_d4d.yaml")
+    assert runs[where]["flags"] and fresh["flags"] == runs[where]["flags"]
+    assert json.dumps(fresh, sort_keys=True, default=str) == json.dumps(runs[where], sort_keys=True, default=str)
 
 
 V8_REP3 = "2026-09-04f_claude-opus-5-api-generic-v8_rep3"
@@ -1793,6 +1845,39 @@ def test_the_same_bytes_under_another_chunk_layout_is_another_view():
         assert {c["id"]: view.chunk_text(c["id"]) for c in manifest["chunks"]} == \
             {c["id"]: sc.BundleView(text, manifest).chunk_text(c["id"]) for c in manifest["chunks"]}
     assert sc._shared_view(raw, text, wide) is a and sc._shared_view(raw, text, narrow) is b
+
+
+def test_a_views_piece_memo_reads_what_a_fresh_view_reads_and_is_bounded(monkeypatch):
+    # #3769: a view memoises each context piece's markers, so a second
+    # receipt of one bundle version folds nothing it already folded, and
+    # reads exactly what a fresh view reads.
+    text, manifest = _bundle(ENUMERATION)
+    receipt = _receipt(text, [(D_SLOT, D_SNIPPET)])
+    record = {"preprocessing_strategies": [{"preprocessing_details": "Data are standardized."}]}
+    folds = []
+    real = sc.normalised_offsets
+    monkeypatch.setattr(sc, "normalised_offsets", lambda t: folds.append(t) or real(t))
+    shared = sc.BundleView(text, manifest)
+    first = sc.receipt_context(receipt, manifest, text, record, view=shared)
+    assert shared._pieces and folds
+    folds.clear()
+    again = sc.receipt_context(receipt, manifest, text, record, view=shared)
+    assert folds == []                 # every piece, and every chunk's haystack, was a memo hit
+    fresh = sc.receipt_context(receipt, manifest, text, record)
+    assert [f["rule"] for f in first["flags"]] == ["governor_outside_snippet"]
+    assert json.dumps(first, sort_keys=True) == json.dumps(again, sort_keys=True) == json.dumps(fresh, sort_keys=True)
+    blank = sc.BundleView(text, manifest)
+    assert {k: blank._piece_markers(*k) for k in shared._pieces} == shared._pieces
+    # The memo is bounded, the oldest piece dropped first; a dropped piece
+    # is read again as it was.
+    monkeypatch.setattr(sc, "PIECE_MEMO_MAX", 2)
+    small = sc.BundleView(text, manifest)
+    will = text.index("will")
+    spans = [(will - 5, will + 10), (will - 6, will + 10), (will - 7, will + 10)]
+    reads = [small._piece_markers(*s) for s in spans]
+    assert list(small._pieces) == spans[1:]
+    assert small._piece_markers(*spans[0]) == reads[0] == ((("planned", "will", will),))
+    assert list(small._pieces) == [spans[2], spans[0]]
 
 
 def test_records_that_differ_only_in_sha256_recover_their_bytes_separately(tmp_path, monkeypatch):
@@ -2072,12 +2157,12 @@ def test_the_corpus_flag_refuses_every_other_option(option, tmp_path, monkeypatc
     assert f"--corpus reads every committed receipt; {option} would be ignored" in bad.output
 
 
-@pytest.mark.corpus   # walks every committed coverage receipt; run on every PR and merge (#1361)
+@pytest.mark.corpus   # walks every committed coverage receipt, once; run on every PR and merge (#1361)
 def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_ones():
-    concat = ROOT / "data" / "d4d_concatenated"
-    if not any(concat.glob("*_core/*/*_coverage_receipt.yaml")):
+    if not any(CONCAT.glob("*_core/*/*_coverage_receipt.yaml")):
         pytest.skip("no committed receipts on disk")
-    out = sc.corpus_status_context(concat)
+    walk = _walk_committed_corpus()
+    out = walk["out"]
     t = out["totals"]
     assert t["checked"] == t["receipts"], [u for p in out["projects"].values() for u in p["unchecked"]]
     assert (t["unlocated"], t["indeterminate"]) == (0, 0)
@@ -2096,3 +2181,5 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])
     assert joined == sorted(JOINED_BEFORE_3043)
+    _assert_the_snippets_unlocated_before_3043_report_the_joined_form(walk["runs"])
+    _assert_a_memo_hit_reads_what_a_fresh_view_reads(walk)
