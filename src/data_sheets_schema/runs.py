@@ -470,6 +470,77 @@ def verdict_schema_pin(method: str, label: str, project: str,
     return VERDICT_UNPINNED
 
 
+#: The schema and class a deterministic-arm record is judged against: the
+#: merged full schema, and the class the mappers target (`rocrate_map`).
+DETERMINISTIC_SCHEMA = "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
+DETERMINISTIC_CLASS = "Dataset"
+
+
+def _validate_deterministic(path: Path) -> tuple[list[str] | None, str | None]:
+    """(findings, failure) for one deterministic-arm record under today's schema.
+
+    The instrument every recorded verdict uses (`api_runner._validator_lines`,
+    as `recheck-validation` and `trap-inventory` call it), plus the
+    duplicate-key reading the loader-based validator cannot see (#1029).
+    `findings` is None exactly when the validator could not run, which is
+    not a record that passed.
+    """
+    from data_sheets_schema.api_runner import _validator_lines
+    from data_sheets_schema.duplicate_keys import describe, duplicate_keys_in
+    lines, failure = _validator_lines(path, DETERMINISTIC_SCHEMA, DETERMINISTIC_CLASS)
+    if failure is not None:
+        return None, failure
+    dups = duplicate_keys_in(path)
+    return ([describe(dups)] if dups else []) + list(lines), None
+
+
+def deterministic_validity(concat_dir: Path = CONCAT_DIR, *, method: str | None = None,
+                           label: str | None = None, project: str | None = None,
+                           validate=None, workers: int = 4) -> list[dict]:
+    """Validity of each deterministic-arm record under the current schema (#2970).
+
+    `rocrate_mapped` and `rocrate_static_map` write no `<method>_core`
+    provenance record, so `validation_status` calls them UNVERIFIED and
+    neither `runs check` nor `recheck-validation --all` ever judged them:
+    records failed schema 3.0.0 with nothing saying so (#2916). This judges
+    each one now, against the merged schema on disk.
+
+    Read-only. The published labels stay as published (#426/#520), so the
+    answer is a stated fact about those arms, never a rewrite and never a
+    gate. Each row is ``{method, label, project, path, status, findings,
+    failure}``; ``status`` is VALID, INVALID, or UNVERIFIED where the
+    validator could not run — never read as valid.
+    """
+    validate = validate or _validate_deterministic
+    targets = []
+    for run in discover(concat_dir):
+        if not run.deterministic:
+            continue
+        if (method and run.method != method) or (label and run.label != label):
+            continue
+        for proj in run.projects:
+            if project and proj != project:
+                continue
+            path = run.path / f"{proj}_d4d.yaml"
+            if path.exists():
+                targets.append((run, proj, path))
+
+    def _judge(target):
+        run, proj, path = target
+        findings, failure = validate(path)
+        status = (UNVERIFIED if findings is None
+                  else INVALID if findings else VALID)
+        return {"method": run.method, "label": run.label, "project": proj,
+                "path": str(path), "status": status,
+                "findings": list(findings or []), "failure": failure}
+
+    # One validator subprocess per record, about two seconds each; a small
+    # pool keeps the report's cost near one record's rather than the arm's.
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
+        return list(pool.map(_judge, targets))
+
+
 class AmbiguousCanonical(RuntimeError):
     """A project carries a canonical mark under more than one configuration."""
 
