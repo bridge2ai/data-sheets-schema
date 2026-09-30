@@ -390,6 +390,9 @@ class Judgements(unittest.TestCase):
         md = self.m.render_markdown(found)
         self.assertIn(f"are the {retained} v3 matches it still ends at", md)
         self.assertIn(f"({retained} × 1/2 + ", md)
+        # The figure itself, not only its label: 1 retained x 1/2 + 3 recovered
+        # in class = 3.5, where counting every v3 match (3) would give 4.5 (#3916).
+        self.assertIn("v4 keeps an estimated 3.5 in-class matches (1 × 1/2 + 3): a precision of 87.5%", md)
 
     def test_a_kept_tally_that_is_not_the_entry_is_refused(self):
         self.m.KEPT["classes"] = {RSN: (len(self.kept_rows), 0, 0)}
