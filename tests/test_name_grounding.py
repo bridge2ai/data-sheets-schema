@@ -710,6 +710,58 @@ class ProximityTest(unittest.TestCase):
         self.assertEqual(demoted("John Smith Jones", "John Smith, Jones"), {"Jones": "absent"})
         self.assertEqual(demoted("John Smith Jr", "John Smith,, Jr."), {"Jr": "absent"})
 
+    def test_an_inversion_comma_after_a_completed_entry_ends_it(self):
+        """#3545: the `Surname, Given` comma follows the surname. After the
+        surname's own initials the entry `Gao J` is complete, so the comma
+        ends it and `Jing` of the next author is not joined to `Gao`: `Jing`
+        is demoted, while `Gao` stays near through its initial `J`. The
+        inversion itself (`Gao, Jing`, a compound surname's) still joins."""
+        for bundle in ("Gao J, Jing Chen", "Gao J., Jing Chen", "Gao JC, Jing Chen",
+                       "Gao J-C, Jing Chen", "Gao J,\nJing Chen"):
+            with self.subTest(bundle=bundle):
+                p = prox("Jing Gao", bundle)
+                self.assertEqual((p["judged"], p["near"], p["demoted"]), (2, 1, 1))
+                self.assertEqual(demoted("Jing Gao", bundle), {"Jing": "initial_expanded"})
+        for name, bundle in (("Jing Gao", "Gao, Jing"), ("Jing Gao", "Gao,\nJing"),
+                             ("JING GAO", "GAO, JING"),
+                             ("Jean Bélisle-Pipon", "Bélisle-Pipon, Jean"),
+                             ("John Smith Jr", "John Smith J, Jr.")):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(demoted(name, bundle), {})
+
+    def test_a_suffix_is_not_kept_by_an_initial(self):
+        """#3547: an initial beside a suffix is another person's, so `Jones
+        Jr, J.` keeps no `Jr` of `John Smith Jr` across the semicolon: the
+        suffix is kept only near a word of its name (#3459)."""
+        for bundle in ("John Smith; Jones Jr, J.", "John Smith; Jones Jr J",
+                       "John Smith; J. Jones Jr"):
+            with self.subTest(bundle=bundle):
+                p = prox("John Smith Jr", bundle)
+                self.assertEqual((p["judged"], p["near"], p["demoted"]), (3, 2, 1))
+                self.assertEqual(demoted("John Smith Jr", bundle), {"Jr": "absent"})
+        self.assertEqual(demoted("John Smith Jr", "John Smith, Jr."), {})
+
+    def test_a_one_letter_particle_may_sit_between(self):
+        """#3546: v1 tokens are two letters or more, so `d` of `d’Amico`
+        and `t` of `van 't Hoff` are no token of the leaf; v2 lets every
+        run of letters the leaf writes sit between two of its words, one
+        letter included, so a name identical to the bundle is not demoted.
+        v1's tokens and counts are unchanged."""
+        for name in ("Andrea d’Amico", "Andrea d'Amico", "Jacobus van 't Hoff"):
+            with self.subTest(name=name):
+                out = check_record({"creators": [{"name": name}]}, name, SLOTS)
+                self.assertEqual(out["findings"], [])
+                p = out["proximity"]
+                self.assertEqual((p["judged"], p["near"], p["demoted"]), (2, 2, 0))
+        self.assertEqual(ng.name_tokens("Andrea d’Amico"), ["Andrea", "Amico"])
+        self.assertEqual(ng.name_tokens("Jacobus van 't Hoff"), ["Jacobus", "van", "Hoff"])
+        self.assertEqual(ng.leaf_words("Jacobus van 't Hoff (ORCID:0000-0001-2345-6789)"),
+                         frozenset({"jacobus", "van", "t", "hoff"}))
+        # Only the leaf's own letters: a particle the leaf does not write
+        # still ends the entry.
+        self.assertEqual(demoted("Andrea Amico", "Andrea d’Amico"),
+                         {"Andrea": "absent", "Amico": "absent"})
+
     def test_a_given_name_elsewhere_is_an_expansion_of_the_initial_beside(self):
         """`Tim` is in the bundle, but not beside Clark, whose initial is T:
         v2 reads it `initial_expanded`, and Clark near its initial."""

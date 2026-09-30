@@ -159,7 +159,8 @@ fewer than two distinct such words, a generational suffix not counted, is
 not judged (`Doctor Y`, `PhD`, `Clark Jr`, a leaf written `Clark, Tim`). A judged token stays grounded when the
 bundle writes it near another word of its part — at most
 `PROXIMITY_WINDOW` capitalised tokens (or words the leaf itself writes,
-`de`, `of`) between them, only whitespace (line breaks included:
+`de`, `of`, one letter included: the `d` of `Andrea d’Amico`, the `t` of
+`Jacobus van 't Hoff`, #3546) between them, only whitespace (line breaks included:
 `Charlotte\\nMarquez`), periods after a single-capital initial (not
 after a word, where a sentence ends: `Emma Lundberg. Clark J`, nor after
 a run of two or three capitals, which is as often a degree or an acronym:
@@ -175,11 +176,15 @@ the name reads its period as an abbreviation, since a word follows it:
 cannot tell from `St. Louis`, so `Emma Clark. Tim Jones` does not demote
 it, #3535, costs), hyphens, apostrophes or
 digits inside a word (`Bridge2AI`) between tokens, and one comma only
-where the bundle inverts the record's order (`Clark, Tim`) or before a
+where the bundle inverts the record's order (`Clark, Tim`), but not
+after the surname's own initials, where that entry is complete (`Gao J,
+Jing Chen` does not keep `Jing` of `Jing Gao`, #3545), or before a
 generational suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside
 that word's initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon
 J-C` keep `Metallo` for `Christian Metallo`; a suffix or `The` has no
-initial there). A generational suffix is no partner for another word at
+initial there, and a suffix is never kept by one, since an initial
+beside it is another person's: `Jones Jr, J.` keeps no `Jr` of `John
+Smith Jr`, #3547). A generational suffix is no partner for another word at
 all, since it identifies no one: `Emma Lundberg Jr` does not keep `Emma`
 of `Emma Clark Jr` (#3497); the suffix itself is judged against the
 name's words. A digit before a comma is an
@@ -551,7 +556,11 @@ class BundleIndex:
         Clark J`, #3460), it ends a sentence (`Emma Lundberg. Clark J`,
         #3427). One comma where `comma_ok`, the `Surname, Given` form, and
         one before a generational suffix in any order (`John Smith, Jr.`,
-        #3459): that comma is the suffix's, not an entry's end."""
+        #3459): that comma is the suffix's, not an entry's end. The
+        `Surname, Given` comma follows the surname, never an initial after
+        it: there the entry `Gao J` is complete and the comma ends it, so
+        `Gao J, Jing Chen` does not join `Jing` to `Gao` (#3545), while
+        `Gao, Jing` does."""
         if any(not self.tokens[m].text[:1].isupper() and exact_key(self.tokens[m].text) not in between
                for m in range(i + 1, j)):
             return False
@@ -568,6 +577,8 @@ class BundleIndex:
                 return False                 # a sentence ends here (#3427, #3460)
             if folded_key(self.tokens[m + 1].text) in _SUFFIXES and gap.count(",") == 1:
                 continue                     # `Smith, Jr.`: the suffix's comma (#3459)
+            if "," in gap and m > i and self._initial_at(m):
+                return False                 # `Gao J, Jing`: a completed entry (#3545)
             commas += gap.count(",")
         return commas == 0 or (comma_ok and commas == 1)
 
@@ -581,8 +592,9 @@ class BundleIndex:
         where the bundle inverts that order, the `Surname, Given` form
         (`Clark, Tim` for `Tim Clark`, not `Tim, Clark`), and never when
         `token_first` is None; a comma before a generational suffix is
-        allowed in either order (`John Smith, Jr.`, #3459). `between` are the exact keys of the record
-        leaf's tokens, which may sit between the two in any case;
+        allowed in either order (`John Smith, Jr.`, #3459). `between` are the exact keys of every
+        run of letters the record leaf writes, one letter included
+        (`leaf_words`, #3546), which may sit between the two in any case;
         `abbreviated` those it writes with a period after them, which may
         be followed by one in the bundle too (`abbreviations`)."""
         if self._exact_positions is None:
@@ -694,6 +706,16 @@ def abbreviations(name: str) -> frozenset[str]:
     return frozenset(out)
 
 
+def leaf_words(name: str) -> frozenset[str]:
+    """Exact keys of every run of letters `name` writes outside its
+    identifier spans, one letter included: the words v2 lets sit between
+    two tokens of the name in any case (`BundleIndex.near`'s `between`).
+    `name_tokens` drops a run of one letter, so without this the particle
+    `d` of `Andrea d’Amico` and the `t` of `Jacobus van 't Hoff` would
+    separate the name from itself (#3546). v1's tokens are unchanged."""
+    return frozenset(exact_key(t.text) for t in _runs(_NOT_A_NAME.sub(" ", name)))
+
+
 def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[str]]:
     """The name words of each part of a leaf, split at `_PART_BREAK`, that
     v2 judges together: capitalised tokens that are not initials. A part of
@@ -724,8 +746,10 @@ def proximity(token: str, name: list[str], index: BundleIndex,
     is no partner to be `near` either, since it identifies no one:
     `Emma Lundberg Jr` does not keep `Emma` for `Emma Clark Jr` (#3497).
     The suffix itself is still judged against the name's other words
-    (`Jr` near `Smith` in `John Smith, Jr.`, #3459), never another suffix. `between` and `abbreviated` are
-    as `BundleIndex.near` takes them."""
+    (`Jr` near `Smith` in `John Smith, Jr.`, #3459), never another suffix,
+    and only by being `near` a word: an initial beside a suffix is another
+    person's, so `Jones Jr, J.` keeps no `Jr` of `John Smith Jr` (#3547).
+    `between` and `abbreviated` are as `BundleIndex.near` takes them."""
     here = name.index(token)
     for at, other in enumerate(name):
         if exact_key(other) == exact_key(token):
@@ -737,6 +761,7 @@ def proximity(token: str, name: list[str], index: BundleIndex,
             return None
         if (other[:1].isupper() and not _initials_like(other, words)
                 and folded_key(other) not in _NO_STAND_IN      # not `Jr`, `The` (#3428)
+                and folded_key(token) not in _SUFFIXES         # `Jones Jr, J.` (#3547)
                 and folded_key(other)[:1] in index.initials_beside(token)):
             return None
     return expansion_class(token, name, index, words)
@@ -820,7 +845,7 @@ def check_record(record: Any, bundle: str | BundleIndex,
         clean = all(cls == "grounded" for _, cls in classes)
         grounded = {exact_key(t) for t, cls in classes if cls == "grounded"}
         counts_grounded = sum(1 for _, cls in classes if cls == "grounded")
-        leaf_keys = frozenset(exact_key(t) for t in tokens)
+        leaf_keys = leaf_words(name)
         dotted = abbreviations(name)
         listed: set[str] = set()
         judged = 0
