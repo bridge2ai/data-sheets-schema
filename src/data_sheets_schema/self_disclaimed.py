@@ -265,7 +265,8 @@ class Lexicon:
     def __init__(self, raw: bytes, *, path: str | None = None):
         try:
             self._compile(raw, path)
-        except (KeyError, IndexError, TypeError, AttributeError, re.error, yaml.YAMLError) as exc:
+        except (KeyError, IndexError, TypeError, AttributeError, OverflowError, RecursionError,
+                re.error, yaml.YAMLError) as exc:   # OverflowError: a repeat count re cannot hold (#3909)
             kind = "re.error" if isinstance(exc, re.error) else type(exc).__name__  # PatternError on 3.13
             raise lx.LexiconError(f"{path or 'the lexicon'} is not a well-formed self_disclaimed "
                                   f"lexicon ({kind}: {exc})") from exc

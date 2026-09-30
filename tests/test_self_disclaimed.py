@@ -1589,6 +1589,9 @@ def test_a_pinned_container_lexicon_that_does_not_compile_is_reported_not_raised
         "wrongly typed guards": ({**data, "guards": ["a list"]},
                                  "is not a well-formed self_disclaimed lexicon (AttributeError: "),
         "another instrument": ({**data, "instrument": "other"}, "not a self_disclaimed lexicon"),
+        # #3909: re.compile raises OverflowError, not re.error, for this.
+        "repeat count too large": ({**data, "self_reference": ["a{4294967296}"]},
+                                   "is not a well-formed self_disclaimed lexicon (OverflowError: "),
     }
     for case, (content, message) in cases.items():
         for stale in tmp_path.glob("*.yaml"):
