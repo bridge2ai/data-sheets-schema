@@ -369,8 +369,11 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     environment set outside the command read, nor a package in the directory the session's
     shell started in that a `python -c` or `-m` part imports first, nor the project there whose
     virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
-    may have left that directory, or where the transcript records another, such a part counts
-    as after a directory change, and a relative `--full` cannot be placed. A relative `--full`
+    may have left that directory (plain, or behind a brace, a compound keyword, `!`, `time`,
+    `builtin` or `command`), such a part counts as after a directory change, and a relative
+    `--full` cannot be placed; where the transcript records another directory, such a part
+    counts as after a change too, and a relative `--full` resolves against the recorded
+    directory. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,

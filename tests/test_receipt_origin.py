@@ -2327,13 +2327,21 @@ class DeriveSpellings(Base):
         # #3719: a directory an earlier call left the shell in is read
         self.assertIn("A directory an earlier call left the shell in is read (#3719): after a call not denied "
                       "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs, may leave anywhere but where it "
-                      "started (one in a subshell counts, the rule's cost), or where the transcript records a "
-                      "working directory other than its first, such a part counts as after a directory change "
-                      "and a relative `--full` cannot be placed; a directory a `source`d script or a function "
-                      "changed to is not seen", text)
+                      "started (plain or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
+                      "`command`, #3797; one in a subshell counts, the rule's cost), such a part counts as after "
+                      "a directory change and a relative `--full` cannot be placed; where the transcript records "
+                      "a working directory other than its first, such a part counts as after a change too, and a "
+                      "relative `--full` resolves against the recorded directory (#3798); a directory a "
+                      "`source`d script or a function changed to is not seen", text)
+        self.assertNotIn("or where the transcript records a working directory other than its first, such a part "
+                         "counts as after a directory change and a relative `--full` cannot be placed", text)
         self.assertIn("The runtime's shell keeps its directory between calls (#3719)", flat := " ".join(
             ro.__doc__.split()))
-        self.assertIn("a resumed run's next transcript starts afresh. A package in the directory the session's "
+        self.assertIn("behind a brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`, `until`, "
+                      "`do`), `!`, `time`, `builtin` or `command` (#3797)", flat)
+        self.assertIn("such a part is read as after a change too, but a relative `--full` resolves against the "
+                      "recorded directory, where the call started (#3798)", flat)
+        self.assertIn("(#3798). A resumed run's next transcript starts afresh. A package in the directory the session's "
                       "shell started in that such a part imports first is not read, nor a directory a "
                       "`source`d script or a function changed to", flat)
         self.assertNotIn("A package in the call's own starting directory", flat)
@@ -3052,6 +3060,14 @@ class EarlierDirectoryChange(Base):
                         # A change in a subshell does not move the call's shell;
                         # reading it as one is the rule's cost.
                         "(cd hack; ls)",
+                        # Behind a brace, a compound keyword, `!`, `time`,
+                        # `builtin` or `command`, the builtin runs in this
+                        # shell (#3797).
+                        "{ cd hack; }", "if true; then cd hack; fi", "for d in hack; do cd $d; done",
+                        "while true; do cd hack; break; done", "if cd hack; then ls; fi",
+                        "builtin cd hack", "command cd hack", "command -p cd hack", "time cd hack",
+                        "time -p cd hack", "! cd hack", "X=1 builtin cd hack", "{ pushd hack; }",
+                        "true && { eval 'cd hack'; }", "builtin eval 'cd hack'",
                         # A command the tokenizer cannot split, read by its text.
                         "cd hack; cat <<EOF\nit's\nEOF"):
             for command in self.READ_HERE:
@@ -3072,7 +3088,10 @@ class EarlierDirectoryChange(Base):
 
     def test_a_call_after_no_change_away_from_the_start_is_read_as_before(self):
         for earlier in (None, "ls", "cd ROOT", "cd ROOT && ls", "cd .", "pushd ROOT && popd",
-                        "bash -c 'cd hack'", "./cd hack", "echo cd hack", "cat <<EOF\nit's\nEOF"):
+                        "bash -c 'cd hack'", "./cd hack", "echo cd hack", "cat <<EOF\nit's\nEOF",
+                        # `command -v` describes `cd` without running it, and
+                        # a function body being defined is not run (#3797).
+                        "command -v cd", "echo builtin cd hack", "f() { cd hack; }"):
             for command in self.READ_HERE:
                 with self.subTest(earlier=earlier, command=command):
                     _, block = self._run(earlier, command)
@@ -3104,6 +3123,42 @@ class EarlierDirectoryChange(Base):
         block = r.report()
         self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be resolved")
         self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+        # So after a change behind a brace or a compound keyword (#3797).
+        for earlier in ("{ cd data; }", "if true; then cd data; fi", "builtin cd data"):
+            with self.subTest(earlier=earlier):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(earlier)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                identity = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
+                                          "resolved")
+                self.assertIsNone(block["derive_core_attempts"][0]["targets_full"])
+
+    def test_a_relative_full_resolves_against_a_recorded_directory_other_than_the_start(self):
+        # Where the transcript records the directory the call started in,
+        # a relative `--full` resolves there, not against the start (#3798).
+        for spelled, placed in (("../FULL", True), ("FULL", False)):
+            with self.subTest(spelled=spelled):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                full = spelled.replace("FULL", str(r.full.relative_to(r.root)))
+                identity = r.bash(f"d4d derive core --full {full} --out o.yaml")
+                r.events[-2]["cwd"] = str(r.root / "sub")
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                [attempt] = block["derive_core_attempts"]
+                self.assertEqual(attempt["tool_use_id"], identity)
+                self.assertIs(attempt["targets_full"], placed)
+                if placed:
+                    self.assertEqual(block["status"], "checked", block["reasons"])
+                    self.assertEqual(attempt["status_basis"], "command")
+                    self.assertIsNotNone(block["boundaries"]["derive_core"])
 
     def test_shell_moves(self):
         for command, cwd, moves in (("cd hack", "/w", True), ("cd hack && ls", "/w", True),
@@ -3117,7 +3172,21 @@ class EarlierDirectoryChange(Base):
                                     ("echo cd", "/w", False), ("eval 'cd hack'", "/w", True),
                                     ("eval \"ls; pushd hack\"", "/w", True), ("eval ls", "/w", False),
                                     ("cat <<EOF\nit's\nEOF", "/w", False),
-                                    ("cat <<EOF\nit's\nEOF\ncd /w", "/w", True)):
+                                    ("cat <<EOF\nit's\nEOF\ncd /w", "/w", True),
+                                    # #3797: behind a brace, a compound keyword,
+                                    # `!`, `time`, `builtin` or `command`.
+                                    ("{ cd hack; }", "/w", True), ("if true; then cd hack; fi", "/w", True),
+                                    ("for d in hack; do cd $d; done", "/w", True),
+                                    ("if cd hack; then ls; fi", "/w", True), ("else pushd x", "/w", True),
+                                    ("until popd; do :; done", "/w", True), ("elif cd x", "/w", True),
+                                    ("builtin cd hack", "/w", True), ("builtin -- cd hack", "/w", True),
+                                    ("command cd hack", "/w", True), ("command -p cd hack", "/w", True),
+                                    ("time cd hack", "/w", True), ("time -p cd hack", "/w", True),
+                                    ("! cd hack", "/w", True), ("X=1 builtin cd hack", "/w", True),
+                                    ("{ eval 'cd hack'; }", "/w", True), ("builtin eval 'cd x'", "/w", True),
+                                    ("command -v cd", "/w", False), ("command -V cd", "/w", False),
+                                    ("echo builtin cd", "/w", False), ("f() { cd x; }", "/w", False),
+                                    ("{ ls; }", "/w", False), ("time ls", "/w", False)):
             with self.subTest(command=command, cwd=cwd):
                 self.assertEqual(ro._shell(command, cwd, [])["moves"], moves)
         # `moved` reads a `python -c`/`-m` or `poetry run` part as after a change.
@@ -3451,8 +3520,11 @@ class Cli(unittest.TestCase):
         self.assertIn("nor a package in the directory the session's shell started in that a `python -c` or "
                       "`-m` part imports first, nor the project there whose virtualenv a `poetry run` part "
                       "takes; after an earlier call whose `cd`, `pushd` or `popd` may have left that "
-                      "directory, or where the transcript records another, such a part counts as after a "
-                      "directory change, and a relative `--full` cannot be placed", text)   # #3699, #3719, #3723
+                      "directory (plain, or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
+                      "`command`), such a part counts as after a directory change, and a relative `--full` "
+                      "cannot be placed; where the transcript records another directory, such a part counts "
+                      "as after a change too, and a relative `--full` resolves against the recorded "
+                      "directory.", text)   # #3699, #3719, #3723, #3797, #3798
         self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
                       "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
