@@ -81,9 +81,11 @@ nothing from this scan and is not named. Neither the findings the dropped
 values would have produced nor the kept values' own are reported: the record
 is not checked, not partly checked.
 
-A key that a merge key brings in and an explicit key of the same mapping
-overrides is YAML's override rule, not a key written twice. The #1029 gate
-does not count it, and it is not named here. The overridden value is dropped
+A merge key is any key tagged as one, `<<` or `!!merge x` alike, as
+PyYAML's `flatten_mapping` decides it; a path names it `<<` however it is
+written (#3410). A key that a merge key brings in and an explicit key of the
+same mapping overrides is YAML's override rule, not a key written twice. The
+#1029 gate does not count it, and it is not named here. The overridden value is dropped
 whole and never scanned, so a key repeated *inside* it hides nothing and is
 not named either; the same holds for a key an earlier mapping in a
 `<<: [...]` list shadows, since the loader keeps the first there (#3203). A
@@ -112,8 +114,8 @@ through it (#3247). The scan decides once per node whether anything under it
 could be a finding and walks only the branches that could, so a shared graph
 with no scoped text costs its distinct nodes, not its paths, and every
 finding keeps the path it is reported at. Where the findings themselves are
-exponential, or merge keys nest the same way, each walk — the scan and the
-duplicate check — stops after `MAX_TRAVERSAL_STEPS` steps and raises
+exponential, or merged pairs grow faster than the text, each walk — the scan
+and the duplicate check — stops after `MAX_TRAVERSAL_STEPS` steps and raises
 `TraversalBudgetExceeded`; `check_text` reports that record as not checked,
 and the command goes on to the next. A string is matched once however many
 aliases reach it, and each visit to it is a step (#3263). A merge key that
@@ -121,19 +123,20 @@ reaches the mapping it is written in (`MergeCycle`) is not checked rather
 than approximated: its kept pairs follow PyYAML's stateful flattening rather
 than the override rule reproduced here (#3263). A merge chain is followed
 with an explicit stack, so the interpreter's recursion limit no longer stops
-it (#3272); the step budget still does. Each mapping the duplicate check
-visits expands the whole chain below it, so a chain whose links are each
+it (#3272); the step budget still does. Each mapping's merged pairs are laid
+out once per walk and kept with paths relative to it, so a mapping the walk
+reaches again, or one a later link merges, is not expanded again (#3496).
+Expanded afresh at every mapping visited, a chain whose links are each
 visited — the usual shape, every link a top-level anchor merging the one
-before — costs about L²/2 steps for L links: one of 628 links is checked,
-one of 629 or more is not checked on the budget. Where each link also adds
-a key, that key is a child the walk visits below every link above it, so
-the walk costs about L² steps: one of 445 links is checked, one of 446 or
-more is not checked on the budget. The loader copies about L²/2 pairs for
-that shape, so its bound is reached only from 633 links; it trips before
-the walk starts, so from there the reason is the loader's (#3491, #3504).
-A chain the walk expands only once — one whose links sit under a key the
-scan skips and whose last link is aliased once — costs about one step a
-link, so one of thousands of links is checked (#3542). Its memory is
+before — cost about L²/2 steps for L links, and one of 629 links or more
+was not checked (#3491). It now costs about four steps a link: one of
+40,000 links is checked, one of 50,000 is not checked on the budget. Where each link also adds a key,
+link i holds i pairs, all of which the loader copies too, so the walk costs
+about L²/2 steps: one of 627 links is checked, one of 628 to 632 is not
+checked on the budget, and from 633 the loader's bound trips first, before
+the walk starts (#3504). A chain the walk expands only once — one whose
+links sit under a key the scan skips and whose last link is aliased once —
+costs about two steps a link (#3542). Its memory is
 bounded by the same steps: the duplicate walk keeps each path as a link to
 its parent and renders only the paths of the duplicates it names. Built as
 strings, each path copied every link above it, about 1.5·L² characters for
@@ -529,60 +532,198 @@ class _Path:
     would have escaped `check_text` and lost the batch's report (#3582).
     Linked, a path costs one small object a step, which the step budget
     bounds. The segment keeps the key's own string, so a long key reached
-    through an alias is not copied either."""
+    through an alias is not copied either.
+
+    A path may also be relative: rooted at `_HERE`, the mapping whose merges
+    it follows, and joined to where that mapping is reached by `_Joined`, so
+    a mapping's merged pairs are laid out once per walk and named at every
+    place the walk reaches it (#3496). A key's dot is decided when the path
+    is rendered, so it is left off only a key written at an unnamed root."""
     __slots__ = ("parent", "sep", "segment")
 
     def __init__(self, parent: "_Path | None", sep: str, segment: str):
         self.parent, self.sep, self.segment = parent, sep, segment
 
     def key(self, key: str) -> "_Path":
-        return _Path(self, "." if self else "", key)
+        return _Path(self, ".", key)
 
     def index(self, index: int) -> "_Path":
         return _Path(self, "[", f"{index}]")
 
-    def __bool__(self) -> bool:
-        return self.parent is not None or bool(self.segment)
-
     def __str__(self) -> str:
-        parts: list[str] = []
-        current: _Path | None = self
-        while current is not None:
-            parts.append(current.segment)
-            parts.append(current.sep)
-            current = current.parent
-        return "".join(reversed(parts))
+        parts: list[tuple[str, str]] = []
+        bases: list[_Path] = []
+        current: _Path = self
+        while True:
+            if isinstance(current, _Joined):
+                bases.append(current.base)
+                current = current.rel
+            elif current is _HERE:
+                current = bases.pop()
+            elif current.parent is None:
+                break
+            else:
+                parts.append((current.sep, current.segment))
+                current = current.parent
+        out, bare = [current.segment], current.segment == ""
+        for sep, segment in reversed(parts):
+            out.append(("" if bare and sep == "." else sep) + segment)
+            bare = False
+        return "".join(out)
+
+
+class _Joined(_Path):
+    """`rel`, a path relative to `_HERE`, read below `base` (#3496)."""
+    __slots__ = ("base", "rel")
+
+    def __init__(self, base: _Path, rel: _Path):
+        super().__init__(None, "", "")
+        self.base, self.rel = base, rel
 
 
 _ROOT = _Path(None, "", "")
+#: The root of a relative path: the mapping whose merges it follows.
+_HERE = _Path(None, "", "")
+
+
+def _join(base: _Path, rel: _Path) -> _Path:
+    return base if rel is _HERE else _Joined(base, rel)
 
 
 def _as_path(path: "_Path | str") -> _Path:
     return path if isinstance(path, _Path) else _Path(None, "", path)
 
 
-def _kept_pairs(loader: yaml.SafeLoader, node: yaml.MappingNode, path: "_Path | str",
-                budget: _Budget) -> list[tuple[yaml.MappingNode, _Path, Any, Any, Any]]:
-    """The pairs the loader reads as `node`'s — (source mapping, the path it
-    is named at, key identity, key node, value node) — in the order it reads
-    them: each merged mapping's (its own merges first), then `node`'s own. A
-    key is kept from the last source that writes it, so a merged key an
-    explicit key overrides, or an earlier mapping in a merge list shadows, is
-    dropped whole (#3203). Every pair of the kept source is listed, an
-    explicit key written twice included: that is the duplicate being judged."""
-    pairs = []
-    for source, label_path in _merge_sources(node, path, budget):
-        for key_node, value_node in source.value:
+def _is_merge(key_node: Any) -> bool:
+    """A merge key: any key tagged as one, `<<` or `!!merge x` alike, as
+    PyYAML's `flatten_mapping` decides it (#3410). Paths name it `<<`."""
+    return getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge"
+
+
+def _merges(node: yaml.MappingNode) -> list[tuple[yaml.MappingNode, _Path]]:
+    """The mappings `node` merges, each with its path relative to `node`, in
+    the order `flatten_mapping` lays them out: every merge key in turn, a
+    list of merges last to first so the first wins. A list item that is not
+    a mapping is one the loader rejects; it is not followed."""
+    out: list[tuple[yaml.MappingNode, _Path]] = []
+    base = _HERE.key("<<")
+    for key_node, value_node in node.value:
+        if not _is_merge(key_node):
+            continue
+        if isinstance(value_node, yaml.MappingNode):
+            out.append((value_node, base))
+        elif isinstance(value_node, yaml.SequenceNode):
+            for index, item in reversed(list(enumerate(value_node.value))):
+                if isinstance(item, yaml.MappingNode):
+                    out.append((item, base.index(index)))
+    return out
+
+
+#: A kept pair: the source mapping, the path it is named at, key identity,
+#: key node and value node.
+_Pair = tuple[yaml.MappingNode, _Path, Any, Any, Any]
+
+
+class _MergedPairs:
+    """The pairs the loader reads as each mapping's, laid out once per walk
+    and kept per mapping with paths relative to it (#3496).
+
+    The pairs are read in `flatten_mapping`'s order: each merged mapping's
+    (its own merges first), then the mapping's own. A key is kept from the
+    last source that writes it, so a merged key an explicit key overrides,
+    or an earlier mapping in a merge list shadows, is dropped whole (#3203).
+    Every pair of the kept source is listed, an explicit key written twice
+    included: that is the duplicate being judged. A mapping reached more
+    than once — merged twice, or through two merges of a diamond — is read
+    once, at its last place: the loader lays its pairs out at each place,
+    but they are the same key nodes with the same values, so the repeat
+    drops nothing, and its last place is the one whose pairs win against
+    the mappings between (#3226).
+
+    Expanded afresh at every mapping visited, a chain of L links, each
+    visited, cost about L²/2 steps (#3491). A mapping's kept pairs follow
+    from its merges' kept pairs alone: a key a later merge or the mapping
+    itself writes is dropped from an earlier merge's, and what survives
+    keeps its order and its path below that merge. A source whose key a
+    later merge also writes appears in that later merge's expansion, so it
+    is dropped there whole and its last place is the later one, as the
+    loader's. Each mapping is laid out once, charged a step and a step for
+    each pair it considers, and each lookup is charged a step for each pair
+    it lays out. A merge that reaches a mapping still being laid out is a
+    cycle and raises MergeCycle: PyYAML does construct one, but the pairs it
+    keeps then follow its stateful flattening, which cutting the cycle does
+    not reproduce, so a duplicate the loader dropped could be read as one an
+    override dropped (#3263). Iterative, so the recursion limit does not cut
+    a merge chain (#3272)."""
+
+    def __init__(self, loader: yaml.SafeLoader, budget: _Budget):
+        self.loader, self.budget = loader, budget
+        self._kept: dict[int, list[_Pair]] = {}
+
+    def kept_pairs(self, node: yaml.MappingNode, path: "_Path | str", *, charge: bool = True) -> list[_Pair]:
+        """`node`'s kept pairs, named below `path`, charged a step each unless
+        `charge` is false: the duplicate walk looks a mapping up at most once
+        in each of its two places, so what it reads there is bounded by what
+        laying the mapping out was charged, and charging it again would
+        count each pair twice."""
+        relative = self._relative(node)
+        if charge:
+            self.budget.spend(len(relative))
+        base = _as_path(path)
+        return [(source, _join(base, rel), identity, key_node, value_node)
+                for source, rel, identity, key_node, value_node in relative]
+
+    def _relative(self, node: yaml.MappingNode) -> list[_Pair]:
+        if id(node) in self._kept:
+            return self._kept[id(node)]
+        # The mappings being laid out, each with the merges still to lay out
+        # before it: a merge that reaches one of them is a cycle.
+        active: set[int] = set()
+        stack: list[tuple[yaml.MappingNode, list[tuple[yaml.MappingNode, _Path]], int]] = []
+
+        def enter(current: yaml.MappingNode) -> None:
+            if id(current) in active:
+                raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
+                                 "loader keeps there is not reproduced, so the record was not read in full")
+            self.budget.spend()
+            active.add(id(current))
+            stack.append((current, _merges(current), 0))
+
+        enter(node)
+        while stack:
+            current, merges, done = stack[-1]
+            if done < len(merges):
+                stack[-1] = (current, merges, done + 1)
+                merged = merges[done][0]
+                if id(merged) not in self._kept:
+                    enter(merged)
+                continue
+            stack.pop()
+            active.discard(id(current))
+            self._kept[id(current)] = self._lay_out(current, merges)
+        return self._kept[id(node)]
+
+    def _lay_out(self, node: yaml.MappingNode,
+                 merges: list[tuple[yaml.MappingNode, _Path]]) -> list[_Pair]:
+        own = []
+        for key_node, value_node in node.value:
             if _is_merge(key_node):
                 continue
-            budget.spend()
-            pairs.append((source, label_path, _key_identity(loader, key_node), key_node, value_node))
-    kept = {identity: id(source) for source, _, identity, _, _ in pairs}
-    return [pair for pair in pairs if kept[pair[2]] == id(pair[0])]
+            self.budget.spend()
+            own.append((node, _HERE, _key_identity(self.loader, key_node), key_node, value_node))
+        written = {pair[2] for pair in own}
+        blocks: list[list[_Pair]] = []
+        for merged, rel in reversed(merges):
+            pairs = self._kept[id(merged)]
+            self.budget.spend(len(pairs))
+            blocks.append([(source, _join(rel, below), identity, key_node, value_node)
+                           for source, below, identity, key_node, value_node in pairs
+                           if identity not in written])
+            written.update(pair[2] for pair in pairs)
+        return [pair for block in reversed(blocks) for pair in block] + own
 
 
-def _holds_a_scoped_slot(loader: yaml.SafeLoader, node: Any, budget: _Budget,
-                         memo: dict[int, bool]) -> bool:
+def _holds_a_scoped_slot(merged: _MergedPairs, node: Any, memo: dict[int, bool]) -> bool:
     """Whether `node`, walked as `_scan` walks a record, reaches a scoped slot:
     a mapping key naming one at any depth, through any key and through
     aliases and merge keys, among the keys the loader would take — a merged
@@ -597,9 +738,9 @@ def _holds_a_scoped_slot(loader: yaml.SafeLoader, node: Any, budget: _Budget,
         if id(current) in seen:
             continue
         seen.add(id(current))
-        budget.spend()
+        merged.budget.spend()
         if isinstance(current, yaml.MappingNode):
-            for _, _, identity, _, value_node in _kept_pairs(loader, current, _ROOT, budget):
+            for _, _, identity, _, value_node in merged.kept_pairs(current, _ROOT):
                 if _constructed(identity) in SCOPED_SLOTS:
                     found = True
                     break
@@ -610,8 +751,8 @@ def _holds_a_scoped_slot(loader: yaml.SafeLoader, node: Any, budget: _Budget,
     return found
 
 
-def _hides_something(loader: yaml.SafeLoader, where: str, key: Any, dropped: list[Any],
-                     budget: _Budget, memo: dict[int, bool]) -> bool:
+def _hides_something(merged: _MergedPairs, where: str, key: Any, dropped: list[Any],
+                     memo: dict[int, bool]) -> bool:
     """Whether a key written more than once, in a mapping the scan reaches
     `where`, dropped a value the scan would have read. Inside a scoped slot
     every key but a skipped one is read. Outside, a scoped slot is read, and
@@ -620,74 +761,8 @@ def _hides_something(loader: yaml.SafeLoader, where: str, key: Any, dropped: lis
     (#2980, #3005, #3247)."""
     if where == _INSIDE:
         return key not in SKIPPED_KEYS
-    return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(loader, value, budget, memo)
+    return key in SCOPED_SLOTS or any(_holds_a_scoped_slot(merged, value, memo)
                                       for value in dropped)
-
-
-def _is_merge(key_node: Any) -> bool:
-    return (getattr(key_node, "value", None) == "<<"
-            and getattr(key_node, "tag", "") == "tag:yaml.org,2002:merge")
-
-
-def _merge_sources(node: yaml.MappingNode, path: "_Path | str",
-                   budget: _Budget) -> list[tuple[yaml.MappingNode, _Path]]:
-    """The mappings whose pairs the loader reads as `node`'s, each with the
-    path it is named at, in the order PyYAML's `flatten_mapping` lays their
-    pairs out: every `<<` in turn — a merged mapping's own merges before its
-    pairs, and a list of merges last to first, so the first wins — then
-    `node` itself. A merge cycle raises MergeCycle: PyYAML does construct
-    one, but the pairs it keeps then follow its stateful flattening, which
-    cutting the cycle does not reproduce, so a duplicate the loader dropped
-    could be read as one an override dropped (#3263).
-    A mapping reached more than once — merged twice, or through two merges
-    of a diamond — is listed once, at its last place: the loader lays its
-    pairs out at each place, but they are the same key nodes with the same
-    values, so the repeat drops nothing, and its last place is the one whose
-    pairs win against the mappings between (#3226).
-    Iterative, with an explicit stack of the merges still to follow at each
-    open mapping, so the recursion limit does not cut a merge chain; each
-    mapping opened is a step, so one call on a chain of L links spends L
-    (#3272, #3491)."""
-    def merges(current: yaml.MappingNode, current_path: _Path) -> Iterator[tuple[yaml.MappingNode, _Path]]:
-        base = current_path.key("<<")
-        for key_node, value_node in current.value:
-            if not _is_merge(key_node):
-                continue
-            if isinstance(value_node, yaml.MappingNode):
-                yield value_node, base
-            elif isinstance(value_node, yaml.SequenceNode):
-                for index, item in reversed(list(enumerate(value_node.value))):
-                    if isinstance(item, yaml.MappingNode):
-                        yield item, base.index(index)
-
-    sources: list[tuple[yaml.MappingNode, _Path]] = []
-    # The mappings open between `node` and the one being read: a merge that
-    # reaches one of them is a cycle; a mapping reached again once closed is
-    # a diamond or a repeat, listed at its last place below.
-    active: set[int] = set()
-    stack: list[tuple[yaml.MappingNode, _Path, Iterator[tuple[yaml.MappingNode, _Path]]]] = []
-
-    def enter(current: yaml.MappingNode, current_path: _Path) -> None:
-        if id(current) in active:
-            raise MergeCycle("a merge key reaches the mapping it is written in; which values the "
-                             "loader keeps there is not reproduced, so the record was not read in full")
-        budget.spend()
-        active.add(id(current))
-        stack.append((current, current_path, merges(current, current_path)))
-
-    enter(node, _as_path(path))
-    while stack:
-        current, current_path, pending = stack[-1]
-        merged = next(pending, None)
-        if merged is not None:
-            enter(*merged)
-            continue
-        # Every merge of `current` has been laid out: its own pairs follow.
-        stack.pop()
-        active.discard(id(current))
-        sources.append((current, current_path))
-    last = {id(source): index for index, (source, _) in enumerate(sources)}
-    return [entry for index, entry in enumerate(sources) if last[id(entry[0])] == index]
 
 
 def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[dict[str, Any]]:
@@ -713,15 +788,16 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
     merge keys are not duplicates, as there. A text the composer rejects
     yields nothing: `safe_load` rejects it too, and the record is not
     checked on that. Raises TraversalBudgetExceeded when the walk takes
-    more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as nested merge
-    lists that double at each level do (#3247), and MergeCycle for a merge
+    more than `max_steps` (default `MAX_TRAVERSAL_STEPS`), as merges holding
+    quadratically many pairs do (#3504), and MergeCycle for a merge
     key that reaches its own mapping: a walk that did not finish found
     nothing, and saying so would read as clean (#3263). A merge chain is
-    not cut at the recursion limit (#3272), but every mapping visited
-    expands the chain below it, so a chain whose links are each visited
-    costs about L²/2 steps and one of 629 links or more raises
-    TraversalBudgetExceeded; where each link also adds a key the walk costs
-    about L² steps and raises from 446 links (#3491, #3504). A path is a
+    not cut at the recursion limit (#3272), and each mapping's merged pairs
+    are laid out once per walk (#3496), so a chain whose links are each
+    visited costs about four steps a link; where each link also adds a key,
+    link i holds i pairs and the walk costs about L²/2 steps, raising from
+    628 links (#3491, #3504). A merge key is any key tagged as one, `<<` or
+    `!!merge x` alike, and a path names it `<<` (#3410). A path is a
     link to its parent, rendered only for a duplicate named, so a chain the
     walk expands once costs memory in proportion to its steps, not to the
     square of its length (#3582)."""
@@ -731,6 +807,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
         loader = yaml.SafeLoader(text)
     except (yaml.YAMLError, RecursionError):
         return []
+    merged = _MergedPairs(loader, budget)
     named: dict[tuple[int, Any], dict[str, Any]] = {}
     try:
         root = loader.get_single_node()
@@ -757,7 +834,7 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
             # shadows, is dropped whole and never scanned (#3203).
             groups: dict[tuple[int, Any], tuple[_Path, str, list[tuple[int, Any]]]] = {}
             children = []
-            for source, label_path, identity, key_node, value_node in _kept_pairs(loader, node, path, budget):
+            for source, label_path, identity, key_node, value_node in merged.kept_pairs(node, path, charge=False):
                 text_key = getattr(key_node, "value", None)
                 label = text_key if isinstance(text_key, str) else str(text_key)
                 groups.setdefault((id(source), identity), (label_path, label, []))[2].append(
@@ -770,9 +847,9 @@ def unread_duplicate_keys(text: str, *, max_steps: int | None = None) -> list[di
                     children.append((value_node, child, _INSIDE))
             for (source_id, identity), (label_path, label, occurrences) in groups.items():
                 if (len(occurrences) > 1 and (source_id, identity) not in named
-                        and _hides_something(loader, where, _constructed(identity),
+                        and _hides_something(merged, where, _constructed(identity),
                                              [value for _, value in occurrences[:-1]],
-                                             budget, holds_memo)):
+                                             holds_memo)):
                     named[(source_id, identity)] = {
                         "path": str(label_path) or "$", "key": label,
                         "lines": [line for line, _ in occurrences], "count": len(occurrences)}
