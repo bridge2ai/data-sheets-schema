@@ -427,6 +427,10 @@ class TestCrateEncoding(unittest.TestCase):
             self.assertTrue((root / "CHORUS" / "processed"
                              / "CHORUS_crate_mapped_d4d.yaml").exists(), r.output)
             self.assertFalse((root / "AI_READI" / "processed").exists())
+            # CHORUS validates; the refusal is not called a validation failure (#3359)
+            self.assertIn("✓ validation: PASS", r.output)
+            self.assertIn("❌ 1 crate(s) refused (missing or unreadable), "
+                          "0 validation failure(s)", r.output)
 
 
 class TestFilledRowNotes(unittest.TestCase):

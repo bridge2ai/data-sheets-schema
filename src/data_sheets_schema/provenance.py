@@ -2261,14 +2261,19 @@ class GitUnavailable(RuntimeError):
 
 def bundle_bytes_for(bundle_path: str, md5: str | None = None,
                      sha256: str | None = None) -> tuple[bytes, dict[str, str]] | None:
-    """The bytes a record read, recovered from the committed version of its
-    declared bundle whose md5 (or sha256) the record hashed (#1140): the
-    newest matching version's blob and its history entry, or None when no
-    committed version matches. Raises `GitUnavailable` as
-    `bundle_blob_history` does. A receipt was written against these bytes,
-    and a recompute of its block on today's bundle is a recompute against
-    the wrong text; this is what lets the block be recomputed on the right
-    one after the path has drifted."""
+    """The bytes of the newest committed version of a repository file whose
+    md5 (or sha256) is the one given, with that version's history entry,
+    or None when no committed version matches. Raises `GitUnavailable` as
+    `bundle_blob_history` does. Every hash given must match.
+
+    The lookup is by path and hash only, so it serves any committed file;
+    `committed_bytes_for` is the same function under a name that says so
+    (#3412). Its first use, and the reason for the name, is a record's
+    declared bundle (#1140): a receipt was written against the bytes the
+    record hashed, and a recompute of its block on today's bundle is a
+    recompute against the wrong text; this lets the block be recomputed on
+    the right one after the path has drifted. `d4d receipts sources
+    --at-run-commit` recovers a run's source manifest the same way (#3050)."""
     if not md5 and not sha256:
         return None
     for entry in bundle_blob_history(bundle_path):
@@ -2290,13 +2295,16 @@ def bundle_bytes_for(bundle_path: str, md5: str | None = None,
 
 @functools.lru_cache(maxsize=None)
 def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
-    """Every committed version of a bundle reachable from HEAD under this
-    name, on every merged side (`--full-history`; 17 versions of the
-    AI_READI bundle against 10 under default simplification), newest
-    first: commit, date, and the sha256 and md5 of the bytes at that
-    commit. Not across a rename: `--follow` cancels `--full-history` and
-    the pre-rename blob lives under a name this function does not read
-    (#1132 round 2). Memoised per path: the backfill asks once per record
+    """Every committed version of a repository file reachable from HEAD
+    under this name, on every merged side (`--full-history`; 17 versions
+    of the AI_READI bundle against 10 under default simplification),
+    newest first: commit, date, and the sha256 and md5 of the bytes at that
+    commit. Nothing here is specific to bundles, which were its first
+    subject; `committed_blob_history` is the same function under a neutral
+    name (#3412). Not across a rename: `--follow` cancels `--full-history`
+    and the pre-rename blob lives under a name this function does not read
+    (#1132 round 2). Memoised per path, whatever the file (one cache,
+    shared by both names): the bundle-md5 backfill asks once per record
     and 82 records name 11 paths. Read-only result — the cached dicts are
     shared. Raises `GitUnavailable` when the log call fails, or when the
     repository is a shallow clone — CI checks out one commit, and a
@@ -2337,6 +2345,14 @@ def bundle_blob_history(bundle_path: str) -> tuple[dict[str, str], ...]:
                     "sha256": hashlib.sha256(blob.stdout).hexdigest(),
                     "md5": hashlib.md5(blob.stdout).hexdigest()})
     return tuple(out)
+
+
+# Neutral names for the two lookups above (#3412): they recover any
+# committed file by path and hash, not only a bundle. Aliases, not wrappers,
+# so behaviour and the memo cache are one. A caller resolves the name it
+# imports at call time, so a test patches the name its code calls.
+committed_bytes_for = bundle_bytes_for
+committed_blob_history = bundle_blob_history
 
 
 def resolve_bundle_md5(record_path: Path,

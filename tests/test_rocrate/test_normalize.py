@@ -250,6 +250,49 @@ class TestUndecodableCrate(unittest.TestCase):
                              / "CHORUS_crate_metadata_reduced.json").exists(), r.output)
             self.assertFalse((root / "AI_READI" / "processed").exists())
 
+    def test_a_refusal_is_not_counted_as_a_validation_failure(self):
+        """#3359. The refused crate and each non-PASS record shared one
+        counter, so a run whose every record passed still ended '1
+        validation failure(s)'. Both are failures; each is named as itself."""
+        from unittest import mock
+        from click.testing import CliRunner
+        from data_sheets_schema.cli.rocrate import rocrate
+
+        def fake(name, root, sv=None):
+            if name == "AI_READI":
+                raise FileNotFoundError(f"no crate for {name}")
+            verdict = "PASS" if name == "CHORUS" else "FAIL\nsome problem"
+            return Result(project=name,
+                          validation={f"{name}_crate_d4d.yaml": verdict})
+
+        def run(*projects):
+            args = ["normalize", "--packages-dir", "unused"]
+            for name in projects:
+                args += ["--project", name]
+            with mock.patch("data_sheets_schema.rocrate_normalize.normalize_project",
+                            side_effect=fake):
+                return CliRunner().invoke(rocrate, args)
+
+        r = run("AI_READI", "CHORUS")                 # refused + every record PASS
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("✓ CHORUS_crate_d4d.yaml: PASS", r.output)
+        self.assertIn("❌ 1 crate(s) refused (missing or unreadable), "
+                      "0 validation failure(s)", r.output)
+
+        r = run("AI_READI", "CM4AI")                  # refused + one invalid record
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("❌ 1 crate(s) refused (missing or unreadable), "
+                      "1 validation failure(s)", r.output)
+
+        r = run("CM4AI")                              # invalid record alone
+        self.assertEqual(r.exit_code, 1, r.output)
+        self.assertIn("❌ 0 crate(s) refused (missing or unreadable), "
+                      "1 validation failure(s)", r.output)
+
+        r = run("CHORUS")                             # nothing wrong
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("✅ Normalization complete", r.output)
+
 
 class TestReduceMetadata(unittest.TestCase):
     def test_large_inventory_collapses_and_reports_count(self):

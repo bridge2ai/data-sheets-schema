@@ -286,13 +286,21 @@ class TestRunsCheckReportsIt(unittest.TestCase):
             "claudecode_agent_core/gen_rep1/OTHER_d4d_core.yaml": VALID_RECORD,
             "claudecode_agent_core/gen_rep1/OTHER_reconciliation.md": "report\n",
         })
-        from data_sheets_schema.runs import GROUNDED_GAPS
+        from data_sheets_schema.runs import (CLAIMS_CONTRADICTED, GROUNDED_GAPS,
+                                             PAIR_DIVERGENT)
+        # All three listing loops run (#3521), not only the grounding one.
         with mock.patch("data_sheets_schema.runs.grounding_status",
-                        return_value=(GROUNDED_GAPS, 1)):
+                        return_value=(GROUNDED_GAPS, 1)), \
+                mock.patch("data_sheets_schema.runs.report_claim_status",
+                           return_value=(CLAIMS_CONTRADICTED, 2)), \
+                mock.patch("data_sheets_schema.runs.pair_status",
+                           return_value=(PAIR_DIVERGENT, 3)):
             result = CliRunner().invoke(cli, ["runs", "check"])
-        # The loop ran and bound the generated run's names …
-        self.assertTrue(any("OTHER" in l and "gen_rep1" in l and "identifier(s)" in l
-                            for l in result.output.splitlines()), result.output)
+        # The loops ran over the generated run's names …
+        for what in ("1 identifier(s)", "2 claim(s)", "3 error(s)"):
+            self.assertTrue(any("OTHER" in l and "gen_rep1" in l and what in l
+                                for l in result.output.splitlines()),
+                            (what, result.output))
         # … and the section still judged both deterministic records.
         self.assertIn("2 deterministic-arm record(s) judged", result.output)
         self.assertIn("1 valid, 1 invalid, 0 could not be checked", result.output)
