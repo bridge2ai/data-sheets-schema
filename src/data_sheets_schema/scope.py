@@ -55,9 +55,21 @@ MANIFEST = Path("data/preprocessed/source_manifest.yaml")
 
 
 def load_manifest(manifest: Path = MANIFEST) -> dict[str, Any]:
+    """The whole manifest at a path, read once and parsed as the byte
+    reader parses it (#3415): `scope_of`, `related_ids` and
+    `check_manifest` then read the declaration off the same parse
+    `scope_in` gives `release_inventory`. A missing file is `{}`; a file
+    that is not UTF-8 YAML raises the decoder's or the parser's own error,
+    as it did when this opened the file itself."""
     if not Path(manifest).exists():
         return {}
-    return yaml.safe_load(Path(manifest).read_text(encoding="utf-8")) or {}
+    return _parse(Path(manifest).read_bytes()) or {}
+
+
+def _parse(encoded: bytes) -> Any:
+    """The one parse of a manifest's bytes. Raises `UnicodeDecodeError` or
+    `yaml.YAMLError`; `scope_in` turns both into `ValueError`."""
+    return yaml.safe_load(encoded.decode("utf-8"))
 
 
 def all_scopes(manifest: Path = MANIFEST) -> dict[str, dict]:
@@ -79,7 +91,7 @@ def scope_in(raw: bytes | str, project: str) -> Any:
     if not isinstance(encoded, bytes):
         raise ValueError("source manifest must be exact bytes or text")
     try:
-        data = yaml.safe_load(encoded.decode("utf-8"))
+        data = _parse(encoded)
     except (UnicodeDecodeError, yaml.YAMLError) as exc:
         raise ValueError(f"source manifest is not readable YAML: {exc}") from exc
     scopes = data.get("scope") if isinstance(data, dict) else None
@@ -101,13 +113,20 @@ def in_bundle_of(entry: Any) -> list[str | int | float]:
     either (#3507): `check_manifest` checks every value, so a repeat is
     kept and `7` and `7.0` -- equal to Python, written differently -- are
     both kept, in the order written."""
+    return [value for value in _in_bundle_as_written(entry) if _is_identifier(value)]
+
+
+def _in_bundle_as_written(entry: Any) -> list[Any]:
+    """Every value an entry's `in_bundle` carries, identifier or not, in
+    the order written: a scalar is one value, a list or tuple its items,
+    a falsy `in_bundle` none (#3415). `in_bundle_of` keeps the
+    identifiers; `check_manifest` reads the rest to report them."""
     if not isinstance(entry, dict):
         return []
     src = entry.get("in_bundle")
     if not src:
         return []
-    return [value for value in (list(src) if isinstance(src, (list, tuple)) else [src])
-            if _is_identifier(value)]
+    return list(src) if isinstance(src, (list, tuple)) else [src]
 
 
 def scope_of(project: str, manifest: Path = MANIFEST) -> dict | None:
@@ -142,6 +161,30 @@ def aliases_of(entry: Any) -> list[str]:
         text = str(ident).strip()
         if text and text not in out:
             out.append(text)
+    return out
+
+
+def names_referent(entry: Any, referent: Any, project: Any) -> list[dict]:
+    """What makes a `related_but_distinct` entry name the dataset its own
+    declaration is about (#3581, #3584): each of its identifiers (`id` or
+    an alias, as `aliases_of` reads them) that is the `referent_id`
+    compared as `_norm` compares spellings -- so a resolver, `doi:` or
+    bare-DOI form, a case change or a trailing slash all match -- and its
+    `manifest_key` when that is the project itself. Empty when it names
+    another dataset. The one test `check_manifest` and `release_inventory`
+    both apply: a narrower checker passed an alias of the referent that
+    `check_record` would then read, on a record carrying its own DOI, as
+    out of scope."""
+    if not isinstance(entry, dict):
+        return []
+    out = []
+    if _is_identifier(referent) and str(referent).strip():
+        own = _norm(referent)
+        out += [{"field": "id / also_known_as", "value": ident, "referent_id": referent}
+                for ident in aliases_of(entry) if _norm(ident) == own]
+    key = entry.get("manifest_key")
+    if isinstance(key, str) and key == project:
+        out.append({"field": "manifest_key", "value": key})
     return out
 
 
@@ -376,6 +419,8 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
     """
     from data_sheets_schema.registry import Registry
 
+    # One read of the file (#3415): every row below, the malformed-entry
+    # rows included, is about the bytes this parse came from.
     data = load_manifest(manifest)
     registry = Registry(path=Path(manifest), data=data)
     projects = data.get("projects") or {}
@@ -399,11 +444,10 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
         # here rather than raised on or dropped (#1157): the scope block the
         # runner sends names such an entry to the model as omitted, and the
         # checker that skips it must say so in the same place.
-        for row in malformed_entries(project, manifest):
+        for row in malformed_in(scope):
             problems.append({"project": project,
                              "problem": f"related_but_distinct[{row['index']}]: {row['problem']}"})
         entries = [e for e in scope.get("related_but_distinct") or [] if isinstance(e, dict)]
-        ids = {e.get("id") for e in entries if _is_identifier(e.get("id"))}
         for entry in entries:
             key = entry.get("manifest_key")
             if key is not None and not _is_identifier(key):
@@ -414,27 +458,35 @@ def check_manifest(manifest: Path = MANIFEST) -> list[dict]:
                 problems.append({"project": project,
                                  "problem": f"related dataset names manifest "
                                             f"key {key!r}, which does not exist"})
-            src = entry.get("in_bundle")
-            if src:
-                # A list of sources is a shape the scope block renders
-                # (#1177 review, SF1): each name is checked.
-                sources = list(src) if isinstance(src, (list, tuple)) else [src]
-                known = {e.get("id") for e in registry.sources(project)}
-                for one in sources:
-                    if not _is_identifier(one):
-                        problems.append({"project": project,
-                                         "problem": f"related dataset's in_bundle carries a "
-                                                    f"{type(one).__name__}, not a source id"})
-                    elif one not in known:
-                        problems.append({
-                            "project": project,
-                            "problem": f"related dataset claims source {one!r} is "
-                                       f"in this bundle; the manifest lists no "
-                                       f"such source for {project}"})
-        if _is_identifier(referent) and referent in ids:
-            problems.append({"project": project,
-                             "problem": "the referent is also listed as "
-                                        "related-but-distinct"})
+            # A list of sources is a shape the scope block renders (#1177
+            # review, SF1): each name is checked, the identifiers exactly as
+            # `in_bundle_of` gives them (#3415) and the rest reported.
+            written = _in_bundle_as_written(entry)
+            known = {e.get("id") for e in registry.sources(project)} if written else set()
+            for one in written:
+                if not _is_identifier(one):
+                    problems.append({"project": project,
+                                     "problem": f"related dataset's in_bundle carries a "
+                                                f"{type(one).__name__}, not a source id"})
+                elif one not in known:
+                    problems.append({
+                        "project": project,
+                        "problem": f"related dataset claims source {one!r} is "
+                                   f"in this bundle; the manifest lists no "
+                                   f"such source for {project}"})
+        # An entry that names the referent itself, by any identifier in any
+        # spelling or by a manifest_key that is this project (#3584): the
+        # exact raw id was the only case reported, so `doi:` + the
+        # referent's DOI passed here while `check_record` would read a
+        # record carrying that DOI as out of scope.
+        for index, entry in enumerate(scope.get("related_but_distinct") or []):
+            matched = names_referent(entry, referent, project)
+            if matched:
+                how = "; ".join(f"{m['field']} {m['value']!r}" for m in matched)
+                problems.append({"project": project,
+                                 "problem": f"related_but_distinct[{index}] names the referent itself "
+                                            f"({how}): the referent is also listed as "
+                                            "related-but-distinct"})
 
         # Symmetry (#443). A one-directional declaration checks one direction:
         # a pediatric record identifying itself by the adult DOI would pass and
