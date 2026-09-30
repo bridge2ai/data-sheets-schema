@@ -2165,8 +2165,18 @@ class DeriveSpellings(Base):
         self.assertIn("is not placed by the words (#3137, #3384) but by position (#3369): a shell call that runs a "
                       "program not read here -- neither a reader, a directory change, a d4d call of a literal "
                       "subcommand, nor `linkml-validate` or `linkml-term-validator` with options read here -- "
-                      "issued after the draft and before the derive boundary, with a receipt change after it, is "
-                      "a reason; its cost is a false `unknown` for such a program that derived nothing", text)
+                      "or runs a command or process substitution, whose inner command is not read (#3675), that "
+                      "had not returned when the draft was issued (one issued before the draft that returned "
+                      "after it, or one whose run is open-ended, counts: #3676), was issued before the derive "
+                      "boundary, and has a receipt change issued before that boundary returning after it, is a "
+                      "reason; its cost is a false `unknown` for such a program that derived nothing", text)
+        self.assertNotIn("issued after the draft and before the derive boundary", text)
+        # #3674: what makes a call's run open-ended, and the detach it cannot see
+        self.assertIn("a part is started with `&` (at the top level, or ending a command inside a word a "
+                      "nested shell may run: `bash -c './derive.sh &'`), or a part's program detaches what it "
+                      "runs (`setsid`, `daemon`, `disown`, `screen`, `tmux`, `at`, `batch`, `systemd-run`, "
+                      "`start-stop-daemon`, #3674); a script or program that backgrounds or daemonises a child "
+                      "itself is not seen as open-ended", text)
         self.assertIn("a `derive core` run by anything other than a shell call in the transcripts given", text)
         self.assertIn("A derive whose words are not on the command line at all (a script, an alias or function, "
                       "`d4d $SUB`, `python -c` building the argument list) is placed by position instead (#3369)",
@@ -2196,9 +2206,10 @@ class UnseenDerive(Base):
     """A `derive core` run without the words on the command line (a script,
     an alias or function, `d4d $SUB`, `python -c` building the argument list)
     left the block `checked` with a Phase 3 entry read as Phase 1 (#3369). A
-    shell call that runs a program this does not read, issued after the draft
-    and before the derive boundary with a receipt change after it, is now a
-    reason. The two schema validators the playbook runs are read."""
+    shell call that runs a program this does not read, that had not returned
+    when the draft was issued and was issued before the derive boundary, with
+    a receipt change after it, is now a reason. The two schema validators the
+    playbook runs are read; a command or process substitution is not (#3675)."""
 
     FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
     VALIDATE = ("python -c 'from linkml.validator.cli import cli; cli()' -s schema.yaml -C Dataset "
@@ -2214,7 +2225,12 @@ class UnseenDerive(Base):
               "linkml-term-validator validate-data F -s s.yaml -a pronto:x.obo",
               "linkml-term-validator validate-data F -s s.yaml --config oak.yaml",
               "linkml-term-validator F -s s.yaml",
-              "python -c 'from linkml.validator.cli import cli; cli(); import os' F")
+              "python -c 'from linkml.validator.cli import cli; cli(); import os' F",
+              # A substitution's inner command is not read, whatever carries it (#3675).
+              "echo \"$(date)\"", "echo \"$(bash derive.sh)\"", "echo `./derive.sh`", "ls `./derive.sh`",
+              "cat <(bash derive.sh)", "d4d receipts check --receipt \"$(bash derive.sh)\"",
+              "linkml-validate -s s.yaml <(./derive.sh)", "linkml-validate -s s.yaml \"$(./derive.sh)\"",
+              "echo $((1 + 2))")
 
     def _run(self, command, *, derive=True, **result):
         """Draft, the call under test, a receipt change, then (by default) the
@@ -2236,7 +2252,8 @@ class UnseenDerive(Base):
                     identity, block = self._run(command, derive=derive)
                     where = "the derive core boundary" if derive else "the end of the transcripts"
                     self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program this "
-                                              f"does not read after the full record's first Write, before {where}, "
+                                              "does not read and had not returned when the full record's first "
+                                              f"Write was issued, was issued before {where}, "
                                               "with a receipt change after it: a `derive core` it ran without the "
                                               "words on its command line would move the Phase 1 / Phase 3 "
                                               "boundary (#3369)")
@@ -2253,7 +2270,7 @@ class UnseenDerive(Base):
         for command in ("cat CHORUS_d4d.yaml", "grep -n title x.md | head -3", "cd data && ls",
                         "d4d receipts check --receipt R", "d4d bundle chunk --check",
                         "python -m data_sheets_schema.cli receipts check --receipt R",
-                        "cat x > /tmp/out.txt", "echo \"$(date)\"",
+                        "cat x > /tmp/out.txt", "echo '$(date)'", "echo 'R&D' && ls",
                         self.VALIDATE, self.TERMS, "poetry run linkml-validate -s s.yaml -C Dataset F",
                         "linkml-validate --schema=s.yaml --target-class=Dataset --exit-on-first-failure -D F",
                         "linkml-term-validator validate-data F -s s.yaml -t Dataset --no-labels --bindings",
@@ -2334,9 +2351,30 @@ class UnseenDerive(Base):
                 r.write(r.receipt, Boundaries.C003)
                 r.derive()
                 self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
-        # A `&&`, `|&` or a redirection's `&` detaches nothing.
+        # So may a `&` ending a command inside a word a nested shell runs, or
+        # a program that detaches what it runs (#3674).
+        for command in ("bash -c './derive.sh &'", "sh -c \"./derive.sh > log 2>&1 &\"",
+                        "bash -c '(./derive.sh &)'", "bash -c './derive.sh & wait'",
+                        "setsid -f ./derive.sh", "timeout 60 setsid ./derive.sh",
+                        "/usr/bin/setsid ./derive.sh", "screen -dm ./derive.sh",
+                        "tmux new -d ./derive.sh", "echo ./derive.sh | at now", "daemon -- ./derive.sh",
+                        "systemd-run --user ./derive.sh", "./derive.sh; disown"):
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive()
+                self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # A `&&`, `|&` or a redirection's `&` detaches nothing, at the top
+        # level or inside a word; nor does a `&` inside a word (`R&D`, a URL's
+        # query), nor `nohup` without a `&`.
         for command in ("bash derive.sh && ls", "bash derive.sh |& cat", "bash derive.sh 2>&1",
-                        "bash derive.sh &>/dev/null"):
+                        "bash derive.sh &>/dev/null", "bash -c './derive.sh && ls'",
+                        "bash -c './derive.sh 2>&1'", "bash -c './derive.sh &>/dev/null'",
+                        "bash -c './derive.sh |& cat'", "bash derive.sh 'R&D'",
+                        "curl 'https://x.org/?a=1&b=2'", "nohup ./derive.sh > log 2>&1"):
             with self.subTest(command=command):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -2715,8 +2753,13 @@ class Cli(unittest.TestCase):
                       "supplying `derive` itself, `python -c` building the arguments) is placed by position: a "
                       "shell call that runs a program this does not read (anything but a reader, a directory "
                       "change, a d4d call of a literal subcommand, or `linkml-validate` or `linkml-term-validator` "
-                      "with the options it reads), issued after the first full-record Write and before the "
-                      "derive, with a receipt change after it, makes the status `unknown`", text)   # #3369
+                      "with the options it reads; the inner command of a command or process substitution is "
+                      "never read), that had not returned when the first full-record Write was issued (one in "
+                      "flight with it, backgrounded, or started with `&`, `setsid` and the like counts) and was "
+                      "issued before the derive, with a receipt change after it, makes the status `unknown`",
+                      text)                                             # #3369, #3674, #3675, #3676
+        self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
+        self.assertNotIn("issued after the first full-record Write", text)                        # #3676
         # #3478-#3480: the command-wide backstop and its cost
         self.assertIn("so does a derive call with a redirection among its words (`--full 2>/dev/null F`)", text)
         self.assertIn("Last, a command-wide backstop: a call carrying more `derive` words than these rules gave "

@@ -349,10 +349,12 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     `derive` itself, `python -c` building the arguments) is placed by position: a
     shell call that runs a program this does not read (anything but a reader, a
     directory change, a d4d call of a literal subcommand, or `linkml-validate` or
-    `linkml-term-validator` with the options it reads), issued after the first
-    full-record Write and before the derive, with a receipt change after it, makes the
-    status `unknown`; its cost is a false `unknown` for such a program that derived
-    nothing. A relative `--full`
+    `linkml-term-validator` with the options it reads; the inner command of a command or
+    process substitution is never read), that had not returned when the first full-record Write was
+    issued (one in flight with it, backgrounded, or started with `&`, `setsid` and the
+    like counts) and was issued before the derive, with a receipt change after it,
+    makes the status `unknown`; its cost is a false `unknown` for such a program that
+    derived nothing. A script that detaches a child itself is not seen as open-ended. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,
