@@ -251,7 +251,7 @@ measure is the text it was not written against: the 1,046 distinct
 sentences outside them that name a slot, anywhere in the committed
 evaluation outputs (other rubric20 questions, rubric10 semantic). Of
 those, 769 carry an `_EMPTINESS` word; 277 carry none, and all 277 were
-read by hand. 87 of them state an absence the list misses. 122 of the 277
+read by hand. 89 of them state an absence the list misses. 122 of the 277
 open with one of a list of imperative verbs ("Populate was_derived_from
 …", "Mirror … into parent_datasets") and are counted apart below (#3747).
 The other 155 hold 29 of the misses:
@@ -289,24 +289,26 @@ fields populated (…)"); the other 111 credit a slot or describe one that
 is populated. Every class but the 111 is pinned by a fragment of each
 sentence in the test.
 
-The 122 recommendations hold the other 58 misses. A recommendation's
+The 122 recommendations hold the other 60 misses. A recommendation's
 imperative is not read as the absence: a sentence counts only for what it
 says beside the imperative.
 
 - 1 names the absence as a noun: "Fill the structural gaps: … populate
   discouraged_uses, parent_datasets and compression".
-- 57 are placements: they say where the slot's content is instead ("the
+- 59 are placements: they say where the slot's content is instead ("the
   ancestry that related_datasets currently holds alone", "Populate the
   dedicated slots that currently hold their content elsewhere:
   download_url …", "the negative findings currently buried in notes",
   "the predecessor release DOIs already present in related_datasets", "in
   addition to the related_datasets typed links", "rather than only
-  related_datasets prose", "from the is_new_version_of relations").
-- 6 criticise what a populated slot holds ("keep the alternative reading
-  in source_caveats rather than in the structured slot"; three name
-  was_derived_from, which their ratings quote as holding the study's name
-  in prose).
-- 58 are requests: the imperative names a slot to fill ("Add
+  related_datasets prose", "from the is_new_version_of relations", "the
+  RO-Crate/FAIRscape provenance shipped with the release").
+- 7 criticise what a populated slot holds ("keep the alternative reading
+  in source_caveats rather than in the structured slot", "consider a
+  value nearer the sources' meaning" for a populated
+  confidentiality_level; three name was_derived_from, which their
+  ratings quote as holding the study's name in prose).
+- 55 are requests: the imperative names a slot to fill ("Add
   was_derived_from field for provenance chain", "Mirror the predecessors
   into parent_datasets/was_derived_from …") and nothing beside it says the
   slot is empty or where its content is. They are not counted as misses:
@@ -316,7 +318,7 @@ says beside the imperative.
   as an absence is part of #3544.
 
 Every one of the 122 is pinned by a fragment to its class in the test.
-The 87 are a count, not a recall ratio: which of the 769 carry their word
+The 89 are a count, not a recall ratio: which of the 769 carry their word
 about the slot, rather than a negation about something else, was not
 read.
 

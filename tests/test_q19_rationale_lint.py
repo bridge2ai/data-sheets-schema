@@ -1993,11 +1993,22 @@ _RECOMMENDATIONS_READ = {
         "Promote information already present in prose into its structured field",
         "the October 2025 release DOI that related_datasets already names as the predecessor",
         "expressing the FAIRSCAPE provenance lineage as was_derived_from/parent_datasets links",
+        # Beside the imperative these say the derivation provenance is already
+        # in the RO-Crate/FAIRscape package shipped with the release, a file,
+        # as the FAIRSCAPE sentence above does; their rating says a
+        # machine-readable provenance representation exists in the release
+        # (#3808). "Rather than inferring derivation from filenames", a
+        # request below, says how a reader infers derivation, not where the
+        # slot's content is held.
+        "provenance already packaged with the release",
+        "provenance shipped with the release",
     ],
     # A criticism of what a populated slot holds. was_derived_from holds the
     # study's name in prose in the two AI_READI ratings the first three come
-    # from, as their own evidence quotes; the other three are about a
-    # populated method or institution.
+    # from, as their own evidence quotes; the other four are about a
+    # populated method, institution or confidentiality level. The last asks
+    # for a different value of confidentiality_level, which its rating says
+    # is 'restricted' where the sources give 'HL7:2N' (#3808).
     "criticism": [
         "reference its per-sub-crate derivation edges from was_derived_from",
         "set was_derived_from to the same identifier, keeping the study-name prose in notes",
@@ -2005,6 +2016,7 @@ _RECOMMENDATIONS_READ = {
         "keep the alternative reading in source_caveats rather than in the structured slot",
         "keeping the divergent platform and RO-Crate values in the details prose",
         "rather than asserting a method in the structured slot that the platform metadata contradicts",
+        "Keep the caveat but consider a value nearer",
     ],
     # A request: the imperative names a slot to fill and nothing beside it
     # says the slot is empty or where its content is. Not counted as a miss:
@@ -2036,7 +2048,6 @@ _RECOMMENDATIONS_READ = {
         "Express typed related_datasets entries for",
         "Include provenance chain using was_derived_from",
         "Include was_derived_from to document provenance",
-        "Keep the caveat but consider a value nearer",
         "Link to related datasets: parent_datasets",
         "Mirror doi:10.60775/fairhub.1 and doi:10.60775/fairhub.2",
         "Mirror the fairhub.1/fairhub.2 predecessors into parent_datasets/was_derived_from and "
@@ -2065,8 +2076,6 @@ _RECOMMENDATIONS_READ = {
         "Populate was_derived_from to link each released",
         "Populate was_derived_from to type the derivation",
         "Populate was_derived_from with the Synapse raw-audio entity and bind",
-        "provenance already packaged with the release",
-        "provenance shipped with the release",
         "Record the publisher as a URI",
         "Set publisher to the organization name FAIRhub",
         "State character encoding (presumably UTF-8)",
@@ -2091,9 +2100,9 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     above, and the two of `_HAND_READ_NOT_CREDIT`), the other classes of
     `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 111 that are
     credit (#3669); and 122 a leading-verb regex sorts as recommendations,
-    read by hand too (#3747): 58 more misses (a named absence and 57
-    placements), six criticisms and 58 requests, each pinned by a fragment
-    in `_RECOMMENDATIONS_READ`. 87 of the 277 state an absence the list
+    read by hand too (#3747): 60 more misses (a named absence and 59
+    placements), seven criticisms and 55 requests, each pinned by a fragment
+    in `_RECOMMENDATIONS_READ`. 89 of the 277 state an absence the list
     misses. The list is main's; this measures it and changes nothing
     (#3544)."""
     from data_sheets_schema import q19_rationale_lint as lint
@@ -2150,9 +2159,9 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             assert hits[0] not in sorted_, (kind, fragment)
             sorted_[hits[0]] = kind
     assert set(sorted_) == set(recommendations)
-    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 57, "criticism": 6,
-                                         "request": 58}
-    # The 58 misses are misses: in a Q19 note the gate reads none of them
+    assert Counter(sorted_.values()) == {"named_absence": 1, "placement": 59, "criticism": 7,
+                                         "request": 55}
+    # The 60 misses are misses: in a Q19 note the gate reads none of them
     # as an empty-slot reason, as on main.
     for sentence, kind in sorted_.items():
         if kind in ("named_absence", "placement"):
