@@ -1,0 +1,256 @@
+# Registered lexicon (#2919, #3132, #3520). These bytes are pinned by sha256
+# in registry.yaml beside this file, comments included. Do not edit this
+# file: a change is absence_self_narration_v4.yaml plus a new registry entry,
+# so a count made under v3 can still be reproduced from v3's bytes.
+#
+# What changed from v2. One regex, its examples and its counterexamples:
+# rsn.source-ranking (#3520); see the comment on that pattern. Every other
+# pattern, the flags, the scope and the class descriptions are v2's, and
+# tests/test_lexicons.py holds v3 to that. Every v3 match of the pattern
+# ends at a term v2 matched, so v3 moves the counts of record_self_narration
+# only, and only down; a match with its verb first spans more words than v2's.
+#
+# What it measures. Two kinds of statement in a record's free text that no
+# passage in the bundle can support:
+#   bundle_wide_absence    an absence asserted of the bundle, the sources or
+#                          the documentation as a whole ("no source states X",
+#                          "not stated in the bundle") — found by searching,
+#                          not stated by a passage. An absence a passage
+#                          states ("the release notes state that no erratum
+#                          has been issued") is not in this class.
+#   record_self_narration  a statement about how the record itself was built:
+#                          which slot holds what, what was left empty or
+#                          omitted, what was merged or kept apart, which
+#                          source was preferred.
+#
+# What it is not. A match is a regular-expression hit on whitespace-collapsed
+# text, not a reviewed finding. The patterns miss phrasings they do not list
+# and match some sentences that are not defects (a quoted source sentence, a
+# dataset fact that happens to use the phrase). The lint is never gating.
+#
+# Patterns are compiled with the flags below. Every pattern must match each of
+# its `examples` and none of its `counterexamples`; tests/test_lexicons.py
+# checks both for every registered lexicon. No study, dataset, consortium or
+# person name belongs in this file.
+name: absence_self_narration
+version: 3
+instrument: absence_self_narration lexicon v3 (#3520)
+counterexamples_required: true
+flags: [IGNORECASE]
+scope:
+  free_text_keys: [description, notes, source_caveats]
+  free_text_key_suffixes: [_details]
+  excluded_keys: [name, id, keywords]
+classes:
+  bundle_wide_absence: >-
+    An absence asserted of the bundle, the sources or the documentation as a
+    whole, which no passage can state.
+  record_self_narration: >-
+    A statement about how the record itself was built: slot placement,
+    omissions, merges, and source preference.
+patterns:
+  - id: bwa.no-source
+    class: bundle_wide_absence
+    regex: |-
+      \bno (?:other |single |one )?(?:source document|input document|bundle document|source|document|passage)s?\b(?! (?:code|data|files?)\b)
+    examples:
+      - No source in the bundle states a license for the data themselves.
+      - the author roster, whose length no source states as a figure
+    counterexamples:
+      - No source code accompanies the release.
+  - id: bwa.not-by-any-source
+    class: bundle_wide_absence
+    regex: |-
+      (?<!["'“‘])\b(?:not|nor|cannot|no|none|nothing|neither)\b(?!["'”’])[^.;:]{0,80}?\b(?:by|in|from|within|across) any (?:of the )?(?:\w+ )?(?:sources?|documents?|passages?)\b
+    examples:
+      - Exact byte counts are not stated by any source.
+      - No start or end date for collection is given in any source.
+    counterexamples:
+      - The release notes state that no erratum has been issued.
+  - id: bwa.none-of-the-sources
+    class: bundle_wide_absence
+    regex: |-
+      \bnone of the (?:\w+ )?(?:sources|documents|passages|materials)\b
+    examples:
+      - None of the sources names a data access committee.
+    counterexamples:
+      # `none of the` over something other than the sources: a dataset fact.
+      - None of the participants withdrew consent.
+  - id: bwa.sources-do-not
+    class: bundle_wide_absence
+    regex: |-
+      \b(?:the|these|its|all|available|provided|bundled|captured|input|declared) (?:\w+ )?(?:sources|source documents|documents|documentation|materials) (?:themselves |itself )?(?:do|does|did) not (?!(?:agree|match|align|coincide|differ|conflict|contradict)\b)\w+
+    examples:
+      - The sources do not state a retention period.
+      - the captured sources do not state whether these are the same deposit
+    counterexamples:
+      - The sources do not agree on the start date.
+  - id: bwa.sources-give-no
+    class: bundle_wide_absence
+    regex: |-
+      \b(?:the|these|its|all|available|provided|bundled|captured|input|declared|source) (?:\w+ )?(?:sources|source documents|documents|documentation|bundle) (?:itself |themselves )?(?:gives?|names?|states?|supplies|supply|provides?|contains?|includes?|lists?|reports?|mentions?|specif(?:y|ies)|identif(?:y|ies)|carries|carry|records?|offers?|has|have) no\b
+    examples:
+      - The bundle gives no protocol number for the review.
+      - The sources name no annotation platform.
+    counterexamples:
+      - The healthsheet documents no adverse events.
+  - id: bwa.bundle-does-not
+    class: bundle_wide_absence
+    regex: |-
+      \b(?:the|this) (?:declared |input |source )?bundle (?:itself )?(?:does|did) not\b
+    examples:
+      - The bundle does not state the calendar coverage period.
+    counterexamples:
+      # A distribution bundle, not the declared input bundle: a dataset fact.
+      - The download bundle does not include raw waveforms.
+  - id: bwa.not-in-bundle
+    class: bundle_wide_absence
+    regex: |-
+      (?<!["'“‘])\b(?:not|nor|cannot|no|none|nothing|neither)\b(?!["'”’])[^.;:]{0,80}?\b(?:anywhere )?(?:in|from|within|across|by) (?:the|this) (?:declared |input |source )?bundle\b
+    examples:
+      - Units are not stated in the bundle.
+      - No fees are mentioned anywhere in the bundle.
+    counterexamples:
+      - 'The release page reads "Regulated: No" for every release in the bundle.'
+  - id: bwa.not-in-the-sources
+    class: bundle_wide_absence
+    regex: |-
+      (?<!["'“‘])\b(?:not|nor|cannot|no|none|nothing|neither)\b(?!["'”’])[^.;:]{0,80}?\b(?:anywhere )?(?:in|from|within|across|by) the (?:\w+ )?(?:sources|source documents|documents|documentation|materials)\b
+    examples:
+      - Residual re-identification risk is not quantified in the sources.
+      - No fixed retention period is stated in the available sources.
+    counterexamples:
+      - The release notes state that no erratum has been issued.
+  - id: bwa.bundle-silent
+    class: bundle_wide_absence
+    regex: |-
+      \b(?:the|this) (?:declared |input )?bundle is silent\b|\b(?:absent|missing) from (?:the|this) (?:declared |input )?bundle\b
+    examples:
+      - The bundle is silent on retention.
+      - A data dictionary is absent from the bundle.
+    counterexamples:
+      # A distribution bundle, not the declared input bundle: a dataset fact.
+      - Two files are missing from the download bundle.
+  - id: rsn.left-empty
+    class: record_self_narration
+    regex: |-
+      \b(?:is|are|was|were|remains?|stays?|been|being) left (?:empty|unset|unpopulated|unfilled|null|unasserted)\b
+    examples:
+      - "`keywords` is left empty."
+      - so the distribution slot is left unpopulated
+    counterexamples:
+      - Questions that do not apply are left blank by respondents.
+  - id: rsn.slot-not-populated
+    class: record_self_narration
+    regex: |-
+      (?:`[^`]{1,80}`|\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+(?:\.[a-z0-9_]+)*|\bslots?) (?:is|are|was|were|has been|have been) (?:therefore |thus |also |likewise |accordingly )?(?:omitted|not populated|not asserted|not filled|unpopulated|not set)\b
+    examples:
+      - so those slots are omitted
+      - so total_bytes is omitted rather than approximated
+      - "`publisher` is omitted: the bundle names only the repository."
+    counterexamples:
+      - Participants with incomplete visits are omitted from the analysis set.
+  - id: rsn.omitted-here
+    class: record_self_narration
+    regex: |-
+      \bomitted (?:here|from this record|for the same reason|at (?:the )?dataset level)\b
+    examples:
+      - they are not collaborating institutions and are omitted here.
+    counterexamples:
+      # Omitted from the release, not from this record: a dataset fact.
+      - Sessions with device errors were omitted from the release.
+  - id: rsn.recorded-here
+    class: record_self_narration
+    regex: |-
+      \b(?:recorded|used|asserted|given|kept|carried|entered|captured|reported|transcribed|retained|placed|treated|stated|noted|adopted|preferred|followed|reproduced) here\b
+    examples:
+      - which is the count recorded here
+      - the dates given here are the award period
+    counterexamples:
+      - The data were collected here and at two partner sites.
+  - id: rsn.this-record
+    class: record_self_narration
+    regex: |-
+      \bthis record(?:'s|’s)?\b
+    examples:
+      - Identifier coined for this record.
+    counterexamples:
+      - Each row of the electronic health record carries a timestamp.
+  - id: rsn.slot-word
+    class: record_self_narration
+    regex: |-
+      (?<!time )(?<!appointment )\bslots?\b
+    examples:
+      - The Creator class provides no slot for this role.
+    counterexamples:
+      - Participants chose an appointment slot online.
+  - id: rsn.rather-than
+    class: record_self_narration
+    regex: |-
+      \brather than (?:being )?(?:merged|reconciled|approximated|populated|asserted|supplied|silently)\b
+    examples:
+      - the two counts are retained separately rather than merged
+      - Both statements are recorded rather than reconciled.
+    counterexamples:
+      - Values were measured directly rather than derived.
+  - id: rsn.recorded-under-slot
+    class: record_self_narration
+    regex: |-
+      \b(?:recorded|carried|placed|expressed|kept|captured|represented|entered|stated|given|noted|attributed) (?:here )?(?:under|in|at|into) (?:the )?(?:`[a-z][a-z0-9_.\[\]]*`|[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b)
+    examples:
+      - The companion release is recorded under related_datasets.
+      - the byte-valued figure is recorded in `total_bytes`
+    # The regex cannot tell a schema slot from any other snake_case word:
+    # after one of its verbs, every underscored or backticked token counts as
+    # a slot, so "Consent was given in the consent_form." matches (#3213).
+    # Whether it should is #3224, and v2 does not change what it matches. v1's
+    # counterexample ("The authors are listed in the kickoff_webinar.") looked
+    # like a guard on that and missed only because `listed` is not one of the
+    # verbs. The two below each name what they guard.
+    counterexamples:
+      # The verb list: a real slot after a verb the pattern does not list.
+      - The authors are listed in related_datasets.
+      # The slot shape: one of the verbs, then a plain word.
+      - The approval was recorded in the minutes.
+  - id: rsn.source-ranking
+    class: record_self_narration
+    # v1 and v2 matched the ranking vocabulary wherever it appeared, so a
+    # source conflict worded with it ("two tier-1 sources disagree") counted
+    # as record self-narration although it says nothing about how the record
+    # was built: all three borderline phrases in the v1 precision sample were
+    # of that kind (#3520). v3 keeps two kinds of term.
+    #   - The names of the declared ranking itself (source manifest, input
+    #     manifest, source ranking, declared ranking) match wherever they
+    #     appear, as in v2: they name the pipeline's input, not a source's
+    #     content. Whether they should is not what #3520 asked.
+    #   - A ranking term applied to a source (tier-N source, higher-ranked,
+    #     ranks higher, ...) matches only when a preference or resolution
+    #     verb (preferred, used, followed, recorded, stated, decide,
+    #     settle, separate, ...) lies within 80 characters of it in the same
+    #     sentence, before or after. A sentence ends at `;` or at a `.`
+    #     followed by whitespace, so the `.` inside `v3.1.0` does not end it.
+    # With the verb after the term, the match is the term alone; with the
+    # verb before it, the match runs from the verb to the term (Python's re
+    # has no variable-width lookbehind), so a phrase's text can be longer
+    # than v2's for the same words.
+    regex: |-
+      \b(?:source manifest|input manifest|source ranking|declared (?:source )?ranking)\b|\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b(?:[^.;]|\.(?!\s)){0,80}?\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b|\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b(?=(?:[^.;]|\.(?!\s)){0,80}?\b(?:prefer(?:s|red|ring)?|use[sd]?|using|follow(?:s|ed|ing)?|adopt(?:s|ed)?|cho(?:ose|sen|se)|select(?:s|ed)?|decide[sd]?|settle[sd]?|resolv(?:e|es|ed|ing)|separate[sd]?|break(?:s)? the tie|stated|given|recorded|noted|represented|reflected|carr(?:y|ies|ied)|retained|kept|taken|carried|asserted|emitted|govern(?:s|ed)?)\b)
+    examples:
+      - The higher-ranked source is preferred.
+      - the two tier-2 sources cannot be separated by rank
+      # The verb before the term, across a `.` inside a version number.
+      - Counts are taken from the v3.1.0 record, the highest-ranked source.
+      # A name of the declared ranking needs no verb.
+      - The source manifest records the release date.
+    counterexamples:
+      # A manifest and an access tier of the dataset, not of the sources.
+      - The file manifest lists every released file.
+      - Tier 2 access requires a signed data use agreement.
+      # The v1 precision sample's three borderline phrases (#3520): source
+      # conflicts worded with the ranking vocabulary, with no preference or
+      # resolution verb in the sentence.
+      - Within the same tier-1 source, the healthsheet answers "No" to whether the dataset identifies demographic sub-populations.
+      - 'Publisher: two tier-1 sources disagree.'
+      - The project documentation, a higher-ranked source, gives a target of 10,000 voices.
+      # The verb is in the next sentence.
+      - Two tier-1 sources disagree. Both values are recorded above.

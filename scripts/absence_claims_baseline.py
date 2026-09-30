@@ -65,8 +65,9 @@ OUT_MD = ROOT / "notes" / "absence_claims_baseline.md"
 PINS = ROOT / "notes" / "absence_claims_baseline_records.yaml"
 RECORD_GLOB = "*_d4d.yaml"
 SAMPLE_SEED = 2919
-#: The registered version of the lexicon the note counts under (#3132).
-LEXICON_VERSION = 1
+#: The registered version of the lexicon the note counts under (#3132): v3
+#: since #3520, whose precision sample is judged in its own file below.
+LEXICON_VERSION = 3
 #: A judgement's verdicts, in the order a precision entry's counts give them.
 VERDICTS = ("in_class", "borderline", "not_in_class")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -90,6 +91,8 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 #: (#3045), not on anything recorded that day. `judgements` names the file
 #: of per-phrase verdicts over that draw (#3197); `read_judgements` refuses an
 #: entry whose file does not name this draw or whose tally is not `classes`.
+#: The v3 entry (#3520) is over the same record set and seed; its verdicts
+#: were written down per phrase when it was checked.
 PRECISION: dict[str, dict[str, Any]] = {
     "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e": {     # v1
         "checked": "2026-09-28",
@@ -100,6 +103,16 @@ PRECISION: dict[str, dict[str, Any]] = {
         "note": "The three borderline phrases are source conflicts worded with the ranking "
                 "vocabulary (\"two tier-1 sources disagree\").",
         "judgements": "notes/absence_precision_judgements_99c92000.yaml",
+    },
+    "f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6": {     # v3 (#3520)
+        "checked": "2026-09-30",
+        "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",   # 303 records
+        "sample": 50, "seed": SAMPLE_SEED,
+        "draw_sha256": "bd0c63eda8bc7d9700fedd2695a7fab4bb472810302b397274ccb2fc94b4b8a8",
+        "classes": {"bundle_wide_absence": (50, 0, 0), "record_self_narration": (50, 0, 0)},
+        "note": "v3 changes no bundle_wide_absence pattern, and that class's draw is the v1 draw phrase for "
+                "phrase; its verdicts are carried over from the v1 judgements, not re-read.",
+        "judgements": "notes/absence_precision_judgements_bd0c63ed.yaml",
     },
 }
 
@@ -358,11 +371,23 @@ def render_markdown(collected: dict[str, Any]) -> str:
             lines += ["", checked["note"]]
         lines += [
             "",
-            f"Each phrase's verdict and reason are in `{checked['judgements']}`, recorded",
-            f"{judged['recorded']} by reading this draw again. They are not the {checked['checked']} judgements, which",
-            "were not written down per phrase; the table is rendered only while their tally equals it (#3197).",
+            *_judgements_sentence(checked, judged),
         ]
     return "\n".join(lines) + "\n"
+
+
+def _judgements_sentence(checked: dict[str, Any], judged: dict[str, Any]) -> list[str]:
+    """Where the per-phrase verdicts are and when they were written down: on
+    the day the sample was checked (v3, #3520), or on a later reading of the
+    same draw (v1, whose verdicts were not written down per phrase, #3197)."""
+    lines = [f"Each phrase's verdict and reason are in `{checked['judgements']}`, recorded"]
+    if judged["recorded"] == checked["checked"]:
+        return lines + [f"{judged['recorded']} when the sample was checked; the table is rendered only while their "
+                        "tally equals it (#3197)."]
+    return lines + [
+        f"{judged['recorded']} by reading this draw again. They are not the {checked['checked']} judgements, which",
+        "were not written down per phrase; the table is rendered only while their tally equals it (#3197).",
+    ]
 
 
 def _later_versions(lexicon: lx.Lexicon) -> list[str]:
