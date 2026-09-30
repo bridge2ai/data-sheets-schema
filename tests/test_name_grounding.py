@@ -710,6 +710,48 @@ class UnspacedScriptTest(unittest.TestCase):
                 self.assertEqual(name_tokens(name), [name])
                 self.assertEqual(cls(name, name, bundle), "grounded")
 
+    def test_the_vertical_iteration_marks_join_their_run(self):
+        """#3751: `〻` and the vertical kana repeat marks `〱`–`〵` are
+        letters (Lm) outside the ideograph and kana blocks. Without their
+        ranges each is a run of its own, `佐〻木` splits into three
+        one-letter pieces that are not checked, and the name disappears
+        from the check. Each is one token, grounds where the bundle writes
+        it, and is `absent` against a bundle that does not, empty or not."""
+        for mark in "〻〱〲〳〴〵":
+            self.assertEqual(unicodedata.category(mark), "Lm")
+            name = "佐" + mark + "木"
+            with self.subTest(mark=mark):
+                self.assertEqual(name_tokens(name), [name])
+                self.assertEqual(cls(name, name, "担当は" + name + "さんです"), "grounded")
+                self.assertEqual(cls(name, name, "担当は山田さんです"), "absent")
+                out = check_record({"creators": [{"name": name}]}, "", SLOTS)
+                self.assertEqual(out["counts"]["absent"], 1)
+                self.assertEqual([f["token"] for f in out["findings"]], [name])
+
+    def test_a_substring_does_not_end_inside_a_combining_sequence(self):
+        """#3750: a substring of the bundle's run that ends before a
+        combining mark takes the letter without the mark the bundle writes
+        on it. `เอ` against `เอ๋` (a Thai tone mark) differs by a
+        diacritic, as `เอ๋` against `เอ` does: the two directions agree.
+        A mark folding keeps (Thai `ั`, Myanmar `ာ`, a spacing mark) is not
+        a diacritic, so there both directions are `absent`. Controls: the
+        same name the bundle writes as it is, followed by a letter, grounds."""
+        for name, bundle, want in (
+                ("เอ", "คุณเอ๋จากโรงเรียน", "diacritic_dropped"),
+                ("เอ๋", "คุณเอจากโรงเรียน", "diacritic_dropped"),
+                ("เอ", "เอ๋", "diacritic_dropped"),
+                ("เอ๋", "เอ", "diacritic_dropped"),
+                ("สมก", "คุณสมกันจาก", "absent"),
+                ("สมกั", "คุณสมกจาก", "absent"),
+                ("ကမ", "ဦးကမာသည်", "absent"),
+                ("ကမာ", "ဦးကမသည်", "absent"),
+                ("เอ๋", "คุณเอ๋จากโรงเรียน", "grounded"),
+                ("เอ", "คุณเอจากโรงเรียน", "grounded"),
+                ("ကမာ", "ဦးကမာသည်", "grounded")):
+            with self.subTest(name=name, bundle=bundle):
+                self.assertEqual(name_tokens(name), [name])
+                self.assertEqual(cls(name, name, bundle), want)
+
     def test_a_character_nfkc_composes_to_such_letters_joins_their_run(self):
         """#3721: a Kangxi radical (U+2F2D `⼭` is `山` under NFKC) is a
         symbol by category, so cutting runs before NFKC dropped it and a

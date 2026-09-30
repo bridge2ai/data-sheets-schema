@@ -39,7 +39,10 @@ without spaces between words, so a run of their letters is a phrase, not a
 word (#3401). Such a run is split from letters of any other script beside
 it (`Tim王小明` is `Tim` and `王小明`), and it is in the bundle when the
 bundle writes it inside one of its own runs in those scripts: `王小明`
-against `本研究由王小明教授负责`. No segmenter is used, so this is
+against `本研究由王小明教授负责`, but not where the bundle writes a
+combining mark on its last letter: `เอ` against `เอ๋` differs by a Thai
+tone mark and is `diacritic_dropped`, in either direction (#3750). No
+segmenter is used, so this is
 substring membership, the fallback the issue allows, and it errs toward
 grounding: a name that is only part of another word grounds (`张三` in
 `张三丰`), and a one-character token (`王` of `王 小明`) is not checked, as a
@@ -285,7 +288,10 @@ import yaml
 #: corpus, none (286 provenance records, the same findings, classes and
 #: v2 readings as v1.1). It also reads a character NFKC composes to such
 #: letters (a Kangxi radical) as one of them (#3721): no bundle on disk
-#: or record carries one, and the corpus reading is the same.
+#: or record carries one, and the corpus reading is the same. A substring
+#: no longer ends inside a combining sequence (#3750), and the vertical
+#: iteration marks are letters of these scripts (#3751): the corpus
+#: reading is again the same.
 INSTRUMENT = "name_grounding v1.2 (#2918, #3026, #3126, #3401)"
 
 #: The proximity reading beside it (#2978): report-only, never a finding.
@@ -328,14 +334,19 @@ class Token(NamedTuple):
 
 
 #: Scripts written without spaces between words (#3401), as code point
-#: ranges: CJK ideographs (with the iteration marks `々` and `〆`), kana
+#: ranges: CJK ideographs (with `々` and `〆`, and the iteration marks of
+#: vertical text, the kana repeat marks `〱`–`〵` and `〻`, #3751), kana
 #: (half-width included), Thai, Lao, Myanmar and Khmer. Hangul is written
-#: with spaces and is not here.
+#: with spaces and is not here. The marks are letters (Lm) outside these
+#: blocks: left out, one would be a run of its own and cut the name it
+#: sits in into one-letter pieces that are not checked (`佐〻木`).
 _UNSPACED_RANGES = (
     (0x0E00, 0x0EFF),     # Thai, Lao
     (0x1000, 0x109F),     # Myanmar
     (0x1780, 0x17FF),     # Khmer
     (0x3005, 0x3006),     # 々 〆
+    (0x3031, 0x3035),     # 〱 〲 〳 〴 〵 vertical kana repeat marks (#3751)
+    (0x303B, 0x303B),     # 〻 vertical ideographic iteration mark (#3751)
     (0x3040, 0x30FF),     # Hiragana, Katakana
     (0x31F0, 0x31FF),     # Katakana phonetic extensions
     (0x3400, 0x4DBF),     # CJK extension A
@@ -412,6 +423,23 @@ def _runs(text: str) -> list[Token]:
     if start is not None:
         out.append(Token(text[start:], start, len(text)))
     return out
+
+
+def _contains_whole(haystack: str, key: str) -> bool:
+    """`key` occurs in `haystack` where the haystack's next character is
+    not a combining mark (#3750). A substring that ends before a mark would
+    take the letter without the mark the bundle writes on it: `เอ` against
+    `เอ๋` (a Thai tone mark) is a different spelling, which the folded
+    comparison then reads as `diacritic_dropped`, as it reads `เอ๋` against
+    `เอ`. A key starts with a letter, since a run does, so the start needs
+    no test."""
+    at = haystack.find(key) if key else -1
+    while at >= 0:
+        end = at + len(key)
+        if end == len(haystack) or unicodedata.category(haystack[end])[0] != "M":
+            return True
+        at = haystack.find(key, at + 1)
+    return False
 
 
 def is_unspaced(token: str) -> bool:
@@ -518,14 +546,17 @@ class BundleIndex:
 
     def has(self, token: str) -> bool:
         """`token` is in the bundle: a token of it, or, for a run in a
-        script written without spaces, part of one of its runs (#3401)."""
+        script written without spaces, part of one of its runs (#3401) that
+        does not end inside a combining sequence (#3750)."""
         key = exact_key(token)
-        return key in self.exact or (is_unspaced(token) and key in self._unspaced_exact)
+        return key in self.exact or (is_unspaced(token)
+                                     and _contains_whole(self._unspaced_exact, key))
 
     def has_folded(self, token: str) -> bool:
         """`has`, compared on the folded form (`diacritic_dropped`)."""
         key = folded_key(token)
-        return key in self.folded or (is_unspaced(token) and key in self._unspaced_folded)
+        return key in self.folded or (is_unspaced(token)
+                                      and _contains_whole(self._unspaced_folded, key))
 
     def _gap(self, i: int, j: int) -> str:
         return self.text[self.tokens[i].end:self.tokens[j].start]
