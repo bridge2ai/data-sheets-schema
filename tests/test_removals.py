@@ -200,12 +200,13 @@ class Containment(unittest.TestCase):
         self.assertIn("file_collections[0].file_count", [r["path"] for r in b["unfounded_paths"]])
 
     def test_a_long_number_or_a_date_or_a_word_still_flattens(self):
-        """The numbers the corpus flattens for real are long: a participant
-        count (v4 VOICE rep1 32522) and a date (CM4AI v4 collection
+        """The numbers the corpus flattens for real are long: a count of
+        recording-feature sets (v4 VOICE rep1 `instances[1].counts` 29278, not
+        a participant count; #3396) and a date (CM4AI v4 collection
         timeframes)."""
-        before = _record(instances=[{"name": "Recordings", "counts": 32522}],
+        before = _record(instances=[{"name": "Recording features", "counts": 29278}],
                          collection_timeframes=[{"start_date": "2022-09-01", "notes": "enrolment"}])
-        after = _record(instances=[{"name": "Recordings", "notes": "32522 recordings"}],
+        after = _record(instances=[{"name": "Recording features", "notes": "29278 feature sets"}],
                         collection_timeframes=[{"notes": "enrolment from 2022-09-01"}])
         b = rm.classify(before, after, _audit())
         self.assertEqual({r["path"] for r in b["flattened_paths"]},
@@ -1010,6 +1011,24 @@ def test_the_v4_ai_readi_rep1_identifiers_that_survive_as_curies_are_flattened(m
     assert {"creators[0].id", "creators[0].principal_investigator.id", "data_governance.committee_contact.id",
             "license_and_use_terms.contact_person.id"} <= flat
     assert (b["unfounded"], b["flattened"]) == (29, 32)
+
+
+@pytest.mark.corpus
+def test_the_one_five_digit_count_the_corpus_flattens_is_v4_voice_rep1_recording_features(monkeypatch):
+    """#3396: the count MIN_NUMERIC_DIGITS is justified by. It is 29278 on the
+    recording-features instance of v4 VOICE rep1 — a count of derived feature
+    sets, not participants (the participant instance beside it holds 833) —
+    and it still flattens under the 5-digit guard."""
+    monkeypatch.chdir(CONCAT.parents[1])
+    label = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+    b = _replay(label, "VOICE", method="claudecode_agent")
+    assert "instances[1].counts" in {r["path"] for r in b["flattened_paths"]}
+    snapshot = yaml.safe_load((CONCAT / "claudecode_agent_core" / label / "intermediate" / "VOICE_full.yaml")
+                              .read_text())
+    entry = snapshot["instances"][1]
+    assert entry["counts"] == 29278
+    assert entry["id"].endswith("/recording-features")
+    assert len(str(entry["counts"])) >= rm.MIN_NUMERIC_DIGITS
 
 
 @pytest.mark.corpus

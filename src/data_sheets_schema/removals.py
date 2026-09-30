@@ -143,7 +143,10 @@ PATH_LIMIT = 50
 #: containment only with at least this many digits (#3243). A count, an index
 #: or a year recurs in sizes, versions and dates of unrelated text — the 22c
 #: CM4AI `file_count` 3 in "3.8 GB" — while the numbers the corpus flattens
-#: for real are longer: a date (8 digits), a participant count (32522).
+#: for real are longer: a date (8 digits; CM4AI v4 and v7 collection
+#: timeframes, a v3 AI_READI release date) and one 5-digit count, v4 VOICE
+#: rep1 `instances[1].counts` 29278 — the recording-features instance, a
+#: count of derived feature sets, not of participants (#3396).
 MIN_NUMERIC_DIGITS = 5
 
 #: The grammar `receipts.remap_path` reads. A key outside it cannot be joined.
