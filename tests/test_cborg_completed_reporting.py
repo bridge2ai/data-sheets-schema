@@ -1,7 +1,8 @@
 """Public reporting must retain qualifications without rewriting measurements."""
 import copy
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 import errno
+import fcntl
 import hashlib
 import json
 import os
@@ -19,6 +20,31 @@ import reference_rescore_cborg_deadline as deadline
 REAL_ACCOUNTED_AUDIT = deadline.accounted_audit
 
 PLAN = ROOT / f"notes/reference_rescore_{adapter.DATE}"
+
+
+@pytest.fixture(autouse=True)
+def condition_directory_gains_nothing():
+    """No test here may leave a file in the real condition directory (#3712).
+
+    Ignored files count: the audit once left an empty ``.canary.lock`` there.
+    Bytecode caches written by importing its execution tools are excluded.
+    """
+    def listing():
+        return {p for p in PLAN.rglob("*") if "__pycache__" not in p.parts}
+    before = listing()
+    yield
+    assert sorted(map(str, listing() - before)) == []
+
+
+@contextmanager
+def exclusive_lock(path):
+    """The runner's canary lock, taken on a file outside the checkout."""
+    with path.open("a") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        try:
+            yield
+        finally:
+            fcntl.flock(handle, fcntl.LOCK_UN)
 
 
 @pytest.fixture
@@ -332,8 +358,19 @@ def test_archived_runner_does_not_import_live_pin_or_report_exports(monkeypatch,
     assert adapter.main(["report"]) == 0
 
 
-def test_completed_audit_does_not_write_its_original_evidence(monkeypatch):
+def test_completed_audit_does_not_write_its_original_evidence(monkeypatch, tmp_path):
     from reference_rescore_cborg_evidence import EvidenceRoot
+    load = batch.load_registered
+    lock = tmp_path / ".canary.lock"
+
+    def runner_locking_outside_the_checkout():
+        # The audit revalidates the canary under its lock; the runner's own
+        # lock lives in the real condition directory (#3712).
+        r, manifest, registration = load()
+        r.canary_lock = lambda: exclusive_lock(lock)
+        return r, manifest, registration
+
+    monkeypatch.setattr(batch, "load_registered", runner_locking_outside_the_checkout)
     evidence = EvidenceRoot(ROOT)
     live = {ROOT / relative for relative in evidence.paths}
     read = Path.read_bytes
@@ -345,6 +382,7 @@ def test_completed_audit_does_not_write_its_original_evidence(monkeypatch):
     monkeypatch.setattr(Path, "write_bytes", refuse_write)
     monkeypatch.setattr(Path, "write_text", refuse_write)
     assert adapter.main(["audit"]) == 0
+    assert lock.exists()
     # Re-reading the registered condition must still work after audit.
     batch.load_registered()
 
