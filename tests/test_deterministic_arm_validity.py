@@ -175,6 +175,21 @@ class TestTheCommittedArms(unittest.TestCase):
                 else:
                     self.assertFalse(any("in /doi" in f for f in r["findings"]), r["findings"])
 
+    def test_an_unfiltered_check_reports_every_committed_record(self):
+        """The first version passed `label` and `project` after the report
+        loops had rebound them to a generated run's, so on the real corpus
+        the section asked for a label no deterministic arm has and printed
+        nothing. Only a corpus with generated rows exercises that."""
+        import os
+        committed = deterministic_validity(ROOT / CONCAT_DIR,
+                                           validate=lambda path: ([], None))
+        cwd = Path.cwd()
+        os.chdir(ROOT)
+        self.addCleanup(os.chdir, cwd)
+        result = CliRunner().invoke(cli, ["runs", "check"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertIn(f"{len(committed)} deterministic-arm record(s) judged", result.output)
+
 
 if __name__ == "__main__":
     unittest.main()
