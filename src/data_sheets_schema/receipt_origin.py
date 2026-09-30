@@ -39,7 +39,10 @@ and on the receipt a successful Edit or MultiEdit, which the agentic
 runtime's playbook permits and which is replayed exactly on the receipt as
 it last stood (#3047): each `old_string` must occur once, or at least once
 under `replace_all`, and a replay that cannot be exact is a reason -- one
-with no earlier state to apply to, a string that does not occur or occurs
+with no earlier state to apply to (except an edit whose first `old_string`
+is empty, which the runtime accepts only on an absent or empty file and so
+replays on the empty text, creating the receipt; an empty `old_string` on
+a receipt already non-empty as replayed is a reason), a string that does not occur or occurs
 more than once without `replace_all`, a deletion the runtime may extend to
 the following newline, a replacement carrying a `$` pattern a JavaScript
 replace may expand, or a result whose metadata says the runtime applied
@@ -1488,8 +1491,12 @@ def _touches(target: _Target, spelled: str, cwd: str | None) -> bool:
 
 def _replace(text: str, old: Any, new: Any, replace_all: Any) -> tuple[str | None, str | None]:
     """One edit applied exactly, or (None, why) when it cannot be (#3047)."""
-    if not isinstance(old, str) or not old or not isinstance(new, str):
-        return None, "an `old_string` that is not a non-empty string, or a `new_string` that is not a string"
+    if not isinstance(old, str) or not isinstance(new, str):
+        return None, "an `old_string` that is not a string, or a `new_string` that is not a string"
+    if old == "" and text != "":
+        # The runtime accepts an empty `old_string` only on an absent or
+        # empty file, where it creates the file (#3588).
+        return None, "an empty `old_string` on a receipt that is not empty as replayed"
     if replace_all not in (None, True, False):
         return None, "a `replace_all` that is not a boolean"
     found = text.count(old)
@@ -1532,6 +1539,17 @@ def _replay(name: str, inputs: dict, metadata: Any, prior: str) -> tuple[str | N
         if text is None:
             return None, (why if name == "Edit" else f"edit {at}: {why}")
     return text, None
+
+
+def _creates(name: str, inputs: dict) -> bool:
+    """An Edit, or a MultiEdit whose first edit, has an empty `old_string`:
+    the runtime's way to create a file with an edit tool (#3588)."""
+    if name == "Edit":
+        first = inputs
+    else:
+        edits = inputs.get("edits")
+        first = edits[0] if isinstance(edits, list) and edits else None
+    return isinstance(first, dict) and first.get("old_string") == ""
 
 
 def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target],
@@ -1621,13 +1639,19 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
                                        "working directory")
                     earlier = h["writes"]["receipt"]
                     prior = earlier[-1]["content"] if earlier else None
+                    created = "edit"
+                    if not earlier and _creates(name, inputs):
+                        # An empty first `old_string` is accepted only on an
+                        # absent or empty file: the text it edited is known
+                        # to be empty, and the result is in the call (#3588).
+                        prior, created = "", "create"
                     content = None
                     if prior is not None:
                         content, why = _replay(name, inputs, result["metadata"], prior)
                         if why is not None:
                             reasons.append(f"{name} {call['id']} of the receipt (transcript {call['transcript']} "
                                            f"line {call['line']}) cannot be replayed: {why}")
-                    earlier.append({**where, "tool": name, "content": content, "created": "edit"})
+                    earlier.append({**where, "tool": name, "content": content, "created": created})
                 else:
                     h["mutations"].append({**where, "target": target.kind, "tool": name, "outcome": state})
     return h
@@ -1643,6 +1667,7 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
     draft = first["pos"] if first else None
     pre_draft = lambda row: draft is None or row["pos"] < draft
     for kind in ("receipt", "full"):
+        # An edit with an empty first `old_string` opens as "create" (#3588).
         opening = h["writes"][kind][0]["created"] if h["writes"][kind] else "create"
         if opening == "edit":
             reasons.append(f"the first observed change of the {_LABEL[kind]} is an edit: the text it "
@@ -1773,6 +1798,11 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
             snapshots[stage] = rows
 
     strip = lambda row: {k: v for k, v in row.items() if k not in ("pos", "content") and not k.startswith("_")}
+    # A successful edit of the receipt is replayed where its row carries the
+    # text it left; one whose replay failed, or that followed a failed one,
+    # carries None and is listed apart (#3589).
+    edit_rows = [w for w in writes if w["tool"] != "Write"]
+    listed = lambda rows: [{k: v for k, v in strip(w).items() if k != "created"} for w in rows]
     block: dict[str, Any] = {
         "instrument": INSTRUMENT,
         "status": "unknown" if reasons else "checked",
@@ -1781,11 +1811,11 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
         "receipt": {"path": str(receipt), "at_run": str(receipt_at_run) if receipt_at_run is not None else None,
                     "sha256": on_disk, "rebuilt_sha256": rebuilt,
                     "writes": sum(1 for w in writes if w["tool"] == "Write"),
-                    "edits": sum(1 for w in writes if w["tool"] != "Write")},
+                    "edits": len(edit_rows)},
         "full": {"path": str(full), "at_run": str(full_at_run) if full_at_run is not None else None,
                  "writes": len(h["writes"]["full"])},
-        "replayed_edits": [{k: v for k, v in strip(w).items() if k != "created"}
-                           for w in writes if w["tool"] != "Write"],
+        "replayed_edits": listed(w for w in edit_rows if w["content"] is not None),
+        "unreplayed_edits": listed(w for w in edit_rows if w["content"] is None),
         "boundaries": {"full_record_write": strip(first) if first else None,
                        "derive_core": strip(derived) if derived else None},
         "derive_core_attempts": [strip(r) for r in h["derives"]],
@@ -1814,9 +1844,11 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
 def summary(block: dict[str, Any]) -> list[str]:
     """Plain lines for the terminal: counts only."""
     lines = [f"receipt origin: {block['status']} ({block['instrument']})"]
-    edits = block["receipt"]["edits"]
-    if edits:
-        lines.append(f"receipt rebuilt from {block['receipt']['writes']} Write(s) and {edits} replayed edit(s)")
+    replayed, unreplayed = len(block["replayed_edits"]), len(block["unreplayed_edits"])
+    if replayed and block["receipt"]["rebuilt_sha256"] is not None:
+        lines.append(f"receipt rebuilt from {block['receipt']['writes']} Write(s) and {replayed} replayed edit(s)")
+    if unreplayed:
+        lines.append(f"{unreplayed} successful edit(s) of the receipt not replayed")
     if block["status"] != "checked":
         return lines + [f"· {r}" for r in block["reasons"]]
     s, d, o = block["snippets"], block["deltas"], block["origin"]

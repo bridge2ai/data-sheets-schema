@@ -1024,7 +1024,9 @@ class EditReplay(Base):
         for prior, inputs, metadata, why in (
                 (PRE, {"old_string": "not in the receipt", "new_string": "x"}, None, "does not occur"),
                 (twice, {"old_string": TITLE, "new_string": LICENSE}, None, "occurs 2 times"),
-                (PRE, {"old_string": "", "new_string": "x"}, None, "not a non-empty string"),
+                (PRE, {"old_string": "", "new_string": "x"}, None,
+                 "an empty `old_string` on a receipt that is not empty"),                  # #3588
+                (PRE, {"old_string": None, "new_string": "x"}, None, "`old_string` that is not a string"),
                 (PRE, {"old_string": TITLE, "new_string": 7}, None, "`new_string` that is not a string"),
                 (PRE, {"old_string": TITLE, "new_string": LICENSE, "replace_all": "yes"}, None, "not a boolean"),
                 (PRE, {"old_string": "OT2OD032701", "new_string": ""}, None, "may extend to the newline"),
@@ -1073,6 +1075,77 @@ class EditReplay(Base):
         block = r.report()
         self.assertUnknown(block, "the first observed change of the receipt is an edit")
         self.assertIsNone(block["receipt"]["rebuilt_sha256"])
+        self.assertEqual(block["replayed_edits"], [])                             # #3589
+        self.assertEqual(len(block["unreplayed_edits"]), 1)
+        self.assertFalse(any("rebuilt from" in x for x in ro.summary(block)))
+
+    def test_an_edit_that_creates_the_receipt_is_replayed_on_empty_text(self):
+        # #3588: an empty `old_string` is accepted only on an absent or empty
+        # file, so the text it edited is known (empty) and the result is the
+        # call's own `new_string`; never "the text it edited is not in the
+        # transcripts".
+        for name, inputs in (("Edit", {"old_string": "", "new_string": PRE}),
+                             ("MultiEdit", {"edits": [{"old_string": "", "new_string": PRE}]})):
+            with self.subTest(tool=name):
+                r = self.new_run()
+                identity = r.edit(name, metadata={"filePath": str(r.receipt), "originalFile": None,
+                                                  "userModified": False}, **inputs)
+                r.last_receipt = PRE
+                r.write(r.full, "id: x\n")
+                block = r.report()
+                self.assertEqual(block["status"], "checked", block["reasons"])
+                self.assertEqual(block["origin"]["contemporaneous"], 3)
+                self.assertEqual(block["receipt"]["rebuilt_sha256"], block["receipt"]["sha256"])
+                self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [identity])
+
+    def test_an_opening_create_edit_that_cannot_be_replayed_names_the_replay(self):
+        # #3588: the reason is the replay's, never the opening-edit one.
+        r = self.run_
+        identity = r.edit(old_string="", new_string=PRE,
+                          metadata={"filePath": str(r.receipt), "originalFile": "stale text"})
+        r.write(r.full, "id: x\n")
+        r.last_receipt = PRE
+        block = r.report()
+        self.assertUnknown(block, f"Edit {identity} of the receipt")
+        self.assertUnknown(block, "`originalFile`")
+        self.assertFalse(any("first observed change" in x for x in block["reasons"]), block["reasons"])
+
+    def test_edit_counts_and_the_summary_line(self):
+        # #3590: `receipt.edits` counts every successful edit of the receipt,
+        # and the summary line appears only where an edit was replayed.
+        r = self._drafted()
+        block = r.report()
+        self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 0))
+        self.assertEqual((block["replayed_edits"], block["unreplayed_edits"]), ([], []))
+        self.assertFalse(any("replayed edit" in x or "not replayed" in x for x in ro.summary(block)))
+        r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        r.edit(old_string="OT2OD032701", new_string="OT2OD032702")
+        r.last_receipt = WITH_LICENSE.replace("OT2OD032701", "OT2OD032702")
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 2))
+        self.assertEqual(len(block["replayed_edits"]), 2)
+        self.assertIn("receipt rebuilt from 1 Write(s) and 2 replayed edit(s)", ro.summary(block))
+
+    def test_an_edit_that_was_not_replayed_is_not_listed_as_replayed(self):
+        # #3589: a failed replay, and an edit after it, are counted as edits
+        # but listed under `unreplayed_edits`, and the summary never says the
+        # receipt was rebuilt from them.
+        r = self._drafted()
+        replayed = r.edit(old_string=TITLE, new_string=TITLE + LICENSE)
+        failed = r.edit(old_string="absent", new_string="x")
+        after = r.edit(old_string=TITLE, new_string=TITLE)
+        block = r.report(sync=False)
+        self.assertUnknown(block, f"Edit {failed} of the receipt")
+        self.assertEqual(block["receipt"]["edits"], 3)
+        self.assertIsNone(block["receipt"]["rebuilt_sha256"])
+        self.assertEqual([e["tool_use_id"] for e in block["replayed_edits"]], [replayed])
+        self.assertEqual([e["tool_use_id"] for e in block["unreplayed_edits"]], [failed, after])
+        self.assertEqual(set(block["unreplayed_edits"][0]), {"tool_use_id", "transcript", "line", "result_line",
+                                                             "tool"})      # no payload
+        lines = ro.summary(block)
+        self.assertFalse(any("rebuilt from" in x for x in lines), lines)
+        self.assertIn("2 successful edit(s) of the receipt not replayed", lines)
 
     def test_a_replayed_receipt_that_differs_from_disk_is_unknown(self):
         r = self._drafted()
@@ -2310,6 +2383,17 @@ class Cli(unittest.TestCase):
         self.assertEqual(out.exit_code, 0, out.output)
         for option in ("--transcript", "--receipt", "--full", "--receipt-at-run", "--full-at-run", "--json"):
             self.assertIn(option, out.output)
+
+    def test_help_says_the_moved_paths_are_not_the_transcripts_spelling(self):
+        # #3591: with --receipt-at-run / --full-at-run, --receipt / --full are
+        # the moved files, which the transcript does not name.
+        from data_sheets_schema.cli import cli
+        text = " ".join(CliRunner().invoke(cli, ["receipts", "origin", "--help"]).output.split())
+        self.assertNotIn("spelled or resolving as the transcript's Writes name it", text)
+        self.assertIn("without --receipt-at-run it must also be spelled or resolve as the transcript's calls "
+                      "name it", text)
+        self.assertIn("without --full-at-run it must also be spelled or resolve as the transcript's calls name it",
+                      text)
 
     def test_help_states_the_derive_rule_the_code_applies(self):
         # A successful `derive && …` is the boundary (and_chain), so the help

@@ -282,9 +282,11 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
 @click.option("--transcript", "transcripts", multiple=True, required=True, type=click.Path(dir_okay=False),
               help="the run's stream-json transcript; repeat, first invocation first, for a killed-and-resumed run")
 @click.option("--receipt", "receipt_file", required=True, type=click.Path(dir_okay=False),
-              help="the coverage receipt, spelled or resolving as the transcript's Writes name it")
+              help="the coverage receipt as it is on disk now, whose sha256 is compared; without "
+                   "--receipt-at-run it must also be spelled or resolve as the transcript's calls name it")
 @click.option("--full", "full_file", required=True, type=click.Path(dir_okay=False),
-              help="the full record, spelled or resolving as the transcript's Writes name it")
+              help="the full record's current path, reported and not read; without --full-at-run it must also be spelled "
+                   "or resolve as the transcript's calls name it")
 @click.option("--receipt-at-run", "receipt_at_run", type=click.Path(dir_okay=False),
               help="the receipt's path as the transcript spelled it, where the file has moved since the run; "
                    "--receipt is then the file read for the final sha256")
