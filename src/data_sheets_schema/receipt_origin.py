@@ -76,8 +76,9 @@ carries them, readers and the recorder's `--phase` included: the parts
 inside a substitution are split out of it, so none can be shown not to be
 in one (#3385). A `derive core` call with a redirection among its words
 rather than after them (`--full 2>/dev/null F`) cannot be placed either
-(#3478). Last, a command-wide backstop (#3478-#3480): a call every rule
-above gave no derive, whose raw text, quote and escape characters
+(#3478). Last, a command-wide backstop (#3478-#3480): a call whose raw text
+carries more whole-word `derive`s than the rules above gave rows (so a
+`--help` row never accounts for a derive hidden beside it), where that text, quote and escape characters
 removed, carries the word `derive` as a whole word anywhere -- inside a
 substitution, an assignment, a `cd` part or an `xargs` argument included
 -- and also a `d4d`, `data_sheets_schema` or `$`-variable invocation, is
@@ -210,7 +211,8 @@ NON_CHECKS = (
     "the tokenizer cannot split (an apostrophe in a here-document body) is tested whole, "
     "quote characters removed, by the same rules (#3458). A derive call with a redirection "
     "among its words (`--full 2>/dev/null F`) cannot be placed (#3478). Last, a command-wide "
-    "backstop (#3478-#3480): a call these rules give no derive, whose raw text, quote and "
+    "backstop (#3478-#3480): a call carrying more whole-word `derive`s than these rules gave "
+    "rows, whose raw text, quote and "
     "escape characters removed, carries the word `derive` as a whole word anywhere (in a "
     "substitution, an assignment, a `cd` part, an `xargs` argument) beside a `d4d`, "
     "`data_sheets_schema` or `$`-variable invocation, is one derive that cannot be placed; its "
@@ -859,8 +861,20 @@ def _backstop(command: str) -> bool:
     depend on how the command is spelled. Its cost is a false `unknown` for
     a call that only mentions the word beside such an invocation (`grep
     'd4d derive core' notes.md`, the recorder's `--phase 'derive core'`)."""
+    return _backstop_count(command) > 0
+
+
+def _backstop_count(command: str) -> int:
+    """How many whole-word `derive`s the raw command carries, quote and
+    escape characters removed; 0 when it names no d4d, `data_sheets_schema`
+    or `$`-variable invocation. `_shell` adds an unparsed row when this
+    exceeds the rows the part-by-part reading gave, so a row for one derive
+    (`--help`, another record's) never accounts for a second one hidden in
+    an assignment or substitution beside it (Codex review of #3374)."""
     text = _QUOTING.sub("", command)
-    return bool(_DERIVE_WORD.search(text)) and bool(_INVOCATION.search(text))
+    if not _INVOCATION.search(text):
+        return 0
+    return len(_DERIVE_WORD.findall(text))
 
 
 def _redirection_interleaved(words: list[str]) -> bool:
@@ -1310,10 +1324,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target]) -> dict[str, A
         if any(j > index for j in piped_into_unknown):
             out["derives"].append({"targets_full": None, "segment": index, "basis": "unparsed"})
     # The command-wide backstop (#3478-#3480), after every rule above: a call
-    # that gave no derive row but carries the word `derive` beside a d4d,
+    # whose raw text carries more whole-word `derive`s than it gave rows, beside a d4d,
     # `data_sheets_schema` or `$`-variable invocation, anywhere in its raw
     # text, is one derive that cannot be placed. A false `unknown` is its cost.
-    if full is not None and not out["derives"] and _backstop(command):
+    if full is not None and _backstop_count(command) > len(out["derives"]):
         out["derives"].append({"targets_full": None, "segment": 0, "basis": "unparsed"})
     out["derives"].sort(key=lambda row: row["segment"])
     out["read_only"] = read_only

@@ -1605,6 +1605,19 @@ class DeriveSpellings(Base):
                     self.assertEqual([(a["targets_full"], a["status_basis"], a["outcome"])
                                       for a in block["derive_core_attempts"]], [(None, "unparsed", "ambiguous")])
 
+    def test_a_row_for_one_derive_does_not_account_for_another(self):
+        # Codex review of #3374: `--help` (or another record's derive) gave a
+        # row, so the backstop, which then fired only on a call with no row,
+        # let the assignment's real derive through as `checked`.
+        for spelling in (f"d4d derive core --help && result=\"$(d4d derive core --full {self.FULL} {self.OUT})\"",
+                         f"d4d derive core --full other_d4d.yaml other_core.yaml && "
+                         f"X=`d4d derive core --full {self.FULL} {self.OUT}`"):
+            for ok in (True, False):
+                with self.subTest(spelling=spelling, ok=ok):
+                    identity, block = self._derived(spelling, ok=ok)
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed")
+                    self.assertIn("unparsed", [a["status_basis"] for a in block["derive_core_attempts"]])
+
     def test_the_backstops_cost_is_a_false_unknown(self):
         # These run no derive, but the word `derive` sits beside a d4d or `$`
         # invocation, so the backstop reads each as one that cannot be placed.
@@ -1733,8 +1746,8 @@ class DeriveSpellings(Base):
         self.assertIn("A command the tokenizer cannot split (an apostrophe in a here-document body) is "
                       "tested whole, quote characters removed, by the same rules (#3458)", text)
         # #3478-#3480: the command-wide backstop, its cost, and what no rule sees
-        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call these rules give no derive, "
-                      "whose raw text, quote and escape characters removed, carries the word `derive` as a "
+        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call carrying more whole-word `derive`s "
+                      "than these rules gave rows, whose raw text, quote and escape characters removed, carries the word `derive` as a "
                       "whole word anywhere (in a substitution, an assignment, a `cd` part, an `xargs` "
                       "argument) beside a `d4d`, `data_sheets_schema` or `$`-variable invocation, is one "
                       "derive that cannot be placed; its cost is a false `unknown` (`grep 'd4d derive core' "
@@ -1745,9 +1758,10 @@ class DeriveSpellings(Base):
                       "invocation", text)
         self.assertNotIn("A word the shell builds some other way (a glob, `derive c*`) is not seen", text)
         self.assertNotIn("nor is a word xargs appends to a `derive` that neither ends", text)
-        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call every rule above gave no derive, "
-                      "whose raw text, quote and escape characters removed, carries the word `derive` as a "
-                      "whole word anywhere -- inside a substitution, an assignment, a `cd` part or an "
+        self.assertIn("Last, a command-wide backstop (#3478-#3480): a call whose raw text carries more "
+                      "whole-word `derive`s than the rules above gave rows (so a `--help` row never accounts "
+                      "for a derive hidden beside it), where that text, quote and escape characters removed, "
+                      "carries the word `derive` as a whole word anywhere -- inside a substitution, an assignment, a `cd` part or an "
                       "`xargs` argument included -- and also a `d4d`, `data_sheets_schema` or `$`-variable "
                       "invocation, is one derive that cannot be placed", doc)
         self.assertIn("its cost is a false `unknown` for a call that only mentions the word beside such an "
@@ -2052,7 +2066,8 @@ class Cli(unittest.TestCase):
                       "supplying `derive` itself) is not seen", text)
         # #3478-#3480: the command-wide backstop and its cost
         self.assertIn("so does a derive call with a redirection among its words (`--full 2>/dev/null F`)", text)
-        self.assertIn("Last, a command-wide backstop: a call these rules give no derive, whose raw text with "
+        self.assertIn("Last, a command-wide backstop: a call carrying more `derive` words than these rules gave "
+                      "rows, whose raw text with "
                       "quotes and escapes removed carries the whole word `derive` anywhere (a substitution, an "
                       "assignment, a `cd` part, an `xargs` argument) beside a `d4d`, `data_sheets_schema` or "
                       "`$`-variable invocation, cannot be placed; its cost is a false `unknown` (`grep 'd4d "
