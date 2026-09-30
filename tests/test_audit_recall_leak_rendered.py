@@ -51,9 +51,10 @@ The audit-batch integration instruction and the direct arm are rendered too
   prepared offline (``prepare_direct.build``, with the runtime and its login
   replaced by stand-ins) into ``tmp_path``, its launch text read back from the
   file the preparer rendered and the launcher streams, and its system prompt
-  assembled as ``run_direct_canary.main`` assembles it: the registered
-  ``system.md`` followed by the command guidance of the policy the launcher
-  rebuilds.
+  taken from the argument vector ``run_direct_canary.main`` itself builds for
+  the child (the registered ``system.md`` followed by the command guidance of
+  the policy it rebuilds), with the child replaced by a stand-in that captures
+  its arguments and raises before anything is launched (#3740).
 
 Not rendered: the worker-checkpoint branch of ``render_parent_instruction``
 (it needs a completed, sealed batch attempt; its text is literals and hashes,
@@ -62,6 +63,7 @@ does not exist when this runs: the integration test shows the needle match
 finds an echo in a proposal, not that no run will produce one. A paraphrase
 stays out of reach of any text scan.
 """
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -349,24 +351,51 @@ def direct_registration(tmp_path, monkeypatch):
         max_output_tokens=64000))
     registration = json.loads(path.read_text(encoding="utf-8"))
     assert not any((ROOT / d).exists() for d in registration["generation"]["jobs"][0]["output_directories"])
-    return registration
+    return SimpleNamespace(path=path, registration=registration, tmp_path=tmp_path)
 
 
-def rendered_direct(registration):
-    """The direct child's system prompt and launch text, as ``run_direct_canary.main`` builds them.
+class _ChildNotStarted(Exception):
+    """Raised by the stand-in child: nothing is launched once its arguments are captured."""
 
-    The system prompt is assembled inline there (``Path(runtime["system_prompt"])
-    .read_text() + command_guidance(command_policy)``, passed as
-    ``--system-prompt``), so it is assembled the same way here, from the policy
-    the launcher rebuilds and checks against the registered one. The launch
-    text is the instruction file ``execute_child`` streams to the child.
+
+def rendered_direct(direct, monkeypatch):
+    """The direct child's system prompt and launch text, from ``run_direct_canary.main`` itself.
+
+    The system prompt is assembled inline in ``main`` (the registered
+    ``system.md`` followed by ``command_guidance`` of the rebuilt policy) and
+    passed to the child as ``--system-prompt``; it has no builder of its own to
+    call (#3740). So ``main`` runs, offline, on the registration with a review
+    and launch word bound to it as ``bind_direct_launch.py`` writes them (the
+    shape of notes/claudecode_direct/test_direct_arm.py's ``bind``), and
+    ``execute_child`` is replaced by a stand-in that captures the argument
+    vector and the instruction path and raises before any child exists. Every
+    check ``main`` makes before the launch runs as written; the runtime's
+    version query goes to the stand-in runtime the registration pins. The
+    launch text is the instruction file ``execute_child`` streams to the child.
     """
-    job = registration["generation"]["jobs"][0]
-    policy = direct_launcher.build_command_policy(job, registration["python"], registration["repository"])
-    assert policy == registration["per_job_command_policy"][job["id"]]
-    return {"system": (Path(registration["native_runtime"]["system_prompt"]).read_text(encoding="utf-8")
-                       + direct_launcher.command_guidance(policy)),
-            "launch instruction": Path(job["instruction"]).read_text(encoding="utf-8")}
+    registration, job = direct.registration, direct.registration["generation"]["jobs"][0]
+    registration_sha = direct_launcher.sha(direct.path)
+    review, word = direct.tmp_path / "review_3740.json", direct.tmp_path / "word_3740.json"
+    review.write_text(json.dumps({"verdict": "approve", "ci_conclusion": "success", "registration_sha256": registration_sha,
+                                  "allowed_jobs": [job["id"]], "ci_head": registration["code_commit"], "ci_run_id": 1,
+                                  "independent_review_sha256": "a" * 64}))
+    word.write_text(json.dumps({"registration_sha256": registration_sha, "exact_response": "a synthetic launch word"}))
+    captured = {}
+
+    def child(argv, *, instruction, attempt, **_):
+        captured.update(argv=list(argv), instruction=instruction, attempt=attempt)
+        raise _ChildNotStarted()
+
+    monkeypatch.setattr(direct_launcher.native, "execute_child", child)
+    assert direct_launcher.main(["--registration", str(direct.path), "--review", str(review),
+                                 "--launch-word", str(word), "--job", job["id"]]) == 1
+    argv = captured["argv"]
+    system = argv[argv.index("--system-prompt") + 1]
+    started = json.loads((captured["attempt"] / "started.json").read_text(encoding="utf-8"))
+    # The captured argument is the prompt the launcher attests on its receipt.
+    assert started["effective_system_sha256"] == hashlib.sha256(system.encode("utf-8")).hexdigest()
+    assert captured["instruction"] == job["instruction"]
+    return {"system": system, "launch instruction": Path(captured["instruction"]).read_text(encoding="utf-8")}
 
 
 def test_the_rendered_command_guidance_quotes_nothing(needles):
@@ -410,10 +439,13 @@ def test_the_rendered_integration_context_quotes_nothing(staged, tmp_path, needl
     assert _found(rendered, [*needles, staged["observation"]]) == {}
 
 
-def test_the_rendered_direct_arm_prompts_quote_nothing(direct_registration, needles):
-    """The direct arm's system prompt and launch text, assembled at run time (#3523)."""
-    rendered = rendered_direct(direct_registration)
-    job = direct_registration["generation"]["jobs"][0]
+def test_the_rendered_direct_arm_prompts_quote_nothing(direct_registration, monkeypatch, needles):
+    """The direct arm's system prompt and launch text, assembled at run time (#3523, #3740)."""
+    rendered = rendered_direct(direct_registration, monkeypatch)
+    job = direct_registration.registration["generation"]["jobs"][0]
+    policy = direct_launcher.build_command_policy(job, direct_registration.registration["python"],
+                                                  direct_registration.registration["repository"])
+    assert rendered["system"].endswith(native_command_policy.command_guidance(policy))
     # The launch text is the instruction the launcher re-renders and compares.
     assert rendered["launch instruction"] == direct_launcher.spec_for(job).instruction
     assert "# Agent runtime: Claude Code (direct)" in rendered["launch instruction"]
@@ -470,12 +502,13 @@ def _planted_protocol(manifest, tmp_path):
 def test_an_observation_in_a_runtime_input_reaches_the_rendered_scan(request, tmp_path, builder):
     """The gap the literal scan leaves (#3198): text no scanned source carries as a literal."""
     if builder == "direct system prompt":
-        # The launcher reads the system prompt from the path the registration names (#3523).
-        registration = request.getfixturevalue("direct_registration")
-        planted = tmp_path / "planted_system.md"
-        planted.write_text(Path(registration["native_runtime"]["system_prompt"]).read_text() + PLANTED + "\n")
-        registration["native_runtime"]["system_prompt"] = str(planted)
-        rendered = {"system": rendered_direct(registration)["system"]}
+        # A piece ``run_direct_canary.main`` assembles into the system prompt at run
+        # time carries the observation: the prompt scanned is what main passes the
+        # child, not a copy of its assembly (#3523, #3740).
+        monkeypatch = request.getfixturevalue("monkeypatch")
+        guidance = direct_launcher.command_guidance
+        monkeypatch.setattr(direct_launcher, "command_guidance", lambda policy: guidance(policy) + PLANTED + "\n")
+        rendered = {"system": rendered_direct(request.getfixturevalue("direct_registration"), monkeypatch)["system"]}
     elif builder == "command guidance":
         rendered = rendered_command_guidance(planted=" " + PLANTED)
     elif builder == "batch child system":

@@ -43,8 +43,9 @@ which predate the ground truth). Those are the operator's to keep clean. Not fou
 at run time from pieces that are not string literals in the scanned source.
 tests/test_audit_recall_leak_rendered.py renders the notes/ builders and scans
 their output, which covers the second case for the builders it calls (#3198):
-the matched arms' and the direct arm's (#3523), and the audit-batch integration
-context on synthetic worker proposals (#3523).
+the matched arms' and the direct arm's (#3523; the direct system prompt is taken
+from the arguments ``run_direct_canary.main`` itself builds for the child, #3740),
+and the audit-batch integration context on synthetic worker proposals (#3523).
 """
 import ast
 import json
