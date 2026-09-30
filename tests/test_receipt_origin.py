@@ -1850,9 +1850,11 @@ class RipgrepHostnameHelper(Base):
 class DeriveSpellings(Base):
     """A `derive core` the parser does not read was invisible: no attempt row,
     no boundary, and a Phase 3 snippet reported as `phase1_correction` with
-    the status `checked` (#3137). The `timeout`, `env` and `nice` wrappers and
-    an interpreter held in a variable are read through; any other part that
-    carries the words `derive core` is a derive that cannot be placed."""
+    the status `checked` (#3137). The `timeout`, `env` and `nice` wrappers are
+    read through; a derive whose program is a variable or a relative path
+    (`$PY -m data_sheets_schema.cli`, `./d4d`) is read but not placed, as that
+    program may be a wrapper (#3693); any other part that carries the words
+    `derive core` is a derive that cannot be placed."""
 
     FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
     OUT = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
@@ -2326,22 +2328,36 @@ class DeriveSpellings(Base):
                       "`poetry run` part takes (#3723)", text)
         # #3719: a directory an earlier call left the shell in is read
         self.assertIn("A directory an earlier call left the shell in is read (#3719): after a call not denied "
-                      "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs, may leave anywhere but where it "
+                      "whose builtin `cd`, `pushd` or `popd`, or one `eval` runs or may run as a word supplied "
+                      "at run time (`eval \"$X\"`, #3815), may leave anywhere but where it "
                       "started (plain or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
                       "`command`, #3797; one in a subshell counts, the rule's cost), such a part counts as after "
                       "a directory change and a relative `--full` cannot be placed; where the transcript records "
-                      "a working directory other than its first, such a part counts as after a change too, and a "
-                      "relative `--full` resolves against the recorded directory (#3798); a directory a "
+                      "a working directory other than its first, such a part counts as after a change too, and, "
+                      "where no earlier call's change was seen, a relative `--full` resolves against the "
+                      "recorded directory (#3798); where both hold the earlier change decides and the `--full` "
+                      "is not placed, as a recorded directory may be inherited from the init event and is not "
+                      "trusted after a change (#3812), a false `unknown` in a transcript that records the "
+                      "directory on every event; in the same command a change `eval` runs leaves no known "
+                      "directory for the parts after it (#3815); a directory a "
                       "`source`d script or a function changed to is not seen", text)
+        self.assertNotIn("counts as after a change too, and a relative `--full` resolves against the recorded "
+                         "directory (#3798)", text)
         self.assertNotIn("or where the transcript records a working directory other than its first, such a part "
                          "counts as after a directory change and a relative `--full` cannot be placed", text)
         self.assertIn("The runtime's shell keeps its directory between calls (#3719)", flat := " ".join(
             ro.__doc__.split()))
         self.assertIn("behind a brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`, `until`, "
                       "`do`), `!`, `time`, `builtin` or `command` (#3797)", flat)
-        self.assertIn("such a part is read as after a change too, but a relative `--full` resolves against the "
-                      "recorded directory, where the call started (#3798)", flat)
-        self.assertIn("(#3798). A resumed run's next transcript starts afresh. A package in the directory the session's "
+        self.assertIn("such a part is read as after a change too, and, where no earlier call's change was seen, "
+                      "a relative `--full` resolves against the recorded directory, where the call started "
+                      "(#3798). Where both hold, the earlier change decides and the `--full` is not placed "
+                      "(#3812)", flat)
+        self.assertNotIn("such a part is read as after a change too, but a relative `--full` resolves", flat)
+        self.assertIn("(or one `eval` runs, or may run as a word supplied at run time, `eval \"$X\"`, #3815)", flat)
+        self.assertIn("In the same command, a directory change `eval` runs (or may run) leaves no known "
+                      "directory for the parts after it, as one behind a brace does (#3815). A resumed run's "
+                      "next transcript starts afresh. A package in the directory the session's "
                       "shell started in that such a part imports first is not read, nor a directory a "
                       "`source`d script or a function changed to", flat)
         self.assertNotIn("A package in the call's own starting directory", flat)
@@ -2815,7 +2831,10 @@ class UnseenDerive(Base):
                  "bash -o pipefail -c x": ["x"], "bash --norc -c x": ["x"], "/bin/zsh -c x": ["x"],
                  "X=1 timeout 60 nohup bash -c x": ["x"], "ls; bash -c x | eval y z": ["x", "y", "z"],
                  "ssh host 'a & b'": ["host", "a & b"], "bash x.sh 'a & b'": [], "bash -- -c x": [],
-                 "bash -c": [], "echo 'R&D team'": [], "python -c 'a & b'": [], "": []}
+                 "bash -c": [], "echo 'R&D team'": [], "python -c 'a & b'": [], "": [],
+                 # `--rcfile` and `--init-file` take the next word (#3813).
+                 "bash --rcfile /dev/null -c x": ["x"], "bash --init-file f -c x": ["x"],
+                 "bash --rcfile -c x": [], "bash --rcfile=f -c x": ["x"]}
         for command, strings in cases.items():
             with self.subTest(command=command):
                 self.assertEqual(ro._command_strings(ro._tokens(command) or []), strings)
@@ -2825,6 +2844,8 @@ class UnseenDerive(Base):
                                  ("eval './derive.sh&echo x'", True), ("bash -c 'setsid ./derive.sh'", True),
                                  ("bash -c 'cat <(./derive.sh)'", True),
                                  ("bash -c \"sh -c 'bash -c \\\"./derive.sh&echo x\\\"'\"", True),
+                                 ("bash -c \"bash --rcfile /dev/null -c './derive.sh&echo x'\"", True),
+                                 ("bash -c \"bash --init-file f -c './derive.sh&echo x'\"", True),
                                  ("echo 'R&D team'", False), ("bash -c 'echo \"R&D team\"'", False),
                                  ("bash x.sh 'a&b c'", False), ("R&D", False)):
             with self.subTest(word=word):
@@ -3160,6 +3181,55 @@ class EarlierDirectoryChange(Base):
                     self.assertEqual(attempt["status_basis"], "command")
                     self.assertIsNotNone(block["boundaries"]["derive_core"])
 
+    def test_after_an_earlier_change_a_recorded_directory_does_not_place_a_relative_full(self):
+        # Where an earlier call's change was seen and the transcript also
+        # records the call's directory, the earlier change decides: the
+        # recorded directory may be inherited from the init event, so the
+        # `--full` is not placed, whichever record it would name (#3812).
+        for spelled in ("../FULL", "FULL"):
+            for earlier in ("cd sub", "eval 'cd sub'"):
+                with self.subTest(spelled=spelled, earlier=earlier):
+                    r = self.new_run()
+                    r.write(r.receipt, PRE)
+                    r.bash(earlier)
+                    r.write(r.full, "id: x\n")
+                    r.write(r.receipt, Boundaries.C003)
+                    full = spelled.replace("FULL", str(r.full.relative_to(r.root)))
+                    identity = r.bash(f"d4d derive core --full {full} --out o.yaml")
+                    r.events[-2]["cwd"] = str(r.root / "sub")
+                    r.write(r.receipt, Boundaries.C004)
+                    block = r.report()
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot "
+                                              "be resolved")
+                    [attempt] = block["derive_core_attempts"]
+                    self.assertIsNone(attempt["targets_full"])
+                    self.assertIsNone(block["boundaries"]["derive_core"])
+
+    def test_a_relative_full_after_an_eval_d_change_in_the_same_command_is_not_placed(self):
+        # `eval 'cd sub' && d4d derive core --full data/...` runs the derive
+        # in `sub`, so its `--full` names `sub/data/...`, not the tracked
+        # record: it is not placed against the start (#3815), nor against
+        # a recorded directory.
+        for command, cwd in (("eval 'cd sub' && d4d derive core --full FULL --out o.yaml", None),
+                             ("eval \"$GO\" && d4d derive core --full FULL --out o.yaml", None),
+                             ("true && { eval 'cd sub'; } && d4d derive core --full FULL --out o.yaml", None),
+                             ("eval 'cd sub' && d4d derive core --full ../FULL --out o.yaml", "sub")):
+            with self.subTest(command=command, cwd=cwd):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                identity = r.bash(command.replace("FULL", str(r.full.relative_to(r.root))))
+                if cwd is not None:
+                    r.events[-2]["cwd"] = str(r.root / cwd)
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
+                                          "resolved")
+                [attempt] = block["derive_core_attempts"]
+                self.assertIsNone(attempt["targets_full"])
+                self.assertIsNone(block["boundaries"]["derive_core"])
+
     def test_shell_moves(self):
         for command, cwd, moves in (("cd hack", "/w", True), ("cd hack && ls", "/w", True),
                                     ("cd /w && ls", "/w", False), ("cd /w/", "/w", False),
@@ -3184,6 +3254,11 @@ class EarlierDirectoryChange(Base):
                                     ("time cd hack", "/w", True), ("time -p cd hack", "/w", True),
                                     ("! cd hack", "/w", True), ("X=1 builtin cd hack", "/w", True),
                                     ("{ eval 'cd hack'; }", "/w", True), ("builtin eval 'cd x'", "/w", True),
+                                    # #3815: a word supplied at run time may be a cd.
+                                    ("eval \"$X\"", "/w", True), ("eval `cat f`", "/w", True),
+                                    ("{ eval \"$X\"; }", "/w", True), ("echo \"$X\"", "/w", False),
+                                    # Through a wrapper, read conservatively.
+                                    ("nice eval 'cd hack'", "/w", True),
                                     ("command -v cd", "/w", False), ("command -V cd", "/w", False),
                                     ("echo builtin cd", "/w", False), ("f() { cd x; }", "/w", False),
                                     ("{ ls; }", "/w", False), ("time ls", "/w", False)):
@@ -3197,10 +3272,23 @@ class EarlierDirectoryChange(Base):
                                 ("{ cd data; } && d4d derive core --full X_d4d.yaml --out o.yaml", None),
                                 ("builtin cd /w && d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
                                 ("cd data && d4d derive core --full X_d4d.yaml --out o.yaml", True),
-                                ("{ ls; } && d4d derive core --full data/X_d4d.yaml --out o.yaml", True)):
+                                ("{ ls; } && d4d derive core --full data/X_d4d.yaml --out o.yaml", True),
+                                # So does one `eval` runs, or may run (#3815).
+                                ("eval 'cd data' && d4d derive core --full X_d4d.yaml --out o.yaml", None),
+                                ("eval 'cd data' && d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
+                                ("eval \"$X\" && d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
+                                ("{ eval 'cd data'; } && d4d derive core --full data/X_d4d.yaml --out o.yaml",
+                                 None),
+                                ("eval 'cd data'; d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
+                                ("eval ls && d4d derive core --full data/X_d4d.yaml --out o.yaml", True)):
             with self.subTest(command=command):
                 [row] = ro._shell(command, "/w", target)["derives"]
                 self.assertIs(row["targets_full"], placed)
+        # A relative path named after a change `eval` runs is a target
+        # wherever it may point (#3815).
+        for command, named in (("eval 'cd data' && cat X_d4d.yaml", ["full"]), ("eval ls && cat X_d4d.yaml", [])):
+            with self.subTest(command=command):
+                self.assertEqual(ro._shell(command, "/w", target)["named"], named)
         # `moved` reads a `python -c`/`-m` or `poetry run` part as after a change.
         for command, unread in ((UnseenDerive.VALIDATE, True), ("poetry run d4d receipts check", True),
                                 ("linkml-validate -s s.yaml F", False), ("d4d receipts check", False)):
@@ -3533,10 +3621,13 @@ class Cli(unittest.TestCase):
                       "`-m` part imports first, nor the project there whose virtualenv a `poetry run` part "
                       "takes; after an earlier call whose `cd`, `pushd` or `popd` may have left that "
                       "directory (plain, or behind a brace, a compound keyword, `!`, `time`, `builtin` or "
-                      "`command`), such a part counts as after a directory change, and a relative `--full` "
-                      "cannot be placed; where the transcript records another directory, such a part counts "
-                      "as after a change too, and a relative `--full` resolves against the recorded "
-                      "directory.", text)   # #3699, #3719, #3723, #3797, #3798
+                      "`command`, or one `eval` runs or may run), such a part counts as after a directory "
+                      "change, and a relative `--full` cannot be placed, even where the transcript records a "
+                      "directory for the call; where the transcript records another directory and no earlier "
+                      "change was seen, such a part counts as after a change too, and a relative `--full` "
+                      "resolves against the recorded directory.", text)   # #3699, #3719, #3723, #3797, #3798, #3812, #3815
+        self.assertIn("where every join from the change to the derive is `&&`, and after one `eval` runs or "
+                      "may run it cannot be placed.", text)                                     # #3815
         self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
                       "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674

@@ -370,12 +370,14 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     shell started in that a `python -c` or `-m` part imports first, nor the project there whose
     virtualenv a `poetry run` part takes; after an earlier call whose `cd`, `pushd` or `popd`
     may have left that directory (plain, or behind a brace, a compound keyword, `!`, `time`,
-    `builtin` or `command`), such a part counts as after a directory change, and a relative
-    `--full` cannot be placed; where the transcript records another directory, such a part
-    counts as after a change too, and a relative `--full` resolves against the recorded
-    directory. A relative `--full`
+    `builtin` or `command`, or one `eval` runs or may run), such a part counts as after a
+    directory change, and a relative `--full` cannot be placed, even where the transcript
+    records a directory for the call; where the transcript records another directory and no
+    earlier change was seen, such a part counts as after a change too, and a relative `--full`
+    resolves against the recorded directory. A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
-    where every join from the change to the derive is `&&`. Where the
+    where every join from the change to the derive is `&&`, and after one `eval` runs
+    or may run it cannot be placed. Where the
     history cannot be rebuilt the status is `unknown`, with the reasons,
     and nothing is classified; that includes a receipt Write (or replayed
     Edit/MultiEdit) in flight together with another receipt change, the

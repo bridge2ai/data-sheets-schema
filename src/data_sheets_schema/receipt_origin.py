@@ -150,7 +150,8 @@ was issued before the
 derive boundary (if any), and a receipt change issued before that
 boundary returned after both it and the draft were issued (#3697). The
 runtime's shell keeps its directory between calls (#3719): after a call
-not denied whose builtin `cd`, `pushd` or `popd` (or one `eval` runs) may
+not denied whose builtin `cd`, `pushd` or `popd` (or one `eval` runs, or
+may run as a word supplied at run time, `eval "$X"`, #3815) may
 leave it anywhere but where that call started -- plain, or behind a
 brace, a compound keyword (`if`, `then`, `elif`, `else`, `while`,
 `until`, `do`), `!`, `time`, `builtin` or `command` (#3797); one in a
@@ -158,8 +159,16 @@ subshell counts, the rule's cost -- a later call's `python -c`, `-m` or
 `poetry run` part is read as after a directory change in its own
 command, and a relative `--full` in it cannot be placed. Wherever the
 transcript records a working directory other than the first it records,
-such a part is read as after a change too, but a relative `--full`
-resolves against the recorded directory, where the call started (#3798).
+such a part is read as after a change too, and, where no earlier call's
+change was seen, a relative `--full` resolves against the recorded
+directory, where the call started (#3798). Where both hold, the earlier
+change decides and the `--full` is not placed (#3812): a call's recorded
+directory may be one inherited from the transcript's init event, which
+an earlier `cd` does not update, so it is not trusted after one; the
+cost is a false `unknown` in a transcript that records the directory on
+every event. In the same command, a directory change `eval` runs (or may
+run) leaves no known directory for the parts after it, as one behind a
+brace does (#3815).
 A resumed run's next transcript starts afresh. A package in the
 directory the session's shell started in that such a part imports first
 is not read, nor a directory a `source`d script or a function changed
@@ -354,12 +363,17 @@ NON_CHECKS = (
     "(a `linkml` or `data_sheets_schema` directory there, #3699), nor the project there whose "
     "virtualenv a `poetry run` part takes (#3723). A directory an earlier call left the shell in "
     "is read (#3719): after a call not denied whose builtin `cd`, `pushd` or `popd`, or one "
-    "`eval` runs, may leave anywhere but where it started (plain or behind a brace, a compound "
+    "`eval` runs or may run as a word supplied at run time (`eval \"$X\"`, #3815), may leave "
+    "anywhere but where it started (plain or behind a brace, a compound "
     "keyword, `!`, `time`, `builtin` or `command`, #3797; one in a subshell counts, the rule's "
     "cost), such a part counts as after a directory change and a relative `--full` cannot be "
     "placed; where the transcript records a working directory other than its first, such a part "
-    "counts as after a change too, and a relative `--full` resolves against the recorded "
-    "directory (#3798); a "
+    "counts as after a change too, and, where no earlier call's change was seen, a relative "
+    "`--full` resolves against the recorded directory (#3798); where both hold the earlier "
+    "change decides and the `--full` is not placed, as a recorded directory may be inherited "
+    "from the init event and is not trusted after a change (#3812), a false `unknown` in a "
+    "transcript that records the directory on every event; in the same command a change `eval` "
+    "runs leaves no known directory for the parts after it (#3815); a "
     "directory a `source`d script or a function changed to is not seen. A d4d call whose program, "
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
@@ -1367,6 +1381,21 @@ def _directory_builtin_behind(segment: list[str]) -> str | None:
     return rest[0] if behind and rest[:1] in (["cd"], ["pushd"], ["popd"]) else None
 
 
+def _eval_may_change_directory(segment: list[str]) -> bool:
+    """Whether the part runs `eval` (plain, through a wrapper `_unwrapped`
+    reads, or behind a word `_behind_prefixes` reads) on words that may
+    change this shell's directory: a `cd`, `pushd` or `popd` word among
+    them, or a word supplied at run time (a `$` or a backquote), which may
+    be one (#3719, #3815). `eval` runs its words in this shell, so the
+    change holds for the parts after it and the calls after this one."""
+    for rest in (_unwrapped(segment), _behind_prefixes(segment)[0]):
+        if rest[:1] == ["eval"]:
+            words = " ".join(rest[1:])
+            if _DIRECTORY_WORD.search(words) or "$" in words or "`" in words:
+                return True
+    return False
+
+
 def _chosen_by_cwd(segment: list[str]) -> bool:
     """Whether the working directory may choose the code a part runs: a
     `python -c` or `-m` interpreter (`_imports_from_cwd`, #3699) or a program
@@ -1494,19 +1523,24 @@ def _nested_detaches(word: str) -> bool:
 #: shell, `ssh` its command on the host it names (#3748).
 _SHELL_PROGRAMS = frozenset({"sh", "bash", "dash", "zsh", "ksh", "mksh", "ash"})
 _COMMAND_ARGUMENTS = frozenset({"eval", "ssh"})
+#: A shell's long options that take the next word as their value (bash's
+#: `--rcfile FILE` and `--init-file FILE`, #3813); every other `--long`
+#: option takes none.
+_SHELL_VALUED_LONG_OPTIONS = frozenset({"--rcfile", "--init-file"})
 
 
 def _shell_command_string(args: list[str]) -> str | None:
     """The command string a shell program's arguments give its `-c` (in any
     option cluster: `-c`, `-lc`, `-ec`): the first word after its options,
-    `-o NAME` and `+o NAME` taking the next word; None without a `-c`."""
+    `-o NAME`, `+o NAME`, `--rcfile FILE` and `--init-file FILE` taking the
+    next word (#3813); None without a `-c`."""
     given, i = False, 0
     while i < len(args):
         a = args[i]
         if a == "--":
             i += 1
             break
-        if a in ("-o", "+o", "-O", "+O"):
+        if a in ("-o", "+o", "-O", "+O") or a in _SHELL_VALUED_LONG_OPTIONS:
             i += 2
         elif a.startswith("--"):
             i += 1                                  # `--norc`, `--login`, ...
@@ -1862,7 +1896,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         for t in tokens) or any(_detacher(s) for s in segments) or _process_substitutes(
         _strip_comments(command))
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"])
-                            or _directory_builtin_behind(s) is not None for s in segments)
+                            or _directory_builtin_behind(s) is not None
+                            or _eval_may_change_directory(s) for s in segments)
     for target in named:
         for token in tokens:
             if target.name not in token:
@@ -1945,8 +1980,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         # and for the calls after this one. Its `moved` changes nothing
         # today, as the part itself runs a program not read here (`{`,
         # `builtin`, `time`, ...) and so already makes the call unread; it
-        # keeps the later parts right should such a part ever be read.
-        if _directory_builtin_behind(segment) is not None:
+        # keeps the later parts right should such a part ever be read. A
+        # change `eval` runs, or may run from a word supplied at run time,
+        # is read the same way (#3815): `eval 'cd sub' && d4d derive core
+        # --full data/X` runs the derive in `sub`, not where the call started.
+        if _directory_builtin_behind(segment) is not None or _eval_may_change_directory(segment):
             unsettled = moved = leaves = True
             local = None
             pushed = [None] * len(pushed)
@@ -2079,10 +2117,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # all the same, which is the rule's cost: the segmenter does not say
     # which parts a `(` encloses. `eval` runs its words in this shell, so a
     # `cd`, `pushd` or `popd` word among them counts too, behind those
-    # words as well.
-    out["moves"] = leaves or any(
-        rest[:1] == ["eval"] and bool(_DIRECTORY_WORD.search(" ".join(rest[1:])))
-        for s in segments for rest in (_unwrapped(s), _behind_prefixes(s)[0]))
+    # words as well, and so does a word supplied at run time, which may
+    # be one (`_eval_may_change_directory`, #3815): the loop above sets
+    # `leaves` for each.
+    out["moves"] = leaves
     # A substitution runs its inner command inside one word of the part that
     # carries it (`echo "$(bash derive.sh)"`, `` echo `./derive.sh` ``, `cat
     # <(bash derive.sh)`), where no part is opaque; that command is not read
@@ -2338,7 +2376,11 @@ def _history(calls: list[dict], results: dict[str, dict], targets: list[_Target]
             # `python -c`/`-m` or `poetry run` part may take its code from it.
             # Only in the first is a relative `--full` unresolved: in the
             # second the recorded directory is where the call started, and
-            # it resolves there (#3798).
+            # it resolves there (#3798). Where both hold, the first decides
+            # (#3812): a call's `cwd` falls back to the init event's where
+            # its own event records none, and an earlier `cd` does not move
+            # that, so after one it is not trusted. The cost is a false
+            # `unknown` where every event records the directory.
             earlier = call["transcript"] in moved_in
             elsewhere = (call["cwd"] is not None and call["start_cwd"] is not None
                          and os.path.normpath(call["cwd"]) != os.path.normpath(call["start_cwd"]))
