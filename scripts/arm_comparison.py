@@ -50,7 +50,10 @@ Bases, stated once and printed into the output:
 - **omission candidates** (#3335): an intermittent slot a filling replicate
   receipts with a snippet verified in its own chunk, the record's bundle
   bytes recovered from git where they drifted
-  (`replicate_structure.record_chunk_texts`); `–` for arms with no receipt.
+  (`replicate_structure.record_chunk_texts`); `–` exactly where no replicate
+  of the group has a readable receipt; the receipts instrument's exempt keys
+  (`notes`, `source_caveats`, `conforms_to_*`) are commentary, never a
+  candidate (#3892, #3893).
 - **release inventory** (#3282): `release_inventory` on today's source and
   crate manifests, and on the source-manifest version each arm's records
   pinned; the doi/license/version/issued differences it explains are
@@ -788,14 +791,15 @@ def omission_candidate_section(data) -> list[str]:
     intermittent slots (#3335, #2932 1(c)), over the records the replicate
     structure table compares."""
     from data_sheets_schema.replicate_structure import (
-        CANDIDATE, compare_structure, dataset_slots, omission_candidates,
+        CANDIDATE, COMMENTARY, COMMENTARY_KEYS, UNMEASURED, compare_structure, dataset_slots,
+        omission_candidates,
     )
     slots = dataset_slots()
     rows, totals = [], {}
     for key, disp, _pfx, _rt, _role in ARMS:
         if key in NOT_REPLICATES:
             continue
-        tot = {"some": 0, CANDIDATE: 0, "not_candidate": 0, "unmeasured": 0}
+        tot = {"some": 0, CANDIDATE: 0, "not_candidate": 0, UNMEASURED: 0, COMMENTARY: 0}
         measured_any = False
         for p in PROJECTS:
             reps = data[key][p]
@@ -807,41 +811,48 @@ def omission_candidate_section(data) -> list[str]:
             oc = omission_candidates(result, {t: _replicate_verified(lab, p) for t, lab in tags.items()})
             n = len(oc["slots"])
             tot["some"] += n
+            for k, v in oc["counts"].items():       # an unmeasured group adds its unmeasured slots,
+                tot[k] += v                         # so the arm's row sums to its intermittent total
             if not oc["measured"]:
                 rows.append(f"| {disp} | {p} | {n} | – | – | – |")
                 continue
             measured_any = True
-            for k, v in oc["counts"].items():
-                tot[k] += v
             c = oc["counts"]
             names = ", ".join(
                 f"`{name}` (filled {len(s['filled_by'])}/{len(recs)}, receipted in {', '.join(s['receipted_in'])})"
                 for name, s in oc["slots"].items() if s["status"] == CANDIDATE) or "none"
             per = " · ".join(f"{t} {len(v)}" + (f" ({', '.join(f'`{x}`' for x in v)})" if v else "")
                              for t, v in oc["per_replicate"].items())
-            rows.append(f"| {disp} | {p} | {n} | {c[CANDIDATE]} / {c['not_candidate']} / {c['unmeasured']} "
-                        f"| {names} | {per} |")
+            rows.append(f"| {disp} | {p} | {n} | {c[CANDIDATE]} / {c['not_candidate']} / {c[UNMEASURED]} / "
+                        f"{c[COMMENTARY]} | {names} | {per} |")
         if measured_any:
             totals[key] = tot
             rows.append(f"| **{disp}** | **all projects** | {tot['some']} | {tot[CANDIDATE]} / "
-                        f"{tot['not_candidate']} / {tot['unmeasured']} | | |")
+                        f"{tot['not_candidate']} / {tot[UNMEASURED]} / {tot[COMMENTARY]} | | |")
     return ["### Receipt-backed omission candidates (#3335)", "",
             "Per arm × project, the intermittent slots of the replicate-structure table above. A slot is a **candidate** "
             "when at least one replicate that fills it carries a coverage-receipt snippet for it that "
             "verifies in the chunk it cites — the verification `receipts.check` counts as `verified`, "
             "after the receipt is inverted by slot (`receipts.claim_receipts`) and each receipt path "
-            "is read at its top-level slot; a path through `source_caveats` receipts commentary and "
-            "counts for nothing. Each receipt is checked against the bytes its record hashed: the "
+            "is read at its top-level slot. A path through a key the receipts instrument exempts as "
+            "commentary or runner-set (`receipts.EXEMPT_LEAVES` and `EXEMPT_SLOTS`: "
+            + ", ".join(f"`{k}`" for k in COMMENTARY_KEYS) + ") counts for nothing, and an "
+            "intermittent slot that is one of them is **commentary**: counted, not classified, "
+            "never an omitted candidate. Each receipt is checked against the bytes its record hashed: the "
             "bundle on disk where it still hashes to the record's, else the committed version that "
             "does (`provenance.committed_bytes_for`), chunked under the record's own rule "
             "(`replicate_structure.record_chunk_texts`). **not**: every replicate that fills it has "
             "a receipt and none verifies a snippet for it; **unmeasured**: none does and some "
-            "filling replicate has no readable receipt. **Omitted candidates per record**: the "
-            "candidate slots each replicate leaves empty. `–` where no replicate of the group has "
-            "a readable receipt — the arms whose procedure wrote none — and not 0. A candidate says "
+            "filling replicate has no readable receipt. The four counts sum to the intermittent "
+            "slots. **Omitted candidates per record**: the "
+            "candidate slots each replicate leaves empty. `–` exactly where no replicate of the "
+            "group has a readable receipt — the arms whose procedure wrote none — and not 0; such a "
+            "group's slots are unmeasured (or commentary) and are added to its arm's total as such. "
+            "A group where some replicate has a readable receipt is shown in full, its unmeasured "
+            "slots included. A candidate says "
             "the bundle supports the slot in one replicate's reading, not that leaving it out was "
             "wrong; only top-level slots are compared.", "",
-            "| arm | project | intermittent | candidates / not / unmeasured | candidate slots "
+            "| arm | project | intermittent | candidates / not / unmeasured / commentary | candidate slots "
             "(replicates filling it; receipted in) | omitted candidates per record |",
             "|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – |"]), ""]
 

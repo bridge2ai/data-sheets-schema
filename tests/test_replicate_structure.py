@@ -219,7 +219,18 @@ def test_top_slot_reads_the_first_segment_and_drops_commentary():
     assert top_slot("purposes") == "purposes"
     assert top_slot("human_subject_research.source_caveats") is None
     assert top_slot("source_caveats[0]") is None
+    assert top_slot("variables[0].notes") is None and top_slot("notes") is None      # #3893
+    assert top_slot("conforms_to_schema") is None
     assert top_slot("") is None and top_slot(None) is None
+
+
+def test_commentary_keys_are_the_receipts_instruments_own_exempt_keys():
+    """Imported, not copied (#3893): what the receipts instrument does not
+    read as a claim is what this one does not either."""
+    from data_sheets_schema import receipts
+    from data_sheets_schema.replicate_structure import COMMENTARY_KEYS
+    assert set(COMMENTARY_KEYS) == receipts.EXEMPT_LEAVES | receipts.EXEMPT_SLOTS
+    assert {"notes", "source_caveats"} <= set(COMMENTARY_KEYS)
 
 
 def test_only_a_snippet_verified_in_its_own_chunk_counts():
@@ -230,7 +241,8 @@ def test_only_a_snippet_verified_in_its_own_chunk_counts():
                    ("c001", "variables[1]", "recorded per participant session"),
                    ("c001", "subpopulations", "five clinical sites across"),        # in c002, not c001
                    ("c002", "subpopulations", "five"),                               # too short
-                   ("c002", "notes", ""),                                            # empty
+                   ("c002", "purposes", ""),                                         # empty
+                   ("c001", "variables[2].notes", "42 voice variables recorded"),    # commentary (#3893)
                    ("c009", "splits", "five clinical sites across"),                 # no such chunk
                    ("c002", "subpopulations.source_caveats", "recruited at five clinical sites"))
     assert verified_by_slot(rec, CHUNKS) == {"variables": 2}
@@ -246,8 +258,8 @@ def test_a_malformed_receipt_entry_is_set_aside_not_raised():
 def _intermittent():
     recs = {"rep1": {"variables": [{"name": "a"}], "splits": ["x"], "title": "T"},
             "rep2": {"variables": [{"name": "a"}], "title": "T"},
-            "rep3": {"splits": ["y"], "title": "T", "notes": "n"}}
-    return compare_structure(recs, ["variables", "splits", "title", "notes"])
+            "rep3": {"splits": ["y"], "title": "T", "purposes": "n"}}
+    return compare_structure(recs, ["variables", "splits", "title", "purposes"])
 
 
 def test_a_slot_receipted_in_a_replicate_that_fills_it_is_a_candidate():
@@ -257,32 +269,60 @@ def test_a_slot_receipted_in_a_replicate_that_fills_it_is_a_candidate():
     assert s["variables"] == {"status": "candidate", "filled_by": ["rep1", "rep2"],
                               "receipted_in": ["rep1"], "unreceipted": []}
     # rep3's receipt names `variables` but rep3 does not fill it: not evidence here.
-    assert s["splits"]["status"] == "not_candidate" and s["notes"]["status"] == "not_candidate"
+    assert s["splits"]["status"] == "not_candidate" and s["purposes"]["status"] == "not_candidate"
     assert "title" not in s                                         # filled in all, not intermittent
     assert oc["per_replicate"] == {"rep1": [], "rep2": [], "rep3": ["variables"]}
-    assert oc["counts"] == {"candidate": 1, "not_candidate": 2, "unmeasured": 0}
+    assert oc["counts"] == {"candidate": 1, "not_candidate": 2, "unmeasured": 0, "commentary": 0}
 
 
 def test_a_filling_replicate_without_a_receipt_leaves_the_slot_unmeasured_not_clear():
-    oc = omission_candidates(_intermittent(), {"rep1": None, "rep2": {}, "rep3": {"notes": 1}})
+    oc = omission_candidates(_intermittent(), {"rep1": None, "rep2": {}, "rep3": {"purposes": 1}})
     s = oc["slots"]
     # rep1 and rep2 fill `variables`; rep2's receipt verifies nothing for it, and
     # rep1 has none to read — so nothing clears it.
     assert s["variables"]["status"] == "unmeasured" and s["variables"]["unreceipted"] == ["rep1"]
     assert s["splits"]["status"] == "unmeasured"                     # rep1 and rep3 fill; rep3 verifies none
-    assert s["notes"]["status"] == "candidate"                       # one receipted filler is enough
-    assert oc["measured"] and oc["per_replicate"] == {"rep1": ["notes"], "rep2": ["notes"], "rep3": []}
-    assert oc["counts"] == {"candidate": 1, "not_candidate": 0, "unmeasured": 2}
+    assert s["purposes"]["status"] == "candidate"                    # one receipted filler is enough
+    assert oc["measured"] and oc["per_replicate"] == {"rep1": ["purposes"], "rep2": ["purposes"], "rep3": []}
+    assert oc["counts"] == {"candidate": 1, "not_candidate": 0, "unmeasured": 2, "commentary": 0}
 
 
 def test_a_group_with_no_receipt_is_unmeasured_never_zero():
     oc = omission_candidates(_intermittent(), {"rep1": None, "rep2": None, "rep3": None})
     assert not oc["measured"]
     assert oc["per_replicate"] == {"rep1": None, "rep2": None, "rep3": None}
-    assert oc["counts"] == {"candidate": 0, "not_candidate": 0, "unmeasured": 3}
+    assert oc["counts"] == {"candidate": 0, "not_candidate": 0, "unmeasured": 3, "commentary": 0}
     # A measured group with no intermittent slot is measured, with nothing omitted.
     same = compare_structure({"a": {"title": "T"}, "b": {"title": "T"}}, ["title"])
     assert omission_candidates(same, {"a": {}, "b": {}})["per_replicate"] == {"a": [], "b": []}
+
+
+def test_a_group_with_receipts_is_measured_even_when_every_slot_is_unmeasured():
+    """#3892: rep1 alone fills `splits` and has no receipt; rep2 and rep3
+    have readable receipts. The group is measured — its row is not the `–`
+    of a group with no receipt — and its one slot is counted unmeasured."""
+    res = compare_structure({"rep1": {"title": "T", "splits": ["x"]}, "rep2": {"title": "T"},
+                             "rep3": {"title": "T"}}, ["title", "splits"])
+    oc = omission_candidates(res, {"rep1": None, "rep2": {"splits": 3}, "rep3": {}})
+    assert oc["measured"]
+    assert oc["slots"]["splits"]["status"] == "unmeasured"
+    assert oc["per_replicate"] == {"rep1": [], "rep2": [], "rep3": []}
+    assert oc["counts"] == {"candidate": 0, "not_candidate": 0, "unmeasured": 1, "commentary": 0}
+
+
+def test_an_intermittent_commentary_slot_is_counted_never_a_candidate():
+    """#3893: `notes` receipted in the replicate that fills it is commentary,
+    not a slot the other replicates omitted; the counts still sum to the
+    intermittent slots."""
+    res = compare_structure({"rep1": {"title": "T", "notes": "n", "splits": ["x"]},
+                             "rep2": {"title": "T"}, "rep3": {"title": "T", "conforms_to_class": "c"}},
+                            ["title", "notes", "splits", "conforms_to_class"])
+    oc = omission_candidates(res, {"rep1": {"notes": 2, "splits": 1}, "rep2": {}, "rep3": {}})
+    assert oc["slots"]["notes"]["status"] == "commentary" and oc["slots"]["notes"]["receipted_in"] == []
+    assert oc["slots"]["conforms_to_class"]["status"] == "commentary"
+    assert oc["per_replicate"] == {"rep1": [], "rep2": ["splits"], "rep3": ["splits"]}
+    assert oc["counts"] == {"candidate": 1, "not_candidate": 0, "unmeasured": 0, "commentary": 2}
+    assert sum(oc["counts"].values()) == len(oc["slots"])
 
 
 def _bundle_inputs(root, text):
@@ -352,17 +392,43 @@ def test_the_section_shows_a_dash_for_an_arm_without_receipts_and_counts_one_wit
     text = "\n".join(m.omission_candidate_section(data))
     assert "| v4 API (2026-08-13) | VOICE | 1 | – | – | – |" in text
     row = next(l for l in text.splitlines() if l.startswith("| v8 API production (2026-09-04f/g) | VOICE |"))
-    assert "| 1 | 1 / 0 / 0 |" in row and "`variables` (filled 2/3, receipted in rep1)" in row
+    assert "| 1 | 1 / 0 / 0 / 0 |" in row and "`variables` (filled 2/3, receipted in rep1)" in row
     assert row.endswith("| rep1 0 · rep2 0 · rep3 1 (`variables`) |")
-    assert "| **v8 API production (2026-09-04f/g)** | **all projects** | 1 | 1 / 0 / 0 | | |" in text
+    assert "| **v8 API production (2026-09-04f/g)** | **all projects** | 1 | 1 / 0 / 0 / 0 | | |" in text
     assert "**v4 API (2026-08-13)** | **all projects**" not in text
+
+
+def test_the_section_dashes_only_receiptless_groups_and_its_arm_total_sums(tmp_path, monkeypatch):
+    """#3892: a group whose only filling replicate lacks a receipt, beside
+    replicates that have one, is a full row with its slot unmeasured; a
+    group with no receipt at all is `–`; and the arm's total sums the two."""
+    m = _arm_comparison()
+    monkeypatch.setattr(m, "CONCAT", tmp_path)
+    monkeypatch.setattr(m, "_method_for", lambda label, project: "claudecode_api")
+    recs = {"rep1": {"splits": ["x"], "title": "T"}, "rep2": {"title": "T"}, "rep3": {"title": "T"}}
+    data = {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}
+    for project in ("VOICE", "CM4AI"):
+        for rep, rec in recs.items():
+            label = f"2026-09-04_{project}_{rep}"
+            d = tmp_path / "claudecode_api" / label
+            d.mkdir(parents=True)
+            (d / f"{project}_d4d.yaml").write_text(yaml.safe_dump(rec))
+            data["v8prod"][project].append({"label": label})
+    # VOICE: rep1 (the only filler) has no receipt, rep2 and rep3 do. CM4AI: none has one.
+    monkeypatch.setattr(m, "_replicate_verified", lambda label, project: (
+        None if project == "CM4AI" or label.endswith("rep1") else {}))
+    text = "\n".join(m.omission_candidate_section(data))
+    assert "| v8 API production (2026-09-04f/g) | CM4AI | 1 | – | – | – |" in text
+    assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | 0 / 0 / 1 / 0 | none | rep1 0 · rep2 0 · rep3 0 |" in text
+    assert "| **v8 API production (2026-09-04f/g)** | **all projects** | 2 | 0 / 0 / 2 / 0 | | |" in text
 
 
 @pytest.mark.corpus
 def test_receipt_verification_reproduces_every_stored_block_and_finds_the_issue_example(monkeypatch):
     """Summed over every path, commentary included, `verified_by_slot` is the
     stored block's `snippets.verified` on every checked receipt; and VOICE v7
-    `variables` (#3335's example) is a candidate receipted in rep1 and rep2."""
+    `variables` (#3335's example) is a candidate, receipted in rep1 and
+    omitted by rep3 (rep2's only receipt for it runs through `notes`)."""
     import data_sheets_schema.replicate_structure as rs
     from data_sheets_schema.receipts import load_receipt
     m = _arm_comparison()
@@ -389,5 +455,7 @@ def test_receipt_verification_reproduces_every_stored_block_and_finds_the_issue_
     oc = omission_candidates(compare_structure(recs, dataset_slots()),
                              {m._rep_tag(lab): m._replicate_verified(lab, "VOICE") for lab in labels})
     assert oc["slots"]["variables"]["status"] == "candidate"
-    assert oc["slots"]["variables"]["receipted_in"] == ["rep1", "rep2"]
+    # rep2's only `variables` receipt is `variables[0].notes`: commentary (#3893).
+    assert oc["slots"]["variables"]["receipted_in"] == ["rep1"]
+    assert oc["slots"]["notes"]["status"] == "commentary"
     assert oc["per_replicate"]["rep3"] and "variables" in oc["per_replicate"]["rep3"]

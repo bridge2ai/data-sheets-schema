@@ -55,6 +55,8 @@ from typing import Any, Iterable, Mapping
 
 import yaml
 
+from data_sheets_schema import receipts as _receipts
+
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 EXCLUDED_SLOTS = ("source_caveats",)
 PRESENT_STATES = ("identical", "two_agree", "some_agree", "all_differ")
@@ -258,21 +260,28 @@ def summarize(result: Mapping[str, Any]) -> dict[str, Any]:
 
 
 # ------------------------------------------------ omission candidates (#3335)
-#: A receipt path through one of these keys receipts commentary about the
+#: The keys the receipts instrument reads as the run's own commentary or as
+#: set by the runner — `receipts.EXEMPT_LEAVES` (`notes`, `source_caveats`,
+#: `conforms_to_*`, at any depth) and `receipts.EXEMPT_SLOTS` — imported, not
+#: copied, so the two instruments cannot disagree about what is a claim
+#: (#3893). A receipt path through one of them receipts commentary about the
 #: slot, not a claim of it: `human_subject_research.source_caveats` quoting
-#: "the bundle names no IRB" is evidence the slot is unsupported. The slot
-#: universe drops `source_caveats` for the same reason.
-COMMENTARY_KEYS = ("source_caveats",)
+#: "the bundle names no IRB" is evidence the slot is unsupported. An
+#: intermittent slot that is itself one of them is set aside as commentary
+#: rather than classified: a snippet for `notes` is not the bundle supporting
+#: a claim another replicate omitted.
+COMMENTARY_KEYS = tuple(sorted(_receipts.EXEMPT_LEAVES | _receipts.EXEMPT_SLOTS))
 
 CANDIDATE = "candidate"
 NOT_CANDIDATE = "not_candidate"
 UNMEASURED = "unmeasured"
+COMMENTARY = "commentary"
 
 
 def top_slot(path: Any) -> str | None:
     """The top-level slot a receipt path names (`variables[3].name` ->
     `variables`), or None for an empty path or one through a
-    `COMMENTARY_KEYS` key at any depth."""
+    `COMMENTARY_KEYS` key at any depth (`notes`, `source_caveats`, …)."""
     parts = re.findall(r"[A-Za-z_]\w*", str(path or ""))
     if not parts or any(p in COMMENTARY_KEYS for p in parts):
         return None
@@ -332,15 +341,24 @@ def omission_candidates(result: Mapping[str, Any],
     and the replicates that leave it empty omitted it. It is **not a
     candidate** when every filling replicate has a receipt and none verifies
     a snippet for it, and **unmeasured** when none verifies one and some
-    filling replicate has no readable receipt. A candidate is evidence that
-    the bundle supports the slot in one replicate's reading; it is not a
-    judgement that the omitting replicate was wrong to leave it out.
+    filling replicate has no readable receipt. An intermittent slot in
+    `COMMENTARY_KEYS` (`notes`) is **commentary**: counted, never
+    classified, and never a candidate a replicate omits (#3893). A candidate
+    is evidence that the bundle supports the slot in one replicate's
+    reading; it is not a judgement that the omitting replicate was wrong to
+    leave it out.
+
+    The group is `measured` when at least one of its replicates has a
+    readable receipt, whatever its slots' statuses (#3892): a measured group
+    can hold unmeasured slots, and an unmeasured group is exactly one where
+    no replicate's receipt could be read, so every slot it has is
+    unmeasured or commentary.
 
     Returns `slots` (name -> status, `filled_by`, `receipted_in`: the
     filling replicates with a verified snippet, `unreceipted`: those with no
-    readable receipt) and `per_replicate` (replicate -> the candidate slots
-    it leaves empty, or None when no candidate status could be measured for
-    the group at all)."""
+    readable receipt), `per_replicate` (replicate -> the candidate slots
+    it leaves empty, or None when the group is not measured) and `counts`
+    by status, which sum to the group's intermittent slots."""
     rows = result["slots"]
     slots: dict[str, dict[str, Any]] = {}
     for name, r in rows.items():
@@ -349,17 +367,19 @@ def omission_candidates(result: Mapping[str, Any],
         filled = [rep for rep, held in r["present"].items() if held]
         receipted = [rep for rep in filled if verified.get(rep) is not None and verified[rep].get(name, 0) > 0]
         unreceipted = [rep for rep in filled if verified.get(rep) is None]
-        status = CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
+        if name in COMMENTARY_KEYS:
+            status, receipted = COMMENTARY, []
+        else:
+            status = CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
         slots[name] = {"status": status, "filled_by": filled,
                        "receipted_in": receipted, "unreceipted": unreceipted}
-    measured = any(s["status"] != UNMEASURED for s in slots.values()) or (
-        not slots and any(v is not None for v in verified.values()))
+    measured = any(verified.get(rep) is not None for rep in result["replicates"])
     per_replicate = {rep: ([n for n, s in slots.items() if s["status"] == CANDIDATE and rep not in s["filled_by"]]
                            if measured else None)
                      for rep in result["replicates"]}
     counts = Counter(s["status"] for s in slots.values())
     return {"slots": slots, "per_replicate": per_replicate, "measured": measured,
-            "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}}
+            "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY)}}
 
 
 _TEXTS_CACHE: dict[tuple, tuple[dict[str, str] | None, str]] = {}
