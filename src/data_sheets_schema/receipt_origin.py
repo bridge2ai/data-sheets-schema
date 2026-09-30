@@ -1942,7 +1942,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         # `command` (#3797) runs the builtin in this shell too, but its part
         # is read below as the program it starts with, so it is not
         # followed: it leaves no known directory, for the parts after it
-        # and for the calls after this one.
+        # and for the calls after this one. Its `moved` changes nothing
+        # today, as the part itself runs a program not read here (`{`,
+        # `builtin`, `time`, ...) and so already makes the call unread; it
+        # keeps the later parts right should such a part ever be read.
         if _directory_builtin_behind(segment) is not None:
             unsettled = moved = leaves = True
             local = None

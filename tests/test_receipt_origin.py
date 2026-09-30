@@ -3189,6 +3189,18 @@ class EarlierDirectoryChange(Base):
                                     ("{ ls; }", "/w", False), ("time ls", "/w", False)):
             with self.subTest(command=command, cwd=cwd):
                 self.assertEqual(ro._shell(command, cwd, [])["moves"], moves)
+        # In the same command, a change behind those words leaves no known
+        # directory for a later part's relative `--full` (#3797); a plain
+        # one is followed.
+        target = [ro._Target("full", "/w/data/X_d4d.yaml")]
+        for command, placed in (("{ cd data; } && d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
+                                ("{ cd data; } && d4d derive core --full X_d4d.yaml --out o.yaml", None),
+                                ("builtin cd /w && d4d derive core --full data/X_d4d.yaml --out o.yaml", None),
+                                ("cd data && d4d derive core --full X_d4d.yaml --out o.yaml", True),
+                                ("{ ls; } && d4d derive core --full data/X_d4d.yaml --out o.yaml", True)):
+            with self.subTest(command=command):
+                [row] = ro._shell(command, "/w", target)["derives"]
+                self.assertIs(row["targets_full"], placed)
         # `moved` reads a `python -c`/`-m` or `poetry run` part as after a change.
         for command, unread in ((UnseenDerive.VALIDATE, True), ("poetry run d4d receipts check", True),
                                 ("linkml-validate -s s.yaml F", False), ("d4d receipts check", False)):
