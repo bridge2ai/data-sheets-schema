@@ -618,6 +618,18 @@ class ProximityTest(unittest.TestCase):
         bundle = "Emma Clark. Tim Jones wrote."
         self.assertEqual(demoted("Tim Clark.", bundle), demoted("Tim Clark", bundle))
         self.assertEqual(demoted("Tim Clark.", bundle), {"Tim": "absent", "Clark": "absent"})
+        # Nor a period with an identifier after it (#3498): the brackets the
+        # identifier leaves behind, a bare ORCID or a part break are not the
+        # word an abbreviation belongs to, so `Clark` is not exempted.
+        for leaf in ("Tim Clark. (ORCID:0000-0001-2345-6789)", "Tim Clark. (0000-0001-2345-6789)",
+                     "Tim Clark. 0000-0001-2345-6789", "Tim Clark. ORCID:0000-0001-2345-6789",
+                     "Tim Clark., PhD", "Tim Clark. [https://kth.se/tim]"):
+            with self.subTest(leaf=leaf):
+                self.assertEqual(ng.abbreviations(leaf), frozenset())
+                self.assertEqual(demoted(leaf, bundle), {"Tim": "absent", "Clark": "absent"})
+        self.assertEqual(ng.abbreviations("Tim St. (ORCID:0000-0001-2345-6789) Clark"), frozenset())
+        self.assertEqual(ng.abbreviations("Tim St.\n  Louis (ORCID:0000-0001-2345-6789)"),
+                         frozenset({"st"}))
         # Nor inside an identifier span (#3463): `tim.clark@kth.se` abbreviates nothing.
         self.assertEqual(ng.abbreviations("Tim Clark (tim.clark@kth.se, https://kth.se/Tim.html)"),
                          frozenset())
@@ -630,6 +642,30 @@ class ProximityTest(unittest.TestCase):
         self.assertIn("Clark", demoted("Emma Clark Jr", bundle))
         self.assertIn("Tuller", demoted("The Tuller Lab", "The lab is large. Tuller T wrote."))
         self.assertNotIn("Clark", demoted("Jane Clark Jr", "Jane Doe wrote. Clark J wrote. Smith Jr."))
+
+    def test_a_suffix_is_no_near_partner(self):
+        """#3497: a suffix identifies no one, so `Jr` beside a different
+        person's `Emma` does not keep `Emma` of `Emma Clark Jr` — the leaf
+        is demoted as `Emma Clark` is. A part whose only other word is a
+        suffix has one name word and is not judged (`Clark Jr`). The suffix
+        itself is still kept near the name's words (#3459)."""
+        bundle = "Emma Lundberg Jr and Clark J wrote."
+        self.assertEqual(demoted("Emma Clark Jr", bundle),
+                         demoted("Emma Clark", "Emma Lundberg and Clark J wrote."))
+        self.assertEqual(demoted("Emma Clark Jr", bundle),
+                         {"Emma": "absent", "Clark": "absent"})
+        p = prox("Clark Jr", "Clark Jr wrote.")
+        self.assertEqual((p["judged"], p["not_judged"], p["demoted"]), (0, 2, 0))
+        self.assertEqual(prox("Clark Jr III", "Clark Jr III")["judged"], 0)
+        self.assertEqual(demoted("John Smith Jr", "John Smith Jr wrote."), {})
+        self.assertEqual(demoted("John Smith Jr", "John Smith wrote. Jones Jr wrote."),
+                         {"Jr": "absent"})
+        # Nor does one suffix keep another of a different person. Only `Jr`
+        # and `Sr` can meet in a part: `II`-`IV` read as initials and are
+        # never judged by v2.
+        self.assertEqual(demoted("John Smith Sr Jr", "John Smith wrote. Jones Sr Jr wrote."),
+                         {"Sr": "absent", "Jr": "absent"})
+        self.assertEqual(demoted("John Smith Sr Jr", "John Smith Sr Jr wrote."), {})
 
     def test_a_comma_before_a_suffix_does_not_end_the_entry(self):
         """#3459: `John Smith, Jr.` writes the suffix in the record's own

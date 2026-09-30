@@ -155,8 +155,8 @@ v1-`grounded` token and reports, beside v1 and never as a finding, the
 ones it would demote. A leaf is split into parts at `;`, `,`, `:`,
 brackets and identifier spans (`person_parts`), and within a part the
 capitalised tokens that are not initials are read together; a part of
-fewer than two distinct such words is not judged (`Doctor Y`, `PhD`, a
-leaf written `Clark, Tim`). A judged token stays grounded when the
+fewer than two distinct such words, a generational suffix not counted, is
+not judged (`Doctor Y`, `PhD`, `Clark Jr`, a leaf written `Clark, Tim`). A judged token stays grounded when the
 bundle writes it near another word of its part — at most
 `PROXIMITY_WINDOW` capitalised tokens (or words the leaf itself writes,
 `de`, `of`) between them, only whitespace (line breaks included:
@@ -165,7 +165,9 @@ after a word, where a sentence ends: `Emma Lundberg. Clark J`, nor after
 a run of two or three capitals, which is as often a degree or an acronym:
 `Emma Lundberg MD. Clark J`, #3460; unless the leaf writes that word with
 a period too, `St. Louis`, but not the period ending the leaf, which
-abbreviates nothing: `Tim Clark.` reads like `Tim Clark`, #3483; so `Tim
+abbreviates nothing: `Tim Clark.` reads like `Tim Clark`, #3483, nor one
+followed by an identifier or anything else that is not a letter, `Tim
+Clark. (ORCID:…)`, #3498; so `Tim
 St John` against `Tim St. John` demotes `John`, and `Mark DA. Wilkinson`
 separates `Mark` from `Wilkinson`, costs), hyphens, apostrophes or
 digits inside a word (`Bridge2AI`) between tokens, and one comma only
@@ -173,7 +175,10 @@ where the bundle inverts the record's order (`Clark, Tim`) or before a
 generational suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside
 that word's initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon
 J-C` keep `Metallo` for `Christian Metallo`; a suffix or `The` has no
-initial there). A digit before a comma is an
+initial there). A generational suffix is no partner for another word at
+all, since it identifies no one: `Emma Lundberg Jr` does not keep `Emma`
+of `Emma Clark Jr` (#3497); the suffix itself is judged against the
+name's words. A digit before a comma is an
 affiliation mark and ends the entry (`Levinson1, Charlotte`). Since any
 whitespace joins, a bundle listing one name per line reads the last word
 of one entry and the first of the next as one entry, and so does a
@@ -666,16 +671,27 @@ def abbreviations(name: str) -> frozenset[str]:
     (#3427). Not a period that ends the leaf, with only whitespace after
     it: that one ends the leaf's sentence and abbreviates nothing, so
     `Tim Clark.` exempts no word and reads `Emma Clark. Tim Jones` as two
-    sentences, as `Tim Clark` does (#3483)."""
+    sentences, as `Tim Clark` does (#3483). Nor a period whose next
+    character, past whitespace, is not a letter: an identifier after it,
+    bracketed or bare (`Tim Clark. (ORCID:…)`, `Tim Clark. 0000-…`), a
+    part break or a digit ends the name as the end of the leaf does
+    (#3498). An abbreviation is followed by the word it belongs to."""
     text = _NOT_A_NAME.sub(" ", name)
-    return frozenset(exact_key(t.text) for t in _runs(text)
-                     if text[t.end:t.end + 1] == "." and text[t.end + 1:].strip())
+    out = set()
+    for t in _runs(text):
+        if text[t.end:t.end + 1] != ".":
+            continue
+        rest = text[t.end + 1:].lstrip()
+        if rest and unicodedata.category(rest[0])[0] == "L":
+            out.add(exact_key(t.text))
+    return frozenset(out)
 
 
 def person_parts(name: str, words: frozenset[str] = frozenset()) -> list[list[str]]:
     """The name words of each part of a leaf, split at `_PART_BREAK`, that
     v2 judges together: capitalised tokens that are not initials. A part of
-    fewer than two distinct words has no partner and is not judged, so
+    fewer than two distinct words (a suffix not counted, #3497) has no
+    partner and is not judged, so
     `Doctor Y; Dailamy A`, a degree after a comma and lower-case prose
     are not; nor is a leaf written `Clark, Tim`. An identifier span
     (`_NOT_A_NAME`) breaks a part too."""
@@ -697,12 +713,18 @@ def proximity(token: str, name: list[str], index: BundleIndex,
     have were it not in the bundle (`expansion_class`). A name of one
     distinct token is not judged: the caller skips it. A suffix or a
     function word (`_NO_STAND_IN`: `Jr`, `The`) has no initial to be
-    written beside `token`, as in `expansion_class` (#3428). `between` and
-    `abbreviated` are as `BundleIndex.near` takes them."""
+    written beside `token`, as in `expansion_class` (#3428), and a suffix
+    is no partner to be `near` either, since it identifies no one:
+    `Emma Lundberg Jr` does not keep `Emma` for `Emma Clark Jr` (#3497).
+    The suffix itself is still judged against the name's other words
+    (`Jr` near `Smith` in `John Smith, Jr.`, #3459), never another suffix. `between` and `abbreviated` are
+    as `BundleIndex.near` takes them."""
     here = name.index(token)
     for at, other in enumerate(name):
         if exact_key(other) == exact_key(token):
             continue
+        if folded_key(other) in _SUFFIXES:
+            continue                     # `Jr` grounds no word beside it (#3497)
         if index.near(token, other, token_first=here < at, between=between,
                       abbreviated=abbreviated):
             return None
@@ -796,8 +818,8 @@ def check_record(record: Any, bundle: str | BundleIndex,
         listed: set[str] = set()
         judged = 0
         for part in person_parts(name, words):
-            if len({exact_key(t) for t in part}) < 2:
-                continue
+            if len({exact_key(t) for t in part if folded_key(t) not in _SUFFIXES}) < 2:
+                continue                 # a suffix is no partner (#3497): `Clark Jr` is one word
             for token in part:
                 if exact_key(token) not in grounded:
                     continue
