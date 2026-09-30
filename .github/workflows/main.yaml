@@ -55,6 +55,14 @@ jobs:
           --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
           --junitxml=test-results/pytest.xml
 
+      # No test may add, change or leave an ignored path under notes/ (#3772);
+      # tests/conftest.py also checks each run. Before the notes/ jobs below,
+      # which run outside tests/ and are not covered.
+      - name: Require the suite to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+
       # These independent offline controls run once, outside the tests/ collection.
       - name: Exercise experimental canary admission offline
         if: matrix.python-version == '3.12' && matrix.shard == 1

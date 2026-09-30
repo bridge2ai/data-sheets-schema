@@ -11,6 +11,7 @@ founded (a finding's path covers the value), unfounded — the identity join
 that keeps a reorder or a stripped key from reading as a removal, and the
 #899 convention that a run with no snapshot measures nothing rather than 0.
 """
+import datetime
 import hashlib
 import importlib.util
 import json
@@ -371,6 +372,626 @@ class NotTheModel(unittest.TestCase):
                        "#3366"):
             self.assertIn(phrase, text)
 
+
+
+class AmendedDeletions(unittest.TestCase):
+    """#3702: a curator's recorded amend that empties a value leaves nothing
+    at its path, so it reads as a deletion. The rewrite's path test marks it;
+    `deleted` and `unfounded` do not move."""
+
+    def test_an_amend_that_empties_a_value_marks_the_deletion(self):
+        before = _record(description="Old description words.",
+                         acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."}])
+        after = _record(description="", acquisition_methods=[{"id": "x#a", "acquisition_details": ""}])
+        stages = [("reconcile_full", before)]
+        b = rm.classify(before, after, _audit(), intermediates=stages,
+                        amended_paths={"description", "acquisition_methods[0]"})
+        self.assertEqual([(r["path"], r.get("curator_amend"), r["phase"]) for r in b["unfounded_paths"]],
+                         [("description", True, "write"),
+                          ("acquisition_methods[0].acquisition_details", True, "write")])
+        self.assertEqual((b["deleted"], b["unfounded"]), (2, 2))
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_unfounded"]), (2, 2))
+        self.assertIn("of the deletions, 2 a curator's amend", b["summary"])
+        unmarked = rm.classify(before, after, _audit(), intermediates=stages)
+        self.assertEqual((unmarked["deleted"], unmarked["deleted_curator_amend"]), (2, 0))
+        self.assertNotIn("curator_amend", unmarked["unfounded_paths"][0])
+        self.assertNotIn("of the deletions", unmarked["summary"])
+
+    def test_a_sibling_or_a_prefix_only_amend_does_not_mark_a_deletion(self):
+        before = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."},
+                                              {"id": "x#b", "acquisition_details": "Another old sentence."}])
+        after = _record(acquisition_methods=[{"id": "x#a", "acquisition_details": "Long old sentence here."},
+                                             {"id": "x#b", "acquisition_details": ""}])
+        for amended in ({"acquisition_methods[0]"}, {"acquisition_methods[1].acquisition"}):
+            b = rm.classify(before, after, _audit(), amended_paths=amended)
+            self.assertEqual((b["unfounded"], b["deleted_curator_amend"]), (1, 0), amended)
+
+    def test_a_deletion_a_model_phase_made_stays_the_models(self):
+        """The #3725 rule for rewrites, on a deletion: reconcile_full
+        emptied it before the amend, so it is the model's and marked as
+        amended after it; unattributed, the path alone decides."""
+        before = _record(description="Old description words.")
+        after = _record(description="")
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", _record(description=""))],
+                        amended_paths={"description"})
+        self.assertEqual(b["unfounded_paths"], [{"path": "description", "phase": "reconcile_full",
+                                                 "amended_after_model_removal": True}])
+        self.assertEqual(b["deleted_curator_amend"], 0)
+        unattributed = rm.classify(before, after, _audit(), amended_paths={"description"})
+        self.assertEqual(unattributed["deleted_curator_amend"], 1)
+
+    def test_a_member_of_a_list_is_marked_by_the_member_its_list_amends_edit_names(self):
+        """#3828: #903 records an amend on one member of a list of scalars
+        at the list's path (`keywords`), since `populated_leaves` reads the
+        list as one leaf. The recorded edit, read against the final list,
+        names the member; the path alone names none."""
+        before = _record(keywords=["speech", "voice"], themes=["audio", "clinic"])
+        after = _record(keywords=["speech", ""], themes=["audio"])
+        b = rm.classify(before, after, _audit(), amended_paths={"keywords"},
+                        amended_edits={"keywords": [("voice", "")]})
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "themes[1]": None})
+        for amended, want in (({"keywords_other"}, 0), ({"keywords[1].x"}, 0)):
+            self.assertEqual(rm.classify(before, after, _audit(), amended_paths=amended)["deleted_curator_amend"],
+                             want, amended)
+        # An amend on the list whose edit is not recorded names no member (#3802).
+        bare = rm.classify(before, after, _audit(), amended_paths={"keywords"})
+        self.assertEqual((bare["deleted_curator_amend"], bare["deleted_curator_amend_ambiguous"]), (0, 1))
+        self.assertTrue(next(r for r in bare["unfounded_paths"] if r["path"] == "keywords[1]")
+                        ["curator_amend_ambiguous"])
+        self.assertIn("1 deleted list member(s) an amend on their list may have emptied (ambiguous)",
+                      bare["summary"])
+
+    def test_an_amend_above_the_list_marks_every_member(self):
+        before = _record(extra={"keywords": ["speech", "voice"]})
+        after = _record(extra={"keywords": [], "note": "x"})
+        b = rm.classify(before, after, _audit(), amended_paths={"extra"})
+        self.assertEqual(b["deleted_curator_amend"], 2)
+
+    def test_a_list_amend_the_final_list_cannot_attest_is_ambiguous(self):
+        """#3828: the list's final value is what the edit is read against.
+        Where the path holds no list, or the list carries several amends
+        of which the final list attests only the last, a member the last
+        edit does not name cannot be ruled out."""
+        before = _record(keywords=["speech", "voice", "clinic"])
+        gone = rm.classify(before, _record(keywords="speech"), _audit(), amended_paths={"keywords"},
+                           amended_edits={"keywords": [("voice", "")]})
+        self.assertEqual((gone["deleted_curator_amend"], gone["deleted_curator_amend_ambiguous"]), (0, 2))
+        # Two amends at `keywords`: 'clinic' -> 'clinics', then 'voice' -> ''.
+        b = rm.classify(before, _record(keywords=["speech", "", "clinics"]), _audit(), amended_paths={"keywords"},
+                        amended_edits={"keywords": [("clinic", "clinics"), ("voice", "")]})
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertTrue(rows["keywords[1]"]["curator_amend"])                  # the last edit names it
+        self.assertTrue(rows["keywords[2]"]["curator_amend_ambiguous"])        # an earlier edit may have
+        # One amend whose edit names another member is evidence against this one.
+        one = rm.classify(before, _record(keywords=["speech", ""]), _audit(), amended_paths={"keywords"},
+                          amended_edits={"keywords": [("voice", "")]})
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in one["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[2]": None})
+        self.assertEqual(one["deleted_curator_amend_ambiguous"], 0)
+
+    def test_an_amend_on_one_member_does_not_mark_a_sibling_a_model_deleted(self):
+        """#3802 in the form #903 records (#3828): reconcile_full drops
+        'clinic'; a curator later amends `keywords`, emptying 'speech'.
+        The edit names 'speech', so 'clinic' is neither the curator's nor
+        amended after its removal."""
+        before = _record(keywords=["speech", "voice", "clinic"])
+        after = _record(keywords=["", "voice"])
+        kw = {"amended_paths": {"keywords"}, "amended_edits": {"keywords": [("speech", "")]}}
+        attributed = rm.classify(before, after, _audit(),
+                                 intermediates=[("reconcile_full", _record(keywords=["speech", "voice"]))], **kw)
+        rows = {r["path"]: r for r in attributed["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write", "curator_amend": True})
+        unattributed = rm.classify(before, after, _audit(), **kw)
+        rows = {r["path"]: r for r in unattributed["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "curator_amend": True})
+        self.assertEqual((unattributed["deleted_curator_amend"], unattributed["deleted_curator_amend_ambiguous"]),
+                         (1, 0))
+
+    def test_an_edit_that_fits_two_deleted_members_is_ambiguous(self):
+        before = _record(keywords=["voice", "a", "voice"])
+        after = _record(keywords=["", "a"])
+        b = rm.classify(before, after, _audit(), amended_paths={"keywords"},
+                        amended_edits={"keywords": [("voice", "")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        self.assertTrue(all(r.get("curator_amend_ambiguous") for r in b["unfounded_paths"]))
+        # The edit's text in a second member is not a fit: applied to
+        # 'speech clinic' it leaves 'clinic', not the '' the final list holds.
+        b = rm.classify(_record(keywords=["speech", "voice", "speech clinic"]), _record(keywords=["", "voice"]),
+                        _audit(), amended_paths={"keywords"}, amended_edits={"keywords": [("speech", "")]})
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[0]": True, "keywords[2]": None})
+        self.assertEqual(b["deleted_curator_amend_ambiguous"], 0)
+
+    def test_a_member_a_model_phase_deleted_is_not_ambiguous(self):
+        """#3818: an amend recorded after the run cannot have emptied a
+        member reconcile_full had already removed. Unrecorded edit: only
+        the write-phase member is ambiguous; the model's carries no mark."""
+        before = _record(keywords=["speech", "voice", "clinic"])
+        after = _record(keywords=["", "voice"])
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", _record(keywords=["speech", "voice"]))],
+                        amended_paths={"keywords"})
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write",
+                                               "curator_amend_ambiguous": True})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 1))
+        # Unattributed, nothing tells the two apart: both stay ambiguous.
+        bare = rm.classify(before, after, _audit(), amended_paths={"keywords"})
+        self.assertEqual(bare["deleted_curator_amend_ambiguous"], 2)
+
+    def test_a_sibling_a_model_phase_deleted_is_no_rival_fit(self):
+        """#3818: the edit 'voice' -> '' fits keywords[0] and keywords[2],
+        but reconcile_full had already removed keywords[2], so the phases
+        and the edit together name keywords[0] as the curator's."""
+        before = _record(keywords=["voice", "a", "voice"])
+        after = _record(keywords=["", "a"])
+        b = rm.classify(before, after, _audit(), intermediates=[("reconcile_full", _record(keywords=["voice", "a"]))],
+                        amended_paths={"keywords"}, amended_edits={"keywords": [("voice", "")]})
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[0]"], {"path": "keywords[0]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+
+    def test_amend_edits_reads_the_recorded_replacement(self):
+        record = {"dispositions": [
+            {"disposition": "amend", "path": "keywords", "replace": "speech", "with": "speech data"},
+            {"disposition": "amend", "path": "keywords", "replace": "x", "with": ""},
+            {"disposition": "amend", "path": "title"},
+            {"disposition": "amend", "path": "title", "replace": " ", "with": "x"},
+            {"disposition": "retain", "path": "description", "replace": "a", "with": "b"}]}
+        # An entry whose edit is not recorded is still an amend on its path (#3842).
+        self.assertEqual(rm.amend_edits(record), {"keywords": [("speech", "speech data"), ("x", "")],
+                                                  "title": [None, None]})
+        self.assertEqual(rm.amend_edits(None), {})
+        # An empty edit fits nothing it could name, so the member stays ambiguous.
+        b = rm.classify(_record(keywords=["x", "y"]), _record(keywords=["ax"]), _audit(),
+                        amended_paths={"keywords"}, amended_edits={"keywords": [("", "a")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+
+    def test_an_unrecorded_amend_on_the_list_counts_among_its_amends(self):
+        """#3842: a list carrying one recorded and one unrecorded amend is not
+        read as a list with one recorded amend. The member the recorded edit
+        names is the curator's only where that edit is the last; the member
+        it does not name is ambiguous, since the unrecorded amend could have
+        emptied it — whichever order they were recorded in."""
+        before = _record(keywords=["speech", "beta", "gamma"])
+        after = _record(keywords=["speech", "vocal"])
+        recorded = {"disposition": "amend", "path": "keywords", "replace": "beta", "with": "vocal"}
+        cases = (({"disposition": "amend", "path": "keywords"}, True),
+                 ({"disposition": "amend", "path": "keywords", "replace": "", "with": ""}, True),
+                 ({"disposition": "amend", "path": "keywords", "replace": " ", "with": "x"}, True),
+                 ({"disposition": "amend", "path": "keywords"}, False))
+        for unrecorded, recorded_last in cases:
+            with self.subTest(unrecorded=unrecorded, recorded_last=recorded_last):
+                rows = [unrecorded, recorded] if recorded_last else [recorded, unrecorded]
+                record = {"dispositions": rows}
+                b = rm.classify(before, after, None, amended_paths=rm.amended_paths(record),
+                                amended_edits=rm.amend_edits(record))
+                marks = {r["path"]: r for r in b["unsorted_paths"]}
+                self.assertNotIn("curator_amend", marks["keywords[2]"])
+                self.assertTrue(marks["keywords[2]"].get("curator_amend_ambiguous"))
+                if recorded_last:
+                    # The final list attests the recorded edit: beta is the curator's.
+                    self.assertTrue(marks["keywords[1]"].get("curator_amend"))
+                    self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 1))
+                else:
+                    # The last amend's edit is not recorded: nothing can be read.
+                    self.assertTrue(marks["keywords[1]"].get("curator_amend_ambiguous"))
+                    self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        # A caller that passes an unusable pair directly gets the same reading.
+        b = rm.classify(before, after, None, amended_paths={"keywords"},
+                        amended_edits={"keywords": [("", ""), ("beta", "vocal")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 1))
+
+    def test_a_list_before_the_edit_that_cannot_be_rebuilt_is_ambiguous(self):
+        """#3848/#3849 as a class: where no list before the edit can be
+        rebuilt, that is no evidence the edit changed another member, so
+        the deleted member is ambiguous, not left unmarked as the model's.
+        Here two members are dropped from a list Python cannot read back."""
+        d = datetime.date(2020, 1, 1)
+        b = rm.classify(_record(keywords=[d, "voice", "clinic"]), _record(keywords=[d]), _audit(),
+                        amended_paths={"keywords"}, amended_edits={"keywords": [(", 'voice', 'clinic'", "")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        # A member the snapshot never had is admitted as co-removed only
+        # where the last phase output holds it: unattested, 'added' ->
+        # 'x' rebuilds nothing and 'voice' is ambiguous; attested, the
+        # rebuild removes only 'added', so the edit named that member.
+        kw = {"amended_paths": {"keywords"}, "amended_edits": {"keywords": [("added", "x")]}}
+        b = rm.classify(_record(keywords=["voice"]), _record(keywords=["x"]), _audit(), **kw)
+        self.assertEqual(b["unfounded_paths"], [{"path": "keywords[0]", "curator_amend_ambiguous": True}])
+        b = rm.classify(_record(keywords=["voice"]), _record(keywords=["x"]), _audit(),
+                        intermediates=[("reconcile_full", _record(keywords=["voice", "added"]))], **kw)
+        self.assertEqual(b["unfounded_paths"], [{"path": "keywords[0]", "phase": "write"}])
+
+    def test_an_entry_whose_address_is_lost_reads_the_amends_on_it(self):
+        """#3850: the join cannot place the entry, so the amends at its
+        value's path, an ancestor's or a sibling's decide. One whose edit
+        gives what its path holds now from this value marks it; one whose
+        edit gives it from another value names that value; one that cannot
+        be read (no recorded edit, a sibling's path) is ambiguous."""
+        before = _record(creators=[{"name": "Ada"}, {"name": "Bob"}])
+        after = _record(creators=[{"name": ""}])
+        rows = lambda b: {r["path"]: {k: v for k, v in r.items() if k != "path"} for r in b["unfounded_paths"]}
+        b = rm.classify(before, after, _audit(), amended_paths={"creators[0].name"},
+                        amended_edits={"creators[0].name": [("Bob", "")]})
+        self.assertEqual(rows(b), {"creators[0].name": {}, "creators[1].name": {"curator_amend": True}})
+        b = rm.classify(before, after, _audit(), amended_paths={"creators[0].name"},
+                        amended_edits={"creators[0].name": [None]})
+        self.assertEqual(rows(b), {"creators[0].name": {"curator_amend_ambiguous": True},
+                                   "creators[1].name": {"curator_amend_ambiguous": True}})
+        b = rm.classify(_record(creators=[{"name": "Ada", "role": "PI"}]), _record(creators=[{"name": "", "role": ""}]),
+                        _audit(), amended_paths={"creators[0].role"}, amended_edits={"creators[0].role": [("PI", "")]})
+        self.assertEqual(rows(b)["creators[0].name"], {"curator_amend_ambiguous": True})
+        self.assertEqual(rows(b)["creators[0].role"], {"curator_amend": True})
+        # No amend on the entry: the model's, as before.
+        self.assertEqual(rm.classify(before, after, _audit(), amended_paths={"title"})["deleted_curator_amend_ambiguous"], 0)
+
+    def test_a_founded_amended_deletion_is_marked_and_not_counted_unfounded(self):
+        before = _record(description="Old description words.")
+        b = rm.classify(before, _record(description=""), _audit({"slot": "description"}),
+                        amended_paths={"description"})
+        self.assertEqual((b["founded"], b["deleted_curator_amend"], b["deleted_curator_amend_unfounded"]),
+                         (1, 1, 0))
+        self.assertTrue(b["founded_paths"][0]["curator_amend"])
+        unsorted = rm.classify(before, _record(description=""), None, amended_paths={"description"})
+        self.assertEqual((unsorted["deleted_curator_amend"], unsorted["deleted_curator_amend_unfounded"]), (1, None))
+
+    def test_no_snapshot_leaves_the_counts_none(self):
+        b = rm.classify(None, _record(), _audit())
+        self.assertIsNone(b["deleted_curator_amend"])
+        self.assertIsNone(b["deleted_curator_amend_unfounded"])
+
+
+class RecordedListAmends(unittest.TestCase):
+    """#3828: the member marking read against what `d4d review disposition
+    --amend` (#903) actually records. Each amend is made through the
+    command, and `classify` reads the recorded `dispositions` back through
+    `amended_paths` and `amend_edits` — no hand-built path."""
+
+    SNAPSHOT = {"id": RID, "title": "A dataset", "keywords": ["alpha", "beta", "gamma"]}
+
+    def setUp(self):
+        from click.testing import CliRunner
+
+        from data_sheets_schema.cli import review as review_cli
+        self.runner, self.cli = CliRunner(), review_cli.review
+        self.tmp = tempfile.TemporaryDirectory()
+        root = Path(self.tmp.name) / "d4d_concatenated"
+        self.full = root / "claudecode_api" / "L" / "VOICE_d4d.yaml"
+        self.core = root / "claudecode_api_core" / "L"
+        self.full.parent.mkdir(parents=True); self.core.mkdir(parents=True)
+        (self.core / "VOICE_review.yaml").write_text(yaml.safe_dump({"items": [
+            {"id": "slot-001", "verdict": "misread", "evidence": "x"}]}), encoding="utf-8")
+        self.prov = self.core / "VOICE_provenance.yaml"
+        self.prov.write_text("# header\n" + yaml.safe_dump({
+            "run": {"label": "L", "project": "VOICE", "method": "claudecode_api"}}), encoding="utf-8")
+        import data_sheets_schema.provenance as pv
+        self.patches = [mock.patch.object(pv, "CONCAT_DIR", root),
+                        mock.patch("data_sheets_schema.api_runner.validate_outputs", lambda spec: []),
+                        mock.patch("data_sheets_schema.api_runner.validation_block",
+                                   lambda spec, problems, recorded_by, prior=None: {"valid": True}),
+                        mock.patch("data_sheets_schema.backfill_checks.compute", lambda p: {})]
+        for patch in self.patches:
+            patch.start()
+
+    def tearDown(self):
+        for patch in self.patches:
+            patch.stop()
+        self.tmp.cleanup()
+
+    def _amend(self, text: str, path: str, old: str, new: str):
+        """Write the generated record, amend it through #903, and return the
+        command's result, the provenance record and the amended record."""
+        self.full.write_text(text, encoding="utf-8")
+        out = self.runner.invoke(self.cli, ["disposition", "--label", "L", "--project", "VOICE", "--method",
+                                            "claudecode_api", "--item", "slot-001", "--disposition", "amend",
+                                            "--note", "n", "--path", path, "--replace", old, "--with", new,
+                                            "--execute"])
+        return out, yaml.safe_load(self.prov.read_text()), yaml.safe_load(self.full.read_text())
+
+    def _classify(self, record, final, **kw):
+        return rm.classify(self.SNAPSHOT, final, _audit(), amended_paths=rm.amended_paths(record),
+                           amended_edits=rm.amend_edits(record), **kw)
+
+    def test_a_member_path_on_a_list_of_scalars_is_refused_and_the_list_path_recorded(self):
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords:\n- alpha\n- beta\n"
+        out, record, _ = self._amend(text, "keywords[1]", "beta", "beta data")
+        self.assertNotEqual(out.exit_code, 0)
+        self.assertIn("the edit changes ['keywords']", out.output)
+        self.assertNotIn("dispositions", record)
+        out, record, final = self._amend(text, "keywords", "beta", "beta data")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual([(d["path"], d["replace"], d["with"]) for d in record["dispositions"]],
+                         [("keywords", "beta", "beta data")])
+        self.assertEqual(final["keywords"], ["alpha", "beta data"])
+
+    def test_a_recorded_list_amend_marks_the_member_it_changed_and_not_the_models_deletion(self):
+        """The issue's case: the model deleted 'gamma'; the curator amended
+        'beta'. Only 'beta' is the curator's, attributed or not."""
+        cases = (("id: doi:10.1/x\ntitle: A dataset\nkeywords:\n- alpha\n- beta\n", "beta", "delta"),
+                 ("id: doi:10.1/x\ntitle: A dataset\nkeywords:\n- alpha\n- 'beta'\n", "'beta'", "''"))
+        for text, old, new in cases:
+            with self.subTest(old=old):
+                self.prov.write_text("# header\n" + yaml.safe_dump({"run": {"label": "L", "project": "VOICE"}}))
+                out, record, final = self._amend(text, "keywords", old, new)
+                self.assertEqual(out.exit_code, 0, out.output)
+                self.assertEqual(rm.amended_paths(record), frozenset({"keywords"}))
+                b = self._classify(record, final)
+                self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                                 {"keywords[1]": True, "keywords[2]": None})
+                self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+                model = yaml.safe_load(text)
+                b = self._classify(record, final, intermediates=[("reconcile_full", model)])
+                rows = {r["path"]: r for r in b["unfounded_paths"]}
+                self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write",
+                                                       "curator_amend": True})
+                self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+
+    def _flow_list_amend(self, old: str, new: str):
+        """A flow list the model wrote without 'audio' (its own deletion),
+        amended by the curator through #903; the snapshot still has it."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: ['speech', 'voice', 'clinic']\n"
+        out, record, final = self._amend(text, "keywords", old, new)
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": ["speech", "voice", "clinic", "audio"]}
+        model = yaml.safe_load(text)
+        return record, final, snapshot, model
+
+    def test_a_recorded_amend_that_drops_a_flow_list_member_marks_it(self):
+        """#3835: #903 accepts an edit that shortens a flow list — its check
+        compares the list's text, not its length — so the member the edit
+        dropped is the curator's, and the model's own deletion is not."""
+        record, final, snapshot, model = self._flow_list_amend("'voice', 'clinic'", "'clinic'")
+        self.assertEqual(final["keywords"], ["speech", "clinic"])
+        self.assertEqual(rm.amend_edits(record), {"keywords": [("'voice', 'clinic'", "'clinic'")]})
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[3]": None})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", model)], **kw)
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[3]"], {"path": "keywords[3]", "phase": "reconcile_full"})
+
+    def test_a_recorded_amend_that_empties_a_flow_list_marks_every_member_it_held(self):
+        """#3835: `[...]` -> `[]` is accepted by #903; every member the
+        written list held is the curator's deletion, the model's is not."""
+        record, final, snapshot, model = self._flow_list_amend("['speech', 'voice', 'clinic']", "[]")
+        self.assertEqual(final["keywords"], [])
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[0]": True, "keywords[1]": True, "keywords[2]": True, "keywords[3]": None})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (3, 0))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", model)], **kw)
+        self.assertEqual({r["path"]: (r["phase"], r.get("curator_amend")) for r in b["unfounded_paths"]},
+                         {"keywords[0]": ("write", True), "keywords[1]": ("write", True),
+                          "keywords[2]": ("write", True), "keywords[3]": ("reconcile_full", None)})
+
+    def test_a_drop_to_nothing_and_a_list_python_cannot_read_back(self):
+        """#3835: an empty `with` puts the dropped text back anywhere in
+        the final list's text, so every place is tried; a list holding a
+        date has no text Python reads back, and its one changed member is
+        found by putting the deleted member back at an index."""
+        record, final, snapshot, _ = self._flow_list_amend(", 'clinic'", "")
+        self.assertEqual(final["keywords"], ["speech", "voice"])
+        b = rm.classify(snapshot, final, _audit(), amended_paths=rm.amended_paths(record),
+                        amended_edits=rm.amend_edits(record))
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[2]": True, "keywords[3]": None})
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: [2020-01-01, 'voice']\n"
+        out, record, final = self._amend(text, "keywords", "'voice'", "''")
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": [datetime.date(2020, 1, 1), "voice", "audio"]}
+        b = rm.classify(snapshot, final, _audit(), amended_paths=rm.amended_paths(record),
+                        amended_edits=rm.amend_edits(record))
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[2]": None})
+
+    def test_a_dropped_member_that_shares_its_text_with_another_deleted_member_is_ambiguous(self):
+        """#3835 with the rival rule: the edit drops one 'voice', and a
+        second deleted 'voice' could be the one it dropped; unattributed,
+        both are ambiguous. With phases, the model's is no rival (#3818)."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: ['speech', 'voice', 'clinic']\n"
+        out, record, final = self._amend(text, "keywords", "'voice', 'clinic'", "'clinic'")
+        self.assertEqual(out.exit_code, 0, out.output)
+        snapshot = {"id": RID, "title": "A dataset", "keywords": ["speech", "voice", "clinic", "voice"]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), **kw)
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[3]"], {"path": "keywords[3]", "phase": "reconcile_full"})
+
+    def test_an_emptied_list_that_held_a_member_a_later_phase_introduced(self):
+        """#3848: the curator empties a list holding 'voice' from the
+        snapshot and 'added', which a later phase introduced (or an empty
+        member). The rebuild removes that member too. An unpopulated member
+        of the snapshot's list, or one the last phase output holds that the
+        snapshot did not, may be co-removed, so 'voice' is the curator's.
+        With no phase output to attest 'added', nothing rebuilds the list,
+        and 'voice' is ambiguous rather than the model's."""
+        for text, old, members, unattributed in (
+                ("keywords: ['voice', 'added']\n", "['voice', 'added']", ["voice"], (0, 1)),
+                ("keywords: ['voice', '']\n", "['voice', '']", ["voice", ""], (1, 0))):
+            with self.subTest(old=old):
+                out, record, final = self._amend("id: doi:10.1/x\ntitle: A dataset\n" + text, "keywords", old, "[]")
+                self.assertEqual(out.exit_code, 0, out.output)
+                self.assertEqual(final["keywords"], [])
+                snapshot = {"id": RID, "title": "A dataset", "keywords": members}
+                kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+                b = rm.classify(snapshot, final, _audit(), intermediates=[
+                    ("reconcile_full", yaml.safe_load("id: x\n" + text))], **kw)
+                self.assertEqual(b["unfounded_paths"], [{"path": "keywords[0]", "phase": "write",
+                                                         "curator_amend": True}])
+                b = rm.classify(snapshot, final, _audit(), **kw)
+                self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), unattributed)
+
+    def test_a_dropped_member_of_a_list_holding_a_date(self):
+        """#3849: `[2020-01-01, 'voice']` with ", 'voice'" dropped. The text
+        holds `datetime.date(...)`, which Python cannot read back, so the
+        dropped member is found by inserting it back into the final list."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: [2020-01-01, 'voice']\n"
+        out, record, final = self._amend(text, "keywords", ", 'voice'", "")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual(final["keywords"], [datetime.date(2020, 1, 1)])
+        snapshot = {"id": RID, "title": "A dataset", "keywords": [datetime.date(2020, 1, 1), "voice", "audio"]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        rows = {r["path"]: r for r in b["unfounded_paths"]}
+        self.assertEqual(rows["keywords[1]"], {"path": "keywords[1]", "phase": "write", "curator_amend": True})
+        self.assertEqual(rows["keywords[2]"], {"path": "keywords[2]", "phase": "reconcile_full"})
+
+    def test_an_amend_that_empties_an_entrys_identifying_value(self):
+        """#3850: `creators[0].name` 'Ada' -> ''. The emptied name was the
+        entry's identity, so the join drops the entry and neither path
+        reaches the other; the recorded edit, applied to 'Ada', gives what
+        the amend's path holds now, so the deletion is the curator's."""
+        text = "id: doi:10.1/x\ntitle: A dataset\ncreators:\n- name: 'Ada'\n"
+        out, record, final = self._amend(text, "creators[0].name", "Ada", "")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual(final["creators"], [{"name": ""}])
+        snapshot = {"id": RID, "title": "A dataset", "creators": [{"name": "Ada"}]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        self.assertEqual(b["unfounded_paths"], [{"path": "creators[0].name", "phase": "write",
+                                                 "curator_amend": True}])
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
+
+    def test_no_scalar_member_path_can_be_recorded_even_in_a_mixed_list(self):
+        """`populated_leaves` never reads a scalar member of a list as a
+        leaf, so a member path is refused in a list that also holds a
+        mapping too: the list path is the only form a member amend takes."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nrelated:\n- name: n\n- beta\n"
+        out, record, _ = self._amend(text, "related[1]", "beta", "delta")
+        self.assertNotEqual(out.exit_code, 0)
+        self.assertIn("the edit changes nothing", out.output)
+        self.assertNotIn("dispositions", record)
+
+
+class RunSchemaTables(unittest.TestCase):
+    """#3702: the enum-alias form is read against the tables of the merged
+    schema the run recorded, not today's, where its bytes can be recovered."""
+
+    SCHEMA = {"enums": {"RelType": {"permissible_values": {"bar": {"aliases": ["Foo"]}, "baz": None}}},
+              "classes": {"Rel": {"attributes": {"relationship_type": {"range": "RelType"}}}}}
+
+    def test_the_table_is_the_runners_on_todays_schema(self):
+        from data_sheets_schema.api_runner import _enum_aliases
+        from data_sheets_schema.schema_cache import load_schema
+        doc = load_schema(Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))
+        self.assertEqual(rm.enum_alias_table(doc), _enum_aliases())
+        # And the one-line rewrite is the runner's, on its own table.
+        from data_sheets_schema.api_runner import normalise_enum_aliases
+        for line in ("relationship_type: IsDerivedFrom", "  - relationship_type: references",
+                     "title: References", "relationship_type: not a value"):
+            self.assertEqual(rm._rewrite_enum_line(line, _enum_aliases()), normalise_enum_aliases(line), line)
+
+    def test_a_slot_ranged_on_two_enums_is_dropped(self):
+        doc = {"enums": {"A": {"permissible_values": {"x": None}}, "B": {"permissible_values": {"y": None}}},
+               "classes": {"C": {"attributes": {"s": {"range": "A"}, "t": {"range": "A"}}},
+                           "D": {"attributes": {"s": {"range": "B"}, "u": {"range": "string"}}}}}
+        self.assertEqual(rm.enum_alias_table(doc), {"t": {"x": "x"}})
+
+    def test_normaliser_form_reads_the_tables_it_is_given(self):
+        run = rm.enum_alias_table(self.SCHEMA)
+        self.assertEqual(rm.normaliser_form("related[0].relationship_type", "Foo", "bar", enum_aliases=run),
+                         "enum_alias")
+        self.assertIsNone(rm.normaliser_form("related[0].relationship_type", "Foo", "bar"))
+        # Today's alias is not the run's where the run's schema did not declare it.
+        self.assertEqual(rm.normaliser_form("relationship_type", "IsDerivedFrom", "derives_from"), "enum_alias")
+        self.assertIsNone(rm.normaliser_form("relationship_type", "IsDerivedFrom", "derives_from",
+                                             enum_aliases=run))
+        # The temporal form reads no schema table.
+        self.assertEqual(rm.normaliser_form("issued", "2024-05-01", "2024-05-01T00:00:00Z", enum_aliases={}),
+                         "temporal")
+        before = _record(related_datasets=[{"id": "x#r", "relationship_type": "Foo"}])
+        after = _record(related_datasets=[{"id": "x#r", "relationship_type": "bar"}])
+        self.assertEqual(rm.classify(before, after, _audit(), enum_aliases=run)["rewritten_normaliser_by"]["enum_alias"], 1)
+        self.assertEqual(rm.classify(before, after, _audit())["rewritten_normaliser"], 0)
+
+    def _schema_file(self, tmp):
+        path = Path(tmp) / "schema_all.yaml"
+        path.write_text(yaml.safe_dump(self.SCHEMA))
+        data = path.read_bytes()
+        return path, hashlib.sha256(data).hexdigest(), hashlib.md5(data).hexdigest()
+
+    def test_run_enum_aliases_reads_the_run_schema_on_disk_by_either_hash(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, md5 = self._schema_file(tmp)
+            for schema in ({"full_path": str(path), "full_sha256": sha}, {"full_path": str(path), "full_md5": md5}):
+                tables, basis = rm.run_enum_aliases({"schema": schema})
+                self.assertEqual(tables, {"relationship_type": {"Foo": "bar", "foo": "bar", "bar": "bar",
+                                                                "baz": "baz"}})
+                self.assertEqual(basis["source"], "the run's schema, on disk")
+
+    def test_an_md5_pinned_record_whose_bytes_changed_on_disk_goes_to_git(self):
+        """#3803: an md5-only record is accepted from disk only where the md5
+        matches; changed bytes fall through to the committed version."""
+        from data_sheets_schema.provenance import GitUnavailable
+        with tempfile.TemporaryDirectory() as tmp:
+            path, _sha, md5 = self._schema_file(tmp)
+            data = path.read_bytes()
+            path.write_text(yaml.safe_dump({"enums": {}, "classes": {}}))     # not the run's bytes
+            record = {"schema": {"full_path": str(path), "full_md5": md5}}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            return_value=(data, {"commit": "abc123", "matched_on": ["md5"]})) as got:
+                tables, basis = rm.run_enum_aliases(record)
+            got.assert_called_once_with(str(path), md5=md5, sha256=None)
+            self.assertEqual(basis["source"], "the run's schema, a git blob")
+            self.assertEqual(tables["relationship_type"]["Foo"], "bar")
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=GitUnavailable("shallow clone")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual((basis["source"], basis["md5"]), ("today's schema", md5))
+
+    def test_git_that_cannot_be_started_falls_back_to_todays_tables(self):
+        """#3851: an OSError launching git (not installed, not on PATH) is
+        the documented fallback with its reason, not a crash."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = self._schema_file(tmp)
+            path.unlink()
+            record = {"schema": {"full_path": str(path), "full_sha256": sha}}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=FileNotFoundError(2, "No such file or directory", "git")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual((basis["source"], basis["sha256"]), ("today's schema", sha))
+            self.assertIn("git could not be run (FileNotFoundError", basis["reason"])
+
+    def test_run_enum_aliases_recovers_a_committed_version_or_says_why_not(self):
+        from data_sheets_schema.provenance import GitUnavailable
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = self._schema_file(tmp)
+            data = path.read_bytes()
+            record = {"schema": {"full_path": str(path), "full_sha256": "0" * 64}}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            return_value=(data, {"commit": "abc123", "matched_on": ["sha256"]})) as got:
+                tables, basis = rm.run_enum_aliases(record)
+            got.assert_called_once_with(str(path), md5=None, sha256="0" * 64)
+            self.assertEqual(tables["relationship_type"]["Foo"], "bar")
+            self.assertEqual((basis["source"], basis["commit"]), ("the run's schema, a git blob", "abc123"))
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual(basis["source"], "today's schema")
+            self.assertIn("no committed version", basis["reason"])
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=GitUnavailable("shallow clone")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertIn("git cannot answer (shallow clone)", basis["reason"])
+        for record in (None, {}, {"schema": {"full_path": "x.yaml"}}, {"schema": {"full_sha256": sha}}):
+            tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual(basis, {"source": "today's schema",
+                                     "reason": "the record names no merged schema by path and hash"})
 
 class LowConfidence(unittest.TestCase):
     """#3367: a flattening a coincidence could make — a needle of one or two
@@ -1095,6 +1716,109 @@ class OnDisk(unittest.TestCase):
         self.assertIn("unfounded, by the phase that removed them: reconcile_full 4", r.output)
         self.assertEqual(json.loads(j.output)["unfounded"], 4)
 
+
+    def test_for_record_reads_the_run_schema_and_marks_an_amended_deletion(self):
+        """#3702 on disk: the record's `schema` block names the tables the
+        enum form is read against, and its amend disposition marks the
+        value it emptied; the CLI names both."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        with tempfile.TemporaryDirectory() as tmp:
+            prov = self._run(tmp)
+            schema = Path(tmp) / "schema_all.yaml"
+            schema.write_text(yaml.safe_dump(RunSchemaTables.SCHEMA))
+            snap = prov.parent / "intermediate" / "VOICE_full.yaml"
+            doc = yaml.safe_load(snap.read_text())
+            doc["related_datasets"] = [{"id": "x#r", "relationship_type": "Foo"}]
+            snap.write_text(yaml.safe_dump(doc))
+            for name in ("VOICE_reconcile_full.yaml", "VOICE_repair_full_r1.yaml"):
+                phase = prov.parent / "intermediate" / name
+                d = yaml.safe_load(phase.read_text())
+                d["related_datasets"] = [{"id": "x#r", "relationship_type": "bar"}]
+                phase.write_text(yaml.safe_dump(d))
+            final = prov.parent.parent.parent / "claudecode_api" / "L" / "VOICE_d4d.yaml"
+            final.write_text(yaml.safe_dump(_record(description="", keywords="a1, b2",
+                                                    related_datasets=[{"id": "x#r", "relationship_type": "bar"}])))
+            prov.write_text(yaml.safe_dump({
+                "run": {"project": "VOICE", "label": "L"},
+                "schema": {"full_path": str(schema), "full_sha256": hashlib.sha256(schema.read_bytes()).hexdigest()},
+                "dispositions": [{"item": "slot-001", "disposition": "amend", "path": "description"}]}))
+            b = rm.for_record(prov)
+            with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                  "--label", "L", "--project", "VOICE"])
+        self.assertEqual(b["artifacts"]["enum_alias_tables"]["source"], "the run's schema, on disk")
+        self.assertEqual(b["rewritten_normaliser_by"]["enum_alias"], 1)
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_unfounded"]), (1, 0))
+        self.assertTrue(next(x for x in b["founded_paths"] if x["path"] == "description")["curator_amend"])
+        self.assertEqual(r.exit_code, 0, r.output)
+        self.assertIn("of the deletions, 1 a curator's amend", r.output)
+
+    def test_the_cli_names_an_amended_deletion_and_whose_it_is(self):
+        """An amend on a value the write emptied is the curator's; one on a
+        value reconcile_full had already emptied stays the model's (#3725)."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        out = {}
+        for emptied_by in ("write", "reconcile_full"):
+            with tempfile.TemporaryDirectory() as tmp:
+                prov = self._run(tmp, audit=False)
+                inter = prov.parent / "intermediate"
+                names = ["VOICE_repair_full_r1.yaml"] + (["VOICE_reconcile_full.yaml"]
+                                                         if emptied_by == "reconcile_full" else [])
+                for f in [*(inter / n for n in names),
+                          prov.parent.parent.parent / "claudecode_api" / "L" / "VOICE_d4d.yaml"]:
+                    d = yaml.safe_load(f.read_text())
+                    d["description"] = ""
+                    f.write_text(yaml.safe_dump(d))
+                if emptied_by == "write":
+                    d = yaml.safe_load((inter / "VOICE_repair_full_r1.yaml").read_text())
+                    d["description"] = "d"
+                    (inter / "VOICE_repair_full_r1.yaml").write_text(yaml.safe_dump(d))
+                prov.write_text(yaml.safe_dump({"run": {"project": "VOICE", "label": "L"}, "dispositions": [
+                    {"item": "slot-001", "disposition": "amend", "path": "description"}]}))
+                b = rm.for_record(prov)
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                      "--label", "L", "--project", "VOICE"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            out[emptied_by] = (b["deleted_curator_amend"], r.output)
+        self.assertEqual(out["write"][0], 1)
+        self.assertIn("? deleted, unsorted description (write, a curator's amend)", out["write"][1])
+        self.assertEqual(out["reconcile_full"][0], 0)
+        self.assertIn("? deleted, unsorted description (reconcile_full, amended by a curator after the model "
+                      "removed it)", out["reconcile_full"][1])
+
+    def test_for_record_reads_the_amends_recorded_edit_for_a_list_member(self):
+        """#3802 on disk, in the form #903 records (#3828): the disposition
+        at `keywords` names no member, and its `replace`/`with` names the
+        one it emptied; without them the member is ambiguous, and the CLI
+        says so rather than naming the curator."""
+        import click.testing
+        from data_sheets_schema.cli.review import review as review_cli
+        out = {}
+        for recorded in (True, False):
+            with tempfile.TemporaryDirectory() as tmp:
+                prov = self._run(tmp, audit=False)
+                inter = prov.parent / "intermediate"
+                for f in (inter / "VOICE_reconcile_full.yaml", inter / "VOICE_repair_full_r1.yaml"):
+                    f.write_text(yaml.safe_dump(_record(description="d", keywords=["a1", "b2"])))
+                (prov.parent.parent.parent / "claudecode_api" / "L" / "VOICE_d4d.yaml").write_text(
+                    yaml.safe_dump(_record(description="d", keywords=["", "b2"])))
+                amend = {"item": "slot-001", "disposition": "amend", "path": "keywords",
+                         **({"replace": "a1", "with": ""} if recorded else {})}
+                prov.write_text(yaml.safe_dump({"run": {"project": "VOICE", "label": "L"}, "dispositions": [amend]}))
+                b = rm.for_record(prov)
+                with mock.patch("data_sheets_schema.cli.review._provenance", lambda m, l, p: prov):
+                    r = click.testing.CliRunner().invoke(review_cli, ["removals", "--method", "claudecode_api",
+                                                                      "--label", "L", "--project", "VOICE"])
+            self.assertEqual(r.exit_code, 0, r.output)
+            out[recorded] = (b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"], r.output)
+        self.assertEqual(out[True][:2], (1, 0))
+        self.assertIn("? deleted, unsorted keywords[0] (write, a curator's amend)", out[True][2])
+        self.assertEqual(out[False][:2], (0, 1))
+        self.assertIn("? deleted, unsorted keywords[0] (write, an amend on its list may have emptied it "
+                      "(ambiguous))", out[False][2])
 
 class CliPastEnd(unittest.TestCase):
     def test_the_cli_reports_finding_paths_past_the_end(self):

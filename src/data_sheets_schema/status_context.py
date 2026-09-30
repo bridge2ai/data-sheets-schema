@@ -412,6 +412,7 @@ HEADING_WINDOW = 30         # non-blank lines scanned above a snippet for a stat
 HEADING_MAX_CHARS = 60
 HEADING_MAX_WORDS = 8
 PROSE_LINE_CHARS = 160      # a line this long is a paragraph, and ends a block
+PIECE_MEMO_MAX = 16384      # context pieces whose markers a view keeps; the oldest is dropped past it (#3769)
 
 
 def _heading_like(line: str) -> bool:
@@ -499,6 +500,7 @@ class BundleView:
             self.chunks[c["id"]] = (lo, hi, c.get("source"))
         self._norm: dict[tuple[str, str], tuple[str, list[int]] | None] = {}
         self._hays: dict[str, tuple[str, str, str, str]] = {}
+        self._pieces: dict[tuple[int, int], tuple[tuple[str, str, int], ...]] = {}
 
     # --- lines
     def line_of(self, off: int) -> int:
@@ -867,11 +869,7 @@ class BundleView:
             via, own = "sentence", s_start
         found: dict[str, dict[str, Any]] = {}
         for lo, hi in pieces:
-            piece = self.text[lo:hi]
-            mapped = normalised_offsets(piece)
-            norm, offs = mapped if mapped is not None else (rc.normalise(piece), None)
-            for cls, term_, off in markers(norm):
-                at = lo + (offs[off] if offs is not None else 0)
+            for cls, term_, at in self._piece_markers(lo, hi):
                 dist = a - at if at < a else max(0, at - b)
                 if cls not in found or dist < found[cls]["_dist"]:
                     found[cls] = {"term": term_, "via": via, "source_line": self.line_of(at), "_dist": dist}
@@ -889,6 +887,32 @@ class BundleView:
             found.setdefault(cls, {"term": term_, "via": heading["via"], "source_line": heading["line"],
                                    "governor": heading["text"]})
         return found
+
+    def _piece_markers(self, lo: int, hi: int) -> tuple[tuple[str, str, int], ...]:
+        """(class, term, bundle offset) for every status marker in the text
+        [lo, hi) — the reading `context` makes of each piece: the markers of
+        its `normalised_offsets` fold, each at the raw offset it came from
+        (at `lo` where the replay refuses the text and `receipts.normalise`
+        is read instead).
+
+        Memoised on the view (#3769): many receipts of one bundle version
+        quote the same passages, and a shared view (`_shared_view`) serves
+        them all, so a piece is folded once per process. The reading is a
+        function of the view's text and the span, so a hit is what a fresh
+        view reads; at most `PIECE_MEMO_MAX` pieces are kept, the oldest
+        dropped first."""
+        key = (lo, hi)
+        hit = self._pieces.get(key)
+        if hit is not None:
+            return hit
+        piece = self.text[lo:hi]
+        mapped = normalised_offsets(piece)
+        norm, offs = mapped if mapped is not None else (rc.normalise(piece), None)
+        read = tuple((cls, term, lo + (offs[off] if offs is not None else 0)) for cls, term, off in markers(norm))
+        if len(self._pieces) >= PIECE_MEMO_MAX:
+            del self._pieces[next(iter(self._pieces))]
+        self._pieces[key] = read
+        return read
 
     def lost_classes(self, cid: str, snippet: str) -> tuple[dict[str, dict[str, Any]] | None, int, bool]:
         """({class: detail} carried by the context of every occurrence and not
@@ -1488,8 +1512,9 @@ _RECOVERED: dict[tuple[str, ...], tuple[bytes, dict[str, Any]] | None] = {}
 _MANIFESTS: dict[tuple[str, ...], dict[str, Any]] = {}
 #: And the `BundleView` of those bytes under that chunk layout, which holds
 #: each chunk's haystack forms and offset maps once built: the larger cost
-#: of a corpus walk (#3709). A view changes after construction only by
-#: filling those memos, which are functions of the chunk text.
+#: of a corpus walk (#3709), and each context piece's markers (#3769). A
+#: view changes after construction only by filling those memos, which are
+#: functions of the chunk text, or of the text and the piece's span.
 _VIEWS: dict[tuple[str, ...], BundleView] = {}
 
 

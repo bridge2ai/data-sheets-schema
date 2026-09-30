@@ -683,6 +683,72 @@ def sssom_justification_pattern():
     return re.compile(slots["mapping_justification"]["pattern"])
 
 
+class TestNoRowNamesAPerson(_Committed):
+    """#2971: every row of every SSSOM table carried ``author_id``
+    ``https://orcid.org/0000-0000-0000-0000``, a well-formed ORCID naming
+    nobody. The owner's decision: no person on any row. A curated row
+    (``mapping_source`` ttl or schema) leaves ``author_id`` empty, since
+    nobody is named as the curator, and every other row is credited to the
+    generating script through SSSOM's ``mapping_tool``. The curated slots are
+    computed from the inputs, not read from the table."""
+
+    PLACEHOLDER = "0000-0000-0000-0000"
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        generated = study_generator().generate_comprehensive_sssom("2001-01-01")
+        cls.tables = {"comprehensive": cls.comp, "uri": cls.uri,
+                      "generated": {r["subject_id"][len("d4d:"):]: r
+                                    for r in generated}}
+        cls.curated = curated_sources(cls.schema, cls.names)
+        # Every SSSOM table the repository commits, the legacy
+        # property- and URI-level ones and the structural one included.
+        cls.all_tables = sorted(
+            set((REPO / "src/data_sheets_schema/semantic_exchange").glob("*sssom*.tsv"))
+            | set((REPO / "data/semantic_exchange").glob("*sssom*.tsv")))
+
+    def test_the_repository_commits_the_tables_this_checks(self):
+        names = {p.name for p in self.all_tables}
+        for name in (COMP.name, URI.name, "d4d_rocrate_sssom_mapping.tsv",
+                     "d4d_rocrate_sssom_mapping_subset.tsv",
+                     "d4d_rocrate_sssom_uri_mapping.tsv",
+                     "d4d_rocrate_structural_mapping.sssom.tsv"):
+            self.assertIn(name, names)
+
+    def test_no_table_carries_the_placeholder_or_an_author(self):
+        for path in self.all_tables:
+            with self.subTest(table=path.name):
+                text = path.read_text(encoding="utf-8")
+                self.assertNotIn(self.PLACEHOLDER, text)
+                self.assertNotIn("orcid.org", text)
+                for row in read_table(text):
+                    self.assertEqual(row.get("author_id") or "", "",
+                                     row.get("subject_id"))
+
+    def test_the_tool_is_credited_exactly_where_no_curated_source_speaks(self):
+        credited = 0
+        for table, rows in self.tables.items():
+            for slot, row in sorted(rows.items()):
+                with self.subTest(table=table, slot=slot):
+                    self.assertEqual(row["author_id"], "")
+                    if slot in self.curated:
+                        self.assertEqual(row["mapping_tool"], "")
+                    else:
+                        credited += 1
+                        self.assertEqual(row["mapping_tool"], gcs.MAPPING_TOOL)
+                        self.assertTrue(row["mapping_tool"].endswith(
+                            "src/semantic_exchange/generate_comprehensive_sssom.py"))
+        self.assertGreaterEqual(credited, 3 * 100, "too few uncurated rows to test")
+
+    def test_the_tool_column_follows_author_id(self):
+        for cls in (gcs.ComprehensiveSSSOMGenerator,
+                    gcsu.ComprehensiveURISSSOMGenerator):
+            with self.subTest(generator=cls.__name__):
+                i = cls.FIELDNAMES.index("author_id")
+                self.assertEqual(cls.FIELDNAMES[i + 1], "mapping_tool")
+
+
 class TestStatusRowsUseSSSOMsNoMatchForm(_Committed):
     """#3361: the ``free_text``, ``novel_d4d`` and ``unmapped`` rows were
     written with ``semapv:UnmappedProperty`` / ``semapv:UnmappableProperty``

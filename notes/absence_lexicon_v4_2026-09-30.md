@@ -134,6 +134,15 @@ construction row (`absorbed`) lies inside a longer v4 match. It recovers all
 are in class, v4 keeps 272 of 283 (96.1%) of the in-class matches v2 had,
 against v3's 248 (87.6%); like v3's figure, an upper bound.
 
+At the precision #3793 measured on v3's kept matches (45 of 50 in class,
+90.0%, Wilson 95% interval 78.6% to 95.7%), which carries to the 248 v3
+matches v4 still ends at, with the 28 recovered rows as judged, v4 keeps an
+estimated 247.2 in-class matches: a recall of this pattern relative to v2 of
+an estimated **95.7%** (95.2% to 96.0%), against v3's 86.4%, and a precision
+of 89.6% (79.4% to 94.6%) over its 276 matches. That is a stratified estimate,
+not a draw of v4's own matches, and the interval is the kept draw's sampling
+error alone (#3895; the note's "v4 at the measured precision" section).
+
 What v4 admits besides:
 
 - 2 borderline source statements through the unbounded window (judgements

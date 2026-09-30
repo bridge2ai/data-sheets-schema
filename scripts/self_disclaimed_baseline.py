@@ -26,11 +26,16 @@ The versions table counts the same records under every version in
 effect on the corpus is the diff of the regenerated note. Moving the detail
 tables to it is a deliberate change of `LEXICON_VERSION`.
 
-A record is parsed as `d4d review self-disclaimed` parses it: one with
-duplicate mapping keys is refused and listed as unreadable (#1029). The
-refusal rule is `duplicate_keys`' own; only the parser differs, libyaml's
-where PyYAML has it, since the pure-Python parse of the pinned files took
-about a minute.
+A record is parsed by the function `d4d review self-disclaimed` parses it
+with, `evidence_assertions.load_record`: one with duplicate mapping keys, or
+that the CLI's YAML grammar rejects, is refused and listed as unreadable
+(#1029, #3837). The script keeps no parser of its own, so it cannot drift from
+the CLI's at the grammar's edges, where libyaml and PyYAML's pure-Python
+scanner disagree in both directions (a tab in a plain scalar: libyaml loads
+it, the CLI refuses it; a byte-order mark before a key: libyaml refuses it,
+the CLI loads it), and it follows the CLI to any other loader. The price is
+the pure-Python parse: about 46 s of CPU over the pinned records, against
+13 s on libyaml (2026-09-30).
 
 The note is regenerated, never edited by hand. A corpus-lane test rebuilds it
 from the pinned files and fails when a pinned file changed or is gone, or
@@ -55,7 +60,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-from data_sheets_schema import duplicate_keys  # noqa: E402
+from data_sheets_schema import evidence_assertions  # noqa: E402
 from data_sheets_schema import receipts  # noqa: E402
 from data_sheets_schema import self_disclaimed as sd  # noqa: E402
 
@@ -73,7 +78,6 @@ PR1_METHODS = ("claudecode_agent", "claudecode_api")
 RETAINED = "self_disclaimed_retained"
 RP_RETAINED = "role_predicate_retained"
 _SHA256 = re.compile(r"[0-9a-f]{64}")
-_LOADER = duplicate_keys.FAST_LOADER
 
 
 class Stale(Exception):
@@ -82,34 +86,23 @@ class Stale(Exception):
 
 
 def load_record(raw: bytes) -> dict:
-    """A record parsed as the CLI parses it (`evidence_assertions.load_record`),
-    or ValueError: not UTF-8, not YAML, a repeated key, or not a mapping.
+    """A record parsed as the CLI parses it, by the CLI's own function
+    (`evidence_assertions.load_record`, #3837), or ValueError: not UTF-8, not
+    YAML, a repeated key, or not a mapping.
 
-    The duplicate-key rule is `duplicate_keys.find_duplicate_keys` (`<<`
-    merges are not duplicates; `true` and `True` are one key), run on a node
-    tree libyaml composes (#3704), and the value is loaded by libyaml's safe
-    loader. The scan is strict: a record it cannot check is refused, never
-    loaded. One nested past the interpreter's recursion limit is refused with
-    ValueError, where the CLI's pure-Python `safe_load` raises RecursionError
-    on the same bytes; a non-strict scan would have passed a duplicate key it
-    never reached (#3799). The scan refuses such a record before libyaml
-    composes it, because libyaml's composer recurses on the C stack and, some
-    tens of thousands of levels down, crashes the process instead of raising
-    (#3817)."""
+    The CLI decodes the bytes as UTF-8 and hands the text to that function,
+    and so does this. Its `yaml.YAMLError` becomes ValueError naming the
+    error's type. One nested past the interpreter's recursion limit is refused
+    with ValueError, where the CLI's pure-Python `safe_load` raises
+    RecursionError on the same bytes; the CLI's duplicate-key scan cannot
+    reach such a record's keys either (#3799). The pure-Python loader recurses
+    on the Python stack, so no depth crashes the process (#3817)."""
     try:
-        text = raw.decode("utf-8")
-        try:
-            found = duplicate_keys.find_duplicate_keys(text, loader=_LOADER, strict=True)
-        except RecursionError as exc:
-            raise ValueError("artifact nests past the recursion limit; its duplicate keys cannot be checked") from exc
-        if found:
-            raise ValueError("artifact has duplicate YAML mapping keys; its location is ambiguous")
-        value = yaml.load(text, Loader=_LOADER)   # noqa: S506 (a safe loader)
+        return evidence_assertions.load_record(raw.decode("utf-8"))
+    except RecursionError as exc:
+        raise ValueError("artifact nests past the recursion limit; its duplicate keys cannot be checked") from exc
     except (UnicodeDecodeError, yaml.YAMLError) as exc:
         raise ValueError(type(exc).__name__) from exc
-    if not isinstance(value, dict):
-        raise ValueError("artifact must be a YAML mapping")
-    return value
 
 
 def versions() -> list[int]:

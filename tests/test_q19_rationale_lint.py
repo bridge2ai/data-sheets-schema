@@ -1549,7 +1549,7 @@ def test_an_absence_stated_as_absence_omits_or_unset_is_an_empty_slot_reason(fie
 def test_an_absence_named_as_a_noun_or_state_is_not_recognised(note):
     """#3544, a measurement: committed evaluation text the vocabulary was
     not written against says a slot is absent in these forms, and the
-    closed list does not read them (11 of the 29 misses the module
+    closed list does not read them (11 of the 31 misses the module
     docstring counts). Forms that read them were withdrawn from PR #3654
     after three review rounds each found a slot named as credit read as an
     empty-slot reason (#3668, #3680, #3694); widening the list is a design
@@ -1856,6 +1856,15 @@ _UNRECOGNISED_PLACEMENTS = [
     "stand in for parent_datasets",
     "residing in prose rather than in the designated structured fields",
     "parent_datasets is arguably satisfied semantically",
+    # Credit until the ordered test's step 2 was asked of the 111 credit
+    # sentences (#3838). Each says where a slot's content is instead, in so
+    # many words: the first follows "parent_datasets is absent." in its
+    # issue (VOICE 2026-09-04f API rep1, rubric20 issues_detected[5]); the
+    # second lists the related_datasets edges "in place of a parent_datasets
+    # slot" in AI_READI v8 rep2's Q19 evidence (09-11 reference). Both are
+    # misses: neither carries an `_EMPTINESS` word.
+    "The derivation is carried instead by was_derived_from (narrative)",
+    "in place of a parent_datasets slot",
 ]
 
 #: The absences the #3544 measurement found named as a noun or a state
@@ -1881,7 +1890,11 @@ _UNRECOGNISED_NAMED_ABSENCES = [
 ]
 
 #: The rest of the hand-read sentences that are not credit or a description
-#: of a populated slot (#3669), by class: a fragment of each.
+#: of a populated slot (#3669), by class: a fragment of each. These were
+#: classed before the module docstring's ordered test existed; steps 1 and 2
+#: (named absence, then placement) were re-asked of every one, against its
+#: own rating, and none moved (#3838). Where the answer was closest it is
+#: noted beside the pin.
 _HAND_READ_NOT_CREDIT = {
     # An absence the list does not recognise that is not a placement.
     "unrecognised_absence": [
@@ -1889,11 +1902,33 @@ _HAND_READ_NOT_CREDIT = {
         "parent_datasets logged as a low-severity completeness gap",
     ],
     # How many designated fields are populated, naming no absent slot.
+    # Step 1: "four of the five ... are populated" implies a fifth that is
+    # not, but names neither it nor its absence; each quality note says what
+    # is missing in its next sentence, with an `_EMPTINESS` word
+    # ("future_use_impacts is empty"; "no acquisition window is given")
+    # (#3838).
     "count": [
         "Four of the five designated fields are populated and the guidance",
         "Four of the five designated fields are populated with genuinely",
     ],
-    # A criticism of what a populated slot holds.
+    # A criticism of what a populated slot holds. Step 2 was re-asked of each
+    # (#3838) and none says where a slot's content is instead:
+    # - "was_derived_from is present but as prose ... rather than an
+    #   identifier" (AI_READI 2026-09-04g API rep2, Q19 evidence) says what
+    #   the slot holds and in what form, not that its content is elsewhere.
+    #   Its rating says the link to fairhub.2 "is recoverable only from
+    #   related_datasets", a placement, in a sentence of its own; this one
+    #   names no other holder, where "keeping the study-name prose in notes"
+    #   among the recommendations was a criticism for the same reason;
+    # - "The record discloses this, but the structured field understates the
+    #   standards landscape" (CHORUS v7 rep1, rubric10 cborg): "this" is the
+    #   collapse of three standards into OTHER, which its rating says
+    #   source_caveats discloses. That is a caveat about a populated slot's
+    #   value, not the slot's content held elsewhere, as "keep the
+    #   alternative reading in source_caveats" was not;
+    # - the two institution sentences and the FAIRhub data-entry sentence
+    #   object to populated attributions; the conflict is disclosed in the
+    #   caveats, an alternative to the value and not its content elsewhere.
     "criticism": [
         "Institutional attribution is contested in the structured fields themselves",
         "Responsible-institution conflict is recorded but left unresolved",
@@ -1901,7 +1936,11 @@ _HAND_READ_NOT_CREDIT = {
         "FAIRhub data-entry error propagated into two structured slots",
         "was_derived_from is present but as prose",
     ],
-    # What was_derived_from records, rather than a parent dataset.
+    # What was_derived_from records, rather than a parent dataset. Each says
+    # what the populated slot holds; the absence of related_datasets or
+    # parent_datasets is stated elsewhere in the same sub-element, with an
+    # `_EMPTINESS` word ("related_datasets: absent", "No parent_datasets and
+    # no related_datasets"), not in these (#3838).
     "qualification": [
         "was_derived_from carries source-system provenance rather than",
         "was_derived_from describes source systems rather than a parent dataset",
@@ -2196,15 +2235,16 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     133 committed ratings, every sentence naming a slot carries an
     `_EMPTINESS` word but two, which say the slot is populated. Outside
     them, in text the vocabulary was not written against, the sentences
-    naming a slot with no `_EMPTINESS` word are 155 read by hand: 29
-    absences the list misses (the 11 named absences and 16 placements
+    naming a slot with no `_EMPTINESS` word are 155 read by hand: 31
+    absences the list misses (the 11 named absences and 18 placements
     above, and the two of `_HAND_READ_NOT_CREDIT`), the other classes of
-    `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 111 that are
-    credit (#3669); and 122 a leading-verb regex sorts as recommendations,
+    `_HAND_READ_NOT_CREDIT`, each pinned by a fragment, and 109 that are
+    credit (#3669; two of the 111 first read as credit are placements under
+    the ordered test's step 2, #3838); and 122 a leading-verb regex sorts as recommendations,
     read by hand too (#3747): 64 more misses (a named absence and 63
     placements), 18 criticisms and 40 requests, each pinned by a fragment
     in `_RECOMMENDATIONS_READ` to the class the module docstring's ordered
-    test gives it (#3829, #3836). 93 of the 277 state an absence the list
+    test gives it (#3829, #3836). 95 of the 277 state an absence the list
     misses.
     The list is main's; this measures it and changes nothing (#3544)."""
     from data_sheets_schema import q19_rationale_lint as lint
@@ -2285,7 +2325,15 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
             hits = [s for s in read if (s == fragment if kind == "bare_name" else fragment in s)]
             assert len(hits) == 1, (kind, fragment)
             classified += hits
-    assert len(set(classified)) == len(classified) == 44
+    assert len(set(classified)) == len(classified) == 46
+    # 109 left are credit: 155 less the 11, 18 and 17 pinned above (#3838).
+    assert len(read) - len(classified) == 109
+    # The classes are the module docstring's counts, so a pin moved from one
+    # class to another fails here, as a recommendation's does above.
+    assert (len(_UNRECOGNISED_NAMED_ABSENCES), len(_UNRECOGNISED_PLACEMENTS)) == (11, 18)
+    assert {kind: len(fragments) for kind, fragments in _HAND_READ_NOT_CREDIT.items()} == {
+        "unrecognised_absence": 2, "count": 2, "criticism": 5, "qualification": 4,
+        "bare_name": 2, "criterion": 2}
     # None of them is read as an empty-slot reason: the gate reads
     # `_EMPTINESS` words only, as on main.
     for sentence in classified[:len(_UNRECOGNISED_NAMED_ABSENCES)]:

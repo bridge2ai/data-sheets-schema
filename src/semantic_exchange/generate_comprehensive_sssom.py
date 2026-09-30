@@ -469,6 +469,30 @@ NO_TERM_PREDICATE = 'skos:exactMatch'
 NO_TERM_JUSTIFICATION = 'semapv:UnspecifiedMatching'
 
 
+#: The sources whose rows a curated input declares: a TTL triple or a schema
+#: declaration. Every other source (``recommendations``, ``heuristic``,
+#: ``none``) is this generator's resolution.
+CURATED_SOURCES = ('ttl', 'schema')
+
+#: SSSOM's ``mapping_tool`` for a row the generator decided rather than a
+#: curated input declared (#2971). Every row once carried ``author_id``
+#: ``https://orcid.org/0000-0000-0000-0000``, a well-formed ORCID naming
+#: nobody. No row names a person now: nobody is named as the curator of the
+#: TTL or the schema declarations, so a curated row leaves ``author_id``
+#: empty too, and a heuristic, recommended or unmapped row is credited to
+#: this script instead. SSSOM requires neither ``author_id`` nor
+#: ``creator_id`` on a mapping. No ``mapping_tool_version`` is written: the
+#: script has no version of its own, and the table's date and
+#: ``mapping_set_version`` already say which generation it is.
+MAPPING_TOOL = ('https://github.com/bridge2ai/data-sheets-schema/blob/main/'
+                'src/semantic_exchange/generate_comprehensive_sssom.py')
+
+
+def mapping_tool(res: 'Resolution') -> str:
+    """The row's ``mapping_tool``: empty for a curated row, else this script."""
+    return '' if res.source in CURATED_SOURCES else MAPPING_TOOL
+
+
 def sssom_object_id(res: 'Resolution') -> str:
     """The row's ``object_id``: the target, else ``sssom:NoTermFound``."""
     return res.object or NO_TERM_FOUND
@@ -557,6 +581,7 @@ class ComprehensiveSSSOMGenerator:
         'confidence',
         'comment',
         'author_id',
+        'mapping_tool',
         'mapping_date',
         'subject_source',
         'object_source',
@@ -982,7 +1007,8 @@ class ComprehensiveSSSOMGenerator:
                 'mapping_justification': res.justification,
                 'confidence': res.confidence,
                 'comment': '; '.join([res.comment] + res.notes),
-                'author_id': 'https://orcid.org/0000-0000-0000-0000',
+                'author_id': '',
+                'mapping_tool': mapping_tool(res),
                 'mapping_date': mapping_date,
                 'subject_source': D4D_NAMESPACE,
                 'object_source': self._get_vocab_source(res.object),
