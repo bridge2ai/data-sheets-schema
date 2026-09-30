@@ -128,18 +128,22 @@ class Causes(unittest.TestCase):
     def test_v4_recovers_a_term_past_an_abbreviation_that_no_lift_of_v3_admits_short_of_a_full_stop(self):
         """#3792: v3 and every lift short of crossing a full stop take the
         `.` of "St." for one; v4 does not, and the note tells that recovery
-        apart from the window-and-`;` lift's."""
+        apart from the window-and-`;` lift's. A verb-first v4 match starts
+        before the term, and ending at it is what makes it a recovery."""
         path = self.corpus / "m_a" / "label" / "P_d4d.yaml"
         path.write_text(yaml.safe_dump({"source_caveats": [
             "The higher-ranked source names Washington University in St. Louis as the sponsor, and that name "
             "is used.",
-            "The higher-ranked source gives Washington University in St. Louis. Both values are recorded above."]}),
+            "The higher-ranked source gives Washington University in St. Louis. Both values are recorded above.",
+            # verb first: the v4 match starts at the verb and ends at the term, and that is a recovery
+            "Both dates are recorded; two tier-1 sources disagree."]}),
             encoding="utf-8")
         found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
         rows = {h["pointer"]: h for _, h in found["rows"]}
         self.assertEqual({p: (h["cause"], h["v4"]) for p, h in rows.items()}, {
             "/source_caveats/0": ("other_sentence", "recovered"),
-            "/source_caveats/1": ("other_sentence", "dropped")})
+            "/source_caveats/1": ("other_sentence", "dropped"),
+            "/source_caveats/2": ("semicolon", "recovered")})
         self.assertNotIn("cumulative_semicolon", rows["/source_caveats/0"]["admitted_by"])
         self.assertIn("cumulative_full_stop", rows["/source_caveats/0"]["admitted_by"])
 

@@ -32,10 +32,11 @@ its own, and do not cross a full stop.
   it, and there is no length bound.
 - The `.` of St., Dr., e.g., i.e. and U.S. does not end it (#3792). Those are
   the abbreviations the pinned records' free text carries mid-sentence (St.
-  183 times, e.g. 87, U.S. 79, Dr. 7, i.e. 7). "No." (42) is not excepted: in
-  these records it ends a sentence ("FDA Regulated: No."). Nor is "et al."
-  (206): in 51 of those a capitalised title follows, where it ends a
-  citation's author list. The counterexample "The higher-ranked source gives
+  183 times, e.g. 87, U.S. 79, Dr. 7, i.e. 7). "No." (42) is not excepted: each
+  is followed by a capitalised word, as a sentence's last word is ("FDA
+  Regulated: No. Data are generated …"). Nor is "et al." (206): in 51 of
+  those a capitalised title follows, where it ends a citation's author list.
+  The counts are a one-off census of the pinned records' free text. The counterexample "The higher-ranked source gives
   Washington University in St. Louis. Both values are recorded above." shows
   the full stop after "Louis" still ends the sentence.
 
