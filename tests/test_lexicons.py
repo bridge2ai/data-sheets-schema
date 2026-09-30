@@ -22,7 +22,17 @@ from data_sheets_schema import lexicon as lx
 REGISTERED = {
     ("absence_self_narration", 1): "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e",
     ("absence_self_narration", 2): "e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708",
+    ("absence_self_narration", 3): "f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6",
 }
+
+#: The v1 precision sample's three borderline phrases (#3520), in their
+#: sentences: source conflicts worded with the ranking vocabulary.
+RANKING_BORDERLINE = (
+    'Within the same tier-1 source, the healthsheet answers "No" to whether the dataset identifies '
+    "demographic sub-populations.",
+    "Publisher: two tier-1 sources disagree.",
+    "The project documentation, a higher-ranked source, gives a target of 10,000 voices.",
+)
 
 MINIMAL = """name: tiny
 version: 1
@@ -144,14 +154,123 @@ class TheRegistry(unittest.TestCase):
         self.assertTrue(pattern.regex.search(shape_guard.replace("the minutes", "`minutes`")))
         self.assertTrue(pattern.regex.search("Consent was given in the consent_form."))       # #3224, unchanged
 
+    def test_v3_changes_only_the_source_ranking_pattern(self):
+        """#3520: one regex and its self-test texts move; every other pattern,
+        the flags, the class descriptions, the scope and the declaration are
+        v2's, so a count under v3 differs from v2's in record_self_narration
+        alone."""
+        v2, v3 = (lx.load("absence_self_narration", v) for v in (2, 3))
+        self.assertTrue(v3.counterexamples_required)
+        self.assertEqual((v3.classes, v3.scope), (v2.classes, v2.scope))
+        self.assertEqual([p.id for p in v3.patterns], [p.id for p in v2.patterns])
+        for a, b in zip(v2.patterns, v3.patterns):
+            with self.subTest(pattern=a.id):
+                same = (a.cls, a.regex.pattern, a.regex.flags, a.examples, a.counterexamples)
+                moved = (b.cls, b.regex.pattern, b.regex.flags, b.examples, b.counterexamples)
+                if a.id == "rsn.source-ranking":
+                    self.assertEqual(b.cls, a.cls)
+                    self.assertEqual(b.regex.flags, a.regex.flags)
+                    self.assertNotEqual(b.regex.pattern, a.regex.pattern)
+                    self.assertEqual(b.examples[:len(a.examples)], a.examples)
+                    self.assertEqual(b.counterexamples[:len(a.counterexamples)], a.counterexamples)
+                else:
+                    self.assertEqual(moved, same)
+
+    def test_v3_source_ranking_misses_the_borderline_conflicts_v2_matched(self):
+        """#3520: the three borderline phrases are v3 counterexamples, and v2
+        matched each, so each is a change v3 makes rather than a text neither
+        version matches."""
+        v2, v3 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (2, 3))
+        for text in RANKING_BORDERLINE:
+            with self.subTest(text=text):
+                self.assertIn(text, v3.counterexamples)
+                self.assertTrue(v2.regex.search(text))
+                self.assertFalse(v3.regex.search(text))
+
+    def test_v3_source_ranking_needs_a_verb_in_the_sentence_and_names_of_the_ranking_need_none(self):
+        """The rule the pattern's comment states, shown by changing one part
+        of a sentence at a time."""
+        pattern = {p.id: p for p in lx.load("absence_self_narration", 3).patterns}["rsn.source-ranking"]
+
+        def match(text):
+            m = pattern.regex.search(text)
+            return m.group() if m else None
+
+        # A ranking term with no verb, then with one after it and before it.
+        self.assertIsNone(match("Two tier-1 sources disagree on the date."))
+        self.assertEqual(match("Two tier-1 sources disagree, so both dates are recorded."), "tier-1 sources")
+        self.assertEqual(match("The date is preferred as the higher-ranked source."),
+                         "preferred as the higher-ranked")
+        # The verb must be in the same sentence: `;` and `. ` end it, a `.` inside a token does not.
+        # The pattern has two branches — verb after the term (a lookahead) and verb before it (a
+        # consuming span) — and each boundary is shown on both (#3759).
+        self.assertIsNone(match("Two tier-1 sources disagree; both dates are recorded."))
+        self.assertIsNone(match("Two tier-1 sources disagree. Both dates are recorded."))
+        self.assertIsNone(match("Both dates are recorded; two tier-1 sources disagree."))
+        self.assertIsNone(match("Both dates are recorded. Two tier-1 sources disagree."))
+        self.assertEqual(match("Counts are taken from the v3.1.0 record, the highest-ranked source."),
+                         "taken from the v3.1.0 record, the highest-ranked")
+        self.assertEqual(match("The higher-ranked source, v3.1.0 of the record, is used."), "higher-ranked")
+        # ... and within 80 characters, on either side.
+        near = "The higher-ranked source " + "x" * 50 + " is used."
+        far = "The higher-ranked source " + "x" * 80 + " is used."
+        self.assertEqual(match(near), "higher-ranked")
+        self.assertIsNone(match(far))
+        near = "The date is used " + "x" * 50 + " as the higher-ranked source."
+        far = "The date is used " + "x" * 80 + " as the higher-ranked source."
+        self.assertEqual(match(near), "used " + "x" * 50 + " as the higher-ranked")
+        self.assertIsNone(match(far))
+        # A verb the list does not name is no verb: the source's own statement.
+        self.assertIsNone(match("The higher-ranked source gives a later date."))
+        # A name of the declared ranking matches as in v2.
+        for text in ("The source manifest records the release date.", "the input manifest ranks it first",
+                     "under the declared source ranking", "The source ranking cannot separate them."):
+            with self.subTest(text=text):
+                self.assertIsNotNone(match(text))
+
+    def test_v3_verb_first_span_absorbs_a_name_and_consumes_its_verb(self):
+        """#3732: the two consequences of the verb-first span that the dated
+        note states. A name of the declared ranking between a verb and a later
+        term is inside that span, not a match of its own (v2 gives two); and a
+        verb one span consumed cannot admit a second term after it, so the
+        80-character rule is a condition a match needs, not a promise."""
+        v2, v3 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (2, 3))
+
+        def matches(pattern, text):
+            return [m.group() for m in pattern.regex.finditer(text)]
+
+        absorbed = "The value used from the input manifest is the higher-ranked one."
+        self.assertEqual(matches(v3, absorbed), ["used from the input manifest is the higher-ranked"])
+        self.assertEqual(matches(v2, absorbed), ["input manifest", "higher-ranked"])
+        consumed = "It was preferred over the lower-ranked source, the higher-ranked one being older."
+        self.assertEqual(matches(v3, consumed), ["preferred over the lower-ranked"])
+        self.assertEqual(matches(v2, consumed), ["lower-ranked", "higher-ranked"])
+
+    def test_every_v3_source_ranking_match_ends_at_a_v2_match(self):
+        """v3 narrows v2: over v3's own self-test texts and the sentences
+        above, each v3 match ends where a v2 match of the same text ends."""
+        v2, v3 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (2, 3))
+        texts = v3.examples + v3.counterexamples + v2.examples + v2.counterexamples + (
+            "Two tier-1 sources disagree, so both dates are recorded.",
+            "The date is preferred as the higher-ranked source, and the lower-ranked one is noted.")
+        for text in texts:
+            ends = {m.end() for m in v2.regex.finditer(text)}
+            for m in v3.regex.finditer(text):
+                with self.subTest(text=text, match=m.group()):
+                    self.assertIn(m.end(), ends)
+
     def test_every_result_identity_names_the_bytes(self):
         """The newest registered version by default, and the one named."""
-        for version, want in [(None, 2), (1, 1), (2, 2)]:
+        issue = {1: 2919, 2: 3132, 3: 3520}
+        for version, want in [(None, 3), (1, 1), (2, 2), (3, 3)]:
             with self.subTest(version=version):
                 lexicon = lx.load("absence_self_narration", version)
                 self.assertEqual(lexicon.identity(), {
                     "name": "absence_self_narration", "version": want,
-                    "instrument": f"absence_self_narration lexicon v{want} (#{2919 if want == 1 else 3132})",
+                    "instrument": f"absence_self_narration lexicon v{want} (#{issue[want]})",
                     "file": f"absence_self_narration_v{want}.yaml",
                     "sha256": REGISTERED[("absence_self_narration", want)]})
 
