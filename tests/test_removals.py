@@ -961,6 +961,46 @@ class Relocation(unittest.TestCase):
         row = next(r for r in b["unfounded_paths"] if r["path"] == "creators[0].id")
         self.assertEqual(row["relocated_candidate"]["to"], "creators[1].notes")
 
+    def test_an_identifier_is_not_found_as_the_prefix_of_a_longer_identifier(self):
+        """#3603: normalisation makes `/`, `#`, `-` and `.` token boundaries,
+        so containment found a site root inside a deeper page URL and `#pi`
+        inside `#pi-record`. A match must now end where an identifier
+        ends; where it ends a sentence, sits in brackets or is a CURIE
+        written with a space in prose (the 22b/22c AI_READI "(ROR
+        00cvxb145)") it is still found."""
+        root, pi = "https://chorus4ai.org/", "https://reporter.nih.gov/project-details/10472824#pi"
+        for hay in ("Files at https://chorus4ai.org/data/v2 are listed.", "https://chorus4ai.org/#dataset"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root), (True, None), hay)
+        self.assertEqual(rm._Relocation(_record(notes=pi + "-record")).candidate(pi), (True, None))
+        for hay in ("Home: https://chorus4ai.org.", "(see https://chorus4ai.org/)", root.rstrip("/"),
+                    "Mirrors: https://mirror.example.org/,https://chorus4ai.org/"):
+            self.assertEqual(rm._Relocation(_record(notes=hay)).candidate(root)[1]["to"], "notes", hay)
+        self.assertEqual(rm._Relocation(_record(notes=f"PI record <{pi}>; see the award.")).candidate(pi)[1]["to"],
+                         "notes")
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145, itself listed)")).candidate(
+            "ROR:00cvxb145")[1]["to"], "notes")
+        self.assertEqual(rm._Relocation(_record(notes="Washington (ROR 00cvxb145x)")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        # And it starts where an identifier starts: another scheme ending
+        # in the same letters is not this one.
+        self.assertEqual(rm._Relocation(_record(notes="See MIRROR:00cvxb145.")).candidate("ROR:00cvxb145"),
+                         (True, None))
+        # A `mailto:` scheme is set aside on the carrying side too.
+        self.assertEqual(rm._Relocation(_record(notes="Write to mailto:dac@example.org.")).candidate(
+            "mailto:dac@example.org")[1]["to"], "notes")
+        # Through classify: the 2026-08-13 shape, a PI id deleted where a
+        # sibling's id extends it.
+        before = _record(creators=[{"name": "Consortium", "principal_investigator": {"name": "Pat Lee", "id": pi}},
+                                   {"name": "Pat Lee", "id": pi + "-record"}])
+        after = _record(creators=[{"name": "Consortium"}, {"name": "Pat Lee", "id": pi + "-record"}])
+        b = rm.classify(before, after, _audit())
+        row = next(r for r in b["unfounded_paths"] if r["path"] == "creators[0].principal_investigator.id")
+        self.assertNotIn("relocated_candidate", row)
+        self.assertEqual(b["relocated_candidate"], 0)
+        text = next(n for n in b["non_checks"] if n.startswith("that a relocation candidate restates the value"))
+        self.assertIn("never as the prefix of a longer one", text)
+        self.assertIn("the identifier route's accuracy was not measured", text)
+
     def test_a_candidate_moves_no_class_count(self):
         before = _record(sampling_strategies=[{"is_sample": True, "notes": self.NOTE}])
         after = _record(sampling_strategies=[{"is_sample": True}], source_caveats=self.NOTE.replace("N/A", "n/a"))

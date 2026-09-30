@@ -126,9 +126,13 @@ direct arms, and adds annotations that move no class:
   `RELOCATED_THRESHOLD` of them occur in one final-record scalar (or one
   list of scalars taken whole): the best such path and the share. An
   identifier-shaped value (a URL, CURIE or `mailto:`) is assessed by its
-  own text on token boundaries instead, its scheme `mailto:` aside, as
-  written or as the CURIE a resolver URL names, as `_survives` reads it
-  (#3585). A
+  own text instead, its scheme `mailto:` aside, as written or as the CURIE
+  a resolver URL names, as `_survives` reads it (#3585), and only where
+  the carrying identifier ends where the match does: after it comes the
+  end of the text, sentence punctuation or a character no identifier
+  continues with, so a site root is not found inside a deeper page URL
+  nor `#pi` inside `#pi-record`, while "(ROR 05gq02987)" in prose still
+  restates `ROR:05gq02987` (#3603). A
   candidate under `source_caveats` is marked `change_of_standing`: the
   value is no longer a claim, only the run's commentary on one. Validated
   on a hand-labelled sample of deleted rows (`RELOCATED_VALIDATION`). No
@@ -216,7 +220,8 @@ RELOCATED_THRESHOLD = 0.7
 
 #: Fewer content words than this and a share says nothing (a two-word name
 #: recurs in any affiliation list): the row is not assessed. An
-#: identifier-shaped value is assessed by its own text instead.
+#: identifier-shaped value is assessed by its own text, as a whole
+#: identifier, instead (#3603).
 RELOCATED_MIN_WORDS = 3
 
 #: The sample the threshold was chosen on, and what it measured there.
@@ -258,7 +263,10 @@ NON_CHECKS = (
     "declared threshold the labelled sample measured it right about nine times in ten and "
     "found about four relocations in five (RELOCATED_VALIDATION), a value with fewer than "
     "three content words (a number, a date, a short name) is not assessed unless it is "
-    "identifier-shaped (a CURIE or a URL, matched by its own text whatever its word count), "
+    "identifier-shaped (a CURIE or a URL, matched by its own text whatever its word count, "
+    "and only where the match ends an identifier, never as the prefix of a longer one, #3603) — "
+    "the sample "
+    "drew content-word rows only, so the identifier route's accuracy was not measured — "
     "and a candidate moves no count (#3223, #3553)",
     "that a source review's judgment was right — a removed value reviewed supported and founded "
     "by no linked finding is unfounded on the review's word, and one reviewed revise is still "
@@ -325,6 +333,13 @@ def _text(value: Any) -> str:
     return normalise(value if isinstance(value, str) else str(value))
 
 
+def _member_raw(value: str) -> str:
+    """What `_member` normalises: the value as the CURIE a resolver URL
+    names, case folded and in American spelling."""
+    from data_sheets_schema.american_spelling import americanise
+    return americanise(_canonical_identifier(value.strip()).casefold())[0]
+
+
 @lru_cache(maxsize=1 << 16, typed=True)
 def _member(value: Any) -> str:
     """A list member's identity: its text, a resolver URL read as the CURIE
@@ -336,8 +351,7 @@ def _member(value: Any) -> str:
     folded too — this is an identity, not a rewrite."""
     if not isinstance(value, str):
         return _text(value)
-    from data_sheets_schema.american_spelling import americanise
-    return _text(americanise(_canonical_identifier(value.strip()).casefold())[0])
+    return _text(_member_raw(value))
 
 
 def _scalars(node: Any):
@@ -600,6 +614,29 @@ def _words(value: Any) -> frozenset[str]:
     return frozenset(w for w in _member(value).split() if len(w) > 2 and w not in STOPWORDS)
 
 
+#: What may follow an identifier where it ends (#3603): an optional
+#: trailing slash, sentence punctuation, then the end of the text or a
+#: character no identifier continues with. `-`, `#`, `/`, `.` followed by
+#: more text, and the rest of a URL's own characters, continue one — so a
+#: site root does not end inside a deeper page URL, nor `#pi` inside
+#: `#pi-record`.
+_IDENTIFIER_END = r"/?[.:]*(?:$|(?=[^\w\-#/?=&%~+@.:]))"
+
+
+def _folded(text: str) -> str:
+    """`receipts.normalise` up to its punctuation step: the raw text an
+    identifier's end is read on."""
+    import unicodedata
+    return unicodedata.normalize("NFKC", re.sub(r"\\[ntr]", " ", text).replace('\\"', '"')).casefold()
+
+
+def _identifier_pattern(needle: str) -> re.Pattern[str]:
+    """A normalised identifier as a pattern on folded raw text: its words
+    on word boundaries, any punctuation between them, and an identifier's
+    end after the last (#3603)."""
+    return re.compile(r"(?<!\w)" + r"\W+".join(map(re.escape, needle.split())) + _IDENTIFIER_END)
+
+
 class _Relocation:
     """Where a deleted value's words recur in the final record (#3223):
     each populated scalar, and each list of scalars taken whole — a member
@@ -614,25 +651,31 @@ class _Relocation:
         # Each scalar as written and as `_member` reads it, as `_survives`
         # reads its hay: a resolver URL quoted inside prose keeps its URL
         # form there, while `_member` rewrites a URL scalar to its CURIE.
-        self.members = [(p, (_text(v), _member(v))) for p, v, _lp in scalars]
+        # Kept before the punctuation step, so an identifier's end can be
+        # read (#3603).
+        self.members = [(p, (_folded(t), _folded(_member_raw(t))))
+                        for p, v, _lp in scalars for t in [v if isinstance(v, str) else str(v)]]
         self.words = ([(p, _words(v)) for p, v, _lp in scalars]
                       + [(lp, frozenset().union(*map(_words, vs))) for lp, vs in lists.items()])
 
     def candidate(self, value: Any) -> tuple[bool, dict[str, Any] | None]:
         """(assessed, candidate or None). An identifier-shaped value is
-        assessed by its own text on token boundaries (a `mailto:` scheme
-        aside), as written or as `_member` reads it, against each scalar
-        read both ways, as `_survives` does (#3585): a resolver URL quoted
+        assessed by its own text (a `mailto:` scheme aside), as written or
+        as `_member` reads it, against each scalar read both ways, as
+        `_survives` does (#3585), and only where the match ends an
+        identifier (`_IDENTIFIER_END`, #3603): a resolver URL quoted
         in prose is found, and so is a CURIE where a scalar is its URL
         (though not where prose quotes the URL, which `_survives` does not
-        find either); any other by the share of its content words one candidate
+        find either), while a longer identifier that begins with it is not
+        it; any other by the share of its content words one candidate
         carries, where it has `RELOCATED_MIN_WORDS` of them. The first
         path in record order wins a tie, a scalar before a list."""
         if isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip()):
             bare = re.sub(r"^mailto:", "", value.strip(), flags=re.I)
             needles = {_text(bare), _member(bare)} - {""}
+            patterns = [_identifier_pattern(n) for n in needles]
             hit = next((p for p, forms in self.members
-                        if any(_carries(h, n) for n in needles for h in forms)), None)
+                        if any(pat.search(h) for pat in patterns for h in forms)), None)
             return True, (self._row(hit, 1.0) if hit is not None else None)
         want = _words(value)
         if isinstance(value, bool) or len(want) < RELOCATED_MIN_WORDS:

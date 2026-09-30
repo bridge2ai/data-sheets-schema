@@ -252,14 +252,16 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                            "unattributed (#3152)"),
     "unfoundedrelocated": ("of those, with a relocation candidate", "live", True,
                            "removals v3 (#3223): the removals without a finding whose content "
-                           "words (three or more; an identifier by its own text) recur, 70% of "
+                           "words (three or more; an identifier by its own text, ending where "
+                           "an identifier ends, #3603) recur, 70% of "
                            "them or more, in one scalar of the final full record or one list of "
                            "scalars taken whole — a sign the value was reworded or moved rather "
                            "than lost. Reported only: no count above moves, a candidate is where "
                            "the words are, not proof the content survives, and on the labelled "
                            "sample the threshold was chosen on (notes/"
                            "removals_relocated_sample_2026-09-29.yaml) it was right about nine "
-                           "times in ten and found about four relocations in five. A candidate "
+                           "times in ten and found about four relocations in five (content-word "
+                           "rows only: the identifier route was not measured there). A candidate "
                            "under source_caveats is a change of standing: the value is no longer a "
                            "claim. – wherever the removals row is –"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
