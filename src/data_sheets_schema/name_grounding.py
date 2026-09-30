@@ -100,9 +100,10 @@ the word sets alone.
 - **After the surname**, an initial may be separated from it by whitespace
   and at most one comma (`Metallo C`, `Metallo, C.`, `Metallo\\nC`). A run
   of two or three capitals followed on its line by a word is an acronym in
-  prose, not initials (`The IRB will`, `RO-Crate`), except `and` or `&`
-  and then a capitalised word, the next entry of an author list
-  (`Levinson MA and Marquez C`, #3026). A word on the next
+  prose, not initials (`The IRB will`, `RO-Crate`), except `and` and
+  then a capitalised word, the next entry of an author list (`Levinson MA
+  and Marquez C`, #3026); `&` is not a word, so `Levinson MA & Marquez C`
+  keeps its initials under the rule itself. A word on the next
   line does not count, so a bundle that lists one author per line keeps
   their initials (`Levinson MA\\nMarquez C`, `Levinson M A\\nMarquez C`).
 - **Initials written together** are single capitals with only joiners
@@ -159,12 +160,16 @@ leaf written `Clark, Tim`). A judged token stays grounded when the
 bundle writes it near another word of its part — at most
 `PROXIMITY_WINDOW` capitalised tokens (or words the leaf itself writes,
 `de`, `of`) between them, only whitespace (line breaks included:
-`Charlotte\\nMarquez`), periods after an initial (not after a word,
-where a sentence ends: `Emma Lundberg. Clark J`, unless the leaf writes
-that word with a period too, `St. Louis`; so `Tim St John` against `Tim
-St. John` demotes `John`, a cost), hyphens, apostrophes
-or digits inside a word (`Bridge2AI`) between tokens, and one comma only where the bundle
-inverts the record's order (`Clark, Tim`) — or beside that word's
+`Charlotte\\nMarquez`), periods after a single-capital initial (not
+after a word, where a sentence ends: `Emma Lundberg. Clark J`, nor after
+a run of two or three capitals, which is as often a degree or an acronym:
+`Emma Lundberg MD. Clark J`, #3460; unless the leaf writes that word with
+a period too, `St. Louis`; so `Tim St John` against `Tim St. John`
+demotes `John`, and `Mark DA. Wilkinson` separates `Mark` from
+`Wilkinson`, costs), hyphens, apostrophes or digits inside a word
+(`Bridge2AI`) between tokens, and one comma only where the bundle
+inverts the record's order (`Clark, Tim`) or before a generational
+suffix (`John Smith, Jr.` keeps `Jr`, #3459) — or beside that word's
 initial (`Metallo C`, `C. Metallo`, `Metallo, C.`, `Pipon J-C` keep
 `Metallo` for `Christian Metallo`; a suffix or `The` has no initial
 there). A digit before a comma is an
@@ -172,8 +177,10 @@ affiliation mark and ends the entry (`Levinson1, Charlotte`). A demoted
 token carries the class it would have were it absent (`initial_expanded`
 where the other word has its initial beside it: `Jing Gao` against
 `Jing Chen; Gao J`), and whether v1 found its leaf clean. On the
-committed corpus at this change (283 provenance records, 4 not
-checkable) v2 demotes 10 token occurrences in 6 records: 7 in leaves v1
+committed corpus at this change (286 provenance records; 7 name no input
+bundle and are not checkable: the four 2026-07-29 guarded-union merged
+cores and the three `curated/` records, #3461) v2 demotes 10 token
+occurrences in 6 of the 279 checkable runs: 7 in leaves v1
 finds clean, among them `Jing` in a CM4AI `Jing Gao` (full and core),
 the rest prose in person slots (`Contact Principal Investigator`). A
 source's own
@@ -333,11 +340,13 @@ def _gap_ok(gap: str, allowed: str, commas: int = 0) -> bool:
 #: bundle gives Sembay `UAB`).
 _WORD_AFTER = re.compile(r"[ \t\-\u2010\u2011]+[^\W\d_]{2}")
 
-#: `and` or `&` and then a capitalised word, on one line, after a run of
+#: `and` and then a capitalised word, on one line, after a run of
 #: capitals: an author list (`Levinson MA and Marquez C`, #3026), where
 #: `The IRB and the` stays prose. The group is the next word's first
-#: character, whose case decides.
-_AUTHOR_AND = re.compile(r"[ \t]+(?:and|&)[ \t]+(\w)")
+#: character, whose case decides. `&` needs no rule: it is not a word, so
+#: `_WORD_AFTER` never matches across it and `Levinson MA & Marquez C`
+#: keeps its initials whatever the case of the next word (#3462).
+_AUTHOR_AND = re.compile(r"[ \t]+and[ \t]+(\w)")
 
 #: Spaces on one line: what may sit between two initials besides joiners.
 _SPACES = " \t"
@@ -388,7 +397,7 @@ class BundleIndex:
         return bool(_WORD_AFTER.match(self.text, self.tokens[j].end))
 
     def _author_and(self, j: int) -> bool:
-        """`and`/`&` then a capitalised word after token `j`, on its line:
+        """`and` then a capitalised word after token `j`, on its line:
         the next entry of an author list, not prose (#3026)."""
         m = _AUTHOR_AND.match(self.text, self.tokens[j].end)
         return bool(m) and m.group(1).isupper()
@@ -515,12 +524,15 @@ class BundleIndex:
         own leaf writes (`de` in `Michael de Riesthal`, `of` in `University
         of Alabama`), and between tokens only whitespace, line breaks
         included (`Charlotte\\nMarquez`), `_IN_ENTRY` characters, or digits
-        inside one word (`Bridge2AI`). A period only after an initial
-        (`Mark D. Wilkinson`) or after a word in `abbreviated`, one the
-        leaf itself writes with a period after it (`St.` in `Washington
-        University in St. Louis`): after any other word it ends a sentence
-        (`Emma Lundberg. Clark J`, #3427). One comma where `comma_ok`, the
-        `Surname, Given` form."""
+        inside one word (`Bridge2AI`). A period only after a single-capital
+        initial (`Mark D. Wilkinson`) or after a word in `abbreviated`, one
+        the leaf itself writes with a period after it (`St.` in `Washington
+        University in St. Louis`): after any other word, a run of two or
+        three capitals included (a degree or an acronym, `Emma Lundberg MD.
+        Clark J`, #3460), it ends a sentence (`Emma Lundberg. Clark J`,
+        #3427). One comma where `comma_ok`, the `Surname, Given` form, and
+        one before a generational suffix in any order (`John Smith, Jr.`,
+        #3459): that comma is the suffix's, not an entry's end."""
         if any(not self.tokens[m].text[:1].isupper() and exact_key(self.tokens[m].text) not in between
                for m in range(i + 1, j)):
             return False
@@ -531,9 +543,12 @@ class BundleIndex:
                 continue
             if not all(ch.isspace() or ch in _IN_ENTRY or ch == "," for ch in gap):
                 return False
-            if ("." in gap and not _is_initial(self.tokens[m].text)
+            if ("." in gap and not (_is_initial(self.tokens[m].text)
+                                    and _letters(self.tokens[m].text) == 1)
                     and exact_key(self.tokens[m].text) not in abbreviated):
-                return False                 # a sentence ends here (#3427)
+                return False                 # a sentence ends here (#3427, #3460)
+            if folded_key(self.tokens[m + 1].text) in _SUFFIXES and gap.count(",") == 1:
+                continue                     # `Smith, Jr.`: the suffix's comma (#3459)
             commas += gap.count(",")
         return commas == 0 or (comma_ok and commas == 1)
 
@@ -546,7 +561,8 @@ class BundleIndex:
         record writes `token` before `partner`; one comma is allowed only
         where the bundle inverts that order, the `Surname, Given` form
         (`Clark, Tim` for `Tim Clark`, not `Tim, Clark`), and never when
-        `token_first` is None. `between` are the exact keys of the record
+        `token_first` is None; a comma before a generational suffix is
+        allowed in either order (`John Smith, Jr.`, #3459). `between` are the exact keys of the record
         leaf's tokens, which may sit between the two in any case;
         `abbreviated` those it writes with a period after them, which may
         be followed by one in the bundle too (`abbreviations`)."""

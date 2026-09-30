@@ -387,6 +387,14 @@ class DocumentedCostTest(unittest.TestCase):
         puts John in another sentence from Tim and St."""
         self.assertEqual(demoted("Tim St John", "Tim St. John"), {"John": "absent"})
 
+    def test_v2_ends_an_entry_at_a_period_after_a_run_of_capitals(self):
+        """#3460's rule cannot tell a degree or acronym (`MD.`) from a
+        person's initials written as a run (`DA.`): a period after either
+        ends the entry, so `Mark Wilkinson` against `Mark DA. Wilkinson`
+        is demoted."""
+        self.assertEqual(demoted("Mark Wilkinson", "Mark DA. Wilkinson"),
+                         {"Mark": "absent", "Wilkinson": "absent"})
+
     def test_a_function_word_outside_the_list(self):
         """`_NOT_SURNAMES` is short (`An`, `To` are surnames): `In` stands in."""
         self.assertEqual(cls("In Data Trust", "Data", "In D, and"), "initial_expanded")
@@ -402,10 +410,21 @@ class LayoutFixTest(unittest.TestCase):
         and `Hansen JN reports` are prose."""
         self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA and Marquez C"),
                          "initial_expanded")
-        self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA & Marquez C"),
-                         "initial_expanded")
+        self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA and marquez C"),
+                         "absent")
         self.assertEqual(cls("Ian Ross", "Ian", "Ross IRB and the"), "absent")
         self.assertEqual(cls("Jakob Hansen", "Jakob", "Hansen JN reports"), "absent")
+
+    def test_an_ampersand_is_not_a_word_after_the_initials(self):
+        """#3462: `&` needs no author-list rule. It is not a word, so the
+        initials before it are kept whatever the case of the word after:
+        this pins `_WORD_AFTER`, not `_AUTHOR_AND`."""
+        for bundle in ("Levinson MA & Marquez C", "Levinson MA & marquez C",
+                       "Levinson MA, & Marquez C"):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(BundleIndex(bundle).initials_beside("Levinson"), {"m", "a"})
+        self.assertEqual(cls("Maxwell Adam Levinson", "Adam", "Levinson MA & Marquez C"),
+                         "initial_expanded")
 
     def test_a_short_given_name_in_a_name_in_capitals(self):
         """`TIM CLARK` is a name in capitals, and so is each short word of
@@ -560,7 +579,8 @@ class ProximityTest(unittest.TestCase):
         case is demoted when the two names sit in adjacent sentences too.
         After an initial a period stays inside the entry, on one line or
         across a line break; with no period `Lundberg` is a middle name."""
-        for bundle in ("Emma Lundberg. Clark J wrote.", "Emma Lundberg.\nClark J"):
+        for bundle in ("Emma Lundberg. Clark J wrote.", "Emma Lundberg.\nClark J",
+                       "Emma Lundberg MD. Clark J wrote.", "Emma Lundberg KTH. Clark J wrote."):
             with self.subTest(bundle=bundle):
                 p = prox("Emma Clark", bundle)
                 self.assertEqual((p["judged"], p["near"], p["demoted"]), (2, 0, 2))
@@ -578,6 +598,9 @@ class ProximityTest(unittest.TestCase):
                          frozenset({"y", "st"}))
         self.assertEqual(ng.abbreviations("Olivier (ORCID:0000-0002-1825-0097) St. Clair"),
                          frozenset({"st"}))
+        # Nor inside an identifier span (#3463): `tim.clark@kth.se` abbreviates nothing.
+        self.assertEqual(ng.abbreviations("Tim Clark (tim.clark@kth.se, https://kth.se/Tim.html)"),
+                         frozenset())
 
     def test_a_suffix_or_function_word_is_no_partner_by_initial(self):
         """#3428: `Jr` and `The` stand in for no surname (`_NO_STAND_IN`), so
@@ -587,6 +610,21 @@ class ProximityTest(unittest.TestCase):
         self.assertIn("Clark", demoted("Emma Clark Jr", bundle))
         self.assertIn("Tuller", demoted("The Tuller Lab", "The lab is large. Tuller T wrote."))
         self.assertNotIn("Clark", demoted("Jane Clark Jr", "Jane Doe wrote. Clark J wrote. Smith Jr."))
+
+    def test_a_comma_before_a_suffix_does_not_end_the_entry(self):
+        """#3459: `John Smith, Jr.` writes the suffix in the record's own
+        order after a comma. That comma is the suffix's, so `Jr` stays near
+        `Smith`; a comma before any other word still ends the entry."""
+        for name, bundle in (("John Smith Jr", "John Smith, Jr., MD"),
+                             ("Tim Clark Jr", "Tim Clark, Jr."),
+                             ("Martin Luther King Jr", "Martin Luther King, Jr."),
+                             ("John Smith III", "John Smith, III"),
+                             ("John Smith Jr", "John Smith Jr.")):
+            with self.subTest(bundle=bundle):
+                self.assertEqual(demoted(name, bundle), {})
+        self.assertEqual(demoted("John Smith Jr", "John Smith, Jr, Jr"), {})
+        self.assertEqual(demoted("John Smith Jones", "John Smith, Jones"), {"Jones": "absent"})
+        self.assertEqual(demoted("John Smith Jr", "John Smith,, Jr."), {"Jr": "absent"})
 
     def test_a_given_name_elsewhere_is_an_expansion_of_the_initial_beside(self):
         """`Tim` is in the bundle, but not beside Clark, whose initial is T:
@@ -683,6 +721,30 @@ class ProximityTest(unittest.TestCase):
         self.assertEqual((p["judged"], p["demoted"], p["demoted_in_clean_leaves"]), (2, 2, 2))
         p = prox("Tom Metallo", "Metallo C; Tim Smith")
         self.assertEqual((p["judged"], p["demoted"], p["demoted_in_clean_leaves"]), (1, 1, 0))
+
+    def test_not_judged_counts_the_grounded_tokens_left_unjudged(self):
+        """#3463: `Smith` is grounded but alone in its part, so it is not
+        judged, beside two judged tokens of the same leaf."""
+        p = prox("Tim Clark; Smith", "Tim Clark; Smith")
+        self.assertEqual((p["judged"], p["near"], p["not_judged"]), (2, 2, 1))
+
+    def test_a_token_demoted_twice_in_one_leaf_is_listed_once(self):
+        """#3463: `Tim` is demoted in both parts of one leaf. `demoted`
+        counts occurrences, `demoted_distinct` distinct tokens, and
+        `demoted_tokens` lists each token once per leaf."""
+        p = prox("Tim Clark; Tim Smith", "Tim Jones wrote. Clark wrote. Smith wrote.")
+        self.assertEqual((p["judged"], p["demoted"], p["demoted_distinct"]), (4, 4, 3))
+        self.assertEqual([f["token"] for f in p["demoted_tokens"]], ["Tim", "Clark", "Smith"])
+
+    def test_the_partner_is_matched_folded(self):
+        """#3463: `near` matches `token` exactly and its partner folded, so
+        `Clark` beside the bundle's `José` stays near the leaf's `Jose`,
+        which v1 reads `diacritic_dropped` and v2 does not judge."""
+        out = check_record({"creators": [{"name": "Jose Clark"}]}, "José Clark", SLOTS)
+        self.assertEqual([(f["token"], f["class"]) for f in out["findings"]],
+                         [("Jose", "diacritic_dropped")])
+        p = out["proximity"]
+        self.assertEqual((p["judged"], p["near"], p["demoted"]), (1, 1, 0))
 
     def test_v1_is_unchanged_by_v2(self):
         bundle = "Emma Lundberg; Clark T"
