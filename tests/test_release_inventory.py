@@ -256,7 +256,8 @@ scope:
 def test_voice_counts_only_its_own_releases_and_names_the_pediatric_one():
     inv = committed("VOICE")
     assert inv["instrument"] == ri.INSTRUMENT and "v2" in ri.INSTRUMENT
-    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [], "skipped_entries": []}
+    assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [], "in_bundle_not_ids": [],
+                            "skipped_entries": []}
     own = [e["source_id"] for e in inv["release_records"]]
     assert "physionet_pediatric_1_1_0" not in own and "physionet_3_1_0" in own
     assert "physionet_pediatric_1_1_0" not in [e["source_id"] for e in inv["tier1"]]
@@ -282,7 +283,7 @@ def test_a_related_release_is_not_this_datasets_release_evidence():
     assert [d["id"] for d in moved["companion_release"]] == ["https://example.org/companion",
                                                             "https://example.org/umbrella"]
     assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": ["not_a_source"],
-                            "skipped_entries": []}
+                            "in_bundle_not_ids": [], "skipped_entries": []}
     assert ri.lacking_release_evidence([inv]) == ["OWN"]
     # The companion's own inventory counts the same source as its release.
     assert ri.inventory(SCOPED, None, "COMPANION")["release_record_in_document_corpus"] is True
@@ -368,7 +369,7 @@ def test_in_bundle_matches_sources_exactly_as_check_manifest_does(tmp_path):
     assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
     assert [e["source_id"] for e in inv["governance"]["license"]] == ["terms", "7"]
     assert inv["scope"] == {"status": "declared", "in_bundle_unmatched": [" promoted ", 7, "promoted2"],
-                            "skipped_entries": []}
+                            "in_bundle_not_ids": [], "skipped_entries": []}
     assert "in_bundle names no source of this project: ' promoted ', 7, promoted2" \
         in "\n".join(ri.render(inv))
     manifest = tmp_path / "manifest_3423.yaml"
@@ -494,3 +495,38 @@ def test_the_unmatched_list_is_check_manifests_finding_item_for_item(tmp_path):
     assert len(claimed) == 4
     assert claimed == sorted(f"related dataset claims source {v!r} is in this bundle; the "
                              f"manifest lists no such source for EXTERNAL" for v in unmatched)
+
+
+# An in_bundle value that is not an identifier -- a bool, a nested list, a
+# mapping -- names no source and moves nothing, but is not dropped silently:
+# the inventory lists it, as written and with its entry's index, one item per
+# "not a source id" problem check_manifest reports on the same bytes, on a
+# usable entry and a skipped one alike, and the render names it (#3543). A
+# falsy in_bundle is skipped by both.
+@pytest.mark.parametrize("entries, not_ids, unmatched", [
+    (b"      - {id: x, in_bundle: true}\n", [(0, True)], []),
+    (b"      - {id: x, in_bundle: [[promoted], nope]}\n", [(0, ["promoted"])], ["nope"]),
+    (b"      - {id: x, in_bundle: {promoted: 1}}\n", [(0, {"promoted": 1})], []),
+    (b"      - {id: x, in_bundle: [terms, null, false]}\n      - {name: N, in_bundle: [true]}\n",
+     [(0, None), (0, False), (1, True)], []),
+    # A falsy in_bundle names nothing and check_manifest skips it: not listed.
+    (b"      - {id: x, in_bundle: false}\n      - {id: y, in_bundle: []}\n", [], []),
+])
+def test_an_in_bundle_value_that_is_not_an_id_is_listed(entries, not_ids, unmatched, tmp_path):
+    from data_sheets_schema import scope
+    raw = NEUTRAL + b"scope:\n  EXTERNAL:\n    related_but_distinct:\n" + entries
+    inv = ri.inventory(raw, None, "EXTERNAL")
+    assert inv["scope"]["status"] == "declared"
+    assert [e["source_id"] for e in inv["tier1"]] == ["promoted"]
+    assert [(r["index"], r["value"]) for r in inv["scope"]["in_bundle_not_ids"]] == not_ids
+    assert inv["scope"]["in_bundle_unmatched"] == unmatched
+    text = "\n".join(ri.render(inv))
+    for index, value in not_ids:
+        assert (f"related_but_distinct[{index}]: in_bundle carries {value!r}, "
+                f"not a source id; it moves nothing") in text
+    manifest = tmp_path / "manifest_3423_3543.yaml"
+    manifest.write_bytes(raw)
+    carried = sorted(p["problem"] for p in scope.check_manifest(manifest)
+                     if p["project"] == "EXTERNAL" and "not a source id" in p["problem"])
+    assert carried == sorted(f"related dataset's in_bundle carries a {type(v).__name__}, "
+                             f"not a source id" for _, v in not_ids)

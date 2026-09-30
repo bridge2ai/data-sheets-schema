@@ -141,9 +141,18 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
     is listed under ``skipped_entries`` with that classifier's problem and
     its ``in_bundle`` as written; its unmatched ids are still named, as
     ``check_manifest`` names them.
+
+    An ``in_bundle`` value that is not an identifier at all -- a bool, a
+    nested list, a mapping -- names no source and moves nothing
+    (``scope.in_bundle_of`` drops it). It is not left out silently (#3543):
+    it is listed under ``in_bundle_not_ids`` with its entry's index and the
+    value as written, one item per value ``check_manifest`` reports as
+    carrying something "not a source id", on usable and skipped entries
+    alike, in entry and value order.
     """
     declared = scope_decl.scope_in(raw, project)
-    status = {"status": "declared", "in_bundle_unmatched": [], "skipped_entries": []}
+    status = {"status": "declared", "in_bundle_unmatched": [], "in_bundle_not_ids": [],
+              "skipped_entries": []}
     if declared is None:
         return {**status, "status": "undeclared"}, {}
     related = declared.get("related_but_distinct") if isinstance(declared, dict) else None
@@ -167,6 +176,11 @@ def _related(raw: bytes | str, project: str, source_ids: set[str]) -> tuple[dict
                    "also_known_as": scope_decl.aliases_of(
                        {"also_known_as": entry.get("also_known_as")}),
                    } if isinstance(entry, dict) else None
+        written = entry.get("in_bundle") if isinstance(entry, dict) else None
+        if written:     # the shapes and the falsy guard check_manifest applies
+            for value in (list(written) if isinstance(written, (list, tuple)) else [written]):
+                if not scope_decl._is_identifier(value):
+                    status["in_bundle_not_ids"].append({"index": index, "value": value})
         for sid in scope_decl.in_bundle_of(entry):
             if sid not in source_ids:
                 status["in_bundle_unmatched"].append(sid)
@@ -278,6 +292,9 @@ def render(inv: dict) -> list[str]:
         lines.append(f"   scope              related_but_distinct[{row['index']}]: {row['problem']}"
                      + (f"; its in_bundle moves nothing: {', '.join(_written(v) for v in row['in_bundle'])}"
                         if row["in_bundle"] else ""))
+    for row in scope["in_bundle_not_ids"]:
+        lines.append(f"   scope              related_but_distinct[{row['index']}]: in_bundle "
+                     f"carries {row['value']!r}, not a source id; it moves nothing")
     if scope["in_bundle_unmatched"]:
         lines.append(f"   scope              in_bundle names no source of this project: "
                      f"{', '.join(_written(v) for v in scope['in_bundle_unmatched'])}")
