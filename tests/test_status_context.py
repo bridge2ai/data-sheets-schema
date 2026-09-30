@@ -1862,6 +1862,109 @@ def test_the_corpus_diagnostic_tallies_each_project_by_form_and_lists_what_it_co
     assert any(line.startswith("   · unchecked Q: m_b_core/L2/Q_coverage_receipt.yaml") for line in lines)
 
 
+def _corpus_run(concat, tmp_path, label, project, text, receipt, record, method="m", **inputs):
+    """One run under `concat`: its provenance record (with `inputs`
+    overriding the bundle fields), receipt and full record."""
+    core, full_dir = concat / f"{method}_core" / label, concat / method / label
+    core.mkdir(parents=True, exist_ok=True)
+    full_dir.mkdir(parents=True, exist_ok=True)
+    bundle = tmp_path / f"{label}_{project}.txt"
+    bundle.write_text(text, encoding="utf-8")
+    rule = chunking.DEFAULT_RULE
+    count = chunking.manifest_from_bytes(text.encode("utf-8"), bundle.name, rule)["chunk_count"]
+    (core / f"{project}_provenance.yaml").write_text("# header\n" + yaml.safe_dump({"run": {"project": project}, "inputs": {
+        "bundle_path": str(bundle), "bundle_md5": _md5(text),
+        "chunks": {"rule": rule, "bundle_name": bundle.name, "chunk_count": count}, **inputs}}), encoding="utf-8")
+    (core / f"{project}_coverage_receipt.yaml").write_text(yaml.safe_dump(receipt), encoding="utf-8")
+    (full_dir / f"{project}_d4d.yaml").write_text(yaml.safe_dump(record), encoding="utf-8")
+
+
+def _conserved(t):
+    """#3822: every snippet a read receipt carries is counted in exactly one place."""
+    return t["snippets"] == (t["located"] + t["unlocated"] + t["indeterminate"]
+                             + t["not_verified"] + t["value_unresolved"])
+
+
+def test_the_corpus_diagnostic_accounts_for_every_snippet_it_did_not_locate(tmp_path):
+    # #3822: a snippet not verified in its chunk, or whose slot does not
+    # resolve, was skipped before its context was read, and a malformed
+    # entry's pairs were never read. The corpus result dropped all three
+    # counts, so its totals did not add up to the snippets it saw.
+    concat = tmp_path / "concat"
+    text, _m = _bundle(FORM_DOCS["plain"])
+    receipt = _receipt(text, [("x", "the imaging waveforms to approved users"),
+                              ("y", "absent from every chunk"),
+                              ("z", "the imaging waveforms to approved users")])
+    receipt["chunks"].append("not an entry")
+    for label in ("L1", "L2"):
+        _corpus_run(concat, tmp_path, label, "P", text, receipt, {"x": "Released.", "y": "y"})
+    out = sc.corpus_status_context(concat)
+    p, t = out["projects"]["P"], out["totals"]
+    assert p["unchecked"] == [], p["unchecked"]
+    for tally, n in ((p, 2), (t, 2)):
+        assert (tally["snippets"], tally["verified"], tally["located"], tally["not_verified"],
+                tally["value_unresolved"], tally["malformed_entries"]) == (3 * n, 2 * n, n, n, n, n)
+        assert _conserved(tally)
+    lines = sc.corpus_report_lines(out)
+    clause = "not verified 2 · value unresolved 2 · malformed receipt entries 2"
+    assert "snippets 6 · located 2" in lines[1] and clause in lines[1]
+    assert any(line.startswith("   P: ") and "snippets 6 · located 2" in line and clause in line for line in lines)
+
+
+def test_the_corpus_diagnostic_prints_the_unread_counts_when_they_are_zero(tmp_path):
+    # #3822: a zero is said, so a reader can tell it from a count not taken.
+    concat = tmp_path / "concat"
+    text, _m = _bundle(FORM_DOCS["plain"])
+    _corpus_run(concat, tmp_path, "L1", "P", text, _receipt(text, [("x", "the imaging waveforms to approved users")]),
+                {"x": "Released."})
+    lines = sc.corpus_report_lines(sc.corpus_status_context(concat))
+    assert "not verified 0 · value unresolved 0 · malformed receipt entries 0" in lines[1]
+
+
+@pytest.mark.parametrize("field,value", [("bundle_path", ["study.txt"]), ("bundle", ["study.txt"]),
+                                         ("bundle_md5", ["0" * 32]), ("bundle_sha256", {"a": 1})])
+def test_a_malformed_provenance_field_is_one_unchecked_receipt_not_the_end_of_the_walk(field, value, tmp_path):
+    # #3823: `inputs.bundle_path: [study.txt]` passed the inputs-mapping
+    # guard and raised TypeError building a Path, which stopped the walk
+    # before any later receipt was read.
+    concat = tmp_path / "concat"
+    text, _m = _bundle(FORM_DOCS["plain"])
+    receipt = _receipt(text, [("x", "the imaging waveforms to approved users")])
+    _corpus_run(concat, tmp_path, "L1", "P", text, receipt, {"x": "Released."}, **{field: value})
+    _corpus_run(concat, tmp_path, "L2", "P", text, receipt, {"x": "Released."})
+    out = sc.corpus_status_context(concat)
+    p = out["projects"]["P"]
+    [unchecked] = p["unchecked"]
+    assert unchecked["receipt"] == "m_core/L1/P_coverage_receipt.yaml"
+    assert unchecked["reason"].endswith(f"inputs.{field} is a {type(value).__name__}, not a string")
+    assert (p["receipts"], p["checked"], p["located"]) == (2, 1, 1)
+    assert any(line.startswith("   · unchecked P: m_core/L1/P_coverage_receipt.yaml")
+               for line in sc.corpus_report_lines(out))
+
+
+@pytest.mark.parametrize("exc", [TypeError, AttributeError, KeyError])
+def test_a_receipt_of_an_unexpected_shape_is_listed_unchecked_and_the_walk_goes_on(exc, tmp_path, monkeypatch):
+    # #3823: whatever shape a reader trips on, the error is that receipt's,
+    # listed with its type, and the next receipt is still read.
+    concat = tmp_path / "concat"
+    text, _m = _bundle(FORM_DOCS["plain"])
+    receipt = _receipt(text, [("x", "the imaging waveforms to approved users")])
+    for label in ("L1", "L2"):
+        _corpus_run(concat, tmp_path, label, "P", text, receipt, {"x": "Released."})
+    real = sc.run_status_context
+
+    def trips(provenance, receipt_path, full):
+        if provenance.parent.name == "L1":
+            raise exc("a shape the reader did not expect")
+        return real(provenance, receipt_path, full)
+    monkeypatch.setattr(sc, "run_status_context", trips)
+    p = sc.corpus_status_context(concat)["projects"]["P"]
+    [unchecked] = p["unchecked"]
+    assert unchecked["receipt"] == "m_core/L1/P_coverage_receipt.yaml"
+    assert unchecked["reason"].startswith(f"{exc.__name__}: ")
+    assert (p["receipts"], p["checked"], p["located"]) == (2, 1, 1)
+
+
 #: #3809: a receipt with more unlocated and form-located snippets than a
 #: list carries (3 and 2 past the cap).
 OVER_CAP = {"unlocated": sc.LISTED_PER_RECEIPT + 3, "form_located": sc.LISTED_PER_RECEIPT + 2}
@@ -1981,6 +2084,14 @@ def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_on
     assert {f: n for f, n in t["located_by_form"].items() if f != "plain"} == {
         "linewrap-joined": 5, "artifact-line-elided": 0, "joined-elided": 0}
     assert sum(t["located_by_form"].values()) == t["located"]
+    # #3822: every snippet is accounted for, per project and in the totals;
+    # the 472 not located were skipped before their context was read, and
+    # they are counted, not dropped (figures in the committed note).
+    for tally in [t, *out["projects"].values()]:
+        assert _conserved(tally), tally
+        assert tally["verified"] + tally["not_verified"] == tally["snippets"]
+    assert (t["snippets"], t["located"], t["not_verified"], t["value_unresolved"], t["malformed_entries"]) == (
+        9770, 9298, 466, 6, 0)
     joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
                      u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
                     for p in out["projects"].values() for u in p["form_located_snippets"])

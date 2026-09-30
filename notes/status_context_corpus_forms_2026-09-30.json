@@ -12,6 +12,11 @@
     "AI_READI": {
       "receipts": 13,
       "checked": 13,
+      "snippets": 3907,
+      "verified": 3800,
+      "not_verified": 107,
+      "value_unresolved": 1,
+      "malformed_entries": 0,
       "located": 3799,
       "located_by_form": {
         "plain": 3798,
@@ -43,6 +48,11 @@
     "CHORUS": {
       "receipts": 12,
       "checked": 12,
+      "snippets": 1230,
+      "verified": 1217,
+      "not_verified": 13,
+      "value_unresolved": 0,
+      "malformed_entries": 0,
       "located": 1217,
       "located_by_form": {
         "plain": 1217,
@@ -66,6 +76,11 @@
     "CM4AI": {
       "receipts": 12,
       "checked": 12,
+      "snippets": 2439,
+      "verified": 2162,
+      "not_verified": 277,
+      "value_unresolved": 3,
+      "malformed_entries": 0,
       "located": 2159,
       "located_by_form": {
         "plain": 2159,
@@ -89,6 +104,11 @@
     "VOICE": {
       "receipts": 11,
       "checked": 11,
+      "snippets": 2194,
+      "verified": 2125,
+      "not_verified": 69,
+      "value_unresolved": 2,
+      "malformed_entries": 0,
       "located": 2123,
       "located_by_form": {
         "plain": 2119,
@@ -142,6 +162,11 @@
   "totals": {
     "receipts": 48,
     "checked": 48,
+    "snippets": 9770,
+    "verified": 9304,
+    "not_verified": 466,
+    "value_unresolved": 6,
+    "malformed_entries": 0,
     "located": 9298,
     "located_by_form": {
       "plain": 9293,
@@ -160,10 +185,10 @@
     "form_located_snippets_omitted": 0
   },
   "summary": [
-    "AI_READI: 13/13 receipts read · located 3799 (plain 3798, linewrap-joined 1, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · flags through a joined or elided form 0",
-    "CHORUS: 12/12 receipts read · located 1217 (plain 1217, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · flags through a joined or elided form 0",
-    "CM4AI: 12/12 receipts read · located 2159 (plain 2159, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · flags through a joined or elided form 0",
-    "VOICE: 11/11 receipts read · located 2123 (plain 2119, linewrap-joined 4, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · flags through a joined or elided form 0"
+    "AI_READI: 13/13 receipts read · snippets 3907 · located 3799 (plain 3798, linewrap-joined 1, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 107 · value unresolved 1 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "CHORUS: 12/12 receipts read · snippets 1230 · located 1217 (plain 1217, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 13 · value unresolved 0 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "CM4AI: 12/12 receipts read · snippets 2439 · located 2159 (plain 2159, linewrap-joined 0, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 277 · value unresolved 3 · malformed receipt entries 0 · flags through a joined or elided form 0",
+    "VOICE: 11/11 receipts read · snippets 2194 · located 2123 (plain 2119, linewrap-joined 4, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · not verified 69 · value unresolved 2 · malformed receipt entries 0 · flags through a joined or elided form 0"
   ],
   "assurance": "Lexical and non-gating: this detects the loss of a registered status marker between a source passage and a value. A flag is not a defect — another passage can independently support the unqualified value, and a marker in the context need not govern the quoted words. The absence of a flag establishes neither semantic support nor the absence of a status defect."
 }

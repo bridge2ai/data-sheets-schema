@@ -1404,6 +1404,11 @@ def file_status_context(receipt: Path, bundle: Path, record: Path, *, chunk_mani
     return out
 
 
+#: The provenance inputs that name the bundle and its bytes, each a string
+#: when present (#3823).
+_STRING_INPUTS = ("bundle_path", "bundle", "bundle_md5", "bundle_sha256")
+
+
 def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str, Any]:
     """Rule 1 for a run, from its provenance record: the bundle the record
     hashed (on disk, else the committed version with its hashes, #1140),
@@ -1423,6 +1428,12 @@ def run_status_context(provenance: Path, receipt: Path, full: Path) -> dict[str,
     if not isinstance(record, dict) or not isinstance(record.get("inputs") or {}, dict):
         return _unchecked(RULE_RECEIPT, f"{provenance} is not a provenance record with an inputs mapping")
     inputs = record.get("inputs") or {}
+    # A path or hash that is not a string cannot name a file or bytes; it
+    # would raise building a Path or asking git (#3823).
+    for field in _STRING_INPUTS:
+        if inputs.get(field) is not None and not isinstance(inputs[field], str):
+            return _unchecked(RULE_RECEIPT, f"{provenance}: inputs.{field} is a {type(inputs[field]).__name__}, "
+                                            "not a string")
     bundle = bc.declared_bundle(record, provenance)
     raw, basis, why = _record_bytes(bundle, inputs)
     if raw is None:
@@ -1527,7 +1538,15 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
     snippets each haystack form located, how many were unlocated or
     indeterminate, and how many flags name a non-plain form (#3709). A
     receipt that cannot be read is listed under `unchecked` with its
-    reason, never raised. Read-only and non-gating, like every rule here.
+    reason, never raised: that includes a record or receipt of a shape the
+    reader does not expect, so one malformed record never stops the walk
+    (#3823). Read-only and non-gating, like every rule here.
+
+    Every snippet a read receipt carries is counted once: `snippets` equals
+    `located + unlocated + indeterminate + not_verified + value_unresolved`
+    (a snippet not verified in its chunk, or whose slot does not resolve in
+    the record, is not located at all), and `malformed_entries` counts the
+    receipt entries none of whose pairs was read (#3822).
 
     The snippet lists carry at most `LISTED_PER_RECEIPT` of each kind per
     receipt, while the counts are complete; `unlocated_snippets_omitted`
@@ -1537,7 +1556,9 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
     non_plain = [f for f in HAYSTACK_FORMS if f != "plain"]
 
     def tally() -> dict[str, Any]:
-        return {"receipts": 0, "checked": 0, "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
+        return {"receipts": 0, "checked": 0, "snippets": 0, "verified": 0, "not_verified": 0,
+                "value_unresolved": 0, "malformed_entries": 0,
+                "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
                 "unlocated": 0, "indeterminate": 0, "flags_by_located_form": dict.fromkeys(non_plain, 0),
                 "unlocated_snippets_omitted": 0, "form_located_snippets_omitted": 0}
 
@@ -1551,7 +1572,10 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
         try:
             out = run_status_context(core / f"{project}_provenance.yaml", receipt,
                                      Path(concat_dir) / method / core.name / f"{project}_d4d.yaml")
-        except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError) as exc:
+        except (OSError, UnicodeDecodeError, ValueError, yaml.YAMLError,
+                TypeError, AttributeError, KeyError) as exc:
+            # A field of a shape no reader expects is this receipt's
+            # problem, not the walk's (#3823).
             out = _unchecked(RULE_RECEIPT, f"{type(exc).__name__}: {exc}")
         for t in (entry, totals):
             t["receipts"] += 1
@@ -1561,7 +1585,7 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
         c = out["counts"]
         for t in (entry, totals):
             t["checked"] += 1
-            for k in ("located", "unlocated", "indeterminate"):
+            for k in _CORPUS_COUNTS:
                 t[k] += c[k]
             t["unlocated_snippets_omitted"] += out["unlocated_omitted"]
             t["form_located_snippets_omitted"] += out["form_located_omitted"]
@@ -1573,13 +1597,31 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
     lines = []
     for project, t in sorted(projects.items()):
         forms = ", ".join(f"{f} {t['located_by_form'][f]}" for f in HAYSTACK_FORMS)
-        lines.append(f"{project}: {t['checked']}/{t['receipts']} receipts read · located {t['located']} ({forms})"
-                     f" · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}"
-                     f" · flags through a joined or elided form {sum(t['flags_by_located_form'].values())}"
+        lines.append(f"{project}: {t['checked']}/{t['receipts']} receipts read · {_corpus_snippets(t)} ({forms})"
+                     f" · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_unread(t)
+                     + f" · flags through a joined or elided form {sum(t['flags_by_located_form'].values())}"
                      + _corpus_omitted(t))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_RECEIPT, "checked": True,
             "gating": False, "root": str(concat_dir), "projects": dict(sorted(projects.items())),
             "totals": totals, "summary": lines, "assurance": ASSURANCE}
+
+
+#: The per-receipt counts a corpus walk sums (#3822): every snippet, and
+#: where each one went.
+_CORPUS_COUNTS = ("snippets", "verified", "not_verified", "value_unresolved", "located", "unlocated",
+                  "indeterminate", "malformed_entries")
+
+
+def _corpus_snippets(t: dict[str, Any]) -> str:
+    return f"snippets {t['snippets']} · located {t['located']}"
+
+
+def _corpus_unread(t: dict[str, Any]) -> str:
+    """The snippets whose context was not read because they were not
+    verified or their slot did not resolve, and the malformed receipt
+    entries none of whose pairs was read (#3822): always shown, zero or not."""
+    return (f" · not verified {t['not_verified']} · value unresolved {t['value_unresolved']}"
+            f" · malformed receipt entries {t['malformed_entries']}")
 
 
 def _corpus_omitted(t: dict[str, Any]) -> str:
@@ -1594,9 +1636,10 @@ def corpus_report_lines(out: dict[str, Any]) -> list[str]:
     """The human-readable form of `corpus_status_context`, one line each."""
     t = out["totals"]
     lines = [f"   {out['instrument']} · {out['rule']} · corpus under {out['root']} · non-gating",
-             f"   {t['checked']}/{t['receipts']} receipts read · located {t['located']} ("
+             f"   {t['checked']}/{t['receipts']} receipts read · {_corpus_snippets(t)} ("
              + ", ".join(f"{f} {n}" for f, n in t["located_by_form"].items())
-             + f") · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_omitted(t)]
+             + f") · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_unread(t)
+             + _corpus_omitted(t)]
     lines += [f"   {line}" for line in out["summary"]]
     for project, p in out["projects"].items():
         for u in p["unchecked"]:
