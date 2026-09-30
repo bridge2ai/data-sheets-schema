@@ -214,11 +214,13 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                    "snapshot, so reconciliation or repair added it after the receipt was "
                    "written and no receipt route existed (#742). Same snapshot caveat"),
     "unfoundedremovals": ("removals without a finding", "live", True,
-                          "removals v2 (#2923): values the phase-1 snapshot carried and the final "
+                          "removals v3 (#2923): values the phase-1 snapshot carried and the final "
                           "full record does not, whose text does not survive under their nearest "
                           "surviving ancestor (a resolver URL and the CURIE it names read as one "
-                          "text, #3129; a value of numbers only below five digits never survives "
-                          "that way, #3243; for an entry dropped from a list, in its recognised "
+                          "text, #3129, and a British spelling and its American form, #3038; a "
+                          "value of numbers only survives only as a scalar equal to it, never "
+                          "quoted in prose, and never below five digits, #3243, #3130; for an "
+                          "entry dropped from a list, in its recognised "
                           "continuation or beyond what the list's other entries account for, "
                           "#3076), and that no slot, review_paths or remove_relationship path of an "
                           "audit finding not scoped to the core record alone covers (#3079; a "
@@ -239,7 +241,7 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                           "snapshot, so an agentic arm is – here, not 0 (#899); – also where the "
                           "run's audit cannot be read unambiguously"),
     "unfoundedreconcile": ("of those, removed at reconcile_full", "live", True,
-                           "removals v2 (#3150): the removals without a finding that "
+                           "removals v3 (#3150): the removals without a finding that "
                            "reconcile_full removed — the phase told to remove what a finding "
                            "identifies as unsupported, and so the one this row compares across "
                            "arms. The rest of the row above is values a repair round or the "
@@ -248,8 +250,20 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                            "constructed id. – wherever the row above is –, and where a phase "
                            "output is missing or unreadable, which leaves the removing phase "
                            "unattributed (#3152)"),
+    "unfoundedrelocated": ("of those, with a relocation candidate", "live", True,
+                           "removals v3 (#3223): the removals without a finding whose content "
+                           "words (three or more; an identifier by its own text) recur, 70% of "
+                           "them or more, in one scalar of the final full record or one list of "
+                           "scalars taken whole — a sign the value was reworded or moved rather "
+                           "than lost. Reported only: no count above moves, a candidate is where "
+                           "the words are, not proof the content survives, and on the labelled "
+                           "sample the threshold was chosen on (notes/"
+                           "removals_relocated_sample_2026-09-29.yaml) it was right about nine "
+                           "times in ten and found about four relocations in five. A candidate "
+                           "under source_caveats is a change of standing: the value is no longer a "
+                           "claim. – wherever the removals row is –"),
     "receipteddeleted": ("receipted values deleted, not flattened", "live", True,
-                         "removals v2 (#2923): removed values a coverage receipt named (on the "
+                         "removals v3 (#2923): removed values a coverage receipt named (on the "
                          "value, an entry above it, or the list it was a member of) whose text "
                          "did not survive by the rule above, founded or not — reworded or moved "
                          "values included (#3207), coincidentally flattened and in-place "
@@ -260,9 +274,10 @@ METRICS: dict[str, tuple[str, str, bool, str]] = {
                          "paths that stopped resolving, flattenings included. – where the run "
                          "wrote no receipt or no snapshot"),
     "unfoundedrewrites": ("values rewritten in place without a finding", "live", True,
-                          "removals v2 (#3243): scalars the final full record still carries at "
+                          "removals v3 (#3243): scalars the final full record still carries at "
                           "their path, populated, where the value now there does not contain "
-                          "their old normalised text (a resolver URL and its CURIE one text), "
+                          "their old normalised text (a resolver URL and its CURIE one text, "
+                          "and a British spelling and its American form, #3038), "
                           "and that no finding path covers by the rule above. Not in the "
                           "removal rows: the in-place route v1 counted as carried (#3229). "
                           "Every phase after phase 1, repair rounds included. A rewording that "
@@ -347,6 +362,7 @@ def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
     by_phase = block.get("unfounded_phase")
     return {"unfoundedremovals": block["unfounded"],
             "unfoundedreconcile": by_phase.get("reconcile_full", 0) if by_phase is not None else None,
+            "unfoundedrelocated": block.get("relocated_candidate_unfounded"),
             "receipteddeleted": (block["receipted"] or {}).get("deleted"),
             "unfoundedrewrites": block.get("rewritten_unfounded"),
             "unrecordedremovals": int(unrecorded) if unrecorded is not None else None}
@@ -739,9 +755,10 @@ def render_markdown(data, scores) -> str:
              "evaluator is an instrument (#1058). N/A exclusions are evaluator "
              "judgements, so adjusted maxima can differ between comparable "
              "records, The Element 4 gate resolved both ways on CM4AI until 2026-09-08; it is now stated per sub-element and those six were rescored (#1060), so the CM4AI rubric10 cells here are not comparable to any figure quoted before that date.",
-             "- removals without a finding (all phases, and the reconcile_full share), "
+             "- removals without a finding (all phases, the reconcile_full share and the "
+             "share with a relocation candidate), "
              "receipted values deleted, values rewritten in place without a finding: "
-             "**recomputed live** under removals v2 "
+             "**recomputed live** under removals v3 "
              "from the phase-1 snapshot, the phase outputs, the final full record, the audit "
              "and the receipt (`removals.for_record`, #2923), read-only; no record carries a "
              "removals block. Removals unrecorded in the report: the record's `report_claims` "

@@ -21,8 +21,10 @@ five such values in VOICE 04f rep1, CHORUS 04f rep3 and AI_READI 04g rep2,
 four reappear reworded elsewhere in the final record (#3207, see below).
 
 This module diffs the phase-1 snapshot (the API runner's
-`intermediate/{P}_full.yaml`) against the final full record, value by value,
-and puts every value the final record no longer carries in one class:
+`intermediate/{P}_full.yaml`; on the native and direct arms, which write no
+intermediate, the frozen `evidence/original_full.yaml`, #3037) against the
+final full record, value by value, and puts every value the final record no
+longer carries in one class:
 
 ``flattened``
     the value's text survives, normalised, under its nearest ancestor that
@@ -48,8 +50,12 @@ followed by its key, else by the overlap of its scalars, and an entry whose
 minted key reconciliation stripped is located at its own index
 (`same_key_stripped`, #1053) — so a reorder, an insertion ahead of an entry or
 a stripped key is not a removal. A value emptied to null or "" is removed.
-A member of a list of scalars is identified by its text, so a rewritten
-member reads as removed unless its old text survives in the list (flattened).
+A member of a list of scalars is identified by its text, a resolver URL read
+as its CURIE and — from v3 (#3038) — a British spelling as the American form
+the #1002 normaliser writes (`american_spelling.americanise`), in every text
+comparison here, so a member respelled at write time is the same member. A
+member reworded in any other way still reads as removed unless its old text
+survives in the list (flattened); v3 reports where its words went (below).
 
 A reworded or moved value reads as deleted (#3207). The text test is
 containment of the value's own normalised text under the nearest surviving
@@ -98,6 +104,47 @@ value v1 read as flattened into its list can read as deleted under v2 (#3383).
 Class declarations, `source_caveats` and minted ids are outside the
 classification (`exempt_value`).
 
+v3 (#3130, #3223, #3038, #3037) narrows coincidental flattening for numbers,
+reads a British spelling as its American form (above), reads the native and
+direct arms, and adds annotations that move no class:
+
+- **A number is carried whole or not at all** (#3130). A value of numbers
+  only (a count, a date) is flattened only where a scalar under the
+  surviving ancestor *is* that value, normalised — never by containment in
+  prose, at any length. Every numeric-only value v2 flattened was measured
+  (ten, over the 87 checked records): nine were a number quoted inside the
+  prose that disowned it — the 2026-08-13 v4 VOICE rep1
+  `instances[1].counts` 32522 as one per-feature count in the entry's
+  `source_caveats`, and the CM4AI v4/v7 `collection_timeframes[0]` start and
+  end dates as the award period in `timeframe_details` beside "the sources
+  give no start or end date for data collection" — and one a release date
+  carried as itself, which stays flattened. The other option #3130 named,
+  never flattening a number, moves that tenth row too.
+- **Where a deleted value's words went** (#3223). Each founded, unfounded
+  or unsorted row whose value has `RELOCATED_MIN_WORDS` content words or
+  more gets a reported-only `relocated_candidate` when at least
+  `RELOCATED_THRESHOLD` of them occur in one final-record scalar (or one
+  list of scalars taken whole): the best such path and the share. An
+  identifier-shaped value (a URL, CURIE or `mailto:`) is assessed by its
+  own text on token boundaries instead, its scheme `mailto:` aside. A
+  candidate under `source_caveats` is marked `change_of_standing`: the
+  value is no longer a claim, only the run's commentary on one. Validated
+  on a hand-labelled sample of deleted rows (`RELOCATED_VALIDATION`). No
+  class count moves: a candidate is where the words are, not proof the
+  content survives, and a value it misses can still have been reworded.
+- **A flattened value only the run's commentary carries** (#3223) keeps its
+  class and is marked `into_source_caveats`: every scalar that carries its
+  text is a `source_caveats` — a change of standing, not of text.
+- **The native and direct arms** (#3037) are read from the snapshot they
+  freeze, `evidence/original_full.yaml`, with `evidence/audit.json`. They
+  write no phase output, so their removals are not attributed to a phase.
+  Where the audit carries a `source_review` bound to the snapshot's bytes
+  (evidence protocol v3+), each deleted or rewritten row carries its
+  judgment (`supported`, `revise`, `metadata`, `unreviewed`), and — as
+  #2923 proposed — a value reviewed `supported` is founded only by a
+  finding linked to it by path (`review_paths` or `remove_relationship`),
+  never by a finding's free-text `slot` alone.
+
 The removing phase is the first stage after the last one that still carried
 the value: `reconcile_full`, `repair_full_rN`, or `write` (the last phase
 output carried it and the written record does not). A phase output that is
@@ -109,12 +156,13 @@ unfounded count by the phase that removed each value (#3150).
 Reported only. No provenance block is written here and nothing is gated:
 `unfounded` says no finding's path covers the value, not that the removal was
 wrong, and `founded` says a finding's path covers it, not that the finding
-was right. With no phase-1 snapshot (the agentic path writes none) every
-count is None, never 0 — the #899 convention: an absent snapshot is not a
-clean diff.
+was right. With no phase-1 snapshot (the agentic path before the evidence
+protocol writes none) every count is None, never 0 — the #899 convention: an
+absent snapshot is not a clean diff.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from functools import lru_cache
@@ -126,28 +174,57 @@ import yaml
 from data_sheets_schema.receipts import (ENTRY_KEYS, _canonical_identifier, _populated, _resolve_value,
                                          dataset_identifier_forms, exempt, normalise, remap_path)
 
-INSTRUMENT = ("removals v2 (#3129, #3243): phase-1 snapshot against the final full record, joined "
-              "by receipts.remap_path; flattened by normalised containment under the nearest "
-              "surviving ancestor, a resolver URL and its CURIE one text, a value of numbers "
-              "only below five digits never, a dropped list entry's only in its recognised "
-              "continuation or beyond what the list's other phase-1 entries account for; a "
-              "carried scalar whose text its path no longer contains is rewritten, apart from "
-              "the removals; founded by a finding's slot, review_paths or remove_relationship "
-              "path covering the value or an ancestor, an index one past the end read as the "
-              "last entry, in a finding whose record is not core only")
+INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223): phase-1 snapshot (or the native/direct "
+              "evidence/original_full.yaml) against the final full record, joined by "
+              "receipts.remap_path; flattened by normalised containment under the nearest "
+              "surviving ancestor, a resolver URL and its CURIE one text, a British spelling and "
+              "its American form one text, a value of numbers only below five digits never and "
+              "otherwise only by a scalar equal to it, a dropped list entry's only in its "
+              "recognised continuation or beyond what the list's other phase-1 entries account "
+              "for; a carried scalar whose text its path no longer contains is rewritten, apart "
+              "from the removals; founded by a finding's slot, review_paths or remove_relationship "
+              "path covering the value or an ancestor (review_paths or remove_relationship only, "
+              "for a value a bound source review judged supported), an index one past the end "
+              "read as the last entry, in a finding whose record is not core only; a deleted "
+              "value's relocation candidate reported at a content-word share of 0.7 or more")
 
 #: Paths kept in the block per class; the counts are never capped.
 PATH_LIMIT = 50
 
-#: A value whose every normalised token is a number is flattened by
-#: containment only with at least this many digits (#3243). A count, an index
-#: or a year recurs in sizes, versions and dates of unrelated text — the 22c
-#: CM4AI `file_count` 3 in "3.8 GB" — while the numbers the corpus flattens
-#: for real are longer: a date (8 digits; CM4AI v4 and v7 collection
-#: timeframes, a v3 AI_READI release date) and one 5-digit count, v4 VOICE
-#: rep1 `instances[1].counts` 29278 — the recording-features instance, a
-#: count of derived feature sets, not of participants (#3396).
+#: A value whose every normalised token is a number is flattened only with at
+#: least this many digits (#3243). A count, an index or a year recurs in
+#: sizes, versions and dates of unrelated text — the 22c CM4AI `file_count` 3
+#: in "3.8 GB". From v3 (#3130) a longer one also needs a scalar equal to it,
+#: so the guard now keeps a short number from being carried by an equal but
+#: unrelated one (another entry's `file_count: 3`). Of the ten numeric-only
+#: values v2 flattened, the one v3 still flattens is a date (the 2026-08-06
+#: v3 AI_READI `distribution_dates[2].release_dates[0]`); the 5-digit count
+#: of v4 VOICE rep1 — 32522 on the recording-features instance of the
+#: snapshot the run pins, `VOICE_full_2.yaml`, not the 29278 of its
+#: `VOICE_full.yaml` #3396 read — survived only as one per-feature count in
+#: the entry's `source_caveats`.
 MIN_NUMERIC_DIGITS = 5
+
+#: A deleted value's relocation candidate (#3223): the share of its content
+#: words (`_words`) that one final-record scalar, or one list of scalars
+#: taken whole, must carry. Chosen on the hand-labelled sample in
+#: `RELOCATED_VALIDATION`, where 0.6 trades precision for recall and 0.8
+#: recall for precision.
+RELOCATED_THRESHOLD = 0.7
+
+#: Fewer content words than this and a share says nothing (a two-word name
+#: recurs in any affiliation list): the row is not assessed. An
+#: identifier-shaped value is assessed by its own text instead.
+RELOCATED_MIN_WORDS = 3
+
+#: The sample the threshold was chosen on, and what it measured there.
+RELOCATED_VALIDATION = "notes/removals_relocated_sample_2026-09-29.yaml"
+
+#: A path under the run's commentary: a move there is a change of standing.
+_CAVEAT_PATH = re.compile(r"(?:^|\.)source_caveats(?:\[|\.|$)")
+
+#: A value that is one identifier: a URL, a CURIE, a `mailto:`.
+_IDENTIFIER_SHAPED = re.compile(r"(?:[a-z][a-z0-9+.-]*://\S+|[A-Za-z][\w.-]*:\S+)", re.I)
 
 #: The grammar `receipts.remap_path` reads. A key outside it cannot be joined.
 _ADDRESSABLE = re.compile(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*")
@@ -158,8 +235,9 @@ NON_CHECKS = (
     "that a founded removal was right — a finding naming a slot is not evidence that its "
     "value was unsupported",
     "that a flattened value kept its meaning — normalised text containment under the nearest "
-    "surviving ancestor, not a semantic comparison: a word or a number of five digits or more "
-    "can coincide with unrelated text (a shorter number is never flattened, #3243), and a "
+    "surviving ancestor, not a semantic comparison: a word can coincide with unrelated text "
+    "(a number is flattened only by a scalar equal to it, and never below five digits, "
+    "#3243, #3130), and a "
     "value a dropped list entry shared with its siblings is not traced "
     "to the entry — it is flattened where the sibling recognised as the entry's continuation "
     "carries it, though that copy may be the sibling's own, and otherwise only where more "
@@ -167,11 +245,21 @@ NON_CHECKS = (
     "that a deleted value's content is gone — the text test is exact normalised containment of "
     "the value's own text, so a value reworded, moved to another key (source_caveats included) or "
     "slot, or split across several list members reads as deleted, and as unfounded when no "
-    "finding covers it (#3207); and not that a flattened value's content survives — a word or "
-    "a long number can still be flattened by coincidental containment, though a number under "
-    "five digits no longer is (the file_count 3 that matched the '3' of '3.8 GB', #3243): "
-    "rewording and moving inflate the deleted, unfounded and receipted-deleted counts, "
-    "coincidental flattening still deflates them, so they bound nothing (#3229)",
+    "finding covers it (#3207); and not that a flattened value's content survives — a word "
+    "can still be flattened by coincidental containment, though a number no longer is (the "
+    "file_count 3 that matched the '3' of '3.8 GB', #3243; a count or a date quoted in the "
+    "prose that disowned it, #3130): rewording and moving inflate the deleted, unfounded and "
+    "receipted-deleted counts, coincidental flattening still deflates them, so they bound "
+    "nothing (#3229)",
+    "that a relocation candidate restates the value — it is where the largest share of the "
+    "value's content words recurs in one final scalar, not a semantic comparison: at the "
+    "declared threshold the labelled sample measured it right about nine times in ten and "
+    "found about four relocations in five (RELOCATED_VALIDATION), a value with fewer than "
+    "three content words (a number, a date, a short name) is not assessed, and a candidate "
+    "moves no count (#3223)",
+    "that a source review's judgment was right — a removed value reviewed supported and founded "
+    "by no linked finding is unfounded on the review's word, and one reviewed revise is still "
+    "founded only by a finding's path (#3037)",
     "that a rewritten value lost its content, or that a carried one kept it — rewritten is a "
     "carried scalar whose normalised text the value now at its path does not contain, so a "
     "rewording that keeps the content is counted, and an edit that keeps the old text as a "
@@ -237,8 +325,16 @@ def _text(value: Any) -> str:
 @lru_cache(maxsize=1 << 16, typed=True)
 def _member(value: Any) -> str:
     """A list member's identity: its text, a resolver URL read as the CURIE
-    it names (#974's normaliser rewrites one to the other at write time)."""
-    return _text(_canonical_identifier(value.strip()) if isinstance(value, str) else value)
+    it names (#974's normaliser rewrites one to the other at write time)
+    and a British spelling as the American form (#1002's normaliser, the
+    form instrument's rules; #3038). Identifier-shaped tokens are left as
+    written, as the normaliser leaves them; the text is folded to lower
+    case first, so a Capitalised word its proper-noun rule would skip is
+    folded too — this is an identity, not a rewrite."""
+    if not isinstance(value, str):
+        return _text(value)
+    from data_sheets_schema.american_spelling import americanise
+    return _text(americanise(_canonical_identifier(value.strip()).casefold())[0])
 
 
 def _scalars(node: Any):
@@ -338,17 +434,38 @@ def _survives(value: Any, node: Any) -> bool:
     return any(_carries(h, n) for n in needles for h in hays)
 
 
+def _numeric(value: Any) -> bool:
+    """A value of numbers only, once normalised: a count, a year, a date."""
+    tokens = _text(value).split()
+    return bool(tokens) and all(t.isdigit() for t in tokens)
+
+
 def _flattenable(value: Any) -> bool:
     """Whether containment can count for this value at all: never a boolean
     (its text is not the fact it states), and never a value of numbers only
     with fewer than `MIN_NUMERIC_DIGITS` digits, which recurs in unrelated
     text by chance (#3243)."""
-    if isinstance(value, bool):
+    if isinstance(value, bool) or not _text(value).split():
         return False
-    tokens = _text(value).split()
-    if not tokens:
-        return False
-    return not (all(t.isdigit() for t in tokens) and sum(map(len, tokens)) < MIN_NUMERIC_DIGITS)
+    return not (_numeric(value) and sum(map(len, _text(value).split())) < MIN_NUMERIC_DIGITS)
+
+
+def _kept_in(value: Any, node: Any) -> bool:
+    """The flattening test: `_survives`, except that a value of numbers only
+    is carried only by a scalar equal to it, normalised (#3130) — a count or
+    a date inside prose is a number quoted, not the value kept."""
+    if not _numeric(value):
+        return _survives(value, node)
+    want = {_text(value), _member(value)}
+    return any(_text(s) in want or _member(s) in want for s in _scalars(node))
+
+
+def _into_source_caveats(value: Any, node: Any, path: str) -> bool:
+    """Whether every scalar of `node` (at `path`) that carries the value's
+    text is a `source_caveats` — the run's commentary, not a claim (#3223)."""
+    wrapped = {"_": node}
+    carriers = [p for p, s, _lp in values(wrapped) if _kept_in(value, s)]
+    return bool(carriers) and all(_CAVEAT_PATH.search(path + p[1:]) for p in carriers)
 
 
 def _identity(entry: dict[str, Any]) -> list[str]:
@@ -422,13 +539,15 @@ def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_li
     the second. Texts are compared by `_survives`, a resolver URL and its
     CURIE as one (#3129). That widens both counts of the second route, so it
     can narrow: a sibling that carried the value's other form counts before,
-    where v1 did not count it, and a v1 surplus can vanish (#3383)."""
+    where v1 did not count it, and a v1 surplus can vanish (#3383). A value
+    of numbers only counts only where a scalar equals it (`_kept_in`,
+    #3130)."""
     j = _fold_target(entry_path, entry, survivors, record_id, carried)
-    if j is not None and _survives(value, survivors[j]):
+    if j is not None and _kept_in(value, survivors[j]):
         return f"{final_path}[{j}]"
     k = int(entry_path[entry_path.rindex("[") + 1:-1])
-    after = sum(_survives(value, e) for e in survivors)
-    before = sum(_survives(value, e) for i, e in enumerate(snapshot_list) if i != k)
+    after = sum(_kept_in(value, e) for e in survivors)
+    before = sum(_kept_in(value, e) for i, e in enumerate(snapshot_list) if i != k)
     return final_path if after > before else None
 
 
@@ -445,7 +564,9 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
     anywhere in the list is still read as flattened (a string split into
     members). A boolean is never flattened — its text is not the fact it
     states — nor a value of numbers only below `MIN_NUMERIC_DIGITS` digits
-    (#3243); a resolver URL and the CURIE it names are one text (#3129)."""
+    (#3243), nor a longer one except by a scalar equal to it (#3130); a
+    resolver URL and the CURIE it names are one text (#3129), and so are a
+    British spelling and its American form (#3038)."""
     if not _flattenable(value):
         return None
     below = path
@@ -463,8 +584,103 @@ def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict
             _ok, snapshot_list = _resolve_value(original, anc)
             if isinstance(entry, dict) and isinstance(snapshot_list, list):
                 return _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
-        return rm["path"] if _survives(value, node) else None
+        return rm["path"] if _kept_in(value, node) else None
     return None
+
+
+# -------------------------------------------------------------- relocation
+@lru_cache(maxsize=1 << 16, typed=True)
+def _words(value: Any) -> frozenset[str]:
+    """A value's content words: `_member`'s tokens longer than two
+    characters, less `redundancy.STOPWORDS` (#3223)."""
+    from data_sheets_schema.redundancy import STOPWORDS
+    return frozenset(w for w in _member(value).split() if len(w) > 2 and w not in STOPWORDS)
+
+
+class _Relocation:
+    """Where a deleted value's words recur in the final record (#3223):
+    each populated scalar, and each list of scalars taken whole — a member
+    split in three is in the list, not in any one member."""
+
+    def __init__(self, final: dict[str, Any]):
+        scalars = values(final)
+        lists: dict[str, list[Any]] = {}
+        for _p, v, lp in scalars:
+            if lp is not None:
+                lists.setdefault(lp, []).append(v)
+        self.members = [(p, _member(v)) for p, v, _lp in scalars]
+        self.words = ([(p, _words(v)) for p, v, _lp in scalars]
+                      + [(lp, frozenset().union(*map(_words, vs))) for lp, vs in lists.items()])
+
+    def candidate(self, value: Any) -> tuple[bool, dict[str, Any] | None]:
+        """(assessed, candidate or None). An identifier-shaped value is
+        assessed by its own text on token boundaries (a `mailto:` scheme
+        aside); any other by the share of its content words one candidate
+        carries, where it has `RELOCATED_MIN_WORDS` of them. The first
+        path in record order wins a tie, a scalar before a list."""
+        if isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip()):
+            needle = _member(re.sub(r"^mailto:", "", value.strip(), flags=re.I))
+            hit = next((p for p, m in self.members if _carries(m, needle)), None)
+            return True, (self._row(hit, 1.0) if hit is not None else None)
+        want = _words(value)
+        if isinstance(value, bool) or len(want) < RELOCATED_MIN_WORDS:
+            return False, None
+        best, at = 0.0, None
+        for p, have in self.words:
+            share = len(want & have) / len(want)
+            if share > best:
+                best, at = share, p
+        return True, (self._row(at, best) if at is not None and best >= RELOCATED_THRESHOLD else None)
+
+    @staticmethod
+    def _row(path: str, share: float) -> dict[str, Any]:
+        # A move into the run's commentary: no longer a claim (#3223).
+        return {"to": path, "share": round(share, 3), "change_of_standing": bool(_CAVEAT_PATH.search(path))}
+
+
+# ----------------------------------------------------------- source review
+def _pointer_path(pointer: Any) -> str | None:
+    """A JSON Pointer as this module's dotted path: `/a/0/b` -> `a[0].b`."""
+    toks = pointer_tokens(pointer)
+    if not toks:
+        return None
+    out = ""
+    for t in toks:
+        out += f"[{t}]" if isinstance(t, int) else (f".{t}" if out else str(t))
+    return out
+
+
+def source_review_judgments(audit: Any, snapshot_sha256: str | None = None
+                            ) -> tuple[dict[str, Any] | None, dict[str, str] | None]:
+    """(state, {path: judgment}) from an audit's original_full
+    `source_review` (evidence protocol v3+; the native and direct arms, #3037).
+    A value's judgment is `revise` where any claim on it is, `supported`
+    where every claim is, `metadata` where it was exempted as record
+    metadata. None, None where the audit carries no source review; the
+    judgments None, with the reason, where it cannot be bound to the
+    snapshot read — another artifact, or other bytes than `snapshot_sha256`."""
+    review = audit.get("source_review") if isinstance(audit, dict) else None
+    if review is None:
+        return None, None
+    if (not isinstance(review, dict) or review.get("artifact") != "original_full"
+            or not isinstance(review.get("values"), list)):
+        return {"state": "unusable", "reason": "the audit's source_review is not an original_full "
+                                               "review with a values list"}, None
+    if snapshot_sha256 is not None and review.get("sha256") != snapshot_sha256:
+        return {"state": "unbound", "reason": "the source review is bound to other bytes than the snapshot "
+                                              "read here (sha256 differs)"}, None
+    judged: dict[str, str] = {}
+    for row in review["values"]:
+        path = _pointer_path(row.get("path")) if isinstance(row, dict) else None
+        if path is None:
+            continue
+        if "claims" not in row and "metadata_reason" in row:
+            judged[path] = "metadata"
+            continue
+        verdicts = {c.get("verdict") for c in row.get("claims") or [] if isinstance(c, dict)}
+        judged[path] = ("revise" if "revise" in verdicts
+                        else "supported" if verdicts == {"supported"} else "unreviewed")
+    return {"state": "bound" if snapshot_sha256 is not None else "unhashed", "reason": None}, judged
 
 
 # ---------------------------------------------------------------- findings
@@ -701,7 +917,9 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "unfounded_named_by_core_finding": None, "unfounded_mentioned_in_finding_text": None,
             "receipted": None, "phase": None, "unfounded_phase": None, "audit": None,
             "rewritten": None, "rewritten_unfounded": None, "rewritten_receipted": None,
-            "rewritten_unfounded_phase": None,
+            "rewritten_unfounded_phase": None, "flattened_into_source_caveats": None,
+            "relocated_candidate": None, "relocated_candidate_unfounded": None,
+            "relocated_candidate_standing": None, "relocated_not_assessed": None, "source_review": None,
             **{f"{cls}_paths{suffix}": ([] if not suffix else None)
                for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten")
                for suffix in ("", "_truncated")},
@@ -717,7 +935,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit: dict[str, Any] | None = None, *,
              receipt: dict[str, Any] | None = None,
              intermediates: list[tuple[str, dict[str, Any] | None]] | None = None,
-             audit_unread: str | None = None) -> dict[str, Any]:
+             audit_unread: str | None = None, snapshot_sha256: str | None = None) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -731,7 +949,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     `receipted` None. `intermediates` is `[(phase name, output or None),
     ...]` between the snapshot and the final record, in run order; without
     them, or with any output None (it is missing or could not be read),
-    `phase` and `unfounded_phase` are None."""
+    `phase` and `unfounded_phase` are None. `snapshot_sha256` is the hash
+    of the snapshot bytes, which an audit's `source_review` must name to
+    be read (#3037); without it the review is read as `unhashed`."""
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -749,6 +969,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     # that carried it" would name a later phase for a value an earlier one
     # removed.
     attributed = intermediates is not None and all(isinstance(doc, dict) for _n, doc in intermediates)
+    review_state, judged = source_review_judgments(audit, snapshot_sha256)
+    relocation = _Relocation(final)
     at_final = _Presence(original, final)
     at_stage = [(name, _Presence(original, doc)) for name, doc in (intermediates or [])] if attributed else []
 
@@ -758,16 +980,31 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         last = max((i for i, (_n, p) in enumerate(at_stage) if keeps(p)), default=-1)
         return at_stage[last + 1][0] if last + 1 < len(at_stage) else "write"
 
-    def finding_for(path: str) -> tuple[int, str, bool] | None:
-        hit = next(((n, via, False) for n, via, fp in named if covers(fp, path, original)), None)
+    def finding_for(path: str, linked_only: bool = False) -> tuple[int, str, bool] | None:
+        pool = [t for t in named if not linked_only or t[1] != "slot"]
+        hit = next(((n, via, False) for n, via, fp in pool if covers(fp, path, original)), None)
         if hit is None:
             # An index one past the end of its list names no entry as
             # written; read as the last entry, and said so on the row (#3077).
-            hit = next(((n, via, True) for n, via, fp in named
+            hit = next(((n, via, True) for n, via, fp in pool
                         if covers(fp, path, original, past_end=True)), None)
         return hit
 
-    total = exempted = unaddressable = 0
+    def judge(row: dict[str, Any], path: str) -> tuple[int, str, bool] | None:
+        # The source review's judgment on the value (#3037), and the finding
+        # that founds it: for a value reviewed `supported`, only one linked
+        # to it by path — a finding's free-text slot does not overrule the
+        # review, as #2923 proposed.
+        if judged is not None:
+            row["source_review"] = judged.get(path, "unreviewed")
+        if row.get("source_review") != "supported":
+            return finding_for(path)
+        hit = finding_for(path, linked_only=True)
+        if hit is None and finding_for(path) is not None:
+            row["supported_slot_only"] = True
+        return hit
+
+    total = exempted = unaddressable = not_assessed = 0
     rows: dict[str, list[dict[str, Any]]] = {"flattened": [], "founded": [], "unfounded": [], "unsorted": [],
                                              "rewritten": []}
     founded_by = {"slot": 0, "review_paths": 0, "remove_relationship": 0}
@@ -791,10 +1028,12 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                 if paths_receipted is not None:
                     rw["receipted"] = _receipted(path, None, paths_receipted)
                 if named is not None:
-                    hit = finding_for(path)
+                    hit = judge(rw, path)
                     rw["founded"] = hit is not None
                     if hit is not None:
                         rw.update({"by": hit[1], "finding": hit[0], **({"index_past_end": True} if hit[2] else {})})
+                elif judged is not None:
+                    rw["source_review"] = judged.get(path, "unreviewed")
                 rows["rewritten"].append(rw)
             continue
         row: dict[str, Any] = {"path": path}
@@ -806,14 +1045,25 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
             receipted["removed"] += row["receipted"]
         into = _flattened_into(path, value, original, final, record_id=record_id, carried=carried)
         if into is not None:
-            rows["flattened"].append({**row, "into": into})
+            flat = {**row, "into": into}
+            if _into_source_caveats(value, _resolve_value(final, into)[1], into):
+                flat["into_source_caveats"] = True
+            rows["flattened"].append(flat)
             receipted["flattened"] += bool(row.get("receipted"))
             continue
         receipted["deleted"] += bool(row.get("receipted"))
+        # Where its words went (#3223): reported, never a class.
+        assessed, where = relocation.candidate(value)
+        if where is not None:
+            row["relocated_candidate"] = where
+        elif not assessed:
+            not_assessed += 1
         if named is None:
+            if judged is not None:
+                row["source_review"] = judged.get(path, "unreviewed")
             rows["unsorted"].append(row)
             continue
-        hit = finding_for(path)
+        hit = judge(row, path)
         if hit is not None:
             founded_by[hit[1]] += 1
             rows["founded"].append({**row, "by": hit[1], "finding": hit[0],
@@ -831,6 +1081,13 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         receipted["unfounded"] += bool(row.get("receipted"))
 
     sorted_ = named is not None
+    deleted_rows = rows["founded"] + rows["unfounded"] + rows["unsorted"]
+
+    def tally(rs: list[dict[str, Any]]) -> dict[str, int]:
+        out = {k: 0 for k in ("supported", "revise", "metadata", "unreviewed")}
+        for r in rs:
+            out[r["source_review"]] += 1
+        return out
     # Every finding path (not core only) whose literal index runs past the
     # end of the snapshot list: True where by exactly one of a non-empty
     # list, the reading `covers(past_end=True)` makes; False where further,
@@ -872,6 +1129,24 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                                 if paths_receipted is not None else None),
         "rewritten_unfounded_phase": (_by_phase([r for r in rows["rewritten"] if not r["founded"]])
                                       if attributed and sorted_ else None),
+        # Reported only (#3223): a flattened value whose text only the run's
+        # commentary carries, and where each deleted value's words went.
+        "flattened_into_source_caveats": sum(1 for r in rows["flattened"] if r.get("into_source_caveats")),
+        "relocated_candidate": sum(1 for r in deleted_rows if "relocated_candidate" in r),
+        "relocated_candidate_unfounded": (sum(1 for r in rows["unfounded"] if "relocated_candidate" in r)
+                                          if sorted_ else None),
+        "relocated_candidate_standing": sum(1 for r in deleted_rows
+                                            if (r.get("relocated_candidate") or {}).get("change_of_standing")),
+        "relocated_not_assessed": not_assessed,
+        # The source review's judgments on what was deleted or rewritten (#3037).
+        "source_review": (None if review_state is None else {
+            **review_state,
+            "deleted": tally(deleted_rows) if judged is not None else None,
+            "rewritten": tally(rows["rewritten"]) if judged is not None else None,
+            "unfounded_supported": (sum(1 for r in rows["unfounded"] if r.get("source_review") == "supported")
+                                    if judged is not None and sorted_ else None),
+            "unfounded_supported_slot_only": (sum(1 for r in rows["unfounded"] if r.get("supported_slot_only"))
+                                              if judged is not None and sorted_ else None)}),
     }
     for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten"):
         _cap(rows[cls], f"{cls}_paths", block)
@@ -902,7 +1177,7 @@ def _summary(block: dict[str, Any], unsorted_why: str | None = None) -> str:
             f" · {block['flattened']} flattened")
     if block["founded"] is None:
         return (head + f" · {block['deleted']} deleted · {unsorted_why or 'the deletions are not sorted'}"
-                f" · {block['rewritten']} rewritten in place")
+                f" · {block['rewritten']} rewritten in place" + _v3_summary(block))
     s = head + f" · {block['founded']} founded · {block['unfounded']} unfounded"
     if block.get("founded_past_end"):
         s += f" ({block['founded_past_end']} founded by an index one past the end)"
@@ -910,6 +1185,24 @@ def _summary(block: dict[str, Any], unsorted_why: str | None = None) -> str:
         s += (f" · receipted: {block['receipted']['deleted']} deleted, "
               f"{block['receipted']['flattened']} flattened")
     s += f" · {block['rewritten']} rewritten in place ({block['rewritten_unfounded']} without a finding)"
+    return s + _v3_summary(block)
+
+
+def _v3_summary(block: dict[str, Any]) -> str:
+    """The reported-only v3 annotations (#3223, #3037), where there are any."""
+    s = ""
+    if block["relocated_candidate"]:
+        s += (f" · {block['relocated_candidate']} deleted with a relocation candidate"
+              f" ({block['relocated_candidate_standing']} into source_caveats)")
+    if block["flattened_into_source_caveats"]:
+        s += f" · {block['flattened_into_source_caveats']} flattened into source_caveats only"
+    review = block.get("source_review")
+    if review is not None and review.get("deleted") is not None:
+        s += (f" · source review: {review['deleted']['supported']} deleted reviewed supported"
+              + (f", {review['unfounded_supported']} of them unfounded" if review["unfounded_supported"] is not None
+                 else ""))
+    elif review is not None:
+        s += f" · source review not read: {review['reason']}"
     return s
 
 
@@ -955,9 +1248,54 @@ def repair_rounds(core_dir: Path, project: str, record: dict[str, Any] | None) -
     return sorted({int(m.group(1)) for n in names if (m := pattern.fullmatch(n))})
 
 
+def evidence_snapshot(core_dir: Path) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
+    """(snapshot, pin) from the native and direct arms' frozen original
+    (#3037): `{method}_core/{label}/evidence/original_full.yaml`, written
+    once, before the audit, by the evidence protocol's freeze command.
+    None, None where there is none. The file is named for no project, so a
+    label directory holding more than one project's record makes it no one
+    record's: unusable, and said so."""
+    path = core_dir / "evidence" / "original_full.yaml"
+    if not path.exists():
+        return None, None
+    records = sorted(core_dir.glob("*_provenance.yaml"))
+    if len(records) > 1:
+        return None, {"path": str(path), "sha256": None, "state": "unusable", "source": "evidence",
+                      "reason": f"{len(records)} records share this label directory, so its unprefixed "
+                                "evidence/original_full.yaml belongs to none of them"}
+    try:
+        raw = path.read_bytes()
+        doc = yaml.safe_load(raw.decode("utf-8"))
+        if not isinstance(doc, dict) or not doc:
+            raise ValueError("snapshot is not a nonempty mapping")
+    except (OSError, UnicodeDecodeError, yaml.YAMLError, ValueError) as exc:
+        return None, {"path": str(path), "sha256": None, "state": "unusable", "source": "evidence",
+                      "reason": str(exc).splitlines()[0] if str(exc) else type(exc).__name__}
+    return doc, {"path": str(path), "sha256": hashlib.sha256(raw).hexdigest(), "state": "usable",
+                 "source": "evidence"}
+
+
+def _evidence_audit(core_dir: Path) -> tuple[str, Path | None, Any, str | None]:
+    """(state, path, parsed, why) for the evidence protocol's `evidence/audit.json`."""
+    path = core_dir / "evidence" / "audit.json"
+    if not path.exists():
+        return "absent", None, None, None
+    try:
+        doc = json.loads(path.read_bytes().decode("utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as exc:
+        return "unusable", path, None, f"{type(exc).__name__}: {str(exc).splitlines()[0] if str(exc) else ''}"
+    if not isinstance(doc, dict):
+        return "unusable", path, None, f"the document is a {type(doc).__name__}, not a mapping"
+    return "usable", path, doc, None
+
+
 def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dict[str, Any]:
     """The block for one run on disk. Read-only: nothing under the run's
-    directories is written, and the provenance record is not changed."""
+    directories is written, and the provenance record is not changed.
+
+    The phase-1 snapshot is the API runner's `intermediate/{P}_full.yaml`;
+    where a run has none, the native/direct `evidence/original_full.yaml`,
+    read with `evidence/audit.json` and no phase outputs (#3037)."""
     from data_sheets_schema.backfill_checks import record_paths
     from data_sheets_schema.report_claims import phase1_snapshot_with_pin_for
     paths = record_paths(provenance)
@@ -968,6 +1306,10 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
         return _unchecked(f"no final full record at {paths['full']}")
     final = yaml.safe_load(paths["full"].read_text(encoding="utf-8")) or {}
     original, pin = phase1_snapshot_with_pin_for(paths["core"], record=record)
+    evidence = False
+    if original is None and pin is None:
+        original, pin = evidence_snapshot(core_dir)
+        evidence = pin is not None
     if original is None:
         why = (pin or {}).get("reason")
         block = _unchecked(f"the phase-1 snapshot is present but not usable ({why})" if why else
@@ -975,10 +1317,16 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
                            "wrote (#899)")
         block["artifacts"] = {"phase1_snapshot": pin}
         return block
-    a_state, a_path, audit, a_why = _phase_output(core_dir, project, f"{project}_audit.json", record)
+    if evidence:
+        # The native and direct arms reconcile in session and snapshot no
+        # phase output: nothing to attribute a removal to (#3037).
+        a_state, a_path, audit, a_why = _evidence_audit(core_dir)
+    else:
+        a_state, a_path, audit, a_why = _phase_output(core_dir, project, f"{project}_audit.json", record)
     stages: list[tuple[str, dict[str, Any] | None]] = []
     phases: list[dict[str, Any]] = []
-    for name in ["reconcile_full", *(f"repair_full_r{n}" for n in repair_rounds(core_dir, project, record))]:
+    for name in ([] if evidence else
+                 ["reconcile_full", *(f"repair_full_r{n}" for n in repair_rounds(core_dir, project, record))]):
         state, path, doc, why = _phase_output(core_dir, project, f"{project}_{name}.yaml", record)
         # A missing output is a gap like an unreadable one (#3152), not a
         # phase to skip: the runner snapshots every phase it runs, and runs
@@ -999,13 +1347,15 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
             receipt = None
         r_state = "usable" if receipt_paths(receipt) is not None else "unusable"
     block = classify(original, final, audit if a_state == "usable" else None,
-                     receipt=receipt, intermediates=stages,
-                     audit_unread=(a_why or "unreadable") if a_state == "unusable" else None)
+                     receipt=receipt, intermediates=None if evidence else stages,
+                     audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
+                     snapshot_sha256=(pin or {}).get("sha256"))
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,
                   **({"reason": a_why} if a_why else {})},
         "receipt": {"state": r_state, "path": str(receipt_file) if r_state != "absent" else None},
         "phases": phases,
+        **({"phases_reason": "the native/direct evidence protocol snapshots no phase output"} if evidence else {}),
     }
     return block
