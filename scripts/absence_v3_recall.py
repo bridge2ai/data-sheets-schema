@@ -48,7 +48,9 @@ The judgement file is in the form of the precision judgements
 (`notes/absence_precision_judgements_bd0c63ed.yaml`) and is checked by the
 same reader (`absence_claims_baseline.read_judgements`): its phrases must be
 the draw the entry names, and its verdict tally the entry's counts, or the
-note is refused. Each row also carries its computed `cause` and `flagged`,
+note is refused. The entry's draw hash must in turn be the draw its `sample`
+and `seed` make, recomputed from the pinned records (#3891), so `--check`
+refuses a hand-picked or re-seeded set that the constant and the file agree on. Each row also carries its computed `cause` and `flagged`,
 which must be what this script computes, and a judged `reading`, which fixes
 its verdict (`READINGS`; the judgement file's header defines each): whether
 the phrase's sentence narrates how the record was built, as the class
@@ -341,6 +343,19 @@ def sample(found: dict[str, Any], n: int, seed: int, population: str = "rows") -
     return out
 
 
+def _seeded_draw(found: dict[str, Any], entry: dict[str, Any], population: str) -> None:
+    """Refused unless the entry's `draw_sha256` is the draw its `sample` and
+    `seed` make of `population`, recomputed from the pinned records (#3891).
+    The baseline's reader ties the file's phrases to the pinned hash; this
+    ties the pinned hash to the seed the note prints, so a hand-picked or
+    re-seeded set cannot pass as `random.Random(seed).sample`."""
+    want = baseline.draw_sha256(draw(found, entry["sample"], entry["seed"], population))
+    if want != entry["draw_sha256"]:
+        flag = "--kept-sample" if population == "kept" else "--sample"
+        raise Refused(f"{entry['judgements']}: its draw {entry['draw_sha256'][:12]}… is not the seeded draw "
+                      f"{want[:12]}… that {flag} {entry['sample']} --seed {entry['seed']} makes of the pinned records")
+
+
 def read_judgements(found: dict[str, Any]) -> dict[str, Any]:
     """The judgement file, checked by the baseline's reader against this
     entry, and each row's computed cause and sentence flags against a fresh
@@ -362,13 +377,15 @@ def read_judgements(found: dict[str, Any]) -> dict[str, Any]:
         if row.get("cause") != h["cause"] or row.get("flagged") != h["flagged"]:
             raise Refused(f"{RECALL['judgements']} #{row.get('n')}: cause {row.get('cause')!r} and flagged "
                           f"{row.get('flagged')!r} are not the computed {h['cause']!r} and {h['flagged']!r}")
+    _seeded_draw(found, RECALL, "rows")
     return data
 
 
 def read_kept_judgements(found: dict[str, Any]) -> dict[str, Any]:
     """The kept-match judgement file, checked by the baseline's reader against
     `KEPT`, with each reading carrying its verdict and each phrase a match v3
-    keeps (the draw's hash already names them; this says which one is not)."""
+    keeps (the draw's hash already names them; this says which one is not),
+    and the pinned hash the seeded draw of the kept matches (#3891)."""
     if found["record_set_sha256"] != KEPT["record_set_sha256"]:
         raise Refused("the pinned record set is not the one the kept-match judgements were drawn from")
     try:
@@ -382,6 +399,7 @@ def read_kept_judgements(found: dict[str, Any]) -> dict[str, Any]:
         if READINGS.get(row.get("reading")) != row["verdict"]:
             raise Refused(f"{KEPT['judgements']} #{row.get('n')}: reading {row.get('reading')!r} does not carry "
                           f"the verdict {row['verdict']!r}")
+    _seeded_draw(found, KEPT, "kept")
     return data
 
 

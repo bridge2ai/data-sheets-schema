@@ -251,6 +251,39 @@ class Judgements(unittest.TestCase):
         with self.assertRaisesRegex(self.m.Refused, "not a match v3 keeps"):
             self.m.render_markdown(self.found)
 
+    def test_a_kept_set_that_is_not_the_seeded_draw_is_refused(self):
+        """A hand-picked kept set, its pin and file in step, is refused: the
+        pinned hash must be the draw the entry's seed makes (#3891)."""
+        rows = list(reversed(self.kept_rows))
+        self.assertGreater(len(rows), 1)
+        self.m.KEPT["draw_sha256"] = self.m.baseline.draw_sha256({RSN: (0, [(r["record"], r) for r in rows])})
+        self._write_kept(rows)
+        with self.assertRaisesRegex(self.m.Refused, "is not the seeded draw"):
+            self.m.render_markdown(self.found)
+
+    def test_a_kept_draw_under_another_seed_is_refused(self):
+        """The file and pin of another seed's draw, labelled with this seed."""
+        for seed in range(8, 200):
+            other = self.m.draw(self.found, self.m.KEPT["sample"], seed, "kept")
+            if self.m.baseline.draw_sha256(other) != self.m.KEPT["draw_sha256"]:
+                break
+        else:
+            self.fail("no other seed makes another draw")
+        rows = [{**r, "record": p, "pointer": h["pointer"], "start": h["start"], "end": h["end"]}
+                for r, (p, h) in zip(self.kept_rows, other[RSN][1])]
+        self.m.KEPT["draw_sha256"] = self.m.baseline.draw_sha256(other)
+        self._write_kept(rows)
+        with self.assertRaisesRegex(self.m.Refused, "is not the seeded draw"):
+            self.m.render_markdown(self.found)
+
+    def test_a_dropped_set_that_is_not_the_seeded_draw_is_refused(self):
+        """The same guard on the recall draw: a census in another order."""
+        rows = list(reversed(self.rows))
+        self.m.RECALL["draw_sha256"] = self.m.baseline.draw_sha256({RSN: (0, [(r["record"], r) for r in rows])})
+        self._write(rows)
+        with self.assertRaisesRegex(self.m.Refused, "is not the seeded draw"):
+            self.m.render_markdown(self.found)
+
     def test_a_census_of_the_kept_matches_reports_no_interval(self):
         """A kept draw of every kept match has no sampling error."""
         self._kept(self.found["totals"]["v3"])
@@ -325,6 +358,25 @@ class Committed(unittest.TestCase):
         self.assertTrue(all(m.READINGS[row["reading"]] == row["verdict"] for row in rows))
         self.assertTrue(all(row["patterns"] == [m.PATTERN] for row in rows))
         self.assertIn(k["draw_sha256"][:8], k["judgements"])
+
+
+@pytest.mark.corpus   # walks the committed corpus
+def test_the_committed_draws_are_the_seeded_draws_they_name():
+    """Each committed judgement file's phrases, in its order, are the draw
+    `random.Random(seed).sample` makes of the pinned records, and hash to
+    both the entry's pin and the file's own `draw_sha256` (#3891; the
+    baseline's #3173 check for its precision sample)."""
+    m = _script()
+    found = m.dropped(m.baseline.CORPUS, m.baseline.read_pins(m.baseline.PINS))
+    for entry, population in ((m.KEPT, "kept"), (m.RECALL, "rows")):
+        drawn = m.draw(found, entry["sample"], entry["seed"], population)
+        data = yaml.safe_load((m.baseline.ROOT / entry["judgements"]).read_text(encoding="utf-8"))
+        want = m.baseline.draw_sha256(drawn)
+        assert want == entry["draw_sha256"] == data["draw_sha256"], entry["judgements"]
+        assert (data["sample"], data["seed"]) == (entry["sample"], entry["seed"])
+        assert [(r["record"], r["pointer"], r["start"], r["end"]) for r in data["judgements"][RSN]] == [
+            (p, h["pointer"], h["start"], h["end"]) for p, h in drawn[RSN][1]], entry["judgements"]
+    assert (m.KEPT["sample"], m.KEPT["seed"], m.KEPT["draw_sha256"][:8]) == (50, 2919, "ec97ce4b")
 
 
 @pytest.mark.corpus   # walks the committed corpus
