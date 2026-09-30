@@ -26,6 +26,8 @@
         "artifact-line-elided": 0,
         "joined-elided": 0
       },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
       "unchecked": [],
       "unlocated_snippets": [],
       "form_located_snippets": [
@@ -55,6 +57,8 @@
         "artifact-line-elided": 0,
         "joined-elided": 0
       },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
       "unchecked": [],
       "unlocated_snippets": [],
       "form_located_snippets": []
@@ -76,6 +80,8 @@
         "artifact-line-elided": 0,
         "joined-elided": 0
       },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
       "unchecked": [],
       "unlocated_snippets": [],
       "form_located_snippets": []
@@ -97,6 +103,8 @@
         "artifact-line-elided": 0,
         "joined-elided": 0
       },
+      "unlocated_snippets_omitted": 0,
+      "form_located_snippets_omitted": 0,
       "unchecked": [],
       "unlocated_snippets": [],
       "form_located_snippets": [
@@ -147,7 +155,9 @@
       "linewrap-joined": 0,
       "artifact-line-elided": 0,
       "joined-elided": 0
-    }
+    },
+    "unlocated_snippets_omitted": 0,
+    "form_located_snippets_omitted": 0
   },
   "summary": [
     "AI_READI: 13/13 receipts read · located 3799 (plain 3798, linewrap-joined 1, artifact-line-elided 0, joined-elided 0) · unlocated 0 · indeterminate 0 · flags through a joined or elided form 0",

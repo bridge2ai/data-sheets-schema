@@ -1855,6 +1855,78 @@ def test_the_corpus_diagnostic_tallies_each_project_by_form_and_lists_what_it_co
     assert any(line.startswith("   · unchecked Q: m_b_core/L2/Q_coverage_receipt.yaml") for line in lines)
 
 
+#: #3809: a receipt with more unlocated and form-located snippets than a
+#: list carries (3 and 2 past the cap).
+OVER_CAP = {"unlocated": sc.LISTED_PER_RECEIPT + 3, "form_located": sc.LISTED_PER_RECEIPT + 2}
+
+
+def _over_cap_pairs():
+    joined = [(f"j{i}", "the imaging waveforms to approved users") for i in range(OVER_CAP["form_located"])]
+    absent = [(f"u{i}", f"absent phrase number {i}") for i in range(OVER_CAP["unlocated"])]
+    return joined + absent, {slot: "Released." for slot, _q in joined + absent}
+
+
+def test_a_cut_snippet_list_says_how_many_it_left_out(monkeypatch):
+    # #3809: the lists stop at LISTED_PER_RECEIPT while the counts are
+    # complete; the omitted count, the summary and the report say so.
+    monkeypatch.setattr(sc.BundleView, "verified", lambda self, cid, snippet: True)
+    pairs, record = _over_cap_pairs()
+    out = _run(FORM_DOCS["linewrap-joined"], pairs, record)
+    assert out["counts"]["unlocated"] == OVER_CAP["unlocated"]
+    assert out["counts"]["located_by_form"]["linewrap-joined"] == OVER_CAP["form_located"]
+    assert (len(out["unlocated"]), out["unlocated_omitted"]) == (sc.LISTED_PER_RECEIPT, 3)
+    assert (len(out["form_located"]), out["form_located_omitted"]) == (sc.LISTED_PER_RECEIPT, 2)
+    assert (f"3 unlocated and 2 form-located snippet(s) not listed (at most {sc.LISTED_PER_RECEIPT}"
+            in out["summary"])
+    assert any(line.startswith("   · 3 more unlocated not listed") for line in sc.report_lines(out))
+
+
+def test_a_list_within_the_cap_omits_nothing_and_says_nothing():
+    out = _run(FORM_DOCS["linewrap-joined"], [("x", "the imaging waveforms to approved users")], {"x": "Released."})
+    assert (out["unlocated_omitted"], out["form_located_omitted"]) == (0, 0)
+    assert "not listed" not in out["summary"]
+    assert not any("not listed" in line for line in sc.report_lines(out))
+
+
+def test_the_corpus_diagnostic_says_how_many_snippets_its_lists_left_out(tmp_path, monkeypatch):
+    # #3809: the corpus lists concatenate each receipt's capped list, so the
+    # omitted counts are summed per project and in the totals and printed.
+    monkeypatch.setattr(sc.BundleView, "verified", lambda self, cid, snippet: True)
+    concat = tmp_path / "concat"
+    pairs, record = _over_cap_pairs()
+    text, _m = _bundle(FORM_DOCS["linewrap-joined"])
+    bundle = tmp_path / "P.txt"
+    bundle.write_text(text, encoding="utf-8")
+    rule = chunking.DEFAULT_RULE
+    count = chunking.manifest_from_bytes(text.encode("utf-8"), bundle.name, rule)["chunk_count"]
+    for label in ("L1", "L2"):
+        core, full_dir = concat / "m_core" / label, concat / "m" / label
+        core.mkdir(parents=True)
+        full_dir.mkdir(parents=True)
+        (core / "P_provenance.yaml").write_text("# header\n" + yaml.safe_dump({"run": {"project": "P"}, "inputs": {
+            "bundle_path": str(bundle), "bundle_md5": _md5(text),
+            "chunks": {"rule": rule, "bundle_name": bundle.name, "chunk_count": count}}}), encoding="utf-8")
+        (core / "P_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(text, pairs)), encoding="utf-8")
+        (full_dir / "P_d4d.yaml").write_text(yaml.safe_dump(record), encoding="utf-8")
+    out = sc.corpus_status_context(concat)
+    p = out["projects"]["P"]
+    assert p["unchecked"] == [], p["unchecked"]
+    assert p["unlocated"] == 2 * OVER_CAP["unlocated"]
+    assert (len(p["unlocated_snippets"]), p["unlocated_snippets_omitted"]) == (2 * sc.LISTED_PER_RECEIPT, 6)
+    assert (len(p["form_located_snippets"]), p["form_located_snippets_omitted"]) == (2 * sc.LISTED_PER_RECEIPT, 4)
+    t = out["totals"]
+    assert (t["unlocated_snippets_omitted"], t["form_located_snippets_omitted"]) == (6, 4)
+    lines = sc.corpus_report_lines(out)
+    clause = f"6 unlocated and 4 form-located snippet(s) not listed below (at most {sc.LISTED_PER_RECEIPT}"
+    assert clause in lines[1] and any(line.startswith("   P: ") and clause in line for line in lines)
+
+
+def test_the_corpus_help_names_the_list_cap():
+    cmd = cli.commands["receipts"].commands["status-context"]
+    [opt] = [o for o in cmd.params if "--corpus" in o.opts]
+    assert f"at most {sc.LISTED_PER_RECEIPT} of each per receipt" in opt.help
+
+
 def test_the_corpus_flag_reads_the_corpus(tmp_path, monkeypatch):
     from data_sheets_schema import provenance as pv
     monkeypatch.setattr(pv, "CONCAT_DIR", tmp_path)

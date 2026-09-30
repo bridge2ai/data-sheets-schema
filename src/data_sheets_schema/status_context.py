@@ -964,6 +964,12 @@ def _ordered(per: list[list[tuple[int, int]]], k: int, *, first: int | None = No
 
 
 # ------------------------------------------------------------------ rule 1
+#: At most this many unlocated and form-located snippets are listed per
+#: receipt; the counts are always complete, and `unlocated_omitted` /
+#: `form_located_omitted` say how many a list left out (#3809).
+LISTED_PER_RECEIPT = 20
+
+
 def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_text: str,
                     record: dict[str, Any], *, final: dict[str, Any] | None = None,
                     view: BundleView | None = None) -> dict[str, Any]:
@@ -979,6 +985,10 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     `extracted` entry whose `extracted` is not a list of mappings — are
     counted under `malformed_entries` and none of their pairs is read, as
     the validator reads none of them.
+
+    `unlocated` and `form_located` list at most `LISTED_PER_RECEIPT`
+    snippets each; `unlocated_omitted` and `form_located_omitted` count the
+    ones a list left out, so a cut list is never read as complete (#3809).
 
     `view`, when given, is a `BundleView` of this text and manifest to read
     through, so a caller reading many receipts of one bundle builds each
@@ -1066,6 +1076,7 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
                + (f" ({sum(by_form.values())} only through a joined or elided form: "
                   + ", ".join(f"{f} {n}" for f, n in by_form.items()) + ")" if by_form else "")
                + (f" ({counts['unlocated']} unlocated)" if counts["unlocated"] else "")
+               + _omitted_summary(len(unlocated), len(form_located))
                + (f" · {counts['indeterminate']} indeterminate (a part matched more than "
                   f"{MAX_PART_MATCHES} times; context not read)" if counts["indeterminate"] else "")
                + (f" · {counts['malformed_entries']} malformed receipt entr"
@@ -1078,8 +1089,23 @@ def receipt_context(receipt: dict[str, Any], manifest: dict[str, Any], bundle_te
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_RECEIPT, "checked": True,
             "gating": False, "counts": {**counts, "flags": by_rule, "slots_flagged": slots,
                                         "flags_by_located_form": flags_by_form},
-            "flags": flags["value"], "label_slot": flags["label"], "unlocated": unlocated[:20],
-            "form_located": form_located[:20], "summary": summary, "assurance": ASSURANCE}
+            "flags": flags["value"], "label_slot": flags["label"],
+            "unlocated": unlocated[:LISTED_PER_RECEIPT], "unlocated_omitted": _omitted(len(unlocated)),
+            "form_located": form_located[:LISTED_PER_RECEIPT],
+            "form_located_omitted": _omitted(len(form_located)), "summary": summary, "assurance": ASSURANCE}
+
+
+def _omitted(n: int) -> int:
+    """How many of `n` snippets a list capped at `LISTED_PER_RECEIPT` leaves out (#3809)."""
+    return max(0, n - LISTED_PER_RECEIPT)
+
+
+def _omitted_summary(unlocated: int, form_located: int) -> str:
+    """The summary clause naming a cut list, empty when neither was cut (#3809)."""
+    cut = [f"{_omitted(n)} {what}" for n, what in ((unlocated, "unlocated"), (form_located, "form-located"))
+           if _omitted(n)]
+    return (f" · {' and '.join(cut)} snippet(s) not listed (at most {LISTED_PER_RECEIPT} of each per receipt)"
+            if cut else "")
 
 
 def _flags_by_form(flags: list[dict[str, Any]]) -> dict[str, int]:
@@ -1501,13 +1527,19 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
     snippets each haystack form located, how many were unlocated or
     indeterminate, and how many flags name a non-plain form (#3709). A
     receipt that cannot be read is listed under `unchecked` with its
-    reason, never raised. Read-only and non-gating, like every rule here."""
+    reason, never raised. Read-only and non-gating, like every rule here.
+
+    The snippet lists carry at most `LISTED_PER_RECEIPT` of each kind per
+    receipt, while the counts are complete; `unlocated_snippets_omitted`
+    and `form_located_snippets_omitted`, per project and in the totals,
+    count what the lists left out (#3809)."""
     import yaml
     non_plain = [f for f in HAYSTACK_FORMS if f != "plain"]
 
     def tally() -> dict[str, Any]:
         return {"receipts": 0, "checked": 0, "located": 0, "located_by_form": dict.fromkeys(HAYSTACK_FORMS, 0),
-                "unlocated": 0, "indeterminate": 0, "flags_by_located_form": dict.fromkeys(non_plain, 0)}
+                "unlocated": 0, "indeterminate": 0, "flags_by_located_form": dict.fromkeys(non_plain, 0),
+                "unlocated_snippets_omitted": 0, "form_located_snippets_omitted": 0}
 
     projects: dict[str, dict[str, Any]] = {}
     totals = tally()
@@ -1531,6 +1563,8 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
             t["checked"] += 1
             for k in ("located", "unlocated", "indeterminate"):
                 t[k] += c[k]
+            t["unlocated_snippets_omitted"] += out["unlocated_omitted"]
+            t["form_located_snippets_omitted"] += out["form_located_omitted"]
             for k in ("located_by_form", "flags_by_located_form"):
                 for f, n in c[k].items():
                     t[k][f] += n
@@ -1541,10 +1575,19 @@ def corpus_status_context(concat_dir: Path) -> dict[str, Any]:
         forms = ", ".join(f"{f} {t['located_by_form'][f]}" for f in HAYSTACK_FORMS)
         lines.append(f"{project}: {t['checked']}/{t['receipts']} receipts read · located {t['located']} ({forms})"
                      f" · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}"
-                     f" · flags through a joined or elided form {sum(t['flags_by_located_form'].values())}")
+                     f" · flags through a joined or elided form {sum(t['flags_by_located_form'].values())}"
+                     + _corpus_omitted(t))
     return {"instrument": INSTRUMENT, "vocabulary": VOCABULARY, "rule": RULE_RECEIPT, "checked": True,
             "gating": False, "root": str(concat_dir), "projects": dict(sorted(projects.items())),
             "totals": totals, "summary": lines, "assurance": ASSURANCE}
+
+
+def _corpus_omitted(t: dict[str, Any]) -> str:
+    """The clause naming snippets the per-receipt lists left out (#3809)."""
+    cut = [f"{t[k]} {what}" for k, what in (("unlocated_snippets_omitted", "unlocated"),
+                                           ("form_located_snippets_omitted", "form-located")) if t[k]]
+    return (f" · {' and '.join(cut)} snippet(s) not listed below (at most {LISTED_PER_RECEIPT} "
+            "of each per receipt)" if cut else "")
 
 
 def corpus_report_lines(out: dict[str, Any]) -> list[str]:
@@ -1553,7 +1596,7 @@ def corpus_report_lines(out: dict[str, Any]) -> list[str]:
     lines = [f"   {out['instrument']} · {out['rule']} · corpus under {out['root']} · non-gating",
              f"   {t['checked']}/{t['receipts']} receipts read · located {t['located']} ("
              + ", ".join(f"{f} {n}" for f, n in t["located_by_form"].items())
-             + f") · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}"]
+             + f") · unlocated {t['unlocated']} · indeterminate {t['indeterminate']}" + _corpus_omitted(t)]
     lines += [f"   {line}" for line in out["summary"]]
     for project, p in out["projects"].items():
         for u in p["unchecked"]:
@@ -1660,5 +1703,8 @@ def _report_lines(out: dict[str, Any]) -> list[str]:
             lines.append(f"   flag {f['rule']} {where}: {detail}")
     for u in out.get("unlocated") or []:
         lines.append(f"   · unlocated: chunk={u['chunk']} slot={u['slot']}")
+    if out.get("unlocated_omitted"):
+        lines.append(f"   · {out['unlocated_omitted']} more unlocated not listed "
+                     f"(at most {LISTED_PER_RECEIPT} per receipt)")
     lines.append(f"   · assurance: {out['assurance']}")
     return lines

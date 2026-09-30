@@ -244,7 +244,9 @@ def sources(method, label, project, examples, at_run_commit, as_json):
               help="with --receipt: the bundle's chunk manifest; default the one beside it or the study's")
 @click.option("--corpus", is_flag=True,
               help="instead of a run or files: every committed coverage receipt, tallied per project by the "
-                   "haystack form that located each snippet, with the unlocated ones listed (#3709)")
+                   "haystack form that located each snippet, with the unlocated and form-located ones listed "
+                   "(at most 20 of each per receipt; the counts are complete and a cut list says how "
+                   "many it left out, #3709, #3809)")
 @click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
 def status_context(method, label, project, receipt_file, bundle_file, record_file, final_file,
                    chunk_manifest, corpus, as_json):
