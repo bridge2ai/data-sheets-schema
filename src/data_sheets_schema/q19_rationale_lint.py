@@ -960,7 +960,10 @@ def _label_reading(label: str) -> tuple[list[tuple[int, int]], bool]:
     (#3404). Such a clause is unread only where no range returned covers
     it: a contrast that names nothing of its own reads the clause before it
     ("Typed PROV graph with errata not recorded but thin"), and a clause so
-    read is not reported as unread (#3681)."""
+    read is not reported as unread (#3681). The absence word is noted part
+    by part as "not" is, so a contrast that names a reason of its own
+    ("Typed PROV graph with errata missing but version history not
+    detailed") does not return before it is (#3749)."""
     def said_absent(pattern, lo, hi):
         return any(_read_in(label, m.start(), m.end()) for m in pattern.finditer(label, lo, hi))
 
@@ -986,6 +989,15 @@ def _label_reading(label: str) -> tuple[list[tuple[int, int]], bool]:
                          if label[lo:hi].strip()]
                 return spans, unread(spans)
             if read and said_absent(_LABEL_NOT, start, end):
+                flagged.append((start, end))
+            # An absence word inside a part that names both kinds is as
+            # ambiguous as a "not" there, and is noted before a later
+            # contrast returns ("Typed PROV graph with errata missing but
+            # version history not detailed", #3749). Bookkeeping only: the
+            # ranges returned are unchanged.
+            absent = _ABSENCE.search(part)
+            if (read and absent and absent.start() != 0 and len(_kinds(part)) >= 2
+                    and said_absent(_ABSENCE, start, end)):
                 flagged.append((start, end))
         clause = label[a:b].strip()
         absent = _ABSENCE.search(clause)

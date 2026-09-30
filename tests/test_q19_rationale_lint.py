@@ -1354,14 +1354,43 @@ def test_a_both_kinds_clause_read_before_an_empty_contrast_is_not_called_unread(
     assert "left unread as ambiguous" not in lines[0]
 
 
-def test_a_both_kinds_clause_left_before_a_contrast_that_names_its_own_reason_is_unread():
+@pytest.mark.parametrize("label", [
+    "Typed PROV graph with errata not recorded but version history not detailed",
+    # #3749: an absence word rather than "not". The contrast returns before
+    # the clause-level absence check, so the part is noted in the loop.
+    "Typed PROV graph with errata missing but version history not detailed",
+    "Machine-readable PROV graph lacking errata but version history not detailed",
+])
+def test_a_both_kinds_clause_left_before_a_contrast_that_names_its_own_reason_is_unread(
+        tmp_path, label):
     """#3681's contrast: where the contrast names a reason of its own, the
-    clause before it stays unread, and is reported so."""
-    label = "Typed PROV graph with errata not recorded but version history not detailed"
+    clause before it stays unread, and is reported so, whether its word is
+    "not" or an absence word (#3749). The reasons are the contrast's only."""
     result = lint_q19(item(label=label, note=_NEUTRAL))
     assert (result.verdict, result.concerns(SUBSTANTIVE), result.label_ambiguous) == (
         SUBSTANTIVE_ONLY, ["version_history"], True)
     assert [r.sentence for r in result.reasons] == ["but version history not detailed"]
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert "left unread as ambiguous" in lines[0]
+    assert "nothing says why" not in lines[0]
+
+
+@pytest.mark.parametrize("label", [
+    # The absence word opens the part: it says what is absent (#3146).
+    "Missing errata with typed PROV graph but version history not detailed",
+    # One kind only.
+    "errata missing but version history not detailed",
+    # In a concession: unread for that, not for ambiguity.
+    "Good despite typed PROV graph with errata missing but version history not detailed",
+])
+def test_an_absence_word_before_a_contrast_is_not_called_ambiguous_when_its_part_is_clear(label):
+    """#3749's bounds: the part before the contrast is noted only where its
+    absence word stands inside it, in a part that is read, naming both
+    kinds."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.concerns(SUBSTANTIVE), result.label_ambiguous) == (["version_history"], False)
 
 
 def test_both_unread_notes_are_reported_together(tmp_path):
