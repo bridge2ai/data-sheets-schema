@@ -139,8 +139,8 @@ class Cues(unittest.TestCase):
         self.assertIsNone(out["candidates"])
 
 
-class Baseline(unittest.TestCase):
-    """The script over a small corpus built here."""
+class CorpusFixture:
+    """A small corpus built here: records, provenance, receipts, one bundle."""
 
     def setUp(self):
         self.m = _script()
@@ -175,6 +175,10 @@ class Baseline(unittest.TestCase):
             yaml.safe_dump({"inputs": inputs, "validation": {"passed": passed}}), encoding="utf-8")
         if receipt is not None:
             (core / f"{project}_coverage_receipt.yaml").write_text(yaml.safe_dump(receipt), encoding="utf-8")
+
+
+class Baseline(CorpusFixture, unittest.TestCase):
+    """The script over the small corpus."""
 
     def _collect(self):
         return self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"))
@@ -250,7 +254,7 @@ class Baseline(unittest.TestCase):
 
     def test_check_is_read_only_and_reports_staleness(self):
         self.m.CORPUS, self.m.OUT_MD, self.m.ROOT, self.m.ARMS = self.corpus, self.dir / "note.md", self.dir, self.arms
-        self.m.PROJECTS = ("P", "Q")
+        self.m.PROJECTS, self.m.ADJUDICATION = ("P", "Q"), self.dir / "no_adjudication.yaml"
         err = io.StringIO()
         with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(self.m.main(["--check"]), 1)
@@ -270,6 +274,275 @@ class Baseline(unittest.TestCase):
             self.assertEqual(self.m.main(["--check"]), 1)
         self.assertIn("stale", err.getvalue())
         self.assertEqual(self.m.OUT_MD.read_bytes(), stale)
+
+
+def _sha(text):
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+#: BUNDLE's c002 and c004 texts under RULE, as `chunk_texts` returns them.
+C002 = "FILE: a.txt\nPATH: a.txt\nThis release is derived from the 2023 cohort; see the data dictionary.\n"
+C004 = "FILE: c.txt\nPATH: c.txt\nProcessed with toolkit version 2.4.1 and 12 variables.\n"
+FACT = {"id": "p-toolkit-2.4.1", "project": "P", "scope": "referent", "names": ["toolkit"],
+        "version": "2.4.1", "snippet": "Processed with toolkit version 2.4.1", "reading": "c.txt states it."}
+
+
+def _adjudication(path, chunks=None, facts=None):
+    doc = {"chunks": chunks if chunks is not None else [
+        {"project": "P", "chunk": "c002", "sha256": [_sha(C002)], "software_version": "none",
+         "parent_dataset": "none", "reading": "A cohort, in text form."}],
+        "facts": facts if facts is not None else [FACT],
+        "bundles": [{"project": "P", "software_version": "One.", "parent_dataset": "None."}]}
+    path.write_text(yaml.safe_dump(doc, sort_keys=False), encoding="utf-8")
+    return path
+
+
+class Carriage(unittest.TestCase):
+    """#3289: how a record carries a versioned software fact."""
+
+    def setUp(self):
+        self.m = _script()
+        self.fact = {"id": "f", "names": ["b2aiprep"], "version": "3.0.0"}
+
+    def carried(self, record):
+        return self.m.fact_carriage(record, self.fact)
+
+    def test_used_software_with_the_version_or_a_tools_string_is_structured(self):
+        self.assertEqual(self.carried({"preprocessing_strategies": [{"used_software": [
+            {"name": "b2aiprep", "version": "3.0.0"}]}]}), "structured")
+        self.assertEqual(self.carried({"machine_annotation_tools": [{"tools": ["b2aiprep v3.0.0"]}]}), "structured")
+
+    def test_structured_needs_the_fact_s_name_and_version_in_one_entry(self):
+        # Review of #3534 (#3573): every positive case above names b2aiprep
+        # with 3.0.0, so dropping either check survived. Another tool at the
+        # fact's version, the fact's tool at another version, or the two
+        # split across entries is not structured carriage of the fact.
+        cases = [
+            ({"used_software": [{"name": "openSMILE", "version": "3.0.0"}]}, "absent"),
+            ({"used_software": [{"name": "b2aiprep", "version": "2.0.0"}]}, "name_only"),
+            ({"used_software": [{"name": "b2aiprep", "version": "2.0.0"},
+                                {"name": "openSMILE", "version": "3.0.0"}]}, "name_only"),
+            ({"tools": ["openSMILE v3.0.0"]}, "absent"),
+            ({"tools": ["b2aiprep v2.0.0"]}, "name_only"),
+            ({"tools": ["b2aiprep v2.0.0", "openSMILE v3.0.0"]}, "name_only"),
+        ]
+        for record, expected in cases:
+            self.assertEqual(self.carried(record), expected, record)
+
+    def test_structured_takes_the_name_from_the_entry_s_naming_fields(self):
+        """Review of #3534 (#3620): a used_software entry for another tool at
+        the fact's version is not the fact's structured carriage because its
+        description or a nested mapping mentions the fact's name. The name
+        must be the entry's `name`, `id` or `url`; a name in the entry's
+        description, beside its version, is still carried, as elsewhere."""
+        other = {"name": "openSMILE", "version": "3.0.0"}
+        self.assertEqual(self.carried({"used_software": [dict(other, description="Run on the output of b2aiprep.")]}),
+                         "elsewhere")
+        self.assertEqual(self.carried({"used_software": [dict(other, depends_on={"name": "b2aiprep"})]}),
+                         "name_only")
+        for k, v in (("name", "b2aiprep"), ("id", "b2aiprep"), ("url", "https://github.com/sensein/b2aiprep")):
+            entry = {"name": "Bridge2AI library", "version": "3.0.0", k: v}
+            self.assertEqual(self.carried({"used_software": [entry]}), "structured", k)
+
+    def test_prose_or_one_mapping_s_own_values_is_elsewhere(self):
+        self.assertEqual(self.carried({"description": "Generated with the b2aiprep library, version 3.0.0."}),
+                         "elsewhere")
+        self.assertEqual(self.carried({"external_resources": [{"name": "b2aiprep", "version": "3.0.0"}]}),
+                         "elsewhere")
+        # A used_software entry without the version does not make it structured.
+        self.assertEqual(self.carried({"used_software": [{"name": "b2aiprep"}],
+                                       "notes": "b2aiprep 3.0.0 generated this release"}), "elsewhere")
+
+    def test_name_without_the_version_and_nothing_at_all(self):
+        self.assertEqual(self.carried({"tools": ["b2aiprep"], "version": "3.0.0"}), "name_only")
+        self.assertEqual(self.carried({"description": "Features from openSMILE 3.0.0."}), "absent")
+
+    def test_the_version_is_a_whole_token(self):
+        for s in ("b2aiprep 13.0.0", "b2aiprep 3.0.01", "b2aiprep 3.0.0.1", "b2aiprep x3.0.0"):
+            self.assertEqual(self.carried({"description": s}), "name_only", s)
+        for s in ("b2aiprep v3.0.0", "b2aiprep (v.3.0.0)", "b2aiprep version 3.0.0", "b2aiprep 3.0.0."):
+            self.assertEqual(self.carried({"description": s}), "elsewhere", s)
+
+    def test_an_attached_suffix_makes_another_version(self):
+        """Review of #3534 (#3583): a prerelease, post-release, development
+        or build suffix is another version on every carriage path, whatever
+        prefix the version carries; sentence punctuation still ends it."""
+        suffixed = ("3.0.0-rc1", "3.0.0--rc1", "3.0.0.post1", "3.0.0.dev1", "3.0.0+build.1", "3.0.0a1", "3.0.0-1")
+        for suffix in suffixed:
+            for prefix in ("", "v", "v.", "version "):
+                v = prefix + suffix
+                for record in ({"used_software": [{"name": "b2aiprep", "version": v}]},
+                               {"tools": [f"b2aiprep {v}"]},
+                               {"description": f"Uses b2aiprep {v}."},
+                               {"external_resources": [{"name": "b2aiprep", "version": v}]}):
+                    self.assertEqual(self.carried(record), "name_only", record)
+        for tail in (".", ",", ";", ")", "-", " "):
+            for prefix in ("", "v", "v.", "version "):
+                v = prefix + "3.0.0"
+                self.assertEqual(self.carried({"tools": [f"(b2aiprep {v}{tail} "]}), "structured", (v, tail))
+                self.assertEqual(self.carried({"description": f"b2aiprep {v}{tail} then"}), "elsewhere",
+                                 (v, tail))
+        self.assertEqual(self.carried({"used_software": [{"name": "b2aiprep", "version": "v3.0.0."}]}),
+                         "structured")
+
+    def test_the_version_matches_only_as_a_complete_version_token(self):
+        """Review of #3534 (#3629): the fact's version inside a longer version
+        token, as its build part (`2.0.0+3.0.0`), its prerelease part
+        (`2.0.0-3.0.0`) or before a suffix joined by several separators
+        (`3.0.0--rc1`), is another version on every carriage path; a name
+        joined by a hyphen, a lone separator after a space and sentence
+        punctuation are not part of the token."""
+        paths = (lambda v: {"used_software": [{"name": "b2aiprep", "version": v}]},
+                 lambda v: {"tools": [f"b2aiprep {v}"]},
+                 lambda v: {"description": f"Uses b2aiprep {v}."},
+                 lambda v: {"external_resources": [{"name": "b2aiprep", "version": v}]})
+        longer = ("2.0.0+3.0.0", "2.0.0+v3.0.0", "x+3.0.0", "2.0.0-3.0.0", "v2-3.0.0", "3.0.0--rc1",
+                  "3.0.0.-rc1", "3.0.0+-build", "v3.0.0--rc1", "version 3.0.0--rc1")
+        for v in longer:
+            for path in paths:
+                self.assertEqual(self.carried(path(v)), "name_only", v)
+        whole = ("b2aiprep-3.0.0", "b2aiprep-v3.0.0", " +3.0.0", "(3.0.0)", "3.0.0--", "3.0.0.",
+                 "2.0.0+3.0.0 and 3.0.0", "3.0.0 not 2.0.0+3.0.0")
+        for v in whole:
+            for path, expected in zip(paths, ("structured", "structured", "elsewhere", "elsewhere")):
+                self.assertEqual(self.carried(path(v)), expected, (v, expected))
+
+    def test_the_name_is_a_whole_token(self):
+        """Review of #3534 (#3601): the name, like the version, matches only
+        where no word character or hyphen is attached to it."""
+        for s in ("myb2aiprep 3.0.0", "b2aiprepx 3.0.0", "pre-b2aiprep 3.0.0", "b2aiprep-extra 3.0.0"):
+            self.assertEqual(self.carried({"description": s}), "absent", s)
+            self.assertEqual(self.carried({"tools": [s]}), "absent", s)
+        for s in ("(b2aiprep) 3.0.0", "b2aiprep, 3.0.0", "B2AIPREP 3.0.0"):
+            self.assertEqual(self.carried({"description": s}), "elsewhere", s)
+
+    def test_a_mapping_s_list_valued_slot_is_its_own_value(self):
+        """Review of #3534 (#3600): a resource entry naming the software in a
+        multivalued string slot, with the version in a scalar beside it,
+        carries both; a nested mapping's values are still not its own."""
+        entry = {"external_resources": ["https://github.com/eipm/b2aiprep"],
+                 "future_guarantees": "with version 3.0.0 deposited at Zenodo"}
+        self.assertEqual(self.carried({"external_resources": [entry]}), "elsewhere")
+        self.assertEqual(self.carried({"external_resources": [dict(entry, external_resources="https://github.com/eipm/b2aiprep")]}),
+                         "elsewhere")
+        nested = {"name": "b2aiprep", "details": {"note": "with version 3.0.0"}}
+        self.assertEqual(self.carried({"external_resources": [nested]}), "name_only")
+
+
+class Adjudication(CorpusFixture, unittest.TestCase):
+    """#3289: the hand reading is checked for shape, its verdicts are
+    matched to candidates by chunk text sha256, and its facts are measured
+    against each record's hashed bytes."""
+
+    def _collect(self, **kw):
+        adj = self.m.load_adjudication(_adjudication(self.dir / "adj.yaml", **kw))
+        return self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"),
+                              adjudication=adj)
+
+    def test_a_malformed_reading_is_refused(self):
+        good = {"project": "P", "chunk": "c002", "sha256": [_sha(C002)], "software_version": "none",
+                "parent_dataset": "none", "reading": "r"}
+        for bad in (dict(good, software_version="maybe"), dict(good, parent_dataset="perhaps"),
+                    dict(good, sha256=_sha(C002)), dict(good, sha256=["abc"]), dict(good, reading="")):
+            with self.assertRaises(ValueError):
+                self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", chunks=[bad]))
+        with self.assertRaises(ValueError):
+            self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", chunks=[good, dict(good, chunk="c009")]))
+        for bad in (dict(FACT, scope="none"), dict(FACT, snippet=""), dict(FACT, names="toolkit"),
+                    dict(FACT, names=[]), dict(FACT, names=["toolkit", 2])):
+            with self.assertRaises(ValueError):
+                self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[bad]))
+        with self.assertRaises(ValueError):
+            self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[FACT, FACT]))
+
+    def test_an_unquoted_version_is_refused_not_read_as_a_number(self):
+        """Review of #3534 (#3621): YAML reads `version: 2.10` as the float
+        2.1, so every match would look for 2.1. A version or snippet that is
+        not a string is an error."""
+        path = self.dir / "unquoted.yaml"
+        text = _adjudication(path).read_text(encoding="utf-8")
+        self.assertIn("version: 2.4.1", text)
+        path.write_text(text.replace("version: 2.4.1", "version: 2.10"), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "version must be a quoted string, not float 2.1"):
+            self.m.load_adjudication(path)
+        path.write_text(text.replace("version: 2.4.1", "version: '2.10'"), encoding="utf-8")
+        self.assertEqual(self.m.load_adjudication(path)["facts"][0]["version"], "2.10")
+        with self.assertRaises(ValueError):
+            self.m.load_adjudication(_adjudication(self.dir / "bad.yaml", facts=[dict(FACT, snippet=3)]))
+
+    def test_candidates_are_matched_by_chunk_text_sha256(self):
+        cov = self.m.adjudication_coverage(self._collect(), arms=self.arms)
+        self.assertEqual([(e["chunk"], e["arms"], e["verdict"]["reading"]) for e in cov["matched"]],
+                         [("c002", ["a1"], "A cohort, in text form.")])
+        self.assertEqual((cov["missing"], cov["unmatched"]), ([], []))
+
+    def test_a_candidate_without_a_verdict_and_a_verdict_without_a_candidate_are_listed(self):
+        stale = {"project": "P", "chunk": "c002", "sha256": [_sha(C002 + "edited")], "software_version": "none",
+                 "parent_dataset": "none", "reading": "Read on other bytes."}
+        c = self._collect(chunks=[stale])
+        cov = self.m.adjudication_coverage(c, arms=self.arms)
+        self.assertEqual([(e["chunk"], e["sha256"]) for e in cov["missing"]], [("c002", _sha(C002))])
+        self.assertEqual([u["reading"] for u in cov["unmatched"]], ["Read on other bytes."])
+        self.assertEqual(cov["matched"], [])
+        md = self.m.render_markdown(c, arms=self.arms)
+        self.assertIn(f"Not adjudicated: P c002 `{_sha(C002)[:12]}` (a1).", md)
+        self.assertIn("Adjudicated but matching no candidate: P c002.", md)
+
+    def test_only_version_and_lineage_candidates_need_a_verdict(self):
+        """Variables are #2079's question, not the bundle reading's."""
+        def row(arm, chunk, cues):
+            return {"arm": arm, "project": "P", "receipt": {"candidates": [
+                {"chunk": chunk, "status": "nothing_relevant", "cues": cues, "sha256": _sha(chunk)}]}}
+        collected = {"rows": [row("a1", "c007", {"variables": {"var.column": 2}}),
+                              row("a2", "c008", {"version": {"ver.version-token": 1}}),
+                              row("a1", "c009", {"lineage": {"lin.lineage": 1}, "variables": {"var.variable": 1}})],
+                     "adjudication": {"chunks": []}}
+        cov = self.m.adjudication_coverage(collected, arms=self.arms)
+        self.assertEqual([(e["chunk"], e["arms"]) for e in cov["missing"]], [("c008", ["a2"]), ("c009", ["a1"])])
+
+    def test_a_fact_is_stated_in_the_hashed_bytes_and_its_carriage_measured(self):
+        c = self._collect()
+        by_path = {r["path"]: r for r in c["rows"]}
+        p = by_path["claudecode_agent/L_rep1/P_d4d.yaml"]["facts"]["p-toolkit-2.4.1"]
+        self.assertEqual(p, {"stated": True, "chunks": ["c004"], "carried": "absent"})
+        # No receipt, so no chunk text; the bytes are still read for the snippet.
+        m = by_path["claudecode_api/M_rep1/P_d4d.yaml"]["facts"]["p-toolkit-2.4.1"]
+        self.assertEqual((m["stated"], m["chunks"]), (True, None))
+        self.assertNotIn("facts", by_path["claudecode_agent/L_rep1/Q_d4d.yaml"])
+        md = self.m.render_markdown(c, arms=self.arms)
+        self.assertIn("## Bundle adjudication (#3289)", md)
+        self.assertIn("| `p-toolkit-2.4.1` | referent | c004 | Arm one | 1 | 1 | 0 | 0 | 0 | 1 |", md)
+        self.assertIn("| P | c002 | `" + _sha(C002)[:12] + "` | a1 | none | none | A cohort, in text form. |", md)
+        self.assertLess(md.index("## Bundle adjudication"), md.index("## Lexical candidates by record"))
+
+    def test_a_snippet_the_bytes_lack_is_not_stated_and_unrecovered_bytes_are_unknown(self):
+        c = self._collect(facts=[dict(FACT, snippet="Processed with toolkit version 9.9.9")])
+        self.assertIs(c["rows"][0]["facts"]["p-toolkit-2.4.1"]["stated"], False)
+        (self.dir / self.bundle_rel).write_text("other bytes\n", encoding="utf-8")
+        from data_sheets_schema import provenance
+        orig, provenance.bundle_bytes_for = provenance.bundle_bytes_for, lambda *a, **k: None
+        self.addCleanup(setattr, provenance, "bundle_bytes_for", orig)
+        c = self._collect()
+        self.assertIsNone(c["rows"][0]["facts"]["p-toolkit-2.4.1"]["stated"])
+        md = self.m.render_markdown(c, arms=self.arms)
+        self.assertIn("| `p-toolkit-2.4.1` | referent | – | Arm one | 1 | – |", md)
+
+    def test_an_arm_partly_unrecovered_says_stated_n_of_m(self):
+        """Review of #3534 (#3602): where some of an arm's rows have their
+        bytes recovered and others do not, `stated` counts the known rows and
+        says how many; a bare N would read as N of all the arm's records."""
+        c = self._collect()
+        row = next(r for r in c["rows"] if r["arm"] == "a1" and "p-toolkit-2.4.1" in (r.get("facts") or {}))
+        unknown = dict(row, path=row["path"] + "#unrecovered",
+                       facts={"p-toolkit-2.4.1": {"stated": None, "chunks": None, "carried": "name_only"}})
+        c["rows"].append(unknown)
+        md = self.m.render_markdown(c, arms=self.arms)
+        self.assertIn("| `p-toolkit-2.4.1` | referent | c004 | Arm one | 2 | 1 of 1 | 0 | 0 | 1 | 1 |", md)
+
+    def test_without_an_adjudication_the_note_has_no_section(self):
+        c = self.m.collect(self.corpus, arms=self.arms, root=self.dir, projects=("P", "Q"))
+        self.assertIsNone(c["adjudication"])
+        self.assertNotIn("Bundle adjudication", self.m.render_markdown(c, arms=self.arms))
 
 
 def test_the_arms_are_arm_comparison_s_where_both_name_one():
@@ -293,8 +566,93 @@ def test_the_arms_are_arm_comparison_s_where_both_name_one():
 @pytest.mark.corpus   # walks the committed corpus and the bundles' git history
 def test_the_committed_baseline_is_what_the_records_reproduce():
     m = _script()
-    assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(m.collect()), (
+    collected = m.collect()
+    assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(collected), (
         "notes/recall_target_baseline.md does not match the records: run scripts/recall_target_baseline.py")
+    # #3289: every version or lineage candidate has a verdict on its bytes,
+    # every verdict still names a candidate, and every fact is stated in the
+    # bytes some counted record hashed.
+    cov = m.adjudication_coverage(collected)
+    assert (cov["missing"], cov["unmatched"]) == ([], [])
+    for fact in collected["adjudication"]["facts"]:
+        assert any((r.get("facts") or {}).get(fact["id"], {}).get("stated") for r in collected["rows"]), fact["id"]
+
+
+#: The shape of a parenthesised version citation in a bundle (#3571, #3611):
+#: `(v3.20.0)`, `(v 1.7.3)`, `(v.1.21.6)`, `(v.gpt-4-1106-preview)`,
+#: `(Version 3.0.0)`, `(version 1.1)`, `(Version: 2.1)`, `(ver. 2.1)`, and
+#: any of these with any amount of text before the close, as in `(version
+#: 3, released fall 2025)` or `(v.12, NDEx uuid 0b04e9eb-...; Extended Data
+#: Fig. 2b,e )` (#3617: the tail was bounded at 60 characters, and two
+#: CM4AI citations ran past it unexamined); any case. The tail stops at the
+#: first parenthesis, so it never spans a nested or a later citation. A bare `v` must be followed by a digit
+#: and a `v.` by a token carrying one, so abbreviations such as `(VNNs)`,
+#: `(VHI-10)` and `(VUMC)` are not citations.
+VERSION_CITATION = __import__("re").compile(
+    r"\((?:v\s?(?=\d)|v\.\s?(?=[\w.-]*\d)|ver\.?\s?(?=\d)|version:?\s?(?=\d))[\w.-]+[^()]*\)",
+    __import__("re").IGNORECASE)
+
+#: Parenthesised version citations in the bundles that are not software:
+#: (project, the text the citation follows, what it versions). A hit whose
+#: preceding text ends with that phrase (a closing quote allowed) is not a
+#: software statement. Everything else of that shape must be some fact of
+#: its project: the version in the parentheses, one of the fact's names in
+#: the citation text just before it.
+NOT_SOFTWARE = (("AI_READI", "AI-READI DATA LICENSE AGREEMENT", "a license version"),
+                ("AI_READI", "current version of the dataset", "the dataset's own release"),
+                ("CM4AI", "HPA", "a database release"),
+                ("CM4AI", "CORUM", "a database release"),
+                ("CM4AI", "STRING interactome", "a database release"),
+                ("CM4AI", "STRING 78 , 79", "a reference database release (#3617)"),
+                ("CM4AI", "CORUM 25 complex", "a reference database release (#3617)"),
+                ("VOICE", "diverse voice dataset linked to health information", "the dataset's own releases"),
+                ("VOICE", "Bridge2AI-Voice Pediatric Dataset", "the related pediatric dataset's release"),
+                ("VOICE", "Discovery DOI", "a dataset release's DOI"))
+
+
+@pytest.mark.parametrize("text", [
+    "(v3.20.0)", "(v 1.7.3)", "(v.1.21.6)", "(v.gpt-4-1106-preview)", "(Version 3.0.0)", "(version 1.1)",
+    "(VERSION 2)", "(Version: 2.1)", "(ver. 2.1)", "(Ver 2.1)", "(version 3, released fall 2025)",
+    "(v.9.9, NDEx uuid 0b04e9eb-8e60-11ee-8a13-005056ae23aa; Extended Data Fig. 2b,e )"])
+def test_the_citation_shape_sees_every_spelling_of_a_version(text):
+    """#3611: the shape was case-sensitive on `Version` and wanted a digit
+    straight after the prefix, so `(version 1.1)`, `(Version: 2.1)`, `(ver.
+    2.1)` and `(v.gpt-4-1106-preview)` were never examined. #3617: a tail
+    longer than 60 characters before the close was never examined either."""
+    assert VERSION_CITATION.fullmatch(text), text
+
+
+@pytest.mark.parametrize("text", ["(VNNs)", "(VHI-10)", "(VUMC)", "(v)", "(version)", "(very 2)", "(vs. 2)", "(v. above)", "(v.s.)"])
+def test_the_citation_shape_skips_abbreviations(text):
+    assert not VERSION_CITATION.search(text), text
+
+
+@pytest.mark.corpus   # reads the committed bundles
+def test_every_parenthesised_version_citation_in_the_bundles_is_a_fact_or_named_as_not_software():
+    """Review of #3534 (#3571, #3611): the adjudication says its facts hold
+    every versioned software statement in the bundles, and the first reading
+    missed two citations of this shape, "Name (v3.20.0)" and "Name (Version
+    3.0.0)". A citation of the `VERSION_CITATION` shape that no fact covers
+    and `NOT_SOFTWARE` does not name fails here. Versions stated outside
+    parentheses ("b2aiprep v3.0.0", "package version 2.18") are not this
+    test's business: the adjudication's own search found those."""
+    m = _script()
+    facts = m.load_adjudication(m.ADJUDICATION)["facts"]
+    re = __import__("re")
+    uncovered = []
+    for project in m.PROJECTS:
+        path = ROOT / "data" / "preprocessed" / "concatenated" / f"{project}_preprocessed.txt"
+        text = " ".join(path.read_text(encoding="utf-8").split())
+        excused = [re.compile(re.escape(phrase) + r"""["'”’]?\s*$""")
+                   for p, phrase, _ in NOT_SOFTWARE if p == project]
+        patterns = [m._fact_patterns(f) for f in facts if f["project"] == project]
+        for hit in VERSION_CITATION.finditer(text):
+            before = text[max(0, hit.start() - 60):hit.start()]
+            if any(e.search(before) for e in excused) or any(
+                    names.search(before) and version.search(hit.group(0)) for names, version in patterns):
+                continue
+            uncovered.append(f"{project}: …{before}{hit.group(0)}")
+    assert uncovered == []
 
 
 if __name__ == "__main__":

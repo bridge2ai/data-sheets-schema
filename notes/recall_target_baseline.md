@@ -144,6 +144,180 @@ Sums over the arm's records, with the per-record mean in parentheses.
 
 Not counted, declared invalid by their own validation block: `claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml`.
 
+## Bundle adjudication (#3289)
+
+A hand reading, `notes/recall_target_bundle_adjudication.yaml` (sha256 `bf39cfee630d22f3b5ab3bce54d38fd7e242b90d55447728107054ee4e3cce21`), rendered here: edit that file, not
+this note. It asks whether the zeros above are bundle facts or omissions. Keep #1349 in
+view: lineage stated in text form is valid, so a biological or clinical source written as
+prose is not a missing parent dataset. Variables are not adjudicated (#2079: whether a row
+is a variable in a data file is not a lexical question). The verdicts are a reading; the
+coverage, the snippet checks and the carriage counts below are measured.
+
+### The answer by project
+
+| project | software versions | parent datasets |
+|---|---|---|
+| AI_READI | No processing software is stated with a version. The one software version is FAIRSCAPE 1.2.1, recorded in the RO-Crate as the metadata packager. Every other version cue is a dataset release, a standard (CDS v0.1.1) or a license version. Software named without a version: the OMOP Data Quality Dashboard, REDCap and the MoCA Duo app. | None. Versions 1.0.0 and 2.0.0 are earlier releases of the same dataset, and the subcrates are its parts. |
+| CHORUS | None. The bundle's only version-like tokens are a row count ("1.6 Billion") and a license (Apache-2.0). Software named without a version: the OHNLP toolkit, the OHDSI tool stack and the chorus-ai GitHub repositories. | None. The bundle names clinical source systems (EHR, PACS, bedside monitors, EEG databases), which is lineage in text form (#1349). |
+| CM4AI | Every stated software version belongs to the companion U2OS analyses (the Nature paper and the preprint's exploratory structure modelling), not to the releases' processing; recording one as the releases' software would move a fact across scope. Software named for the releases without a version: FAIRSCAPE and the MuSIC/Cell Mapping Toolkit pipeline. The Dataverse pages' footers give the hosting platform's version (v. 6.6, v. 6.9), the host's software, not the releases'. | None. The releases are "derived from commercially available de-identified human cell lines", a biological source; the lineage graphs are files the bundle names but does not contain. |
+| VOICE | One: b2aiprep v3.0.0 generated the v3.0.0 and v3.1.0 releases. Tools named without a version: openSMILE, Praat, parselmouth, torchaudio, sparc, ppgs, Whisper Large and SenseLab. "TorchAudio 2.1" is a paper title, BIDS v1.9.0 a standard, and Python 3.12.0 a badge on the documentation repository. | None. The pediatric dataset is related but distinct (source manifest scope), and the features are derived from raw audio inside the dataset. |
+
+### Lexical candidates with a version or lineage cue
+
+Each distinct candidate text, keyed on its sha256 (the chunk manifests' `sha256`), with the
+arms whose receipts mark it `nothing_relevant`/`redundant_with`. **software version**: `none`
+(the cue is not a software version), `referent` (stated as used for the dataset the record
+describes), `companion` (stated for an analysis the bundle documents, not said to be applied
+to the released data) or `cited` (a versioned citation with no stated use). **parent
+dataset**: `none` or `stated`.
+
+| project | chunk | chunk sha256 | candidate in | software version | parent dataset | reading |
+|---|---|---|---|---|---|---|
+| AI_READI | c006 | `9fe57d4d18aa` | v7api, v7prod, v8prod | none | none | Reference list of the cohort paper; the version cue is the dataset citation "(1.0.0)". |
+| AI_READI | c010 | `d8520f3776f2` | v7api | none | none | Documentation page for dataset v2.0.0; every version cue is a dataset release (v1.0.0, v2.0.0, v3.0.0), releases of the same dataset. The two texts differ only by a mojibake repair. |
+| AI_READI | c010 | `63f0ca137b46` | v7prod, v8prod | none | none | Documentation page for dataset v2.0.0; every version cue is a dataset release (v1.0.0, v2.0.0, v3.0.0), releases of the same dataset. The two texts differ only by a mojibake repair. |
+| AI_READI | c013 | `69dad28786b9` | v7prod, v8prod | none | none | FAIRhub page listing dataset versions 1.0.0 to 3.0.0 with their DOIs. |
+| AI_READI | c023 | `986c66138dfb` | v7api, v7prod | none | none | RO-Crate subcrates; "version": "3.0.0" is the dataset release, and each subcrate's isPartOf names the release itself, so the subcrates are parts of the referent, not its parents. |
+| AI_READI | c025 | `86e8e9fdb79c` | v6agentic, v7api, v7prod | none | none | IRB application form; "derived from" is about cannabis products in a form question. |
+| CM4AI | c003 | `9fbd71fc29fc` | v7prod, v8prod | none | none | Companion Nature paper on the U2OS cell map (the releases are MDA-MB-468 and KOLF2.1J); names the Cell Mapping Toolkit without a version; "derived from" is about its findings. |
+| CM4AI | c004 | `25765998c5df` | v7prod, v8prod | companion | none | Companion paper methods: DIA-NN v.1.8.1.0, PyTorch v.2.0.1 and GPT-4 v.gpt-4-1106-preview for the U2OS map. CORUM, STRING and HPA versions are reference inputs of that analysis; "subset of" selects assemblies. |
+| CM4AI | c005 | `54b97ebc1ccf` | v7prod, v8prod | companion | none | Companion paper methods: transformers v.4.29.2, scipy v1.7.3, numpy v.1.21.6, MutSigCV v.1.4 and IMP v.2.18 for the U2OS map; "derived from" is about AlphaFold-Multimer restraints. |
+| CM4AI | c006 | `30baa79daf33` | v6agentic, v7prod, v8prod | none | none | Companion paper references; the version cue is the digits of a bioRxiv DOI. |
+| CM4AI | c013 | `152f308ffd98` | v6agentic, v7prod, v8prod | none | none | Preprint references; the version cues are bioRxiv DOI digits. |
+| CM4AI | c020 | `147a4351b49f` | v8prod | none | none | Dataverse June 2025 release page; "Version 2.1" is the Dataverse version. "Derived from commercially available de-identified human cell lines" is a biological source (text-form lineage), and the provenance cues name provenance-graph files, whose content is not in the bundle. |
+| CM4AI | c021 | `ef8c0922455b` | v6agentic, v7prod, v8prod | none | none | Dataverse release page; version cues are bioRxiv DOI digits; the cell-line sentence as in c020. |
+| CM4AI | c024 | `3cb935d02f07` | v6agentic, v7prod, v8prod | none | none | Dataverse release page; as c021. |
+| CM4AI | c027 | `170c8aebadaf` | v6agentic, v8prod | none | none | Dataverse June 2026 release page; as c021. |
+| VOICE | c003 | `ea3c76a6af36` | v7prod, v8prod | none | none | Feasibility paper tables and references; version cues are DOI digits, "derivation" a cited title. |
+| VOICE | c017 | `3ae0a7440719` | v8prod | referent | none | PhysioNet v3.0.0 page: "This release was generated with b2aiprep v3.0.0." The other version cues are release notes, the REDCap instrument deposit (v3.23.0) and paper titles; "derived from" describes features computed from the raw audio, lineage inside the dataset. |
+| VOICE | c021 | `9054f042c02b` | v7prod, v8prod | cited | none | The pediatric dataset's page, a related-but-distinct dataset (source manifest scope): its references cite the Bridge2AI Data Processing Library (Version 3.0.0). |
+
+Not adjudicated: none.
+Adjudicated but matching no candidate: none.
+
+### Versioned software the bundles state, and where the records carry it
+
+Every versioned software statement found in the four bundles, searched in full, citations
+included; what is not one (releases, standards, database versions, paper titles, the
+Dataverse host's footer) is listed in the adjudication file's header. Per arm,
+over the records of the fact's project: **stated** is the records whose hashed bundle bytes
+contain the snippet (`–` where the bytes are not recovered); **used_software/tools** is a
+`used_software` entry whose `name`, `id` or `url` names the software, with that `version`
+(a name only in its description counts as elsewhere), or a `tools` string with
+both; **elsewhere** is any other string, or one mapping's own values (its scalars and the
+items of its lists other than `used_software` and `tools`), holding the name and the version
+(prose, a resource entry); **name only** is the name without the version; **absent** is
+neither. A version is a whole version token: anything attached to it (`-rc1`, `--rc1`,
+`.post1`, `+build`, or a leading `2.0.0+` or `2.0.0-`) makes another version, while a name
+joined by a hyphen (`b2aiprep-3.0.0`) and sentence punctuation do not. Lexical, like the
+cues: a match does not check that the value is right, and
+a `companion` or `cited` fact carried is not thereby in scope.
+
+| fact | scope | stated in chunks | arm | records | stated | used_software/tools | elsewhere | name only | absent |
+|---|---|---|---|---:|---:|---:|---:|---:|---:|
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v4 API (2026-08-13) | 3 | 3 | 0 | 3 | 0 | 0 |
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v5 API (2026-08-22c) | 3 | 3 | 0 | 3 | 0 | 0 |
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v5 agentic (2026-08-24) | 3 | 3 | 3 | 0 | 0 | 0 |
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v6 agentic (2026-08-28) | 3 | 3 | 3 | 0 | 0 | 0 |
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v7 API production (2026-09-01) | 3 | 3 | 0 | 2 | 1 | 0 |
+| `voice-b2aiprep-3.0.0` | referent | c017, c019 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 3 | 0 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v4 API (2026-08-13) | 3 | 3 | 0 | 3 | 0 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v5 API (2026-08-22c) | 3 | 3 | 0 | 1 | 2 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 1 | 1 | 1 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.23.0` | cited | c017, c019 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 1 | 2 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v4 API (2026-08-13) | 3 | 3 | 0 | 2 | 1 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 1 | 1 | 1 |
+| `voice-redcap-3.20.0` | cited | c015 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-redcap-3.20.0` | cited | c015 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 1 | 2 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 1 | 0 | 2 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-pediatric-data-processing-library-3.0.0` | cited | c021 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `voice-b2aiprep-0.21.0` | cited | c015 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v4 API (2026-08-13) | 3 | 3 | 0 | 1 | 1 | 1 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 1 | 2 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 2 | 0 | 1 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v7 API canaries (2026-08-28…d, exploratory) | 3 | 3 | 0 | 0 | 2 | 1 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 1 | 2 |
+| `ai-readi-fairscape-1.2.1` | referent | c022 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 2 | 1 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-dia-nn-1.8.1.0` | companion | c004 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-pytorch-2.0.1` | companion | c004 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 1 | 2 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v6 agentic (2026-08-28) | 3 | 3 | 1 | 0 | 2 | 0 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 2 | 1 |
+| `cm4ai-gpt-4-1106-preview` | companion | c004 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-transformers-4.29.2` | companion | c005 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-scipy-1.7.3` | companion | c005 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-numpy-1.21.6` | companion | c005 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v6 agentic (2026-08-28) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-mutsigcv-1.4` | companion | c005 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-imp-2.18` | companion | c011 | v4 API (2026-08-13) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `cm4ai-imp-2.18` | companion | c011 | v5 API (2026-08-22c) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `cm4ai-imp-2.18` | companion | c011 | v5 agentic (2026-08-24) | 3 | 3 | 0 | 0 | 0 | 3 |
+| `cm4ai-imp-2.18` | companion | c011 | v6 agentic (2026-08-28) | 3 | 3 | 1 | 2 | 0 | 0 |
+| `cm4ai-imp-2.18` | companion | c011 | v7 API production (2026-09-01) | 3 | 3 | 0 | 0 | 3 | 0 |
+| `cm4ai-imp-2.18` | companion | c011 | v8 API production (2026-09-04f/g) | 3 | 3 | 0 | 0 | 2 | 1 |
+
+Where each fact is stated, as read:
+
+- `voice-b2aiprep-3.0.0`: The adult release pages for v3.0.0 and v3.1.0 both state it, and both cite the "b2aiprep library (Version 3.0.0)" in their references.
+- `voice-redcap-3.23.0`: A reference to the Zenodo deposit of the REDCap instruments; no stated use for the release.
+- `voice-redcap-3.20.0`: The v1.1 page's reference to an earlier Zenodo deposit of the REDCap instruments, in the same reference list as the b2aiprep 0.21.0 citation; no stated use for the release.
+- `voice-pediatric-data-processing-library-3.0.0`: The pediatric dataset's page (c021) cites the b2aiprep repository under this title. The pediatric dataset is related but distinct, so the citation is not the referent's; a record naming b2aiprep 3.0.0 is counted under voice-b2aiprep-3.0.0, and this row counts the title.
+- `voice-b2aiprep-0.21.0`: The v1.1 page's reference to the b2aiprep repository; v1.1 is an earlier release.
+- `ai-readi-fairscape-1.2.1`: The root RO-Crate records the FAIRSCAPE version that packaged the metadata, not a processing step.
+- `cm4ai-dia-nn-1.8.1.0`: SEC-MS search for the U2OS map in the companion paper.
+- `cm4ai-pytorch-2.0.1`: Model training for the U2OS map.
+- `cm4ai-gpt-4-1106-preview`: Assembly naming for the U2OS map.
+- `cm4ai-transformers-4.29.2`: Name-similarity step of the U2OS annotation reproducibility test.
+- `cm4ai-scipy-1.7.3`: Cancer-assembly density estimate in the companion paper.
+- `cm4ai-numpy-1.21.6`: Same analysis as scipy.
+- `cm4ai-mutsigcv-1.4`: Mutation analysis of the pediatric cancer cohort in the companion paper.
+- `cm4ai-imp-2.18`: The project preprint's structure modelling, which it calls exploratory ("We are currently exploring the feasibility"); the companion paper states the same version for the U2OS map.
+
 ## Lexical candidates by record
 
 Each receipted record: the basis its chunk text was read on, then each
