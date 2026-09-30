@@ -695,9 +695,11 @@ class UnspacedScriptTest(unittest.TestCase):
         character is a run of its own, so the name splits into two
         one-letter tokens that are not judged, and nothing is grounded.
 
-        The compatibility ideograph is U+FA0E, one of the few in its block
-        that NFKC leaves as itself: most map to a unified ideograph, which
-        would pass without the range."""
+        The compatibility ideograph is U+FA0E; any in its block would do.
+        Runs are cut on the raw character before NFKC is applied, and a
+        compatibility ideograph is a letter (Lo), so `_compat_unspaced`
+        never reads it: an NFKC-mapped one such as U+F900 fails without the
+        range exactly as U+FA0E does (#3743)."""
         for script, ch in (
                 ("katakana phonetic extensions", "ㇰ"),
                 ("CJK extension A", "㐀"),
