@@ -125,7 +125,9 @@ machine-readable form and lineage across fields. So:
   `cue_unread`, and the report says a withholding cue was not read rather
   than that nothing says why (#3205). A label clause left unread because
   it names both kinds (above) is marked `label_ambiguous`, and the report
-  says so rather than that nothing says why (#3404). A clause that opens
+  says so rather than that nothing says why (#3404); a clause read after
+  all, before a contrast that names nothing of its own ("… errata not
+  recorded but thin"), is not so marked (#3681). A clause that opens
   with "but", "whereas" or "however", and disclaims without naming a concern of its own, is about the clause
   before it, which is not read either ("the empty was_derived_from is
   noted but not penalised"). A clause that is not read keeps its scope
@@ -234,8 +236,11 @@ sentence or label range, carries one of the words `_EMPTINESS` lists
 "not", "none", "nor", "neither", "never", "nothing" and "n't"; or an
 absence named as a noun or a state in one of the `_ABSENCE_NAMED` forms:
 "absentee(s)", a counted "two absences" or "three gaps", "the one (only,
-sole) gap", "remain the gaps", "is silent" (not "silent on …"), and not a
-gap a slot is said to fill, close or cover. "Held at 4 because errata are
+sole) gap", "remain the gaps", "is silent" (not "silent on …" and not
+the bare word: "silent corrections" names none), and not a gap a slot is
+said to fill, close or cover, with an article or quantifier between
+("fills both of the two gaps") or in the passive ("the two gaps are
+filled by was_derived_from"; #3680). "Held at 4 because errata are
 thin; was_derived_from links every release to its parent" gives no
 empty-slot reason, and neither does it with "errata leave gaps in the
 history" or "errata are silent on the Snellen removal" in place of "errata
@@ -548,15 +553,31 @@ _ABSENCE_NAMED = re.compile(
     r"|\bremains?\s+the\s+gaps?\b"
     r"|\b(?:is|are|remains?|stays?)\s+(?:\w+\s+)?silent\b"
     r"(?!\s+(?:on|about|regarding|as\s+to|over)\b)", _I)
-#: A gap a slot closes rather than leaves: "was_derived_from fills the one
-#: gap".
-_GAP_CLOSED = re.compile(r"\b(?:fill|clos|bridg|cover|address|plug)\w*\s+$", _I)
+#: A gap a slot closes rather than leaves, the verb before the counted form
+#: with any article, determiner or quantifier between ("was_derived_from
+#: fills the one gap", "… closes the two remaining gaps", "… fills both of
+#: the two gaps") or after it in the passive ("the two gaps are filled by
+#: was_derived_from", "the one gap is closed by parent_datasets"), not
+#: negated there ("the two gaps are not filled"; #3680). The passive is
+#: read after a gap only: an absence another slot is said to cover is
+#: still absent ("two of the four absences are functionally covered by
+#: sibling slots — … parent_datasets by … related_datasets", a committed
+#: sentence the #3544 measurement counts).
+_CLOSING_VERB = r"(?:fill|clos|bridg|cover|address|plug)\w*"
+_GAP_CLOSED = re.compile(
+    rf"\b{_CLOSING_VERB}\s+(?:in\s+|up\s+)?"
+    r"(?:(?:the|a|an|both|all|each|either|of|these|those|its|their|any|remaining|last|final)"
+    r"\s+)*$", _I)
+_GAP_CLOSED_AFTER = re.compile(
+    rf"^\s+(?:is|are|was|were|be|been|being|gets?|got|get)\s+"
+    rf"(?:(?!(?:not|never)\b)\w+\s+)?{_CLOSING_VERB}\b", _I)
 
 
 def _names_absence(text: str) -> bool:
     """Whether `text` names an absence in an `_ABSENCE_NAMED` form that no
-    slot is said to close (`_GAP_CLOSED`)."""
+    slot is said to close (`_GAP_CLOSED`, and for a gap `_GAP_CLOSED_AFTER`)."""
     return any(not _GAP_CLOSED.search(text[:m.start()])
+               and not ("gap" in m.group().lower() and _GAP_CLOSED_AFTER.search(text[m.end():]))
                for m in _ABSENCE_NAMED.finditer(text))
 
 
@@ -621,7 +642,9 @@ class Q19Lint:
     #: Where the basis is UNSTATED: a score-label clause says something is
     #: absent or "not" but names both kinds of concern, so it was not read
     #: (#3146): its words do not say which is absent and which is credit.
-    #: The label may name a gap; the lint could not tell which (#3404).
+    #: The label may name a gap; the lint could not tell which (#3404). Not
+    #: set where the clause is read after all, with a contrast after it
+    #: that names nothing of its own (#3681).
     label_ambiguous: bool = False
 
     def concerns(self, kind: str) -> list[str]:
@@ -979,16 +1002,24 @@ def _label_reasons(label: str) -> list[tuple[int, int]]:
 
 
 def _label_reading(label: str) -> tuple[list[tuple[int, int]], bool]:
-    """`_label_reasons`, and whether a clause before the reason was left
-    unread because it names both kinds of concern (#3146): a clause whose
-    "not" or absence word stands inside it, in a clause that is read (not
-    in a concession's or an acceptance's), and whose words do not say which
-    concern is absent. The lint report says so rather than that nothing
-    says why (#3404)."""
+    """`_label_reasons`, and whether a clause was left unread because it
+    names both kinds of concern (#3146): a clause whose "not" or absence
+    word stands inside it, in a clause that is read (not in a concession's
+    or an acceptance's), and whose words do not say which concern is
+    absent. The lint report says so rather than that nothing says why
+    (#3404). Such a clause is unread only where no range returned covers
+    it: a contrast that names nothing of its own reads the clause before it
+    ("Typed PROV graph with errata not recorded but thin"), and a clause so
+    read is not reported as unread (#3681)."""
     def said_absent(pattern, lo, hi):
         return any(_read_in(label, m.start(), m.end()) for m in pattern.finditer(label, lo, hi))
 
-    out, ambiguous = [], False
+    def unread(spans):
+        return any(not any(lo <= fa and fb <= hi for lo, hi in spans) for fa, fb in flagged)
+
+    # The clauses that name both kinds of concern: unread unless a range
+    # returned covers them.
+    out, flagged = [], []
     for a, b in _spans(label):
         cuts = [a] + [m.end() for m in _LABEL_CONJUNCTION.finditer(label, a, b)]
         for i, start in enumerate(cuts):
@@ -1001,16 +1032,18 @@ def _label_reading(label: str) -> tuple[list[tuple[int, int]], bool]:
                     or (_LABEL_NOT.search(part) and len(_kinds(part)) < 2)):
                 if i and not _names_reason([("score_label", label, (start, b))]):
                     start = cuts[i - 1]
-                return [(lo, hi) for lo, hi in out + [(start, len(label))]
-                        if label[lo:hi].strip()], ambiguous
-            ambiguous |= read and said_absent(_LABEL_NOT, start, end)
+                spans = [(lo, hi) for lo, hi in out + [(start, len(label))]
+                         if label[lo:hi].strip()]
+                return spans, unread(spans)
+            if read and said_absent(_LABEL_NOT, start, end):
+                flagged.append((start, end))
         clause = label[a:b].strip()
         absent = _ABSENCE.search(clause)
         if absent and (absent.start() == 0 or len(_kinds(clause)) < 2):
             out.append((a, b))
         elif absent and said_absent(_ABSENCE, a, b):
-            ambiguous = True
-    return out, ambiguous
+            flagged.append((a, b))
+    return out, unread(out)
 
 
 def _gap_parts(sentence: str) -> list[tuple[int, int]]:

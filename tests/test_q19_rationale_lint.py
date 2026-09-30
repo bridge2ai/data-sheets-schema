@@ -1318,6 +1318,9 @@ def test_a_label_clause_left_unread_as_ambiguous_is_reported_as_such(tmp_path, l
     # The absence word stands in a concession, which is not read for its own
     # reason, not for ambiguity.
     ("Good despite typed PROV graph with errata not recorded", _NEUTRAL, UNSTATED),
+    # The same with an absence word rather than "not" (#3683).
+    ("Good despite typed was_derived_from links and errata missing", _NEUTRAL, UNSTATED),
+    ("Good despite machine-readable PROV graph lacking errata", _NEUTRAL, UNSTATED),
     # A body sentence says why: the report does not say "nothing says why".
     ("Typed PROV graph with errata not recorded", "Held at 4 because no checksums are recorded.",
      STATED),
@@ -1328,6 +1331,37 @@ def test_a_label_clause_left_unread_as_ambiguous_is_reported_as_such(tmp_path, l
 def test_a_label_read_or_unread_for_another_reason_is_not_called_ambiguous(label, note, basis):
     result = lint_q19(item(label=label, note=note))
     assert (result.basis, result.label_ambiguous) == (basis, False), label
+
+
+@pytest.mark.parametrize("label, verdict", [
+    ("Typed PROV graph with errata not recorded but thin", REPRESENTATION_AND_SUBSTANTIVE),
+    ("Typed PROV graph with errata not recorded but otherwise strong",
+     REPRESENTATION_AND_SUBSTANTIVE),
+    ("Typed PROV graph with errata not recorded without more", REPRESENTATION_AND_SUBSTANTIVE),
+])
+def test_a_both_kinds_clause_read_before_an_empty_contrast_is_not_called_unread(tmp_path, label,
+                                                                                verdict):
+    """#3681: a contrast that names nothing of its own reads the clause
+    before it, so a clause naming both kinds is read there after all, and
+    its concerns are the reasons; the report does not say it was left
+    unread."""
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.basis, result.verdict, result.label_ambiguous) == (UNSTATED, verdict, False)
+    assert all(r.sentence == label for r in result.reasons)
+    (tmp_path / "a_evaluation.json").write_text(json.dumps({
+        "rubric": "rubric20-semantic", "categories": [{"questions": [item(label=label, note=_NEUTRAL)]}]}))
+    lines, _ = lint_report([tmp_path])
+    assert "left unread as ambiguous" not in lines[0]
+
+
+def test_a_both_kinds_clause_left_before_a_contrast_that_names_its_own_reason_is_unread():
+    """#3681's contrast: where the contrast names a reason of its own, the
+    clause before it stays unread, and is reported so."""
+    label = "Typed PROV graph with errata not recorded but version history not detailed"
+    result = lint_q19(item(label=label, note=_NEUTRAL))
+    assert (result.verdict, result.concerns(SUBSTANTIVE), result.label_ambiguous) == (
+        SUBSTANTIVE_ONLY, ["version_history"], True)
+    assert [r.sentence for r in result.reasons] == ["but version history not detailed"]
 
 
 def test_both_unread_notes_are_reported_together(tmp_path):
@@ -1509,6 +1543,17 @@ _CREDIT = "was_derived_from links every release to its parent."
     ("Held at 4 because was_derived_from fills the gap.", REASON_NOT_DETERMINED, []),
     ("Held at 4 because was_derived_from fills the one gap.", REASON_NOT_DETERMINED, []),
     ("Held at 4 because related_datasets covers the one gap.", REASON_NOT_DETERMINED, []),
+    # With an article or quantifier between, or in the passive (#3680).
+    ("Held at 4 because was_derived_from fills the two gaps.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from closes the two remaining gaps.",
+     REASON_NOT_DETERMINED, []),
+    ("Held at 4 because was_derived_from fills both of the two gaps.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the two gaps are filled by was_derived_from.", REASON_NOT_DETERMINED, []),
+    ("Held at 4 because the one gap is closed by parent_datasets.", REASON_NOT_DETERMINED, []),
+    # "silent" only as "is/are … silent", never the bare word (#3684).
+    (f"Held at 4 because errata are thin, with silent corrections; {_CREDIT}", SUBSTANTIVE_ONLY,
+     ["version_history"]),
+    (f"Held at 4 because of silent errata; {_CREDIT}", SUBSTANTIVE_ONLY, ["version_history"]),
 ])
 def test_a_gap_or_silence_about_something_else_licenses_no_slot(note, verdict, concerns):
     """#3668: "gap" and "silent" as often name a concern other than a slot,
@@ -1517,6 +1562,31 @@ def test_a_gap_or_silence_about_something_else_licenses_no_slot(note, verdict, c
     result = lint_q19(item(note=note))
     assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
         STATED, verdict, concerns), note
+
+
+@pytest.mark.parametrize("note", [
+    "Held at 4 because the two gaps are not filled by was_derived_from.",
+    "Held at 4 because the two gaps were never closed by parent_datasets.",
+    # An absence another slot covers is still absent (#3680).
+    "Held at 4 because two of the four absences are covered by sibling slots: parent_datasets "
+    "among them.",
+])
+def test_a_gap_a_slot_is_said_not_to_fill_is_still_an_absence(note):
+    """#3680: the passive closing verb, negated, closes nothing; and an
+    absence another slot covers is still one."""
+    result = lint_q19(item(note=note))
+    assert (result.basis, result.verdict, [r.concern for r in result.reasons]) == (
+        STATED, REPRESENTATION_ONLY, ["empty_slot"]), note
+
+
+def test_the_committed_absences_covered_by_sibling_slots_still_name_an_absence():
+    """The committed sentence the #3544 measurement counts among the 11:
+    the passive closing verb is read after a gap only (#3680)."""
+    from data_sheets_schema.q19_rationale_lint import _names_absence
+    assert _names_absence(
+        "Ten of fourteen listed fields carry substantive content, and two of the four absences are "
+        "functionally covered by sibling slots — file resources by file_collections, "
+        "parent_datasets by four is_new_version_of entries in related_datasets.")
 
 
 def test_a_named_absence_about_something_else_still_licenses_a_slot_as_absent_does():
