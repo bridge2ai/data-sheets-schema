@@ -1893,18 +1893,35 @@ _HAND_READ_NOT_CREDIT = {
 }
 
 
+#: Sentences the leading-verb regex put among the 122 recommendations
+#: that state what the hand-read classes count as a miss (#3742). They
+#: are examples found after the fact, not a reading of the bucket: the
+#: 122 were not read, so the misses they hold are not counted.
+_UNREAD_RECOMMENDATIONS_NOT_CREDIT = [
+    # A named absence, in the noun form of the 11.
+    "Fill the structural gaps: record the Snellen variable removal",
+    # Placements, of the kind the 16 count.
+    "Populate the dedicated slots that currently hold their content elsewhere: download_url",
+    "the ancestry that related_datasets currently holds alone",
+    "the negative findings currently buried in notes",
+]
+
+
 @pytest.mark.corpus
 def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     """The module docstring's #3544 measurement. In the Q19 fields of the
     133 committed ratings, every sentence naming a slot carries an
     `_EMPTINESS` word but two, which say the slot is populated. Outside
     them, in text the vocabulary was not written against, the sentences
-    naming a slot with no `_EMPTINESS` word are 122 recommendations and
-    155 read by hand: 29 absences the list misses (the 11 named absences
-    and 16 placements above, and the two of `_HAND_READ_NOT_CREDIT`), the
-    other classes of `_HAND_READ_NOT_CREDIT`, each pinned by a fragment,
-    and 111 that are credit (#3669). The list is main's; this measures it
-    and changes nothing (#3544)."""
+    naming a slot with no `_EMPTINESS` word are 122 set aside by a
+    leading-verb regex and 155 read by hand: 29 absences the list misses
+    (the 11 named absences and 16 placements above, and the two of
+    `_HAND_READ_NOT_CREDIT`), the other classes of `_HAND_READ_NOT_CREDIT`,
+    each pinned by a fragment, and 111 that are credit (#3669). The 122
+    were not read, and some of them state an absence or a placement
+    (`_UNREAD_RECOMMENDATIONS_NOT_CREDIT`), so the 29 are a floor on the
+    misses, not a bound (#3742). The list is main's; this measures it and
+    changes nothing (#3544)."""
     from data_sheets_schema import q19_rationale_lint as lint
     listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "-z", "data/evaluation_llm"],
                             capture_output=True, text=True, check=True).stdout.split("\0")
@@ -1949,6 +1966,12 @@ def test_the_absence_vocabulary_recall_measured_on_the_committed_text():
     assert (len(outside), len(marked), len(recommendations)) == (1046, 769, 122)
     read = [s for s in rest if not recommendation.match(s)]
     assert len(read) == 155
+    # The regex sorts by the first word only, and the bucket was not read:
+    # it holds absences and placements of the kinds counted below (#3742).
+    for fragment in _UNREAD_RECOMMENDATIONS_NOT_CREDIT:
+        hits = [s for s in recommendations if fragment in s]
+        assert len(hits) == 1, fragment
+        assert not [s for s in read if fragment in s], fragment
     classified = []
     for fragment in _UNRECOGNISED_NAMED_ABSENCES:
         # The second "remain the gaps" sentence is the whole of one.

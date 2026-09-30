@@ -251,9 +251,16 @@ measure is the text it was not written against: the 1,046 distinct
 sentences outside them that name a slot, anywhere in the committed
 evaluation outputs (other rubric20 questions, rubric10 semantic). Of
 those, 769 carry an `_EMPTINESS` word; 277 carry none. 122 of the 277
-open with an imperative, recommendations ("Populate was_derived_from …",
-"Mirror … into parent_datasets") that state no absence. The other 155
-were read by hand, and 29 of them state an absence the list misses:
+open with one of a list of imperative verbs ("Populate was_derived_from
+…", "Mirror … into parent_datasets"). They were set aside by that
+leading-verb regex and not read, and they are not free of absences: some
+state one or a placement of the kinds counted below ("Fill the
+structural gaps: … populate discouraged_uses, parent_datasets and
+compression", "Populate the dedicated slots that currently hold their
+content elsewhere: download_url …", "… the ancestry that
+related_datasets currently holds alone", "the negative findings
+currently buried in notes"; #3742). The other 155 were read by hand,
+and 29 of them state an absence the list misses:
 
 - 11 name the absence as a noun or a state: "two absences: resources, and
   parent_datasets", "the four genuine absences (doi, variables,
@@ -286,9 +293,10 @@ systems rather than a parent dataset"); two are a slot's bare name, as a
 list item; two define the criterion ("Proportion of mandatory schema
 fields populated (…)"); the other 111 credit a slot or describe one that
 is populated. Every class but the 111 is pinned by a fragment of each
-sentence in the test. It bounds the misses, not a recall ratio: which of
-the 769 carry their word about the slot, rather than a negation about
-something else, was not read.
+sentence in the test. The 29 are a floor on the misses, not a bound
+and not a recall ratio: the 122 recommendations were not read and hold
+more, and which of the 769 carry their word about the slot, rather than
+a negation about something else, was not read either.
 
 The list is left as it is. Forms that read the 11 were tried on PR #3654
 and withdrawn: in three review rounds each (the bare "gap" and "silent";
