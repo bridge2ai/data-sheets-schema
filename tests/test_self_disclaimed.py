@@ -32,14 +32,15 @@ V1 = sd.load_lexicon(sd.lexicon_path(1))
 #: Every output names the sha it ran under, and no committed output, record
 #: or note cites any of them (#3161). v2 (#3131, #3244, #3261, #3273) is a
 #: new file beside v1, whose bytes are unchanged. v2 was revised in review
-#: before it first merged, so this PR's commits carry four earlier byte
+#: before it first merged, so this PR's commits carry five earlier byte
 #: versions under `version: 2`:
 #:   6d232ed346308bd7cf97b262aff47cefb869673c55d72fb994411f2c2d34e09a (389436318, first commit)
 #:   520e2779966f84a827ef0b6f9fdab3a6457cf85cce177a13291661453918dd7d (3a9d8198d, review round 1)
 #:   aff86697da6e3713dc6925d851840d581eabf76a76aed100a909d32982468a73 (e3e1ca227, review round 2)
 #:   15e9ed95b55fa9e60d8d557d6c4ae87cdc2bcf32b0ba7f09d676e842f713a4d9 (0d1ada61e, review round 3)
+#:   63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9 (4cf8faa65, review round 4)
 LEXICON_PINS = {1: "15a1b7ddfa9fa0677d1ab1075dfd2485b5920c32a59cf23d6108fb94b7afcb3a",
-                2: "63cc268b0d296ae3e2d35e4c0ae7a513f0adacf46a82a84529e60feb816901f9"}
+                2: "2edac57763fddb717a237e3fe4d0444526f93fcbc5dfe286e5584ca676f3aa24"}
 
 
 def record(**containers):
@@ -813,6 +814,61 @@ def test_without_a_tail_any_ending_counts():
         assert outcomes("splits", text, lexicon=lexicon) == [("presence.prospective_predicate", "flag", None)]
         assert outcomes("splits", text) == [
             ("presence.prospective_predicate", "out_of_scope", "no_member_subject")]
+
+
+# A comma-less coordinated clause before the cue is not its subject (#3619):
+# every sentence here was flagged by v1 and, before the conjunct cut, read
+# by v2 as the earlier clause's subject.
+@pytest.mark.parametrize("text,scope", [
+    ("Its release is pending and this split remains prospective.", "this split"),
+    ("Its release is pending and it remains prospective.", "it"),
+    ("Sizes are unknown and the holdout set remains prospective.", "holdout set"),
+    ("No sizes are given and this split remains prospective.", "this split"),
+    ("No data from this split has been released so it remains prospective.", "it"),
+    ("No release has occurred and the holdout set remains prospective.", "holdout set"),
+    ("It was announced in 2024 and remains prospective.", "It"),
+    ("The split was delayed while this split remains prospective.", "this split"),
+    ("Nothing is released yet, but the holdout set is prospective.", "holdout set"),
+    # no verb before the conjunction: coordinated noun phrases, kept whole
+    ("This split and its labels are prospective.", "This split"),
+    ("The holdout set and the test set remain prospective.", "holdout set"),
+])
+def test_a_subject_cue_reads_its_own_conjunct(text, scope):
+    assert outcomes("splits", text, lexicon=V1) == [("presence.prospective_predicate", "flag", None)]
+    out = sd.scan(record(splits=[{"name": "Entry", "description": text}]), LEXICON)
+    assert [(h["rule"], h["scope"]) for f in out["flags"] for h in f["hits"]] == [
+        ("presence.prospective_predicate", scope)], text
+
+
+@pytest.mark.parametrize("text,reason", [
+    # the cue's own conjunct is about something else, whatever the first says
+    ("This split is balanced and the consent process remains prospective.", "no_member_subject"),
+    ("The holdout set is balanced while the consent process remains prospective.", "no_member_subject"),
+    ("Its release is pending but neither statement is prospective.", "negated_subject"),
+    ("Its release is pending and the consent process is prospective.", "no_member_subject"),
+])
+def test_a_subject_cue_whose_own_conjunct_is_another_thing_is_out_of_scope(text, reason):
+    assert outcomes("splits", text) == [("presence.prospective_predicate", "out_of_scope", reason)], text
+
+
+def test_a_date_in_the_cues_own_conjunct_is_still_guarded():
+    """#3619: the date/amount guard reads the cue's own conjunct, so a year
+    there is a date and a year in the earlier clause is not."""
+    out = sd.scan(record(splits=[{"name": "Entry", "description":
+                                  "Its release is pending and the 2025 split is prospective."}]), LEXICON)
+    assert out["flags"] == [] and [(g["guard"], g["term"]) for g in out["guarded"]] == [("date_amount", "2025")]
+
+
+def test_without_a_conjunction_the_subject_is_the_whole_clause():
+    """#3619: `statement_subject.conjunction` and `clause_verb` are what cut
+    the subject to the cue's own conjunct; a lexicon that declares neither
+    reads it as round 4 did, and one that declares only one is refused."""
+    lexicon = edited_lexicon(lambda d: [d["statement_subject"].pop(k) for k in ("conjunction", "clause_verb")])
+    assert outcomes("splits", "No sizes are given and this split remains prospective.", lexicon=lexicon) == [
+        ("presence.prospective_predicate", "out_of_scope", "negated_subject")]
+    for key in ("conjunction", "clause_verb"):
+        with pytest.raises(ValueError, match="declared together"):
+            edited_lexicon(lambda d, key=key: d["statement_subject"].pop(key))
 
 
 def test_without_negated_a_negated_subject_is_read_as_before():

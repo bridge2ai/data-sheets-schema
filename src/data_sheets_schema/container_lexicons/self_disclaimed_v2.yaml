@@ -217,13 +217,26 @@ item_qualifiers:
 # for the consent process", #3615); "on" is not a topic preposition, so "The
 # statements on the program page" still names the statements. The subject is a passive
 # cue's (`_subject`: the clause before the cue, an appositive and anything
-# before its last comma left out).
+# before its last comma left out), cut to the cue's own conjunct: after the
+# last `conjunction` whose stretch before it holds a `clause_verb`, that
+# conjunction joins two clauses, and the negation, head and date/amount
+# checks read only the second. "Its release is pending and this split
+# remains prospective", "No sizes are given and this split remains
+# prospective" and "It was announced in 2024 and remains prospective" are
+# about the split; "This split is balanced and the consent process remains
+# prospective" is about the consent process (#3619). With no verb before it
+# the conjunction joins noun phrases and the subject is kept whole ("This
+# split and its labels"). `clause_verb` names auxiliaries and copulas only,
+# so a first clause whose only verb is a lexical one ("The page lists no
+# sizes and this split ...") is not cut.
 statement_subject:
   nouns: ['statements?', 'descriptions?', 'mentions?', 'references?']
   negated: '\s*(?:(?:and|but|yet|so|while|whereas)\s+)?(?:no|neither|none|not)\b'
   head: '\s*(?:(?:both|all|each|either|some|any|one|two|three) of\s+)?(?!(?:[\w''-]+\s+){0,2}?(?:in|on|of|to|by|for|from|at|with|within|across|about|under|described|mentioned|cited|listed|given|named|made|quoted)\s)(?:[\w''-]+\s+){0,3}'
   topic: '\s+(?:about|of|on the subject of|regarding|concerning|describing|to|for)\s+(?P<topic>.+)'
   tail: '\s*(?:$|[,;:()\u2013\u2014]|(?:in|on|of|to|by|for|from|at|with|within|across|about|under|over|regarding|concerning|describing|as|that|which|who|whose|where|described|mentioned|cited|listed|given|named|made|quoted|reported|and|or|nor|itself|themselves|alone|all|both|also|too|still|now|remains?|is|are|was|were)\b)'
+  conjunction: '\b(?:and|but|so|while|whereas|yet)\s+'
+  clause_verb: '\b(?:is|are|was|were|am|be|been|being|has|have|had|does|do|did|remains?|remained|will|would|can|could|may|might|must|shall|should)\b'
 
 # How the diff resolves two original members that `receipts.remap_path`
 # follows to the same final entry. `identity_keys`: the one member whose

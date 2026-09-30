@@ -45,7 +45,11 @@ process is prospective", "The consent process described in both
 statements", "The labels in this split" and "The split labels" are out of
 scope. A subject that opens on a negating determiner ("Neither statement",
 "None of the statements", "No statements") says nothing it names is
-prospective and is out of scope (`negated_subject`, #3614). A statement
+prospective and is out of scope (`negated_subject`, #3614). The subject
+these checks and the date/amount guard read is the cue's own conjunct: a
+comma-less clause joined before it by a conjunction after an auxiliary or
+copula ("Its release is pending and this split remains prospective") is
+left out (`statement_subject.conjunction`, `clause_verb`, #3619). A statement
 topic ("statements about/of/for ...", #3615) must itself be headed by a
 self-reference or presence term. A `none` cue has no further
 condition: `role.not_necessarily` names the container's role in its cue.
@@ -264,6 +268,7 @@ class Lexicon:
         # the lexicon as v1 did.
         self._statement = self._statement_topic = self._statement_head = None
         self._statement_tail = self._statement_negated = None
+        self._clause_conjunction = self._clause_verb = None
         statement = data.get("statement_subject")
         if statement is not None:
             self._statement = _word(statement["nouns"])
@@ -273,6 +278,11 @@ class Lexicon:
                 self._statement_head = re.compile(statement["head"], re.I)
             if statement.get("tail") is not None:
                 self._statement_tail = re.compile(statement["tail"], re.I)
+            if (statement.get("conjunction") is None) != (statement.get("clause_verb") is None):
+                raise ValueError("statement_subject.conjunction and clause_verb are declared together")
+            if statement.get("conjunction") is not None:
+                self._clause_conjunction = re.compile(statement["conjunction"], re.I)
+                self._clause_verb = re.compile(statement["clause_verb"], re.I)
             self._statement_topic = re.compile(statement["topic"], re.I)
             if "topic" not in self._statement_topic.groupindex:
                 raise ValueError("statement_subject.topic must name its topic as a `topic` group")
@@ -551,10 +561,31 @@ def _subject(before: str) -> tuple[int, int]:
     return spans[-1]
 
 
-def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None) -> dict[str, str]:
+def _clause_cut(lexicon, subject: str) -> int:
+    """Where the cue's own conjunct starts in `subject` (a `_subject`
+    stretch, unmasked): after the last `statement_subject.conjunction` whose
+    stretch before it (from the previous cut) holds a
+    `statement_subject.clause_verb`, so the conjunction joins two clauses
+    and the earlier one is not the cue's subject. "Its release is pending
+    and this split" -> "this split"; "It was announced in 2024 and " -> ""
+    (an elided subject); "This split and its labels" is one noun phrase and
+    is kept whole (#3619). 0 when the lexicon declares no conjunction."""
+    if lexicon is None or lexicon._clause_conjunction is None:
+        return 0
+    cut = 0
+    for found in lexicon._clause_conjunction.finditer(subject):
+        if lexicon._clause_verb.search(subject, cut, found.start()):
+            cut = found.end()
+    return cut
+
+
+def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None,
+           lexicon=None) -> dict[str, str]:
     """The pieces of the cue's clause a guard or an object can name, read
     from the masked sentence: `clause`, `before_cue`, `subject` (a passive
-    cue's subject, `_subject`, located on `raw`, the unmasked sentence),
+    cue's subject, `_subject`, located on `raw`, the unmasked sentence, and,
+    given a `lexicon` that declares clause conjunctions, cut to the cue's
+    own conjunct, `_clause_cut`),
     `cue`, `item` (the cue's named `item` group: the item a cue that cites
     its source reports, empty when the cue has none), `after_phrase` (after
     the cue up to the phrase's end,
@@ -564,7 +595,9 @@ def _parts(masked: str, c0: int, c1: int, m, raw: str | None = None) -> dict[str
     end = _PHRASE_END.search(after)
     phrase = after[:end.start()] if end else after
     before = masked[c0:m.start()]
-    s0, s1 = _subject((raw if raw is not None else masked)[c0:m.start()])
+    text = (raw if raw is not None else masked)[c0:m.start()]
+    s0, s1 = _subject(text)
+    s0 += _clause_cut(lexicon, text[s0:s1])
     item = (masked[m.start("item"):m.end("item")]
             if "item" in m.re.groupindex and m.start("item") >= 0 else "")
     return {"clause": masked[c0:c1], "before_cue": before, "subject": before[s0:s1],
@@ -757,10 +790,16 @@ def _self_heads_subject(lexicon, selves, subject: str) -> bool:
     """False when the subject holds self-references and none heads it
     (`_heads`): "The labels in this split are prospective" is about the
     labels, as "The consent process for the splits" is about the consent
-    process (#3592). True when the subject holds none, so a self-reference
-    earlier in the sentence before an elided subject still counts."""
+    process (#3592). When the subject holds none, True only where it is
+    elided ("It was announced in 2024 and remains prospective"), so a
+    self-reference earlier in the sentence still counts, and not where it
+    has words of its own: in "This split is balanced and the consent process
+    remains prospective" the cue's subject, its own conjunct (#3619), is the
+    consent process."""
     found = [f for rx in selves for f in rx.finditer(subject)]
-    return not found or any(_heads(lexicon, subject, f) for f in found)
+    if not found:
+        return _ELIDED.fullmatch(subject.strip()) is not None
+    return any(_heads(lexicon, subject, f) for f in found)
 
 
 def _item_self_reference(lexicon, selves, item: str) -> str | None:
@@ -803,8 +842,8 @@ def _subject_scope(lexicon, container, member, selves, sentence: str,
     The presence terms are read with the member's self-references blanked,
     a topic's self-reference on the topic as written (`_topic_self_reference`,
     #3593)."""
-    raw = _parts(sentence, c0, c1, m, sentence)["subject"]
-    subject = _parts(_masked(sentence, selves), c0, c1, m, sentence)["subject"]
+    raw = _parts(sentence, c0, c1, m, sentence, lexicon)["subject"]
+    subject = _parts(_masked(sentence, selves), c0, c1, m, sentence, lexicon)["subject"]
     noun = _statement_head(lexicon, subject)
     if noun is not None:
         # located on the unmasked subject (the same offsets): a blanked
@@ -841,7 +880,11 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     # that item alone: "Unlike the other splits, this split is not released"
     # is about the member (#3231). Only a presence container's: a role cue's
     # subject is the source it cites, not another item (#3249, #3250).
-    parts = _parts(masked, c0, c1, m, sentence)
+    # A `subject` cue's subject is its own conjunct: in "Its release is
+    # pending and this split remains prospective" the earlier clause is
+    # not what the cue says is prospective (#3619).
+    cut = lexicon if pattern.scope == "subject" else None
+    parts = _parts(masked, c0, c1, m, sentence, cut)
     if container.kind == "presence":
         other = _search(lexicon._other_item, _item_text(pattern, parts))
         if other:
@@ -856,7 +899,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
     # blanked ("this author's institution", "the email of this author"): a
     # self-reference that is itself the object ("does not name this
     # maintainer") names the role, one that owns the object does not (#3251).
-    objects = _parts(_possessors_blanked(sentence, selves), c0, c1, m, sentence)
+    objects = _parts(_possessors_blanked(sentence, selves), c0, c1, m, sentence, cut)
     if pattern.scope == "role":
         verdict, term = _role_scope(lexicon, container, sentence, masked, c0, c1, m,
                                     [objects[p] for p in pattern.object])
@@ -883,7 +926,7 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         # prospective" (#3131); where the subject holds one, it must head it:
         # not "The labels in this split are prospective" (#3592).
         owners = _possessors_blanked(sentence, selves)
-        subject = _parts(owners, c0, c1, m, sentence)["subject"]
+        subject = _parts(owners, c0, c1, m, sentence, lexicon)["subject"]
         # A subject that opens on a negating determiner says nothing it
         # names is prospective: "Neither statement is prospective", "None
         # of the statements are prospective" (#3614).
@@ -892,6 +935,11 @@ def _judge(lexicon, container, member, pattern, sentence, m) -> dict:
         term = _self_reference(selves, owners, c0, m.start())
         if term is not None and not _self_heads_subject(lexicon, selves, subject):
             term = None
+        elif term is not None:
+            # the self-reference that heads the cue's own conjunct, not one
+            # in an earlier clause: "No data from this split has been
+            # released so it remains prospective" is about "it" (#3619)
+            term = _item_self_reference(lexicon, selves, subject) or term
         if term is None:
             verdict, term = _subject_scope(lexicon, container, member, selves, sentence, c0, c1, m)
             if verdict != "scope":
