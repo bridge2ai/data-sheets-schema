@@ -416,6 +416,14 @@ def _doubling_merges(levels):
                                                  for i in range(1, levels + 1)]) + "\n"
 
 
+def _doubling_single_merges(levels):
+    """As `_doubling_merges`, but each anchor merges the one before through
+    two single-mapping `<<` keys rather than one merge list, so the copies go
+    through the loader's other branch (#3440)."""
+    return "\n".join(["a0: &a0 {name: safe}"] + [f"a{i}: &a{i} {{<<: *a{i - 1}, <<: *a{i - 1}, k{i}: 1}}"
+                                                 for i in range(1, levels + 1)]) + "\n"
+
+
 class TestAMergeOverrideInsideADroppedAncestorHidesNothing(unittest.TestCase):
     """#3247 (Codex): a dropped ancestor is looked into only for the keys the
     loader would take from it, so a merged value an explicit key overrides
@@ -620,8 +628,29 @@ class TestTheLoaderIsBounded(unittest.TestCase):
             rd._load(text, max_pairs=239)
         self.assertEqual(rd._load("a: 1\nb: [1, 2]\n", max_pairs=0), {"a": 1, "b": [1, 2]})
 
+    def test_doubling_single_mapping_merges_are_not_checked(self):
+        """The same stall through repeated single-mapping `<<` keys (#3440):
+        the copies a `<<: *x` makes are charged as a merge list's are.
+        Twenty-one levels, under 1 KB: uncharged, the loader copies ~4M pairs
+        and the record reaches the later walk budget seconds later."""
+        text = _doubling_single_merges(21)
+        self.assertLess(len(text), 1_000)
+        started = time.perf_counter()
+        found, reason = rd.check_text(text)
+        elapsed = time.perf_counter() - started
+        self.assertIsNone(found)
+        self.assertTrue(reason.startswith(
+            f"the loader's merge keys would copy more than {rd.MAX_TRAVERSAL_STEPS:,} pairs"), reason)
+        self.assertLess(elapsed, 10.0)
+
+    def test_the_bound_counts_the_pairs_single_mapping_merges_copy(self):
+        text = _doubling_single_merges(6)      # 2 + 6 + 14 + 30 + 62 + 126 = 240 pairs copied
+        self.assertEqual(rd._load(text, max_pairs=240), yaml.safe_load(text))
+        with self.assertRaises(rd.TraversalBudgetExceeded):
+            rd._load(text, max_pairs=239)
+
     def test_under_the_bound_a_record_loads_as_safe_load_loads_it(self):
-        for text in (MERGE_CYCLE, _merge_chain(50), _doubling_merges(8),
+        for text in (MERGE_CYCLE, _merge_chain(50), _doubling_merges(8), _doubling_single_merges(8),
                      "d: &d {name: safe}\nl: &l {<<: *d}\nr: &r {<<: *d}\nx: {<<: [*l, *r], k: 1}\n",
                      "a: &a {k: 1, j: 2}\nb: {<<: *a, k: 3}\nc: {<<: [{k: 1}, {k: 2}]}\n",
                      "a: {=: v, <<: {=: w}}\n"):
