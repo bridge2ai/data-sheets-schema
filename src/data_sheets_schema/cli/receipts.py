@@ -242,9 +242,12 @@ def sources(method, label, project, examples, at_run_commit, as_json):
               help="with --receipt: the final record, to say whether each flagged value there expresses the status")
 @click.option("--chunk-manifest", default=None, type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="with --receipt: the bundle's chunk manifest; default the one beside it or the study's")
+@click.option("--corpus", is_flag=True,
+              help="instead of a run or files: every committed coverage receipt, tallied per project by the "
+                   "haystack form that located each snippet, with the unlocated ones listed (#3709)")
 @click.option("--json", "as_json", is_flag=True, help="print the whole result as JSON")
 def status_context(method, label, project, receipt_file, bundle_file, record_file, final_file,
-                   chunk_manifest, as_json):
+                   chunk_manifest, corpus, as_json):
     """Where a receipted snippet lost a status marker its context carries
     (#2917): `governor_outside_snippet` and `modal_dropped`, label slots apart.
 
@@ -258,6 +261,21 @@ def status_context(method, label, project, receipt_file, bundle_file, record_fil
 
     from data_sheets_schema import receipts as rc
     from data_sheets_schema import status_context as sc
+    if corpus:
+        given = [flag for flag, v in (("--method", method), ("--label", label), ("--project", project),
+                                      ("--receipt", receipt_file), ("--bundle", bundle_file),
+                                      ("--record", record_file), ("--final", final_file),
+                                      ("--chunk-manifest", chunk_manifest)) if v is not None]
+        if given:
+            raise click.UsageError(f"--corpus reads every committed receipt; {', '.join(given)} would be ignored")
+        from data_sheets_schema.provenance import CONCAT_DIR
+        out = sc.corpus_status_context(_corpus_path(CONCAT_DIR))
+        if as_json:
+            click.echo(json.dumps(out, indent=2, ensure_ascii=False, default=str))
+        else:
+            for line in sc.corpus_report_lines(out):
+                click.echo(line)
+        return
     if receipt_file is not None:
         if bundle_file is None or record_file is None or label or project or method:
             # --method names a run's directory family; the files named here

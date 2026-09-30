@@ -17,6 +17,15 @@ from data_sheets_schema.cli import cli
 ROOT = Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture(autouse=True)
+def _fresh_caches():
+    """Run mode's process-local caches (#3709) never carry one test's
+    bundle into another."""
+    sc.clear_caches()
+    yield
+    sc.clear_caches()
+
+
 def _md5(text):
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
@@ -848,6 +857,72 @@ def test_only_located_snippets_are_counted_by_form():
     assert sc.BundleView(text, manifest).located_form("c002", "absent from the chunk") is None
 
 
+FORM_DOCS = {
+    "plain": "The consortium will release the imaging waveforms to approved users.",
+    "linewrap-joined": "The consortium will release the imag-\ning waveforms to approved users.",
+    "artifact-line-elided": "The consortium will release the\n7.\nimaging waveforms to approved users.",
+    "joined-elided": "The consortium will release the\n7.\nimag-\ning waveforms to approved users.",
+}
+
+
+@pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
+def test_each_flag_names_the_form_its_snippet_was_located_through(form):
+    # #3708: the counts said how many snippets a joined or elided form
+    # located, not which flags were read there. Each flag now names a
+    # non-plain form, both rules' flags, and a plain one names none.
+    doc = FORM_DOCS[form]
+    pairs = [("x", "the imaging waveforms to approved users"),        # governor_outside_snippet
+             ("y", "will release the imaging waveforms")]            # modal_dropped
+    out = _run(doc, pairs, {"x": "The consortium releases the imaging waveforms.", "y": "Released."})
+    assert sorted(f["rule"] for f in out["flags"]) == ["governor_outside_snippet", "modal_dropped"]
+    named = {f["rule"]: f.get("located_form") for f in out["flags"]}
+    if form == "plain":
+        assert named == {"governor_outside_snippet": None, "modal_dropped": None}
+        assert all("located_form" not in f for f in out["flags"]) and out["form_located"] == []
+        assert "read through a joined or elided form" not in out["summary"]
+    else:
+        assert named == {"governor_outside_snippet": form, "modal_dropped": form}
+        assert [(u["slot"], u["form"]) for u in out["form_located"]] == [("x", form), ("y", form)]
+        assert f"2 flags read through a joined or elided form: {form} 2" in out["summary"]
+        assert any(f"located_form={form}" in line for line in sc.report_lines(out))
+    assert out["counts"]["flags_by_located_form"] == {
+        f: 2 * int(f == form) for f in sc.HAYSTACK_FORMS if f != "plain"}
+
+
+def test_a_label_slot_flag_names_its_form_too():
+    out = _run(FORM_DOCS["linewrap-joined"], [("creators[0].name", "the imaging waveforms to approved users")],
+               {"creators": [{"name": "The imaging waveforms"}]})
+    assert out["flags"] == [] and [f["located_form"] for f in out["label_slot"]] == ["linewrap-joined"]
+    assert out["counts"]["flags_by_located_form"]["linewrap-joined"] == 1
+
+
+def test_an_unlocated_snippets_flag_names_no_form():
+    # A modal_dropped flag reads only the snippet: where no form locates it,
+    # neither its line nor any context was read, so no form is named.
+    text, manifest = _bundle("Nothing here.")
+    receipt = _receipt(text, [("x", "the data will be released")])
+    view = sc.BundleView(text, manifest)
+    view.verified = lambda cid, snippet: True       # verified by fiat; located by nothing
+    out = sc.receipt_context(receipt, manifest, text, {"x": "Released."}, view=view)
+    [flag] = out["flags"]
+    assert flag["rule"] == "modal_dropped" and flag["snippet_line"] is None and "located_form" not in flag
+    assert out["counts"]["unlocated"] == 1 and out["form_located"] == []
+
+
+@pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
+def test_rule_2_names_the_form_an_evidence_quotes_context_was_read_through(form):
+    text, manifest = _bundle(FORM_DOCS[form])
+    view = sc.BundleView(text, manifest)
+    out = sc.review_status_expression(_review(("/description", [
+        _claim("The waveforms are released.", "fact", quote="the imaging waveforms to approved users")])),
+        view=view)
+    [flag] = out["flags"]
+    assert (flag["rule"], flag["via"], flag["marker"]) == ("planned_evidence_declared_fact", "sentence", "will")
+    assert flag.get("located_form") == (None if form == "plain" else form)
+    assert out["counts"]["quotes_located_by_form"] == {f: int(f == form) for f in sc.HAYSTACK_FORMS}
+    assert ("read only through a joined or elided form" in out["summary"]) == (form != "plain")
+
+
 @pytest.mark.parametrize("form", sc.HAYSTACK_FORMS)
 def test_each_haystack_form_maps_to_the_validators_own_haystack(form):
     raw = ("Partic-\r\nipants were   enrolled\n6.\nat SITE-\n  One; “data” \\n were\n 12. \n"
@@ -1600,3 +1675,153 @@ def test_every_file_option_says_which_mode_reads_it():
         assert helps[name].startswith("with --receipt:"), (name, helps[name])
     review_cmd = cli.commands["review"].commands["status-expression"]
     assert {p.name: p.help for p in review_cmd.params}["chunk_manifest"].startswith("with --bundle:")
+
+
+# ------------------------------------------- one process, many receipts (#3709)
+def _drifted_run(tmp_path, name, text):
+    """A run whose bundle on disk has drifted from the bytes its record
+    hashed; `bundle_bytes_for` is what recovers them (patched by the caller)."""
+    run = tmp_path / name
+    run.mkdir()
+    provenance, receipt, full = _run_dir(run)
+    record = yaml.safe_load(provenance.read_text(encoding="utf-8").split("\n", 1)[1])
+    Path(record["inputs"]["bundle_path"]).write_text(text + "drifted since\n", encoding="utf-8")
+    record["inputs"]["bundle_path"] = "data/study.txt"
+    provenance.write_text("# header\n" + yaml.safe_dump(record), encoding="utf-8")
+    return provenance, receipt, full
+
+
+def test_run_mode_recovers_and_chunks_a_shared_drifted_bundle_once_per_process(tmp_path, monkeypatch):
+    from data_sheets_schema import provenance as pv
+    text, _m = _bundle(ENUMERATION)
+    calls = {"git": 0, "chunk": 0, "view": 0}
+
+    def recovered(rel, md5=None, sha256=None):
+        calls["git"] += 1
+        assert (rel, md5) == ("data/study.txt", _md5(text))
+        return text.encode("utf-8"), {"commit": "c0ffee"}
+    real_chunk, real_view = chunking.manifest_from_bytes, sc.BundleView
+
+    def chunk(*a, **k):
+        calls["chunk"] += 1
+        return real_chunk(*a, **k)
+
+    class View(real_view):
+        def __init__(self, *a, **k):
+            calls["view"] += 1
+            super().__init__(*a, **k)
+    runs = [_drifted_run(tmp_path, n, text) for n in ("rep1", "rep2", "rep3")]
+    monkeypatch.setattr(pv, "bundle_bytes_for", recovered)
+    monkeypatch.setattr(chunking, "manifest_from_bytes", chunk)
+    monkeypatch.setattr(sc, "BundleView", View)
+    outs = [sc.run_status_context(*r) for r in runs]
+    assert calls == {"git": 1, "chunk": 1, "view": 1}
+    assert all(o["checked"] and o["bundle_basis"]["source"] == "git blob" for o in outs), outs
+    # A hit is the answer a fresh process gives.
+    sc.clear_caches()
+    fresh = sc.run_status_context(*runs[2])
+    assert calls == {"git": 2, "chunk": 2, "view": 2}
+    assert json.dumps(fresh, sort_keys=True, default=str) == json.dumps(outs[2], sort_keys=True, default=str)
+    assert [f["slot"] for f in outs[0]["flags"]] == [D_SLOT]
+
+
+def test_a_cached_manifest_is_a_copy_and_a_git_failure_is_not_cached(tmp_path, monkeypatch):
+    from data_sheets_schema import provenance as pv
+    text, _m = _bundle(ENUMERATION)
+    raw = text.encode("utf-8")
+    first = sc._chunked(raw, "study.txt", chunking.DEFAULT_RULE, chunking.manifest_from_bytes)
+    first["chunks"].clear()
+    assert sc._chunked(raw, "study.txt", chunking.DEFAULT_RULE, chunking.manifest_from_bytes)["chunks"]
+    # A key over any YAML shape, keys of mixed types included, never raises.
+    assert len({sc._key({1: "a", "b": 2}), sc._key(["a"]), sc._key("a")}) == 3
+    # Another name or rule is another manifest.
+    assert sc._chunked(raw, "other.txt", chunking.DEFAULT_RULE, chunking.manifest_from_bytes)["bundle"] == "other.txt"
+    answers = [pv.GitUnavailable("no git here"), (raw, {"commit": "c0ffee"})]
+
+    def recovered(rel, md5=None, sha256=None):
+        answer = answers.pop(0)
+        if isinstance(answer, Exception):
+            raise answer
+        return answer
+    monkeypatch.setattr(pv, "bundle_bytes_for", recovered)
+    run = _drifted_run(tmp_path, "rep1", text)
+    refused = sc.run_status_context(*run)
+    assert refused["checked"] is False and "no git here" in refused["reason"]
+    assert sc.run_status_context(*run)["checked"] and answers == []
+
+
+def test_the_corpus_diagnostic_tallies_each_project_by_form_and_lists_what_it_could_not_read(tmp_path):
+    concat = tmp_path / "concat"
+
+    def run(method, label, project, doc, value):
+        text, _m = _bundle(doc)
+        core, full_dir = concat / f"{method}_core" / label, concat / method / label
+        core.mkdir(parents=True, exist_ok=True)
+        full_dir.mkdir(parents=True, exist_ok=True)
+        bundle = tmp_path / f"{label}_{project}.txt"
+        bundle.write_text(text, encoding="utf-8")
+        rule = chunking.DEFAULT_RULE
+        count = chunking.manifest_from_bytes(text.encode("utf-8"), bundle.name, rule)["chunk_count"]
+        (core / f"{project}_provenance.yaml").write_text("# header\n" + yaml.safe_dump({"run": {"project": project}, "inputs": {
+            "bundle_path": str(bundle), "bundle_md5": _md5(text),
+            "chunks": {"rule": rule, "bundle_name": bundle.name, "chunk_count": count}}}), encoding="utf-8")
+        (core / f"{project}_coverage_receipt.yaml").write_text(yaml.safe_dump(_receipt(text, [
+            ("x", "the imaging waveforms to approved users"), ("y", "absent from every chunk")])), encoding="utf-8")
+        (full_dir / f"{project}_d4d.yaml").write_text(yaml.safe_dump({"x": value, "y": "y"}), encoding="utf-8")
+    run("m_a", "L1", "P", FORM_DOCS["plain"], "Released.")
+    run("m_a", "L2", "P", FORM_DOCS["linewrap-joined"], "Released.")
+    run("m_b", "L1", "Q", FORM_DOCS["artifact-line-elided"], "It will be released.")
+    (concat / "m_b_core" / "L2").mkdir(parents=True)
+    (concat / "m_b_core" / "L2" / "Q_coverage_receipt.yaml").write_text("chunks: []\n", encoding="utf-8")
+    before = _tree_hashes(tmp_path)
+    out = sc.corpus_status_context(concat)
+    assert _tree_hashes(tmp_path) == before and out["gating"] is False
+    p, q = out["projects"]["P"], out["projects"]["Q"]
+    assert p["unchecked"] == [], p["unchecked"]
+    assert (p["receipts"], p["checked"], p["located"], p["unlocated"]) == (2, 2, 2, 0)
+    assert p["located_by_form"] == {"plain": 1, "linewrap-joined": 1, "artifact-line-elided": 0, "joined-elided": 0}
+    assert p["flags_by_located_form"] == {"linewrap-joined": 1, "artifact-line-elided": 0, "joined-elided": 0}
+    assert [(u["receipt"], u["slot"], u["form"]) for u in p["form_located_snippets"]] == [
+        ("m_a_core/L2/P_coverage_receipt.yaml", "x", "linewrap-joined")]
+    assert (q["receipts"], q["checked"], q["located_by_form"]["artifact-line-elided"]) == (2, 1, 1)
+    assert q["flags_by_located_form"]["artifact-line-elided"] == 0      # the value keeps "will"
+    [unchecked] = q["unchecked"]
+    assert unchecked["receipt"] == "m_b_core/L2/Q_coverage_receipt.yaml" and "no provenance record" in unchecked["reason"]
+    assert out["totals"]["receipts"] == 4 and out["totals"]["checked"] == 3
+    assert out["totals"]["located_by_form"] == {"plain": 1, "linewrap-joined": 1, "artifact-line-elided": 1,
+                                                "joined-elided": 0}
+    lines = sc.corpus_report_lines(out)
+    assert all(len(line.splitlines()) == 1 for line in lines)
+    assert any(line.startswith("   · linewrap-joined P: m_a_core/L2/P_coverage_receipt.yaml") for line in lines)
+    assert any(line.startswith("   · unchecked Q: m_b_core/L2/Q_coverage_receipt.yaml") for line in lines)
+
+
+def test_the_corpus_flag_reads_the_corpus_and_refuses_every_other_option(tmp_path, monkeypatch):
+    from data_sheets_schema import provenance as pv
+    monkeypatch.setattr(pv, "CONCAT_DIR", tmp_path)
+    ok = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus"])
+    assert ok.exit_code == 0, ok.output
+    assert f"corpus under {tmp_path}" in ok.output and "0/0 receipts read" in ok.output
+    as_json = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus", "--json"])
+    assert json.loads(as_json.output)["totals"]["receipts"] == 0
+    for extra in (["--label", "L"], ["--project", "P"], ["--method", "m"]):
+        bad = CliRunner().invoke(cli, ["receipts", "status-context", "--corpus", *extra])
+        assert bad.exit_code == 2 and extra[0] in bad.output and "would be ignored" in bad.output
+
+
+@pytest.mark.corpus   # walks every committed coverage receipt; the main-branch lane (#1203)
+def test_the_committed_corpus_locates_every_snippet_and_names_the_five_joined_ones():
+    concat = ROOT / "data" / "d4d_concatenated"
+    if not any(concat.glob("*_core/*/*_coverage_receipt.yaml")):
+        pytest.skip("no committed receipts on disk")
+    out = sc.corpus_status_context(concat)
+    t = out["totals"]
+    assert t["checked"] == t["receipts"], [u for p in out["projects"].values() for u in p["unchecked"]]
+    assert (t["unlocated"], t["indeterminate"]) == (0, 0)
+    assert {f: n for f, n in t["located_by_form"].items() if f != "plain"} == {
+        "linewrap-joined": 5, "artifact-line-elided": 0, "joined-elided": 0}
+    assert sum(t["located_by_form"].values()) == t["located"]
+    joined = sorted((u["receipt"].split("/")[0][:-len("_core")], u["receipt"].split("/")[1],
+                     u["receipt"].split("/")[2][:-len("_coverage_receipt.yaml")])
+                    for p in out["projects"].values() for u in p["form_located_snippets"])
+    assert joined == sorted(JOINED_BEFORE_3043)
