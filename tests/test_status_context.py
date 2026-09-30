@@ -640,16 +640,50 @@ def test_a_lost_status_is_one_governor_flag_whichever_equivalent_governors_carry
                 {"x": "Future releases include the imaging waveforms."})["flags"] == []
 
 
-def test_equivalent_governors_in_one_sentence_report_the_nearer_line():
+@pytest.mark.parametrize("doc,reported,beside", [
+    (("In future the consortium,\nafter review by the board,\nwill release\n"
+      "the imaging waveforms to approved users."), ("planned", "will"), ("prospective", "future")),
+    # #3435: the nearer governor's class ("prospective") sorts after the
+    # farther one's ("planned"), so only the line distance reports it; with
+    # the distance tiebreak removed the class name would pick "will".
+    (("The consortium will,\nafter review by the board,\nin future release\n"
+      "the imaging waveforms to approved users."), ("prospective", "future"), ("planned", "will")),
+])
+def test_equivalent_governors_in_one_sentence_report_the_nearer_line(doc, reported, beside):
     # Both classes in the snippet's own sentence: the governor on the line
     # nearer the snippet is reported, the other listed beside it.
-    doc = ("In future the consortium,\nafter review by the board,\nwill release\n"
-           "the imaging waveforms to approved users.")
     out = _run(doc, [("x", "the imaging waveforms to approved users")], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
     [flag] = out["flags"]
-    assert (flag["class"], flag["marker"]) == ("planned", "will")
+    assert (flag["class"], flag["marker"]) == reported
+    assert flag["source_line"] == _line(text, "in future release" if reported[1] == "future" else "will release")
     assert [(e["class"], e["marker"], e["via"]) for e in flag["equivalent_governors"]] == [
-        ("prospective", "future", "sentence")]
+        (*beside, "sentence")]
+
+
+@pytest.mark.parametrize("heading,sentence_tail,reported,beside", [
+    ("Future Data Releases", "will be released to approved users.",
+     ("planned", "will"), ("prospective", "future")),
+    # The heading's class ("planned") also sorts first: only the via rank
+    # reports the sentence's governor.
+    ("Planned Data Releases", "are released in future to approved users.",
+     ("prospective", "future"), ("planned", "planned")),
+])
+def test_a_sentence_governor_beats_a_nearer_heading_governor(heading, sentence_tail, reported, beside):
+    # #3437: rule 1 of the ordering. The heading sits one line above the
+    # snippet and the sentence's marker two lines below it, so line distance
+    # alone would report the heading; the sentence governor is reported and
+    # the heading listed beside it.
+    doc = f"{heading}\nThe imaging waveforms\nand the labels\n{sentence_tail}\n"
+    out = _run(doc, [("x", "The imaging waveforms")], {"x": "Waveforms are released."})
+    text, _m = _bundle(doc)
+    [flag] = out["flags"]
+    snippet_line = _line(text, "The imaging")
+    assert flag["snippet_line"] == snippet_line
+    assert (flag["class"], flag["marker"], flag["via"], flag["source_line"]) == (
+        *reported, "sentence", snippet_line + 2)
+    assert flag["equivalent_governors"] == [{"class": beside[0], "marker": beside[1], "via": "heading",
+                                             "source_line": snippet_line - 1, "governor": heading}]
 
 
 @pytest.mark.parametrize("doc,form", [
