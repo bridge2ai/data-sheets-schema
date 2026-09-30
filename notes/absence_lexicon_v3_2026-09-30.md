@@ -29,6 +29,27 @@ regex, so they could not be counterexamples there.
   followed by whitespace end the sentence; a `.` inside `v3.1.0` does not.
 - With the verb first, the match runs from the verb to the term, so a
   phrase's text can be longer than v2's for the same words.
+- Two consequences of that span, which the pattern's comment does not state
+  (#3732). A name of the declared ranking lying between a verb and a later
+  ranking term is inside the verb-first span and is not a match of its own:
+  "The value used from the input manifest is the higher-ranked one." gives
+  one match, "used from the input manifest is the higher-ranked", where v2
+  gives two. So "wherever they appear, as in v2" holds for the names' text,
+  which is always inside a flagged span, but not for their count as separate
+  phrases. And matches do not overlap, so a verb consumed by one span cannot
+  admit a second ranking term after it: in "It was preferred over the
+  lower-ranked source, the higher-ranked one being older." only "preferred
+  over the lower-ranked" matches. The 80-character rule above is a condition
+  a match needs, not a promise that every term meeting it matches.
+  `tests/test_lexicons.py` holds both. Over the 303 pinned records (a
+  reimplementation of the rule in the review round's scratch script, not a
+  recorded instrument) one name is absorbed (`claudecode_agent/…v5_rep2`
+  VOICE, "resolved by the input manifest's ranking, the higher-ranked
+  source") and two terms the rule admits sit in no span (`claudecode_api/
+  2026-09-04e…rep1` VOICE "the lower-ranked white paper" after "recorded as
+  separate purposes because the higher-ranked documentation"; `2026-09-04g…
+  rep3` AI_READI "tier-1 sources" after "recorded because two equally
+  ranked"). The counts below are what the regex matches and do not move.
 
 The three borderline phrases are v3 counterexamples, and v2 matches each of
 them.
@@ -74,4 +95,7 @@ than 80 characters away ("… the higher-ranked source in the input manifest
 or a phrase the list does not name ("is left unpopulated"). About half of
 those are referent sentences ("This record describes …, the highest-ranked
 source in the bundle") that `rsn.this-record` still matches. That reading is
-not a recorded judgement; the recall of the change is unmeasured.
+not a recorded judgement; the recall of the change is unmeasured. A cause
+not in that reading is the non-overlap described under "What v3 matches":
+two ranking terms in the pinned records whose only verb an earlier match
+had already consumed.

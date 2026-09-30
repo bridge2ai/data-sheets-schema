@@ -220,6 +220,25 @@ class TheRegistry(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertIsNotNone(match(text))
 
+    def test_v3_verb_first_span_absorbs_a_name_and_consumes_its_verb(self):
+        """#3732: the two consequences of the verb-first span that the dated
+        note states. A name of the declared ranking between a verb and a later
+        term is inside that span, not a match of its own (v2 gives two); and a
+        verb one span consumed cannot admit a second term after it, so the
+        80-character rule is a condition a match needs, not a promise."""
+        v2, v3 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (2, 3))
+
+        def matches(pattern, text):
+            return [m.group() for m in pattern.regex.finditer(text)]
+
+        absorbed = "The value used from the input manifest is the higher-ranked one."
+        self.assertEqual(matches(v3, absorbed), ["used from the input manifest is the higher-ranked"])
+        self.assertEqual(matches(v2, absorbed), ["input manifest", "higher-ranked"])
+        consumed = "It was preferred over the lower-ranked source, the higher-ranked one being older."
+        self.assertEqual(matches(v3, consumed), ["preferred over the lower-ranked"])
+        self.assertEqual(matches(v2, consumed), ["lower-ranked", "higher-ranked"])
+
     def test_every_v3_source_ranking_match_ends_at_a_v2_match(self):
         """v3 narrows v2: over v3's own self-test texts and the sentences
         above, each v3 match ends where a v2 match of the same text ends."""
