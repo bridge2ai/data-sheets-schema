@@ -6,12 +6,15 @@ judgements that are the draw it names. The fixture tests build their own
 corpus; the corpus-marked test reproduces the committed note from the pinned
 records.
 """
+import contextlib
 import copy
+import dataclasses
 import importlib.util
 import re
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 import pytest
@@ -67,6 +70,32 @@ V4 = {
     "/source_caveats/7": "recovered",      # semicolon, past the window too
     "/notes": "dropped",                   # no_verb
 }
+
+
+#: A `;` sentence whose dropped term no other v3 phrase shares a sentence
+#: with: an in-class row v3 counts nothing in, which v4 recovers (#3896).
+UNFLAGGED_SEMICOLON = "The higher-ranked source gives 19 July 2023; that date is used."
+
+
+@contextlib.contextmanager
+def _v4_without_prefer(m):
+    """The script's v4, with the preference verbs taken out of the pattern's
+    verb list and its bytes' identity kept, so a v3 match resting on
+    "preferred" is ended by no v4 match (#3896)."""
+    load = m.lx.load
+
+    def narrowed(name, version=None, **kw):
+        lexicon = load(name, version, **kw)
+        if version != m.NEXT_VERSION:
+            return lexicon
+        patterns = tuple(dataclasses.replace(p, regex=re.compile(p.regex.pattern.replace(
+                             "prefer(?:s|red|ring)?|", ""), p.regex.flags)) if p.id == m.PATTERN else p
+                         for p in lexicon.patterns)
+        assert patterns != tuple(lexicon.patterns)
+        return dataclasses.replace(lexicon, patterns=type(lexicon.patterns)(patterns))
+
+    with mock.patch.object(m.lx, "load", narrowed):
+        yield
 
 
 def _script():
@@ -125,6 +154,15 @@ class Causes(unittest.TestCase):
         self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 0)
         self.assertEqual(found["totals"]["v4"], found["totals"]["v3"] + 3)
 
+    def test_a_v3_match_no_v4_match_ends_at_is_counted(self):
+        """#3896: the registered v4 ends every v3 match, so the fixture's
+        count is 0; a v4 without the preference verbs does not end the two
+        v3 matches that rest on "preferred", and the counter says so."""
+        with _v4_without_prefer(self.m):
+            found = self.m.dropped(self.corpus, self.pins)
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 2)
+        self.assertEqual(self.m.dropped(self.corpus, self.pins)["totals"]["v3_not_ended_by_v4"], 0)
+
     def test_v4_recovers_a_term_past_an_abbreviation_that_no_lift_of_v3_admits_short_of_a_full_stop(self):
         """#3792: v3 and every lift short of crossing a full stop take the
         `.` of "St." for one; v4 does not, and the note tells that recovery
@@ -172,11 +210,16 @@ class Judgements(unittest.TestCase):
         self.m = _script()
         self.dir = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.dir)
-        corpus = self.dir / "d4d_concatenated"
-        path = corpus / "m_a" / "label" / "P_d4d.yaml"
-        path.parent.mkdir(parents=True)
-        path.write_text(yaml.safe_dump({"source_caveats": [text for text, _, _ in LEAVES]}), encoding="utf-8")
-        self.found = self.m.dropped(corpus, self.m.baseline.current_records(corpus))
+        self._build([text for text, _, _ in LEAVES])
+
+    def _build(self, leaves):
+        """Write the fixture record with these leaves, and judgements that
+        are the draw over it: every row in class but the `no_verb` one."""
+        self.corpus = self.dir / "d4d_concatenated"
+        path = self.corpus / "m_a" / "label" / "P_d4d.yaml"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(yaml.safe_dump({"source_caveats": leaves}), encoding="utf-8")
+        self.found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
         drawn = self.m.draw(self.found, 10, 7)
         _, picked = drawn[RSN]
         self.rows = [{"n": i, "record": p, "pointer": h["pointer"], "start": h["start"], "end": h["end"],
@@ -221,6 +264,33 @@ class Judgements(unittest.TestCase):
         self.assertIn("none needs an abbreviation's `.`.", md)
         self.assertIn("by reading and cause: 1 construction `absorbed`, 1 construction `consumed`, "
                       "1 construction `other_sentence`.", md)
+
+    def test_the_note_says_how_many_lost_in_class_phrases_v4_recovers(self):
+        """#3896: "lost" rows are in-class dropped terms in sentences v3
+        counts nothing in. In the fixture one is lost and v4 does not recover
+        it; an added `;` sentence with no other phrase is lost and recovered."""
+        md = self.m.render_markdown(self.found)
+        self.assertIn("It recovers 0 of the 1 in-class phrases in sentences v3 counts nothing in.", md)
+        self._build([text for text, _, _ in LEAVES] + [UNFLAGGED_SEMICOLON])
+        rows = {h["pointer"]: h for _, h in self.found["rows"]}
+        self.assertEqual((rows["/source_caveats/8"]["cause"], rows["/source_caveats/8"]["flagged"],
+                          rows["/source_caveats/8"]["v4"]), ("semicolon", [], "recovered"))
+        md = self.m.render_markdown(self.found)
+        self.assertIn("It recovers 1 of the 2 in-class phrases in sentences v3 counts nothing in.", md)
+
+    def test_the_note_counts_the_v3_matches_no_v4_match_ends_at(self):
+        """#3896: with a v4 that lacks the verb one v3 match rests on, that
+        match is counted as ended by no v4 match, the note says so, and the
+        in-class share v4 keeps loses it."""
+        md = self.m.render_markdown(self.found)
+        self.assertIn("0 of v3's 3 matches end where no v4 match does.", md)
+        self.assertIn("v4 keeps 6 of 9 (66.7%) of the in-class matches v2 had", md)
+        with _v4_without_prefer(self.m):
+            found = self.m.dropped(self.corpus, self.m.baseline.current_records(self.corpus))
+        self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 2)
+        md = self.m.render_markdown(found)
+        self.assertIn("2 of v3's 3 matches end where no v4 match does.", md)
+        self.assertIn("v4 keeps 4 of 9 (44.4%) of the in-class matches v2 had", md)
 
     def test_a_row_whose_cause_is_not_the_computed_one_is_refused(self):
         rows = copy.deepcopy(self.rows)
