@@ -25,7 +25,7 @@ from typing import Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent))
 from generate_comprehensive_sssom import (  # noqa: E402
     ComprehensiveSSSOMGenerator, add_common_arguments, committed_date,
-    report_drift, sssom_object_id,
+    mapping_tool, report_drift, sssom_object_id,
 )
 
 #: The slot_uri-flavoured comment for each (status, source).
@@ -62,6 +62,7 @@ class ComprehensiveURISSSOMGenerator:
         'needs_slot_uri',
         'vocab_crosswalk',
         'author_id',
+        'mapping_tool',
         'mapping_date',
         'mapping_set_id',
         'mapping_set_version'
@@ -121,7 +122,9 @@ class ComprehensiveURISSSOMGenerator:
                 'heuristic_hint': res.hint,
                 'needs_slot_uri': 'yes' if not current_slot_uri and res.status in ['recommended', 'novel_d4d'] else 'no',
                 'vocab_crosswalk': self._is_vocab_crosswalk(current_slot_uri, target_uri),
-                'author_id': 'https://orcid.org/0000-0000-0000-0000',
+                # #2971: no person on any row (MAPPING_TOOL in generate_comprehensive_sssom.py)
+                'author_id': '',
+                'mapping_tool': mapping_tool(res),
                 'mapping_date': mapping_date,
                 'mapping_set_id': 'd4d-rocrate-uri-comprehensive-v1',
                 'mapping_set_version': '2.0',

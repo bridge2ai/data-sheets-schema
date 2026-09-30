@@ -240,7 +240,9 @@ class SSSOMGenerator:
                 'mapping_justification': self._get_mapping_justification(predicate),
                 'confidence': self._get_mapping_confidence(predicate),
                 'comment': f"Source: {validation['source']}",
-                'author_id': 'https://orcid.org/0000-0000-0000-0000',  # Placeholder
+                # #2971: a row is a SKOS alignment TTL triple and nobody is
+                # named as the TTL's curator, so no person is named.
+                'author_id': '',
                 'mapping_date': datetime.now().strftime('%Y-%m-%d'),
                 'subject_source': 'https://w3id.org/bridge2ai/data-sheets-schema/',
                 'object_source': self._get_object_source(object_uri),

@@ -142,7 +142,8 @@ class SSSOMURIGenerator:
                 'mapping_justification': self._get_mapping_justification(skos_predicate),
                 'confidence': confidence,
                 'comment': f"D4D slot '{d4d_property}' (slot_uri: {d4d_uri}) → RO-Crate '{rocrate_uri}'",
-                'author_id': 'https://orcid.org/0000-0000-0000-0000',
+                # #2971: nobody is named as the curator, so no person is named.
+                'author_id': '',
                 'mapping_date': datetime.now().strftime('%Y-%m-%d'),
                 'mapping_set_id': 'd4d-rocrate-uri-alignment-v1',
                 'mapping_set_version': '1.0',
