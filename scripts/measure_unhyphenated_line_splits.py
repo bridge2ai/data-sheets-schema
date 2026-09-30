@@ -11,7 +11,12 @@ sides, per bundle version a provenance record names, before more versions
 are certified:
 
 - `letter_breaks`: line pairs where one line ends and the next starts in a
-  letter — every break the missing reading could apply to;
+  letter, in any script — the breaks the split-word test judges;
+- `joinable_breaks`: every break between two lines that are not blank,
+  except one after a hyphen (that break is read already) — every break the
+  missing reading could apply to, whatever ends and starts the lines: a
+  letter/digit break ('for v' / '2.0.0'), a digit/digit one, one beside
+  punctuation or a letter outside ASCII (#3438);
 - `split_words`: those whose two halves joined are a word while neither
   half is (the issue's method), each listed with its line;
 - `wraps_that_join`: those whose halves are both words and join to one
@@ -19,8 +24,8 @@ are certified:
   as well;
 - `moved`: the checks with a match across one of the `split_words`
   breaks read as nothing (the two lines joined with no space), and
-  `moved_if_every_break_joins` across any letter/letter break — the reading
-  the issue weighs adding, spurious joins and all. `status` where the check
+  `moved_if_every_break_joins` across any of the `joinable_breaks` — the
+  reading the issue weighs adding, spurious joins and all. `status` where the check
   is `not_stated_in_source` on the bytes as they are, so the reading would
   move it to `unknown`; `lines` where it is `unknown` already and would only
   list more lines. A match that needs this join and another break's
@@ -29,7 +34,9 @@ are certified:
   `MIXED_WINDOW_LINES` lines holding two or more, and the most in one
   (each such window is read 3^k - 3 ways for its k breaks); and, with
   `--compare-window N`, the checks whose matching lines differ when the
-  breaks are read each on its own within N lines instead.
+  breaks are read each on its own within N lines instead, with the same
+  two window counts at N lines — the cost of the wider window, which is
+  not the cost at `MIXED_WINDOW_LINES` (#3439).
 
 "A word" is a line-interior token of the same bundle (the first and last
 token of a line are left out: they are the halves being judged) or an
@@ -67,9 +74,11 @@ from data_sheets_schema.chunking import DEFAULT_RULE  # noqa: E402
 
 CORPUS = Path("data/d4d_concatenated")
 DEFAULT_WORDS = Path("/usr/share/dict/words")
-_TAIL = re.compile(r"([A-Za-z]+)$")
-_HEAD = re.compile(r"^([A-Za-z]+)")
-_TOKEN = re.compile(r"[A-Za-z]+")
+# A letter in any script: a word character that is neither a digit nor '_'.
+_LETTERS = r"[^\W\d_]+"
+_TAIL = re.compile(rf"({_LETTERS})$")
+_HEAD = re.compile(rf"^({_LETTERS})")
+_TOKEN = re.compile(_LETTERS)
 
 
 def bundle_versions(corpus: Path) -> tuple[dict[tuple[str, str], int], list[str]]:
@@ -105,6 +114,26 @@ def letter_breaks(lines: list[str]) -> list[tuple[int, str, str]]:
         if tail and head:
             out.append((n, tail.group(1), head.group(1)))
     return out
+
+
+def joinable_breaks(lines: list[str]) -> list[int]:
+    """The line number of every break the missing reading could apply to:
+    both lines carry something other than white space, and the first does
+    not end in a hyphen, whose break `matching_lines` reads already (the
+    compound reading is this join). What ends and starts the lines is not
+    judged, so a letter/digit, digit/digit or punctuation break is one."""
+    return [n for n, (this, after) in enumerate(zip(lines, lines[1:]), 1)
+            if this.strip() and after.strip() and not this.rstrip().endswith("-")]
+
+
+def window_load(lines: dict[int, tuple[str, str]], width: int) -> tuple[int, int]:
+    """(windows of `width` consecutive lines holding two or more hyphenated
+    breaks, the most such breaks in one window): the windows `_readings`
+    reads 3^k - 3 ways each when `MIXED_WINDOW_LINES` is `width`."""
+    hyphenated = at._hyphenated(lines)
+    numbers = sorted(lines)
+    per_window = [sum(1 for n in numbers[i:i + width][:-1] if n in hyphenated) for i in range(len(numbers))]
+    return sum(1 for k in per_window if k >= 2), max(per_window, default=0)
 
 
 def crossing_checks(lines: list[str], line: int) -> set[str]:
@@ -171,16 +200,19 @@ def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int |
     _, lines = at._lines_by_chunk(text, dict(DEFAULT_RULE))
     hits = {c.name: set(at.matching_lines(c.pattern, lines)) for c in at.CHECKS}
     moved = moved_checks(raw_lines, [s["line"] for s in splits], hits)
-    moved_all = moved_checks(raw_lines, [n for n, _, _ in breaks], hits)
-    hyphenated = at._hyphenated(lines)
-    numbers = sorted(lines)
-    per_window = [sum(1 for n in numbers[i:i + at.MIXED_WINDOW_LINES][:-1] if n in hyphenated)
-                  for i in range(len(numbers))]
-    return {"lines": len(raw_lines), "letter_breaks": len(breaks), "split_words": splits,
-            "wraps_that_join": joins, "moved": moved, "moved_if_every_break_joins": moved_all,
-            **({"window_moves": window_moves(lines, compare_window, hits)} if compare_window else {}),
-            "hyphenated_breaks": len(hyphenated),
-            "mixed_windows": sum(1 for k in per_window if k >= 2), "most_in_one_window": max(per_window, default=0)}
+    joinable = joinable_breaks(raw_lines)
+    moved_all = moved_checks(raw_lines, joinable, hits)
+    mixed, most = window_load(lines, at.MIXED_WINDOW_LINES)
+    wider: dict[str, Any] = {}
+    if compare_window:
+        wider_mixed, wider_most = window_load(lines, compare_window)
+        wider = {"window_moves": window_moves(lines, compare_window, hits),
+                 "compare_mixed_windows": wider_mixed, "compare_most_in_one_window": wider_most}
+    return {"lines": len(raw_lines), "letter_breaks": len(breaks), "joinable_breaks": len(joinable),
+            "split_words": splits, "wraps_that_join": joins, "moved": moved,
+            "moved_if_every_break_joins": moved_all, **wider,
+            "hyphenated_breaks": len(at._hyphenated(lines)),
+            "mixed_windows": mixed, "most_in_one_window": most}
 
 
 def load_words(path: Path | None) -> tuple[set[str], dict[str, Any]]:
@@ -213,19 +245,20 @@ def markdown(result: dict[str, Any]) -> str:
     words = result["words"]
     out = [f"Word list: `{words['path']}` (sha256 `{words['sha256']}`, {words['entries']} entries), "
            "plus each bundle's own line-interior tokens.", "",
-           "| Bundle | md5 | Records | Letter/letter breaks | Split words | Wraps that join | "
-           "Checks moved | Moved if every break joins | Hyphenated breaks | Mixed windows | Most in one |",
-           "|---|---|---:|---:|---|---:|---|---|---:|---:|---:|"]
+           "| Bundle | md5 | Records | Letter/letter breaks | Split words | Wraps that join | Checks moved | "
+           "Breaks joined | Moved if every break joins | Hyphenated breaks | Mixed windows | Most in one |",
+           "|---|---|---:|---:|---|---:|---|---:|---|---:|---:|---:|"]
     for r in result["rows"]:
         if "error" in r:
             out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | "
-                       f"not measured: {r['error']} | | | | | | | |")
+                       f"not measured: {r['error']} | | | | | | | | |")
             continue
         splits = ", ".join(f"{s['tail']}/{s['head']} (line {s['line']})" for s in r["split_words"]) or "0"
         moved, moved_all = (", ".join(f"{k} ({v})" for k, v in sorted(m.items())) or "none"
                             for m in (r["moved"], r["moved_if_every_break_joins"]))
         out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | {r['letter_breaks']} | "
-                   f"{splits} | {r['wraps_that_join']} | {moved} | {moved_all} | {r['hyphenated_breaks']} | "
+                   f"{splits} | {r['wraps_that_join']} | {moved} | {r['joinable_breaks']} | {moved_all} | "
+                   f"{r['hyphenated_breaks']} | "
                    f"{r['mixed_windows']} | {r['most_in_one_window']} |")
     if result["compare_window"]:
         moved = [f"`{Path(r['bundle']).name}` `{r['md5'][:8]}`: "
@@ -235,6 +268,14 @@ def markdown(result: dict[str, Any]) -> str:
                     f"{result['mixed_window_lines']}, the hyphenated breaks move "
                     + ("the matching lines of: " + "; ".join(moved) if moved else
                        "no check's matching lines on any version measured") + "."]
+        measured = [r for r in result["rows"] if "error" not in r]
+        if measured:
+            top = max(measured, key=lambda r: r["compare_most_in_one_window"])
+            out += ["", f"At {result['compare_window']} lines the most hyphenated breaks in one window is "
+                        f"{top['compare_most_in_one_window']} (`{Path(top['bundle']).name}` `{top['md5'][:8]}`, "
+                        f"{top['compare_mixed_windows']} windows with two or more), read "
+                        f"{3 ** top['compare_most_in_one_window'] - 3} ways; the table's last two columns "
+                        f"are at {result['mixed_window_lines']} lines."]
     if result["unreadable_records"]:
         out += ["", "Provenance records that could not be read: " + "; ".join(result["unreadable_records"])]
     return "\n".join(out) + "\n"

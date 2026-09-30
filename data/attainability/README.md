@@ -20,9 +20,11 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   `protec-` `tion impact`). A word split with no hyphen is not read that way,
   nor a statement over more than six lines whose hyphens need different
   readings; every entry's note says so. Both limits were measured over the
-  22 bundle versions provenance records name, and neither moves a check on
-  any of them (`notes/attainability_line_splits_2026-09-29.md`, #3199,
-  #3246). Measure a new version before certifying it:
+  22 bundle versions provenance records name, and neither moves a check's
+  status on any of them; reading every break as nothing only adds lines to
+  `version_string` entries that are `unknown` already
+  (`notes/attainability_line_splits_2026-09-29.md`, #3199, #3246, #3438).
+  Measure a new version before certifying it:
   `python scripts/measure_unhyphenated_line_splits.py --compare-window 10`.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,

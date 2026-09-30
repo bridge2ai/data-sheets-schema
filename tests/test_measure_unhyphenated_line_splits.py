@@ -103,3 +103,45 @@ def test_bundle_versions_count_records_and_list_the_unreadable(m, tmp_path):
 def test_the_command_refuses_a_missing_word_list(m, tmp_path, capsys):
     assert m.main(["--words", str(tmp_path / "none"), "--corpus", str(tmp_path)]) == 2
     assert "no word list at" in capsys.readouterr().err
+
+
+def test_every_break_joins_means_every_break_not_only_letter_letter_ones(m):
+    """#3438: the AI_READI bundles wrap their version as 'for v' / '2.0.0',
+    a letter/digit break. Read as nothing it joins to 'v2.0.0', a match of
+    `version_string` that takes a character from the first line, which the
+    bytes as they are do not. The every-break column must see it."""
+    got = m.measure("This documentation is for v\n2.0.0 of the data.")
+    assert got["letter_breaks"] == 0 and got["joinable_breaks"] == 1
+    assert got["moved_if_every_break_joins"] == {"version_string": "lines"}
+    bare = m.measure("This documentation is for v\n2 of the data.")         # 'v2': no match either side
+    assert bare["moved_if_every_break_joins"] == {"version_string": "status"}
+    # Digit/digit and punctuation breaks count; a blank line and a hyphenated
+    # break (read already) do not.
+    assert m.joinable_breaks(["10.", "1234/x", "", "y", "con-", "sent", "z"]) == [1, 4, 6]
+
+
+def test_a_letter_outside_ascii_is_a_letter(m):
+    """#3438: the CM4AI bundles carry breaks with a letter outside ASCII on
+    one side; the split-word test judges them like any other."""
+    assert m.letter_breaks(["un café", "über alles"]) == [(1, "café", "über")]
+    assert m.interior_words(["a naïve b"]) == {"naïve"}
+    got = m.measure("the prot\négé left", {"the", "left", "protégé"})
+    assert got["split_words"] == [{"line": 1, "tail": "prot", "head": "égé", "word": "protégé"}]
+
+
+def test_the_wider_window_reports_its_own_load(m):
+    """#3439: the window counts at `--compare-window N` are the cost of the
+    wider window; the table's are at `MIXED_WINDOW_LINES`."""
+    got = m.measure("a-\nb\nc\nd-\ne\nf\ng-\nh\ni", compare_window=8)
+    assert (got["mixed_windows"], got["most_in_one_window"]) == (3, 2)
+    assert (got["compare_mixed_windows"], got["compare_most_in_one_window"]) == (4, 3)
+    assert m.window_load(at._lines_by_chunk("a-\nb\nc\nd-\ne\nf\ng-\nh\ni", {})[1], 8) == (4, 3)
+    result = {"words": {"path": None, "sha256": None, "entries": 0}, "mixed_window_lines": 6,
+              "compare_window": 8, "unreadable_records": [],
+              "rows": [{"bundle": "x/B.txt", "md5": "f" * 32, "records": 1, **got}]}
+    assert ("At 8 lines the most hyphenated breaks in one window is 3 (`B.txt` `ffffffff`, "
+            "4 windows with two or more), read 24 ways") in m.markdown(result)
+    # The heaviest wider window is named, not the row heaviest at six lines.
+    six = {**got, "most_in_one_window": 5, "compare_most_in_one_window": 2, "compare_mixed_windows": 9}
+    result["rows"].insert(0, {"bundle": "x/A.txt", "md5": "a" * 32, "records": 1, **six})
+    assert "window is 3 (`B.txt`" in m.markdown(result)
