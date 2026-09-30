@@ -562,3 +562,24 @@ def test_the_committed_recall_note_is_what_its_records_and_judgements_reproduce(
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_a_recovered_consumed_row_is_not_credited_to_the_abbreviations(tmp_path):
+    """#3917: an absorbed or consumed row carries no `admitted_by`, so its
+    recovery is named on its own, never as one v4 owes to an abbreviation."""
+    m = _script()
+    corpus = tmp_path / "d4d_concatenated"
+    record = corpus / "m_a" / "label" / "P_d4d.yaml"
+    record.parent.mkdir(parents=True)
+    record.write_text(yaml.safe_dump({"source_caveats": [
+        "Both are recorded as the higher-ranked and the lower-ranked sources; the date is used."]}))
+    found = m.dropped(corpus, m.baseline.current_records(corpus))
+    consumed = [(rel, h) for rel, h in found["rows"] if h["cause"] == "consumed" and h["v4"] == "recovered"]
+    assert consumed, found["rows"]
+    rel, h = consumed[0]
+    rows = [{"n": 1, "record": rel, "pointer": h["pointer"], "start": h["start"], "end": h["end"],
+             "verdict": "in_class", "reading": "construction", "cause": h["cause"]}]
+    text = "\n".join(m._v4_section(rows, {(rel, h["pointer"], h["start"], h["end"]): h}, [],
+                                   found["totals"]["v3"], found["totals"], (1, 1, 1.0, 1.0, True)))
+    assert "judgement #1 (construction, `consumed`) the change table does not classify (#3917)" in text
+    assert "past an abbreviation" not in text

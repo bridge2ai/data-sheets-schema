@@ -56,7 +56,9 @@ records two things it computes rather than judges:
             A recovered row that the cumulative window-and-`;` lift of v3
             (`cumulative_semicolon` in `admitted_by`) does not admit is one
             v4 owes to its abbreviations (#3792): that lift is v4's rule
-            without them.
+            without them. An absorbed or consumed row is the exception: the
+            change table does not classify it, so its recovery is named on
+            its own (#3917).
 
 The judgement file is in the form of the precision judgements
 (`notes/absence_precision_judgements_bd0c63ed.yaml`) and is checked by the
@@ -626,7 +628,12 @@ def _v4_section(rows: list[dict], computed: dict, lost: list[dict], kept: int, t
     is left out of the estimate and named when there is any."""
     v4 = {r["n"]: computed[(r["record"], r["pointer"], r["start"], r["end"])] for r in rows}
     recovered = [r for r in rows if v4[r["n"]]["v4"] == "recovered"]
-    by_abbreviation = [r for r in recovered if "cumulative_semicolon" not in v4[r["n"]]["admitted_by"]]
+    # An absorbed or consumed row carries no `admitted_by` (the change table
+    # does not classify it), so its recovery is not evidence about the
+    # abbreviations and is named on its own (#3917).
+    unclassified = [r for r in recovered if r["cause"] in ("absorbed", "consumed")]
+    by_abbreviation = [r for r in recovered if r not in unclassified
+                       and "cumulative_semicolon" not in v4[r["n"]]["admitted_by"]]
     in_class = [r for r in recovered if r["verdict"] == "in_class"]
     all_in_class = sum(r["verdict"] == "in_class" for r in rows)
     lines = [
@@ -668,9 +675,11 @@ def _v4_section(rows: list[dict], computed: dict, lost: list[dict], kept: int, t
         f"v4 recovers {len(recovered)} of the {len(rows)} dropped matches: {len(in_class)} in class, "
         f"{sum(r['verdict'] == 'borderline' for r in recovered)} borderline and",
         f"{sum(r['verdict'] == 'not_in_class' for r in recovered)} not in class. "
-        f"{len(recovered) - len(by_abbreviation)} of them are among the {len(admitted_lift)} rows the change "
+        f"{len(recovered) - len(by_abbreviation) - len(unclassified)} of them are among the {len(admitted_lift)} rows the change "
         "table's \"Widen the window",
         "and cross `;`\" admits"
+        + ("; " + ", ".join(f"judgement #{r['n']} ({r['reading']}, `{r['cause']}`)" for r in unclassified)
+           + " the change table does not classify (#3917)" if unclassified else "")
         + ("; the rest are admitted only past an abbreviation's `.` (#3792): "
            + ", ".join(f"judgement #{r['n']} ({r['reading']}, `{r['cause']}`)" for r in by_abbreviation) + "."
            if by_abbreviation else "; none needs an abbreviation's `.`."),
