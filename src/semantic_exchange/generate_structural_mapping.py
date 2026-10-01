@@ -610,11 +610,12 @@ STRUCTURAL_COLUMNS = ("d4d_subject_range", "subject_multivalued",
 #: (#234), each under what is wrong with it; #294 is the work that would
 #: derive them. `--check` (`make check-sssom-structural`) accepts exactly
 #: these and tests/test_semantic_exchange/test_structural_mapping_drift.py
-#: pins exactly these, both from this one set (#3968). Regeneration cannot
-#: produce them, so rewriting the table drops them, which is why `make
-#: gen-sssom-all` does not run the structural target (#3967). Shrinking the
-#: set is progress. Growing it without a reason is the drift both exist to
-#: catch.
+#: pins exactly these, both from this one set (#3968). The check compares
+#: none of their columns, since regeneration has no row to compare them
+#: with (#4050). Regeneration cannot produce them, so rewriting the table
+#: drops them, which is why `make gen-sssom-all` does not run the
+#: structural target (#3967). Shrinking the set is progress. Growing it
+#: without a reason is the drift both exist to catch.
 KNOWN_UNDERIVABLE = frozenset({
     # No class-level strategy exists — `class_uri` is parsed and never used.
     ("d4d:CoreDataset", "skos:exactMatch", "schema:Dataset"),
@@ -709,9 +710,23 @@ def run_check(generator, committed: Path, summary: Path, known) -> int:
     """`--check`: compare `committed` and `summary` with what `generator`
     regenerates, print what differs, and return the exit status.
 
-    The rows the committed mapping carries and regeneration does not produce
-    must be exactly `known`, which `main` passes as KNOWN_UNDERIVABLE
-    (#3968); those are named and accepted, and any other difference fails.
+    Three things are compared, and nothing else (#4050):
+
+    - the rows, as a set of (subject, predicate, object) triples, so
+      neither their order nor a repeated triple is seen;
+    - STRUCTURAL_COLUMNS (`d4d_subject_range`, `subject_multivalued`,
+      `type_compatible`) on the rows both files carry, reading the last row
+      of a repeated triple; a change to any other column, such as
+      `confidence`, `warnings` or `rocrate_value_type`, passes;
+    - the summary's whole text, read in text mode, so its line endings are
+      not compared.
+
+    A difference in any of them fails, except that the rows the committed
+    mapping carries and regeneration does not produce must be exactly
+    `known`, which `main` passes as KNOWN_UNDERIVABLE (#3968): those are
+    named and accepted, and no column of an accepted row is compared, since
+    regeneration has no row to compare it with.
+
     Writes nothing beside them: regeneration goes to a temporary directory.
     """
     # Never write over the committed file while checking it. Regenerating
@@ -859,13 +874,20 @@ def main(argv=None):
     """Generate schema-structure-aware mappings."""
     import argparse
     ap = argparse.ArgumentParser(description=__doc__)
+    # The columns are read from the constant the check compares, so this
+    # cannot name others (#4050).
     ap.add_argument("--check", action="store_true",
                     help="Regenerate to a temporary directory and report "
                          "drift against the committed mapping and summary. "
-                         "Writes nothing. Exits non-zero on any difference "
-                         "except the rows KNOWN_UNDERIVABLE lists, which the "
-                         "committed mapping must carry and regeneration "
-                         "cannot produce.")
+                         "Writes nothing. Compares the rows by subject, "
+                         "predicate and object; "
+                         f"{', '.join(STRUCTURAL_COLUMNS)} on the rows both "
+                         "carry; and the summary's whole text. Exits non-zero "
+                         "on a difference in any of them, except the rows "
+                         "KNOWN_UNDERIVABLE lists, which the committed "
+                         "mapping must carry and regeneration cannot "
+                         "produce. Compares no other column, and no column "
+                         "of a KNOWN_UNDERIVABLE row.")
     # The inputs stay fixed; only where the two artifacts live can move. That
     # is what lets a test run the check on a copy of the mapping it has
     # changed, which is the only way to see what `--check` does with a

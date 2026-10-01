@@ -24,12 +24,15 @@ make check-sssom-structural   # committed mapping and summary against regenerati
 The check writes nothing. It lists every row the committed file carries that
 regeneration does not produce (and the reverse), every value that differs in
 `d4d_subject_range`, `subject_multivalued` or `type_compatible` on the rows
-both carry, and whether the summary regenerates. It exits non-zero on any
-difference but one: the hand-written rows described under
-[Rows the generator does not produce](#rows-the-generator-does-not-produce),
+both carry, and whether the summary's whole text regenerates. It exits
+non-zero on any of those differences but one: the hand-written rows described
+under [Rows the generator does not produce](#rows-the-generator-does-not-produce),
 which it names and accepts while the committed file carries exactly those
 (#3968). One of them missing from the file fails it, and so does one that
-regeneration has come to produce.
+regeneration has come to produce. It compares nothing else: no other column,
+so a hand edit to a row's `confidence`, `warnings` or `rocrate_value_type`
+passes it, and no column of the hand-written rows, which regeneration has no
+row to compare with (#4050).
 
 The summary is written from the generator's output, not from the committed
 TSV, so its per-justification counts describe what regeneration makes and not

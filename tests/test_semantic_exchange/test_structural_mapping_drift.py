@@ -163,8 +163,9 @@ class TestStructuralMappingDrift(unittest.TestCase):
         rows, which only the test above allowed. It accepts exactly them
         now, and still names each one, so a pass shows the gap rather than
         hiding it. Run as `make` runs it, so it also holds `main` to passing
-        the module's set; `TestTheCheckAcceptsExactlyTheKnownGap` is what
-        makes the check fail on anything else."""
+        the module's set; `TestTheCheckAcceptsExactlyTheKnownGap` is where
+        the check fails on drift in what it compares, and where what it does
+        not compare is pinned (#4050)."""
         result = subprocess.run([sys.executable, str(SCRIPT), "--check"],
                                 cwd=REPO, capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stdout)
@@ -509,19 +510,27 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
 @unittest.skipUnless(COMMITTED.exists() and SUMMARY.exists(),
                      "structural mapping not present")
 class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
-    """#3968. `--check` accepts the rows KNOWN_UNDERIVABLE lists and nothing
-    else, so it is green on the committed table and red on any other drift.
+    """#3968. `--check` accepts the rows KNOWN_UNDERIVABLE lists and no
+    other row, so it is green on the committed table and red on drift in
+    what it compares: the rows, by triple; STRUCTURAL_COLUMNS on the rows
+    both files carry; and the summary's text. It compares nothing else
+    (#4050).
 
     Each case is a copy of the committed mapping and summary changed in one
     way, checked by `run_check` with the set as it stands against one
-    generator run (`main` would parse the merged schema once per case): a
-    row added; a regenerable row's object changed; a value changed on a row
-    both files carry; one KNOWN_UNDERIVABLE row removed; and the generator's
-    own output, which is the table `make gen-sssom-structural` writes and
-    lacks every one of them (#3967). The last case checks the unchanged copy
-    against the set with one regenerable row added to it, which is what the
-    set says once #294 makes one of its rows derivable and nobody takes it
-    out.
+    generator run (`main` would parse the merged schema once per case).
+    These fail: a row added; a regenerable row's object changed; a
+    structural value changed on a row both files carry; one
+    KNOWN_UNDERIVABLE row removed; the generator's own output, which is the
+    table `make gen-sssom-structural` writes and lacks every one of them
+    (#3967); and the unchanged copy checked against the set with one
+    regenerable row added to it, which is what the set says once #294 makes
+    one of its rows derivable and nobody takes it out.
+
+    Two pass, and pin what the check does not compare, so that its
+    descriptions stay true (#4050): every other column of a regenerable row
+    changed, and every column of a KNOWN_UNDERIVABLE row but its triple
+    changed.
     """
 
     #: The KNOWN_UNDERIVABLE row taken out of one copy.
@@ -566,7 +575,7 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
             return row
 
         # The first committed row regeneration produces. Every case but the
-        # removal adds, changes or lists this one.
+        # two on a KNOWN_UNDERIVABLE row adds, changes or lists this one.
         at = next(i for i, line in enumerate(lines)
                   if triple(fields(line)) not in gsm.KNOWN_UNDERIVABLE)
         row = fields(lines[at])
@@ -578,6 +587,22 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
         was = row[names.index(column)]
         cls.revalued = (column, str(was != "True"), was)
         revalued = changed(row, column, cls.revalued[1])
+        # Every column the check does not compare, changed on that row
+        # (#4050).
+        cls.uncompared = [c for c in names
+                          if c not in gsm.TRIPLE + gsm.STRUCTURAL_COLUMNS]
+        unchecked = row
+        for c in cls.uncompared:
+            unchecked = changed(unchecked, c, "changed by this test")
+
+        # The first committed KNOWN_UNDERIVABLE row, with every column but
+        # its triple changed, the structural ones included (#4050).
+        known_at = next(i for i, line in enumerate(lines)
+                        if triple(fields(line)) in gsm.KNOWN_UNDERIVABLE)
+        curated = fields(lines[known_at])
+        for c in names:
+            if c not in gsm.TRIPLE:
+                curated = changed(curated, c, "changed by this test")
 
         def copy(name, data):
             directory = base / name
@@ -587,8 +612,8 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
             shutil.copy(SUMMARY, directory / SUMMARY.name)
             return directory
 
-        def replace(line):
-            return lines[:at] + [line] + lines[at + 1:]
+        def replace(line, i=at):
+            return lines[:i] + [line] + lines[i + 1:]
 
         cases = {
             "committed": copy("committed", lines),
@@ -598,6 +623,10 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
             "known row removed": copy(
                 "removed",
                 [line for line in lines if triple(fields(line)) != cls.REMOVED]),
+            "uncompared columns changed": copy(
+                "uncompared", replace(joined(unchecked))),
+            "known row's columns changed": copy(
+                "curated", replace(joined(curated), known_at)),
         }
         rewritten = cases["rewritten"] = base / "rewritten"
         rewritten.mkdir()
@@ -627,10 +656,9 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
         """`rows` as the check prints a list of them, in its order."""
         return "".join(f"      {s}  --{p}->  {o}\n" for s, p, o in sorted(rows))
 
-    def test_the_committed_table_passes_and_names_the_gap(self):
-        """The state of main, and the control for every case below: each
-        fails for the one change made to its copy."""
-        code, out = self.results["committed"]
+    def _assert_passes(self, case):
+        """`case` passes as the committed table does, naming the gap."""
+        code, out = self.results[case]
         self.assertEqual(code, 0, out)
         self.assertIn(
             f"✓ The committed mapping regenerates apart from the "
@@ -639,6 +667,12 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
         self.assertIn(self._listed(gsm.KNOWN_UNDERIVABLE), out)
         self.assertIn(f"The {self.shared} row(s) both files carry agree on",
                       out)
+
+    def test_the_committed_table_passes_and_names_the_gap(self):
+        """The state of main, and the control for the cases below: each that
+        fails does so for the one change made to its copy, and the two that
+        pass (#4050) pass as this does."""
+        self._assert_passes("committed")
 
     def test_an_added_row_fails_and_is_named(self):
         code, out = self.results["added row"]
@@ -721,6 +755,29 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
         self.assertIn("1 row(s) KNOWN_UNDERIVABLE lists that regeneration now "
                       "produces:\n" + self._listed([self.regenerable]), out)
         self.assertIn("take them out of KNOWN_UNDERIVABLE (#294)", out)
+
+    def test_a_change_to_a_column_it_does_not_compare_passes(self):
+        """#4050. The check's descriptions say it compares no column but the
+        triple and STRUCTURAL_COLUMNS. This copy changes every other column
+        of a regenerable row, and the check passes it. Pinned so that the
+        descriptions stay true: `read_sssom_rows` says why confidence and
+        notes are left out, and a check that compared more would fail here,
+        with its descriptions to change beside it."""
+        self.assertLessEqual({"confidence", "warnings", "rocrate_value_type"},
+                             set(self.uncompared),
+                             "the copy leaves a column the descriptions name "
+                             "unchanged")
+        self._assert_passes("uncompared columns changed")
+
+    def test_no_column_of_a_known_row_is_compared(self):
+        """#4050. Regeneration has no row to compare a KNOWN_UNDERIVABLE row
+        with, so the check compares none of its columns: this copy changes
+        every column of one of them but its triple, `d4d_subject_range` and
+        `type_compatible` included, and the check passes it and lists the
+        row as accepted. The descriptions say so. A check that protected
+        those rows' content would fail here; `TestRowsStateTheSchema` holds
+        their range and cardinality in the committed file to the schema."""
+        self._assert_passes("known row's columns changed")
 
 
 class TestTheAggregateTargetsLeaveTheStructuralTable(unittest.TestCase):
@@ -1139,6 +1196,78 @@ class TestTheSummaryIsDescribedAsTruncated(unittest.TestCase):
                 self.assertIn("first 10 rows", row)
                 self.assertIn(f"{self.shown} of", row)
                 self.assertIn(f"{self.total}", row)
+
+
+class TestTheCheckIsDescribedByWhatItCompares(unittest.TestCase):
+    """#4050. Four descriptions of `--check` (the README, the docs page, its
+    `--help` and `run_check`'s docstring) said it failed on any difference
+    but the accepted rows. It compares the rows by triple, STRUCTURAL_COLUMNS
+    on the rows both files carry, and the summary's text, and nothing else,
+    so a hand edit to a regenerable row's `warnings`, or to any column of a
+    KNOWN_UNDERIVABLE row, passed a check the README said would fail on it.
+    Each description, and the analysis doc's, now names the columns compared
+    and says that no column of the accepted rows is;
+    `TestTheCheckAcceptsExactlyTheKnownGap` holds the check to both."""
+
+    README = REPO / "data" / "semantic_exchange" / "README.md"
+    DOCS = REPO / "docs" / "semantic_exchange.md"
+    ANALYSIS = README.with_name("STRUCTURAL_MAPPING_ANALYSIS.md")
+
+    @staticmethod
+    def _paragraph(path, opening):
+        """The paragraph of `path` that starts with `opening`, on one line."""
+        for block in path.read_text(encoding="utf-8").split("\n\n"):
+            if block.startswith(opening):
+                return " ".join(block.split())
+        raise AssertionError(f"{path.name} has no paragraph starting "
+                             f"{opening!r}")
+
+    @classmethod
+    def setUpClass(cls):
+        import io
+        import re
+        from contextlib import redirect_stdout
+
+        out = io.StringIO()
+        with redirect_stdout(out):
+            try:
+                gsm.main(["--help"])
+            except SystemExit:
+                pass
+        # The option's own text, from the help as printed: the usage line
+        # names `[--check]`, which no space follows.
+        option = re.search(r"--check (.+?) --output-dir ",
+                           " ".join(out.getvalue().split()))
+        if option is None:
+            raise AssertionError("--help has no --check option text")
+        cls.descriptions = {
+            "README": cls._paragraph(
+                cls.README, "`make check-sssom-structural` checks"),
+            "docs": cls._paragraph(
+                cls.DOCS, "The structural mapping carries rows its generator "
+                          "cannot produce"),
+            "analysis": cls._paragraph(cls.ANALYSIS,
+                                       "The check writes nothing."),
+            "--check help": option.group(1),
+            "run_check docstring": " ".join(gsm.run_check.__doc__.split()),
+        }
+
+    def test_none_says_it_fails_on_any_other_difference(self):
+        for name, text in self.descriptions.items():
+            with self.subTest(description=name):
+                self.assertNotRegex(
+                    text, r"(?i)\bany (other )?(differences?|drift)\b")
+
+    def test_each_names_the_columns_it_compares(self):
+        for name, text in self.descriptions.items():
+            for column in gsm.STRUCTURAL_COLUMNS:
+                with self.subTest(description=name, column=column):
+                    self.assertIn(column, text)
+
+    def test_each_says_no_column_of_the_accepted_rows_is_compared(self):
+        for name, text in self.descriptions.items():
+            with self.subTest(description=name):
+                self.assertIn("no column of", text.lower())
 
 
 if __name__ == "__main__":
