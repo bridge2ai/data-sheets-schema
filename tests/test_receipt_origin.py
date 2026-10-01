@@ -2028,7 +2028,12 @@ class DeriveSpellings(Base):
                 "PATH=./bin:$PATH && poetry run d4d {derive}",
                 "X=1; d4d {derive}",
                 "PYTHONPATH=src; python3 -m data_sheets_schema.cli {derive}",
-                "printf -v PATH '%s' ./bin; d4d {derive}")
+                "printf -v PATH '%s' ./bin; d4d {derive}",
+                # An append, or an array element: `BASH_CMDS[d4d]=./x` makes
+                # bash run `./x` for `d4d`. `_ASSIGNMENT` reads neither.
+                "PATH+=:./bin; d4d {derive}",
+                "BASH_CMDS[d4d]=./x; d4d {derive}",
+                "X=1 PATH+=:./bin; poetry run d4d {derive}")
 
     def test_a_derive_with_an_assignment_before_its_program_is_not_placed(self):
         # The owner's decision of 2026-09-30 on #3781: a derive whose
@@ -2094,6 +2099,19 @@ class DeriveSpellings(Base):
         # An assignment made any other way is not read as one, as NON_CHECKS
         # says: this pin moves if that rule is widened.
         self.assertEqual(rows(f"export PYTHONPATH=./hack; d4d {derive}"), [(True, "command")])
+        # A part of appends or array elements is read as a program not read
+        # here, as before, and assigns as well: the call is unread either way.
+        shell = ro._shell("PATH+=:./bin; cat x", "/w", [full])
+        self.assertTrue(shell["runs_unread"])
+        self.assertFalse(shell["read_only"])
+
+    def test_assignment_word(self):
+        cases = {"X=1": True, "PATH=./bin:$PATH": True, "PATH+=:./bin": True, "A[0]=x": True,
+                 "BASH_CMDS[d4d]=./x": True, "A[k]+=x": True, "X=": True, "1X=1": False, "X": False,
+                 "-X=1": False, "X+1=2": False, "--full=F": False, "": False}
+        for word, assigns in cases.items():
+            with self.subTest(word=word):
+                self.assertEqual(bool(ro._ASSIGNMENT_WORD.fullmatch(word)), assigns)
 
     def test_the_report_of_an_assigned_derive_is_unknown_end_to_end(self):
         # Through `d4d receipts origin`, as a reviewer runs it: the block is
@@ -2622,7 +2640,8 @@ class DeriveSpellings(Base):
                       "program, on the part, given to `env`, as an earlier part of the command or by `printf -v` "
                       "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
                       "derive core`), since the assignment may make the part run other code; no assignment is "
-                      "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781). An "
+                      "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781); an earlier "
+                      "part of appends or array elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`) counts too. An "
                       "assignment made any other way (by `export`, `declare` or `read`, in a sourced script, a "
                       "function or an `eval`, or outside the command) is not read as one, so a derive after "
                       "`export PYTHONPATH=./hack;` is placed.", text)
@@ -2630,8 +2649,10 @@ class DeriveSpellings(Base):
                       "-- on the part, given to `env`, as an earlier part of the command or by `printf -v` "
                       "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
                       "derive core`) -- as the assignment may make the part run other code; no assignment is "
-                      "exempt, `PYTHONPATH=src` included (#3781). The assignment is read as the position rule "
-                      "reads one (#3689, #3700): one made any other way -- by `export`, `declare` or `read`, in a "
+                      "exempt, `PYTHONPATH=src` included (#3781), and an earlier part of appends or array "
+                      "elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`) counts too. The assignment is read as "
+                      "the position rule reads one (#3689, #3700): one made any other way -- by `export`, "
+                      "`declare` or `read`, in a "
                       "sourced script, a function or an `eval`, or outside the command -- is not read as one, so "
                       "a derive after `export PYTHONPATH=./hack;` is placed.", flat)
         # Round 6 (#3843-#3847): the texts name each rule and what remains unread.
@@ -4512,7 +4533,8 @@ class Cli(unittest.TestCase):
         self.assertIn("Nor can one with an assignment before its program, on the part, given to `env`, as an "
                       "earlier part of the command or by `printf -v` (`PYTHONPATH=src python -m "
                       "data_sheets_schema.cli`, `PATH=./bin:$PATH; d4d`), as the assignment may make it run other "
-                      "code: no assignment is exempt. An assignment made any other way (`export`, `declare`, "
+                      "code: no assignment is exempt, and an earlier part of appends or array elements "
+                      "(`PATH+=:./bin;`) counts too. An assignment made any other way (`export`, `declare`, "
                       "`read`, a sourced script, a function, `eval`, or outside the command) is not read as one, "
                       "so a derive after `export PYTHONPATH=./hack;` is placed.", text)            # #3781
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674

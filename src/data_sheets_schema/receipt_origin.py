@@ -77,14 +77,15 @@ before its program -- on the part, given to `env`, as an earlier part of
 the command or by `printf -v` (`PYTHONPATH=src python -m
 data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d derive
 core`) -- as the assignment may make the part run other code; no
-assignment is exempt, `PYTHONPATH=src` included (#3781). The assignment is
-read as the position rule reads one (#3689, #3700): one made any other way
--- by `export`, `declare` or `read`, in a sourced script, a function or an
-`eval`, or outside the command -- is not read as one, so a derive after
-`export PYTHONPATH=./hack;` is placed. Any other
-part that carries the words `derive core` and is neither a d4d call of
-another subcommand nor a program known to read is a derive that cannot be
-placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
+assignment is exempt, `PYTHONPATH=src` included (#3781), and an earlier
+part of appends or array elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`)
+counts too. The assignment is read as the position rule reads one (#3689,
+#3700): one made any other way -- by `export`, `declare` or `read`, in a
+sourced script, a function or an `eval`, or outside the command -- is not
+read as one, so a derive after `export PYTHONPATH=./hack;` is placed. Any
+other part that carries the words `derive core` and is neither a d4d call
+of another subcommand nor a program known to read is a derive that cannot
+be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
 option this does not read makes a part such a one (#3455). The words are matched after quote and escape
 characters are removed, as the shell running a nested string removes them
 (`bash -c 'd4d derive "core"'`), and `derive` followed by a word supplied
@@ -476,7 +477,8 @@ NON_CHECKS = (
     "on the part, given to `env`, as an earlier part of the command or by `printf -v` "
     "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
     "derive core`), since the assignment may make the part run other code; no assignment is "
-    "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781). An assignment "
+    "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781); an earlier part "
+    "of appends or array elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`) counts too. An assignment "
     "made any other way (by `export`, `declare` or `read`, in a sourced script, a function or an "
     "`eval`, or outside the command) is not read as one, so a derive after `export "
     "PYTHONPATH=./hack;` is placed. The words are matched "
@@ -510,6 +512,11 @@ _OPERATORS = frozenset({"&&", "||", ";", "|", "&", "|&", "(", ")", ";;", ";&", "
 _PUNCT = frozenset("();<>|&")
 _CLEAN_PATH = re.compile(r"[A-Za-z0-9_./+@-]+")
 _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
+#: Any of bash's assignment words: `NAME=`, an append (`NAME+=`) or an array
+#: element (`NAME[KEY]=`, `NAME[KEY]+=`). `_ASSIGNMENT` reads the first only,
+#: and the rules that use it still read the others as a program; this reads
+#: a part made of them alone as an assignment-only part (#3781).
+_ASSIGNMENT_WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\+?=.*")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
 _VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
 _DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
@@ -2396,6 +2403,13 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
         if not rest:
             assigned = assigned or any(_ASSIGNMENT.fullmatch(word) for word in segment)
             continue
+        # A part of assignments `_ASSIGNMENT` does not read -- an append or an
+        # array element, `PATH+=:./bin`, or `BASH_CMDS[d4d]=./x`, after which
+        # bash runs `./x` for `d4d` -- is still read below as a program not
+        # read here, but it assigns as well, so a later part is not plainly
+        # run and a derive after it is not placed (#3781).
+        if all(_ASSIGNMENT_WORD.fullmatch(word) for word in segment):
+            assigned = True
         program = os.path.basename(rest[0])
         # Only the builtin moves the directory, and only it leaves the loop
         # here: a path-qualified lookalike (`./cd`, `/usr/bin/cd`) or one run

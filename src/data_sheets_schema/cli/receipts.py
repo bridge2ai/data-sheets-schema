@@ -351,7 +351,8 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     assignment before its program, on the part, given to `env`, as an
     earlier part of the command or by `printf -v` (`PYTHONPATH=src python -m
     data_sheets_schema.cli`, `PATH=./bin:$PATH; d4d`), as the assignment may
-    make it run other code: no assignment is exempt. An assignment made any
+    make it run other code: no assignment is exempt, and an earlier part of
+    appends or array elements (`PATH+=:./bin;`) counts too. An assignment made any
     other way (`export`, `declare`, `read`, a sourced script, a function,
     `eval`, or outside the command) is not read as one, so a derive after
     `export PYTHONPATH=./hack;` is placed. Three kinds of part carrying
