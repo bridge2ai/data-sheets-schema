@@ -141,6 +141,8 @@ def test_the_blind_figures_leave_out_exactly_the_items_the_rubric_gave_away():
     fa = [first[(r["source_file"], r["n"])]["verdict"] for r in rows]
     po, k = _kappa(fa, [r["verdict"] for r in rows])
     agree = sum(x == r["verdict"] for x, r in zip(fa, rows))
+    assert (a["blind_verdict"]["n"], a["blind_verdict"]["agree"]) == (187, agree)
+    assert a["blind_verdict"]["kappa"] == pytest.approx(k)
     section = NOTE.split("## Verdict, the 187 blind items", 1)[1].split("\n## ", 1)[0]
     assert "Without recall_dropped-019" in section
     assert f"{agree} of 187 agree: raw agreement {100 * po:.1f}%" in section
@@ -149,6 +151,8 @@ def test_the_blind_figures_leave_out_exactly_the_items_the_rubric_gave_away():
     both = [(f["reading"], s["reading"]) for f, s in both if "reading" in f and "reading" in s]
     po_r, k_r = _kappa([x for x, _ in both], [y for _, y in both])
     agree_r = sum(x == y for x, y in both)
+    assert (a["blind_reading"]["n"], a["blind_reading"]["agree"]) == (len(both), agree_r)
+    assert a["blind_reading"]["kappa"] == pytest.approx(k_r)
     assert (f"The blind items, without recall_dropped-019: {agree_r} of {len(both)} agree: raw agreement "
             f"{100 * po_r:.1f}%") in NOTE
     assert f"Cohen's kappa {k_r:.3f}" in NOTE.split("The blind items, without", 1)[1].split("\n", 1)[0]
