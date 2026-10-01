@@ -1,4 +1,12 @@
-"""CI writes no bytecode into the checkout's pinned notes/ or tests/ (#3865, #3866)."""
+"""Bytecode CI leaves in the checkout (#3865, #3866).
+
+The suite step compiles tests/ and utils/ outside the checkout, and its check
+fails on any path under notes/, tests/ or utils/. The notes/ control steps run
+without writing bytecode, but a Python child the pinned controls start with a
+scrubbed environment can still leave __pycache__/ under notes/: the trailing
+checks on shard 1 and offline-audit report that as a warning and fail on any
+other path; offline-evaluation fails on any path. This is why #3865 stays open.
+"""
 import os
 from pathlib import Path
 import subprocess
@@ -50,6 +58,15 @@ def trailing_check(job):
     return later[0]
 
 
+def suite_check():
+    """The check between the tests/ suite step and the first notes/ control step."""
+    [(_, suite, _)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
+    first_notes = min(index for name, index, _ in NOTES_STEPS if name == "python-tests")
+    [step] = [step for name, index, step in CHECKS
+              if name == "python-tests" and suite < index < first_notes]
+    return step
+
+
 def test_every_notes_control_step_is_followed_by_a_check_in_its_job():
     for job, _, step in NOTES_STEPS:
         assert trailing_check(job).get("if") == step.get("if"), (job, step["name"])
@@ -61,16 +78,22 @@ LOCK = "!! notes/matched_cborg_2026-09-13/.canary.lock\n"
 EDITED = " M notes/matched_cborg_2026-09-13/budgeted_cborg.py\n"
 
 
-def check(step, tmp_path, porcelain):
-    """Run the step's script against a git that reports *porcelain*."""
+def check(step, tmp_path, porcelain, pathspec="notes/"):
+    """Run the step's script against a git that reports *porcelain*, and require
+    that the script asked git about exactly *pathspec* (the stub cannot narrow it)."""
     stub = tmp_path / "bin"
     stub.mkdir(exist_ok=True)
-    (stub / "git").write_text("#!/bin/sh\nprintf '%s' \"$STUB_PORCELAIN\"\n")
+    (stub / "git").write_text("#!/bin/sh\nprintf '%s\\n' \"$*\" >> \"$STUB_ARGS\"\n"
+                              "printf '%s' \"$STUB_PORCELAIN\"\n")
     (stub / "git").chmod(0o755)
+    args = tmp_path / "git-args"
+    args.write_text("")
     env = {**os.environ, "PATH": f"{stub}{os.pathsep}{os.environ['PATH']}",
-           "STUB_PORCELAIN": porcelain}
-    return subprocess.run(["bash", "-e", "-c", step["run"]], cwd=tmp_path, env=env,
-                          capture_output=True, text=True, timeout=10)
+           "STUB_PORCELAIN": porcelain, "STUB_ARGS": str(args)}
+    result = subprocess.run(["bash", "-e", "-c", step["run"]], cwd=tmp_path, env=env,
+                            capture_output=True, text=True, timeout=10)
+    assert args.read_text().splitlines() == [f"status --ignored --porcelain -- {pathspec}"]
+    return result
 
 
 @pytest.mark.parametrize("job", ["python-tests", "offline-audit"])
@@ -93,3 +116,18 @@ def test_the_evaluation_lane_fails_on_any_path_including_bytecode(tmp_path):
     assert check(step, tmp_path, CLEAN).returncode == 0
     for porcelain in (BYTECODE, LOCK, EDITED):
         assert check(step, tmp_path, porcelain).returncode == 1, porcelain
+
+
+SUITE_BYTECODE = "!! tests/__pycache__/\n"
+UTILS_BYTECODE = "!! utils/__pycache__/\n"
+
+
+def test_the_suite_check_covers_notes_tests_and_utils_and_fails_on_any_path(tmp_path):
+    """#3866: the prefix keeps tests/ and utils/ free of bytecode, so any path fails."""
+    step = suite_check()
+    spec = "notes/ tests/ utils/"
+    assert check(step, tmp_path, CLEAN, spec).returncode == 0
+    for porcelain in (SUITE_BYTECODE, UTILS_BYTECODE, BYTECODE, LOCK, EDITED):
+        failed = check(step, tmp_path, porcelain, spec)
+        assert failed.returncode == 1, porcelain
+        assert porcelain.strip() in failed.stdout
