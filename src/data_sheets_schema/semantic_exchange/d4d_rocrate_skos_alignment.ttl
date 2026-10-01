@@ -271,7 +271,7 @@ d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
-# Settled 2026-09-30 (#3971, #3995, #4002, #4052): each slot-level twin of a
+# Settled 2026-09-30 (#3971, #3995, #4002) and 2026-10-01 (#4052): each slot-level twin of a
 # class triple #3942 corrected or removed now carries what its class
 # carries, as the slot holds that class's objects; where the class triple
 # was removed, the twin's is removed too. That includes the nine twins no
