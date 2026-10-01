@@ -208,6 +208,47 @@ class TestUnencodableText(unittest.TestCase):
         with self.assertRaises(yaml.YAMLError):
             find_duplicate_keys(text, loader=yaml.CSafeLoader, strict=True)
 
+    def test_libyaml_accepts_a_line_start_mark_the_default_refuses(self):
+        """A mark opening a later line is not refused by libyaml in general
+        (#3956): libyaml drops it, so before a comment the text loads and the
+        libyaml scan reports the duplicate. The pure-Python scanner reads the
+        mark as an ordinary character there and refuses the text."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        text = "a: 1\n\ufeff# c\na: 2\n"
+        self.assertEqual(yaml.load(text, Loader=yaml.CSafeLoader), {"a": 2})   # noqa: S506
+        self.assertEqual([d["key"] for d in find_duplicate_keys(text, loader=yaml.CSafeLoader,
+                                                                 strict=True)], ["a"])
+        with self.assertRaises(yaml.scanner.ScannerError):
+            yaml.load(text, Loader=yaml.SafeLoader)   # noqa: S506
+        self.assertEqual(find_duplicate_keys(text, loader=yaml.SafeLoader), [])
+        with self.assertRaises(yaml.YAMLError):
+            find_duplicate_keys(text, loader=yaml.SafeLoader, strict=True)
+
+    def test_one_line_start_mark_gives_different_structures(self):
+        """One mark that does not lead the stream is read by both loaders, to
+        different structures (#3956). libyaml drops it but counts it as a
+        column, which nests `b` under `x`. The pure-Python loader reads the
+        mark into a key."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        bom = "\ufeff"
+        text = "b: 0\nx:\n" + bom + "  b: 1\n"
+        self.assertEqual(yaml.load(text, Loader=yaml.SafeLoader),   # noqa: S506
+                         {"b": 0, "x": None, bom + "  b": 1})
+        self.assertEqual(yaml.load(text, Loader=yaml.CSafeLoader), {"b": 0, "x": {"b": 1}})   # noqa: S506
+        for loader in (yaml.SafeLoader, yaml.CSafeLoader):
+            with self.subTest(loader=loader.__name__):
+                self.assertEqual(find_duplicate_keys(text, loader=loader, strict=True), [])
+        # The mark counts as a column: the key after it is at column 3, so a
+        # duplicate there must be indented three spaces for libyaml to nest it
+        # beside the first (two spaces is a ParserError).
+        text = "x:\n" + bom + "  b: 1\n   b: 2\n"
+        self.assertEqual([(d["path"], d["key"]) for d in find_duplicate_keys(
+            text, loader=yaml.CSafeLoader, strict=True)], [("x", "b")])
+        with self.assertRaises(yaml.YAMLError):
+            find_duplicate_keys("x:\n" + bom + "  b: 1\n  b: 2\n", loader=yaml.CSafeLoader, strict=True)
+
     def test_two_leading_byte_order_marks_give_different_keys(self):
         """Both loaders scan a stream opening with two byte-order marks, to
         different keys: libyaml drops both, the pure-Python reader only the

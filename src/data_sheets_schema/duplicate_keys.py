@@ -201,22 +201,34 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     accepted, alike by both readers.
 
     The two scanners are not the same grammar at the edges, and the
-    difference runs both ways (#3855). PyYAML's pure-Python scanner rejects
-    a tab inside a plain scalar (`b: x<TAB>y`) and a byte-order mark after
-    the last token (`a: 1\\n<BOM>`), both of which libyaml accepts: there
-    the default gives `[]` (or raises under `strict`) and `FAST_LOADER`
-    reports the keys it scanned. libyaml rejects a byte-order mark at the
-    start of a later line (`a: 1\\n<BOM>b: 2\\n`, a `ParserError`), which the
-    pure-Python loader reads as part of the key (`'<BOM>b'`): there
-    `FAST_LOADER` gives `[]` (or raises) and the default reports what it
-    scanned. A stream opening with two byte-order marks is scanned by both
-    to different keys: libyaml drops both (`a`), the pure-Python reader
-    only the first (`'<BOM>a'`), so the two can name one duplicate by
-    different keys, or disagree on whether there is one
-    (`<BOM><BOM>a: 1\\na: 2\\n` is two distinct keys to the default and a
-    `ParserError` to libyaml). A caller that switches loaders can therefore
-    refuse, or read differently, a text the other loader reads. Each answer
-    is still the one its own loader would load (`yaml.load(...,
+    difference runs in every direction (#3855). PyYAML's pure-Python scanner
+    rejects a tab inside a plain scalar (`b: x<TAB>y`), which libyaml
+    accepts. A byte-order mark past the first character of the stream is
+    read by two different rules. The pure-Python reader drops only the
+    stream's first mark; any later one is an ordinary character, so it opens
+    a plain scalar where the grammar admits one (`a: 1\\n<BOM>b: 2\\n` gives
+    the key `'<BOM>b'`) and is a `ScannerError` anywhere else: before a
+    comment (`a: 1\\n<BOM># c\\na: 2\\n`), alone on a line, or after the last
+    token (`a: 1\\n<BOM>`). libyaml drops one mark at the start of any line
+    but counts it as a column, so the token after it sits one column further
+    right: `a: 1\\n<BOM>b: 2\\n` is a `ParserError`,
+    `a: 1\\n<BOM># c\\na: 2\\n` is `{a: 2}`, and `b: 0\\nx:\\n<BOM>  b: 1\\n`
+    nests `b` under `x`, where the pure-Python loader reads
+    `{b: 0, x: null, '<BOM>  b': 1}`. A stream opening with two marks loses
+    both under libyaml (`a`) and only the first under pure-Python
+    (`'<BOM>a'`). A mark inside a scalar (`a: x<BOM>y`) is a character of
+    it to both. So one text can be scannable by libyaml alone, by the
+    pure-Python loader alone, or by both to different keys or structures,
+    and the two can name one duplicate by different keys or disagree on
+    whether there is one: `<BOM><BOM>a: 1\\na: 2\\n` is two distinct keys to
+    the default and a `ParserError` to libyaml, while
+    `a: 1\\n<BOM># c\\na: 2\\n` is a duplicate `a` to libyaml and unscannable
+    to the default. Where one loader cannot scan a text it gives `[]` (or
+    raises under `strict`) and the other reports what it scanned. A caller
+    that switches loaders can therefore refuse, or read differently, a text
+    the other loader reads. These are examples of what PyYAML 6.0 and its
+    libyaml binding do, not a complete grammar of the difference. Each
+    answer is still the one its own loader would load (`yaml.load(...,
     Loader=loader)` on the same text); the scan does not paper over the
     difference. None of the 1,616 YAML files under `data/d4d_concatenated`
     is scannable by one and not the other, none carries a byte-order mark
