@@ -236,8 +236,9 @@ text as written, before any lexing (`_v6_admissible`, #4028). v6 reads it
 where it holds only printable ASCII, tabs and newlines, no
 backslash-newline, no `$$`, no construct bash reads to a closing bracket
 with its own grammar (`$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(`, a
-backquote), and not both a `<<` and a `$'`; where every here-document in
-it is read as data (below); and where v6 can split it. v6 lexes it as
+backquote), and not both a `<<` and a `$'`; where, if it carries `<<`,
+v6 finds here-documents in it and reads every one as data (below), a
+`<<<` alone being no here-document; and where v6 can split it. v6 lexes it as
 bash does (#3830): a quoted or escaped operator (`';'`, `'&&'`, `\\;`) is
 a word, never a join; a `$'...'` string closes where bash closes it, past
 a `\\'`; a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
@@ -499,8 +500,9 @@ NON_CHECKS = (
     "at that quote (#3925; both wait for a shell grammar); every gap origin/main's reading has, in "
     "a command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
     "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or backquote "
-    "anywhere, or both a `<<` and a `$'`), one with a here-document not read as data, and one v6 "
-    "cannot split is read exactly as origin/main read it (#4028), so a quoted operator there "
+    "anywhere, or both a `<<` and a `$'`), one with a `<<` v6 does not read as here-documents of "
+    "data, and one v6 cannot split is read exactly as origin/main read it (#4028), so a quoted "
+    "operator there "
     "joins, a `$'...'` holding `\\'` is split at shlex's quotes or not at all, a brace expansion "
     "with a quoted blank (`{cd,'/tmp a b'}`) is not read as built at run time (#3924), `echo "
     "$$'\\'`, a newline and `cd data` reads the newline as quoted and the `cd` as an argument, and "
@@ -1463,9 +1465,9 @@ def _v6_admissible(command: str) -> bool:
     - not both a `<<` and a `$'`: a `$'` reads as ANSI-C only where no
       here-document body may hold it (#4028).
 
-    A command carrying `<<` is read by v6 only where its here-documents are
-    data (`_heredocs_are_data`), and any command only where v6 can split
-    it; `_lex` decides both."""
+    A command carrying `<<` is read by v6 only where `_scan` finds
+    here-documents in it and `_heredocs_are_data` admits every one, and any
+    command only where v6 can split it (`_v6_lex`); `_lex` decides both."""
     if not _V6_TEXT.fullmatch(command) or "\\\n" in command or "$$" in command:
         return False
     if _V6_NESTING.search(command):

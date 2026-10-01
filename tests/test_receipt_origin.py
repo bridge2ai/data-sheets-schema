@@ -2438,9 +2438,9 @@ class DeriveSpellings(Base):
                       "quote (#3925; both wait for a shell grammar); every gap origin/main's reading has, in a "
                       "command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
                       "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or "
-                      "backquote anywhere, or both a `<<` and a `$'`), one with a here-document not read as "
-                      "data, and one v6 cannot split is read exactly as origin/main read it (#4028), so a "
-                      "quoted operator there joins, a `$'...'` holding `\\'` is split at shlex's quotes or "
+                      "backquote anywhere, or both a `<<` and a `$'`), one with a `<<` v6 does not read as "
+                      "here-documents of data, and one v6 cannot split is read exactly as origin/main read it "
+                      "(#4028), so a quoted operator there joins, a `$'...'` holding `\\'` is split at shlex's quotes or "
                       "not at all, a brace expansion with a quoted blank (`{cd,'/tmp a b'}`) is not read as "
                       "built at run time (#3924), `echo $$'\\'`, a newline and `cd data` reads the newline as "
                       "quoted and the `cd` as an argument, and `cat $$'\\' <(./derive.sh) '\\'` is not read "
@@ -4529,6 +4529,13 @@ class ShellLexer(Base):
                 self.assertIs(ro._lex(command)[2], False)
                 self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
                 self.assertEqual(ro._lex(command)[1], ro._strip_comments(command))
+        # A `<<` that begins no here-document v6 reads as data -- a `<<<`
+        # string, a quoted or commented `<<` -- is read as on origin/main too.
+        for command in ("cat <<< x ';'", "echo '<<' ';'", "echo ';' # <<EOF"):
+            with self.subTest(command=command):
+                self.assertIs(ro._v6_admissible(command), True)
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
 
     #: origin/main's `_shell` for every counterexample of this lexer's review
     #: rounds (#3947, #3948, #3983, #3985, #3996, #4005, #4028, #4029),
