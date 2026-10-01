@@ -231,18 +231,32 @@ d4d:informed_consent skos:exactMatch d4d:informedConsent .
 d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
+# TODO(#3942): the Confidentiality class is relatedMatch to this term (see
+# above), so this slot-level exact match disagrees with it (#3995). Left for
+# the slot-level change, because changing it moves comprehensive SSSOM rows.
 d4d:confidential_elements skos:exactMatch rai:personalSensitiveInformation .
+# TODO(#3942): the DataProtectionImpact class is now broadMatch to this term
+# (part of the social impact FutureUseImpact matches exactly), so this
+# slot-level exact match disagrees with it. Left for the slot-level change.
 d4d:data_protection_impacts skos:exactMatch rai:dataSocialImpact .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
-# TODO(#3942): rai:prohibitedUses and rai:ethicalReview (below) are not
+# TODO(#3942): rai:prohibitedUses (here) and rai:ethicalReview (further down) are not
 # Croissant RAI 1.0 properties; the class-level triples on them were removed
 # (see above). These slot-level triples are unchanged here, because changing
 # them moves the comprehensive SSSOM rows; a separate change settles them.
 d4d:discouraged_uses skos:exactMatch rai:prohibitedUses .
 d4d:prohibited_uses skos:exactMatch rai:prohibitedUses .
+# TODO(#3942): a distribution date is a release date; the DistributionDate
+# class now says closeMatch schema:datePublished (its release_dates attribute
+# declares dcterms:available). This slot-level triple still names the
+# creation date. Left for the slot-level change.
 d4d:distribution_dates skos:exactMatch schema:dateCreated .
 d4d:errata skos:exactMatch schema:correction .
+# TODO(#3942): rai:ethicalReview, as the prohibitedUses comment above says.
 d4d:ethical_reviews skos:exactMatch rai:ethicalReview .
+# TODO(#3942): the ExistingUse class is now closeMatch to this term, because
+# IntendedUse carries the schema's exact_mappings; this slot-level exact match
+# disagrees with it. Left for the slot-level change.
 d4d:existing_uses skos:exactMatch rai:dataUseCases .
 d4d:intended_uses skos:exactMatch rai:dataUseCases .
 d4d:other_tasks skos:exactMatch rai:dataUseCases .
@@ -289,6 +303,9 @@ d4d:created_by skos:closeMatch schema:creator .
 d4d:modified_by skos:closeMatch schema:contributor .
 
 # Sensitive data (similar to confidential but not identical)
+# TODO(#3942): the SensitiveElement class is exactMatch to this term, as the
+# schema declares; this slot-level close match disagrees with it (#3995).
+# Left for the slot-level change.
 d4d:sensitive_elements skos:closeMatch rai:personalSensitiveInformation .
 
 # String to structured object array
@@ -301,6 +318,9 @@ d4d:machine_annotation_tools skos:closeMatch rai:machineAnnotationTools .
 # Multiple properties to single field
 d4d:license_and_use_terms skos:closeMatch schema:license .
 d4d:ip_restrictions skos:closeMatch schema:conditionsOfAccess .
+# TODO(#3942): the ExtensionMechanism class triple on schema:license was
+# removed (an extension mechanism is not a license); this slot-level triple
+# is unchanged. Left for the slot-level change.
 d4d:extension_mechanism skos:closeMatch schema:license .
 d4d:regulatory_restrictions skos:closeMatch schema:conditionsOfAccess .
 
@@ -362,6 +382,8 @@ d4d:is_deidentified skos:narrowMatch rai:confidentialityLevel .
 d4d:is_tabular skos:narrowMatch schema:encodingFormat .
 
 # D4D retention is narrower than general data management
+# TODO(#3942): the RetentionLimits class is relatedMatch to this term; this
+# slot-level narrowMatch disagrees with it. Left for the slot-level change.
 d4d:retention_limit skos:narrowMatch schema:conditionsOfAccess .
 
 # D4D schema/class conformance is narrower than general conformsTo

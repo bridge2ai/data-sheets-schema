@@ -218,6 +218,14 @@ class TestClassLevelCorrections(unittest.TestCase):
         self.assertEqual(self.classes["Grantor"],
                          [("broadMatch", "schema:Organization")])
 
+    def test_distribution_date_is_a_release_date(self):
+        """A distribution date is a release date: the class's release_dates
+        attribute declares dcterms:available. The class said
+        schema:dateCreated before #3942; the predicate and the namespace did
+        not change, so no count above sees the object revert."""
+        self.assertEqual(self.classes["DistributionDate"],
+                         [("closeMatch", "schema:datePublished")])
+
     def test_imputation_slot_and_class_name_the_same_rai_term(self):
         """#3926: the slot said rai:imputationProtocol, which RAI does not
         define; the class, its schema exact_mappings and fairscape_models
@@ -227,6 +235,75 @@ class TestClassLevelCorrections(unittest.TestCase):
         self.assertEqual(self.classes["ImputationProtocol"], slot)
         self.assertNotIn("rai:imputationProtocol",
                          {o for _, _, o in self.triples})
+
+
+#: Slot-level twins of #3942's class corrections that this change left as
+#: found (#3971, #3995), with the triple each still carries. While a twin
+#: still carries that triple, the comment block directly above it says
+#: TODO(#3942); a twin settled later drops out of the check.
+SLOT_TWINS_LEFT_AS_FOUND = {
+    "discouraged_uses": ("exactMatch", "rai:prohibitedUses"),
+    "prohibited_uses": ("exactMatch", "rai:prohibitedUses"),
+    "ethical_reviews": ("exactMatch", "rai:ethicalReview"),
+    "is_deidentified": ("narrowMatch", "rai:confidentialityLevel"),
+    "extension_mechanism": ("closeMatch", "schema:license"),
+    "distribution_dates": ("exactMatch", "schema:dateCreated"),
+    "retention_limit": ("narrowMatch", "schema:conditionsOfAccess"),
+    "confidential_elements": ("exactMatch", "rai:personalSensitiveInformation"),
+    "sensitive_elements": ("closeMatch", "rai:personalSensitiveInformation"),
+    "existing_uses": ("exactMatch", "rai:dataUseCases"),
+    "data_protection_impacts": ("exactMatch", "rai:dataSocialImpact"),
+}
+
+
+def todo_above(lines, index, twins):
+    """Whether the comment block directly above ``lines[index]`` carries
+    TODO(#3942). ``twins`` maps slot to (predicate, object); a twin line
+    directly above that carries the same target is skipped, so one comment
+    covers adjacent twins of one term (discouraged_uses and prohibited_uses)
+    and no other twin's comment does."""
+    target = lines[index].split()[2]
+    same = [s for s, (_, obj) in twins.items() if obj == target]
+    i = index - 1
+    while i >= 0 and any(lines[i].startswith(f"d4d:{s} ") for s in same):
+        i -= 1
+    block = []
+    while i >= 0 and lines[i].startswith("#"):
+        block.append(lines[i])
+        i -= 1
+    return any("TODO(#3942)" in line for line in block)
+
+
+class TestSlotLevelTwinsAreMarked(unittest.TestCase):
+    """#4000: the PR and #3971 say every slot-level twin left as found is
+    marked TODO in the TTL; three were not."""
+
+    def test_each_twin_left_as_found_carries_a_todo(self):
+        lines = TTL.read_text().splitlines()
+        triples = set(parsed_triples())
+        for slot, (predicate, obj) in SLOT_TWINS_LEFT_AS_FOUND.items():
+            if (slot, predicate, obj) not in triples:
+                continue
+            line = f"d4d:{slot} skos:{predicate} {obj} ."
+            with self.subTest(slot=slot):
+                self.assertIn(line, lines)
+                self.assertTrue(
+                    todo_above(lines, lines.index(line), SLOT_TWINS_LEFT_AS_FOUND),
+                    f"{slot}: no TODO(#3942) directly above {line!r}")
+
+    def test_the_check_reads_a_missing_todo(self):
+        twins = {"a": ("exactMatch", "x:y"), "b": ("exactMatch", "x:y"),
+                 "c": ("exactMatch", "x:z")}
+        lines = ["# an ordinary comment", "d4d:a skos:exactMatch x:y ."]
+        self.assertFalse(todo_above(lines, 1, twins))
+        # One comment covers adjacent twins of one term ...
+        lines = ["# TODO(#3942): x", "d4d:a skos:exactMatch x:y .",
+                 "d4d:b skos:exactMatch x:y ."]
+        self.assertTrue(todo_above(lines, 2, twins))
+        # ... and not a twin of another term below them.
+        lines = ["# TODO(#3942): x", "d4d:a skos:exactMatch x:y .",
+                 "d4d:c skos:exactMatch x:z ."]
+        self.assertFalse(todo_above(lines, 2, twins))
 
 
 if __name__ == "__main__":
