@@ -2876,7 +2876,8 @@ def audit_continuations(root: Path, floor: int, controllers: list[str], runner_t
     else:
         why = f"no controller sets renderer >= {floor}"
     cont_text = ("every native continuation of a parent run, at any renderer ("
-                 + "; ".join(f"{c['package']}: {len(c['sites'])} spec rebuilds" for c in continuations)
+                 + "; ".join(f"{c['package']}: {len(c['sites'])} spec rebuild" + ("s" if len(c["sites"]) != 1 else "")
+                             for c in continuations)
                  + "), sits in a controller package that refuses a parent unless it is an agentic run ("
                  + gate_text + ")") if continuations and not ungated else \
         ("no controller rebuilds a parent run's spec" if not continuations else "")
@@ -3082,7 +3083,7 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict) -> dict:
         if turn == "PHASES" or turn in phases:
             continue
         if turn in scopes:
-            scope, basis = scopes[turn], "plan() conditional_calls"
+            scope, basis = scopes[turn], "per plan()'s conditional_calls"
         else:
             guarded = []
             for fname, c in sites:
@@ -3095,7 +3096,7 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict) -> dict:
                 raise _not_derived("which conditions make a follow-up turn",
                                    f"`{turn}` is guarded by `{ast.unparse(guarded[0])[:60]}` and plan() does not "
                                    "list it")
-            scope, basis = None, "no condition test on its call path"
+            scope, basis = None, "since no condition test guards its call path"
         turns[turn] = {"calls": sorted({f"api_runner.py:{c.lineno}" for _, c in sites}), "conditions": scope,
                        "basis": basis}
     return turns
@@ -3548,7 +3549,7 @@ def render_markdown(result: dict) -> str:
           f"- Schema sent: {m['schema_form']}.",
           "- Follow-up turns (model calls besides the phases, from the runner's model-call wrapper): "
           + "; ".join(f"{k} ({', '.join(v['calls'])}; " + ("every condition" if v["conditions"] is None
-                      else "only " + ", ".join(v["conditions"])) + f", from {v['basis']})"
+                      else "only " + ", ".join(v["conditions"])) + f", {v['basis']})"
                       for k, v in m["followup_turns"].items()) + ".",
           f"- Native audit batch: from renderer {m['agentic_audit_from_renderer']}, `build_phase` refuses the "
           f"audit phase on every spec and the audit is a registered native batch. Default renderer when none is "
