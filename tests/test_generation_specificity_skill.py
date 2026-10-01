@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import io
 import re
 import shutil
 import sys
@@ -170,6 +171,19 @@ class TestTheExitStatus(unittest.TestCase):
     def test_a_derivation_that_finds_nothing_is_exit_2(self):
         with mock.patch.object(scan, "discover", side_effect=scan._not_derived("x", "y")):
             self.assertEqual(self._main(), 2)
+
+    def test_a_surface_that_cannot_be_read_is_exit_2(self):
+        """A discovered file the scan cannot read is not vouched for: the scan
+        stops rather than report a result without it."""
+        surfaces = scan.Surfaces()
+        surfaces.add("no/such/surface_4027.md", "api", "model_facing", "live", "test")
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(scan, "discover", return_value=(surfaces, {})), \
+                mock.patch("sys.stderr", err), mock.patch("sys.stdout"):
+            code = scan.main(["--root", str(ROOT), "--report", str(Path(d) / "r.md")])
+        self.assertEqual(code, 2)
+        self.assertIn("no/such/surface_4027.md", err.getvalue())
+        self.assertIn("could not be read", err.getvalue())
 
 
 class TestTheScannerSees(unittest.TestCase):
