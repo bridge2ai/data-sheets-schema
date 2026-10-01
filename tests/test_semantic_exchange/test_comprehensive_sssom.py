@@ -710,8 +710,9 @@ class TestNoRowNamesAPerson(_Committed):
 
     #: The legacy property-level table, its interface subset and the 33-slot
     #: URI table, retired with their generators (#3884). Nothing read them,
-    #: no check could hold them to their inputs, and they had fallen 70 TTL
-    #: triples behind; a copy put back would be unchecked again.
+    #: and no check could hold them to their inputs (the property-level table
+    #: had fallen 70 TTL triples behind); a copy put back would be unchecked
+    #: again.
     RETIRED = ("d4d_rocrate_sssom_mapping.tsv",
                "d4d_rocrate_sssom_mapping_subset.tsv",
                "d4d_rocrate_sssom_uri_mapping.tsv")
