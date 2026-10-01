@@ -262,11 +262,12 @@ def record_validator(schema: str):
     It checks a record against the JSON Schema LinkML generates for a closed
     Dataset: a key its class does not declare is an error, and so is a value
     of the wrong type, format, pattern or enum, or an object that lacks a
-    required key. Formats are jsonschema's checks; its `date-time` check
-    needs `rfc3339-validator`, which the lock file installs. `_settle` runs
-    it on every record `convert` returns, and `_validate_d4d` on the record
-    the script writes (#4098). It is built once per schema, because
-    generating that JSON Schema takes seconds.
+    required key. LinkML closes every nested class itself; `closed=True`
+    closes the record's own top level too. Formats are jsonschema's checks,
+    and its `date-time` check needs `rfc3339-validator`, which the lock
+    file installs. `_settle` runs it on every record `convert` returns, and
+    `_validate_d4d` on the record the script writes (#4098). It is built
+    once per schema, because generating that JSON Schema takes seconds.
     """
     from linkml.validator import Validator
     from linkml.validator.plugins import JsonschemaValidationPlugin

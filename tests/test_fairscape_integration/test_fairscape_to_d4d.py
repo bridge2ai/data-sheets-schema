@@ -1159,16 +1159,22 @@ class TestTheRecordValidates(unittest.TestCase):
     def test_a_key_its_class_does_not_declare_is_left_out_by_name(self):
         """`_fit` keeps only declared keys, so this reaches `_settle` only
         if something else adds one; the closed schema names it, and only it
-        goes."""
+        goes. LinkML closes every nested class; the record's own top level
+        is closed only because the validator asks for it (`closed=True`)."""
         converter = FairscapeToD4DConverter()
         record = converter._settle(
-            {"id": "./", "creators": [{"name": "A", "nickname": "B"}]},
-            {"creators": "author"}, {})
+            {"id": "./", "alias": "C",
+             "creators": [{"name": "A", "nickname": "B"}]},
+            {"alias": "alternateName", "creators": "author"}, {})
         self.assertEqual(record, {"id": "./", "creators": [{"name": "A"}]})
-        self.assertEqual(converter.dropped, [("creators[0].nickname", (
-            "not placed in `nickname`: B (the schema rejects it: Additional "
-            "properties are not allowed ('nickname' was unexpected) in "
-            "/creators/0)"))])
+        self.assertEqual(converter.dropped, [
+            ("alternateName", (
+                "not placed in `alias`: C (the schema rejects it: Additional "
+                "properties are not allowed ('alias' was unexpected) in /)")),
+            ("creators[0].nickname", (
+                "not placed in `nickname`: B (the schema rejects it: Additional "
+                "properties are not allowed ('nickname' was unexpected) in "
+                "/creators/0)"))])
 
     def test_a_record_no_value_left_out_can_make_valid_is_an_error(self):
         """A root with no `@id` and no `identifier` gives no `id`, which the
