@@ -765,7 +765,12 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
     - the value in each column, alone, of four rows, two that regeneration
       produces and two KNOWN_UNDERIVABLE rows (one class-level, one naming
       a slot), against the verdict EDIT_VERDICTS gives that column on that
-      kind of row, which is the table the statement prints;
+      kind of row, which is the table the statement prints. The table is
+      for a change that leaves every other value the csv module reads as
+      it was, so each copy is read back as the check reads it and must
+      differ from the committed mapping in that one value; and each changed
+      triple must be named, the new one as a row KNOWN_UNDERIVABLE does not
+      list and the old one as missing;
     - a triple repeated: by a row with other structural values before the
       row it repeats and after it, and by an exact copy;
     - lines that are not rows (a # line before the header and after it,
@@ -844,6 +849,22 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
                     summary if summary_bytes is None else summary_bytes)
             return directory
 
+        # The statement's table is for a mapping in which no triple is
+        # repeated; the committed one is that mapping.
+        cls.repeated = len(lines) - len({triple(line) for line in lines})
+        # Each row as the check reads it: the values the table's changes
+        # are to (#4076).
+        read = gsm._read_sssom(COMMITTED, gsm.TRIPLE)
+
+        def values_changed(path):
+            """The (row, column) of every value the check reads from `path`
+            that differs from the committed mapping's, and whether it reads
+            the same number of rows."""
+            rows_read = gsm._read_sssom(path, gsm.TRIPLE)
+            return len(rows_read) == len(read), sorted(
+                (i, c) for i, (was, now) in enumerate(zip(read, rows_read))
+                for c in was.keys() | now.keys() if was.get(c) != now.get(c))
+
         produced = [i for i, line in enumerate(lines)
                     if triple(line) not in gsm.KNOWN_UNDERIVABLE]
         listed = [i for i, line in enumerate(lines)
@@ -853,14 +874,17 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
                                if "/" not in triple(lines[i])[0]),
                           next(i for i in listed
                                if "/" in triple(lines[i])[0]))}
-        cls.edits = {}
+        cls.edits, cls.read_back = {}, {}
         for kind, at_rows in rows.items():
             for at in at_rows:
                 for n, column in enumerate(names):
                     directory = copy(f"{kind}-{at}-{n}",
                                      mapping(at, changed(lines[at], [column])))
-                    cls.edits[kind, triple(lines[at]), column] = cls._outcome(
-                        directory)
+                    key = kind, triple(lines[at]), column
+                    cls.edits[key] = cls._outcome(directory)
+                    cls.read_back[key] = (
+                        values_changed(directory / COMMITTED.name),
+                        (True, [(at, column)]))
 
         at = produced[0]
         other = changed(lines[at], gsm.STRUCTURAL_COLUMNS)
@@ -970,6 +994,46 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
             with self.subTest(row=row, column=column, verdict=verdict):
                 self.assertEqual(code, {"fails": 1, "passes": 0}[verdict],
                                  out)
+
+    def test_each_change_is_the_kind_the_table_is_for(self):
+        """The table is for a mapping with no triple repeated, changed in
+        one value and in no other value the csv module reads. A copy whose
+        change moved what else is read would test something the table does
+        not claim, so each is read back with the check's own reader."""
+        self.assertEqual(self.repeated, 0, "a triple is repeated")
+        self.assertEqual(len(self.read_back), len(self.edits))
+        for (kind, row, column), (found, wanted) in self.read_back.items():
+            with self.subTest(row=row, column=column):
+                self.assertEqual(found, wanted)
+
+    def test_a_changed_triple_is_named_new_and_old(self):
+        """What the statement says a changed triple fails as: the new triple
+        as one the mapping carries that regeneration does not produce and
+        KNOWN_UNDERIVABLE does not list, and the old one as missing, which on
+        a KNOWN_UNDERIVABLE row is a listed triple the mapping lacks (#4076)
+        and on a row regeneration produces is one it produces that the
+        mapping lacks."""
+        listed = TestTheCheckAcceptsExactlyTheKnownGap._listed
+        missing = {
+            "known": "1 row(s) KNOWN_UNDERIVABLE lists that the committed "
+                     "file does not carry:\n",
+            "produced": "1 row(s) regeneration produces that the committed "
+                        "file lacks:\n",
+        }
+        cases = [(kind, row, column) for kind, row, column in self.edits
+                 if column in gsm.TRIPLE]
+        self.assertEqual(len(cases), 4 * len(gsm.TRIPLE))
+        for kind, row, column in cases:
+            code, out = self.edits[kind, row, column]
+            new = tuple(value + self.CHANGE if name == column else value
+                        for name, value in zip(gsm.TRIPLE, row))
+            with self.subTest(row=row, column=column):
+                self.assertEqual(code, 1, out)
+                self.assertIn(
+                    "1 row(s) in the committed file that regeneration does "
+                    "not produce and KNOWN_UNDERIVABLE does not list:\n"
+                    + listed([new]), out)
+                self.assertIn(missing[kind] + listed([row]), out)
 
     def test_a_repeated_triple_is_not_seen(self):
         """The rows are a set, and the structural columns are read from the
@@ -1454,7 +1518,8 @@ class TestTheCheckIsStatedOnce(unittest.TestCase):
     certain words, so it passed descriptions the check contradicted.
 
     So it is stated once, in CHECK_STATEMENT, which is written from the
-    constants the check uses and held to what the check does by
+    columns the check compares (TRIPLE, STRUCTURAL_COLUMNS) and from the
+    table of verdicts (EDIT_VERDICTS), and held to what the check does by
     `TestTheCheckDoesWhatItsStatementSays`. `run_check`'s docstring ends
     with it, and `--help` prints it when run as the docs say to run it. The
     README, the docs page, the analysis doc and the Makefile's help for the

@@ -35,7 +35,7 @@ make gen-sssom-comprehensive gen-sssom-uri-comprehensive
 make check-sssom-comprehensive
 ```
 
-`make check-sssom-structural` compares the structural mapping and its summary with what the generator writes, allowing for the rows the generator cannot produce, which `KNOWN_UNDERIVABLE` in `src/semantic_exchange/generate_structural_mapping.py` lists (#3968); `python src/semantic_exchange/generate_structural_mapping.py --help` states exactly what it compares (#4076). A rewrite by the generator drops those rows, so `make gen-sssom-all` does not run `make gen-sssom-structural` and `make clean-sssom` does not delete the table (#3967).
+`make check-sssom-structural` checks the structural mapping and its summary against what the generator writes, allowing for the rows it cannot produce that `KNOWN_UNDERIVABLE` in `src/semantic_exchange/generate_structural_mapping.py` lists (#3968); `python src/semantic_exchange/generate_structural_mapping.py --help` states exactly what it compares (#4076). A rewrite by the generator drops those rows, so `make gen-sssom-all` does not run `make gen-sssom-structural` and `make clean-sssom` does not delete the table (#3967).
 
 The legacy property-level table (`d4d_rocrate_sssom_mapping.tsv`), its interface-only subset and the 33-slot URI table were retired in #3884; their last versions are in git history.
 

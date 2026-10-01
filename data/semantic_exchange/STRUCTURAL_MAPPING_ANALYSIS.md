@@ -21,9 +21,10 @@ instead:
 make check-sssom-structural   # committed mapping and summary against regeneration
 ```
 
-The check writes nothing. It compares the committed mapping and summary with
-what the generator writes, allowing for the hand-written rows described under
-[Rows the generator does not produce](#rows-the-generator-does-not-produce);
+The check writes nothing and compares the committed mapping and summary with
+what the generator writes, allowing for the rows it cannot produce that
+`KNOWN_UNDERIVABLE` lists (see
+[Rows the generator does not produce](#rows-the-generator-does-not-produce));
 `python src/semantic_exchange/generate_structural_mapping.py --help` states
 exactly what it compares (#4076).
 

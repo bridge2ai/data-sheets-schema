@@ -634,8 +634,9 @@ KNOWN_UNDERIVABLE = frozenset({
     ("d4d:FileCollection/total_bytes", "skos:exactMatch", "dcat:byteSize"),
 })
 
-#: What `--check` does with a mapping and summary it passes once the value
-#: in one column of one row changes, by the kind of row: (the columns, the
+#: What `--check` does with a mapping and summary it passes, with no triple
+#: repeated, once the value in one column of one row changes and no other
+#: value the csv module reads does, by the kind of row: (the columns, the
 #: verdict on a row regeneration produces, the verdict on a
 #: KNOWN_UNDERIVABLE row), with `None` for every column the other entries
 #: do not name. CHECK_STATEMENT prints it, and
@@ -692,21 +693,30 @@ def _check_statement(width: int = 76) -> str:
         bullet("The summary's whole text, except its line endings."),
         text("""Both files are read as UTF-8 text. The rows are read with
             Python's csv module from the lines of the tab-separated mapping
-            that do not start with #, below its header, so an empty line is
-            not a row and double quotes around a value are quoting, not part
-            of it. A missing mapping or summary fails. A mapping without one
-            of the columns named here is an error that names the column, and
-            a file that is not UTF-8 is an error."""),
+            that do not start with #, the first of which is its header, so
+            an empty line is not a row and double quotes around a value are
+            quoting, not part of it. A missing mapping or summary fails. A
+            mapping without one of the columns named here is an error that
+            names the column, and a file that is not UTF-8 is an error."""),
+        # "Every other value the csv module reads" is needed: on the
+        # committed table a tab, a line break or an unclosed leading double
+        # quote written into a row's `confidence` changes what the csv
+        # module reads beside it and fails the check, and a # starting a
+        # line drops its row (#4076, review round 2).
         text("""So, from a mapping and summary the check passes, with no
-            triple repeated, a change to the value in one column of one
-            row:"""),
+            triple repeated, a change to the value in one column of one row
+            that leaves every other value the csv module reads as it was (a
+            tab, line break or double quote in the value, or a # starting
+            its line, can change them):"""),
         "\n".join(edits),
-        text("""Such a change to a triple fails because the triple it
-            replaced is then missing: from a row regeneration produces, a
-            triple regeneration produces that the mapping lacks; from a
-            KNOWN_UNDERIVABLE row, a listed triple the mapping lacks. The
-            new triple fails as well unless regeneration produces it or
-            KNOWN_UNDERIVABLE lists it."""),
+        text("""A changed triple fails because the triple it replaced is
+            then missing: on a row regeneration produces, as a triple
+            regeneration produces that the mapping lacks, and on a
+            KNOWN_UNDERIVABLE row, as a listed triple the mapping lacks.
+            Unless regeneration produces the new triple or KNOWN_UNDERIVABLE
+            lists it, the new triple fails too, as one the mapping carries
+            that regeneration does not produce and KNOWN_UNDERIVABLE does
+            not list."""),
     ])
 
 

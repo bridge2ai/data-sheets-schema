@@ -50,7 +50,7 @@ make gen-sssom-comprehensive gen-sssom-uri-comprehensive
 make check-sssom-comprehensive
 ```
 
-The structural mapping carries rows its generator cannot produce, listed with their reasons as `KNOWN_UNDERIVABLE` in `generate_structural_mapping.py` (#294). Rewriting the table with `make gen-sssom-structural` drops those rows, so `make gen-sssom-all` regenerates only the comprehensive pair and `make clean-sssom` deletes only that pair (#3967). `make check-sssom-structural` compares the table and its summary with what the generator writes, allowing for those rows, and names any of them a rewrite dropped, to restore from git before committing; `python src/semantic_exchange/generate_structural_mapping.py --help` states exactly what it compares (#4076).
+The structural mapping carries rows its generator cannot produce, listed with their reasons as `KNOWN_UNDERIVABLE` in `generate_structural_mapping.py` (#294). Rewriting the table with `make gen-sssom-structural` drops those rows, so `make gen-sssom-all` regenerates only the comprehensive pair and `make clean-sssom` deletes only that pair (#3967). `make check-sssom-structural` checks the table and its summary against what the generator writes, allowing for those rows, and names any of them a rewrite dropped, to restore from git before committing; `python src/semantic_exchange/generate_structural_mapping.py --help` states exactly what it compares (#4076).
 
 ## Validation
 
