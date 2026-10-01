@@ -1,29 +1,40 @@
-# A blind second reading of the 122 Q19 recommendations (#3831, #3871).
+# The blind second reading of record of the 122 Q19 recommendations
+# (#3831, #3871), made WITH the step 3b sources.
 #
-# Read by a separately run Claude agent, on 2026-09-30, that was given only
+# Read by a separately run Claude agent, on 2026-09-30, that was given
 # notes/q19_recommendations_3831_packet.json (the 122 sentences with their
-# source rating file and JSON path, no classes) and
+# source rating file and JSON path, no classes),
 # notes/q19_recommendations_3831_rubric.md (the module docstring's ordered
-# test with every example sentence, per-class count and pin removed), whose
-# sha256 are recorded below. It did not see the pins, the module docstring,
-# tests/test_q19_rationale_lint.py or the first reading. It is a second
-# model reading, not an independent human rater: both readers are model
-# agents.
+# test with every example sentence, per-class count and pin removed), and
+# the 84 rating files the packet's 124 sources name, copied under
+# q19_sources/ at the same relative paths, byte-identical to this checkout's
+# (each compared with cmp on 2026-09-30). Those files carry the ratings'
+# weaknesses, issues and quality notes, which step 3b asks about, and no
+# first-reader class. The reader reports reading only the rubric, the packet
+# and those files; that it did not see the pins, the module docstring,
+# tests/test_q19_rationale_lint.py or the first reading is its own statement
+# and how it was launched, not something a file here can prove. It pulled
+# the matching weaknesses, issues and quality notes out of each rating with
+# a small text-extraction script and reports making every class decision
+# itself. It is a second model reading, not an independent human rater:
+# both readers are model agents.
 #
-# On ten items its `reason` says the rating was "not visible" or "not
-# checked", and no reason quotes a rating: step 3b, which asks what the
-# sentence's own rating faults, does not appear to have been applied, and
-# its step 3/4 calls rest on the sentence alone.
+# It replaces the reading made without the sources
+# (notes/q19_recommendations_3831_second_reading_without_sources.yaml),
+# whose instructions forbade opening the ratings, so step 3b could not be
+# applied there. That reading is kept as a recorded deviation.
 #
 # `class`, `unsure` and `reason` are the reader's, verbatim from its JSON
 # output (sha256 `second_reading_json_sha256`), in packet order. Never
 # edited; a correction would be added beside a judgement with its reason.
 packet_sha256: 9a9b0dec8b2053c89de776d76273517108224885fd5073a26834d7b1ceb9152d
 rubric_sha256: 905b5cb72472d36bcfc706fdbbcfd8cad903908a6073aa849f482180fb732791
-second_reading_json_sha256: 004fb984cc8f4e762e390e82ec7660d5b550403e3ffdcf5e20ba72c41ec0e741
+second_reading_json_sha256: e34907ebc915b7809f342a9e86b2895a2cd0bf43dc7e57f184e9d86d0ebd4138
 recorded: '2026-09-30'
-rater: a separately run Claude agent given only the packet and the rubric; blind to the pins; not an independent
-  human rater
+reading: with_sources
+sources_given: 'q19_sources/: the 84 rating files the packet names, byte-identical to the checkout'
+rater: a separately run Claude agent given the packet, the rubric and the rating files the packet names; blind to
+  the pins; not an independent human rater
 classes_allowed:
 - named_absence
 - placement
@@ -33,488 +44,488 @@ judgements:
 - id: q19r-000
   class: placement
   unsure: false
-  reason: says the derivation is held in the typed related_datasets entry
+  reason: Derivation already carried by the typed related_datasets entry.
 - id: q19r-001
-  class: request
-  unsure: false
-  reason: imperative to add was_derived_from; no absence, placement or objection stated
+  class: criticism
+  unsure: true
+  reason: Asks for more on populated ethical_reviews (COI statement); rating faults the missing COI statement.
 - id: q19r-002
   class: placement
   unsure: false
-  reason: says revision history is currently held in related_datasets notes
+  reason: Revision history currently held in related_datasets notes.
 - id: q19r-003
   class: request
   unsure: false
-  reason: asks to add a dedicated field; nothing stated beside the imperative
+  reason: Asks for a dedicated deidentification field; no absence or location stated.
 - id: q19r-004
   class: request
   unsure: false
-  reason: plain request to add parent_datasets
+  reason: Plain imperative to add parent_datasets.
 - id: q19r-005
   class: request
   unsure: false
-  reason: conditional request to add parent_datasets
+  reason: Conditional request for parent_datasets.
 - id: q19r-006
-  class: placement
-  unsure: true
-  reason: points to the RO-Crate lineage (a file) as where the lineage is; weak placement
+  class: request
+  unsure: false
+  reason: Imperative to add parent_datasets/was_derived_from; no location stated.
 - id: q19r-007
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for was_derived_from.
 - id: q19r-008
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for related/parent dataset entries.
 - id: q19r-009
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for typed related/parent datasets.
 - id: q19r-010
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for release_notes or was_derived_from.
 - id: q19r-011
-  class: request
-  unsure: true
-  reason: requests; 'add tool versions' may be more-on-held-entries criticism but rating not visible
+  class: criticism
+  unsure: false
+  reason: Names the held tools and asks for versions; rating faults them as versionless.
 - id: q19r-012
   class: request
   unsure: true
-  reason: '''mirror the version lineage'' implies it is elsewhere but names no location'
+  reason: '"Mirror the version lineage" implies content elsewhere but names no location.'
 - id: q19r-013
-  class: request
-  unsure: true
-  reason: requests; versions/URLs for tools may be criticism of held entries, rating not visible
+  class: criticism
+  unsure: false
+  reason: Names held tools and asks for versions/URLs; rating faults their missing versions and URLs.
 - id: q19r-014
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for was_derived_from.
 - id: q19r-015
   class: placement
   unsure: false
-  reason: derivation is 'reconstructed from three others' slots
+  reason: Derivation path currently reconstructed from three other slots.
 - id: q19r-016
   class: placement
-  unsure: false
-  reason: release chain 'already listed in version_access'
+  unsure: true
+  reason: Release chain already listed in version_access.
 - id: q19r-017
   class: placement
   unsure: false
-  reason: provenance currently 'inferable from prose'
+  reason: Provenance currently inferable from prose.
 - id: q19r-018
   class: request
   unsure: false
-  reason: request; RO-Crate conformance mention is not a placement of slot content
+  reason: Requests was_derived_from; RO-Crate mention is not a location of the slot's content.
 - id: q19r-019
   class: placement
   unsure: false
-  reason: provenance claim evidenced by 'prose alone'
+  reason: Provenance claim evidenced by prose alone.
 - id: q19r-020
   class: criticism
-  unsure: true
-  reason: asks the held citation/RRID to be clarified (different); rating not checked
+  unsure: false
+  reason: Objects to the RRID in the citation; rating issue faults it as identifying PhysioNet, not the dataset.
 - id: q19r-021
   class: request
   unsure: false
-  reason: conditional request
+  reason: Conditional request for parent_datasets.
 - id: q19r-022
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for parent_datasets.
 - id: q19r-023
   class: placement
   unsure: false
-  reason: derivation 'now carried only by raw_data_sources prose'
+  reason: Derivation "now carried only by raw_data_sources prose".
 - id: q19r-024
   class: request
   unsure: false
-  reason: request to document in a dedicated field
+  reason: Request for a dedicated provenance field.
 - id: q19r-025
   class: placement
   unsure: false
-  reason: predecessors held in related_datasets typed links
+  reason: Variables drawn from existing JSON dictionaries; predecessors in related_datasets.
 - id: q19r-026
   class: placement
   unsure: false
-  reason: predecessors held in related_datasets typed links
+  reason: Predecessors in related_datasets typed links; dictionaries exist.
 - id: q19r-027
   class: placement
   unsure: true
-  reason: derivation edges are in the RO-Crate file; weak placement
+  reason: Derivation edges said to be in the RO-Crate (a file); could be read as request.
 - id: q19r-028
   class: request
   unsure: false
-  reason: request; no location of current content stated
+  reason: Request for PROV-O / was_derived_from; no location stated.
 - id: q19r-029
   class: request
   unsure: false
-  reason: request to express derivation; no location stated
+  reason: Request to express the derivation; location not stated in the sentence.
 - id: q19r-030
   class: request
   unsure: false
-  reason: request for typed entries and parent_datasets
+  reason: related_datasets and parent_datasets absent; plain request.
 - id: q19r-031
   class: named_absence
   unsure: false
-  reason: names 'structural gaps' (absence as a noun) before the populate list
+  reason: '"Fill the structural gaps" names the absence as a noun.'
 - id: q19r-032
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for was_derived_from.
 - id: q19r-033
   class: placement
   unsure: false
-  reason: version ('large-v3') said to be mentioned in descriptions
+  reason: Whisper version mentioned in descriptions.
 - id: q19r-034
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request.
 - id: q19r-035
   class: placement
   unsure: false
-  reason: provenance graph 'the notes describe'
+  reason: Provenance graph described in notes.
 - id: q19r-036
   class: placement
-  unsure: false
-  reason: RRID is held in the citation
+  unsure: true
+  reason: RRID content is in the citation; asks for a dedicated slot.
 - id: q19r-037
   class: criticism
-  unsure: true
-  reason: objects to the held enum value and asks for a value nearer the sources; rating not checked
+  unsure: false
+  reason: Objects to the populated confidentiality enum; rating faults it as stricter than sources.
 - id: q19r-038
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request for parent/related datasets.
 - id: q19r-039
   class: request
   unsure: true
-  reason: '''mirror'' DOIs implies elsewhere but no location named'
+  reason: '"Mirror" implies content elsewhere but no location named.'
 - id: q19r-040
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-041
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-042
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-043
   class: placement
   unsure: false
-  reason: content held in is_new_version_of relation
+  reason: Content in the is_new_version_of relation targets.
 - id: q19r-044
   class: placement
   unsure: false
-  reason: relation 'expressed only through related_datasets'
+  reason: Content in is_new_version_of / related_datasets.
 - id: q19r-045
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-046
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-047
   class: request
   unsure: true
-  reason: '''mirror'' predecessors; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-048
   class: request
   unsure: true
-  reason: '''mirror'' releases; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-049
   class: request
   unsure: true
-  reason: '''mirror'' predecessor; no location named'
+  reason: '"Mirror" without a named location.'
 - id: q19r-050
-  class: request
+  class: criticism
   unsure: true
-  reason: mirror lineage (no location); 'attribute the residual' may be criticism, rating not visible
+  reason: Asks to attribute the disclosed byte residual; rating faults it as unattributed (mirror part has no location).
 - id: q19r-051
   class: placement
   unsure: false
-  reason: lineage held in 'related_datasets prose'
+  reason: Lineage only in related_datasets prose.
 - id: q19r-052
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain requests for version, version_access, related/parent datasets.
 - id: q19r-053
   class: criticism
-  unsure: true
-  reason: asks publisher to be a different value (org name); rating not checked
+  unsure: false
+  reason: Objects to publisher held as URL; rating faults it.
 - id: q19r-054
   class: criticism
-  unsure: true
-  reason: asks publisher recorded as name 'FAIRhub'; rating not checked
+  unsure: false
+  reason: Objects to publisher held as URL; rating faults it.
 - id: q19r-055
   class: request
   unsure: false
-  reason: request; no current location stated
+  reason: Request for download_url; no location stated in sentence.
 - id: q19r-056
   class: placement
   unsure: false
-  reason: figures held in source_caveats
+  reason: Figures currently in source_caveats.
 - id: q19r-057
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request.
 - id: q19r-058
   class: placement
   unsure: false
-  reason: values 'already present in prose'
+  reason: Values already present in prose; CHANGELOG records changes.
 - id: q19r-059
   class: placement
   unsure: false
-  reason: DOIs 'already in related_datasets'
+  reason: DOIs already in related_datasets.
 - id: q19r-060
   class: placement
   unsure: false
-  reason: from is_new_version_of edges; lineage documented in prose
+  reason: From the is_new_version_of edges; lineage in prose.
 - id: q19r-061
   class: placement
   unsure: false
-  reason: derivation resolves through related_datasets
+  reason: As well as related_datasets.
 - id: q19r-062
   class: placement
   unsure: false
-  reason: DOIs already present in related_datasets
+  reason: DOIs already in related_datasets.
 - id: q19r-063
   class: placement
   unsure: false
-  reason: prior versions held in related_datasets
+  reason: In addition to related_datasets.
 - id: q19r-064
   class: placement
   unsure: false
-  reason: derivation inferable from prose
+  reason: Derivation currently inferable from prose.
 - id: q19r-065
-  class: request
+  class: criticism
   unsure: true
-  reason: request; notes mention concerns study-name prose, not the slot's content
+  reason: Objects to was_derived_from holding study-name prose; rating faults it.
 - id: q19r-066
   class: request
   unsure: false
-  reason: plain request
+  reason: No location or absence stated.
 - id: q19r-067
   class: request
   unsure: false
-  reason: plain request
+  reason: No location or absence stated.
 - id: q19r-068
   class: placement
   unsure: false
-  reason: content held as is_new_version_of targets
+  reason: is_new_version_of targets.
 - id: q19r-069
   class: request
   unsure: false
-  reason: request; no location stated
+  reason: No location stated.
 - id: q19r-070
   class: placement
   unsure: false
-  reason: already named in related_datasets
+  reason: Already named in related_datasets.
 - id: q19r-071
   class: placement
   unsure: false
-  reason: already recorded in related_datasets; textual lineage
+  reason: Already recorded in related_datasets.
 - id: q19r-072
   class: placement
   unsure: false
-  reason: already named in related_datasets
+  reason: Already named in related_datasets.
 - id: q19r-073
   class: placement
   unsure: false
-  reason: already listed in related_datasets / distribution_formats
+  reason: Already listed in related_datasets.
 - id: q19r-074
   class: placement
   unsure: false
-  reason: related_datasets entry carries the derivation
+  reason: Descriptive related_datasets entry carries it.
 - id: q19r-075
   class: placement
   unsure: false
-  reason: DOIs held in related_datasets
+  reason: Duplicating related_datasets.
 - id: q19r-076
   class: placement
   unsure: false
-  reason: derivation via related_datasets
+  reason: As well as through related_datasets.
 - id: q19r-077
   class: placement
   unsure: false
-  reason: already carried in related_datasets
+  reason: Already carried in related_datasets.
 - id: q19r-078
   class: placement
   unsure: false
-  reason: already named in related_datasets
+  reason: Already named in related_datasets.
 - id: q19r-079
   class: placement
   unsure: false
-  reason: '''have prose or external equivalents today'''
+  reason: Prose or external equivalents today.
 - id: q19r-080
   class: request
   unsure: false
-  reason: plain request
+  reason: Plain request.
 - id: q19r-081
   class: placement
   unsure: false
-  reason: populate from related_datasets
+  reason: From related_datasets; dictionaries the record says exist.
 - id: q19r-082
   class: placement
-  unsure: true
-  reason: '''already present in the record'' - location vague'
+  unsure: false
+  reason: From information already present in the record.
 - id: q19r-083
   class: criticism
   unsure: true
-  reason: '''add at least one more keyword'' asks more of held keywords; rating not checked'
+  reason: Asks for more keywords (populated); rating faults having only 7; sentence truncated.
 - id: q19r-084
   class: placement
   unsure: false
-  reason: from the is_new_version_of relations
+  reason: From file_collections and is_new_version_of relations.
 - id: q19r-085
   class: placement
   unsure: false
-  reason: from the is_new_version_of relations
+  reason: From file_collections and is_new_version_of relations.
 - id: q19r-086
   class: placement
   unsure: false
-  reason: ancestry related_datasets currently holds alone
+  reason: Ancestry related_datasets currently holds alone.
 - id: q19r-087
   class: placement
   unsure: false
-  reason: slots that 'currently hold their content elsewhere'
+  reason: Slots currently hold their content elsewhere.
 - id: q19r-088
   class: placement
   unsure: false
-  reason: values already present in prose
+  reason: Values already present in prose.
 - id: q19r-089
   class: placement
   unsure: false
-  reason: negatives currently buried in notes
+  reason: Negative findings buried in notes.
 - id: q19r-090
   class: placement
   unsure: false
-  reason: derives_from edge through related_datasets
+  reason: From JSON dictionaries; through related_datasets.
 - id: q19r-091
   class: placement
   unsure: false
-  reason: lineage currently narrative
+  reason: Lineage currently narrative.
 - id: q19r-092
   class: request
-  unsure: false
-  reason: request; no current location stated
+  unsure: true
+  reason: Request for provenance slots; naming the RO-Crate archive is about a release artifact.
 - id: q19r-093
-  class: request
+  class: criticism
   unsure: false
-  reason: plain requests
+  reason: Asks for an expanded variables list; rating faults variables as only four columns.
 - id: q19r-094
   class: placement
   unsure: false
-  reason: related_datasets entries express the same relations
+  reason: related_datasets entries carry the same relations.
 - id: q19r-095
   class: placement
   unsure: false
-  reason: already named in raw_data_sources and raw_sources
+  reason: Already named in raw_data_sources and raw_sources.
 - id: q19r-096
   class: placement
   unsure: false
-  reason: already described in prose
+  reason: Already described in prose.
 - id: q19r-097
   class: placement
   unsure: false
-  reason: related_datasets already implies; narratively recoverable
+  reason: related_datasets already implies; narratively recoverable.
 - id: q19r-098
   class: placement
   unsure: false
-  reason: provenance graph asserted in notes
+  reason: Provenance graph asserted in notes.
 - id: q19r-099
   class: placement
   unsure: true
-  reason: derivation inferred from filenames (file); weak placement
+  reason: Derivation currently inferred from filenames.
 - id: q19r-100
   class: request
   unsure: false
-  reason: request; RO-Crate is a target, not stated location of the content
+  reason: Request for was_derived_from; no location stated.
 - id: q19r-101
   class: request
   unsure: false
-  reason: plain request
+  reason: Request for was_derived_from.
 - id: q19r-102
   class: request
   unsure: false
-  reason: plain request
+  reason: Request for was_derived_from / parent_datasets.
 - id: q19r-103
   class: placement
   unsure: false
-  reason: lineage already present in prose
+  reason: Lineage already present in prose.
 - id: q19r-104
   class: placement
   unsure: false
-  reason: already named in raw_data_sources and raw_sources
+  reason: Already named in raw_data_sources and raw_sources.
 - id: q19r-105
   class: placement
   unsure: true
-  reason: conversions 'already described' (unspecified) and RO-Crate provenance
+  reason: '"Already described" conversions; RO-Crate provenance.'
 - id: q19r-106
   class: placement
   unsure: false
-  reason: already described in prose
+  reason: Already described in prose.
 - id: q19r-107
   class: placement
   unsure: false
-  reason: release chain already typed in related_datasets
+  reason: Release chain already typed in related_datasets.
 - id: q19r-108
   class: placement
   unsure: false
-  reason: release chain already typed in related_datasets
+  reason: Release chain already typed in related_datasets.
 - id: q19r-109
   class: placement
   unsure: true
-  reason: provenance already packaged in RO-Crate file
+  reason: RO-Crate provenance already packaged with the release (file).
 - id: q19r-110
   class: placement
   unsure: true
-  reason: provenance shipped in RO-Crate file
+  reason: RO-Crate provenance shipped with the release (file).
 - id: q19r-111
   class: placement
   unsure: false
-  reason: information already present in prose/notes/citation
+  reason: Information already present in prose/notes/citation.
 - id: q19r-112
   class: placement
   unsure: false
-  reason: converting the prose lineage
+  reason: Converting the prose lineage.
 - id: q19r-113
   class: placement
   unsure: false
-  reason: related_datasets already names the predecessor
+  reason: related_datasets already names the predecessor.
 - id: q19r-114
-  class: placement
+  class: request
   unsure: true
-  reason: FAIRSCAPE provenance lineage held outside the record (file)
+  reason: Requests errata and provenance links; FAIRSCAPE not clearly a location in the record.
 - id: q19r-115
-  class: criticism
-  unsure: true
-  reason: asks held publisher to be a URI instead; rating not checked
+  class: request
+  unsure: false
+  reason: publisher absent per rating; no populated value named.
 - id: q19r-116
   class: criticism
   unsure: false
-  reason: objects to the conflicting accountable organization value and asks for one
+  reason: Objects to the populated accountable_organization conflict; rating faults it.
 - id: q19r-117
   class: criticism
-  unsure: true
-  reason: asks publisher set to a different value; rating not checked
-- id: q19r-118
-  class: request
   unsure: false
-  reason: plain request
+  reason: Objects to publisher held as URL; rating faults it.
+- id: q19r-118
+  class: criticism
+  unsure: true
+  reason: Asks for encoding on the held text formats; rating faults its absence.
 - id: q19r-119
   class: criticism
   unsure: false
-  reason: objects to the held is_deidentified.method and asks it be set accordingly
+  reason: Objects to is_deidentified.method; rating faults it.
 - id: q19r-120
   class: criticism
   unsure: false
-  reason: objects to the method asserted in the structured slot
+  reason: Objects to the asserted method; rating faults it.
 - id: q19r-121
   class: request
   unsure: false
-  reason: request to add was_generated_by
+  reason: Request for was_generated_by; RO-Crate is not a held value.
