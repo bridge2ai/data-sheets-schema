@@ -18,16 +18,20 @@ deviation**, and its figures are reported below, not discarded.
 | file | what it is | sha256 |
 |---|---|---|
 | `notes/q19_recommendations_3831_packet.json` | the 122 sentences, each with its source rating file and JSON path; no classes | `9a9b0dec8b2053c89de776d76273517108224885fd5073a26834d7b1ceb9152d` |
-| `notes/q19_recommendations_3831_rubric.md` | the docstring's ordered test, with every example sentence, per-class count and pinned sentence removed | `905b5cb72472d36bcfc706fdbbcfd8cad903908a6073aa849f482180fb732791` |
+| `notes/q19_recommendations_3831_rubric.md` | the docstring's ordered test, with every example sentence, per-class count and pinned sentence removed, and one further sentence dropped and the issue references moved (see the erratum below) | `905b5cb72472d36bcfc706fdbbcfd8cad903908a6073aa849f482180fb732791` |
 | `notes/q19_recommendations_3831_first_reading.yaml` | the pins at origin/main c962a6cc8 in per-item form; a test checks it against the pins | |
 | `notes/q19_recommendations_3831_second_reading.yaml` | **the second reading of record**, made with the step 3b sources: class, `unsure` and reason per item, verbatim from the reader's JSON | JSON `e34907ebc915b7809f342a9e86b2895a2cd0bf43dc7e57f184e9d86d0ebd4138` |
 | `notes/q19_recommendations_3831_second_reading_without_sources.yaml` | the earlier reading made without the step 3b sources, a recorded deviation; judgements unchanged from 89101b256 | JSON `004fb984cc8f4e762e390e82ec7660d5b550403e3ffdcf5e20ba72c41ec0e741` |
+| `notes/q19_recommendations_3831_sources_given.yaml` | the sha256 of each of the 84 rating files given to the reader of record, hashed from the copies it was given; a test checks each against this checkout's file | |
 
 Both second readers were separately run Claude agents. Each was given the
 packet and the rubric, the same bytes both times. The reader of record was
 also given the 84 rating files the packet's 124 sources name, copied at the
 same relative paths. Each copy was compared with this checkout's file and is
-byte-identical. Those files carry the ratings' weaknesses, issues and quality
+byte-identical; the copies' sha256 are recorded in
+`notes/q19_recommendations_3831_sources_given.yaml`, which the test checks
+against the checkout. That records the bytes of the copies, not which of them
+the reader opened. Those files carry the ratings' weaknesses, issues and quality
 notes, and no first-reader class.
 
 Neither reader saw the pins, the module docstring, the test file or the first
@@ -293,3 +297,17 @@ lint. The reading of record would move the Q19 miss count by one, from 64 to
 request, which is the open question above. The reading without sources moved
 it the other way, to 65 and 96, on `q19r-006`. #3544 reports the 95 as a
 count, not a recall ratio, so no precision or recall figure moves.
+
+## Erratum (2026-09-30, #3963)
+
+The rubric's header says that every example sentence, per-class count and
+pinned sentence was removed and that "nothing else has been changed or added
+except the 'How to answer' note". That is not quite true. Compared with the
+docstring at c962a6cc8, the rubric also drops the last sentence of step 4,
+"Whether the gate should read a request as an absence is part of #3544.",
+which is neither an example, a count nor a pin. It also moves the issue
+references "(#3829, #3836)" from the docstring's body to the rubric's Source
+line. The rubric's bytes are pinned by the sha256 both readings record, so the
+header is left as the readers saw it and corrected here. Neither change carries
+a first-reader class: the dropped sentence is about gate policy, not
+classification.

@@ -26,6 +26,7 @@ FIRST = NOTES / "q19_recommendations_3831_first_reading.yaml"
 SECOND = NOTES / "q19_recommendations_3831_second_reading.yaml"
 WITHOUT = NOTES / "q19_recommendations_3831_second_reading_without_sources.yaml"
 NOTE = NOTES / "q19_recommendations_blind_agreement_2026-09-30.md"
+SOURCES_GIVEN = NOTES / "q19_recommendations_3831_sources_given.yaml"
 
 
 def _script():
@@ -70,13 +71,20 @@ def test_the_files_are_the_bytes_the_second_readers_were_given():
     assert "NOT the second reading of record" in WITHOUT.read_text(encoding="utf-8")
 
 
-def test_the_reading_of_record_had_the_rating_files_step_3b_reads():
-    """Every rating file the packet names is a file in this checkout, the
-    files the reader of record was given copies of."""
+def test_the_rating_files_given_to_the_reader_of_record_are_the_checkouts_bytes():
+    """The manifest records the sha256 of each copy the reader of record was
+    given under q19_sources/. Its paths are exactly the packet's sources, and
+    each hash is this checkout's file. This attests the bytes of the copies;
+    which of them the reader opened is its own report."""
     _, _, packet, _ = _readings()
     files = {s["file"] for i in packet["items"] for s in i["sources"]}
     assert len(files) == 84
-    assert all((ROOT / f).is_file() for f in files)
+    given = yaml.safe_load(SOURCES_GIVEN.read_text(encoding="utf-8"))["files"]
+    assert set(given) == files
+    for path, sha256 in given.items():
+        assert re.fullmatch(r"[0-9a-f]{64}", sha256), path
+        assert (ROOT / path).is_file(), path
+        assert _sha256(ROOT / path) == sha256, path
 
 
 def test_each_second_reading_covers_exactly_the_first_readings_items_with_the_rubrics_classes():
