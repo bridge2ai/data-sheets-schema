@@ -15,13 +15,27 @@ import pytest
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-JOBS = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
+WORKFLOW = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())
+JOBS = WORKFLOW["jobs"]
 
 
 def steps():
     for job, spec in JOBS.items():
         for index, step in enumerate(spec.get("steps", [])):
             yield job, index, step
+
+
+def effective_env(job, step, workflow=None):
+    """The environment a step runs with: workflow, then job, then step `env:`.
+
+    A variable set at workflow or job level reaches every step, so a test of a
+    step's environment must read all three levels, not the step's alone (#3988).
+    """
+    workflow = WORKFLOW if workflow is None else workflow
+    env = {}
+    for level in (workflow.get("env"), workflow["jobs"][job].get("env"), step.get("env")):
+        env.update(level or {})
+    return env
 
 
 def runs_pytest_on(step, tree):
@@ -39,15 +53,28 @@ def test_the_notes_controls_run_without_bytecode_and_without_a_prefix():
     assert {job for job, _, _ in NOTES_STEPS} == {"python-tests", "offline-audit", "offline-evaluation"}
     assert len(NOTES_STEPS) == 4
     for job, _, step in NOTES_STEPS:
-        env = step.get("env", {})
+        env = effective_env(job, step)
         assert env.get("PYTHONDONTWRITEBYTECODE") == "1", (job, step["name"])
         assert "PYTHONPYCACHEPREFIX" not in env, (job, step["name"])
 
 
 def test_the_tests_lane_compiles_its_conftest_outside_the_checkout():
-    [(_, _, step)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
-    assert step["env"]["PYTHONPYCACHEPREFIX"].startswith("${{ runner.temp }}/")
-    assert "PYTHONDONTWRITEBYTECODE" not in step["env"]
+    [(job, _, step)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
+    env = effective_env(job, step)
+    assert env["PYTHONPYCACHEPREFIX"].startswith("${{ runner.temp }}/")
+    assert "PYTHONDONTWRITEBYTECODE" not in env
+
+
+@pytest.mark.parametrize("level", ["workflow", "job", "step"])
+def test_the_effective_env_reads_every_level(level):
+    """A prefix at any level reaches the step, so each level must be seen (#3988)."""
+    step = {"env": {"PYTHONDONTWRITEBYTECODE": "1"}}
+    workflow = {"jobs": {"offline-audit": {"steps": [step]}}}
+    target = {"workflow": workflow, "job": workflow["jobs"]["offline-audit"], "step": step}[level]
+    target.setdefault("env", {})["PYTHONPYCACHEPREFIX"] = "/tmp/x"
+    env = effective_env("offline-audit", step, workflow)
+    assert env["PYTHONPYCACHEPREFIX"] == "/tmp/x"
+    assert env["PYTHONDONTWRITEBYTECODE"] == "1"
 
 
 def trailing_check(job):
