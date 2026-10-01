@@ -511,15 +511,19 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
 		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
 
-# Every FAIRSCAPE crate the repository bundles must convert to a record that
-# validates. The records go to a temporary directory: a test does not rewrite
+# The four crates #3969 names, the FAIRSCAPE profile crate and the three
+# examples under data/ro-crate/, must each convert to a record that
+# validates. The release crates under data/ro-crate_packages/ are not in
+# this list: tests/test_fairscape_integration/test_fairscape_to_d4d.py
+# converts CM4AI's, and AI_READI's is not UTF-8. The records go to a
+# temporary directory: a test does not rewrite
 # data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml (#3969).
 FAIRSCAPE_CRATES = $(ROCRATE_JSON) \
 	data/ro-crate/examples/CM4AI_roundtrip.json \
 	data/ro-crate/examples/voice_d4d_to_fairscape.json \
 	data/ro-crate/examples/voice_fairscape_test.json
 
-test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (each bundled crate)
+test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (the four data/ro-crate crates)
 	@echo "Testing FAIRSCAPE → D4D conversion..."
 	@out=$$(mktemp -d) && status=0 && \
 	for crate in $(FAIRSCAPE_CRATES); do \

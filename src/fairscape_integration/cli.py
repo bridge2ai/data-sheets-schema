@@ -118,7 +118,10 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
         else:
             click.echo(yaml_output)
 
-        # What the record could not hold, on stderr so stdout stays YAML (#3969)
+        # What the record could not hold, on stderr (#3969). That does not
+        # make stdout YAML alone without -o: convert() prints its progress
+        # lines there first, and so do the import warnings when the FAIRSCAPE
+        # models are missing (#4075).
         for source, reason in converter.dropped:
             click.echo(f"⚠ not placed: {source}: {reason}", err=True)
 
