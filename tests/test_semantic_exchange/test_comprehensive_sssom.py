@@ -455,11 +455,10 @@ class TestTTLAlignmentsAreMapped(_Committed):
     def test_the_29_the_heuristics_used_to_hide(self):
         """25 were aligned to an external term: 20 still are and are mapped,
         and the 5 whose term no vocabulary defines are aligned no longer
-        (#3971, #3974) and not mapped. The other 4 named only a D4D term.
-        It was their rows' mapping from #2935 (58ba281ca) until #3054
-        (9201af3d4), which made it listed and not mapped; #4052 removed
-        those triples too, so they name no term now and are still not
-        mapped."""
+        (#3971, #3974) and not mapped. The other 4 named only a D4D term:
+        from #2935 (58ba281ca) it was the row's mapping, until #3054
+        (9201af3d4) made it listed and not mapped; #4052 removed those
+        triples too, so they name no term now and are still not mapped."""
         external = FORMERLY_UNMAPPED_TTL_SLOTS - FORMERLY_UNMAPPED_D4D_TARGET_SLOTS
         self.assertEqual(len(external), 25)
         self.assertLessEqual(FORMERLY_UNMAPPED_WITHDRAWN_SLOTS, external)

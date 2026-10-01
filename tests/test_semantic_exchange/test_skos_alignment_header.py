@@ -617,8 +617,8 @@ def pairs_on_slot(pairs, slot, classes):
     takes a class-scoped triple as the TTL's word on the slot (#3053), and
     the /d4d-add-mapping playbook writes a class's own slots in that form.
     The generator reads one only for a class that carries the slot; this
-    reads it for any class, so no class-scoped triple on the slot's name is
-    left out (#4078)."""
+    reads it for any of ``classes``, so no class-scoped triple on the slot's
+    name is left out (#4078)."""
     found = set(pairs.get(slot, ()))
     for subject, subject_pairs in pairs.items():
         if (subject.endswith("_" + slot)
@@ -653,14 +653,13 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
       discouraged_uses, prohibited_uses, ethical_reviews, is_deidentified,
       extension_mechanism, and the seven on d4d: terms;
     - eight carried a triple on a term whose class triple #3942 corrected,
-      and differed from the replacement. raw_sources, existing_uses,
-      data_protection_impacts and confidential_elements said exactMatch
-      where their classes now said close, close, broad and related;
+      and differed from the class's replacement: raw_sources,
+      existing_uses, data_protection_impacts and confidential_elements said
+      exactMatch where their classes said close, close, broad and related;
       distribution_dates said exactMatch schema:dateCreated where its class
-      now said closeMatch schema:datePublished; sensitive_elements said
-      close where its class now said exact, labeling_strategies close where
-      its class said narrow, and retention_limit narrow where its class
-      said related;
+      said closeMatch schema:datePublished; sensitive_elements said close
+      where its class said exact, labeling_strategies close where its class
+      said narrow, and retention_limit narrow where its class said related;
     - sampling_strategies said relatedMatch evi:samplingPlan where
       SamplingStrategy said exactMatch. #3942 did not change that class;
       #3974 removed both triples, since EVI defines no samplingPlan.
