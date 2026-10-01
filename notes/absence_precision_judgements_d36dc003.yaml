@@ -1,0 +1,1041 @@
+# Per-phrase precision judgements behind the v5 absence baseline's table (#3875).
+#
+# The draw is `scripts/absence_claims_baseline.py --sample 50 --seed 2919`
+# over the pinned records, under lexicon absence_self_narration v5; its
+# sha256 is `draw_sha256` below, over each phrase's class, record, pointer
+# and span in the order drawn, and the script recomputes it from the entries
+# here. Verdicts: in_class, borderline, not_in_class. The class tally must
+# equal the counts in the script's PRECISION entry, or the note is not
+# rendered.
+#
+# Both classes were read. v5 changes three bundle_wide_absence patterns
+# (#3887), so that class's population is no longer v1's, v3's and v4's and
+# the seeded draw is a different set of phrases: 8 of its 50 are phrases the
+# v4 draw also held (same record, pointer and span), read again rather than
+# carried over. Of the record_self_narration phrases 2 are in the v4 draw,
+# also read again.
+# Each phrase was read in context, to its sentence's end, against its class
+# definition on 2026-09-30, when the v5 sample was drawn, and its verdict
+# written down then. One rater, the agent implementing #3875: not an
+# independent review (a second rating is #3197's open part).
+# Written by a one-off script; never edited except to add a judgement's
+# correction with its reason.
+draw_sha256: d36dc0038839bb0bdc49e97c6d8e39ee9afde83ff912e58072696d7d6185245b
+lexicon_sha256: d1134fd779a6940d0b214fcc514f0298b3712a97bb8877eb80c625c6d76bcab0
+record_set_sha256: cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711
+sample: 50
+seed: 2919
+recorded: '2026-09-30'
+rater: 'the agent implementing #3875; not an independent rater'
+judgements:
+  bundle_wide_absence:
+  - n: 1
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/AI_READI_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 310
+    end: 319
+    patterns:
+    - bwa.no-source
+    text: no source
+    verdict: in_class
+    reason: 'Says no source uses the word ''compliant'': an absence found by searching every source.'
+  - n: 2
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CHORUS_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 0
+    end: 29
+    patterns:
+    - bwa.sources-give-no
+    text: The declared bundle states no
+    verdict: in_class
+    reason: The declared bundle as a whole is said to state no IRB approval or protocol identifier.
+  - n: 3
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 397
+    end: 406
+    patterns:
+    - bwa.no-source
+    text: no source
+    verdict: in_class
+    reason: 'No source is said to make a HIPAA compliance determination: an absence across the sources.'
+  - n: 4
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CHORUS_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 0
+    end: 28
+    patterns:
+    - bwa.bundle-does-not
+    text: The declared bundle does not
+    verdict: in_class
+    reason: An absence asserted of the declared bundle (which identifiers are removed).
+  - n: 5
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    pointer: /sampling_strategies/1/source_caveats
+    start: 480
+    end: 489
+    patterns:
+    - bwa.no-source
+    text: no source
+    verdict: in_class
+    reason: No source is said to state that the gene set is not a sample.
+  - n: 6
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CM4AI_d4d.yaml
+    pointer: /raw_data_sources/3/source_caveats
+    start: 0
+    end: 89
+    patterns:
+    - bwa.not-in-bundle
+    text: No public access route to these laboratory deposition archives is described in the bundle
+    verdict: in_class
+    reason: No public access route is said to be described anywhere in the bundle.
+  - n: 7
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 360
+    end: 455
+    patterns:
+    - bwa.not-by-any-source
+    text: No committee membership list, decision timeframe, or appeal process is documented in any source
+    verdict: in_class
+    reason: No committee list, timeframe or appeal process is said to be documented in any source.
+  - n: 8
+    record: claudecode_agent/2026-08-22_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /variables/68/notes
+    start: 10
+    end: 34
+    patterns:
+    - bwa.not-in-bundle
+    text: not stated in the bundle
+    verdict: in_class
+    reason: Units are said not to be stated in the bundle.
+  - n: 9
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/CHORUS_d4d.yaml
+    pointer: /external_resources/2/description
+    start: 359
+    end: 416
+    patterns:
+    - bwa.not-by-any-source
+    text: No direct download URL for the data appears in any source
+    verdict: in_class
+    reason: No download URL is said to appear in any source.
+  - n: 10
+    record: claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/CM4AI_d4d.yaml
+    pointer: /data_collectors/3/collector_details/0
+    start: 113
+    end: 179
+    patterns:
+    - bwa.not-by-any-source
+    text: not appear in the Dataverse author list or in any of the documents
+    verdict: in_class
+    reason: 'The name is said to appear in none of the documents: an absence across the bundle.'
+  - n: 11
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 1937
+    end: 1957
+    patterns:
+    - bwa.sources-give-no
+    text: The bundle offers no
+    verdict: in_class
+    reason: The bundle as a whole is said to offer no explanation for the dates.
+  - n: 12
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/CM4AI_d4d.yaml
+    pointer: /regulatory_restrictions/description
+    start: 291
+    end: 376
+    patterns:
+    - bwa.not-in-the-sources
+    text: No export control designations (e.g. ITAR or EAR) are stated in the available sources
+    verdict: in_class
+    reason: No export-control designation is said to be stated in the sources; the window crosses 'e.g.'
+      (#3887).
+  - n: 13
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_d4d.yaml
+    pointer: /creators/2/source_caveats
+    start: 458
+    end: 487
+    patterns:
+    - bwa.not-in-the-sources
+    text: not reconciled in the sources
+    verdict: in_class
+    reason: 'The figures are said to be reconciled nowhere in the sources: an absence found by searching.'
+  - n: 14
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep3/CM4AI_d4d.yaml
+    pointer: /file_collections/0/notes
+    start: 91
+    end: 110
+    patterns:
+    - bwa.bundle-does-not
+    text: the bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (no per-release image count).
+  - n: 15
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 63
+    end: 85
+    patterns:
+    - bwa.sources-give-no
+    text: the bundle supplies no
+    verdict: in_class
+    reason: The bundle is said to supply no registered prefix for NIH awards.
+  - n: 16
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep2/CHORUS_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 0
+    end: 23
+    patterns:
+    - bwa.sources-do-not
+    text: The sources do not name
+    verdict: in_class
+    reason: The sources as a whole are said not to name a de-identification standard.
+  - n: 17
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 0
+    end: 19
+    patterns:
+    - bwa.bundle-does-not
+    text: The bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (no distribution of admissions by unit).
+  - n: 18
+    record: claudecode_agent/2026-07-28_claude-opus-5-generic_rep2/CHORUS_d4d.yaml
+    pointer: /regulatory_restrictions/description
+    start: 67
+    end: 93
+    patterns:
+    - bwa.sources-do-not
+    text: The documents do not state
+    verdict: in_class
+    reason: The documents as a whole are said not to state a HIPAA determination.
+  - n: 19
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 730
+    end: 750
+    patterns:
+    - bwa.sources-give-no
+    text: The bundle states no
+    verdict: in_class
+    reason: The bundle is said to state no DOI, citation, version or IRB detail.
+  - n: 20
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 0
+    end: 31
+    patterns:
+    - bwa.sources-give-no
+    text: The declared bundle provides no
+    verdict: in_class
+    reason: The declared bundle is said to provide no persistent identifier.
+  - n: 21
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /ethical_reviews/1/source_caveats
+    start: 0
+    end: 22
+    patterns:
+    - bwa.sources-give-no
+    text: The bundle contains no
+    verdict: in_class
+    reason: The bundle is said to contain no approval number, date or letter.
+  - n: 22
+    record: claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/VOICE_d4d.yaml
+    pointer: /labeling_strategies/0/labeling_details/0
+    start: 229
+    end: 262
+    patterns:
+    - bwa.sources-do-not
+    text: the documentation does not report
+    verdict: in_class
+    reason: The documentation as a whole is said not to report multiple ratings.
+  - n: 23
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/CHORUS_d4d.yaml
+    pointer: /known_biases/0/description
+    start: 0
+    end: 37
+    patterns:
+    - bwa.sources-do-not
+    text: The available sources do not identify
+    verdict: in_class
+    reason: The available sources are said not to identify any bias.
+  - n: 24
+    record: claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/VOICE_d4d.yaml
+    pointer: /instances/2/description
+    start: 443
+    end: 471
+    patterns:
+    - bwa.not-in-bundle
+    text: not reconciled in the bundle
+    verdict: in_class
+    reason: The two accountings are said to be reconciled nowhere in the bundle.
+  - n: 25
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep1/CHORUS_d4d.yaml
+    pointer: /creators/5/source_caveats
+    start: 75
+    end: 94
+    patterns:
+    - bwa.bundle-does-not
+    text: the bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (the individual's role).
+  - n: 26
+    record: claudecode_agent/2026-08-28_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml
+    pointer: /maintainers/0/source_caveats
+    start: 164
+    end: 208
+    patterns:
+    - bwa.not-in-the-sources
+    text: no corrected address is given in the sources
+    verdict: in_class
+    reason: No corrected address is said to be given in the sources.
+  - n: 27
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml
+    pointer: /data_governance/notes
+    start: 173
+    end: 254
+    patterns:
+    - bwa.not-in-the-sources
+    text: no committee membership or contact for that body is given in the declared sources
+    verdict: in_class
+    reason: No committee membership or contact is said to be given in the declared sources.
+  - n: 28
+    record: claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep2/VOICE_d4d.yaml
+    pointer: /instances/2/description
+    start: 661
+    end: 685
+    patterns:
+    - bwa.not-in-bundle
+    text: not stated in the bundle
+    verdict: in_class
+    reason: 'The bundle is said not to state the figures reconcilable: an absence across it.'
+  - n: 29
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep2/AI_READI_d4d.yaml
+    pointer: /missing_data_documentation/3/description
+    start: 0
+    end: 58
+    patterns:
+    - bwa.not-in-bundle
+    text: No imputation protocol is described in the declared bundle
+    verdict: in_class
+    reason: No imputation protocol is said to be described in the declared bundle.
+  - n: 30
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+    pointer: /direct_collection/0/source_caveats
+    start: 0
+    end: 27
+    patterns:
+    - bwa.sources-do-not
+    text: The sources do not classify
+    verdict: in_class
+    reason: The sources as a whole are said not to classify the collection.
+  - n: 31
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /subpopulations/0/source_caveats
+    start: 48
+    end: 81
+    patterns:
+    - bwa.not-in-bundle
+    text: not stated anywhere in the bundle
+    verdict: in_class
+    reason: The age-band counts are said not to be stated anywhere in the bundle.
+  - n: 32
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml
+    pointer: /file_collections/0/source_caveats
+    start: 131
+    end: 188
+    patterns:
+    - bwa.not-in-bundle
+    text: no directory listing or byte total is given in the bundle
+    verdict: in_class
+    reason: No directory listing or byte total is said to be given in the bundle.
+  - n: 33
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /funders/0/grants/2/description
+    start: 123
+    end: 171
+    patterns:
+    - bwa.not-in-bundle
+    text: No award title or amount is stated in the bundle
+    verdict: in_class
+    reason: No award title or amount is said to be stated in the bundle.
+  - n: 34
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep3/CHORUS_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 50
+    end: 69
+    patterns:
+    - bwa.bundle-does-not
+    text: the bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (no data-use permission category).
+  - n: 35
+    record: claudecode_agent_crate/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml
+    pointer: /anomalies/4/description
+    start: 291
+    end: 316
+    patterns:
+    - bwa.not-in-the-sources
+    text: not stated in the sources
+    verdict: in_class
+    reason: The reason is said not to be stated in the sources.
+  - n: 36
+    record: claudecode_agent/2026-08-28b_claude-opus-5-api-generic-v7_rep1/CHORUS_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 353
+    end: 372
+    patterns:
+    - bwa.bundle-does-not
+    text: the bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (which organization is accountable).
+  - n: 37
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /cleaning_strategies/1/source_caveats
+    start: 91
+    end: 134
+    patterns:
+    - bwa.sources-do-not
+    text: the project documentation does not describe
+    verdict: borderline
+    reason: 'Borderline: the absence is asserted of one named source (the project documentation), not
+      of the sources or the documentation as a whole; bwa.sources-do-not admits any one-word qualifier
+      before `documentation`.'
+  - n: 38
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml
+    pointer: /at_risk_populations/source_caveats
+    start: 70
+    end: 110
+    patterns:
+    - bwa.sources-do-not
+    text: the source documents do not characterize
+    verdict: in_class
+    reason: The source documents as a whole are said not to characterize the cohort.
+  - n: 39
+    record: claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep2/AI_READI_d4d.yaml
+    pointer: /creators/11/description
+    start: 194
+    end: 248
+    patterns:
+    - bwa.not-in-bundle
+    text: cannot be reliably determined from the declared bundle
+    verdict: in_class
+    reason: 'The institution is said to be undeterminable from the declared bundle: an absence across
+      it.'
+  - n: 40
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 2109
+    end: 2147
+    patterns:
+    - bwa.not-by-any-source
+    text: not attested as keywords by any source
+    verdict: in_class
+    reason: The terms are said to be attested as keywords by no source.
+  - n: 41
+    record: claudecode_agent_crate/2026-07-27_claude-opus-5_rep2/CHORUS_d4d.yaml
+    pointer: /updates/update_details/6
+    start: 0
+    end: 24
+    patterns:
+    - bwa.sources-do-not
+    text: The sources do not state
+    verdict: in_class
+    reason: The sources as a whole are said not to state an update frequency.
+  - n: 42
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+    pointer: /at_risk_populations/description
+    start: 609
+    end: 628
+    patterns:
+    - bwa.bundle-does-not
+    text: The bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (no population-specific safeguards).
+  - n: 43
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/CHORUS_d4d.yaml
+    pointer: /data_governance/source_caveats
+    start: 285
+    end: 309
+    patterns:
+    - bwa.not-in-bundle
+    text: not stated in the bundle
+    verdict: in_class
+    reason: The name is said not to be stated in the bundle.
+  - n: 44
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /known_biases/0/source_caveats
+    start: 0
+    end: 31
+    patterns:
+    - bwa.sources-give-no
+    text: The declared bundle contains no
+    verdict: in_class
+    reason: The declared bundle is said to contain no bias analysis.
+  - n: 45
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CM4AI_d4d.yaml
+    pointer: /funders/0/source_caveats
+    start: 146
+    end: 169
+    patterns:
+    - bwa.no-source
+    - bwa.not-in-bundle
+    text: no source in the bundle
+    verdict: in_class
+    reason: No source in the bundle is said to supply a RePORTER details page.
+  - n: 46
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep1/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 504
+    end: 530
+    patterns:
+    - bwa.not-in-the-sources
+    text: not settled by the sources
+    verdict: in_class
+    reason: 'The question is said to be settled by none of the sources: an absence found by searching.'
+  - n: 47
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CM4AI_d4d.yaml
+    pointer: /preprocessing_strategies/1/source_caveats
+    start: 423
+    end: 451
+    patterns:
+    - bwa.sources-give-no
+    text: The declared bundle gives no
+    verdict: in_class
+    reason: The declared bundle is said to give no repository URL.
+  - n: 48
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep3/CHORUS_d4d.yaml
+    pointer: /at_risk_populations/description
+    start: 81
+    end: 118
+    patterns:
+    - bwa.sources-do-not
+    text: The available sources do not describe
+    verdict: in_class
+    reason: The available sources are said not to describe safeguards.
+  - n: 49
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /data_collectors/0/source_caveats
+    start: 0
+    end: 19
+    patterns:
+    - bwa.bundle-does-not
+    text: The bundle does not
+    verdict: in_class
+    reason: An absence asserted of the bundle (the staff who recruited).
+  - n: 50
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml
+    pointer: /intended_uses/1/source_caveats
+    start: 0
+    end: 34
+    patterns:
+    - bwa.sources-do-not
+    text: The source documents do not report
+    verdict: in_class
+    reason: The source documents as a whole are said not to report the holdout's release.
+  record_self_narration:
+  - n: 1
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 600
+    end: 613
+    patterns:
+    - rsn.left-empty
+    text: is left unset
+    verdict: in_class
+    reason: 'governance_committee_contact is said to be left unset: an omission in this record.'
+  - n: 2
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_d4d.yaml
+    pointer: /creators/2/source_caveats
+    start: 154
+    end: 167
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says which collaborator list is recorded here.
+  - n: 3
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /data_protection_impacts/0/source_caveats
+    start: 325
+    end: 329
+    patterns:
+    - rsn.slot-word
+    text: slot
+    verdict: in_class
+    reason: Tells the reader how to read this slot of the record.
+  - n: 4
+    record: claudecode_api/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 2018
+    end: 2041
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded in conforms_to
+    verdict: in_class
+    reason: Says which slots carry the data standards.
+  - n: 5
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1841
+    end: 1867
+    patterns:
+    - rsn.recorded-under-slot
+    text: carried in is_deidentified
+    verdict: in_class
+    reason: Says both statements are carried in is_deidentified.
+  - n: 6
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 725
+    end: 739
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    verdict: in_class
+    reason: 'The manifest''s declaration is why the pediatric dataset is represented only through related_datasets
+      (verb past the `;`): construction.'
+  - n: 7
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/CHORUS_d4d.yaml
+    pointer: /human_subject_research/source_caveats
+    start: 140
+    end: 154
+    patterns:
+    - rsn.left-empty
+    text: are left unset
+    verdict: in_class
+    reason: Says those slots are left unset.
+  - n: 8
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 326
+    end: 337
+    patterns:
+    - rsn.this-record
+    text: this record
+    verdict: in_class
+    reason: Says which figure is used in this record.
+  - n: 9
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml
+    pointer: /creators/1/source_caveats
+    start: 376
+    end: 389
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says which affiliation is recorded here and why.
+  - n: 10
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 856
+    end: 886
+    patterns:
+    - rsn.source-ranking
+    text: preferred as the higher-ranked
+    verdict: in_class
+    reason: Says PhysioNet is preferred as the higher-ranked source.
+  - n: 11
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 146
+    end: 164
+    patterns:
+    - rsn.rather-than
+    text: rather than merged
+    verdict: in_class
+    reason: Says the figures are recorded separately rather than merged.
+  - n: 12
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep2/VOICE_d4d.yaml
+    pointer: /related_datasets/2/source_caveats
+    start: 375
+    end: 388
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says which record is recorded here and that the others are not merged.
+  - n: 13
+    record: claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    pointer: /source_caveats
+    start: 289
+    end: 300
+    patterns:
+    - rsn.this-record
+    text: this record
+    verdict: in_class
+    reason: Says earlier releases are kept out of this record.
+  - n: 14
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep2/AI_READI_d4d.yaml
+    pointer: /ethical_reviews/0/source_caveats
+    start: 307
+    end: 320
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says which attribution is the one recorded here.
+  - n: 15
+    record: claudecode_agent/2026-08-06_claude-opus-5-1m-generic-v3-schema2_rep3/AI_READI_d4d.yaml
+    pointer: /notes
+    start: 1171
+    end: 1184
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says the organization is recorded here for want of a slot.
+  - n: 16
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep3/VOICE_d4d.yaml
+    pointer: /confidential_elements/0/source_caveats
+    start: 88
+    end: 126
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded under regulatory_restrictions
+    verdict: in_class
+    reason: Says where the certificate is recorded in the record.
+  - n: 17
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1837
+    end: 1846
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    verdict: in_class
+    reason: Says only the narrative answers are used here.
+  - n: 18
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /distribution_dates/0/source_caveats
+    start: 232
+    end: 243
+    patterns:
+    - rsn.recorded-here
+    text: stated here
+    verdict: in_class
+    reason: Says which date is stated here.
+  - n: 19
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 60
+    end: 71
+    patterns:
+    - rsn.this-record
+    text: this record
+    verdict: in_class
+    reason: Says the value is a mapping made for this record.
+  - n: 20
+    record: claudecode_agent/2026-08-20_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 400
+    end: 409
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    verdict: in_class
+    reason: Says which name is used here.
+  - n: 21
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep3/VOICE_d4d.yaml
+    pointer: /creators/8/notes
+    start: 258
+    end: 268
+    patterns:
+    - rsn.recorded-here
+    text: given here
+    verdict: in_class
+    reason: Says which affiliation is given here.
+  - n: 22
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/CM4AI_d4d.yaml
+    pointer: /updates/source_caveats
+    start: 80
+    end: 175
+    patterns:
+    - rsn.source-ranking
+    text: stated in the release maintenance plan; the release statement is preferred as the higher-ranked
+    verdict: in_class
+    reason: Says the release statement is preferred as the higher-ranked source and the disagreement recorded.
+  - n: 23
+    record: claudecode_agent/2026-07-31_claude-opus-5-api-generic_rep1/CM4AI_d4d.yaml
+    pointer: /external_resources/2/description
+    start: 1055
+    end: 1066
+    patterns:
+    - rsn.this-record
+    text: this record
+    verdict: in_class
+    reason: 'Names the release this record describes: a referent statement.'
+  - n: 24
+    record: claudecode_api/2026-09-04c_claude-opus-5-api-generic-v8_rep1/CM4AI_d4d.yaml
+    pointer: /creators/44/source_caveats
+    start: 251
+    end: 264
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says the higher-ranked affiliation is recorded here.
+  - n: 25
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /errata/0/source_caveats
+    start: 166
+    end: 179
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says where the corrections recorded here come from.
+  - n: 26
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep1/VOICE_PEDIATRIC_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 741
+    end: 745
+    patterns:
+    - rsn.slot-word
+    text: slot
+    verdict: in_class
+    reason: Explains the slot's range as the reason it is unset.
+  - n: 27
+    record: claudecode_agent/2026-08-07_claude-opus-5-claudecode-generic-v3_rep3/CM4AI_d4d.yaml
+    pointer: /resources/1/source_caveats
+    start: 192
+    end: 210
+    patterns:
+    - rsn.slot-not-populated
+    text: '`bytes` is omitted'
+    verdict: in_class
+    reason: Says `bytes` is omitted for every file.
+  - n: 28
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 111
+    end: 125
+    patterns:
+    - rsn.source-ranking
+    text: input manifest
+    verdict: in_class
+    reason: Says the higher-ranked value was used where the input manifest ranks one source above the
+      other.
+  - n: 29
+    record: claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep3/CM4AI_d4d.yaml
+    pointer: /creators/44/description
+    start: 256
+    end: 269
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says both statements are recorded here without resolution.
+  - n: 30
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CHORUS_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 313
+    end: 332
+    patterns:
+    - rsn.left-empty
+    text: is left unpopulated
+    verdict: in_class
+    reason: Says the principal_investigator slot is left unpopulated.
+  - n: 31
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 1578
+    end: 1592
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    verdict: in_class
+    reason: 'The equally ranked conflict is why both values are represented under sensitive_elements:
+      construction.'
+  - n: 32
+    record: claudecode_agent/2026-08-28d_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 929
+    end: 943
+    patterns:
+    - rsn.source-ranking
+    text: equally ranked
+    verdict: in_class
+    reason: The equal ranking is why the publisher slot is left unpopulated and both are recorded here.
+  - n: 33
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 126
+    end: 139
+    patterns:
+    - rsn.source-ranking
+    text: higher ranked
+    verdict: in_class
+    reason: Says the higher-ranked figure is used here and the other recorded in this caveat.
+  - n: 34
+    record: claudecode_agent/2026-08-22b_claude-opus-5-api-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /sampling_strategies/0/source_caveats
+    start: 401
+    end: 414
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says which description is recorded here.
+  - n: 35
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/CHORUS_d4d.yaml
+    pointer: /regulatory_restrictions/source_caveats
+    start: 131
+    end: 144
+    patterns:
+    - rsn.this-record
+    text: this record's
+    verdict: in_class
+    reason: Says the enum value is this record's mapping.
+  - n: 36
+    record: claudecode_agent/2026-08-28_claude-opus-5-claudecode-generic-v6_rep2/VOICE_d4d.yaml
+    pointer: /content_warnings/0/source_caveats
+    start: 396
+    end: 409
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says the removal is recorded here.
+  - n: 37
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CHORUS_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 511
+    end: 531
+    patterns:
+    - rsn.left-empty
+    text: are left unpopulated
+    verdict: in_class
+    reason: Says two slots are left unpopulated.
+  - n: 38
+    record: claudecode_agent/2026-07-31_claude-opus-5-generic-v2_rep1/CM4AI_d4d.yaml
+    pointer: /subsets/3/description
+    start: 213
+    end: 224
+    patterns:
+    - rsn.this-record
+    text: this record
+    verdict: in_class
+    reason: Says the identifier was minted for this record.
+  - n: 39
+    record: claudecode_agent/2026-08-20b_claude-opus-5-api-generic-v5_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 727
+    end: 736
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    verdict: in_class
+    reason: Says the per-feature counts are used here.
+  - n: 40
+    record: claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep2/AI_READI_d4d.yaml
+    pointer: /is_deidentified/source_caveats
+    start: 411
+    end: 449
+    patterns:
+    - rsn.recorded-under-slot
+    text: recorded in `deidentification_details`
+    verdict: in_class
+    reason: Says where the tier 3 statement is recorded rather than merged.
+  - n: 41
+    record: claudecode_agent/2026-08-11_claude-opus-5-claudecode-generic_rep2/CM4AI_d4d.yaml
+    pointer: /file_collections/0/source_caveats
+    start: 130
+    end: 155
+    patterns:
+    - rsn.slot-not-populated
+    text: '`total_bytes` are omitted'
+    verdict: in_class
+    reason: Says `total_bytes` is omitted throughout.
+  - n: 42
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic_rep1/CHORUS_d4d.yaml
+    pointer: /license_and_use_terms/source_caveats
+    start: 231
+    end: 250
+    patterns:
+    - rsn.left-empty
+    text: is left unpopulated
+    verdict: in_class
+    reason: Says the permission slot is left unpopulated.
+  - n: 43
+    record: claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml
+    pointer: /collection_timeframes/0/source_caveats
+    start: 216
+    end: 225
+    patterns:
+    - rsn.recorded-here
+    text: used here
+    verdict: in_class
+    reason: Says the FAIRhub value is used here.
+  - n: 44
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep3/VOICE_d4d.yaml
+    pointer: /data_protection_impacts/0/source_caveats
+    start: 268
+    end: 281
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says what the governance work recorded here is.
+  - n: 45
+    record: claudecode_agent/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 4069
+    end: 4096
+    patterns:
+    - rsn.slot-not-populated
+    text: '`use_repository` is omitted'
+    verdict: in_class
+    reason: Says `use_repository` is omitted.
+  - n: 46
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep3/CHORUS_d4d.yaml
+    pointer: /source_caveats
+    start: 1797
+    end: 1810
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says what the title recorded here is.
+  - n: 47
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/VOICE_d4d.yaml
+    pointer: /source_caveats
+    start: 0
+    end: 11
+    patterns:
+    - rsn.this-record
+    text: This record
+    verdict: in_class
+    reason: 'Names the dataset this record describes: a referent statement.'
+  - n: 48
+    record: claudecode_agent/2026-08-24_claude-opus-5-claudecode-generic-v5_rep1/AI_READI_d4d.yaml
+    pointer: /source_caveats
+    start: 2515
+    end: 2519
+    patterns:
+    - rsn.slot-word
+    text: slot
+    verdict: in_class
+    reason: The single-valued publisher slot is why it is left unpopulated.
+  - n: 49
+    record: claudecode_agent/2026-08-22c_claude-opus-5-api-generic-v5_rep2/AI_READI_d4d.yaml
+    pointer: /variables/30/notes
+    start: 299
+    end: 312
+    patterns:
+    - rsn.recorded-here
+    text: recorded here
+    verdict: in_class
+    reason: Says the ceiling is recorded here rather than in maximum_value.
+  - n: 50
+    record: claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml
+    pointer: /creators/0/source_caveats
+    start: 108
+    end: 143
+    patterns:
+    - rsn.recorded-here
+    - rsn.source-ranking
+    text: preferred here as the higher-ranked
+    verdict: in_class
+    reason: Says the PhysioNet spelling is preferred here as the higher-ranked source.

@@ -26,6 +26,7 @@ REGISTERED = {
     ("absence_self_narration", 2): "e5f35547ca9862c8dc7d5f8996e0e67712549591334b9f726003fd4b3c257708",
     ("absence_self_narration", 3): "f1657b94067ebb8fbdfd83bccdad1780b83d1b9e8dba245664b9fe54d41df7b6",
     ("absence_self_narration", 4): "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec",
+    ("absence_self_narration", 5): "d1134fd779a6940d0b214fcc514f0298b3712a97bb8877eb80c625c6d76bcab0",
 }
 
 #: v4's `rsn.source-ranking` gap between verb and term (#3791, #3792): any
@@ -36,6 +37,26 @@ V4_GAP = (r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?
 #: The gap as first written, whose abbreviation alternatives also took a `.`
 #: that `\.(?!\s)` takes: the same language, matched in exponential time.
 V4_GAP_OVERLAPPING = r"(?:[^.]|\.(?!\s)|(?<=\bSt)\.|(?<=\bDr)\.|(?<=\be\.g)\.|(?<=\bi\.e)\.|(?<=\bU\.S)\.)*?"
+#: v1-v4's window in the three bundle-wide patterns that bound one, and
+#: v5's (#3887): the same 80 characters ending at `;` and `:`, which now end
+#: at a full stop only where V4_GAP's sentence ends.
+BWA_GAP = r"[^.;:]{0,80}?"
+V5_BWA_GAP = (r"(?:[^.;:]|\.(?!\s)|(?<=\bSt)\.(?=\s)|(?<=\bDr)\.(?=\s)|(?<=\be\.g)\.(?=\s)|(?<=\bi\.e)\.(?=\s)"
+              r"|(?<=\bU\.S)\.(?=\s)){0,80}?")
+V5_BWA_PATTERNS = ("bwa.not-by-any-source", "bwa.not-in-bundle", "bwa.not-in-the-sources")
+#: v1-v4's names of the declared ranking, an alternative that needs no verb,
+#: and v4's ranking terms; v5 makes the names terms (#3874, #3706).
+NAMES = r"\b(?:source manifest|input manifest|source ranking|declared (?:source )?ranking)\b|"
+V4_TERM = r"\b(?:tier[- ]?[0-9] sources?|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b"
+V5_TERM = (r"\b(?:source manifest|input manifest|source ranking|declared (?:source )?ranking|tier[- ]?[0-9] sources?"
+           r"|(?:highest|lowest|higher|lower|equally)[- ]ranked|ranks? (?:higher|lower|highest|lowest))\b")
+#: v4's `use` in the verb list, and v5's (#3875): not where the text marks a
+#: noun, by a determiner, preposition or "data" before it or a noun or "of"
+#: after it. `used` stays a verb of its own.
+V4_USE = r"|use[sd]?|"
+V5_USE = (r"|(?<!\bthe )(?<!\ba )(?<!\ban )(?<!\bits )(?<!\btheir )(?<!\bany )(?<!\bno )(?<!\bfor )(?<!\bof )"
+          r"(?<!\bin )(?<!\bdata )uses?\b(?! (?:agreements?|of|cases?|limitations?|restrictions?|conditions?|terms"
+          r"|polic(?:y|ies))\b)|used|")
 
 #: Append-only, as REGISTERED: the container lexicons read by
 #: `self_disclaimed` (#2913), pinned in container_lexicons/registry.yaml and
@@ -484,10 +505,210 @@ class TheRegistry(unittest.TestCase):
                 self.assertLessEqual(ends[4], ends[2])
                 self.assertLessEqual(ends[3], ends[4])
 
+    def test_v5_changes_only_the_four_patterns_it_names(self):
+        """#3875: rsn.source-ranking and the three bundle-wide patterns with a
+        bounded window move; every other pattern, the flags, the class
+        descriptions, the scope and the declaration are v4's. The four keep
+        v4's self-test texts and add to them, except the one v4 example that
+        is now a counterexample (#3874, #3706)."""
+        v4, v5 = (lx.load("absence_self_narration", v) for v in (4, 5))
+        self.assertTrue(v5.counterexamples_required)
+        self.assertEqual((v5.classes, v5.scope), (v4.classes, v4.scope))
+        self.assertEqual([p.id for p in v5.patterns], [p.id for p in v4.patterns])
+        moved = "The source manifest records the release date."
+        for a, b in zip(v4.patterns, v5.patterns):
+            with self.subTest(pattern=a.id):
+                if a.id in V5_BWA_PATTERNS + ("rsn.source-ranking",):
+                    self.assertEqual((b.cls, b.regex.flags), (a.cls, a.regex.flags))
+                    self.assertNotEqual(b.regex.pattern, a.regex.pattern)
+                    self.assertGreater(len(b.examples), len([t for t in a.examples if t != moved]))
+                    self.assertEqual([t for t in b.examples if t in a.examples],
+                                     [t for t in a.examples if t != moved])
+                    self.assertEqual(b.counterexamples[:len(a.counterexamples)], a.counterexamples)
+                    self.assertGreater(len(b.counterexamples), len(a.counterexamples))
+                else:
+                    self.assertEqual((b.cls, b.regex.pattern, b.regex.flags, b.examples, b.counterexamples),
+                                     (a.cls, a.regex.pattern, a.regex.flags, a.examples, a.counterexamples))
+        ranking = {p.id: p for p in v5.patterns}["rsn.source-ranking"]
+        self.assertIn(moved, ranking.counterexamples)
+
+    def test_v5_bundle_wide_windows_are_v4s_with_the_source_ranking_sentence_end(self):
+        """#3887: in the three patterns, only the window's character class
+        moves, to the one v4's rsn.source-ranking gap uses, bounded as
+        before and still ending at `;` and `:`."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns} for v in (4, 5))
+        for pid in V5_BWA_PATTERNS:
+            with self.subTest(pattern=pid):
+                self.assertEqual(v4[pid].regex.pattern.count(BWA_GAP), 1)
+                self.assertEqual(v5[pid].regex.pattern, v4[pid].regex.pattern.replace(BWA_GAP, V5_BWA_GAP))
+        self.assertEqual(V5_BWA_GAP, V4_GAP.replace("[^.]", "[^.;:]").replace(")*?", "){0,80}?"))
+        no_window = [p.id for p in v5.values() if p.id not in V5_BWA_PATTERNS and "{0,80}" in p.regex.pattern]
+        self.assertEqual(no_window, [])
+
+    def test_no_character_of_the_v5_bundle_wide_window_can_be_taken_two_ways(self):
+        """#3894's rule for the new windows: at every position at most one
+        alternative matches, and the overlapping form would match the same."""
+        alternatives = [re.compile(a) for a in V5_BWA_GAP[len("(?:"):-len("){0,80}?")].split("|")]
+        self.assertEqual(len(alternatives), 7)
+        text = ("See e.g., x and i.e., y; U.S.-based St. Louis, Dr. Smith, v3.1.0 and No. 5 et al. end: "
+                "U.S. data, e.g. these, i.e. those.\nSt.\tDr.  e.g.x i.e.x U.S.x St.x Dr.x")
+        for i in range(len(text)):
+            with self.subTest(i=i, at=text[max(0, i - 5):i + 2]):
+                self.assertLessEqual(sum(bool(a.match(text, i)) for a in alternatives), 1)
+        v5 = {p.id: p for p in lx.load("absence_self_narration", 5).patterns}
+        overlapping = V4_GAP_OVERLAPPING.replace("[^.]", "[^.;:]").replace(")*?", "){0,80}?")
+        for pid in V5_BWA_PATTERNS:
+            pattern = v5[pid]
+            other = re.compile(pattern.regex.pattern.replace(V5_BWA_GAP, overlapping), pattern.regex.flags)
+            self.assertNotEqual(other.pattern, pattern.regex.pattern)
+            for sample in pattern.examples + pattern.counterexamples + (text,):
+                with self.subTest(pattern=pid, text=sample):
+                    self.assertEqual([m.span() for m in pattern.regex.finditer(sample)],
+                                     [m.span() for m in other.finditer(sample)])
+
+    def test_v5_bundle_wide_windows_cross_an_abbreviation_and_stop_at_a_full_stop(self):
+        """#3887, one change at a time: the abbreviation's `.` no longer ends
+        the window (v4 stopped there); the full stop after the next word, "No."
+        and "et al." still do, as do `;` and `:`; and 80 characters still
+        bound it."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns} for v in (4, 5))
+        tails = {"bwa.not-by-any-source": "given by any source", "bwa.not-in-bundle": "given in the bundle",
+                 "bwa.not-in-the-sources": "given in the sources"}
+        for pid, tail in tails.items():
+            for abbreviation in ("St.", "Dr.", "e.g.", "i.e.", "U.S."):
+                text = f"No address for {abbreviation} Smith is {tail}."
+                with self.subTest(pattern=pid, abbreviation=abbreviation):
+                    self.assertIsNone(v4[pid].regex.search(text))
+                    self.assertEqual(v5[pid].regex.search(text).group(), text[:-1])
+            for word in ("Louis.", "No.", "et al.", "first.", "Smith;", "Smith:"):
+                text = f"No address for {word} Smith is {tail}."
+                with self.subTest(pattern=pid, word=word):
+                    self.assertIsNone(v5[pid].regex.search(text))
+            near = f"No {'x' * 60} is {tail}."
+            far = f"No {'x' * 90} is {tail}."
+            self.assertIsNotNone(v5[pid].regex.search(near))
+            self.assertIsNone(v5[pid].regex.search(far))
+
+    def test_v5_source_ranking_is_v4s_with_names_as_terms_and_use_guarded(self):
+        """#3875, #3874, #3706: the names' verb-free alternative is gone, the
+        names join the ranking terms on both branches, and `use[sd]?` becomes
+        a guarded `uses?` beside `used`. The window is v4's."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (4, 5))
+        self.assertTrue(v4.regex.pattern.startswith(NAMES))
+        rest = v4.regex.pattern[len(NAMES):]
+        self.assertEqual((rest.count(V4_TERM), rest.count(V4_USE), rest.count(V4_GAP)), (2, 2, 2))
+        self.assertEqual(v5.regex.pattern, rest.replace(V4_TERM, V5_TERM).replace(V4_USE, V5_USE))
+
+    def test_v5_use_counts_as_the_verb_only_where_it_is_one(self):
+        """#3875, shown by changing one word at a time: the document name
+        "data transfer and use agreement" carries no verb in v5 (v4 took its
+        `use`), and `use` after a subject or "to" still counts."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (4, 5))
+
+        def match(pattern, text):
+            m = pattern.regex.search(text)
+            return m.group() if m else None
+
+        issue = ("Attachment 2 of the data transfer and use agreement, an equally ranked source, states that the "
+                 "data are identifiable.")
+        self.assertIn(issue, v5.counterexamples)
+        self.assertEqual(match(v4, issue), "use agreement, an equally ranked")
+        self.assertIsNone(match(v5, issue))
+        example = "The record does not use the lower-ranked source's date."
+        self.assertIn(example, v5.examples)
+        self.assertEqual(match(v5, example), "use the lower-ranked")
+        for verb in ("We use the higher-ranked source.", "The record uses the higher-ranked source.",
+                     "The higher-ranked source is used.", "It chose to use the higher-ranked source."):
+            with self.subTest(verb=verb):
+                self.assertIsNotNone(match(v5, verb))
+        # Each guard alone decides: a noun after `use`, and a word before it.
+        base = "The higher-ranked source permits use {}to research."
+        self.assertIsNotNone(match(v5, base.format("")))
+        for noun in ("agreement ", "agreements ", "of the data ", "cases ", "limitations ", "restrictions ",
+                     "conditions ", "terms ", "policy ", "policies "):
+            with self.subTest(after=noun):
+                self.assertIsNone(match(v5, base.format(noun)))
+                self.assertIsNotNone(match(v4, base.format(noun)))
+        for word in ("the", "a", "an", "its", "their", "any", "no", "for", "of", "in", "data"):
+            text = f"The higher-ranked source permits {word} use to research."
+            with self.subTest(before=word):
+                self.assertIsNone(match(v5, text))
+                self.assertIsNotNone(match(v5, text.replace(f" {word} use", " use")))
+        # A noun after an adjective is not guarded: the list is not a parser.
+        self.assertIsNotNone(match(v5, "The higher-ranked source permits secondary use."))
+
+    def test_v5_names_of_the_declared_ranking_need_a_verb(self):
+        """#3874, #3706: a name with no listed verb in its sentence, which v4
+        matched, does not match in v5; with one, before or after it and past
+        `;` as for the other terms, it does. The full stop still ends it."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (4, 5))
+
+        def match(pattern, text):
+            m = pattern.regex.search(text)
+            return m.group() if m else None
+
+        for name in ("source manifest", "input manifest", "source ranking", "declared ranking",
+                     "declared source ranking"):
+            with self.subTest(name=name):
+                bare = f"The {name} records the release date."
+                self.assertEqual(match(v4, bare), name)
+                self.assertIsNone(match(v5, bare))
+                self.assertEqual(match(v5, f"The {name} ranks the page first; its date is used."), name)
+                self.assertEqual(match(v5, f"The date is preferred under the {name}."),
+                                 f"preferred under the {name}")
+                self.assertIsNone(match(v5, f"The {name} ranks the page first. Its date is used."))
+        for text in ("The source manifest records the release date.",
+                     "The release pages, which the input manifest ranks higher, state no single total."):
+            with self.subTest(text=text):
+                self.assertIn(text, v5.counterexamples)
+                self.assertIsNotNone(match(v4, text))
+
+    def test_v5_name_after_a_span_that_took_its_verb_does_not_match(self):
+        """#4001: a name can lose its v4 match with a listed verb in its
+        sentence, when a verb-first span to an earlier tier term has already
+        taken that verb. The v5 note counts this case apart from the names
+        with no listed verb. The sentence is the AI_READI 2026-08-24 v5 rep2
+        `/intended_uses/3/source_caveats` leaf, shortened."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (4, 5))
+        text = ("Both statements are recorded; the license is a tier 2 source and the FAIRhub structured "
+                "metadata tier 1 in the input manifest, but the two describe different instruments.")
+        span = "recorded; the license is a tier 2 source"
+        self.assertEqual([m.group() for m in v4.regex.finditer(text)], [span, "input manifest"])
+        self.assertEqual([m.group() for m in v5.regex.finditer(text)], [span])
+        # The verb is the one the name needed: with no tier term before it,
+        # the same verb's span reaches the name.
+        alone = ("Both statements are recorded; the license and the FAIRhub structured metadata are in the "
+                 "input manifest, but the two describe different instruments.")
+        self.assertEqual([m.group() for m in v5.regex.finditer(alone)],
+                         ["recorded; the license and the FAIRhub structured metadata are in the input manifest"])
+
+    def test_every_v5_source_ranking_match_ends_at_a_v2_term(self):
+        """v5 matches only terms v2 matched; a name inside a v4 verb-first
+        span can now end a span of its own, so a v5 match need not end where
+        a v4 match does (the absorbed case of #3732)."""
+        v2, v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                      for v in (2, 4, 5))
+        texts = v5.examples + v5.counterexamples + v4.examples + v2.examples + (
+            "Two tier-1 sources disagree, so both dates are recorded.",
+            "The value used from the input manifest is the higher-ranked one.",
+            "It was preferred over the lower-ranked source, the higher-ranked one being older.")
+        for text in texts:
+            with self.subTest(text=text):
+                self.assertLessEqual({m.end() for m in v5.regex.finditer(text)},
+                                     {m.end() for m in v2.regex.finditer(text)})
+        absorbed = "The value used from the input manifest is the higher-ranked one."
+        self.assertEqual([m.group() for m in v4.regex.finditer(absorbed)],
+                         ["used from the input manifest is the higher-ranked"])
+        self.assertEqual([m.group() for m in v5.regex.finditer(absorbed)], ["used from the input manifest"])
+
     def test_every_result_identity_names_the_bytes(self):
         """The newest registered version by default, and the one named."""
-        issue = {1: 2919, 2: 3132, 3: 3520, 4: 3791}
-        for version, want in [(None, 4), (1, 1), (2, 2), (3, 3), (4, 4)]:
+        issue = {1: 2919, 2: 3132, 3: 3520, 4: 3791, 5: 3875}
+        for version, want in [(None, 5), (1, 1), (2, 2), (3, 3), (4, 4), (5, 5)]:
             with self.subTest(version=version):
                 lexicon = lx.load("absence_self_narration", version)
                 self.assertEqual(lexicon.identity(), {

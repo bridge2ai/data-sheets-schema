@@ -24,6 +24,9 @@ an interval.
 The v4 section restates v4's recall on that precision (#3895): v4's matches
 are v3's that it still ends at, which the kept draw covers, and the dropped
 rows it recovers, which the dropped judgements cover.
+Since v5 (#3875), which requires a verb for the names of the declared
+ranking too (#3874, #3706) and does not take a noun `use` for one, the note
+also says what v5 gives up relative to v4 on the same two judgement files.
 
 A *dropped match* is a v2 match of the pattern that no v3 match of the same
 pattern ends at, in the same leaf. Every v3 match ends at a term v2 matched
@@ -59,6 +62,12 @@ records two things it computes rather than judges:
             without them. An absorbed or consumed row is the exception: the
             change table does not classify it, so its recovery is named on
             its own (#3917).
+  v5        what the registered v5 pattern does with the term (#3875):
+              ended           a v5 match of the pattern ends at it
+              inside          it lies inside a v5 match that ends later
+              dropped         neither
+            computed for the dropped rows and for the matches v3 keeps, so
+            the judged rows of both files say what v5 gives up.
 
 The judgement file is in the form of the precision judgements
 (`notes/absence_precision_judgements_bd0c63ed.yaml`) and is checked by the
@@ -122,6 +131,10 @@ FROM_VERSION, TO_VERSION = 2, 3
 NEXT_VERSION = 4
 #: What a dropped term becomes under v4 (see the module docstring).
 V4_OUTCOMES = ("recovered", "inside", "dropped")
+#: The version that took the owner's decisions on the verb rule (#3875,
+#: #3874, #3706), and what a judged term becomes under it.
+V5_VERSION = 5
+V5_OUTCOMES = ("ended", "inside", "dropped")
 #: A judged reading of a dropped phrase's sentence, and the verdict it
 #: carries (the judgement file's header defines each).
 READINGS = {"construction": "in_class", "referent": "in_class", "source": "borderline", "absence": "not_in_class"}
@@ -159,6 +172,7 @@ RECALL: dict[str, Any] = {
     "classes": {RSN: (35, 50, 3)},
     "judgements": "notes/absence_v3_recall_judgements_241e910e.yaml",
     "next_lexicon_sha256": "8e2c25be9a6cb5374652a095f8f1749cd8e5ec82852f5394d0526fee5fb7bfec",   # v4 (#3791)
+    "v5_lexicon_sha256": "d1134fd779a6940d0b214fcc514f0298b3712a97bb8877eb80c625c6d76bcab0",     # v5 (#3875)
 }
 #: The judged draw of the matches v3 keeps (#3793), keyed like RECALL: a
 #: seeded sample of them, in the order `random.Random(seed).sample` puts
@@ -263,23 +277,35 @@ def cause(variants: dict, text: str, start: int, end: int, v3_spans: list[tuple[
     return "no_verb"
 
 
+def _outcome(spans: list[tuple[int, int]], start: int, end: int, names: tuple[str, str, str]) -> str:
+    """What a later version does with the term at [start, end): a match of
+    the pattern ends at it, it lies inside a match that ends later, or
+    neither (`names` spells the three for the version)."""
+    if any(e == end for _, e in spans):
+        return names[0]
+    return names[1] if any(s <= start and end <= e for s, e in spans) else names[2]
+
+
 def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
     """Every v2 match of the pattern that no v3 match ends at, over the
     pinned records, in record then leaf then offset order, with its cause and
     the v3 phrases in its sentence."""
-    v2, v3, v4 = (lx.load(absence_lint.LEXICON, v) for v in (FROM_VERSION, TO_VERSION, NEXT_VERSION))
+    v2, v3, v4, v5 = (lx.load(absence_lint.LEXICON, v)
+                      for v in (FROM_VERSION, TO_VERSION, NEXT_VERSION, V5_VERSION))
     for have, want in ((v2.sha256, RECALL["from_lexicon_sha256"]), (v3.sha256, RECALL["lexicon_sha256"]),
-                       (v4.sha256, RECALL["next_lexicon_sha256"])):
+                       (v4.sha256, RECALL["next_lexicon_sha256"]), (v5.sha256, RECALL["v5_lexicon_sha256"])):
         if have != want:
             raise Refused(f"a registered lexicon hashes to {have[:12]}…, not the {want[:12]}… "
                           "this measurement names")
     p2 = next(p for p in v2.patterns if p.id == PATTERN).regex
     p3 = next(p for p in v3.patterns if p.id == PATTERN)
     p4 = next(p for p in v4.patterns if p.id == PATTERN).regex
+    p5 = next(p for p in v5.patterns if p.id == PATTERN).regex
     variants = _variants(p3)
     scope = absence_lint._scope(v3)
     rows: list[tuple[str, dict]] = []
-    totals = {"v2": 0, "v3": 0, "v4": 0, "v3_not_ended_by_v4": 0}
+    totals = {"v2": 0, "v3": 0, "v4": 0, "v3_not_ended_by_v4": 0, "v5": 0, "v4_not_ended_by_v5": 0,
+              "v5_not_ending_at_v4": 0}
     kept_rows: list[tuple[str, dict]] = []
     records, changed, missing = [], [], []
     for rel in sorted(pins):
@@ -308,10 +334,14 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
             old = [(m.start(), m.end()) for m in p2.finditer(text)]
             new = [(m.start(), m.end()) for m in p3.regex.finditer(text)]
             v4_spans = [(m.start(), m.end()) for m in p4.finditer(text)]
+            v5_spans = [(m.start(), m.end()) for m in p5.finditer(text)]
             totals["v2"] += len(old)
             totals["v3"] += len(new)
             totals["v4"] += len(v4_spans)
             totals["v3_not_ended_by_v4"] += len({e for _, e in new} - {e for _, e in v4_spans})
+            totals["v5"] += len(v5_spans)
+            totals["v4_not_ended_by_v5"] += len({e for _, e in v4_spans} - {e for _, e in v5_spans})
+            totals["v5_not_ending_at_v4"] += len({e for _, e in v5_spans} - {e for _, e in v4_spans})
             ends = {e for _, e in old}
             if any(e not in ends for _, e in new):
                 raise Refused(f"{rel} {pointer}: a v3 match ends where no v2 match does")
@@ -319,7 +349,8 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
             for s, e in new:
                 ss, se = _sentence(text, s, e)
                 kept_rows.append((rel, {"pointer": pointer, "start": s, "end": e, "text": text[s:e],
-                                        "patterns": [PATTERN], "sentence": (ss, se)}))
+                                        "patterns": [PATTERN], "sentence": (ss, se),
+                                        "v5": _outcome(v5_spans, s, e, V5_OUTCOMES)}))
             for s, e in old:
                 if e in kept:
                     continue
@@ -330,11 +361,11 @@ def dropped(corpus: Path, pins: dict[str, str]) -> dict[str, Any]:
                 admitted = sorted({key for name, _, key in LIFTS
                                    if why not in ("absorbed", "consumed")
                                    and _admits(variants[name], text, s, e)})
-                v4 = ("recovered" if any(ve == e for _, ve in v4_spans) else
-                      "inside" if any(vs <= s and e <= ve for vs, ve in v4_spans) else "dropped")
                 rows.append((rel, {"pointer": pointer, "start": s, "end": e, "text": text[s:e],
                                    "patterns": [PATTERN], "cause": why, "admitted_by": admitted,
-                                   "flagged": flagged, "sentence": (ss, se), "v4": v4}))
+                                   "flagged": flagged, "sentence": (ss, se),
+                                   "v4": _outcome(v4_spans, s, e, V4_OUTCOMES),
+                                   "v5": _outcome(v5_spans, s, e, V5_OUTCOMES)}))
     if changed or missing:
         raise baseline.Stale(f"{len(changed)} pinned record(s) changed and {len(missing)} gone", changed, missing)
     digest = hashlib.sha256("".join(f"{r['path']} {r['sha256']}\n" for r in records).encode()).hexdigest()
@@ -455,8 +486,9 @@ def render_markdown(found: dict[str, Any]) -> str:
         "to regenerate it, or `--check` to ask whether it still matches its records and judgements.",
         "",
         f"- **Lexicons:** absence_self_narration v2 (sha256 `{RECALL['from_lexicon_sha256']}`),",
-        f"  v3 (sha256 `{RECALL['lexicon_sha256']}`) and",
-        f"  v4 (sha256 `{RECALL['next_lexicon_sha256']}`, #3791), all registered; this note",
+        f"  v3 (sha256 `{RECALL['lexicon_sha256']}`),",
+        f"  v4 (sha256 `{RECALL['next_lexicon_sha256']}`, #3791) and",
+        f"  v5 (sha256 `{RECALL['v5_lexicon_sha256']}`, #3875), all registered; this note",
         "  registers nothing and moves no count in `notes/absence_claims_baseline.md`.",
         f"- **Records:** the {found['records']} records that note pins, record-set sha256",
         f"  `{found['record_set_sha256']}`.",
@@ -608,6 +640,8 @@ def render_markdown(found: dict[str, Any]) -> str:
         "also admit. `absorbed` terms are still inside a flagged span, and `consumed` ones are",
         "the non-overlap `notes/absence_lexicon_v3_2026-09-30.md` describes (#3732).",
         *_v4_section(rows, computed, lost, kept, totals, (k_in, n_kept, lo, hi, kept_census)),
+        *_v5_section(rows, computed, kept_rows, {(p, h["pointer"], h["start"], h["end"]): h
+                                                 for p, h in found["kept"]}, totals),
     ]
     return "\n".join(lines) + "\n"
 
@@ -715,6 +749,78 @@ def _v4_section(rows: list[dict], computed: dict, lost: list[dict], kept: int, t
         + ("" if kept_census else f" ({recall(v3_in[1], v4_in[1]):.1f}% to {recall(v3_in[2], v4_in[2]):.1f}%)")
         + f", against v3's {100 * v3_in[0] / (v3_in[0] + all_in_class):.1f}%.",
         "Borderline phrases are counted in class on neither side.",
+    ]
+    return lines
+
+
+def _v5_section(rows: list[dict], computed: dict, kept_rows: list[dict], kept_computed: dict,
+                totals: dict) -> list[str]:
+    """What the registered v5 pattern gives up relative to v4 (#3875, #3874,
+    #3706), on the judged rows of both files: the dropped rows v4 recovers
+    that v5 does not end a match at, and the drawn kept matches v5 does not
+    end one at. v5 changes no window, so a row v4 did not recover is one v5
+    does not either, unless a verb-first span a name now ends lets a term
+    keep a verb it lost; such a row is named.
+
+    v4's precision is not restated for v5 at the kept draw's rate: v5 drops
+    matches by what their sentences say (a name with no verb), so the v3
+    matches it keeps are not a random subset of the ones that draw was made
+    of. v5's own precision is its baseline draw (#3875)."""
+    def key(r):
+        return (r["record"], r["pointer"], r["start"], r["end"])
+
+    v4_recovered = [r for r in rows if computed[key(r)]["v4"] == "recovered"]
+    lost_dropped = [r for r in v4_recovered if computed[key(r)]["v5"] != "ended"]
+    gained = [r for r in rows if computed[key(r)]["v4"] != "recovered" and computed[key(r)]["v5"] == "ended"]
+    lost_kept = [r for r in kept_rows if kept_computed[key(r)]["v5"] != "ended"]
+    inside = (sum(computed[key(r)]["v5"] == "inside" for r in v4_recovered)
+              + sum(kept_computed[key(r)]["v5"] == "inside" for r in kept_rows))
+
+    def named(rs: list[dict], file: str) -> str:
+        return ", ".join(f"{file} #{r['n']} ({r['reading']})" for r in rs) or "none"
+
+    lines = [
+        "",
+        "## What v5 gives up relative to v4 (#3875)",
+        "",
+        "v5 (`absence_self_narration_v5.yaml`) keeps v4's window and changes the verb rule twice: the",
+        "names of the declared ranking (source manifest, input manifest, source ranking, declared",
+        "ranking) need a preference or resolution verb in the sentence as the other ranking terms do",
+        "(#3874, #3706), and `use` or `uses` where the text marks a noun (\"data transfer and use",
+        f"agreement\") is no verb (#3875). v5 matches the pattern {totals['v5']} times over the same records,",
+        f"against v4's {totals['v4']}: {totals['v4_not_ended_by_v5']} of v4's matches end where no v5 match "
+        f"does, and {totals['v5_not_ending_at_v4']} v5 "
+        + ("match ends" if totals["v5_not_ending_at_v4"] == 1 else "matches end") + " where",
+        "no v4 match does (a verb-first span that a name now ends, so the term after it is a match",
+        "of its own). A judged term is *ended* by v5 when a v5 match of the pattern ends at it;",
+        f"{inside} of them lie inside a v5 match that ends later instead.",
+        "",
+        "| reading | verdict | dropped rows v4 recovers | ended by v5 | kept, drawn | ended by v5 |",
+        "|---|---|---:|---:|---:|---:|",
+    ]
+    for reading, verdict in [*READINGS.items(), ("**all**", None)]:
+        def pick(rs):
+            return rs if verdict is None else [r for r in rs if r["reading"] == reading]
+        rec, kd = pick(v4_recovered), pick(kept_rows)
+        head = f"| {reading} | {verdict} |" if verdict else f"| {reading} | |"
+        lines.append(f"{head} {len(rec)} | {sum(computed[key(r)]['v5'] == 'ended' for r in rec)} | {len(kd)} | "
+                     f"{sum(kept_computed[key(r)]['v5'] == 'ended' for r in kd)} |")
+    lost_in = ([("dropped", r) for r in lost_dropped if r["verdict"] == "in_class"]
+               + [("kept", r) for r in lost_kept if r["verdict"] == "in_class"])
+    lines += [
+        "",
+        f"Of the {len(v4_recovered)} dropped rows v4 recovers, v5 gives up {len(lost_dropped)}: "
+        f"{named(lost_dropped, 'dropped')}.",
+        f"Of the {len(kept_rows)} drawn matches v3 keeps, v5 gives up {len(lost_kept)}: {named(lost_kept, 'kept')}.",
+        f"{len(lost_in)} of those {len(lost_dropped) + len(lost_kept)} are in class"
+        + (": " + ", ".join(f"{f} #{r['n']}" for f, r in lost_in) + "." if lost_in else "."),
+        "A dropped row v4 does not recover and v5 ends a match at: "
+        + (named(gained, "dropped") + "." if gained else "none."),
+        "(*dropped #n* is judgement n of the dropped matches, *kept #n* of the kept-match draw.)",
+        "",
+        "v4's precision is not restated for v5 at the kept draw's rate: v5 drops matches by what",
+        "their sentences say, so the v3 matches it keeps are not a random subset of the ones the kept",
+        "draw was made of. v5's own precision is the draw in `notes/absence_claims_baseline.md`.",
     ]
     return lines
 
