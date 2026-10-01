@@ -6,13 +6,16 @@ block's identifier walk and resolver-URL findings read today's schema and
 said nothing about it. #3788 is the case that matters: the 2026-08-13 v4 rep1
 VOICE run read a schema declaring `ROR`, `ORCID` and `doi`, and its commit's
 blob declares none of the three. These pin the one resolution
-(`run_schema.run_schema_bytes`), the rules read from its bytes, and the two
-blocks that now read them.
+(`run_schema.run_schema_bytes`), the rules read from its bytes, the two
+blocks that now read them, and the view the rules are read from, which is
+released once they are (#4082).
 """
 import gzip
 import hashlib
 import tempfile
 import unittest
+import weakref
+from contextlib import contextmanager
 from pathlib import Path
 from unittest import mock
 
@@ -135,6 +138,24 @@ class Resolution(unittest.TestCase):
                              (rs.TODAY, "src/x_all.yaml", "a" * 64))
             self.assertIn(reason, basis["reason"])
 
+    def test_an_oserror_resolving_the_path_on_disk_goes_on_to_the_next_source(self):
+        """The one difference from the code `run_enum_aliases` held: there
+        `resource_path` ran outside the `try`, so an OSError resolving the
+        path (a deleted working directory, an unsearchable `src/`) raised
+        out of removals. Here it is a file not on disk, and the
+        reconstruction and git are asked."""
+        record = {"schema": {"full_path": "src/x_all.yaml", "full_sha256": "a" * 64}}
+        for error in (FileNotFoundError(2, "No such file or directory"),
+                      PermissionError(13, "Permission denied", "src")):
+            with self.subTest(error=type(error).__name__), \
+                    mock.patch("data_sheets_schema.resources.resource_path", side_effect=error), \
+                    mock.patch(REBUILT, return_value=None) as rebuilt, \
+                    mock.patch(GIT, return_value=(b"bytes", {"commit": "c" * 40, "matched_on": ["sha256"]})):
+                data, basis = rs.run_schema_bytes(record)
+            rebuilt.assert_called_once()
+            self.assertEqual((data, basis["source"], basis["commit"]),
+                             (b"bytes", "the run's schema, a git blob", "c" * 40))
+
     def test_removals_reads_its_enum_tables_through_the_helper(self):
         """The extraction: `run_enum_aliases` is the helper's bytes and basis,
         tabled, or None with the helper's fallback basis."""
@@ -207,30 +228,86 @@ class Rules(unittest.TestCase):
 
 
 class VersionView(unittest.TestCase):
-    """`schema_view.version_view`: a version read by its hash is one view per
-    process, held beside today's view of the same path, never in its place
-    (#926: every view linkml builds stays pinned, so an evicted view of
-    today's schema would be rebuilt and pinned again for each version)."""
+    """`schema_view.version_view`: a view of a version read by its hash, for
+    one `with` block. It is never shared, so it never evicts today's view of
+    the same path (#926: an evicted view of today's schema would be rebuilt,
+    and pinned again, for each version). Its method caches are its own, so
+    once released it is freed (#4082: kept for the process, the corpus's 14
+    versions took a form and grounding pass's peak RSS from 287 MB to
+    803 MB)."""
 
-    def test_a_version_is_viewed_once_and_never_evicts_todays_view(self):
+    def test_a_version_view_is_not_shared_and_never_evicts_todays_view(self):
         from data_sheets_schema import schema_view
         from data_sheets_schema.identifiers import FULL_SCHEMA
         today = schema_view.shared_view(FULL_SCHEMA)
-        data = yaml.safe_dump({**RUN_SCHEMA, "name": "a-recorded-version"}).encode()
-        first = schema_view.version_view(FULL_SCHEMA, data)
-        self.assertEqual(first.schema.name, "a-recorded-version")
-        self.assertIs(schema_view.version_view(FULL_SCHEMA, data), first)
+        held = schema_view.views_held()
+        doc = schema_view.version_document(yaml.safe_dump({**RUN_SCHEMA, "name": "a-recorded-version"}).encode())
+        with schema_view.version_view(FULL_SCHEMA, doc) as view:
+            self.assertEqual(view.schema.name, "a-recorded-version")
+            self.assertEqual(str(view.induced_slot("publisher", "Dataset").range), "uriorcurie")
+            self.assertEqual(schema_view.views_held(), held)
         self.assertIs(schema_view.shared_view(FULL_SCHEMA), today)
+        self.assertEqual(schema_view.views_held(), held)
 
-    def test_only_the_linkml_metamodel_may_be_imported(self):
+    def test_a_released_version_view_is_freed(self):
+        """Its cached methods have run, which pins a view whose caches are
+        linkml's class-level ones. This one goes with its last reference,
+        with no collection, once its block has exited. That includes a
+        deprecated alias, whose `deprecated` wrapper sits outside the cache."""
+        from data_sheets_schema import schema_view
+        from data_sheets_schema.identifiers import FULL_SCHEMA, person_slots_of, uriorcurie_slots_of
+        doc = schema_view.version_document(yaml.safe_dump({**RUN_SCHEMA, "name": "released"}).encode())
+        with schema_view.version_view(FULL_SCHEMA, doc) as view:
+            self.assertEqual((uriorcurie_slots_of(view), person_slots_of(view)), ({"id", "publisher"}, {"lead"}))
+            self.assertIn("Dataset", view.all_class())
+            freed = weakref.ref(view)
+        del view
+        self.assertIsNone(freed(), "a released version view is still referenced")
+
+    def test_every_class_cached_method_is_cached_on_the_instance(self):
+        """Each of linkml's class-level caches is shadowed by one on the
+        instance, of the function the cache wraps, never of the cache
+        itself: a class-level cache anywhere in the chain pins the view."""
+        from linkml_runtime import SchemaView
+
+        from data_sheets_schema import schema_view
+        cached = {name for name, attr in vars(SchemaView).items() if hasattr(attr, "cache_info")}
+        self.assertTrue(cached)
+        self.assertEqual(set(schema_view._INSTANCE_CACHED), cached)
+        for name in sorted(cached):
+            shadow = vars(schema_view._ReleasableView)[name]
+            self.assertIsInstance(shadow, schema_view._InstanceCached, name)
+            self.assertFalse(hasattr(shadow.function, "cache_info"), name)
+
+    def test_deriving_a_version_s_rules_keeps_no_view(self):
+        """`run_schema` keeps a version's rules and not the view it read them
+        from, so a corpus pass holds one version view at a time (#4082)."""
+        from data_sheets_schema import schema_view
+        real, seen = schema_view.version_view, []
+
+        @contextmanager
+        def watched(path, document):
+            with real(path, document) as view:
+                seen.append(weakref.ref(view))
+                yield view
+        with mock.patch.object(schema_view, "version_view", watched):
+            rules = rs._derive_rules(yaml.safe_dump({**RUN_SCHEMA, "name": "keeps-no-view"}).encode())
+        self.assertEqual(rules.slots, frozenset({"id", "publisher"}))
+        self.assertEqual(len(seen), 1)
+        self.assertIsNone(seen[0](), "the rules were read and the view outlived them")
+
+    def test_only_a_mapping_importing_at_most_the_linkml_metamodel_is_viewed(self):
         from data_sheets_schema import schema_view
         from data_sheets_schema.identifiers import FULL_SCHEMA
+        with self.assertRaisesRegex(ValueError, "the bytes are not a schema mapping"):
+            schema_view.version_document(b"- a\n- list\n")
         with self.assertRaisesRegex(ValueError, "import D4D_Base_import, which their recorded hash"):
-            schema_view.version_view(FULL_SCHEMA, yaml.safe_dump(
-                {**RUN_SCHEMA, "imports": ["linkml:types", "D4D_Base_import"]}).encode())
-        view = schema_view.version_view(FULL_SCHEMA, yaml.safe_dump(
+            with schema_view.version_view(FULL_SCHEMA, {**RUN_SCHEMA, "imports": ["linkml:types", "D4D_Base_import"]}):
+                pass
+        doc = schema_view.version_document(yaml.safe_dump(
             {**RUN_SCHEMA, "name": "imports-the-metamodel", "imports": ["linkml:types"]}).encode())
-        self.assertEqual(str(view.induced_slot("id", "Dataset").range), "uriorcurie")
+        with schema_view.version_view(FULL_SCHEMA, doc) as view:
+            self.assertEqual(str(view.induced_slot("id", "Dataset").range), "uriorcurie")
 
 
 class FormBlock(unittest.TestCase):

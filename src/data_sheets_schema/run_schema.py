@@ -127,25 +127,29 @@ def todays_identifier_rules() -> IdentifierRules:
 
 
 def _derive_rules(data: bytes) -> IdentifierRules:
-    """The rules of other bytes, by the functions today's are read with, over
-    `schema_view.version_view`: the version's own view, held beside today's
-    so that reading it does not evict today's (#926), and refused where the
-    bytes import a local file, which would be read from today's tree."""
-    import yaml
-    from linkml_runtime.utils.yamlutils import DupCheckYamlLoader
+    """The rules of other bytes, by the functions today's are read with.
 
+    The bytes are parsed once (`schema_view.version_document`). The prefixes
+    and bases are read from that document, and the induced slots from a
+    view of it (`schema_view.version_view`). That view is the version's own,
+    so reading it does not evict today's (#926). It is released when the
+    slots have been read, because these rules are what `_rules_of` keeps
+    (#4082). Bytes that import a local file are refused, since the import
+    would be read from today's tree."""
     from data_sheets_schema.grounding import declared_bases_of
     from data_sheets_schema.identifiers import (FULL_SCHEMA, declared_prefixes_of, person_slots_of,
                                                 uriorcurie_slots_of)
-    from data_sheets_schema.schema_view import version_view
-    view = version_view(FULL_SCHEMA, data)
-    doc = yaml.load(data.decode("utf-8"), Loader=DupCheckYamlLoader)
-    return IdentifierRules(frozenset(declared_prefixes_of(doc)), frozenset(uriorcurie_slots_of(view)),
-                           frozenset(person_slots_of(view)), tuple(declared_bases_of(doc)))
+    from data_sheets_schema.schema_view import version_document, version_view
+    doc = version_document(data)
+    prefixes, bases = frozenset(declared_prefixes_of(doc)), tuple(declared_bases_of(doc))
+    with version_view(FULL_SCHEMA, doc) as view:
+        slots, persons = frozenset(uriorcurie_slots_of(view)), frozenset(person_slots_of(view))
+    return IdentifierRules(prefixes, slots, persons, bases)
 
 
 #: Identifier rules by the sha256 of the merged-schema bytes they were read
-#: from: one view per schema version per process.
+#: from, so each schema version is derived once per process. The rules are
+#: kept here, and the view they were read from is not (#4082).
 _RULES_BY_SHA256: dict[str, IdentifierRules] = {}
 
 
