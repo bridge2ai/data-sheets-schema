@@ -32,15 +32,76 @@
     "shape": "MULTI-PHASE (same phase list as every condition)"
    }
   },
+  "audit_continuations": {
+   "api_cli_renderer_inputs": [],
+   "api_path": "`d4d api` hands RunSpec no renderer (the API default is 8); and `build_phase` refuses the audit phase at renderer >= 20 on any spec, so an API run that reached it would stop at audit, not become a hybrid",
+   "api_reaches_floor": false,
+   "default_renderer": {
+    "agentic": 7,
+    "api": 8
+   },
+   "floor": 20,
+   "gates": [
+    {
+     "at": "notes/matched_cborg_2026-09-13/audit_controls/contract.py:153",
+     "condition": "generic_v9",
+     "line": 153,
+     "parent_renderer": 14,
+     "path": "notes/matched_cborg_2026-09-13/audit_controls/contract.py"
+    }
+   ],
+   "runtime_hybrid_possible": false,
+   "setters": [
+    {
+     "gates": [
+      "notes/matched_cborg_2026-09-13/audit_controls/contract.py:153"
+     ],
+     "line": 158,
+     "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
+     "renderers": [
+      23
+     ]
+    },
+    {
+     "gates": [
+      "notes/matched_cborg_2026-09-13/audit_controls/contract.py:153"
+     ],
+     "line": 408,
+     "path": "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
+     "renderers": [
+      22
+     ]
+    },
+    {
+     "gates": [
+      "notes/matched_cborg_2026-09-13/audit_controls/contract.py:153"
+     ],
+     "line": 412,
+     "path": "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
+     "renderers": [
+      23
+     ]
+    },
+    {
+     "gates": [
+      "notes/matched_cborg_2026-09-13/audit_controls/contract.py:153"
+     ],
+     "line": 405,
+     "path": "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
+     "renderers": [
+      20,
+      21
+     ]
+    }
+   ],
+   "uncovered": [],
+   "why": "renderer >= 20 is set only by native audit continuations (notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py:158, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:405, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:408, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:412), and each sits in a controller package that refuses its parent unless it is a native run (notes/matched_cborg_2026-09-13/audit_controls/contract.py:153 refuses a parent that is not an agentic run of generic_v9 at renderer 14): the native audit batch continues native generations only"
+  },
   "conditions": {
    "generic": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt.md",
@@ -48,21 +109,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": " + CLI default (GitHub assistant)",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "live",
     "tuned": false
    },
    "generic_v2": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v2.md",
@@ -70,21 +129,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v3": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v3.md",
@@ -92,21 +149,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v4": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v4.md",
@@ -114,21 +169,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v5": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v5.md",
@@ -136,21 +189,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v6": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v6.md",
@@ -158,21 +209,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v7": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v7.md",
@@ -180,21 +229,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": true,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v8": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v8.md",
@@ -202,21 +249,19 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": true,
     "role": "",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
     "tuned": false
    },
    "generic_v9": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt_v9.md",
@@ -224,24 +269,22 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": true,
     "role": "current generic",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "live",
     "tuned": false
    },
    "tuned": {
-    "agentic_step_when": "renderer >= 20 (audit)",
     "appends": [
      "src/download/prompts/d4d_tuned_arm_prompt.md",
      "src/download/prompts/components/{PROJECT}.md"
     ],
-    "hybrid": true,
     "hybrid_reasons": [
-     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (an agentic-only instruction)",
-     "when rendered at renderer >= 20 the audit phase refuses the API path and requires the registered native audit batch (an agentic step)",
-     "the same condition renders for an agentic runtime (RunSpec.is_agentic): one condition name, two procedures"
+     "the prompt body tells the model to read .claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md; the API request never carries those files (a prompt-level hybrid)"
     ],
     "model_calls_minimum": 4,
     "prompt": "src/download/prompts/d4d_generic_arm_prompt.md",
@@ -249,8 +292,10 @@
      ".claude/agents/d4d-provenance-guard.md",
      ".claude/commands/d4d-full-core.md"
     ],
+    "prompt_hybrid": true,
     "receipt_condition": false,
     "role": "per-project tuning: appends components/{PROJECT}.md",
+    "runtime_hybrid": false,
     "schema_form": "schema digest (schema_digest.digest_text)",
     "shape": "MULTI-PHASE",
     "status": "historical",
@@ -287,6 +332,34 @@
    "shape": "MULTI-PHASE"
   },
   "legacy": {
+   "scripts/fix_failed_extractions.py": {
+    "concatenated_input": false,
+    "full_schema": false,
+    "model_call_sites": 2,
+    "shape": "PER-DOCUMENT",
+    "tool_decorators": 0
+   },
+   "src/download/claude_max_d4d_processor.py": {
+    "concatenated_input": false,
+    "full_schema": false,
+    "model_call_sites": 0,
+    "shape": "NO MODEL CALL",
+    "tool_decorators": 0
+   },
+   "src/download/d4d_agent_wrapper.py": {
+    "concatenated_input": false,
+    "full_schema": true,
+    "model_call_sites": 1,
+    "shape": "PER-DOCUMENT",
+    "tool_decorators": 0
+   },
+   "src/download/interactive_d4d_wrapper.py": {
+    "concatenated_input": false,
+    "full_schema": false,
+    "model_call_sites": 1,
+    "shape": "PER-DOCUMENT",
+    "tool_decorators": 0
+   },
    "src/download/process_concatenated_d4d.py": {
     "concatenated_input": true,
     "full_schema": true,
@@ -302,13 +375,41 @@
     "tool_decorators": 0
    },
    "src/download/process_individual_d4d_claude_direct.py": {
-    "concatenated_input": false,
+    "concatenated_input": true,
     "full_schema": true,
     "model_call_sites": 0,
     "shape": "NO MODEL CALL",
     "tool_decorators": 0
    },
    "src/download/process_individual_d4d_gpt5.py": {
+    "concatenated_input": false,
+    "full_schema": false,
+    "model_call_sites": 1,
+    "shape": "PER-DOCUMENT",
+    "tool_decorators": 0
+   },
+   "src/download/prompt_loader.py": {
+    "concatenated_input": false,
+    "full_schema": true,
+    "model_call_sites": 0,
+    "shape": "NO MODEL CALL",
+    "tool_decorators": 0
+   },
+   "src/download/standalone_d4d_wrapper.py": {
+    "concatenated_input": false,
+    "full_schema": false,
+    "model_call_sites": 1,
+    "shape": "PER-DOCUMENT",
+    "tool_decorators": 0
+   },
+   "src/schema_extract/process_d4d_claude_API_temp0.py": {
+    "concatenated_input": true,
+    "full_schema": true,
+    "model_call_sites": 1,
+    "shape": "MONOLITHIC",
+    "tool_decorators": 0
+   },
+   "src/schema_extract/schema_extract.py": {
     "concatenated_input": false,
     "full_schema": false,
     "model_call_sites": 1,
@@ -344,11 +445,13 @@
   "schema_form": "schema digest (schema_digest.digest_text)",
   "verdict": [
    "No live API condition (generic, generic_v9) is monolithic: each run makes at least 4 model calls (full, audit, reconcile_full, report), sends the schema digest (schema_digest.digest_text) rather than the LinkML schema, and may add follow-up turns (full_readdress, readdress, repair, report_regate).",
-   "The monolithic shape (prompt + full LinkML schema + concatenated documents, one call) survives only in legacy scripts: src/download/process_concatenated_d4d.py, src/download/process_concatenated_d4d_claude.py.",
-   "Live conditions with an agentic component or agentic-only instruction: generic, generic_v9."
+   "The monolithic shape (prompt + full LinkML schema + concatenated documents, one call) survives only in 3 scripts outside the runner: src/download/process_concatenated_d4d.py, src/download/process_concatenated_d4d_claude.py, src/schema_extract/process_d4d_claude_API_temp0.py.",
+   "Prompt-level hybrid: the live conditions generic, generic_v9 tell the API model to read playbook files the API request never carries (.claude/agents/d4d-provenance-guard.md, .claude/commands/d4d-full-core.md).",
+   "No API condition is a runtime hybrid: renderer >= 20 is set only by native audit continuations (notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py:158, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:405, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:408, notes/matched_cborg_2026-09-13/audit_controls/prepare.py:412), and each sits in a controller package that refuses its parent unless it is a native run (notes/matched_cborg_2026-09-13/audit_controls/contract.py:153 refuses a parent that is not an agentic run of generic_v9 at renderer 14): the native audit batch continues native generations only; `d4d api` hands RunSpec no renderer (the API default is 8); and `build_phase` refuses the audit phase at renderer >= 20 on any spec, so an API run that reached it would stop at audit, not become a hybrid.",
+   "The agentic runtimes Claude Code, Claude Code (direct), Codex CLI render the same condition names (one name, two procedures); a run is one or the other, not a hybrid."
   ]
  },
- "commit": "ecb618b1689d0cce097e6b4b4520bc21f68ca428",
+ "commit": "8a19955b59a339d858bbccf7ebc378d501943ae6",
  "counts_by_file": [
   {
    "approaches": [
@@ -436,10 +539,10 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "example": 5,
+    "example": 6,
     "prose": 5
    },
-   "hits": 10,
+   "hits": 11,
    "model_facing": 0,
    "path": ".claude/agents/d4d-rubric10-semantic.md",
    "with_reason": 0
@@ -518,9 +621,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "example": 5
+    "example": 6
    },
-   "hits": 5,
+   "hits": 6,
    "model_facing": 0,
    "path": ".claude/agents/d4d-rubric20-semantic.md",
    "with_reason": 0
@@ -572,7 +675,7 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -585,7 +688,8 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "string_literal": 2
+    "code_table": 1,
+    "string_literal": 1
    },
    "hits": 2,
    "model_facing": 0,
@@ -598,8 +702,8 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "code_table": 1,
-    "string_literal": 35
+    "code_table": 4,
+    "string_literal": 32
    },
    "hits": 36,
    "model_facing": 0,
@@ -612,7 +716,8 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "string_literal": 43
+    "code_table": 5,
+    "string_literal": 38
    },
    "hits": 43,
    "model_facing": 0,
@@ -837,16 +942,16 @@
    "category": "gc_project",
    "contexts": {
     "comment": 31,
-    "value": 237
+    "value": 257
    },
-   "hits": 268,
-   "model_facing": 237,
+   "hits": 288,
+   "model_facing": 257,
    "path": "data/preprocessed/source_manifest.yaml",
-   "with_reason": 268
+   "with_reason": 288
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -859,7 +964,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -872,20 +977,20 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
     "string_literal": 1
    },
    "hits": 1,
-   "model_facing": 0,
+   "model_facing": 1,
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
    "with_reason": 0
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -898,7 +1003,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -911,7 +1016,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -924,12 +1029,11 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "code_table": 1,
-    "string_literal": 1
+    "code_table": 2
    },
    "hits": 2,
    "model_facing": 0,
@@ -938,7 +1042,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -949,6 +1053,20 @@
    "hits": 9,
    "model_facing": 0,
    "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "contexts": {
+    "code_table": 2,
+    "string_literal": 10
+   },
+   "hits": 12,
+   "model_facing": 0,
+   "path": "scripts/fix_failed_extractions.py",
    "with_reason": 0
   },
   {
@@ -1318,9 +1436,9 @@
    "category": "gc_project",
    "contexts": {
     "comment": 1,
-    "string_literal": 9
+    "string_literal": 10
    },
-   "hits": 10,
+   "hits": 11,
    "model_facing": 0,
    "path": "src/data_sheets_schema/constants/methods.py",
    "with_reason": 0
@@ -1332,9 +1450,8 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 6,
-    "comment": 8,
-    "string_literal": 2
+    "code_table": 8,
+    "comment": 8
    },
    "hits": 16,
    "model_facing": 0,
@@ -1541,9 +1658,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "docstring": 5
+    "docstring": 7
    },
-   "hits": 5,
+   "hits": 7,
    "model_facing": 0,
    "path": "src/data_sheets_schema/merge.py",
    "with_reason": 0
@@ -1616,8 +1733,9 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
+    "code_table": 1,
     "docstring": 4,
-    "string_literal": 2
+    "string_literal": 1
    },
    "hits": 6,
    "model_facing": 0,
@@ -1632,10 +1750,10 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 5,
+    "code_table": 21,
     "comment": 2,
     "docstring": 1,
-    "string_literal": 18
+    "string_literal": 2
    },
    "hits": 26,
    "model_facing": 0,
@@ -1788,9 +1906,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "docstring": 9
+    "docstring": 10
    },
-   "hits": 9,
+   "hits": 10,
    "model_facing": 0,
    "path": "src/data_sheets_schema/release_inventory.py",
    "with_reason": 0
@@ -1886,9 +2004,9 @@
    "category": "gc_project",
    "contexts": {
     "comment": 4,
-    "docstring": 1
+    "docstring": 8
    },
-   "hits": 5,
+   "hits": 12,
    "model_facing": 0,
    "path": "src/data_sheets_schema/rocrate_normalize.py",
    "with_reason": 0
@@ -2497,9 +2615,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "docstring": 15
+    "docstring": 21
    },
-   "hits": 15,
+   "hits": 21,
    "model_facing": 0,
    "path": "src/data_sheets_schema/scope.py",
    "with_reason": 0
@@ -2537,7 +2655,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -2550,8 +2668,8 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 8,
-    "string_literal": 18
+    "code_table": 24,
+    "string_literal": 2
    },
    "hits": 26,
    "model_facing": 0,
@@ -2578,9 +2696,10 @@
    "category": "gc_project",
    "contexts": {
     "code_branch": 4,
+    "code_table": 1,
     "comment": 2,
     "docstring": 4,
-    "string_literal": 20
+    "string_literal": 19
    },
    "hits": 30,
    "model_facing": 0,
@@ -2609,7 +2728,8 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "string_literal": 3
+    "code_table": 1,
+    "string_literal": 2
    },
    "hits": 3,
    "model_facing": 0,
@@ -2622,7 +2742,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -2635,9 +2755,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 12,
+    "code_table": 28,
     "comment": 1,
-    "string_literal": 19
+    "string_literal": 3
    },
    "hits": 32,
    "model_facing": 0,
@@ -2664,8 +2784,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "code_table": 1,
-    "string_literal": 1
+    "code_table": 2
    },
    "hits": 2,
    "model_facing": 0,
@@ -2751,7 +2870,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -2778,7 +2897,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -3158,6 +3277,33 @@
    "model_facing": 2,
    "path": "src/download/prompts/shared/prompt_versions.yaml",
    "with_reason": 0
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "contexts": {
+    "code_table": 4,
+    "string_literal": 7
+   },
+   "hits": 11,
+   "model_facing": 0,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "contexts": {
+    "docstring": 2
+   },
+   "hits": 2,
+   "model_facing": 0,
+   "path": "src/schema_extract/schema_extract.py",
+   "with_reason": 0
   }
  ],
  "exceptions": [
@@ -3180,7 +3326,7 @@
     "biomedical_clinical"
    ],
    "decision": "#621, #623, #1299 (manifest is the registry)",
-   "hits": 324,
+   "hits": 344,
    "index": 1,
    "path": "data/preprocessed/source_manifest.yaml",
    "reason": "The study manifest is the project registry: naming, scope and source ranking are data here and reach the model only for the study's own bundles."
@@ -3368,6 +3514,209 @@
    ],
    "tuned_prompt": "src/download/prompts/d4d_tuned_arm_prompt.md"
   },
+  "controller_text": {
+   "notes/claudecode_direct/system.md": "notes/claudecode_direct/prepare_direct.py",
+   "notes/matched_cborg_2026-09-13/native_controls/system.md": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py"
+  },
+  "controllers": {
+   "notes/claudecode_direct/bind_direct_launch.py": "imported or staged by a controller",
+   "notes/claudecode_direct/prepare_direct.py": "builds a generation request (RunSpec)",
+   "notes/claudecode_direct/run_direct_canary.py": "builds a generation request (RunSpec)",
+   "notes/matched_cborg_2026-09-13/audit_controls/__init__.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py": "builds a generation request (phase_instruction)",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract.py": "builds a generation request (RunSpec, build_phase)",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/native.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/registration.py": "builds a generation request (RunSpec)",
+   "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/transport.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/budget_amendment.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/budgeted_cborg.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/continuation_sequence.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": "builds a generation request (RunSpec, build_phase)",
+   "notes/matched_cborg_2026-09-13/finalization_controls/native.py": "runs a controller (imports __init__.py, native.py, budgeted_cborg.py)",
+   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/finalization_controls/registration.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_context.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_context_control.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": "builds a generation request (playbook_text)",
+   "notes/matched_cborg_2026-09-13/native_controls/native_control.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "runs a controller (imports native_command_policy.py)",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/prepare_registration.py": "builds a generation request (RunSpec, build_phase)",
+   "notes/matched_cborg_2026-09-13/run_api_canary.py": "imported or staged by a controller",
+   "notes/matched_cborg_2026-09-13/sequence_claim.py": "imported or staged by a controller"
+  },
+  "evaluation_controllers": {
+   "notes/matched_cborg_2026-09-13/evaluation_controls/adapter_closure.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/api.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/closure.py": "evaluation module a run controller imports (an evaluation-sequence branch)",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py": "imported by an evaluation controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/native.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/offline.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/registration.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/run_evaluation.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/source_pair.py": "evaluation controller: imports a run controller",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/validation.py": "imported by an evaluation controller"
+  },
+  "legacy_scripts": [
+   "scripts/fix_failed_extractions.py",
+   "src/download/claude_max_d4d_processor.py",
+   "src/download/d4d_agent_wrapper.py",
+   "src/download/interactive_d4d_wrapper.py",
+   "src/download/process_concatenated_d4d.py",
+   "src/download/process_concatenated_d4d_claude.py",
+   "src/download/process_individual_d4d_claude_direct.py",
+   "src/download/process_individual_d4d_gpt5.py",
+   "src/download/prompt_loader.py",
+   "src/download/standalone_d4d_wrapper.py",
+   "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "src/schema_extract/schema_extract.py"
+  ],
+  "model_clients": {
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py": {
+    "classified": "run_controllers",
+    "evidence": [
+     "import anthropic"
+    ]
+   },
+   "notes/matched_cborg_2026-09-13/budgeted_cborg.py": {
+    "classified": "run_controllers",
+    "evidence": [
+     "import anthropic",
+     "self.client.messages.create()",
+     "self.client.messages.stream()"
+    ]
+   },
+   "notes/matched_cborg_2026-09-13/evaluation_controls/api.py": {
+    "classified": "other_model_client",
+    "evidence": [
+     "self.messages.stream()"
+    ]
+   },
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_buffered_stall.py": {
+    "classified": "other_model_client",
+    "evidence": [
+     "import anthropic"
+    ]
+   },
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_stall.py": {
+    "classified": "other_model_client",
+    "evidence": [
+     "import anthropic"
+    ]
+   },
+   "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py": {
+    "classified": "other_model_client",
+    "evidence": [
+     "import anthropic"
+    ]
+   },
+   "scripts/fix_failed_extractions.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from pydantic_ai import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/data_sheets_schema/api_runner.py": {
+    "classified": "the api/native import closure",
+    "evidence": [
+     "client.messages.stream()",
+     "import anthropic"
+    ]
+   },
+   "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py": {
+    "classified": "the api/native import closure",
+    "evidence": [
+     "import anthropic",
+     "self.client.messages.create()",
+     "self.client.messages.stream()"
+    ]
+   },
+   "src/download/d4d_agent_wrapper.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from aurelian.agents.d4d.d4d_config import",
+     "from aurelian.agents.d4d.d4d_tools import",
+     "from pydantic_ai import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/download/interactive_d4d_wrapper.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from pydantic_ai import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/download/process_concatenated_d4d.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from aurelian.agents.d4d.d4d_config import",
+     "from aurelian.agents.d4d.d4d_tools import",
+     "from pydantic_ai import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/download/process_concatenated_d4d_claude.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from aurelian.agents.d4d.d4d_config import",
+     "from pydantic_ai import",
+     "from pydantic_ai.models.anthropic import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/download/process_individual_d4d_gpt5.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "agent.run()",
+     "from pydantic_ai import"
+    ]
+   },
+   "src/download/standalone_d4d_wrapper.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "from pydantic_ai import",
+     "self.d4d_agent.run()"
+    ]
+   },
+   "src/schema_extract/process_d4d_claude_API_temp0.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "client.messages.create()",
+     "import anthropic"
+    ]
+   },
+   "src/schema_extract/schema_extract.py": {
+    "classified": "legacy_monolithic",
+    "evidence": [
+     "import openai",
+     "openai.ChatCompletion.create()"
+    ]
+   }
+  },
   "native_cli_groups": [
    "api",
    "bundle",
@@ -3461,6 +3810,7 @@
   ],
   "native_referenced": [
    ".claude/agents/d4d-provenance-guard.md",
+   ".claude/agents/d4d-validator.md",
    ".claude/commands/d4d-agent.md",
    ".claude/commands/d4d-full-core.md",
    ".claude/commands/d4d-uniform-rules.md"
@@ -3482,6 +3832,389 @@
    "src/download/prompts/d4d_generic_arm_prompt_v9.md",
    "src/download/prompts/d4d_tuned_arm_prompt.md"
   ],
+  "python_sources": [
+   "src/data_sheets_schema/_version.py",
+   "src/data_sheets_schema/absence_lint.py",
+   "src/data_sheets_schema/agent_pin.py",
+   "src/data_sheets_schema/agentic_observed.py",
+   "src/data_sheets_schema/agentic_runtime.py",
+   "src/data_sheets_schema/agreement.py",
+   "src/data_sheets_schema/american_spelling.py",
+   "src/data_sheets_schema/anonymous_removals.py",
+   "src/data_sheets_schema/api_runner.py",
+   "src/data_sheets_schema/attainability.py",
+   "src/data_sheets_schema/audit_batch_context.py",
+   "src/data_sheets_schema/audit_batch_format.py",
+   "src/data_sheets_schema/audit_batches.py",
+   "src/data_sheets_schema/audit_grammar.py",
+   "src/data_sheets_schema/audit_recall.py",
+   "src/data_sheets_schema/awards.py",
+   "src/data_sheets_schema/backfill_checks.py",
+   "src/data_sheets_schema/canary.py",
+   "src/data_sheets_schema/chunking.py",
+   "src/data_sheets_schema/cli/__init__.py",
+   "src/data_sheets_schema/cli/__main__.py",
+   "src/data_sheets_schema/cli/_repo_utils.py",
+   "src/data_sheets_schema/cli/agents.py",
+   "src/data_sheets_schema/cli/api.py",
+   "src/data_sheets_schema/cli/bundle.py",
+   "src/data_sheets_schema/cli/derive.py",
+   "src/data_sheets_schema/cli/download.py",
+   "src/data_sheets_schema/cli/enrich.py",
+   "src/data_sheets_schema/cli/evaluate.py",
+   "src/data_sheets_schema/cli/healthsheet.py",
+   "src/data_sheets_schema/cli/method.py",
+   "src/data_sheets_schema/cli/prompt.py",
+   "src/data_sheets_schema/cli/provenance.py",
+   "src/data_sheets_schema/cli/receipts.py",
+   "src/data_sheets_schema/cli/render.py",
+   "src/data_sheets_schema/cli/review.py",
+   "src/data_sheets_schema/cli/rocrate.py",
+   "src/data_sheets_schema/cli/runs.py",
+   "src/data_sheets_schema/cli/schema.py",
+   "src/data_sheets_schema/cli/utils.py",
+   "src/data_sheets_schema/constants/__init__.py",
+   "src/data_sheets_schema/constants/evaluation.py",
+   "src/data_sheets_schema/constants/methods.py",
+   "src/data_sheets_schema/constants/projects.py",
+   "src/data_sheets_schema/constants/schemas.py",
+   "src/data_sheets_schema/corpus.py",
+   "src/data_sheets_schema/d4d_pair_consistency.py",
+   "src/data_sheets_schema/datamodel/__init__.py",
+   "src/data_sheets_schema/datamodel/data_sheets_schema.py",
+   "src/data_sheets_schema/derive_core.py",
+   "src/data_sheets_schema/duplicate_keys.py",
+   "src/data_sheets_schema/enumeration.py",
+   "src/data_sheets_schema/evaluation/__init__.py",
+   "src/data_sheets_schema/evaluation/evaluate_d4d.py",
+   "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py",
+   "src/data_sheets_schema/evaluation/validate.py",
+   "src/data_sheets_schema/evaluation_context.py",
+   "src/data_sheets_schema/evaluation_model.py",
+   "src/data_sheets_schema/evaluation_plan.py",
+   "src/data_sheets_schema/evidence_assertions.py",
+   "src/data_sheets_schema/evidence_score.py",
+   "src/data_sheets_schema/fetch.py",
+   "src/data_sheets_schema/field_agent_contract.py",
+   "src/data_sheets_schema/fitness_schema.py",
+   "src/data_sheets_schema/form_defects.py",
+   "src/data_sheets_schema/grounding.py",
+   "src/data_sheets_schema/healthsheet.py",
+   "src/data_sheets_schema/identifiers.py",
+   "src/data_sheets_schema/judge_contract.py",
+   "src/data_sheets_schema/lexicon.py",
+   "src/data_sheets_schema/merge.py",
+   "src/data_sheets_schema/name_grounding.py",
+   "src/data_sheets_schema/org_registry.py",
+   "src/data_sheets_schema/profiles.py",
+   "src/data_sheets_schema/prompt_registry.py",
+   "src/data_sheets_schema/provenance.py",
+   "src/data_sheets_schema/q19_rationale_lint.py",
+   "src/data_sheets_schema/reasoning.py",
+   "src/data_sheets_schema/receipt_origin.py",
+   "src/data_sheets_schema/receipt_sources.py",
+   "src/data_sheets_schema/receipts.py",
+   "src/data_sheets_schema/reconstructed_bytes.py",
+   "src/data_sheets_schema/record_schema.py",
+   "src/data_sheets_schema/redundancy.py",
+   "src/data_sheets_schema/registry.py",
+   "src/data_sheets_schema/related_datasets.py",
+   "src/data_sheets_schema/release_inventory.py",
+   "src/data_sheets_schema/removals.py",
+   "src/data_sheets_schema/rendering/__init__.py",
+   "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "src/data_sheets_schema/rendering/normalization.py",
+   "src/data_sheets_schema/rendering/process_text_files.py",
+   "src/data_sheets_schema/rendering/rubric10_semantic.py",
+   "src/data_sheets_schema/rendering/rubric20_semantic.py",
+   "src/data_sheets_schema/replicate_structure.py",
+   "src/data_sheets_schema/report_claims.py",
+   "src/data_sheets_schema/resources.py",
+   "src/data_sheets_schema/review_pack.py",
+   "src/data_sheets_schema/rocrate_map.py",
+   "src/data_sheets_schema/rocrate_normalize.py",
+   "src/data_sheets_schema/routing_diagnostics.py",
+   "src/data_sheets_schema/rubric_pooling.py",
+   "src/data_sheets_schema/run_guard.py",
+   "src/data_sheets_schema/run_lock.py",
+   "src/data_sheets_schema/run_telemetry.py",
+   "src/data_sheets_schema/runs.py",
+   "src/data_sheets_schema/schema_cache.py",
+   "src/data_sheets_schema/schema_digest.py",
+   "src/data_sheets_schema/schema_semantics.py",
+   "src/data_sheets_schema/schema_snapshot.py",
+   "src/data_sheets_schema/schema_sync.py",
+   "src/data_sheets_schema/schema_view.py",
+   "src/data_sheets_schema/scope.py",
+   "src/data_sheets_schema/self_disclaimed.py",
+   "src/data_sheets_schema/semantic_comparison.py",
+   "src/data_sheets_schema/semantic_evidence.py",
+   "src/data_sheets_schema/semantic_scope.py",
+   "src/data_sheets_schema/snapshot_store.py",
+   "src/data_sheets_schema/source_metadata.py",
+   "src/data_sheets_schema/source_priority.py",
+   "src/data_sheets_schema/source_review.py",
+   "src/data_sheets_schema/spelling.py",
+   "src/data_sheets_schema/status_context.py",
+   "src/data_sheets_schema/stream_evidence.py",
+   "src/data_sheets_schema/support_judge.py",
+   "src/data_sheets_schema/usage_ledger.py",
+   "src/data_sheets_schema/verifiable.py",
+   "src/download/__init__.py",
+   "src/download/claude_max_d4d_processor.py",
+   "src/download/concatenate_documents.py",
+   "src/download/d4d_agent_wrapper.py",
+   "src/download/dataset_extractor.py",
+   "src/download/enhanced_organized_extractor.py",
+   "src/download/enhanced_sheet_downloader.py",
+   "src/download/interactive_d4d_wrapper.py",
+   "src/download/organized_dataset_extractor.py",
+   "src/download/preprocess_sources.py",
+   "src/download/process_concatenated_d4d.py",
+   "src/download/process_concatenated_d4d_claude.py",
+   "src/download/process_individual_d4d_claude_direct.py",
+   "src/download/process_individual_d4d_gpt5.py",
+   "src/download/prompt_loader.py",
+   "src/download/standalone_d4d_wrapper.py",
+   "src/download/validate_preprocessing_quality.py",
+   "src/evaluation/compare_evaluation_methods.py",
+   "src/evaluation/evaluate_d4d.py",
+   "src/evaluation/evaluate_d4d_llm.py",
+   "src/fairscape_integration/__init__.py",
+   "src/fairscape_integration/cli.py",
+   "src/fairscape_integration/constants.py",
+   "src/fairscape_integration/d4d_to_fairscape.py",
+   "src/fairscape_integration/fairscape_to_d4d.py",
+   "src/fairscape_integration/utils/__init__.py",
+   "src/fairscape_integration/utils/d4d_builder.py",
+   "src/fairscape_integration/utils/field_prioritizer.py",
+   "src/fairscape_integration/utils/informativeness_scorer.py",
+   "src/fairscape_integration/utils/linkml_map_integration.py",
+   "src/fairscape_integration/utils/mapping_loader.py",
+   "src/fairscape_integration/utils/rocrate_merger.py",
+   "src/fairscape_integration/utils/rocrate_parser.py",
+   "src/fairscape_integration/utils/sssom_integration.py",
+   "src/fairscape_integration/utils/sssom_reader.py",
+   "src/fairscape_integration/utils/validator.py",
+   "src/github/generate_d4d_metadata.py",
+   "src/github/validate_d4d_completeness.py",
+   "src/html/convert_yaml_to_html.py",
+   "src/html/human_readable_renderer.py",
+   "src/html/process_text_files.py",
+   "src/html/render_concatenated.py",
+   "src/mapping/generate_mappings.py",
+   "src/renderer/__init__.py",
+   "src/renderer/batch_process.py",
+   "src/renderer/cli.py",
+   "src/renderer/convert_all.py",
+   "src/renderer/convert_file.py",
+   "src/renderer/converter.py",
+   "src/renderer/converters/__init__.py",
+   "src/renderer/converters/docx_converter.py",
+   "src/renderer/converters/yaml_template_converter.py",
+   "src/renderer/debug_extractor.py",
+   "src/renderer/main.py",
+   "src/renderer/process_docx.py",
+   "src/renderer/run.py",
+   "src/renderer/setup.py",
+   "src/renderer/simple_extractor.py",
+   "src/renderer/structured_renderer.py",
+   "src/renderer/template_renderer.py",
+   "src/renderer/updated_converter.py",
+   "src/renderer/yaml_parser.py",
+   "src/renderer/yaml_renderer.py",
+   "src/schema_extract/__init__.py",
+   "src/schema_extract/d4d_extract_metadata.py",
+   "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "src/schema_extract/schema_extract.py",
+   "src/semantic_exchange/add_module_column.py",
+   "src/semantic_exchange/add_slot_uris.py",
+   "src/semantic_exchange/generate_comprehensive_sssom.py",
+   "src/semantic_exchange/generate_comprehensive_sssom_uri.py",
+   "src/semantic_exchange/generate_structural_mapping.py",
+   "src/semantic_exchange/implement_uri_mappings.py",
+   "src/transformation/transform_api.py",
+   "src/validation/unified_validator.py",
+   "notes/cborg_canaries_2026-09-12/execution_tools/probe_cli_model_identity.py",
+   "notes/cborg_canaries_2026-09-12/execution_tools/probe_cli_tools.py",
+   "notes/claudecode_direct/bind_direct_launch.py",
+   "notes/claudecode_direct/prepare_direct.py",
+   "notes/claudecode_direct/probe_recorder_permission.py",
+   "notes/claudecode_direct/run_direct_canary.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/__init__.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/native.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/probe_batch_read.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/registration.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/transport.py",
+   "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py",
+   "notes/matched_cborg_2026-09-13/budget_amendment.py",
+   "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+   "notes/matched_cborg_2026-09-13/continuation_sequence.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/adapter_closure.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/api.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/closure.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/native.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/offline.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/registration.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/run_evaluation.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/source_pair.py",
+   "notes/matched_cborg_2026-09-13/evaluation_controls/validation.py",
+   "notes/matched_cborg_2026-09-13/finalization_controls/__init__.py",
+   "notes/matched_cborg_2026-09-13/finalization_controls/contract.py",
+   "notes/matched_cborg_2026-09-13/finalization_controls/native.py",
+   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py",
+   "notes/matched_cborg_2026-09-13/finalization_controls/registration.py",
+   "notes/matched_cborg_2026-09-13/inventory.py",
+   "notes/matched_cborg_2026-09-13/kids_first/build_sources.py",
+   "notes/matched_cborg_2026-09-13/kids_first/capture.py",
+   "notes/matched_cborg_2026-09-13/native_context.py",
+   "notes/matched_cborg_2026-09-13/native_context_control.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+   "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_buffered_stall.py",
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_cli.py",
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_history.py",
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_permissions.py",
+   "notes/matched_cborg_2026-09-13/native_controls/probe_native_stall.py",
+   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+   "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py",
+   "notes/matched_cborg_2026-09-13/prepare_registration.py",
+   "notes/matched_cborg_2026-09-13/run_api_canary.py",
+   "notes/matched_cborg_2026-09-13/sequence_claim.py",
+   "notes/matched_cborg_2026-09-13_v10b/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10c/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10d/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10e/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-14_v10e/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10f/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-14_v10f/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10f_cap20/prepare_budget_amendment.py",
+   "notes/matched_cborg_2026-09-14_v10f_cap20/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-14_v10g/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-14_v10g/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10h/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10h/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10i/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10i/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10j/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10j/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10k/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10k/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10l/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10l/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10m/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10m/publish_registration_view.py",
+   "notes/matched_cborg_2026-09-15_v10n/enumerate_workload.py",
+   "notes/matched_cborg_2026-09-15_v10n/publish_registration_view.py",
+   "notes/matched_evaluation_workload_2026-09-14/enumerate_workload.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/audit_registered_results.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/qualify_reference_results.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_canonical_validator.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_model_provenance.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_percentage_denial.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/run_registered_job_reporting_audit.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/verify_final_written_outputs.py",
+   "notes/reference_rescore_2026-09-11/execution_tools/write_reference_completion.py",
+   "notes/reference_rescore_2026-09-12_cborg/execution_tools/audit_completion.py",
+   "notes/reference_rescore_2026-09-12_cborg/execution_tools/write_completion_summary.py",
+   "notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/audit_completion.py",
+   "notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/probe_validator_status_permissions.py",
+   "notes/reference_rescore_2026-09-12_cborg_runtime/execution_tools/write_completion_summary.py",
+   "notes/schema_changes_since_april_2026-09-16/compare.py",
+   "notes/schema_changes_since_april_2026-09-16/probe_neutral_native.py",
+   "scripts/absence_claims_baseline.py",
+   "scripts/absence_second_reading_agreement.py",
+   "scripts/absence_use_noun_counts.py",
+   "scripts/absence_v3_recall.py",
+   "scripts/agentic_observed.py",
+   "scripts/arm_comparison.py",
+   "scripts/arm_deck.py",
+   "scripts/audit_reference_rescore.py",
+   "scripts/batch_evaluate_rubric10_hybrid.py",
+   "scripts/batch_evaluate_rubric20_hybrid.py",
+   "scripts/check_budget.py",
+   "scripts/check_large_files.py",
+   "scripts/check_schema_ranges.py",
+   "scripts/concat_all_by_column.py",
+   "scripts/concat_tabs_by_source.py",
+   "scripts/convert_debug_to_yaml.py",
+   "scripts/create_gsheet.py",
+   "scripts/data_value_analyzer.py",
+   "scripts/description_comprehensive_review.py",
+   "scripts/description_quality_analyzer.py",
+   "scripts/evaluate_all_d4ds_rubric10.py",
+   "scripts/evaluation_manifest.py",
+   "scripts/fix_evaluation_scores.py",
+   "scripts/fix_failed_extractions.py",
+   "scripts/fix_yaml_debug_files.py",
+   "scripts/generate_all_d4d_html.py",
+   "scripts/generate_gc_approach_comparison.py",
+   "scripts/generate_rubric10_semantic_summary.py",
+   "scripts/generate_rubric10_semantic_summary_simple.py",
+   "scripts/generate_semantic_review_report.py",
+   "scripts/generic_v2_report.py",
+   "scripts/instrument_provenance.py",
+   "scripts/lint_schema_files.py",
+   "scripts/mappings/generate_schema_mappings.py",
+   "scripts/mappings/transform_data.py",
+   "scripts/measure_unhyphenated_line_splits.py",
+   "scripts/organize_extracted_files.py",
+   "scripts/publication_summary_2026-07-22.py",
+   "scripts/q19_blind_agreement.py",
+   "scripts/range_description_checker.py",
+   "scripts/recall_target_baseline.py",
+   "scripts/reference_rescore.py",
+   "scripts/reference_rescore_cborg.py",
+   "scripts/reference_rescore_cborg_batch.py",
+   "scripts/reference_rescore_cborg_deadline.py",
+   "scripts/reference_rescore_cborg_evidence.py",
+   "scripts/reference_rescore_cborg_validator_status.py",
+   "scripts/render_claudecode_agent_html.py",
+   "scripts/render_claudecode_assistant_html.py",
+   "scripts/render_evaluation_html_rubric10_semantic.py",
+   "scripts/render_evaluation_html_rubric20_semantic.py",
+   "scripts/render_interleaved_evaluation.py",
+   "scripts/report_claims_removal_diff.py",
+   "scripts/report_semantic_comparison.py",
+   "scripts/review_reliability_stats.py",
+   "scripts/self_disclaimed_baseline.py",
+   "scripts/slot_uri_conflict_detector.py",
+   "scripts/summarize_rubric10_results.py",
+   "scripts/summarize_rubric20_results.py",
+   "scripts/update_agent_preimages.py",
+   "scripts/update_raw_from_sheet.py",
+   "scripts/upload_to_gdrive.py",
+   "scripts/v5_baselines.py",
+   "scripts/validate_evaluation_schema.py",
+   "scripts/validation_profile.py"
+  ],
+  "registered_copies_skipped": 20,
   "schema_closure": [
    "src/data_sheets_schema/schema/D4D_Base_import.yaml",
    "src/data_sheets_schema/schema/D4D_Collection.yaml",
@@ -3499,7 +4232,8 @@
    "src/data_sheets_schema/schema/D4D_Variables.yaml",
    "src/data_sheets_schema/schema/data_sheets_schema.yaml",
    "src/data_sheets_schema/schema/data_sheets_schema_core.yaml"
-  ]
+  ],
+  "unparsed_python": []
  },
  "gc_project_hits": [
   {
@@ -3569,6 +4303,24 @@
    "model_facing": false,
    "path": ".claude/agents/d4d-rubric10-semantic.md",
    "pattern": "physionet",
+   "role": "exposed",
+   "snippet": "- Example: `10.13026/...` (PhysioNet), `10.5281/...` (Zenodo), `10.18130/...` (Harvard Dataverse)",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "example",
+   "exception": null,
+   "line": 127,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": ".claude/agents/d4d-rubric10-semantic.md",
+   "pattern": "\\b10\\.18130/",
    "role": "exposed",
    "snippet": "- Example: `10.13026/...` (PhysioNet), `10.5281/...` (Zenodo), `10.18130/...` (Harvard Dataverse)",
    "status": "live",
@@ -3853,6 +4605,24 @@
    "context": "example",
    "exception": null,
    "line": 131,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": ".claude/agents/d4d-rubric20-semantic.md",
+   "pattern": "\\b10\\.18130/",
+   "role": "exposed",
+   "snippet": "- Example: `10.13026/...` (PhysioNet), `10.5281/...` (Zenodo), `10.18130/...` (Harvard Dataverse)",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "example",
+   "exception": null,
+   "line": 131,
    "match": "Dataverse",
    "model_facing": false,
    "path": ".claude/agents/d4d-rubric20-semantic.md",
@@ -4029,8 +4799,8 @@
     "native_agentic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 285,
    "match": "diabet",
@@ -4040,7 +4810,7 @@
    "role": "run_shaping",
    "snippet": "primary = ['AI', 'READI', 'diabetes']",
    "status": "live",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -5315,6 +6085,42 @@
    "model_facing": true,
    "path": "data/preprocessed/source_manifest.yaml",
    "pattern": "B35XWX",
+   "role": "model_facing",
+   "snippet": "The four Dataverse releases in the bundle (B35XWX, F3TD5R, K7TGEM and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 216,
+   "match": "F3TD5R",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bF3TD5R\\b)",
+   "role": "model_facing",
+   "snippet": "The four Dataverse releases in the bundle (B35XWX, F3TD5R, K7TGEM and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 216,
+   "match": "K7TGEM",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bK7TGEM\\b)",
    "role": "model_facing",
    "snippet": "The four Dataverse releases in the bundle (B35XWX, F3TD5R, K7TGEM and the",
    "status": "live",
@@ -7470,6 +8276,24 @@
    "code": false,
    "context": "value",
    "exception": 1,
+   "line": 562,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "model_facing",
+   "snippet": "The page labels HIGT4C as the June 2026 release but displays June 17,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
    "line": 563,
    "match": "Dataverse",
    "model_facing": true,
@@ -7477,6 +8301,42 @@
    "pattern": "dataverse",
    "role": "model_facing",
    "snippet": "2025. Official Dataverse metadata reports publication date 2026-06-17",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 565,
+   "match": "K7TGEM",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bK7TGEM\\b)",
+   "role": "model_facing",
+   "snippet": "selects the older K7TGEM release; the HIGT4C release itself is now",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 565,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "model_facing",
+   "snippet": "selects the older K7TGEM release; the HIGT4C release itself is now",
    "status": "live",
    "violation": false
   },
@@ -7511,6 +8371,42 @@
    "model_facing": true,
    "path": "data/preprocessed/source_manifest.yaml",
    "pattern": "dataverse",
+   "role": "model_facing",
+   "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 567,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 567,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
    "role": "model_facing",
    "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
    "status": "live",
@@ -7686,6 +8582,42 @@
    "code": false,
    "context": "value",
    "exception": 1,
+   "line": 585,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 585,
+   "match": "F3TD5R",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bF3TD5R\\b)",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/F3TD5R",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
    "line": 586,
    "match": "dataverse",
    "model_facing": true,
@@ -7758,6 +8690,42 @@
    "code": false,
    "context": "value",
    "exception": 1,
+   "line": 596,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 596,
+   "match": "K7TGEM",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bK7TGEM\\b)",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/K7TGEM",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
    "line": 597,
    "match": "dataverse",
    "model_facing": true,
@@ -7812,6 +8780,42 @@
    "code": false,
    "context": "value",
    "exception": 1,
+   "line": 601,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "model_facing",
+   "snippet": "Sheet cell B16 was corrected to HIGT4C on 2026-07-27, so this is no",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 603,
+   "match": "K7TGEM",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bK7TGEM\\b)",
+   "role": "model_facing",
+   "snippet": "capture does not mention K7TGEM at all, so its DOI, file inventory and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
    "line": 605,
    "match": "CM4AI",
    "model_facing": true,
@@ -7819,6 +8823,24 @@
    "pattern": "CM4AI",
    "role": "model_facing",
    "snippet": "the March and June 2025 releases. Second, CM4AI's pinned referent is",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 610,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "model_facing",
+   "snippet": "Sheet-selected release, superseded upstream by the June 2026 HIGT4C",
    "status": "live",
    "violation": false
   },
@@ -7871,6 +8893,42 @@
    "model_facing": true,
    "path": "data/preprocessed/source_manifest.yaml",
    "pattern": "dataverse",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 614,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 614,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
    "role": "model_facing",
    "snippet": "url: https://dataverse.lib.virginia.edu/dataset.xhtml?persistentId=doi:10.18130/V3/HIGT4C",
    "status": "live",
@@ -7938,11 +8996,83 @@
    "code": false,
    "context": "value",
    "exception": 1,
+   "line": 619,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "Current CM4AI data release, DOI 10.18130/V3/HIGT4C, version 2.0,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 619,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "model_facing",
+   "snippet": "Current CM4AI data release, DOI 10.18130/V3/HIGT4C, version 2.0,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
    "line": 625,
    "match": "dataverse",
    "model_facing": true,
    "path": "data/preprocessed/source_manifest.yaml",
    "pattern": "dataverse",
+   "role": "model_facing",
+   "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 625,
+   "match": "10.18130/",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "value",
+   "exception": 1,
+   "line": 625,
+   "match": "HIGT4C",
+   "model_facing": true,
+   "path": "data/preprocessed/source_manifest.yaml",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
    "role": "model_facing",
    "snippet": "verification_url: https://dataverse.lib.virginia.edu/api/datasets/:persistentId/?persistentId=doi:10.18130/V3/HIGT4C",
    "status": "live",
@@ -9156,7 +10286,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9174,7 +10304,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -9192,7 +10322,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -9210,7 +10340,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9228,7 +10358,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9246,7 +10376,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9264,7 +10394,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9282,7 +10412,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9300,7 +10430,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9318,7 +10448,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9336,25 +10466,25 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 86,
+   "line": 87,
    "match": "CHORUS",
    "model_facing": false,
    "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
    "pattern": "CHo?RUS",
    "role": "run_shaping",
-   "snippet": "help=\"wall-clock limit of one native attempt; 1800 is what v10q and v10r \"",
+   "snippet": "\"registered, and it stopped the v10r CHORUS attempt in Phase 3 (#2010)\")",
    "status": "live",
    "violation": false
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -9369,6 +10499,222 @@
    "snippet": "\"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"},",
    "status": "live",
    "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 272,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'column': 'AI_READI'",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 277,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'column': 'VOICE'",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 270,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 270,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 271,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 271,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 275,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 275,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 275,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 276,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 276,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 276,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
+   "status": "legacy",
+   "violation": false
   },
   {
    "approaches": [
@@ -10690,13 +12036,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 60,
    "match": "AI-READI",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "AI[-_ ]?READI",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"records also document superseded releases \u2014 AI-READI v2.0.0 (1,067 \"",
    "status": "live",
    "violation": false
   },
@@ -10709,13 +12055,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 61,
    "match": "VOICE",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "(?-i:\\bVOICE\\b)",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"participants), VOICE v2.0 (442 participants), CM4AI B35XWX v1.4 \u2014 so \"",
    "status": "live",
    "violation": false
   },
@@ -10728,13 +12074,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 61,
    "match": "CM4AI",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "CM4AI",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"participants), VOICE v2.0 (442 participants), CM4AI B35XWX v1.4 \u2014 so \"",
    "status": "live",
    "violation": false
   },
@@ -10747,13 +12093,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 61,
    "match": "B35XWX",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "B35XWX",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"participants), VOICE v2.0 (442 participants), CM4AI B35XWX v1.4 \u2014 so \"",
    "status": "live",
    "violation": false
   },
@@ -10766,13 +12112,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 63,
    "match": "AI-READI",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "AI[-_ ]?READI",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"which describes AI-READI v3.0.0, VOICE 3.1.0 (833 participants) and \"",
    "status": "live",
    "violation": false
   },
@@ -10785,13 +12131,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 63,
    "match": "VOICE",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "(?-i:\\bVOICE\\b)",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"which describes AI-READI v3.0.0, VOICE 3.1.0 (833 participants) and \"",
    "status": "live",
    "violation": false
   },
@@ -10804,13 +12150,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 64,
    "match": "CM4AI",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "CM4AI",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"CM4AI HIGT4C. There is no CHORUS record. See issue #177.\"",
    "status": "live",
    "violation": false
   },
@@ -10823,13 +12169,32 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 58,
+   "line": 64,
+   "match": "HIGT4C",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/constants/methods.py",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "run_shaping",
+   "snippet": "\"CM4AI HIGT4C. There is no CHORUS record. See issue #177.\"",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 64,
    "match": "CHORUS",
    "model_facing": false,
    "path": "src/data_sheets_schema/constants/methods.py",
    "pattern": "CHo?RUS",
    "role": "run_shaping",
-   "snippet": "\"Generated through a ChatGPT chat interface by pasting in the prompt, \"",
+   "snippet": "\"CM4AI HIGT4C. There is no CHORUS record. See issue #177.\"",
    "status": "live",
    "violation": false
   },
@@ -10991,8 +12356,8 @@
     "native_agentic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 6,
    "line": 33,
    "match": "VOICE",
@@ -11010,8 +12375,8 @@
     "native_agentic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 6,
    "line": 33,
    "match": "VOICE_PEDIATRIC",
@@ -12480,6 +13845,42 @@
    "code": false,
    "context": "docstring",
    "exception": null,
+   "line": 19,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/merge.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "run_shaping",
+   "snippet": "doi      doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 19,
+   "match": "HIGT4C",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/merge.py",
+   "pattern": "(?-i:\\bHIGT4C\\b)",
+   "role": "run_shaping",
+   "snippet": "doi      doi:10.18130/V3/HIGT4C",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
    "line": 324,
    "match": "CM4AI",
    "model_facing": false,
@@ -12916,8 +14317,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 125,
    "match": "AI_READI",
@@ -12936,8 +14337,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 126,
    "match": "AI_READI",
@@ -12956,8 +14357,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 127,
    "match": "AI-READI",
@@ -12976,8 +14377,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 123,
    "match": "AI_READI",
@@ -12996,8 +14397,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 123,
    "match": "CHORUS",
@@ -13016,8 +14417,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 123,
    "match": "CM4AI",
@@ -13036,8 +14437,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 123,
    "match": "VOICE",
@@ -13196,8 +14597,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 121,
    "match": "AI_READI",
@@ -13216,8 +14617,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 122,
    "match": "CHORUS",
@@ -13236,8 +14637,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 122,
    "match": "CM4AI",
@@ -13256,8 +14657,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 122,
    "match": "VOICE",
@@ -13276,8 +14677,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 129,
    "match": "aireadi",
@@ -13296,8 +14697,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 129,
    "match": "chorus",
@@ -13316,8 +14717,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 129,
    "match": "cm4ai",
@@ -13336,8 +14737,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 130,
    "match": "voicepediatric",
@@ -13356,8 +14757,8 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
    "line": 130,
    "match": "voicepeds",
@@ -14337,6 +15738,24 @@
    "code": false,
    "context": "docstring",
    "exception": null,
+   "line": 8,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/release_inventory.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "run_shaping",
+   "snippet": "XNBOPG crate, which ``crate_manifest.yaml`` keeps out of the document corpus",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
    "line": 22,
    "match": "CHORUS",
    "model_facing": false,
@@ -14736,6 +16155,139 @@
    "pattern": "AI[-_ ]?READI",
    "role": "run_shaping",
    "snippet": "The AI_READI crate is windows-1252 (crate_manifest.yaml `encoding_note`),",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 462,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "``doi:10.18130/V3/XNBOPG``, ``https://doi.org/10.18130/V3/XNBOPG`` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 462,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "``doi:10.18130/V3/XNBOPG``, ``https://doi.org/10.18130/V3/XNBOPG`` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 462,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "``doi:10.18130/V3/XNBOPG``, ``https://doi.org/10.18130/V3/XNBOPG`` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 462,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "``doi:10.18130/V3/XNBOPG``, ``https://doi.org/10.18130/V3/XNBOPG`` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 463,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "``...dataset.xhtml?persistentId=doi:10.18130/V3/XNBOPG`` all reduce to",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 463,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "``...dataset.xhtml?persistentId=doi:10.18130/V3/XNBOPG`` all reduce to",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "deterministic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 464,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "``10.18130/v3/xnbopg``. Returns None when there is no DOI to compare.",
    "status": "live",
    "violation": false
   },
@@ -15407,6 +16959,120 @@
    "code": false,
    "context": "docstring",
    "exception": null,
+   "line": 289,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "`https://doi.org/10.18130/V3/XNBOPG`, `doi:10.18130/V3/XNBOPG` and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 289,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "`https://doi.org/10.18130/V3/XNBOPG`, `doi:10.18130/V3/XNBOPG` and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 289,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "`https://doi.org/10.18130/V3/XNBOPG`, `doi:10.18130/V3/XNBOPG` and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 289,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "`https://doi.org/10.18130/V3/XNBOPG`, `doi:10.18130/V3/XNBOPG` and the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 290,
+   "match": "10.18130/",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "\\b10\\.18130/",
+   "role": "model_facing",
+   "snippet": "bare DOI all give `10.18130/V3/XNBOPG`. `_norm` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 290,
+   "match": "XNBOPG",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/scope.py",
+   "pattern": "(?-i:\\bXNBOPG\\b)",
+   "role": "model_facing",
+   "snippet": "bare DOI all give `10.18130/V3/XNBOPG`. `_norm` and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "api",
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
    "line": 375,
    "match": "VOICE",
    "model_facing": false,
@@ -15589,8 +17255,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "ai-readi",
@@ -15600,15 +17266,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "aireadi",
@@ -15618,15 +17284,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "diabet",
@@ -15636,15 +17302,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "fairhub",
@@ -15654,15 +17320,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 42,
    "match": "chorus",
@@ -15672,15 +17338,15 @@
    "role": "run_shaping",
    "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 43,
    "match": "cm4ai",
@@ -15690,15 +17356,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 43,
    "match": "dataverse",
@@ -15708,15 +17374,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 44,
    "match": "b2ai-voice",
@@ -15726,7 +17392,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -15751,8 +17417,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 44,
    "match": "physionet",
@@ -15762,7 +17428,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -15859,8 +17525,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 105,
    "match": "aireadi",
@@ -15870,15 +17536,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 105,
    "match": "fairhub",
@@ -15888,15 +17554,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 106,
    "match": "chorus",
@@ -15906,15 +17572,15 @@
    "role": "run_shaping",
    "snippet": "'CHORUS': ['aim-ahead', 'chorus'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 107,
    "match": "dataverse",
@@ -15924,15 +17590,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 107,
    "match": "cm4ai",
@@ -15942,15 +17608,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 108,
    "match": "physionet",
@@ -15960,15 +17626,15 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 108,
    "match": "b2ai-voice",
@@ -15978,7 +17644,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -16255,8 +17921,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 290,
    "match": "FAIRhub",
@@ -17335,8 +19001,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 38,
    "match": "ai-readi",
@@ -17346,15 +19012,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 38,
    "match": "aireadi",
@@ -17364,15 +19030,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 38,
    "match": "diabet",
@@ -17382,15 +19048,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 38,
    "match": "fairhub",
@@ -17400,15 +19066,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 39,
    "match": "chorus",
@@ -17418,15 +19084,15 @@
    "role": "run_shaping",
    "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 40,
    "match": "cm4ai",
@@ -17436,15 +19102,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 40,
    "match": "dataverse",
@@ -17454,15 +19120,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "b2ai-voice",
@@ -17472,7 +19138,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -17497,8 +19163,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 41,
    "match": "physionet",
@@ -17508,7 +19174,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -17695,8 +19361,8 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 249,
    "match": "aireadi",
@@ -17706,15 +19372,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 249,
    "match": "fairhub",
@@ -17724,15 +19390,15 @@
    "role": "run_shaping",
    "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 250,
    "match": "chorus",
@@ -17742,15 +19408,15 @@
    "role": "run_shaping",
    "snippet": "'CHORUS': ['aim-ahead', 'chorus'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 251,
    "match": "dataverse",
@@ -17760,15 +19426,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 251,
    "match": "cm4ai",
@@ -17778,15 +19444,15 @@
    "role": "run_shaping",
    "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 252,
    "match": "physionet",
@@ -17796,15 +19462,15 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "line": 252,
    "match": "b2ai-voice",
@@ -17814,7 +19480,7 @@
    "role": "run_shaping",
    "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -20861,9 +22527,243 @@
    "snippet": "DATASET_NAME=\"<dataset_name>\"  # e.g., \"cm4ai\", \"ai_readi_voice\"",
    "status": "legacy",
    "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 341,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "help=\"Project name (AI_READI, CHORUS, CM4AI, VOICE)\"",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 341,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "help=\"Project name (AI_READI, CHORUS, CM4AI, VOICE)\"",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 341,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "help=\"Project name (AI_READI, CHORUS, CM4AI, VOICE)\"",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 341,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "help=\"Project name (AI_READI, CHORUS, CM4AI, VOICE)\"",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 405,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "print(\"      -i data/preprocessed/concatenated/sources/AI_READI_sources_concatenated.txt \\\\\")",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 406,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "print(\"      -o data/d4d_concatenated/claudecode/AI_READI_d4d.yaml -p AI_READI\")",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 406,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "print(\"      -o data/d4d_concatenated/claudecode/AI_READI_d4d.yaml -p AI_READI\")",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 16,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/schema_extract/schema_extract.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "python schema_extract.py ../../../CM4AI_docs_for_D4D/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/ro-crate-metadata.json ../data_sheets_schema/schema/modules/ ./ <open ai ke",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "line": 16,
+   "match": "cm4ai",
+   "model_facing": false,
+   "path": "src/schema_extract/schema_extract.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "python schema_extract.py ../../../CM4AI_docs_for_D4D/cm4ai_chromatin_mda-mb-468_untreated_apms_0.1_alpha/ro-crate-metadata.json ../data_sheets_schema/schema/modules/ ./ <open ai ke",
+   "status": "legacy",
+   "violation": false
   }
  ],
- "root": "fix-4007",
+ "root": "origin-main",
  "self_test": {
   "imported_from_neutrality_test": 36,
   "passed": true,
@@ -20871,7 +22771,7 @@
   "token_counts": {
    "biomedical_clinical": 25,
    "bridge2ai_program": 9,
-   "gc_project": 60
+   "gc_project": 65
   }
  },
  "surfaces": {
@@ -20882,7 +22782,7 @@
    "path": ".claude/agents/d4d-description-reviewer.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-mapper.md": {
    "approaches": [
@@ -20891,7 +22791,7 @@
    "path": ".claude/agents/d4d-mapper.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-provenance-guard.md": {
    "approaches": [
@@ -20900,7 +22800,7 @@
    "path": ".claude/agents/d4d-provenance-guard.md",
    "role": "model_facing",
    "status": "live",
-   "why": "agent named by a playbook or live prompt"
+   "why": "agent named (path, bare name or slash command) by a playbook, live prompt, controller or the assistant instructions"
   },
   ".claude/agents/d4d-review-record.md": {
    "approaches": [
@@ -20909,7 +22809,7 @@
    "path": ".claude/agents/d4d-review-record.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-rocrate.md": {
    "approaches": [
@@ -20918,7 +22818,7 @@
    "path": ".claude/agents/d4d-rocrate.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-rubric10-semantic.md": {
    "approaches": [
@@ -20927,7 +22827,7 @@
    "path": ".claude/agents/d4d-rubric10-semantic.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-rubric10.md": {
    "approaches": [
@@ -20936,7 +22836,7 @@
    "path": ".claude/agents/d4d-rubric10.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-rubric20-semantic.md": {
    "approaches": [
@@ -20945,7 +22845,7 @@
    "path": ".claude/agents/d4d-rubric20-semantic.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-rubric20.md": {
    "approaches": [
@@ -20954,7 +22854,7 @@
    "path": ".claude/agents/d4d-rubric20.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-schema-expert.md": {
    "approaches": [
@@ -20963,16 +22863,16 @@
    "path": ".claude/agents/d4d-schema-expert.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/d4d-validator.md": {
    "approaches": [
     "native_agentic"
    ],
    "path": ".claude/agents/d4d-validator.md",
-   "role": "exposed",
+   "role": "model_facing",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "agent named (path, bare name or slash command) by a playbook, live prompt, controller or the assistant instructions"
   },
   ".claude/agents/schema-stats.md": {
    "approaches": [
@@ -20981,7 +22881,7 @@
    "path": ".claude/agents/schema-stats.md",
    "role": "exposed",
    "status": "live",
-   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook names it"
+   "why": "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller or assistant instruction names it"
   },
   ".claude/agents/scripts/auto_process_rocrates.py": {
    "approaches": [
@@ -21219,336 +23119,570 @@
   },
   "notes/claudecode_direct/bind_direct_launch.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/claudecode_direct/bind_direct_launch.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/claudecode_direct/prepare_direct.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/claudecode_direct/prepare_direct.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (RunSpec)"
   },
   "notes/claudecode_direct/run_direct_canary.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/claudecode_direct/run_direct_canary.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (RunSpec)"
   },
   "notes/claudecode_direct/system.md": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/claudecode_direct/system.md",
    "role": "model_facing",
    "status": "live",
-   "why": "appended system prompt"
+   "why": "text a controller hands to the model (notes/claudecode_direct/prepare_direct.py)"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/__init__.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/__init__.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (phase_instruction)"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/contract.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/contract.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (RunSpec, build_phase)"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/native.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/native.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/registration.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/registration.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (RunSpec)"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/transport.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/transport.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/budget_amendment.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/budgeted_cborg.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/continuation_sequence.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/continuation_sequence.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/adapter_closure.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/adapter_closure.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/api.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/api.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "calls a model client outside the generation controllers (a diagnostic probe, a transport or an evaluator): self.messages.stream()"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/closure.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/closure.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation module a run controller imports (an evaluation-sequence branch)"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "imported by an evaluation controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/native.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/native.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/offline.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/offline.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/registration.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/registration.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/run_evaluation.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/run_evaluation.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/source_pair.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/source_pair.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "evaluation controller: imports a run controller"
+  },
+  "notes/matched_cborg_2026-09-13/evaluation_controls/validation.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/evaluation_controls/validation.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "imported by an evaluation controller"
+  },
+  "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/finalization_controls/contract.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: builds a generation request (RunSpec, build_phase)"
+  },
+  "notes/matched_cborg_2026-09-13/finalization_controls/native.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/finalization_controls/native.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: runs a controller (imports __init__.py, native.py, budgeted_cborg.py)"
+  },
+  "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/finalization_controls/registration.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/finalization_controls/registration.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_context.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_context.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/native_context_control.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/native_context_control.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (playbook_text)"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_control.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: runs a controller (imports native_command_policy.py)"
   },
   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/native_controls/probe_native_buffered_stall.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_buffered_stall.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "calls a model client outside the generation controllers (a diagnostic probe, a transport or an evaluator): import anthropic"
+  },
+  "notes/matched_cborg_2026-09-13/native_controls/probe_native_stall.py": {
+   "approaches": [
+    "other_model_client"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_stall.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "calls a model client outside the generation controllers (a diagnostic probe, a transport or an evaluator): import anthropic"
   },
   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/system.md": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/system.md",
    "role": "model_facing",
    "status": "live",
-   "why": "appended system prompt"
+   "why": "text a controller hands to the model (notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py)"
   },
   "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py": {
    "approaches": [
-    "native_agentic"
+    "other_model_client"
    ],
    "path": "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "calls a model client outside the generation controllers (a diagnostic probe, a transport or an evaluator): import anthropic"
   },
   "notes/matched_cborg_2026-09-13/prepare_registration.py": {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
    "role": "run_shaping",
    "status": "live",
-   "why": "native/direct controller"
+   "why": "run controller: builds a generation request (RunSpec, build_phase)"
+  },
+  "notes/matched_cborg_2026-09-13/run_api_canary.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "notes/matched_cborg_2026-09-13/sequence_claim.py": {
+   "approaches": [
+    "run_controllers"
+   ],
+   "path": "notes/matched_cborg_2026-09-13/sequence_claim.py",
+   "role": "run_shaping",
+   "status": "live",
+   "why": "run controller: imported or staged by a controller"
+  },
+  "scripts/fix_failed_extractions.py": {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "path": "scripts/fix_failed_extractions.py",
+   "role": "run_shaping",
+   "status": "legacy",
+   "why": "calls a model client to write a D4D record outside the runner: from pydantic_ai import, self.d4d_agent.run()"
   },
   "src/data_sheets_schema/agent_pin.py": {
    "approaches": [
@@ -22519,7 +24653,7 @@
    "path": "src/download/claude_max_d4d_processor.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "legacy generation helper script"
   },
   "src/download/concatenate_documents.py": {
    "approaches": [
@@ -22537,7 +24671,7 @@
    "path": "src/download/d4d_agent_wrapper.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: from aurelian.agents.d4d.d4d_config import, from aurelian.agents.d4d.d4d_tools import, from pydantic_ai import, self.d4d_agent.run()"
   },
   "src/download/dataset_extractor.py": {
    "approaches": [
@@ -22564,7 +24698,7 @@
    "path": "src/download/interactive_d4d_wrapper.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: from pydantic_ai import, self.d4d_agent.run()"
   },
   "src/download/organized_dataset_extractor.py": {
    "approaches": [
@@ -22591,7 +24725,7 @@
    "path": "src/download/process_concatenated_d4d.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: from aurelian.agents.d4d.d4d_config import, from aurelian.agents.d4d.d4d_tools import, from pydantic_ai import, self.d4d_agent.run()"
   },
   "src/download/process_concatenated_d4d_claude.py": {
    "approaches": [
@@ -22600,7 +24734,7 @@
    "path": "src/download/process_concatenated_d4d_claude.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: from aurelian.agents.d4d.d4d_config import, from pydantic_ai import, from pydantic_ai.models.anthropic import, self.d4d_agent.run()"
   },
   "src/download/process_individual_d4d_claude_direct.py": {
    "approaches": [
@@ -22609,7 +24743,7 @@
    "path": "src/download/process_individual_d4d_claude_direct.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "legacy generation helper script"
   },
   "src/download/process_individual_d4d_gpt5.py": {
    "approaches": [
@@ -22618,7 +24752,7 @@
    "path": "src/download/process_individual_d4d_gpt5.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: agent.run(), from pydantic_ai import"
   },
   "src/download/prompt_loader.py": {
    "approaches": [
@@ -22627,7 +24761,7 @@
    "path": "src/download/prompt_loader.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "legacy generation helper script"
   },
   "src/download/prompts/canonical_hashes.yaml": {
    "approaches": [
@@ -22997,7 +25131,25 @@
    "path": "src/download/standalone_d4d_wrapper.py",
    "role": "run_shaping",
    "status": "legacy",
-   "why": "legacy generation script"
+   "why": "calls a model client to write a D4D record outside the runner: from pydantic_ai import, self.d4d_agent.run()"
+  },
+  "src/schema_extract/process_d4d_claude_API_temp0.py": {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "role": "run_shaping",
+   "status": "legacy",
+   "why": "calls a model client to write a D4D record outside the runner: client.messages.create(), import anthropic"
+  },
+  "src/schema_extract/schema_extract.py": {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "path": "src/schema_extract/schema_extract.py",
+   "role": "run_shaping",
+   "status": "legacy",
+   "why": "calls a model client to write a D4D record outside the runner: import openai, openai.ChatCompletion.create()"
   }
  },
  "test_dependencies": [
@@ -23644,6 +25796,22 @@
   {
    "category": "gc_project",
    "context": "test_assertion",
+   "line": 344,
+   "match": "10.18130/",
+   "path": "tests/test_scope.py",
+   "snippet": "self.assertEqual(\"10.18130/V3/XNBOPG\", scope.bare_doi(form))"
+  },
+  {
+   "category": "gc_project",
+   "context": "test_assertion",
+   "line": 344,
+   "match": "XNBOPG",
+   "path": "tests/test_scope.py",
+   "snippet": "self.assertEqual(\"10.18130/V3/XNBOPG\", scope.bare_doi(form))"
+  },
+  {
+   "category": "gc_project",
+   "context": "test_assertion",
    "line": 233,
    "match": "VOICE",
    "path": "tests/test_scope.py",
@@ -23757,7 +25925,7 @@
  "totals": {
   "biomedical_clinical": {
    "hits": 1619,
-   "model_facing": 1357,
+   "model_facing": 1358,
    "with_reason": 1344
   },
   "bridge2ai_program": {
@@ -23766,13 +25934,31 @@
    "with_reason": 2354
   },
   "gc_project": {
-   "hits": 949,
-   "model_facing": 292,
-   "with_reason": 374
+   "hits": 1013,
+   "model_facing": 312,
+   "with_reason": 394
   },
-  "violations": 42
+  "violations": 81
  },
  "tracked_without_reason": [
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 29,
+   "match": "deidentif",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/field_prioritizer.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "'is_deidentified', 'data_governance', 'known_biases', 'intended_uses',",
+   "status": "live",
+   "violation": false
+  },
   {
    "approaches": [
     "native_agentic"
@@ -23788,6 +25974,150 @@
    "pattern": "de-?identif",
    "role": "run_shaping",
    "snippet": "'is_deidentified': ('narrowMatch', 'minimal', 'is_deidentified', 'true', '\"de-identified\"'),",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 106,
+   "match": "Patient",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_enhanced_tsv.py",
+   "pattern": "patients?\\b",
+   "role": "run_shaping",
+   "snippet": "'instances': ('relatedMatch', 'high', 'instances[].data_topic', '[{\"data_topic\":\"Patient\",\"instance_type\":\"record\",\"counts\":1000}]', '\"1000 patient records\"'),",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 118,
+   "match": "deidentif",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_enhanced_tsv.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "'is_deidentified': ('narrowMatch', 'minimal', 'is_deidentified', 'true', '\"de-identified\"'),",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 118,
+   "match": "de-identif",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_enhanced_tsv.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "'is_deidentified': ('narrowMatch', 'minimal', 'is_deidentified', 'true', '\"de-identified\"'),",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 130,
+   "match": "deidentif",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_interface_mapping.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "('Privacy', 'Dataset.is_deidentified', 'bool', 'd4d:is_deidentified skos:narrowMatch rai:confidentialityLevel', '@graph[?@type=\\'Dataset\\'][\\'rai:confidentialityLevel\\']', 'narrowM",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 130,
+   "match": "de-identif",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_interface_mapping.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "('Privacy', 'Dataset.is_deidentified', 'bool', 'd4d:is_deidentified skos:narrowMatch rai:confidentialityLevel', '@graph[?@type=\\'Dataset\\'][\\'rai:confidentialityLevel\\']', 'narrowM",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 183,
+   "match": "IRB",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_interface_mapping.py",
+   "pattern": "(?-i:\\bIRBs?\\b)",
+   "role": "run_shaping",
+   "snippet": "('Ethics & Compliance', 'EthicalReview.irb_id', 'str', 'd4d:ethical_reviews.irb_id', 'rai:ethicalReview', 'closeMatch', 'moderate', '\"IRB-2023-456\"', 'Embedded in ethicalReview str",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 248,
+   "match": "Patient",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_interface_mapping.py",
+   "pattern": "patients?\\b",
+   "role": "run_shaping",
+   "snippet": "('Unmapped', 'Dataset.instances', 'Instance', 'Partial: schema:variableMeasured', '@graph[?@type=\\'Dataset\\'][\\'variableMeasured\\']', 'relatedMatch', 'high', '{\"data_topic\":\"Patien",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 250,
+   "match": "Patient",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/generate_interface_mapping.py",
+   "pattern": "patients?\\b",
+   "role": "run_shaping",
+   "snippet": "('Unmapped', 'Instance.data_topic', 'str', 'No mapping', 'N/A', 'unmapped', 'high', '\"Patient\"', 'N/A', 'Nested property lost'),",
    "status": "live",
    "violation": false
   },
@@ -24081,7 +26411,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": true,
@@ -24099,7 +26429,44 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
+   ],
+   "category": "biomedical_clinical",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "line": 86,
+   "match": "diagnos",
+   "model_facing": true,
+   "model_text_function": "child_system",
+   "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
+   "pattern": "diagnos(?!tic)",
+   "role": "run_shaping",
+   "snippet": "'governs this new condition. Historical audits and external review diagnoses are not '",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "run_controllers"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 232,
+   "match": "bridge2ai",
+   "model_facing": false,
+   "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+   "pattern": "Bridge2AI",
+   "role": "run_shaping",
+   "snippet": "for profile_name in (\"neutral\", \"bridge2ai\"):",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": true,
@@ -24124,13 +26491,13 @@
    "code": false,
    "context": "string_literal",
    "exception": null,
-   "line": 1551,
+   "line": 1600,
    "match": "de-identif",
    "model_facing": true,
    "path": "src/data_sheets_schema/api_runner.py",
    "pattern": "de-?identif",
    "role": "model_facing",
-   "snippet": "\"Phase 3. Audit the FULL record against the declared bundle and the \"",
+   "snippet": "\"storage or a software name alone does not attest de-identification \"",
    "status": "live",
    "violation": false
   },
@@ -24787,6 +27154,60 @@
   },
   {
    "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 42,
+   "match": "bridge2ai",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "Bridge2AI",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 39,
+   "match": "bridge2ai",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "Bridge2AI",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 234,
+   "match": "biomarker",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "biomarker",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['voice recording', 'speech', 'vocal', 'acoustic', 'biomarker', 'mit']",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
     "shared_input"
    ],
    "category": "bridge2ai_program",
@@ -24801,6 +27222,60 @@
    "role": "run_shaping",
    "snippet": "USER_AGENT = \"bridge2ai-data-sheets-schema/1.0\"",
    "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "shared_input"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 1166,
+   "match": "b2ai",
+   "model_facing": false,
+   "path": "src/download/organized_dataset_extractor.py",
+   "pattern": "b2ai",
+   "role": "run_shaping",
+   "snippet": "prefix=\"b2ai-canonical-download-\"",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 38,
+   "match": "bridge2ai",
+   "model_facing": false,
+   "path": "src/download/process_individual_d4d_gpt5.py",
+   "pattern": "Bridge2AI",
+   "role": "run_shaping",
+   "snippet": "schema_url: str = \"https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/main/src/data_sheets_schema/schema/data_sheets_schema.yaml\"",
+   "status": "legacy",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "bridge2ai_program",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 263,
+   "match": "bridge2ai",
+   "model_facing": false,
+   "path": "src/download/prompt_loader.py",
+   "pattern": "Bridge2AI",
+   "role": "run_shaping",
+   "snippet": "\"https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/\"",
+   "status": "legacy",
    "violation": false
   },
   {
@@ -24900,6 +27375,24 @@
     "native_agentic"
    ],
    "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 285,
+   "match": "diabet",
+   "model_facing": false,
+   "path": ".claude/agents/scripts/field_prioritizer.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "primary = ['AI', 'READI', 'diabetes']",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
@@ -24933,7 +27426,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -24951,7 +27444,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -24969,7 +27462,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -24987,7 +27480,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25005,7 +27498,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25023,7 +27516,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25041,7 +27534,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25059,7 +27552,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25077,7 +27570,7 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": true,
@@ -25091,6 +27584,42 @@
    "role": "run_shaping",
    "snippet": "\"canary\": replicate == 1 and case[\"project\"] in {\"CHORUS\", \"KIDS_FIRST\"},",
    "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 272,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'column': 'AI_READI'",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 277,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'column': 'VOICE'",
+   "status": "legacy",
    "violation": true
   },
   {
@@ -25191,6 +27720,168 @@
    "code": true,
    "context": "code_table",
    "exception": null,
+   "line": 41,
+   "match": "ai-readi",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 41,
+   "match": "aireadi",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 41,
+   "match": "diabet",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 41,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 42,
+   "match": "chorus",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 43,
+   "match": "cm4ai",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 43,
+   "match": "dataverse",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "dataverse",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 44,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 44,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
    "line": 105,
    "match": "AI_READI",
    "model_facing": false,
@@ -25263,6 +27954,132 @@
    "code": true,
    "context": "code_table",
    "exception": null,
+   "line": 105,
+   "match": "aireadi",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 105,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 106,
+   "match": "chorus",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['aim-ahead', 'chorus'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 107,
+   "match": "dataverse",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "dataverse",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 107,
+   "match": "cm4ai",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 108,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 108,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "src/download/claude_max_d4d_processor.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
    "line": 38,
    "match": "AI_READI",
    "model_facing": false,
@@ -25322,6 +28139,168 @@
    "model_facing": false,
    "path": "src/download/interactive_d4d_wrapper.py",
    "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 38,
+   "match": "ai-readi",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 38,
+   "match": "aireadi",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 38,
+   "match": "diabet",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 38,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['ai-readi', 'aireadi', 'artificial intelligence ready', 'diabetes', 'salutogenic', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 39,
+   "match": "chorus",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['chorus', 'clinical health outcomes research', 'informatics', 'aim ahead', 'bridge2ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 40,
+   "match": "cm4ai",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 40,
+   "match": "dataverse",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "dataverse",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['cm4ai', 'computational microscopy', 'microscopy', 'imaging', 'cellular', 'dataverse'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 41,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 41,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "physionet",
    "role": "run_shaping",
    "snippet": "'VOICE': ['voice', 'b2ai-voice', 'bridge2ai voice', 'vocal', 'speech', 'physionet', 'health data nexus']",
    "status": "legacy",
@@ -25466,6 +28445,132 @@
    "model_facing": false,
    "path": "src/download/interactive_d4d_wrapper.py",
    "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 249,
+   "match": "aireadi",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 249,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'AI_READI': ['aireadi', 'fairhub'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 250,
+   "match": "chorus",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "'CHORUS': ['aim-ahead', 'chorus'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 251,
+   "match": "dataverse",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "dataverse",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 251,
+   "match": "cm4ai",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "'CM4AI': ['dataverse', 'cm4ai'],",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 252,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 252,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "src/download/interactive_d4d_wrapper.py",
+   "pattern": "b2ai-voice",
    "role": "run_shaping",
    "snippet": "'VOICE': ['physionet', 'voice', 'b2ai-voice', 'healthnexus']",
    "status": "legacy",
@@ -25648,6 +28753,78 @@
    "pattern": "AI[-_ ]?READI",
    "role": "model_facing",
    "snippet": "DATASET_NAME=\"<dataset_name>\"  # e.g., \"cm4ai\", \"ai_readi_voice\"",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CHo?RUS",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "CM4AI",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "line": 72,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "PROJECTS = [\"AI_READI\", \"CHORUS\", \"CM4AI\", \"VOICE\"]",
    "status": "legacy",
    "violation": true
   }
