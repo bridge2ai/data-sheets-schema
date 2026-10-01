@@ -695,6 +695,14 @@ class AmendedDeletions(unittest.TestCase):
         b = rm.classify(_record(creators=[{"name": "Ada", "affiliation": "Univ of X"}]),
                         _record(creators=[{"name": "", "affiliation": "University of Y"}]), _audit(), **kw)
         self.assertEqual(rows(b), {"creators[0].name": {"curator_amend": True}, "creators[0].affiliation": {}})
+        # An edit with an empty `with` admits several records before it;
+        # where any of them cannot place the entry, nothing is decided by
+        # the rebuild and the #3850 reading stands.
+        b = rm.classify(_record(creators=[{"name": "AdaX", "roles": ["PI"]}, {"name": "Bob", "roles": ["PI"]}]),
+                        _record(creators=[{"name": "Ada", "roles": ["PI"]}]), _audit(),
+                        amended_paths={"creators[0].name"}, amended_edits={"creators[0].name": [("X", "")]})
+        self.assertEqual(rows(b)["creators[0].name"], {"curator_amend": True})
+        self.assertEqual(rows(b)["creators[0].roles[0]"], {"curator_amend_ambiguous": True})
         # An amend that cannot be reversed (no recorded edit) leaves the #3850 reading.
         b = rm.classify(_record(creators=[{"name": "Ada", "affiliation": "Univ of X"}]),
                         _record(creators=[{"name": "", "affiliation": "University of Y"}]), _audit(),
