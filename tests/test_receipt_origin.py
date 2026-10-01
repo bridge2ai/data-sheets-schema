@@ -2466,10 +2466,11 @@ class DeriveSpellings(Base):
         self.assertIn("a `python3 - <<'EOF'` program that runs a shell string it carries (`os.system(\"$X "
                       "./derive.sh\")`), or writes one to a file a later part or a later call runs, is read as "
                       "the same program given to `python -c` is", text)
-        self.assertIn("a function, alias or command-hash entry for the reader's own word that the session's shell "
-                      "kept from an earlier call, or its profile set (an earlier `printf -v 'BASH_CMDS[cat]' %s "
-                      "/bin/sh`, then `cat <<'EOF'`, runs the body), is not seen, as for every reader, where "
-                      "origin/main, reading the body's lines as commands, saw them", text)
+        self.assertIn("a function, alias or command-hash entry for the reader's own word, or a redirection of the "
+                      "shell's own output (`exec > s.sh`), that the session's shell kept from an earlier call, or "
+                      "its profile set (an earlier `printf -v 'BASH_CMDS[cat]' %s /bin/sh`, then `cat <<'EOF'`, "
+                      "runs the body), is not seen, as for every reader, where origin/main, reading the body's "
+                      "lines as commands, saw them", text)
         # #3924 is read in a command v6 reads, and named as a gap only in one
         # read as origin/main read it. #3925 is a gap again (#3983). The
         # round-4 guards are gone into the one gate (#4028).
@@ -4299,8 +4300,11 @@ class ShellLexer(Base):
     #: name (#3996): an assignment before it (`PATH`, `LD_PRELOAD`), on the
     #: part, to `env` or as a part of its own; `poetry run`, `env`, `nohup`,
     #: `command`, `exec` or `builtin` before it; or a redirection before the
-    #: program, which origin/main does not read through. `PATH=./bin cat`
-    #: runs `./bin/cat`, which may run its standard input as commands.
+    #: program, which origin/main does not read through, an input one too
+    #: (#4070 refuses an output one on its own). `PATH=./bin cat` runs
+    #: `./bin/cat`, which may run its standard input as commands. An
+    #: assignment-only part after the part carrying it refuses the reading
+    #: as well.
     NOT_PLAINLY_RUN = (
         "PATH=./bin cat <<'EOF'\n{body}\nEOF",
         "PATH=./bin; cat <<'EOF'\n{body}\nEOF",
@@ -4317,6 +4321,8 @@ class ShellLexer(Base):
         "exec cat <<'EOF'\n{body}\nEOF",
         "builtin cd x <<'EOF'\n{body}\nEOF",
         "2>/dev/null cat <<'EOF'\n{body}\nEOF",
+        "< in.txt cat <<'EOF'\n{body}\nEOF",
+        "cat <<'EOF'\n{body}\nEOF\nPATH=./bin; ls",
     )
 
     def test_a_here_document_under_a_part_not_plainly_run_is_read_as_on_origin_main(self):
@@ -4783,6 +4789,16 @@ class ShellLexer(Base):
                         shell = ro._shell(command, "/w", [])
                         self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
                         self.assertIs(shell["detaches"], body.startswith("$X"))
+        # The rule is blunt: a carrying part on the right of a pipe is in a
+        # pipeline too, though there its copy goes to the call's output.
+        for head in ("cd sub | cat <<'EOF'", "mkdir -p o |& cat <<'EOF'"):
+            for body in ("$X ./derive.sh", "cd data"):
+                command = f"{head}\n{body}\nEOF"
+                with self.subTest(command=command):
+                    self.assertFalse(ro._heredocs_are_data(*ro._scan(command, heredocs=True)))
+                    self.assertIs(ro._lex(command)[2], False)
+                    self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                    self.assertIs(ro._shell(command, "/w", [])["detaches"], body.startswith("$X"))
         # `tee` writes its input to every file it names: no reader of data.
         self.assertNotIn("tee", ro._DATA_READERS)
         # The control: where the carrying part's output goes nowhere but the
