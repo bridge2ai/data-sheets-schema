@@ -161,11 +161,13 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
 
     `loader` composes the node tree the rule walks; the rule is the same
     whichever composes it. The default is the pure-Python `SafeLoader`, as
-    it always was; `FAST_LOADER` (libyaml's) gives the same findings about
-    nine times faster (CPU time over the 1,616 YAML files under
-    `data/d4d_concatenated` on 2026-09-30, the depth guard below included:
-    58.4 s against 6.7 s, of which the guard's event pass is 2.3 s; #3704,
-    #3800, #3817, #3826).
+    it always was. On the 1,616 YAML files under `data/d4d_concatenated`,
+    `FAST_LOADER` (libyaml's) gives the same findings about nine times
+    faster (CPU time over those files on 2026-09-30, the depth guard below
+    included: 58.4 s against 6.7 s, of which the guard's event pass is
+    2.3 s; #3704, #3800, #3817, #3826). The equal findings are a fact about
+    those files, not about the loaders: on other text the two can disagree,
+    as the #3855 paragraph below sets out.
 
     A text that cannot be scanned — the reader or composer rejects it, or it
     nests past the interpreter's recursion limit — gives `[]` by default:
