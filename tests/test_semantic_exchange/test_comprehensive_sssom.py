@@ -1563,9 +1563,9 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
                       f"{gcs.REGENERATE_HINT}.")
 
     def test_a_drift_failure_says_how_to_regenerate_and_what_moves_the_tables(self):
-        """#2993: the /d4d-add-mapping playbook (pinned, not edited here)
-        still says to skip regeneration after adding a TTL triple, so the
-        failure itself has to say what to run and that the TTL moves it."""
+        """#2993: the failure itself says what to run and that the TTL moves
+        the tables, for whoever edits the TTL without the /d4d-add-mapping
+        playbook (which says the same since #3884)."""
         with tempfile.TemporaryDirectory() as d:
             stale = Path(d) / COMP.name
             stale.write_text(self._without_first_row(COMP.read_text(encoding="utf-8")),
@@ -1579,6 +1579,25 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
                        "commit them with the change", "SKOS alignment TTL",
                        "/d4d-add-mapping", "D4D_MISSING_URI_RECOMMENDATIONS.tsv"):
             self.assertIn(needle, message)
+
+    def test_the_add_mapping_playbook_regenerates_and_names_nobody(self):
+        """#2993, #3883, #3884: the /d4d-add-mapping playbook sends new
+        mappings through the TTL and the comprehensive generator, runs the
+        drift check, commits the tables with the TTL, writes no author and no
+        row by hand, and points at no retired table."""
+        text = (REPO / ".claude/commands/d4d-add-mapping.md").read_text(
+            encoding="utf-8")
+        for needle in ("make gen-sssom-comprehensive gen-sssom-uri-comprehensive",
+                       "make check-sssom-comprehensive",
+                       "d4d_rocrate_skos_alignment.ttl",
+                       COMP.name, URI.name):
+            self.assertIn(needle, text)
+        self.assertNotIn("0000-0000-0000-0000", text)
+        self.assertNotIn("orcid.org", text)
+        self.assertNotIn("Skip regen", text)
+        self.assertNotIn("make gen-sssom-all", text)
+        for name in TestNoRowNamesAPerson.RETIRED:
+            self.assertNotIn(f"semantic_exchange/{name}", text)
 
     def test_comprehensive_table(self):
         self._assert_regenerates(
