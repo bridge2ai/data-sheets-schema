@@ -150,6 +150,9 @@ class Time(unittest.TestCase):
         "verb, no term": ("The source was used, ", "e.g., x ", "and nothing else."),
         "term, no verb": ("The higher-ranked source lists items, ", "e.g., x ", "and more."),
         "term, then verb": ("The higher-ranked source lists items, ", "e.g., x ", "and that value is used."),
+        # v5's bundle-wide windows cross the same dots (#3887), bounded at 80
+        # characters; a negation with no partner fails at every start.
+        "negation, no partner": ("No figure is given, ", "e.g., x ", "by the release page."),
     }
     CEILING = 1.0       # seconds for one call; the fixed pattern takes about a millisecond
 
@@ -179,10 +182,10 @@ class Identity(unittest.TestCase):
     def test_the_result_names_the_instrument_version_and_lexicon_bytes(self):
         """The newest registered version unless one is passed (#3132)."""
         result = al.lint({"notes": POSITIVE[0][0]})
-        self.assertEqual(result["instrument"], "absence_self_narration lexicon v4 (#3791)")
-        self.assertEqual(result["lexicon"]["version"], 4)
+        self.assertEqual(result["instrument"], "absence_self_narration lexicon v5 (#3875)")
+        self.assertEqual(result["lexicon"]["version"], 5)
         self.assertEqual(result["lexicon"]["sha256"], hashlib.sha256(
-            (lx.LEXICON_DIR / "absence_self_narration_v4.yaml").read_bytes()).hexdigest())
+            (lx.LEXICON_DIR / "absence_self_narration_v5.yaml").read_bytes()).hexdigest())
         self.assertIs(result["gating"], False)
         v1 = al.lint({"notes": POSITIVE[0][0]}, lx.load(al.LEXICON, 1))
         self.assertEqual((v1["lexicon"]["version"], v1["lexicon"]["sha256"]),
@@ -738,26 +741,33 @@ class Baseline(unittest.TestCase):
         """#3132: registering a version does not move the note's counts; the
         note names the later ones and is stale until regenerated. Counting
         under another is a change of `LEXICON_VERSION`, and a precision table
-        is shown only under the bytes it was checked under. Since #3791 the
-        note counts under v4, the newest, so it names none."""
-        self.assertEqual(self.m.LEXICON_VERSION, 4)
+        is shown only under the bytes it was checked under. Since #3875 the
+        note counts under v5, the newest, so it names none."""
+        self.assertEqual(self.m.LEXICON_VERSION, 5)
         collected = self.m.collect(self.corpus)
-        v2, v3, v4 = (lx.load(al.LEXICON, v) for v in (2, 3, 4))
-        self.assertEqual(collected["lexicon"].sha256, v4.sha256)
+        v2, v3, v4, v5 = (lx.load(al.LEXICON, v) for v in (2, 3, 4, 5))
+        self.assertEqual(collected["lexicon"].sha256, v5.sha256)
         md = self.m.render_markdown(collected)
         self.assertNotIn("Later versions", md)
+        self.assertIn("| bundle_wide_absence | 49 | 1 | 0 |", md)
+        self.assertIn("| record_self_narration | 50 | 0 | 0 |", md)
+        self.m.LEXICON_VERSION = 4
+        md = self.m.render_markdown(self.m.collect(self.corpus))
+        self.assertIn(f"- **Later versions:** v5 (`absence_self_narration_v5.yaml`, sha256 `{v5.sha256}`). "
+                      "This note counts under v4", md)
         self.assertIn("| record_self_narration | 49 | 1 | 0 |", md)
         self.m.LEXICON_VERSION = 3
         md = self.m.render_markdown(self.m.collect(self.corpus))
-        self.assertIn(f"- **Later versions:** v4 (`absence_self_narration_v4.yaml`, sha256 `{v4.sha256}`). "
-                      "This note counts under v3", md)
+        self.assertIn(f"- **Later versions:** v4 (`absence_self_narration_v4.yaml`, sha256 `{v4.sha256}`); "
+                      f"v5 (`absence_self_narration_v5.yaml`, sha256 `{v5.sha256}`). This note counts under v3", md)
         self.assertIn("| record_self_narration | 50 | 0 | 0 |", md)
         self.m.LEXICON_VERSION = 1
         under_v1 = self.m.collect(self.corpus)
         md = self.m.render_markdown(under_v1)
         self.assertIn(f"- **Later versions:** v2 (`absence_self_narration_v2.yaml`, sha256 `{v2.sha256}`); "
                       f"v3 (`absence_self_narration_v3.yaml`, sha256 `{v3.sha256}`); "
-                      f"v4 (`absence_self_narration_v4.yaml`, sha256 `{v4.sha256}`). This note counts under v1", md)
+                      f"v4 (`absence_self_narration_v4.yaml`, sha256 `{v4.sha256}`); "
+                      f"v5 (`absence_self_narration_v5.yaml`, sha256 `{v5.sha256}`). This note counts under v1", md)
         self.assertIn("| record_self_narration | 47 | 3 | 0 |", md)
         self.m.LEXICON_VERSION = 2
         under_v2 = self.m.collect(self.corpus)
@@ -803,6 +813,26 @@ class Baseline(unittest.TestCase):
         totals = {v: self.m.summarise(self.m.collect(self.corpus, lx.load(al.LEXICON, v)))["total"] for v in (3, 4)}
         self.assertEqual(totals[3], totals[4])
 
+    def test_v5_moves_the_source_ranking_and_bundle_wide_window_counts(self):
+        """#3875, #3874, #3887: a name of the declared ranking with no verb
+        and a ranking term whose only verb is the `use` of "use agreement"
+        count under v4 and not v5; an absence past "e.g." counts under v5 and
+        not v4. The fixture corpus has none of these, so its v4 and v5
+        counts are equal."""
+        self._write("m_e/label/S_d4d.yaml", {"source_caveats": [
+            "The source manifest records the release date.",
+            "The data transfer and use agreement, an equally ranked source, states otherwise.",
+            "No dates, e.g. for the follow-up visits, are stated in the bundle.",
+            "The source manifest ranks the page first, and its date is used."]})
+        under = {v: self.m.summarise(self.m.collect(self.corpus, lx.load(al.LEXICON, v))) for v in (4, 5)}
+        ranking = {v: under[v]["patterns"]["rsn.source-ranking"]["matches"] for v in (4, 5)}
+        window = {v: under[v]["patterns"]["bwa.not-in-bundle"]["matches"] for v in (4, 5)}
+        self.assertEqual((ranking[4], ranking[5]), (3, 1))
+        self.assertEqual(window[5] - window[4], 1)
+        (self.corpus / "m_e/label/S_d4d.yaml").unlink()
+        totals = {v: self.m.summarise(self.m.collect(self.corpus, lx.load(al.LEXICON, v)))["total"] for v in (4, 5)}
+        self.assertEqual(totals[4], totals[5])
+
     def test_the_committed_v3_judgements_bear_out_the_v3_table(self):
         """#3520: the v3 sample's verdicts are written down per phrase, its
         bundle_wide_absence phrases are v1's (no pattern of that class moved)
@@ -843,8 +873,26 @@ class Baseline(unittest.TestCase):
         borderline = [r for r in rows[RSN] if r["verdict"] != "in_class"]
         self.assertEqual([(r["verdict"], r["patterns"], r["text"]) for r in borderline],
                          [("borderline", ["rsn.source-ranking"], "input manifest")])
-        md = self.m.render_markdown(self.m.collect(self.corpus))
+        md = self.m.render_markdown(self.m.collect(self.corpus, v4))
         self.assertIn("`notes/absence_precision_judgements_574f03c2.yaml`, recorded\n2026-09-30 when the sample "
+                      "was checked", md)
+
+    def test_the_committed_v5_judgements_bear_out_the_v5_table(self):
+        """#3875: v5 moves three bundle_wide_absence patterns, so both classes
+        were drawn afresh and every phrase read; the one borderline phrase
+        asserts an absence of one named source."""
+        v5 = lx.load(al.LEXICON, 5)
+        checked = self.m.PRECISION[v5.sha256]
+        self.assertEqual(checked["classes"], {BWA: (49, 1, 0), RSN: (50, 0, 0)})
+        data = self.m.read_judgements(v5.sha256, checked)
+        rows = data["judgements"]
+        self.assertEqual({cls: len(r) for cls, r in rows.items()}, {BWA: 50, RSN: 50})
+        self.assertEqual((data["recorded"], checked["checked"], data["seed"]), ("2026-09-30", "2026-09-30", 2919))
+        borderline = [r for cls in rows for r in rows[cls] if r["verdict"] != "in_class"]
+        self.assertEqual([(r["verdict"], r["patterns"], r["text"]) for r in borderline],
+                         [("borderline", ["bwa.sources-do-not"], "the project documentation does not describe")])
+        md = self.m.render_markdown(self.m.collect(self.corpus))
+        self.assertIn("`notes/absence_precision_judgements_d36dc003.yaml`, recorded\n2026-09-30 when the sample "
                       "was checked", md)
 
 

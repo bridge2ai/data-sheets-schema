@@ -71,6 +71,14 @@ V4 = {
     "/notes": "dropped",                   # no_verb
 }
 
+#: What the registered v5 pattern does with each fixture leaf's dropped term
+#: (#3875): v4's window, so v4's recoveries stand; the absorbed name, which
+#: v5 makes a term, now ends a verb-first match of its own.
+V5 = {**{p: "ended" if o == "recovered" else o for p, o in V4.items()}, "/source_caveats/5": "ended"}
+#: ... and with each match v3 keeps: the absorbed leaf's `higher-ranked` lost
+#: its verb to the name's span (#3732's consumption, now by a name).
+V5_KEPT = {"/source_caveats/0": "ended", "/source_caveats/5": "dropped", "/source_caveats/6": "ended"}
+
 
 #: A `;` sentence whose dropped term no other v3 phrase shares a sentence
 #: with: an in-class row v3 counts nothing in, which v4 recovers (#3896).
@@ -153,6 +161,16 @@ class Causes(unittest.TestCase):
         self.assertEqual({h["pointer"]: h["v4"] for _, h in found["rows"]}, V4)
         self.assertEqual(found["totals"]["v3_not_ended_by_v4"], 0)
         self.assertEqual(found["totals"]["v4"], found["totals"]["v3"] + 3)
+
+    def test_v5_keeps_v4s_recoveries_and_a_name_ends_its_own_span(self):
+        """#3875: every dropped term v4 recovers v5 ends a match at too, the
+        name v4 absorbed is now the end of a match, and the v3 term after it
+        loses its verb to that match."""
+        found = self.m.dropped(self.corpus, self.pins)
+        self.assertEqual({h["pointer"]: h["v5"] for _, h in found["rows"]}, V5)
+        self.assertEqual({h["pointer"]: h["v5"] for _, h in found["kept"]}, V5_KEPT)
+        t = found["totals"]
+        self.assertEqual((t["v5"], t["v4_not_ended_by_v5"], t["v5_not_ending_at_v4"]), (t["v4"], 1, 1))
 
     def test_a_v3_match_no_v4_match_ends_at_is_counted(self):
         """#3896: the registered v4 ends every v3 match, so the fixture's
@@ -320,6 +338,38 @@ class Judgements(unittest.TestCase):
                           rows["/source_caveats/8"]["v4"]), ("semicolon", [], "recovered"))
         md = self.m.render_markdown(self.found)
         self.assertIn("It recovers 1 of the 2 in-class phrases in sentences v3 counts nothing in.", md)
+
+    def test_the_note_says_what_v5_gives_up_from_the_same_judgements(self):
+        """#3875: the v5 section tallies the judged rows of both files by
+        whether v5 still ends a match at them, and names the ones it gives
+        up and the one it gains, by file and judgement number."""
+        md = self.m.render_markdown(self.found)
+        self.assertIn("## What v5 gives up relative to v4 (#3875)", md)
+        self.assertIn("v5 matches the pattern 6 times over the same records,\nagainst v4's 6: 1 of v4's matches end "
+                      "where no v5 match does, and 1 v5 match ends where", md)
+        computed = {(p, h["pointer"], h["start"], h["end"]): h for p, h in self.found["kept"]}
+        lost = [r["n"] for r in self.kept_rows
+                if computed[(r["record"], r["pointer"], r["start"], r["end"])]["v5"] != "ended"]
+        self.assertIn(f"| **all** | | 3 | 3 | 2 | {2 - len(lost)} |", md)
+        self.assertIn("Of the 3 dropped rows v4 recovers, v5 gives up 0: none.", md)
+        self.assertIn(f"Of the 2 drawn matches v3 keeps, v5 gives up {len(lost)}", md)
+        absorbed = next(r["n"] for r in self.rows if r["cause"] == "absorbed")
+        self.assertIn(f"A dropped row v4 does not recover and v5 ends a match at: dropped #{absorbed} "
+                      "(construction).", md)
+
+    def test_the_note_names_each_kept_match_v5_gives_up(self):
+        """With every kept match drawn, the one v5 loses (the absorbed leaf's
+        term) is named, by file and number, and counted in class."""
+        self._kept(3)
+        md = self.m.render_markdown(self.found)
+        computed = {(p, h["pointer"], h["start"], h["end"]): h for p, h in self.found["kept"]}
+        lost = [r for r in self.kept_rows
+                if computed[(r["record"], r["pointer"], r["start"], r["end"])]["v5"] != "ended"]
+        self.assertEqual([r["pointer"] for r in lost], ["/source_caveats/5"])
+        self.assertIn(f"Of the 3 drawn matches v3 keeps, v5 gives up 1: kept #{lost[0]['n']} "
+                      f"({lost[0]['reading']}).", md)
+        self.assertIn(f"1 of those 1 are in class: kept #{lost[0]['n']}." if lost[0]["verdict"] == "in_class"
+                      else "0 of those 1 are in class.", md)
 
     def test_the_note_counts_the_v3_matches_no_v4_match_ends_at(self):
         """#3896: with a v4 that lacks the verb one v3 match rests on, that
@@ -506,8 +556,9 @@ class Committed(unittest.TestCase):
     def test_the_committed_judgements_are_the_entry_they_name(self):
         m = _script()
         r = m.RECALL
-        v2, v3 = (lx.load(al.LEXICON, v) for v in (2, 3))
+        v2, v3, v4, v5 = (lx.load(al.LEXICON, v) for v in (2, 3, 4, 5))
         self.assertEqual((r["from_lexicon_sha256"], r["lexicon_sha256"]), (v2.sha256, v3.sha256))
+        self.assertEqual((r["next_lexicon_sha256"], r["v5_lexicon_sha256"]), (v4.sha256, v5.sha256))
         data = m.baseline.read_judgements(r["lexicon_sha256"], r)
         rows = data["judgements"][RSN]
         self.assertEqual(len(rows), r["sample"])
@@ -555,6 +606,9 @@ def test_the_committed_recall_note_is_what_its_records_and_judgements_reproduce(
     assert (found["totals"]["v2"], found["totals"]["v3"], len(found["rows"])) == (336, 248, 88)
     assert (found["totals"]["v4"], found["totals"]["v3_not_ended_by_v4"]) == (276, 0)
     assert sum(h["v4"] == "recovered" for _, h in found["rows"]) == 28
+    # v5 (#3875): 36 of v4's 276 matches lose their end, and one v4 span splits in two.
+    assert (found["totals"]["v5"], found["totals"]["v4_not_ended_by_v5"],
+            found["totals"]["v5_not_ending_at_v4"]) == (241, 36, 1)
     assert len(found["kept"]) == 248
     assert m.OUT_MD.read_text(encoding="utf-8") == m.render_markdown(found), (
         "notes/absence_v3_recall.md does not match its records and judgements: run scripts/absence_v3_recall.py")

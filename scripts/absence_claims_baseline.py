@@ -65,10 +65,10 @@ OUT_MD = ROOT / "notes" / "absence_claims_baseline.md"
 PINS = ROOT / "notes" / "absence_claims_baseline_records.yaml"
 RECORD_GLOB = "*_d4d.yaml"
 SAMPLE_SEED = 2919
-#: The registered version of the lexicon the note counts under (#3132): v4
-#: since #3791 (v3 from #3520), whose precision sample is judged in its own
-#: file below.
-LEXICON_VERSION = 4
+#: The registered version of the lexicon the note counts under (#3132): v5
+#: since #3875 (v4 from #3791, v3 from #3520), whose precision sample is
+#: judged in its own file below.
+LEXICON_VERSION = 5
 #: A judgement's verdicts, in the order a precision entry's counts give them.
 VERDICTS = ("in_class", "borderline", "not_in_class")
 _SHA256 = re.compile(r"[0-9a-f]{64}")
@@ -92,8 +92,9 @@ _SHA256 = re.compile(r"[0-9a-f]{64}")
 #: (#3045), not on anything recorded that day. `judgements` names the file
 #: of per-phrase verdicts over that draw (#3197); `read_judgements` refuses an
 #: entry whose file does not name this draw or whose tally is not `classes`.
-#: The v3 entry (#3520) is over the same record set and seed; its verdicts
-#: were written down per phrase when it was checked.
+#: The v3 (#3520), v4 (#3791) and v5 (#3875) entries are over the same record
+#: set and seed; their verdicts were written down per phrase when each was
+#: checked.
 PRECISION: dict[str, dict[str, Any]] = {
     "7b5c2237df5a0c2fa71446f472abb8aefc7458ea5c9d9f15228f172b5325ef1e": {     # v1
         "checked": "2026-09-28",
@@ -126,6 +127,17 @@ PRECISION: dict[str, dict[str, Any]] = {
                 "phrase is a name of the declared ranking in a sentence that reports the sources, which v2 to v4 "
                 "all match without a verb (#3706).",
         "judgements": "notes/absence_precision_judgements_574f03c2.yaml",
+    },
+    "d1134fd779a6940d0b214fcc514f0298b3712a97bb8877eb80c625c6d76bcab0": {     # v5 (#3875)
+        "checked": "2026-09-30",
+        "record_set_sha256": "cb4b5b8ae826da7ec9ede78ffc920725df39e6b9a3140b18ca01e54b54a6b711",   # 303 records
+        "sample": 50, "seed": SAMPLE_SEED,
+        "draw_sha256": "d36dc0038839bb0bdc49e97c6d8e39ee9afde83ff912e58072696d7d6185245b",
+        "classes": {"bundle_wide_absence": (49, 1, 0), "record_self_narration": (50, 0, 0)},
+        "note": "v5 changes three bundle_wide_absence patterns (#3887), so both classes were drawn afresh and "
+                "read. The borderline bundle_wide_absence phrase asserts an absence of one named source (\"the "
+                "project documentation does not describe\"), not of the sources as a whole.",
+        "judgements": "notes/absence_precision_judgements_d36dc003.yaml",
     },
 }
 
