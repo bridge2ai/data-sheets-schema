@@ -233,7 +233,9 @@ that part runs only if the change ran and succeeded -- reached by `;` or
 multi-line command, the directory is not known (#3268).
 The command is lexed as bash lexes it (#3830): a quoted or escaped
 operator (`';'`, `'&&'`, `\\;`) is a word, never a join; and a `$'...'`
-string closes where bash closes it, past a `\\'`. A double-quoted word
+string closes where bash closes it, past a `\\'`. A command carrying `$'`
+and `$$` (bash reads `$$'\\'` as `$$` and a plain single-quoted string)
+is read with origin/main's tokenizer, as origin/main read it (#4005). A double-quoted word
 still ends at its first unescaped `"`, inside a `$(...)` too, as shlex
 ended it on origin/main, where bash reads on (`"$(echo ")"; ls)"`), and
 a substitution's command is read to its `)` by counting brackets (#3925;
@@ -248,8 +250,9 @@ or `rg` (whose `e` command and `--pre` run commands), a builtin `cd`,
 program from the here-document it carries (`python3 - <<'EOF'`), nothing
 in it substitutes, every delimiter is a plain word (letters, digits,
 `_`, `-`, `.`) bare or wholly inside one pair of single or double quotes
-(#3947), and no `${`, `$[`, `$((`, `((` or backquote appears anywhere in
-the command (#3948), the body is one word, read as a `<<<` string or a
+(#3947), no `${`, `$[`, `$((`, `((` or backquote appears anywhere in
+the command (#3948), and no backslash-newline does either (#4005: bash
+removes one, so `cat\\` then a newline then `x` runs `catx`), the body is one word, read as a `<<<` string or a
 `python -c` program is. Anywhere else -- a shell, `eval`, `source`,
 `xargs`, a program not read, a pipe into one, a body that substitutes,
 an escaped, partly quoted or `$'...'` delimiter, a `<<` that may be a
@@ -482,7 +485,12 @@ NON_CHECKS = (
     "a glob, a brace expansion), which is not read as detaching there (#3923); a substitution "
     "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
     "command is read only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending "
-    "at that quote (#3925; both wait for a shell grammar); and what a program "
+    "at that quote (#3925; both wait for a shell grammar); a command carrying `$$` and `$'`, read "
+    "with origin/main's tokenizer, whose comment, newline, operator and substitution scans, as on "
+    "origin/main, still take the `'` after `$$` to open an ANSI-C string, so `echo $$'\\'`, a "
+    "newline and `cd data` reads the newline as quoted and the `cd` as an argument, and `cat "
+    "$$'\\' <(./derive.sh) '\\'` is not read as open-ended (#4005; a gap origin/main has); and "
+    "what a program "
     "does with a here-document body read as its data: where every part of the command is plainly "
     "run -- its program its first word, with no assignment, `env`, `poetry run`, other wrapper or "
     "redirection before it and no assignment-only part, since `PATH=./bin cat` may run any program "
@@ -491,7 +499,8 @@ NON_CHECKS = (
     "interpreter reading its program from the here-document it carries, nothing substitutes, every "
     "delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of "
     "single or double quotes (#3947), and no `${`, `$[`, `$((`, `((` or backquote appears anywhere "
-    "in the command (#3948), the body is one word, read as a `<<<` string "
+    "in the command (#3948), and no backslash-newline does either (#4005), the body is one word, "
+    "read as a `<<<` string "
     "or a `python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it "
     "carries (`os.system(\"$X ./derive.sh\")`) is read as the same program given to `python -c` is; "
     "anywhere else the body's lines are read as commands (#3897). "

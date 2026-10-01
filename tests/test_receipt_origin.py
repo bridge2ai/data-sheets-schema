@@ -2435,8 +2435,14 @@ class DeriveSpellings(Base):
                       "which is not read as detaching there (#3923); a substitution whose command holds a "
                       "case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose command is read "
                       "only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending at that "
-                      "quote (#3925; both wait for a shell grammar); and what a program does with a "
-                      "here-document body read as its data", text)
+                      "quote (#3925; both wait for a shell grammar); a command carrying `$$` and `$'`, read "
+                      "with origin/main's tokenizer, whose comment, newline, operator and substitution scans, "
+                      "as on origin/main, still take the `'` after `$$` to open an ANSI-C string, so `echo "
+                      "$$'\\'`, a newline and `cd data` reads the newline as quoted and the `cd` as an "
+                      "argument, and `cat $$'\\' <(./derive.sh) '\\'` is not read as open-ended (#4005; a "
+                      "gap origin/main has); and what a program does with a here-document body read as its "
+                      "data", text)
+        self.assertIn("and no backslash-newline does either (#4005), the body is one word", text)
         # #3924 is read now: no longer named as a gap. #3925 is again (#3983).
         for gone in ("which the tokenizer splits so it is not read as built at run time",
                      "Both wait for a shell grammar (#3830)"):

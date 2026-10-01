@@ -412,7 +412,8 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     open-ended where any word in it starts with `$` or a backquote. A command is
     lexed as bash lexes it (#3830): a quoted or escaped operator (`';'`, `'&&'`,
     `\\;`) is a word, never a join; a `$'...'` string closes where bash closes it,
-    past a `\\'`; and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
+    past a `\\'`, except in a command that also carries `$$`, which is read as
+    origin/main read it (#4005: `$$'\\'` is `$$` and a plain quote); and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
     is a program built at run time (#3924). A double-quoted word still ends at its
     first `"`, inside a `$(...)` too, and a substitution is read to its `)` by
     counting brackets, so a case pattern's `)` ends it (#3925: these wait for a
@@ -425,7 +426,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     it carries (`python3 - <<'EOF'`, standard input); nothing substitutes; every
     delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly
     inside one pair of single or double quotes (#3947); and no `${`, `$[`, `$((`,
-    `((` or backquote appears anywhere in the command (#3948). Anywhere else, and
+    `((` or backquote appears anywhere in the command (#3948); and the command
+    carries no backslash-newline (#4005: bash removes one, so `cat\\` then a newline
+    then `x` runs `catx`). Anywhere else, and
     in a nested command string, the body's lines are read as commands. A tool
     call whose name is not a non-empty string is a malformed call (#3918). A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
