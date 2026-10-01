@@ -6,8 +6,10 @@ block's identifier walk and resolver-URL findings read today's schema and
 said nothing about it. #3788 is the case that matters: the 2026-08-13 v4 rep1
 VOICE run read a schema declaring `ROR`, `ORCID` and `doi`, and its commit's
 blob declares none of the three. These pin the one resolution
-(`run_schema.run_schema_bytes`) that removals now reads through.
+(`run_schema.run_schema_bytes`), the rules read from its bytes, and the two
+blocks that now read them.
 """
+import gzip
 import hashlib
 import tempfile
 import unittest
@@ -136,6 +138,235 @@ class Resolution(unittest.TestCase):
         fallback = {"source": rs.TODAY, "reason": "why"}
         with mock.patch("data_sheets_schema.run_schema.run_schema_bytes", return_value=(None, fallback)):
             self.assertEqual(rm.run_enum_aliases(None), (None, fallback))
+
+
+class Rules(unittest.TestCase):
+    """`identifier_rules`: the rules of the run's bytes, by today's functions."""
+
+    def test_the_rules_of_other_bytes_are_read_as_todays_are(self):
+        """The same derivation on other bytes: today's file through the
+        private view gives exactly what today's functions give."""
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        from data_sheets_schema.resources import resource_path
+        self.assertEqual(rs._derive_rules(resource_path(FULL_SCHEMA).read_bytes()), rs.todays_identifier_rules())
+
+    def test_a_run_schema_s_rules_are_its_own(self):
+        rules = rs._derive_rules(yaml.safe_dump(RUN_SCHEMA).encode())
+        self.assertEqual(rules, rs.IdentifierRules(
+            prefixes=frozenset({"foo", "linkml"}), slots=frozenset({"id", "publisher"}),
+            persons=frozenset({"lead"}),
+            bases=(("https://foo.example.org/", "foo"), ("https://w3id.org/linkml/", "linkml"))))
+
+    def test_rules_are_derived_once_per_version(self):
+        data = yaml.safe_dump({**RUN_SCHEMA, "name": "derived-once"}).encode()
+        rs._RULES_BY_SHA256.pop(hashlib.sha256(data).hexdigest(), None)
+        with mock.patch.object(rs, "_derive_rules", wraps=rs._derive_rules) as derive:
+            first, second = rs._rules_of(data), rs._rules_of(data)
+        self.assertIs(first, second)
+        derive.assert_called_once_with(data)
+
+    def test_rules_fall_back_to_todays_with_the_reason(self):
+        with mock.patch(REBUILT, return_value=None), mock.patch(GIT, return_value=None):
+            rules, basis = rs.identifier_rules({"schema": {"full_path": "src/x_all.yaml", "full_md5": "m"}})
+        self.assertEqual(rules, rs.todays_identifier_rules())
+        self.assertEqual(basis["source"], rs.TODAY)
+
+    def test_bytes_that_import_a_local_file_are_the_stated_fallback(self):
+        """A merged schema imports nothing. An import would be read from
+        today's tree, which the recorded hash does not cover."""
+        today = rs.IdentifierRules(frozenset({"today"}), frozenset(), frozenset(), ())
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(rs, "todays_identifier_rules", return_value=today):
+            path, sha, _md5 = _schema_file(tmp, {**RUN_SCHEMA, "imports": ["linkml:types", "D4D_Base_import"]})
+            rules, basis = rs.identifier_rules({"schema": {"full_path": str(path), "full_sha256": sha}})
+        self.assertIs(rules, today)
+        self.assertEqual((basis["source"], basis["path"], basis["sha256"]), (rs.TODAY, str(path), sha))
+        self.assertIn('the bytes recovered as "the run\'s schema, on disk" could not be loaded as a schema',
+                      basis["reason"])
+        self.assertIn("import D4D_Base_import", basis["reason"])
+
+
+class VersionView(unittest.TestCase):
+    """`schema_view.version_view`: a version read by its hash is one view per
+    process, held beside today's view of the same path, never in its place
+    (#926: every view linkml builds stays pinned, so an evicted view of
+    today's schema would be rebuilt and pinned again for each version)."""
+
+    def test_a_version_is_viewed_once_and_never_evicts_todays_view(self):
+        from data_sheets_schema import schema_view
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        today = schema_view.shared_view(FULL_SCHEMA)
+        data = yaml.safe_dump({**RUN_SCHEMA, "name": "a-recorded-version"}).encode()
+        first = schema_view.version_view(FULL_SCHEMA, data)
+        self.assertEqual(first.schema.name, "a-recorded-version")
+        self.assertIs(schema_view.version_view(FULL_SCHEMA, data), first)
+        self.assertIs(schema_view.shared_view(FULL_SCHEMA), today)
+
+    def test_only_the_linkml_metamodel_may_be_imported(self):
+        from data_sheets_schema import schema_view
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        with self.assertRaisesRegex(ValueError, "import D4D_Base_import, which their recorded hash"):
+            schema_view.version_view(FULL_SCHEMA, yaml.safe_dump(
+                {**RUN_SCHEMA, "imports": ["linkml:types", "D4D_Base_import"]}).encode())
+        view = schema_view.version_view(FULL_SCHEMA, yaml.safe_dump(
+            {**RUN_SCHEMA, "name": "imports-the-metamodel", "imports": ["linkml:types"]}).encode())
+        self.assertEqual(str(view.induced_slot("id", "Dataset").range), "uriorcurie")
+
+
+class FormBlock(unittest.TestCase):
+    """The undeclared-prefix count reads the run's declared prefixes, its
+    identifier slots and its Person slots, and says which schema it read."""
+
+    def _records(self, tmp: str, full: dict) -> tuple[Path, Path]:
+        paths = Path(tmp) / "P_d4d.yaml", Path(tmp) / "P_d4d_core.yaml"
+        paths[0].write_text(yaml.safe_dump(full), encoding="utf-8")
+        return paths
+
+    def test_the_prefix_count_reads_the_run_schema(self):
+        from data_sheets_schema.grounding import form_facts
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = _schema_file(tmp)
+            full, core = self._records(tmp, {"id": "foo:1", "publisher": "doi:10.1/x",
+                                             "lead": {"id": "mailto:jane@example.org"}})
+            record = {"schema": {"full_path": str(path), "full_sha256": sha}}
+            run = form_facts(full, core, record=record)
+            today = form_facts(full, core)
+        # The run's schema declared `foo` and not `doi`, and ranged `lead` on
+        # Person, so its `mailto:` id is the normaliser's case (#982 v3).
+        self.assertEqual(run["undeclared_prefixes"], {"doi": 1})
+        self.assertEqual(run["schema_basis"], {"source": "the run's schema, on disk", "path": str(path),
+                                               "sha256": sha})
+        # Today's declares `doi` and not `foo`, and ranges no `lead` on Person.
+        self.assertEqual(today["undeclared_prefixes"], {"foo": 1, "mailto": 1})
+        self.assertNotIn("schema_basis", today)
+
+    def test_no_record_on_disk_reads_no_schema(self):
+        from data_sheets_schema.grounding import form_facts
+        with tempfile.TemporaryDirectory() as tmp, \
+                mock.patch.object(rs, "identifier_rules", side_effect=AssertionError("not asked")):
+            out = form_facts(Path(tmp) / "a.yaml", Path(tmp) / "b.yaml", record={"schema": {}})
+        self.assertEqual(out, {"checked": False, "reason": "neither record is on disk"})
+
+    def test_git_that_cannot_be_started_is_todays_count_with_its_reason(self):
+        from data_sheets_schema.grounding import form_facts
+        with tempfile.TemporaryDirectory() as tmp:
+            full, core = self._records(tmp, {"id": "foo:1"})
+            record = {"schema": {"full_path": "src/data_sheets_schema/schema/gone_all.yaml", "full_sha256": "a" * 64}}
+            with mock.patch(REBUILT, return_value=None), \
+                    mock.patch(GIT, side_effect=FileNotFoundError(2, "No such file or directory", "git")):
+                out = form_facts(full, core, record=record)
+        self.assertEqual(out["undeclared_prefixes"], {"foo": 1})
+        self.assertEqual(out["schema_basis"]["source"], rs.TODAY)
+        self.assertIn("git could not be run (FileNotFoundError", out["schema_basis"]["reason"])
+
+    def test_the_voice_v4_rep1_run_read_prefixes_its_commits_blob_lacks(self):
+        """#3788 on the record: the run's schema, read from its committed
+        artefact, declares `ROR`, `ORCID` and `doi`; the blob at its commit
+        (the artefact less the edit, the bytes the other runs of that label
+        recorded) declares none of them. A `ROR:` CURIE is undeclared only
+        against the wrong bytes."""
+        from data_sheets_schema.backfill_checks import record_paths
+        from data_sheets_schema.grounding import form_facts, undeclared_prefixes
+        from data_sheets_schema.provenance import _REPO_ROOT
+        from data_sheets_schema.reconstructed_bytes import RECONSTRUCTIONS
+        label = _REPO_ROOT / "data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1"
+        prov, sibling = label / "VOICE_provenance.yaml", label / "AI_READI_provenance.yaml"
+        if not (prov.exists() and sibling.exists()):
+            self.skipTest("needs the corpus records")
+        record = yaml.safe_load(prov.read_text(encoding="utf-8"))
+        with mock.patch(GIT, side_effect=AssertionError("git must not be needed")):
+            rules, basis = rs.identifier_rules(record)
+        self.assertEqual((basis["source"], basis["artefact"]),
+                         ("the run's schema, reconstructed", RECONSTRUCTIONS[0]["artefact"]))
+        self.assertLessEqual({"ROR", "ORCID", "doi"}, rules.prefixes)
+        (edit,) = RECONSTRUCTIONS[0]["edits"]
+        lines = gzip.decompress((_REPO_ROOT / RECONSTRUCTIONS[0]["artefact"]).read_bytes()).splitlines(keepends=True)
+        blob = b"".join(lines[:edit["at"]] + lines[edit["at"] + edit["insert"].count("\n"):])
+        self.assertEqual(hashlib.sha256(blob).hexdigest(),
+                         yaml.safe_load(sibling.read_text(encoding="utf-8"))["schema"]["full_sha256"])
+        blob_rules = rs._rules_of(blob)
+        self.assertFalse({"ROR", "ORCID", "doi"} & blob_rules.prefixes)
+        ror = {"id": "ROR:032db5x82"}
+        self.assertEqual(undeclared_prefixes(ror, {"id"}, prefixes=rules.prefixes, persons=rules.persons), {})
+        self.assertEqual(undeclared_prefixes(ror, {"id"}, prefixes=blob_rules.prefixes,
+                                             persons=blob_rules.persons), {"ROR": 1})
+        paths = record_paths(prov)
+        self.assertEqual(form_facts(paths["full"], paths["core"], record=record)["schema_basis"], basis)
+
+
+class GroundingBlock(unittest.TestCase):
+    """The identifier walk and the resolver-URL finding read the run's schema."""
+
+    def test_the_resolver_url_finding_reads_the_run_schema_bases(self):
+        """Where the run's schema declared no `doi`, its resolver URL was the
+        only form the run could write: not a finding. A URL on a base it did
+        declare is."""
+        from data_sheets_schema.grounding import check_run
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = _schema_file(tmp)
+            full = Path(tmp) / "P_d4d.yaml"
+            full.write_text(yaml.safe_dump({"id": "https://doi.org/10.1234/x",
+                                            "publisher": "https://foo.example.org/thing"}), encoding="utf-8")
+            bundle = Path(tmp) / "bundle.txt"
+            bundle.write_text("The dataset is doi.org/10.1234/x.\n", encoding="utf-8")
+            record = {"schema": {"full_path": str(path), "full_sha256": sha}}
+            run = check_run(full, Path(tmp) / "P_d4d_core.yaml", bundle, record=record)
+            today = check_run(full, Path(tmp) / "P_d4d_core.yaml", bundle)
+
+        def urls(block):
+            return [(f["prefix"], f["value"]) for f in block["findings"]
+                    if f["kind"] == "resolver_url_in_identifier_slot"]
+        self.assertEqual(urls(run), [("foo", "https://foo.example.org/thing")])
+        self.assertEqual(urls(today), [("doi", "https://doi.org/10.1234/x")])
+        self.assertEqual(run["counts"], today["counts"])
+        self.assertEqual(run["counts"]["grounded"], 1)
+        self.assertEqual(run["schema_basis"]["source"], "the run's schema, on disk")
+        self.assertNotIn("schema_basis", today)
+
+
+class Backfill(unittest.TestCase):
+    """`backfill_checks.compute` (and so `d4d provenance record`) passes the
+    provenance record to both blocks, and the report line names a fallback."""
+
+    def _layout(self, tmp: str, schema: dict) -> Path:
+        owner = Path(tmp)
+        provenance = owner / "data/d4d_concatenated/external_core/run/P_provenance.yaml"
+        provenance.parent.mkdir(parents=True)
+        schema_path, sha, _md5 = _schema_file(tmp)
+        provenance.write_text(yaml.safe_dump({"inputs": {"bundle_path": "evidence.txt"},
+                                              "schema": {"full_path": str(schema_path), "full_sha256": sha,
+                                                         **schema}}), encoding="utf-8")
+        from data_sheets_schema.backfill_checks import record_paths
+        for name in ("full", "core"):
+            target = record_paths(provenance)[name]
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text("id: foo:1\npublisher: https://foo.example.org/thing\n", encoding="utf-8")
+        (owner / "evidence.txt").write_text("No identifier is stated here.\n", encoding="utf-8")
+        return provenance
+
+    def test_compute_reads_the_run_schema_for_form_and_grounding(self):
+        from data_sheets_schema.backfill_checks import compute, summarise
+        with tempfile.TemporaryDirectory() as tmp:
+            blocks = compute(self._layout(tmp, {}), only={"form", "grounding"})
+        for name in ("form", "grounding"):
+            self.assertEqual(blocks[name]["schema_basis"]["source"], "the run's schema, on disk", name)
+        self.assertEqual(blocks["form"]["undeclared_prefixes"], {})
+        self.assertEqual([f["prefix"] for f in blocks["grounding"]["findings"]
+                          if f["kind"] == "resolver_url_in_identifier_slot"], ["foo", "foo"])
+        self.assertNotIn(rs.TODAY, summarise(blocks))
+
+    def test_a_fallback_is_named_on_the_report_line(self):
+        from data_sheets_schema.backfill_checks import compute, summarise
+        with tempfile.TemporaryDirectory() as tmp:
+            provenance = self._layout(tmp, {"full_sha256": "0" * 64})
+            with mock.patch(REBUILT, return_value=None), \
+                    mock.patch(GIT, side_effect=GitUnavailable("shallow clone")):
+                blocks = compute(provenance, only={"form", "grounding"})
+        for name in ("form", "grounding"):
+            self.assertEqual(blocks[name]["schema_basis"]["source"], rs.TODAY, name)
+        self.assertEqual(blocks["form"]["undeclared_prefixes"], {"foo": 2})
+        self.assertIn("today's schema read: the run's schema is not on disk and git cannot answer "
+                      "(shallow clone)", summarise(blocks))
 
 
 if __name__ == "__main__":

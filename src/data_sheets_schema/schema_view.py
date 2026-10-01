@@ -86,6 +86,38 @@ def shared_view(path: str | Path, *, content: bytes | None = None,
     return view
 
 
+def version_view(path: str | Path, content: bytes) -> SchemaView:
+    """The shared view of `content`, another version of the file at `path`
+    (the merged schema a run recorded, #3931), held beside the file's own
+    view, not in its place. `shared_view` keeps one view per logical path
+    and drops it when the bytes change, which is right for a file rewritten
+    under a running process. For a version read by its hash it is not: each
+    version would evict today's view of the same path, the next reader would
+    build today's again, and a corpus pass would pin a fresh view of today's
+    schema for every version it met (#926). Here each version is one view
+    per process, keyed apart.
+
+    The bytes are parsed once, as `shared_view` parses them. A version read
+    by its hash is only those bytes, so one that imports anything but the
+    LinkML metamodel (`linkml:`) is refused rather than completed from
+    today's tree; a merged schema imports nothing."""
+    version = hashlib.blake2b(content, digest_size=16).hexdigest()
+    key = (f"{Path(path).resolve()}@{version}", version)
+    view = _VIEWS.get(key)
+    if view is None:
+        doc = yaml.load(content.decode("utf-8"), Loader=DupCheckYamlLoader)
+        if not isinstance(doc, dict):
+            raise ValueError("the bytes are not a schema mapping")
+        local = [str(i) for i in (doc.get("imports") or []) if not str(i).startswith("linkml:")]
+        if local:
+            raise ValueError(f"the bytes import {', '.join(local)}, which their recorded hash does not cover")
+        schema = SchemaDefinition(**doc)
+        schema.source_file = str(path)
+        view = SchemaView(schema)
+        _VIEWS[key] = view
+    return view
+
+
 def views_held() -> int:
     """How many views this module currently shares (for tests)."""
     return len(_VIEWS)

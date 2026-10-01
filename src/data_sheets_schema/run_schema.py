@@ -29,11 +29,19 @@ The basis is one mapping wherever it is reported: `source`, the recorded
 `path` and hashes, and either a `reason` or what was read (`commit` and
 `matched_on` for a git blob; `artefact`, `base_commit`, `matched_on`,
 `observed_at` and `reconstruction` for a reconstruction).
+
+`identifier_rules` reads the identifier rules from those bytes for the
+form block's undeclared-prefix count and the grounding block's walk and
+resolver-URL findings. #3788 is the case: the 2026-08-13 v4 rep1 VOICE run
+read a schema declaring `ROR`, `ORCID` and `doi`, which its commit's blob
+lacks. On 2026-09-30, 192 of the 283 corpus records read a schema that
+declares none of the three, which today's does: 282 resolve to a git blob
+and one to its reconstruction.
 """
 from __future__ import annotations
 
 import hashlib
-from typing import Any
+from typing import Any, NamedTuple
 
 #: The fallback's `source`: what a caller reads when the run's bytes cannot
 #: be recovered.
@@ -96,3 +104,79 @@ def run_schema_bytes(record: dict[str, Any] | None) -> tuple[bytes | None, dict[
     data, entry = found
     return data, {"source": "the run's schema, a git blob", "path": path, **hashes,
                   "commit": entry["commit"], "matched_on": entry["matched_on"]}
+
+
+class IdentifierRules(NamedTuple):
+    """What a merged schema says about identifiers: the CURIE prefixes it
+    declares (as written), the slots whose induced range is `uriorcurie`
+    and those whose induced range is `Person`, and its http prefix bases
+    (lower-cased, longest first, as `grounding.declared_bases` orders them)."""
+    prefixes: frozenset[str]
+    slots: frozenset[str]
+    persons: frozenset[str]
+    bases: tuple[tuple[str, str], ...]
+
+
+def todays_identifier_rules() -> IdentifierRules:
+    """The rules of the merged schema on disk, from the functions every
+    other caller reads them with."""
+    from data_sheets_schema.grounding import declared_bases
+    from data_sheets_schema.identifiers import declared_prefixes, person_slots, uriorcurie_slots
+    return IdentifierRules(frozenset(declared_prefixes()), frozenset(uriorcurie_slots()),
+                           frozenset(person_slots()), tuple(declared_bases()))
+
+
+def _derive_rules(data: bytes) -> IdentifierRules:
+    """The rules of other bytes, by the functions today's are read with, over
+    `schema_view.version_view`: the version's own view, held beside today's
+    so that reading it does not evict today's (#926), and refused where the
+    bytes import a local file, which would be read from today's tree."""
+    import yaml
+    from linkml_runtime.utils.yamlutils import DupCheckYamlLoader
+
+    from data_sheets_schema.grounding import declared_bases_of
+    from data_sheets_schema.identifiers import (FULL_SCHEMA, declared_prefixes_of, person_slots_of,
+                                                uriorcurie_slots_of)
+    from data_sheets_schema.schema_view import version_view
+    view = version_view(FULL_SCHEMA, data)
+    doc = yaml.load(data.decode("utf-8"), Loader=DupCheckYamlLoader)
+    return IdentifierRules(frozenset(declared_prefixes_of(doc)), frozenset(uriorcurie_slots_of(view)),
+                           frozenset(person_slots_of(view)), tuple(declared_bases_of(doc)))
+
+
+#: Identifier rules by the sha256 of the merged-schema bytes they were read
+#: from: one view per schema version per process.
+_RULES_BY_SHA256: dict[str, IdentifierRules] = {}
+
+
+def _rules_of(data: bytes) -> IdentifierRules:
+    """The rules of `data`, derived once per version. Bytes equal to today's
+    file are read through today's functions and their shared view, so a
+    record whose run read today's schema builds no second view of it."""
+    key = hashlib.sha256(data).hexdigest()
+    if key not in _RULES_BY_SHA256:
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        from data_sheets_schema.schema_cache import sha256_of
+        try:
+            today = sha256_of(FULL_SCHEMA)
+        except OSError:
+            today = None
+        _RULES_BY_SHA256[key] = todays_identifier_rules() if key == today else _derive_rules(data)
+    return _RULES_BY_SHA256[key]
+
+
+def identifier_rules(record: dict[str, Any] | None) -> tuple[IdentifierRules, dict[str, Any]]:
+    """(rules, basis): the identifier rules of the merged schema the run
+    recorded (`run_schema_bytes`), else today's, the basis saying which and
+    why. Recovered bytes that cannot be read as a schema are the same
+    stated fallback, with the reason."""
+    data, basis = run_schema_bytes(record)
+    if data is None:
+        return todays_identifier_rules(), basis
+    try:
+        return _rules_of(data), basis
+    except Exception as exc:  # noqa: BLE001 — recovered bytes no view can load are a fallback, not a crash
+        return todays_identifier_rules(), {
+            "source": TODAY, **{k: basis[k] for k in ("path", "sha256", "md5") if k in basis},
+            "reason": f"the bytes recovered as {basis['source']!r} could not be loaded as a schema "
+                      f"({type(exc).__name__}: {exc})"}
