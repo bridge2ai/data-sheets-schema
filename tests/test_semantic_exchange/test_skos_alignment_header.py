@@ -2,9 +2,11 @@
 the class-level corrections of #3942 and #3926 hold, the 14 class rows #3942
 did not review are settled against the merged schemas (#3976), a slot that
 holds a class #3942, #3974 or #3976 changed carries that class's targets
-only as the class now carries them (#3971, #3995, #4002, #3974, #4052), no
-triple names an RAI term Croissant RAI 1.0 does not define, and every EVI
-term a triple names is recorded with the outcome of a check against EVI.
+only as the class now carries them, whether a triple's subject is the slot
+(``d4d:<slot>``) or the slot in a class (``d4d:<Class>_<slot>``) (#3971,
+#3995, #4002, #3974, #4052, #4078), no triple names an RAI term Croissant
+RAI 1.0 does not define, and every EVI term a triple names is recorded with
+the outcome of a check against EVI.
 
 Before #3942 the header said 189 triples (exact 112, close 59, related 10,
 narrow 7, broad 1) while the file held 184 (111/58/9/6/0), and the per-section
@@ -14,8 +16,8 @@ the two parses are required to agree, so a triple written into a comment (which
 the line pattern would read and a Turtle parser would not) fails.
 
 Nothing here walks the corpus: the input is the TTL, plus the merged schemas
-for the class names, declarations and slot ranges, and the repository's list
-of the Croissant RAI 1.0 properties.
+for the class and slot names, declarations and slot ranges, and the
+repository's list of the Croissant RAI 1.0 properties.
 """
 
 import collections
@@ -398,7 +400,8 @@ class TestClassRows3942DidNotReview(unittest.TestCase):
 #: twenty are settled (SETTLED_TWINS below), so no TODO(#3942) is left in
 #: the TTL, and the derived check below
 #: (test_a_slot_that_holds_a_changed_class_follows_it) reads every slot that
-#: holds a changed class, listed or not.
+#: holds a changed class in either merged schema, listed or not, under its
+#: own name and under every class-scoped name (#4078).
 SLOT_TWINS_LEFT_AS_FOUND = {}
 
 
@@ -567,10 +570,11 @@ CLASS_PAIRS_REPLACED_SINCE_3942 = {
 }
 
 
-def slots_holding(classes):
-    """{class: {slot}}: every slot name a declaration of which, in either
-    merged schema (top-level, class attribute or slot_usage), ranges over
-    one of ``classes``, directly or through any_of / exactly_one_of."""
+def slots_holding(classes, schemas=SCHEMAS):
+    """{class: {slot}}: every slot name a declaration of which, in one of
+    ``schemas`` (both merged schemas unless given; top-level, class
+    attribute or slot_usage), ranges over one of ``classes``, directly or
+    through any_of / exactly_one_of."""
     found = collections.defaultdict(set)
 
     def ranges(definition):
@@ -580,7 +584,7 @@ def slots_holding(classes):
                     for alt in (definition or {}).get(group) or []}
         return out - {None}
 
-    for path in SCHEMAS:
+    for path in schemas:
         schema = raw_schema(path)
         declarations = list((schema.get("slots") or {}).items())
         for cdef in (schema.get("classes") or {}).values():
@@ -592,21 +596,94 @@ def slots_holding(classes):
     return found
 
 
+def schema_slot_names():
+    """Every slot name either merged schema declares: top-level, in a
+    class's ``slots:`` list, attributes or slot_usage."""
+    names = set()
+    for path in SCHEMAS:
+        schema = raw_schema(path)
+        names |= set(schema.get("slots") or {})
+        for cdef in (schema.get("classes") or {}).values():
+            names |= set((cdef or {}).get("slots") or [])
+            for group in ("attributes", "slot_usage"):
+                names |= set((cdef or {}).get(group) or {})
+    return names
+
+
+def pairs_on_slot(pairs, slot, classes):
+    """What the TTL says for ``slot``: the pairs of its slot-level subject,
+    ``d4d:<slot>``, and of every class-scoped one, ``d4d:<Class>_<slot>``,
+    whose ``<Class>`` is one of ``classes``. The comprehensive generator
+    takes a class-scoped triple as the TTL's word on the slot (#3053), and
+    the /d4d-add-mapping playbook writes a class's own slots in that form.
+    The generator reads one only for a class that carries the slot; this
+    reads it for any class, so no class-scoped triple on the slot's name is
+    left out (#4078)."""
+    found = set(pairs.get(slot, ()))
+    for subject, subject_pairs in pairs.items():
+        if (subject.endswith("_" + slot)
+                and subject[:-len(slot) - 1] in classes):
+            found |= subject_pairs
+    return found
+
+
+def slots_not_following(pairs, changed, holders, classes):
+    """{(class, slot): pairs}: for each slot that holds a changed class, the
+    pairs it carries in either form (pairs_on_slot) on one of that class's
+    targets, former or current, that the class does not carry now. Empty
+    when every holder follows its class."""
+    found = {}
+    for cls, lost in changed.items():
+        now = pairs.get(cls, set())
+        targets = {o for _, o in lost | now}
+        for slot in holders.get(cls, ()):
+            extra = {(p, o) for p, o in pairs_on_slot(pairs, slot, classes)
+                     if o in targets} - now
+            if extra:
+                found[(cls, slot)] = extra
+    return found
+
+
 class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
-    """#3971, #3995, #4002, #3974, #4052: until these, the class level and
-    the slot level disagreed for each twin (exactMatch on the slot where the
-    class said related, broad or close, or a triple on a term whose class
-    triple #3942 removed). SETTLED_TWINS was a list, so the seven twins of
-    #3942's d4d: class removals, which no list named, kept the removed
-    triple with every test passing (#4052); the derived check reads every
-    slot that holds a changed class."""
+    """#3971, #3995, #4002, #3974, #4052, #4078. Until these changes each of
+    the 21 twins in SETTLED_TWINS disagreed with its class, in the TTL at
+    8a19955b5, the main commit #4031 branched from:
+
+    - twelve carried a triple on a term whose class triple #3942 removed:
+      discouraged_uses, prohibited_uses, ethical_reviews, is_deidentified,
+      extension_mechanism, and the seven on d4d: terms;
+    - eight carried a triple on a term whose class triple #3942 corrected,
+      and differed from the replacement. raw_sources, existing_uses,
+      data_protection_impacts and confidential_elements said exactMatch
+      where their classes now said close, close, broad and related;
+      distribution_dates said exactMatch schema:dateCreated where its class
+      now said closeMatch schema:datePublished; sensitive_elements said
+      close where its class now said exact, labeling_strategies close where
+      its class said narrow, and retention_limit narrow where its class
+      said related;
+    - sampling_strategies said relatedMatch evi:samplingPlan where
+      SamplingStrategy said exactMatch. #3942 did not change that class;
+      #3974 removed both triples, since EVI defines no samplingPlan.
+
+    SETTLED_TWINS is a list, so the seven twins of #3942's d4d: class
+    removals, which no list named, kept the removed triple with every test
+    passing (#4052). The derived check reads every slot that holds a
+    changed class in either merged schema, listed or not, under its own
+    name and under every class-scoped name, ``d4d:<Class>_<slot>``, the
+    form the /d4d-add-mapping playbook writes for a class's slots (#4078).
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.pairs = pairs_by_subject(parsed_triples())
+        cls.classes = schema_classes()
         cls.changed = {**CLASS_PAIRS_3942_REPLACED,
                        **CLASS_PAIRS_REPLACED_SINCE_3942}
-        cls.holders = slots_holding(cls.changed)
+        # Every class's holders, read from both merged schemas
+        # (test_the_holders_are_read_from_both_merged_schemas); the check
+        # reads the changed classes' among them.
+        cls.every = slots_holding(cls.classes)
+        cls.holders = {c: cls.every[c] for c in cls.changed if c in cls.every}
 
     def test_each_twin_is_the_slot_that_holds_its_class(self):
         """Read from the full schema: every declaration of the slot name that
@@ -623,9 +700,12 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
                 self.assertEqual(ranges, {cls})
 
     def test_a_twin_and_its_class_carry_the_settled_pairs(self):
+        """What the TTL says for the twin, slot-level and class-scoped
+        together (pairs_on_slot), is what it says for the class."""
         for slot, (cls, pairs) in SETTLED_TWINS.items():
             with self.subTest(slot=slot):
-                self.assertEqual(self.pairs.get(slot, set()), pairs)
+                self.assertEqual(pairs_on_slot(self.pairs, slot, self.classes),
+                                 pairs)
             with self.subTest(cls=cls):
                 self.assertEqual(self.pairs.get(cls, set()), pairs)
 
@@ -645,29 +725,99 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
         """Derived, not listed: a slot that holds a changed class (a
         declaration of it, in either merged schema, ranges over the class)
         carries a triple on one of that class's targets, former or current,
-        only as the class now carries it. So a class triple that was removed
-        and left on such a slot fails, and so does a correction the slot did
-        not follow. A slot that never shared a target with its class is not
-        constrained: creators holds Creator and says closeMatch
+        only as the class now carries it, whether the triple's subject is
+        the slot (``d4d:<slot>``) or the slot in a class
+        (``d4d:<Class>_<slot>``). So a class triple that was removed and
+        left on such a slot fails in either form, and so does a correction
+        the slot did not follow. A slot that never shared a target with its
+        class is not constrained: creators holds Creator and says closeMatch
         schema:author, a property, where Creator lost exactMatch
         schema:Person, a type."""
-        checked = set()
-        for cls, lost in sorted(self.changed.items()):
-            now = self.pairs.get(cls, set())
-            targets = {o for _, o in lost | now}
-            allowed = {(p, o) for p, o in now if o in targets}
-            for slot in sorted(self.holders.get(cls, ())):
-                checked.add(slot)
-                carried = {(p, o) for p, o in self.pairs.get(slot, ())
-                           if o in targets}
-                with self.subTest(cls=cls, slot=slot):
-                    self.assertLessEqual(carried, allowed)
+        self.assertEqual(slots_not_following(self.pairs, self.changed,
+                                             self.holders, self.classes), {})
         # Not vacuous: every settled twin is among the slots read, by the
         # schemas and not by the list.
+        checked = set().union(*self.holders.values())
         self.assertLessEqual(set(SETTLED_TWINS), checked)
         for slot, (cls, _) in SETTLED_TWINS.items():
             with self.subTest(twin=slot):
                 self.assertIn(slot, self.holders.get(cls, ()))
+
+    def test_the_check_reads_a_triple_in_either_form(self):
+        """#4078: each triple below, added to the TTL's own, is reported,
+        whether its subject is the slot or the slot in a class, and it is
+        all that is added to what the TTL alone reports. CollectionConsent's
+        closeMatch rai:personalSensitiveInformation is the class triple
+        #3942 removed, here on collection_consents, which no list names;
+        exactMatch on confidential_elements is the contradiction #3995
+        settled, on a listed twin. CoreDataset is a class only the core
+        schema defines."""
+        def check(pairs):
+            return slots_not_following(pairs, self.changed, self.holders,
+                                       self.classes)
+
+        alone = check(self.pairs)
+        psi = "rai:personalSensitiveInformation"
+        for subject, cls, slot, pair in (
+                ("collection_consents", "CollectionConsent",
+                 "collection_consents", ("closeMatch", psi)),
+                ("Dataset_collection_consents", "CollectionConsent",
+                 "collection_consents", ("closeMatch", psi)),
+                ("confidential_elements", "Confidentiality",
+                 "confidential_elements", ("exactMatch", psi)),
+                ("Dataset_confidential_elements", "Confidentiality",
+                 "confidential_elements", ("exactMatch", psi)),
+                ("CoreDataset_confidential_elements", "Confidentiality",
+                 "confidential_elements", ("exactMatch", psi))):
+            pairs = {s: set(p) for s, p in self.pairs.items()}
+            pairs.setdefault(subject, set()).add(pair)
+            added = {key: extra - alone.get(key, set())
+                     for key, extra in check(pairs).items()}
+            with self.subTest(subject=subject):
+                self.assertEqual({k: v for k, v in added.items() if v},
+                                 {(cls, slot): {pair}})
+
+    def test_every_subject_but_a_class_is_read_for_a_schema_slot(self):
+        """The reading is complete: every slot-level subject is a slot name
+        of either merged schema, and every class-scoped one is
+        ``<Class>_<slot>`` for a class and a slot name of either merged
+        schema, which pairs_on_slot reads for that slot. A misspelled class
+        or slot would be read for no slot, so a triple on it would escape
+        the derived check; it fails here instead."""
+        slots = schema_slot_names()
+        probe = {("probe", "probe")}
+        for subject in self.pairs:
+            if subject_kind(subject) == "class":
+                continue
+            with self.subTest(subject=subject):
+                self.assertTrue(
+                    {s for s in slots
+                     if pairs_on_slot({subject: probe}, s, self.classes)},
+                    f"d4d:{subject} is read for no slot of either merged "
+                    "schema")
+
+    def test_the_holders_are_read_from_both_merged_schemas(self):
+        """The holders the check reads are those of the full and the core
+        schema together (#4078), and each schema declares holders the other
+        does not: only the core schema's distributions holds
+        CoreDistribution, and only the full schema's participant_compensation
+        holds HumanSubjectCompensation. When this was written the core
+        schema added no holder of a changed class that the full schema
+        lacks, so a check over the changed classes alone could not see the
+        core schema dropped; this one is made over every class."""
+        def flat(found):
+            return {(c, s) for c, slots in found.items() for s in slots}
+
+        alone = {path: flat(slots_holding(self.classes, (path,)))
+                 for path in SCHEMAS}
+        self.assertEqual(flat(self.every),
+                         alone[SCHEMAS[0]] | alone[SCHEMAS[1]])
+        for path, other, own in (
+                (SCHEMAS[0], SCHEMAS[1],
+                 ("HumanSubjectCompensation", "participant_compensation")),
+                (SCHEMAS[1], SCHEMAS[0], ("CoreDistribution", "distributions"))):
+            with self.subTest(schema=path.name):
+                self.assertIn(own, alone[path] - alone[other])
 
 
 #: Each EVI term the TTL names, with whether EVI defines it. The repository

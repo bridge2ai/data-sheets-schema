@@ -81,8 +81,13 @@ FORMERLY_UNMAPPED_WITHDRAWN_SLOTS = {
 #: Every slot-level triple #3971, #3974 and #4052 removed, with its old
 #: target: the five above; extension_mechanism (closeMatch schema:license; a
 #: way to contribute to a dataset is not its license); and the seven twins of
-#: the classes #3942 found aligned to d4d: terms, whose D4D target was never
-#: an alignment (#3054) and never a row's mapping, only listed beside it.
+#: the classes #3942 found aligned to d4d: terms. A D4D target is not an
+#: alignment (#3054), but each of the seven was its row's mapping (mapped,
+#: source ttl) from #2935 (58ba281ca) until #3054 (9201af3d4), two commits
+#: of the branch #2963 merged; anomalies, at_risk_populations and
+#: human_subject_research had been mapped to theirs since #147 (7ae9832ba)
+#: added the table. From #3054 the rows only listed the target, in
+#: other_curated_mappings, until #4052 removed the triples.
 SLOT_TRIPLES_REMOVED = {
     'discouraged_uses': 'rai:prohibitedUses',
     'prohibited_uses': 'rai:prohibitedUses',
@@ -450,9 +455,11 @@ class TestTTLAlignmentsAreMapped(_Committed):
     def test_the_29_the_heuristics_used_to_hide(self):
         """25 were aligned to an external term: 20 still are and are mapped,
         and the 5 whose term no vocabulary defines are aligned no longer
-        (#3971, #3974) and not mapped. The other 4 named only a D4D term,
-        which was listed and never mapped (#3054); #4052 removed those
-        triples too, so they name no term now and are still not mapped."""
+        (#3971, #3974) and not mapped. The other 4 named only a D4D term.
+        It was their rows' mapping from #2935 (58ba281ca) until #3054
+        (9201af3d4), which made it listed and not mapped; #4052 removed
+        those triples too, so they name no term now and are still not
+        mapped."""
         external = FORMERLY_UNMAPPED_TTL_SLOTS - FORMERLY_UNMAPPED_D4D_TARGET_SLOTS
         self.assertEqual(len(external), 25)
         self.assertLessEqual(FORMERLY_UNMAPPED_WITHDRAWN_SLOTS, external)
