@@ -28,6 +28,7 @@ import re
 import shutil
 import sys
 import tempfile
+import tokenize
 import unittest
 from functools import lru_cache
 from pathlib import Path
@@ -345,18 +346,32 @@ class TestDiscovery(unittest.TestCase):
     def setUpClass(cls):
         cls.surfaces, cls.facts = _discovered()
 
+    @staticmethod
+    def _code_tokens(path: Path) -> str:
+        """The module's names and operators, space-separated, with comments and
+        strings dropped: a mechanism independent of the scanner's ast reading,
+        and blind to a docstring that only mentions a client."""
+        out = []
+        try:
+            for tok in tokenize.generate_tokens(io.StringIO(path.read_text(encoding="utf-8")).readline):
+                if tok.type in (tokenize.NAME, tokenize.OP):
+                    out.append(tok.string)
+                elif tok.type in (tokenize.NEWLINE, tokenize.NL):
+                    out.append("\n")
+        except (tokenize.TokenError, SyntaxError, UnicodeDecodeError):
+            return ""
+        return " ".join(out)
+
     def test_every_module_that_calls_a_model_client_is_a_surface(self):
-        """Cross-checked with a text search, a different mechanism from the
-        scanner's ast reading."""
-        client = re.compile(r"^\s*(?:import (?:anthropic|openai)|from (?:anthropic|openai|pydantic_ai|aurelian)"
-                            r"[\w.]* import)|\.messages\.create\(|\.ChatCompletion\.create\(", re.M)
+        client = re.compile(r"\b(?:import (?:anthropic|openai|pydantic_ai|aurelian)\b|from (?:anthropic|openai|"
+                            r"pydantic_ai|aurelian)\b)|\. messages \. (?:create|stream) \(|\. ChatCompletion \. create \(")
         found = []
         for top in ("src", "notes"):
             for p in sorted((ROOT / top).rglob("*.py")):
                 rel = p.relative_to(ROOT).as_posix()
                 if scan._is_test(rel) or scan.REGISTERED_COPY.search(rel):
                     continue
-                if client.search(p.read_text(encoding="utf-8", errors="ignore")):
+                if client.search(self._code_tokens(p)):
                     found.append(rel)
         self.assertIn("src/schema_extract/process_d4d_claude_API_temp0.py", found)
         self.assertEqual([r for r in found if r not in self.surfaces.files], [])
