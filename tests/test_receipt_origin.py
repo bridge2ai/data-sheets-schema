@@ -2432,11 +2432,14 @@ class DeriveSpellings(Base):
                       "builds at run time behind `nohup`, `exec` or `command` (`nohup $X ./derive.sh`), which is "
                       "not read as detaching; in a command the tokenizer cannot split, a program word built "
                       "other than from a leading `$` or backquote (`set${X}sid`, a glob, a brace expansion), "
-                      "which is not read as detaching there (#3923); and what a program does with a "
+                      "which is not read as detaching there (#3923); a substitution whose command holds a "
+                      "case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose command is read "
+                      "only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending at that "
+                      "quote (#3925; both wait for a shell grammar); and what a program does with a "
                       "here-document body read as its data", text)
-        # #3924 and #3925 are read now: no longer named as gaps.
+        # #3924 is read now: no longer named as a gap. #3925 is again (#3983).
         for gone in ("which the tokenizer splits so it is not read as built at run time",
-                     "whose command is read only up to that `)`", "Both wait for a shell grammar"):
+                     "Both wait for a shell grammar (#3830)"):
             with self.subTest(gone=gone):
                 self.assertNotIn(gone, text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
@@ -4013,11 +4016,12 @@ class EarlierDirectoryChange(Base):
 
 class ShellLexer(Base):
     """The tokenizer lexes a command as bash does (#3830): quoted operators
-    are words, `$'...'` closes where bash closes it, a double-quoted
-    `$(...)` runs to the `)` bash closes it at (#3925), and a here-document
+    are words, `$'...'` closes where bash closes it, and a here-document
     body every part of the command reads as data is one word, not lines of
-    commands (#3897). Each reading below was checked against bash 5.3: what
-    it prints, or `bash --pretty-print`'s parse."""
+    commands (#3897). A double-quoted word still ends at its first `"`, as
+    on origin/main, inside a `$(...)` too (#3925 waits for a shell grammar,
+    #3983). Each reading below was checked against bash 5.3: what it
+    prints, or `bash --pretty-print`'s parse."""
 
     FULL = "/w/data/X_d4d.yaml"
     DERIVE = f"d4d derive core --full {FULL} --out /w/o.yaml"
@@ -4164,10 +4168,14 @@ class ShellLexer(Base):
                 self.assertEqual((shell["moves"], shell["runs_unread"]), (True, True))
                 shell = ro._shell(command.replace("cd data", "./derive.sh &"), "/w", [])
                 self.assertEqual((shell["moves"], shell["runs_unread"], shell["detaches"]), (True, True, True))
-        # A substitution's end is not read past such a delimiter either.
-        self.assertIsNone(ro._comsub_end("cat <<\"E'F\"\n)\nE'F\n) tail", 0))
-        self.assertIsNone(ro._comsub_end("cat <<$'E\\x41'\n)\nEA\n) tail", 0))
-        self.assertIsNone(ro._comsub_end("cat <<\\E\n)\nE\n) tail", 0))
+        # A delimiter word that does not end where the plain word does is
+        # not read (`EOF'x'`, `"E"F`, a carriage return): bash's delimiter
+        # is the whole word.
+        for spelling in ("EOF'x'", "\"E\"F", "EOF\r", "E\\F", "'E'\\F"):
+            with self.subTest(spelling=spelling):
+                self.assertIsNone(ro._heredoc_delimiter(f"{spelling}\nx", 0))
+        self.assertEqual(ro._heredoc_delimiter("EOF;x", 0), ("EOF", False, 3))
+        self.assertEqual(ro._heredoc_delimiter(" 'EOF' x", 0), ("EOF", True, 6))
         # The two spellings read: a plain word, bare or wholly quoted.
         for delimiter in ("EOF", "'EOF'", '"EOF"', "my_end-1.x"):
             with self.subTest(delimiter=delimiter):
@@ -4232,25 +4240,57 @@ class ShellLexer(Base):
                           target)["derives"]
         self.assertIsNone(row["targets_full"])
 
-    def test_a_case_pattern_does_not_end_a_quoted_substitution(self):
-        # `X=echo; echo "$(case x in x) $X inner-ran;; esac)"` prints
-        # `inner-ran`: the pattern's `)` is not the substitution's (#3925).
+    #: Commands where reading a double-quoted `$(...)` to the `)` bash
+    #: closes it at ended the word later than bash does (#3983): bash 5.3
+    #: runs `cd data` at top level in each (a here-document inside `$( )`
+    #: ends at the line `EOF)`; `<<` in `((...))` or `$[...]` is a shift; a
+    #: trailing backslash under a quoted delimiter is text; and a quote-naive
+    #: comment pass meets a `"` inside `'...'` inside the substitution).
+    QUOTED_SUBSTITUTIONS = (
+        'echo "$(cat <<EOF\nx\nEOF)"; cd data; echo "\nEOF\n)"',
+        'echo "$( ((x<<2))\n)"; cd data; echo "\n2\n)"',
+        'echo "$(echo $[1<<2 ]\n)"; cd data; echo "\n2\n)"',
+        'echo "$(cat <<\'E\'\nfoo\\\nE\n)"; cd data; echo "\nE\n)"',
+        'echo "$(cat <<E\nfoo\\\\\nE\n)"; cd data; echo "\nE\n)"',
+        'echo "$(cat <<E\nfoo\\\\\\\\\nE\n)"; cd data; echo "\nE\n)"',
+        'echo "$(echo \'"\' \\\') #"; cd data; echo "\n"',
+    )
+
+    def test_a_double_quoted_word_ends_at_its_first_quote_as_on_origin_main(self):
+        # A `"` inside a double-quoted `$(...)` ends the word, as shlex ended
+        # it on origin/main, and the quotes after it pair anew (#3925 waits
+        # for a shell grammar, #3983).
+        command = "echo \"$(echo \")\"; cd x)\" && ls"
+        self.assertEqual(ro._tokens(command), ["echo", "$(echo ", ")", "; cd x)", "&&", "ls"])
+        self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+        for command in self.QUOTED_SUBSTITUTIONS:
+            with self.subTest(command=command):
+                # A `cd` word at top level, or (the last, whose quotes do not
+                # pair) a command not split, read whole and counted.
+                tokens = ro._tokens(command, heredoc_data=True)
+                self.assertTrue(tokens is None or "cd" in tokens, tokens)
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+        # A substitution's command is read to its `)` by counting brackets,
+        # so a case pattern's `)` ends it (the #3925 gap, as on origin/main).
         word = "$(case x in x) $X ./derive.sh;; esac)"
-        self.assertEqual(ro._substitution_bodies(word), ["case x in x) $X ./derive.sh;; esac"])
-        self.assertEqual(ro._comsub_end(word, 2), len(word))
-        for command in (f"echo \"{word}\"", "echo \"$(case x in (x) $X ./derive.sh;; esac)\"",
-                        "echo \"$(case x in a|b) ls;; x) $X ./derive.sh;; esac)\"",
-                        "echo \"$(echo ')'; $X ./derive.sh)\"", "echo \"$(echo \")\"; $X ./derive.sh)\""):
+        self.assertEqual(ro._substitution_bodies(word), ["case x in x"])
+        for command in ("echo \"$(echo ')'; $X ./derive.sh)\"", "echo \"$(echo \")\"; $X ./derive.sh)\""):
             with self.subTest(command=command):
                 self.assertTrue(ro._shell(command, "/w", [])["detaches"])
-        # A quoted `)`, a nested substitution or a here-document inside one
-        # does not end the word either: `echo "$(echo ")"; echo y)"` prints
-        # `)` and `y`.
-        self.assertEqual(ro._tokens("echo \"$(echo \")\"; cd x)\" && ls"),
-                         ["echo", "$(echo \")\"; cd x)", "&&", "ls"])
-        self.assertEqual(ro._comsub_end("cat <<'E'\n)\nE\n) tail", 0), len("cat <<'E'\n)\nE\n)"))
-        self.assertEqual(ro._comsub_end("echo $(a) ')' \\) \"$(b)\") tail", 0), len("echo $(a) ')' \\) \"$(b)\")"))
-        self.assertIsNone(ro._comsub_end("case x in x) ls", 0))
+
+    def test_a_double_quoted_substitution_does_not_place_a_later_derive(self):
+        # End to end: bash runs `cd data` at top level, so the relative
+        # `--full` cannot be placed (#3983: the branch said `checked`).
+        for command in self.QUOTED_SUBSTITUTIONS:
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
         # A list-valued name raised TypeError in `_history` (#3918). Each
@@ -4266,7 +4306,12 @@ class ShellLexer(Base):
                 r.result(f"bad_{len(r.events) - 1}", "ok")
                 block = r.report()
                 self.assertUnknown(block, "whose name is not a non-empty string")
-                self.assertFalse(any("no earlier call" in reason for reason in block["reasons"]))
+                # Its id is kept, so its result pairs with it and is not a
+                # second malformed event, "a tool result with no earlier
+                # call" (#3984): `_pair` reports the count and the first.
+                malformed = [reason for reason in block["reasons"] if "malformed tool event" in reason]
+                self.assertEqual(len(malformed), 1, block["reasons"])
+                self.assertTrue(malformed[0].startswith("1 malformed tool event(s)"), malformed)
 
 
 class RuntimeDenial(Base):

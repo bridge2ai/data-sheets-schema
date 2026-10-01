@@ -412,10 +412,11 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     open-ended where any word in it starts with `$` or a backquote. A command is
     lexed as bash lexes it (#3830): a quoted or escaped operator (`';'`, `'&&'`,
     `\\;`) is a word, never a join; a `$'...'` string closes where bash closes it,
-    past a `\\'`; a double-quoted `$(...)` runs to the `)` bash closes it at, past
-    a quoted `)`, a nested substitution, a here-document or a case pattern's `)`
-    (#3925); and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
-    is a program built at run time (#3924). A here-document body is one data word,
+    past a `\\'`; and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
+    is a program built at run time (#3924). A double-quoted word still ends at its
+    first `"`, inside a `$(...)` too, and a substitution is read to its `)` by
+    counting brackets, so a case pattern's `)` ends it (#3925: these wait for a
+    shell grammar). A here-document body is one data word,
     never commands of this shell (#3897), only where every part of the command is
     a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
     plain-named `python*` interpreter reading its program from the here-document

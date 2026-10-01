@@ -232,13 +232,14 @@ that part runs only if the change ran and succeeded -- reached by `;` or
 `&&` and followed by `&&` alone up to the part; otherwise, and in a
 multi-line command, the directory is not known (#3268).
 The command is lexed as bash lexes it (#3830): a quoted or escaped
-operator (`';'`, `'&&'`, `\\;`) is a word, never a join; a `$'...'`
-string closes where bash closes it, past a `\\'`; and a double-quoted
-`$(...)` runs to the `)` bash closes it at, past a quoted `)`, a
-here-document or a case pattern's `)` (#3925). A brace expansion with a
-quoted blank in it (`{cd,'/tmp a b'}`) is still read as built at run time
-(#3924). A here-document's body is data, never a command of this shell
-(#3897): where every part of the command is a reader other than `sed`
+operator (`';'`, `'&&'`, `\\;`) is a word, never a join; and a `$'...'`
+string closes where bash closes it, past a `\\'`. A double-quoted word
+still ends at its first unescaped `"`, inside a `$(...)` too, as shlex
+ended it on origin/main, where bash reads on (`"$(echo ")"; ls)"`), and
+a substitution's command is read to its `)` by counting brackets (#3925;
+it waits for a shell grammar, #3983). A brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
+is still read as built at run time (#3924). A here-document's body is
+data, never a command of this shell (#3897): where every part of the command is a reader other than `sed`
 or `rg` (whose `e` command and `--pre` run commands), a builtin `cd`,
 `pushd` or `popd`, or a plain-named `python*` interpreter reading its
 program from the here-document it carries (`python3 - <<'EOF'`), nothing
@@ -474,7 +475,10 @@ NON_CHECKS = (
     "started with; a program bash builds at run time behind `nohup`, `exec` or `command` "
     "(`nohup $X ./derive.sh`), which is not read as detaching; in a command the tokenizer "
     "cannot split, a program word built other than from a leading `$` or backquote (`set${X}sid`, "
-    "a glob, a brace expansion), which is not read as detaching there (#3923); and what a program "
+    "a glob, a brace expansion), which is not read as detaching there (#3923); a substitution "
+    "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
+    "command is read only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending "
+    "at that quote (#3925; both wait for a shell grammar); and what a program "
     "does with a here-document body read as its data: where every part of the command is a reader "
     "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
     "interpreter reading its program from the here-document it carries, nothing substitutes, every "
@@ -1052,136 +1056,20 @@ class _Fallback(Exception):
     lexed again with its body lines read as commands, as before (#3897)."""
 
 
-#: Words after which bash still reads the next word as a command's start:
-#: the reserved words a command may follow, `!` and `time`. `_comsub_end`
-#: reads a `case` there (#3925).
-_COMMAND_FOLLOWS = frozenset({"if", "then", "else", "elif", "while", "until", "do", "!", "{", "time"})
-
-
-def _quoted_end(text: str, i: int) -> int | None:
-    """The index after a quoted span starting at `text[i]` (`'...'`,
-    `$'...'` or `"..."`), or None when it does not close. A double-quoted
-    span may carry `$(...)`, read to its own `)` (`_comsub_end`)."""
+def _ansi_c_end(text: str, i: int) -> int | None:
+    """The index after a `$'...'` string starting at `text[i]`, read as bash
+    reads it: a backslash escapes the next character, so a `\\'` does not
+    close it; None when it does not close (#3830)."""
     n = len(text)
-    if text.startswith("$'", i):
-        i += 2
-        while i < n:
-            if text[i] == "\\":
-                i += 2
-            elif text[i] == "'":
-                return i + 1
-            else:
-                i += 1
-        return None
-    if text[i] == "'":
-        end = text.find("'", i + 1)
-        return None if end < 0 else end + 1
-    i += 1                                          # a double quote
+    i += 2
     while i < n:
-        c = text[i]
-        if c == "\\":
+        if text[i] == "\\":
             i += 2
-        elif c == '"':
+        elif text[i] == "'":
             return i + 1
-        elif text.startswith("$(", i) and not text.startswith("$((", i):
-            end = _comsub_end(text, i + 2)
-            if end is None:
-                return None
-            i = end
-        elif c == "`":
-            end = _backquote_end(text, i)
-            if end is None:
-                return None
-            i = end
         else:
             i += 1
     return None
-
-
-def _backquote_end(text: str, i: int) -> int | None:
-    """The index after a backquoted command starting at `text[i]`: the next
-    unescaped backquote, or None."""
-    j = i + 1
-    while j < len(text):
-        if text[j] == "\\":
-            j += 2
-        elif text[j] == "`":
-            return j + 1
-        else:
-            j += 1
-    return None
-
-
-def _paren_end(text: str, i: int) -> int | None:
-    """The index after the `)` balancing the `(` at `text[i]`, quoted spans
-    skipped: an arithmetic `$((...))` or a `${...}`'s brace, read the same
-    way with `{`/`}`."""
-    opening = text[i]
-    closing = {"(": ")", "{": "}"}[opening]
-    depth, n = 0, len(text)
-    while i < n:
-        c = text[i]
-        if c == "\\":
-            i += 2
-            continue
-        if c in "'\"" or text.startswith("$'", i):
-            end = _quoted_end(text, i)
-            if end is None:
-                return None
-            i = end
-            continue
-        if c == opening:
-            depth += 1
-        elif c == closing:
-            depth -= 1
-            if depth == 0:
-                return i + 1
-        i += 1
-    return None
-
-
-def _word_end(text: str, i: int) -> int | None:
-    """The index after the shell word starting at `text[i]`, read as bash
-    reads it inside a command substitution: quoted spans, escapes, `$(...)`,
-    `$((...))`, `${...}` and backquotes are part of it; an unquoted blank
-    or metacharacter ends it. None where a span does not close."""
-    n = len(text)
-    while i < n:
-        c = text[i]
-        if c in " \t\r\n;&|()<>":
-            return i
-        if c == "\\":
-            if i + 1 >= n:
-                return None
-            i += 2
-        elif c in "'\"" or text.startswith("$'", i):
-            end = _quoted_end(text, i)
-            if end is None:
-                return None
-            i = end
-        elif text.startswith("$((", i):
-            end = _paren_end(text, i + 1)
-            if end is None:
-                return None
-            i = end
-        elif text.startswith("$(", i):
-            end = _comsub_end(text, i + 2)
-            if end is None:
-                return None
-            i = end
-        elif text.startswith("${", i):
-            end = _paren_end(text, i + 1)
-            if end is None:
-                return None
-            i = end
-        elif c == "`":
-            end = _backquote_end(text, i)
-            if end is None:
-                return None
-            i = end
-        else:
-            i += 1
-    return i
 
 
 #: The only here-document delimiters read (#3947): a plain word, bare or
@@ -1204,15 +1092,22 @@ def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
     n = len(text)
     while i < n and text[i] in " \t":
         i += 1
-    end = _word_end(text, i)
-    if end is None or end == i:
+    plain = _PLAIN_DELIMITER.match(text, i)
+    if plain:
+        word, quoted, end = plain.group(), False, plain.end()
+    elif text[i:i + 1] in ("'", '"'):
+        close = text.find(text[i], i + 1)
+        if close < 0 or not _PLAIN_DELIMITER.fullmatch(text[i + 1:close]):
+            return None
+        word, quoted, end = text[i + 1:close], True, close + 1
+    else:
         return None
-    raw = text[i:end]
-    if _PLAIN_DELIMITER.fullmatch(raw):
-        return raw, False, end
-    if len(raw) > 2 and raw[0] == raw[-1] and raw[0] in "'\"" and _PLAIN_DELIMITER.fullmatch(raw[1:-1]):
-        return raw[1:-1], True, end
-    return None
+    # The word must end there, as bash ends one: at a blank, a newline or
+    # an operator character, or the end. Anything else (`EOF'x'`, `E\F`,
+    # `"E"F`, a carriage return) continues the word, a spelling not read.
+    if end < n and text[end] not in " \t\n;&|()<>":
+        return None
+    return word, quoted, end
 
 
 def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
@@ -1246,121 +1141,28 @@ def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
     return None
 
 
-def _comsub_end(text: str, i: int) -> int | None:
-    """The index after the `)` that closes a command substitution whose
-    command starts at `text[i]` (just after its `$(`), as bash finds it: by
-    reading the command, so a `)` that is quoted, escaped, in a nested
-    substitution or here-document body, or that closes a case pattern
-    (`$(case x in x) ls;; esac)`, #3925) does not close it. None where
-    nothing does. `case` is read where a command starts, and a pattern
-    list from its `in` to each `)`."""
-    n = len(text)
-    depth = 0
-    cases: list[str] = []                           # "subject", "in", "pattern", "body"
-    heredocs: list[tuple[str, bool, bool]] = []
-    command = True
-    while i < n:
-        c = text[i]
-        if c == "\n":
-            i += 1
-            command = True
-            for delimiter, dash, expands in heredocs:
-                body = _heredoc_body_end(text, i, delimiter, dash, expands)
-                if body is None:
-                    return None
-                i = body[1]
-            heredocs = []
-            continue
-        if c in " \t\r":
-            i += 1
-            continue
-        if c == "#":
-            end = text.find("\n", i)
-            if end < 0:
-                return None
-            i = end
-            continue
-        if c in ";&|":
-            op = next(o for o in (";;&", ";;", ";&", "&&", "||", "|&", c) if text.startswith(o, i))
-            if op in (";;&", ";;", ";&") and cases and cases[-1] == "body":
-                cases[-1] = "pattern"
-            i += len(op)
-            command = True
-            continue
-        if c == "(":
-            if not (cases and cases[-1] == "pattern"):
-                depth += 1                          # a pattern's optional `(` opens nothing
-            i += 1
-            command = True
-            continue
-        if c == ")":
-            if cases and cases[-1] == "pattern":
-                cases[-1] = "body"
-                command = True
-            elif depth == 0:
-                return i + 1
-            else:
-                depth -= 1
-                command = False
-            i += 1
-            continue
-        if c in "<>":
-            if text.startswith("<<<", i):
-                i += 3
-            elif text.startswith("<<", i):
-                dash = text.startswith("<<-", i)
-                found = _heredoc_delimiter(text, i + 2 + dash)
-                if found is None:
-                    return None
-                heredocs.append((found[0], dash, not found[1]))
-                i = found[2]
-            elif text[i + 1:i + 2] == "(":
-                depth += 1                          # a process substitution's command
-                i += 2
-                command = True
-                continue
-            else:
-                i += 1
-                while i < n and text[i] in ">&|":
-                    i += 1
-            command = False
-            continue
-        end = _word_end(text, i)
-        if end is None:
-            return None
-        word = text[i:end]
-        i = end
-        if cases and cases[-1] == "subject":
-            cases[-1] = "in"
-        elif cases and cases[-1] == "in":
-            if word == "in":
-                cases[-1] = "pattern"
-        elif cases and cases[-1] == "pattern":
-            if word == "esac":
-                cases.pop()
-        elif command and word == "case":
-            cases.append("subject")
-        elif command and word == "esac" and cases and cases[-1] == "body":
-            cases.pop()
-        command = command and word in _COMMAND_FOLLOWS
-    return None
-
-
 def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
     """The words and operators of `text` as bash's lexer reads them, and
     the text with comments and here-document bodies removed; None where a
     quote or an escape does not close, as for shlex (#3830). A
     backslash-newline outside a here-document body is a blank, as the
     shlex tokenizer read it once `_lex` had replaced each with a space.
+    Where `_lex` has not replaced them (here-documents read as data), an
+    escaped backslash before a newline is a backslash and the newline a
+    `;`, as bash reads it; on `_lex`'s fallback the replacement has
+    already joined such a line to the next, as origin/main did (#3985).
 
     - A word's quotes and escapes are removed and it is marked `quoted`
       where it had any; `$'...'` is read as bash reads it, so a `\\'` in it
       does not close it (shlex kept its `$` and paired its quotes wrongly),
       and the `$` is kept, so such a word still reads as one built at run
       time where it stands as a program.
-    - A double-quoted `$(...)` is read to its own `)` (`_comsub_end`), so a
-      quote, a case pattern's `)` or a here-document inside it does not end
-      the word; its text is kept as written, for `_substitution_bodies`.
+    - A double-quoted word ends at the first unescaped `"`, as shlex ended
+      it on origin/main, even inside a `$(...)` it carries: reading such a
+      substitution to the `)` bash closes it at needs bash's grammar (a
+      here-document inside it ends at a line like `EOF)`, a `<<` in
+      arithmetic is a shift), and a reading that ended the word later than
+      bash does hid top-level commands (#3925, #3983).
     - Each unquoted run of operator characters is split into bash's
       operators (#3825), an unquoted newline is a `;`, and a `#` at a
       word's start begins a comment where `heredocs` is set (the caller has
@@ -1421,7 +1223,7 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
             i = end + 1
             continue
         if text.startswith("$'", i):
-            end = _quoted_end(text, i)
+            end = _ansi_c_end(text, i)
             if end is None:
                 return None
             buf.append("$" + text[i + 2:end - 1].replace("\\'", "'").replace("\\\n", " "))
@@ -1444,12 +1246,6 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
                                text[j + 1] if text[j + 1] in '"\\' else text[j:j + 2])
                     j += 2
                     continue
-                if text.startswith("$(", j) and not text.startswith("$((", j):
-                    end = _comsub_end(text, j + 2)
-                    if end is not None:
-                        buf.append(text[j:end])
-                        j = end
-                        continue
                 buf.append(c)
                 j += 1
             scan.append(text[i:j])
@@ -2474,15 +2270,17 @@ def _nested_open_ended(word: str, *, command: bool = False) -> bool:
 def _substitution_bodies(word: str) -> list[str]:
     """The commands inside the command substitutions a word carries whole
     (a quoted `"$(...)"` or a backquoted one, which the tokenizer keeps in
-    one word), each read to the `)` bash closes it at (`_comsub_end`: not a
-    quoted one, nor a case pattern's, #3925), or to the end where none
-    does. Arithmetic's `$((` runs no command."""
+    one word), each read to its matching `)` by counting brackets, or to the
+    end where none matches. Arithmetic's `$((` runs no command."""
     out, i = [], 0
     while i < len(word):
         if word.startswith("$(", i) and not word.startswith("$((", i):
-            j = _comsub_end(word, i + 2)
-            out.append(word[i + 2:] if j is None else word[i + 2:j - 1])
-            i = len(word) if j is None else j
+            depth, j = 1, i + 2
+            while j < len(word) and depth:
+                depth += {"(": 1, ")": -1}.get(word[j], 0)
+                j += 1
+            out.append(word[i + 2:j - 1] if depth == 0 else word[i + 2:])
+            i = j
         elif word[i] == "`":
             j = word.find("`", i + 1)
             out.append(word[i + 1:] if j < 0 else word[i + 1:j])
