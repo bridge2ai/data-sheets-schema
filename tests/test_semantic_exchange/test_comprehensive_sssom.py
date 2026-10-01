@@ -85,8 +85,9 @@ FORMERLY_UNMAPPED_WITHDRAWN_SLOTS = {
 #: alignment (#3054), but each of the seven was its row's mapping (mapped,
 #: source ttl) from #2935 (58ba281ca) until #3054 (9201af3d4), two commits
 #: of the branch #2963 merged; anomalies, at_risk_populations and
-#: human_subject_research had been mapped to theirs since #147 (7ae9832ba)
-#: added the table. From #3054 the rows only listed the target, in
+#: human_subject_research had been mapped to theirs since #137 (84637af7c)
+#: added the table (#147, 7ae9832ba, only moved it). From #3054 the rows
+#: only listed the target, in
 #: other_curated_mappings, until #4052 removed the triples.
 SLOT_TRIPLES_REMOVED = {
     'discouraged_uses': 'rai:prohibitedUses',
