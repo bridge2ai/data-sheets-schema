@@ -373,17 +373,45 @@ class TestSharedSlots(unittest.TestCase):
 
     def test_the_slot_takes_the_next_value_when_the_schema_rejects_the_first(self):
         """`June 2026` is shaped, as `_coerce` leaves it, and the schema
-        rejects it; the slot then takes the next value (#4098)."""
+        rejects it; the slot then takes the next value, in its place among
+        the record's keys (#4098)."""
         record, dropped = converted(crate({
-            "datePublished": "June 2026",
+            "datePublished": "June 2026", "url": "https://example.org",
             "additionalProperty": [{"@type": "PropertyValue", "name": "Issued",
                                     "value": "2026-06-30"}]}))
         self.assertEqual(record["issued"], "2026-06-30T00:00:00Z")
+        self.assertEqual(list(record), ["id", "title", "issued", "page"])
         self.assertEqual(dropped, [("datePublished", (
             "not placed in `issued`: June 2026 (the schema rejects it: 'June "
             "2026' is not a 'date-time' in /issued); `issued` holds the value "
             "of additionalProperty[Issued] instead"))])
         self.assertEqual(problems(record), [])
+
+    def test_the_same_value_from_two_properties_is_not_dropped(self):
+        """Nothing is left out when two properties state one value, and a
+        value stated twice is superseded once."""
+        license_entry = {"@type": "PropertyValue", "name": "License"}
+        record, dropped = converted(crate({
+            "license": "MIT",
+            "additionalProperty": [{**license_entry, "value": "MIT"}]}))
+        self.assertEqual((record["license"], dropped), ("MIT", []))
+        record, dropped = converted(crate({
+            "license": "MIT",
+            "additionalProperty": [{**license_entry, "value": "Apache-2.0"},
+                                   {**license_entry, "value": "Apache-2.0"}]}))
+        self.assertEqual(record["license"], "MIT")
+        self.assertEqual(dropped, [("additionalProperty[License]",
+                                    "superseded by license, which also maps "
+                                    "to `license`")])
+
+    def test_each_value_for_a_slot_the_class_does_not_declare_is_named(self):
+        record, dropped = converted(crate({"additionalProperty": [
+            {"@type": "PropertyValue", "name": "Completeness", "value": "a"},
+            {"@type": "PropertyValue", "name": "Completeness", "value": "b"}]}))
+        self.assertNotIn("completeness", record)
+        self.assertEqual(dropped, 2 * [("additionalProperty[Completeness]",
+                                        "the schema declares no `completeness` "
+                                        "slot on Dataset")])
 
     def test_a_list_for_a_single_valued_object_slot_is_one_object(self):
         record = quietly(FairscapeToD4DConverter().convert, crate({
@@ -1101,6 +1129,46 @@ class TestTheRecordValidates(unittest.TestCase):
                     ValueError, "still fails validation after leaving out what "
                                 "the schema rejected in 1 pass: 'source_desc"):
                 converted(crate_json)
+
+    def test_a_value_inside_one_left_out_goes_with_it(self):
+        """The object lacks its required key, and its `id` is not text: it
+        is left out once, with both messages."""
+        record, dropped = converted(crate(
+            {"rai:dataCollectionRawData": [{"@id": "#raw", "id": 5}]}))
+        self.assertNotIn("raw_data_sources", record)
+        self.assertEqual(reasons(dropped, "rai:dataCollectionRawData"), (
+            'not placed in `raw_data_sources`: {"id": 5} (the schema rejects '
+            "it: 'source_description' is a required property in "
+            "/raw_data_sources/0; 5 is not of type 'string', 'null' in "
+            "/raw_data_sources/0/id)"))
+        self.assertEqual([source for source, _ in dropped],
+                         ["raw_data_sources[0].@id", "rai:dataCollectionRawData"])
+
+    def test_each_rejected_item_of_a_list_is_named(self):
+        """Left out last first, so each is the item named."""
+        record, dropped = converted(crate({"keywords": [7, "a", 8]}))
+        self.assertEqual(record["keywords"], ["a"])
+        self.assertEqual(dropped, [
+            ("keywords", "part of the value not placed in `keywords`: 7 (the "
+                         "schema rejects it: 7 is not of type 'string' in "
+                         "/keywords/0)"),
+            ("keywords", "part of the value not placed in `keywords`: 8 (the "
+                         "schema rejects it: 8 is not of type 'string' in "
+                         "/keywords/2)")])
+
+    def test_a_key_its_class_does_not_declare_is_left_out_by_name(self):
+        """`_fit` keeps only declared keys, so this reaches `_settle` only
+        if something else adds one; the closed schema names it, and only it
+        goes."""
+        converter = FairscapeToD4DConverter()
+        record = converter._settle(
+            {"id": "./", "creators": [{"name": "A", "nickname": "B"}]},
+            {"creators": "author"}, {})
+        self.assertEqual(record, {"id": "./", "creators": [{"name": "A"}]})
+        self.assertEqual(converter.dropped, [("creators[0].nickname", (
+            "not placed in `nickname`: B (the schema rejects it: Additional "
+            "properties are not allowed ('nickname' was unexpected) in "
+            "/creators/0)"))])
 
     def test_a_record_no_value_left_out_can_make_valid_is_an_error(self):
         """A root with no `@id` and no `identifier` gives no `id`, which the
