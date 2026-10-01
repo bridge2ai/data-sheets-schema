@@ -746,7 +746,8 @@
  "counts_by_file": [
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -759,7 +760,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -773,7 +775,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -786,20 +789,22 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
     "frontmatter": 2
    },
    "hits": 2,
-   "model_facing": 0,
+   "model_facing": 2,
    "path": ".claude/agents/d4d-review-record.md",
    "with_reason": 0
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -813,7 +818,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -826,7 +832,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
@@ -840,7 +847,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -854,7 +862,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -867,7 +876,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
@@ -880,7 +890,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -895,7 +906,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -908,7 +920,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
@@ -921,7 +934,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -936,7 +950,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
@@ -949,7 +964,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -962,7 +978,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "contexts": {
@@ -976,7 +993,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "contexts": {
@@ -989,7 +1007,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "contexts": {
@@ -1016,7 +1035,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1029,7 +1049,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1042,7 +1063,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1056,7 +1078,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "contexts": {
@@ -1069,7 +1092,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1082,7 +1106,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1095,8 +1120,7 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1109,8 +1133,7 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -1128,7 +1151,7 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "value": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -1147,19 +1170,6 @@
    "hits": 2,
    "model_facing": 0,
    "path": ".github/workflows/d4d_assistant_deterministic.config",
-   "with_reason": 0
-  },
-  {
-   "approaches": [
-    "github_assistant"
-   ],
-   "category": "bridge2ai_program",
-   "contexts": {
-    "example": 1
-   },
-   "hits": 1,
-   "model_facing": 1,
-   "path": ".github/workflows/d4d_assistant_edit.md",
    "with_reason": 0
   },
   {
@@ -2294,6 +2304,19 @@
    "approaches": [
     "native_agentic"
    ],
+   "category": "gc_project",
+   "contexts": {
+    "docstring": 1
+   },
+   "hits": 1,
+   "model_facing": 0,
+   "path": "src/data_sheets_schema/reconstructed_bytes.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
    "category": "biomedical_clinical",
    "contexts": {
     "comment": 1,
@@ -2357,6 +2380,47 @@
    "hits": 10,
    "model_facing": 0,
    "path": "src/data_sheets_schema/release_inventory.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "contexts": {
+    "comment": 4,
+    "docstring": 27
+   },
+   "hits": 31,
+   "model_facing": 0,
+   "path": "src/data_sheets_schema/removals.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "contexts": {
+    "code_table": 5
+   },
+   "hits": 5,
+   "model_facing": 0,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "with_reason": 0
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "contexts": {
+    "code_table": 1,
+    "string_literal": 1
+   },
+   "hits": 2,
+   "model_facing": 0,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
    "with_reason": 0
   },
   {
@@ -2558,7 +2622,7 @@
     "comment": 1
    },
    "hits": 1,
-   "model_facing": 0,
+   "model_facing": 1,
    "path": "src/data_sheets_schema/schema/D4D_Base_import.yaml",
    "with_reason": 0
   },
@@ -2601,7 +2665,7 @@
     "value": 2
    },
    "hits": 25,
-   "model_facing": 24,
+   "model_facing": 25,
    "path": "src/data_sheets_schema/schema/D4D_Composition.yaml",
    "with_reason": 25
   },
@@ -2621,7 +2685,6 @@
   },
   {
    "approaches": [
-    "github_assistant",
     "native_agentic",
     "shared_schema"
    ],
@@ -2637,7 +2700,6 @@
   },
   {
    "approaches": [
-    "github_assistant",
     "native_agentic",
     "shared_schema"
    ],
@@ -2652,7 +2714,6 @@
   },
   {
    "approaches": [
-    "github_assistant",
     "native_agentic",
     "shared_schema"
    ],
@@ -2661,7 +2722,7 @@
     "comment": 1
    },
    "hits": 1,
-   "model_facing": 0,
+   "model_facing": 1,
    "path": "src/data_sheets_schema/schema/D4D_Core.yaml",
    "with_reason": 0
   },
@@ -2961,7 +3022,7 @@
     "value": 3
    },
    "hits": 10,
-   "model_facing": 9,
+   "model_facing": 10,
    "path": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
    "with_reason": 10
   },
@@ -2976,15 +3037,15 @@
     "value": 15
    },
    "hits": 21,
-   "model_facing": 15,
+   "model_facing": 21,
    "path": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
    "with_reason": 21
   },
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "biomedical_clinical",
@@ -3001,8 +3062,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -3033,7 +3094,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "biomedical_clinical",
@@ -3051,7 +3111,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -4013,6 +4072,93 @@
    "src/data_sheets_schema/stream_evidence.py",
    "src/data_sheets_schema/usage_ledger.py"
   ],
+  "assistant_instructions": {
+   ".github/workflows/d4d_assistant_create.md": [
+    ".claude/commands/d4d-assistant.md (native_agentic)",
+    ".claude/commands/d4d-webfetch.md (native_agentic)"
+   ],
+   ".github/workflows/d4d_assistant_edit.md": []
+  },
+  "cli_groups": {
+   "native_agentic": {
+    "api": {
+     "by": [
+      ".claude/commands/d4d-full-core.md",
+      ".claude/commands/d4d-input-deep-research.md"
+     ],
+     "role": "run_shaping"
+    },
+    "bundle": {
+     "by": [
+      ".claude/commands/d4d-full-core.md"
+     ],
+     "role": "run_shaping"
+    },
+    "derive": {
+     "by": [
+      ".claude/agents/d4d-provenance-guard.md",
+      ".claude/commands/d4d-full-core.md"
+     ],
+     "role": "run_shaping"
+    },
+    "download": {
+     "by": [
+      ".claude/agents/d4d-rocrate.md",
+      ".claude/commands/d4d-agent.md",
+      ".claude/commands/d4d-assistant.md",
+      ".claude/commands/d4d-full-core.md",
+      ".claude/commands/d4d-uniform-rules.md",
+      ".claude/commands/d4d-webfetch.md"
+     ],
+     "role": "run_shaping"
+    },
+    "prompt": {
+     "by": [
+      ".claude/commands/d4d-full-core.md"
+     ],
+     "role": "run_shaping"
+    },
+    "provenance": {
+     "by": [
+      ".claude/commands/d4d-full-core.md"
+     ],
+     "role": "run_shaping"
+    },
+    "receipts": {
+     "by": [
+      ".claude/agents/d4d-provenance-guard.md",
+      ".claude/commands/d4d-full-core.md"
+     ],
+     "role": "run_shaping"
+    },
+    "review": {
+     "by": [
+      ".claude/agents/d4d-review-record.md"
+     ],
+     "role": "exposed"
+    },
+    "rocrate": {
+     "by": [
+      ".claude/agents/d4d-rocrate.md"
+     ],
+     "role": "exposed"
+    },
+    "runs": {
+     "by": [
+      ".claude/commands/d4d-full-core.md",
+      ".claude/commands/d4d-input-deep-research.md"
+     ],
+     "role": "run_shaping"
+    },
+    "utils": {
+     "by": [
+      ".claude/commands/d4d-agent.md",
+      ".claude/commands/d4d-assistant.md"
+     ],
+     "role": "run_shaping"
+    }
+   }
+  },
   "conditions": {
    "agentic_runtimes": [
     "Claude Code",
@@ -4071,6 +4217,53 @@
     "sends_tuned_prompt": false
    },
    "tuned_prompt": "src/download/prompts/d4d_tuned_arm_prompt.md"
+  },
+  "controller_runs": {
+   "notes/claudecode_direct/bind_direct_launch.py": "an entry point: no module imports it; notes/claudecode_direct/README.md runs `notes/claudecode_direct/bind_direct_launch.py`",
+   "notes/claudecode_direct/prepare_direct.py": "notes/claudecode_direct/README.md runs `notes/claudecode_direct/prepare_direct.py`",
+   "notes/claudecode_direct/run_direct_canary.py": "an entry point: no module imports it; notes/claudecode_direct/README.md runs `notes/claudecode_direct/run_direct_canary.py`",
+   "notes/matched_cborg_2026-09-13/audit_controls/__init__.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py": "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py:43 runs `-m audit_controls.batch_output`",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py": "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py:49 relaunches itself (`__file__`)",
+   "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py": "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py:113 relaunches itself (`__file__`)",
+   "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract.py": "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py:156 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/native.py:62 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/prepare.py:373 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/registration.py:588 runs `-m audit_controls.contract`",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py": "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py:24 runs `-m audit_controls.draft_output`",
+   "notes/matched_cborg_2026-09-13/audit_controls/native.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.native`",
+   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.output_parts`; notes/matched_cborg_2026-09-13/audit_controls/output_parts.py:29 runs `-m audit_controls.output_parts`",
+   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.prepare`",
+   "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.reconcile_stopped`; notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py's docstring runs `-m audit_controls.reconcile_stopped`",
+   "notes/matched_cborg_2026-09-13/audit_controls/registration.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/transport.py": "",
+   "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py": "",
+   "notes/matched_cborg_2026-09-13/budget_amendment.py": "",
+   "notes/matched_cborg_2026-09-13/budgeted_cborg.py": "",
+   "notes/matched_cborg_2026-09-13/continuation_sequence.py": "",
+   "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": "notes/matched_cborg_2026-09-13/finalization_controls/native.py:34 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/prepare.py:85 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/registration.py:232 runs `-m finalization_controls.contract`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/native.py": "an entry point: no module imports it; notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.native`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": "notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.prepare`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/registration.py": "",
+   "notes/matched_cborg_2026-09-13/native_context.py": "",
+   "notes/matched_cborg_2026-09-13/native_context_control.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_control.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "an entry point: no module imports it",
+   "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "",
+   "notes/matched_cborg_2026-09-13/prepare_registration.py": "",
+   "notes/matched_cborg_2026-09-13/run_api_canary.py": "",
+   "notes/matched_cborg_2026-09-13/sequence_claim.py": ""
   },
   "controller_text": {
    "notes/claudecode_direct/system.md": "notes/claudecode_direct/prepare_direct.py",
@@ -4209,18 +4402,73 @@
     "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode",
     "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
    ],
+   "described": [
+    ".claude/agents/d4d-description-reviewer.md",
+    ".claude/agents/d4d-mapper.md",
+    ".claude/agents/d4d-provenance-guard.md",
+    ".claude/agents/d4d-review-record.md",
+    ".claude/agents/d4d-rocrate.md",
+    ".claude/agents/d4d-rubric10-semantic.md",
+    ".claude/agents/d4d-rubric10.md",
+    ".claude/agents/d4d-rubric20-semantic.md",
+    ".claude/agents/d4d-rubric20.md",
+    ".claude/agents/d4d-schema-expert.md",
+    ".claude/agents/d4d-validator.md",
+    ".claude/agents/schema-stats.md",
+    ".claude/commands/README.md",
+    ".claude/commands/d4d-add-mapping.md",
+    ".claude/commands/d4d-agent.md",
+    ".claude/commands/d4d-assistant.md",
+    ".claude/commands/d4d-full-core.md",
+    ".claude/commands/d4d-input-deep-research.md",
+    ".claude/commands/d4d-uniform-rules.md",
+    ".claude/commands/d4d-webfetch.md",
+    ".claude/skills/review-open-issues/SKILL.md"
+   ],
    "hooks": [
     ".claude/hooks/protect_schema_hook.py",
     ".claude/hooks/term_validator_hook.py",
     ".claude/hooks/validate_d4d_yaml_hook.py"
    ],
+   "launches": [
+    {
+     "carries": true,
+     "evidence": [
+      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
+      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+     ],
+     "site": "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt"
+    },
+    {
+     "carries": true,
+     "evidence": [
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+     ],
+     "site": "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt"
+    },
+    {
+     "carries": true,
+     "evidence": [
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+     ],
+     "site": "notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt"
+    },
+    {
+     "carries": true,
+     "evidence": [
+      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
+      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+     ],
+     "site": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt"
+    }
+   ],
+   "launches_without_customizations_off": [],
    "memory": [
     "CLAUDE.md"
    ],
    "memory_named_by": [
     ".claude/commands/d4d-add-mapping.md",
-    ".github/workflows/d4d_assistant_create.md",
-    ".github/workflows/d4d_assistant_edit.md"
+    ".github/workflows/d4d_assistant_create.md"
    ],
    "native_launch_sites": [
     "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt",
@@ -4508,6 +4756,15 @@
     ],
     "runs": false
    },
+   ".github/ai-controllers.json": {
+    "approaches": [
+     "github_assistant"
+    ],
+    "by": [
+     ".github/workflows/d4d-agent.yml"
+    ],
+    "runs": false
+   },
    ".github/workflows/d4d_assistant_create.md": {
     "approaches": [
      "native_agentic"
@@ -4520,9 +4777,11 @@
    },
    ".github/workflows/d4d_assistant_deterministic.config": {
     "approaches": [
+     "github_assistant",
      "run_controllers"
     ],
     "by": [
+     ".github/workflows/d4d-agent.yml",
      "notes/matched_cborg_2026-09-13/prepare_registration.py"
     ],
     "runs": false
@@ -4559,12 +4818,10 @@
    },
    "scripts/check_budget.py": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
-     ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md"
+     ".github/workflows/d4d_assistant_create.md"
     ],
     "runs": true
    },
@@ -4679,7 +4936,6 @@
    },
    "src/data_sheets_schema/schema/D4D_Core.yaml": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
@@ -4733,8 +4989,8 @@
      ".claude/commands/d4d-assistant.md",
      ".claude/commands/d4d-full-core.md",
      ".claude/commands/d4d-webfetch.md",
+     ".github/workflows/d4d-agent.yml",
      ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md",
      "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
      "notes/matched_cborg_2026-09-13/audit_controls/registration.py"
     ],
@@ -4742,7 +4998,6 @@
    },
    "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml": {
     "approaches": [
-     "github_assistant",
      "native_agentic",
      "run_controllers"
     ],
@@ -4751,7 +5006,6 @@
      ".claude/agents/d4d-validator.md",
      ".claude/commands/d4d-full-core.md",
      ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md",
      "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
      "notes/matched_cborg_2026-09-13/audit_controls/registration.py"
     ],
@@ -4862,29 +5116,24 @@
    },
    "src/github/generate_d4d_metadata.py": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
-     ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md"
+     ".github/workflows/d4d_assistant_create.md"
     ],
     "runs": true
    },
    "src/github/validate_d4d_completeness.py": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
-     ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md"
+     ".github/workflows/d4d_assistant_create.md"
     ],
     "runs": true
    },
    "src/github/validate_prerequisites.sh": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
@@ -4894,12 +5143,10 @@
    },
    "src/html/human_readable_renderer.py": {
     "approaches": [
-     "github_assistant",
      "native_agentic"
     ],
     "by": [
-     ".github/workflows/d4d_assistant_create.md",
-     ".github/workflows/d4d_assistant_edit.md"
+     ".github/workflows/d4d_assistant_create.md"
     ],
     "runs": true
    },
@@ -4921,7 +5168,8 @@
    "prompt",
    "provenance",
    "receipts",
-   "runs"
+   "runs",
+   "utils"
   ],
   "native_closure": [
    "src/data_sheets_schema/agent_pin.py",
@@ -4948,6 +5196,7 @@
    "src/data_sheets_schema/cli/provenance.py",
    "src/data_sheets_schema/cli/receipts.py",
    "src/data_sheets_schema/cli/runs.py",
+   "src/data_sheets_schema/cli/utils.py",
    "src/data_sheets_schema/constants/__init__.py",
    "src/data_sheets_schema/constants/evaluation.py",
    "src/data_sheets_schema/constants/methods.py",
@@ -5028,6 +5277,7 @@
    "src/download/prompts/d4d_generic_arm_prompt_v9.md",
    "src/download/prompts/d4d_tuned_arm_prompt.md"
   ],
+  "python": "CPython 3.13.12",
   "python_roots": [
    "src",
    "notes",
@@ -5416,6 +5666,62 @@
    "src/validation/unified_validator.py"
   ],
   "registered_copies_skipped": 20,
+  "run_script_imports": {
+   ".claude/agents/scripts/d4d_builder.py": [
+    ".claude/agents/scripts/mapping_loader.py",
+    ".claude/agents/scripts/rocrate_parser.py"
+   ],
+   ".claude/agents/scripts/rocrate_to_d4d.py": [
+    ".claude/agents/scripts/d4d_builder.py",
+    ".claude/agents/scripts/field_prioritizer.py",
+    ".claude/agents/scripts/informativeness_scorer.py",
+    ".claude/agents/scripts/mapping_loader.py",
+    ".claude/agents/scripts/rocrate_merger.py",
+    ".claude/agents/scripts/rocrate_parser.py",
+    ".claude/agents/scripts/validator.py"
+   ],
+   ".claude/agents/scripts/schema_stats.py": [
+    "src/data_sheets_schema/constants/__init__.py",
+    "src/data_sheets_schema/constants/evaluation.py",
+    "src/data_sheets_schema/constants/methods.py",
+    "src/data_sheets_schema/constants/projects.py",
+    "src/data_sheets_schema/constants/schemas.py"
+   ],
+   "scripts/agentic_observed.py": [
+    "src/data_sheets_schema/agentic_observed.py"
+   ],
+   "scripts/validate_evaluation_schema.py": [
+    "src/data_sheets_schema/duplicate_keys.py",
+    "src/data_sheets_schema/evaluation/__init__.py",
+    "src/data_sheets_schema/evaluation/validate.py",
+    "src/data_sheets_schema/evaluation_context.py",
+    "src/data_sheets_schema/field_agent_contract.py",
+    "src/data_sheets_schema/judge_contract.py",
+    "src/data_sheets_schema/resources.py",
+    "src/data_sheets_schema/semantic_scope.py"
+   ],
+   "src/data_sheets_schema/d4d_pair_consistency.py": [
+    "src/data_sheets_schema/chunking.py",
+    "src/data_sheets_schema/corpus.py",
+    "src/data_sheets_schema/profiles.py",
+    "src/data_sheets_schema/registry.py",
+    "src/data_sheets_schema/resources.py",
+    "src/data_sheets_schema/schema_cache.py",
+    "src/data_sheets_schema/schema_digest.py",
+    "src/data_sheets_schema/schema_snapshot.py",
+    "src/data_sheets_schema/schema_sync.py",
+    "src/data_sheets_schema/schema_view.py",
+    "src/data_sheets_schema/scope.py"
+   ],
+   "src/html/human_readable_renderer.py": [
+    "src/data_sheets_schema/cli/__init__.py",
+    "src/data_sheets_schema/rendering/__init__.py",
+    "src/data_sheets_schema/rendering/human_readable_renderer.py",
+    "src/data_sheets_schema/resources.py",
+    "src/data_sheets_schema/schema_snapshot.py",
+    "src/data_sheets_schema/schema_view.py"
+   ]
+  },
   "schema_closure": [
    "src/data_sheets_schema/schema/D4D_Base_import.yaml",
    "src/data_sheets_schema/schema/D4D_Collection.yaml",
@@ -5451,51 +5757,63 @@
     "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
     "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml"
    ]
-  },
-  "unparsed_python": []
+  }
  },
  "gc_project_hits": [
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "interactive_session"
+   ],
    "line": 6,
+   "loaded_in": {
+    "interactive_session": "frontmatter description"
+   },
    "match": "CHORUS",
-   "model_facing": false,
+   "model_facing": true,
    "path": ".claude/agents/d4d-review-record.md",
    "pattern": "CHo?RUS",
    "role": "exposed",
    "snippet": "- \"Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1\"",
    "status": "live",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "interactive_session"
+   ],
    "line": 7,
+   "loaded_in": {
+    "interactive_session": "frontmatter description"
+   },
    "match": "AI_READI",
-   "model_facing": false,
+   "model_facing": true,
    "path": ".claude/agents/d4d-review-record.md",
    "pattern": "AI[-_ ]?READI",
    "role": "exposed",
    "snippet": "- \"Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1\"",
    "status": "live",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5514,7 +5832,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5533,7 +5852,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5552,7 +5872,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5571,7 +5892,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5590,7 +5912,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5609,7 +5932,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5628,7 +5952,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5647,7 +5972,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5666,7 +5992,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5685,7 +6012,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5704,7 +6032,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5723,7 +6052,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5742,7 +6072,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5761,7 +6092,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5780,7 +6112,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5799,7 +6132,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5818,7 +6152,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5837,7 +6172,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5856,7 +6192,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5875,7 +6212,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5894,7 +6232,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5913,7 +6252,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5932,7 +6272,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -5951,7 +6292,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -5971,7 +6313,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -5991,7 +6334,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6011,7 +6355,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6031,7 +6376,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6051,7 +6397,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6071,7 +6418,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6091,7 +6439,8 @@
   },
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "gc_project",
    "code": false,
@@ -6231,7 +6580,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -6252,7 +6602,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -20628,6 +20979,25 @@
    "context": "docstring",
    "exception": null,
    "gates_in": [],
+   "line": 16,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/reconstructed_bytes.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "One entry today. The 2026-08-13 generic-v4 rep1 VOICE run recorded merged-",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
    "line": 36,
    "match": "FAIRhub",
    "model_facing": false,
@@ -20981,6 +21351,635 @@
    "snippet": "rather than this one, as VOICE's ``physionet_pediatric_1_1_0`` describes the",
    "status": "live",
    "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 10,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "a receipted top-level slot removed with no record in the report \u2014 VOICE 04f",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 11,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "rep2 `data_governance`, AI_READI 04g rep3 `content_warnings`, CHORUS 04f",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 11,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "rep2 `data_governance`, AI_READI 04g rep3 `content_warnings`, CHORUS 04f",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 16,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "(#3078): six of the twelve-record 04f/g fill \u2014 those three, VOICE 04f rep1,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 17,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "CHORUS 04f rep3 and AI_READI 04g rep2 \u2014 the AI_READI 04f rep1 record its own",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 17,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "CHORUS 04f rep3 and AI_READI 04g rep2 \u2014 the AI_READI 04f rep1 record its own",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 17,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "CHORUS 04f rep3 and AI_READI 04g rep2 \u2014 the AI_READI 04f rep1 record its own",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 18,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "validation block declares invalid, and the 04b CM4AI canary. Those are values",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 20,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "five such values in VOICE 04f rep1, CHORUS 04f rep3 and AI_READI 04g rep2,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 20,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "five such values in VOICE 04f rep1, CHORUS 04f rep3 and AI_READI 04g rep2,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 20,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "five such values in VOICE 04f rep1, CHORUS 04f rep3 and AI_READI 04g rep2,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 65,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "survives. Among the v8 rows the review checked: AI_READI 04g rep2",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 68,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "standing, not of content); VOICE 04f rep1",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 71,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "reworded into `data_governance.notes`; CHORUS 04f rep3",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 78,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "containment \u2014 in 2026-08-22c v5 rep1 CM4AI, reconcile_full dropped",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 98,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "counted the AI_READI v4 rep1 creator's eight ROR URLs and its PI's ORCID",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 116,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "prose that disowned it \u2014 the 2026-08-13 v4 VOICE rep1",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 118,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "`source_caveats`, and the CM4AI v4/v7 `collection_timeframes[0]` start and",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 218,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "v4 rep1 VOICE, whose audit could not be read), none has the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 222,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "to `write` (2026-09-01 v7 rep2 VOICE",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 422,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "receipted value AI_READI 04g rep3 lost with `content_warnings` was",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 645,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "identifying texts (`_identity`), no other as many \u2014 the CM4AI v4 rep3",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 649,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "classification: the CHORUS 2026-08-11 leadership team folded into one",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 674,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "them is the root's coincidence at list level. The AI_READI v7 rep2",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 684,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "entry's \u2014 an entry split in several (CM4AI 22c rep1's image archives,",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 1303,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "names one. The 04f v8 rep3 VOICE finding on `preprocessing_strategies[6]`",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "docstring",
+   "exception": null,
+   "gates_in": [],
+   "line": 1305,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "any other). Of the v7 rep2 AI_READI findings on a ten-entry",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [],
+   "line": 296,
+   "match": "CM4AI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CM4AI",
+   "role": "exposed",
+   "snippet": "#: sizes, versions and dates of unrelated text \u2014 the 22c CM4AI `file_count` 3",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [],
+   "line": 301,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "#: v3 AI_READI `distribution_dates[2].release_dates[0]`); the 5-digit count",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [],
+   "line": 302,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "exposed",
+   "snippet": "#: of v4 VOICE rep1 \u2014 32522 on the recording-features instance of the",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [],
+   "line": 760,
+   "match": "CHORUS",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/removals.py",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "#: (the CHORUS 'UF' affiliation). An identifier-shaped value (a URL, a",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "string_literal",
+   "exception": null,
+   "gates_in": [],
+   "line": 385,
+   "match": "Diabet",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "category_names.append('Diabetes Status')",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 384,
+   "match": "diabet",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "elif any(term in data_lower for term in ['diabetes', 'dm', 'lifestyle', 'oral', 'insulin']):",
+   "status": "live",
+   "violation": true
   },
   {
    "approaches": [
@@ -21862,20 +22861,22 @@
    "code": false,
    "context": "comment",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "native_agentic"
+   ],
    "line": 637,
    "match": "AI-READI",
-   "model_facing": false,
+   "model_facing": true,
    "path": "src/data_sheets_schema/schema/D4D_Base_import.yaml",
    "pattern": "AI[-_ ]?READI",
+   "read_raw": true,
    "role": "model_facing",
    "snippet": "# and the previous value was a real DOI of an AI-READI licence record",
    "status": "live",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
-    "github_assistant",
     "native_agentic",
     "shared_schema"
    ],
@@ -21883,16 +22884,19 @@
    "code": false,
    "context": "comment",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "native_agentic"
+   ],
    "line": 87,
    "match": "AI_READI",
-   "model_facing": false,
+   "model_facing": true,
    "path": "src/data_sheets_schema/schema/D4D_Core.yaml",
    "pattern": "AI[-_ ]?READI",
+   "read_raw": true,
    "role": "model_facing",
    "snippet": "# could not reach the exchange layer (#403). AI_READI's phase 4 handled",
    "status": "live",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -27510,7 +28514,7 @@
    "violation": false
   }
  ],
- "root": "origin-main",
+ "root": "main_8a19955b5_4021",
  "self_test": {
   "imported_from_neutrality_test": 36,
   "passed": true,
@@ -27524,14 +28528,32 @@
  "surfaces": {
   ".claude/agents/d4d-description-reviewer.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      10,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-description-reviewer.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27540,14 +28562,32 @@
   },
   ".claude/agents/d4d-mapper.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-mapper.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27556,30 +28596,66 @@
   },
   ".claude/agents/d4d-provenance-guard.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      6,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-provenance-guard.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "command or agent named (path, bare name or slash command) by a playbook, live prompt, controller or the assistant instructions"
+   "why": "command or agent named (path, bare name or slash command) by a playbook, live prompt, controller or assistant instruction"
   },
   ".claude/agents/d4d-review-record.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      8,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-review-record.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27588,14 +28664,32 @@
   },
   ".claude/agents/d4d-rocrate.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-rocrate.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27604,14 +28698,32 @@
   },
   ".claude/agents/d4d-rubric10-semantic.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-rubric10-semantic.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27620,14 +28732,32 @@
   },
   ".claude/agents/d4d-rubric10.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-rubric10.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27636,14 +28766,32 @@
   },
   ".claude/agents/d4d-rubric20-semantic.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-rubric20-semantic.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27652,14 +28800,32 @@
   },
   ".claude/agents/d4d-rubric20.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-rubric20.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27668,14 +28834,32 @@
   },
   ".claude/agents/d4d-schema-expert.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-schema-expert.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27684,30 +28868,66 @@
   },
   ".claude/agents/d4d-validator.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/d4d-validator.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "command or agent named (path, bare name or slash command) by a playbook, live prompt, controller or the assistant instructions"
+   "why": "command or agent named (path, bare name or slash command) by a playbook, live prompt, controller or assistant instruction"
   },
   ".claude/agents/schema-stats.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/agents/schema-stats.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27718,7 +28938,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/check_mapping_coverage.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -27735,7 +28957,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/d4d_builder.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -27750,12 +28974,16 @@
   },
   ".claude/agents/scripts/field_prioritizer.py": {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/field_prioritizer.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "deterministic": "run_shaping"
+    "deterministic": "run_shaping",
+    "native_agentic": "exposed"
    },
    "runs_as_script_in": [],
    "status": "live",
@@ -27764,12 +28992,16 @@
   },
   ".claude/agents/scripts/informativeness_scorer.py": {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/informativeness_scorer.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "deterministic": "run_shaping"
+    "deterministic": "run_shaping",
+    "native_agentic": "exposed"
    },
    "runs_as_script_in": [],
    "status": "live",
@@ -27781,7 +29013,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/mapping_loader.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -27796,12 +29030,16 @@
   },
   ".claude/agents/scripts/rocrate_merger.py": {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/rocrate_merger.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "deterministic": "run_shaping"
+    "deterministic": "run_shaping",
+    "native_agentic": "exposed"
    },
    "runs_as_script_in": [],
    "status": "live",
@@ -27813,7 +29051,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/rocrate_parser.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -27831,7 +29071,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/rocrate_to_d4d.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -27848,7 +29090,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/schema_stats.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -27865,7 +29109,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": ".claude/agents/scripts/validator.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -27880,14 +29126,27 @@
   },
   ".claude/commands/README.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/README.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "exposed"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27896,14 +29155,27 @@
   },
   ".claude/commands/d4d-add-mapping.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-add-mapping.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27912,14 +29184,27 @@
   },
   ".claude/commands/d4d-agent.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-agent.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27928,14 +29213,27 @@
   },
   ".claude/commands/d4d-assistant.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-assistant.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27944,14 +29242,27 @@
   },
   ".claude/commands/d4d-full-core.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-full-core.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27960,14 +29271,27 @@
   },
   ".claude/commands/d4d-input-deep-research.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-input-deep-research.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27976,14 +29300,27 @@
   },
   ".claude/commands/d4d-uniform-rules.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-uniform-rules.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -27992,14 +29329,27 @@
   },
   ".claude/commands/d4d-webfetch.md": {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ]
+   },
    "path": ".claude/commands/d4d-webfetch.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
+    "interactive_session": "exposed",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
+    "interactive_session",
     "native_agentic"
    ],
    "status": "live",
@@ -28010,7 +29360,9 @@
    "approaches": [
     "interactive_session"
    ],
+   "loaded": {},
    "path": ".claude/hooks/protect_schema_hook.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "interactive_session": "run_shaping"
@@ -28026,7 +29378,9 @@
    "approaches": [
     "interactive_session"
    ],
+   "loaded": {},
    "path": ".claude/hooks/term_validator_hook.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "interactive_session": "run_shaping"
@@ -28042,7 +29396,9 @@
    "approaches": [
     "interactive_session"
    ],
+   "loaded": {},
    "path": ".claude/hooks/validate_d4d_yaml_hook.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "interactive_session": "run_shaping"
@@ -28058,7 +29414,9 @@
    "approaches": [
     "interactive_session"
    ],
+   "loaded": {},
    "path": ".claude/settings.json",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "interactive_session": "run_shaping"
@@ -28075,7 +29433,22 @@
     "native_agentic",
     "interactive_session"
    ],
+   "loaded": {
+    "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      3,
+      "frontmatter description"
+     ]
+    ]
+   },
    "path": ".claude/skills/review-open-issues/SKILL.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
@@ -28088,11 +29461,29 @@
    "text_spans": [],
    "why": "named by .claude/commands/README.md"
   },
+  ".github/ai-controllers.json": {
+   "approaches": [
+    "github_assistant"
+   ],
+   "loaded": {},
+   "path": ".github/ai-controllers.json",
+   "read_raw_in": [],
+   "role": "run_shaping",
+   "roles": {
+    "github_assistant": "run_shaping"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "named by .github/workflows/d4d-agent.yml"
+  },
   ".github/workflows/d4d-agent.yml": {
    "approaches": [
     "github_assistant"
    ],
+   "loaded": {},
    "path": ".github/workflows/d4d-agent.yml",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "github_assistant": "run_shaping"
@@ -28102,66 +29493,53 @@
    ],
    "status": "live",
    "text_spans": [],
-   "why": "assistant workflow / config"
+   "why": "the @d4dassistant workflow"
   },
   ".github/workflows/d4d_assistant_create.md": {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
+   "loaded": {},
    "path": ".github/workflows/d4d_assistant_create.md",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
-    "github_assistant": "model_facing",
     "native_agentic": "model_facing"
    },
    "runs_as_script_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "assistant instruction file a playbook names"
+   "why": "assistant instruction file .claude/commands/d4d-webfetch.md loads"
   },
   ".github/workflows/d4d_assistant_deterministic.config": {
    "approaches": [
     "run_controllers",
     "github_assistant"
    ],
+   "loaded": {},
    "path": ".github/workflows/d4d_assistant_deterministic.config",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "github_assistant": "run_shaping",
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "github_assistant"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "named by notes/matched_cborg_2026-09-13/prepare_registration.py"
-  },
-  ".github/workflows/d4d_assistant_edit.md": {
-   "approaches": [
-    "github_assistant"
-   ],
-   "path": ".github/workflows/d4d_assistant_edit.md",
-   "role": "model_facing",
-   "roles": {
-    "github_assistant": "model_facing"
-   },
-   "runs_as_script_in": [
-    "github_assistant"
-   ],
-   "status": "live",
-   "text_spans": [],
-   "why": "assistant instruction file (loaded by /d4d-assistant and /d4d-webfetch)"
   },
   "CLAUDE.md": {
    "approaches": [
     "interactive_session"
    ],
+   "loaded": {},
    "path": "CLAUDE.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "interactive_session": "model_facing"
@@ -28177,7 +29555,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "data/preprocessed/source_manifest.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -28193,7 +29573,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "notes/RUBRIC_AGENT_USAGE.md",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -28207,7 +29589,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/claudecode_direct/bind_direct_launch.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28223,7 +29607,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/claudecode_direct/prepare_direct.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28239,7 +29625,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/claudecode_direct/run_direct_canary.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28255,7 +29643,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/claudecode_direct/system.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "run_controllers": "model_facing"
@@ -28271,14 +29661,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/__init__.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28287,14 +29677,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28303,14 +29693,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28319,7 +29709,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28351,14 +29743,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -28388,7 +29780,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28404,7 +29798,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28420,14 +29816,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28436,7 +29832,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/contract.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28468,14 +29866,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -28490,14 +29888,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28506,7 +29904,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28533,7 +29933,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/native.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28549,7 +29951,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28576,7 +29980,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/prepare.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28603,14 +30009,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28619,7 +30025,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28635,14 +30043,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/registration.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: builds a generation request (RunSpec)"
@@ -28651,14 +30059,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28667,14 +30075,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/transport.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28683,14 +30091,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/audit_controls/worker_checkpoint.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28699,14 +30107,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/budget_amendment.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28715,14 +30123,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/budgeted_cborg.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28731,14 +30139,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/continuation_sequence.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -28747,7 +30155,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/adapter_closure.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28763,7 +30173,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/api.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28779,7 +30191,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/closure.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28795,7 +30209,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28811,7 +30227,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/native.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28827,7 +30245,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/offline.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28843,7 +30263,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28859,7 +30281,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/prepare_subtype.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28875,7 +30299,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/registration.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28891,7 +30317,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/run_evaluation.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28907,7 +30335,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/source_pair.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28923,7 +30353,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/evaluation_controls/validation.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -28939,7 +30371,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/finalization_controls/contract.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28966,7 +30400,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/finalization_controls/native.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -28982,7 +30418,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -29009,14 +30447,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/finalization_controls/registration.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29025,14 +30463,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_context.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -29062,14 +30500,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_context_control.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -29084,14 +30522,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -29106,14 +30544,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_control.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29122,14 +30560,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29138,14 +30576,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29154,14 +30592,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29170,14 +30608,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
     [
@@ -29192,7 +30630,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
@@ -29208,14 +30648,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29224,7 +30664,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_buffered_stall.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -29240,7 +30682,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/probe_native_stall.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -29256,14 +30700,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29272,7 +30716,9 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/system.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "run_controllers": "model_facing"
@@ -29288,7 +30734,9 @@
    "approaches": [
     "other_model_client"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/native_controls/transport_probe.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "other_model_client": "run_shaping"
@@ -29304,14 +30752,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: builds a generation request (RunSpec, build_phase)"
@@ -29320,14 +30768,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/run_api_canary.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29336,14 +30784,14 @@
    "approaches": [
     "run_controllers"
    ],
+   "loaded": {},
    "path": "notes/matched_cborg_2026-09-13/sequence_claim.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [
-    "run_controllers"
-   ],
+   "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -29352,7 +30800,11 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "notes/receipts_pattern_2026-08-27.md",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing"
@@ -29366,7 +30818,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "scripts/agentic_observed.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29380,28 +30834,29 @@
   },
   "scripts/check_budget.py": {
    "approaches": [
-    "github_assistant",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "scripts/check_budget.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "github_assistant": "run_shaping",
     "native_agentic": "run_shaping"
    },
    "runs_as_script_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "named by .github/workflows/d4d_assistant_edit.md, which runs it"
+   "why": "named by .github/workflows/d4d_assistant_create.md, which runs it"
   },
   "scripts/description_comprehensive_review.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "scripts/description_comprehensive_review.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -29417,7 +30872,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "scripts/description_quality_analyzer.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -29433,7 +30890,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "scripts/fix_failed_extractions.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -29449,7 +30908,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "scripts/validate_evaluation_schema.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -29461,11 +30922,29 @@
    "text_spans": [],
    "why": "named by .claude/agents/d4d-rubric10-semantic.md, which runs it"
   },
+  "src/data_sheets_schema/absence_lint.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/absence_lint.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
+  },
   "src/data_sheets_schema/agent_pin.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/agent_pin.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29473,14 +30952,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/agentic_observed.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/agentic_observed.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29497,7 +30978,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/agentic_runtime.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -29515,7 +30998,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/american_spelling.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29534,7 +31019,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/anonymous_removals.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29554,7 +31041,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/api_runner.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -29647,7 +31136,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/audit_batch_context.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing"
@@ -29655,14 +31146,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/audit_batch_format.py": {
    "approaches": [
     "run_controllers",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/audit_batch_format.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing",
@@ -29677,13 +31170,15 @@
      "render() (its value reaches child_system())"
     ]
    ],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/audit_batches.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/audit_batches.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29691,13 +31186,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/audit_grammar.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/audit_grammar.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing"
@@ -29705,13 +31202,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/awards.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/awards.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29719,13 +31218,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/b2ai_registry_vocabularies.yaml": {
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/b2ai_registry_vocabularies.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -29743,7 +31244,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/backfill_checks.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29760,7 +31263,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/canary.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29777,7 +31282,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/chunking.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -29794,7 +31301,9 @@
     "run_controllers",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/__init__.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping",
@@ -29813,7 +31322,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/_repo_utils.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -29822,14 +31333,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/cli/api.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/api.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29844,7 +31357,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/bundle.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29852,13 +31367,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/cli/derive.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/derive.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29866,13 +31383,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/cli/download.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/download.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29880,13 +31399,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/cli/healthsheet.py": {
    "approaches": [
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/healthsheet.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping"
@@ -29901,7 +31422,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/method.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29916,7 +31439,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/prompt.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29924,14 +31449,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/cli/provenance.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/provenance.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -29946,7 +31473,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/receipts.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29954,16 +31483,36 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/cli/review.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/cli/review.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
   },
   "src/data_sheets_schema/cli/rocrate.py": {
    "approaches": [
+    "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/rocrate.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "deterministic": "run_shaping"
+    "deterministic": "run_shaping",
+    "native_agentic": "exposed"
    },
    "runs_as_script_in": [],
    "status": "live",
@@ -29974,7 +31523,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/cli/runs.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -29982,14 +31533,32 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/cli/utils.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/cli/utils.py",
+   "read_raw_in": [],
+   "role": "run_shaping",
+   "roles": {
+    "native_agentic": "run_shaping"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/constants/__init__.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/constants/__init__.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30005,7 +31574,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/constants/evaluation.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30021,7 +31592,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/constants/methods.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30037,7 +31610,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/constants/projects.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30053,7 +31628,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/constants/schemas.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30070,7 +31647,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/corpus.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30088,7 +31667,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/d4d_pair_consistency.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30106,7 +31687,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/datamodel/data_sheets_schema.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -30122,7 +31705,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/derive_core.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30140,7 +31725,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/duplicate_keys.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30152,11 +31739,29 @@
    "text_spans": [],
    "why": "import closure of cli/api.py + api_runner"
   },
+  "src/data_sheets_schema/evaluation/__init__.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/evaluation/__init__.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by scripts/validate_evaluation_schema.py, which is run in native_agentic"
+  },
   "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30164,13 +31769,31 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/evaluation/validate.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/evaluation/validate.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by scripts/validate_evaluation_schema.py, which is run in native_agentic"
   },
   "src/data_sheets_schema/evaluation_context.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/evaluation_context.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30178,13 +31801,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/evaluation_model.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/evaluation_model.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30192,7 +31817,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/evidence_assertions.py": {
    "approaches": [
@@ -30200,7 +31825,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/evidence_assertions.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -30216,7 +31843,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/evidence_score.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30224,13 +31853,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/fetch.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/fetch.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30238,13 +31869,31 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/field_agent_contract.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/field_agent_contract.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by scripts/validate_evaluation_schema.py, which is run in native_agentic"
   },
   "src/data_sheets_schema/fitness_schema.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/fitness_schema.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30252,7 +31901,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/grounding.py": {
    "approaches": [
@@ -30260,7 +31909,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/grounding.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -30276,7 +31927,9 @@
    "approaches": [
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/healthsheet.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "deterministic": "model_facing"
@@ -30292,7 +31945,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/identifiers.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30308,7 +31963,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/judge_contract.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30316,13 +31973,31 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/lexicon.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/lexicon.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
   },
   "src/data_sheets_schema/merge.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/merge.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30330,14 +32005,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/name_grounding.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/name_grounding.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30355,7 +32032,9 @@
     "deterministic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/profiles.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30376,7 +32055,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/prompt_registry.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30394,7 +32075,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/provenance.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30412,7 +32095,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/reasoning.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30428,7 +32113,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/receipt_origin.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30436,13 +32123,15 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/receipt_sources.py": {
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/receipt_sources.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30450,7 +32139,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/receipts.py": {
    "approaches": [
@@ -30458,7 +32147,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/receipts.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30470,13 +32161,31 @@
    "text_spans": [],
    "why": "import closure of cli/api.py + api_runner"
   },
+  "src/data_sheets_schema/reconstructed_bytes.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/reconstructed_bytes.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
+  },
   "src/data_sheets_schema/record_schema.py": {
    "approaches": [
     "api",
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/record_schema.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30492,7 +32201,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/redundancy.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30500,7 +32211,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/registry.py": {
    "approaches": [
@@ -30509,7 +32220,9 @@
     "deterministic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/registry.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30528,7 +32241,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/release_inventory.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30536,7 +32251,55 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
+  },
+  "src/data_sheets_schema/removals.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/removals.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
+  },
+  "src/data_sheets_schema/rendering/__init__.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/rendering/__init__.py",
+   "read_raw_in": [],
+   "role": "run_shaping",
+   "roles": {
+    "native_agentic": "run_shaping"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by src/html/human_readable_renderer.py, which is run in native_agentic"
+  },
+  "src/data_sheets_schema/rendering/human_readable_renderer.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "read_raw_in": [],
+   "role": "run_shaping",
+   "roles": {
+    "native_agentic": "run_shaping"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by src/html/human_readable_renderer.py, which is run in native_agentic"
   },
   "src/data_sheets_schema/report_claims.py": {
    "approaches": [
@@ -30544,7 +32307,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/report_claims.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30562,7 +32327,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/resources.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30578,7 +32345,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/review_pack.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30586,14 +32355,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/rocrate_map.py": {
    "approaches": [
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/rocrate_map.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "deterministic": "run_shaping",
@@ -30602,14 +32373,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/rocrate_normalize.py": {
    "approaches": [
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/rocrate_normalize.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "deterministic": "model_facing",
@@ -30618,14 +32391,16 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/run_guard.py": {
    "approaches": [
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/run_guard.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30641,7 +32416,9 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/run_lock.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30656,7 +32433,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/run_telemetry.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -30664,7 +32443,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/runs.py": {
    "approaches": [
@@ -30672,7 +32451,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/runs.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -30689,7 +32470,11 @@
     "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Base_import.yaml",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing",
@@ -30706,7 +32491,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Collection.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30723,7 +32510,11 @@
     "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Composition.yaml",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing",
@@ -30738,14 +32529,16 @@
   },
   "src/data_sheets_schema/schema/D4D_Core.yaml": {
    "approaches": [
-    "github_assistant",
     "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Core.yaml",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
-    "github_assistant": "model_facing",
     "native_agentic": "model_facing",
     "shared_schema": "model_facing"
    },
@@ -30760,7 +32553,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Data_Governance.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30776,7 +32571,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Distribution.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30792,7 +32589,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Ethics.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30808,7 +32607,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -30823,7 +32624,11 @@
     "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_FileCollection.yaml",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing",
@@ -30840,7 +32645,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Human.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30856,7 +32663,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Maintenance.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30872,7 +32681,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Motivation.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30888,7 +32699,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Preprocessing.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30904,7 +32717,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Uses.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30920,7 +32735,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/D4D_Variables.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30937,7 +32754,11 @@
     "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/data_sheets_schema.yaml",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "native_agentic": "model_facing",
@@ -30953,14 +32774,20 @@
   "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+   "read_raw_in": [
+    "native_agentic",
+    "run_controllers",
+    "shared_schema"
+   ],
    "role": "model_facing",
    "roles": {
-    "github_assistant": "model_facing",
+    "github_assistant": "run_shaping",
     "native_agentic": "model_facing",
     "run_controllers": "model_facing",
     "shared_schema": "model_facing"
@@ -30976,7 +32803,9 @@
    "approaches": [
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/data_sheets_schema_core.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "shared_schema": "model_facing"
@@ -30992,13 +32821,17 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml",
+   "read_raw_in": [
+    "native_agentic",
+    "run_controllers",
+    "shared_schema"
+   ],
    "role": "model_facing",
    "roles": {
-    "github_assistant": "model_facing",
     "native_agentic": "model_facing",
     "run_controllers": "model_facing",
     "shared_schema": "model_facing"
@@ -31016,7 +32849,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_cache.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31034,7 +32869,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_digest.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31053,7 +32890,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_semantics.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31072,7 +32911,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_snapshot.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31090,7 +32931,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_sync.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31108,7 +32951,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/schema_view.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31126,7 +32971,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/scope.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31138,13 +32985,47 @@
    "text_spans": [],
    "why": "import closure of cli/api.py + api_runner"
   },
+  "src/data_sheets_schema/self_disclaimed.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/self_disclaimed.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "closure of the CLI group `d4d review` that .claude/agents/d4d-review-record.md run"
+  },
+  "src/data_sheets_schema/semantic_scope.py": {
+   "approaches": [
+    "native_agentic"
+   ],
+   "loaded": {},
+   "path": "src/data_sheets_schema/semantic_scope.py",
+   "read_raw_in": [],
+   "role": "exposed",
+   "roles": {
+    "native_agentic": "exposed"
+   },
+   "runs_as_script_in": [],
+   "status": "live",
+   "text_spans": [],
+   "why": "imported by scripts/validate_evaluation_schema.py, which is run in native_agentic"
+  },
   "src/data_sheets_schema/snapshot_store.py": {
    "approaches": [
     "api",
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/snapshot_store.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31163,7 +33044,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/source_metadata.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31182,7 +33065,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/source_priority.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31200,7 +33085,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/source_review.py",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31216,7 +33103,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/status_context.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -31224,7 +33113,7 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [],
-   "why": "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports"
+   "why": "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports"
   },
   "src/data_sheets_schema/stream_evidence.py": {
    "approaches": [
@@ -31232,7 +33121,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/stream_evidence.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31250,7 +33141,9 @@
     "native_agentic",
     "deterministic"
    ],
+   "loaded": {},
    "path": "src/data_sheets_schema/usage_ledger.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping",
@@ -31266,7 +33159,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/claude_max_d4d_processor.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31282,7 +33177,9 @@
    "approaches": [
     "shared_input"
    ],
+   "loaded": {},
    "path": "src/download/concatenate_documents.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "shared_input": "run_shaping"
@@ -31298,7 +33195,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/d4d_agent_wrapper.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31314,7 +33213,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/interactive_d4d_wrapper.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31330,7 +33231,9 @@
    "approaches": [
     "shared_input"
    ],
+   "loaded": {},
    "path": "src/download/organized_dataset_extractor.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "shared_input": "run_shaping"
@@ -31346,7 +33249,9 @@
    "approaches": [
     "shared_input"
    ],
+   "loaded": {},
    "path": "src/download/preprocess_sources.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "shared_input": "run_shaping"
@@ -31362,7 +33267,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/process_concatenated_d4d.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31378,7 +33285,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/process_concatenated_d4d_claude.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31394,7 +33303,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/process_individual_d4d_claude_direct.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31410,7 +33321,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/process_individual_d4d_gpt5.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31426,7 +33339,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompt_loader.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31442,7 +33357,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/canonical_hashes.yaml",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping"
@@ -31458,7 +33375,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claude/d4d_concatenated_system_prompt.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31474,7 +33393,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claude/d4d_concatenated_user_prompt.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31490,7 +33411,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claudecode/README.md",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -31506,7 +33429,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claudecode/d4d_deterministic_create.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31522,7 +33447,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claudecode/d4d_deterministic_edit.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31538,7 +33465,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/claudecode/d4d_generate_from_sources.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31554,7 +33483,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/AI_READI.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31570,7 +33501,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/CHORUS.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31586,7 +33519,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/CM4AI.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31602,7 +33537,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/README.md",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping"
@@ -31618,7 +33555,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/VOICE.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31634,7 +33573,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/components/VOICE_PEDIATRIC.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31650,7 +33591,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_concatenated_system_prompt.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31666,7 +33609,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_concatenated_user_prompt.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -31683,7 +33628,9 @@
     "api",
     "github_assistant"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31701,7 +33648,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v2.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31717,7 +33666,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v3.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31733,7 +33684,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v4.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31749,7 +33702,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v5.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31765,7 +33720,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v6.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31781,7 +33738,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v7.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31797,7 +33756,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v8.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31813,7 +33774,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_generic_arm_prompt_v9.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31830,7 +33793,11 @@
     "api",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/d4d_tuned_arm_prompt.md",
+   "read_raw_in": [
+    "native_agentic"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "run_shaping",
@@ -31847,7 +33814,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/determinism_settings.yaml",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "api": "run_shaping"
@@ -31863,7 +33832,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v1.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31879,7 +33850,9 @@
    "approaches": [
     "api"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v2.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "api": "model_facing"
@@ -31896,7 +33869,11 @@
     "api",
     "run_controllers"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v3.md",
+   "read_raw_in": [
+    "run_controllers"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31914,7 +33891,11 @@
     "api",
     "run_controllers"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v4.md",
+   "read_raw_in": [
+    "run_controllers"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31932,7 +33913,11 @@
     "api",
     "run_controllers"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v5.md",
+   "read_raw_in": [
+    "run_controllers"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31950,7 +33935,11 @@
     "api",
     "run_controllers"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v6.md",
+   "read_raw_in": [
+    "run_controllers"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31968,7 +33957,11 @@
     "api",
     "run_controllers"
    ],
+   "loaded": {},
    "path": "src/download/prompts/evidence_protocol_v7.md",
+   "read_raw_in": [
+    "run_controllers"
+   ],
    "role": "model_facing",
    "roles": {
     "api": "model_facing",
@@ -31985,7 +33978,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/gpt5/README.md",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -32001,7 +33996,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/gpt5/d4d_assistant_create.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32017,7 +34014,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/gpt5/d4d_assistant_edit.md",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32033,7 +34032,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/shared/d4d_system_prompt.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32049,7 +34050,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/shared/d4d_user_prompt_content_mode.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32065,7 +34068,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/shared/d4d_user_prompt_url_mode.txt",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32081,7 +34086,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/prompts/shared/prompt_versions.yaml",
+   "read_raw_in": [],
    "role": "model_facing",
    "roles": {
     "legacy_monolithic": "model_facing"
@@ -32097,7 +34104,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/download/standalone_d4d_wrapper.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -32113,7 +34122,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/evaluation/evaluate_d4d.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -32127,7 +34138,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/fairscape_integration/d4d_to_fairscape.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -32141,7 +34154,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/fairscape_integration/fairscape_to_d4d.py",
+   "read_raw_in": [],
    "role": "exposed",
    "roles": {
     "native_agentic": "exposed"
@@ -32153,51 +34168,49 @@
   },
   "src/github/generate_d4d_metadata.py": {
    "approaches": [
-    "github_assistant",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/github/generate_d4d_metadata.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "github_assistant": "run_shaping",
     "native_agentic": "run_shaping"
    },
    "runs_as_script_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "named by .github/workflows/d4d_assistant_edit.md, which runs it"
+   "why": "named by .github/workflows/d4d_assistant_create.md, which runs it"
   },
   "src/github/validate_d4d_completeness.py": {
    "approaches": [
-    "github_assistant",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/github/validate_d4d_completeness.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "github_assistant": "run_shaping",
     "native_agentic": "run_shaping"
    },
    "runs_as_script_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "named by .github/workflows/d4d_assistant_edit.md, which runs it"
+   "why": "named by .github/workflows/d4d_assistant_create.md, which runs it"
   },
   "src/github/validate_prerequisites.sh": {
    "approaches": [
-    "github_assistant",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/github/validate_prerequisites.sh",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "github_assistant": "run_shaping",
     "native_agentic": "run_shaping"
    },
    "runs_as_script_in": [],
@@ -32207,28 +34220,29 @@
   },
   "src/html/human_readable_renderer.py": {
    "approaches": [
-    "github_assistant",
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/html/human_readable_renderer.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "github_assistant": "run_shaping",
     "native_agentic": "run_shaping"
    },
    "runs_as_script_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "status": "live",
    "text_spans": [],
-   "why": "named by .github/workflows/d4d_assistant_edit.md, which runs it"
+   "why": "named by .github/workflows/d4d_assistant_create.md, which runs it"
   },
   "src/schema_extract/process_d4d_claude_API_temp0.py": {
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/schema_extract/process_d4d_claude_API_temp0.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -32244,7 +34258,9 @@
    "approaches": [
     "legacy_monolithic"
    ],
+   "loaded": {},
    "path": "src/schema_extract/schema_extract.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "legacy_monolithic": "run_shaping"
@@ -32260,7 +34276,9 @@
    "approaches": [
     "native_agentic"
    ],
+   "loaded": {},
    "path": "src/semantic_exchange/generate_comprehensive_sssom.py",
+   "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
     "native_agentic": "run_shaping"
@@ -33043,28 +35061,28 @@
  ],
  "totals": {
   "biomedical_clinical": {
-   "hits": 1618,
-   "model_facing": 1369,
+   "hits": 1623,
+   "model_facing": 1371,
    "with_reason": 1345
   },
   "bridge2ai_program": {
-   "hits": 2468,
-   "model_facing": 2369,
+   "hits": 2467,
+   "model_facing": 2374,
    "with_reason": 2364
   },
   "gc_project": {
-   "hits": 1078,
-   "model_facing": 386,
+   "hits": 1112,
+   "model_facing": 390,
    "with_reason": 394
   },
-  "violations": 154,
+  "violations": 159,
   "violations_by_approach": {
    "api": 0,
    "deterministic": 1,
    "github_assistant": 0,
-   "interactive_session": 70,
+   "interactive_session": 72,
    "legacy_monolithic": 68,
-   "native_agentic": 6,
+   "native_agentic": 9,
    "other_model_client": 0,
    "run_controllers": 9,
    "shared_input": 0,
@@ -33074,7 +35092,8 @@
  "tracked_without_reason": [
   {
    "approaches": [
-    "deterministic"
+    "deterministic",
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": true,
@@ -33095,7 +35114,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33116,7 +35136,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33137,7 +35158,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33158,7 +35180,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33179,7 +35202,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33200,7 +35224,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -33221,15 +35246,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 257,
@@ -33244,15 +35267,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 258,
@@ -33267,15 +35288,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 264,
@@ -33290,15 +35309,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 278,
@@ -33313,15 +35330,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 278,
@@ -33336,15 +35351,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 284,
@@ -33359,15 +35372,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 285,
@@ -33382,15 +35393,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 373,
@@ -33405,15 +35414,13 @@
   },
   {
    "approaches": [
-    "native_agentic",
-    "github_assistant"
+    "native_agentic"
    ],
    "category": "bridge2ai_program",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic"
    ],
    "line": 809,
@@ -33428,22 +35435,24 @@
   },
   {
    "approaches": [
+    "run_controllers",
     "github_assistant"
    ],
    "category": "bridge2ai_program",
-   "code": false,
-   "context": "example",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [
-    "github_assistant"
+    "github_assistant",
+    "run_controllers"
    ],
-   "line": 546,
+   "line": 45,
    "match": "bridge2ai",
-   "model_facing": true,
-   "path": ".github/workflows/d4d_assistant_edit.md",
+   "model_facing": false,
+   "path": ".github/workflows/d4d_assistant_deterministic.config",
    "pattern": "Bridge2AI",
-   "role": "model_facing",
-   "snippet": "\ud83d\udcc4 **D4D YAML Link**: https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/${BRANCH_NAME}/<path-to-file>.yaml",
+   "role": "run_shaping",
+   "snippet": "remote_url: https://raw.githubusercontent.com/bridge2ai/data-sheets-schema/main/src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
    "status": "live",
    "violation": false
   },
@@ -33982,6 +35991,111 @@
   },
   {
    "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 642,
+   "match": "deidentif",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "'is_deidentified': 'Deidentification',",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 642,
+   "match": "Deidentif",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "de-?identif",
+   "role": "run_shaping",
+   "snippet": "'is_deidentified': 'Deidentification',",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 724,
+   "match": "NIH",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "(?-i:\\bNIH\\b)",
+   "role": "run_shaping",
+   "snippet": "'nih': 'NIH',",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 725,
+   "match": "IRB",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "(?-i:\\bIRBs?\\b)",
+   "role": "run_shaping",
+   "snippet": "'irb': 'IRB',",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 726,
+   "match": "PHI",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "(?-i:\\bPHI\\b)",
+   "role": "run_shaping",
+   "snippet": "'phi': 'PHI',",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
     "native_agentic",
     "shared_schema"
    ],
@@ -34029,8 +36143,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34038,7 +36152,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34056,8 +36169,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34065,7 +36178,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34083,8 +36195,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34092,7 +36204,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34110,8 +36221,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34119,7 +36230,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34137,8 +36247,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34146,7 +36256,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34164,8 +36273,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34173,7 +36282,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34191,8 +36299,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34200,7 +36308,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34218,8 +36325,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34227,7 +36334,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34245,8 +36351,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34254,7 +36360,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34272,8 +36377,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34281,7 +36386,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34299,8 +36403,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34308,7 +36412,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34326,8 +36429,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34335,7 +36438,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34353,8 +36455,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34362,7 +36464,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34380,8 +36481,8 @@
   {
    "approaches": [
     "run_controllers",
-    "native_agentic",
     "github_assistant",
+    "native_agentic",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34389,7 +36490,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34408,7 +36508,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34416,7 +36515,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34435,7 +36533,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34443,7 +36540,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34462,7 +36558,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34470,7 +36565,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34489,7 +36583,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34497,7 +36590,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34516,7 +36608,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34524,7 +36615,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34543,7 +36633,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34551,7 +36640,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34570,7 +36658,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34578,7 +36665,6 @@
    "context": "example",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -34597,7 +36683,6 @@
    "approaches": [
     "run_controllers",
     "native_agentic",
-    "github_assistant",
     "shared_schema"
    ],
    "category": "bridge2ai_program",
@@ -34605,7 +36690,6 @@
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "github_assistant",
     "native_agentic",
     "run_controllers",
     "shared_schema"
@@ -35033,7 +37117,58 @@
  "violations": [
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "frontmatter",
+   "exception": null,
+   "gates_in": [
+    "interactive_session"
+   ],
+   "line": 6,
+   "loaded_in": {
+    "interactive_session": "frontmatter description"
+   },
+   "match": "CHORUS",
+   "model_facing": true,
+   "path": ".claude/agents/d4d-review-record.md",
+   "pattern": "CHo?RUS",
+   "role": "exposed",
+   "snippet": "- \"Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1\"",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "interactive_session"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "frontmatter",
+   "exception": null,
+   "gates_in": [
+    "interactive_session"
+   ],
+   "line": 7,
+   "loaded_in": {
+    "interactive_session": "frontmatter description"
+   },
+   "match": "AI_READI",
+   "model_facing": true,
+   "path": ".claude/agents/d4d-review-record.md",
+   "pattern": "AI[-_ ]?READI",
+   "role": "exposed",
+   "snippet": "- \"Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1\"",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -35054,7 +37189,8 @@
   },
   {
    "approaches": [
-    "native_agentic"
+    "native_agentic",
+    "interactive_session"
    ],
    "category": "gc_project",
    "code": false,
@@ -36876,6 +39012,73 @@
    "pattern": "fairhub",
    "role": "model_facing",
    "snippet": "\"Origin: FAIRhub API record, metadata.healthsheet\",",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 384,
+   "match": "diabet",
+   "model_facing": false,
+   "path": "src/data_sheets_schema/rendering/human_readable_renderer.py",
+   "pattern": "diabet",
+   "role": "run_shaping",
+   "snippet": "elif any(term in data_lower for term in ['diabetes', 'dm', 'lifestyle', 'oral', 'insulin']):",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 637,
+   "match": "AI-READI",
+   "model_facing": true,
+   "path": "src/data_sheets_schema/schema/D4D_Base_import.yaml",
+   "pattern": "AI[-_ ]?READI",
+   "read_raw": true,
+   "role": "model_facing",
+   "snippet": "# and the previous value was a real DOI of an AI-READI licence record",
+   "status": "live",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "native_agentic",
+    "shared_schema"
+   ],
+   "category": "gc_project",
+   "code": false,
+   "context": "comment",
+   "exception": null,
+   "gates_in": [
+    "native_agentic"
+   ],
+   "line": 87,
+   "match": "AI_READI",
+   "model_facing": true,
+   "path": "src/data_sheets_schema/schema/D4D_Core.yaml",
+   "pattern": "AI[-_ ]?READI",
+   "read_raw": true,
+   "role": "model_facing",
+   "snippet": "# could not reach the exchange layer (#403). AI_READI's phase 4 handled",
    "status": "live",
    "violation": true
   },
