@@ -35,6 +35,20 @@
 # This file changes no first-reader verdict, no committed count and no lint.
 # Written by a one-off script; never edited except to add a correction with
 # its reason.
+#
+# Correction (#3964, review round 1 of PR #3946): the header above calls the
+# rubric one with "no judged example", and the rubric says "No judged example
+# is included". Both are false. The rubric's `absence` reading illustrates
+# itself with ("no tier-1 source states them") -> not_in_class. That is the
+# sentence of item recall_dropped-019 (first reading
+# notes/absence_v3_recall_judgements_241e910e.yaml #19), paired with its
+# first-reader verdict: the example came from the first reader's own header,
+# which was written from that item. So the second reader was not blind on
+# recall_dropped-019, and was blind on the other 187. Its row below is kept as
+# the reader wrote it. The agreement note gives every figure over all 188
+# items and over the 187 blind ones, and lists every item whose leaf contains
+# a phrase the rubric quotes (recall_dropped-045's leaf carries "not stated in
+# the bundle" outside its judged sentence). The rubric stays byte for byte.
 packet: absence_v3_v4_judgements_3876
 source_commit: c962a6cc88f8844ef59890fb5fa1bd30931edd1e
 packet_sha256: 6711e73adb350c371b5e4a1884aa183901dac77b6e467abffb9bd7678a67ac97

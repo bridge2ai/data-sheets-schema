@@ -1,15 +1,24 @@
 #!/usr/bin/env python
-"""Agreement between the first reading and a blind second reading of the
-record_self_narration judgements behind the absence v3/v4 notes (#3876).
+"""Agreement between the first reading and a second reading of the
+record_self_narration judgements behind the absence v3/v4 notes (#3876),
+blind on 187 of its 188 items.
 
 The first reading is the three committed judgement files `FIRST` names; the
 second is `SECOND`, a separately run agent's reading of the same 188 phrases
-from a packet and rubric that carried none of the first reading's verdicts.
+from a packet and a rubric. The packet carried none of the first reading's
+verdicts. The rubric carried one: its `absence` reading illustrates itself
+with "no tier-1 source states them" -> not_in_class, which is the sentence of
+item recall_dropped-019 with that item's first-reader verdict (the example
+came from the first reader's own header, written from that item). So that
+item was not blind (`NOT_BLIND`, #3964), and every figure is given both over
+all 188 items and over the 187 blind ones.
+
 This script writes `notes/absence_second_reading_agreement_2026-09-30.md`:
 raw agreement, Cohen's kappa with a 95% interval, the confusion matrix and
-agreement by class, on the verdict for all 188 and on the reading where both
-readers gave one, and every disagreement by id with both readings and both
-reasons.
+agreement by class, on the verdict and on the reading where both readers
+gave one, each over all items and over the blind items; every disagreement
+by id with both readings and both reasons; and, from the pinned records,
+every item whose sentence or leaf contains a phrase the rubric quotes.
 
 It also says what the recall note (`notes/absence_v3_recall.md`) would read
 if the second reading's verdicts stood in for the first's: a sensitivity
@@ -31,6 +40,7 @@ import argparse
 import hashlib
 import importlib.util
 import math
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -51,6 +61,12 @@ VERDICTS = ("in_class", "borderline", "not_in_class")
 READINGS = {"construction": "in_class", "referent": "in_class", "source": "borderline",
             "absence": "not_in_class"}
 SOURCE_RANKING = "rsn.source-ranking"
+#: Items the second reader was not blind to, and why: the rubric quotes the
+#: item's own sentence with its first-reader verdict (#3964).
+NOT_BLIND = {
+    "recall_dropped-019": 'the rubric\'s `absence` example, "no tier-1 source states them" -> '
+                          "not_in_class, is this item's sentence with its first-reader verdict",
+}
 #: The normal quantile of the 95% intervals.
 _Z95 = 1.959963984540054
 
@@ -107,6 +123,34 @@ def pairs() -> list[tuple[dict, dict]]:
     return out
 
 
+def rubric_quotes(text: str) -> list[str]:
+    """The double-quoted phrases of the rubric (its examples), whitespace
+    collapsed, in order of appearance."""
+    return [" ".join(q.split()) for q in re.findall(r'"([^"]+)"', text)]
+
+
+def rubric_text_in_items(corpus: Path) -> dict[str, list[tuple[str, str]]]:
+    """For every second-reading item whose leaf contains a phrase the rubric
+    quotes (case and whitespace aside): (phrase, "sentence") when the phrase is
+    in the judged phrase's sentence, as the recall script bounds it, else
+    (phrase, "leaf"). Reads the pinned records under `corpus`."""
+    second = _load(SECOND)
+    quotes = rubric_quotes((ROOT / second["rubric"]).read_text(encoding="utf-8"))
+    m = _recall_script()
+    norm = lambda t: " ".join(t.split()).lower()  # noqa: E731
+    records: dict[str, Any] = {}
+    out: dict[str, list[tuple[str, str]]] = {}
+    for r in second["judgements"][RSN]:
+        if r["record"] not in records:
+            records[r["record"]] = yaml.safe_load((corpus / r["record"]).read_text(encoding="utf-8"))
+        leaf = m.baseline._at(records[r["record"]], r["pointer"])
+        lo, hi = m._sentence(leaf, r["start"], r["end"])
+        for q in quotes:
+            if norm(q) in norm(leaf):
+                out.setdefault(r["id"], []).append((q, "sentence" if norm(q) in norm(leaf[lo:hi]) else "leaf"))
+    return out
+
+
 def kappa(a: list[str], b: list[str], classes: tuple[str, ...]) -> dict[str, Any]:
     """Cohen's kappa for two raters over the same items, with the large-sample
     standard error of Fleiss, Cohen and Everitt (1969) and a 95% normal
@@ -137,6 +181,9 @@ def wilson(k: int, n: int, z: float = _Z95) -> tuple[float, float]:
 def agreement() -> dict[str, Any]:
     """Every figure the note's agreement sections state, from the judgement files alone."""
     ps = pairs()
+    blind = [(f, s) for f, s in ps if s["id"] not in NOT_BLIND]
+    if len(blind) != len(ps) - len(NOT_BLIND):
+        raise Refused(f"{SECOND} does not carry every item NOT_BLIND names")
     first_v = [f["verdict"] for f, _ in ps]
     second_v = [s["verdict"] for _, s in ps]
     both_read = [(f, s) for f, s in ps if "reading" in f and "reading" in s]
@@ -155,6 +202,11 @@ def agreement() -> dict[str, Any]:
         "reading": kappa([f["reading"] for f, _ in both_read], [s["reading"] for _, s in both_read],
                          reading_classes),
         "reading_confusion": Counter((f["reading"], s["reading"]) for f, s in both_read),
+        "excluded": [s["id"] for _, s in ps if s["id"] in NOT_BLIND],
+        "blind_verdict": kappa([f["verdict"] for f, _ in blind], [s["verdict"] for _, s in blind], VERDICTS),
+        "blind_reading": kappa([f["reading"] for f, s in blind if "reading" in f and "reading" in s],
+                               [s["reading"] for f, s in blind if "reading" in f and "reading" in s],
+                               reading_classes),
         "reading_only_second": [s["id"] for f, s in ps if "reading" in s and "reading" not in f],
         "disagree": [(f, s) for f, s in ps
                      if f["verdict"] != s["verdict"] or ("reading" in f and f.get("reading") != s.get("reading"))],
@@ -202,6 +254,11 @@ def agreement_lines(a: dict[str, Any]) -> list[str]:
         f"  `{second['second_reading_sha256']}`.",
         "- Both readers are instances of the same kind of model. Agreement says how far the verdicts",
         "  depend on one reading, not on one kind of reader.",
+        f"- **Not blind on {len(a['excluded'])} item{'s' * (len(a['excluded']) != 1)}** (#3964). The packet"
+        " carries no first-reader verdict, but the rubric does:",
+        *[f"  `{i}`: {NOT_BLIND[i]}." for i in a["excluded"]],
+        f"  Every figure below is given over all {a['n']} items and over the"
+        f" {a['n'] - len(a['excluded'])} blind ones, without {', '.join(a['excluded'])}.",
         "",
         "## Verdict, all items",
         "",
@@ -221,7 +278,14 @@ def agreement_lines(a: dict[str, Any]) -> list[str]:
     lines += ["", "| first-reading file | agree | items |", "|---|---:|---:|"]
     for name, (k, n) in a["by_file"].items():
         lines.append(f"| `{name}` | {k} | {n} |")
+    bv, br = a["blind_verdict"], a["blind_reading"]
     lines += [
+        "",
+        f"## Verdict, the {bv['n']} blind items",
+        "",
+        f"Without {', '.join(a['excluded'])}:",
+        "",
+        _kappa_line(bv),
         "",
         "## Reading, where both readers gave one",
         "",
@@ -230,9 +294,11 @@ def agreement_lines(a: dict[str, Any]) -> list[str]:
         f"gives none, so its {len(a['reading_only_second'])} {SOURCE_RANKING} rows are compared on the",
         f"verdict only ({', '.join(a['reading_only_second'])}).",
         "",
-        _kappa_line(r),
+        f"All items: {_kappa_line(r)}",
         "",
-        *_confusion(a["reading_confusion"], tuple(READINGS), "reading:"),
+        f"The blind items, without {', '.join(a['excluded'])}: {_kappa_line(br)}",
+        "",
+        *_confusion(a["reading_confusion"], tuple(READINGS), "reading, all items:"),
         "",
         "## Disagreements",
         "",
@@ -260,6 +326,11 @@ def agreement_lines(a: dict[str, Any]) -> list[str]:
         "they say which reading was applied, not what in the sentence decided it.",
     ]
     return lines
+
+
+def m_corpus() -> Path:
+    """The corpus the pinned records are read from (the recall script's)."""
+    return _recall_script().baseline.CORPUS
 
 
 def _recall_script():
@@ -367,14 +438,43 @@ def sensitivity_lines(first: dict, alt: dict, v4_tally: dict) -> list[str]:
     return lines
 
 
+def rubric_text_lines(hits: dict[str, list[tuple[str, str]]]) -> list[str]:
+    second = _load(SECOND)
+    quotes = rubric_quotes((ROOT / second["rubric"]).read_text(encoding="utf-8"))
+    lines = [
+        "## Judged text in the rubric",
+        "",
+        f"Every double-quoted phrase of the rubric ({len(quotes)}: "
+        + "; ".join(f'"{q}"' for q in quotes) + "),",
+        "searched for, case and whitespace aside, in each item's leaf in the pinned record. *Sentence*",
+        "means the phrase is in the judged phrase's own sentence, which the reader classifies; *leaf*",
+        "means it is elsewhere in the field, in a sentence the item does not judge.",
+        "",
+        "| item | rubric phrase | where | blind |",
+        "|---|---|---|---|",
+    ]
+    for i, found in hits.items():
+        for q, where in found:
+            lines.append(f"| `{i}` | \"{q}\" | {where} | {'no' if i in NOT_BLIND else 'yes'} |")
+    lines += [
+        "",
+        "A phrase in the judged sentence hands the reader that sentence's class; that is the item",
+        "`NOT_BLIND` excludes. A phrase elsewhere in the leaf classifies a sentence the item does",
+        "not judge. The test suite checks the excluded items are exactly the *sentence* rows.",
+    ]
+    return lines
+
+
 def render_markdown(found: dict[str, Any]) -> str:
     lines = [
-        "# Absence judgements: agreement with a blind second reading (2026-09-30)",
+        "# Absence judgements: agreement with a second reading, blind on all but one item (2026-09-30)",
         "",
         "Generated by `scripts/absence_second_reading_agreement.py` (#3876). Do not edit by hand: run",
         "the script to regenerate it, or `--check` to ask whether it still matches its inputs.",
         "",
         *agreement_lines(agreement()),
+        "",
+        *rubric_text_lines(rubric_text_in_items(m_corpus())),
         "",
         *sensitivity_lines(*sensitivity(found)),
     ]
