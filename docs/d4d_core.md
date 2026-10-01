@@ -39,9 +39,9 @@ Each Bridge2AI generating center has a curated d4d-core-aligned datasheet:
 | `CoreDataset` | `schema:Dataset` | The primary dataset metadata record (~79 induced slots) |
 | `CoreDatasetCollection` | `schema:Dataset` (RO-Crate root) + `dcat:Catalog` | `tree_root: true`; renders as `@id: "./"` with `@type: ["Dataset", "https://w3id.org/EVI#ROCrate"]` |
 | `CoreDistribution` | `dcat:Distribution` | Concrete download/distribution surface |
-| `Person`, `Creator` | `schema:Person` | People referenced in `creator`, `author`, `contributor`, `maintainer` |
+| `Person` | `schema:Person` | People referenced in `creator`, `author`, `contributor`, `maintainer`. `Creator`, `Maintainer` and `DataCollector` wrap a person or team with a role and are not themselves `schema:Person` (#3942) |
 | `Organization` | `schema:Organization` | Institutional affiliations and publishers |
-| `Grant`, `FundingMechanism` | `schema:Grant` | Funding records linked via `schema:funder` |
+| `Grant` | `schema:Grant` | Funding records; `FundingMechanism` wraps a grantor and its grants and is linked via `schema:funder` (#3942) |
 
 The full crosswalk lives in the [Semantic Exchange Layer](semantic_exchange.md).
 
