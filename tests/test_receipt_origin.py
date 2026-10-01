@@ -4116,27 +4116,23 @@ class ShellLexer(Base):
             with self.subTest(command=command):
                 self.assertTrue(ro._shell(command, "/w", [])["detaches"])
 
-    def test_a_body_ends_at_the_line_bash_ends_it_at(self):
-        # With a quoted delimiter a trailing backslash is text, so the body
-        # ends at the first `EOF` and `cd /tmp` runs (bash prints `foo\` and
-        # then the listing of /tmp); with an unquoted one bash joins the
-        # lines, `fooEOF` is no delimiter, and `cd /tmp` is body text.
-        quoted = "cat <<'EOF'\nfoo\\\nEOF\ncd /tmp\nls"
-        unquoted = "cat <<EOF\nfoo\\\nEOF\ncd /tmp\nEOF"
-        self.assertIs(ro._shell(quoted, "/w", [])["moves"], True)
-        self.assertEqual([t for t in ro._tokens(quoted, heredoc_data=True) if getattr(t, "heredoc", False)],
-                         ["foo\\"])
-        self.assertIs(ro._shell(unquoted, "/w", [])["moves"], False)
-        self.assertEqual([t for t in ro._tokens(unquoted, heredoc_data=True) if getattr(t, "heredoc", False)],
-                         ["fooEOF\ncd /tmp"])
-        # Only an odd run of trailing backslashes joins (#3952): `foo\\\\` is
-        # an escaped backslash, the line is not joined, the body ends at the
-        # first `EOF` and bash runs `cd /tmp` and then a program `EOF` (not
-        # read, so the lines are read as commands); joining it would hide
-        # the `cd` in a body ending at the last `EOF`.
-        even = "cat <<EOF\nfoo\\\\\nEOF\ncd /tmp\nEOF"
-        self.assertIs(ro._shell(even, "/w", [])["moves"], True)
-        self.assertEqual(ro._tokens(even, heredoc_data=True), ro._tokens(even))
+    def test_a_body_with_a_backslash_newline_is_read_as_commands(self):
+        # A backslash-newline anywhere in the command keeps every body's
+        # lines read as commands, as on origin/main (#4005): bash removes a
+        # line continuation outright, and reading its body as data needs
+        # bash's joining exactly right. With a quoted delimiter a trailing
+        # backslash is text and bash runs `cd /tmp`; with an unquoted one
+        # bash joins the lines and `cd /tmp` is body text -- both now read
+        # as moving, the second a false `unknown` at worst. An even run
+        # (`foo\\\\`, #3952) reads the same way.
+        for command in ("cat <<'EOF'\nfoo\\\nEOF\ncd /tmp\nls",
+                        "cat <<EOF\nfoo\\\nEOF\ncd /tmp\nEOF",
+                        "cat <<EOF\nfoo\\\\\nEOF\ncd /tmp\nEOF"):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+                self.assertFalse(any(getattr(t, "heredoc", False)
+                                     for t in ro._tokens(command, heredoc_data=True)))
+                self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
 
     #: Here-documents whose `<<` or delimiter this does not read (#3947,
     #: #3948): bash 5.3 runs `cd data` in each, then fails on the last line.
@@ -4388,6 +4384,86 @@ class ShellLexer(Base):
                 derive = r.derive()
                 r.write(r.receipt, Boundaries.C004)
                 self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+
+    #: A `$'` after the special parameter `$$` (#4005): bash reads `$$`
+    #: and then a plain single-quoted string, so a `\'` there does not
+    #: escape the quote and the middle runs at top level (bash 5.3 and 3.2
+    #: print the pid and a backslash, run it, then print a backslash). The
+    #: second spells `$$` across a line continuation, which bash removes.
+    DOLLAR_DOLLAR = ("echo $$'\\'; {body} echo '\\'", "echo $\\\n$'\\'; {body} echo '\\'")
+    #: What runs in the middle, each with the join bash reads after it.
+    DOLLAR_DOLLAR_BODIES = ("cd data;", "./derive.sh &", "$X ./derive.sh;")
+    #: A backslash-newline joining a program word before a here-document
+    #: (#4005): bash runs `catx` (`bash --pretty-print` prints `catx <<EOF`),
+    #: not the reader `cat`, and `catx` may run its standard input.
+    CONTINUED_READER = ("cat\\\nx <<'EOF'\n{body}\nEOF",)
+
+    def test_a_dollar_dollar_quote_is_read_as_on_origin_main(self):
+        for template in self.DOLLAR_DOLLAR:
+            for body in self.DOLLAR_DOLLAR_BODIES:
+                command = template.format(body=body)
+                with self.subTest(command=command):
+                    tokens = ro._tokens(command, heredoc_data=True)
+                    self.assertEqual(tokens, ro._origin_tokens(command))
+                    self.assertIn(";", tokens[:4])
+                    shell = ro._shell(command, "/w", [])
+                    # `$X` may name `cd`; `./derive.sh &` runs in a child.
+                    self.assertIs(shell["moves"], body != "./derive.sh &")
+                    if body != "cd data;":
+                        self.assertEqual((shell["runs_unread"], shell["read_only"]), (True, False))
+                    self.assertIs(shell["detaches"], body != "cd data;")
+        # An escaped `\$` opens no ANSI-C string in any reading, so the `;`s
+        # are joins here too; and without `$$` a `$'...'` is read as bash
+        # reads it, past its `\'`.
+        command = "echo \\$'\\'; cd data; echo '\\'"
+        self.assertEqual(ro._tokens(command, heredoc_data=True)[:4], ["echo", "$\\", ";", "cd"])
+        self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+        self.assertEqual(ro._tokens("echo $'\\'; cd data; echo '"), ["echo", "$'; cd data; echo "])
+        self.assertFalse(ro._origin_reading("echo $'\\'; cd data; echo '"))
+        self.assertFalse(ro._origin_reading("echo $$; cat <<'EOF'\nx\nEOF"))
+
+    def test_a_backslash_newline_keeps_here_document_lines_read_as_commands(self):
+        for template in self.CONTINUED_READER:
+            for body in ("cd data", "$X ./derive.sh"):
+                command = template.format(body=body)
+                with self.subTest(command=command):
+                    tokens = ro._tokens(command, heredoc_data=True)
+                    self.assertFalse(any(getattr(t, "heredoc", False) for t in tokens))
+                    self.assertEqual(tokens, ro._tokens(command))
+                    shell = ro._shell(command, None, [])
+                    self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
+                    self.assertIs(shell["detaches"], body.startswith("$X"))
+        # The control: the same here-document with no continuation is data.
+        shell = ro._shell("cat <<'EOF'\n$X ./derive.sh\nEOF", None, [])
+        self.assertEqual((shell["runs_unread"], shell["detaches"], shell["moves"]), (False, False, False))
+
+    def test_a_dollar_dollar_quote_or_a_continued_reader_does_not_place_a_later_derive(self):
+        # End to end (#4005: the round-4 head said `checked`): a `cd data`
+        # bash runs leaves the later relative `--full` unplaceable, and a
+        # job it may leave running keeps a call issued before the draft in
+        # flight with it.
+        for template in self.DOLLAR_DOLLAR + self.CONTINUED_READER:
+            dollars = template in self.DOLLAR_DOLLAR
+            command = template.format(body="cd data;" if dollars else "cd data")
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+            for body in self.DOLLAR_DOLLAR_BODIES[1:] if dollars else ("$X ./derive.sh",):
+                command = template.format(body=body)
+                with self.subTest(command=command):
+                    r = self.new_run()
+                    r.write(r.receipt, PRE)
+                    identity = r.bash(command)
+                    r.write(r.full, "id: x\n")
+                    r.write(r.receipt, Boundaries.C003)
+                    r.derive(full=r.full)
+                    self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
         # A list-valued name raised TypeError in `_history` (#3918). Each

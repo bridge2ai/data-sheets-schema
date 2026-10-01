@@ -299,6 +299,7 @@ import hashlib
 import json
 import os
 import re
+import shlex
 import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -1123,7 +1124,9 @@ def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
     removed first for `<<-`), and the index after that line; None where no
     line closes it. Where the delimiter was not quoted (`expands`) a line
     ending in an unescaped backslash continues on the next, as bash joins
-    them, before it is compared."""
+    them, before it is compared. `_lex` never reaches this with a
+    backslash-newline in the command (#4005), so the join serves a direct
+    caller only."""
     lines: list[str] = []
     n = len(text)
     while i < n:
@@ -1150,19 +1153,23 @@ def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
 def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
     """The words and operators of `text` as bash's lexer reads them, and
     the text with comments and here-document bodies removed; None where a
-    quote or an escape does not close, as for shlex (#3830). A
-    backslash-newline outside a here-document body is a blank, as the
-    shlex tokenizer read it once `_lex` had replaced each with a space.
-    Where `_lex` has not replaced them (here-documents read as data), an
-    escaped backslash before a newline is a backslash and the newline a
-    `;`, as bash reads it; on `_lex`'s fallback the replacement has
-    already joined such a line to the next, as origin/main did (#3985).
+    quote or an escape does not close, as for shlex (#3830). `_lex`
+    replaces each backslash-newline with a space before this reads a
+    command, as origin/main did (which joins an even backslash run's line
+    to the next, #3985), except on the here-document path, which it takes
+    only for a command carrying no backslash-newline at all (#4005): bash
+    removes a line continuation outright, joining the words on either side
+    (`cat\\` then a newline then `x` is the program `catx`), so the blank
+    this reads one as (a split word) is never the ground for a data
+    reading. Called directly with one, it is still read as a blank.
 
     - A word's quotes and escapes are removed and it is marked `quoted`
       where it had any; `$'...'` is read as bash reads it, so a `\\'` in it
       does not close it (shlex kept its `$` and paired its quotes wrongly),
       and the `$` is kept, so such a word still reads as one built at run
-      time where it stands as a program.
+      time where it stands as a program. `_lex` never passes a command
+      where a `$'` may follow the special parameter `$$` (`$$'\\'` is `$$`
+      and a plain single-quoted string to bash): `_origin_reading`, #4005.
     - A double-quoted word ends at the first unescaped `"`, as shlex ended
       it on origin/main, even inside a `$(...)` it carries: reading such a
       substitution to the `)` bash closes it at needs bash's grammar (a
@@ -1209,7 +1216,7 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
         if ch == "\\":
             if i + 1 >= n:
                 return None
-            if text[i + 1] == "\n":                 # a line continuation: a blank, as before
+            if text[i + 1] == "\n":                 # a blank; `_lex` never passes one (#4005)
                 end_word()
                 scan.append(" ")
                 i += 2
@@ -1388,6 +1395,117 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
 _HEREDOC_UNREAD = re.compile(r"\$\{|\$\[|\(\(|`")
 
 
+#: The origin/main tokenizer (receipt_origin v5), kept whole for the
+#: commands the v6 lexer refuses to read in its own way (`_origin_reading`):
+#: a guarded command reads exactly as it did on origin/main, so a guard can
+#: only move a command back to that reading, never past it (#4005).
+def _origin_newlines_as_joins(command: str) -> str:
+    """origin/main's `_newlines_as_joins`, unchanged: the (comment-free)
+    command with each unquoted newline written as ` ; `."""
+    out: list[str] = []
+    i, n = 0, len(command)
+    quote: str | None = None
+    while i < n:
+        ch = command[i]
+        if quote is not None:
+            if ch == "\\" and quote != "'" and i + 1 < n:
+                out.append(command[i:i + 2])
+                i += 2
+                continue
+            out.append(ch)
+            if ch == quote[-1]:
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(command[i:i + 2])
+            i += 2
+            continue
+        if ch == "$" and command[i + 1:i + 2] == "'":
+            quote = "$'"
+            out.append("$'")
+            i += 2
+            continue
+        if ch in "'\"":
+            quote = ch
+        out.append(" ; " if ch == "\n" else ch)
+        i += 1
+    return "".join(out)
+
+
+def _origin_spaced_operators(text: str) -> str:
+    """origin/main's `_spaced_operators`, unchanged: each unquoted run of
+    operator characters written as bash's operators, a space between each."""
+    out: list[str] = []
+    i, n = 0, len(text)
+    quote: str | None = None
+    while i < n:
+        ch = text[i]
+        if quote is not None:
+            if ch == "\\" and quote != "'" and i + 1 < n:
+                out.append(text[i:i + 2])
+                i += 2
+                continue
+            out.append(ch)
+            if ch == quote[-1]:
+                quote = None
+            i += 1
+            continue
+        if ch == "\\" and i + 1 < n:
+            out.append(text[i:i + 2])
+            i += 2
+            continue
+        if ch == "$" and text[i + 1:i + 2] == "'":
+            quote = "$'"
+            out.append("$'")
+            i += 2
+            continue
+        if ch in "'\"":
+            quote = ch
+        if ch in _PUNCT:
+            j = i
+            while j < n and text[j] in _PUNCT:
+                j += 1
+            out.append(" ".join(_split_operators(text[i:j])))
+            i = j
+            continue
+        out.append(ch)
+        i += 1
+    return "".join(out)
+
+
+def _origin_tokens(command: str) -> list[str] | None:
+    """origin/main's `_tokens`, unchanged: shlex over the comment-free
+    command with newlines as joins and operator runs spaced, or None when
+    it does not tokenise. Its words carry no `quoted` flag, so a quoted
+    operator joins there, and a here-document's lines are read as commands,
+    as origin/main read both."""
+    text = _origin_spaced_operators(_origin_newlines_as_joins(_strip_comments(command.replace("\\\n", " "))))
+    lexer = shlex.shlex(text, posix=True, punctuation_chars=True)
+    lexer.whitespace_split = True
+    lexer.commenters = ""
+    try:
+        return list(lexer)
+    except ValueError:
+        return None
+
+
+def _origin_reading(command: str) -> bool:
+    """Whether a command is read with origin/main's tokenizer
+    (`_origin_tokens`) rather than v6's (#4005): where it carries `$$` --
+    after line continuations are removed, as bash removes them, so `$\\`
+    then a newline then `$` counts -- and a `$'`. bash reads `$$` as the
+    special parameter, so a `'` after it opens a plain single-quoted
+    string, not an ANSI-C one, and a `\\'` in it does not escape the quote
+    (`echo $$'\\'; cd data; echo '\\'` runs `cd data`). v6 reads `$'...'`
+    as ANSI-C only where no `$$` can stand before it. Blunt by design: a
+    `$$` anywhere, quoted or not, takes the command back to origin/main's
+    reading, which carries no quoted-operator, ANSI-C or here-document
+    reading of v6's. An escaped `\\$'` never opens an ANSI-C string in any
+    reading: the escape takes the `$` first."""
+    return "$'" in command and "$$" in command.replace("\\\n", "")
+
+
 def _lex(command: str, *, heredoc_data: bool = False) -> tuple[list[_Word], str] | None:
     """The command's tokens (`_scan`) and its comment-free text for the
     substitution scans, or None when it does not tokenise. With
@@ -1397,12 +1515,28 @@ def _lex(command: str, *, heredoc_data: bool = False) -> tuple[list[_Word], str]
     as commands (#3897); otherwise, and anywhere a nested
     command is lexed (a `-c` string, `eval`'s command, a substitution's
     command), the body's lines are read as commands, as before: a false
-    `unknown` at worst."""
+    `unknown` at worst.
+
+    Two guards take a command back to origin/main's reading (#4005), and
+    neither can move one past it. A command `_origin_reading` names (a `$$`
+    and a `$'`) is lexed by origin/main's tokenizer and scanned as
+    origin/main scanned it. A command with a backslash-newline anywhere
+    never has its here-document bodies read as data: bash removes a line
+    continuation outright, so `cat\\` then a newline then `x <<'EOF'` runs
+    `catx`, not the reader `cat` a word split there would name; its lines
+    are read as commands, as on origin/main. Under either guard the
+    substitution scans (`_substitutes`, `_process_substitutes`) read
+    `_strip_comments(command)`, exactly the text origin/main gave them,
+    never the here-document path's scan."""
+    if _origin_reading(command):
+        tokens = _origin_tokens(command)
+        return None if tokens is None else (tokens, _strip_comments(command))
     text = command.replace("\\\n", " ")
-    if heredoc_data and "<<" in text and not _HEREDOC_UNREAD.search(command):
-        # Read from the command as written: a body keeps its own line
-        # continuations, which bash joins only where the delimiter is not
-        # quoted; elsewhere one is a blank, as `text` has it.
+    if heredoc_data and "<<" in text and "\\\n" not in command and not _HEREDOC_UNREAD.search(command):
+        # Read from the command as written, which carries no line
+        # continuation here (#4005): bash removes one outright, joining the
+        # words on either side, and a reading that split them could name a
+        # reader bash never runs.
         try:
             lexed = _scan(command, heredocs=True)
         except _Fallback:
