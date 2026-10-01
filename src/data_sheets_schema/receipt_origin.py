@@ -239,7 +239,10 @@ ended it on origin/main, where bash reads on (`"$(echo ")"; ls)"`), and
 a substitution's command is read to its `)` by counting brackets (#3925;
 it waits for a shell grammar, #3983). A brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
 is still read as built at run time (#3924). A here-document's body is
-data, never a command of this shell (#3897): where every part of the command is a reader other than `sed`
+data, never a command of this shell (#3897): where every part of the command is plainly run (#3996: its
+program is its first word, with no assignment, `env`, `poetry run`, other
+wrapper or redirection before it and no assignment-only part, since
+`PATH=./bin cat` may run any program) and is a reader other than `sed`
 or `rg` (whose `e` command and `--pre` run commands), a builtin `cd`,
 `pushd` or `popd`, or a plain-named `python*` interpreter reading its
 program from the here-document it carries (`python3 - <<'EOF'`), nothing
@@ -479,7 +482,10 @@ NON_CHECKS = (
     "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
     "command is read only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending "
     "at that quote (#3925; both wait for a shell grammar); and what a program "
-    "does with a here-document body read as its data: where every part of the command is a reader "
+    "does with a here-document body read as its data: where every part of the command is plainly "
+    "run -- its program its first word, with no assignment, `env`, `poetry run`, other wrapper or "
+    "redirection before it and no assignment-only part, since `PATH=./bin cat` may run any program "
+    "(#3996) -- and is a reader "
     "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
     "interpreter reading its program from the here-document it carries, nothing substitutes, every "
     "delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of "
@@ -1313,26 +1319,48 @@ _DATA_READERS = READ_ONLY_PROGRAMS - {"sed", "rg"}
 _PYTHON_STDIN_OPTIONS = frozenset({"-", "-u", "-I", "-E", "-B", "-s", "-S", "-q"})
 
 
+def _heredoc_reader_head(segment: list[str]) -> list[str] | None:
+    """The part, where it plainly runs the program its first word names
+    (#3996), else None. Nothing may stand before that word: no assignment
+    (`PATH=./bin cat`, `LD_PRELOAD=./e.so cat`), no `env` with assignments
+    or any other wrapper, no `poetry run` (`poetry run cd` is a program,
+    #3753), no `nohup`, `command`, `exec` or `builtin`, and no redirection
+    (origin/main does not read a program behind one, and it reports such a
+    part `runs_unread`); and `_plainly_run` holds for it, which refuses an
+    assignment before the program and a program word that is not a
+    `_plain_word`. An assignment-only part (`PATH=./bin;`) is None too,
+    since it changes the program a later part's word names. The caller
+    then requires that first word to be a reader, `cd`, `pushd`, `popd` or
+    a plain-named `python*`."""
+    if not segment or segment[:2] == ["poetry", "run"] or _wrapper_skip(segment) is not None \
+            or _redirection_skip(segment) is not None or not _plainly_run(segment):
+        return None
+    return list(segment)
+
+
 def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     """Whether every here-document in a command lexed with its bodies as
     words (`_scan`) is data no part of it runs as a shell command (#3897):
     no command or process substitution anywhere outside a quoted-delimiter
-    body (`_substitutes`; one in an unquoted body runs), and every part's
-    program, read as `_command_heads` reads it, a reader in `_DATA_READERS`,
-    a builtin `cd`, `pushd` or `popd`, or a `python*` interpreter that reads
-    its program from the here-document it carries (`python3 - <<'EOF'`), as
-    `python -c` reads its program from a word. Anything else -- a shell,
-    `eval`, `source`, `xargs`, `ssh`, a wrapper not read, a program not
-    read, a word built at run time -- may run the body, or text a reader
-    passed on, as commands, so the body's lines are read as commands there,
-    as before."""
+    body (`_substitutes`; one in an unquoted body runs), and every part
+    plainly run (`_heredoc_reader_head`, #3996: no assignment in it or in a
+    part of its own, no `env`, `poetry run`, other wrapper or redirection
+    before its program, a plain program word) with a program that is a reader in
+    `_DATA_READERS`, a builtin `cd`, `pushd` or `popd`, or a plain-named
+    `python*` interpreter that reads its program from the here-document it
+    carries (`python3 - <<'EOF'`), as `python -c` reads its program from a
+    word. Anything else -- a shell, `eval`, `source`, `xargs`, `ssh`, a
+    wrapper, an assignment that may change which program a word names
+    (`PATH=./bin cat`), a program not read, a word built at run time -- may
+    run the body, or text a reader passed on, as commands, so the body's
+    lines are read as commands there, as on origin/main."""
     if _substitutes(scan) or any(getattr(t, "heredoc", False) and not getattr(t, "unexpanded", False)
                                  and ("$(" in t or "`" in t) for t in tokens):
         return False
     for segment in _layout(tokens)[0]:
-        rest = _command_head(segment)
-        if not rest:
-            continue
+        rest = _heredoc_reader_head(segment)
+        if rest is None:
+            return False
         program = os.path.basename(rest[0])
         if rest[0] in _DATA_READERS or rest[0] in ("cd", "pushd", "popd"):
             continue

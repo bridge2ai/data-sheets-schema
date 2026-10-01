@@ -4228,6 +4228,103 @@ class ShellLexer(Base):
                 else:
                     self.assertUnknown(block, f"derive core {derive} cannot be placed")
 
+    #: Here-documents under a part that may not run the reader its words
+    #: name (#3996): an assignment before it (`PATH`, `LD_PRELOAD`), on the
+    #: part, to `env` or as a part of its own; `poetry run`, `env`, `nohup`,
+    #: `command`, `exec` or `builtin` before it; or a redirection before the
+    #: program, which origin/main does not read through. `PATH=./bin cat`
+    #: runs `./bin/cat`, which may run its standard input as commands.
+    NOT_PLAINLY_RUN = (
+        "PATH=./bin cat <<'EOF'\n{body}\nEOF",
+        "PATH=./bin; cat <<'EOF'\n{body}\nEOF",
+        "PATH=./bin && cat <<'EOF'\n{body}\nEOF",
+        "LD_PRELOAD=./e.so cat <<'EOF'\n{body}\nEOF",
+        "env PATH=./bin cat <<'EOF'\n{body}\nEOF",
+        "PATH=./bin python3 - <<'EOF'\n{body}\nEOF",
+        "poetry run cd x <<'EOF'\n{body}\nEOF",
+        "poetry run python3 - <<'EOF'\n{body}\nEOF",
+        "X=1; cd x <<'EOF'\n{body}\nEOF",
+        "env cat <<'EOF'\n{body}\nEOF",
+        "nohup cat <<'EOF'\n{body}\nEOF",
+        "command cat <<'EOF'\n{body}\nEOF",
+        "exec cat <<'EOF'\n{body}\nEOF",
+        "builtin cd x <<'EOF'\n{body}\nEOF",
+        "2>/dev/null cat <<'EOF'\n{body}\nEOF",
+    )
+
+    def test_a_here_document_under_a_part_not_plainly_run_is_read_as_on_origin_main(self):
+        # The body's lines are read as commands, the lexing origin/main had,
+        # with origin/main's reading: the shell moves, runs a program not
+        # read, and with a body line `$X ./derive.sh` is open-ended.
+        for template in self.NOT_PLAINLY_RUN:
+            for body in ("cd data", "$X ./derive.sh"):
+                command = template.format(body=body)
+                with self.subTest(command=command):
+                    self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                    shell = ro._shell(command, "/w", [])
+                    self.assertEqual((shell["moves"], shell["runs_unread"]), (True, True))
+                    self.assertIs(shell["detaches"], body.startswith("$X"))
+        # The same here-document under a reader plainly run is data: its
+        # body line neither moves the shell nor runs on in the background.
+        for command in ("cat <<'EOF'\n$X ./derive.sh\nEOF", "cat <<'EOF'\ncd data\nEOF",
+                        "/opt/py/bin/python - <<'EOF'\n$X ./derive.sh\nEOF",
+                        "/opt/py/bin/python - <<'EOF'\ncd data\nEOF"):
+            with self.subTest(command=command):
+                shell = ro._shell(command, "/w", [])
+                self.assertEqual((shell["moves"], shell["detaches"]), (False, False))
+                self.assertNotEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+
+    def test_a_reader_head_is_the_first_word_of_a_part_plainly_run(self):
+        # `_heredoc_reader_head` on its own (#3996): anything before the
+        # program word, or a program word that is not plain, is None.
+        for segment in (["PATH=./bin", "cat"], ["PATH=./bin"], ["env", "cat"], ["env", "PATH=./bin", "cat"],
+                        ["poetry", "run", "cd", "x"], ["nice", "cat"], ["timeout", "5", "cat"],
+                        ["2", ">", "/dev/null", "cat"], ["<", "f", "cat"], ["./cat"], ["$CAT"], []):
+            with self.subTest(segment=segment):
+                self.assertIsNone(ro._heredoc_reader_head(segment))
+        for segment in (["cat"], ["cd", "x"], ["/opt/py/bin/python", "-"], ["nohup", "cat"]):
+            with self.subTest(segment=segment):
+                self.assertEqual(ro._heredoc_reader_head(segment), segment)
+        # `nohup` heads its part plainly; the caller then refuses it, as no reader.
+        self.assertFalse(ro._heredocs_are_data(*ro._scan("nohup cat <<'EOF'\nx\nEOF", heredocs=True)))
+        self.assertTrue(ro._heredocs_are_data(*ro._scan("cat <<'EOF'\nx\nEOF", heredocs=True)))
+
+    def test_a_here_document_under_a_part_not_plainly_run_does_not_place_a_later_derive(self):
+        # End to end: a `cd data` body line moves the shell, so the later
+        # relative `--full` cannot be placed (the branch at dbe0364b9 said
+        # `checked`); a `$X ./derive.sh` line may run on in the background,
+        # so a call issued before the draft that runs a program not read is
+        # in flight with it (#3996: the branch read it as returned).
+        for template in self.NOT_PLAINLY_RUN:
+            command = template.format(body="cd data")
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+            command = template.format(body="$X ./derive.sh")
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive(full=r.full)
+                self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # The control: under a plain `cat` the body is data and nothing runs on.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.bash("cat <<'EOF'\n$X ./derive.sh\nEOF")
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive(full=r.full)
+        block = r.report()
+        self.assertEqual(block["status"], "checked", block["reasons"])
+
     def test_a_brace_expansion_with_a_quoted_blank_is_built_at_run_time(self):
         # `for w in {echo,'a b'}` iterates `echo` and `a b`: bash expands the
         # braces around a quoted blank (#3924).

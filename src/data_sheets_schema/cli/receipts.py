@@ -418,7 +418,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     counting brackets, so a case pattern's `)` ends it (#3925: these wait for a
     shell grammar). A here-document body is one data word,
     never commands of this shell (#3897), only where every part of the command is
-    a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
+    plainly run -- its program its first word, with no assignment, `env`, `poetry
+    run`, other wrapper or redirection before it and no assignment-only part
+    (#3996) -- and is a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
     plain-named `python*` interpreter reading its program from the here-document
     it carries (`python3 - <<'EOF'`, standard input); nothing substitutes; every
     delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly
