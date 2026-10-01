@@ -253,8 +253,10 @@ reader's copy of the body or a python program's output, goes nowhere but
 the call's own output (#4070: `cat <<'EOF' > s.sh` and then `printf -v
 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs the body as a script, and a
 later call may run the file too; `tee`, which writes to the files it
-names, is no reader), that part and every part after it is plainly run
-(#3996: its program is its first word, with no assignment, `env`, `poetry
+names, is no reader), nothing follows that part (#4086: a later part may
+run what its program wrote, as `printf -v 'BASH_CMDS[cat]' %s /bin/sh;
+cat s.sh` runs a file a `python3 - <<'EOF'` program wrote), that part is
+plainly run (#3996: its program is its first word, with no assignment, `env`, `poetry
 run`, other wrapper or redirection before it, since `PATH=./bin cat` may
 run any program) and is a reader other than `sed` or `rg` (whose `e`
 command and `--pre` run commands), a builtin `cd`, `pushd` or `popd`, or
@@ -522,7 +524,9 @@ NON_CHECKS = (
     "`./bin/cat`), that part carries no redirection but an input one (`<`, `<<`, `<<<`) and no "
     "pipe joins it to another part, so what it prints goes nowhere but the call's own output "
     "(#4070: `cat <<'EOF' > s.sh` and then `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs "
-    "the body as a script; `tee` is no reader), that part and every part after it is plainly run "
+    "the body as a script; `tee` is no reader), nothing follows that part (#4086: a later `printf -v "
+    "'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs a file a `python3 - <<'EOF'` program in it wrote), "
+    "that part is plainly run "
     "-- its program its first word, with no assignment, `env`, `poetry run`, other wrapper or "
     "redirection before it, since `PATH=./bin cat` may run any program (#3996) -- and is a reader "
     "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
@@ -530,7 +534,7 @@ NON_CHECKS = (
     "every delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one "
     "pair of single or double quotes (#3947), the body is one word, read as a `<<<` string or a "
     "`python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it carries "
-    "(`os.system(\"$X ./derive.sh\")`), or writes one to a file a later part or a later call runs, "
+    "(`os.system(\"$X ./derive.sh\")`), or writes one to a file a later call runs, "
     "is read as the same program given to `python -c` is; a function, alias or command-hash entry "
     "for the reader's own word, or a redirection of the shell's own output (`exec > s.sh`), that "
     "the session's shell kept from an earlier call, or its profile set (an earlier `printf -v "
@@ -1412,8 +1416,10 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     of the body nor a python program's output reaches a file or a pipe a
     later part or a later call may run (`cat <<'EOF' > s.sh` and then
     `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs the body), and
-    `tee`, which writes to the files it names, is no reader here; and that
-    part and every part after it is plainly run (`_heredoc_reader_head`,
+    `tee`, which writes to the files it names, is no reader here; nothing
+    follows that part (#4086: a later `printf -v 'BASH_CMDS[cat]' %s
+    /bin/sh; cat s.sh` runs a file a `python3 - <<'EOF'` program wrote);
+    and that part is plainly run (`_heredoc_reader_head`,
     #3996: no assignment in it or in a part of its own, no `env`, `poetry
     run`, other wrapper or redirection before its program, a plain program
     word) with a program that is a reader in `_DATA_READERS`, a builtin
@@ -1423,7 +1429,8 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     -- a shell, `eval`, `source`, `xargs`, `ssh`, a wrapper, an assignment
     that may change which program a word names (`PATH=./bin cat`), a
     program not read, a word built at run time, a second part carrying a
-    here-document, a copy of the body sent to a file or a pipe -- may run
+    here-document, a part after the carrying one, a copy of the body sent
+    to a file or a pipe -- may run
     the body, or text a reader passed on, as commands, so the command is
     read as origin/main read it, its body's lines as commands (`_lex`). The
     substitution test is the gate's as well (`_v6_admissible` refuses any
@@ -1438,6 +1445,8 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     if len(carriers) != 1:
         return False
     carrier = carriers[0]
+    if carrier != len(segments) - 1:
+        return False
     if not all(_setup_part(segment) for segment in segments[:carrier]):
         return False
     around = (leading if carrier == 0 else joins[carrier - 1]) + joins[carrier]

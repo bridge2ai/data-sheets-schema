@@ -2464,8 +2464,11 @@ class DeriveSpellings(Base):
         self.assertIn(copy_rule + ", a reader's copy of the body or a python program's output, goes nowhere but "
                       "the call's own output (#4070: `cat <<'EOF' > s.sh`", doc)
         self.assertIn("a `python3 - <<'EOF'` program that runs a shell string it carries (`os.system(\"$X "
-                      "./derive.sh\")`), or writes one to a file a later part or a later call runs, is read as "
+                      "./derive.sh\")`), or writes one to a file a later call runs, is read as "
                       "the same program given to `python -c` is", text)
+        self.assertIn("nothing follows that part (#4086: a later `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` "
+                      "runs a file a `python3 - <<'EOF'` program in it wrote)", text)
+        self.assertIn("nothing follows that part (#4086: a later part may run what its program wrote", doc)
         self.assertIn("a function, alias or command-hash entry for the reader's own word, or a redirection of the "
                       "shell's own output (`exec > s.sh`), that the session's shell kept from an earlier call, or "
                       "its profile set (an earlier `printf -v 'BASH_CMDS[cat]' %s /bin/sh`, then `cat <<'EOF'`, "
@@ -3651,7 +3654,7 @@ class EarlierDirectoryChange(Base):
                                     # A body a reader takes as data is not lines of
                                     # commands, whatever it says (#3897).
                                     ("cat <<EOF\nit's\nEOF", "/w", False),
-                                    ("cat <<EOF\nit's\nEOF\nls", "/w", False),
+                                    ("cat <<EOF\nit's\nEOF\nls", "/w", True),  # #4086: read as origin/main
                                     # #3797: behind a brace, a compound keyword,
                                     # `!`, `time`, `builtin` or `command`.
                                     ("{ cd hack; }", "/w", True), ("if true; then cd hack; fi", "/w", True),
@@ -4119,14 +4122,23 @@ class ShellLexer(Base):
         # an input redirection (`<`, `<<<`) is no copy (#4070).
         body = "cd /tmp\nx = d[\"k\"]\n$X ./derive.sh\nsource env.sh\nit's"
         for command in (f"cat <<'EOF'\n{body}\nEOF", f"cat <<-EOF\n\t{body}\n\tEOF",
-                        f"cat <<\"EOF\"\n{body}\nEOF\nls", f"cat <<'A' <<'B'\n{body}\nA\n{body}\nB",
+                        f"cat <<\"EOF\"\n{body}\nEOF", f"cat <<'A' <<'B'\n{body}\nA\n{body}\nB",
                         f"head -n 3 < in.txt <<'EOF'\n{body}\nEOF", f"cat <<'EOF' <<< x\n{body}\nEOF",
-                        f"cat '>' '|' <<'EOF'\n{body}\nEOF\nls | wc -l"):
+                        f"cat '>' '|' <<'EOF'\n{body}\nEOF"):
             with self.subTest(command=command):
                 shell = ro._shell(command, "/w", [])
                 self.assertEqual((shell["moves"], shell["runs_unread"]), (False, False))
                 words = [t for t in ro._tokens(command) if getattr(t, "heredoc", False)]
                 self.assertTrue(words and all(w.replace("\t", "") == body for w in words), words)
+        # Nothing follows the part that carries it: a later part may run what
+        # that part's program wrote (#4086), so with one, whatever its
+        # program, the body's lines are read as commands, as on origin/main.
+        for later in ("ls", "ls | wc -l", "printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh"):
+            command = f"cat <<'EOF'\n{body}\nEOF\n{later}"
+            with self.subTest(command=command):
+                self.assertFalse(ro._heredocs_are_data(*ro._scan(command, heredocs=True)))
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
         # Before the part that carries it, only `cd WORD` or `mkdir [-p]
         # WORD...` (#4028); the body is data there too, though the `cd`
         # itself moves and `mkdir` is a program not read.
@@ -4575,7 +4587,7 @@ class ShellLexer(Base):
 
     #: origin/main's `_shell` for every counterexample of this lexer's review
     #: rounds (#3947, #3948, #3983, #3985, #3996, #4005, #4028, #4029, and
-    #: the Codex review's #4070), computed with the merge base's module
+    #: the Codex review's #4070 and its #4086), computed with the merge base's module
     #: (c962a6cc8) and pinned (#4028).
     MAIN_READINGS = Path(__file__).parent / "data" / "receipt_origin_main_readings.json"
 
@@ -4585,7 +4597,7 @@ class ShellLexer(Base):
         # brace-expansion pattern are origin/main's (#4028, #4029).
         pinned = json.loads(self.MAIN_READINGS.read_text(encoding="utf-8"))
         self.assertEqual({entry["issue"].split(" ")[0].rstrip(",:") for entry in pinned["commands"]},
-                         {"#3947", "#3983", "#3996", "#4005", "#4028", "#4029", "#4070"})
+                         {"#3947", "#3983", "#3996", "#4005", "#4028", "#4029", "#4070", "#4086"})
         for entry in pinned["commands"]:
             command = entry["command"]
             with self.subTest(issue=entry["issue"], command=command):
@@ -4803,19 +4815,22 @@ class ShellLexer(Base):
         self.assertNotIn("tee", ro._DATA_READERS)
         # The control: where the carrying part's output goes nowhere but the
         # call's own (an input redirection is no copy, nor a quoted `>` or
-        # `|`), the body is data. It is not what `cat s.sh` runs, so the
-        # command reads as that later part alone does (#4071 is that
-        # reading's own gap, origin/main's too).
-        later = ro._shell(self.COPY_RUNNER, "/w", [])
+        # `|`) and nothing follows it, the body is data. With a later part --
+        # here the one that runs s.sh -- the command reads as on origin/main
+        # (#4086: a later part may run what the carrying part's program wrote).
         for head in ("cat <<'EOF'", "cat < in.txt <<'EOF'", "cat <<'EOF' <<< x", "cat '>' '|' <<'EOF'",
                      "/opt/py/bin/python3 - <<'EOF'"):
-            command = f"{head}\n$X ./derive.sh\nEOF\n{self.COPY_RUNNER}"
+            alone = f"{head}\n$X ./derive.sh\nEOF"
+            with self.subTest(command=alone):
+                self.assertIs(ro._lex(alone)[2], True)
+                self.assertTrue(ro._heredocs_are_data(*ro._scan(alone, heredocs=True)))
+                self.assertIs(ro._shell(alone, "/w", [])["detaches"], False)
+            command = f"{alone}\n{self.COPY_RUNNER}"
             with self.subTest(command=command):
-                self.assertIs(ro._lex(command)[2], True)
-                self.assertTrue(ro._heredocs_are_data(*ro._scan(command, heredocs=True)))
-                shell = ro._shell(command, "/w", [])
-                self.assertEqual({k: shell[k] for k in ("runs_unread", "detaches", "moves")},
-                                 {k: later[k] for k in ("runs_unread", "detaches", "moves")})
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertFalse(ro._heredocs_are_data(*ro._scan(command, heredocs=True)))
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                self.assertIs(ro._shell(command, "/w", [])["detaches"], True)
 
     def test_a_here_document_copied_to_a_file_a_later_part_or_call_runs_reads_as_on_origin_main_end_to_end(self):
         # #4070, end to end: the issue's command, and its cross-call form --
@@ -4856,6 +4871,29 @@ class ShellLexer(Base):
                     derive = r.derive()
                     r.write(r.receipt, Boundaries.C004)
                     self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+
+    def test_a_part_after_the_carrying_one_reads_as_on_origin_main_end_to_end(self):
+        # #4086: a python here-document program may write a file a later part
+        # of the call runs. `printf -v 'BASH_CMDS[cat]' %s /bin/sh` makes `cat
+        # s.sh` run it as a script (bash 5.3.3 runs the derive). So nothing
+        # may follow the part that carries a here-document; with a later part
+        # the body's lines are read as commands, as origin/main read them.
+        writer = "python3 - <<'EOF'\nopen('s.sh', 'w').write('$X ./derive.sh\\n')\nEOF"
+        command = f"{writer}\n{self.COPY_RUNNER}"
+        self.assertFalse(ro._heredocs_are_data(*ro._scan(command, heredocs=True)))
+        self.assertIs(ro._lex(command)[2], False)
+        self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+        self.assertIs(ro._shell(command, "/w", [])["detaches"], True)
+        # Alone, the writer's program is read as `python -c` reads it: nothing
+        # in this call runs s.sh.
+        self.assertTrue(ro._heredocs_are_data(*ro._scan(writer, heredocs=True)))
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        identity = r.bash(command)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        r.derive(full=r.full)
+        self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
         # A list-valued name raised TypeError in `_history` (#3918). Each
