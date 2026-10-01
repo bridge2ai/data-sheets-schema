@@ -666,6 +666,26 @@ class TheRegistry(unittest.TestCase):
                 self.assertIn(text, v5.counterexamples)
                 self.assertIsNotNone(match(v4, text))
 
+    def test_v5_name_after_a_span_that_took_its_verb_does_not_match(self):
+        """#4001: a name can lose its v4 match with a listed verb in its
+        sentence, when a verb-first span to an earlier tier term has already
+        taken that verb. The v5 note counts this case apart from the names
+        with no listed verb. The sentence is the AI_READI 2026-08-24 v5 rep2
+        `/intended_uses/3/source_caveats` leaf, shortened."""
+        v4, v5 = ({p.id: p for p in lx.load("absence_self_narration", v).patterns}["rsn.source-ranking"]
+                  for v in (4, 5))
+        text = ("Both statements are recorded; the license is a tier 2 source and the FAIRhub structured "
+                "metadata tier 1 in the input manifest, but the two describe different instruments.")
+        span = "recorded; the license is a tier 2 source"
+        self.assertEqual([m.group() for m in v4.regex.finditer(text)], [span, "input manifest"])
+        self.assertEqual([m.group() for m in v5.regex.finditer(text)], [span])
+        # The verb is the one the name needed: with no tier term before it,
+        # the same verb's span reaches the name.
+        alone = ("Both statements are recorded; the license and the FAIRhub structured metadata are in the "
+                 "input manifest, but the two describe different instruments.")
+        self.assertEqual([m.group() for m in v5.regex.finditer(alone)],
+                         ["recorded; the license and the FAIRhub structured metadata are in the input manifest"])
+
     def test_every_v5_source_ranking_match_ends_at_a_v2_term(self):
         """v5 matches only terms v2 matched; a name inside a v4 verb-first
         span can now end a span of its own, so a v5 match need not end where

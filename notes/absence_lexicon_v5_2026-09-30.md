@@ -92,7 +92,13 @@ No other pattern's count moves. By method: `claudecode_agent` record_self_narrat
 **`rsn.source-ranking`.** 36 v4 matches lose their end and 1 v5 match ends where
 no v4 match did, so the net change is −35.
 
-- 35 are a name of the declared ranking with no listed verb in its sentence.
+- 35 are a name of the declared ranking. In 34 of them no listed verb is in
+  its sentence. In the other, `claudecode_agent/2026-08-24…v5_rep2` AI_READI
+  `/intended_uses/3/source_caveats` ("Both statements are recorded; the
+  license is a tier 2 source and … tier 1 in the input manifest, …"), the
+  verb `recorded` is there, but the verb-first span "recorded; the license is
+  a tier 2 source" takes it, and a span takes its verb once (#3732), so
+  "input manifest" has none left.
 - 1 is the #3875 mechanism: "the two equally ranked sources characterize …
   the data transfer and use agreement states …", whose only listed verb was
   the noun `use`.
