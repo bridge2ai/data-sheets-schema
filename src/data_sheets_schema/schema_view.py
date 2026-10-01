@@ -124,7 +124,17 @@ class _ReleasableView(SchemaView):
     Here each of those methods is cached on the instance, and `release`
     drops the caches. Each cache holds its bound method, which holds the
     view, so dropping them is what lets the view's last reference free it.
-    Nothing else differs: the functions and arguments are linkml's own."""
+
+    The functions and arguments are linkml's own. One thing has to be done
+    by hand: linkml's caches miss once a view is modified, because
+    `set_modified` changes the hash that is part of every key. These caches
+    are keyed on the arguments alone, so `set_modified` drops them."""
+
+    def set_modified(self) -> None:
+        """What linkml does (the hash moves, so its caches miss), and this
+        view's own caches dropped, so they miss too."""
+        self.release()
+        super().set_modified()
 
     def release(self) -> None:
         """Drop this view's method caches and their references to it."""
@@ -202,9 +212,10 @@ def version_view(path: str | Path, document: dict[str, Any]) -> Iterator[SchemaV
     is built with its method caches on the instance (`_ReleasableView`) and
     released when the block exits. A caller keeps what it read from the
     view, as `run_schema` keeps a version's identifier rules, and not the
-    view. So a corpus pass holds at most one version view at a time. Kept,
-    each one was 24-49 MB resident: 14 versions took a form and grounding
-    pass from about 0.29 GB to 0.80 GB peak (#4082).
+    view. So a corpus pass holds at most one version view at a time. Kept
+    for the process, as they were before #4082, each one was 24-49 MB
+    resident once its induced slots were read, and a form and grounding
+    pass over the corpus meets 14 versions.
 
     A version read by its hash is only those bytes, so a document that
     imports anything but the LinkML metamodel (`linkml:`) is refused rather

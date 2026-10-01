@@ -232,9 +232,8 @@ class VersionView(unittest.TestCase):
     one `with` block. It is never shared, so it never evicts today's view of
     the same path (#926: an evicted view of today's schema would be rebuilt,
     and pinned again, for each version). Its method caches are its own, so
-    once released it is freed (#4082: kept for the process, the corpus's 14
-    versions took a form and grounding pass's peak RSS from 287 MB to
-    803 MB)."""
+    once released it is freed (#4082: kept for the process, each version
+    view was 24-49 MB resident, and a corpus pass meets 14 versions)."""
 
     def test_a_version_view_is_not_shared_and_never_evicts_todays_view(self):
         from data_sheets_schema import schema_view
@@ -278,6 +277,30 @@ class VersionView(unittest.TestCase):
             shadow = vars(schema_view._ReleasableView)[name]
             self.assertIsInstance(shadow, schema_view._InstanceCached, name)
             self.assertFalse(hasattr(shadow.function, "cache_info"), name)
+
+    def test_a_modified_version_view_reads_its_modification(self):
+        """linkml's caches miss once a view is modified, since `set_modified`
+        moves the hash in every key. A version view's caches are keyed on
+        the arguments alone, so a modification drops them, and the view
+        reads what a SchemaView reads."""
+        from linkml_runtime import SchemaView
+        from linkml_runtime.linkml_model.meta import ClassDefinition, SchemaDefinition, SlotDefinition
+
+        from data_sheets_schema import schema_view
+        from data_sheets_schema.identifiers import FULL_SCHEMA, uriorcurie_slots_of
+
+        def extra():
+            return ClassDefinition("Extra", attributes={"code": SlotDefinition("code", range="uriorcurie")})
+        plain = SchemaView(SchemaDefinition(**schema_view.version_document(yaml.safe_dump(RUN_SCHEMA).encode())))
+        self.assertEqual(uriorcurie_slots_of(plain), {"id", "publisher"})
+        plain.add_class(extra())
+        self.assertEqual(uriorcurie_slots_of(plain), {"id", "publisher", "code"})
+        doc = schema_view.version_document(yaml.safe_dump({**RUN_SCHEMA, "name": "modified"}).encode())
+        with schema_view.version_view(FULL_SCHEMA, doc) as view:
+            self.assertEqual(uriorcurie_slots_of(view), {"id", "publisher"})
+            view.add_class(extra())
+            self.assertEqual(set(view.all_classes()), {"Dataset", "Person", "Extra"})
+            self.assertEqual(uriorcurie_slots_of(view), {"id", "publisher", "code"})
 
     def test_deriving_a_version_s_rules_keeps_no_view(self):
         """`run_schema` keeps a version's rules and not the view it read them
