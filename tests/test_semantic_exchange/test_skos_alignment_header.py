@@ -1,8 +1,10 @@
 """The SKOS alignment TTL's own statistics describe the triples it carries,
-the class-level corrections of #3942 and #3926 hold, the pre-#149 class rows
-are settled against the merged schemas (#3976), every slot-level twin of a
-class correction carries its class's triple (#3971, #3995, #4002, #3974), and
-no triple names an RAI term Croissant RAI 1.0 does not define.
+the class-level corrections of #3942 and #3926 hold, the 14 class rows #3942
+did not review are settled against the merged schemas (#3976), a slot that
+holds a class #3942, #3974 or #3976 changed carries that class's targets
+only as the class now carries them (#3971, #3995, #4002, #3974, #4052), no
+triple names an RAI term Croissant RAI 1.0 does not define, and every EVI
+term a triple names is recorded with the outcome of a check against EVI.
 
 Before #3942 the header said 189 triples (exact 112, close 59, related 10,
 narrow 7, broad 1) while the file held 184 (111/58/9/6/0), and the per-section
@@ -12,8 +14,8 @@ the two parses are required to agree, so a triple written into a comment (which
 the line pattern would read and a Turtle parser would not) fails.
 
 Nothing here walks the corpus: the input is the TTL, plus the merged schemas
-for the class names and declarations, and the repository's list of the
-Croissant RAI 1.0 properties.
+for the class names, declarations and slot ranges, and the repository's list
+of the Croissant RAI 1.0 properties.
 """
 
 import collections
@@ -269,10 +271,15 @@ class TestClassLevelCorrections(unittest.TestCase):
                          {o for _, _, o in self.triples})
 
 
-#: The class rows #3942 did not review (it covered the 70 class triples #149
-#: added that the legacy table never carried), as #3976 settled them against
-#: the merged schemas' class_uri, is_a and *_mappings.
-PRE_149_CLASS_ROWS = {
+#: The 14 class rows #3942 did not review, as #3976 settled them against the
+#: merged schemas' class_uri, is_a and *_mappings. #3942 covered the 70 class
+#: triples #149 added that the legacy SSSOM table never carried; these 14 are
+#: the class rows that table did carry (#3884 retired it). Not all predate
+#: #149: Dataset's row came with #129, and DatasetCollection's, File's and
+#: FileCollection's with #147, but #149 (e141852f5) added the other seven,
+#: DataSubset's and those of the three Core* classes, and transcribed them
+#: into the table.
+CLASS_ROWS_3942_DID_NOT_REVIEW = {
     "Dataset": {("exactMatch", "schema:Dataset")},
     "DatasetCollection": {("closeMatch", "schema:Dataset"),
                           ("closeMatch", "dcat:Catalog")},
@@ -310,7 +317,7 @@ def declared(definition, metaslot):
     return [value] if isinstance(value, str) else list(value or [])
 
 
-class TestPre149ClassRows(unittest.TestCase):
+class TestClassRows3942DidNotReview(unittest.TestCase):
     """#3976: six classes said exactMatch schema:Dataset (Dataset,
     DatasetCollection, FileCollection, DataSubset, CoreDataset,
     CoreDatasetCollection), and the full schema's Dataset declares class_uri
@@ -325,7 +332,7 @@ class TestPre149ClassRows(unittest.TestCase):
         cls.schemas = {path: raw_classes(path) for path in SCHEMAS}
 
     def test_each_row_as_settled(self):
-        for cls, pairs in PRE_149_CLASS_ROWS.items():
+        for cls, pairs in CLASS_ROWS_3942_DID_NOT_REVIEW.items():
             with self.subTest(cls=cls):
                 self.assertEqual(self.pairs[cls], pairs)
 
@@ -385,9 +392,13 @@ class TestPre149ClassRows(unittest.TestCase):
 #: Slot-level twins of a class correction left as found, with the triple
 #: each still carries. While a twin still carries that triple, the comment
 #: block directly above it says TODO(#3942); a twin settled later drops out
-#: of the check. #3942 left eleven marked (#3971, #3995, #4002) and two
-#: unmarked (labeling_strategies, raw_sources); #3971 settled all thirteen
-#: (SETTLED_TWINS below), so no TODO(#3942) is left in the TTL.
+#: of the check. #3942 left eleven marked (#3971, #3995, #4002) and nine
+#: unmarked: labeling_strategies, raw_sources and the seven twins of its
+#: d4d: class removals, which review round 1 of #4031 found (#4052). All
+#: twenty are settled (SETTLED_TWINS below), so no TODO(#3942) is left in
+#: the TTL, and the derived check below
+#: (test_a_slot_that_holds_a_changed_class_follows_it) reads every slot that
+#: holds a changed class, listed or not.
 SLOT_TWINS_LEFT_AS_FOUND = {}
 
 
@@ -460,14 +471,16 @@ class TestSlotLevelTwinsAreMarked(unittest.TestCase):
 
 
 #: The slot-level twins #3942 left as found, and sampling_strategies (#3974),
-#: as #3971, #3995, #4002 and #3974 settled them: the class the slot holds
-#: (its range), and the pairs the slot and that class both carry. A twin
-#: follows its class unless the slot's semantics differ; none of these do.
-#: An empty set is a removed triple: its target is not a term its vocabulary
-#: defines (rai:prohibitedUses, rai:ethicalReview, rai:confidentialityLevel,
-#: evi:samplingPlan) or names another notion (schema:license for an
-#: extension mechanism). labeling_strategies and raw_sources are twins of
-#: #3942's LabelingStrategy and RawData corrections that no TODO marked.
+#: as #3971, #3995, #4002, #3974 and #4052 settled them: the class the slot
+#: holds (its range), and the pairs the slot and that class both carry. A
+#: twin follows its class unless the slot's semantics differ; none of these
+#: do. An empty set is a removed triple: its target is not a term its
+#: vocabulary defines (rai:prohibitedUses, rai:ethicalReview,
+#: rai:confidentialityLevel, evi:samplingPlan), names another notion
+#: (schema:license for an extension mechanism), or is a D4D term, which is
+#: not an alignment to an external vocabulary (#3054; the last seven, whose
+#: class triples #3942 removed for that reason). labeling_strategies,
+#: raw_sources and those seven are the twins no TODO marked.
 SETTLED_TWINS = {
     "discouraged_uses": ("DiscouragedUse", set()),
     "prohibited_uses": ("ProhibitedUse", set()),
@@ -489,18 +502,111 @@ SETTLED_TWINS = {
     "labeling_strategies": ("LabelingStrategy",
                             {("narrowMatch", "rai:dataAnnotationProtocol")}),
     "raw_sources": ("RawData", {("closeMatch", "rai:dataCollectionRawData")}),
+    "addressing_gaps": ("AddressingGap", set()),
+    "anomalies": ("DataAnomaly", set()),
+    "content_warnings": ("ContentWarning", set()),
+    "informed_consent": ("InformedConsent", set()),
+    "human_subject_research": ("HumanSubjectResearch", set()),
+    "at_risk_populations": ("AtRiskPopulations", set()),
+    "participant_compensation": ("HumanSubjectCompensation", set()),
+}
+
+#: The class-level pairs #3942 removed or replaced (5463875a9), by class: the
+#: pairs each class carried before that commit and not after it, read from
+#: an rdflib parse of the TTL on either side. Its message counts "Removed
+#: (20)" and "Corrected (14)". History, so a pinned record; the slots that
+#: hold each class are read from the schemas, never listed.
+CLASS_PAIRS_3942_REPLACED = {
+    # Removed: the class carries no triple now.
+    "Creator": {("exactMatch", "schema:Person")},
+    "Maintainer": {("exactMatch", "schema:Person")},
+    "DataCollector": {("exactMatch", "schema:Person")},
+    "FundingMechanism": {("exactMatch", "schema:Grant")},
+    "HumanSubjectResearch": {("exactMatch", "d4d:humanSubject")},
+    "InformedConsent": {("exactMatch", "d4d:informedConsent")},
+    "AtRiskPopulations": {("exactMatch", "d4d:atRiskPopulations")},
+    "ContentWarning": {("exactMatch", "d4d:contentWarning")},
+    "AddressingGap": {("exactMatch", "d4d:addressingGaps")},
+    "DataAnomaly": {("exactMatch", "d4d:dataAnomalies")},
+    "HumanSubjectCompensation": {("exactMatch", "d4d:participantCompensation")},
+    "Deidentification": {("closeMatch", "rai:confidentialityLevel")},
+    "ExtensionMechanism": {("closeMatch", "schema:license")},
+    "Relationships": {("closeMatch", "schema:isRelatedTo")},
+    "CollectionConsent": {("closeMatch", "rai:personalSensitiveInformation")},
+    "CollectionNotification": {("closeMatch", "rai:personalSensitiveInformation")},
+    "ConsentRevocation": {("closeMatch", "rai:personalSensitiveInformation")},
+    "DiscouragedUse": {("exactMatch", "rai:prohibitedUses")},
+    "ProhibitedUse": {("exactMatch", "rai:prohibitedUses")},
+    "EthicalReview": {("exactMatch", "rai:ethicalReview")},
+    # Corrected: the class carries a replacement now.
+    "Grantor": {("exactMatch", "schema:Organization")},
+    "DataProtectionImpact": {("exactMatch", "rai:dataSocialImpact")},
+    "LabelingStrategy": {("exactMatch", "rai:dataAnnotationProtocol")},
+    "Instance": {("closeMatch", "schema:variableMeasured")},
+    "Subpopulation": {("closeMatch", "schema:variableMeasured")},
+    "VersionAccess": {("closeMatch", "schema:version")},
+    "Confidentiality": {("closeMatch", "rai:personalSensitiveInformation")},
+    "RetentionLimits": {("closeMatch", "schema:conditionsOfAccess")},
+    "UseRepository": {("closeMatch", "schema:relatedLink")},
+    "Splits": {("closeMatch", "schema:hasPart")},
+    "RawData": {("exactMatch", "rai:dataCollectionRawData")},
+    "ExistingUse": {("exactMatch", "rai:dataUseCases")},
+    "SensitiveElement": {("closeMatch", "rai:personalSensitiveInformation")},
+    "DistributionDate": {("closeMatch", "schema:dateCreated")},
+}
+
+#: The same record for the class-level changes made since: #3974
+#: (SamplingStrategy) and #3976 (DataSubset, DatasetCollection,
+#: CoreDatasetCollection).
+CLASS_PAIRS_REPLACED_SINCE_3942 = {
+    "SamplingStrategy": {("exactMatch", "evi:samplingPlan")},
+    "DataSubset": {("exactMatch", "schema:Dataset")},
+    "DatasetCollection": {("exactMatch", "schema:Dataset")},
+    "CoreDatasetCollection": {("exactMatch", "schema:Dataset"),
+                              ("closeMatch", "dcat:Catalog")},
 }
 
 
+def slots_holding(classes):
+    """{class: {slot}}: every slot name a declaration of which, in either
+    merged schema (top-level, class attribute or slot_usage), ranges over
+    one of ``classes``, directly or through any_of / exactly_one_of."""
+    found = collections.defaultdict(set)
+
+    def ranges(definition):
+        out = {(definition or {}).get("range")}
+        for group in ("any_of", "exactly_one_of"):
+            out |= {(alt or {}).get("range")
+                    for alt in (definition or {}).get(group) or []}
+        return out - {None}
+
+    for path in SCHEMAS:
+        schema = raw_schema(path)
+        declarations = list((schema.get("slots") or {}).items())
+        for cdef in (schema.get("classes") or {}).values():
+            for group in ("attributes", "slot_usage"):
+                declarations += list(((cdef or {}).get(group) or {}).items())
+        for slot, definition in declarations:
+            for cls in ranges(definition) & set(classes):
+                found[cls].add(slot)
+    return found
+
+
 class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
-    """#3971, #3995, #4002, #3974: until these, the class level and the slot
-    level disagreed for each twin (exactMatch on the slot where the class
-    said related, broad or close, or a triple on a term whose class triple
-    #3942 removed)."""
+    """#3971, #3995, #4002, #3974, #4052: until these, the class level and
+    the slot level disagreed for each twin (exactMatch on the slot where the
+    class said related, broad or close, or a triple on a term whose class
+    triple #3942 removed). SETTLED_TWINS was a list, so the seven twins of
+    #3942's d4d: class removals, which no list named, kept the removed
+    triple with every test passing (#4052); the derived check reads every
+    slot that holds a changed class."""
 
     @classmethod
     def setUpClass(cls):
         cls.pairs = pairs_by_subject(parsed_triples())
+        cls.changed = {**CLASS_PAIRS_3942_REPLACED,
+                       **CLASS_PAIRS_REPLACED_SINCE_3942}
+        cls.holders = slots_holding(cls.changed)
 
     def test_each_twin_is_the_slot_that_holds_its_class(self):
         """Read from the full schema: every declaration of the slot name that
@@ -523,10 +629,77 @@ class TestSlotTwinsFollowTheirClasses(unittest.TestCase):
             with self.subTest(cls=cls):
                 self.assertEqual(self.pairs.get(cls, set()), pairs)
 
+    def test_the_record_holds_3942s_count_and_no_class_kept_a_lost_pair(self):
+        """CLASS_PAIRS_3942_REPLACED is complete by #3942's own count: of
+        its classes, twenty carry no triple now and fourteen a replacement.
+        No class in either record carries a pair it lost."""
+        removed = [c for c in CLASS_PAIRS_3942_REPLACED if not self.pairs.get(c)]
+        self.assertEqual(
+            (len(removed), len(CLASS_PAIRS_3942_REPLACED) - len(removed)),
+            (20, 14))
+        for cls, lost in self.changed.items():
+            with self.subTest(cls=cls):
+                self.assertFalse(lost & self.pairs.get(cls, set()))
 
-class TestNoTripleNamesAnUndefinedTerm(unittest.TestCase):
-    """#3942 removed the class triples on RAI terms Croissant RAI 1.0 does not
-    define; #3971 and #3974 removed their slot twins."""
+    def test_a_slot_that_holds_a_changed_class_follows_it(self):
+        """Derived, not listed: a slot that holds a changed class (a
+        declaration of it, in either merged schema, ranges over the class)
+        carries a triple on one of that class's targets, former or current,
+        only as the class now carries it. So a class triple that was removed
+        and left on such a slot fails, and so does a correction the slot did
+        not follow. A slot that never shared a target with its class is not
+        constrained: creators holds Creator and says closeMatch
+        schema:author, a property, where Creator lost exactMatch
+        schema:Person, a type."""
+        checked = set()
+        for cls, lost in sorted(self.changed.items()):
+            now = self.pairs.get(cls, set())
+            targets = {o for _, o in lost | now}
+            allowed = {(p, o) for p, o in now if o in targets}
+            for slot in sorted(self.holders.get(cls, ())):
+                checked.add(slot)
+                carried = {(p, o) for p, o in self.pairs.get(slot, ())
+                           if o in targets}
+                with self.subTest(cls=cls, slot=slot):
+                    self.assertLessEqual(carried, allowed)
+        # Not vacuous: every settled twin is among the slots read, by the
+        # schemas and not by the list.
+        self.assertLessEqual(set(SETTLED_TWINS), checked)
+        for slot, (cls, _) in SETTLED_TWINS.items():
+            with self.subTest(twin=slot):
+                self.assertIn(slot, self.holders.get(cls, ()))
+
+
+#: Each EVI term the TTL names, with whether EVI defines it. The repository
+#: holds no copy of EVI, so this records a check made against EVI 1.6, the
+#: version https://w3id.org/EVI resolves to (79 terms; the Turtle fetched
+#: 2026-10-01T06:40Z, sha256 8b5bb170..., for #3974 and #4037): it defines
+#: none of the three. They stay in the TTL until #4037 decides each triple.
+#: A new EVI target is checked against EVI the same way and recorded here
+#: with what was found.
+EVI_TARGETS_CHECKED = {
+    "evi:formats": False,
+    "evi:md5": False,
+    "evi:sha256": False,
+}
+
+
+class TestNoUndefinedRaiTermAndNoUncheckedEviTerm(unittest.TestCase):
+    """Scope: the rai: and evi: targets, of every subject.
+
+    An rai: target must be one of the 20 properties Croissant RAI 1.0
+    defines, read from the repository's list: #3942 removed the class
+    triples on terms it does not define, and #3971 and #3974 their slot
+    twins. An evi: target must be recorded in EVI_TARGETS_CHECKED. The
+    three recorded are not EVI 1.6 terms; they are #4037's, so this class
+    names them and does not fail on them. It fails on an RAI term RAI 1.0
+    does not define, on an EVI term nobody has checked, on one recorded as
+    undefined other than #4037's three, and on evi:samplingPlan (#3974).
+
+    Not checked here: schema: targets. Class-level ones are checked against
+    rdflib's schema.org term list (TestClassLevelCorrections). The three
+    slot-level triples on schema:conformsTo, which schema.org does not
+    define, are OPEN disagreements in generate_comprehensive_sssom.py."""
 
     @classmethod
     def setUpClass(cls):
@@ -545,12 +718,27 @@ class TestNoTripleNamesAnUndefinedTerm(unittest.TestCase):
                 with self.subTest(subject=subject, obj=obj):
                     self.assertIn(obj, properties)
 
+    def test_every_evi_target_is_recorded_as_checked(self):
+        """The record names exactly the EVI targets the TTL names: an
+        unrecorded one fails until it is checked against EVI, and a recorded
+        one the TTL no longer names fails until the record follows (#4037).
+        The only terms recorded as undefined are the three #4037 holds; a
+        term found undefined later belongs in no triple. A term recorded as
+        defined is taken on the record's word: with no copy of EVI here,
+        that is the limit of this check."""
+        evi = {o for _, _, o in self.triples if o.startswith("evi:")}
+        self.assertEqual(evi, set(EVI_TARGETS_CHECKED))
+        self.assertLessEqual(
+            {t for t, defined in EVI_TARGETS_CHECKED.items() if not defined},
+            {"evi:formats", "evi:md5", "evi:sha256"})
+
     def test_no_triple_names_evi_sampling_plan(self):
         """#3974: EVI 1.6, the version https://w3id.org/EVI resolves to, has
         79 terms and no samplingPlan in its Turtle, RDF/XML or JSON-LD form
         or on its documentation page (checked 2026-09-30); the repository
         holds no copy of EVI to test against."""
         self.assertNotIn("evi:samplingPlan", {o for _, _, o in self.triples})
+        self.assertNotIn("evi:samplingPlan", EVI_TARGETS_CHECKED)
 
 
 if __name__ == "__main__":

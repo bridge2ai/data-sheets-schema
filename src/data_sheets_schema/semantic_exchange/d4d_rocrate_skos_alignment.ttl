@@ -227,7 +227,7 @@ d4d:FormatDialect skos:closeMatch schema:encodingFormat .
 # notice and revocation are not sensitive personal attributes, and no
 # offline vocabulary here names a consent term.
 
-# Direct/Exact Mappings (53 triples)
+# Direct/Exact Mappings (46 triples)
 # ==============================================================================
 # These properties map directly without transformation
 
@@ -252,24 +252,34 @@ d4d:status skos:exactMatch schema:creativeWorkStatus .
 d4d:conforms_to skos:exactMatch schema:conformsTo .
 d4d:was_derived_from skos:exactMatch schema:isBasedOn .
 
-# Addressing_gaps and related properties
-d4d:addressing_gaps skos:exactMatch d4d:addressingGaps .
-d4d:anomalies skos:exactMatch d4d:dataAnomalies .
-d4d:content_warnings skos:exactMatch d4d:contentWarning .
-d4d:informed_consent skos:exactMatch d4d:informedConsent .
+# Removed (#3971, #4052): the slot-level twins of the seven classes #3942
+# found aligned to a d4d: term (see "Removed (#3942)" above), as their class
+# triples were. Each slot holds that class's objects, and each said
+# exactMatch to the same D4D term: addressing_gaps addressingGaps, anomalies
+# dataAnomalies, content_warnings contentWarning, informed_consent
+# informedConsent, human_subject_research humanSubject, at_risk_populations
+# atRiskPopulations and participant_compensation participantCompensation. A
+# D4D target is not an alignment to an external vocabulary (#3054), for a
+# slot as for its class. Four of the seven restated the slot's own slot_uri.
+# The other three are keys the FAIRSCAPE converters write
+# (src/fairscape_integration/); no slot_uri, class_uri or element name in
+# the schema is one of them (the slot_uris are anomalies, contentWarnings and
+# humanSubjectResearch).
 
 # RAI namespace - exact matches
 d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
-# Settled 2026-09-30 (#3971, #3995, #4002): each slot-level twin of a #3942
-# class correction now carries its class's triple, as the slot holds that
-# class's objects. That includes labeling_strategies and raw_sources, which
-# no TODO marked. Twins whose predicate changed moved to the section their
-# predicate names (confidential_elements, data_protection_impacts,
-# distribution_dates, existing_uses, labeling_strategies, raw_sources,
-# retention_limit, sensitive_elements).
+# Settled 2026-09-30 (#3971, #3995, #4002, #4052): each slot-level twin of a
+# class triple #3942 corrected or removed now carries what its class
+# carries, as the slot holds that class's objects; where the class triple
+# was removed, the twin's is removed too. That includes the nine twins no
+# TODO marked: labeling_strategies, raw_sources and the seven twins of the
+# classes aligned to d4d: terms (removed above). Twins whose predicate
+# changed moved to the section their predicate names (confidential_elements,
+# data_protection_impacts, distribution_dates, existing_uses,
+# labeling_strategies, raw_sources, retention_limit, sensitive_elements).
 # Removed (#3971): discouraged_uses and prohibited_uses exactMatch
 # rai:prohibitedUses, and ethical_reviews exactMatch rai:ethicalReview, as
 # the DiscouragedUse, ProhibitedUse and EthicalReview class triples were.
@@ -295,8 +305,6 @@ d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
 # from it: exact, as the class is (was closeMatch, #4002).
 d4d:sensitive_elements skos:exactMatch rai:personalSensitiveInformation .
 d4d:updates skos:exactMatch rai:dataReleaseMaintenancePlan .
-d4d:human_subject_research skos:exactMatch d4d:humanSubject .
-d4d:at_risk_populations skos:exactMatch d4d:atRiskPopulations .
 
 # FAIRSCAPE Evidence namespace - exact matches
 d4d:distribution_formats skos:exactMatch evi:formats .
@@ -313,9 +321,6 @@ d4d:variables skos:exactMatch schema:variableMeasured .
 
 # JSON-LD identifier
 d4d:id skos:exactMatch rdf:ID .
-
-# D4D-specific properties
-d4d:participant_compensation skos:exactMatch d4d:participantCompensation .
 
 # Close Matches (19 triples)
 # ==============================================================================
@@ -447,22 +452,22 @@ d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 157 SKOS triples
+# Total mappings: 150 SKOS triples
 # - Class-level: 63
 # - Class-scoped slot (d4d:<Class>_<slot>): 6
-# - Slot-level: 88
+# - Slot-level: 81
 #
 # By predicate:
-# - Exact matches: 83 (52.9%)
-# - Close matches: 47 (29.9%)
-# - Related matches: 17 (10.8%)
-# - Narrow matches: 6 (3.8%)
-# - Broad matches: 4 (2.5%)
+# - Exact matches: 76 (50.7%)
+# - Close matches: 47 (31.3%)
+# - Related matches: 17 (11.3%)
+# - Narrow matches: 6 (4.0%)
+# - Broad matches: 4 (2.7%)
 #
 # Triples by target namespace:
 # - schema.org: 81
 # - rai (Responsible AI): 52
-# - d4d (D4D-internal): 10
+# - d4d (D4D-internal): 3
 # - evi (FAIRSCAPE Evidence): 7
 # - dcat (Data Catalog Vocabulary): 6
 # - rdf: 1

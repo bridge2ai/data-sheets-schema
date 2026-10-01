@@ -47,10 +47,11 @@ import generate_comprehensive_sssom as gcs  # noqa: E402
 import generate_comprehensive_sssom_uri as gcsu  # noqa: E402
 
 #: The 29 TTL-aligned slots the committed table did not label ``mapped``
-#: before #2935 (25 novel_d4d, 4 free_text). Four of them have a TTL target
+#: before #2935 (25 novel_d4d, 4 free_text). Four of them had a TTL target
 #: in the D4D namespace only (FORMERLY_UNMAPPED_D4D_TARGET_SLOTS), which is
-#: not an alignment (#3054); of the other 25, 20 are mapped now and 5 lost
-#: their TTL alignment (FORMERLY_UNMAPPED_WITHDRAWN_SLOTS).
+#: not an alignment (#3054), and #4052 removed those triples with the other
+#: twins of #3942's d4d: class removals; of the other 25, 20 are mapped now
+#: and 5 lost their TTL alignment (FORMERLY_UNMAPPED_WITHDRAWN_SLOTS).
 FORMERLY_UNMAPPED_TTL_SLOTS = {
     'addressing_gaps', 'annotation_analyses', 'cleaning_strategies',
     'collection_timeframes', 'confidential_elements', 'content_warnings',
@@ -77,9 +78,11 @@ FORMERLY_UNMAPPED_WITHDRAWN_SLOTS = {
     'prohibited_uses', 'sampling_strategies',
 }
 
-#: Every slot-level triple #3971 and #3974 removed, with its old target: the
-#: five above and extension_mechanism (closeMatch schema:license; a way to
-#: contribute to a dataset is not its license).
+#: Every slot-level triple #3971, #3974 and #4052 removed, with its old
+#: target: the five above; extension_mechanism (closeMatch schema:license; a
+#: way to contribute to a dataset is not its license); and the seven twins of
+#: the classes #3942 found aligned to d4d: terms, whose D4D target was never
+#: an alignment (#3054) and never a row's mapping, only listed beside it.
 SLOT_TRIPLES_REMOVED = {
     'discouraged_uses': 'rai:prohibitedUses',
     'prohibited_uses': 'rai:prohibitedUses',
@@ -87,6 +90,13 @@ SLOT_TRIPLES_REMOVED = {
     'is_deidentified': 'rai:confidentialityLevel',
     'extension_mechanism': 'schema:license',
     'sampling_strategies': 'evi:samplingPlan',
+    'addressing_gaps': 'd4d:addressingGaps',
+    'anomalies': 'd4d:dataAnomalies',
+    'content_warnings': 'd4d:contentWarning',
+    'informed_consent': 'd4d:informedConsent',
+    'human_subject_research': 'd4d:humanSubject',
+    'at_risk_populations': 'd4d:atRiskPopulations',
+    'participant_compensation': 'd4d:participantCompensation',
 }
 
 SCHEMA_KINDS = (('slot_uri', 'skos:exactMatch'),
@@ -411,12 +421,13 @@ class TestTTLAlignmentsAreMapped(_Committed):
         cls.ttl = ttl_slot_alignments(cls.names)
 
     def test_the_ttl_has_slot_level_alignments(self):
-        """88 slot-level subjects: 81 with an external target, 7 with only a
-        D4D one. (94 and 87 until #3971 and #3974 removed six slot-level
-        triples, SLOT_TRIPLES_REMOVED.)"""
-        internal = ttl_slot_alignments(self.names, internal=True)
+        """81 slot-level subjects, each with an external target, and none
+        with a D4D target: a D4D target is not an alignment (#3054), and
+        #4052 removed the 7 slot-level triples that named one. (94 subjects,
+        87 external, until #3971 and #3974 removed six slot-level triples;
+        88 and 81 until #4052 removed seven more; SLOT_TRIPLES_REMOVED.)"""
         self.assertGreater(len(self.ttl), 75)
-        self.assertGreater(len(set(self.ttl) | set(internal)), 85)
+        self.assertEqual(ttl_slot_alignments(self.names, internal=True), {})
 
     def test_every_slot_level_alignment_is_the_mapped_row(self):
         """Every slot-level triple whose target is outside the D4D
@@ -439,8 +450,9 @@ class TestTTLAlignmentsAreMapped(_Committed):
     def test_the_29_the_heuristics_used_to_hide(self):
         """25 were aligned to an external term: 20 still are and are mapped,
         and the 5 whose term no vocabulary defines are aligned no longer
-        (#3971, #3974) and not mapped. The other 4 name only a D4D term,
-        which is listed and not mapped (#3054)."""
+        (#3971, #3974) and not mapped. The other 4 named only a D4D term,
+        which was listed and never mapped (#3054); #4052 removed those
+        triples too, so they name no term now and are still not mapped."""
         external = FORMERLY_UNMAPPED_TTL_SLOTS - FORMERLY_UNMAPPED_D4D_TARGET_SLOTS
         self.assertEqual(len(external), 25)
         self.assertLessEqual(FORMERLY_UNMAPPED_WITHDRAWN_SLOTS, external)
@@ -448,20 +460,16 @@ class TestTTLAlignmentsAreMapped(_Committed):
         self.assertEqual(len(aligned), 20)
         self.assertLessEqual(aligned, set(self.ttl))
         internal = ttl_slot_alignments(self.names, internal=True)
-        self.assertLessEqual(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS, set(internal))
-        self.assertFalse(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS & set(self.ttl))
-        self.assertFalse(FORMERLY_UNMAPPED_WITHDRAWN_SLOTS
-                         & (set(self.ttl) | set(internal)))
+        withdrawn = (FORMERLY_UNMAPPED_WITHDRAWN_SLOTS
+                     | FORMERLY_UNMAPPED_D4D_TARGET_SLOTS)
+        self.assertLessEqual(withdrawn, set(SLOT_TRIPLES_REMOVED))
+        self.assertFalse(withdrawn & (set(self.ttl) | set(internal)))
         for slot in sorted(aligned):
             with self.subTest(slot=slot):
                 self.assertEqual(self.comp[slot]["mapping_status"], "mapped")
-        for slot in sorted(FORMERLY_UNMAPPED_WITHDRAWN_SLOTS):
+        for slot in sorted(withdrawn):
             with self.subTest(slot=slot):
                 self.assertNotEqual(self.comp[slot]["mapping_status"], "mapped")
-        for slot in sorted(FORMERLY_UNMAPPED_D4D_TARGET_SLOTS):
-            with self.subTest(slot=slot):
-                self.assertNotEqual(self.comp[slot]["mapping_status"], "mapped")
-                self.assertLessEqual(set(internal[slot]), pairs_in(self.comp[slot]))
 
     def test_a_d4d_target_is_listed_and_never_the_mapped_row(self):
         """#3054: the schema rung drops a D4D target because it names the
@@ -470,14 +478,22 @@ class TestTTLAlignmentsAreMapped(_Committed):
         or class-scoped, by rdflib) stays in the row, and a slot with no
         external curated target is not ``mapped`` whichever input names the
         D4D term. Before #3054, 10 rows were ``mapped`` to a D4D term, 7 of
-        them to the slot's own slot_uri."""
+        them to the slot's own slot_uri. #4052 removed the 7 slot-level
+        triples among those 10 (SLOT_TRIPLES_REMOVED); the 3 class-scoped
+        ones are left (File_file_type, FileCollection_collection_type,
+        FileCollection_file_count), each naming its slot's own slot_uri. A
+        change that removes them too leaves this test nothing to read on the
+        committed tables, and the fixture test of the same rule
+        (TestPrecedenceOnAFixture) is then what checks it."""
         internal = ttl_all_alignments(self.schema, self.names, internal=True)
-        self.assertGreaterEqual(len(internal), 10)
+        self.assertEqual(set(internal), {"collection_type", "file_count",
+                                         "file_type"})
         curated = curated_sources(self.schema, self.names)
         slot_uris = raw_slot_uris(self.schema)
         self_alignments = [s for s, pairs in internal.items()
                            if {o for _, o in pairs} & slot_uris.get(s, set())]
-        self.assertGreaterEqual(len(self_alignments), 7)
+        self.assertEqual(sorted(self_alignments),
+                         ["collection_type", "file_count", "file_type"])
         generated = {r["subject_id"][len("d4d:"):]: r for r in
                      study_generator().generate_comprehensive_sssom("2001-01-01")}
         tables = (("comprehensive", self.comp), ("generated", generated),
@@ -518,14 +534,19 @@ class TestTTLAlignmentsAreMapped(_Committed):
                 self.assertEqual((row["predicate_id"], row["object_id"]), pair)
 
     def test_a_slot_whose_ttl_triple_was_removed_asserts_no_mapping(self):
-        """#3971, #3974: nothing else curated speaks for the six slots whose
-        TTL triple was removed, so in both tables each row is the keyword
-        hint's status, names no term, and keeps no trace of the old target."""
+        """#3971, #3974, #4052: the TTL says nothing about the thirteen slots
+        whose triple was removed, and nothing else curated speaks for them,
+        so in both tables each row is the keyword hint's status, names no
+        term, and keeps no trace of the old target: for the seven whose
+        target was a D4D term, other_curated_mappings listed it until
+        #4052."""
         curated = curated_sources(self.schema, self.names)
+        internal = ttl_slot_alignments(self.names, internal=True)
         for table, rows in (("comprehensive", self.comp), ("uri", self.uri)):
             for slot, target in sorted(SLOT_TRIPLES_REMOVED.items()):
                 with self.subTest(table=table, slot=slot):
                     self.assertNotIn(slot, self.ttl)
+                    self.assertNotIn(slot, internal)
                     self.assertNotIn(slot, curated)
                     row = rows[slot]
                     self.assertIn(row["mapping_source"], ("heuristic", "none"))
