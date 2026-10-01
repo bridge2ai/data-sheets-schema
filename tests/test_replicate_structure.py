@@ -596,6 +596,21 @@ def test_an_unparseable_receipt_path_is_unresolved_with_or_without_a_snapshot():
         assert got["basis"]["unresolved"] == 2
 
 
+
+def test_structure_disagreement_is_unresolved_only_when_the_snapshot_has_the_list():
+    """#3997: `remap_path`'s `unresolved` for a structural disagreement is
+    one-way. A list in the snapshot where the final record has none is
+    `unresolved`; an object in the snapshot where the final record has a
+    list is `leaf_dropped` at a key step and `not_in_snapshot` at an index
+    step. All three resolve nowhere."""
+    as_list, as_object = {"s": [{"name": "A"}]}, {"s": {"name": "A"}}
+    cases = [("s[0].name", as_list, as_object, "unresolved"),
+             ("s.name", as_object, as_list, "leaf_dropped"),
+             ("s[0].name", as_object, as_list, "not_in_snapshot")]
+    for path, snapshot, final, basis in cases:
+        got = resolve_verified({path: 1}, snapshot, final)
+        assert got == {"paths": {}, "basis": {basis: 1}}, (path, basis)
+
 def _entry_group():
     recs = {"r1": {"s": [{"name": "A"}, {"name": "B"}, {"description": "k"}], "t": ["x"]},
             "r2": {"s": [{"name": "A"}, {"description": "k"}], "t": ["x"]},
