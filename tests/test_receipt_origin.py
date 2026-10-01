@@ -646,6 +646,26 @@ class Unknown(Base):
         self.assertUnknown(block, "(pre_draft) is not a receipt")
         self.assertNotIn(SECRET, json.dumps(block))
 
+    def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
+        # A list-valued name raised TypeError in `_history` (#3918). Each
+        # name gets a run of its own, so no earlier case's reason can
+        # satisfy a later one's assertion.
+        for name in (["Bash"], {"tool": "Bash"}, None, ""):
+            with self.subTest(name=name):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.events.append({"type": "assistant", "message": {"content": [
+                    {"type": "tool_use", "id": f"bad_{len(r.events)}", "name": name, "input": {"command": "ls"}}]}})
+                r.result(f"bad_{len(r.events) - 1}", "ok")
+                block = r.report()
+                self.assertUnknown(block, "whose name is not a non-empty string")
+                # Its id is kept, so its result pairs with it and is not a
+                # second malformed event, "a tool result with no earlier call".
+                malformed = [reason for reason in block["reasons"] if "malformed tool event" in reason]
+                self.assertEqual(len(malformed), 1, block["reasons"])
+                self.assertTrue(malformed[0].startswith("1 malformed tool event(s)"), malformed)
+
 
 class ShellComments(Base):
     """A `#` starts a comment only at the start of a word, as bash reads it,

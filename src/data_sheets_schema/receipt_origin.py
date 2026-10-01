@@ -634,6 +634,16 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
                 if kind != "assistant" or not isinstance(identity, str) or not identity:
                     malformed.append(f"transcript {t} line {n}: tool call without an id or outside an assistant event")
                     continue
+                # A name that is not a string (a list, a mapping) names no
+                # tool: the call is malformed, never looked up (#3918). Its id
+                # is kept, so its result is paired and not reported again.
+                if not isinstance(block.get("name"), str) or not block["name"]:
+                    malformed.append(f"transcript {t} line {n}: tool call {identity} whose name is not a "
+                                     "non-empty string")
+                    if identity in by_id:
+                        duplicated.add(identity)
+                    by_id[identity] = None
+                    continue
                 if identity in by_id:
                     duplicated.add(identity)
                     continue
