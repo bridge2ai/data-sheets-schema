@@ -10,9 +10,10 @@ step of an API run is agentic.
     python .claude/skills/d4d-generation-specificity-audit/scan.py \
         --report notes/x.md --json notes/x.json
 
-Exit status: 0 when no gc_project hit outside an exception is model-facing or
-a code branch/table in a gating surface; 1 when one is; 2 when the scan did
-not happen: PyYAML cannot be imported, the self-test failed, the
+Exit status: 0 when no gating approach counts a gc_project hit outside an
+exception (model-facing text, or a code branch or table, under the file's
+role in that approach); 1 when one does; 2 when the scan did not happen:
+PyYAML cannot be imported, the self-test failed, the
 configuration is malformed, a discovered surface could not be read, a
 derivation the report rests on found nothing ("not derived"), or the scan
 stopped on an error. A crash is never exit 1, which means violations (#4027,

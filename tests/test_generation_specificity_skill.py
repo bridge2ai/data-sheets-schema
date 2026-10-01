@@ -1316,7 +1316,9 @@ class TestTheWholeAudit(unittest.TestCase):
         for live in result["facts"]["conditions"]["live"]:
             self.assertIn(f"| {live} |", markdown)
         self.assertNotIn("renderer None", markdown)
-        self.assertIn("--safe-mode", markdown)
+        # the report names where the registered launchers switch CLAUDE.md off
+        self.assertRegex(markdown, r"native_controls/prepare_overlay\.py:\d+ --safe-mode")
+        self.assertRegex(markdown, r"claudecode_direct/prepare_direct\.py:\d+ --safe-mode")
 
     def test_claude_md_and_the_agent_script_demo_are_judged_as_they_run(self):
         """CLAUDE.md's GC names are interactive-session violations; the
