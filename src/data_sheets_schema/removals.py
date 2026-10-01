@@ -256,6 +256,7 @@ absent snapshot is not a clean diff.
 from __future__ import annotations
 
 import ast
+import copy
 import hashlib
 import json
 import re
@@ -973,7 +974,10 @@ def run_enum_aliases(record: dict[str, Any] | None
     record names no hash, no version matches, git cannot answer (a
     shallow clone) or git cannot be started (an OSError launching it,
     #3851): `normaliser_form` then reads today's tables, and the basis
-    says so and why."""
+    says so and why. Where no reachable version matches, bytes only a
+    squash-merged branch held are rebuilt from a reachable one by a
+    recorded edit (`reconstructed_bytes`, #3788) and accepted only by the
+    recorded hashes; the basis says they were reconstructed."""
     today = "today's schema"
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     schema = schema if isinstance(schema, dict) else {}
@@ -1003,12 +1007,27 @@ def run_enum_aliases(record: dict[str, Any] | None
         return None, {"source": today, "path": path, **hashes,
                       "reason": f"the run's schema is not on disk and git could not be run "
                                 f"({type(exc).__name__}: {exc})"}
-    if found is None:
+    if found is not None:
+        data, entry = found
+        return _tables_of(data), {"source": "the run's schema, a git blob", "path": path, **hashes,
+                                  "commit": entry["commit"], "matched_on": entry["matched_on"]}
+    # No reachable version: bytes a squash-merged branch held can still be
+    # rebuilt from one that is, where the edit is recorded (#3788).
+    from data_sheets_schema.reconstructed_bytes import reconstructed_bytes_for
+    try:
+        rebuilt = reconstructed_bytes_for(path, md5=md5, sha256=sha256)
+    except (GitUnavailable, OSError) as exc:
+        return None, {"source": today, "path": path, **hashes,
+                      "reason": "no committed version of the path hashes to what the record recorded, "
+                                f"and its recorded reconstruction could not be read ({type(exc).__name__}: {exc})"}
+    if rebuilt is None:
         return None, {"source": today, "path": path, **hashes,
                       "reason": "no committed version of the path hashes to what the record recorded"}
-    data, entry = found
-    return _tables_of(data), {"source": "the run's schema, a git blob", "path": path, **hashes,
-                              "commit": entry["commit"], "matched_on": entry["matched_on"]}
+    data, entry = rebuilt
+    return _tables_of(data), {"source": "the run's schema, reconstructed", "path": path, **hashes,
+                              "base_commit": entry["base_commit"], "matched_on": entry["matched_on"],
+                              "observed_at": entry["observed_at"],
+                              "reconstruction": f"reconstructed_bytes.RECONSTRUCTIONS (#{entry['issue']})"}
 
 
 # -------------------------------------------------------------- relocation
@@ -1426,6 +1445,94 @@ def _cap(rows: list[dict[str, Any]], key: str, block: dict[str, Any]) -> None:
     block[f"{key}_truncated"] = max(0, len(rows) - PATH_LIMIT) or None
 
 
+def _read_back_list(text: str, known: list[Any]) -> list[Any] | None:
+    """`text`, a list's `str`, read back as the list it is the text of, or
+    None. `ast.literal_eval` reads a list of literals; where it cannot, a
+    member that is not one (a `datetime.date`, whose text is
+    `datetime.date(2020, 1, 1)`) is read as whichever `known` scalar its
+    text is, by putting a string placeholder in its place first (#3853).
+    Every occurrence of such a text is replaced, longest first; one inside
+    a string member leaves that member either unparseable or holding a
+    placeholder, whose text no list before the edit had, so the caller's
+    check (the rebuilt list's text against the edit) refuses it."""
+    try:
+        parsed = ast.literal_eval(text)
+        return parsed if isinstance(parsed, list) else None
+    except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
+        pass
+    subs: dict[str, Any] = {}
+    for m in known:
+        if isinstance(m, (dict, list)):
+            continue
+        r = repr(m)
+        try:
+            back = ast.literal_eval(r)
+            if type(back) is type(m) and back == m:
+                continue                          # a literal: read back as itself
+        except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
+            pass
+        subs.setdefault(r, m)
+    marks: dict[str, Any] = {}
+    for n, (r, m) in enumerate(sorted(subs.items(), key=lambda kv: -len(kv[0]))):
+        mark = f"\x00removals-member-{n}\x00"
+        if repr(mark) in text:
+            return None
+        text = text.replace(r, repr(mark))
+        marks[mark] = m
+    try:
+        parsed = ast.literal_eval(text)
+    except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
+        return None
+    if not isinstance(parsed, list):
+        return None
+    return [marks.get(x, x) if isinstance(x, str) else x for x in parsed]
+
+
+#: At most this many pre-amend records are rebuilt for one run (#3854): one
+#: per combination of the inverses each amend's recorded edit admits.
+PRE_AMEND_LIMIT = 16
+
+
+def _inverse_texts(now: str, old: str, new: str) -> list[str]:
+    """Every text (whitespace runs collapsed) that #903's check on the
+    recorded edit — the first occurrence of `old` turned into `new` —
+    turns into `now`: the edit reversed at each occurrence of `new` (with
+    an empty `new`, at every place) and kept where it passes that check
+    (#3854)."""
+    after, o, n = _ws(now), _ws(old), _ws(new)
+    out: list[str] = []
+    k = after.find(n)
+    while k != -1:
+        text = after[:k] + o + after[k + len(n):]
+        if o in text and text.replace(o, n, 1) == after and text not in out:
+            out.append(text)
+        k = after.find(n, k + 1) if n else (k + 1 if k < len(after) else -1)
+    return out
+
+
+def _with_leaf(record: dict[str, Any], path: str, value: Any) -> dict[str, Any] | None:
+    """A copy of `record` with the leaf at `path` set to `value`, or None
+    where the path does not resolve to a leaf."""
+    out = copy.deepcopy(record)
+    node: Any = out
+    tokens = _tokens(path)
+    for t in tokens[:-1]:
+        if isinstance(t, int) and isinstance(node, list) and 0 <= t < len(node):
+            node = node[t]
+        elif isinstance(t, str) and isinstance(node, dict) and t in node:
+            node = node[t]
+        else:
+            return None
+    last = tokens[-1] if tokens else None
+    if isinstance(last, str) and isinstance(node, dict) and last in node:
+        node[last] = value
+    elif isinstance(last, int) and isinstance(node, list) and 0 <= last < len(node):
+        node[last] = value
+    else:
+        return None
+    return out
+
+
 def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit: dict[str, Any] | None = None, *,
              receipt: dict[str, Any] | None = None,
@@ -1531,6 +1638,35 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
             row["supported_slot_only"] = True
         return hit
 
+    rebuilt: list[Any] = []
+
+    def pre_amend() -> list[tuple[dict[str, Any], _Presence]] | None:
+        # The record before the curator's amends (#3854): the final record
+        # with each amend's recorded edit reversed at its path. #903 proves
+        # each amend changed exactly its one leaf, so where every amend is at
+        # a string leaf with one recorded edit this is the record the model
+        # wrote, one per combination of the inverses the edits admit. None
+        # where any amend cannot be reversed: an unrecorded or repeated edit,
+        # a path that holds no string now (a list amend among them), or more
+        # combinations than `PRE_AMEND_LIMIT`.
+        if not rebuilt:
+            records: list[dict[str, Any]] | None = [final]
+            for a in sorted(amended):
+                edits = amended_edits.get(a) or []
+                found, now = _resolve_value(final, a)
+                if len(edits) != 1 or edits[0] is None or not found or not isinstance(now, str):
+                    records = None
+                    break
+                texts = _inverse_texts(now, *edits[0])
+                if not texts or len(records) * len(texts) > PRE_AMEND_LIMIT:
+                    records = None
+                    break
+                records = [r for rec in records for t in texts if (r := _with_leaf(rec, a, t)) is not None]
+                if not records:
+                    break
+            rebuilt.append([(r, _Presence(original, r)) for r in records] if records else None)
+        return rebuilt[0]
+
     def amended_at(at: str | None) -> bool:
         return at is not None and (at in amended or any(a in amended for a in _ancestors(at)))
 
@@ -1549,11 +1685,13 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # `[]`), as well as change one (#3835). So every list before the
         # edit it admits is rebuilt — the final list with one deleted
         # member put back at an index, in place of a member or inserted
-        # before one (a list whose text Python cannot read back, a date
-        # among them, is rebuilt only these ways, #3849), and the final
-        # list's text with one occurrence of the edit's `with` turned back
-        # into its `replace` (with an empty `with`, at every place), read
-        # back as a list — and a rebuild counts only where every member it
+        # before one, and the final list's text with one occurrence of the
+        # edit's `with` turned back into its `replace` (with an empty
+        # `with`, at every place), read back as a list — a member whose text
+        # Python cannot read back (a date, #3849) read as the member of the
+        # final list, the value or a rival it is the text of
+        # (`_read_back_list`, #3853), so an edit that drops several members
+        # from such a list is rebuilt too — and a rebuild counts only where every member it
         # says the edit removed is a deleted member this amend can have
         # removed (this one or a rival), or one the phases attest the
         # edit could have co-removed (`co_removable`, #3848): an unpopulated
@@ -1577,13 +1715,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         befores: list[list[Any]] = [[c if j == i else m for j, m in enumerate(now)]
                                     for c in (value, *rivals) for i in range(len(now))]
         befores += [[*now[:i], c, *now[i:]] for c in (value, *rivals) for i in range(len(now) + 1)]
+        known = [*now, value, *rivals]
         k = after.find(n)
         while k != -1:
-            try:
-                parsed = ast.literal_eval(after[:k] + o + after[k + len(n):])
-            except (ValueError, SyntaxError, TypeError, MemoryError, RecursionError):
-                parsed = None
-            if isinstance(parsed, list):
+            parsed = _read_back_list(after[:k] + o + after[k + len(n):], known)
+            if parsed is not None:
                 befores.append(parsed)
             k = after.find(n, k + 1) if n else (k + 1 if k < len(after) else -1)
         readings, seen = [], set()
@@ -1615,7 +1751,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # every such amend is at a scalar path of this shape with one
         # recorded edit and none is (the edits changed other values);
         # "ambiguous" otherwise — which entry the amend changed cannot be
-        # established, and that is no evidence it was another.
+        # established, and that is no evidence it was another. Before
+        # either, the record before the amends is rebuilt and joined
+        # (`pre_amend`, #3854), which decides wherever it places the entry.
         target = list_path or path
         shape = _any_index(target)
         parent = shape[:max(shape.rfind("."), 0)]
@@ -1625,6 +1763,24 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                        and "[" not in s[len(parent) + 1:])]
         if not related:
             return None
+        # The stronger reading (#3854): in the record before the amends the
+        # join places the entry again, and whether the value is there says
+        # whether the amend removed it (the amended leaf itself, or a
+        # sibling the join lost only because the amend changed the value
+        # identifying its entry) or it was gone before the amend. Where any
+        # rebuild cannot place the entry either, the amends are read below.
+        readings: set[bool] = set()
+        for record, presence in pre_amend() or []:
+            if remap_path(target, original, record)["path"] is None:
+                readings = set()
+                break
+            # Kept as written: a value the model had already rewritten (the
+            # join lost its entry, but it is the model's rewrite) is not the
+            # amend's, as #3725 reads a rewrite a curator then amended.
+            readings.add(presence.carried(path, list_path)
+                         and (list_path is not None or presence.retains(path, value)))
+        if readings:
+            return "amend" if readings == {True} else None if readings == {False} else "ambiguous"
         against = True
         for a in related:
             edits = amended_edits.get(a) or []
