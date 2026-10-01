@@ -1,0 +1,190 @@
+# The first reading of the 122 Q19 recommendations (#3747, #3831): the class
+# each sentence of notes/q19_recommendations_3831_packet.json is pinned to by
+# a fragment in tests/test_q19_rationale_lint.py::_RECOMMENDATIONS_READ
+# at origin/main c962a6cc8 (#3829, #3836, #3838). Derived from those pins, not
+# re-judged: tests/test_q19_blind_second_reading.py applies the pins to the
+# packet's sentences and fails if any class here differs from them. The pins
+# remain the record; this file is their per-item form, so the agreement in
+# notes/q19_recommendations_blind_agreement_2026-09-30.md recomputes from two
+# files.
+#
+# `reasons` are given only for the items the second reading classes
+# differently. `basis: comment` is the comment beside the pin in that test
+# (or the module docstring's step-3 list), transcribed; `basis:
+# reconstructed` is a reason the pins do not state, written on 2026-09-30
+# by the agent integrating #3831 from the item's source rating, and is that
+# agent's reading, not the first reader's.
+# One rater: the agent(s) implementing #3747/#3829/#3836, who wrote the pins.
+packet_sha256: 9a9b0dec8b2053c89de776d76273517108224885fd5073a26834d7b1ceb9152d
+source_commit: c962a6cc88f8844ef59890fb5fa1bd30931edd1e
+basis: tests/test_q19_rationale_lint.py::_RECOMMENDATIONS_READ
+rater: 'the agent(s) that wrote the #3747 pins; not an independent rater'
+classes:
+  q19r-000: placement
+  q19r-001: criticism
+  q19r-002: placement
+  q19r-003: request
+  q19r-004: request
+  q19r-005: request
+  q19r-006: request
+  q19r-007: request
+  q19r-008: request
+  q19r-009: request
+  q19r-010: request
+  q19r-011: criticism
+  q19r-012: request
+  q19r-013: criticism
+  q19r-014: request
+  q19r-015: placement
+  q19r-016: placement
+  q19r-017: placement
+  q19r-018: request
+  q19r-019: placement
+  q19r-020: criticism
+  q19r-021: request
+  q19r-022: request
+  q19r-023: placement
+  q19r-024: request
+  q19r-025: placement
+  q19r-026: placement
+  q19r-027: placement
+  q19r-028: request
+  q19r-029: request
+  q19r-030: request
+  q19r-031: named_absence
+  q19r-032: request
+  q19r-033: placement
+  q19r-034: request
+  q19r-035: placement
+  q19r-036: placement
+  q19r-037: criticism
+  q19r-038: request
+  q19r-039: request
+  q19r-040: request
+  q19r-041: request
+  q19r-042: request
+  q19r-043: placement
+  q19r-044: placement
+  q19r-045: request
+  q19r-046: request
+  q19r-047: request
+  q19r-048: request
+  q19r-049: request
+  q19r-050: criticism
+  q19r-051: placement
+  q19r-052: request
+  q19r-053: criticism
+  q19r-054: criticism
+  q19r-055: request
+  q19r-056: placement
+  q19r-057: request
+  q19r-058: placement
+  q19r-059: placement
+  q19r-060: placement
+  q19r-061: placement
+  q19r-062: placement
+  q19r-063: placement
+  q19r-064: placement
+  q19r-065: criticism
+  q19r-066: request
+  q19r-067: request
+  q19r-068: placement
+  q19r-069: request
+  q19r-070: placement
+  q19r-071: placement
+  q19r-072: placement
+  q19r-073: placement
+  q19r-074: placement
+  q19r-075: placement
+  q19r-076: placement
+  q19r-077: placement
+  q19r-078: placement
+  q19r-079: placement
+  q19r-080: request
+  q19r-081: placement
+  q19r-082: placement
+  q19r-083: criticism
+  q19r-084: placement
+  q19r-085: placement
+  q19r-086: placement
+  q19r-087: placement
+  q19r-088: placement
+  q19r-089: placement
+  q19r-090: placement
+  q19r-091: placement
+  q19r-092: criticism
+  q19r-093: criticism
+  q19r-094: placement
+  q19r-095: placement
+  q19r-096: placement
+  q19r-097: placement
+  q19r-098: placement
+  q19r-099: placement
+  q19r-100: request
+  q19r-101: request
+  q19r-102: request
+  q19r-103: placement
+  q19r-104: placement
+  q19r-105: placement
+  q19r-106: placement
+  q19r-107: placement
+  q19r-108: placement
+  q19r-109: placement
+  q19r-110: placement
+  q19r-111: placement
+  q19r-112: placement
+  q19r-113: placement
+  q19r-114: placement
+  q19r-115: request
+  q19r-116: criticism
+  q19r-117: criticism
+  q19r-118: criticism
+  q19r-119: criticism
+  q19r-120: criticism
+  q19r-121: criticism
+reasons:
+  q19r-001:
+    basis: comment
+    reason: ethical_reviews holds the USF IRB and Canadian REB reviews, and the rating's note on it says
+      "no conflicts-of-interest statement"
+  q19r-006:
+    basis: comment
+    reason: '"consider embedding the RO-Crate lineage as a provenance graph" asks for a change to a release
+      artifact the record points at, not to a value the record holds; it gives the slots'' content as
+      doi:10.60775/fairhub.2 and the lineage a graph of its own. Round 4 (#3836): "the RO-Crate lineage"
+      is to become a graph of its own, not what the parent_datasets/was_derived_from it asks for are to
+      hold'
+  q19r-011:
+    basis: comment
+    reason: preprocessing_strategies names b2aiprep, openSMILE, sparc, ppgs and Whisper, which the rating
+      says carry no version ("No tool carries a version number"), and external_resources, which it faults
+      for not listing the feasibility publication and white paper
+  q19r-013:
+    basis: comment
+    reason: preprocessing_strategies and machine_annotation_tools name sparc, openSMILE, Praat, Parselmouth,
+      ppgs and Whisper, which "have neither version nor URL"
+  q19r-050:
+    basis: comment
+    reason: source_caveats discloses the 419,614-byte residual, which the rating calls "stated but unexplained"
+  q19r-065:
+    basis: comment
+    reason: was_derived_from holds the study's name in prose, as its rating's own evidence quotes; "keeping
+      the study-name prose in notes" says where content is to go (the value was_derived_from holds, moving
+      to notes), not where a slot's content is now
+  q19r-092:
+    basis: comment
+    reason: file_collections lists ten archives and conforms_to claims an RO-Crate provenance graph, and
+      the rating says no listed archive is stated to carry it
+  q19r-093:
+    basis: comment
+    reason: variables holds four columns ("enumerates only four columns")
+  q19r-115:
+    basis: reconstructed
+    reason: 'no comment names this pin; its rating (issues_detected[12]) says "publisher is absent", so
+      the sentence names no value the record holds and step 3a fails: a request'
+  q19r-118:
+    basis: comment
+    reason: the text formats are listed with no encoding, which the rating records as a warning
+  q19r-121:
+    basis: comment
+    reason: file_collections lists ten collections, and the rating says "no collection carries a was_generated_by"
