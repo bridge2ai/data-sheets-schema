@@ -151,8 +151,14 @@ class Time(unittest.TestCase):
         "term, no verb": ("The higher-ranked source lists items, ", "e.g., x ", "and more."),
         "term, then verb": ("The higher-ranked source lists items, ", "e.g., x ", "and that value is used."),
         # v5's bundle-wide windows cross the same dots (#3887), bounded at 80
-        # characters; a negation with no partner fails at every start.
-        "negation, no partner": ("No figure is given, ", "e.g., x ", "by the release page."),
+        # characters, so the cost of an overlapping window is 2^k for the k
+        # dots inside one window, per negation start. A sparse row ("e.g., x "
+        # per item) puts about ten dots in a window and one start in the
+        # sentence, and the overlapping #3894 form ran it in milliseconds
+        # (#3993). Each item here is a negation with no partner and sixteen
+        # "e.g.," filling one 80-character window: the overlapping form took
+        # about 3.7 s at n=20 against about 0.02 s for v5's disjoint window.
+        "negation, no partner": ("", "No " + "e.g.," * 16 + " ", "by the release page."),
     }
     CEILING = 1.0       # seconds for one call; the fixed pattern takes about a millisecond
 

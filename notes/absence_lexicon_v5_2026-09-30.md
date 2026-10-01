@@ -44,8 +44,11 @@ The owner decided all four on 2026-09-30, in one version:
   no, for, of, in* or *data*, or before *agreement(s), of, case(s),
   limitation(s), restriction(s), condition(s), terms* or *policy (policies)*.
   `used` and `using` are unchanged. Over the pinned records' free text bare
-  `use`/`uses` occurs 2,916 times, overwhelmingly as a noun: "use agreement(s)"
-  733 times, "use of" 387, "data use" 504. The guard is a list, not a parser,
+  `use`/`uses` occurs 3,103 times, overwhelmingly as a noun: "use agreement(s)"
+  738 times, "use of" 381, "data use" 505. These are what
+  `scripts/absence_use_noun_counts.py` prints: case-insensitive occurrences over
+  the v5 scope's free-text leaves (#3992; the figures first written here
+  could not be reproduced). The guard is a list, not a parser,
   so a noun `use` after an adjective ("secondary use") still counts as a verb.
   The test shows each guard deciding on its own, with one word changed at a
   time. No other pattern has this verb list (`rsn.recorded-here` has `used`
@@ -57,9 +60,16 @@ The owner decided all four on 2026-09-30, in one version:
   before whitespace, no longer end it. Every other `.` still ends it, as `;`
   and `:` do, and it is still at most 80 characters. These are #3894's
   disjoint alternatives, and a test shows that no character of a dense
-  abbreviation text can be taken two ways. The window is bounded, and the lint's
-  linear-time test now includes a bundle-wide sentence with 20 to 40 "e.g.," and
-  no partner. Sharing the sentence end brings the in-token `.` as well: the
+  abbreviation text can be taken two ways. That disjointness test is the
+  guard against #3894's overlapping form. The window is bounded at 80
+  characters, so an overlapping form costs 2^k per negation start for the k
+  dots inside one window. The lint's linear-time test therefore carries a
+  bundle-wide sentence of 20 to 40 negations with no partner, each followed by
+  sixteen "e.g.," that fill one window. With the overlapping form put back in
+  all three patterns it fails its one-second ceiling at n=20 (about 3.9 s,
+  against about 0.02 s for v5). Its first form, one "e.g., x " per item, put
+  about ten dots in a window and one start in the sentence, and passed under
+  the overlapping form (#3993). Sharing the sentence end brings the in-token `.` as well: the
   first `.` of "e.g." needs it, so the abbreviations cannot be excepted without
   it.
 
@@ -235,8 +245,26 @@ judgements rather than measure v5.
 - Nothing else imports `absence_lint` or the `lexicons/` registry. That was
   checked with `grep -r` over the whole worktree outside `data/`, and over the
   primary checkout's `notes/matched_cborg_2026-09-13/`, gitignored files
-  included. audit28 runs from its own frozen copy, and the only repository
-  files its registration checks are `api_runner.py`, `evidence_assertions.py`
-  and, from protocol 5, `source_review.py`
-  (`audit_controls/registration.py` `VERSIONED_SCIENTIFIC_FILES`); v5 touches
-  none of them.
+  included.
+- audit28 is unaffected (#3991 corrected the first wording here, which listed
+  only the versioned scientific files). Each audit runs from its own checkout
+  at its registered commit, and `audit_controls/registration.py` pins that
+  checkout, not this branch:
+  - `verify()` requires the working directory to be the registered
+    `repository` and its `HEAD` to be `repository_commit`. Every
+    implementation path (`implementation_paths`: every `.py`, `.yaml` and
+    `.json` under `src/data_sheets_schema/`, so the `lexicons/` files too,
+    every file under `src/download/prompts/`, the audit controls,
+    `pyproject.toml` and `poetry.lock`) must be tracked and unchanged from that
+    `HEAD`. Each `pinned_files` entry must still hash to its recorded sha256,
+    and `api_runner` must import from that checkout. The pinned set
+    (`required_paths`) also takes in the parent run's own pinned files,
+    resolved in the parent's checkout.
+  - `validate_scientific_identity` compares `api_runner.py`,
+    `evidence_assertions.py`, `source_review.py`, `profiles.py` and
+    `schema_digest.py` between the audit checkout and its parent. It pins both
+    copies of the versioned ones (`VERSIONED_SCIENTIFIC_FILES`, plus
+    `source_review.py` from protocol 5) and requires equal hashes for the rest.
+  - This PR changes only `origin/main`. It moves no audit or parent
+    checkout's `HEAD`, edits no file in one, and touches none of the five
+    scientific files.
