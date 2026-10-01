@@ -32,6 +32,7 @@ import fnmatch
 import io
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -71,11 +72,13 @@ APPROACHES = {
     "native_agentic": (True, "Claude Code / native runtime following the d4d playbooks, the agents they name and the "
                              "files they name"),
     "interactive_session": (True, "a person's Claude Code session in a checkout, where the /d4d-* playbooks run "
-                                  "interactively: the project memory (CLAUDE.md) and the settings hooks Claude Code "
-                                  "loads into it. Interactive sessions only: registered native runs pass --safe-mode, "
-                                  "which disables them"),
+                                  "interactively: the project memory (CLAUDE.md), the settings hooks and the "
+                                  "descriptions of every command, agent and skill Claude Code loads into it. A "
+                                  "registered native launch that does not pass --safe-mode or --bare loads them too "
+                                  "(see run_controllers)"),
     "api": (True, "d4d api run|batch: api_runner and its condition prompts"),
-    "github_assistant": (True, "the @d4dassistant workflow and its instruction files"),
+    "github_assistant": (True, "the @d4dassistant workflow, what it names or runs, the condition its d4d api run "
+                               "runs, and an instruction file only where the workflow loads one"),
     "shared_schema": (True, "the LinkML generation schema, digest inputs, profile and manifest"),
     "deterministic": (True, "the arm commands that build a non-baseline arm's bundle or record (healthsheet, "
                             "RO-Crate) and their import closure"),
@@ -135,6 +138,22 @@ MODULE_RUN = re.compile(r"(?<![\w-])-m\s+([A-Za-z_]\w*(?:\.\w+)*)")
 PROJECT_MEMORY = ("CLAUDE.md", "CLAUDE.local.md", ".claude/CLAUDE.md")
 PROJECT_SETTINGS = (".claude/settings.json", ".claude/settings.local.json")
 CUSTOMIZATION_OFF_FLAGS = frozenset({"--safe-mode", "--bare"})
+#: Where Claude Code finds the commands, agents and skills whose descriptions
+#: it lists in every interactive session (the Agent tool's agent types, the
+#: skill and command listing); a body is loaded only when it is invoked
+#: (#4091). Commands and agents are found at any depth, skills one level down.
+SESSION_DESCRIBED = ((".claude/commands", "**/*.md"), (".claude/agents", "**/*.md"), (".claude/skills", "*/SKILL.md"))
+#: The frontmatter keys a session lists (the name and the description).
+SESSION_KEYS = ("name", "description")
+#: A `d4d <group> <command>`, or `python -m data_sheets_schema.cli <group>
+#: <command>`, that a text runs: the CLI group it runs (#4091).
+CLI_GROUP_RUN = re.compile(r"(?:(?<![\w/.-])d4d|(?<![\w-])-m\s+data_sheets_schema\.cli)\s+([a-z][\w-]*)\s+[a-z]")
+#: The CLI package imports every group: a closure that reaches it stops
+#: there, and a group is followed where a text runs it (#4091).
+CLI_PACKAGE = ("src/data_sheets_schema/cli/__init__.py", "src/data_sheets_schema/cli/__main__.py")
+#: YAML files: a comment in one counts where a text names it for the model to
+#: Read, since the Read tool returns it raw (#4091); the digest drops it.
+YAML_SUFFIXES = frozenset({".yaml", ".yml"})
 #: argv flags whose next element is the system prompt a native runtime is
 #: launched with (#4054).
 SYSTEM_PROMPT_FLAGS = frozenset({"--system-prompt", "--append-system-prompt"})
@@ -176,6 +195,26 @@ ARGS_NAMES = frozenset({"args", "arguments", "ns", "namespace", "opts", "options
 class ConfigError(ValueError):
     """The configuration, a surface or a derivation failed: the scan did not
     happen (exit 2)."""
+
+
+class UnparsedSurface(Exception):
+    """A Python surface that does not parse under this interpreter: the scan
+    cannot classify its code, so it stops (exit 2) rather than report the file
+    as having nothing that gates (#4092)."""
+
+    def __init__(self, path: str, error: BaseException):
+        super().__init__(f"{path} ({type(error).__name__}: {error})")
+        self.path = path
+
+
+def _interpreter() -> str:
+    return f"{platform.python_implementation()} {platform.python_version()} ({sys.executable})"
+
+
+def _unparsed(files: list[str]) -> ConfigError:
+    return ConfigError(f"{len(files)} Python file(s) cannot be parsed by {_interpreter()}, so the scan cannot "
+                       "vouch for them: " + "; ".join(files) + ". Code the project's interpreter parses can need a "
+                       "newer Python: run the scanner with the project's interpreter (`poetry run python`) (#4092)")
 
 
 def _not_derived(what: str, how: str) -> ConfigError:
@@ -414,14 +453,9 @@ def _string_lines(node, toks: list, starts: list, lines: list[str]) -> list[tupl
 
 def _python_units(text: str, tree=None):
     if tree is None:
-        try:
-            tree = ast.parse(text)
-        except SyntaxError:
-            tree = None
-    if tree is None:
-        for i, line in enumerate(text.splitlines(), 1):
-            yield i, "unparsed", line, line
-        return
+        # A file that does not parse raises: its code cannot be classified,
+        # and a surface the scan cannot classify stops it (#4092).
+        tree = ast.parse(text)
     lines = text.splitlines()
     try:
         toks = list(tokenize.generate_tokens(io.StringIO(text).readline))
@@ -591,7 +625,407 @@ def _yaml_units(text: str):
             yield i, "comment", comment, line
 
 
-def units_for(path: Path, rel: str, text: str, tree=None):
+# ---- code in run-shaping YAML, workflow, config and shell files (#4091)
+#
+# A workflow, a config or a shell script decides what runs as surely as
+# Python does: an `if:` on a project name, a `case` on it, a `--project
+# CHORUS` default or a per-project key is project-keyed code. Each line is
+# split into spans: a branch (code_branch), a default, assignment, option
+# value or bare key/value (code_table), a comment, and the rest of the line,
+# which keeps its YAML context or `value`. A token is matched in one span
+# only.
+
+
+def _merge(first: list, more: list) -> list:
+    """`first` plus each span of `more` that overlaps none of them."""
+    out = list(first)
+    for a, b, ctx in more:
+        if a < b and not any(a < e and s < b for s, e, _ in out):
+            out.append((a, b, ctx))
+    return out
+
+
+def _split_units(line: str, spans: list, rest: str) -> list[tuple[str, str]]:
+    """(text, context) for each span of a line, and the line with the spans
+    blanked out as `rest`, so that no token is counted twice."""
+    out = [(line[a:b], ctx) for a, b, ctx in sorted(spans)]
+    chars = list(line)
+    for a, b, _ in spans:
+        chars[a:b] = " " * (b - a)
+    remainder = "".join(chars)
+    if remainder.strip():
+        out.append((remainder, rest))
+    return out
+
+
+def _unquote(s: str) -> str:
+    return re.sub(r"""'([^']*)'|"((?:[^"\\]|\\.)*)"|\\(.)""",
+                  lambda m: next(g for g in m.groups() if g is not None), s)
+
+
+#: A shell token: a separator, a word (quoted parts, escapes and plain text
+#: run together), a redirection, or whitespace.
+_SH_LEX = re.compile(r"""(?P<sep>;;|&&|\|\||[;&|()])"""
+                     r"""|(?P<word>(?:'[^']*'|"(?:[^"\\]|\\.)*"|\\.|[^\s;&|()<>'"\\])+)"""
+                     r"""|(?P<redir>\d*[<>]+&?-?)|(?P<space>\s+)|(?P<other>.)""")
+_SH_KEYWORDS = frozenset({"if", "elif", "while", "until", "then", "do", "else", "!", "time", "{", "}"})
+_SH_DECLARE = frozenset({"export", "local", "readonly", "declare", "typeset"})
+_SH_TEST_OPS = frozenset({"=", "==", "!=", "=~", "<", ">", "!", "]", "]]"})
+
+
+def _sh_literal(word: str) -> str:
+    """The literal text a shell word spells: GitHub expressions, shell
+    expansions and quotes removed."""
+    w = re.sub(r"\$\{\{.*?\}\}", "", word)
+    w = re.sub(r"\$(?:\{[^}]*\}|\([^)]*\)?|[A-Za-z_]\w*|[@*#?$!0-9-])|\$$", "", w)
+    return _unquote(w)
+
+
+def _sh_value(word: str) -> bool:
+    """A value with literal text and no whitespace: a table entry."""
+    lit = _sh_literal(word)
+    return bool(lit.strip()) and not re.search(r"\s", lit)
+
+
+def _sh_operand(word: str) -> bool:
+    """A value a test compares or a condition passes: literal text, not an
+    operator or an option."""
+    return word not in _SH_TEST_OPS and not word.startswith("-") and bool(_sh_literal(word).strip())
+
+
+class _ShellSpans:
+    """Code spans of shell lines, read in order with the state a `case` and a
+    multi-line condition need (#4091). A branch: the operands of `[ ]`, `[[
+    ]]` and `test`, the arguments of an `if`/`elif`/`while`/`until`
+    condition, a `case` pattern. A table: a default (`${VAR:-X}`), an
+    assignment (`VAR=X`, `VAR=(X Y)`), a long option's value (`--project X`,
+    `--project=X`) and a `for` list, when the value has no whitespace."""
+
+    def __init__(self):
+        self.case = 0
+        self.pattern_next = False
+        self.condition = False
+
+    def __call__(self, line: str) -> list:
+        spans: list = []
+
+        def claim(a, b, ctx):
+            if a < b and not any(a < e and s < b for s, e, _ in spans):
+                spans.append((a, b, ctx))
+
+        # a GitHub expression is substituted before the shell runs: read it as
+        # one expansion (its own literals are `_expr_spans`' business)
+        line = _GH_EXPR.sub(lambda x: "$" + "_" * (len(x.group(0)) - 1), line)
+        toks = []
+        for m in _SH_LEX.finditer(line):
+            kind, text = m.lastgroup, m.group(0)
+            if kind == "space":
+                continue
+            if kind == "word" and text.startswith("#") and (m.start() == 0 or line[m.start() - 1].isspace()
+                                                            or (toks and toks[-1][0] == "sep")):
+                claim(m.start(), len(line), "comment")
+                break
+            toks.append((kind, m.start(), m.end(), text))
+        code_end = spans[0][0] if spans else len(line)
+        for m in re.finditer(r"\$\{[A-Za-z_]\w*:?[-=+]((?:[^{}]|\{[^{}]*\})*)\}", line[:code_end]):
+            if _sh_literal(m.group(1)).strip():
+                claim(m.start(1), m.end(1), "code_table")
+        start = 0
+        if self.case and self.pattern_next:
+            close = next((k for k, t in enumerate(toks) if t[0] == "sep" and t[3] == ")"), None)
+            if close is not None and not (toks and toks[0][3] == "esac"):
+                for t in toks[:close]:
+                    if t[0] == "word" and _sh_literal(t[3]).strip():
+                        claim(t[1], t[2], "code_branch")
+                self.pattern_next = False
+                start = close + 1
+        segments, seg = [], []
+        for t in toks[start:]:
+            if t[0] == "sep":
+                segments.append((seg, t[3]))
+                seg = []
+            elif t[0] == "word":
+                seg.append(t)
+        segments.append((seg, None))
+        array_next = False
+        for words, sep in segments:
+            if array_next:
+                for w in words:
+                    if _sh_value(w[3]):
+                        claim(w[1], w[2], "code_table")
+                array_next = False
+                continue
+            i = 0
+            while i < len(words) and words[i][3] in _SH_KEYWORDS:
+                if words[i][3] in {"if", "elif", "while", "until"}:
+                    self.condition = True
+                elif words[i][3] in {"then", "do"}:
+                    self.condition = False
+                i += 1
+            if i < len(words) and words[i][3] == "case":
+                self.case += 1
+                self.pattern_next = True
+                continue
+            if i < len(words) and words[i][3] == "esac":
+                self.case = max(0, self.case - 1)
+                self.pattern_next = False
+                continue
+            while i < len(words):
+                w = words[i][3]
+                if w in _SH_DECLARE or (w.startswith("-") and i and words[i - 1][3] in _SH_DECLARE):
+                    i += 1
+                    continue
+                m = re.match(r"[A-Za-z_]\w*(?:\[[^\]]*\])?\+?=", w)
+                if not m:
+                    break
+                if m.end() == len(w) and sep == "(":
+                    array_next = True
+                elif _sh_value(w[m.end():]):
+                    claim(words[i][1] + m.end(), words[i][2], "code_table")
+                i += 1
+            if i >= len(words):
+                continue
+            cmd, args = words[i][3], words[i + 1:]
+            if cmd in {"[", "[["}:
+                for w in args:
+                    if w[3] in {"]", "]]"}:
+                        break
+                    if _sh_operand(w[3]):
+                        claim(w[1], w[2], "code_branch")
+            elif cmd == "test" or self.condition:
+                for w in args:
+                    if _sh_operand(w[3]):
+                        claim(w[1], w[2], "code_branch")
+            elif cmd == "for" and len(args) >= 2 and args[1][3] == "in":
+                for w in args[2:]:
+                    if _sh_value(w[3]):
+                        claim(w[1], w[2], "code_table")
+            for j, w in enumerate(args):
+                m = re.match(r"--[\w-]+=", w[3])
+                if m and _sh_value(w[3][m.end():]):
+                    claim(w[1] + m.end(), w[2], "code_table")
+                elif re.fullmatch(r"--[\w-]+", w[3]) and j + 1 < len(args) and \
+                        not args[j + 1][3].startswith("-") and _sh_value(args[j + 1][3]):
+                    claim(args[j + 1][1], args[j + 1][2], "code_table")
+            if sep == ";;" and self.case:
+                self.pattern_next = True
+        if any(t[0] == "sep" and t[3] == ";;" for t in toks) and self.case:
+            self.pattern_next = True
+        return spans
+
+
+def _shell_units(text: str):
+    """Units of a shell script (#4091): its code spans, its comments and the
+    rest of each line as `value`."""
+    spans_of = _ShellSpans()
+    for i, line in enumerate(text.splitlines(), 1):
+        for unit, ctx in _split_units(line, spans_of(line), "value"):
+            yield i, ctx, unit, line
+
+
+_JS_TOKEN = re.compile(r"""'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`|//.*$|[\[\](){}]""")
+
+
+def _js_spans(line: str) -> list:
+    """Code spans of a JavaScript line (a github-script step, #4091): a string
+    compared (`===`, `!=`, ...), a `case` label or an argument of
+    `.includes`, `.startsWith`, `.endsWith`, `.indexOf` is a branch; a bare
+    string assigned, used as an object value, an array item, a default
+    (`||`, `??`), a conditional value or a return value is a table."""
+    spans, stack = [], []
+    for m in _JS_TOKEN.finditer(line):
+        t = m.group(0)
+        if t.startswith("//"):
+            spans.append((m.start(), len(line), "comment"))
+            break
+        if t in "[({":
+            stack.append(t)
+            continue
+        if t in "])}":
+            if stack:
+                stack.pop()
+            continue
+        content = t[1:-1]
+        if t[0] == "`" and "${" in content:
+            continue
+        before, after = line[:m.start()].rstrip(), line[m.end():].lstrip()
+        if (before.endswith(("===", "!==", "==", "!=")) or after.startswith(("===", "!==", "==", "!="))
+                or re.search(r"(?:^|[^\w$.])case$", before)
+                or re.search(r"\.(?:includes|startsWith|endsWith|indexOf|lastIndexOf)\($", before)):
+            spans.append((m.start(), m.end(), "code_branch"))
+        elif content and not re.search(r"\s", content) and (
+                re.search(r"(?:^|[^=!<>])=$|=>$|:$|\|\|$|\?\?$|\?$|\[$|\breturn$", before)
+                or (before.endswith(",") and stack and stack[-1] == "[")):
+            spans.append((m.start(), m.end(), "code_table"))
+    return spans
+
+
+_GH_EXPR = re.compile(r"\$\{\{(.*?)\}\}")
+_GH_LITERAL = re.compile(r"'(?:[^']|'')*'")
+_GH_COMPARE = ("==", "!=", "<=", ">=", "<", ">")
+
+
+def _enclosing_call(text: str, at: int) -> str:
+    """The name of the call whose parentheses enclose position `at`."""
+    depth = 0
+    for k in range(at - 1, -1, -1):
+        if text[k] == ")":
+            depth += 1
+        elif text[k] == "(":
+            if depth == 0:
+                m = re.search(r"([A-Za-z_]\w*)\s*$", text[:k])
+                return m.group(1).lower() if m else ""
+            depth -= 1
+    return ""
+
+
+def _expr_spans(text: str, base: int = 0) -> list:
+    """Code spans of a GitHub Actions expression (an `if:` value or the inside
+    of `${{ }}`, #4091): a literal compared or tested by `contains`,
+    `startsWith` or `endsWith` is a branch; a literal after `||` or `&&` (a
+    default, a conditional value) is a table."""
+    out = []
+    for m in _GH_LITERAL.finditer(text):
+        before, after = text[:m.start()].rstrip(), text[m.end():].lstrip()
+        if before.endswith(_GH_COMPARE) or after.startswith(_GH_COMPARE) or \
+                _enclosing_call(text, m.start()) in {"contains", "startswith", "endswith"}:
+            ctx = "code_branch"
+        elif before.endswith(("||", "&&")):
+            ctx = "code_table"
+        else:
+            continue
+        out.append((base + m.start(), base + m.end(), ctx))
+    return out
+
+
+def _gh_expr_spans(line: str) -> list:
+    out = []
+    for m in _GH_EXPR.finditer(line):
+        out += _expr_spans(m.group(1), m.start(1))
+    return out
+
+
+def _yaml_bare(item: str) -> bool:
+    """A YAML scalar with no whitespace: not an anchor, alias, tag, block,
+    flow collection or expression."""
+    if not item or item[0] in "&*!{[|>" or "${{" in item:
+        return False
+    s = item[1:-1] if len(item) > 1 and item[0] == item[-1] and item[0] in "'\"" else item
+    return bool(s) and not re.search(r"\s", s)
+
+
+def _yaml_value_spans(body: str, at: int) -> list:
+    """A bare scalar value, or each bare item of a flow sequence, from position
+    `at` of a data line: a table entry (#4091)."""
+    value = body[at:]
+    v = value.strip()
+    start = at + len(value) - len(value.lstrip())
+    if v.startswith("[") and v.endswith("]"):
+        out = []
+        for m in re.finditer(r"""'[^']*'|"(?:[^"\\]|\\.)*"|[^,\s][^,]*""", v[1:-1]):
+            item = m.group(0).rstrip()
+            if _yaml_bare(item):
+                out.append((start + 1 + m.start(), start + 1 + m.start() + len(item), "code_table"))
+        return out
+    return [(start, start + len(v), "code_table")] if _yaml_bare(v) else []
+
+
+_BLOCK_SCALAR = re.compile(r"[|>][0-9+-]*")
+#: A key `_KEY` does not read, such as a file path (`src/x/CHORUS.md:` in the
+#: pin registry): a key for the context, never a per-project table key.
+_PATH_KEY = re.compile(r"""^(\s*)(?:-\s+)?([^\s#'"{}\[\],&*!|>][^\s#]*?):(\s|$)""")
+
+
+def _yaml_code_units(text: str):
+    """Units of a YAML, workflow or config file that no approach hands to a
+    model and some approach runs on (#4091): the contexts `_yaml_units`
+    gives, with the code in it split out. A workflow's `if:` values and `${{
+    }}` expressions, its `run:` blocks (shell) and `script:` blocks
+    (github-script) are read as code; a key (`CM4AI:`) or a bare value
+    (`project: CHORUS`, a flow or block list item) of the data is a table. A
+    key that names a file path is not a key here (`_KEY` excludes `/`): the
+    pin registry's paths stay values. Prose keys keep their text."""
+    stack: list[tuple[int, str]] = []
+    block = None                    # (indent, lang, shell state, context)
+    for i, line in enumerate(text.splitlines(), 1):
+        stripped = line.strip()
+        indent = len(line) - len(line.lstrip(" "))
+        if block is not None:
+            if not stripped:
+                continue
+            if indent > block[0]:
+                spans = _gh_expr_spans(line)
+                if block[1] == "shell":
+                    spans = _merge(spans, block[2](line))
+                elif block[1] == "js":
+                    spans = _merge(spans, _js_spans(line))
+                elif block[1] == "expr":
+                    spans = _merge(spans, _expr_spans(line))
+                for unit, ctx in _split_units(line, spans, block[3]):
+                    yield i, ctx, unit, line
+                continue
+            block = None
+        if not stripped:
+            continue
+        if stripped.startswith("#"):
+            yield i, "comment", line, line
+            continue
+        body, comment = line, ""
+        hash_at = re.search(r"\s#\s", line)
+        if hash_at and line.count('"', 0, hash_at.start()) % 2 == 0 and \
+                line.count("'", 0, hash_at.start()) % 2 == 0:
+            body, comment = line[:hash_at.start()], line[hash_at.start():]
+        m = _KEY.match(body)
+        path_key = None if m else _PATH_KEY.match(body)
+        key_indent = 0
+        if m or path_key:
+            k = m or path_key
+            key_indent = len(k.group(1)) + (2 if body.lstrip().startswith("- ") else 0)
+            while stack and stack[-1][0] >= key_indent:
+                stack.pop()
+            stack.append((key_indent, k.group(2).strip("'\"").lower()))
+        else:
+            while stack and stack[-1][0] > indent:
+                stack.pop()
+        keys = [k for _, k in stack]
+        meta = [not (n and keys[n - 1] in _NAME_CONTAINERS) for n in range(len(keys))]
+        if any(k in _EXAMPLE_KEYS and meta[n] for n, k in enumerate(keys)):
+            context = "example"
+        elif keys and keys[-1] in _PROSE_KEYS and meta[-1]:
+            context = "prose"
+        else:
+            context = "value"
+        spans = _gh_expr_spans(body)
+        if m:
+            key = m.group(2).strip("'\"")
+            lowkey = key.lower()
+            if re.fullmatch(r"[\w.-]+", key):
+                spans = _merge(spans, [(m.start(2), m.end(2), "code_table")])
+            value = body[m.end():]
+            if _BLOCK_SCALAR.fullmatch(value.strip()):
+                lang = {"run": "shell", "script": "js", "if": "expr"}.get(lowkey)
+                block = (key_indent, lang, _ShellSpans() if lang == "shell" else None,
+                         "value" if lang else context)
+            elif lowkey == "if" and value.strip():
+                spans = _merge(spans, _expr_spans(value, m.end()))
+            elif lowkey == "run" and value.strip():
+                spans = _merge(spans, [(a + m.end(), b + m.end(), c) for a, b, c in _ShellSpans()(value)])
+            elif value.strip() and context != "prose":
+                spans = _merge(spans, _yaml_value_spans(body, m.end()))
+        else:
+            item = re.match(r"(\s*-\s+)(\S.*)$", body)
+            if item and context != "prose":
+                spans = _merge(spans, _yaml_value_spans(body, item.start(2)))
+        for unit, ctx in _split_units(body, spans, context):
+            yield i, ctx, unit, line
+        if comment:
+            yield i, "comment", comment, line
+
+
+def units_for(path: Path, rel: str, text: str, tree=None, code: bool = False):
+    """The units of one file, each with its context. `code` is true for a
+    YAML or config file that no approach hands to a model and some approach
+    runs on (#4091): its expressions, scripts and data tables are code."""
     suffix = path.suffix.lower()
     if suffix == ".py":
         return _python_units(text, tree)
@@ -599,7 +1033,9 @@ def units_for(path: Path, rel: str, text: str, tree=None):
         return _markdown_units(text, prompt_header=rel.startswith("src/download/prompts/")
                                and "## Prompt body" in text)
     if suffix in {".yaml", ".yml", ".config"}:
-        return _yaml_units(text)
+        return _yaml_code_units(text) if code else _yaml_units(text)
+    if suffix == ".sh":
+        return _shell_units(text)
     return ((i, "value", line, line) for i, line in enumerate(text.splitlines(), 1))
 
 
@@ -614,7 +1050,11 @@ class Surface:
     which the file runs as a script (its `__main__` block executes: a module
     an approach only imports never runs that block); `text_spans` are line
     ranges of run-shaping code whose text reaches a model, found by data flow
-    at discovery."""
+    at discovery; `loaded` maps an approach to the line ranges it loads into
+    the model whatever the file's role there (the description of an agent,
+    command or skill that a session lists, #4091); `raw` holds the approaches
+    whose model reads the file raw, comments included (a text names it for
+    the model to Read, #4091)."""
     path: str
     approaches: list[str]
     role: str
@@ -623,6 +1063,8 @@ class Surface:
     roles: dict = field(default_factory=dict)
     runs: set | None = None
     text_spans: list = field(default_factory=list)
+    loaded: dict = field(default_factory=dict)
+    raw: set = field(default_factory=set)
 
     def __post_init__(self):
         if not self.roles:
@@ -633,16 +1075,20 @@ class Surface:
     def as_dict(self) -> dict:
         return {"path": self.path, "approaches": list(self.approaches), "role": self.role, "status": self.status,
                 "why": self.why, "roles": dict(self.roles), "runs_as_script_in": sorted(self.runs),
-                "text_spans": [list(s) for s in self.text_spans]}
+                "text_spans": [list(s) for s in self.text_spans],
+                "loaded": {a: [list(s) for s in v] for a, v in sorted(self.loaded.items())},
+                "read_raw_in": sorted(self.raw)}
 
 
 class Surfaces:
     def __init__(self):
         self.files: dict[str, Surface] = {}
 
-    def add(self, rel: str, approach: str, role: str, status: str, why: str, *, runs: bool = True):
+    def add(self, rel: str, approach: str, role: str, status: str, why: str, *, runs: bool = True,
+            raw: bool = False):
         """Add one route to a file. `runs` says whether this route executes
-        the file as a script (False for an import closure)."""
+        the file as a script (False for an import closure); `raw` whether its
+        model reads the file raw (a text names it for the model to Read)."""
         cur = self.files.get(rel)
         if cur is None:
             cur = self.files[rel] = Surface(rel, [], role, status, why, roles={}, runs=set())
@@ -653,6 +1099,8 @@ class Surfaces:
             cur.roles[approach] = role
         if runs:
             cur.runs.add(approach)
+        if raw:
+            cur.raw.add(approach)
         if ROLE_RANK[role] > ROLE_RANK[cur.role]:
             cur.role, cur.why = role, why
         if cur.status != "live" and status == "live":
@@ -690,20 +1138,28 @@ _PARSED: dict[str, tuple] = {}
 def _parse(p: Path):
     """(text, tree) of a Python file, parsed once per process and content of
     the file (a rewrite of the same size within one mtime tick is still a
-    new version); (None, None) when it cannot be read as UTF-8 or parsed."""
+    new version); (None, None) when it cannot be read as UTF-8 or parsed,
+    and `_parse_problem` says why."""
+    key = str(_resolved(p))
     try:
         text = p.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError, ValueError):
+    except (UnicodeDecodeError, OSError, ValueError) as exc:
+        _PARSED[key] = (None, None, f"{type(exc).__name__}: {exc}")
         return None, None
-    key = str(_resolved(p))
     entry = _PARSED.get(key)
     if entry is None or entry[0] != text:
         try:
-            entry = (text, ast.parse(text))
-        except (SyntaxError, ValueError):
-            entry = (text, None)
+            entry = (text, ast.parse(text), None)
+        except (SyntaxError, ValueError) as exc:
+            entry = (text, None, f"{type(exc).__name__}: {exc}")
         _PARSED[key] = entry
     return (entry[0], entry[1]) if entry[1] is not None else (None, None)
+
+
+def _parse_problem(p: Path) -> str:
+    """Why `_parse` gave nothing for a file: the read or parse error."""
+    entry = _PARSED.get(str(_resolved(p)))
+    return entry[2] if entry and entry[2] else "not parsed"
 
 
 def _tree(path: Path) -> ast.Module:
@@ -780,6 +1236,12 @@ def _package_module_name(p: Path) -> str | None:
     return p.stem if p.parent.name == "data_sheets_schema" else None
 
 
+def _package_module(rel: str) -> bool:
+    """A module of the `data_sheets_schema` package (run with `-m`, never by
+    its path)."""
+    return rel.startswith("src/data_sheets_schema/")
+
+
 def _package_closure(root: Path, starts: list[str], package: str = "data_sheets_schema",
                      base: str = "src") -> list[Path]:
     """Every module of `package` statically imported from the start modules."""
@@ -802,8 +1264,8 @@ def _package_closure(root: Path, starts: list[str], package: str = "data_sheets_
             continue
         seen[mod] = p
         _, tree = _parse(p)
-        if tree is None:
-            continue
+        if tree is None:            # a module the closure cannot read stops the scan (#4092)
+            raise _unparsed([f"{_rel(root, p)} ({_parse_problem(p)})"])
         for node in _summary(tree)["imports"]:
             names = []
             if isinstance(node, ast.Import):
@@ -1017,11 +1479,18 @@ def condition_table(root: Path) -> dict:
             "agentic_runtimes": sorted(_required(env, "AGENTIC_RUNTIMES", tuple, nonempty=True))}
 
 
+#: Every `--condition` a command passes, with the value that follows it.
+CONDITION_ARG = re.compile(r"(?<![\w-])--condition(?![\w-])(?:=|\s+)?(\S*)")
+
+
 def github_assistant_run(root: Path, cond: dict) -> dict:
     """What the GitHub assistant workflow runs: its `d4d api run` command and
-    the condition it names, or the CLI default when it names none (#4057).
-    No workflow file is an empty result; a workflow with no `d4d api run`, or
-    one naming an unregistered condition, is not derived."""
+    the condition it names, or the CLI default when it passes no
+    `--condition` at all (#4057). No workflow file is an empty result; a
+    workflow with no `d4d api run`, one naming an unregistered condition, and
+    one whose `--condition` is not a literal condition name (an expression,
+    a variable: chosen when the workflow runs) are not derived (#4092): the
+    CLI default is reported only where no `--condition` is passed."""
     yml = root / ".github/workflows/d4d-agent.yml"
     if not yml.exists():
         return {}
@@ -1030,13 +1499,24 @@ def github_assistant_run(root: Path, cond: dict) -> dict:
     if m is None:
         raise _not_derived("what the GitHub assistant runs", "d4d-agent.yml has no `d4d api run` command")
     block = m.group(0)
-    cm = re.search(r"--condition[\s=]+(['\"]?)([\w.-]+)\1", block)
-    name = cm.group(2) if cm else cond["default"]
+    values = []
+    for cm in CONDITION_ARG.finditer(block.replace("\\\n", " ")):
+        lit = re.fullmatch(r"(['\"]?)([A-Za-z_][\w.-]*)\1", cm.group(1))
+        if lit is None:
+            raise _not_derived("what the GitHub assistant runs",
+                               f"its `d4d api run` passes `--condition {cm.group(1)}`, which is not a literal "
+                               "condition name: the condition is chosen when the workflow runs, and reporting the "
+                               "CLI default would be false")
+        values.append(lit.group(2))
+    if len(set(values)) > 1:
+        raise _not_derived("what the GitHub assistant runs",
+                           f"its `d4d api run` passes --condition {sorted(set(values))}")
+    name = values[0] if values else cond["default"]
     if name not in cond["prompts"]:
         raise _not_derived("what the GitHub assistant runs", f"--condition {name} is not a registered condition")
     return {"command": " ".join(block.replace("\\\n", " ").split()), "condition_name": name,
-            "condition_basis": "--condition" if cm else "CLI default (no --condition)",
-            "condition": name if cm else f"{name} (CLI default; no --condition)",
+            "condition_basis": "--condition" if values else "CLI default (no --condition)",
+            "condition": name if values else f"{name} (CLI default; no --condition)",
             "manifest": "given" if "--manifest" in block else "none passed (neutral for an external bundle)"}
 
 
@@ -1504,8 +1984,8 @@ def deterministic_arm_commands(root: Path, exclude: frozenset = frozenset()) -> 
         if _resolved(p) == _resolved(root / CLI_API) or _rel(root, p) in exclude:
             continue
         _, tree = _parse(p)
-        if tree is None:
-            continue
+        if tree is None:            # a group that does not parse could be an arm command (#4092)
+            raise _unparsed([f"{_rel(root, p)} ({_parse_problem(p)})"])
         lits = _str_constants(tree)
         arms_named = sorted({arm for sfx, arm in suffixes.items() if any(sfx in lit for lit in lits)})
         if arms_named:
@@ -1593,11 +2073,16 @@ def _import_targets(root: Path, p: Path, tree, dirs: list[str]) -> list[Path]:
     return out
 
 
-def _code_closure(root: Path, starts: list[Path], stop: set[Path]) -> tuple[list[Path], list[str]]:
+def _code_closure(root: Path, starts: list[Path], stop: set[Path], dirs: list[str] | None = None,
+                  opaque: frozenset = frozenset()) -> tuple[list[Path], list[str]]:
     """Every module the start modules import, statically (`_import_targets`),
     with the sys.path directories the closure's own code adds found to a
-    fixed point. A module in `stop` (an upstream input step) is not entered."""
-    dirs: list[str] = []
+    fixed point, beyond `dirs` (a script run by path has its own directory
+    on sys.path). A module in `stop` (an upstream input step) is not
+    entered; a module in `opaque` (the CLI package, which imports every
+    group) is reached but its imports are not followed. A module the closure
+    cannot read or parse stops the scan (#4092)."""
+    dirs = list(dirs or [])
     added: dict[Path, list[str]] = {}
     while True:
         seen: dict[Path, ast.AST] = {}
@@ -1608,12 +2093,14 @@ def _code_closure(root: Path, starts: list[Path], stop: set[Path]) -> tuple[list
                 continue
             text, tree = _parse(p)
             if tree is None:
-                continue
+                raise _unparsed([f"{_rel(root, p)} ({_parse_problem(p)})"])
             seen[p] = tree
+            if p in opaque:
+                continue
             if p not in added:          # only a module that names sys.path can extend it
                 added[p] = _sys_path_dirs(root, tree) if "sys.path" in text else []
             todo += _import_targets(root, p, tree, dirs)
-        found = sorted({d for p in seen for d in added[p]} - set(dirs))
+        found = sorted({d for p in seen for d in added.get(p, ())} - set(dirs))
         if not found:
             return sorted(seen), dirs
         dirs += found
@@ -1679,6 +2166,306 @@ def _flag_sites(root: Path, controllers: dict[str, Path], parsed: dict, flags) -
             if isinstance(n, ast.Constant) and n.value in flags:
                 out.add(f"{rel}:{n.lineno} {n.value}")
     return sorted(out)
+
+
+def _cli_groups(root: Path, text: str) -> list[str]:
+    """The `d4d` CLI groups a text runs (`d4d <group> <command>`, `python -m
+    data_sheets_schema.cli <group> <command>`) that exist as group modules
+    (#4091)."""
+    out = set()
+    for g in CLI_GROUP_RUN.findall(text):
+        if (root / "src/data_sheets_schema/cli" / f"{g.replace('-', '_')}.py").is_file():
+            out.add(g.replace("-", "_"))
+    return sorted(out)
+
+
+def _run_module_target(root: Path, here: Path, dotted: str) -> Path | None:
+    """The file `python -m dotted` runs, from a text or code in directory
+    `here`: resolved under src/, the checkout root, and `here` and its
+    parents below the top-level tree (a controller is run from its experiment
+    directory, `python -m audit_controls.native`). `-m package` runs the
+    package's `__main__.py`."""
+    if not re.fullmatch(r"[A-Za-z_]\w*(?:\.\w+)*", dotted):
+        return None
+    bases = [_resolved(root / "src"), _resolved(root)]
+    tops = {_resolved(root / t) for t in PYTHON_ROOTS}
+    d = _resolved(here)
+    while d != _resolved(root) and _is_inside(d, root):
+        bases.append(d)
+        if d in tops:
+            break
+        d = d.parent
+    for base in bases:
+        t = _module_at(base, dotted)
+        if t is not None and _is_inside(t, root):
+            main = t.parent / "__main__.py"
+            return _resolved(main) if t.name == "__init__.py" and main.is_file() else t
+    return None
+
+
+def _text_runs(root: Path, here: Path, text: str) -> list[tuple[Path, str]]:
+    """(file, the command) for each script a text runs: `python path.py`
+    (a path under a tree, or relative to `here`) or `python -m module`."""
+    out = []
+    for line in text.splitlines():
+        for m in MODULE_RUN.finditer(line):
+            t = _run_module_target(root, here, m.group(1))
+            if t is not None:
+                out.append((t, f"-m {m.group(1)}"))
+        for m in re.finditer(r"(?<![\w/.-])((?:\./)?[\w./-]+\.py)\b", line):
+            if not RUN_PREFIX.search(line[:m.start()]):
+                continue
+            for base in (root, here):
+                q = base / m.group(1)
+                if q.is_file() and _is_inside(q, root):
+                    out.append((_resolved(q), m.group(1)))
+                    break
+    return out
+
+
+def _interpreter_element(e) -> bool:
+    """An argv element that names a Python interpreter: `sys.executable`,
+    `manifest['python']`, `PYTHON`."""
+    text = ast.unparse(e) if not isinstance(e, ast.Starred) else ""
+    return "sys.executable" in text or bool(re.search(r"python", text, re.I))
+
+
+def _argv_runs(root: Path, p: Path, tree) -> list[tuple[Path, str]]:
+    """(file, where) for each script an argv in module `p` runs: `[..., '-m',
+    'pkg.mod', ...]`, and with a Python interpreter in the argv, the module
+    itself through `__file__` (a worker that relaunches itself) or a `.py`
+    path beside it (#4093)."""
+    rel, out = _rel(root, p), []
+    for n in ast.walk(tree):
+        if not isinstance(n, (ast.List, ast.Tuple)):
+            continue
+        consts = [e.value if isinstance(e, ast.Constant) and isinstance(e.value, str) else None for e in n.elts]
+        for i, c in enumerate(consts[:-1]):
+            if c == "-m" and consts[i + 1]:
+                t = _run_module_target(root, p.parent, consts[i + 1])
+                if t is not None:
+                    out.append((t, f"{rel}:{n.lineno} runs `-m {consts[i + 1]}`"))
+        if not any(_interpreter_element(e) for e in n.elts):
+            continue
+        for e in n.elts:
+            if any(isinstance(x, ast.Name) and x.id == "__file__" for x in ast.walk(e)):
+                out.append((_resolved(p), f"{rel}:{n.lineno} relaunches itself (`__file__`)"))
+            elif isinstance(e, ast.Constant) and isinstance(e.value, str) and e.value.endswith(".py"):
+                for base in (p.parent, root):
+                    if (base / e.value).is_file():
+                        out.append((_resolved(base / e.value), f"{rel}:{n.lineno} runs `{e.value}`"))
+                        break
+    return out
+
+
+def controller_run_evidence(root: Path, parsed: dict, index: dict,
+                            controllers: dict[str, Path]) -> dict[str, str]:
+    """How each run-controller module runs as a script (its `__main__` block
+    executes), or no entry when nothing runs it (#4093). Something runs it
+    when: an argv in any module runs it (`[python, '-m', module]`, a worker
+    relaunching itself through `__file__`); a document beside it, in its
+    directory or a parent directory below the top-level tree, or a module
+    docstring says `python path.py` or `python -m module`; or no module
+    imports it (an entry point: running it is the only way it acts). A
+    module a controller only imports is not run by that import."""
+    by_path = {_resolved(p): rel for rel, p in controllers.items()}
+    how: dict[str, set] = {}
+    importers: set[Path] = set()
+    for p, (_, tree) in parsed.items():
+        for t in _local_import_targets(root, p, tree, index) + _import_targets(root, p, tree, []):
+            if _resolved(t) != _resolved(p):
+                importers.add(_resolved(t))
+        for t, why in _argv_runs(root, p, tree):
+            if _resolved(t) in by_path:
+                how.setdefault(by_path[_resolved(t)], set()).add(why)
+    docs: dict[Path, str] = {}
+    tops = {_resolved(root / t) for t in PYTHON_ROOTS}
+    for rel, p in controllers.items():
+        d = _resolved(p).parent
+        while _is_inside(d, root) and d != _resolved(root):
+            for md in sorted(d.glob("*.md")):
+                if not REGISTERED_COPY.search(_rel(root, md)):
+                    docs.setdefault(md, None)
+            if d in tops:
+                break
+            d = d.parent
+        doc = ast.get_docstring(parsed[p][1]) or ""
+        for t, cmd in _text_runs(root, _resolved(p).parent, doc):
+            if t in by_path:
+                how.setdefault(by_path[t], set()).add(f"{rel}'s docstring runs `{cmd}`")
+    for md in docs:
+        try:
+            text = md.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as exc:
+            raise ConfigError(f"{_rel(root, md)} cannot be read, so whether it runs a controller is unknown: "
+                              f"{exc}") from exc
+        for t, cmd in _text_runs(root, md.parent, text):
+            if t in by_path:
+                how.setdefault(by_path[t], set()).add(f"{_rel(root, md)} runs `{cmd}`")
+    for rel, p in controllers.items():
+        if _resolved(p) not in importers:
+            how.setdefault(rel, set()).add("an entry point: no module imports it")
+    return {rel: "; ".join(sorted(v)) for rel, v in sorted(how.items())}
+
+
+def session_description_lines(text: str) -> list[tuple[int, int, str]]:
+    """The lines of a command, agent or skill that Claude Code lists in every
+    session (#4091): its frontmatter `name` and `description` (a multi-line
+    or block value with its continuation lines), else the first non-empty
+    line of the body, which is a command's description when its frontmatter
+    gives none (a heading's `#` is dropped there)."""
+    lines = text.splitlines()
+    start, spans = 0, []
+    if lines and lines[0].strip() == "---":
+        end = next((k for k in range(1, len(lines)) if lines[k].strip() == "---"), None)
+        if end is not None:
+            for k in range(1, end):
+                m = re.match(r"(%s)\s*:" % "|".join(SESSION_KEYS), lines[k])
+                if not m:
+                    continue
+                j = k + 1
+                while j < end and (not lines[j].strip() or lines[j][:1] in (" ", "\t")):
+                    j += 1
+                spans.append((k + 1, j, f"frontmatter {m.group(1)}"))
+            if any(label.endswith("description") for *_, label in spans):
+                return spans
+            start = end + 1
+    first = next((k for k in range(start, len(lines)) if lines[k].strip()), None)
+    return spans + ([(first + 1, first + 1, "description (the first line)")] if first is not None else [])
+
+
+def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: dict) -> list[dict]:
+    """Whether each registered native launch switches off what an interactive
+    session loads (#4092). A launch is an argv in a run controller that hands
+    a native runtime `--system-prompt`; it carries `--safe-mode` or `--bare`
+    when an element is that literal, or a list that holds it: a starred
+    local, module constant or imported constant, a sum of lists, or a field
+    of a record (`overlay['cli_flags']`) every controller that writes that
+    field fills with it. A list that is computed (a comprehension, a call)
+    is not read: it may drop the flag, so that launch is `None`, never
+    assumed to carry it. Returns one row per launch: its site, `carries`
+    (True, False or None) and the evidence or the reason."""
+    consts_of, binds_of = {}, {}
+
+    def rel(q):
+        return _rel(root, q)
+
+    def consts(q):
+        if q not in consts_of:
+            consts_of[q] = _module_assignments(parsed[q][1])
+        return consts_of[q]
+
+    def binds(q):
+        if q not in binds_of:
+            binds_of[q] = _bindings(root, q, parsed[q][1], index)
+        return binds_of[q]
+
+    def writers(key):
+        out = []
+        for _, p in sorted(controllers.items()):
+            for n in ast.walk(parsed[p][1]):
+                if isinstance(n, ast.Dict):
+                    out += [(p, v) for k, v in zip(n.keys, n.values) if isinstance(k, ast.Constant) and k.value == key]
+                elif isinstance(n, ast.keyword) and n.arg == key:
+                    out.append((p, n.value))
+        return out
+
+    def combine(results, what):
+        """Every value a name or a field can hold must hold the flag."""
+        if results and all(ok for ok, _ in results):
+            return True, [e for _, ev in results for e in ev]
+        if all(ok is False for ok, _ in results):
+            return False, [e for _, ev in results for e in ev]
+        reasons = [e for ok, ev in results if ok is None for e in ev]
+        if any(ok is False for ok, _ in results):
+            reasons.append(f"not every {what} holds --safe-mode or --bare")
+        return None, reasons
+
+    def resolve(q, fn, e, seen):
+        """(True, where the flag is) | (False, why) | (None, why) for a list."""
+        here = f"{rel(q)}:{getattr(e, 'lineno', '?')}"
+        if isinstance(e, (ast.List, ast.Tuple)):
+            return elements(q, fn, e.elts, seen)
+        if isinstance(e, ast.BinOp) and isinstance(e.op, ast.Add):
+            a, b = resolve(q, fn, e.left, seen), resolve(q, fn, e.right, seen)
+            if a[0] or b[0]:
+                return True, (a[1] if a[0] else []) + (b[1] if b[0] else [])
+            return (False, a[1] + b[1]) if a[0] is False and b[0] is False else \
+                (None, (a[1] if a[0] is None else []) + (b[1] if b[0] is None else []))
+        if isinstance(e, ast.Call) and _attr_or_name(e.func) in {"list", "tuple"} and len(e.args) == 1:
+            return resolve(q, fn, e.args[0], seen)
+        if isinstance(e, ast.Name):
+            key = (q, id(fn), e.id)
+            if key in seen:
+                return None, [f"{here} `{e.id}` refers to itself"]
+            seen = seen | {key}
+            local = _local_assignments(fn).get(e.id) if fn is not None else None
+            if local:
+                return combine([resolve(q, fn, v, seen) for v in local], "assignment")
+            if e.id in consts(q):
+                return resolve(q, None, consts(q)[e.id].value, seen)
+            target, attr = binds(q).get(e.id, (None, None))
+            if target is not None and attr and target in parsed and attr in consts(target):
+                return resolve(target, None, consts(target)[attr].value, seen)
+            return None, [f"{here} `{e.id}` cannot be read"]
+        if isinstance(e, ast.Attribute) and isinstance(e.value, ast.Name):
+            target, attr = binds(q).get(e.value.id, (None, None))
+            if target is not None and attr is None and target in parsed and e.attr in consts(target):
+                return resolve(target, None, consts(target)[e.attr].value, seen)
+            return None, [f"{here} `{ast.unparse(e)}` cannot be read"]
+        field_name = None
+        if isinstance(e, ast.Subscript) and isinstance(e.slice, ast.Constant) and isinstance(e.slice.value, str):
+            field_name = e.slice.value
+        elif isinstance(e, ast.Call) and _attr_or_name(e.func) == "get" and e.args and \
+                isinstance(e.args[0], ast.Constant) and isinstance(e.args[0].value, str):
+            field_name = e.args[0].value
+        if field_name is not None:
+            key = ("field", field_name)
+            if key in seen:
+                return None, [f"{here} the field `{field_name}` refers to itself"]
+            ws = writers(field_name)
+            if not ws:
+                return None, [f"{here} no run controller writes the field `{field_name}`"]
+            return combine([resolve(wq, _innermost_function(parsed[wq][1], v.lineno), v, seen | {key})
+                            for wq, v in ws], "writer of `" + field_name + "`")
+        return None, [f"{here} `{ast.unparse(e)[:60]}` is computed (a comprehension or a call can drop a flag)"]
+
+    def elements(q, fn, elts, seen):
+        results = []
+        for x in elts:
+            if isinstance(x, ast.Starred):
+                results.append(resolve(q, fn, x.value, seen))
+            elif isinstance(x, ast.Constant) and x.value in CUSTOMIZATION_OFF_FLAGS:
+                results.append((True, [f"{rel(q)}:{x.lineno} {x.value}"]))
+            elif isinstance(x, ast.Name) and _str_value(x, fn, _module_constants(q)) in CUSTOMIZATION_OFF_FLAGS:
+                results.append((True, [f"{rel(q)}:{x.lineno} {_str_value(x, fn, _module_constants(q))}"]))
+        if any(ok for ok, _ in results):
+            return True, [e for ok, ev in results if ok for e in ev]
+        unknown = [e for ok, ev in results if ok is None for e in ev]
+        return (None, unknown) if unknown else (False, [e for _, ev in results for e in ev])
+
+    rows = []
+    for crel, p in sorted(controllers.items()):
+        tree = parsed[p][1]
+        read = set()
+        for n in ast.walk(tree):
+            if not isinstance(n, (ast.List, ast.Tuple)):
+                continue
+            flag = next((e for e in n.elts if isinstance(e, ast.Constant) and e.value in SYSTEM_PROMPT_FLAGS), None)
+            if flag is None:
+                continue
+            read.add(id(flag))
+            ok, ev = elements(p, _innermost_function(tree, n.lineno), n.elts, frozenset())
+            rows.append({"site": f"{crel}:{flag.lineno} {flag.value}", "carries": ok,
+                         "evidence": sorted(set(ev)) if ok else ev or ["no element holds --safe-mode or --bare"]})
+        # a system-prompt flag outside an argv list (appended, or in a set)
+        # is a launch whose flags cannot be read: never assumed to carry one
+        for n in ast.walk(tree):
+            if isinstance(n, ast.Constant) and n.value in SYSTEM_PROMPT_FLAGS and id(n) not in read:
+                rows.append({"site": f"{crel}:{n.lineno} {n.value}", "carries": None,
+                             "evidence": [f"{crel}:{n.lineno} `{n.value}` is not in an argv list, so the launch's "
+                                          "flags cannot be read"]})
+    return sorted(rows, key=lambda r: r["site"])
 
 
 # ---- text a model receives, by data flow (#4054)
@@ -1864,9 +2651,27 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
 
 def discover(root: Path) -> tuple[Surfaces, dict]:
     s = Surfaces()
-    facts: dict = {}
+    facts: dict = {"python": f"{platform.python_implementation()} {platform.python_version()}"}
     src = root / "src/data_sheets_schema"
     prompts_dir = root / "src/download/prompts"
+
+    # ---- every non-test Python module under PYTHON_ROOTS, parsed once
+    # (#4023). One that does not parse stops the scan (#4092): discovery
+    # cannot vouch that it is not a controller, a launcher or a model client.
+    sources, skipped, nested_memory = _walk_sources(root)
+    facts["python_roots"] = list(PYTHON_ROOTS)
+    facts["python_sources"] = [_rel(root, p) for p in sources]
+    facts["registered_copies_skipped"] = skipped
+    parsed, unparsed = {}, []
+    for p in sources:
+        text, tree = _parse(p)
+        if tree is None:
+            unparsed.append(f"{_rel(root, p)} ({_parse_problem(p)})")
+        else:
+            parsed[p] = (text, tree)
+    if unparsed:
+        raise _unparsed(unparsed)
+    index = _notes_index(root, parsed)
 
     # ---- api: runner closure, conditions, evidence protocols
     api_closure = _package_closure(root, ["data_sheets_schema.cli.api", "data_sheets_schema.api_runner"])
@@ -1911,19 +2716,6 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     for p in sorted(prompts_dir.glob("determinism_settings.yaml")):
         s.add(_rel(root, p), "api", "run_shaping", "live", "determinism settings")
 
-    # ---- every non-test Python module under PYTHON_ROOTS, parsed once (#4023)
-    sources, skipped, nested_memory = _walk_sources(root)
-    facts["python_roots"] = list(PYTHON_ROOTS)
-    facts["python_sources"] = [_rel(root, p) for p in sources]
-    facts["registered_copies_skipped"] = skipped
-    parsed = {}
-    for p in sources:
-        text, tree = _parse(p)
-        if tree is not None:
-            parsed[p] = (text, tree)
-    facts["unparsed_python"] = sorted(_rel(root, p) for p in sources if p not in parsed)
-    index = _notes_index(root, parsed)
-
     # ---- what a native run is handed (#4054)
     toolchain = derive_toolchain(root)
     facts["toolchain"] = toolchain
@@ -1932,28 +2724,31 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     # controllers: a module in a generation closure is neither an arm
     # command nor a launcher
     playbook = root / PLAYBOOK
-    groups = sorted(set(re.findall(r"\bd4d ([a-z][\w-]*) [a-z]", playbook.read_text(encoding="utf-8"))))
     starts = ["data_sheets_schema.agentic_runtime"] + [
-        f"data_sheets_schema.cli.{g.replace('-', '_')}" for g in groups
-        if (src / "cli" / f"{g.replace('-', '_')}.py").exists()]
+        f"data_sheets_schema.cli.{g}" for g in _cli_groups(root, playbook.read_text(encoding="utf-8"))]
     early_native = _package_closure(root, sorted(set(starts)))
 
     # ---- upstream input and the deterministic arms (#4054)
     shared = shared_input_modules(root)
     facts["shared_input"] = shared
+    stop = {_resolved(root / r) for r in shared}
     arm_commands = deterministic_arm_commands(root, frozenset(_rel(root, p) for p in api_closure + early_native))
-    det_closure, det_dirs = _code_closure(root, [root / r for r in arm_commands],
-                                          stop={_resolved(root / r) for r in shared})
+    det_closure, det_dirs = _code_closure(root, [root / r for r in arm_commands], stop=stop)
     facts["deterministic_commands"] = arm_commands
     facts["deterministic_closure"] = [_rel(root, p) for p in det_closure]
     facts["deterministic_sys_path"] = det_dirs
     exclude = frozenset(_rel(root, p) for p in api_closure + early_native + det_closure)
 
-    # ---- run controllers and launchers (#4023, #4054): what they do, not a glob
+    # ---- run controllers and launchers (#4023, #4054): what they do, not a
+    # glob. A controller module runs as a script only where something runs it
+    # (#4093): an import by another controller never runs its __main__ block.
     controllers, controller_why, evaluation_reached = run_controllers(root, parsed, index, exclude)
+    controller_runs = controller_run_evidence(root, parsed, index, controllers)
     facts["controllers"] = controller_why
+    facts["controller_runs"] = {rel: controller_runs.get(rel, "") for rel in controller_why}
     for rel in controller_why:
-        s.add(rel, "run_controllers", "run_shaping", "live", "run controller: " + controller_why[rel])
+        s.add(rel, "run_controllers", "run_shaping", "live", "run controller: " + controller_why[rel],
+              runs=rel in controller_runs)
     controller_text = {}
     for rel, p in sorted(controllers.items()):
         for name in _md_literals(parsed[p][1]):
@@ -1965,25 +2760,36 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(rel, "run_controllers", "model_facing", "live", f"text a controller hands to the model ({by})")
 
     # ---- every playbook, agent and file that a playbook, an agent, a live
-    # prompt, a controller or the assistant instructions name (#4023, #4054)
+    # prompt, a controller, the assistant workflow or an instruction it loads
+    # names or runs (#4023, #4054, #4091, #4093)
     walker = (lambda d: d.rglob(toolchain["pattern"])) if toolchain["recursive"] else \
         (lambda d: d.glob(toolchain["pattern"]))
     claude_files = sorted({p for d in toolchain["directories"] for p in walker(root / d) if p.is_file()})
     claude_set = {_rel(root, p) for p in claude_files}
     claude_names = {p.stem: _rel(root, p) for p in claude_files if p.stem.lower() != "readme"}
     playbooks = [p for p in claude_files if p.parent == root / ".claude/commands" and p.name.startswith("d4d-")]
-    assistant = sorted((root / ".github/workflows").glob("d4d_assistant_*.md"))
-    assistant_set = {_rel(root, p) for p in assistant}
+    wf = root / ".github/workflows"
+    workflow = wf / "d4d-agent.yml"
+    assistant_set = {_rel(root, p) for p in sorted(wf.glob("d4d_assistant_*.md"))}
     memory = [rel for rel in PROJECT_MEMORY if (root / rel).is_file()] + \
         [rel for rel in nested_memory if rel not in PROJECT_MEMORY]
     memory_set = set(memory)
     referenced: set[str] = set()
     named: dict[str, dict] = {}
     memory_named_by: set[str] = set()
-    queue: list[tuple[str, str, str, str]] = []
+    loaders: dict[str, set] = {}
+    run_scripts: dict[str, dict] = {}
+    cli_groups: dict[str, dict] = {}
+    queue: list[tuple[str, str, str, str, str]] = []
     done: set[tuple[str, str, str]] = set()
 
-    def names_in(text: str, namer: str, approach: str, role: str, status: str, claude_only: bool = False):
+    def names_in(text: str, namer: str, approach: str, role: str, status: str, claude_only: bool = False,
+                 namer_kind: str = "text", groups: bool = True):
+        """Follow what a text names. A text the model reads (`namer_kind`
+        "text") hands the model the text files it names, raw (#4091); code
+        (the workflow) hands a model only the instructions (.md, .txt) it
+        names, and reads the rest as data. A `.py` it runs is followed
+        through its imports, and a CLI group it runs through the group's."""
         for rel, run in _named_files(root, text, claude_names).items():
             if rel == namer:
                 continue
@@ -1993,7 +2799,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
             if rel in claude_set:
                 if role != "exposed" and rel not in referenced:
                     referenced.add(rel)
-                    queue.append((rel, "native_agentic", "model_facing", "live"))
+                    queue.append((rel, "native_agentic", "model_facing", "live", namer))
                 continue
             if claude_only:
                 continue
@@ -2002,32 +2808,53 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
             entry["runs"] = entry["runs"] or run
             entry["approaches"].add(approach)
             if rel in assistant_set:
-                queue.append((rel, approach, "exposed" if role == "exposed" else "model_facing", status))
+                loaders.setdefault(rel, set()).add(f"{namer} ({approach})")
+                queue.append((rel, approach, "exposed" if role == "exposed" else "model_facing", status, namer))
                 continue
             # text a named file holds is read by the model; code it runs shapes the run
-            kind = "model_facing" if Path(rel).suffix in NAMED_TEXT else "run_shaping"
-            s.add(rel, approach, "exposed" if role == "exposed" else kind, status,
-                  f"named by {namer}" + (", which runs it" if run else ""), runs=run)
+            texts = NAMED_TEXT if namer_kind == "text" else frozenset({".md", ".txt"})
+            kind = "exposed" if role == "exposed" else "model_facing" if Path(rel).suffix in texts else "run_shaping"
+            s.add(rel, approach, kind, status, f"named by {namer}" + (", which runs it" if run else ""),
+                  runs=run, raw=kind == "model_facing")
+            if run and rel.endswith(".py") and rel not in CLI_PACKAGE:
+                by = run_scripts.setdefault(rel, {})
+                by[approach] = "run_shaping" if role != "exposed" or by.get(approach) == "run_shaping" else "exposed"
+        if groups and not claude_only:
+            for g in _cli_groups(root, text):
+                by = cli_groups.setdefault(approach, {}).setdefault(g, {})
+                by[namer] = "exposed" if role == "exposed" else "run_shaping"
 
     def drain():
         while queue:
-            rel, approach, role, status = queue.pop()
+            rel, approach, role, status, namer = queue.pop()
             if (rel, approach, role) in done:
                 continue
             done.add((rel, approach, role))
-            if rel in assistant_set and approach != "github_assistant":
-                s.add(rel, approach, role, status, "assistant instruction file a playbook names")
+            if rel in assistant_set:
+                s.add(rel, approach, role, status, f"assistant instruction file {namer} loads",
+                      raw=role == "model_facing")
             names_in((root / rel).read_text(encoding="utf-8"), rel, approach, role, status)
 
-    queue += [(_rel(root, p), "native_agentic", "model_facing", "live") for p in playbooks]
-    queue += [(rel, "github_assistant", "model_facing", "live") for rel in sorted(assistant_set)]
+    queue += [(_rel(root, p), "native_agentic", "model_facing", "live", "slash command") for p in playbooks]
     for c in cond["live"]:          # an API prompt can only point at a playbook (#4014)
         names_in((root / cond["prompts"][c]).read_text(encoding="utf-8"), cond["prompts"][c], "native_agentic",
                  "model_facing", "live", claude_only=True)
+    # a controller's CLI groups are not followed here: the package modules
+    # the controllers import are, through the native closure below
     for rel, by in sorted(controller_text.items()):
-        names_in((root / rel).read_text(encoding="utf-8"), rel, "run_controllers", "model_facing", "live")
+        names_in((root / rel).read_text(encoding="utf-8"), rel, "run_controllers", "model_facing", "live",
+                 groups=False)
     for rel, p in sorted(controllers.items()):     # literals, never comments
-        names_in("\n".join(_str_constants(parsed[p][1])), rel, "run_controllers", "model_facing", "live")
+        names_in("\n".join(_str_constants(parsed[p][1])), rel, "run_controllers", "model_facing", "live",
+                 groups=False)
+    # the @d4dassistant workflow: what it names and runs, and an instruction
+    # file only where it loads one (#4093); the runner its `d4d api run`
+    # starts is the api approach
+    if workflow.is_file():
+        wf_rel = _rel(root, workflow)
+        s.add(wf_rel, "github_assistant", "run_shaping", "live", "the @d4dassistant workflow")
+        names_in(workflow.read_text(encoding="utf-8"), wf_rel, "github_assistant", "run_shaping", "live",
+                 namer_kind="code", groups=False)
     drain()
     # what an agent no live text names, and what it names in turn, is exposed:
     # available to a native run, never gating (#4054)
@@ -2039,6 +2866,9 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     facts["native_referenced"] = sorted(referenced)
     facts["named_files"] = {rel: {"by": sorted(e["by"]), "runs": e["runs"], "approaches": sorted(e["approaches"])}
                             for rel, e in sorted(named.items())}
+    # an assistant instruction file is a surface only where the workflow, a
+    # playbook or a loaded instruction loads it (#4093)
+    facts["assistant_instructions"] = {rel: sorted(loaders.get(rel, ())) for rel in sorted(assistant_set)}
     for p in claude_files:
         rel = _rel(root, p)
         if p in playbooks:
@@ -2046,26 +2876,41 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         elif rel in referenced:
             s.add(rel, "native_agentic", "model_facing", "live",
                   "command or agent named (path, bare name or slash command) by a playbook, live prompt, "
-                  "controller or the assistant instructions")
+                  "controller or assistant instruction")
         else:
             s.add(rel, "native_agentic", "exposed", "live",
                   "handed to native runs by agentic_runtime.toolchain(); no playbook, live prompt, controller "
                   "or assistant instruction names it")
 
-    # ---- native closure: agentic_runtime, the playbook's CLI groups, and the
-    # package modules the controllers import (the native audit batch)
+    # ---- native closure: agentic_runtime, the CLI groups the playbooks,
+    # agents and instructions run, and the package modules the controllers
+    # import (the native audit batch)
     for p in controllers.values():
         for node in ast.walk(parsed[p][1]):
             if isinstance(node, ast.ImportFrom) and (node.module or "").startswith("data_sheets_schema"):
                 starts += [node.module] + [f"{node.module}.{a.name}" for a in node.names]
             elif isinstance(node, ast.Import):
                 starts += [a.name for a in node.names if a.name.startswith("data_sheets_schema")]
-    facts["native_cli_groups"] = groups
+    native_groups = sorted(g for g, by in cli_groups.get("native_agentic", {}).items() if "run_shaping" in by.values())
+    starts += [f"data_sheets_schema.cli.{g}" for g in native_groups]
+    facts["native_cli_groups"] = native_groups
+    facts["cli_groups"] = {a: {g: {"by": sorted(by), "role": "run_shaping" if "run_shaping" in by.values()
+                                   else "exposed"} for g, by in sorted(gs.items())}
+                           for a, gs in sorted(cli_groups.items())}
     native_closure = _package_closure(root, sorted(set(starts)))
     facts["native_closure"] = [_rel(root, p) for p in native_closure]
     for p in native_closure:
         s.add(_rel(root, p), "native_agentic", _module_role(p), "live",
-              "closure of agentic_runtime, the playbook's CLI groups and the controllers' imports", runs=False)
+              "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports", runs=False)
+    # a CLI group run only by an exposed text, or by a controller (#4091)
+    for approach, gs in sorted(cli_groups.items()):
+        for g, by in sorted(gs.items()):
+            if approach == "native_agentic" and g in native_groups:
+                continue
+            role = "run_shaping" if "run_shaping" in by.values() else "exposed"
+            for p in _package_closure(root, [f"data_sheets_schema.cli.{g}"]):
+                s.add(_rel(root, p), approach, role if role == "exposed" else _module_role(p), "live",
+                      f"closure of the CLI group `d4d {g}` that {', '.join(sorted(by))} run", runs=False)
 
     # ---- deterministic arms: the commands that build a non-baseline arm's
     # bundle, and what they import (#4054)
@@ -2076,7 +2921,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(rel, "deterministic", _module_role(p), "live", why, runs=False)
 
     # ---- interactive sessions: what Claude Code loads into a person's session
-    # in a checkout, and that registered native runs switch off (#4054)
+    # in a checkout, and that registered native runs switch off (#4054, #4091)
     for rel in memory:
         s.add(rel, "interactive_session", "model_facing", "live",
               "project memory Claude Code loads into an interactive session (--safe-mode and --bare disable it)")
@@ -2089,16 +2934,59 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
             for h in _hook_scripts(root, root / rel):
                 hooks.append(h)
                 s.add(h, "interactive_session", "run_shaping", "live", f"hook command {rel} runs")
-    skills = sorted(_rel(root, p) for p in (root / ".claude/skills").glob("*/SKILL.md"))
-    for rel in skills:
+                if h.endswith(".py"):
+                    run_scripts.setdefault(h, {})["interactive_session"] = "run_shaping"
+    described = []
+    for base, pattern in SESSION_DESCRIBED:
+        if (root / base).is_dir():
+            described += [p for p in sorted((root / base).glob(pattern)) if p.is_file()]
+    for p in described:
+        rel = _rel(root, p)
         s.add(rel, "interactive_session", "exposed", "live",
-              "skill an interactive session lists (its description is loaded, its body on invocation); no "
-              "playbook names it")
+              "Claude Code lists its description in every interactive session (the agent types of the Agent "
+              "tool, the commands and skills); its body loads only when it is invoked")
+        s.files[rel].loaded["interactive_session"] = session_description_lines(p.read_text(encoding="utf-8"))
+    skills = sorted(_rel(root, p) for p in (root / ".claude/skills").glob("*/SKILL.md"))
+    launches = launch_flags(root, controllers, parsed, index)
+    unsafe = [x["site"] for x in launches if not x["carries"]]
     facts["interactive"] = {
         "memory": memory, "memory_named_by": sorted(memory_named_by), "settings": settings,
-        "hooks": sorted(set(hooks)), "skills": skills,
-        "customizations_off": _flag_sites(root, controllers, parsed, CUSTOMIZATION_OFF_FLAGS),
-        "native_launch_sites": _flag_sites(root, controllers, parsed, SYSTEM_PROMPT_FLAGS)}
+        "hooks": sorted(set(hooks)), "skills": skills, "described": sorted(_rel(root, p) for p in described),
+        "launches": launches, "native_launch_sites": [x["site"] for x in launches],
+        "customizations_off": sorted({e for x in launches if x["carries"] for e in x["evidence"]}),
+        "launches_without_customizations_off": unsafe}
+    # a registered launch that does not switch them off loads what an
+    # interactive session loads (#4092): those surfaces are its too
+    if unsafe:
+        for rel, surf in sorted(s.files.items()):
+            role = surf.roles.get("interactive_session")
+            if role is None:
+                continue
+            s.add(rel, "run_controllers", role, "live", "loaded by a registered native launch that does not switch "
+                  "session customizations off (" + ", ".join(unsafe) + ")",
+                  runs="interactive_session" in surf.runs, raw="interactive_session" in surf.raw)
+            if "interactive_session" in surf.loaded:
+                surf.loaded["run_controllers"] = list(surf.loaded["interactive_session"])
+
+    # ---- what the scripts a text or a hook runs import (#4091): `python
+    # x.py` puts x's directory on sys.path (`-m` a package module does not);
+    # the CLI package is not entered, its groups are followed where run
+    opaque = frozenset(_resolved(root / r) for r in CLI_PACKAGE)
+    script_imports: dict[str, list[str]] = {}
+    for rel, by in sorted(run_scripts.items()):
+        if not (root / rel).is_file():
+            continue
+        dirs = [] if _package_module(rel) else [Path(rel).parent.as_posix()]
+        members, _ = _code_closure(root, [root / rel], stop, dirs=dirs, opaque=opaque)
+        for q in members:
+            qrel = _rel(root, q)
+            if qrel == rel or not _is_inside(q, root):
+                continue
+            script_imports.setdefault(rel, []).append(qrel)
+            for approach, role in sorted(by.items()):
+                s.add(qrel, approach, role if role == "exposed" else _module_role(q), "live",
+                      f"imported by {rel}, which is run in {approach}", runs=False)
+    facts["run_script_imports"] = {k: sorted(v) for k, v in sorted(script_imports.items())}
 
     # ---- every module that calls a model client (#4023), wherever it is
     in_closure = (set(facts["api_closure"]) | set(facts["native_closure"]) | set(facts["deterministic_closure"])
@@ -2133,13 +3021,8 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(rel, "other_model_client", "run_shaping", "live", why)
     facts["evaluation_controllers"] = evaluation
 
-    # ---- github assistant
-    wf = root / ".github/workflows"
-    for p in assistant:
-        s.add(_rel(root, p), "github_assistant", "model_facing", "live",
-              "assistant instruction file (loaded by /d4d-assistant and /d4d-webfetch)")
-    for p in sorted(wf.glob("d4d-agent.yml")) + sorted(wf.glob("d4d_assistant_*.config")):
-        s.add(_rel(root, p), "github_assistant", "run_shaping", "live", "assistant workflow / config")
+    # ---- github assistant: the workflow and what it names were found above;
+    # the condition its `d4d api run` runs
     if gh:
         s.add(cond["prompts"][gh["condition_name"]], "github_assistant", "model_facing", "live",
               f"condition the workflow runs ({gh['condition_basis']})")
@@ -2153,7 +3036,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(_rel(root, p), "shared_schema", "model_facing", "live", "generation schema import closure")
     for rel in toolchain["schemas"]:
         s.add(rel, "shared_schema", "model_facing", "live", "schema file agentic_runtime.toolchain() hands a "
-              "native run, read whole")
+              "native run, read whole", raw=True)
     # hand-kept: why each of these reaches a model is not in an import graph
     for rel, role, why in (
             ("src/data_sheets_schema/profiles.py", "run_shaping", "profile selection"),
@@ -2277,14 +3160,19 @@ def _model_text_ranges(tree) -> list[tuple[int, int, str]]:
 
 
 def scan_file(root: Path, surface: Surface, tokens: list[Token]) -> list[dict]:
-    """Every token hit in one surface. A file that cannot be read raises:
-    the caller decides, and `run` refuses to report on a surface it could
-    not see. Each approach that reaches the file judges a hit by the file's
-    role in that approach (#4054): text counts where the role is
-    model-facing, or where run-shaping code renders model text (a function
-    named for it in a run controller, or text found by data flow); code
-    counts unless the role is exposed; and nothing in a `__main__` block
-    counts for an approach that only imports the module."""
+    """Every token hit in one surface. A file that cannot be read, or a
+    Python file that does not parse (#4092), raises: the caller decides, and
+    `run` refuses to report on a surface it could not see. Each approach that
+    reaches the file judges a hit by the file's role in that approach
+    (#4054): text counts where the role is model-facing, where run-shaping
+    code renders model text (a function named for it in a run controller, or
+    text found by data flow), and on the lines the approach loads whatever
+    the role (a description a session lists, #4091); a YAML comment counts
+    where the model reads the file raw (#4091); code counts unless the role
+    is exposed, and in a YAML, config or shell file that no approach hands
+    to a model a branch, default or per-project key is code (#4091); and
+    nothing in a `__main__` block counts for an approach that only imports
+    the module."""
     path = root / surface.path
     text = path.read_text(encoding="utf-8")
     is_py = path.suffix == ".py"
@@ -2292,8 +3180,8 @@ def scan_file(root: Path, surface: Surface, tokens: list[Token]) -> list[dict]:
     if is_py:
         try:
             tree = ast.parse(text)
-        except SyntaxError:
-            tree = None
+        except (SyntaxError, ValueError) as exc:
+            raise UnparsedSurface(surface.path, exc) from exc
     roles = surface.roles or {a: surface.role for a in surface.approaches}
     # In a run controller, the string literals of a function that renders
     # what a model receives (render_instruction, render_system, ...) are
@@ -2303,18 +3191,28 @@ def scan_file(root: Path, surface: Surface, tokens: list[Token]) -> list[dict]:
     if is_py and roles.get("run_controllers") == "run_shaping":
         spans += _model_text_ranges(tree)
     main = _main_block_lines(tree) if is_py and any(a not in surface.runs for a in roles) else []
+    code_units = not is_py and "model_facing" not in roles.values() and "run_shaping" in roles.values()
+    raw_comments = path.suffix.lower() in YAML_SUFFIXES
     hits = []
-    for line, context, unit, src in units_for(path, surface.path, text, tree):
+    for line, context, unit, src in units_for(path, surface.path, text, tree, code=code_units):
         label = next((name for a, b, name in spans if a <= line <= b), None) \
             if context == "string_literal" else None
         in_main = any(a <= line <= b for a, b in main)
         reaches: dict[str, tuple[bool, bool]] = {}
+        loaded: dict[str, str] = {}
+        raw = False
         for a, r in roles.items():
-            if r == "exposed" or (in_main and a not in surface.runs):
+            here = next((name for lo, hi, name in surface.loaded.get(a, ()) if lo <= line <= hi), None)
+            if (r == "exposed" and here is None) or (in_main and a not in surface.runs):
                 reaches[a] = (False, False)
                 continue
-            reaches[a] = (context in MODEL_FACING_CONTEXTS and (r == "model_facing" or label is not None),
-                          context in CODE_CONTEXTS)
+            text_counts = context in MODEL_FACING_CONTEXTS and (r == "model_facing" or label is not None
+                                                                or here is not None)
+            if context == "comment" and raw_comments and r == "model_facing" and a in surface.raw:
+                text_counts = raw = True
+            reaches[a] = (text_counts, context in CODE_CONTEXTS and r != "exposed")
+            if here is not None and text_counts:
+                loaded[a] = here
         model_facing = any(t for t, _ in reaches.values())
         code = any(c for _, c in reaches.values())
         gates_in = sorted(a for a, (t, c) in reaches.items() if (t or c) and APPROACHES[a][0])
@@ -2330,6 +3228,10 @@ def scan_file(root: Path, surface: Surface, tokens: list[Token]) -> list[dict]:
                 hit["model_text_function"] = label
             if in_main:
                 hit["main_block"] = True
+            if loaded:
+                hit["loaded_in"] = loaded
+            if raw:
+                hit["read_raw"] = True
             hits.append(hit)
     return hits
 
@@ -2353,8 +3255,8 @@ def scan_tests(root: Path, tokens: list[Token]) -> tuple[list[dict], list[str]]:
             continue
         try:
             tree = ast.parse(text)
-        except SyntaxError:
-            continue
+        except (SyntaxError, ValueError) as exc:     # never skipped in silence (#4092)
+            raise _unparsed([f"{_rel(root, p)} ({type(exc).__name__}: {exc})"]) from exc
         lines = text.splitlines()
         asserted = set()
         for node in ast.walk(tree):
@@ -3194,10 +4096,8 @@ def api_meaning(root: Path, facts: dict) -> dict:
     legacy = {}
     for rel in facts["legacy_scripts"]:
         text, ltree = _parse(root / rel)
-        if ltree is None:
-            legacy[rel] = {"shape": "UNPARSED", "model_call_sites": None, "full_schema": None,
-                           "concatenated_input": None, "tool_decorators": None}
-            continue
+        if ltree is None:           # never "UNPARSED" and left out of the verdict (#4092)
+            raise _unparsed([f"{rel} ({_parse_problem(root / rel)})"])
         n_calls = len(model_call_sites(ltree))
         full = bool(re.search(r"_all\.yaml|get_full_schema", text))
         # concatenated input: the file name says so, or it reads the
@@ -3309,15 +4209,19 @@ def run(root: Path, tokens_file: Path = TOKENS_FILE, exceptions_file: Path = EXC
         return {"self_test": st, "exit": exit_status(False, [])}
     exceptions = load_exceptions(exceptions_file)
     surfaces, facts = discover(root)
-    hits, unreadable = [], []
+    hits, unreadable, unparsed = [], [], []
     for rel in sorted(surfaces.files):
         try:
             hits.extend(scan_file(root, surfaces.files[rel], tokens))
         except (OSError, UnicodeDecodeError) as exc:
             unreadable.append(f"{rel} ({type(exc).__name__})")
+        except UnparsedSurface as exc:
+            unparsed.append(str(exc))
     if unreadable:
         raise ConfigError("discovered surfaces could not be read, so the scan cannot vouch for them: "
                           + "; ".join(unreadable))
+    if unparsed:            # a Python surface that does not parse is never "nothing gates" (#4092)
+        raise _unparsed(unparsed)
     used = {}
     for h in hits:
         e = exception_for(h, exceptions)
@@ -3388,11 +4292,37 @@ def _why_quiet(h: dict) -> str:
     return h["context"]
 
 
+def _session_statement(it: dict) -> str:
+    """What the report may say about registered runs and session
+    customizations, derived from each launch's flags (#4092): unaffected
+    only where every registered native launch carries `--safe-mode` or
+    `--bare`."""
+    launches = it.get("launches") or []
+    if not launches:
+        return ("No run controller launches a native runtime with `--system-prompt`, so no registered native "
+                "run is affected; the interactive_session approach covers interactive sessions.")
+    ok = [x for x in launches if x["carries"]]
+    if len(ok) == len(launches):
+        return ("Every registered native launch switches these off: " + "; ".join(
+            f"`{x['site']}` (" + ", ".join(f"`{e}`" for e in x["evidence"]) + ")" for x in launches)
+            + ". So the interactive_session approach covers interactive sessions only; it does not change a "
+            "registered run's verdict.")
+    bad = [x for x in launches if not x["carries"]]
+    return ("NOT every registered native launch switches these off: " + "; ".join(
+        f"`{x['site']}` " + ("does not pass `--safe-mode` or `--bare`" if x["carries"] is False else
+                             "cannot be shown to pass `--safe-mode` or `--bare`")
+        + " (" + "; ".join(x["evidence"]) + ")" for x in bad)
+        + (". The others do: " + "; ".join(f"`{x['site']}`" for x in ok) if ok else "")
+        + ". A run so launched loads what an interactive session loads, so every interactive_session surface is "
+        "also a run_controllers surface, and its violations count there.")
+
+
 def render_markdown(result: dict) -> str:
     L = ["# D4D generation-specificity audit", ""]
     st = result["self_test"]
+    python = (result.get("facts") or {}).get("python")
     L += [f"Checkout `{result.get('root')}` at commit `{result.get('commit')}`; generated by "
-          f"`.claude/skills/d4d-generation-specificity-audit/scan.py`.",
+          f"`.claude/skills/d4d-generation-specificity-audit/scan.py`" + (f" under {python}" if python else "") + ".",
           f"Self-test: {'passed' if st['passed'] else 'FAILED'} "
           f"(tokens by category: {st['token_counts']}; {st['imported_from_neutrality_test']} imported from "
           f"`{NEUTRALITY_TEST}`).", ""]
@@ -3415,11 +4345,13 @@ def render_markdown(result: dict) -> str:
     tc = f["toolchain"]
     it = f["interactive"]
     roots = f["python_roots"]
+    runs = f.get("controller_runs") or {}
+    ai = f.get("assistant_instructions") or {}
     L += ["## How the surfaces were found", "",
           f"- Python modules read: {len(f['python_sources'])} non-test modules under "
           + ", ".join(f"`{r}/`" for r in roots)
-          + f" ({f['registered_copies_skipped']} registered byte copies under `registrations/` skipped"
-          + (f"; could not parse: {', '.join(f['unparsed_python'])}" if f["unparsed_python"] else "") + ").",
+          + f" ({f['registered_copies_skipped']} registered byte copies under `registrations/` skipped). Every "
+          "one parses; a file that does not stops the scan (exit 2).",
           "- What a native run is handed (`agentic_runtime.toolchain()`, read with ast): the schemas "
           + ", ".join(f"`{x}`" for x in tc["schemas"]) + " and `" + tc["pattern"] + "` in "
           + ", ".join(f"`{d}`" for d in tc["directories"])
@@ -3428,28 +4360,38 @@ def render_markdown(result: dict) -> str:
              ". It hands Python files too: each is exposed unless something live names it."),
           f"- Run controllers and launchers: {len(f['controllers'])} modules. A seed under `notes/` builds a "
           "generation request; one under `scripts/` or `src/` (outside the generation closures) also launches "
-          "it; the rest are imported by a controller or run one (imports one, or stages its files by name).",
+          "it; the rest are imported by a controller or run one (imports one, or stages its files by name). "
+          f"{sum(bool(v) for v in runs.values())} of them run as a script (an argv runs them, a document beside "
+          "them runs them, or nothing imports them); a `__main__` block counts only in those.",
           "- Text a controller hands to the model: "
           + (", ".join(f"`{k}`" for k in f["controller_text"]) or "none") + ".",
           "- Code whose text reaches a model, found by data flow from `--system-prompt` and from the functions "
           "that render model text: " + ("; ".join(f"`{k}`: " + ", ".join(v) for k, v in f["model_text"].items())
                                         or "none") + ".",
-          "- Playbooks and agents a playbook, a live prompt, a controller or the assistant instructions name "
+          "- Playbooks and agents a playbook, a live prompt, a controller or an assistant instruction names "
           "(path, bare name or slash command): " + ", ".join(f"`{r}`" for r in f["native_referenced"]) + ".",
+          "- Assistant instruction files, a surface only where the `@d4dassistant` workflow, a playbook or a "
+          "loaded instruction loads them: " + ("; ".join(f"`{k}` (" + (", ".join(
+              "loaded by " + re.sub(r"^(\S+) \((\w+)\)$", r"`\1` (\2)", x) for x in v)
+              or "loaded by nothing: not a surface") + ")" for k, v in ai.items()) or "none") + ".",
           f"- Other files they name ({len(f['named_files'])}): "
           + "; ".join(f"`{k}` ({', '.join(v['approaches'])}{', run' if v['runs'] else ''})"
                       for k, v in f["named_files"].items()) + ".",
+          "- What the scripts they and the hooks run import (`python x.py`, `-m`; a closure stops at the CLI "
+          "package and at the upstream input): " + ("; ".join(f"`{k}`: " + ", ".join(f"`{x}`" for x in v)
+                                                               for k, v in f["run_script_imports"].items())
+                                                     or "nothing") + ".",
+          "- CLI groups they run (`d4d <group> ...`), each followed through its imports: "
+          + ("; ".join(f"{a}: " + ", ".join(f"`{g}`" + (" (exposed)" if v["role"] == "exposed" else "")
+                                            for g, v in gs.items()) for a, gs in f["cli_groups"].items())
+             or "none") + ".",
           "- Interactive sessions: Claude Code loads the project memory "
           + (", ".join(f"`{m}`" for m in it["memory"]) or "(none)")
           + (f" (named by {', '.join(f'`{n}`' for n in it['memory_named_by'])})" if it["memory_named_by"] else "")
           + ", the settings " + (", ".join(f"`{x}`" for x in it["settings"]) or "(none)")
           + " and their hooks " + (", ".join(f"`{x}`" for x in it["hooks"]) or "(none)")
-          + ", and lists the skills " + (", ".join(f"`{x}`" for x in it["skills"]) or "(none)")
-          + ". The registered native launchers switch these off: "
-          + (", ".join(f"`{x}`" for x in it["customizations_off"]) or "nowhere")
-          + " (native launch sites: " + (", ".join(f"`{x}`" for x in it["native_launch_sites"]) or "none")
-          + "). So the interactive_session approach covers interactive sessions only; it does not change a "
-          "registered run's verdict.",
+          + f", and lists the name and description of {len(it['described'])} commands, agents and skills "
+          "(their bodies load when invoked). " + _session_statement(it),
           "- Deterministic arm commands (CLI groups that name a non-baseline arm's bundle): "
           + "; ".join(f"`{k}` ({v})" for k, v in f["deterministic_commands"].items())
           + f". Their import closure: {len(f['deterministic_closure'])} modules, following "
@@ -3460,7 +4402,8 @@ def render_markdown(result: dict) -> str:
           "- Legacy prompt sets beside the conditions: " + ", ".join(f"`{d}`" for d in f["legacy_prompt_sets"])
           + ".",
           ""]
-    L += _table([[f"`{p}`", w] for p, w in f["controllers"].items()], ["run controller", "why"]) + [""]
+    L += _table([[f"`{p}`", w, runs.get(p) or "no: imported only"] for p, w in f["controllers"].items()],
+                ["run controller", "why", "runs as a script"]) + [""]
     L += _table([[f"`{p}`", ", ".join(v["evidence"]), v["classified"]] for p, v in f["model_clients"].items()],
                 ["module that calls a model client", "evidence", "classified as"]) + [""]
     if f["evaluation_controllers"]:

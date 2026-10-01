@@ -14,6 +14,14 @@ reports is derived from the code that decides it:
   arm from the code rather than a glob list, follows text a model receives
   by data flow, and classes CLAUDE.md under interactive sessions (#4023,
   #4054);
+- it follows the imports of every script a text runs and every CLI group it
+  runs, the descriptions a session lists, the YAML comments a playbook's
+  Read returns, and the code in run-shaping workflows, configs and shell
+  scripts (#4091); a Python file that does not parse stops the scan, whether
+  registered runs load the session is read from each launch's argv, and a
+  non-literal --condition is not derived (#4092); an assistant instruction
+  file is a surface only where something loads it, and a controller module
+  runs as a script only where something runs it (#4093);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -98,6 +106,50 @@ def _scan_text(rel: str, text: str, surface) -> list[dict]:
 
 def _parsed(root: Path, *tops: str) -> dict:
     return {p.resolve(): scan._parse(p) for top in tops for p in (root / top).rglob("*.py")}
+
+
+def _plant(rel: str, line: str, after: str | None = None, surface=None):
+    """Plant a line in a copy of a real surface and scan it under the role
+    discover() gives that surface, or under `surface` (#4026): a
+    misclassified real surface fails the tests that use this. With `after`,
+    the line goes right after the first line that starts with it; otherwise
+    at the end. Returns (the planted line's hits, every hit)."""
+    surface = surface or _discovered()[0].files[rel]
+    text = (ROOT / rel).read_text(encoding="utf-8")
+    if not text.endswith("\n"):
+        text += "\n"
+    lines = text.splitlines()
+    if after is None:
+        at = len(lines)
+    else:
+        at = next(i for i, x in enumerate(lines, 1) if x.lstrip().startswith(after))
+    new = "\n".join(lines[:at] + line.split("\n") + lines[at:]) + "\n"
+    first, last = at + 1, at + len(line.split("\n"))
+    hits = _scan_text(rel, new, surface)
+    return [h for h in hits if first <= h["line"] <= last], hits
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_a_loading_workflow_and_an_unsafe_launch():
+    """discover() of this checkout with two things it does not do today
+    (#4092, #4093): the @d4dassistant workflow names an instruction file
+    (d4d_assistant_edit.md), and one registered native launch passes no
+    --safe-mode. Computed once; the mocks are gone when it returns."""
+    workflow = (ROOT / ".github/workflows/d4d-agent.yml").read_text(encoding="utf-8")
+    real_named, real_launches = scan._named_files, scan.launch_flags
+
+    def named(root, text, claude_names):
+        got = real_named(root, text, claude_names)
+        return {**got, ".github/workflows/d4d_assistant_edit.md": False} if text == workflow else got
+
+    def launches(*args, **kwargs):
+        return real_launches(*args, **kwargs) + [
+            {"site": "notes/exp_4092/launch.py:9 --system-prompt", "carries": False,
+             "evidence": ["no element holds --safe-mode or --bare"]}]
+
+    with mock.patch.object(scan, "_named_files", side_effect=named), \
+            mock.patch.object(scan, "launch_flags", side_effect=launches):
+        return scan.discover(ROOT)
 
 
 class TestTheSkillFiles(unittest.TestCase):
@@ -296,24 +348,10 @@ class TestTheScannerSees(unittest.TestCase):
         self.assertIn((2, "string_literal", "CHORUS here"), [(u[0], u[1], u[2]) for u in units])
 
     def _planted(self, rel: str, line: str, after: str | None = None):
-        """Plant a line in a copy of a real surface and scan it under the
-        role discover() gives that surface (#4026): a misclassified real
-        surface fails these tests. With `after`, the line goes right after
-        the first line that starts with it (inside a constant or a function
-        whose span discovery derived); otherwise at the end."""
-        surface = _discovered()[0].files[rel]
-        text = (ROOT / rel).read_text(encoding="utf-8")
-        if not text.endswith("\n"):
-            text += "\n"
-        lines = text.splitlines()
-        if after is None:
-            at = len(lines)
-        else:
-            at = next(i for i, x in enumerate(lines, 1) if x.lstrip().startswith(after))
-        new = "\n".join(lines[:at] + line.split("\n") + lines[at:]) + "\n"
-        first, last = at + 1, at + len(line.split("\n"))
-        hits = _scan_text(rel, new, surface)
-        return [h for h in hits if first <= h["line"] <= last], hits
+        """`_plant`: a line planted in a copy of a real surface, scanned
+        under the role discover() gives it (inside a constant or a function
+        whose span discovery derived, with `after`)."""
+        return _plant(rel, line, after)
 
     def test_a_gc_token_planted_in_a_playbook_is_a_violation(self):
         for rel in (".claude/commands/d4d-full-core.md", ".claude/commands/d4d-input-deep-research.md"):
@@ -670,12 +708,15 @@ class TestDiscovery(unittest.TestCase):
 
     def test_files_the_assistant_tells_the_model_to_run_are_surfaces(self):
         """d4d_assistant_create.md runs src/github/generate_d4d_metadata.py
-        and validate_d4d_completeness.py (#4054)."""
+        and validate_d4d_completeness.py (#4054). The instructions are
+        loaded by /d4d-assistant and /d4d-webfetch, so the scripts are
+        native_agentic surfaces; the @d4dassistant workflow loads no
+        instruction file, so they are not the GitHub assistant's (#4093)."""
         for rel in ("src/github/generate_d4d_metadata.py", "src/github/validate_d4d_completeness.py"):
             with self.subTest(rel=rel):
                 surface = self.surfaces.files[rel]
-                self.assertEqual(surface.roles.get("github_assistant"), "run_shaping")
-                self.assertIn("github_assistant", surface.runs)
+                self.assertEqual(surface.roles, {"native_agentic": "run_shaping"})
+                self.assertEqual(surface.runs, {"native_agentic"})
                 self.assertIn(".github/workflows/d4d_assistant_create.md", self.facts["named_files"][rel]["by"])
 
     def test_claude_md_is_interactive_and_registered_runs_switch_it_off(self):
@@ -693,6 +734,15 @@ class TestDiscovery(unittest.TestCase):
             with self.subTest(site=site):
                 self.assertTrue(any(x.startswith(site + ":") and x.endswith("--safe-mode")
                                     for x in it["customizations_off"]), it["customizations_off"])
+        # each launch carries the flag, derived from its own argv (#4092)
+        self.assertEqual({x["site"].split(":")[0] for x in it["launches"]},
+                         {"notes/claudecode_direct/run_direct_canary.py",
+                          "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py",
+                          "notes/matched_cborg_2026-09-13/audit_controls/native.py",
+                          "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py"})
+        self.assertTrue(all(x["carries"] is True for x in it["launches"]), it["launches"])
+        self.assertEqual(it["launches_without_customizations_off"], [])
+        self.assertEqual(self.surfaces.files["CLAUDE.md"].roles, {"interactive_session": "model_facing"})
         self.assertTrue(set(it["hooks"]) <= set(self.surfaces.files))
 
     def test_controller_text_found_by_data_flow(self):
@@ -748,10 +798,11 @@ class TestDiscovery(unittest.TestCase):
 
     def test_an_agent_script_is_a_surface_only_where_something_runs_or_imports_it(self):
         """No glob over .claude/agents/scripts (#4054): a script an exposed
-        agent runs is exposed, a script the RO-Crate arm imports is
-        deterministic, and one nothing reaches is no surface. The
-        field_prioritizer demo list sits in a __main__ block the arm never
-        runs."""
+        agent runs is exposed, and so is what it imports (#4091); a script
+        the RO-Crate arm imports is deterministic; one nothing reaches is no
+        surface. The field_prioritizer demo list sits in a __main__ block
+        nothing runs: the arm and rocrate_to_d4d.py, which the exposed
+        d4d-rocrate agent runs, only import it."""
         files = self.surfaces.files
         for rel in sorted(files):
             if rel.startswith(".claude/agents/scripts/"):
@@ -759,8 +810,10 @@ class TestDiscovery(unittest.TestCase):
                     self.assertIn(files[rel].roles.get("native_agentic"), (None, "exposed"))
         self.assertEqual(files[".claude/agents/scripts/schema_stats.py"].roles, {"native_agentic": "exposed"})
         prioritizer = files[".claude/agents/scripts/field_prioritizer.py"]
-        self.assertEqual(prioritizer.roles, {"deterministic": "run_shaping"})
+        self.assertEqual(prioritizer.roles, {"deterministic": "run_shaping", "native_agentic": "exposed"})
         self.assertEqual(prioritizer.runs, set())
+        self.assertIn(".claude/agents/scripts/field_prioritizer.py",
+                      self.facts["run_script_imports"][".claude/agents/scripts/rocrate_to_d4d.py"])
         self.assertNotIn(".claude/agents/scripts/generate_interface_mapping.py", files)
 
     def test_the_deterministic_arms_are_derived_from_the_code(self):
@@ -926,8 +979,12 @@ class TestApiMeaning(unittest.TestCase):
         self.assertIn(self.cond["default"], self.cond["live"])
         gh = self.meaning["github_assistant"]
         workflow = (ROOT / ".github/workflows/d4d-agent.yml").read_text(encoding="utf-8")
-        block = re.search(r"d4d api run(?:[^\n]*\\\n)*[^\n]*", workflow).group(0)
-        named = re.search(r"--condition[\s=]+['\"]?([\w.-]+)", block)
+        block = re.search(r"d4d api run(?:[^\n]*\\\n)*[^\n]*", workflow).group(0).replace("\\\n", " ")
+        # any spelling of --condition, so a non-literal one cannot pass as
+        # "no --condition" here either (#4092)
+        passed = re.search(r"--condition\b", block)
+        named = re.search(r"--condition(?:=|\s+)['\"]?([\w.-]+)['\"]?(?:\s|$)", block)
+        self.assertEqual(bool(passed), bool(named), "a --condition the oracle cannot read: update this test")
         expected = named.group(1) if named else spec.condition
         self.assertEqual(gh["condition_name"], expected)
         self.assertEqual(gh["condition"], expected if named else f"{spec.condition} (CLI default; no --condition)")
@@ -944,6 +1001,33 @@ class TestApiMeaning(unittest.TestCase):
             gh = scan.github_assistant_run(Path(d), self.cond)
         self.assertEqual((gh["condition_name"], gh["condition_basis"], gh["condition"]),
                          (self.cond["current"], "--condition", self.cond["current"]))
+
+    def test_a_condition_the_workflow_chooses_when_it_runs_is_not_derived(self):
+        """A --condition that is not a literal (an expression, a variable)
+        is chosen when the workflow runs: "not derived", never reported as
+        the CLI default with "no --condition" (#4092). Every literal
+        spelling, also one continued onto the next line, is read."""
+        text = (ROOT / ".github/workflows/d4d-agent.yml").read_text(encoding="utf-8")
+        current = self.cond["current"]
+
+        def run_with(spelling):
+            with tempfile.TemporaryDirectory() as d:
+                _write(Path(d) / ".github/workflows/d4d-agent.yml",
+                       text.replace("d4d api run ", f"d4d api run {spelling} ", 1))
+                return scan.github_assistant_run(Path(d), self.cond)
+
+        for spelling in ('--condition "${{ inputs.condition }}"', "--condition=$CONDITION",
+                         '--condition "$CONDITION"', "--condition ${CONDITION}", "--condition"):
+            with self.subTest(spelling=spelling), \
+                    self.assertRaisesRegex(scan.ConfigError, "not derived.*not a literal condition name"):
+                run_with(spelling)
+        for spelling in (f"--condition {current}", f"--condition={current}", f"--condition '{current}'",
+                         f'--condition "{current}"', f"--condition \\\n            {current}"):
+            with self.subTest(spelling=spelling):
+                gh = run_with(spelling)
+                self.assertEqual((gh["condition_name"], gh["condition_basis"]), (current, "--condition"))
+        with self.assertRaisesRegex(scan.ConfigError, "not derived"):
+            run_with(f"--condition {current} --condition generic")
 
     def test_the_default_renderers_are_what_the_runtime_uses(self):
         self.assertEqual(self._cli_spec().render_version, self.meaning["default_renderer"]["api"])
@@ -1295,6 +1379,430 @@ class TestDerivationsFailLoudly(unittest.TestCase):
                 scan.api_meaning(root, facts)
 
 
+class TestWhatTextsRun(unittest.TestCase):
+    """The imports of every script a playbook, agent or instruction runs, and
+    every CLI group they run, are followed (#4091)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.surfaces, cls.facts = _discovered()
+
+    def test_the_renderer_behind_the_shim_the_instructions_run_is_a_surface(self):
+        """d4d_assistant_create.md runs `src/html/human_readable_renderer.py`,
+        a shim whose code is in the rendering module it imports. The closure
+        stops at the CLI package, whose groups are followed where run."""
+        shim, impl = "src/html/human_readable_renderer.py", "src/data_sheets_schema/rendering/human_readable_renderer.py"
+        self.assertIn(impl, self.facts["run_script_imports"][shim])
+        self.assertIn("src/data_sheets_schema/cli/__init__.py", self.facts["run_script_imports"][shim])
+        self.assertEqual(self.surfaces.files[impl].roles, {"native_agentic": "run_shaping"})
+        self.assertEqual(self.surfaces.files[impl].runs, set())
+        self.assertNotIn("src/data_sheets_schema/cli/evaluate.py", self.surfaces.files)
+
+    def test_a_code_table_in_what_a_run_script_imports_is_a_violation(self):
+        """The 'Diabetes Status' table of AI-READI's study groups gates, and a
+        project list planted in the module does too."""
+        rel = "src/data_sheets_schema/rendering/human_readable_renderer.py"
+        lines = (ROOT / rel).read_text(encoding="utf-8").splitlines()
+        at = next(i for i, x in enumerate(lines, 1) if "'diabetes', 'dm'" in x)
+        hits = [h for h in _scan_text(rel, "\n".join(lines) + "\n", self.surfaces.files[rel]) if h["line"] == at]
+        self.assertEqual({(h["match"].lower(), h["context"]) for h in hits}, {("diabet", "code_table")})
+        self.assertTrue(all(h["violation"] and h["gates_in"] == ["native_agentic"] for h in hits))
+        planted, _ = _plant(rel, 'RENDER_PROJECTS_4091 = ["CHORUS"]')
+        self.assertTrue(planted and all(h["violation"] for h in planted))
+
+    def test_a_run_script_imports_from_its_directory_and_stops_at_the_cli(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "src/html/run_4091.py", "import sibling_4091\n"
+                                                  "from data_sheets_schema.rendering.impl_4091 import x\n")
+            _write(root / "src/html/sibling_4091.py", "Y = 1\n")
+            _write(root / "src/data_sheets_schema/rendering/impl_4091.py",
+                   "x = ['diabetes']\ndef main():\n    from data_sheets_schema.cli import cli\n")
+            _write(root / "src/data_sheets_schema/cli/__init__.py", "from . import evaluate\n")
+            _write(root / "src/data_sheets_schema/cli/evaluate.py", "PROJECTS = ['CHORUS']\n")
+            cli = frozenset({(root / scan.CLI_PACKAGE[0]).resolve()})
+            members, _ = scan._code_closure(root, [root / "src/html/run_4091.py"], set(), dirs=["src/html"],
+                                            opaque=cli)
+            names = {p.relative_to(root).as_posix() for p in members}
+        self.assertEqual(names, {"src/html/run_4091.py", "src/html/sibling_4091.py",
+                                 "src/data_sheets_schema/rendering/impl_4091.py",
+                                 "src/data_sheets_schema/cli/__init__.py"})
+
+    def test_every_cli_group_a_playbook_or_agent_runs_is_followed(self):
+        """/d4d-agent and /d4d-assistant run `d4d utils status`; the exposed
+        d4d-review-record agent runs `d4d review`, which is exposed."""
+        groups = self.facts["cli_groups"]["native_agentic"]
+        self.assertIn(".claude/commands/d4d-agent.md", groups["utils"]["by"])
+        self.assertEqual(groups["utils"]["role"], "run_shaping")
+        self.assertIn("utils", self.facts["native_cli_groups"])
+        self.assertEqual(self.surfaces.files["src/data_sheets_schema/cli/utils.py"].roles,
+                         {"native_agentic": "run_shaping"})
+        self.assertEqual(groups["review"]["role"], "exposed")
+        self.assertEqual(self.surfaces.files["src/data_sheets_schema/cli/review.py"].roles,
+                         {"native_agentic": "exposed"})
+        self.assertEqual(scan._cli_groups(ROOT, "run `d4d utils status --quick`, then `python -m "
+                                                "data_sheets_schema.cli provenance record x`; /d4d-full-core "
+                                                "and d4d nosuch run are not groups"), ["provenance", "utils"])
+
+
+class TestSessionDescriptions(unittest.TestCase):
+    """Claude Code lists the name and description of every command, agent
+    and skill in every interactive session; a body loads only when it is
+    invoked (#4091)."""
+
+    def test_the_lines_a_session_lists(self):
+        agent = ("---\nname: a-4091\ndescription: |\n  When to use: x.\n  Examples:\n"
+                 "    - \"Review the CHORUS record\"\nmodel: inherit\n---\n\nBody naming VOICE.\n")
+        self.assertEqual(scan.session_description_lines(agent),
+                         [(2, 2, "frontmatter name"), (3, 6, "frontmatter description")])
+        self.assertEqual(scan.session_description_lines("# Generate a CM4AI datasheet\n\nBody.\n"),
+                         [(1, 1, "description (the first line)")])
+        self.assertEqual(scan.session_description_lines("---\nname: c\n---\n\nFirst line of the body.\n"),
+                         [(2, 2, "frontmatter name"), (5, 5, "description (the first line)")])
+
+    def test_every_command_agent_and_skill_lists_its_description_in_a_session(self):
+        surfaces, facts = _discovered()
+        for rel in (".claude/agents/d4d-review-record.md", ".claude/commands/README.md",
+                    ".claude/commands/d4d-full-core.md", ".claude/skills/review-open-issues/SKILL.md"):
+            with self.subTest(rel=rel):
+                self.assertEqual(surfaces.files[rel].roles["interactive_session"], "exposed")
+                self.assertTrue(surfaces.files[rel].loaded["interactive_session"])
+                self.assertIn(rel, facts["interactive"]["described"])
+
+    def test_a_token_in_a_description_is_an_interactive_session_violation(self):
+        """In an agent's description, in a command's first line; the same
+        token in the body is exposed and never gates."""
+        rel = ".claude/agents/d4d-schema-expert.md"
+        planted, _ = _plant(rel, '    - "Describe the CM4AI release"', after="Examples:")
+        self.assertTrue(planted)
+        self.assertTrue(all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in planted), planted)
+        body, _ = _plant(rel, "Prefer the CM4AI release notes.")
+        self.assertTrue(body and not any(h["violation"] for h in body))
+        readme = ".claude/commands/README.md"
+        text = (ROOT / readme).read_text(encoding="utf-8").splitlines()
+        first = next(i for i, x in enumerate(text) if x.strip())
+        text[first] += " for CM4AI"
+        hits = [h for h in _scan_text(readme, "\n".join(text) + "\n", _discovered()[0].files[readme])
+                if h["line"] == first + 1]
+        self.assertTrue(hits and all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in hits))
+
+
+class TestRawYamlComments(unittest.TestCase):
+    """A comment in a YAML file counts where a text names the file for the
+    model to Read: the Read tool returns it raw (#4091). The digest drops it,
+    so a comment in a schema module only the digest renders never gates."""
+
+    def test_a_yaml_comment_counts_where_a_text_names_the_file_for_reading(self):
+        surfaces, _ = _discovered()
+        core = "src/data_sheets_schema/schema/D4D_Core.yaml"
+        self.assertIn("native_agentic", surfaces.files[core].raw)
+        self.assertNotIn("shared_schema", surfaces.files[core].raw)
+        planted, _ = _plant(core, "# Record the CHORUS release identifiers here.")
+        self.assertTrue(planted)
+        self.assertTrue(all(h["violation"] and h["gates_in"] == ["native_agentic"] and h["context"] == "comment"
+                            and h["read_raw"] for h in planted), planted)
+        human = "src/data_sheets_schema/schema/D4D_Human.yaml"
+        self.assertEqual(surfaces.files[human].roles, {"shared_schema": "model_facing"})
+        digest_only, _ = _plant(human, "# Record the CHORUS release identifiers here.")
+        self.assertTrue(digest_only and not any(h["violation"] for h in digest_only))
+
+
+class TestRunShapingYamlAndShell(unittest.TestCase):
+    """A workflow, a config and a shell script decide what runs: a branch on
+    a project, a project default and a per-project key there gate (#4091)."""
+
+    def _units(self, text: str, code: bool = True) -> dict:
+        """token -> contexts of the units holding it, per line."""
+        out: dict = {}
+        for line, ctx, unit, _ in scan.units_for(Path("x.yml"), "x.yml", text, code=code):
+            for _, _, tok, matched in scan.match_text(unit, list(_tokens())):
+                out.setdefault((line, matched), set()).add(ctx)
+        return out
+
+    def test_shell_branches_defaults_and_tables(self):
+        cases = (('if [ "$P" = "CHORUS" ]; then', "CHORUS", {"code_branch"}),
+                 ("[[ $P == VOICE* ]] && echo y", "VOICE", {"code_branch"}),
+                 ("if grep -q CM4AI notes.txt; then", "CM4AI", {"code_branch"}),
+                 ('P="${P:-CM4AI}"', "CM4AI", {"code_table"}),
+                 ("d4d api run --project AI_READI --yes", "AI_READI", {"code_table"}),
+                 ("d4d api run --project=AI_READI", "AI_READI", {"code_table"}),
+                 ("for p in CHORUS VOICE; do", "CHORUS", {"code_table"}),
+                 ("PROJECTS=(CHORUS VOICE)", "VOICE", {"code_table"}),
+                 ("DATASET=CHORUS", "CHORUS", {"code_table"}),
+                 ('echo "Processing CHORUS now"', "CHORUS", {"value"}),
+                 ('MSG="see the CHORUS docs"', "CHORUS", {"value"}),
+                 ("# a CHORUS comment", "CHORUS", {"comment"}))
+        for line, token, want in cases:
+            with self.subTest(line=line):
+                got = {c for _, c, unit, _ in scan._shell_units(line) if token in unit}
+                self.assertEqual(got, want)
+        case = 'case "$P" in\n  CHORUS|VOICE) X=1 ;;\n  *) X=2 ;;\nesac\n'
+        got = {(n, unit.strip(), c) for n, c, unit, _ in scan._shell_units(case) if c != "value"}
+        self.assertTrue({(2, "CHORUS", "code_branch"), (2, "VOICE", "code_branch"), (2, "1", "code_table"),
+                         (3, "*", "code_branch")} <= got, got)
+
+    def test_workflow_expressions_scripts_and_config_tables(self):
+        text = ("jobs:\n"                                                           # 1
+                "  go:\n"                                                           # 2
+                "    if: github.event.inputs.dataset == 'CHORUS'\n"                 # 3
+                "    steps:\n"                                                      # 4
+                "      - name: Run for the VOICE study\n"                           # 5
+                "        run: |\n"                                                  # 6
+                '          if [ "$D" = "CM4AI" ]; then echo y; fi\n'                # 7
+                '          echo "the AI_READI notes"\n'                             # 8
+                "        env:\n"                                                    # 9
+                "          P: ${{ inputs.project || 'VOICE_PEDIATRIC' }}\n"         # 10
+                "      - uses: actions/github-script@v7\n"                          # 11
+                "        with:\n"                                                   # 12
+                "          script: |\n"                                             # 13
+                "            if (p === 'aireadi') { x = 1; }\n"                     # 14
+                "            const d = 'cm4ai';\n"                                  # 15
+                "            console.log('see the CHORUS page');\n"                 # 16
+                "CM4AI:\n"                                                          # 17
+                "  temperature: 0\n"                                                # 18
+                "description: CHORUS\n"                                             # 19
+                "src/download/prompts/components/CHORUS.md:\n"                      # 20
+                "  sha256: abc\n")                                                  # 21
+        got = self._units(text)
+        self.assertEqual(got, {(3, "CHORUS"): {"code_branch"}, (5, "VOICE"): {"value"},
+                               (7, "CM4AI"): {"code_branch"}, (8, "AI_READI"): {"value"},
+                               (10, "VOICE_PEDIATRIC"): {"code_table"}, (14, "aireadi"): {"code_branch"},
+                               (15, "cm4ai"): {"code_table"}, (16, "CHORUS"): {"value"},
+                               (17, "CM4AI"): {"code_table"}, (19, "CHORUS"): {"prose"},
+                               (20, "CHORUS"): {"value"}})
+        # a file some approach hands to a model keeps the YAML contexts
+        self.assertFalse({c for v in self._units(text, code=False).values() for c in v} & scan.CODE_CONTEXTS)
+
+    def test_project_branches_planted_in_the_workflow_config_and_shell_gate(self):
+        """The reviewer's plants (#4091): a shell branch, a default in an
+        expression, a github-script branch and a step `if:` in the workflow,
+        a per-project key in the config, a branch in the prerequisite
+        script. Text in the same files stays run-shaping text."""
+        wf, config = ".github/workflows/d4d-agent.yml", ".github/workflows/d4d_assistant_deterministic.config"
+        shell = "src/github/validate_prerequisites.sh"
+        for rel, line, after, token, ctx in (
+                (wf, '          if [ "$DATASET" = "CHORUS" ]; then echo special; fi', "set -euo pipefail",
+                 "CHORUS", "code_branch"),
+                (wf, "          D=${{ steps.resolve.outputs.dataset || 'VOICE' }}", "set -euo pipefail",
+                 "VOICE", "code_table"),
+                (wf, "            if (itemType === 'AI_READI') { core.setOutput('x', 'y'); }",
+                 "const isAllowed = allowedUsers.includes(userLogin);", "AI_READI", "code_branch"),
+                (wf, "        if: steps.resolve.outputs.dataset != 'CM4AI'", "- name: Validate against the schema",
+                 "CM4AI", "code_branch"),
+                (config, "CM4AI:\n  temperature: 0.0", None, "CM4AI", "code_table"),
+                (shell, 'if [ "$DATASET" = "VOICE" ]; then echo x; fi', None, "VOICE", "code_branch")):
+            with self.subTest(rel=rel, token=token):
+                planted, _ = _plant(rel, line, after)
+                hits = [h for h in planted if h["match"] == token]
+                self.assertTrue(hits)
+                self.assertTrue(all(h["context"] == ctx and h["violation"] for h in hits), hits)
+        quiet, _ = _plant(wf, '          echo "Generating the CHORUS datasheet"', "set -euo pipefail")
+        self.assertTrue(quiet and not any(h["violation"] for h in quiet))
+
+
+class TestParseFailures(unittest.TestCase):
+    """A Python file the scan cannot parse stops it with exit 2 and is
+    named, as an unreadable surface is; it is never classed as having
+    nothing that gates (#4092)."""
+
+    BROKEN = "def broken(:\n    PROJECTS = ['CHORUS']\n"
+
+    def test_a_python_surface_that_does_not_parse_raises(self):
+        with tempfile.TemporaryDirectory() as d:
+            _write(Path(d) / "bad_4092.py", self.BROKEN)
+            surface = scan.Surface("bad_4092.py", ["run_controllers"], "run_shaping", "live", "t")
+            with self.assertRaisesRegex(scan.UnparsedSurface, "bad_4092.py"):
+                scan.scan_file(Path(d), surface, list(_tokens()))
+        with self.assertRaises(SyntaxError):
+            list(scan._python_units(self.BROKEN))
+
+    def test_an_unparsed_surface_is_exit_2_and_named(self):
+        err = io.StringIO()
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            shutil.copy(ROOT / scan.NEUTRALITY_TEST, _write(root / scan.NEUTRALITY_TEST, ""))
+            _write(root / "notes/bad_4092.py", self.BROKEN)
+            surfaces = scan.Surfaces()
+            surfaces.add("notes/bad_4092.py", "run_controllers", "run_shaping", "live", "test")
+            with mock.patch.object(scan, "discover", return_value=(surfaces, {})), mock.patch("sys.stderr", err), \
+                    mock.patch("sys.stdout"):
+                code = scan.main(["--root", str(root), "--report", str(root / "r.md")])
+        self.assertEqual(code, 2)
+        self.assertIn("notes/bad_4092.py", err.getvalue())
+        self.assertIn("cannot be parsed", err.getvalue())
+
+    def test_discovery_refuses_a_module_it_cannot_parse(self):
+        """A controller or model client that does not parse could not be
+        discovered: discovery stops and names it with the interpreter."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "notes/exp_4092/launch.py", "from data_sheets_schema.api_runner import RunSpec\n"
+                   + self.BROKEN)
+            with self.assertRaisesRegex(scan.ConfigError, r"cannot be parsed by .*notes/exp_4092/launch\.py"):
+                scan.discover(root)
+
+    def test_a_closure_or_a_test_listing_that_reaches_an_unparsable_file_stops(self):
+        """An import closure does not drop a module it cannot parse, and the
+        test listing does not skip a test of generation it cannot parse."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "src/data_sheets_schema/cli/arm_4092.py", "from data_sheets_schema.helper_4092 import x\n")
+            _write(root / "src/data_sheets_schema/helper_4092.py", self.BROKEN)
+            _write(root / "tests/test_x_4092.py", "from data_sheets_schema.api_runner import build_phase\n"
+                   + self.BROKEN)
+            with self.assertRaisesRegex(scan.ConfigError, "helper_4092.py"):
+                scan._code_closure(root, [root / "src/data_sheets_schema/cli/arm_4092.py"], set())
+            with self.assertRaisesRegex(scan.ConfigError, "helper_4092.py"):
+                scan._package_closure(root, ["data_sheets_schema.cli.arm_4092"])
+            with self.assertRaisesRegex(scan.ConfigError, "tests/test_x_4092.py"):
+                scan.scan_tests(root, list(_tokens()))
+
+
+class TestLaunchFlags(unittest.TestCase):
+    """Whether registered native runs load what an interactive session
+    loads is derived from each launch's own argv (#4092)."""
+
+    FLAGS = {"notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\nPLAIN = ['--print']\n",
+             "notes/x/a_literal.py": "def go(exe, p):\n    return [exe, '--safe-mode', '--system-prompt', p]\n",
+             "notes/x/b_constant.py": "CLI_FLAGS = ['--print', '--safe-mode']\n"
+                                      "def go(exe, p):\n    return [exe, *CLI_FLAGS, '--system-prompt', p]\n",
+             "notes/x/c_imported.py": "import flags\n"
+                                      "def go(exe, p):\n    return [exe, *flags.PLAIN, '--system-prompt', p]\n",
+             "notes/x/d_from.py": "from flags import SAFE\n"
+                                  "def go(exe, p):\n    return [exe, *SAFE, '--system-prompt', p]\n",
+             "notes/x/e_filtered.py": "def go(exe, p, rec):\n    return [exe, *[f for f in rec['cli_flags'] "
+                                      "if f != '--safe-mode'], '--system-prompt', p]\n",
+             "notes/x/f_field.py": "def go(exe, p, rec):\n    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
+             "notes/x/g_sum.py": "BASE = ['--print']\n"
+                                 "def go(exe, p):\n    return [exe, *(BASE + ['--bare']), '--system-prompt', p]\n",
+             "notes/x/h_none.py": "def go(exe, p):\n    return [exe, '--print', '--system-prompt', p]\n",
+             "notes/x/i_append.py": "def go(exe, p):\n    argv = [exe, '--safe-mode']\n"
+                                    "    argv.append('--system-prompt')\n    return argv + [p]\n",
+             "notes/x/writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n"}
+
+    def _launches(self, files: dict) -> dict:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            for rel, text in files.items():
+                _write(root / rel, text)
+            parsed = _parsed(root, "notes")
+            controllers = {p.relative_to(root).as_posix(): p for p in parsed}
+            rows = scan.launch_flags(root, controllers, parsed, scan._notes_index(root, parsed))
+        return {r["site"].split(":")[0].rsplit("/", 1)[-1]: r["carries"] for r in rows}
+
+    def test_each_launch_is_read_for_the_flag(self):
+        self.assertEqual(self._launches(self.FLAGS),
+                         {"a_literal.py": True, "b_constant.py": True, "c_imported.py": False, "d_from.py": True,
+                          "e_filtered.py": None, "f_field.py": True, "g_sum.py": True, "h_none.py": False,
+                          "i_append.py": None})
+        # a field one writer fills without the flag is not shown to carry it
+        other = {**self.FLAGS, "notes/x/writer2.py": "def make():\n    return {'cli_flags': ['--print']}\n"}
+        self.assertIsNone(self._launches(other)["f_field.py"])
+
+    def test_the_report_says_unaffected_only_when_every_launch_carries_the_flag(self):
+        ok = {"site": "a.py:1 --system-prompt", "carries": True, "evidence": ["b.py:2 --safe-mode"]}
+        bad = {"site": "c.py:3 --system-prompt", "carries": False, "evidence": ["no element holds --safe-mode"]}
+        unknown = {"site": "d.py:4 --system-prompt", "carries": None, "evidence": ["d.py:4 `x` is computed"]}
+        self.assertIn("does not change a registered run's verdict", scan._session_statement({"launches": [ok]}))
+        for rows in ([ok, bad], [ok, unknown], [bad]):
+            text = scan._session_statement({"launches": rows})
+            with self.subTest(rows=[r["site"] for r in rows]):
+                self.assertNotIn("does not change a registered run's verdict", text)
+                for r in rows:
+                    if not r["carries"]:
+                        self.assertIn(r["site"], text)
+
+    def test_a_launch_without_the_flag_makes_the_session_surfaces_run_controllers(self):
+        """A registered run so launched loads CLAUDE.md and the session
+        descriptions, so their violations count in run_controllers too."""
+        surfaces, facts = _discovered_with_a_loading_workflow_and_an_unsafe_launch()
+        self.assertEqual(facts["interactive"]["launches_without_customizations_off"],
+                         ["notes/exp_4092/launch.py:9 --system-prompt"])
+        claude = surfaces.files["CLAUDE.md"]
+        self.assertEqual(claude.roles, {"interactive_session": "model_facing", "run_controllers": "model_facing"})
+        review = surfaces.files[".claude/agents/d4d-review-record.md"]
+        self.assertEqual(review.loaded["run_controllers"], review.loaded["interactive_session"])
+        planted, _ = _plant("CLAUDE.md", "Always describe the dataset as AI-READI.", surface=claude)
+        self.assertTrue(planted)
+        self.assertTrue(all(h["gates_in"] == ["interactive_session", "run_controllers"] for h in planted))
+
+
+class TestAssistantInstructions(unittest.TestCase):
+    """An assistant instruction file is a surface only where the
+    @d4dassistant workflow, a playbook or a loaded instruction loads it
+    (#4093)."""
+
+    def test_an_instruction_file_nothing_loads_is_not_a_surface(self):
+        surfaces, facts = _discovered()
+        edit, create = ".github/workflows/d4d_assistant_edit.md", ".github/workflows/d4d_assistant_create.md"
+        self.assertNotIn(edit, surfaces.files)
+        self.assertEqual(facts["assistant_instructions"][edit], [])
+        self.assertEqual(surfaces.files[create].roles, {"native_agentic": "model_facing"})
+        self.assertEqual(facts["assistant_instructions"][create],
+                         [".claude/commands/d4d-assistant.md (native_agentic)",
+                          ".claude/commands/d4d-webfetch.md (native_agentic)"])
+        github = sorted(r for r, s in surfaces.files.items() if "github_assistant" in s.approaches)
+        self.assertIn(".github/workflows/d4d-agent.yml", github)
+        self.assertFalse([r for r in github if r.startswith(".github/workflows/d4d_assistant_") and r.endswith(".md")])
+
+    def test_an_instruction_file_the_workflow_loads_is_the_assistants(self):
+        surfaces, facts = _discovered_with_a_loading_workflow_and_an_unsafe_launch()
+        edit = ".github/workflows/d4d_assistant_edit.md"
+        self.assertEqual(surfaces.files[edit].roles, {"github_assistant": "model_facing"})
+        self.assertIn(".github/workflows/d4d-agent.yml", surfaces.files[edit].why)
+        self.assertEqual(facts["assistant_instructions"][edit], [".github/workflows/d4d-agent.yml (github_assistant)"])
+        planted, _ = _plant(edit, "When editing a CHORUS datasheet, keep its consortium list.",
+                            surface=surfaces.files[edit])
+        self.assertTrue(planted and all(h["violation"] and h["gates_in"] == ["github_assistant"] for h in planted))
+
+
+class TestControllerRuns(unittest.TestCase):
+    """A controller module runs as a script only where something runs it: an
+    argv, a document beside it, or nothing importing it. An import by
+    another controller never runs its __main__ block (#4093)."""
+
+    def test_a_module_runs_as_a_script_only_where_something_runs_it(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            base = root / "notes/exp_4093"
+            _write(base / "seed.py", "import sys\nfrom data_sheets_schema.api_runner import RunSpec\n"
+                                     "import helper, worker, tool, documented\nspec = RunSpec\n"
+                                     "RUN = [sys.executable, '-m', 'tool', '--x']\n")
+            _write(base / "helper.py", "X = 1\n")
+            _write(base / "worker.py", "import sys\nARGV = [sys.executable, __file__, '--worker']\n")
+            _write(base / "tool.py", "Y = 1\n")
+            _write(base / "documented.py", "Z = 1\n")
+            _write(base / "README.md", "Run it from here:\n\n    python -m documented --label L\n")
+            parsed = _parsed(root, "notes")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            runs = scan.controller_run_evidence(root, parsed, index, controllers)
+        names = {f"notes/exp_4093/{n}.py" for n in ("seed", "helper", "worker", "tool", "documented")}
+        self.assertEqual(set(controllers), names)
+        self.assertEqual(set(runs), names - {"notes/exp_4093/helper.py"})
+        self.assertIn("an entry point", runs["notes/exp_4093/seed.py"])
+        self.assertIn("relaunches itself", runs["notes/exp_4093/worker.py"])
+        self.assertIn("-m tool", runs["notes/exp_4093/tool.py"])
+        self.assertIn("README.md", runs["notes/exp_4093/documented.py"])
+
+    def test_a_main_block_in_a_module_a_controller_only_imports_does_not_gate(self):
+        """transport.py is only imported; bounded_stream.py relaunches
+        itself, so its __main__ block runs."""
+        surfaces, facts = _discovered()
+        demo = 'if __name__ == "__main__":\n    DEMO_PROJECTS_4093 = ["CHORUS"]'
+        transport = "notes/matched_cborg_2026-09-13/audit_controls/transport.py"
+        self.assertEqual(surfaces.files[transport].runs, set())
+        self.assertEqual(facts["controller_runs"][transport], "")
+        quiet, _ = _plant(transport, demo)
+        chorus = [h for h in quiet if h["match"] == "CHORUS"]
+        self.assertTrue(chorus and all(h.get("main_block") and not h["violation"] for h in chorus))
+        stream = "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py"
+        self.assertIn("run_controllers", surfaces.files[stream].runs)
+        self.assertIn("relaunches itself", facts["controller_runs"][stream])
+        loud, _ = _plant(stream, demo)
+        self.assertTrue([h for h in loud if h["match"] == "CHORUS" and h["violation"]])
+
+
 class TestTheWholeAudit(unittest.TestCase):
     """The full scan of this checkout (reads code, prompts, schema and the
     source manifest, never the record corpus)."""
@@ -1332,6 +1840,26 @@ class TestTheWholeAudit(unittest.TestCase):
                 and h.get("main_block") and h["category"] == "gc_project"]
         self.assertTrue(demo)
         self.assertFalse(any(h["violation"] for h in demo))
+
+    def test_the_review_round_three_findings_are_violations(self):
+        """The GC names in d4d-review-record's description (interactive
+        sessions), the renderer's study-group table and the YAML comments a
+        playbook's Read returns (native_agentic) all gate (#4091); the
+        report says registered runs are unaffected because every launch
+        carries --safe-mode, and names the instruction file nothing loads
+        (#4092, #4093)."""
+        result = _full_run()
+        found = {(v["path"], v["match"].lower(), tuple(v["gates_in"])) for v in result["violations"]}
+        for want in ((".claude/agents/d4d-review-record.md", "chorus", ("interactive_session",)),
+                     (".claude/agents/d4d-review-record.md", "ai_readi", ("interactive_session",)),
+                     ("src/data_sheets_schema/rendering/human_readable_renderer.py", "diabet", ("native_agentic",)),
+                     ("src/data_sheets_schema/schema/D4D_Core.yaml", "ai_readi", ("native_agentic",)),
+                     ("src/data_sheets_schema/schema/D4D_Base_import.yaml", "ai-readi", ("native_agentic",))):
+            with self.subTest(want=want):
+                self.assertIn(want, found)
+        markdown = scan.render_markdown(result)
+        self.assertIn("Every registered native launch switches these off", markdown)
+        self.assertIn("`.github/workflows/d4d_assistant_edit.md` (loaded by nothing: not a surface)", markdown)
 
 
 if __name__ == "__main__":
