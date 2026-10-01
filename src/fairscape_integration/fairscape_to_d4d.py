@@ -15,6 +15,14 @@ Features:
   to its slot, and any part of a value its slot cannot hold are left out
   and named in `dropped` (#3969, #4073). A crate property no mapping here
   reads is not listed (#4046).
+- The fitted record is then validated in-process with the LinkML check the
+  script runs on the file it writes (`record_validator`). Each value the
+  validator rejects is left out and named in `dropped` with the
+  validator's message, and the record is validated again, until it passes
+  (#4098). So every record `convert` returns validates, and every value of
+  what it reads that the record does not hold is named in `dropped`. That
+  holds whatever the per-slot rules miss, and a record that cannot be made
+  valid by leaving values out is an error, not a record.
 - LinkML validation of output D4D
 """
 
@@ -22,6 +30,7 @@ import json
 import re
 import sys
 import yaml
+from functools import lru_cache
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 
@@ -65,15 +74,34 @@ N2T_RESOLVER = "https://n2t.net/"
 #: its resolver URL (#4074).
 IDENTIFIER_RANGES = ("uri", "uriorcurie")
 
-#: The @id RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
+#: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
 #: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
 DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
 
-#: A size stated as a whole number of bytes: `2048`, `2048 B`, `2048 bytes`.
-BYTE_COUNT = re.compile(r"^\s*(\d+)\s*(?:B|[Bb]ytes?)?\s*$")
+#: A size stated as a whole number of bytes: `2048`, `2,048`, `2048 B`,
+#: `2048 bytes`, `2,048 BYTES`. The digits may be grouped in threes by
+#: commas (#4098). A lower-case `b` alone names a bit, and is not read.
+BYTE_COUNT = re.compile(r"^\s*(\d{1,3}(?:,\d{3})+|\d+)\s*(?:B|(?i:bytes?))?\s*$")
 
-#: A size stated with a unit: `19.1 TB`, `441.2 GB`, `2 GiB`.
-SIZE_WITH_UNIT = re.compile(r"^\s*\d[\d,]*(?:\.\d+)?\s*[A-Za-z]+\s*$")
+#: A size stated in a 1024-based (IEC) unit: `2 GiB`, `2048 KiB` (#4098).
+IEC_SIZE = re.compile(
+    r"^\s*\d[\d,]*(?:\.\d+)?\s*"
+    r"(?i:[KMGTPEZY]iB|(?:kibi|mebi|gibi|tebi|pebi|exbi|zebi|yobi)bytes?)\s*$")
+
+#: A size stated in a unit that can be 1000- or 1024-based: `19.1 TB`,
+#: `441.2 GB`, `19.1 tb`, `3 gigabytes`. Text in any other unit is not a
+#: size with a unit here, and is reported as not a byte count (#4098).
+SIZE_WITH_UNIT = re.compile(
+    r"^\s*\d[\d,]*(?:\.\d+)?\s*"
+    r"(?i:[KMGTPEZY]B|(?:kilo|mega|giga|tera|peta|exa|zetta|yotta)bytes?)\s*$")
+
+#: The most passes `_settle` makes, each validating the record and leaving
+#: out what the schema rejects, before it gives up (#4098). A pass leaves
+#: out every value the validator rejects at once, so another pass is needed
+#: only where leaving a value out leaves its object without a required key.
+#: That moves the problem one level up, so a record needs at most one pass
+#: per level of nesting, plus the pass that finds it valid.
+MAX_VALIDATION_PASSES = 20
 
 #: What `_normalize_datetime` makes of a calendar date.
 MIDNIGHT = re.compile(r"^(\d{4}-\d{2}-\d{2})T00:00:00Z$")
@@ -122,7 +150,7 @@ def _as_list(value: Any) -> List[Any]:
 
 
 def _ref_id(value: Any) -> Optional[str]:
-    """The @id a JSON-LD reference names, `{"@id": x}` or a bare `x`."""
+    """The `@id` a JSON-LD reference names, `{"@id": x}` or a bare `x`."""
     if isinstance(value, dict):
         value = value.get('@id')
     return value.strip() if isinstance(value, str) and value.strip() else None
@@ -163,12 +191,12 @@ def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
 
     1. The entity the metadata descriptor (`ro-crate-metadata.json`) names
        in `about`. That is how RO-Crate defines the root.
-    2. Otherwise the entity whose @id is `./`.
+    2. Otherwise the entity whose `@id` is `./`.
     3. Otherwise the first ROCrate-typed entity, which is the one
        `rocrate_map.crate_root` and FAIRSCAPE's
        `ROCrateV1_2.getCrateMetadata` return.
 
-    A FAIRSCAPE release crate lists its sub-crates in the same @graph,
+    A FAIRSCAPE release crate lists its sub-crates in the same `@graph`,
     each typed ROCrate like the release itself. Taking the last such
     entity, as this converter did, described a sub-crate as the release.
     """
@@ -177,8 +205,8 @@ def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
     for entity in entities:
         if isinstance(entity.get('@id'), str):
             by_id.setdefault(entity['@id'], entity)
-    # The @id itself, not its last path segment: a release crate can list a
-    # sub-crate's `<dir>/ro-crate-metadata.json` as a file of its own.
+    # The `@id` itself, not its last path segment: a release crate can list
+    # a sub-crate's `<dir>/ro-crate-metadata.json` as a file of its own.
     descriptor = next((by_id[name] for name in DESCRIPTOR_IDS if name in by_id),
                       None)
     if descriptor is not None:
@@ -193,29 +221,129 @@ def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
 def exact_bytes(value: Any) -> Tuple[Optional[int], str]:
     """`value` as a whole number of bytes, or None and the reason (#4074).
 
-    An integer, or text of digits alone or followed by `B` or `bytes`, is
-    a byte count. A size with a unit (`19.1 TB`) is not. It is rounded,
-    and the crate does not say whether its unit is 1000- or 1024-based, so
-    turning it into a number would present an approximate size as an exact
-    count. The interface mapping (d4d_rocrate_interface_mapping.tsv) takes
-    `Dataset.total_size_bytes` from `evi:totalContentSizeBytes` and not
-    from `contentSize` for this reason.
+    An integer is a byte count, and so is text of digits alone or followed
+    by `B` or `bytes` in any case, the digits grouped in threes by commas
+    or not (`2,048 bytes`, #4098). A size in a unit (`19.1 TB`, `2 GiB`)
+    is not converted. It is given to the precision its digits show, which
+    can be rounded, so a number made from it could present an approximate
+    size as an exact count. A unit such as `TB` also does not say whether
+    it is 1000- or 1024-based; a 1024-based (IEC) unit such as `GiB` does,
+    and its reason does not claim otherwise (#4098). The interface mapping
+    (d4d_rocrate_interface_mapping.tsv) takes `Dataset.total_size_bytes`
+    from `evi:totalContentSizeBytes` and not from `contentSize` for this
+    reason. Any other value is not a byte count.
     """
     if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
         return value, ''
     if isinstance(value, str):
         count = BYTE_COUNT.match(value)
         if count:
-            return int(count.group(1)), ''
+            return int(count.group(1).replace(',', '')), ''
+        why = ("so a number made from it could give an approximate size as an "
+               "exact one (the interface mapping takes "
+               "Dataset.total_size_bytes from evi:totalContentSizeBytes for "
+               "this reason)")
+        if IEC_SIZE.match(value):
+            return None, (
+                f"{value!r} is a size with a 1024-based unit, not a byte "
+                f"count: it is given to the precision its digits show, {why}")
         if SIZE_WITH_UNIT.match(value):
             return None, (
                 f"{value!r} is a size with a unit, not a byte count: it is "
-                "rounded, and the crate does not state whether the unit is "
-                "1000- or 1024-based, so a number made from it would give an "
-                "approximate size as an exact one (the interface mapping "
-                "takes Dataset.total_size_bytes from evi:totalContentSizeBytes "
-                "for this reason)")
+                "given to the precision its digits show, and the crate does "
+                "not state whether the unit is 1000- or 1024-based, " + why)
     return None, f"{_preview(value)} is not a byte count"
+
+
+@lru_cache(maxsize=None)
+def record_validator(schema: str):
+    """The LinkML validator `linkml.validator.validate` builds for `schema`.
+
+    It checks a record against the JSON Schema LinkML generates for a closed
+    Dataset: a key its class does not declare is an error, and so is a value
+    of the wrong type, format, pattern or enum, or an object that lacks a
+    required key. Formats are jsonschema's checks; its `date-time` check
+    needs `rfc3339-validator`, which the lock file installs. `_settle` runs
+    it on every record `convert` returns, and `_validate_d4d` on the record
+    the script writes (#4098). It is built once per schema, because
+    generating that JSON Schema takes seconds.
+    """
+    from linkml.validator import Validator
+    from linkml.validator.plugins import JsonschemaValidationPlugin
+    return Validator(schema,
+                     validation_plugins=[JsonschemaValidationPlugin(closed=True)])
+
+
+def _record_path(path: Tuple[Any, ...]) -> str:
+    """`creators[0].name` for the path `('creators', 0, 'name')`."""
+    text = ''
+    for part in path:
+        text += f"[{part}]" if isinstance(part, int) else (
+            f".{part}" if text else str(part))
+    return text
+
+
+def _at(record: Any, path: Tuple[Any, ...]) -> Any:
+    """The value at `path` in `record`."""
+    for part in path:
+        record = record[part]
+    return record
+
+
+def _position(record: Any, path: Tuple[Any, ...]) -> Tuple[int, ...]:
+    """Where `path` falls in `record`, in the order the record is written."""
+    place = []
+    for part in path:
+        place.append(list(record).index(part) if isinstance(record, dict)
+                     else part)
+        record = record[part]
+    return tuple(place)
+
+
+def _rejected(results: List[Any]) -> Dict[Tuple[Any, ...], List[str]]:
+    """The values to leave out of a record the validator rejects, each
+    path with the validator's messages about it (#4098).
+
+    Each error points at a value: one of the wrong type, format, pattern or
+    enum, or an object that lacks a required key, which goes whole. An
+    `additionalProperties` error points at the object, and the keys its
+    class does not declare go by name. A value inside one that goes, goes
+    with it, and its messages are given with that value's. An error that
+    points at the record itself names nothing that can be left out, so the
+    record cannot be made valid this way, and that is a ValueError.
+    """
+    found: Dict[Tuple[Any, ...], List[str]] = {}
+    for result in results:
+        error = result.source
+        if error is None:
+            raise ValueError(f"a validation error with no location: {result.message}")
+        path = tuple(error.absolute_path)
+        targets = [path]
+        if (error.validator == 'additionalProperties'
+                and isinstance(error.instance, dict)
+                and isinstance(error.schema, dict)):
+            declared = error.schema.get('properties', {})
+            patterns = error.schema.get('patternProperties', {})
+            targets = [path + (key,) for key in error.instance
+                       if key not in declared
+                       and not any(re.search(p, key) for p in patterns)] or targets
+        for target in targets:
+            if not target:
+                raise ValueError(
+                    "the record cannot be made valid by leaving values out: "
+                    f"{result.message}")
+            messages = found.setdefault(target, [])
+            if result.message not in messages:
+                messages.append(result.message)
+    outer: Dict[Tuple[Any, ...], List[str]] = {}
+    for path in sorted(found, key=len):
+        holder = next((path[:n] for n in range(1, len(path))
+                       if path[:n] in outer), None)
+        if holder is None:
+            outer[path] = list(found[path])
+        else:
+            outer[holder] += [m for m in found[path] if m not in outer[holder]]
+    return outer
 
 
 def _calendar_date(value: Any) -> Tuple[Optional[str], str]:
@@ -257,8 +385,8 @@ class FairscapeToD4DConverter:
         self._view = None
         self._slots: Dict[str, Dict[str, Any]] = {}
         self._minted: Dict[str, int] = {}
-        #: The @graph's entities by @id, and the @ids of the root's parts
-        #: already written as file collections, for `_parts`.
+        #: The `@graph`'s entities by `@id`, and the `@id`s of the root's
+        #: parts already written as file collections, for `_parts`.
         self._described: Dict[str, Dict[str, Any]] = {}
         self._collected: set = set()
 
@@ -270,7 +398,11 @@ class FairscapeToD4DConverter:
             rocrate_input: FAIRSCAPE RO-Crate (dict, Path, or ROCrateV1_2)
 
         Returns:
-            D4D dictionary
+            D4D dictionary, which the schema accepts as a Dataset (#4098)
+
+        Raises:
+            ValueError: the crate has no root data entity, or the record
+                cannot be made valid by leaving values out (`_settle`)
         """
         self.dropped = []
         self._minted = {}
@@ -299,9 +431,9 @@ class FairscapeToD4DConverter:
 
         if not dataset:
             raise ValueError(
-                "No root data entity in the RO-Crate @graph: the metadata "
+                "No root data entity in the RO-Crate `@graph`: the metadata "
                 "descriptor's `about` names no entity in it, no entity has "
-                "@id './', and none is typed ROCrate")
+                "`@id` './', and none is typed ROCrate")
 
         # Convert to D4D
         d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
@@ -313,17 +445,18 @@ class FairscapeToD4DConverter:
 
         The root is the one the RO-Crate rule picks (`root_data_entity`),
         and every value in the record is read from it (#4072). It used to
-        be the last entity typed `Dataset` whose @id was `./` or that was
+        be the last entity typed `Dataset` whose `@id` was `./` or that was
         typed EVI#ROCrate. In a FAIRSCAPE release crate, which lists its
-        sub-crates in the same @graph and types them ROCrate too, that was
-        a sub-crate, so the release was described by one of its parts. Each
-        sub-crate's `hasPart` was also collected, so the record listed
+        sub-crates in the same `@graph` and types them ROCrate too, that
+        was a sub-crate, so the release was described by one of its parts.
+        Each sub-crate's `hasPart` was also collected, so the record listed
         itself among its own file collections. A root typed only
         `https://w3id.org/EVI#Dataset` (CHORUS, VOICE) was not found at all.
 
-        A nested dataset is an entity of the @graph that the root's
-        `hasPart` names and that is typed as a dataset (`is_dataset`). The
-        parts of a sub-crate are that sub-crate's, not the root's.
+        A nested dataset is an entity of the `@graph` that the root's
+        `hasPart` names and that is typed as a dataset (`is_dataset`), in
+        `@graph` order. The parts of a sub-crate are that sub-crate's, not
+        the root's.
 
         Returns:
             Tuple of (root, nested_datasets_list)
@@ -354,9 +487,12 @@ class FairscapeToD4DConverter:
         The mappings name the D4D slot each crate property goes to. The
         record is then fitted to the schema's Dataset class (`_fit`), so it
         carries only keys the class declares, each shaped to its slot's
-        range; what cannot be placed is recorded in `dropped` (#3969). The
-        record no longer carries the converter's own `schema_version`,
-        `generated_date` and `source` stamps, which are not D4D slots.
+        range; what cannot be placed is recorded in `dropped` (#3969).
+        Last, it is validated, and each value the schema rejects is left
+        out and recorded in `dropped` with the validator's message, until
+        it validates (`_settle`, #4098). The record no longer carries the
+        converter's own `schema_version`, `generated_date` and `source`
+        stamps, which are not D4D slots.
 
         Args:
             dataset: Main Dataset entity
@@ -369,6 +505,9 @@ class FairscapeToD4DConverter:
         d4d: Dict[str, Any] = {}
         # slot -> the crate property it was filled from, for `dropped`
         origin: Dict[str, str] = {}
+        # single-valued slot -> the other (crate property, value) pairs that
+        # map to it, in the order the slot takes them (`_place`)
+        rivals: Dict[str, List[Tuple[str, Any]]] = {}
         self._described = {}
         for entity in full_rocrate.get('@graph', []):
             if isinstance(entity, dict) and isinstance(entity.get('@id'), str):
@@ -389,8 +528,8 @@ class FairscapeToD4DConverter:
             d4d['file_collections'] = file_collections
             origin['file_collections'] = 'hasPart'
 
-        # In this order a later mapping supersedes an earlier one in a
-        # single-valued slot (`_place`).
+        # In this order a later mapping takes precedence over an earlier one
+        # in a single-valued slot (`_place`).
         for prop, slot, value in (self._map_basic_properties(dataset)
                                   + self._map_complex_properties(dataset)
                                   # EVI properties (computational provenance)
@@ -411,23 +550,31 @@ class FairscapeToD4DConverter:
                         "hasPart member the crate types as a dataset, which is "
                         "all `resources` holds")))
                 continue
-            self._place(d4d, origin, slot, value, prop)
+            self._place(d4d, origin, rivals, slot, value, prop)
 
-        return self._fit(d4d, TARGET_CLASS, origin)
+        fitted = self._fit(d4d, TARGET_CLASS, origin, rivals=rivals)
+        return self._settle(fitted, origin, rivals)
 
     def _record_id(self, dataset: Dict) -> Tuple[Optional[str], Optional[str]]:
         """The record's required `id` and the crate property it came from.
 
-        The root's `identifier`, else its `@id` (#3969): the rule
-        `rocrate_map.map_crate` applies to the root it picks, and on a crate
-        whose root both converters pick the two ids name the same
-        identifier. It is never a minted value, so the record points back
-        at the crate it came from. A DOI is written as the `doi:` CURIE
-        (#974). An ARK is written as its n2t.net resolver URL, where
-        `map_crate` keeps the ARK as written. A list gives its first text
-        item (`map_crate` takes its first item), and its other items are
-        recorded in `dropped` (#4073). A root whose only identifier is an
-        attached crate's `./` gives `./`, which is all such a crate supplies.
+        The root's `identifier`, else its `@id` (#3969), the rule
+        `rocrate_map.map_crate` applies to the root it picks. It is never a
+        minted value, so the record points back at the crate it came from.
+        A DOI is written as the `doi:` CURIE (#974). Where the root's
+        `identifier` is text, both converters name the same identifier,
+        apart from the form of an ARK: this converter writes it as its
+        n2t.net resolver URL, where `map_crate` keeps it as written. A list
+        gives its first text item, where `map_crate` takes its first item,
+        and its other items are recorded in `dropped` (#4073).
+
+        An `identifier` that holds no text, such as a reference
+        (`{"@id": …}`, which RO-Crate 1.2's own root example uses), an
+        object, a number or blank text, is recorded in `dropped`, and the
+        root's `@id` is the record's `id`. `map_crate` writes such a value
+        as `str()` gives it, or for `[""]` writes no `id` (#4100). A root
+        whose only identifier is an attached crate's `./` gives `./`, which
+        is all such a crate supplies.
         """
         for source in ('identifier', '@id'):
             items = [item for item in _as_list(dataset.get(source))
@@ -453,6 +600,7 @@ class FairscapeToD4DConverter:
         return None, None
 
     def _place(self, d4d: Dict[str, Any], origin: Dict[str, str],
+               rivals: Dict[str, List[Tuple[str, Any]]],
                slot: str, value: Any, prop: str) -> None:
         """Put `value`, read from crate property `prop`, in `slot`.
 
@@ -460,11 +608,20 @@ class FairscapeToD4DConverter:
         entry and the property it duplicates, or the FAIRSCAPE spelling of
         a key and the one this repo's d4d_to_fairscape.py writes. A
         multivalued slot keeps each distinct value of both, so neither is
-        chosen over the other. A single-valued slot keeps one value and
-        records the other as dropped: a dedicated property's over an
-        `additionalProperty` entry, FAIRSCAPE's own precedence (its
-        datasheet mapping reads each dedicated key first and falls back to
-        the `additionalProperty` entry), and otherwise the later mapping's.
+        chosen over the other.
+
+        A single-valued slot holds one value. Its values are put in order
+        here, and which one it holds is decided only once they are shaped
+        (`_fit`) and validated (`_settle`): the first in that order that
+        its slot can hold, the others recorded as dropped (#4098). Until
+        #4098 the first was chosen here, on the crate's values, so a value
+        that could not be shaped left the slot empty, and the usable value
+        behind it was recorded as superseded by it. The order puts a
+        dedicated property before an `additionalProperty` entry, which is
+        FAIRSCAPE's own precedence (its datasheet mapping reads each
+        dedicated key first and falls back to the `additionalProperty`
+        entry), and otherwise the later mapping first. `d4d[slot]` holds
+        the first value and `rivals[slot]` the rest.
         """
         if value in (None, '', [], {}):
             return
@@ -483,13 +640,16 @@ class FairscapeToD4DConverter:
             d4d[slot], origin[slot] = items, f"{origin[slot]} + {prop}"
             return
         fallback = 'additionalProperty['
-        if prop.startswith(fallback) and not origin[slot].startswith(fallback):
-            self.dropped.append(
-                (prop, f"superseded by {origin[slot]}, which also maps to `{slot}`"))
+        order = [(origin[slot], held)] + rivals.get(slot, [])
+        if any(value == other for _, other in order):
             return
-        self.dropped.append(
-            (origin[slot], f"superseded by {prop}, which also maps to `{slot}`"))
-        d4d[slot], origin[slot] = value, prop
+        # The latest mapping goes before every value of its own kind, and a
+        # dedicated property before every additionalProperty entry
+        at = next((n for n, (source, _) in enumerate(order)
+                   if source.startswith(fallback)
+                   or not prop.startswith(fallback)), len(order))
+        order.insert(at, (prop, value))
+        (origin[slot], d4d[slot]), rivals[slot] = order[0], order[1:]
 
     def _schema_view(self):
         """The merged schema, read from any working directory (#1301)."""
@@ -506,24 +666,52 @@ class FairscapeToD4DConverter:
         return self._slots[cls]
 
     def _fit(self, obj: Dict[str, Any], cls: str, origin: Dict[str, str],
-             where: str = '') -> Dict[str, Any]:
+             where: str = '',
+             rivals: Optional[Dict[str, List[Tuple[str, Any]]]] = None
+             ) -> Dict[str, Any]:
         """`obj` with only the keys `cls` declares, each value shaped to its
         slot by `_shape`.
 
         A key the class does not declare, a value `_shape` cannot fit to
         its slot, and each part of a value its slot cannot hold are left
         out and recorded in `dropped` (#3969, #4073). `where` is the path of
-        a nested object, which names what was dropped from it.
+        a nested object, which names what was dropped from it. `rivals`
+        holds, for a single-valued slot that two crate properties fill, the
+        values after the one `obj` holds (`_place`): the slot takes the
+        first of them it can hold (`_take`), and the rest wait for
+        `_settle`.
         """
         slots = self._class_slots(cls)
         fitted: Dict[str, Any] = {}
         for key, value in obj.items():
             source = origin.get(key) or f"{where}{key}"
+            waiting = rivals.pop(key, []) if rivals is not None else []
             slot = slots.get(key)
             if slot is None:
-                self.dropped.append(
-                    (source, f"the schema declares no `{key}` slot on {cls}"))
+                for each, _ in [(source, value)] + waiting:
+                    self.dropped.append(
+                        (each, f"the schema declares no `{key}` slot on {cls}"))
                 continue
+            self._take(fitted, origin, key, slot, [(source, value)] + waiting,
+                       where, rivals)
+        return fitted
+
+    def _take(self, record: Dict[str, Any], origin: Dict[str, str], key: str,
+              slot: Any, candidates: List[Tuple[str, Any]], where: str,
+              rivals: Optional[Dict[str, List[Tuple[str, Any]]]]) -> bool:
+        """Put in `record[key]` the first of `candidates`, (crate property,
+        value) pairs, that `_shape` can fit to `slot` (#4098).
+
+        Each candidate that cannot be shaped is recorded in `dropped` with
+        the reason, and that entry says which value the slot holds instead.
+        The candidates after the one placed wait in `rivals[key]`: `_settle`
+        tries them if the schema rejects the value placed, and records the
+        rest as superseded. Each part of a value its slot does not hold is
+        recorded as before (#4073). False when no candidate fits.
+        """
+        refused: List[int] = []
+        while candidates:
+            source, value = candidates.pop(0)
             if value in (None, '', [], {}):
                 continue
             shaped, why, left = self._shape(value, slot, f"{where}{key}")
@@ -533,9 +721,108 @@ class FairscapeToD4DConverter:
                     f"{_preview(part)} ({reason})")))
             if shaped is None:
                 self.dropped.append((source, f"not placed in `{key}`: {why}"))
+                refused.append(len(self.dropped) - 1)
                 continue
-            fitted[key] = shaped
-        return fitted
+            record[key], origin[key] = shaped, source
+            if candidates and rivals is not None:
+                rivals[key] = candidates
+            self._say_instead(refused, key, source)
+            return True
+        return False
+
+    def _say_instead(self, entries: List[int], key: str, source: str) -> None:
+        """Add to each of these `dropped` entries which crate property's
+        value `key` holds in place of the one it names (#4098)."""
+        for n in entries:
+            src, reason = self.dropped[n]
+            self.dropped[n] = (src, f"{reason}; `{key}` holds the value of "
+                                    f"{source} instead")
+
+    def _settle(self, record: Dict[str, Any], origin: Dict[str, str],
+                rivals: Dict[str, List[Tuple[str, Any]]]) -> Dict[str, Any]:
+        """`record` once the schema accepts it (#4098).
+
+        The record is validated with `record_validator`, the check the
+        script runs on the file it writes. Each value the validator rejects
+        is left out and recorded in `dropped` with the validator's message
+        (`_leave_out`), and the record is validated again. A single-valued
+        slot left empty takes the next value waiting for it, if any can be
+        shaped (`_take`). The per-slot rules in `_shape` already fit most
+        values. This pass makes the record valid however many of them a
+        crate gets past, and makes every value it leaves out a `dropped`
+        entry: a date-time `_coerce` leaves as written (`11/17/25`), a count
+        written as text, an object that lacks a required key.
+
+        After `MAX_VALIDATION_PASSES` passes, a record that still fails is a
+        ValueError, as is an error that names no value to leave out (an
+        `id` the record lacks). The values still waiting for a slot that
+        holds a value are recorded as superseded by it.
+        """
+        validator = record_validator(str(resource_path(FULL_SCHEMA)))
+        order = list(record)
+        for _ in range(MAX_VALIDATION_PASSES):
+            results = list(validator.iter_results(record, TARGET_CLASS))
+            if not results:
+                break
+            entries = self._leave_out(record, origin, _rejected(results))
+            for key in [key for key in rivals if key not in record]:
+                if self._take(record, origin, key,
+                              self._class_slots(TARGET_CLASS)[key],
+                              rivals.pop(key), '', rivals):
+                    self._say_instead(entries.get(key, []), key, origin[key])
+            record = {key: record[key]
+                      for key in sorted(record, key=order.index)}
+        else:
+            problems = [result.message for result in
+                        validator.iter_results(record, TARGET_CLASS)]
+            if problems:
+                passes = MAX_VALIDATION_PASSES
+                raise ValueError(
+                    "the record still fails validation after leaving out what "
+                    f"the schema rejected in {passes} "
+                    f"pass{'' if passes == 1 else 'es'}: {'; '.join(problems)}")
+        for key, waiting in rivals.items():
+            for source, _ in waiting:
+                self.dropped.append((source, (
+                    f"superseded by {origin[key]}, which also maps to `{key}`")))
+        return record
+
+    def _leave_out(self, record: Dict[str, Any], origin: Dict[str, str],
+                   rejected: Dict[Tuple[Any, ...], List[str]]
+                   ) -> Dict[str, List[int]]:
+        """Move each value `rejected` names out of `record` and into
+        `dropped`, with the validator's messages as the reason (#4098).
+
+        A value of a top-level slot, or an item of one, is named by the
+        crate property the slot was filled from, as `_fit` names it. A value
+        inside an object is named by its path in the record, as `_object`
+        names it. An object or list left empty is removed, since the record
+        writes no empty value, and holds nothing left to report. Returns the
+        indexes of the `dropped` entries made, by top-level slot.
+        """
+        order = sorted(rejected, key=lambda path: _position(record, path))
+        entries: Dict[str, List[int]] = {}
+        for path in order:
+            key = next(part for part in reversed(path) if isinstance(part, str))
+            item = isinstance(path[-1], int)
+            part = item and len(_at(record, path[:-1])) > 1
+            if len(path) == 1 or (len(path) == 2 and item):
+                source = origin.get(path[0]) or path[0]
+            else:
+                source = _record_path(path[:-1] if item else path)
+            self.dropped.append((source, (
+                f"{'part of the value ' if part else ''}not placed in "
+                f"`{key}`: {_preview(_at(record, path))} (the schema rejects "
+                f"it: {'; '.join(rejected[path])})")))
+            entries.setdefault(path[0], []).append(len(self.dropped) - 1)
+        # Last first, so no index a later deletion uses has moved
+        for path in reversed(order):
+            del _at(record, path[:-1])[path[-1]]
+            path = path[:-1]
+            while path and _at(record, path) in ({}, []):
+                del _at(record, path[:-1])[path[-1]]
+                path = path[:-1]
+        return entries
 
     def _shape(self, value: Any, slot: Any,
                where: str) -> Tuple[Any, str, List[Tuple[Any, str]]]:
@@ -546,15 +833,22 @@ class FairscapeToD4DConverter:
 
         A slot whose range is a class is filled by `_shape_objects`. Other
         values go through the static-map arm's coercion
-        (`rocrate_map._coerce`): a DOI is the bare DOI, a date-time slot
-        takes a date-time, enum values are kept only where permitted, a
-        one-item list is unwrapped for a single-valued slot and a scalar is
-        wrapped for a multivalued one. This converter departs from it in
-        four places:
+        (`rocrate_map._coerce`): a DOI is the bare DOI, a date written
+        `YYYY-MM-DD` or as an unambiguous slash date with a four-digit year
+        is widened to the date-time a date-time slot takes, enum values are
+        kept only where permitted, and a scalar is wrapped for a
+        multivalued slot. `_coerce` leaves any other date-time text as
+        written; the schema rejects it, and `_settle` leaves it out with
+        the validator's message (#4098). This converter departs from
+        `_coerce` in five places:
 
         - A reference or an object is not text, and a slot whose range is
           not a class does not hold it. `_coerce` would keep it as it is, or
           join its Python repr into one text.
+        - A one-item list for a single-valued slot is unwrapped before
+          `_coerce` reads it. `_coerce` reads a date before it unwraps the
+          list, so `["2026-06-30"]` stayed a date the date-time slot does
+          not accept (#4098).
         - A single-valued slot whose range is not text (an identifier, a
           number, a date) keeps the first item of a list, as `id` and an
           enum slot do. `_coerce` would join the items into a text that is
@@ -584,6 +878,8 @@ class FairscapeToD4DConverter:
                         f"`{slot.range}` slot does not hold")
                  for item in items if not _is_scalar(item)]
         value = scalars if isinstance(value, list) else scalars[0]
+        if isinstance(value, list) and len(value) == 1 and not slot.multivalued:
+            value = value[0]
         enum = view.get_enum(slot.range) if slot.range else None
         if (isinstance(value, list) and len(value) > 1 and not slot.multivalued
                 and not enum and slot.name != DOI_SLOT
@@ -685,10 +981,10 @@ class FairscapeToD4DConverter:
         its `@id` as the object's `id`, an ARK as its resolver URL, and its
         other keys are fitted the same way. `@type` and `@context` are
         JSON-LD framing, not values. `rocrate_map._to_object` kept only a
-        reference's @id, name and description and dropped its other keys
-        without a word. Text becomes an object by the static-map arm's rule
-        (`_to_object`). Whatever is left out is recorded in `dropped` under
-        `path`.
+        reference's `@id`, `name` and `description` and dropped its other
+        keys without a word. Text becomes an object by the static-map arm's
+        rule (`_to_object`). Whatever is left out is recorded in `dropped`
+        under `path`.
         """
         where = path.rstrip('.')
         if isinstance(item, dict):
@@ -870,7 +1166,8 @@ class FairscapeToD4DConverter:
 
         # isPartOf → parent_datasets, the Dataset slot whose slot_uri is
         # schema:isPartOf; there is no `is_part_of` slot (#3969). What the
-        # crate names there is not checked to be a dataset (#4047).
+        # crate names there is not checked to be a dataset (#4047). Each
+        # reference's keys are fitted to Dataset or recorded (#4098).
         if 'isPartOf' in dataset:
             found.append(('isPartOf', 'parent_datasets',
                           self._references('isPartOf',
@@ -888,22 +1185,36 @@ class FairscapeToD4DConverter:
 
         `resources` ranges over Dataset ("component datasets"), so a member
         is written there only when the crate types it as a dataset
-        (`is_dataset`). A member the @graph describes as a dataset is
-        already a file collection (`_extract_datasets`) and is not repeated.
-        A member the @graph describes as anything else (a person, a defined
-        term, software, a computation, a schema) is not a dataset part. A
-        member the @graph does not describe has no type, so nothing in the
-        crate says it is a dataset, unless the reference types it itself.
-        Each member left out is recorded in `dropped` with its reason. Until
-        #4074 every member was written as a Dataset, whatever its type.
+        (`is_dataset`). There are four cases:
+
+        - A member the `@graph` describes as a dataset is already a file
+          collection (`_extract_datasets`) and is not repeated. The file
+          collection is made from the `@graph`'s entity, so a key the
+          reference states that the entity does not, or states otherwise,
+          is recorded in `dropped` (`_keys_not_taken`, #4098).
+        - A member the `@graph` describes as anything else (a person, a
+          defined term, software, a computation, a schema) is not a dataset
+          part, and is recorded in `dropped`.
+        - A member the `@graph` does not describe, whose reference types it
+          as a dataset, is a component dataset: it is written to
+          `resources`, and `_object` fits the reference's keys to Dataset,
+          recording each it does not declare (#4098). Until #4098 only its
+          `@id` was kept, and its other keys were lost without a word.
+        - Any other member the `@graph` does not describe has no type, or
+          one that is not a dataset, so nothing in the crate says it is a
+          dataset, and it is recorded in `dropped`.
+
+        Until #4074 every member was written as a Dataset, whatever its
+        type.
         """
         parts = []
         for item in _as_list(has_part):
             ref = _ref_id(item)
             if ref is None:
-                self.dropped.append(('hasPart', f"an entry with no @id: {_preview(item)}"))
+                self.dropped.append(('hasPart', f"an entry with no `@id`: {_preview(item)}"))
                 continue
             if ref in self._collected:
+                self._keys_not_taken(item, ref)
                 continue
             if ref == root_id:
                 self.dropped.append(('hasPart', (
@@ -914,29 +1225,59 @@ class FairscapeToD4DConverter:
                 entity = item
             if entity is None:
                 self.dropped.append(('hasPart', (
-                    f"{ref}: the crate's @graph does not describe it, so nothing "
-                    "in the crate says it is a dataset; `resources` holds the "
-                    "dataset's component datasets")))
+                    f"{ref}: the crate's `@graph` does not describe it, so "
+                    "nothing in the crate says it is a dataset; `resources` "
+                    "holds the dataset's component datasets")))
             elif not is_dataset(entity):
                 self.dropped.append(('hasPart', (
                     f"{ref}: the crate types it {_types(entity)}, not as a "
                     "dataset; `resources` holds the dataset's component "
                     "datasets")))
             else:
-                parts.append({'id': resolvable_id(ref)})
+                # Only a reference that types itself reaches here: one the
+                # `@graph` describes as a dataset is a file collection.
+                parts.append(item)
         return parts
 
+    def _keys_not_taken(self, item: Any, ref: str) -> None:
+        """Record each key a `hasPart` reference states that the member's
+        file collection does not take from it (#4098).
+
+        The file collection is made from the `@graph`'s entity for the
+        member (`_build_file_collections`). A reference may state the
+        member's keys again, as CHORUS's root does with `name`. A key it
+        states with the entity's own value says nothing the entity does
+        not, and goes where the entity's does. A key the entity does not
+        carry, or carries with another value, is not in the record.
+        """
+        if not isinstance(item, dict):
+            return
+        entity = self._described.get(ref, {})
+        for key, value in item.items():
+            if key in ('@id', '@type', '@context') or entity.get(key) == value:
+                continue
+            self.dropped.append(('hasPart', (
+                f"{ref}: `{key}` {_preview(value)}, which the root's `hasPart` "
+                "states for it, is not what the `@graph`'s entity for it "
+                "states, and its file collection is made from that entity")))
+
     def _references(self, prop: str, items: List[Any]) -> List[Dict[str, Any]]:
-        """Crate references as the `{id: …}` objects a Dataset-ranged slot
-        holds, an ARK as its resolver URL; an entry with no id is recorded
-        in `dropped`."""
+        """The crate references `items`, for a Dataset-ranged slot (#4098).
+
+        A reference keeps its `@id` as the object's `id`, an ARK as its
+        resolver URL, and `_object` fits its other keys to Dataset: a key
+        the class declares, such as `name` or `description`, is kept, and
+        any other is recorded in `dropped`. Until #4098 only the `@id` was
+        kept, and every other key was lost without a word. An entry with no
+        `@id` is recorded in `dropped`.
+        """
         references = []
         for item in items:
             ref = _ref_id(item)
             if ref is not None:
-                references.append({'id': resolvable_id(ref)})
+                references.append(item if isinstance(item, dict) else {'@id': ref})
             else:
-                self.dropped.append((prop, f"an entry with no @id: {_preview(item)}"))
+                self.dropped.append((prop, f"an entry with no `@id`: {_preview(item)}"))
         return references
 
     def _map_evi_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
@@ -1096,7 +1437,7 @@ class FairscapeToD4DConverter:
 
         for n, prop in enumerate(additional):
             # schema:additionalProperty ranges over PropertyValue, so an
-            # entry that states no @type is read as one.
+            # entry that states no `@type` is read as one.
             if not isinstance(prop, dict) or (
                     prop.get('@type') and not _type_matches(prop, 'PropertyValue')):
                 self.dropped.append((f"additionalProperty[{n}]",
@@ -1167,11 +1508,14 @@ class FairscapeToD4DConverter:
         return d4d_dict, is_valid
 
     def _validate_d4d(self, d4d_file: Path) -> bool:
-        """Validate D4D YAML against schema."""
-        try:
-            from linkml.validator import validate
-            from linkml_runtime.loaders import yaml_loader
+        """Validate D4D YAML against schema.
 
+        The file is read back and checked by `record_validator`, the
+        validator `linkml.validator.validate` builds, which `convert` has
+        already run on the record. So this checks what the YAML on disk
+        holds, not a different rule.
+        """
+        try:
             # From any working directory (#1301). A schema that cannot be
             # found means the record was not validated, which is not a pass
             # (#3969).
@@ -1186,7 +1530,8 @@ class FairscapeToD4DConverter:
                 d4d_data = yaml.safe_load(f)
 
             # Validate
-            report = validate(d4d_data, str(schema_file), target_class='Dataset')
+            report = record_validator(str(schema_file)).validate(
+                d4d_data, TARGET_CLASS)
 
             if report.results:
                 print(f"✗ Validation failed with {len(report.results)} errors")

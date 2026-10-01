@@ -7,10 +7,12 @@ exited 1 because its own output failed D4D validation. The record is now
 fitted to the schema's Dataset class, and what cannot be placed is recorded
 in `dropped`. #3973: the converter read `rai:` spellings of three keys
 FAIRSCAPE writes otherwise. #4072: the record describes the crate's root
-data entity, not the last sub-crate in the @graph. #4073: the part of a
+data entity, not the last sub-crate in the `@graph`. #4073: the part of a
 value a slot cannot hold is recorded too, and nothing is joined as a
 Python repr. #4074: `resources` holds only hasPart members the crate types
-as datasets, and `total_size_bytes` only a byte count.
+as datasets, and `total_size_bytes` only a byte count. #4098: the record is
+validated before it is returned, and each value the schema rejects is left
+out and recorded with the validator's message, so every record validates.
 """
 
 import contextlib
@@ -45,8 +47,9 @@ SCHEMA = repo_root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
 
 #: The four crates #3969 names, all under data/ro-crate/, which
 #: `make test-fairscape-to-d4d` converts. The FAIRSCAPE release crates under
-#: data/ro-crate_packages/ are not among them (`TestRootDataEntity` converts
-#: CM4AI's), and AI_READI's is not UTF-8.
+#: data/ro-crate_packages/ are not among them. `TestRootDataEntity` converts
+#: CM4AI's and CHORUS's, and `TestTheRecordValidates` AI_READI's, decoded
+#: from windows-1252 because it is not UTF-8 (#4089).
 BUNDLED = (
     "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json",
     "data/ro-crate/examples/CM4AI_roundtrip.json",
@@ -57,12 +60,17 @@ FULL = repo_root / BUNDLED[0]
 
 #: The CM4AI June 2026 release crate as published, and as `d4d rocrate
 #: normalize` reduced it: ten entities typed ROCrate, the release and nine
-#: sub-crates, in one @graph (#4072).
+#: sub-crates, in one `@graph` (#4072).
 CM4AI_ZIP = repo_root / "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip"
 CM4AI_REDUCED = (repo_root / "data/ro-crate_packages/CM4AI/processed/"
                  "CM4AI_crate_metadata_reduced.json")
 CM4AI_RELEASE = ("https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-"
                  "artificial-intelligence-June-2026-data-release")
+
+#: The AI-READI v3.0.0 release crate, which is windows-1252, not UTF-8
+#: (#4089). Its root's `datePublished` is `11/17/25` (#4098).
+AI_READI = repo_root / "data/ro-crate_packages/AI_READI/raw/ro-crate-metadata.json"
+CHORUS = repo_root / "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json"
 
 
 @lru_cache(maxsize=1)
@@ -88,7 +96,7 @@ def quietly(call, *args):
 
 def crate(root, *entities):
     """A crate whose root entity carries `root`, with `entities` after it
-    in the @graph."""
+    in the `@graph`."""
     return {
         "@context": {"@vocab": "https://schema.org/"},
         "@graph": [
@@ -165,7 +173,7 @@ class TestDroppedValuesAreRecorded(unittest.TestCase):
     }
     #: What else each bundled crate carries that its slot cannot hold, with
     #: the reason given (#4073, #4074): the full crate's size with a unit,
-    #: its four hasPart members the @graph does not describe, and the
+    #: its four hasPart members the `@graph` does not describe, and the
     #: ambiguous start date `9/1/2022` both crates write.
     CANNOT_HOLD = {
         BUNDLED[0]: {"contentSize": "a size with a unit, not a byte count",
@@ -203,18 +211,26 @@ class TestDroppedValuesAreRecorded(unittest.TestCase):
                 self.assertNotIn(key, record)
 
     def test_fairscape_cli_reports_what_it_drops(self):
+        """On stderr, apart from the YAML the command writes (#3969, #4099).
+        Click 8.1 mixes stderr into `output` unless told not to; 8.2 dropped
+        the option and always keeps `stderr` apart."""
         from click.testing import CliRunner
         from src.fairscape_integration.cli import cli
 
+        try:
+            runner = CliRunner(mix_stderr=False)
+        except TypeError:
+            runner = CliRunner()
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "record.yaml"
-            result = CliRunner().invoke(
+            result = runner.invoke(
                 cli, ["rocrate-to-d4d", str(FULL), "-o", str(output)])
-            self.assertEqual(result.exit_code, 0, result.output)
+            self.assertEqual(result.exit_code, 0, result.stdout + result.stderr)
             self.assertEqual(
                 problems(yaml.safe_load(output.read_text(encoding="utf-8"))), [])
         for source in self.NO_SLOT[BUNDLED[0]] | set(self.CANNOT_HOLD[BUNDLED[0]]):
-            self.assertIn(f"not placed: {source}:", result.output)
+            self.assertIn(f"not placed: {source}:", result.stderr)
+        self.assertNotIn("not placed:", result.stdout)
 
     def test_each_conversion_reports_its_own_drops(self):
         converter = FairscapeToD4DConverter()
@@ -329,6 +345,46 @@ class TestSharedSlots(unittest.TestCase):
         self.assertIn("superseded by license",
                       dict(converter.dropped)["additionalProperty[License]"])
 
+    def test_the_slot_takes_the_next_value_when_the_first_cannot_be_shaped(self):
+        """The dedicated property comes first, but its value is chosen only
+        once it is shaped: one its slot cannot hold leaves the slot to the
+        `additionalProperty` value, and its entry says so (#4098). It used
+        to leave the slot empty, and call the usable value superseded."""
+        for root, slot, kept, source, fallback in (
+                ({"license": {"@id": "https://spdx.org/licenses/MIT"}},
+                 "license", "MIT", "license", ("License", "MIT")),
+                ({"identifier": "ark:59853/x-1"}, "doi", "10.5555/ABC",
+                 "identifier", ("DOI", "10.5555/ABC")),
+                ({"d4d:humanSubject": True}, "human_subject_research",
+                 {"name": "Approved by the IRB."}, "d4d:humanSubject",
+                 ("Human Subject", "Approved by the IRB."))):
+            with self.subTest(source=source):
+                name, value = fallback
+                record, dropped = converted(crate({**root, "additionalProperty": [
+                    {"@type": "PropertyValue", "name": name, "value": value}]}))
+                self.assertEqual(record[slot], kept)
+                why = reasons(dropped, source)
+                self.assertIn(f"not placed in `{slot}`", why)
+                self.assertIn(f"`{slot}` holds the value of "
+                              f"additionalProperty[{name}] instead", why)
+                self.assertNotIn(f"additionalProperty[{name}]",
+                                 [src for src, _ in dropped])
+                self.assertEqual(problems(record), [])
+
+    def test_the_slot_takes_the_next_value_when_the_schema_rejects_the_first(self):
+        """`June 2026` is shaped, as `_coerce` leaves it, and the schema
+        rejects it; the slot then takes the next value (#4098)."""
+        record, dropped = converted(crate({
+            "datePublished": "June 2026",
+            "additionalProperty": [{"@type": "PropertyValue", "name": "Issued",
+                                    "value": "2026-06-30"}]}))
+        self.assertEqual(record["issued"], "2026-06-30T00:00:00Z")
+        self.assertEqual(dropped, [("datePublished", (
+            "not placed in `issued`: June 2026 (the schema rejects it: 'June "
+            "2026' is not a 'date-time' in /issued); `issued` holds the value "
+            "of additionalProperty[Issued] instead"))])
+        self.assertEqual(problems(record), [])
+
     def test_a_list_for_a_single_valued_object_slot_is_one_object(self):
         record = quietly(FairscapeToD4DConverter().convert, crate({
             "rai:dataReleaseMaintenancePlan": ["Quarterly.", "Then yearly."]}))
@@ -423,10 +479,15 @@ def sub_crate(name, last):
 
 
 def release_crate():
-    """A release crate the way FAIRSCAPE writes one: the descriptor is about
-    the release, and its two sub-crates, typed ROCrate like it, come before
-    and after it in the @graph, so neither the first nor the last ROCrate
-    entity is the release."""
+    """A release crate whose descriptor is about the release, with its two
+    sub-crates, typed ROCrate like it, before and after it in the `@graph`.
+
+    FAIRSCAPE writes the release first, as `@graph[1]`, the first ROCrate
+    entity, with its sub-crates after it (every tracked release crate is
+    laid out so). This layout is built so that neither the first nor the
+    last ROCrate entity is the release, which only the descriptor's
+    `about` names. A JSON-LD `@graph` is unordered, so it is the same
+    crate in any order."""
     return {"@graph": [
         {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
          "about": {"@id": "ark:59853/rocrate-release"}},
@@ -469,7 +530,7 @@ class TestRootDataEntity(unittest.TestCase):
         self.assertEqual(problems(record), [])
 
     def test_a_sub_crates_metadata_file_is_not_the_descriptor(self):
-        """Only the entity whose @id is `ro-crate-metadata.json` is the
+        """Only the entity whose `@id` is `ro-crate-metadata.json` is the
         descriptor, not a file listed under that name in a sub-directory."""
         crate_json = release_crate()
         crate_json["@graph"].insert(0, {
@@ -520,17 +581,36 @@ class TestRootDataEntity(unittest.TestCase):
     def test_a_root_typed_evi_dataset_is_found_by_the_descriptor(self):
         """CHORUS types its root and sub-crates https://w3id.org/EVI#Dataset,
         not Dataset, which the converter required before the descriptor
-        named the root."""
-        path = repo_root / "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json"
-        graph = json.loads(path.read_text(encoding="utf-8"))["@graph"]
-        root = root_data_entity(graph)
-        record, _ = converted(path)
-        self.assertEqual(record["id"], "doi:10.18130/V3/XNBOPG")
-        self.assertEqual(record["title"], root["name"])
-        # In @graph order, as before
-        self.assertEqual(sorted(fc["id"] for fc in record["file_collections"]),
-                         sorted(part["@id"] for part in root["hasPart"]))
-        self.assertEqual(problems(record), [])
+        named the root.
+
+        As published, the root is also the first ROCrate entity, so the
+        third rule finds it too. The same crate with its sub-crates listed
+        first is found only by the descriptor (#4099)."""
+        crate_json = json.loads(CHORUS.read_text(encoding="utf-8"))
+        graph = crate_json["@graph"]
+        descriptor = next(e for e in graph if e["@id"] == "ro-crate-metadata.json")
+        root = next(e for e in graph if e["@id"] == descriptor["about"]["@id"])
+        subcrates = [e for e in graph if e is not root and e is not descriptor]
+        self.assertTrue(subcrates and all("ROCrate" in str(e["@type"])
+                                          for e in subcrates))
+        for order, entities in (("as published", graph),
+                                ("sub-crates first",
+                                 [descriptor, *subcrates, root])):
+            with self.subTest(order=order):
+                record, dropped = converted({**crate_json, "@graph": entities})
+                self.assertIs(root_data_entity(entities), root)
+                self.assertEqual(record["id"], "doi:10.18130/V3/XNBOPG")
+                self.assertEqual(record["title"], root["name"])
+                # In `@graph` order, which is not the order of the root's
+                # hasPart; the reference's `name` is the entity's own
+                self.assertEqual([fc["id"] for fc in record["file_collections"]],
+                                 [e["@id"] for e in subcrates])
+                self.assertNotEqual([e["@id"] for e in subcrates],
+                                    [part["@id"] for part in root["hasPart"]])
+                self.assertEqual(
+                    {source for source, _ in dropped},
+                    {"contentSize", *(f"{e['@id']}.contentSize" for e in subcrates)})
+                self.assertEqual(problems(record), [])
 
     def test_the_cm4ai_release_zip_converts_as_its_june_2026_release(self):
         with zipfile.ZipFile(CM4AI_ZIP) as archive:
@@ -629,6 +709,32 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                 self.assertIn(f"not placed in `{slot}`", reasons(dropped, source))
         self.assertEqual(problems(record), [])
 
+    def test_a_reference_beside_text_in_a_text_slot_is_recorded(self):
+        """The text is placed, and the reference or object beside it, which
+        a slot that does not range over a class cannot hold, is named
+        (#4099)."""
+        for key, value, kept, left in (
+                ("license", ["MIT", {"@id": "https://spdx.org/licenses/Apache-2.0"}],
+                 "MIT", '{"@id": "https://spdx.org/licenses/Apache-2.0"}'),
+                ("keywords", ["a", {"@type": "DefinedTerm", "name": "b"}],
+                 ["a"], '{"@type": "DefinedTerm", "name": "b"}')):
+            with self.subTest(key=key):
+                record, dropped = converted(crate({key: value}))
+                self.assertEqual(record[key], kept)
+                self.assertEqual(dropped, [(key, (
+                    f"part of the value not placed in `{key}`: {left} (a "
+                    "crate reference or object, which a `string` slot does "
+                    "not hold)"))])
+                self.assertEqual(problems(record), [])
+
+    def test_an_is_part_of_entry_with_no_id_is_recorded(self):
+        record, dropped = converted(crate({"isPartOf": [
+            {"name": "Project X"}, {"@id": "ark:59852/project-y"}]}))
+        self.assertEqual(record["parent_datasets"],
+                         [{"id": "https://n2t.net/ark:59852/project-y"}])
+        self.assertEqual(dropped, [("isPartOf", (
+            'an entry with no `@id`: {"name": "Project X"}'))])
+
     def test_a_single_valued_identifier_slot_keeps_one_identifier(self):
         record, dropped = converted(crate(
             {"publisher": ["ark:59852/org-a", "ark:59852/org-b"]}))
@@ -712,8 +818,8 @@ class TestDatasetParts(unittest.TestCase):
         why = reasons(dropped, "hasPart")
         for ref in ("#tool", "#step", "https://orcid.org/0000-0002-1825-0097"):
             self.assertIn(f"{ref}: the crate types it", why)
-        self.assertIn("ark:59853/schema-undescribed: the crate's @graph does not "
-                      "describe it", why)
+        self.assertIn("ark:59853/schema-undescribed: the crate's `@graph` does "
+                      "not describe it", why)
         self.assertEqual(problems(record), [])
 
     def test_total_size_bytes_is_the_crates_byte_count(self):
@@ -751,6 +857,106 @@ class TestDatasetParts(unittest.TestCase):
                 else:
                     self.assertEqual(dropped, [])
 
+    def test_the_byte_count_supersedes_a_content_size_that_disagrees(self):
+        """`evi:totalContentSizeBytes` is the size, and a byte `contentSize`
+        that differs from it is named, for the root and for a file
+        collection (#4099)."""
+        record, dropped = converted(crate(
+            {"contentSize": "2048", "evi:totalContentSizeBytes": 4096,
+             "hasPart": [{"@id": "#raw"}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw files",
+             "contentSize": "2048", "evi:totalContentSizeBytes": 4096}))
+        self.assertEqual(record["total_size_bytes"], 4096)
+        self.assertEqual(record["file_collections"][0]["total_bytes"], 4096)
+        self.assertEqual(dict(dropped), {
+            "contentSize": ("superseded by evi:totalContentSizeBytes, which "
+                            "also maps to `total_size_bytes`"),
+            "#raw.contentSize": ("not placed in `total_bytes`: 2048; superseded "
+                                 "by evi:totalContentSizeBytes, 4096")})
+
+    def test_a_total_content_size_that_is_not_a_count_is_recorded(self):
+        record, dropped = converted(crate({"evi:totalContentSizeBytes": "19.1 TB"}))
+        self.assertNotIn("total_size_bytes", record)
+        self.assertIn("not placed in `total_size_bytes`: '19.1 TB' is a size "
+                      "with a unit", reasons(dropped, "evi:totalContentSizeBytes"))
+
+    def test_a_byte_count_may_group_its_digits(self):
+        """Commas in threes, and `BYTES` in any case, are a byte count; a
+        size is not one, and the reason says what the size states (#4098)."""
+        for size, expected in (("2,048 bytes", 2048), ("2,048", 2048),
+                               ("2,048 B", 2048), ("1,000,000 bytes", 1000000),
+                               ("2048 BYTES", 2048)):
+            with self.subTest(size=size):
+                record, dropped = converted(crate({"contentSize": size}))
+                self.assertEqual(record["total_size_bytes"], expected)
+                self.assertEqual(dropped, [])
+        for size, said, unsaid in (
+                ("2 GiB", "is a size with a 1024-based unit", "1000- or 1024"),
+                ("2048 KiB", "is a size with a 1024-based unit", "1000- or 1024"),
+                ("2 GB", "does not state whether the unit is 1000- or 1024-based",
+                 "1024-based unit"),
+                ("2,04 bytes", "is not a byte count", "a size with"),
+                ("2 widgets", "is not a byte count", "a size with")):
+            with self.subTest(size=size):
+                record, dropped = converted(crate({"contentSize": size}))
+                self.assertNotIn("total_size_bytes", record)
+                self.assertIn(said, reasons(dropped, "contentSize"))
+                self.assertNotIn(unsaid, reasons(dropped, "contentSize"))
+
+    def test_a_part_typed_only_as_a_crate_is_a_file_collection(self):
+        """An RO-Crate is a dataset of its own (`is_dataset`, #4099)."""
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#sub"}]},
+            {"@id": "#sub", "@type": "https://w3id.org/EVI#ROCrate",
+             "name": "A sub-crate"}))
+        self.assertEqual(record["file_collections"],
+                         [{"id": "#sub", "name": "A sub-crate"}])
+        self.assertEqual(dropped, [])
+
+    def test_a_references_keys_are_fitted_or_recorded(self):
+        """An `isPartOf` reference, and a `hasPart` member only its
+        reference types as a dataset, keep the keys Dataset declares, and
+        each other key is named (#4098). They used to become `{id}`."""
+        reference = {"@type": "Dataset", "name": "Project X",
+                     "description": "The parent project",
+                     "url": "https://example.org/x", "funder": "NIH"}
+        record, dropped = converted(crate({
+            "isPartOf": [{"@id": "ark:59852/project-x", **reference}],
+            "hasPart": [{"@id": "ark:59853/rocrate-y", **reference}]}))
+        for slot, ref in (("parent_datasets", "ark:59852/project-x"),
+                          ("resources", "ark:59853/rocrate-y")):
+            with self.subTest(slot=slot):
+                self.assertEqual(record[slot], [{
+                    "id": f"https://n2t.net/{ref}", "name": "Project X",
+                    "description": "The parent project"}])
+                for key in ("url", "funder"):
+                    self.assertEqual(
+                        reasons(dropped, f"{slot}[0].{key}"),
+                        f"the schema declares no `{key}` slot on Dataset")
+        self.assertEqual(len(dropped), 4)
+        self.assertEqual(problems(record), [])
+
+    def test_what_a_part_reference_says_beyond_its_entity_is_recorded(self):
+        """A member the `@graph` describes is a file collection made from
+        that entity. A key the reference states that the entity does not,
+        or states otherwise, is named (#4098); one it states as the entity
+        does is not, as on CHORUS (`TestRootDataEntity`)."""
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#raw", "@type": "Dataset", "name": "Raw files",
+                          "description": "Said only here"},
+                         {"@id": "#other", "name": "Another name"}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw files"},
+            {"@id": "#other", "@type": "Dataset", "name": "Other files"}))
+        self.assertEqual([fc["name"] for fc in record["file_collections"]],
+                         ["Raw files", "Other files"])
+        why = reasons(dropped, "hasPart")
+        self.assertIn("#raw: `description` Said only here, which the root's "
+                      "`hasPart` states for it, is not what the `@graph`'s "
+                      "entity for it states", why)
+        self.assertIn("#other: `name` Another name", why)
+        self.assertNotIn("#raw: `name`", why)
+        self.assertEqual(len(dropped), 2)
+
     def test_an_ark_in_any_identifier_slot_is_its_resolver_url(self):
         record, _ = converted(crate({
             "publisher": "ark:59852/organization-x",
@@ -784,6 +990,166 @@ class TestDatasetParts(unittest.TestCase):
                 theirs = map_crate(crate_json["@graph"], rows, view).record
                 self.assertEqual({slot for slot in set(ours) & set(theirs)
                                   if ours[slot] != theirs[slot]}, differ)
+
+
+class TestTheRecordValidates(unittest.TestCase):
+    """#4098: every record `convert` returns validates, and each value the
+    schema rejects is left out and named in `dropped` with the validator's
+    message, whatever the per-slot rules let through."""
+
+    def assert_left_out(self, crate_json, slot, source, *said):
+        """`slot` is not in the record, which validates, and `source` is
+        named in `dropped` with a reason saying each of `said`."""
+        record, dropped = converted(crate_json)
+        self.assertNotIn(slot, record)
+        self.assertEqual(problems(record), [])
+        why = reasons(dropped, source)
+        for text in said:
+            self.assertIn(text, why)
+        return record, dropped
+
+    def test_the_ai_readi_release_date_is_left_out(self):
+        """The tracked AI-READI v3.0.0 release crate's root has
+        `datePublished: 11/17/25`, which `_coerce` leaves as written. The
+        file is windows-1252 (#4089), so it is decoded as that here."""
+        crate_json = json.loads(AI_READI.read_bytes().decode("cp1252"))
+        _, dropped = self.assert_left_out(
+            crate_json, "issued", "datePublished",
+            "not placed in `issued`: 11/17/25 (the schema rejects it: "
+            "'11/17/25' is not a 'date-time' in /issued)")
+        self.assertEqual({source for source, _ in dropped},
+                         {"contentSize", "datePublished"})
+
+    def test_a_date_time_the_date_rule_does_not_read_is_left_out(self):
+        for key, slot, value in (("datePublished", "issued", "June 2026"),
+                                 ("datePublished", "issued", "2026"),
+                                 ("datePublished", "issued", "11/17/25"),
+                                 ("dateCreated", "created_on", "2026-01")):
+            with self.subTest(key=key, value=value):
+                self.assert_left_out(
+                    crate({key: value}), slot, key,
+                    f"not placed in `{slot}`: {value} (the schema rejects it: "
+                    f"'{value}' is not a 'date-time' in /{slot})")
+
+    def test_a_one_item_list_is_read_as_its_item(self):
+        """For a single-valued slot, before the date in it is read: as
+        `_coerce` reads it, `["2026-06-30"]` kept a date the slot does not
+        take."""
+        for key, slot, value, expected in (
+                ("datePublished", "issued", ["2026-06-30"], "2026-06-30T00:00:00Z"),
+                ("dateModified", "last_updated_on", ["2026-01-31"],
+                 "2026-01-31T00:00:00Z"),
+                ("datePublished", "issued", ["12/16/2025"], "2025-12-16T00:00:00Z")):
+            with self.subTest(value=value):
+                record, dropped = converted(crate({key: value}))
+                self.assertEqual(record[slot], expected)
+                self.assertEqual(dropped, [])
+                self.assertEqual(problems(record), [])
+        # A date the rule will not guess is refused in a list as on its own
+        self.assert_left_out(crate({"datePublished": ["9/1/2022"]}), "issued",
+                             "datePublished", "ambiguous date '9/1/2022'")
+
+    def test_a_count_written_as_text_is_left_out(self):
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#raw"}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw files",
+             "d4d:fileCount": "200"}))
+        self.assertEqual(record["file_collections"],
+                         [{"id": "#raw", "name": "Raw files"}])
+        self.assertEqual(dropped, [("file_collections[0].file_count", (
+            "not placed in `file_count`: 200 (the schema rejects it: '200' is "
+            "not of type 'integer', 'null' in /file_collections/0/file_count)"))])
+        self.assertEqual(problems(record), [])
+
+    def test_an_object_without_a_required_key_is_left_out_whole(self):
+        self.assert_left_out(
+            crate({"rai:dataCollectionRawData": {"@id": "#raw"}}),
+            "raw_data_sources", "rai:dataCollectionRawData",
+            'not placed in `raw_data_sources`: {"id": "#raw"} (the schema '
+            "rejects it: 'source_description' is a required property in "
+            "/raw_data_sources/0)")
+        # Beside one its class can hold, it is a part of the value
+        record, dropped = converted(crate({"rai:dataCollectionRawData": [
+            {"@id": "#raw"}, "Survey responses."]}))
+        self.assertEqual(record["raw_data_sources"],
+                         [{"source_description": "Survey responses."}])
+        self.assertIn('part of the value not placed in `raw_data_sources`: '
+                      '{"id": "#raw"}',
+                      reasons(dropped, "rai:dataCollectionRawData"))
+        self.assertEqual(problems(record), [])
+
+    def test_leaving_a_required_value_out_leaves_its_object_out(self):
+        """The schema rejects the object's required key, and then the object
+        that lacks it, a pass later."""
+        crate_json = crate({"rai:dataCollectionRawData": [
+            {"@id": "#raw", "source_description": 5}]})
+        record, dropped = converted(crate_json)
+        self.assertNotIn("raw_data_sources", record)
+        self.assertEqual(dropped, [
+            ("raw_data_sources[0].source_description", (
+                "not placed in `source_description`: 5 (the schema rejects it: "
+                "5 is not of type 'string' in "
+                "/raw_data_sources/0/source_description)")),
+            ("rai:dataCollectionRawData", (
+                'not placed in `raw_data_sources`: {"id": "#raw"} (the schema '
+                "rejects it: 'source_description' is a required property in "
+                "/raw_data_sources/0)"))])
+        self.assertEqual(problems(record), [])
+        # With one pass the record is still invalid, and that is an error
+        with mock.patch.object(fairscape_to_d4d, "MAX_VALIDATION_PASSES", 1):
+            with self.assertRaisesRegex(
+                    ValueError, "still fails validation after leaving out what "
+                                "the schema rejected in 1 pass: 'source_desc"):
+                converted(crate_json)
+
+    def test_a_record_no_value_left_out_can_make_valid_is_an_error(self):
+        """A root with no `@id` and no `identifier` gives no `id`, which the
+        schema requires and leaving values out cannot supply."""
+        with self.assertRaisesRegex(
+                ValueError, "cannot be made valid by leaving values out: "
+                            "'id' is a required property"):
+            converted({"@graph": [{"@type": ROCRATE, "name": "No identifier"}]})
+
+    def test_whatever_the_crate_holds_the_record_validates(self):
+        """A value of the wrong kind for each slot it maps to: each one is
+        either in the record or named in `dropped`."""
+        values = {
+            "identifier": {"@id": "#not-text"}, "datePublished": "June 2026",
+            "dateModified": ["9/1/2022"], "dateCreated": 2026, "license": 5,
+            "version": {"v": 1}, "keywords": [{"@id": "#k"}, 7],
+            "url": ["https://a.example", "https://b.example"],
+            "publisher": {"@id": "ark:59852/org"}, "contentUrl": 12,
+            "contentSize": "lots", "isPartOf": "ark:59852/project",
+            "rai:dataCollectionRawData": [{"@id": "#raw"}, "Survey."],
+            "rai:dataCollectionTimeframe": ["2022-09-01", "2026-13-45"],
+            "d4d:humanSubject": True, "d4d:atRiskPopulations": [{"@value": "x"}],
+            "evi:totalContentSizeBytes": -1,
+        }
+        #: The slot each property maps to (`_map_basic_properties` and on)
+        slots = {"identifier": "doi", "datePublished": "issued",
+                 "dateModified": "last_updated_on", "dateCreated": "created_on",
+                 "license": "license", "version": "version",
+                 "keywords": "keywords", "url": "page", "publisher": "publisher",
+                 "contentUrl": "download_url", "contentSize": "total_size_bytes",
+                 "isPartOf": "parent_datasets",
+                 "rai:dataCollectionRawData": "raw_data_sources",
+                 "rai:dataCollectionTimeframe": "collection_timeframes",
+                 "d4d:humanSubject": "human_subject_research",
+                 "d4d:atRiskPopulations": "at_risk_populations",
+                 "evi:totalContentSizeBytes": "total_size_bytes"}
+        record, dropped = converted(crate(values))
+        self.assertEqual(problems(record), [])
+        named = {source for source, _ in dropped}
+        for key, slot in slots.items():
+            with self.subTest(key=key):
+                self.assertTrue(
+                    slot in record or key in named
+                    or any(source.startswith(slot) for source in named),
+                    f"{key} is neither in `{slot}` nor named in `dropped`")
+        # The end date's month is 13: the date rule writes it, the schema
+        # does not accept it
+        self.assertIn("'2026-13-45' is not a 'date'",
+                      reasons(dropped, "collection_timeframes[0].end_date"))
 
 
 class TestValidationIsNotVacuous(unittest.TestCase):
