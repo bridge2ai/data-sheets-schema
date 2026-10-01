@@ -9,7 +9,8 @@ counts record keys, so a key holding `null` or `[]` reads as present and
 and has no structural tier; `scripts/arm_comparison.py` reported populated
 leaves per replicate and nothing across them.
 
-`compare_structure` is that tier, for top-level slots. It is pure: records
+`compare_structure` is that tier, for top-level slots (below them, see
+the end of this docstring). It is pure: records
 in, a report out, no file read. Per slot it gives
 
 - **presence** per replicate. A value is empty when it is `None`, `""`, `[]`
@@ -44,6 +45,19 @@ receipt-backed omission candidate when a replicate that fills it carries a
 verified receipt snippet for it (`verified_by_slot`, the verification
 `receipts.check` applies). Both are pure; `record_chunk_texts` is the one
 reader, recovering the chunk texts a record's receipt cites.
+
+Below the top level (#3337), `compare_nested` walks the class-ranged slots
+every replicate fills, pair by pair: dicts by field, lists by `align`'s
+one-to-one join, recursively. Each comparison at a path is counted under its
+join basis — `single` (one object each side), `key` or `position`, the
+weakest on the way down — so position joins, which dominate (on v7
+production, 135 top-level entries join by key against 1,048 by position),
+are never read as identity. `entry_omission_candidates` (#3880) applies the
+omission-candidate reading one level down, to list entries some replicates
+carry and others do not, joined by key only, crediting a verified receipt
+path that `resolve_verified` follows into the entry; `receipted_where_empty`
+lists the slots a replicate leaves empty and yet receipts, and
+`removal_status` reads what the removals block (#2923) says of them.
 """
 from __future__ import annotations
 
@@ -119,17 +133,17 @@ def _entry_keys(value: Any) -> set[str] | None:
     return set().union(*(set(d) for d in dicts))
 
 
-def align(a: list[Any], b: list[Any]) -> dict[str, Any]:
-    """One-to-one alignment of two lists' entries. An entry `receipts._entry_key`
-    identifies joins the first unjoined entry of `b` with the same key; a
-    keyless entry joins the keyless entry at its own index in `b`, if that is
-    unjoined (`joined_by_position`). Everything else is unaligned, counted on
-    both sides."""
+def _join(a: list[Any], b: list[Any]) -> list[tuple[int, int, str | None]]:
+    """The one-to-one join `align` counts: `(i, j, key)` for entry `a[i]`
+    joined with `b[j]`, `key` the identity key's name (`id`, `name`, …,
+    `value` for a string entry) or None for a keyless entry joined by its
+    index. Keyed joins first, in `a`'s order, each taking the first unjoined
+    entry of `b` with the same key; then each keyless entry of `a` takes the
+    keyless entry at its own index in `b`, if that is unjoined."""
     from data_sheets_schema.receipts import _entry_key
     keys_b = [_entry_key(e) for e in b]
     used: set[int] = set()
-    by_key: Counter[str] = Counter()
-    by_position = 0
+    out: list[tuple[int, int, str | None]] = []
     keyless_a = []
     for i, entry in enumerate(a):
         key = _entry_key(entry)
@@ -139,17 +153,28 @@ def align(a: list[Any], b: list[Any]) -> dict[str, Any]:
         j = next((j for j, k in enumerate(keys_b) if k == key and j not in used), None)
         if j is not None:
             used.add(j)
-            by_key[key[0]] += 1
+            out.append((i, j, key[0]))
     for i in keyless_a:
         # Only a keyless entry of `b` can join by position (`keys_b[i] is None`),
         # and a keyed join only takes keyed entries, so the two passes never
         # compete for an entry of `b`; their order does not matter.
         if i < len(b) and i not in used and keys_b[i] is None:
             used.add(i)
-            by_position += 1
-    joined = sum(by_key.values()) + by_position
+            out.append((i, i, None))
+    return out
+
+
+def align(a: list[Any], b: list[Any]) -> dict[str, Any]:
+    """One-to-one alignment of two lists' entries. An entry `receipts._entry_key`
+    identifies joins the first unjoined entry of `b` with the same key; a
+    keyless entry joins the keyless entry at its own index in `b`, if that is
+    unjoined (`joined_by_position`). Everything else is unaligned, counted on
+    both sides."""
+    pairs = _join(a, b)
+    by_key = Counter(k for _i, _j, k in pairs if k is not None)
+    by_position = sum(1 for _i, _j, k in pairs if k is None)
     return {"joined_by_key": dict(sorted(by_key.items())), "joined_by_position": by_position,
-            "unaligned": len(a) + len(b) - 2 * joined}
+            "unaligned": len(a) + len(b) - 2 * len(pairs)}
 
 
 def compare_slot(values: Mapping[str, Any]) -> dict[str, Any]:
@@ -259,6 +284,107 @@ def summarize(result: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+# ------------------------------------------- below the top level (#3337)
+#: How a nested comparison's two values were paired, weakest last. `single`:
+#: each replicate's slot (or the object above) holds one object, so the pair
+#: is the only one there is; `key`: list entries joined by identity
+#: (`receipts._entry_key`); `position`: keyless entries joined by index —
+#: #908's caveat, no evidence of identity. A path's basis is the weakest of
+#: every join on the way down, so a field of a position-joined entry is a
+#: `position` comparison whatever joins lie below it.
+BASES = ("single", "key", "position")
+OUTCOMES = ("identical", "differ", "one_side")
+
+
+def _weaker(a: str, b: str) -> str:
+    return a if BASES.index(a) >= BASES.index(b) else b
+
+
+def _walk(a: Any, b: Any, path: str, basis: str, acc: dict[str, dict[str, Any]], record: bool) -> None:
+    """Compare `a` and `b` at `path` (recorded unless `record` is False, as
+    for the top-level slot itself) and descend through dicts by field and
+    through lists by `_join`."""
+    ea, eb = is_empty(a), is_empty(b)
+    if ea and eb:
+        return
+    if record:
+        row = acc.setdefault(path, {"by_basis": {}, "unaligned": 0})
+        outcome = ("one_side" if ea or eb else
+                   "identical" if canonical(a) == canonical(b) else "differ")
+        cell = row["by_basis"].setdefault(basis, {o: 0 for o in OUTCOMES})
+        cell[outcome] += 1
+    if ea or eb:
+        return
+    if isinstance(a, dict) and isinstance(b, dict):
+        for k in sorted(set(a) | set(b), key=str):
+            if k in EXCLUDED_SLOTS:
+                continue                 # commentary, as at the top level
+            _walk(a.get(k), b.get(k), f"{path}.{k}", basis, acc, True)
+    elif isinstance(a, list) and isinstance(b, list):
+        pairs = _join(a, b)
+        entries = f"{path}[*]"
+        for i, j, key in pairs:
+            _walk(a[i], b[j], entries, _weaker(basis, "position" if key is None else "key"), acc, True)
+        unaligned = len(a) + len(b) - 2 * len(pairs)
+        if unaligned:
+            acc.setdefault(entries, {"by_basis": {}, "unaligned": 0})["unaligned"] += unaligned
+
+
+def compare_nested(records: Mapping[str, Mapping[str, Any]], result: Mapping[str, Any]) -> dict[str, Any]:
+    """Structure below the top level (#3337). Pure.
+
+    Over the class-ranged slots `result` (`compare_structure` of the same
+    `records`) finds filled in every replicate — a slot without a `kind`
+    (bare names) is taken as class-ranged — the values of each pair of
+    replicates are walked together: a dict by field (`license.name`), a
+    list by the one-to-one join `align` counts (`creators[*]`), and so on
+    down. At each path below the top level, every pair of joined values
+    where at least one side holds something is one comparison: `identical`
+    (fig12's canonical form), `differ`, or `one_side` (held in one
+    replicate's entry, empty in the other's — the key-set disagreement the
+    top-level table sees only as `keys.agree`). Each comparison is counted
+    under its join basis (`BASES`), never pooled across them. At an entries
+    path (`…[*]`), `unaligned` counts the entries the join left unpaired,
+    on both sides; nothing below an unpaired entry is compared. A field in
+    `EXCLUDED_SLOTS` (`source_caveats`) is not compared at any depth, as
+    at the top level. A list
+    against an object, or either against a scalar, is compared and not
+    descended.
+
+    Returns `paths` (path -> `by_basis` {basis -> outcome counts},
+    `unaligned`), `slots` (the top-level slots walked) and `pairs` (the
+    replicate pairs)."""
+    reps = list(records)
+    slots = [name for name, r in result["slots"].items()
+             if r["state"] in PRESENT_STATES and r.get("kind", "nested") == "nested"]
+    acc: dict[str, dict[str, Any]] = {}
+    for name in slots:
+        for ra, rb in combinations(reps, 2):
+            _walk((records[ra] or {}).get(name), (records[rb] or {}).get(name), name, "single", acc, False)
+    return {"slots": slots, "pairs": len(reps) * (len(reps) - 1) // 2,
+            "paths": {p: acc[p] for p in sorted(acc)}}
+
+
+def summarize_nested(nested: Mapping[str, Any]) -> dict[str, Any]:
+    """Per-basis totals over every path of a `compare_nested` report:
+    comparisons, and of those `one_side` and `differ`; entries left
+    unaligned; the number of paths. A comparison is one path x one joined
+    pair, so an entry and each of its fields are counted at their own
+    paths."""
+    tot = {b: {o: 0 for o in OUTCOMES} for b in BASES}
+    unaligned = 0
+    for row in nested["paths"].values():
+        unaligned += row["unaligned"]
+        for b, cell in row["by_basis"].items():
+            for o, n in cell.items():
+                tot[b][o] += n
+    return {"paths": len(nested["paths"]),
+            "compared": {b: sum(tot[b].values()) for b in BASES},
+            "one_side": {b: tot[b]["one_side"] for b in BASES},
+            "differ": {b: tot[b]["differ"] for b in BASES},
+            "unaligned": unaligned}
+
+
 # ------------------------------------------------ omission candidates (#3335)
 #: The keys the receipts instrument reads as the run's own commentary or as
 #: set by the runner — `receipts.EXEMPT_LEAVES` (`notes`, `source_caveats`,
@@ -288,6 +414,34 @@ def top_slot(path: Any) -> str | None:
     return parts[0]
 
 
+def verified_by_path(receipt: Mapping[str, Any], chunk_texts: Mapping[str, str]) -> dict[str, int]:
+    """Receipt path, as the receipt wrote it -> the number of its snippets
+    that verify in the chunk they cite, for every path `top_slot` does not
+    drop as commentary. Pure. `verified_by_slot` is this summed by top-level
+    slot; the verification is the one described there."""
+    from data_sheets_schema.receipts import (
+        _receipt_entries, claim_receipts, elide_artifact_lines, normalise, normalise_joined, snippet_in,
+    )
+    entries, _findings = _receipt_entries(dict(receipt))
+    claims = claim_receipts({"chunks": entries})
+    hays: dict[str, tuple[str, str, str, str]] = {}
+    out: Counter[str] = Counter()
+    for path, item in claims["slots"].items():
+        if top_slot(path) is None:
+            continue
+        for r in item["receipts"]:
+            text, snippet = chunk_texts.get(r["chunk"]), r["snippet"]
+            if text is None or not isinstance(snippet, str) or not snippet.strip():
+                continue
+            if r["chunk"] not in hays:
+                hays[r["chunk"]] = (normalise(text), normalise_joined(text),
+                                    normalise(elide_artifact_lines(text)),
+                                    normalise_joined(elide_artifact_lines(text)))
+            if snippet_in(snippet, text, *hays[r["chunk"]])[0]:
+                out[path] += 1
+    return dict(sorted(out.items()))
+
+
 def verified_by_slot(receipt: Mapping[str, Any], chunk_texts: Mapping[str, str]) -> dict[str, int]:
     """Top-level slot -> the number of the receipt's snippets for it that
     verify in the chunk they cite. Pure.
@@ -301,27 +455,9 @@ def verified_by_slot(receipt: Mapping[str, Any], chunk_texts: Mapping[str, str])
     does not count it verified either. Summed over every path, commentary
     included, these are `check`'s `snippets.verified`; `top_slot` then
     drops the commentary paths."""
-    from data_sheets_schema.receipts import (
-        _receipt_entries, claim_receipts, elide_artifact_lines, normalise, normalise_joined, snippet_in,
-    )
-    entries, _findings = _receipt_entries(dict(receipt))
-    claims = claim_receipts({"chunks": entries})
-    hays: dict[str, tuple[str, str, str, str]] = {}
     out: Counter[str] = Counter()
-    for path, item in claims["slots"].items():
-        slot = top_slot(path)
-        if slot is None:
-            continue
-        for r in item["receipts"]:
-            text, snippet = chunk_texts.get(r["chunk"]), r["snippet"]
-            if text is None or not isinstance(snippet, str) or not snippet.strip():
-                continue
-            if r["chunk"] not in hays:
-                hays[r["chunk"]] = (normalise(text), normalise_joined(text),
-                                    normalise(elide_artifact_lines(text)),
-                                    normalise_joined(elide_artifact_lines(text)))
-            if snippet_in(snippet, text, *hays[r["chunk"]])[0]:
-                out[slot] += 1
+    for path, n in verified_by_path(receipt, chunk_texts).items():
+        out[top_slot(path)] += n
     return dict(sorted(out.items()))
 
 
@@ -380,6 +516,147 @@ def omission_candidates(result: Mapping[str, Any],
     counts = Counter(s["status"] for s in slots.values())
     return {"slots": slots, "per_replicate": per_replicate, "measured": measured,
             "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY)}}
+
+
+# ------------------------- below the top level, and where empty (#3880)
+def resolve_verified(paths: Mapping[str, int], snapshot: Mapping[str, Any] | None,
+                     final: Mapping[str, Any]) -> dict[str, Any]:
+    """Where each verified receipt path (`verified_by_path`, as the receipt
+    wrote it) sits in the final record, and on what basis. Pure.
+
+    A receipt is written against the phase-1 record and reconciliation
+    reorders, inserts and drops entries after it (#742), so an index in a
+    receipt path is followed by identity with `receipts.remap_path` where
+    the run left a phase-1 snapshot (#899) — `same`, `by_<key>`,
+    `by_overlap`, `same_key_stripped` — and read as written where it did not
+    (`no_snapshot`: an index join, the agentic path's). A path the snapshot
+    never had (`not_in_snapshot`) or whose entry or leaf is gone resolves
+    nowhere, as in `receipts.claim_receipts`. Returns `paths` (resolved path
+    -> snippets) and `basis` (basis -> snippets, resolved or not)."""
+    from data_sheets_schema.receipts import remap_path
+    out: Counter[str] = Counter()
+    basis: Counter[str] = Counter()
+    for path, n in paths.items():
+        rm = remap_path(path, dict(snapshot) if snapshot is not None else None, dict(final))
+        basis[rm["basis"]] += n
+        if rm["path"] and rm["basis"] != "not_in_snapshot":
+            out[rm["path"]] += n
+    return {"paths": dict(sorted(out.items())), "basis": dict(sorted(basis.items()))}
+
+
+def _into(paths: Mapping[str, int], entry: str) -> bool:
+    """A verified path on the entry or below it. A receipt on the list
+    itself covers only the list (#721), never an entry of it."""
+    return any(n > 0 and (p == entry or p.startswith(entry + ".") or p.startswith(entry + "["))
+               for p, n in paths.items())
+
+
+def entry_omission_candidates(records: Mapping[str, Mapping[str, Any]], result: Mapping[str, Any],
+                              resolved: Mapping[str, Mapping[str, int] | None]) -> dict[str, Any]:
+    """Receipt-backed omission candidates one level down (#3880 (1)): list
+    entries some replicates carry and others do not. Pure.
+
+    Over the class-ranged slots `result` finds filled in every replicate
+    and a list in each (`counted`; a slot without a `kind` is taken as
+    class-ranged), less `COMMENTARY_KEYS`. An entry is identified by
+    `receipts._entry_key` and its occurrence among the entries with that key
+    — the one-to-one keyed join `align` makes — so an entry is **missing**
+    from a replicate exactly where the keyed join leaves it unpaired. A
+    keyless entry has no identity to be missing by: a position join is no
+    evidence (#908), so keyless entries are counted (`keyless`) and never
+    classified. `resolved` maps each replicate to `resolve_verified(...)
+    ["paths"]` or None where it has no readable receipt.
+
+    An entry held by some replicates and not all is a **candidate** when a
+    replicate holding it has a verified receipt path on that entry or below
+    it (`slot[i]`, `slot[i].name`); **not_candidate** when every holder has
+    a receipt and none does; **unmeasured** otherwise. Returns `entries`
+    (one row per such entry: `slot`, `key`, `held_by`, `receipted_in`,
+    `unreceipted`, `status`), `counts` by status, `keyless`, `measured` and
+    `per_replicate` (replicate -> the number of candidate entries it lacks,
+    or None when no replicate has a readable receipt)."""
+    from data_sheets_schema.receipts import _entry_key
+    reps = list(result["replicates"])
+    rows: list[dict[str, Any]] = []
+    keyless = 0
+    for name, r in result["slots"].items():
+        if (r["state"] not in PRESENT_STATES or not r["counted"] or r.get("kind", "nested") != "nested"
+                or name in COMMENTARY_KEYS):
+            continue
+        where: dict[tuple[str, str, int], dict[str, int]] = {}
+        for rep in reps:
+            seen: Counter[tuple[str, str]] = Counter()
+            for i, entry in enumerate(records[rep][name]):
+                key = _entry_key(entry)
+                if key is None:
+                    keyless += 1
+                    continue
+                seen[key] += 1
+                where.setdefault((key[0], key[1], seen[key]), {})[rep] = i
+        for (kname, kval, nth), held in where.items():
+            if len(held) == len(reps):
+                continue
+            receipted = [rep for rep, i in held.items()
+                         if resolved.get(rep) is not None and _into(resolved[rep], f"{name}[{i}]")]
+            unreceipted = [rep for rep in held if resolved.get(rep) is None]
+            status = CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
+            rows.append({"slot": name, "key": f"{kname}={kval}" + (f" (#{nth})" if nth > 1 else ""),
+                         "held_by": list(held), "receipted_in": receipted, "unreceipted": unreceipted,
+                         "status": status})
+    measured = any(resolved.get(rep) is not None for rep in reps)
+    per_replicate = {rep: (sum(1 for e in rows if e["status"] == CANDIDATE and rep not in e["held_by"])
+                           if measured else None) for rep in reps}
+    counts = Counter(e["status"] for e in rows)
+    return {"entries": rows, "keyless": keyless, "measured": measured, "per_replicate": per_replicate,
+            "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}}
+
+
+def receipted_where_empty(result: Mapping[str, Any],
+                          verified: Mapping[str, Mapping[str, int] | None]) -> dict[str, list[str]]:
+    """Slot -> the replicates that leave it empty and yet carry a verified
+    receipt snippet for it (#3880 (2)), over the slots `result` compares
+    that some replicate leaves empty (intermittent or absent), less
+    `COMMENTARY_KEYS`. Pure. `verified` is `verified_by_slot` per replicate,
+    None where there is no readable receipt. Such a value was receipted
+    against the phase-1 record and is not in the final one — removed by
+    reconcile or repair, or receipted at a path phase 1 never wrote;
+    `removal_status` reads which from the removals block (#2923)."""
+    out: dict[str, list[str]] = {}
+    for name, r in result["slots"].items():
+        if r["state"] in PRESENT_STATES or name in COMMENTARY_KEYS:
+            continue
+        reps = [rep for rep, held in r["present"].items()
+                if not held and verified.get(rep) is not None and verified[rep].get(name, 0) > 0]
+        if reps:
+            out[name] = reps
+    return out
+
+
+#: The removals block's capped row lists (`removals._cap`), by what they say.
+REMOVAL_ROWS = (("flattened_paths", "flattened"), ("founded_paths", "deleted"),
+                ("unfounded_paths", "deleted"), ("unsorted_paths", "deleted"))
+
+
+def removal_status(block: Mapping[str, Any] | None, slot: str) -> str:
+    """What a record's removals block (`removals.for_record`, #2923) says of
+    `slot`: `deleted` or `flattened` where it lists a removed phase-1 value
+    at the slot or below it (`deleted` wins), `no removal row` where the
+    block was checked and lists none, `rows truncated` where it lists none
+    but a row list was capped, and `removals unchecked` where the block
+    could not be computed (no phase-1 snapshot, #899). Pure."""
+    if not block or not block.get("checked"):
+        return "removals unchecked"
+    found = {what for key, what in REMOVAL_ROWS for row in (block.get(key) or [])
+             if isinstance(row, dict) and _under(str(row.get("path") or ""), slot)}
+    if found:
+        return "deleted" if "deleted" in found else "flattened"
+    if any(block.get(f"{key}_truncated") for key, _w in REMOVAL_ROWS):
+        return "rows truncated"
+    return "no removal row"
+
+
+def _under(path: str, slot: str) -> bool:
+    return path == slot or path.startswith(slot + ".") or path.startswith(slot + "[")
 
 
 _TEXTS_CACHE: dict[tuple, tuple[dict[str, str] | None, str]] = {}

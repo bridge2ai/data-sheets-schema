@@ -13,8 +13,9 @@ import pytest
 import yaml
 
 from data_sheets_schema.replicate_structure import (
-    align, compare_slot, compare_structure, dataset_slots, is_empty, omission_candidates,
-    record_chunk_texts, summarize, top_slot, verified_by_slot,
+    align, compare_nested, compare_slot, compare_structure, dataset_slots, entry_omission_candidates,
+    is_empty, omission_candidates, receipted_where_empty, record_chunk_texts, removal_status,
+    resolve_verified, summarize, summarize_nested, top_slot, verified_by_path, verified_by_slot,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -459,3 +460,246 @@ def test_receipt_verification_reproduces_every_stored_block_and_finds_the_issue_
     assert oc["slots"]["variables"]["receipted_in"] == ["rep1"]
     assert oc["slots"]["notes"]["status"] == "commentary"
     assert oc["per_replicate"]["rep3"] and "variables" in oc["per_replicate"]["rep3"]
+
+
+# ------------------------------------------- below the top level (#3337)
+def _nested(recs, names=None):
+    names = names or sorted({k for r in recs.values() for k in r})
+    res = compare_structure(recs, names)
+    return compare_nested(recs, res), res
+
+
+def test_nested_paths_are_counted_under_their_join_basis():
+    recs = {"r1": {"license": {"name": "CC", "url": "u"},
+                   "creators": [{"name": "Ada", "orcid": "1"}, {"description": "p", "role": "x"}]},
+            "r2": {"license": {"name": "CC"},
+                   "creators": [{"name": "Ada", "orcid": "2"}, {"description": "q"}]}}
+    nested, _ = _nested(recs)
+    paths = nested["paths"]
+    assert "license" not in paths and "creators" not in paths          # the top level is not repeated
+    assert paths["license.name"]["by_basis"] == {"single": {"identical": 1, "differ": 0, "one_side": 0}}
+    assert paths["license.url"]["by_basis"] == {"single": {"identical": 0, "differ": 0, "one_side": 1}}
+    assert paths["creators[*]"]["by_basis"] == {"key": {"identical": 0, "differ": 1, "one_side": 0},
+                                                "position": {"identical": 0, "differ": 1, "one_side": 0}}
+    assert paths["creators[*].orcid"]["by_basis"] == {"key": {"identical": 0, "differ": 1, "one_side": 0}}
+    assert paths["creators[*].role"]["by_basis"] == {"position": {"identical": 0, "differ": 0, "one_side": 1}}
+    assert nested["slots"] == ["creators", "license"] and nested["pairs"] == 1
+
+
+def test_a_path_takes_the_weakest_join_on_the_way_down():
+    """A keyed list inside a position-joined entry is a position comparison:
+    the entries above it may be two different ones."""
+    recs = {"r1": {"s": [{"d": "a", "people": [{"name": "Ada", "x": 1}]}]},
+            "r2": {"s": [{"d": "b", "people": [{"name": "Ada", "x": 2}]}]}}
+    paths = _nested(recs)[0]["paths"]
+    assert set(paths["s[*].people[*].x"]["by_basis"]) == {"position"}
+    # And a keyed entry's single-object field stays keyed.
+    recs = {"r1": {"s": [{"name": "A", "o": {"v": 1}}]}, "r2": {"s": [{"name": "A", "o": {"v": 2}}]}}
+    assert set(_nested(recs)[0]["paths"]["s[*].o.v"]["by_basis"]) == {"key"}
+
+
+def test_unpaired_entries_are_unaligned_and_not_descended():
+    recs = {"r1": {"s": [{"name": "A", "deep": {"v": 1}}, {"name": "B", "deep": {"v": 1}}]},
+            "r2": {"s": [{"name": "A", "deep": {"v": 1}}, {"name": "C"}]}}
+    paths = _nested(recs)[0]["paths"]
+    assert paths["s[*]"]["unaligned"] == 2
+    assert paths["s[*].deep.v"]["by_basis"] == {"key": {"identical": 1, "differ": 0, "one_side": 0}}
+
+
+def test_only_slots_filled_in_every_replicate_are_walked_and_source_caveats_is_skipped():
+    recs = {"r1": {"s": {"a": 1, "source_caveats": "c"}, "t": {"a": 1}, "u": "scalar"},
+            "r2": {"s": {"a": 2, "source_caveats": "d"}, "u": "scalar"},
+            "r3": {"s": {"a": 1}, "u": "scalar"}}
+    res = compare_structure(recs, {"s": "nested", "t": "nested", "u": "scalar"})
+    nested = compare_nested(recs, res)
+    assert nested["slots"] == ["s"] and nested["pairs"] == 3
+    assert list(nested["paths"]) == ["s.a"]
+    assert nested["paths"]["s.a"]["by_basis"]["single"] == {"identical": 1, "differ": 2, "one_side": 0}
+
+
+def test_a_list_against_an_object_is_compared_not_descended():
+    recs = {"r1": {"s": {"x": [{"name": "A"}]}}, "r2": {"s": {"x": {"name": "A"}}}}
+    paths = _nested(recs)[0]["paths"]
+    assert list(paths) == ["s.x"] and paths["s.x"]["by_basis"]["single"]["differ"] == 1
+
+
+def test_summarize_nested_totals_by_basis():
+    recs = {"r1": {"s": [{"name": "A", "v": 1}, {"d": 1}], "o": {"k": 1}},
+            "r2": {"s": [{"name": "A"}, {"d": 2}, {"name": "Z"}], "o": {"k": 1}}}
+    s = summarize_nested(_nested(recs)[0])
+    assert s["compared"] == {"single": 1, "key": 3, "position": 2}
+    assert s["one_side"] == {"single": 0, "key": 1, "position": 0}
+    assert s["differ"] == {"single": 0, "key": 1, "position": 2}
+    assert s["unaligned"] == 1 and s["paths"] == 5
+
+
+def test_first_level_entry_joins_are_the_top_level_alignment():
+    """At `slot[*]`, the key and position comparisons of a list slot filled in
+    every replicate are the top-level table's joined entries, and its
+    unaligned count theirs."""
+    recs = {"r1": {"s": [{"id": "x:1"}, {"d": 1}, {"name": "B"}]},
+            "r2": {"s": [{"id": "x:1"}, {"d": 2}]},
+            "r3": {"s": [{"name": "B"}, {"id": "x:1"}, {"d": 1}]}}
+    nested, res = _nested(recs)
+    row = nested["paths"]["s[*]"]
+    al = res["slots"]["s"]["alignment"]
+    assert sum(row["by_basis"]["key"].values()) == sum(al["joined_by_key"].values())
+    assert sum(row["by_basis"]["position"].values()) == al["joined_by_position"]
+    assert row["unaligned"] == al["unaligned"]
+
+
+def test_join_is_what_align_counts():
+    from data_sheets_schema.replicate_structure import _join
+    a = [{"name": "Ada"}, {"description": "p"}, {"name": "Bo"}, "v"]
+    b = [{"name": "Bo"}, {"description": "q"}, {"name": "Cy"}, "v"]
+    assert sorted(_join(a, b)) == [(1, 1, None), (2, 0, "name"), (3, 3, "value")]
+
+
+# --------------------------- entry candidates and receipted-where-empty (#3880)
+def test_verified_by_path_sums_to_verified_by_slot():
+    rec = _receipt(("c001", "variables[0].name", "42 voice variables recorded"),
+                   ("c001", "variables[1]", "recorded per participant session"),
+                   ("c001", "variables[2].notes", "42 voice variables recorded"),
+                   ("c002", "subpopulations", "recruited at five clinical sites"))
+    assert verified_by_path(rec, CHUNKS) == {"subpopulations": 1, "variables[0].name": 1, "variables[1]": 1}
+    assert verified_by_slot(rec, CHUNKS) == {"subpopulations": 1, "variables": 2}
+
+
+def test_receipt_paths_follow_the_entry_by_identity_where_a_snapshot_exists():
+    snapshot = {"s": [{"name": "A"}, {"name": "B"}, {"name": "C"}], "t": "x"}
+    final = {"s": [{"name": "B"}, {"name": "A"}], "t": "x", "u": "added after the receipt"}
+    got = resolve_verified({"s[0].name": 2, "s[2]": 1, "u": 1, "t": 1}, snapshot, final)
+    # A moved; C dropped; u was never in phase 1, so a receipt on it vouches
+    # for nothing even though the final record now holds a `u`.
+    assert got["paths"] == {"s[1].name": 2, "t": 1}
+    assert got["basis"] == {"by_name": 2, "entry_dropped": 1, "not_in_snapshot": 1, "same": 1}
+    # Without a snapshot the path is read as written: an index join.
+    got = resolve_verified({"s[0].name": 2, "s[5]": 1}, None, final)
+    assert got["paths"] == {"s[0].name": 2} and got["basis"] == {"no_snapshot": 3}
+
+
+def _entry_group():
+    recs = {"r1": {"s": [{"name": "A"}, {"name": "B"}, {"description": "k"}], "t": ["x"]},
+            "r2": {"s": [{"name": "A"}, {"description": "k"}], "t": ["x"]},
+            "r3": {"s": [{"name": "A"}, {"name": "B"}, {"name": "C"}, {"name": "C"}], "t": ["y"]}}
+    return recs, compare_structure(recs, {"s": "nested", "t": "list"})
+
+
+def test_an_entry_receipted_where_it_is_held_is_a_candidate_and_keyless_entries_are_not_classified():
+    recs, res = _entry_group()
+    # r1 receipts B (its s[1]); r3 receipts only the list itself and its first C.
+    eo = entry_omission_candidates(recs, res, {"r1": {"s[1].name": 1}, "r2": {}, "r3": {"s": 3, "s[2]": 1}})
+    by_key = {e["key"]: e for e in eo["entries"]}
+    assert set(by_key) == {"name=B", "name=C", "name=C (#2)"}      # A is in all three
+    assert by_key["name=B"]["status"] == "candidate" and by_key["name=B"]["receipted_in"] == ["r1"]
+    assert by_key["name=C"]["status"] == "candidate"
+    assert by_key["name=C (#2)"]["status"] == "not_candidate"        # a receipt on the list covers only the list
+    assert eo["keyless"] == 2 and eo["measured"]
+    assert eo["per_replicate"] == {"r1": 1, "r2": 2, "r3": 0}
+    assert eo["counts"] == {"candidate": 2, "not_candidate": 1, "unmeasured": 0}
+
+
+def test_entry_candidates_without_receipts_are_unmeasured():
+    recs, res = _entry_group()
+    eo = entry_omission_candidates(recs, res, {"r1": None, "r2": {}, "r3": {}})
+    assert {e["key"]: e["status"] for e in eo["entries"]}["name=B"] == "unmeasured"
+    eo = entry_omission_candidates(recs, res, {"r1": None, "r2": None, "r3": None})
+    assert not eo["measured"] and eo["per_replicate"] == {"r1": None, "r2": None, "r3": None}
+
+
+def test_receipted_where_empty_lists_replicates_that_leave_a_slot_empty_and_receipt_it():
+    recs = {"r1": {"a": "x", "b": ["y"]}, "r2": {"b": ["y"]}, "r3": {"b": ["z"]}}
+    res = compare_structure(recs, ["a", "b", "c", "notes"])
+    got = receipted_where_empty(res, {"r1": {"a": 1}, "r2": {"a": 2, "b": 1, "c": 1, "notes": 4},
+                                      "r3": None})
+    assert got == {"a": ["r2"], "c": ["r2"]}          # b is filled in all; notes is commentary; r3 has no receipt
+
+
+def test_removal_status_reads_the_removals_rows():
+    block = {"checked": True, "flattened_paths": [{"path": "a[0].x"}], "unfounded_paths": [{"path": "b"}],
+             "founded_paths": [{"path": "ab"}, {"path": "a[1]"}]}
+    assert removal_status(block, "a") == "deleted"
+    assert removal_status({"checked": True, "flattened_paths": [{"path": "a.x"}]}, "a") == "flattened"
+    assert removal_status(block, "b") == "deleted"
+    assert removal_status(block, "c") == "no removal row"
+    assert removal_status({**block, "unsorted_paths_truncated": 3}, "c") == "rows truncated"
+    assert removal_status({"checked": False}, "a") == "removals unchecked"
+    assert removal_status(None, "a") == "removals unchecked"
+
+
+def _section_fixture(tmp_path, monkeypatch, recs, arm="v8prod", project="VOICE"):
+    m = _arm_comparison()
+    monkeypatch.setattr(m, "CONCAT", tmp_path)
+    monkeypatch.setattr(m, "_method_for", lambda label, project: "claudecode_api")
+    data = {k: {p: [] for p in m.PROJECTS} for k, *_ in m.ARMS}
+    for rep, rec in recs.items():
+        d = tmp_path / "claudecode_api" / f"2026-09-04_x_{rep}"
+        d.mkdir(parents=True)
+        (d / f"{project}_d4d.yaml").write_text(yaml.safe_dump(rec))
+        data[arm][project].append({"label": f"2026-09-04_x_{rep}"})
+    return m, data
+
+
+def test_the_nested_section_prints_counts_by_basis(tmp_path, monkeypatch):
+    recs = {"rep1": {"purposes": [{"response": "a", "x": 1}], "updates": {"name": "CC"}},
+            "rep2": {"purposes": [{"response": "b"}], "updates": {"name": "CC", "url": "u"}}}
+    m, data = _section_fixture(tmp_path, monkeypatch, recs)
+    text = "\n".join(m.nested_structure_section(data))
+    row = next(l for l in text.splitlines() if l.startswith("| v8 API production (2026-09-04f/g) | VOICE |"))
+    # purposes[*] (position), .response (position), .x (position, one side); updates.name, .url (single).
+    assert row == "| v8 API production (2026-09-04f/g) | VOICE | 2 | 5 | 2 / 0 / 3 | 1 / 0 / 1 | 0 / 0 / 2 | 0 |"
+    assert "| **v8 API production (2026-09-04f/g)** | **all projects** | | | 2 / 0 / 3 | 1 / 0 / 1 | 0 / 0 / 2 | 0 |" in text
+    assert "`updates.url` 1 (single 1)" in text and "`purposes[*].x` 1 (position 1)" in text
+
+
+def test_the_entry_section_dashes_a_group_without_receipts(tmp_path, monkeypatch):
+    recs = {"rep1": {"purposes": [{"name": "A"}, {"name": "B"}]}, "rep2": {"purposes": [{"name": "A"}]}}
+    m, data = _section_fixture(tmp_path, monkeypatch, recs)
+    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (None, None))
+    text = "\n".join(m.entry_omission_section(data))
+    assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | – | 0 | – | – |" in text
+    assert "**all projects**" not in text
+    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (
+        ({"purposes[1].name": 1}, None) if label.endswith("rep1") else ({}, None)))
+    text = "\n".join(m.entry_omission_section(data))
+    assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | 1 / 0 / 0 | 0 | no_snapshot 1 | rep1 0 · rep2 1 |" in text
+
+
+def test_the_receipted_where_empty_section_cross_references_removals(tmp_path, monkeypatch):
+    import data_sheets_schema.removals as removals
+    recs = {"rep1": {"splits": ["x"]}, "rep2": {"title": "T"}}
+    m, data = _section_fixture(tmp_path, monkeypatch, recs)
+    for rep in recs:
+        d = tmp_path / "claudecode_api_core" / f"2026-09-04_x_{rep}"
+        d.mkdir(parents=True)
+        (d / "VOICE_provenance.yaml").write_text("{}\n")
+    monkeypatch.setattr(m, "_replicate_verified", lambda label, project: {"splits": 2} if label.endswith("rep2") else {})
+    monkeypatch.setattr(removals, "for_record", lambda prov, record=None: {
+        "checked": True, "unfounded_paths": [{"path": "splits[0]"}]})
+    text = "\n".join(m.receipted_where_empty_section(data))
+    assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | `splits` (filled 1/2; rep2 2, deleted) |" in text
+    assert "Receipting replicates by removals status: deleted 1." in text
+
+
+@pytest.mark.corpus
+def test_the_nested_walk_reproduces_the_top_level_alignment_on_v7_production():
+    """#3337's figure: on v7 production, 135 top-level entries join by key
+    against 1048 by position; the nested walk's first-level `slot[*]`
+    comparisons over the same list slots are those joins."""
+    m = _arm_comparison()
+    slots = dataset_slots()
+    prefix = next(pfx for key, _d, pfx, *_ in m.ARMS if key == "v7prod")
+    key = pos = 0
+    for p in m.PROJECTS:
+        labels = m.arm_labels(prefix)
+        recs = {lab: yaml.safe_load((m.CONCAT / m._method_for(lab, p) / lab / f"{p}_d4d.yaml").read_text())
+                for lab in labels}
+        res = compare_structure(recs, slots)
+        nested = compare_nested(recs, res)
+        assert len(nested["slots"]) == summarize(res)["nested_in_all"]
+        for name, r in res["slots"].items():
+            if r.get("kind") == "nested" and r["counted"] and r["state"] in ("identical", "two_agree", "all_differ"):
+                cell = nested["paths"].get(f"{name}[*]", {"by_basis": {}})["by_basis"]
+                key += sum(cell.get("key", {}).values())
+                pos += sum(cell.get("position", {}).values())
+    assert (key, pos) == (135, 1048)

@@ -760,30 +760,58 @@ def replicate_structure_section(data) -> list[str]:
                f"of those differing in count and {both['ge2']} reaching max/min ≥ 2; "
                f"{both['some']} intermittent cells" if len(prod) == 2 else "") + ". "
             "`runs.compare` counts record keys, so a key holding null or `[]` is present "
-            "there and absent here. Only top-level slots are compared; nothing below the top "
-            "level is. Every arm shown ran under an earlier schema release than today's, so a "
-            "slot its release did not declare counts as unfilled. Record keys holding a value "
+            "there and absent here. Only top-level slots are compared in this table; the "
+            "structure below them is the next one (#3337). Every arm shown ran under an "
+            "earlier schema release than today's, so a slot its release did not declare "
+            "counts as unfilled. Record keys holding a value "
             "outside the universe: "
             + (", ".join(f"`{k}`" for k in sorted(outside)) if outside else "none") + ".", ""]
+
+
+_RECEIPT_CACHE: dict[tuple[str, str, str], tuple[dict[str, int] | None, dict[str, Any] | None]] = {}
+
+
+def _replicate_receipt(label: str, project: str) -> tuple[dict[str, int] | None, dict[str, Any] | None]:
+    """(`replicate_structure.verified_by_path` of one record's coverage
+    receipt, its phase-1 snapshot), the first None where it wrote no receipt
+    or its chunk texts cannot be recovered, the second where the run left no
+    usable snapshot (the agentic path writes none). Memoised."""
+    key = (str(CONCAT), label, project)
+    if key in _RECEIPT_CACHE:
+        return _RECEIPT_CACHE[key]
+    from data_sheets_schema.receipts import load_receipt, phase1_snapshot
+    from data_sheets_schema.replicate_structure import record_chunk_texts, verified_by_path
+    core_dir = CONCAT / f"{_method_for(label, project)}_core" / label
+    receipt = core_dir / f"{project}_coverage_receipt.yaml"
+    prov = core_dir / f"{project}_provenance.yaml"
+    out: tuple[dict[str, int] | None, dict[str, Any] | None] = (None, None)
+    if receipt.exists() and prov.exists():
+        try:
+            rec = load_receipt(receipt)
+        except (OSError, ValueError, yaml.YAMLError):
+            rec = None
+        if rec is not None:
+            texts, _basis = record_chunk_texts(load(prov).get("inputs") or {}, ROOT)
+            if texts is not None:
+                out = (verified_by_path(rec, texts), phase1_snapshot(receipt))
+    _RECEIPT_CACHE[key] = out
+    return out
 
 
 def _replicate_verified(label: str, project: str) -> dict[str, int] | None:
     """`replicate_structure.verified_by_slot` of one record's coverage
     receipt, or None where it wrote none or its chunk texts cannot be
-    recovered — no receipt is not a receipt of nothing."""
-    from data_sheets_schema.receipts import load_receipt
-    from data_sheets_schema.replicate_structure import record_chunk_texts, verified_by_slot
-    core_dir = CONCAT / f"{_method_for(label, project)}_core" / label
-    receipt = core_dir / f"{project}_coverage_receipt.yaml"
-    prov = core_dir / f"{project}_provenance.yaml"
-    if not (receipt.exists() and prov.exists()):
+    recovered — no receipt is not a receipt of nothing. Summed from
+    `_replicate_receipt`'s per-path counts, which is what `verified_by_slot`
+    does."""
+    from data_sheets_schema.replicate_structure import top_slot
+    paths, _snapshot = _replicate_receipt(label, project)
+    if paths is None:
         return None
-    try:
-        rec = load_receipt(receipt)
-    except (OSError, ValueError, yaml.YAMLError):
-        return None
-    texts, _basis = record_chunk_texts(load(prov).get("inputs") or {}, ROOT)
-    return verified_by_slot(rec, texts) if texts is not None else None
+    out: dict[str, int] = {}
+    for path, n in paths.items():
+        out[top_slot(path)] = out.get(top_slot(path), 0) + n
+    return dict(sorted(out.items()))
 
 
 def omission_candidate_section(data) -> list[str]:
@@ -851,10 +879,209 @@ def omission_candidate_section(data) -> list[str]:
             "A group where some replicate has a readable receipt is shown in full, its unmeasured "
             "slots included. A candidate says "
             "the bundle supports the slot in one replicate's reading, not that leaving it out was "
-            "wrong; only top-level slots are compared.", "",
+            "wrong; only top-level slots are compared here, list entries one level down in the "
+            "table after this one (#3880).", "",
             "| arm | project | intermittent | candidates / not / unmeasured / commentary | candidate slots "
             "(replicates filling it; receipted in) | omitted candidates per record |",
             "|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – |"]), ""]
+
+
+def _replicate_groups(data, key: str):
+    """(project, replicate tag -> label, tag -> full record) for each of one
+    arm's projects the replicate-structure table compares: at least two
+    records."""
+    for p in PROJECTS:
+        reps = data[key][p]
+        if len(reps) < 2:
+            continue
+        tags = {_rep_tag(r["label"]): r["label"] for r in reps}
+        yield p, tags, {t: load(CONCAT / _method_for(lab, p) / lab / f"{p}_d4d.yaml") for t, lab in tags.items()}
+
+
+def _by_basis(v: dict[str, int]) -> str:
+    return " / ".join(str(v[b]) for b in ("single", "key", "position"))
+
+
+def nested_structure_section(data) -> list[str]:
+    """Structure below the top level (#3337): `replicate_structure.compare_nested`
+    over the replicate-structure table's groups, every count by join basis."""
+    from data_sheets_schema.replicate_structure import (
+        BASES, compare_nested, compare_structure, dataset_slots, summarize_nested,
+    )
+    slots = dataset_slots()
+    rows, top = [], []
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            continue
+        tot = {k: {b: 0 for b in BASES} for k in ("compared", "one_side", "differ")}
+        unaligned, one_side_by_path, groups = 0, {}, 0
+        for p, _tags, recs in _replicate_groups(data, key):
+            nested = compare_nested(recs, compare_structure(recs, slots))
+            s = summarize_nested(nested)
+            groups += 1
+            rows.append(f"| {disp} | {p} | {len(nested['slots'])} | {s['paths']} | {_by_basis(s['compared'])} | "
+                        f"{_by_basis(s['one_side'])} | {_by_basis(s['differ'])} | {s['unaligned']} |")
+            for k in tot:
+                for b in BASES:
+                    tot[k][b] += s[k][b]
+            unaligned += s["unaligned"]
+            for path, row in nested["paths"].items():
+                cell = one_side_by_path.setdefault(path, {b: 0 for b in BASES})
+                for b, c in row["by_basis"].items():
+                    cell[b] += c["one_side"]
+        if not groups:
+            continue
+        rows.append(f"| **{disp}** | **all projects** | | | {_by_basis(tot['compared'])} | "
+                    f"{_by_basis(tot['one_side'])} | {_by_basis(tot['differ'])} | {unaligned} |")
+        ranked = sorted(((sum(c.values()), path, c) for path, c in one_side_by_path.items() if sum(c.values())),
+                        key=lambda x: (-x[0], x[1]))[:5]
+        top.append(f"| {disp} | " + (", ".join(
+            f"`{path}` {n} ({', '.join(f'{b} {c[b]}' for b in BASES if c[b])})" for n, path, c in ranked)
+            or "none") + " |")
+    return ["### Below the top level (#3337)", "",
+            "Per arm × project, the class-ranged slots filled in every replicate (the table's "
+            "**nested in all**, single objects included), walked pair by pair of replicates "
+            "(`replicate_structure.compare_nested`): an object by field, a list by the one-to-one "
+            "join the table above counts, recursively; `source_caveats` is skipped at any depth, as "
+            "at the top level. At each path below the top level (`creators[*]`, "
+            "`creators[*].affiliations[*].name`, `license.name`), every joined pair of values of "
+            "which at least one is filled is one **comparison**: equal on the canonical form, "
+            "**differ**, or **in one only** — filled in one replicate's entry and empty in the "
+            "other's. A comparison is counted under its **join basis**, the weakest join on the "
+            "way down: **single** (one object on each side, nothing to choose between), **key** "
+            "(list entries joined by `receipts._entry_key`) or **position** (keyless entries "
+            "joined by index; #908's caveat: no evidence of identity, so a position-basis "
+            "difference may be two different entries rather than one entry that changed). The "
+            "bases are never pooled. An entry and each of its fields are counted at their own "
+            "paths, so the counts are path × pair, not values. **Entries unaligned**: entries a "
+            "join left unpaired at any depth, counted on both sides, nothing below them compared; "
+            "for the list slots with a count this includes the table's own unaligned column.", "",
+            "| arm | project | slots walked | paths | comparisons single / key / position | in one only "
+            "single / key / position | differ single / key / position | entries unaligned |",
+            "|---|---|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – | – | – |"]), "",
+            "Paths most often filled in one replicate's joined value and empty in the other's, per "
+            "arm over its projects (in-one-only comparisons, then by join basis):", "",
+            "| arm | paths |", "|---|---|", *(top or ["| – | none |"]), ""]
+
+
+def entry_omission_section(data) -> list[str]:
+    """Receipt-backed omission candidates among list entries (#3880 (1)),
+    over the groups the replicate-structure table compares."""
+    from data_sheets_schema.replicate_structure import (
+        CANDIDATE, NOT_CANDIDATE, UNMEASURED, compare_structure, dataset_slots, entry_omission_candidates,
+        resolve_verified,
+    )
+    slots = dataset_slots()
+    rows = []
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            continue
+        tot = {"n": 0, "keyless": 0, CANDIDATE: 0, NOT_CANDIDATE: 0, UNMEASURED: 0}
+        measured_any = False
+        for p, tags, recs in _replicate_groups(data, key):
+            resolved, basis = {}, {}
+            for t, lab in tags.items():
+                paths, snapshot = _replicate_receipt(lab, p)
+                if paths is None:
+                    resolved[t] = None
+                    continue
+                rv = resolve_verified(paths, snapshot, recs[t])
+                resolved[t] = rv["paths"]
+                for b, n in rv["basis"].items():
+                    basis[b] = basis.get(b, 0) + n
+            eo = entry_omission_candidates(recs, compare_structure(recs, slots), resolved)
+            n = len(eo["entries"])
+            tot["n"] += n
+            tot["keyless"] += eo["keyless"]
+            for k, v in eo["counts"].items():
+                tot[k] += v
+            if not eo["measured"]:
+                rows.append(f"| {disp} | {p} | {n} | – | {eo['keyless']} | – | – |")
+                continue
+            measured_any = True
+            c = eo["counts"]
+            rows.append(f"| {disp} | {p} | {n} | {c[CANDIDATE]} / {c[NOT_CANDIDATE]} / {c[UNMEASURED]} | "
+                        f"{eo['keyless']} | " + (", ".join(f"{b} {v}" for b, v in sorted(basis.items())) or "none")
+                        + " | " + " · ".join(f"{t} {v}" for t, v in eo["per_replicate"].items()) + " |")
+        if measured_any:
+            rows.append(f"| **{disp}** | **all projects** | {tot['n']} | {tot[CANDIDATE]} / {tot[NOT_CANDIDATE]} / "
+                        f"{tot[UNMEASURED]} | {tot['keyless']} | | |")
+    return ["### Receipt-backed omission candidates among list entries (#3880)", "",
+            "One level down from the table above, over the list-valued class-ranged slots every "
+            "replicate fills (the replicate-structure table's **with a count**): the entries some "
+            "replicates carry and others do not. An entry is identified by `receipts._entry_key` "
+            "and its occurrence among the entries sharing that key — the keyed join the "
+            "replicate-structure table counts — so an entry is missing from a replicate exactly "
+            "where that join leaves it unpaired. A **keyless** entry has no identity to be missing "
+            "by (a position join is no evidence of one, #908): counted, never classified. An entry "
+            "is a **candidate** when a replicate carrying it has a verified receipt snippet (as in "
+            "the table above) on that entry or below it; a receipt on the list itself covers only "
+            "the list (#721). A receipt path is followed into the final record by identity where "
+            "the run left a phase-1 snapshot (`receipts.remap_path`, #899: `same`, `by_<key>`, "
+            "`by_overlap`, `same_key_stripped`), read as written where it left none "
+            "(`no_snapshot`, the agentic path: an index join), and resolves nowhere where its "
+            "entry or leaf is gone (`entry_dropped`, `leaf_dropped`, `ambiguous`) or the snapshot "
+            "never had it (`not_in_snapshot`); **receipt paths by basis** counts the group's "
+            "verified snippets, resolved or not. **not** and **unmeasured** as above, and `–` "
+            "exactly where no replicate of the group has a readable receipt. **Omitted candidate "
+            "entries per record**: how many candidate entries each replicate lacks. Only entries "
+            "of top-level lists are classified; deeper lists and the fields of single objects are "
+            "not.", "",
+            "| arm | project | entries in some replicates | candidates / not / unmeasured | keyless "
+            "entries | receipt paths by basis | omitted candidate entries per record |",
+            "|---|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – | – |"]), ""]
+
+
+def receipted_where_empty_section(data) -> list[str]:
+    """Slots a replicate leaves empty and yet receipts (#3880 (2)), beside
+    what the removals block (#2923) says of that replicate's slot."""
+    from data_sheets_schema.removals import for_record
+    from data_sheets_schema.replicate_structure import (
+        compare_structure, dataset_slots, receipted_where_empty, removal_status,
+    )
+    slots = dataset_slots()
+    rows, status_tot = [], {}
+    for key, disp, _pfx, _rt, _role in ARMS:
+        if key in NOT_REPLICATES:
+            continue
+        for p, tags, recs in _replicate_groups(data, key):
+            result = compare_structure(recs, slots)
+            verified = {t: _replicate_verified(lab, p) for t, lab in tags.items()}
+            if all(v is None for v in verified.values()):
+                continue
+            found = receipted_where_empty(result, verified)
+            cells = []
+            for name, reps in found.items():
+                r = result["slots"][name]
+                said = []
+                for t in reps:
+                    lab = tags[t]
+                    prov = CONCAT / f"{_method_for(lab, p)}_core" / lab / f"{p}_provenance.yaml"
+                    st = removal_status(for_record(prov, record=load(prov)), name)
+                    status_tot[st] = status_tot.get(st, 0) + 1
+                    said.append(f"{t} {verified[t][name]}, {st}")
+                cells.append(f"`{name}` (filled {r['n_present']}/{r['n_replicates']}; {'; '.join(said)})")
+            rows.append(f"| {disp} | {p} | {len(found)} | " + (", ".join(cells) or "none") + " |")
+    return ["### Receipted where empty (#3880)", "",
+            "Per arm × project with a readable receipt, the slots of the replicate-structure table "
+            "that some replicate leaves empty (intermittent or absent) although its own receipt "
+            "carries a snippet for the slot verified in the chunk it cites, as in the tables above "
+            "(commentary keys aside). The receipt was written against the phase-1 record, so the "
+            "value was receipted and is not in the final record. Beside each replicate: its "
+            "verified snippets for the slot, then what the removals rows (#2923, "
+            "`removals.for_record`, read-only) list for that replicate at the slot or below it — "
+            "**deleted** or **flattened** (a phase-1 value removed by reconcile or repair, counted "
+            "in the removal rows of the metric table, not again here), **no removal row** (the "
+            "removals instrument found no phase-1 value there that went: the receipt names a path "
+            "phase 1 did not fill), **rows truncated** (none among the listed rows, which are "
+            "capped), or **removals unchecked** (no phase-1 snapshot to read removals against — "
+            "the agentic path). A group none of whose replicates has a readable receipt is not "
+            "listed.", "",
+            "| arm | project | slots | slot (replicates filling it; per receipting replicate: verified "
+            "snippets, removals) |",
+            "|---|---|---|---|", *(rows or ["| – | – | – | – |"]), "",
+            "Receipting replicates by removals status: "
+            + (", ".join(f"{k} {v}" for k, v in sorted(status_tot.items())) or "none") + ".", ""]
 
 
 SOURCE_MANIFEST = Path("data/preprocessed/source_manifest.yaml")
@@ -1112,7 +1339,10 @@ def render_markdown(data, scores) -> str:
 
     lines += receipt_section(data)
     lines += replicate_structure_section(data)
+    lines += nested_structure_section(data)
     lines += omission_candidate_section(data)
+    lines += entry_omission_section(data)
+    lines += receipted_where_empty_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
     for mk, (disp, src, _hiw, cav) in METRICS.items():
