@@ -192,10 +192,14 @@ class TestUnencodableText(unittest.TestCase):
                 self.assertEqual(yaml.load(text, Loader=yaml.CSafeLoader)["a"], 2)   # noqa: S506
 
     def test_the_scanners_differ_the_other_way_on_a_byte_order_mark(self):
-        """The reverse direction (#3855), pinned as documented: libyaml
-        rejects a byte-order mark opening a later line, which the pure-Python
-        loader reads into the key, so the default scan reports what libyaml
-        refuses."""
+        """The reverse direction (#3855): a byte-order mark directly before a
+        plain key at column 0 on a later line is a ParserError to libyaml,
+        which drops the mark but counts it as a column, while the pure-Python
+        loader reads the mark into the key, so the default scan reports what
+        libyaml refuses. This is not a general rule for a mark opening a later
+        line: before a comment, alone on a line or before indentation libyaml
+        accepts it (#3956, #3987; the next two tests pin the comment and
+        indentation cases)."""
         if not hasattr(yaml, "CSafeLoader"):
             self.skipTest("PyYAML built without libyaml")
         text = "a: 1\na: 2\n﻿b: 3\n"
@@ -250,9 +254,11 @@ class TestUnencodableText(unittest.TestCase):
             find_duplicate_keys("x:\n" + bom + "  b: 1\n  b: 2\n", loader=yaml.CSafeLoader, strict=True)
 
     def test_two_leading_byte_order_marks_give_different_keys(self):
-        """Both loaders scan a stream opening with two byte-order marks, to
-        different keys: libyaml drops both, the pure-Python reader only the
-        first (#3855). Each scan names the key its own loader constructs."""
+        """Both loaders scan `<BOM><BOM>a: 1`, to different keys: libyaml
+        drops both marks, the pure-Python reader only the first (#3855). Each
+        scan names the key its own loader constructs. Not every stream opening
+        with two marks scans under both: the last case below is one libyaml
+        refuses (#3987)."""
         if not hasattr(yaml, "CSafeLoader"):
             self.skipTest("PyYAML built without libyaml")
         bom = "﻿"
