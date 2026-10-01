@@ -126,9 +126,13 @@ d4d:DatasetLimitation skos:exactMatch rai:dataLimitations .
 # related, as the version_access slot says (was closeMatch).
 d4d:VersionAccess skos:relatedMatch schema:version .
 d4d:LicenseAndUseTerms skos:closeMatch schema:license .
-# Confidentiality covers legally privileged or non-public data, not the
-# sensitive human attributes rai:personalSensitiveInformation lists;
-# SensitiveElement is that term's match (was closeMatch).
+# Confidentiality is about why data must be withheld: its examples are
+# legal privilege, patient data and non-public communications. Patient
+# data overlaps the personal attributes (gender, age, location ...) that
+# rai:personalSensitiveInformation lists, but privilege and private
+# communications do not, and the class records a confidentiality basis,
+# not attribute categories. Related, not close; SensitiveElement is
+# that term's exact match (was closeMatch).
 d4d:Confidentiality skos:relatedMatch rai:personalSensitiveInformation .
 # The schema declares SensitiveElement exact_mappings rai:personalSensitiveInformation (was closeMatch).
 d4d:SensitiveElement skos:exactMatch rai:personalSensitiveInformation .
