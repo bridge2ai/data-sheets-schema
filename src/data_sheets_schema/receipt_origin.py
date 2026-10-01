@@ -72,7 +72,16 @@ program, or a wrapper's, is a variable or a relative path (`$PY -m
 data_sheets_schema.cli`, `./d4d`) is read as one, but a `derive core` of
 the full record it spells cannot be placed, as the program may be a
 wrapper that did not run it, and no subcommand of it is read-only
-(#3693); any other
+(#3693). Nor can a `derive core` of the full record with an assignment
+before its program -- on the part, given to `env`, as an earlier part of
+the command or by `printf -v` (`PYTHONPATH=src python -m
+data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d derive
+core`) -- as the assignment may make the part run other code; no
+assignment is exempt, `PYTHONPATH=src` included (#3781). The assignment is
+read as the position rule reads one (#3689, #3700): one made any other way
+-- by `export`, `declare` or `read`, in a sourced script, a function or an
+`eval`, or outside the command -- is not read as one, so a derive after
+`export PYTHONPATH=./hack;` is placed. Any other
 part that carries the words `derive core` and is neither a d4d call of
 another subcommand nor a program known to read is a derive that cannot be
 placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
@@ -282,7 +291,7 @@ from typing import Any
 
 import yaml
 
-INSTRUMENT = "receipt_origin v5 (#2933, #3047, #3369, #3693, #3782)"
+INSTRUMENT = "receipt_origin v6 (#2933, #3047, #3369, #3693, #3781, #3782)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -463,7 +472,14 @@ NON_CHECKS = (
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
     "the program may be a wrapper that did not run it, and no subcommand of it is read-only "
-    "(#3693). The words are matched "
+    "(#3693). Nor can a `derive core` of the full record with an assignment before its program, "
+    "on the part, given to `env`, as an earlier part of the command or by `printf -v` "
+    "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
+    "derive core`), since the assignment may make the part run other code; no assignment is "
+    "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781). An assignment "
+    "made any other way (by `export`, `declare` or `read`, in a sourced script, a function or an "
+    "`eval`, or outside the command) is not read as one, so a derive after `export "
+    "PYTHONPATH=./hack;` is placed. The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -779,9 +795,11 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     is the part's status), `and_chain` (a success is the part's; a failure
     may be a later part's), `none` (piped, backgrounded, grouped, after
     `||`, followed by `;`, or in a multi-line command), `unparsed` (a
-    spelling the parser does not read, #3137) or `unnamed_program` (a
-    variable or relative-path program, which may be a wrapper, #3693). A
-    part whose status the
+    spelling the parser does not read, #3137), `unnamed_program` (a
+    variable or relative-path program, which may be a wrapper, #3693) or
+    `assigned_environment` (an assignment before the program, on the part,
+    given to `env`, as an earlier part or by `printf -v`, which may make it
+    run other code, #3781). A part whose status the
     result does not carry is `ambiguous`, unless the call was `denied` --
     by the native control or, corroborated, by the runtime (#3201) -- and
     so never ran. `inputs` are the call's, for `_backgrounded`."""
@@ -1427,7 +1445,9 @@ def _plainly_run(segment: list[str]) -> bool:
     part itself or given to an `env` wrapper, since one (`PYTHONPATH`,
     `PATH`, `LD_PRELOAD`, ...) can make it load other code; and the program
     word, and every wrapper's, is a `_plain_word`. An environment set
-    outside the command (exported earlier or inherited) is not read."""
+    outside the command (exported earlier or inherited) is not read. A
+    `derive core` part this rejects, or one after an assignment-only part
+    or `printf -v`, is not placed (#3781)."""
     rest = list(segment)
     while rest:
         if _ASSIGNMENT.fullmatch(rest[0]):
@@ -1450,7 +1470,8 @@ def _names_its_program(segment: list[str]) -> bool:
     relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) may name a
     wrapper rather than the interpreter or the CLI, so a `derive core` its
     words spell may not have run: the row is not placed. Assignments are
-    `_plainly_run`'s part of the question, not this one."""
+    `_plainly_run`'s part of the question, not this one; a derive with one
+    is not placed either (#3781)."""
     rest = _program(segment)
     while (skip := _wrapper_skip(rest)) is not None and skip < len(rest):
         if not _plain_word(rest[0]):
@@ -2471,11 +2492,25 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 else:
                     verdict = full.matches(spelled[-1], local)
                 # One whose `--full` names another record places nothing
-                # either way, and the position rule holds it (#3722).
-                if named or verdict is False:
+                # either way, and the position rule holds it (#3722). Any
+                # other is placed only where the part runs as its words
+                # name it. A variable or relative-path program may be a
+                # wrapper (#3693). An assignment before the program -- on the
+                # part, given to `env`, as an earlier part of the command or
+                # by `printf -v`: `assigned` or `_plainly_run`, as the
+                # position rule reads one (#3689, #3700) -- may make the part
+                # run other code (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`).
+                # There is no allow-list, `PYTHONPATH=src` included (#3781,
+                # the owner's decision of 2026-09-30): the cost is a false
+                # `unknown`, never a false `checked`.
+                if verdict is False:
                     basis = _status_basis(index, joins, leading, newline)
-                else:
+                elif not named:
                     verdict, basis = None, "unnamed_program"
+                elif assigned or not _plainly_run(segment):
+                    verdict, basis = None, "assigned_environment"
+                else:
+                    basis = _status_basis(index, joins, leading, newline)
                 out["derives"].append({"targets_full": verdict, "segment": index, "basis": basis})
                 continue
             # A d4d call runs only its own subcommand: `derive core` in an
@@ -2936,6 +2971,11 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                    "unnamed_program": "its program is a variable or a relative path (`$PY -m "
                                       "data_sheets_schema.cli`, `./d4d`), which may name a wrapper that did "
                                       "not run the derive its words spell (#3693)",
+                   "assigned_environment": "an assignment comes before its program, on the part, given to "
+                                           "`env`, as an earlier part of the command or by `printf -v` "
+                                           "(`PYTHONPATH=src`, `PATH=./bin:$PATH;`), which may make it run "
+                                           "code other than the derive its words spell; no assignment is "
+                                           "exempt (#3781)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "

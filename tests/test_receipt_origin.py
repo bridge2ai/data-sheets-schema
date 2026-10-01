@@ -988,7 +988,7 @@ class EditReplay(Base):
         r.derive()
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
-        self.assertEqual(block["instrument"], "receipt_origin v5 (#2933, #3047, #3369, #3693, #3782)")
+        self.assertEqual(block["instrument"], "receipt_origin v6 (#2933, #3047, #3369, #3693, #3781, #3782)")
         self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
         self.assertEqual(block["snippets"], {"pre_draft": 3, "at_derive_core": 4, "final": 4})
         self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 1))
@@ -1551,8 +1551,10 @@ class Boundaries(Base):
     def test_every_registered_derive_spelling_is_the_boundary(self):
         full = "data/claudecode_direct/L/CHORUS_d4d.yaml"
         out = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
-        for spelling in (f"D4D_PROFILE=bridge2ai poetry run d4d derive core --full {full} {out}",
-                         f"cd data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml {out}",
+        # A `VAR=` prefix (`D4D_PROFILE=bridge2ai poetry run d4d ...`) was
+        # read as the boundary too until #3781: an assignment before the
+        # program is not placed (`DeriveSpellings.ASSIGNED`).
+        for spelling in (f"cd data && poetry run d4d derive core --full claudecode_direct/L/CHORUS_d4d.yaml {out}",
                          f"poetry run d4d derive core --full={full} {out}",
                          f"poetry run d4d --manifest data/preprocessed/source_manifest.yaml derive core "
                          f"--full {full} {out}",
@@ -1924,8 +1926,11 @@ class DeriveSpellings(Base):
     the status `checked` (#3137). The `timeout`, `env` and `nice` wrappers are
     read through; a derive whose program is a variable or a relative path
     (`$PY -m data_sheets_schema.cli`, `./d4d`) is read but not placed, as that
-    program may be a wrapper (#3693); any other part that carries the words
-    `derive core` is a derive that cannot be placed."""
+    program may be a wrapper (#3693), and so is one with an assignment before
+    its program (`PYTHONPATH=src python -m data_sheets_schema.cli`,
+    `PATH=./bin:$PATH; d4d`), as the assignment may make it run other code
+    (#3781); any other part that carries the words `derive core` is a derive
+    that cannot be placed."""
 
     FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
     OUT = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
@@ -1942,11 +1947,15 @@ class DeriveSpellings(Base):
 
     def test_wrapped_and_interpreter_spellings_are_the_boundary(self):
         derive = f"derive core --full {self.FULL} {self.OUT}"
+        # No spelling here carries an assignment: one before the program is
+        # not placed, `env PYTHONPATH=src` included (#3781; the three that
+        # stood here are in the test below). The wrappers they read through
+        # are kept without the assignment.
         for spelling in (f"timeout 600 poetry run d4d {derive}",
                          f"timeout -s KILL --preserve-status 10m d4d {derive}",
                          f"timeout --kill-after=5 1.5h d4d {derive}",
-                         f"env PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
-                         f"env -i -u HOME -- D4D_PROFILE=bridge2ai poetry run d4d {derive}",
+                         f"env python -m data_sheets_schema.cli {derive}",
+                         f"env -i -u HOME -- poetry run d4d {derive}",
                          # An interpreter named by a bare word or an absolute
                          # path is taken to be one (#3693).
                          f"python3 -m data_sheets_schema.cli {derive}",
@@ -1954,7 +1963,9 @@ class DeriveSpellings(Base):
                          f"timeout 60 /venv/bin/python -m data_sheets_schema.cli {derive}",
                          f"nice -n 10 d4d {derive}",
                          f"nice -5 poetry run d4d {derive}",
-                         f"X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L",
+                         f"timeout 60 env nice d4d {derive} && d4d receipts check --label L",
+                         # An assignment after the derive changes nothing it ran.
+                         f"d4d {derive} && X=1",
                          # #3478: redirections after the call's words leave it read as written
                          f"poetry run d4d {derive} 2>&1",
                          f"poetry run d4d {derive} > /tmp/derive-3374.log 2>&1",
@@ -1998,6 +2009,133 @@ class DeriveSpellings(Base):
                                         metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+
+    #: Each spelling puts an assignment before the derive's program, which
+    #: may make the part run code other than the CLI (#3781).
+    ASSIGNED = ("env PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
+                "PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
+                "PYTHONPATH=./hack python -m data_sheets_schema.cli {derive}",
+                "env PYTHONPATH=./hack /venv/bin/python -m data_sheets_schema.cli {derive}",
+                "PATH=./bin:$PATH d4d {derive}",
+                "D4D_PROFILE=bridge2ai poetry run d4d {derive}",
+                "LC_ALL=C d4d {derive}",
+                "env -i -u HOME -- D4D_PROFILE=bridge2ai poetry run d4d {derive}",
+                "timeout 60 env PYTHONPATH=src poetry run d4d {derive}",
+                "X=1 timeout 60 env Y=2 nice d4d {derive} && d4d receipts check --label L",
+                # An assignment-only part before it, or `printf -v`, which
+                # assigns as one does (#3689, #3700).
+                "PATH=./bin:$PATH; d4d {derive}",
+                "PATH=./bin:$PATH && poetry run d4d {derive}",
+                "X=1; d4d {derive}",
+                "PYTHONPATH=src; python3 -m data_sheets_schema.cli {derive}",
+                "printf -v PATH '%s' ./bin; d4d {derive}")
+
+    def test_a_derive_with_an_assignment_before_its_program_is_not_placed(self):
+        # The owner's decision of 2026-09-30 on #3781: a derive whose
+        # program has an assignment before it is not placed, with no
+        # allow-list, not even `PYTHONPATH=src`. `env PYTHONPATH=src python
+        # -m data_sheets_schema.cli derive core` was pinned as the boundary
+        # above until then. The cost is a false `unknown`, never a false
+        # `checked`; no recorded call spells a derive this way.
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling in self.ASSIGNED:
+            spelling = spelling.format(derive=derive)
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling)
+                self.assertIsNone(block["boundaries"]["derive_core"])
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but its "
+                                          "status is not the derive's own (assigned_environment: an assignment "
+                                          "comes before its program, on the part, given to `env`, as an earlier "
+                                          "part of the command or by `printf -v` (`PYTHONPATH=src`, "
+                                          "`PATH=./bin:$PATH;`), which may make it run code other than the "
+                                          "derive its words spell; no assignment is exempt (#3781))")
+                attempt = block["derive_core_attempts"][0]
+                self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                 (None, "assigned_environment", "ambiguous"))
+                self.assertEqual(len(block["derive_core_attempts"]), 1)
+        # A failed call is no more the derive's own: it may have run other code.
+        identity, block = self._derived(f"PYTHONPATH=src python -m data_sheets_schema.cli {derive}", ok=False)
+        self.assertUnknown(block, f"derive core {identity} cannot be placed: the call failed but its status is "
+                                  "not the derive's own (assigned_environment")
+        # One the native control refused never ran, whatever its assignments.
+        identity, block = self._derived(f"env PYTHONPATH=src python -m data_sheets_schema.cli {derive}", ok=False,
+                                        content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+                                        metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+
+    def test_the_assignment_rule_reads_the_part_and_the_parts_before_it(self):
+        full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
+        rows = lambda command, cwd="/w": [(d["targets_full"], d["basis"])
+                                          for d in ro._shell(command, cwd, [full])["derives"]]
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling in self.ASSIGNED:
+            spelling = spelling.format(derive=derive)
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(None, "assigned_environment")])
+                # Aimed at another record it places nothing either way, and
+                # the position rule holds it (#3722).
+                other = ro._shell(spelling.replace(self.FULL, "/o/full.yaml"), "/w", [full])
+                self.assertEqual([d["targets_full"] for d in other["derives"]], [False])
+                self.assertTrue(other["runs_unread"])
+        # A `--full` that cannot be resolved is not placed either way.
+        self.assertEqual(rows(f"PYTHONPATH=src d4d {derive}", None), [(None, "assigned_environment")])
+        # A variable program is #3693's reason, with or without an assignment.
+        self.assertEqual(rows(f"PYTHONPATH=src $PY -m data_sheets_schema.cli {derive}"),
+                         [(None, "unnamed_program")])
+        # Only an assignment before the derive's program counts: one in a
+        # later part runs after it, and a word of that form after the
+        # program is an argument the program receives.
+        self.assertEqual(rows(f"d4d {derive} && PYTHONPATH=src"), [(True, "and_chain")])
+        self.assertEqual(rows(f"d4d {derive} PYTHONPATH=src"), [(True, "command")])
+        # Which parts a child runs is not read (#3830): an assignment on a
+        # pipe's left side counts, the rule's cost.
+        self.assertEqual(rows(f"X=1 | d4d {derive}"), [(None, "assigned_environment")])
+        # An assignment made any other way is not read as one, as NON_CHECKS
+        # says: this pin moves if that rule is widened.
+        self.assertEqual(rows(f"export PYTHONPATH=./hack; d4d {derive}"), [(True, "command")])
+
+    def test_the_report_of_an_assigned_derive_is_unknown_end_to_end(self):
+        # Through `d4d receipts origin`, as a reviewer runs it: the block is
+        # `unknown`, the derive row is not placed, and the Phase 1 / Phase 3
+        # split is not reported.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        r.write(r.receipt, Boundaries.C003)
+        identity = r.bash(f"env PYTHONPATH=src python -m data_sheets_schema.cli derive core --full {self.FULL} "
+                          f"{self.OUT}")
+        r.write(r.receipt, Boundaries.C004)
+        r.receipt.write_text(r.last_receipt, encoding="utf-8")
+        path = r.transcript()
+        from data_sheets_schema.cli.receipts import receipts
+        args = ["origin", "--transcript", str(path), "--receipt", str(r.receipt), "--full", str(r.full)]
+        out = CliRunner().invoke(receipts, args + ["--json"])
+        self.assertEqual(out.exit_code, 0, out.output)
+        block = json.loads(out.output)
+        self.assertEqual(block["status"], "unknown")
+        self.assertEqual(block["instrument"], ro.INSTRUMENT)
+        self.assertIsNone(block["boundaries"]["derive_core"])
+        self.assertEqual([(a["tool_use_id"], a["targets_full"], a["status_basis"], a["outcome"])
+                          for a in block["derive_core_attempts"]],
+                         [(identity, None, "assigned_environment", "ambiguous")])
+        for key in ("origin", "snippets", "deltas"):
+            self.assertNotIn(key, block)
+        # The position rule holds the call as well, as it holds any part
+        # that may not run what its words name (#3722): two reasons, both
+        # this call's.
+        self.assertEqual(len(block["reasons"]), 2, block["reasons"])
+        self.assertTrue(block["reasons"][0].startswith(f"derive core {identity} cannot be placed"), block["reasons"])
+        self.assertTrue(block["reasons"][1].startswith(f"Bash call {identity} "), block["reasons"])
+        self.assertEqual([row["tool_use_id"] for row in block["possible_unseen_derives"]], [identity])
+        # The plain report names the reason, never the command.
+        out = CliRunner().invoke(receipts, args)
+        self.assertEqual(out.exit_code, 0, out.output)
+        text = " ".join(out.output.split())
+        self.assertIn(f"receipt origin: unknown ({ro.INSTRUMENT})", text)
+        self.assertIn(f"· derive core {identity} cannot be placed: the call succeeded but its status is not the "
+                      "derive's own (assigned_environment: an assignment comes before its program", text)
+        self.assertNotIn(self.OUT, text)
 
     def test_names_its_program(self):
         full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
@@ -2478,6 +2616,24 @@ class DeriveSpellings(Base):
                       "subcommand of it is read-only (#3693)", flat)
         self.assertNotIn("and an interpreter held in a variable (`$PY -m data_sheets_schema.cli`), are read "
                          "through", flat)
+        # #3781: an assignment before the derive's program, no allow-list,
+        # and the assignments that are not read as one
+        self.assertIn("(#3693). Nor can a `derive core` of the full record with an assignment before its "
+                      "program, on the part, given to `env`, as an earlier part of the command or by `printf -v` "
+                      "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
+                      "derive core`), since the assignment may make the part run other code; no assignment is "
+                      "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781). An "
+                      "assignment made any other way (by `export`, `declare` or `read`, in a sourced script, a "
+                      "function or an `eval`, or outside the command) is not read as one, so a derive after "
+                      "`export PYTHONPATH=./hack;` is placed.", text)
+        self.assertIn("(#3693). Nor can a `derive core` of the full record with an assignment before its program "
+                      "-- on the part, given to `env`, as an earlier part of the command or by `printf -v` "
+                      "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
+                      "derive core`) -- as the assignment may make the part run other code; no assignment is "
+                      "exempt, `PYTHONPATH=src` included (#3781). The assignment is read as the position rule "
+                      "reads one (#3689, #3700): one made any other way -- by `export`, `declare` or `read`, in a "
+                      "sourced script, a function or an `eval`, or outside the command -- is not read as one, so "
+                      "a derive after `export PYTHONPATH=./hack;` is placed.", flat)
         # Round 6 (#3843-#3847): the texts name each rule and what remains unread.
         for phrase in ("a redirection with its target and descriptor is read past (`2>/dev/null cd /tmp`, #3845)",
                        "whose program word bash builds at run time (a `$` or backquote anywhere in it, a glob or a "
@@ -3409,7 +3565,7 @@ class EarlierDirectoryChange(Base):
         # derive in `sub`, and so does one after `eval '"cd" sub'` (#3844,
         # #3845): neither is placed against the start.
         for change in ("2>/dev/null cd sub", ">/dev/null cd sub", "eval '\"cd\" sub'", "eval 'c\\d sub'",
-                       "2>/dev/null eval 'cd sub'", "C=cd; $C sub", "eval \"echo 'open\""):
+                       "2>/dev/null eval 'cd sub'", "$C sub", "C=cd; $C sub", "eval \"echo 'open\""):
             with self.subTest(change=change):
                 r = self.new_run()
                 r.write(r.receipt, PRE)
@@ -3418,8 +3574,12 @@ class EarlierDirectoryChange(Base):
                 identity = r.bash(f"{change} && d4d derive core --full {r.full.relative_to(r.root)} --out o.yaml")
                 r.write(r.receipt, Boundaries.C004)
                 block = r.report()
-                self.assertUnknown(block, f"derive core {identity} cannot be placed: its --full cannot be "
-                                          "resolved")
+                # `C=cd` is an assignment-only part before the derive, the
+                # reason it is not placed first (#3781); `$C` from the
+                # environment is the run-time program alone (#3852).
+                why = ("the call succeeded but its status is not the derive's own (assigned_environment"
+                       if change.startswith("C=") else "its --full cannot be resolved")
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: {why}")
                 [attempt] = block["derive_core_attempts"]
                 self.assertIsNone(attempt["targets_full"])
                 self.assertIsNone(block["boundaries"]["derive_core"])
@@ -3885,10 +4045,14 @@ class EarlierDirectoryChange(Base):
                     with self.subTest(sub=sub, op=op, tail=tail):
                         self.assertIs(ro._shell(f"{sub}{op}{tail}", "/w", [])["moves"], unread)
                 # A derive heads its own part, and a change before it in the
-                # command leaves its relative `--full` unplaced.
+                # command leaves its relative `--full` unplaced. After an
+                # assignment-only part (`X=$(pwd)`) it is read as a d4d
+                # derive and not placed, for the assignment (#3781).
                 with self.subTest(sub=sub, op=op, rule="derive"):
                     [row] = ro._shell(f"{sub}{op}{derive}", "/w", target)["derives"]
-                    self.assertIs(row["targets_full"], None if unread else True)
+                    assigns = bool(ro._ASSIGNMENT.fullmatch(sub.split()[0]))
+                    self.assertIs(row["targets_full"], None if unread or assigns else True)
+                    self.assertEqual(row["basis"] == "assigned_environment", assigns)
                     self.assertNotEqual(row.get("basis"), "unparsed")
                     for change in ("cd data", "{ cd data; }", "eval 'cd data'"):
                         [row] = ro._shell(f"{sub}{op}{change} && {derive}", "/w", target)["derives"]
@@ -4345,6 +4509,12 @@ class Cli(unittest.TestCase):
                 self.assertNotIn(gone, text)
         self.assertIn("A derive whose program is a variable or a relative path (`$PY -m data_sheets_schema.cli`, "
                       "`./d4d`) cannot be placed, as that program may be a wrapper.", text)                 # #3693
+        self.assertIn("Nor can one with an assignment before its program, on the part, given to `env`, as an "
+                      "earlier part of the command or by `printf -v` (`PYTHONPATH=src python -m "
+                      "data_sheets_schema.cli`, `PATH=./bin:$PATH; d4d`), as the assignment may make it run other "
+                      "code: no assignment is exempt. An assignment made any other way (`export`, `declare`, "
+                      "`read`, a sourced script, a function, `eval`, or outside the command) is not read as one, "
+                      "so a derive after `export PYTHONPATH=./hack;` is placed.", text)            # #3781
         self.assertIn("A script that detaches a child itself is not seen as open-ended", text)    # #3674
         self.assertIn("nor is an environment set outside the command read", text)                  # #3689
         self.assertNotIn("issued after the first full-record Write", text)                        # #3676

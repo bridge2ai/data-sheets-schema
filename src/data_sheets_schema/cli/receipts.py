@@ -347,7 +347,14 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     terminal `result` lists the call, which then never ran. `timeout`,
     `env` and `nice` wrappers are read through. A derive whose program is a
     variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`)
-    cannot be placed, as that program may be a wrapper. Three kinds of part carrying
+    cannot be placed, as that program may be a wrapper. Nor can one with an
+    assignment before its program, on the part, given to `env`, as an
+    earlier part of the command or by `printf -v` (`PYTHONPATH=src python -m
+    data_sheets_schema.cli`, `PATH=./bin:$PATH; d4d`), as the assignment may
+    make it run other code: no assignment is exempt. An assignment made any
+    other way (`export`, `declare`, `read`, a sourced script, a function,
+    `eval`, or outside the command) is not read as one, so a derive after
+    `export PYTHONPATH=./hack;` is placed. Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
