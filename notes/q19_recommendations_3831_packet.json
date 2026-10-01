@@ -1,0 +1,1653 @@
+{
+ "packet": "q19_recommendations_3831",
+ "source_commit": "c962a6cc88f8844ef59890fb5fa1bd30931edd1e",
+ "n": 122,
+ "items": [
+  {
+   "id": "q19r-000",
+   "sentence": "Add AIO ontology mappings and a subgroup fairness analysis to known_biases, and consider expressing the raw-audio derivation with was_derived_from in addition to the typed related_datasets entry.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-001",
+   "sentence": "Add a was_derived_from link to the raw audio Synapse resource and, when available, a publication DOI and a conflicts-of-interest statement under ethical_reviews",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-08-28agentic_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-002",
+   "sentence": "Add errata as a structured field (migrating the June 2025 revision history currently held in related_datasets notes) and add missing_data_documentation covering the incompletely overlapping protein sets.",
+   "slots_named": [
+    "structured field"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-003",
+   "sentence": "Add explicit deidentification method (e.g., HIPAA Safe Harbor, Expert Determination) in a dedicated field",
+   "slots_named": [
+    "dedicated field"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/0/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-004",
+   "sentence": "Add parent_datasets field linking to Bridge2AI program or individual institutional contributions",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_opus-4.8/CHORUS_claudecode_agent_core_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-005",
+   "sentence": "Add parent_datasets or hierarchical relationship structure if adult/pediatric datasets share common root or if this is versioned continuation of earlier Bridge2AI-Voice releases",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_opus-4.8/VOICE_claudecode_agent_core_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-006",
+   "sentence": "Add parent_datasets/was_derived_from pointing to doi:10.60775/fairhub.2 and an errata entry, and consider embedding the RO-Crate lineage as a provenance graph",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-22c_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-007",
+   "sentence": "Add provenance information (was_derived_from, release_notes)",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_assistant_evaluation.json",
+     "json_path": "/semantic_analysis/recommendations/medium_priority/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-008",
+   "sentence": "Add related_datasets/parent_datasets entries with typed relationships linking the pediatric dataset and prior versions.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/VOICE_claudecode_agent_core_evaluation.json",
+     "json_path": "/assessment/recommendations/0"
+    }
+   ]
+  },
+  {
+   "id": "q19r-009",
+   "sentence": "Add related_datasets/parent_datasets with typed relationships (e.g., is-part-of Bridge2AI, has-archive Zenodo).",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-010",
+   "sentence": "Add release_notes or was_derived_from for provenance",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/VOICE_claudecode_assistant_evaluation.json",
+     "json_path": "/semantic_analysis/recommendations/low_priority/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-011",
+   "sentence": "Add tool versions (b2aiprep, openSMILE, sparc, ppgs, Whisper), populate publisher and was_derived_from, and cite the feasibility publication and white paper with DOIs in external_resources.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-012",
+   "sentence": "Add variables (or a per-collection data dictionary reference) and mirror the version lineage into parent_datasets.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/12/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-013",
+   "sentence": "Add versions and URLs for sparc, openSMILE, Praat, Parselmouth, ppgs and Whisper; populate conforms_to_schema and a was_derived_from link to the raw audio source.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-28agentic_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-014",
+   "sentence": "Add was_derived_from field for provenance chain",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_claudecode_evaluation.json",
+     "json_path": "/recommendations/nice_to_have/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-015",
+   "sentence": "Add was_derived_from naming the version 3.0.0 DOI 10.13026/k81f-qr68 and the raw audio source, so the derivation path is readable from the provenance slots rather than reconstructed from three others.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-016",
+   "sentence": "Add was_derived_from or parent_datasets links from the processed perturb-seq atlas to its raw sequence archive, and extend related_datasets to the full five-release chain already listed in version_access.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-09-04gapi_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/8"
+    }
+   ]
+  },
+  {
+   "id": "q19r-017",
+   "sentence": "Add was_derived_from per collection linking source cell line (entity), acquisition activity, and performing laboratory (agent), exploiting the declared RO-Crate packaging to make the provenance chain machine-readable rather than inferable from prose.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-018",
+   "sentence": "Add was_derived_from per file collection linking source cell line, acquisition activity and performing laboratory, exploiting the RO-Crate conformance already declared.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-019",
+   "sentence": "Attribute the AI-readiness percentages explicitly as consortium self-assessment (already partly done) and add was_derived_from / parent_datasets linkages so the provenance claim is evidenced by structured fields rather than prose alone.",
+   "slots_named": [
+    "parent_datasets",
+    "structured fields",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/2/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-020",
+   "sentence": "Clarify in the citation or a dedicated field that the RRID identifies the hosting repository, or add a dataset-level RRID if one has been minted.",
+   "slots_named": [
+    "dedicated field"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/4/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-021",
+   "sentence": "Consider adding hierarchical resources or parent_datasets if part of larger collection",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_assistant_evaluation.json",
+     "json_path": "/semantic_analysis/recommendations/low_priority/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-022",
+   "sentence": "Consider adding parent_datasets field linking to broader Bridge2AI program dataset collection",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_opus-4.8/CM4AI_claudecode_agent_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-023",
+   "sentence": "Declare character encoding for the CSV, JSON, Markdown and WFDB header files, and add a was_derived_from statement summarising the raw-to-release derivation now carried only by raw_data_sources prose.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json",
+     "json_path": "/assessment/recommendations/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-024",
+   "sentence": "Document FAIRSCAPE provenance graph structure and EVI ontology usage in dedicated provenance field for semantic interoperability",
+   "slots_named": [
+    "dedicated provenance field"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/concatenated/_archive_2026-07-22/CM4AI_claudecode_agent_core_evaluation.json",
+     "json_path": "/assessment/recommendations/9"
+    }
+   ]
+  },
+  {
+   "id": "q19r-025",
+   "sentence": "Emit a variables element for the phenotype tables' key columns (participant_id, session_id, diagnosis, demographic fields) drawn from the existing JSON data dictionaries, and record version predecessors as parent_datasets in addition to the related_datasets typed links.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-026",
+   "sentence": "Emit variables entries for at least the phenotype tables' key columns (participant_id, session_id, diagnosis, demographic fields), and express the version predecessors as parent_datasets in addition to the related_datasets typed links.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-027",
+   "sentence": "Expose the FAIRSCAPE RO-Crate as a resolvable resource within the release and reference its per-sub-crate derivation edges from was_derived_from, so the lineage is machine-traversable at artifact level.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/7/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-028",
+   "sentence": "Express the conversion and QC chain as PROV-O activities with the device exports as source entities, or at minimum populate was_derived_from",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-04gapi_rep3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/9/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-029",
+   "sentence": "Express the feature-from-audio derivation as a typed was_derived_from relation linking the released feature tables to the controlled-access raw audio, naming b2aiprep as the generating agent.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/1/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-030",
+   "sentence": "Express typed related_datasets entries for the sequestered holdout set, the three sibling Bridge2AI data generation projects, and the Bridge2AI programme parent, and record parent_datasets or resources for the nine modality components.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/CHORUS_v7_rep1_r10_rating2_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-031",
+   "sentence": "Fill the structural gaps: record the Snellen variable removal and any corrections as errata entries; populate discouraged_uses, parent_datasets and compression; and extend keywords to at least eight by adding the unrepresented modalities (environmental sensing, wearable activity monitoring, optical coherence tomography, OMOP).",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-032",
+   "sentence": "Include provenance chain using was_derived_from to link to raw institutional EHR/PACS/monitor systems for full data lineage",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/_archive_2026-07-22/CHORUS_claudecode_agent_core_evaluation.json",
+     "json_path": "/recommendations/9"
+    }
+   ]
+  },
+  {
+   "id": "q19r-033",
+   "sentence": "Include software version numbers in structured fields when using full schema: b2aiprep version, OpenSMILE version, Whisper model version (large-v3 mentioned in descriptions)",
+   "slots_named": [
+    "structured fields"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/concatenated/_archive_2026-07-22/VOICE_claudecode_agent_core_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-034",
+   "sentence": "Include was_derived_from to document provenance",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_gpt5_evaluation.json",
+     "json_path": "/recommendations/secondary_improvements/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-035",
+   "sentence": "Instantiate the provenance graph the notes describe: link each file_collection to its raw_data_sources entry and to the acquisition activity and performing laboratory via was_derived_from, rather than leaving the FAIRSCAPE/EVI capability as an unexercised framework claim.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-036",
+   "sentence": "Keep the RRID in the citation as published and, if a resource identifier for the platform is wanted structurally, record it in a dedicated slot with a note that it identifies PhysioNet",
+   "slots_named": [
+    "dedicated slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/10/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-037",
+   "sentence": "Keep the caveat but consider a value nearer the sources' meaning (publicly downloadable subject to attestation and licence) or add the raw source values as structured fields alongside the enum.",
+   "slots_named": [
+    "structured fields"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-038",
+   "sentence": "Link to related datasets: parent_datasets (Bridge2AI program), related_datasets (other Bridge2AI projects: VOICE, CM4AI; related diabetes datasets)",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/2026-07-22_opus-4.8/AI_READI_claudecode_agent_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-039",
+   "sentence": "Mirror doi:10.60775/fairhub.1 and doi:10.60775/fairhub.2 into parent_datasets and was_derived_from, and record the version 3.0.0 removal of the Snellen visual-acuity variables as an erratum.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-040",
+   "sentence": "Mirror the fairhub.1/fairhub.2 predecessors into parent_datasets/was_derived_from and record the Snellen change as an erratum",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-041",
+   "sentence": "Mirror the fairhub.1/fairhub.2 predecessors into parent_datasets/was_derived_from and record the Snellen change as an erratum so provenance slots are machine-readable",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-042",
+   "sentence": "Mirror the fairhub.1/fairhub.2 predecessors into parent_datasets/was_derived_from and record the Snellen visual-acuity change as an erratum.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-043",
+   "sentence": "Mirror the is_new_version_of targets into parent_datasets and list the PhysioNet/Synapse/GitHub locations under resources.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-22c_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-044",
+   "sentence": "Mirror the is_new_version_of targets into parent_datasets, or state that the relation is expressed only through related_datasets.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/7/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-045",
+   "sentence": "Mirror the predecessor versions into parent_datasets/was_derived_from and record the Snellen drop as an erratum so lineage and changes are machine-readable in the provenance slots.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-046",
+   "sentence": "Mirror the predecessor versions into parent_datasets/was_derived_from so lineage is machine-readable in the provenance slots",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/4/recommendation"
+    },
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-047",
+   "sentence": "Mirror the predecessors into parent_datasets/was_derived_from and record the Snellen change as an erratum so lineage is machine-readable in the provenance slots.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/2/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-048",
+   "sentence": "Mirror the two predecessor releases into parent_datasets and was_derived_from, and record the Snellen variable removal as an erratum so lineage and corrections are machine-readable in the provenance slots.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-049",
+   "sentence": "Mirror the v2.0.0 predecessor into parent_datasets/was_derived_from so lineage is machine-readable in the provenance slots.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28agentic_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/4/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-050",
+   "sentence": "Mirror the version lineage into was_derived_from and parent_datasets, and attribute the disclosed 419,614-byte residual so both provenance and size arithmetic are machine-checkable in the slots consumers query.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-051",
+   "sentence": "Populate `parent_datasets` with DOIs 10.60775/fairhub.1 and 10.60775/fairhub.2 and `was_derived_from` with the raw-source-to-release derivation path, so lineage occupies the schema slots consumers read rather than only related_datasets prose.",
+   "slots_named": [
+    "parent_datasets",
+    "schema slots",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/0"
+    }
+   ]
+  },
+  {
+   "id": "q19r-052",
+   "sentence": "Populate a top-level version field, document version_access, and add typed related_datasets/parent_datasets (e.g., part-of Bridge2AI, archived-in Zenodo).",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_claudecode_agent_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-053",
+   "sentence": "Populate confidentiality_level ('HL7:2N'), parent_datasets/was_derived_from (doi:10.60775/fairhub.2), an errata entry for the Snellen drop, and set publisher to the organization name FAIRhub.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-054",
+   "sentence": "Populate data_protection_impacts (truthful status), parent_datasets/was_derived_from (doi:10.60775/fairhub.2), and record publisher as the name 'FAIRhub'.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-055",
+   "sentence": "Populate download_url with the FAIRhub access endpoint so that harvesters reading the dedicated slot find it.",
+   "slots_named": [
+    "dedicated slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r10_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-056",
+   "sentence": "Populate file_collections with per-format entries carrying total_bytes and file counts, moving the 32,522, 29,278 and 29,289 figures out of source_caveats into structured slots while keeping the reconciliation note as the explanation of which source was preferred.",
+   "slots_named": [
+    "structured slots"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-057",
+   "sentence": "Populate parent_datasets / was_derived_from for versions 1.0.0 and 2.0.0 to make the lineage machine-readable",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28capi_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-058",
+   "sentence": "Populate parent_datasets and regulatory_restrictions.confidentiality_level with the values already present in prose, and add an errata slot summarising the changes that the CHANGELOG records (for example the removal of Snellen acuity variables in 3.0.0).",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-059",
+   "sentence": "Populate parent_datasets from the prior-version and source DOIs already in related_datasets, use resources for the feature and phenotype sub-collections, and add total_size_bytes or per-collection byte totals.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/6"
+    }
+   ]
+  },
+  {
+   "id": "q19r-060",
+   "sentence": "Populate parent_datasets from the two is_new_version_of edges and add was_derived_from for the device-native exports, then express the conversion and QC chain as PROV-O activities so the lineage the record already documents in prose becomes traversable.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-04gapi_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-061",
+   "sentence": "Populate parent_datasets or was_derived_from with doi:10.60775/fairhub.2 and doi:10.60775/fairhub.1 so version derivation resolves through the derivation slots as well as related_datasets.",
+   "slots_named": [
+    "derivation slots",
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-062",
+   "sentence": "Populate parent_datasets or was_derived_from with the predecessor release DOIs already present in related_datasets, and add a brief donor consent and ethical-sourcing statement for the KOLF2.1J (HipSci) and MDA-MB-468 (ATCC) lines.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/9"
+    }
+   ]
+  },
+  {
+   "id": "q19r-063",
+   "sentence": "Populate parent_datasets or was_derived_from with the prior version DOIs in addition to related_datasets, so version derivation is machine-resolvable through the derivation slots as well as the relation slot.",
+   "slots_named": [
+    "derivation slots",
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/4/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-064",
+   "sentence": "Populate parent_datasets with doi:10.60775/fairhub.2 and add was_derived_from links from each file_collection to the raw_data_sources entry that produced it, making the derivation graph queryable rather than inferable from prose.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-065",
+   "sentence": "Populate parent_datasets with doi:10.60775/fairhub.2 and set was_derived_from to the same identifier, keeping the study-name prose in notes.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-04gapi_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/2/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-066",
+   "sentence": "Populate parent_datasets with the 3.0.0 DOI and the Synapse accession so version and derivation ancestry are machine-readable in the slot built for them.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-04fapi_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-067",
+   "sentence": "Populate parent_datasets with the controlled-access raw audio collection so the derivation is machine-resolvable at the schema's intended location.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-068",
+   "sentence": "Populate parent_datasets with the is_new_version_of targets and resources with the PhysioNet, Synapse and GitHub locations.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-08-22c_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-069",
+   "sentence": "Populate parent_datasets with the prior version DOIs and resources (or file_collections as nested resources) so the hierarchical fields carry the lineage they are defined for",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/8"
+    }
+   ]
+  },
+  {
+   "id": "q19r-070",
+   "sentence": "Populate parent_datasets with the prior version and the Synapse raw-audio accession already named in related_datasets.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/10/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-071",
+   "sentence": "Populate parent_datasets with the prior version and the Synapse raw-audio accession already recorded in related_datasets, and consider emitting the existing textual lineage as a W3C PROV-O graph.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/6"
+    }
+   ]
+  },
+  {
+   "id": "q19r-072",
+   "sentence": "Populate parent_datasets with the prior-version and Health Data Nexus records already named in related_datasets, so lineage resolves at both paths.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-073",
+   "sentence": "Populate parent_datasets with the prior-version and source dataset DOIs already listed in related_datasets, and use resources to enumerate the feature and phenotype sub-collections described in distribution_formats.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-074",
+   "sentence": "Populate parent_datasets with the raw audio collection so the derivation is a typed linkage, keeping the descriptive related_datasets entry alongside it.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-04fapi_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-075",
+   "sentence": "Populate parent_datasets with the two prior version DOIs (duplicating related_datasets is acceptable) and expose file_collections as resources where the schema permits.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-076",
+   "sentence": "Populate parent_datasets with the version 2.0.0 DOI so version derivation is machine-discoverable through the derivation slots as well as through related_datasets.",
+   "slots_named": [
+    "derivation slots",
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-077",
+   "sentence": "Populate parent_datasets with the version predecessors already carried in related_datasets (doi:10.13026/k81f-qr68 for v3.0.0 and doi:10.57764/qb6h-em84 for v1.0)",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-078",
+   "sentence": "Populate parent_datasets with the version predecessors already named in related_datasets (doi:10.13026/k81f-qr68, doi:10.57764/qb6h-em84).",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-079",
+   "sentence": "Populate parent_datasets, regulatory_restrictions.confidentiality_level ('HL7:2N (normal)'), an errata slot summarising CHANGELOG entries, and file-level checksums, all of which have prose or external equivalents today.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-080",
+   "sentence": "Populate parent_datasets/was_derived_from for v2.0.0 and v1.0.0 and add an errata slot referencing the CHANGELOG.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28bapi_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-081",
+   "sentence": "Populate parent_datasets/was_derived_from from related_datasets, and variables from the JSON-Schema mini-data-dictionaries the record says exist.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-08-22c_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-082",
+   "sentence": "Populate publisher (PhysioNet), download_url, software_and_tools and was_derived_from from information already present in the record",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/VOICE_2026-08-28agentic_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    },
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/superseded_fable5/VOICE_2026-09-01api_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-083",
+   "sentence": "Populate regulatory_restrictions.confidentiality_level ('HL7:2N'), publisher ('FAIRhub'), and parent_datasets/was_derived_from (doi:10.60775/fairhub.2); add at least one more keyword (e.g.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28agentic_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-084",
+   "sentence": "Populate resources from file_collections and parent_datasets/was_derived_from from the is_new_version_of relations.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28agentic_rep3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-085",
+   "sentence": "Populate resources from file_collections and parent_datasets/was_derived_from from the is_new_version_of relations; add an errata entry pointing to CHANGELOG.md.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28agentic_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-086",
+   "sentence": "Populate resources with the ten file_collections as nested sub-resources and parent_datasets with the prior version DOIs, so the hierarchical fields carry the ancestry that related_datasets currently holds alone.",
+   "slots_named": [
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-087",
+   "sentence": "Populate the dedicated slots that currently hold their content elsewhere: download_url with the PhysioNet content URL, data_governance.committee_contact with the DACO address, and at_risk_populations with the neurological and psychiatric cohorts.",
+   "slots_named": [
+    "dedicated slots"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/VOICE_v8_rep2_r10_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-088",
+   "sentence": "Populate the dedicated slots with the values already present in prose; retain the prose explanations, which are the more informative part.",
+   "slots_named": [
+    "dedicated slots"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r10_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-089",
+   "sentence": "Populate the dedicated slots, including an explicit negative for data_protection_impacts, so the negative findings currently buried in notes become machine-readable.",
+   "slots_named": [
+    "dedicated slots"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep2_r10_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/7/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-090",
+   "sentence": "Populate variables from the existing JSON data dictionaries, and mirror the derives_from edge into parent_datasets so provenance is machine-readable through the dedicated field as well as through related_datasets.",
+   "slots_named": [
+    "dedicated field",
+    "parent_datasets"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-091",
+   "sentence": "Populate variables with variable-level metadata and code systems, add missing_data_documentation for flowsheet and waveform missingness, and add was_derived_from and parent_datasets linkages so the documented lineage becomes traversable rather than narrative",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CHORUS_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/10"
+    }
+   ]
+  },
+  {
+   "id": "q19r-092",
+   "sentence": "Populate was_derived_from and parent_datasets so each processed archive links to its raw source, and name the archive carrying the RO-Crate descriptor and provenance graph so the FAIRSCAPE claim can be verified.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-093",
+   "sentence": "Populate was_derived_from and parent_datasets so the derivation path is machine-readable, and add file_collections with byte totals and file counts alongside an expanded variables list covering the principal phenotype columns.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/VOICE_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-094",
+   "sentence": "Populate was_derived_from and parent_datasets with the Synapse raw-audio deposit and the prior version DOIs, keeping the related_datasets entries as the typed expression of the same relations.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/VOICE_2026-09-01api_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/7"
+    }
+   ]
+  },
+  {
+   "id": "q19r-095",
+   "sentence": "Populate was_derived_from and parent_datasets with the deposition archives and external repository deposits already named in raw_data_sources and raw_sources, and surface a summary of the RO-Crate provenance graph in the record rather than only inside cm4ai_release_metadata.zip.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/5"
+    }
+   ]
+  },
+  {
+   "id": "q19r-096",
+   "sentence": "Populate was_derived_from and parent_datasets with the prior release DOIs and the ATCC, HipSci and MassIVE sources already described in prose, and surface the RO-Crate EVI provenance graph location so the lineage is traversable from the datasheet.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-097",
+   "sentence": "Populate was_derived_from and parent_datasets with the typed links that related_datasets already implies, so that provenance is machine-traversable rather than only narratively recoverable.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/8/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-098",
+   "sentence": "Populate was_derived_from for each file_collection linking it to its raw_data_sources entry and the acquisition activity that produced it, so the provenance graph asserted in notes is realised in the datasheet.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-099",
+   "sentence": "Populate was_derived_from linking each processed archive to its raw source, and document the actual processing pipeline (alignment, guide assignment, QC thresholds) rather than inferring derivation from filenames.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/3/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-100",
+   "sentence": "Populate was_derived_from to link each released collection to the raw export and processing activity that produced it, and expose the lineage through the existing RO-Crate as entity–activity–agent relationships; this is the single change that would move Q19 from 4 to 5.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-101",
+   "sentence": "Populate was_derived_from to type the derivation of the released Parquet and TSV features from the controlled-access raw audio, naming sensein/b2aiprep as the generating agent, which would move Q19 to the full provenance band.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-102",
+   "sentence": "Populate was_derived_from with the Synapse raw-audio entity and bind the b2aiprep v3.0.0 processing step to its inputs, outputs and agent, and mirror the derivation into parent_datasets, which would move Q19 into the 5-band.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-103",
+   "sentence": "Populate was_derived_from with the Synapse raw-audio entity and express the b2aiprep processing step as an activity with its agent, so the lineage already present in prose becomes an entity-activity-agent structure.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/VOICE_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/7/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-104",
+   "sentence": "Populate was_derived_from with the deposition-archive and external-repository sources already named in raw_data_sources and raw_sources, and surface a summary of the RO-Crate provenance graph in the record.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/CM4AI_v7_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/5/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-105",
+   "sentence": "Populate was_derived_from with the device-export-to-standard conversions already described, and parent_datasets with fairhub.1 and fairhub.2, making the lineage machine-traversable; consider transcribing the RO-Crate FAIRscape provenance.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-106",
+   "sentence": "Populate was_derived_from with the device-export-to-standard-format conversions already described in prose, and parent_datasets with fairhub.1/fairhub.2, so the lineage is machine-traversable rather than narrative only.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/7/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-107",
+   "sentence": "Populate was_derived_from with the four acquisition modalities and the two source cell lines, and parent_datasets with the release chain already typed in related_datasets, so lineage is machine-readable rather than inferable.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-09-04gapi_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-108",
+   "sentence": "Populate was_derived_from with the four acquisition modalities and the two source cell lines, and parent_datasets with the release chain already typed in related_datasets.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-09-04gapi_rep2_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/2/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-109",
+   "sentence": "Populate was_derived_from with the raw-export-to-release derivation path and parent_datasets with the version lineage, and expose the RO-Crate/FAIRscape provenance already packaged with the release as a machine-readable graph reference.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/6/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-110",
+   "sentence": "Populate was_derived_from with the raw-export-to-release derivation path and parent_datasets with the version lineage, and expose the RO-Crate/FAIRscape provenance shipped with the release as a machine-readable graph reference.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v8_rep1_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-111",
+   "sentence": "Promote information already present in prose into its structured field: total_size_bytes and file_collections.total_bytes from the description text; creator affiliations from notes into `affiliations` with ROR identifiers (ROR:0168r3w48 UCSD, ROR:043mz5j54 UCSF, ROR:00f54p054 Stanford); the governance contact into regulatory_restrictions.governance_committee_contact; and publisher set to the University of Virginia Dataverse, which the citation already names.",
+   "slots_named": [
+    "structured field"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-112",
+   "sentence": "Publish the FAIRSCAPE RO-Crate as a resolvable resource within the release and reference its sub-crate derivation edges from was_derived_from, converting the prose lineage into an artifact-level traversable graph.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-11/AI_READI_v8_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/4"
+    }
+   ]
+  },
+  {
+   "id": "q19r-113",
+   "sentence": "Record structured derivation with was_derived_from linking each subset to its raw_data_sources deposit, and set parent_datasets to the October 2025 release DOI that related_datasets already names as the predecessor.",
+   "slots_named": [
+    "parent_datasets",
+    "structured derivation",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/CM4AI_2026-09-04gapi_rep3_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-114",
+   "sentence": "Record the June 2025 revision and post-publication file additions as errata entries, and consider expressing the FAIRSCAPE provenance lineage as was_derived_from/parent_datasets links in the record itself.",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/superseded_fable5/CM4AI_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/3"
+    }
+   ]
+  },
+  {
+   "id": "q19r-115",
+   "sentence": "Record the publisher as a URI (https://fairhub.io) so Q13 sustainability consumers can find the repository in the structured slot.",
+   "slots_named": [
+    "structured slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/label_aware/AI_READI_2026-08-28dapi_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/12/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-116",
+   "sentence": "Resolve the Licensor/IRB institution conflict against the published IRB approval letter or the signed licence, record one accountable_organization, and keep the alternative reading in source_caveats rather than in the structured slot.",
+   "slots_named": [
+    "structured slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/AI_READI_v7_rep3_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-117",
+   "sentence": "Set publisher to the organization name FAIRhub; populate confidentiality_level (HL7:2N), parent_datasets/was_derived_from (doi:10.60775/fairhub.2) and an errata entry for the Snellen drop",
+   "slots_named": [
+    "parent_datasets",
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/superseded_fable5/AI_READI_2026-09-01api_rep2_evaluation.json",
+     "json_path": "/assessment/recommendations/1"
+    }
+   ]
+  },
+  {
+   "id": "q19r-118",
+   "sentence": "State character encoding (presumably UTF-8) on the text formats and add a was_derived_from statement summarising the raw-to-release derivation.",
+   "slots_named": [
+    "was_derived_from"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/reference_2026-09-11/AI_READI_v7_rep1_r10_rating3_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/8/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-119",
+   "sentence": "State which deidentification statement governs the released files and set is_deidentified.method accordingly, keeping the divergent platform and RO-Crate values in the details prose rather than in tension with the structured slot.",
+   "slots_named": [
+    "structured slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json",
+     "json_path": "/assessment/recommendations/2"
+    }
+   ]
+  },
+  {
+   "id": "q19r-120",
+   "sentence": "State which statement governs the released files and why, rather than asserting a method in the structured slot that the platform metadata contradicts in the prose slot beneath it.",
+   "slots_named": [
+    "structured slot"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric10_semantic/label_aware/AI_READI_2026-09-04gapi_rep1_evaluation.json",
+     "json_path": "/semantic_analysis/issues_detected/2/recommendation"
+    }
+   ]
+  },
+  {
+   "id": "q19r-121",
+   "sentence": "Wire the provenance explicitly: give each file_collection a was_generated_by link to the acquisition or preprocessing activity that produced it, and state whether the shipped RO-Crate provenance graphs carry per-modality processing parameters.",
+   "slots_named": [
+    "was_generated_by"
+   ],
+   "sources": [
+    {
+     "file": "data/evaluation_llm/rubric20_semantic/reference_2026-09-12_cborg_runtime/CM4AI_v7_rep2_r20_rating1_evaluation.json",
+     "json_path": "/assessment/recommendations/8"
+    }
+   ]
+  }
+ ]
+}
