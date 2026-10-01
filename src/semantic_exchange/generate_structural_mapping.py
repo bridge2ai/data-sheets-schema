@@ -658,6 +658,96 @@ def check_column_drift(committed: Path, regenerated: Path,
     return len(shared), differ
 
 
+def run_check(generator, committed: Path, summary: Path) -> int:
+    """`--check`: compare `committed` and `summary` with what `generator`
+    regenerates, print what differs, and return the exit status.
+
+    Writes nothing beside them: regeneration goes to a temporary
+    directory.
+    """
+    # Never write over the committed file while checking it. Regenerating
+    # in place to compare is how a check becomes the thing it was meant to
+    # detect.
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp) / "regenerated.sssom.tsv"
+        generator.export_sssom(scratch)
+        if not committed.exists():
+            print(f"\n✗ No committed mapping at {committed}")
+            return 1
+        lost, gained = check_drift(committed, scratch)
+        compared, column_drift = check_column_drift(committed, scratch)
+
+        # The target writes two artifacts from the same mappings list, so
+        # check both. Today the summary is fresh and the mapping is stale
+        # (#295) — the confusing direction, because the artifact that is
+        # right is the one nobody thinks to distrust.
+        scratch_summary = Path(tmp) / "regenerated_summary.md"
+        generator.export_summary(scratch_summary)
+        summary_missing = not summary.exists()
+        summary_drifted = (
+            summary_missing
+            or summary.read_text(encoding="utf-8")
+            != scratch_summary.read_text(encoding="utf-8"))
+    # Said on a pass as well as a failure. Before #2936 a pass printed
+    # only the line below, from a check that compared triples alone, so
+    # without this a column check that found nothing reads exactly like
+    # one that never ran (#3057).
+    agree = (f"\n  The {compared} row(s) both files carry agree on "
+             f"{', '.join(STRUCTURAL_COLUMNS)}.")
+    if not lost and not gained and not column_drift and not summary_drifted:
+        print("\n✓ The committed mapping and summary regenerate exactly.")
+        print(agree)
+        return 0
+    # The headline names what drifted. It used to blame the mapping
+    # whatever failed, so a stale summary beside a mapping that
+    # regenerates exactly read as a mapping failure (#3125).
+    mapping_drifted = bool(lost or gained or column_drift)
+    if mapping_drifted:
+        print("\n✗ The committed mapping does not regenerate from its inputs.")
+    elif summary_missing:
+        print(f"\n✗ No committed summary at {summary}.")
+    else:
+        print("\n✗ The committed summary does not regenerate from the "
+              "mapping's inputs.")
+    if lost:
+        print(f"\n  {len(lost)} row(s) in the committed file that "
+              "regeneration does not produce:")
+        for s, p_, o in lost:
+            print(f"      {s}  --{p_}->  {o}")
+    if gained:
+        print(f"\n  {len(gained)} row(s) regeneration produces that the "
+              "committed file lacks:")
+        for s, p_, o in gained:
+            print(f"      {s}  --{p_}->  {o}")
+    if column_drift:
+        print(f"\n  {len(column_drift)} value(s) differ on the {compared} "
+              "row(s) both files carry:")
+        for (s, p_, o), col, was, now in column_drift:
+            print(f"      {s}  --{p_}->  {o}  {col}: "
+                  f"committed {was!r}, regenerated {now!r}")
+    else:
+        print(agree)
+    if not mapping_drifted and summary_missing:
+        print("\n  The mapping regenerates exactly; the summary beside it "
+              "is missing.")
+    elif not mapping_drifted:
+        # Reached only with the summary stale: the pass returned above.
+        print("\n  The summary does not regenerate. The mapping beside it "
+              "does, so only the summary is stale.")
+    elif summary_missing:
+        print(f"\n  There is no committed summary either, at {summary}.")
+    elif summary_drifted:
+        print("\n  The summary does not regenerate either.")
+    else:
+        print("\n  The summary regenerates exactly, so it describes the "
+              "generator's output rather than the mapping beside it (#295).")
+    if mapping_drifted:
+        print("\n  A mapping nobody can rebuild is a mapping nobody can "
+              "safely change (#234).")
+    return 1
+
+
 def main(argv=None):
     """Generate schema-structure-aware mappings."""
     import argparse
@@ -699,97 +789,17 @@ def main(argv=None):
     print(f"  Generated {len(mappings)} mappings")
 
     committed = output_dir / "d4d_rocrate_structural_mapping.sssom.tsv"
+    summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
 
     if args.check:
-        # Never write over the committed file while checking it. Regenerating
-        # in place to compare is how a check becomes the thing it was meant to
-        # detect.
-        import tempfile
-        with tempfile.TemporaryDirectory() as tmp:
-            scratch = Path(tmp) / "regenerated.sssom.tsv"
-            generator.export_sssom(scratch)
-            if not committed.exists():
-                print(f"\n✗ No committed mapping at {committed}")
-                return 1
-            lost, gained = check_drift(committed, scratch)
-            compared, column_drift = check_column_drift(committed, scratch)
-
-            # The target writes two artifacts from the same mappings list, so
-            # check both. Today the summary is fresh and the mapping is stale
-            # (#295) — the confusing direction, because the artifact that is
-            # right is the one nobody thinks to distrust.
-            summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
-            scratch_summary = Path(tmp) / "regenerated_summary.md"
-            generator.export_summary(scratch_summary)
-            summary_missing = not summary.exists()
-            summary_drifted = (
-                summary_missing
-                or summary.read_text(encoding="utf-8")
-                != scratch_summary.read_text(encoding="utf-8"))
-        # Said on a pass as well as a failure. Before #2936 a pass printed
-        # only the line below, from a check that compared triples alone, so
-        # without this a column check that found nothing reads exactly like
-        # one that never ran (#3057).
-        agree = (f"\n  The {compared} row(s) both files carry agree on "
-                 f"{', '.join(STRUCTURAL_COLUMNS)}.")
-        if not lost and not gained and not column_drift and not summary_drifted:
-            print("\n✓ The committed mapping and summary regenerate exactly.")
-            print(agree)
-            return 0
-        # The headline names what drifted. It used to blame the mapping
-        # whatever failed, so a stale summary beside a mapping that
-        # regenerates exactly read as a mapping failure (#3125).
-        mapping_drifted = bool(lost or gained or column_drift)
-        if mapping_drifted:
-            print("\n✗ The committed mapping does not regenerate from its inputs.")
-        elif summary_missing:
-            print(f"\n✗ No committed summary at {summary}.")
-        else:
-            print("\n✗ The committed summary does not regenerate from the "
-                  "mapping's inputs.")
-        if lost:
-            print(f"\n  {len(lost)} row(s) in the committed file that "
-                  "regeneration does not produce:")
-            for s, p_, o in lost:
-                print(f"      {s}  --{p_}->  {o}")
-        if gained:
-            print(f"\n  {len(gained)} row(s) regeneration produces that the "
-                  "committed file lacks:")
-            for s, p_, o in gained:
-                print(f"      {s}  --{p_}->  {o}")
-        if column_drift:
-            print(f"\n  {len(column_drift)} value(s) differ on the {compared} "
-                  "row(s) both files carry:")
-            for (s, p_, o), col, was, now in column_drift:
-                print(f"      {s}  --{p_}->  {o}  {col}: "
-                      f"committed {was!r}, regenerated {now!r}")
-        else:
-            print(agree)
-        if not mapping_drifted and summary_missing:
-            print("\n  The mapping regenerates exactly; the summary beside it "
-                  "is missing.")
-        elif not mapping_drifted:
-            # Reached only with the summary stale: the pass returned above.
-            print("\n  The summary does not regenerate. The mapping beside it "
-                  "does, so only the summary is stale.")
-        elif summary_missing:
-            print(f"\n  There is no committed summary either, at {summary}.")
-        elif summary_drifted:
-            print("\n  The summary does not regenerate either.")
-        else:
-            print("\n  The summary regenerates exactly, so it describes the "
-                  "generator's output rather than the mapping beside it (#295).")
-        if mapping_drifted:
-            print("\n  A mapping nobody can rebuild is a mapping nobody can "
-                  "safely change (#234).")
-        return 1
+        return run_check(generator, committed, summary)
 
     # Export. The directory is made here rather than up front, so `--check`
     # pointed at one that does not exist creates nothing either.
     print("\nExporting mappings...")
     output_dir.mkdir(parents=True, exist_ok=True)
     generator.export_sssom(committed)
-    generator.export_summary(output_dir / "d4d_rocrate_structural_mapping_summary.md")
+    generator.export_summary(summary)
 
     print("\n✓ Schema-structure-aware mapping complete")
     return 0
