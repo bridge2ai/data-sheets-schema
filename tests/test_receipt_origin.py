@@ -2439,7 +2439,8 @@ class DeriveSpellings(Base):
                       "command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
                       "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or "
                       "backquote anywhere, or both a `<<` and a `$'`), one with a `<<` v6 does not read as "
-                      "here-documents of data, and one v6 cannot split is read exactly as origin/main read it "
+                      "here-documents of data, one that is not one part with no pipe and no redirection but an input "
+                      "one (#4095), and one v6 cannot split is read exactly as origin/main read it "
                       "(#4028), so a quoted operator there joins, a `$'...'` holding `\\'` is split at shlex's quotes or "
                       "not at all, a brace expansion with a quoted blank (`{cd,'/tmp a b'}`) is not read as "
                       "built at run time (#3924), `echo $$'\\'`, a newline and `cd data` reads the newline as "
@@ -3895,7 +3896,9 @@ class EarlierDirectoryChange(Base):
         # nothing, and `\'` inside `$'...'` does not close it, so the run
         # after each is split or kept as bash reads it.
         self.assertEqual(ro._tokens('echo \\" x);cd y'), ["echo", '"', "x", ")", ";", "cd", "y"])
-        self.assertEqual(ro._tokens("echo $'it\\'s);' x);cd y"), ["echo", "$it's);", "x", ")", ";", "cd", "y"])
+        self.assertEqual(ro._v6_lex("echo $'it\\'s);' x);cd y")[0], ["echo", "$it's);", "x", ")", ";", "cd", "y"])
+        # A command of more than one part is read as origin/main read it (#4095).
+        self.assertEqual(ro._tokens("echo $'it\\'s);' x);cd y"), ro._origin_tokens("echo $'it\\'s);' x);cd y"))
         # `;;&` ends a case clause, a join; it starts nothing in the background.
         self.assertEqual(ro._layout(ro._tokens("a;;&b"))[0], [["a"], ["b"]])
         self.assertFalse(ro._shell("case x in a) ls;;& b) ls;; esac", "/w", [])["detaches"])
@@ -4081,16 +4084,22 @@ class ShellLexer(Base):
                                   ("echo \"|\" b", [["echo", "|", "b"]]),
                                   ("echo ';' && ls", [["echo", ";"], ["ls"]])):
             with self.subTest(command=command):
-                self.assertEqual(ro._layout(ro._tokens(command))[0], segments)
-        tokens = ro._tokens("echo ';' ; ls")
+                self.assertEqual(ro._layout(ro._v6_lex(command)[0])[0], segments)
+        tokens = ro._v6_lex("echo ';' ; ls")[0]
         self.assertEqual([getattr(t, "quoted", False) for t in tokens], [False, True, False, False])
         self.assertFalse(ro._punct(tokens[1]))
         self.assertTrue(ro._punct(tokens[2]))
-        # The derive after a quoted `|` is the command's last part, joined by
-        # `;` alone: its status is the call's (origin/main read a pipe).
+        # v6 reads only a one-part command (#4095): a quoted operator is data
+        # to the program given it, but a pipe or a later part may hand what
+        # that program prints to a shell, so the rest read as origin/main did.
+        for command in ("find . -exec x {} ';'", "echo '&&' b"):
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], True)
+        for command in ("echo ';' && ls", "echo ';' ; ls", f"echo '|' ; {self.DERIVE}"):
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
         target = [ro._Target("full", self.FULL)]
-        [row] = ro._shell(f"echo '|' ; {self.DERIVE}", "/w", target)["derives"]
-        self.assertEqual((row["targets_full"], row["basis"]), (True, "command"))
         # An unquoted operator still joins.
         [row] = ro._shell(f"echo | {self.DERIVE}", "/w", target)["derives"]
         self.assertEqual(row["basis"], "none")
@@ -4101,10 +4110,13 @@ class ShellLexer(Base):
     def test_an_ansi_c_string_closes_where_bash_closes_it(self):
         # `$'it\'s'` is one word, `it's`: shlex paired its quotes wrongly and
         # could not split the command at all.
-        self.assertEqual(ro._tokens("echo $'it\\'s' && cd /w"), ["echo", "$it's", "&&", "cd", "/w"])
-        self.assertEqual(ro._tokens("echo $'a\\'b;' x; cd y"), ["echo", "$a'b;", "x", ";", "cd", "y"])
-        self.assertIs(ro._shell("echo $'it\\'s' && cd /w", "/w", [])["moves"], False)
-        self.assertIs(ro._shell("echo $'it\\'s' && cd /tmp", "/w", [])["moves"], True)
+        self.assertEqual(ro._v6_lex("echo $'it\\'s' && cd /w")[0], ["echo", "$it's", "&&", "cd", "/w"])
+        self.assertEqual(ro._v6_lex("echo $'a\\'b;' x; cd y")[0], ["echo", "$a'b;", "x", ";", "cd", "y"])
+        self.assertEqual(ro._tokens("echo $'it\\'s' x"), ["echo", "$it's", "x"])
+        self.assertIs(ro._shell("echo $'it\\'s' x", "/w", [])["moves"], False)
+        # A command of more than one part is read as origin/main read it
+        # (#4095): shlex cannot split this one, so it may move.
+        self.assertIs(ro._shell("echo $'it\\'s' && cd /w", "/w", [])["moves"], True)
         # The `$` is kept: as a program it is still a word built at run time.
         self.assertTrue(ro._shell("$'cd' /tmp", "/w", [])["moves"])
         self.assertTrue(ro._shell("$'setsid' ./derive.sh", "/w", [])["detaches"])
@@ -4413,14 +4425,17 @@ class ShellLexer(Base):
     def test_a_brace_expansion_with_a_quoted_blank_is_built_at_run_time(self):
         # `for w in {echo,'a b'}` iterates `echo` and `a b`: bash expands the
         # braces around a quoted blank (#3924).
-        for command in ("{cd,'/tmp a b'}", "{cd,/tmp\\ a}", "{cd,\"/tmp a\"} && ls"):
+        for command in ("{cd,'/tmp a b'}", "{cd,/tmp\\ a}", "{cd,\"/tmp a\"}"):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
         self.assertTrue(ro._shell("{setsid,'./derive script.sh'}", "/w", [])["detaches"])
-        target = [ro._Target("full", "/w/data/X_d4d.yaml")]
-        [row] = ro._shell("{cd,'/tmp a b'} && d4d derive core --full data/X_d4d.yaml --out o.yaml", "/w",
-                          target)["derives"]
-        self.assertIsNone(row["targets_full"])
+        # A command of more than one part is read as origin/main read it
+        # (#4095), and origin/main does not see these braces (#3924's gap).
+        for command in ("{cd,\"/tmp a\"} && ls",
+                        "{cd,'/tmp a b'} && d4d derive core --full data/X_d4d.yaml --out o.yaml"):
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
 
     #: Commands where reading a double-quoted `$(...)` to the `)` bash
     #: closes it at ended the word later than bash does (#3983): bash 5.3
@@ -4563,11 +4578,13 @@ class ShellLexer(Base):
         # no backslash-newline, no `$$`, no construct bash reads to a
         # closing bracket, and not both a `<<` and a `$'`. Every other
         # command is lexed as origin/main lexed it.
-        for command in ("echo ';' && ls", "echo $'it\\'s' && cd /w", "cat <<'EOF'\ncd data\nEOF",
-                        "find . -exec x {} \\;\tls", "printf '%s' a; echo \"b c\""):
+        for command, one_part in (("echo ';' && ls", False), ("echo $'it\\'s' && cd /w", False),
+                                  ("cat <<'EOF'\ncd data\nEOF", True), ("find . -exec x {} \\;\tls", True),
+                                  ("printf '%s' a; echo \"b c\"", False)):
             with self.subTest(command=command):
                 self.assertIs(ro._v6_admissible(command), True)
-                self.assertIs(ro._lex(command)[2], True)
+                # v6 then reads only a one-part command (#4095).
+                self.assertIs(ro._lex(command)[2], one_part)
         for command in ("cat\r <<'EOF'\nx\nEOF", "echo ';'\r", "echo ';' \x0b", "echo ';' \x00", "echo 'é' ';'",
                         "echo '\u2014' ';'", "echo ';'\u2028ls", "echo ';' \\\nls", "echo $$ ';'", "echo `x` ';'",
                         "echo \"$(x)\" ';'", "echo ${x} ';'", "echo $[1] ';'", "echo $((1)) ';'", "(( x )); echo ';'",
@@ -4587,7 +4604,7 @@ class ShellLexer(Base):
 
     #: origin/main's `_shell` for every counterexample of this lexer's review
     #: rounds (#3947, #3948, #3983, #3985, #3996, #4005, #4028, #4029, and
-    #: the Codex review's #4070 and its #4086), computed with the merge base's module
+    #: the Codex reviews' #4070 and #4095, and #4086), computed with the merge base's module
     #: (c962a6cc8) and pinned (#4028).
     MAIN_READINGS = Path(__file__).parent / "data" / "receipt_origin_main_readings.json"
 
@@ -4597,7 +4614,7 @@ class ShellLexer(Base):
         # brace-expansion pattern are origin/main's (#4028, #4029).
         pinned = json.loads(self.MAIN_READINGS.read_text(encoding="utf-8"))
         self.assertEqual({entry["issue"].split(" ")[0].rstrip(",:") for entry in pinned["commands"]},
-                         {"#3947", "#3983", "#3996", "#4005", "#4028", "#4029", "#4070", "#4086"})
+                         {"#3947", "#3983", "#3996", "#4005", "#4028", "#4029", "#4070", "#4086", "#4095"})
         for entry in pinned["commands"]:
             command = entry["command"]
             with self.subTest(issue=entry["issue"], command=command):
@@ -4894,6 +4911,32 @@ class ShellLexer(Base):
         r.write(r.receipt, Boundaries.C003)
         r.derive(full=r.full)
         self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+
+    def test_a_quoted_operator_a_pipe_or_a_later_part_hands_to_a_shell_reads_as_on_origin_main(self):
+        # #4095 (the Codex re-check): a quoted `;` is data to `echo`, but the
+        # shell it is piped into runs `true ; $X ./derive.sh` (bash 3.2.57 and
+        # 5.3.3 leave the child running), and a file it writes may be run by
+        # a later part. So v6 reads only a one-part command with no pipe and
+        # no redirection but an input one; the rest read as on origin/main.
+        for command in ("echo true ';' '$X' ./derive.sh | /bin/bash",
+                        "echo true ';' '$X' ./derive.sh > s.sh\n" + self.COPY_RUNNER):
+            with self.subTest(command=command):
+                self.assertIs(ro._v6_admissible(command), True)
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                self.assertIs(ro._shell(command, "/w", [])["detaches"], True)
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive(full=r.full)
+                self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+        # Alone, the quoted operator is data: `echo` prints it and runs nothing.
+        alone = "echo true ';' '$X' ./derive.sh"
+        self.assertIs(ro._lex(alone)[2], True)
+        self.assertEqual({k: ro._shell(alone, "/w", [])[k] for k in ("detaches", "moves", "runs_unread")},
+                         {"detaches": False, "moves": False, "runs_unread": False})
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
         # A list-valued name raised TypeError in `_history` (#3918). Each

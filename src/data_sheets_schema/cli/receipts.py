@@ -413,8 +413,9 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     command's text, before any lexing, chooses its reading (#4028): v6 reads a command
     of printable ASCII, tabs and newlines only, with no backslash-newline, no `$$`, no
     `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or backquote anywhere, and not both a `<<`
-    and a `$'`, where any `<<` in it begins here-documents it reads as data, and where
-    it can split it; every other
+    and a `$'`, where any `<<` in it begins here-documents it reads as data, where after
+    any `cd`/`mkdir` parts it is one part with no pipe and no redirection but an input one
+    (#4095), and where it can split it; every other
     command is read exactly as origin/main read it, and a nested command string (a
     substitution's command, a `-c` string, `eval`'s command) is always split as
     origin/main split it (#4029). v6 lexes as bash lexes (#3830): a quoted or escaped

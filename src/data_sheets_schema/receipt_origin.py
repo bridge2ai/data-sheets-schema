@@ -238,7 +238,11 @@ backslash-newline, no `$$`, no construct bash reads to a closing bracket
 with its own grammar (`$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(`, a
 backquote), and not both a `<<` and a `$'`; where, if it carries `<<`,
 v6 finds here-documents in it and reads every one as data (below), a
-`<<<` alone being no here-document; and where v6 can split it. v6 lexes it as
+`<<<` alone being no here-document; where, after any `cd WORD` or `mkdir
+[-p] WORD...` parts, it is one part with no `|` or `|&` and no
+redirection but an input one (#4095: a quoted operator is data to the
+program given it, but `echo true ';' '$X' ./derive.sh | /bin/bash` hands
+it to a shell that runs it); and where v6 can split it. v6 lexes it as
 bash does (#3830): a quoted or escaped operator (`';'`, `'&&'`, `\\;`) is
 a word, never a join; a `$'...'` string closes where bash closes it, past
 a `\\'`; a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
@@ -510,7 +514,8 @@ NON_CHECKS = (
     "a command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
     "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or backquote "
     "anywhere, or both a `<<` and a `$'`), one with a `<<` v6 does not read as here-documents of "
-    "data, and one v6 cannot split is read exactly as origin/main read it (#4028), so a quoted "
+    "data, one that is not one part with no pipe and no redirection but an input one (#4095), and "
+    "one v6 cannot split is read exactly as origin/main read it (#4028), so a quoted "
     "operator there "
     "joins, a `$'...'` holding `\\'` is split at shlex's quotes or not at all, a brace expansion "
     "with a quoted blank (`{cd,'/tmp a b'}`) is not read as built at run time (#3924), `echo "
@@ -1660,9 +1665,31 @@ def _lex(command: str) -> tuple[list[str] | None, str, bool]:
     command (#4029)."""
     if _v6_admissible(command):
         lexed = _v6_lex(command)
-        if lexed is not None:
+        if lexed is not None and _one_part(lexed[0]):
             return lexed[0], lexed[1], True
     return _origin_tokens(command), _strip_comments(command), False
+
+
+def _one_part(tokens: list[str]) -> bool:
+    """Whether nothing a command prints can reach a program that runs it
+    as commands: after any `cd WORD` or `mkdir [-p] WORD...` parts
+    (`_setup_part`), the command is one part, no `|` or `|&` joins it, and
+    it carries no redirection but an input one. v6 reads only such a
+    command (#4095). A quoted operator is data to the program it is given
+    to, but `echo true ';' '$X' ./derive.sh | /bin/bash` hands it to a
+    shell that runs `$X ./derive.sh`, and a file a part writes may be run
+    by a later part (#4070, #4086); every other command is read as
+    origin/main read it."""
+    segments, joins, leading = _layout(tokens)
+    first = 0
+    while first < len(segments) - 1 and _setup_part(segments[first]):
+        first += 1
+    if first != len(segments) - 1:
+        return False
+    if {"|", "|&"} & set(leading + [op for ops in joins for op in ops]):
+        return False
+    return not any(_punct(word) and word not in _HEREDOC_CARRIER_REDIRECTIONS
+                   for segment in segments for word in segment)
 
 
 def _tokens(command: str) -> list[str] | None:
