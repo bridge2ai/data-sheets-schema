@@ -1,0 +1,38 @@
+# Provenance of data_sheets_schema_all_fc3ca873.yaml.gz (#3788, review #3953).
+#
+# The merged schema the 2026-08-13 generic-v4 rep1 VOICE run hashed
+# (schema.full_sha256 fc3ca873...). No commit reachable from main holds these
+# bytes: they were data_sheets_schema_all.yaml at 09da326f32, a commit of the
+# PR #543 branch that #543 squash-merged as 0a35dfde1 with a later schema.
+# They are committed here, gzip-compressed, so a fresh clone, a shallow clone
+# and CI read them without that branch. src/data_sheets_schema/
+# reconstructed_bytes.py reads the artefact and accepts it only where the
+# artefact and its decompressed bytes hash to the values below.
+issue: 3788
+artefact: notes/reconstructed_bytes/data_sheets_schema_all_fc3ca873.yaml.gz
+artefact_sha256: b5cd76321a2fbbf47aace3b3450026795b00dc21b253b2e042f59bd587303a5b
+compression: gzip, level 9, mtime 0
+path: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+bytes: 1434231
+sha256: fc3ca87375af6954cc47c27910574d1b67f5a2391697bf45be8097326a9e4015
+md5: 0c5e049f5547a0b490683efb37f906f8
+record: data/d4d_concatenated/claudecode_agent_core/2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_provenance.yaml
+# How the bytes were made: the base blob below with one edit applied.
+base:
+  # On origin/main ("Bind the B2AI_* prefixes to the registry's namespaces
+  # (#535) (#536)"). Its blob of `path` is befe38d9, the same blob as at the
+  # record's own repo.commit 4892fcd3. 4892fcd3 is on the #543 branch and no
+  # remote ref reaches it, so it is not the base named here.
+  commit: c327fd0dfc5fd6e7341c96002dde83b044d6e063
+  blob: befe38d97b476092ec1bbbfabe53828588a87f81
+  sha256: 992cbb48d6c8fbcfce68a88f6992de81851c070037baec5db07db8c594514e47
+edits:
+  # 0-based line index into the base; nothing deleted; nine lines inserted.
+  - at: 55
+    delete: 0
+    insert: "  ROR:\n    prefix_prefix: ROR\n    prefix_reference: https://ror.org/\n  ORCID:\n    prefix_prefix: ORCID\n    prefix_reference: https://orcid.org/\n  doi:\n    prefix_prefix: doi\n    prefix_reference: https://doi.org/\n"
+observed_at: >-
+  09da326f32aed4bc501355efc7a4a1aee1819257, a commit of the PR #543 branch
+  squash-merged as 0a35dfde1; reachable from no remote ref. GitHub still
+  serves it: on 2026-09-30 its data_sheets_schema_all.yaml hashed to the
+  sha256 above, the same as the base with the edit applied.

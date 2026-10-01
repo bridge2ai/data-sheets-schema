@@ -974,10 +974,11 @@ def run_enum_aliases(record: dict[str, Any] | None
     record names no hash, no version matches, git cannot answer (a
     shallow clone) or git cannot be started (an OSError launching it,
     #3851): `normaliser_form` then reads today's tables, and the basis
-    says so and why. Where no reachable version matches, bytes only a
-    squash-merged branch held are rebuilt from a reachable one by a
-    recorded edit (`reconstructed_bytes`, #3788) and accepted only by the
-    recorded hashes; the basis says they were reconstructed."""
+    says so and why. Bytes only a squash-merged branch held, which no
+    reachable version matches, are read before git is asked from their
+    committed artefact (`reconstructed_bytes`, #3788, #3953) and accepted
+    only by the recorded hashes, so a fresh or shallow clone reads them
+    too; the basis says they were reconstructed and names the artefact."""
     today = "today's schema"
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     schema = schema if isinstance(schema, dict) else {}
@@ -995,6 +996,21 @@ def run_enum_aliases(record: dict[str, Any] | None
         data = None
     if data is not None and all(getattr(hashlib, k)(data).hexdigest() == v for k, v in hashes.items()):
         return _tables_of(data), {"source": "the run's schema, on disk", "path": path, **hashes}
+    # Bytes no reachable commit holds, committed as a hash-checked artefact
+    # (#3788): read before git, which a shallow clone cannot answer (#3953).
+    from data_sheets_schema.reconstructed_bytes import reconstructed_bytes_for
+    try:
+        rebuilt = reconstructed_bytes_for(path, md5=md5, sha256=sha256)
+    except OSError as exc:
+        return None, {"source": today, "path": path, **hashes,
+                      "reason": "the run's schema is not on disk and its recorded reconstruction "
+                                f"could not be read ({type(exc).__name__}: {exc})"}
+    if rebuilt is not None:
+        data, entry = rebuilt
+        return _tables_of(data), {"source": "the run's schema, reconstructed", "path": path, **hashes,
+                                  "artefact": entry["artefact"], "base_commit": entry["base_commit"],
+                                  "matched_on": entry["matched_on"], "observed_at": entry["observed_at"],
+                                  "reconstruction": f"reconstructed_bytes.RECONSTRUCTIONS (#{entry['issue']})"}
     from data_sheets_schema.provenance import GitUnavailable, committed_bytes_for
     try:
         found = committed_bytes_for(path, md5=md5, sha256=sha256)
@@ -1007,27 +1023,12 @@ def run_enum_aliases(record: dict[str, Any] | None
         return None, {"source": today, "path": path, **hashes,
                       "reason": f"the run's schema is not on disk and git could not be run "
                                 f"({type(exc).__name__}: {exc})"}
-    if found is not None:
-        data, entry = found
-        return _tables_of(data), {"source": "the run's schema, a git blob", "path": path, **hashes,
-                                  "commit": entry["commit"], "matched_on": entry["matched_on"]}
-    # No reachable version: bytes a squash-merged branch held can still be
-    # rebuilt from one that is, where the edit is recorded (#3788).
-    from data_sheets_schema.reconstructed_bytes import reconstructed_bytes_for
-    try:
-        rebuilt = reconstructed_bytes_for(path, md5=md5, sha256=sha256)
-    except (GitUnavailable, OSError) as exc:
-        return None, {"source": today, "path": path, **hashes,
-                      "reason": "no committed version of the path hashes to what the record recorded, "
-                                f"and its recorded reconstruction could not be read ({type(exc).__name__}: {exc})"}
-    if rebuilt is None:
+    if found is None:
         return None, {"source": today, "path": path, **hashes,
                       "reason": "no committed version of the path hashes to what the record recorded"}
-    data, entry = rebuilt
-    return _tables_of(data), {"source": "the run's schema, reconstructed", "path": path, **hashes,
-                              "base_commit": entry["base_commit"], "matched_on": entry["matched_on"],
-                              "observed_at": entry["observed_at"],
-                              "reconstruction": f"reconstructed_bytes.RECONSTRUCTIONS (#{entry['issue']})"}
+    data, entry = found
+    return _tables_of(data), {"source": "the run's schema, a git blob", "path": path, **hashes,
+                              "commit": entry["commit"], "matched_on": entry["matched_on"]}
 
 
 # -------------------------------------------------------------- relocation

@@ -1124,52 +1124,62 @@ class RunSchemaTables(unittest.TestCase):
             self.assertEqual(basis, {"source": "today's schema",
                                      "reason": "the record names no merged schema by path and hash"})
 
-    def test_bytes_no_reachable_commit_holds_are_rebuilt_where_the_edit_is_recorded(self):
-        """#3788: where no reachable version matches, a recorded
-        reconstruction is tried, and the basis says the bytes were
-        reconstructed; git failing there is the documented fallback."""
+    def test_bytes_no_reachable_commit_holds_are_read_from_their_committed_artefact(self):
+        """#3788: a recorded reconstruction is read before git is asked, so a
+        shallow or fresh clone reads it too (#3953), and the basis says the
+        bytes were reconstructed and names the artefact; an OSError reading
+        it is the documented fallback; none recorded falls through to git."""
         from data_sheets_schema.provenance import GitUnavailable
         with tempfile.TemporaryDirectory() as tmp:
             path, sha, _md5 = self._schema_file(tmp)
             data = path.read_bytes()
             path.unlink()
             record = {"schema": {"full_path": str(path), "full_sha256": sha}}
-            entry = {"base_commit": "b" * 40, "matched_on": ["sha256"], "observed_at": "a branch commit",
-                     "issue": 3788}
-            with mock.patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None), \
+            entry = {"artefact": "notes/x.yaml.gz", "base_commit": "b" * 40, "matched_on": ["sha256"],
+                     "observed_at": "a branch commit", "issue": 3788}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=GitUnavailable("shallow clone")) as git, \
                     mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
                                return_value=(data, entry)) as got:
                 tables, basis = rm.run_enum_aliases(record)
             got.assert_called_once_with(str(path), md5=None, sha256=sha)
+            git.assert_not_called()
             self.assertEqual(tables["relationship_type"]["Foo"], "bar")
-            self.assertEqual((basis["source"], basis["base_commit"], basis["observed_at"]),
-                             ("the run's schema, reconstructed", "b" * 40, "a branch commit"))
+            self.assertEqual((basis["source"], basis["artefact"], basis["base_commit"], basis["observed_at"]),
+                             ("the run's schema, reconstructed", "notes/x.yaml.gz", "b" * 40, "a branch commit"))
             self.assertIn("#3788", basis["reconstruction"])
-            for failure in (GitUnavailable("corrupt"), FileNotFoundError(2, "No such file", "git")):
-                with mock.patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None), \
-                        mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
-                                   side_effect=failure):
-                    tables, basis = rm.run_enum_aliases(record)
-                self.assertIsNone(tables)
-                self.assertEqual(basis["source"], "today's schema")
-                self.assertIn("its recorded reconstruction could not be read", basis["reason"])
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None), \
+                    mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                               side_effect=PermissionError(13, "Permission denied", "x.yaml.gz")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual(basis["source"], "today's schema")
+            self.assertIn("its recorded reconstruction could not be read (PermissionError", basis["reason"])
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            return_value=(data, {"commit": "abc123", "matched_on": ["sha256"]})) as git, \
+                    mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                               return_value=None):
+                tables, basis = rm.run_enum_aliases(record)
+            git.assert_called_once()
+            self.assertEqual((basis["source"], basis["commit"]), ("the run's schema, a git blob", "abc123"))
 
     def test_the_voice_v4_rep1_record_reads_its_own_schema(self):
         """#3788 on the record itself: the one checked record whose merged
-        schema no reachable commit holds now reads the reconstructed bytes."""
-        import subprocess
+        schema no reachable commit holds reads the committed artefact, with
+        no git needed, so CI and a fresh or shallow clone read it (#3953)."""
         from data_sheets_schema.provenance import _REPO_ROOT
         from data_sheets_schema.reconstructed_bytes import RECONSTRUCTIONS
         prov = _REPO_ROOT / ("data/d4d_concatenated/claudecode_agent_core/"
                              "2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_provenance.yaml")
-        shallow = subprocess.run(["git", "rev-parse", "--is-shallow-repository"], cwd=_REPO_ROOT,
-                                 capture_output=True, text=True, check=False).stdout.strip()
-        if not prov.exists() or shallow != "false":
-            self.skipTest("needs the corpus record and a full clone")
-        tables, basis = rm.run_enum_aliases(yaml.safe_load(prov.read_text(encoding="utf-8")))
+        if not prov.exists():
+            self.skipTest("needs the corpus record")
+        with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                        side_effect=AssertionError("git must not be needed")):
+            tables, basis = rm.run_enum_aliases(yaml.safe_load(prov.read_text(encoding="utf-8")))
         self.assertIsNotNone(tables)
-        self.assertEqual((basis["source"], basis["base_commit"]),
-                         ("the run's schema, reconstructed", RECONSTRUCTIONS[0]["base_commit"]))
+        self.assertEqual((basis["source"], basis["artefact"], basis["base_commit"]),
+                         ("the run's schema, reconstructed", RECONSTRUCTIONS[0]["artefact"],
+                          RECONSTRUCTIONS[0]["base_commit"]))
 
 
 class LowConfidence(unittest.TestCase):
