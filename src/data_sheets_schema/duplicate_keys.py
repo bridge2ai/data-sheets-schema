@@ -229,10 +229,14 @@ def find_duplicate_keys(text: str, loader: type = yaml.SafeLoader, *,
     raises under `strict`) and the other reports what it scanned. A caller
     that switches loaders can therefore refuse, or read differently, a text
     the other loader reads. These are examples of what PyYAML 6.0 and its
-    libyaml binding do, not a complete grammar of the difference. Each
-    answer is still the one its own loader would load (`yaml.load(...,
-    Loader=loader)` on the same text); the scan does not paper over the
-    difference. None of the 1,616 YAML files under `data/d4d_concatenated`
+    libyaml binding do, not a complete grammar of the difference. Where
+    its loader can scan the text, each answer is still the one that loader
+    would load (`yaml.load(..., Loader=loader)` on the same text); the scan
+    does not paper over the difference. Where it cannot, there is no such
+    load to match: the answer is `[]`, or under `strict` the loader's own
+    error, and on every example text above that a loader cannot scan,
+    `yaml.load` with that loader raises too (a text refused for its depth
+    alone is the exception set out above). None of the 1,616 YAML files under `data/d4d_concatenated`
     is scannable by one and not the other, none carries a byte-order mark
     past its first character, and on every one the two loaders give
     identical findings (checked 2026-09-30)."""

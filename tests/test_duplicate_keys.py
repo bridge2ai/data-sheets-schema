@@ -278,6 +278,40 @@ class TestUnencodableText(unittest.TestCase):
             find_duplicate_keys(text, loader=yaml.CSafeLoader, strict=True)
 
 
+    def test_an_answer_matches_the_load_only_where_the_loader_scans(self):
+        """The docstring's claim that each answer is what `yaml.load` with the
+        same loader would load holds only where that loader scans the text
+        (#4006). On every example text of the #3855 paragraph, under each
+        loader: where `yaml.load` raises, the scan gives `[]` and under
+        `strict` raises the same error class; where it loads, the strict scan
+        succeeds and every duplicate it reports is a key of that load."""
+        if not hasattr(yaml, "CSafeLoader"):
+            self.skipTest("PyYAML built without libyaml")
+        bom = "﻿"
+        texts = ["b: x\ty\n", "a: 1\n" + bom + "b: 2\n", "a: 1\n" + bom + "# c\na: 2\n",
+                 "a: 1\n" + bom + "\na: 2\n", "a: 1\n" + bom, "b: 0\nx:\n" + bom + "  b: 1\n",
+                 bom * 2 + "a: 1\n", "a: x" + bom + "y\n", bom * 2 + "a: 1\na: 2\n",
+                 bom * 2 + "a: 1\n" + bom + "a: 2\n"]
+        unscannable, reported = set(), set()
+        for text in texts:
+            for loader in (yaml.SafeLoader, yaml.CSafeLoader):
+                with self.subTest(text=text, loader=loader.__name__):
+                    try:
+                        loaded = yaml.load(text, Loader=loader)   # noqa: S506
+                    except yaml.YAMLError as exc:
+                        unscannable.add(loader.__name__)
+                        self.assertEqual(find_duplicate_keys(text, loader=loader), [])
+                        with self.assertRaises(type(exc)):
+                            find_duplicate_keys(text, loader=loader, strict=True)
+                        continue
+                    for d in find_duplicate_keys(text, loader=loader, strict=True):
+                        reported.add(loader.__name__)
+                        self.assertIn(d["key"], loaded if d["path"] == "$" else loaded[d["path"]])
+        # The examples exercise both branches under each loader.
+        self.assertEqual(unscannable, {"SafeLoader", "CSafeLoader"})
+        self.assertEqual(reported, {"SafeLoader", "CSafeLoader"})
+
+
 #: A child process that scans texts nested 50,000 deep with libyaml. Before
 #: #3817 the flow case killed the interpreter with SIGSEGV (exit 139), which
 #: is why it runs in a subprocess and not in pytest's own process.
