@@ -1,9 +1,13 @@
 """Agreement between the two readings of the 122 Q19 recommendations (#3831).
 
 Reads notes/q19_recommendations_3831_first_reading.yaml (the #3747 pins in
-per-item form) and notes/q19_recommendations_3831_second_reading.yaml (the
-blind second reading), and renders the figures between the GENERATED markers
-of notes/q19_recommendations_blind_agreement_2026-09-30.md.
+per-item form), notes/q19_recommendations_3831_second_reading.yaml (the blind
+second reading of record, made with the rating files step 3b asks about) and
+notes/q19_recommendations_3831_second_reading_without_sources.yaml (the
+earlier blind reading made without them, a recorded deviation), and renders
+the figures between the GENERATED markers of
+notes/q19_recommendations_blind_agreement_2026-09-30.md: each second reading
+against the first, and the two second readings against each other.
 
     python scripts/q19_blind_agreement.py           # print the block
     python scripts/q19_blind_agreement.py --write   # rewrite it in the note
@@ -28,6 +32,7 @@ NOTES = ROOT / "notes"
 PACKET = NOTES / "q19_recommendations_3831_packet.json"
 FIRST = NOTES / "q19_recommendations_3831_first_reading.yaml"
 SECOND = NOTES / "q19_recommendations_3831_second_reading.yaml"
+SECOND_WITHOUT_SOURCES = NOTES / "q19_recommendations_3831_second_reading_without_sources.yaml"
 NOTE = NOTES / "q19_recommendations_blind_agreement_2026-09-30.md"
 BEGIN, END = "<!-- BEGIN GENERATED: scripts/q19_blind_agreement.py -->", "<!-- END GENERATED -->"
 
@@ -40,11 +45,12 @@ Z95 = 1.959963984540054
 MISSES_OUTSIDE_RECOMMENDATIONS, HAND_READ_TOTAL = 31, 277
 
 
-def load(first=FIRST, second=SECOND, packet=PACKET):
+def load(first=FIRST, second=SECOND, packet=PACKET, without=SECOND_WITHOUT_SOURCES):
     f = yaml.safe_load(Path(first).read_text(encoding="utf-8"))
     s = yaml.safe_load(Path(second).read_text(encoding="utf-8"))
     p = json.loads(Path(packet).read_text(encoding="utf-8"))
-    return f, s, p
+    w = yaml.safe_load(Path(without).read_text(encoding="utf-8"))
+    return f, s, p, w
 
 
 def kappa(pairs, classes):
@@ -70,10 +76,14 @@ def kappa(pairs, classes):
             "ci95": (kap - Z95 * se, kap + Z95 * se)}
 
 
-def agreement(first, second):
-    """Every figure the note states, from the two readings."""
-    one = first["classes"]
-    two = {j["id"]: j["class"] for j in second["judgements"]}
+def classes_of(reading):
+    """{id: class} of a second-reading file."""
+    return {j["id"]: j["class"] for j in reading["judgements"]}
+
+
+def agreement(one, two, unsure=None):
+    """Every figure the note states for one pair of readings, given as
+    {id: class} maps over the same ids (rows `one`, columns `two`)."""
     ids = sorted(one)
     pairs = [(one[i], two[i]) for i in ids]
     matrix = {a: {b: sum(1 for x, y in pairs if (x, y) == (a, b)) for b in CLASSES} for a in CLASSES}
@@ -87,18 +97,21 @@ def agreement(first, second):
     # Step 3 versus 4 among the items both readings take past steps 1-2.
     past = [(x, y) for x, y in pairs if x not in MISSES and y not in MISSES]
     misses = {"first": sum(x == "miss" for x, _ in miss), "second": sum(y == "miss" for _, y in miss)}
-    return {
+    disagreements = [i for i in ids if one[i] != two[i]]
+    out = {
         "all": kappa(pairs, CLASSES),
         "matrix": matrix,
         "by_class": by_class,
         "steps_1_2": kappa(miss, ("miss", "not")),
         "step_3_4": kappa(past, ("criticism", "request")),
-        "disagreements": [i for i in ids if one[i] != two[i]],
-        "unsure": {"all": sum(j["unsure"] for j in second["judgements"]),
-                   "disagreeing": sum(j["unsure"] for j in second["judgements"] if one[j["id"]] != j["class"])},
+        "disagreements": disagreements,
         "misses": misses,
         "misses_277": {k: MISSES_OUTSIDE_RECOMMENDATIONS + v for k, v in misses.items()},
     }
+    if unsure is not None:
+        out["unsure"] = {"all": sum(unsure.values()),
+                         "disagreeing": sum(unsure[i] for i in disagreements)}
+    return out
 
 
 def _k(r):
@@ -109,30 +122,56 @@ def _k(r):
             f"chance agreement {r['expected']:.3f})")
 
 
-def render(first, second, packet):
-    r = agreement(first, second)
-    one = first["classes"]
-    two = {j["id"]: j for j in second["judgements"]}
-    sentence = {i["id"]: i for i in packet["items"]}
-    reasons = first.get("reasons", {})
-    out = [BEGIN, "",
-           f"- All four classes: {_k(r['all'])}.",
-           f"- Steps 1-2 (miss = named_absence or placement, versus not): {_k(r['steps_1_2'])}.",
-           f"- Step 3 versus 4, over the items both readings take past steps 1-2: {_k(r['step_3_4'])}.",
-           f"- Disagreements: {len(r['disagreements'])}; the second reader marked "
-           f"{r['unsure']['disagreeing']} of them unsure ({r['unsure']['all']} unsure of 122 in all).",
-           "",
-           "Confusion matrix (rows: first reading; columns: second):",
-           "",
-           "| first \\ second | " + " | ".join(CLASSES) + " | total |",
+def _matrix(r, rows, cols):
+    out = [f"Confusion matrix (rows: {rows}; columns: {cols}):", "",
+           f"| {rows} \\ {cols} | " + " | ".join(CLASSES) + " | total |",
            "|---|" + "---:|" * (len(CLASSES) + 1)]
     for a in CLASSES:
         out.append(f"| {a} | " + " | ".join(str(r["matrix"][a][b]) for b in CLASSES)
                    + f" | {sum(r['matrix'][a].values())} |")
     out.append("| total | " + " | ".join(str(r["by_class"][b]["second"]) for b in CLASSES)
                + f" | {r['all']['n']} |")
-    out += ["", "Agreement by class (specific agreement = 2 x both / (first + second)):", "",
-            "| class | first | second | both | specific agreement |", "|---|---:|---:|---:|---:|"]
+    return out
+
+
+def _figures(r, rows, cols):
+    return [f"- All four classes: {_k(r['all'])}.",
+            f"- Steps 1-2 (miss = named_absence or placement, versus not): {_k(r['steps_1_2'])}.",
+            f"- Step 3 versus 4, over the items both readings take past steps 1-2: {_k(r['step_3_4'])}.",
+            "", *_matrix(r, rows, cols)]
+
+
+def _sentence(item):
+    src = item["sources"][0]
+    return [f"> {item['sentence']}", "", f"Source: `{src['file']}` `{src['json_path']}`", ""]
+
+
+def _second(label, j):
+    return f"- {label}, {j['class']}{' (unsure)' if j['unsure'] else ''}: {j['reason']}"
+
+
+def render(first, second, packet, without):
+    one = first["classes"]
+    two = {j["id"]: j for j in second["judgements"]}
+    wo = {j["id"]: j for j in without["judgements"]}
+    sentence = {i["id"]: i for i in packet["items"]}
+    reasons = first.get("reasons", {})
+    r = agreement(one, classes_of(second), {i: j["unsure"] for i, j in two.items()})
+    rw = agreement(one, classes_of(without), {i: j["unsure"] for i, j in wo.items()})
+    rr = agreement(classes_of(without), classes_of(second))
+
+    def first_line(i):
+        f_reason = reasons.get(i, {})
+        return (f"- First, {one[i]} ({f_reason.get('basis', 'no reason recorded')}): "
+                f"{f_reason.get('reason', '')}")
+
+    out = [BEGIN, "", "### The second reading of record (with the step 3b sources) against the first", "",
+           *_figures(r, "first reading", "second"),
+           "",
+           f"Disagreements: {len(r['disagreements'])}; the second reader marked "
+           f"{r['unsure']['disagreeing']} of them unsure ({r['unsure']['all']} unsure of 122 in all).",
+           "", "Agreement by class (specific agreement = 2 x both / (first + second)):", "",
+           "| class | first | second | both | specific agreement |", "|---|---:|---:|---:|---:|"]
     for c in CLASSES:
         b = r["by_class"][c]
         out.append(f"| {c} | {b['first']} | {b['second']} | {b['both']} | {b['specific']:.3f} |")
@@ -146,15 +185,32 @@ def render(first, second, packet):
             f"122 ({MISSES_OUTSIDE_RECOMMENDATIONS} outside the 122 held fixed).",
             "", "Every disagreement:", ""]
     for i in r["disagreements"]:
-        f_reason = reasons.get(i, {})
-        out += [f"### {i}: {one[i]} (first) / {two[i]['class']} (second)", "",
-                f"> {sentence[i]['sentence']}", "",
-                f"Source: `{sentence[i]['sources'][0]['file']}` `{sentence[i]['sources'][0]['json_path']}`",
-                "",
-                f"- First, {one[i]} ({f_reason.get('basis', 'no reason recorded')}): "
-                f"{f_reason.get('reason', '')}",
-                f"- Second, {two[i]['class']}{' (unsure)' if two[i]['unsure'] else ''}: "
-                f"{two[i]['reason']}", ""]
+        out += [f"#### {i}: {one[i]} (first) / {two[i]['class']} (second)", "",
+                *_sentence(sentence[i]), first_line(i), _second("Second", two[i]), ""]
+
+    mw = rw["misses"]
+    out += ["### The reading made without the step 3b sources (a recorded deviation) against the first", "",
+            *_figures(rw, "first reading", "without sources"),
+            "",
+            f"Disagreements: {len(rw['disagreements'])}; marked unsure {rw['unsure']['disagreeing']} "
+            f"({rw['unsure']['all']} unsure of 122 in all). Q19 misses among the 122: {mw['first']} "
+            f"under the first reading, {mw['second']} under this one ({mw['second'] - mw['first']:+d}).",
+            "", "| item | first | without sources | its reason |", "|---|---|---|---|"]
+    for i in rw["disagreements"]:
+        unsure = " (unsure)" if wo[i]["unsure"] else ""
+        out.append(f"| {i} | {one[i]} | {wo[i]['class']}{unsure} | {wo[i]['reason']} |")
+
+    out += ["", "### The two second readings against each other (what step 3b changed)", "",
+            *_figures(rr, "without sources", "with sources"),
+            "", f"Items the two second readings class differently: {len(rr['disagreements'])}.", ""]
+    for i in rr["disagreements"]:
+        moved = ("now agrees with the first" if two[i]["class"] == one[i]
+                 else "now disagrees with the first" if wo[i]["class"] == one[i]
+                 else "disagrees with the first either way")
+        out += [f"#### {i}: {wo[i]['class']} (without) / {two[i]['class']} (with); first {one[i]}, "
+                f"{moved}", "",
+                *_sentence(sentence[i]),
+                _second("Without sources", wo[i]), _second("With sources", two[i]), ""]
     out.append(END)
     return "\n".join(out)
 
@@ -176,7 +232,7 @@ def main(argv=None):
     text = NOTE.read_text(encoding="utf-8")
     if args.check:
         same = note_block(text) == block
-        print("note matches" if same else "note differs from the two readings")
+        print("note matches" if same else "note differs from the readings")
         return 0 if same else 1
     NOTE.write_text(text.replace(note_block(text), block), encoding="utf-8")
     return 0

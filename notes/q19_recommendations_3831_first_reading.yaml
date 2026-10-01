@@ -8,8 +8,9 @@
 # notes/q19_recommendations_blind_agreement_2026-09-30.md recomputes from two
 # files.
 #
-# `reasons` are given only for the items the second reading classes
-# differently. `basis: comment` is the comment beside the pin in that test
+# `reasons` are given only for the items a second reading classes
+# differently: the reading of record (with the step 3b sources) or the
+# earlier reading made without them. `basis: comment` is the comment beside the pin in that test
 # (or the module docstring's step-3 list), transcribed; `basis:
 # reconstructed` is a reason the pins do not state, written on 2026-09-30
 # by the agent integrating #3831 from the item's source rating, and is that
@@ -178,6 +179,14 @@ reasons:
   q19r-093:
     basis: comment
     reason: variables holds four columns ("enumerates only four columns")
+  q19r-114:
+    basis: comment
+    reason: 'the comment on the two pins after it ("Beside the imperative these say the derivation provenance
+      is already in the RO-Crate/FAIRscape package shipped with the release, a file, as the FAIRSCAPE sentence
+      above does") names this sentence: "the FAIRSCAPE provenance lineage" is where the lineage is now, a
+      file, which was_derived_from/parent_datasets are to express "in the record itself". Added on 2026-09-30 by the
+      agent integrating #3831, not the pin''s: its rating''s weaknesses[3] says the graphs "exist only inside
+      the RO-Crate metadata archive"'
   q19r-115:
     basis: reconstructed
     reason: 'no comment names this pin; its rating (issues_detected[12]) says "publisher is absent", so
