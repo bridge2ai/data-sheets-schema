@@ -57,6 +57,17 @@ extensions:
     - '10\.60775/fairhub'
     - '10\.18130/V3/B35XWX'
     - 'B35XWX'
+    # The UVA Dataverse DOI prefix, whole like PhysioNet's below: CM4AI
+    # publishes there (B35XWX, F3TD5R and K7TGEM superseded, HIGT4C current:
+    # source_manifest.yaml CM4AI entries, constants/methods.py) and so does
+    # CHORUS (XNBOPG, its crate's release: scope.py, release_inventory.py).
+    # Each id is checked present in the repository (grep -r); a bare release
+    # id is a hit too (#4027)
+    - '\b10\.18130/'
+    - '(?-i:\bHIGT4C\b)'
+    - '(?-i:\bXNBOPG\b)'
+    - '(?-i:\bK7TGEM\b)'
+    - '(?-i:\bF3TD5R\b)'
     - '10\.13026/37yb-1t42'
     - '10\.13026/h995-bt35'
     - '\b10\.13026/'
