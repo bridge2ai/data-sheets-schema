@@ -202,11 +202,59 @@ Class-ranged slots filled in every replicate whose entry counts reach max/min �
 | v8 API production (2026-09-04f/g) | CM4AI | `file_collections` 6/5/10, `tasks` 2/4/5, `funders` 2/3/1, `acquisition_methods` 2/4/3, `data_collectors` 4/2/3, `raw_data_sources` 2/2/7, `prohibited_uses` 1/1/2, `maintainers` 2/3/4, `related_datasets` 1/7/7 |
 | v8 API production (2026-09-04f/g) | VOICE | `external_resources` 5/1/6, `creators` 16/3/16, `subpopulations` 1/2/1, `sensitive_elements` 3/1/1, `relationships` 2/1/1, `acquisition_methods` 2/1/1, `collection_consents` 2/1/1, `ethical_reviews` 1/1/3, `preprocessing_strategies` 6/2/5, `cleaning_strategies` 2/1/1, `future_use_impacts` 2/2/1, `discouraged_uses` 1/2/1, `distribution_formats` 3/2/1, `errata` 1/3/1 |
 
-Differences from the other measures. fig12 (#2303, `scripts/figures/fig12_replication_stability.py`, not on main) uses the same slot universe, emptiness and canonical form, over the 24 records of the frozen 2026-09-12 rescore manifest — exactly the v7 and v8 production records here — and compares whole values only (it also splits scalar strings into long text by observed length, which changes no count here). Its nested cells filled in all three include the single objects this table sets apart: over the v7 and v8 production arms, 354 such cells, of which 285 are lists with an item count, 165 of those differing in count and 75 reaching max/min ≥ 2; 97 intermittent cells. `runs.compare` counts record keys, so a key holding null or `[]` is present there and absent here. Only top-level slots are compared; nothing below the top level is. Every arm shown ran under an earlier schema release than today's, so a slot its release did not declare counts as unfilled. Record keys holding a value outside the universe: none.
+Differences from the other measures. fig12 (#2303, `scripts/figures/fig12_replication_stability.py`, not on main) uses the same slot universe, emptiness and canonical form, over the 24 records of the frozen 2026-09-12 rescore manifest — exactly the v7 and v8 production records here — and compares whole values only (it also splits scalar strings into long text by observed length, which changes no count here). Its nested cells filled in all three include the single objects this table sets apart: over the v7 and v8 production arms, 354 such cells, of which 285 are lists with an item count, 165 of those differing in count and 75 reaching max/min ≥ 2; 97 intermittent cells. `runs.compare` counts record keys, so a key holding null or `[]` is present there and absent here. Only top-level slots are compared in this table; the structure below them is the next one (#3337). Every arm shown ran under an earlier schema release than today's, so a slot its release did not declare counts as unfilled. Record keys holding a value outside the universe: none.
+
+### Below the top level (#3337)
+
+Per arm × project, the class-ranged slots filled in every replicate (the table's **nested in all**, single objects included), walked pair by pair of replicates (`replicate_structure.compare_nested`): an object by field, a list by the one-to-one join the table above counts, recursively; `source_caveats` is skipped at any depth, as at the top level. At each path below the top level (`creators[*]`, `creators[*].affiliations[*].name`, `license.name`), every joined pair of values of which at least one is filled is one **comparison**: equal on the canonical form, **differ**, or **in one only** — filled in one replicate's entry and empty in the other's. A comparison is counted under its **join basis**, the weakest join on the way down: **single** (one object on each side, nothing to choose between), **key** (list entries joined by `receipts._entry_key`) or **position** (keyless entries joined by index; #908's caveat: no evidence of identity, so a position-basis difference may be two different entries rather than one entry that changed). The bases are never pooled. An entry and each of its fields are counted at their own paths, so the counts are path × pair, not values. **Entries unaligned**: entries a join left unpaired at any depth, counted on both sides, nothing below them compared; for the list slots with a count this includes the table's own unaligned column.
+
+| arm | project | slots walked | paths | comparisons single / key / position | in one only single / key / position | differ single / key / position | entries unaligned |
+|---|---|---|---|---|---|---|---|
+| v4 API (2026-08-13) | AI_READI | 56 | 238 | 110 / 340 / 1042 | 18 / 65 / 99 | 65 / 124 / 828 | 495 |
+| v4 API (2026-08-13) | CHORUS | 38 | 126 | 68 / 0 / 222 | 24 / 0 / 27 | 32 / 0 / 177 | 440 |
+| v4 API (2026-08-13) | CM4AI | 45 | 172 | 84 / 63 / 847 | 24 / 15 / 123 | 42 / 17 / 614 | 519 |
+| v4 API (2026-08-13) | VOICE | 60 | 243 | 118 / 211 / 350 | 12 / 57 / 31 | 78 / 55 / 268 | 893 |
+| **v4 API (2026-08-13)** | **all projects** | | | 380 / 614 / 2461 | 78 / 137 / 280 | 217 / 196 / 1887 | 2347 |
+| v5 API (2026-08-22c) | AI_READI | 52 | 228 | 103 / 221 / 1209 | 14 / 17 / 139 | 62 / 82 / 902 | 622 |
+| v5 API (2026-08-22c) | CHORUS | 33 | 112 | 38 / 0 / 750 | 6 / 0 / 79 | 26 / 0 / 539 | 108 |
+| v5 API (2026-08-22c) | CM4AI | 42 | 168 | 85 / 242 / 794 | 23 / 0 / 125 | 43 / 17 / 534 | 384 |
+| v5 API (2026-08-22c) | VOICE | 61 | 257 | 112 / 226 / 1191 | 18 / 63 / 132 | 60 / 62 / 870 | 497 |
+| **v5 API (2026-08-22c)** | **all projects** | | | 338 / 689 / 3944 | 61 / 80 / 475 | 191 / 161 / 2845 | 1611 |
+| v5 agentic (2026-08-24) | AI_READI | 54 | 204 | 132 / 543 / 0 | 16 / 26 / 0 | 85 / 208 / 0 | 710 |
+| v5 agentic (2026-08-24) | CHORUS | 29 | 67 | 68 / 61 / 0 | 24 / 2 / 0 | 37 / 29 / 0 | 349 |
+| v5 agentic (2026-08-24) | CM4AI | 38 | 170 | 131 / 438 / 0 | 28 / 64 / 0 | 67 / 154 / 0 | 759 |
+| v5 agentic (2026-08-24) | VOICE | 57 | 143 | 160 / 147 / 0 | 52 / 24 / 0 | 85 / 73 / 0 | 719 |
+| **v5 agentic (2026-08-24)** | **all projects** | | | 491 / 1189 / 0 | 120 / 116 / 0 | 274 / 464 / 0 | 2537 |
+| v6 agentic (2026-08-28) | AI_READI | 56 | 238 | 131 / 621 / 147 | 42 / 64 / 28 | 63 / 161 / 105 | 747 |
+| v6 agentic (2026-08-28) | CHORUS | 30 | 66 | 55 / 47 / 0 | 28 / 0 / 0 | 24 / 11 / 0 | 328 |
+| v6 agentic (2026-08-28) | CM4AI | 34 | 143 | 131 / 756 / 0 | 34 / 161 / 0 | 61 / 189 / 0 | 393 |
+| v6 agentic (2026-08-28) | VOICE | 59 | 205 | 151 / 603 / 0 | 38 / 61 / 0 | 85 / 264 / 0 | 747 |
+| **v6 agentic (2026-08-28)** | **all projects** | | | 468 / 2027 / 147 | 142 / 286 / 28 | 233 / 625 / 105 | 2215 |
+| v7 API production (2026-09-01) | AI_READI | 52 | 210 | 101 / 72 / 958 | 16 / 4 / 112 | 57 / 32 / 730 | 381 |
+| v7 API production (2026-09-01) | CHORUS | 33 | 111 | 40 / 0 / 638 | 12 / 0 / 85 | 22 / 0 / 444 | 104 |
+| v7 API production (2026-09-01) | CM4AI | 39 | 160 | 76 / 686 / 678 | 22 / 237 / 111 | 39 / 125 / 464 | 289 |
+| v7 API production (2026-09-01) | VOICE | 57 | 223 | 107 / 1 / 1144 | 12 / 0 / 148 | 69 / 0 / 814 | 334 |
+| **v7 API production (2026-09-01)** | **all projects** | | | 324 / 759 / 3418 | 62 / 241 / 456 | 187 / 157 / 2452 | 1108 |
+| v8 API production (2026-09-04f/g) | AI_READI | 51 | 247 | 114 / 85 / 833 | 16 / 19 / 111 | 62 / 27 / 613 | 407 |
+| v8 API production (2026-09-04f/g) | CHORUS | 34 | 119 | 57 / 39 / 549 | 20 / 12 / 64 | 25 / 6 / 417 | 153 |
+| v8 API production (2026-09-04f/g) | CM4AI | 32 | 152 | 74 / 883 / 522 | 22 / 85 / 78 | 23 / 232 / 344 | 234 |
+| v8 API production (2026-09-04f/g) | VOICE | 56 | 228 | 79 / 146 / 710 | 6 / 8 / 74 | 49 / 54 / 527 | 390 |
+| **v8 API production (2026-09-04f/g)** | **all projects** | | | 324 / 1153 / 2614 | 64 / 124 / 327 | 159 / 319 / 1901 | 1184 |
+
+Paths most often filled in one replicate's joined value and empty in the other's, per arm over its projects (in-one-only comparisons, then by join basis):
+
+| arm | paths |
+|---|---|
+| v4 API (2026-08-13) | `variables[*].description` 38 (key 38), `external_resources[*].notes` 18 (position 18), `known_limitations[*].scope_impact` 17 (position 17), `raw_data_sources[*].access_details` 16 (position 16), `variables[*].notes` 15 (key 15) |
+| v5 API (2026-08-22c) | `external_resources[*].notes` 34 (position 34), `external_resources[*].archival` 30 (position 30), `creators[*].principal_investigator` 25 (position 25), `variables[*].notes` 22 (key 22), `external_resources[*].restrictions` 20 (position 20) |
+| v5 agentic (2026-08-24) | `creators[*].principal_investigator` 15 (key 15), `resources[*].citation` 8 (key 8), `resources[*].created_by` 8 (key 8), `resources[*].created_on` 8 (key 8), `resources[*].distribution_dates` 8 (key 8) |
+| v6 agentic (2026-08-28) | `creators[*].credit_roles` 40 (key 40), `resources[*].file_collections[*].resources[*].hash` 30 (key 30), `resources[*].file_collections[*].resources[*].md5` 30 (key 30), `resources[*].file_collections[*].resources[*].path` 30 (key 30), `creators[*].principal_investigator` 21 (key 21) |
+| v7 API production (2026-09-01) | `creators[*].notes` 109 (key 76, position 33), `creators[*].name` 76 (key 76), `creators[*].affiliations` 66 (key 66), `raw_data_sources[*].access_details` 24 (position 24), `instances[*].notes` 19 (position 19) |
+| v8 API production (2026-09-04f/g) | `creators[*].notes` 74 (key 74), `intended_uses[*].examples` 20 (position 20), `collection_mechanisms[*].notes` 18 (position 18), `external_resources[*].notes` 18 (position 18), `instances[*].notes` 17 (position 17) |
 
 ### Receipt-backed omission candidates (#3335)
 
-Per arm × project, the intermittent slots of the replicate-structure table above. A slot is a **candidate** when at least one replicate that fills it carries a coverage-receipt snippet for it that verifies in the chunk it cites — the verification `receipts.check` counts as `verified`, after the receipt is inverted by slot (`receipts.claim_receipts`) and each receipt path is read at its top-level slot. A path through a key the receipts instrument exempts as commentary or runner-set (`receipts.EXEMPT_LEAVES` and `EXEMPT_SLOTS`: `conforms_to_class`, `conforms_to_schema`, `notes`, `source_caveats`) counts for nothing, and an intermittent slot that is one of them is **commentary**: counted, not classified, never an omitted candidate. Each receipt is checked against the bytes its record hashed: the bundle on disk where it still hashes to the record's, else the committed version that does (`provenance.committed_bytes_for`), chunked under the record's own rule (`replicate_structure.record_chunk_texts`). **not**: every replicate that fills it has a receipt and none verifies a snippet for it; **unmeasured**: none does and some filling replicate has no readable receipt. The four counts sum to the intermittent slots. **Omitted candidates per record**: the candidate slots each replicate leaves empty. `–` exactly where no replicate of the group has a readable receipt — the arms whose procedure wrote none — and not 0; such a group's slots are unmeasured (or commentary) and are added to its arm's total as such. A group where some replicate has a readable receipt is shown in full, its unmeasured slots included. A candidate says the bundle supports the slot in one replicate's reading, not that leaving it out was wrong; only top-level slots are compared.
+Per arm × project, the intermittent slots of the replicate-structure table above. A slot is a **candidate** when at least one replicate that fills it carries a coverage-receipt snippet for it that verifies in the chunk it cites — the verification `receipts.check` counts as `verified`, after the receipt is inverted by slot (`receipts.claim_receipts`) and each receipt path is read at its top-level slot. A path through a key the receipts instrument exempts as commentary or runner-set (`receipts.EXEMPT_LEAVES` and `EXEMPT_SLOTS`: `conforms_to_class`, `conforms_to_schema`, `notes`, `source_caveats`) counts for nothing, and an intermittent slot that is one of them is **commentary**: counted, not classified, never an omitted candidate. Each receipt is checked against the bytes its record hashed: the bundle on disk where it still hashes to the record's, else the committed version that does (`provenance.committed_bytes_for`), chunked under the record's own rule (`replicate_structure.record_chunk_texts`). **not**: every replicate that fills it has a receipt and none verifies a snippet for it; **unmeasured**: none does and some filling replicate has no readable receipt. The four counts sum to the intermittent slots. **Omitted candidates per record**: the candidate slots each replicate leaves empty. `–` exactly where no replicate of the group has a readable receipt — the arms whose procedure wrote none — and not 0; such a group's slots are unmeasured (or commentary) and are added to its arm's total as such. A group where some replicate has a readable receipt is shown in full, its unmeasured slots included. A candidate says the bundle supports the slot in one replicate's reading, not that leaving it out was wrong; only top-level slots are compared here, list entries one level down in the table after this one (#3880).
 
 | arm | project | intermittent | candidates / not / unmeasured / commentary | candidate slots (replicates filling it; receipted in) | omitted candidates per record |
 |---|---|---|---|---|---|
@@ -237,6 +285,61 @@ Per arm × project, the intermittent slots of the replicate-structure table abov
 | v8 API production (2026-09-04f/g) | CM4AI | 17 | 10 / 7 / 0 / 0 | `subsets` (filled 2/3, receipted in 04g/rep2, 04g/rep3), `confidential_elements` (filled 2/3, receipted in 04g/rep1, 04g/rep2), `subpopulations` (filled 2/3, receipted in 04g/rep3), `sampling_strategies` (filled 2/3, receipted in 04g/rep1, 04g/rep3), `collection_timeframes` (filled 1/3, receipted in 04g/rep1), `raw_sources` (filled 1/3, receipted in 04g/rep1), `existing_uses` (filled 1/3, receipted in 04g/rep1), `regulatory_restrictions` (filled 2/3, receipted in 04g/rep2, 04g/rep3), `language` (filled 1/3, receipted in 04g/rep2), `publisher` (filled 2/3, receipted in 04g/rep2, 04g/rep3) | 04g/rep1 5 (`subsets`, `subpopulations`, `regulatory_restrictions`, `language`, `publisher`) · 04g/rep2 4 (`sampling_strategies`, `collection_timeframes`, `raw_sources`, `existing_uses`) · 04g/rep3 5 (`confidential_elements`, `collection_timeframes`, `raw_sources`, `existing_uses`, `language`) |
 | v8 API production (2026-09-04f/g) | VOICE | 9 | 6 / 2 / 0 / 1 | `subsets` (filled 1/3, receipted in 04f/rep3), `raw_data_sources` (filled 2/3, receipted in 04f/rep1, 04f/rep3), `at_risk_populations` (filled 2/3, receipted in 04f/rep1, 04f/rep3), `raw_sources` (filled 1/3, receipted in 04f/rep2), `other_tasks` (filled 1/3, receipted in 04f/rep1), `data_governance` (filled 2/3, receipted in 04f/rep1, 04f/rep3) | 04f/rep1 2 (`subsets`, `raw_sources`) · 04f/rep2 5 (`subsets`, `raw_data_sources`, `at_risk_populations`, `other_tasks`, `data_governance`) · 04f/rep3 2 (`raw_sources`, `other_tasks`) |
 | **v8 API production (2026-09-04f/g)** | **all projects** | 48 | 32 / 14 / 0 / 2 | | |
+
+### Receipt-backed omission candidates among list entries (#3880)
+
+One level down from the table above, over the list-valued class-ranged slots every replicate fills (the replicate-structure table's **with a count**): the entries some replicates carry and others do not. An entry is identified by `receipts._entry_key` and its occurrence among the entries sharing that key — the keyed join the replicate-structure table counts — so an entry is missing from a replicate exactly where that join leaves it unpaired. A **keyless** entry has no identity to be missing by (a position join is no evidence of one, #908): counted, never classified. An entry is a **candidate** when a replicate carrying it has a verified receipt snippet (as in the table above) on that entry or below it; a receipt on the list itself covers only the list (#721). A receipt path is followed into the final record by identity where the run left a phase-1 snapshot (`receipts.remap_path`, #899: `same`, `by_<key>`, `by_overlap`, `same_key_stripped`), read as written where it left none (`no_snapshot`, the agentic path: an index join), is not followed at all where the snapshot is present but unusable — a parse error, bytes that are not UTF-8, an empty document, a list or a scalar (`snapshot_unusable`, #1124: no index join stands in for it, so that replicate counts as having no readable receipt here), and resolves nowhere where its entry or leaf is gone (`entry_dropped`, `leaf_dropped`, `ambiguous`) or the snapshot never had it (`not_in_snapshot`), and resolves nowhere as `unresolved` where the path does not parse as a slot path or an index step finds a list in the snapshot and no list in the final record — the parse is tested first, so an unparseable path is `unresolved` with or without a snapshot, never `no_snapshot`; the reverse (an object in the snapshot, a list in the final record) is `leaf_dropped` at a key step and `not_in_snapshot` at an index step (#3997); **receipt paths by basis** counts the group's verified snippets, resolved or not. **not** and **unmeasured** as above, and `–` exactly where no replicate of the group has a readable receipt. **Omitted candidate entries per record**: how many candidate entries each replicate lacks. Only entries of top-level lists are classified; deeper lists and the fields of single objects are not.
+
+| arm | project | entries in some replicates | candidates / not / unmeasured | keyless entries | receipt paths by basis | omitted candidate entries per record |
+|---|---|---|---|---|---|---|
+| v4 API (2026-08-13) | AI_READI | 96 | – | 416 | – | – |
+| v4 API (2026-08-13) | CHORUS | 102 | – | 169 | – | – |
+| v4 API (2026-08-13) | CM4AI | 79 | – | 349 | – | – |
+| v4 API (2026-08-13) | VOICE | 193 | – | 254 | – | – |
+| v5 API (2026-08-22c) | AI_READI | 117 | – | 427 | – | – |
+| v5 API (2026-08-22c) | CHORUS | 0 | – | 261 | – | – |
+| v5 API (2026-08-22c) | CM4AI | 73 | – | 284 | – | – |
+| v5 API (2026-08-22c) | VOICE | 33 | – | 403 | – | – |
+| v5 agentic (2026-08-24) | AI_READI | 291 | – | 0 | – | – |
+| v5 agentic (2026-08-24) | CHORUS | 166 | – | 0 | – | – |
+| v5 agentic (2026-08-24) | CM4AI | 289 | – | 0 | – | – |
+| v5 agentic (2026-08-24) | VOICE | 281 | – | 4 | – | – |
+| v6 agentic (2026-08-28) | AI_READI | 228 | 199 / 29 / 0 | 129 | no_snapshot 1282 | rep1 140 · rep2 86 · rep3 141 |
+| v6 agentic (2026-08-28) | CHORUS | 138 | 118 / 20 / 0 | 15 | no_snapshot 316 | rep1 79 · rep2 71 · rep3 76 |
+| v6 agentic (2026-08-28) | CM4AI | 172 | 167 / 5 / 0 | 0 | no_snapshot 967 | rep1 111 · rep2 105 · rep3 104 |
+| v6 agentic (2026-08-28) | VOICE | 263 | 210 / 53 / 0 | 0 | no_snapshot 727 | rep1 141 · rep2 136 · rep3 121 |
+| **v6 agentic (2026-08-28)** | **all projects** | 801 | 694 / 107 / 0 | 144 | | |
+| v7 API production (2026-09-01) | AI_READI | 87 | 52 / 35 / 0 | 337 | by_overlap 3, by_variable_name 1, entry_dropped 4, leaf_dropped 10, same 549 | rep1 32 · rep2 32 · rep3 35 |
+| v7 API production (2026-09-01) | CHORUS | 2 | 0 / 2 / 0 | 234 | entry_dropped 13, leaf_dropped 11, same 221, same_key_stripped 2, unresolved 2 | rep1 0 · rep2 0 · rep3 0 |
+| v7 API production (2026-09-01) | CM4AI | 51 | 28 / 23 / 0 | 243 | ambiguous 2, by_id 1, leaf_dropped 12, not_in_snapshot 1, same 219 | rep1 13 · rep2 18 · rep3 19 |
+| v7 API production (2026-09-01) | VOICE | 2 | 2 / 0 / 0 | 376 | ambiguous 1, entry_dropped 3, leaf_dropped 5, not_in_snapshot 2, same 369 | rep1 0 · rep2 2 · rep3 2 |
+| **v7 API production (2026-09-01)** | **all projects** | 142 | 82 / 60 / 0 | 1190 | | |
+| v8 API production (2026-09-04f/g) | AI_READI | 96 | 85 / 11 / 0 | 295 | entry_dropped 3, leaf_dropped 12, same 824, unresolved 17 | 04g/rep1 44 · 04g/rep2 68 · 04g/rep3 54 |
+| v8 API production (2026-09-04f/g) | CHORUS | 16 | 14 / 2 / 0 | 219 | by_name 1, entry_dropped 5, leaf_dropped 5, same 190, same_key_stripped 45, unresolved 5 | 04f/rep1 7 · 04f/rep2 1 · 04f/rep3 14 |
+| v8 API production (2026-09-04f/g) | CM4AI | 35 | 30 / 5 / 0 | 183 | by_overlap 1, entry_dropped 4, leaf_dropped 16, same 378, unresolved 3 | 04g/rep1 15 · 04g/rep2 21 · 04g/rep3 16 |
+| v8 API production (2026-09-04f/g) | VOICE | 44 | 39 / 5 / 0 | 239 | by_overlap 3, entry_dropped 8, leaf_dropped 20, same 599 | 04f/rep1 21 · 04f/rep2 28 · 04f/rep3 16 |
+| **v8 API production (2026-09-04f/g)** | **all projects** | 191 | 168 / 23 / 0 | 936 | | |
+
+### Receipted where empty (#3880)
+
+Per arm × project with a readable receipt, the slots of the replicate-structure table that some replicate leaves empty (intermittent or absent) although its own receipt carries a snippet for the slot verified in the chunk it cites, as in the tables above (commentary keys aside). The receipt was written against the phase-1 record, so the value was receipted and is not in the final record. Beside each replicate: its verified snippets for the slot, then what the removals rows (#2923, `removals.for_record`, read-only) list for that replicate at the slot or below it — **deleted** or **flattened** (a phase-1 value removed by reconcile or repair, counted in the removal rows of the metric table, not again here), **no removal row** (the removals instrument found no phase-1 value there that went: the receipt names a path phase 1 did not fill), **rows truncated** (none among the listed rows, which are capped), or **removals unchecked** (no phase-1 snapshot to read removals against — the agentic path). A group none of whose replicates has a readable receipt is not listed.
+
+| arm | project | slots | slot (replicates filling it; per receipting replicate: verified snippets, removals) |
+|---|---|---|---|
+| v6 agentic (2026-08-28) | AI_READI | 0 | none |
+| v6 agentic (2026-08-28) | CHORUS | 0 | none |
+| v6 agentic (2026-08-28) | CM4AI | 0 | none |
+| v6 agentic (2026-08-28) | VOICE | 0 | none |
+| v7 API production (2026-09-01) | AI_READI | 6 | `subsets` (filled 1/3; rep1 1, deleted), `data_protection_impacts` (filled 1/3; rep1 1, deleted; rep3 1, deleted), `labeling_strategies` (filled 0/3; rep3 1, deleted), `future_use_impacts` (filled 2/3; rep1 1, deleted), `extension_mechanism` (filled 1/3; rep1 1, deleted; rep3 1, deleted), `download_url` (filled 0/3; rep1 1, deleted) |
+| v7 API production (2026-09-01) | CHORUS | 0 | none |
+| v7 API production (2026-09-01) | CM4AI | 1 | `errata` (filled 0/3; rep2 1, deleted) |
+| v7 API production (2026-09-01) | VOICE | 0 | none |
+| v8 API production (2026-09-04f/g) | AI_READI | 1 | `extension_mechanism` (filled 2/3; 04g/rep2 1, deleted) |
+| v8 API production (2026-09-04f/g) | CHORUS | 3 | `known_biases` (filled 1/3; 04f/rep3 1, deleted), `labeling_strategies` (filled 2/3; 04f/rep2 2, deleted), `regulatory_restrictions` (filled 2/3; 04f/rep2 1, deleted) |
+| v8 API production (2026-09-04f/g) | CM4AI | 5 | `preprocessing_strategies` (filled 1/3; 04g/rep2 4, deleted; 04g/rep3 4, deleted), `labeling_strategies` (filled 0/3; 04g/rep2 1, deleted; 04g/rep3 1, deleted), `machine_annotation_tools` (filled 0/3; 04g/rep2 1, deleted; 04g/rep3 1, deleted), `use_repository` (filled 0/3; 04g/rep3 1, deleted), `parent_datasets` (filled 0/3; 04g/rep3 2, deleted) |
+| v8 API production (2026-09-04f/g) | VOICE | 4 | `data_protection_impacts` (filled 1/3; 04f/rep3 1, deleted), `at_risk_populations` (filled 2/3; 04f/rep2 3, deleted), `data_governance` (filled 2/3; 04f/rep2 8, deleted), `conforms_to` (filled 0/3; 04f/rep1 1, deleted; 04f/rep3 1, deleted) |
+
+Receipting replicates by removals status (distinct arm × project × replicate; one with slots of two statuses is counted under each): deleted 11. Slot × replicate instances by removals status: deleted 26.
 
 ## Per-metric caveats (attached, not footnoted elsewhere)
 
