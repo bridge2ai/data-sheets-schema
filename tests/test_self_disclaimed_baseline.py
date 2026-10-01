@@ -111,6 +111,32 @@ def test_the_note_names_the_lexicon_and_counts_every_version(corpus):
         assert f"| v{version} | `{lexicon.sha256[:12]}…` |" in md
 
 
+def test_an_unregistered_lexicon_file_is_reported_not_counted(corpus, tmp_path, monkeypatch, capsys):
+    """#3860: the versions are the registry's. A file named like a version
+    that the registry does not name is reported by `main` and never loaded;
+    globbed as a version, its load raised LexiconError."""
+    m = _script()
+    lexicons = tmp_path / "container_lexicons"
+    lexicons.mkdir()
+    for p in sd.LEXICON_DIR.iterdir():
+        (lexicons / p.name).write_bytes(p.read_bytes())
+    registered = sd.registered_versions()
+    (lexicons / "self_disclaimed_v99.yaml").write_bytes((lexicons / "self_disclaimed_v2.yaml").read_bytes())
+    monkeypatch.setattr(sd, "LEXICON_DIR", lexicons)
+    assert m.versions() == registered and 99 not in m.versions()
+    assert m.unregistered() == ["self_disclaimed_v99.yaml"]
+    assert sorted(m.collect(corpus)["lexicons"]) == registered
+    with pytest.raises(sd.lx.LexiconError, match="not registered"):
+        sd.load_lexicon(sd.lexicon_path(99))
+    monkeypatch.setattr(m, "CORPUS", corpus)
+    monkeypatch.setattr(m, "PINS", tmp_path / "pins.yaml")
+    monkeypatch.setattr(m, "OUT_MD", tmp_path / "note.md")
+    assert m.main(["--repin"]) == 0
+    err = capsys.readouterr().err
+    assert "self_disclaimed_v99.yaml" in err and "not registered" in err
+    assert "| v99 |" not in (tmp_path / "note.md").read_text(encoding="utf-8")
+
+
 def test_a_changed_or_missing_pinned_file_is_stale_and_a_new_record_is_reported(corpus):
     m = _script()
     pins = m.current_records(corpus)

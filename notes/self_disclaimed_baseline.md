@@ -26,9 +26,9 @@ record or a provenance block. A file whose text repeats a mapping key is refused
 
 ## By lexicon version
 
-The same pinned files under every lexicon version in `container_lexicons/`. A version added
-there adds a row, so the note goes stale until it is regenerated, and the row is the
-version's effect on the corpus.
+The same pinned files under every lexicon version registered in `container_lexicons/`. A
+version registered there adds a row, so the note goes stale until it is regenerated, and the
+row is the version's effect on the corpus.
 
 | lexicon | sha256 | final: flagged members | records flagged | guarded | out of scope | snapshot flags | removed | retained | identity_unresolved | final_only | check (b) flagged |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|

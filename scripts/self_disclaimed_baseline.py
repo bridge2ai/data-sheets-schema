@@ -21,10 +21,11 @@ the corpus as it stands and rewrites both files: it is the one act that moves
 the baseline to other records.
 
 The detail tables count under one named lexicon version, `LEXICON_VERSION`.
-The versions table counts the same records under every version in
-`container_lexicons/`, so registering a version makes the note stale, and its
-effect on the corpus is the diff of the regenerated note. Moving the detail
-tables to it is a deliberate change of `LEXICON_VERSION`.
+The versions table counts the same records under every version the registry
+in `container_lexicons/` pins, so registering a version makes the note stale,
+and its effect on the corpus is the diff of the regenerated note. A file in
+that directory the registry does not name is reported, not counted (#3860).
+Moving the detail tables to it is a deliberate change of `LEXICON_VERSION`.
 
 A record is parsed by the function `d4d review self-disclaimed` parses it
 with, `evidence_assertions.load_record`: one with duplicate mapping keys, or
@@ -61,6 +62,7 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema import evidence_assertions  # noqa: E402
+from data_sheets_schema import lexicon as lx  # noqa: E402
 from data_sheets_schema import receipts  # noqa: E402
 from data_sheets_schema import self_disclaimed as sd  # noqa: E402
 
@@ -106,9 +108,20 @@ def load_record(raw: bytes) -> dict:
 
 
 def versions() -> list[int]:
-    """Every lexicon version in `container_lexicons/`, oldest first."""
-    found = (re.fullmatch(r"self_disclaimed_v(\d+)\.yaml", p.name) for p in sd.LEXICON_DIR.iterdir())
-    return sorted(int(m.group(1)) for m in found if m)
+    """Every lexicon version the registry in `container_lexicons/` pins,
+    oldest first (#3860). The registry is the only source: a file in the
+    directory that it does not name is not a version (`unregistered`)."""
+    return sd.registered_versions(sd.LEXICON_DIR)
+
+
+def unregistered() -> list[str]:
+    """The files in `container_lexicons/` named like a lexicon version that
+    the registry does not name, sorted: reported by `main`, never counted
+    (#3860). Before #3860 such a file was globbed as a version and its load
+    raised `LexiconError`."""
+    named = {e["file"] for e in lx.registered(sd.LEXICON_DIR).get(sd.LEXICON_NAME, [])}
+    return sorted(p.name for p in sd.LEXICON_DIR.iterdir()
+                  if re.fullmatch(rf"{re.escape(sd.LEXICON_NAME)}_v\d+\.yaml", p.name) and p.name not in named)
 
 
 # ------------------------------------------------------------------ the pinned set
@@ -442,9 +455,9 @@ def render_markdown(collected: dict[str, Any]) -> str:
         "",
         "## By lexicon version",
         "",
-        "The same pinned files under every lexicon version in `container_lexicons/`. A version added",
-        "there adds a row, so the note goes stale until it is regenerated, and the row is the",
-        "version's effect on the corpus.",
+        "The same pinned files under every lexicon version registered in `container_lexicons/`. A",
+        "version registered there adds a row, so the note goes stale until it is regenerated, and the",
+        "row is the version's effect on the corpus.",
         "",
     ]
     vrows = []
@@ -523,6 +536,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"stale: {exc}. Run scripts/self_disclaimed_baseline.py --repin to pin the corpus as it "
               "stands.", file=sys.stderr)
         return 1
+    stray = unregistered()
+    if stray:
+        print(f"reported, not counted: {', '.join(stray)} in {sd.LEXICON_RESOURCE_DIR}/ "
+              f"{'is' if len(stray) == 1 else 'are'} not registered in {sd.LEXICON_RESOURCE_DIR}/"
+              f"{lx.REGISTRY_FILE}", file=sys.stderr)
     new = unpinned(CORPUS, pins)
     if new:
         named = "; ".join(new[:10]) + (f"; and {len(new) - 10} more" if len(new) > 10 else "")
