@@ -514,9 +514,9 @@ make lint-core           # linkml-lint on the core module
 <td>Concrete download/distribution surface</td>
 </tr>
 <tr>
-<td><code>Person</code>, <code>Creator</code></td>
+<td><code>Person</code></td>
 <td><code>schema:Person</code></td>
-<td>People referenced in <code>creator</code>, <code>author</code>, <code>contributor</code>, <code>maintainer</code></td>
+<td>People referenced in <code>creator</code>, <code>author</code>, <code>contributor</code>, <code>maintainer</code>. <code>Creator</code>, <code>Maintainer</code> and <code>DataCollector</code> wrap a person or team with a role and are not themselves <code>schema:Person</code> (#3942)</td>
 </tr>
 <tr>
 <td><code>Organization</code></td>
@@ -524,9 +524,9 @@ make lint-core           # linkml-lint on the core module
 <td>Institutional affiliations and publishers</td>
 </tr>
 <tr>
-<td><code>Grant</code>, <code>FundingMechanism</code></td>
+<td><code>Grant</code></td>
 <td><code>schema:Grant</code></td>
-<td>Funding records linked via <code>schema:funder</code></td>
+<td>Funding records; <code>FundingMechanism</code> wraps a grantor and its grants and is linked via <code>schema:funder</code> (#3942)</td>
 </tr>
 </tbody>
 </table>
