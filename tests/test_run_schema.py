@@ -278,6 +278,22 @@ class VersionView(unittest.TestCase):
             self.assertIsInstance(shadow, schema_view._InstanceCached, name)
             self.assertFalse(hasattr(shadow.function, "cache_info"), name)
 
+    def test_a_version_view_serves_a_repeated_call_from_its_instance_cache(self):
+        """The caching itself, not only its shape (#4114): a second call of a
+        cached method on a version view is a hit on a cache stored in the
+        view's own `__dict__`, and returns the first call's object. Without
+        it every call recomputes, and deriving one version's rules takes
+        minutes instead of a second."""
+        from data_sheets_schema import schema_view
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        doc = schema_view.version_document(yaml.safe_dump({**RUN_SCHEMA, "name": "cached"}).encode())
+        with schema_view.version_view(FULL_SCHEMA, doc) as view:
+            first = view.all_classes()
+            cache = view.__dict__.get("all_classes")
+            self.assertIsNotNone(cache, "all_classes is not cached on the instance")
+            self.assertIs(view.all_classes(), first)
+            self.assertGreaterEqual(cache.cache_info().hits, 1)
+
     def test_a_modified_version_view_reads_its_modification(self):
         """linkml's caches miss once a view is modified, since `set_modified`
         moves the hash in every key. A version view's caches are keyed on
