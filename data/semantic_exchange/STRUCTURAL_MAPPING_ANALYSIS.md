@@ -25,8 +25,11 @@ The check writes nothing. It lists every row the committed file carries that
 regeneration does not produce (and the reverse), every value that differs in
 `d4d_subject_range`, `subject_multivalued` or `type_compatible` on the rows
 both carry, and whether the summary regenerates. It exits non-zero on any
-difference. It currently fails on the hand-written rows described under
-[Rows the generator does not produce](#rows-the-generator-does-not-produce).
+difference but one: the hand-written rows described under
+[Rows the generator does not produce](#rows-the-generator-does-not-produce),
+which it names and accepts while the committed file carries exactly those
+(#3968). One of them missing from the file fails it, and so does one that
+regeneration has come to produce.
 
 The summary is written from the generator's output, not from the committed
 TSV, so its per-justification counts describe what regeneration makes and not
@@ -124,8 +127,10 @@ The committed file carries rows no strategy emits: class-level rows (the
 generator reads `class_uri` and never emits a row from it), `schema:hasPart`,
 `dcat:byteSize`, and `d4d:` targets that are absent from the RO-Crate input.
 They are listed, each with its reason, in `KNOWN_UNDERIVABLE` in
-`tests/test_semantic_exchange/test_structural_mapping_drift.py` (#234), and
-that test fails if the set changes. Their range and cardinality columns are
+`src/semantic_exchange/generate_structural_mapping.py` (#234). The check and
+`tests/test_semantic_exchange/test_structural_mapping_drift.py` both read that
+set (#3968), and both fail if the rows regeneration does not produce stop
+being exactly those. Their range and cardinality columns are
 still checked against the schema (`TestRowsStateTheSchema`). A row that names
 a slot states that slot's range and cardinality. A class-level row names a
 class, not a slot, so its range is the class itself and it is not
@@ -149,8 +154,10 @@ make gen-sssom-structural
 ```
 
 When its inputs (the merged schema, the FAIRSCAPE RO-Crate example `data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json`, or the generator) are newer than the mapping, this rewrites both the mapping and the summary from the generator; otherwise make does nothing. To force a rewrite, run `python src/semantic_exchange/generate_structural_mapping.py`. While the
-rows above stand, a rewrite also drops them from the committed mapping, so
-review the diff before committing.
+rows above stand, a rewrite also drops them from the committed mapping, and
+the check then fails and names each one: restore their lines from git before
+committing. That is why `make gen-sssom-all` does not run this target and
+`make clean-sssom` does not delete the mapping (#3967).
 
 ## References
 

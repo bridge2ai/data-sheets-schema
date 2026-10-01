@@ -2,13 +2,21 @@
 
 `make gen-sssom-structural` emits 155 rows against the committed 165 (#234). A
 mapping nobody can rebuild is a mapping nobody can safely change, so the ten
-missing rows are enumerated here with what is actually wrong with each. Both
-counts, and the `d4d:` counts in the table below, are compared with the files
-by `test_the_module_docstring_states_the_current_counts` (#3000).
+missing rows are enumerated, with what is actually wrong with each, as
+`KNOWN_UNDERIVABLE` in `generate_structural_mapping.py`; this test and the
+generator's `--check` (`make check-sssom-structural`) both read that one set
+(#3968). Both counts, and the `d4d:` counts in the table below, are compared
+with the files by `test_the_module_docstring_states_the_current_counts`
+(#3000).
 
 The point is not to bless the gap. It is that **new** drift should fail while the
 known gap does not, because a check that has been red since the day it was
-written is a check nobody reads.
+written is a check nobody reads. `--check` was that check until #3968.
+
+Nor may the gap be lost. A rewrite by the generator drops all ten rows, so
+`make gen-sssom-all` no longer runs the structural target and `make
+clean-sssom` no longer deletes the table (#3967); `--check` names every
+curated row a rewrite dropped.
 
 ## Why each row is missing
 
@@ -42,6 +50,7 @@ import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 REPO = Path(__file__).resolve().parents[2]
 SCRIPT = REPO / "src" / "semantic_exchange" / "generate_structural_mapping.py"
@@ -61,25 +70,15 @@ def _snapshot(*paths):
                      p.stat().st_mtime_ns)
             for p in paths}
 
-#: Rows the committed file asserts that regeneration does not produce.
-#: Shrinking this set is progress. Growing it without a reason is the drift
-#: this test exists to catch.
-KNOWN_UNDERIVABLE = {
-    # No class-level strategy exists — `class_uri` is parsed and never used.
-    ("d4d:CoreDataset", "skos:exactMatch", "schema:Dataset"),
-    ("d4d:CoreDatasetCollection", "skos:exactMatch", "schema:Dataset"),
-    ("d4d:CoreDistribution", "skos:exactMatch", "schema:DataDownload"),
-    ("d4d:DataSubset", "skos:exactMatch", "schema:Dataset"),
-    # No `schema:` targets are produced.
-    ("d4d:DatasetCollection/resources", "skos:exactMatch", "schema:hasPart"),
-    ("d4d:FileCollection/resources", "skos:exactMatch", "schema:hasPart"),
-    # Target absent from the RO-Crate input, so `_map_slot_uris` cannot match.
-    ("d4d:File/file_type", "skos:exactMatch", "d4d:fileType"),
-    ("d4d:FileCollection/collection_type", "skos:exactMatch", "d4d:collectionType"),
-    ("d4d:FileCollection/file_count", "skos:exactMatch", "d4d:fileCount"),
-    # Also disagrees with the schema, which declares `slot_uri: d4d:total_bytes`.
-    ("d4d:FileCollection/total_bytes", "skos:exactMatch", "dcat:byteSize"),
-}
+
+if str(SCRIPT.parent) not in sys.path:
+    sys.path.insert(0, str(SCRIPT.parent))
+
+# The rows the committed file asserts that regeneration does not produce are
+# `gsm.KNOWN_UNDERIVABLE`, each with its reason where it is defined. This
+# file reads the generator's set rather than a copy of it, so the test and
+# `--check` cannot disagree about what the gap is (#3968).
+import generate_structural_mapping as gsm  # noqa: E402
 
 
 @unittest.skipUnless(COMMITTED.exists(), "structural mapping not present")
@@ -116,10 +115,11 @@ class TestStructuralMappingDrift(unittest.TestCase):
     def test_the_gap_is_exactly_the_known_one(self):
         """New drift fails; the documented gap does not."""
         self.assertEqual(
-            set(self.lost), KNOWN_UNDERIVABLE,
+            set(self.lost), gsm.KNOWN_UNDERIVABLE,
             "the set of rows that will not regenerate has changed — if rows "
-            "were fixed, shrink KNOWN_UNDERIVABLE; if new ones appeared, they "
-            "are drift and need a reason")
+            "were fixed, shrink KNOWN_UNDERIVABLE in "
+            "generate_structural_mapping.py; if new ones appeared, they are "
+            "drift and need a reason")
 
     def test_regeneration_invents_nothing(self):
         """The other direction. Rows the generator produces that the committed
@@ -147,20 +147,33 @@ class TestStructuralMappingDrift(unittest.TestCase):
         `TestTheCheckActsOnColumnDrift` makes the same check on a summary
         that differs from regeneration, where the content would move too.
 
-        This run fails on the KNOWN_UNDERIVABLE rows, so it never reaches the
-        pass branch. `TestTheCheckActsOnColumnDrift` covers that branch on
-        the generator's own output (#3142)."""
+        Since #3968 this run takes the pass branch, the one that accepts the
+        KNOWN_UNDERIVABLE rows; until then it failed on them and never
+        reached a pass. `TestTheCheckActsOnColumnDrift` covers the pass with
+        no known gap, on the generator's own output (#3142)."""
         present = [p for p in (COMMITTED, SUMMARY) if p.exists()]
         before = _snapshot(*present)
         subprocess.run([sys.executable, str(SCRIPT), "--check"],
                        cwd=REPO, capture_output=True)
         self.assertEqual(_snapshot(*present), before)
 
-    def test_check_mode_fails_while_the_gap_stands(self):
+    def test_check_mode_passes_on_exactly_the_known_gap(self):
+        """#3968. `make check-sssom-structural` runs this, and it exited 1 on
+        main by design: the committed file carries the KNOWN_UNDERIVABLE
+        rows, which only the test above allowed. It accepts exactly them
+        now, and still names each one, so a pass shows the gap rather than
+        hiding it. Run as `make` runs it, so it also holds `main` to passing
+        the module's set; `TestTheCheckAcceptsExactlyTheKnownGap` is what
+        makes the check fail on anything else."""
         result = subprocess.run([sys.executable, str(SCRIPT), "--check"],
                                 cwd=REPO, capture_output=True, text=True)
-        self.assertEqual(result.returncode, 1)
-        self.assertIn("does not regenerate", result.stdout)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn(
+            f"✓ The committed mapping regenerates apart from the "
+            f"{len(gsm.KNOWN_UNDERIVABLE)} row(s) KNOWN_UNDERIVABLE lists, "
+            "and the summary regenerates exactly.", result.stdout)
+        for s, p, o in gsm.KNOWN_UNDERIVABLE:
+            self.assertIn(f"      {s}  --{p}->  {o}\n", result.stdout)
 
 
 
@@ -223,8 +236,9 @@ class TestTheCheckCoversBothArtifacts(unittest.TestCase):
 
     def test_the_check_says_which_columns_it_compared(self):
         """#2936. Said when nothing differs too, so a column check that found
-        nothing cannot be mistaken for one that never ran. This run fails on
-        the KNOWN_UNDERIVABLE rows; the same line on a pass is
+        nothing cannot be mistaken for one that never ran. This run passes
+        on the KNOWN_UNDERIVABLE rows (#3968); the same line on a pass with
+        no known gap is
         `TestTheCheckActsOnColumnDrift.test_a_pass_says_which_columns_it_compared`
         (#3057)."""
         import re
@@ -236,24 +250,32 @@ class TestTheCheckCoversBothArtifacts(unittest.TestCase):
                            "the check compared almost nothing")
 
     def test_the_summary_is_currently_the_fresh_one(self):
-        """Pinned so that fixing #294 cannot silently leave them swapped."""
+        """Pinned so that fixing #294 cannot silently leave them swapped.
+        Said on the pass as well since #3968: the summary describes the
+        generator's output, which lacks the KNOWN_UNDERIVABLE rows."""
         self.assertIn("describes the generator's output", self.stdout)
 
 
 class TestTheCheckActsOnColumnDrift(unittest.TestCase):
     """#2999. What `--check` does with `check_column_drift`'s answer.
 
-    Every other `--check` test reads the committed file, where no value
-    differs, so neither half of that use was exercised: printing the
-    differences rather than "agree", and failing on them. The second was
-    hidden besides by the ten KNOWN_UNDERIVABLE rows, which fail the check on
-    their own; once #234 is fixed, a verdict that ignored column drift would
-    pass a table that contradicts the schema.
+    The `--check` tests that read the committed file read one where no
+    value differs, so neither half of that use was exercised there: printing
+    the differences rather than "agree", and failing on them. The second was
+    hidden besides by the ten KNOWN_UNDERIVABLE rows, which failed the check
+    on their own until #3968 had it accept exactly them; a verdict that
+    ignored column drift would now pass a table that contradicts the schema.
 
     So the check is pointed (`--output-dir`) at the generator's own output,
     which regenerates exactly, and at a copy of it with one value put back to
     the placeholder #2936 removed — a copy that differs from regeneration in
     that value and in nothing else.
+
+    The generator's own output carries none of the KNOWN_UNDERIVABLE rows,
+    and the check now fails a table that lacks them (#3968), so these runs
+    patch the set empty: the check as it will run once #294 has made every
+    row derivable. `TestTheCheckAcceptsExactlyTheKnownGap` runs it with the
+    set as it stands.
 
     A third copy differs in its summary alone, by one appended line (#3056).
     It is what lets "writes nothing where it reads" fail for the summary: in
@@ -262,8 +284,9 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
 
     All three are snapshotted, the check is run on exactly the directories
     snapshotted, and the generator's own output is among them (#3142). It is
-    the only run here that takes the pass branch, and the committed data
-    cannot take it while the KNOWN_UNDERIVABLE rows stand. A pass means both
+    the only run here that takes the pass branch; the committed data takes
+    the other pass, the one that accepts the KNOWN_UNDERIVABLE rows. A pass
+    means both
     artifacts already equal what regeneration makes, so a write there leaves
     their content as it was and only the modification time can see it. Every
     file is therefore set to a fixed past time before the snapshot, so that
@@ -342,16 +365,20 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
             return _snapshot(*sorted(read_from[name].iterdir()))
         cls.before = {name: directory(name) for name in read_from}
 
-        cls.results = {name: run("--check", "--output-dir", str(path))
-                       for name, path in read_from.items()}
+        # No known gap: these copies are the generator's own output, which
+        # carries none of the KNOWN_UNDERIVABLE rows (#3968).
+        with mock.patch.object(gsm, "KNOWN_UNDERIVABLE", frozenset()):
+            cls.results = {name: run("--check", "--output-dir", str(path))
+                           for name, path in read_from.items()}
+            cls.absent = base / "absent"
+            cls.absent_result = run("--check", "--output-dir",
+                                    str(cls.absent))
         cls.exact_result = cls.results["exact"]
         cls.drifted_result = cls.results["drifted"]
         cls.stale_result = cls.results["stale summary"]
         cls.no_summary_result = cls.results["no summary"]
         cls.drifted_no_summary_result = cls.results["drifted, no summary"]
         cls.after = {name: directory(name) for name in read_from}
-        cls.absent = base / "absent"
-        cls.absent_result = run("--check", "--output-dir", str(cls.absent))
 
     @classmethod
     def tearDownClass(cls):
@@ -479,6 +506,275 @@ class TestTheCheckActsOnColumnDrift(unittest.TestCase):
                          "--check created the directory it was checking")
 
 
+@unittest.skipUnless(COMMITTED.exists() and SUMMARY.exists(),
+                     "structural mapping not present")
+class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
+    """#3968. `--check` accepts the rows KNOWN_UNDERIVABLE lists and nothing
+    else, so it is green on the committed table and red on any other drift.
+
+    Each case is a copy of the committed mapping and summary changed in one
+    way, checked by `run_check` with the set as it stands against one
+    generator run (`main` would parse the merged schema once per case): a
+    row added; a regenerable row's object changed; a value changed on a row
+    both files carry; one KNOWN_UNDERIVABLE row removed; and the generator's
+    own output, which is the table `make gen-sssom-structural` writes and
+    lacks every one of them (#3967). The last case checks the unchanged copy
+    against the set with one regenerable row added to it, which is what the
+    set says once #294 makes one of its rows derivable and nobody takes it
+    out.
+    """
+
+    #: The KNOWN_UNDERIVABLE row taken out of one copy.
+    REMOVED = ("d4d:FileCollection/total_bytes", "skos:exactMatch",
+               "dcat:byteSize")
+
+    @classmethod
+    def setUpClass(cls):
+        import io
+        import shutil
+        import tempfile
+        from contextlib import redirect_stdout
+
+        with redirect_stdout(io.StringIO()):
+            cls.generator = gsm.StructuralMappingGenerator(
+                gsm.D4DSchemaParser(
+                    REPO / "src/data_sheets_schema/schema/"
+                    "data_sheets_schema_all.yaml"),
+                gsm.ROCrateSchemaParser(
+                    REPO / "data/ro-crate/profiles/fairscape/"
+                    "full-ro-crate-metadata.json"))
+            cls.generator.generate_mappings()
+        cls._tmp = tempfile.TemporaryDirectory()
+        base = Path(cls._tmp.name)
+
+        header, *lines = COMMITTED.read_text(encoding="utf-8").splitlines(
+            keepends=True)
+        names = header.rstrip("\n").split("\t")
+
+        def fields(line):
+            return line.rstrip("\n").split("\t")
+
+        def triple(row):
+            return tuple(row[names.index(c)] for c in gsm.TRIPLE)
+
+        def joined(row):
+            return "\t".join(row) + "\n"
+
+        def changed(row, column, value):
+            row = list(row)
+            row[names.index(column)] = value
+            return row
+
+        # The first committed row regeneration produces. Every case but the
+        # removal adds, changes or lists this one.
+        at = next(i for i, line in enumerate(lines)
+                  if triple(fields(line)) not in gsm.KNOWN_UNDERIVABLE)
+        row = fields(lines[at])
+        cls.regenerable = triple(row)
+        added = changed(row, "object_id", "schema:addedByThisTest")
+        moved = changed(row, "object_id", "schema:changedByThisTest")
+        cls.added, cls.moved = triple(added), triple(moved)
+        column = "subject_multivalued"
+        was = row[names.index(column)]
+        cls.revalued = (column, str(was != "True"), was)
+        revalued = changed(row, column, cls.revalued[1])
+
+        def copy(name, data):
+            directory = base / name
+            directory.mkdir()
+            (directory / COMMITTED.name).write_text(header + "".join(data),
+                                                    encoding="utf-8")
+            shutil.copy(SUMMARY, directory / SUMMARY.name)
+            return directory
+
+        def replace(line):
+            return lines[:at] + [line] + lines[at + 1:]
+
+        cases = {
+            "committed": copy("committed", lines),
+            "added row": copy("added", lines + [joined(added)]),
+            "changed row": copy("changed", replace(joined(moved))),
+            "changed value": copy("revalued", replace(joined(revalued))),
+            "known row removed": copy(
+                "removed",
+                [line for line in lines if triple(fields(line)) != cls.REMOVED]),
+        }
+        rewritten = cases["rewritten"] = base / "rewritten"
+        rewritten.mkdir()
+        with redirect_stdout(io.StringIO()):
+            cls.generator.export_sssom(rewritten / COMMITTED.name)
+            cls.generator.export_summary(rewritten / SUMMARY.name)
+
+        def check(directory, known):
+            out = io.StringIO()
+            with redirect_stdout(out):
+                code = gsm.run_check(cls.generator, directory / COMMITTED.name,
+                                     directory / SUMMARY.name, known)
+            return code, out.getvalue()
+
+        cls.results = {name: check(directory, gsm.KNOWN_UNDERIVABLE)
+                       for name, directory in cases.items()}
+        cls.results["listed but produced"] = check(
+            cases["committed"], gsm.KNOWN_UNDERIVABLE | {cls.regenerable})
+        cls.shared = len(lines) - len(gsm.KNOWN_UNDERIVABLE)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls._tmp.cleanup()
+
+    @staticmethod
+    def _listed(rows):
+        """`rows` as the check prints a list of them, in its order."""
+        return "".join(f"      {s}  --{p}->  {o}\n" for s, p, o in sorted(rows))
+
+    def test_the_committed_table_passes_and_names_the_gap(self):
+        """The state of main, and the control for every case below: each
+        fails for the one change made to its copy."""
+        code, out = self.results["committed"]
+        self.assertEqual(code, 0, out)
+        self.assertIn(
+            f"✓ The committed mapping regenerates apart from the "
+            f"{len(gsm.KNOWN_UNDERIVABLE)} row(s) KNOWN_UNDERIVABLE lists, "
+            "and the summary regenerates exactly.", out)
+        self.assertIn(self._listed(gsm.KNOWN_UNDERIVABLE), out)
+        self.assertIn(f"The {self.shared} row(s) both files carry agree on",
+                      out)
+
+    def test_an_added_row_fails_and_is_named(self):
+        code, out = self.results["added row"]
+        self.assertEqual(code, 1, out)
+        self.assertIn("✗ The committed mapping does not regenerate from its "
+                      "inputs.", out)
+        self.assertIn("1 row(s) in the committed file that regeneration does "
+                      "not produce and KNOWN_UNDERIVABLE does not list:\n"
+                      + self._listed([self.added]), out)
+
+    def test_a_changed_row_fails_and_both_halves_are_named(self):
+        """The row as changed is one regeneration does not produce, and the
+        row as it was is one regeneration produces that the copy lacks."""
+        code, out = self.results["changed row"]
+        self.assertEqual(code, 1, out)
+        self.assertIn("1 row(s) in the committed file that regeneration does "
+                      "not produce and KNOWN_UNDERIVABLE does not list:\n"
+                      + self._listed([self.moved]), out)
+        self.assertIn("1 row(s) regeneration produces that the committed "
+                      "file lacks:\n" + self._listed([self.regenerable]), out)
+
+    def test_a_changed_value_fails_beside_the_accepted_gap(self):
+        """Accepting the gap must hide nothing else: this copy carries every
+        KNOWN_UNDERIVABLE row and differs in one value."""
+        code, out = self.results["changed value"]
+        self.assertEqual(code, 1, out)
+        column, now, was = self.revalued
+        s, p, o = self.regenerable
+        self.assertIn(f"1 value(s) differ on the {self.shared} row(s) both "
+                      f"files carry:\n      {s}  --{p}->  {o}  {column}: "
+                      f"committed {now!r}, regenerated {was!r}\n", out)
+        self.assertIn(self._listed(gsm.KNOWN_UNDERIVABLE), out)
+        self.assertNotIn("does not carry", out)
+
+    def test_a_removed_known_row_is_reported(self):
+        """A curated row deleted from the table fails the check by name,
+        and the rest of the gap is still accepted and listed. Nothing else
+        differs, so the headline is the gap's, not the mapping's."""
+        code, out = self.results["known row removed"]
+        self.assertEqual(code, 1, out)
+        self.assertIn("✗ The rows regeneration does not produce are not "
+                      "exactly the ones KNOWN_UNDERIVABLE lists.", out)
+        self.assertIn("1 row(s) KNOWN_UNDERIVABLE lists that the committed "
+                      "file does not carry:\n" + self._listed([self.REMOVED]),
+                      out)
+        self.assertIn("Restore their lines from git", out)
+        rest = gsm.KNOWN_UNDERIVABLE - {self.REMOVED}
+        self.assertIn(f"{len(rest)} row(s) in the committed file that "
+                      "regeneration does not produce, listed with their "
+                      "reasons in KNOWN_UNDERIVABLE", out)
+        self.assertIn(self._listed(rest), out)
+        self.assertNotIn("committed mapping does not regenerate", out)
+        self.assertNotIn("(#234)", out)
+
+    def test_a_table_the_generator_rewrote_fails_on_every_known_row(self):
+        """#3967. What `make gen-sssom-all` wrote after a schema edit until
+        it stopped running the structural target, and what `make
+        gen-sssom-structural` still writes. It regenerates exactly, so the
+        check fails on the curated rows it dropped alone, and names each."""
+        code, out = self.results["rewritten"]
+        self.assertEqual(code, 1, out)
+        self.assertIn(f"{len(gsm.KNOWN_UNDERIVABLE)} row(s) KNOWN_UNDERIVABLE "
+                      "lists that the committed file does not carry:\n"
+                      + self._listed(gsm.KNOWN_UNDERIVABLE), out)
+        self.assertIn("a table the generator rewrote lacks them (#3967)", out)
+        self.assertIn(f"The {self.shared} row(s) both files carry agree on",
+                      out)
+        self.assertNotIn("committed mapping does not regenerate", out)
+        self.assertIn("\n  The summary regenerates exactly.\n", out)
+        self.assertNotIn("rather than the mapping beside it", out)
+
+    def test_a_listed_row_regeneration_produces_fails(self):
+        """A row the set lists that regeneration produces is no longer a
+        gap, and the drift test above fails on it too: the set must shrink
+        as #294 makes rows derivable."""
+        code, out = self.results["listed but produced"]
+        self.assertEqual(code, 1, out)
+        self.assertIn("✗ The rows regeneration does not produce are not "
+                      "exactly the ones KNOWN_UNDERIVABLE lists.", out)
+        self.assertIn("1 row(s) KNOWN_UNDERIVABLE lists that regeneration now "
+                      "produces:\n" + self._listed([self.regenerable]), out)
+        self.assertIn("take them out of KNOWN_UNDERIVABLE (#294)", out)
+
+
+class TestTheAggregateTargetsLeaveTheStructuralTable(unittest.TestCase):
+    """#3967. `make gen-sssom-all` ran `gen-sssom-structural`, whose rule
+    rewrites the table whenever the merged schema, the RO-Crate example or
+    the generator is newer than it, so the documented aggregate run after a
+    schema edit dropped the KNOWN_UNDERIVABLE rows; `make clean-sssom`
+    deleted the table outright.
+
+    Read from `make -n`, which runs no recipe, with every input of the
+    structural rule marked new (`-W`), so a dependency on that rule by any
+    route prints its recipe. `RUN=false` keeps any expansion of `$(RUN)`
+    from reaching an environment, as the onboarding test's dry runs do.
+    """
+
+    #: The structural rule's prerequisites, as the Makefile names them.
+    INPUTS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+              "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json",
+              "src/semantic_exchange/generate_structural_mapping.py")
+
+    def _dry_run(self, target):
+        import shutil
+        if shutil.which("make") is None:
+            self.skipTest("make is not installed")
+        what_if = [arg for path in self.INPUTS for arg in ("-W", path)]
+        result = subprocess.run(
+            ["make", "-n", "--no-print-directory", *what_if, target,
+             "RUN=false"],
+            cwd=REPO, capture_output=True, text=True, timeout=300)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        return result.stdout
+
+    def test_gen_sssom_all_does_not_rewrite_the_structural_table(self):
+        out = self._dry_run("gen-sssom-all")
+        self.assertIn("generate_comprehensive_sssom.py", out,
+                      "the dry run did not reach the comprehensive rules")
+        self.assertIn("generate_comprehensive_sssom_uri.py", out)
+        self.assertNotIn(SCRIPT.name, out)
+        self.assertNotIn(COMMITTED.name, out)
+
+    def test_gen_sssom_structural_still_rewrites_it(self):
+        """Kept as an explicit target, and the control for the test above:
+        with the same inputs marked new, it runs the generator."""
+        out = self._dry_run("gen-sssom-structural")
+        self.assertIn(f"python {SCRIPT.relative_to(REPO)}\n", out)
+
+    def test_clean_sssom_leaves_the_structural_table(self):
+        out = self._dry_run("clean-sssom")
+        self.assertIn("rm -f", out)
+        self.assertIn("d4d_rocrate_sssom_comprehensive.tsv", out)
+        self.assertIn("d4d_rocrate_sssom_uri_comprehensive.tsv", out)
+        self.assertNotIn(COMMITTED.name, out)
+
+
 class TestMalformedInputIsNamed(unittest.TestCase):
     """#296: a bare KeyError sends the reader to the code, not the file."""
 
@@ -578,6 +874,48 @@ class TestColumnDrift(unittest.TestCase):
                                "hand\tp\to\tFileCollectionTypeEnum\tTrue\tTrue\t1.0")
         regenerated = self._file("regenerated.tsv", "s\tp\to\tstring\tFalse\tTrue\t0.7")
         self.assertEqual(check_column_drift(committed, regenerated), (1, []))
+
+
+class TestKnownGap(unittest.TestCase):
+    """#3968: `check_known_gap` on files small enough to read."""
+
+    def setUp(self):
+        import tempfile
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+
+    def _file(self, name, *triples):
+        p = Path(self._tmp.name) / name
+        p.write_text("\t".join(gsm.TRIPLE) + "\n"
+                     + "".join("\t".join(t) + "\n" for t in triples))
+        return p
+
+    def test_each_kind_of_row_lands_in_its_own_answer(self):
+        """A listed row regeneration produces is `derivable` whether or not
+        the committed file carries it, and is never `missing`, which would
+        call it a row regeneration cannot produce. A row both files carry
+        that the set does not list, which every other committed row is,
+        lands in none."""
+        gap, unlisted, missing = (("gap", "p", "o"), ("unlisted", "p", "o"),
+                                  ("missing", "p", "o"))
+        produced = ("produced", "p", "o")
+        produced_only = ("produced_only", "p", "o")
+        shared = ("shared", "p", "o")
+        committed = self._file("committed.tsv", gap, unlisted, produced, shared)
+        regenerated = self._file("regenerated.tsv", produced, produced_only,
+                                 shared)
+        self.assertEqual(
+            gsm.check_known_gap(committed, regenerated,
+                                frozenset({gap, missing, produced,
+                                           produced_only})),
+            ([gap], [unlisted], [missing], [produced, produced_only]))
+
+    def test_exactly_the_listed_gap_leaves_nothing_else(self):
+        known = frozenset({("a", "p", "o"), ("b", "p", "o")})
+        committed = self._file("committed.tsv", *sorted(known), ("c", "p", "o"))
+        regenerated = self._file("regenerated.tsv", ("c", "p", "o"))
+        self.assertEqual(gsm.check_known_gap(committed, regenerated, known),
+                         (sorted(known), [], [], []))
 
 
 def _schema_values(sv, subject_id):

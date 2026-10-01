@@ -40,7 +40,7 @@ sssom-py-compatible variants and analysis docs.
 |---|---|---|
 | `generate_comprehensive_sssom_uri.py` | `make gen-sssom-uri-comprehensive` | URI variant for all attributes |
 | `generate_comprehensive_sssom.py` | `make gen-sssom-comprehensive` | Label-level variant for all attributes |
-| `generate_structural_mapping.py` | `make gen-sssom-structural` | sssom-py-compatible structural SSSOM |
+| `generate_structural_mapping.py` | `make gen-sssom-structural` | sssom-py-compatible structural SSSOM; not run by `make gen-sssom-all` (see below) |
 | `add_module_column.py`, `add_slot_uris.py`, `implement_uri_mappings.py` | — | One-shot maintenance helpers |
 
 Regenerate the comprehensive pair and check it for drift:
@@ -50,7 +50,7 @@ make gen-sssom-comprehensive gen-sssom-uri-comprehensive
 make check-sssom-comprehensive
 ```
 
-The structural mapping carries rows its generator cannot produce, so it is checked by `tests/test_semantic_exchange/test_structural_mapping_drift.py`, which allows exactly those; `make check-sssom-structural` reports them and exits non-zero, and regenerating it drops them.
+The structural mapping carries rows its generator cannot produce, listed with their reasons as `KNOWN_UNDERIVABLE` in `generate_structural_mapping.py` (#294). `make check-sssom-structural` accepts exactly those rows and names them; it exits non-zero on any other drift, including one of them missing from the table (#3968). `tests/test_semantic_exchange/test_structural_mapping_drift.py` pins the same set. Rewriting the table with `make gen-sssom-structural` drops those rows, so `make gen-sssom-all` regenerates only the comprehensive pair and `make clean-sssom` deletes only that pair (#3967). After a deliberate rewrite, `make check-sssom-structural` names each dropped row; restore their lines from git before committing.
 
 ## Validation
 

@@ -606,6 +606,32 @@ TRIPLE = ("subject_id", "predicate_id", "object_id")
 STRUCTURAL_COLUMNS = ("d4d_subject_range", "subject_multivalued",
                       "type_compatible")
 
+#: Rows the committed mapping asserts that regeneration does not produce
+#: (#234), each under what is wrong with it; #294 is the work that would
+#: derive them. `--check` (`make check-sssom-structural`) accepts exactly
+#: these and tests/test_semantic_exchange/test_structural_mapping_drift.py
+#: pins exactly these, both from this one set (#3968). Regeneration cannot
+#: produce them, so rewriting the table drops them, which is why `make
+#: gen-sssom-all` does not run the structural target (#3967). Shrinking the
+#: set is progress. Growing it without a reason is the drift both exist to
+#: catch.
+KNOWN_UNDERIVABLE = frozenset({
+    # No class-level strategy exists — `class_uri` is parsed and never used.
+    ("d4d:CoreDataset", "skos:exactMatch", "schema:Dataset"),
+    ("d4d:CoreDatasetCollection", "skos:exactMatch", "schema:Dataset"),
+    ("d4d:CoreDistribution", "skos:exactMatch", "schema:DataDownload"),
+    ("d4d:DataSubset", "skos:exactMatch", "schema:Dataset"),
+    # No `schema:` targets are produced.
+    ("d4d:DatasetCollection/resources", "skos:exactMatch", "schema:hasPart"),
+    ("d4d:FileCollection/resources", "skos:exactMatch", "schema:hasPart"),
+    # Target absent from the RO-Crate input, so `_map_slot_uris` cannot match.
+    ("d4d:File/file_type", "skos:exactMatch", "d4d:fileType"),
+    ("d4d:FileCollection/collection_type", "skos:exactMatch", "d4d:collectionType"),
+    ("d4d:FileCollection/file_count", "skos:exactMatch", "d4d:fileCount"),
+    # Also disagrees with the schema, which declares `slot_uri: d4d:total_bytes`.
+    ("d4d:FileCollection/total_bytes", "skos:exactMatch", "dcat:byteSize"),
+})
+
 
 def _read_sssom(path: Path, required: tuple) -> list:
     import csv
@@ -658,12 +684,35 @@ def check_column_drift(committed: Path, regenerated: Path,
     return len(shared), differ
 
 
-def run_check(generator, committed: Path, summary: Path) -> int:
+def check_known_gap(committed: Path, regenerated: Path, known) -> tuple:
+    """The committed rows regeneration does not produce, held to `known`.
+
+    Four sorted lists of triples. `gap`: the rows `known` lists that the
+    committed file carries and regeneration does not produce, which is the
+    part accepted. `unlisted`: the rows the committed file carries and
+    regeneration does not produce that `known` does not list. `missing`: the
+    rows `known` lists that neither the committed file nor regeneration has.
+    `derivable`: the rows `known` lists that regeneration produces.
+
+    The rows regeneration does not produce are exactly `known` only when the
+    last three are empty (#3968). `missing` is how a table the generator
+    rewrote shows: it regenerates exactly, and it has lost every curated
+    row (#3967).
+    """
+    have, made = read_sssom_rows(committed), read_sssom_rows(regenerated)
+    lost = have - made
+    return (sorted(lost & known), sorted(lost - known),
+            sorted(known - have - made), sorted(known & made))
+
+
+def run_check(generator, committed: Path, summary: Path, known) -> int:
     """`--check`: compare `committed` and `summary` with what `generator`
     regenerates, print what differs, and return the exit status.
 
-    Writes nothing beside them: regeneration goes to a temporary
-    directory.
+    The rows the committed mapping carries and regeneration does not produce
+    must be exactly `known`, which `main` passes as KNOWN_UNDERIVABLE
+    (#3968); those are named and accepted, and any other difference fails.
+    Writes nothing beside them: regeneration goes to a temporary directory.
     """
     # Never write over the committed file while checking it. Regenerating
     # in place to compare is how a check becomes the thing it was meant to
@@ -675,7 +724,9 @@ def run_check(generator, committed: Path, summary: Path) -> int:
         if not committed.exists():
             print(f"\n✗ No committed mapping at {committed}")
             return 1
-        lost, gained = check_drift(committed, scratch)
+        _, gained = check_drift(committed, scratch)
+        gap, unlisted, missing, derivable = check_known_gap(
+            committed, scratch, known)
         compared, column_drift = check_column_drift(committed, scratch)
 
         # The target writes two artifacts from the same mappings list, so
@@ -695,31 +746,79 @@ def run_check(generator, committed: Path, summary: Path) -> int:
     # one that never ran (#3057).
     agree = (f"\n  The {compared} row(s) both files carry agree on "
              f"{', '.join(STRUCTURAL_COLUMNS)}.")
-    if not lost and not gained and not column_drift and not summary_drifted:
-        print("\n✓ The committed mapping and summary regenerate exactly.")
-        print(agree)
+    # The known gap is accepted, not hidden: it is listed on a pass too, so
+    # a check that is green still says what regeneration cannot rebuild.
+    # Before #3968 the check failed on it, so it was red on main by design
+    # and only the drift test, which allowed exactly these rows, could tell
+    # new drift from the gap.
+    apart = f"apart from the {len(gap)} row(s) KNOWN_UNDERIVABLE lists"
+
+    def print_gap():
+        if gap:
+            print(f"\n  {len(gap)} row(s) in the committed file that "
+                  "regeneration does not produce, listed with their reasons "
+                  "in KNOWN_UNDERIVABLE in generate_structural_mapping.py "
+                  "(#294):")
+            for s, p_, o in gap:
+                print(f"      {s}  --{p_}->  {o}")
+
+    # Drift from regeneration and a gap that is not the declared one are
+    # told apart: a table the generator rewrote regenerates exactly, and
+    # fails only for the curated rows it dropped (#3967).
+    mapping_drifted = bool(unlisted or gained or column_drift)
+    gap_drifted = bool(missing or derivable)
+    if not mapping_drifted and not gap_drifted and not summary_drifted:
+        if gap:
+            print(f"\n✓ The committed mapping regenerates {apart}, and the "
+                  "summary regenerates exactly.")
+            print_gap()
+            print(agree)
+            print("\n  The summary describes the generator's output, so not "
+                  f"those {len(gap)} row(s) (#295).")
+        else:
+            print("\n✓ The committed mapping and summary regenerate exactly.")
+            print(agree)
         return 0
     # The headline names what drifted. It used to blame the mapping
     # whatever failed, so a stale summary beside a mapping that
     # regenerates exactly read as a mapping failure (#3125).
-    mapping_drifted = bool(lost or gained or column_drift)
     if mapping_drifted:
         print("\n✗ The committed mapping does not regenerate from its inputs.")
+    elif gap_drifted:
+        print("\n✗ The rows regeneration does not produce are not exactly "
+              "the ones KNOWN_UNDERIVABLE lists.")
     elif summary_missing:
         print(f"\n✗ No committed summary at {summary}.")
     else:
         print("\n✗ The committed summary does not regenerate from the "
               "mapping's inputs.")
-    if lost:
-        print(f"\n  {len(lost)} row(s) in the committed file that "
-              "regeneration does not produce:")
-        for s, p_, o in lost:
+    if unlisted:
+        print(f"\n  {len(unlisted)} row(s) in the committed file that "
+              "regeneration does not produce and KNOWN_UNDERIVABLE does not "
+              "list:")
+        for s, p_, o in unlisted:
             print(f"      {s}  --{p_}->  {o}")
     if gained:
         print(f"\n  {len(gained)} row(s) regeneration produces that the "
               "committed file lacks:")
         for s, p_, o in gained:
             print(f"      {s}  --{p_}->  {o}")
+    if missing:
+        print(f"\n  {len(missing)} row(s) KNOWN_UNDERIVABLE lists that the "
+              "committed file does not carry:")
+        for s, p_, o in missing:
+            print(f"      {s}  --{p_}->  {o}")
+        print("  Regeneration cannot produce them, so a table the generator "
+              "rewrote lacks them (#3967). Restore their lines from git; if "
+              "one is wrong, take it out of KNOWN_UNDERIVABLE and say why.")
+    if derivable:
+        print(f"\n  {len(derivable)} row(s) KNOWN_UNDERIVABLE lists that "
+              "regeneration now produces:")
+        for s, p_, o in derivable:
+            print(f"      {s}  --{p_}->  {o}")
+        print("  They are no longer a gap: take them out of "
+              "KNOWN_UNDERIVABLE (#294).")
+    print_gap()
     if column_drift:
         print(f"\n  {len(column_drift)} value(s) differ on the {compared} "
               "row(s) both files carry:")
@@ -728,20 +827,28 @@ def run_check(generator, committed: Path, summary: Path) -> int:
                   f"committed {was!r}, regenerated {now!r}")
     else:
         print(agree)
-    if not mapping_drifted and summary_missing:
-        print("\n  The mapping regenerates exactly; the summary beside it "
-              "is missing.")
-    elif not mapping_drifted:
+    drifted = mapping_drifted or gap_drifted
+    if not drifted and summary_missing:
+        regenerates = f"regenerates {apart}" if gap else "regenerates exactly"
+        print(f"\n  The mapping {regenerates}; the summary beside it is "
+              "missing.")
+    elif not drifted:
         # Reached only with the summary stale: the pass returned above.
+        does = f"regenerates {apart}" if gap else "does"
         print("\n  The summary does not regenerate. The mapping beside it "
-              "does, so only the summary is stale.")
+              f"{does}, so only the summary is stale.")
     elif summary_missing:
         print(f"\n  There is no committed summary either, at {summary}.")
     elif summary_drifted:
         print("\n  The summary does not regenerate either.")
-    else:
+    elif mapping_drifted:
         print("\n  The summary regenerates exactly, so it describes the "
               "generator's output rather than the mapping beside it (#295).")
+    else:
+        # Only the gap differs, so the mapping may be the generator's own
+        # output written over the curated rows (#3967), and "rather than the
+        # mapping beside it" would be false.
+        print("\n  The summary regenerates exactly.")
     if mapping_drifted:
         print("\n  A mapping nobody can rebuild is a mapping nobody can "
               "safely change (#234).")
@@ -753,9 +860,12 @@ def main(argv=None):
     import argparse
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--check", action="store_true",
-                    help="Regenerate to a temporary file and report drift "
-                         "against the committed mapping. Writes nothing. "
-                         "Exits non-zero if they differ.")
+                    help="Regenerate to a temporary directory and report "
+                         "drift against the committed mapping and summary. "
+                         "Writes nothing. Exits non-zero on any difference "
+                         "except the rows KNOWN_UNDERIVABLE lists, which the "
+                         "committed mapping must carry and regeneration "
+                         "cannot produce.")
     # The inputs stay fixed; only where the two artifacts live can move. That
     # is what lets a test run the check on a copy of the mapping it has
     # changed, which is the only way to see what `--check` does with a
@@ -792,7 +902,10 @@ def main(argv=None):
     summary = output_dir / "d4d_rocrate_structural_mapping_summary.md"
 
     if args.check:
-        return run_check(generator, committed, summary)
+        # The module's set is read when the check runs, not bound as a
+        # default of `run_check`, so a test can run `main` with another
+        # (#3968).
+        return run_check(generator, committed, summary, KNOWN_UNDERIVABLE)
 
     # Export. The directory is made here rather than up front, so `--check`
     # pointed at one that does not exist creates nothing either.
