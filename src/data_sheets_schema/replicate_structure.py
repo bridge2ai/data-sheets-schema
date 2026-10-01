@@ -531,7 +531,12 @@ def resolve_verified(paths: Mapping[str, int], snapshot: Mapping[str, Any] | Non
     `by_overlap`, `same_key_stripped` — and read as written where it left
     none (`no_snapshot`: an index join, the agentic path's). A path the
     snapshot never had (`not_in_snapshot`) or whose entry or leaf is gone
-    resolves nowhere, as in `receipts.claim_receipts`.
+    (`entry_dropped`, `leaf_dropped`, `ambiguous`) resolves nowhere, as in
+    `receipts.claim_receipts`. So does a path that does not parse as a slot
+    path, or whose snapshot and final structures disagree (a list in one, not
+    in the other): `remap_path` returns `unresolved` for those, and the parse
+    test comes before the snapshot test, so an unparseable path is
+    `unresolved` with or without a snapshot, never `no_snapshot`.
 
     `unusable` is why a snapshot that is present cannot be read
     (`receipts.phase1_snapshot_state`'s `unusable` state: a parse error,

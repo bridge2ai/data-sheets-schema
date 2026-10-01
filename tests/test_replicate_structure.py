@@ -586,6 +586,16 @@ def test_an_unusable_snapshot_is_refused_not_read_as_absent():
     assert got == {"paths": None, "basis": {"snapshot_unusable": 3}}
 
 
+def test_an_unparseable_receipt_path_is_unresolved_with_or_without_a_snapshot():
+    """#3986: `remap_path` tests the parse before the snapshot, so a path
+    that is not a slot path is `unresolved`, never read as written."""
+    final = {"s": [{"name": "A"}]}
+    for snapshot in (None, {"s": [{"name": "A"}]}):
+        got = resolve_verified({"s[0]..name": 2, "s[0].name": 1}, snapshot, final)
+        assert got["paths"] == {"s[0].name": 1}
+        assert got["basis"]["unresolved"] == 2
+
+
 def _entry_group():
     recs = {"r1": {"s": [{"name": "A"}, {"name": "B"}, {"description": "k"}], "t": ["x"]},
             "r2": {"s": [{"name": "A"}, {"description": "k"}], "t": ["x"]},
@@ -605,6 +615,19 @@ def test_an_entry_receipted_where_it_is_held_is_a_candidate_and_keyless_entries_
     assert eo["keyless"] == 2 and eo["measured"]
     assert eo["per_replicate"] == {"r1": 1, "r2": 2, "r3": 0}
     assert eo["counts"] == {"candidate": 2, "not_candidate": 1, "unmeasured": 0}
+
+
+def test_a_receipt_on_entry_ten_does_not_credit_entry_one():
+    """#3986: `s[10]` is not below `s[1]`. The entry string carries its
+    closing bracket, so the boundary holds; a test that drops it (matching on
+    `s[1`) credits E1 with E10's receipt."""
+    full = [{"name": f"E{i}"} for i in range(11)]
+    recs = {"r1": {"s": full}, "r2": {"s": [e for e in full if e["name"] != "E1"]}}
+    res = compare_structure(recs, {"s": "nested"})
+    eo = entry_omission_candidates(recs, res, {"r1": {"s[10].name": 1}, "r2": {}})
+    assert {e["key"]: e["status"] for e in eo["entries"]} == {"name=E1": "not_candidate"}
+    eo = entry_omission_candidates(recs, res, {"r1": {"s[1].name": 1}, "r2": {}})
+    assert {e["key"]: e["status"] for e in eo["entries"]} == {"name=E1": "candidate"}
 
 
 def test_entry_candidates_without_receipts_are_unmeasured():
@@ -633,6 +656,16 @@ def test_removal_status_reads_the_removals_rows():
     assert removal_status({**block, "unsorted_paths_truncated": 3}, "c") == "rows truncated"
     assert removal_status({"checked": False}, "a") == "removals unchecked"
     assert removal_status(None, "a") == "removals unchecked"
+
+
+def test_removal_status_does_not_read_a_longer_slot_name_as_below_the_slot():
+    """#3986: a row for `ab` (or `ab[0]`, `ab.x`) is not a row for `a`; the
+    decoy in the test above cannot show it, since `a[1]` is deleted too."""
+    for path in ("ab", "ab[0]", "ab.x"):
+        block = {"checked": True, "founded_paths": [{"path": path}]}
+        assert removal_status(block, "a") == "no removal row"
+        assert removal_status(block, "ab") == "deleted"
+    assert removal_status({"checked": True, "flattened_paths": [{"path": "ab.x"}]}, "a") == "no removal row"
 
 
 def _section_fixture(tmp_path, monkeypatch, recs, arm="v8prod", project="VOICE"):
