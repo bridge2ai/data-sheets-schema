@@ -2000,7 +2000,7 @@ def render_markdown(result: dict) -> str:
           "(path, bare name or slash command): " + ", ".join(f"`{r}`" for r in f["native_referenced"]) + ".",
           ""]
     L += _table([[f"`{p}`", w] for p, w in f["controllers"].items()], ["run controller", "why"]) + [""]
-    L += _table([[f"`{p}`", ", ".join(v["evidence"])[:120], v["classified"]] for p, v in f["model_clients"].items()],
+    L += _table([[f"`{p}`", ", ".join(v["evidence"]), v["classified"]] for p, v in f["model_clients"].items()],
                 ["module that calls a model client", "evidence", "classified as"]) + [""]
     if f["evaluation_controllers"]:
         L += ["Evaluation controllers (listed under other_model_client, never gating): "
