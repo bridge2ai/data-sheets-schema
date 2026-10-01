@@ -570,12 +570,11 @@ class FairscapeToD4DConverter:
         and its other items are recorded in `dropped` (#4073).
 
         An `identifier` that holds no text, such as a reference
-        (`{"@id": …}`, which RO-Crate 1.2's own root example uses), an
-        object, a number or blank text, is recorded in `dropped`, and the
-        root's `@id` is the record's `id`. `map_crate` writes such a value
-        as `str()` gives it, or for `[""]` writes no `id` (#4100). A root
-        whose only identifier is an attached crate's `./` gives `./`, which
-        is all such a crate supplies.
+        (`{"@id": …}`), an object, a number or blank text, is recorded in
+        `dropped`, and the root's `@id` is the record's `id`. `map_crate`
+        writes such a value as `str()` gives it, or for `[""]` writes no
+        `id` (#4100). A root whose only identifier is an attached crate's
+        `./` gives `./`, which is all such a crate supplies.
         """
         for source in ('identifier', '@id'):
             items = [item for item in _as_list(dataset.get(source))
