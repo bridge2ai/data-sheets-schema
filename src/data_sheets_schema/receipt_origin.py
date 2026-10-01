@@ -2793,8 +2793,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     call starts in.
 
     The command is read as `_lex` reads it (#4028): with v6's readings
-    where `_v6_admissible` admits it (a here-document body every part
-    reads as data is then one quoted word, not lines of commands, #3897,
+    where `_v6_admissible` admits it and v6 reads it (a here-document body
+    read as data is then one quoted word, not lines of commands, #3897,
     and `scan` the command with the bodies and comments removed), and
     otherwise exactly as origin/main read it -- its tokenizer, the text it
     gave the substitution scans and its brace-expansion pattern (`_BRACES`)
