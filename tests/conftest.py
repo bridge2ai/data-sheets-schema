@@ -10,7 +10,11 @@ jobs CI runs separately, and that environment is left as it is.
   moves every ``.pyc`` this process writes, and ``PYTHONPYCACHEPREFIX`` does
   the same for the subprocesses that inherit the environment. A prefix
   already chosen by the caller (``-X pycache_prefix`` or the variable) is
-  kept.
+  kept. pytest compiles this file, and any ``-p`` plugin such as
+  ``utils.pytest_shard``, before it can run, so their bytecode still lands
+  in ``tests/__pycache__`` and ``utils/__pycache__`` unless the prefix is
+  already set: CI sets ``PYTHONPYCACHEPREFIX`` for the suite (#3866), and a
+  developer who wants a clean tree exports it too.
 * No test may add a path under ``notes/`` (#3772). The tree is listed once
   when the session is configured and again when it finishes, in the process
   that runs the session: under pytest-xdist that is the controller, before

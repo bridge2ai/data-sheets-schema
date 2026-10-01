@@ -47,7 +47,11 @@ jobs:
       # physical cores on the standard four-vCPU public Linux runner.
       # Long checks start first; small scheduling chunks keep each worker
       # available instead of leaving one with a queue of expensive tests.
+      # pytest compiles tests/conftest.py (and -p utils.pytest_shard) before
+      # the conftest can move bytecode, so the prefix is set here (#3866).
       - name: Run the suite shard including corpus checks
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
         run: >-
           poetry run python -m pytest tests -v -p no:cacheprovider
           -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}
@@ -57,15 +61,20 @@ jobs:
 
       # No test may add, change or leave an ignored path under notes/ (#3772);
       # tests/conftest.py also checks each run. Before the notes/ jobs below,
-      # which run outside tests/ and are not covered.
-      - name: Require the suite to leave notes/ untouched
+      # which run outside tests/ and are not covered. tests/ and utils/ hold
+      # no bytecode either, given the prefix above (#3866).
+      - name: Require the suite to leave notes/, tests/ and utils/ untouched
         run: |
-          changed="$(git status --ignored --porcelain -- notes/)"
+          changed="$(git status --ignored --porcelain -- notes/ tests/ utils/)"
           test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
 
       # These independent offline controls run once, outside the tests/ collection.
+      # They run without writing bytecode beside the pinned tools (#3865). Not
+      # a cache prefix: transport_probe.verify_bytecode refuses to run under one.
       - name: Exercise experimental canary admission offline
         if: matrix.python-version == '3.12' && matrix.shard == 1
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py
           notes/matched_cborg_2026-09-13/test_budget_amendment.py
@@ -78,6 +87,7 @@ jobs:
       - name: Exercise native canary transport and shutdown offline
         if: matrix.python-version == '3.12' && matrix.shard == 1
         env:
+          PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
         run: >-
           poetry run python -m pytest
@@ -99,6 +109,18 @@ jobs:
           notes/matched_cborg_2026-09-13/native_controls/test_audit_after_probe.py
           notes/claudecode_direct/test_direct_arm.py
           -q -p no:cacheprovider --junitxml=test-results/native.xml
+
+      # Any path the controls leave under notes/ fails, except bytecode written
+      # by a Python child the pinned controls start with a whitelisted
+      # environment that drops PYTHON* variables: reported, not failed (#3865).
+      - name: Require the notes/ controls to leave notes/ untouched
+        if: matrix.python-version == '3.12' && matrix.shard == 1
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          bytecode="$(printf '%s\n' "$changed" | grep -E '^!! .*/__pycache__/$' || true)"
+          other="$(printf '%s\n' "$changed" | grep -vE '^!! .*/__pycache__/$|^$' || true)"
+          test -z "$bytecode" || { echo "::warning::bytecode under notes/ from a child with a scrubbed environment (#3865)"; printf '%s\n' "$bytecode"; }
+          test -z "$other" || { printf '%s\n' "$other"; exit 1; }
 
       - name: Preserve test results and per-test timings
         if: always()
@@ -126,11 +148,20 @@ jobs:
           python-version: "3.12"
       - name: Exercise native audit continuation controls offline
         env:
+          PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/audit_controls
           notes/matched_cborg_2026-09-13/finalization_controls
           -q -p no:cacheprovider --junitxml=test-results/audit-controls.xml
+      # As on shard 1: scrubbed-environment bytecode is reported, not failed (#3865).
+      - name: Require the audit controls to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          bytecode="$(printf '%s\n' "$changed" | grep -E '^!! .*/__pycache__/$' || true)"
+          other="$(printf '%s\n' "$changed" | grep -vE '^!! .*/__pycache__/$|^$' || true)"
+          test -z "$bytecode" || { echo "::warning::bytecode under notes/ from a child with a scrubbed environment (#3865)"; printf '%s\n' "$bytecode"; }
+          test -z "$other" || { printf '%s\n' "$other"; exit 1; }
       - name: Preserve test results and per-test timings
         if: always()
         uses: actions/upload-artifact@v4
@@ -156,10 +187,15 @@ jobs:
           python-version: "3.12"
       - name: Exercise registered evaluation controls offline
         env:
+          PYTHONDONTWRITEBYTECODE: "1"
           PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls:notes/matched_cborg_2026-09-13/evaluation_controls
         run: >-
           poetry run python -m pytest notes/matched_cborg_2026-09-13/evaluation_controls
           -q -p no:cacheprovider --junitxml=test-results/evaluation-controls.xml
+      - name: Require the evaluation controls to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
       - name: Preserve test results and per-test timings
         if: always()
         uses: actions/upload-artifact@v4
