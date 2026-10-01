@@ -486,7 +486,7 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 
 gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Rewrite the structural D4D ↔ RO-Crate SSSOM and its summary from the generator when its inputs are newer, dropping the KNOWN_UNDERIVABLE rows it cannot produce (not run by gen-sssom-all)
 
-check-sssom-structural: ## Report drift between the committed structural mapping and its generator, accepting exactly the KNOWN_UNDERIVABLE rows (writes nothing)
+check-sssom-structural: ## Compare the committed structural mapping and summary with their generator, allowing for the KNOWN_UNDERIVABLE rows (writes nothing; generate_structural_mapping.py --help states exactly what it compares)
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT) --check
 
 $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)

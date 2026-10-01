@@ -10,7 +10,9 @@ This script:
 5. Outputs SSSOM-compatible mappings
 """
 
+import inspect
 import json
+import textwrap
 import yaml
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
@@ -608,12 +610,11 @@ STRUCTURAL_COLUMNS = ("d4d_subject_range", "subject_multivalued",
 
 #: Rows the committed mapping asserts that regeneration does not produce
 #: (#234), each under what is wrong with it; #294 is the work that would
-#: derive them. `--check` (`make check-sssom-structural`) accepts exactly
-#: these and tests/test_semantic_exchange/test_structural_mapping_drift.py
-#: pins exactly these, both from this one set (#3968). The check compares
-#: none of their columns, since regeneration has no row to compare them
-#: with (#4050). Regeneration cannot produce them, so rewriting the table
-#: drops them, which is why `make gen-sssom-all` does not run the
+#: derive them. `--check` (`make check-sssom-structural`) and
+#: tests/test_semantic_exchange/test_structural_mapping_drift.py both read
+#: this one set (#3968); what the check does with it is CHECK_STATEMENT's
+#: to say (#4076). Regeneration cannot produce these rows, so rewriting the
+#: table drops them, which is why `make gen-sssom-all` does not run the
 #: structural target (#3967). Shrinking the set is progress. Growing it
 #: without a reason is the drift both exist to catch.
 KNOWN_UNDERIVABLE = frozenset({
@@ -632,6 +633,102 @@ KNOWN_UNDERIVABLE = frozenset({
     # Also disagrees with the schema, which declares `slot_uri: d4d:total_bytes`.
     ("d4d:FileCollection/total_bytes", "skos:exactMatch", "dcat:byteSize"),
 })
+
+#: What `--check` does with a mapping and summary it passes once the value
+#: in one column of one row changes, by the kind of row: (the columns, the
+#: verdict on a row regeneration produces, the verdict on a
+#: KNOWN_UNDERIVABLE row), with `None` for every column the other entries
+#: do not name. CHECK_STATEMENT prints it, and
+#: tests/test_semantic_exchange/test_structural_mapping_drift.py makes each
+#: of these changes, column by column, in a copy of the committed table and
+#: holds the check to the verdict given here (#4076).
+EDIT_VERDICTS = (
+    (TRIPLE, "fails", "fails"),
+    (STRUCTURAL_COLUMNS, "fails", "passes"),
+    (None, "passes", "passes"),
+)
+
+
+def _check_statement(width: int = 76) -> str:
+    """CHECK_STATEMENT, written from TRIPLE, STRUCTURAL_COLUMNS and
+    EDIT_VERDICTS, so that it names the columns `run_check` compares and the
+    verdicts the drift test holds it to, and no others (#4076)."""
+    def text(words, first="", rest=None):
+        # Never split a word, so a column name is always printed whole.
+        return textwrap.fill(" ".join(words.split()), width,
+                             initial_indent=first,
+                             subsequent_indent=first if rest is None else rest,
+                             break_long_words=False, break_on_hyphens=False)
+
+    def bullet(words):
+        return text(words, "- ", "  ")
+
+    triple = ", ".join(TRIPLE)
+    structural = (", ".join(STRUCTURAL_COLUMNS[:-1])
+                  + f" and {STRUCTURAL_COLUMNS[-1]}")
+    edits = []
+    for columns, produced, known in EDIT_VERDICTS:
+        edits.append(text((", ".join(columns) if columns
+                           else "any other column") + ":", "  ", "    "))
+        edits.append(text(f"{produced} on a row regeneration produces",
+                          "      "))
+        edits.append(text(f"{known} on a KNOWN_UNDERIVABLE row", "      "))
+    return "\n\n".join([
+        "What --check compares with regeneration, and nothing else:",
+        bullet(f"""The ({triple}) triple of every committed row, a
+            KNOWN_UNDERIVABLE row's included, as a set. A triple the
+            committed mapping carries and regeneration does not produce is
+            accepted and named if KNOWN_UNDERIVABLE lists it, and fails if it
+            does not. A triple regeneration produces that the mapping lacks
+            fails, and so does a listed triple that the mapping lacks or
+            regeneration produces."""),
+        bullet(f"""{structural}, on each row the committed mapping and
+            regeneration both carry, which is never a row the check accepts:
+            a listed row is one of those only when regeneration produces it,
+            and that fails."""),
+        bullet("""A repeated triple is not seen: the rows are a set, and
+            those columns are read from the last row that carries the
+            triple."""),
+        bullet("The summary's whole text, except its line endings."),
+        text("""Both files are read as UTF-8 text. The rows are read with
+            Python's csv module from the lines of the tab-separated mapping
+            that do not start with #, below its header, so an empty line is
+            not a row and double quotes around a value are quoting, not part
+            of it. A missing mapping or summary fails. A mapping without one
+            of the columns named here is an error that names the column, and
+            a file that is not UTF-8 is an error."""),
+        text("""So, from a mapping and summary the check passes, with no
+            triple repeated, a change to the value in one column of one
+            row:"""),
+        "\n".join(edits),
+        text("""Such a change to a triple fails because the triple it
+            replaced is then missing: from a row regeneration produces, a
+            triple regeneration produces that the mapping lacks; from a
+            KNOWN_UNDERIVABLE row, a listed triple the mapping lacks. The
+            new triple fails as well unless regeneration produces it or
+            KNOWN_UNDERIVABLE lists it."""),
+    ])
+
+
+#: The one statement of what `--check` compares (#4050, #4076).
+#: `run_check`'s docstring ends with it and `--help` prints it; the README,
+#: docs/semantic_exchange.md, STRUCTURAL_MAPPING_ANALYSIS.md and the
+#: Makefile's help for `check-sssom-structural` point to `--help` rather
+#: than describe the check, after two rounds of review found their
+#: descriptions wrong, first saying it compared more than it does and then
+#: less.
+CHECK_STATEMENT = _check_statement()
+
+
+def _docstring_ends_with(statement: str):
+    """Decorator: end the function's docstring with `statement`, so that the
+    docstring and the `--help` that prints `statement` carry one text."""
+    def end(fn):
+        fn.__doc__ = "\n\n".join(
+            part for part in (inspect.cleandoc(fn.__doc__ or ""), statement)
+            if part)
+        return fn
+    return end
 
 
 def _read_sssom(path: Path, required: tuple) -> list:
@@ -706,28 +803,16 @@ def check_known_gap(committed: Path, regenerated: Path, known) -> tuple:
             sorted(known - have - made), sorted(known & made))
 
 
+@_docstring_ends_with(CHECK_STATEMENT)
 def run_check(generator, committed: Path, summary: Path, known) -> int:
     """`--check`: compare `committed` and `summary` with what `generator`
-    regenerates, print what differs, and return the exit status.
+    regenerates, print what differs, and return the exit status: 1 when the
+    check fails, 0 when it passes. `known` is the set `main` passes as
+    KNOWN_UNDERIVABLE (#3968). Writes nothing beside them: regeneration goes
+    to a temporary directory.
 
-    Three things are compared, and nothing else (#4050):
-
-    - the rows, as a set of (subject, predicate, object) triples, so
-      neither their order nor a repeated triple is seen;
-    - STRUCTURAL_COLUMNS (`d4d_subject_range`, `subject_multivalued`,
-      `type_compatible`) on the rows both files carry, reading the last row
-      of a repeated triple; a change to any other column, such as
-      `confidence`, `warnings` or `rocrate_value_type`, passes;
-    - the summary's whole text, read in text mode, so its line endings are
-      not compared.
-
-    A difference in any of them fails, except that the rows the committed
-    mapping carries and regeneration does not produce must be exactly
-    `known`, which `main` passes as KNOWN_UNDERIVABLE (#3968): those are
-    named and accepted, and no column of an accepted row is compared, since
-    regeneration has no row to compare it with.
-
-    Writes nothing beside them: regeneration goes to a temporary directory.
+    What it compares is CHECK_STATEMENT, the one statement of it: the
+    decorator ends this docstring with it, and `--help` prints it (#4076).
     """
     # Never write over the committed file while checking it. Regenerating
     # in place to compare is how a check becomes the thing it was meant to
@@ -873,21 +958,17 @@ def run_check(generator, committed: Path, summary: Path, known) -> int:
 def main(argv=None):
     """Generate schema-structure-aware mappings."""
     import argparse
-    ap = argparse.ArgumentParser(description=__doc__)
-    # The columns are read from the constant the check compares, so this
-    # cannot name others (#4050).
+    # The epilog is CHECK_STATEMENT, printed as run_check's docstring has
+    # it: the raw formatter keeps its lines rather than refilling them into
+    # one paragraph. It is the only description of the check here (#4076).
+    ap = argparse.ArgumentParser(
+        description=__doc__, epilog=CHECK_STATEMENT,
+        formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true",
-                    help="Regenerate to a temporary directory and report "
-                         "drift against the committed mapping and summary. "
-                         "Writes nothing. Compares the rows by subject, "
-                         "predicate and object; "
-                         f"{', '.join(STRUCTURAL_COLUMNS)} on the rows both "
-                         "carry; and the summary's whole text. Exits non-zero "
-                         "on a difference in any of them, except the rows "
-                         "KNOWN_UNDERIVABLE lists, which the committed "
-                         "mapping must carry and regeneration cannot "
-                         "produce. Compares no other column, and no column "
-                         "of a KNOWN_UNDERIVABLE row.")
+                    help="Regenerate into a temporary directory and compare "
+                         "with the committed mapping and summary, writing "
+                         "nothing. What it compares, and what fails it, is "
+                         "stated below.")
     # The inputs stay fixed; only where the two artifacts live can move. That
     # is what lets a test run the check on a copy of the mapping it has
     # changed, which is the only way to see what `--check` does with a

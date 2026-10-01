@@ -21,18 +21,11 @@ instead:
 make check-sssom-structural   # committed mapping and summary against regeneration
 ```
 
-The check writes nothing. It lists every row the committed file carries that
-regeneration does not produce (and the reverse), every value that differs in
-`d4d_subject_range`, `subject_multivalued` or `type_compatible` on the rows
-both carry, and whether the summary's whole text regenerates. It exits
-non-zero on any of those differences but one: the hand-written rows described
-under [Rows the generator does not produce](#rows-the-generator-does-not-produce),
-which it names and accepts while the committed file carries exactly those
-(#3968). One of them missing from the file fails it, and so does one that
-regeneration has come to produce. It compares nothing else: no other column,
-so a hand edit to a row's `confidence`, `warnings` or `rocrate_value_type`
-passes it, and no column of the hand-written rows, which regeneration has no
-row to compare with (#4050).
+The check writes nothing. It compares the committed mapping and summary with
+what the generator writes, allowing for the hand-written rows described under
+[Rows the generator does not produce](#rows-the-generator-does-not-produce);
+`python src/semantic_exchange/generate_structural_mapping.py --help` states
+exactly what it compares (#4076).
 
 The summary is written from the generator's output, not from the committed
 TSV, so its per-justification counts describe what regeneration makes and not
@@ -130,17 +123,18 @@ The committed file carries rows no strategy emits: class-level rows (the
 generator reads `class_uri` and never emits a row from it), `schema:hasPart`,
 `dcat:byteSize`, and `d4d:` targets that are absent from the RO-Crate input.
 They are listed, each with its reason, in `KNOWN_UNDERIVABLE` in
-`src/semantic_exchange/generate_structural_mapping.py` (#234). The check and
-`tests/test_semantic_exchange/test_structural_mapping_drift.py` both read that
-set (#3968), and both fail if the rows regeneration does not produce stop
-being exactly those. Their range and cardinality columns are
-still checked against the schema (`TestRowsStateTheSchema`). A row that names
-a slot states that slot's range and cardinality. A class-level row names a
-class, not a slot, so its range is the class itself and it is not
-multivalued (#3388): the check requires the class to exist in the merged full
-schema or the merged core schema, `d4d_subject_range` to name it, and
-`subject_multivalued` to be `False`. `d4d:DataSubset` once gave its parent,
-`Dataset`, as its range.
+`src/semantic_exchange/generate_structural_mapping.py` (#234), which the check
+and `tests/test_semantic_exchange/test_structural_mapping_drift.py` both read
+(#3968).
+
+These rows' range and cardinality columns are checked against the schema, as
+every committed row's are, by `TestRowsStateTheSchema` in that test file. A
+row that names a slot states that slot's range and cardinality. A class-level
+row names a class, not a slot, so its range is the class itself and it is not
+multivalued (#3388): `TestRowsStateTheSchema` requires the class to exist in
+the merged full schema or the merged core schema, `d4d_subject_range` to name
+it, and `subject_multivalued` to be `False` (#4076). `d4d:DataSubset` once
+gave its parent, `Dataset`, as its range.
 
 ## Usage
 
