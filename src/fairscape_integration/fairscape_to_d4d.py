@@ -36,8 +36,9 @@ class FairscapeToD4DConverter:
 
     # Until #3884 the constructor took an SSSOM table (`--sssom`, defaulting
     # to the retired d4d_rocrate_sssom_mapping.tsv) and loaded it into an
-    # attribute nothing read: the output was byte-identical with it, with
-    # another table and with none. The field mapping is the code below.
+    # attribute nothing read: the output was identical with it, with another
+    # table and with none, apart from the `generated_date` timestamp every run
+    # stamps. The field mapping is the code below.
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """

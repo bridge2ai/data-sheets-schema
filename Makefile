@@ -431,10 +431,12 @@ lint-core: ## Lint the core exchange schema files
 
 # The legacy property-level table, its interface subset and the 33-slot URI
 # table were retired (#3884): no running code read them, they had no drift
-# check, and their generator stamped the run date and left 70 TTL triples
-# untranscribed. The comprehensive pair and the structural table replace them;
-# the SKOS alignment TTL stays the curated input. Their last bytes are in git
-# history (`git log --diff-filter=D -- <path>`).
+# check (their generator stamped the run date), and the committed property
+# table, never regenerated, had fallen 70 SKOS triples behind the TTL (the
+# generator itself transcribes all 184). The comprehensive pair and the
+# structural table replace them; the SKOS alignment TTL stays the curated
+# input. Their last bytes are in git history (`git log --diff-filter=D --
+# <path>`).
 gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (comprehensive pair + structural)
 
 gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
