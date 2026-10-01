@@ -514,32 +514,18 @@
 <td>Authoritative SKOS triples — <code>skos:exactMatch</code>, <code>skos:closeMatch</code>, <code>skos:relatedMatch</code>, <code>skos:narrowMatch</code>, <code>skos:broadMatch</code> (100+ class- and slot-level alignments)</td>
 </tr>
 <tr>
-<td><a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv"><code>d4d_rocrate_sssom_mapping.tsv</code></a></td>
-<td>SSSOM (19-col)</td>
-<td>Semantic SSSOM with extended columns: <code>d4d_schema_path</code>, <code>rocrate_json_path</code>, <code>in_pydantic_model</code>, <code>in_rocrate_json</code>, <code>in_interface_mapping</code>, <code>d4d_module</code></td>
-</tr>
-<tr>
-<td><code>d4d_rocrate_sssom_mapping_subset.tsv</code></td>
-<td>SSSOM (19-col)</td>
-<td>Interface-only subset (curated Google-Sheet seed mappings)</td>
-</tr>
-<tr>
-<td><code>d4d_rocrate_sssom_uri_mapping.tsv</code></td>
-<td>SSSOM</td>
-<td>URI-level variant for slots with explicit <code>slot_uri</code></td>
-</tr>
-<tr>
 <td><code>d4d_rocrate_sssom_uri_comprehensive.tsv</code></td>
 <td>SSSOM</td>
-<td>URI-level variant covering all D4D attributes (auto-derived)</td>
+<td>URI-level variant covering all D4D attributes (generated)</td>
 </tr>
 <tr>
 <td><code>d4d_rocrate_sssom_comprehensive.tsv</code></td>
 <td>SSSOM</td>
-<td>Comprehensive label-level mapping for every D4D attribute</td>
+<td>Comprehensive label-level mapping for every D4D attribute (generated)</td>
 </tr>
 </tbody>
 </table>
+<p>Both comprehensive tables are generated, never hand-edited: a change to the schema, to the SKOS TTL or to the recommendations file below regenerates them in the same commit, and <code>make check-sssom-comprehensive</code> fails until it does. The legacy property-level table (<code>d4d_rocrate_sssom_mapping.tsv</code>), its interface-only subset and the 33-slot URI table were retired in #3884: nothing read them and they had no drift check; the property-level table, never regenerated, had also fallen 70 TTL triples behind. Their last versions are in git history.</p>
 <p>The two comprehensive tables also read <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv"><code>notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv</code></a>, the URI suggestions for slots without a curated mapping. A suggestion withdrawn after review keeps its row with <code>suggested_uri</code> and <code>confidence</code> cleared and the reason in <code>review_note</code>, and is read as no suggestion; see <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/notes/D4D_URI_COVERAGE_REPORT.md"><code>notes/D4D_URI_COVERAGE_REPORT.md</code></a>. A slot with no mapping from any source is written in SSSOM's no-match form, <code>skos:exactMatch sssom:NoTermFound</code> under <code>semapv:UnspecifiedMatching</code>, with its status (<code>free_text</code>, <code>novel_d4d</code>, <code>unmapped</code>) in <code>mapping_status</code>.</p>
 <h3 id="datasemantic_exchange"><code>data/semantic_exchange/</code></h3>
 <p>sssom-py-compatible variants and analysis docs.</p>
@@ -585,16 +571,6 @@
 </thead>
 <tbody>
 <tr>
-<td><code>generate_sssom_mapping.py</code></td>
-<td><code>make gen-sssom</code> (full + subset)</td>
-<td>Derives the semantic SSSOM from the SKOS TTL + interface CSV</td>
-</tr>
-<tr>
-<td><code>generate_sssom_uri_mapping.py</code></td>
-<td><code>make gen-sssom-uri</code></td>
-<td>URI-level variant (slots with <code>slot_uri</code>)</td>
-</tr>
-<tr>
 <td><code>generate_comprehensive_sssom_uri.py</code></td>
 <td><code>make gen-sssom-uri-comprehensive</code></td>
 <td>URI variant for all attributes</td>
@@ -616,22 +592,23 @@
 </tr>
 </tbody>
 </table>
-<p>Regenerate everything:</p>
-<pre><code class="language-bash">make gen-sssom-all
+<p>Regenerate the comprehensive pair and check it for drift:</p>
+<pre><code class="language-bash">make gen-sssom-comprehensive gen-sssom-uri-comprehensive
+make check-sssom-comprehensive
 </code></pre>
+<p>The structural mapping carries rows its generator cannot produce, so it is checked by <code>tests/test_semantic_exchange/test_structural_mapping_drift.py</code>, which allows exactly those; <code>make check-sssom-structural</code> reports them and exits non-zero, and regenerating it drops them.</p>
 <h2 id="validation">Validation</h2>
 <pre><code class="language-bash">poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 </code></pre>
 <p>These tests check column counts, required-column presence, sssom-py parseability, and consistency between the SKOS triples and the SSSOM rows.</p>
 <h2 id="adding-a-new-mapping">Adding a new mapping</h2>
-<p>When a new D4D class joins the exchange layer (e.g. <code>Dataset</code>, <code>DatasetCollection</code>, <code>File</code>, <code>FileCollection</code> were added as part of PR #147), follow the <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/.claude/commands/d4d-add-mapping.md"><code>/d4d-add-mapping</code></a> Claude Code skill. The workflow:</p>
+<p>When a D4D class or slot joins the exchange layer, follow the <a href="https://github.com/bridge2ai/data-sheets-schema/blob/main/.claude/commands/d4d-add-mapping.md"><code>/d4d-add-mapping</code></a> Claude Code skill. The workflow:</p>
 <ol>
-<li>Pick the SKOS predicate (<code>exactMatch</code> / <code>closeMatch</code> / <code>relatedMatch</code> / <code>narrow|broadMatch</code>) using the rubric in the skill.</li>
-<li>Append class-level and slot-level rows to the semantic SSSOM and the structural SSSOM.</li>
-<li>Append matching SKOS triples to <code>d4d_rocrate_skos_alignment.ttl</code>.</li>
-<li>Update <code>class_uri</code> / <code>exact_mappings</code> annotations on the schema YAML if missing.</li>
-<li>Regenerate the URI / comprehensive variants with <code>make gen-sssom-all</code>.</li>
-<li>Run the validation tests above.</li>
+<li>Pick the SKOS predicate (<code>exactMatch</code> / <code>closeMatch</code> / <code>relatedMatch</code> / <code>narrow|broadMatch</code>) using the rubric in the skill. A <code>d4d:</code> target is not an alignment (#3054).</li>
+<li>Append the triples to <code>d4d_rocrate_skos_alignment.ttl</code>: slot-level (<code>d4d:&lt;slot&gt;</code>) or class-scoped (<code>d4d:&lt;Class&gt;_&lt;slot&gt;</code>) triples feed the comprehensive tables; class-level triples are recorded in the TTL only.</li>
+<li>Update <code>class_uri</code> / <code>exact_mappings</code> / <code>slot_uri</code> annotations on the schema YAML if missing (a schema change has its own regeneration steps).</li>
+<li>Regenerate the comprehensive pair with <code>make gen-sssom-comprehensive gen-sssom-uri-comprehensive</code> and commit both tables with the TTL.</li>
+<li>Run <code>make check-sssom-comprehensive</code> and the validation tests above.</li>
 </ol>
 <h2 id="mapping-namespaces">Mapping namespaces</h2>
 <table>
