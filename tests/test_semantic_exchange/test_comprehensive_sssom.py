@@ -702,19 +702,50 @@ class TestNoRowNamesAPerson(_Committed):
                       "generated": {r["subject_id"][len("d4d:"):]: r
                                     for r in generated}}
         cls.curated = curated_sources(cls.schema, cls.names)
-        # Every SSSOM table the repository commits, the legacy
-        # property- and URI-level ones and the structural one included.
+        # Every SSSOM table the repository commits, the structural one
+        # included.
         cls.all_tables = sorted(
             set((REPO / "src/data_sheets_schema/semantic_exchange").glob("*sssom*.tsv"))
             | set((REPO / "data/semantic_exchange").glob("*sssom*.tsv")))
 
+    #: The legacy property-level table, its interface subset and the 33-slot
+    #: URI table, retired with their generators (#3884). Nothing read them,
+    #: and no check could hold them to their inputs (the property-level table
+    #: had fallen 70 TTL triples behind); a copy put back would be unchecked
+    #: again.
+    RETIRED = ("d4d_rocrate_sssom_mapping.tsv",
+               "d4d_rocrate_sssom_mapping_subset.tsv",
+               "d4d_rocrate_sssom_uri_mapping.tsv")
+
     def test_the_repository_commits_the_tables_this_checks(self):
         names = {p.name for p in self.all_tables}
-        for name in (COMP.name, URI.name, "d4d_rocrate_sssom_mapping.tsv",
-                     "d4d_rocrate_sssom_mapping_subset.tsv",
-                     "d4d_rocrate_sssom_uri_mapping.tsv",
+        for name in (COMP.name, URI.name,
                      "d4d_rocrate_structural_mapping.sssom.tsv"):
             self.assertIn(name, names)
+
+    def test_the_retired_tables_and_their_generators_are_gone(self):
+        """#3884: the only SSSOM tables committed are the drift-checked ones,
+        and nothing that wrote or named a retired table is left to recreate
+        it: no generator, no Makefile target, no converter default."""
+        self.assertEqual(
+            {p.name for p in self.all_tables},
+            {COMP.name, URI.name, "d4d_rocrate_structural_mapping.sssom.tsv"})
+        for script in ("generate_sssom_mapping.py",
+                       "generate_sssom_uri_mapping.py"):
+            self.assertFalse((REPO / "src/semantic_exchange" / script).exists(),
+                             script)
+        for path in ("Makefile",
+                     "src/fairscape_integration/fairscape_to_d4d.py",
+                     "src/fairscape_integration/cli.py"):
+            text = (REPO / path).read_text(encoding="utf-8")
+            for name in self.RETIRED:
+                # The converter's comment names the table it no longer
+                # loads; a path to it would be a reader.
+                self.assertNotIn(f"semantic_exchange/{name}", text, path)
+        makefile = (REPO / "Makefile").read_text(encoding="utf-8")
+        for target in ("gen-sssom-full", "gen-sssom-subset", "gen-sssom-uri:",
+                       "gen-sssom:"):
+            self.assertNotIn(target, makefile)
 
     def test_no_table_carries_the_placeholder_or_an_author(self):
         for path in self.all_tables:
@@ -1533,9 +1564,9 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
                       f"{gcs.REGENERATE_HINT}.")
 
     def test_a_drift_failure_says_how_to_regenerate_and_what_moves_the_tables(self):
-        """#2993: the /d4d-add-mapping playbook (pinned, not edited here)
-        still says to skip regeneration after adding a TTL triple, so the
-        failure itself has to say what to run and that the TTL moves it."""
+        """#2993: the failure itself says what to run and that the TTL moves
+        the tables, for whoever edits the TTL without the /d4d-add-mapping
+        playbook (which says the same since #3884)."""
         with tempfile.TemporaryDirectory() as d:
             stale = Path(d) / COMP.name
             stale.write_text(self._without_first_row(COMP.read_text(encoding="utf-8")),
@@ -1549,6 +1580,25 @@ class TestCommittedTablesRegenerate(unittest.TestCase):
                        "commit them with the change", "SKOS alignment TTL",
                        "/d4d-add-mapping", "D4D_MISSING_URI_RECOMMENDATIONS.tsv"):
             self.assertIn(needle, message)
+
+    def test_the_add_mapping_playbook_regenerates_and_names_nobody(self):
+        """#2993, #3883, #3884: the /d4d-add-mapping playbook sends new
+        mappings through the TTL and the comprehensive generator, runs the
+        drift check, commits the tables with the TTL, writes no author and no
+        row by hand, and points at no retired table."""
+        text = (REPO / ".claude/commands/d4d-add-mapping.md").read_text(
+            encoding="utf-8")
+        for needle in ("make gen-sssom-comprehensive gen-sssom-uri-comprehensive",
+                       "make check-sssom-comprehensive",
+                       "d4d_rocrate_skos_alignment.ttl",
+                       COMP.name, URI.name):
+            self.assertIn(needle, text)
+        self.assertNotIn("0000-0000-0000-0000", text)
+        self.assertNotIn("orcid.org", text)
+        self.assertNotIn("Skip regen", text)
+        self.assertNotIn("make gen-sssom-all", text)
+        for name in TestNoRowNamesAPerson.RETIRED:
+            self.assertNotIn(f"semantic_exchange/{name}", text)
 
     def test_comprehensive_table(self):
         self._assert_regenerates(

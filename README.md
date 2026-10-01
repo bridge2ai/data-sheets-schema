@@ -45,17 +45,17 @@ The **Semantic Exchange Layer** is the canonical SKOS + SSSOM mapping that lets 
 | Artifact | Path | Description |
 |---|---|---|
 | SKOS alignment (authoritative) | [`src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl) | 100+ `skos:exactMatch` / `closeMatch` / `relatedMatch` triples |
-| Semantic SSSOM | [`src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv) | 19-column SSSOM with json_path / pydantic / interface columns |
-| URI SSSOM | [`d4d_rocrate_sssom_uri_mapping.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv) + `_comprehensive.tsv` | Auto-regenerated URI variants |
+| Comprehensive SSSOM | [`src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv) + [`d4d_rocrate_sssom_uri_comprehensive.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv) | One row per schema slot, generated from the schema, the SKOS TTL and the URI recommendations; drift-checked by `make check-sssom-comprehensive` |
 | Structural SSSOM | [`data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv`](https://github.com/bridge2ai/data-sheets-schema/blob/main/data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv) | sssom-py-compatible 17-column structural mapping |
-| Generators | [`src/semantic_exchange/`](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/semantic_exchange) | Scripts that derive the URI/comprehensive/structural variants |
+| Generators | [`src/semantic_exchange/`](https://github.com/bridge2ai/data-sheets-schema/tree/main/src/semantic_exchange) | Scripts that derive the comprehensive and structural tables |
 | Tests | [`tests/test_semantic_exchange/`](https://github.com/bridge2ai/data-sheets-schema/tree/main/tests/test_semantic_exchange) + `tests/test_fairscape_integration/` | SSSOM column/structure validation |
-| Add a new mapping | `/d4d-add-mapping` Claude Code skill ([command](.claude/commands/d4d-add-mapping.md)) | Schema-driven workflow for new SSSOM rows |
+| Add a new mapping | `/d4d-add-mapping` Claude Code skill ([command](.claude/commands/d4d-add-mapping.md)) | Add SKOS triples, then regenerate the comprehensive tables |
 
 **Build / validate:**
 
 ```bash
-make gen-sssom-all       # regenerate URI + comprehensive + structural variants
+make gen-sssom-comprehensive gen-sssom-uri-comprehensive  # regenerate the comprehensive pair
+make check-sssom-comprehensive                           # drift check (writes nothing)
 poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 ```
 

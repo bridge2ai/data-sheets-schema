@@ -2,16 +2,15 @@
 """
 FAIRSCAPE RO-Crate to D4D Converter (Reverse Transformation)
 
-Converts FAIRSCAPE RO-Crate JSON-LD to D4D YAML format using SSSOM mapping guidance.
+Converts FAIRSCAPE RO-Crate JSON-LD to D4D YAML format.
 
 Features:
-- SSSOM-guided semantic mapping
+- Field mapping written out in this module's extraction methods
 - Vocabulary translation (schema.org → dcterms, etc.)
 - Pydantic validation of input RO-Crate
 - LinkML validation of output D4D
 """
 
-import csv
 import json
 import sys
 import yaml
@@ -35,49 +34,11 @@ except ImportError:
 class FairscapeToD4DConverter:
     """Convert FAIRSCAPE RO-Crate to D4D YAML."""
 
-    def __init__(self, sssom_mapping_file: Optional[Path] = None):
-        """
-        Initialize converter.
-
-        Args:
-            sssom_mapping_file: Path to SSSOM mapping TSV (optional)
-        """
-        self.sssom_mapping = self._load_sssom(sssom_mapping_file) if sssom_mapping_file else {}
-
-    def _load_sssom(self, sssom_file: Path) -> Dict[str, Dict]:
-        """Load SSSOM mapping for semantic guidance."""
-        mapping = {}
-
-        with open(sssom_file) as f:
-            # Skip comment lines
-            lines = [line for line in f if not line.startswith('#')]
-
-        # Parse TSV
-        reader = csv.DictReader(lines, delimiter='\t')
-        for row in reader:
-                # Map from object (RO-Crate) to subject (D4D)
-                object_id = row['object_id']
-                subject_id = row['subject_id']
-
-                # Extract property name
-                if ':' in object_id:
-                    rocrate_prop = object_id.split(':')[1]
-                else:
-                    rocrate_prop = object_id
-
-                if ':' in subject_id:
-                    d4d_prop = subject_id.split(':')[1]
-                else:
-                    d4d_prop = subject_id
-
-                mapping[rocrate_prop] = {
-                    'd4d_property': d4d_prop,
-                    'predicate': row['predicate_id'],
-                    'confidence': float(row['confidence']),
-                    'comment': row.get('comment', '')
-                }
-
-        return mapping
+    # Until #3884 the constructor took an SSSOM table (`--sssom`, defaulting
+    # to the retired d4d_rocrate_sssom_mapping.tsv) and loaded it into an
+    # attribute nothing read: the output was identical with it, with another
+    # table and with none, apart from the `generated_date` timestamp every run
+    # stamps. The field mapping is the code below.
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """
@@ -603,11 +564,6 @@ def main():
         help='Output D4D YAML file'
     )
     parser.add_argument(
-        '--sssom',
-        default='src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv',
-        help='SSSOM mapping file for semantic guidance'
-    )
-    parser.add_argument(
         '--no-validate',
         action='store_true',
         help='Skip D4D schema validation'
@@ -615,14 +571,8 @@ def main():
 
     args = parser.parse_args()
 
-    # Load SSSOM mapping
-    sssom_file = Path(args.sssom)
-    if not sssom_file.exists():
-        print(f"Warning: SSSOM mapping not found: {sssom_file}")
-        sssom_file = None
-
     # Convert
-    converter = FairscapeToD4DConverter(sssom_file)
+    converter = FairscapeToD4DConverter()
 
     print(f"\nConverting FAIRSCAPE RO-Crate → D4D YAML...")
     print(f"  Input:  {args.input}")
