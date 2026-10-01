@@ -178,6 +178,27 @@ class TestSSSOMIntegrationWithRealFile(unittest.TestCase):
         self.assertGreater(stats['total_mappings'], 50)
         self.assertIn('skos:exactMatch', stats['predicate_counts'])
 
+    def test_load_comprehensive_mapping(self):
+        """The /d4d-add-mapping playbook spot-checks a new slot through this
+        class on the comprehensive table (#3884): every row is found under
+        its own subject, with its own target."""
+        import csv
+        sssom_file = repo_root / ("src/data_sheets_schema/semantic_exchange/"
+                                  "d4d_rocrate_sssom_comprehensive.tsv")
+        with open(sssom_file, encoding='utf-8') as f:
+            rows = list(csv.DictReader(
+                (line for line in f if not line.startswith('#')), delimiter='\t'))
+
+        integration = SSSOMIntegration(str(sssom_file), verbose=False)
+
+        self.assertEqual(integration.get_mappings_count(), len(rows))
+        self.assertEqual(len(integration.get_subjects()), len(rows))
+        for row in rows:
+            found = integration.get_mappings_by_subject(row['subject_id'])
+            self.assertEqual([(m['predicate_id'], m['object_id']) for m in found],
+                             [(row['predicate_id'], row['object_id'])],
+                             row['subject_id'])
+
 
 if __name__ == '__main__':
     unittest.main()

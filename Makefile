@@ -378,26 +378,20 @@ git-status:
 ## SSSOM Alignment Generation
 ## ------------------------------------------------------------------
 
-SSSOM_SCRIPT = src/semantic_exchange/generate_sssom_mapping.py
-SSSOM_URI_SCRIPT = src/semantic_exchange/generate_sssom_uri_mapping.py
 SSSOM_URI_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom_uri.py
 SSSOM_COMPREHENSIVE_SCRIPT = src/semantic_exchange/generate_comprehensive_sssom.py
 SSSOM_STRUCTURAL_SCRIPT = src/semantic_exchange/generate_structural_mapping.py
 SKOS_ALIGNMENT = src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl
 ROCRATE_JSON = data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json
-INTERFACE_MAPPING = data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
 D4D_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_all.yaml
 D4D_CORE_SCHEMA = src/data_sheets_schema/schema/data_sheets_schema_core.yaml
 D4D_CORE_SCHEMA_ALL = src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml
 URI_RECOMMENDATIONS = notes/D4D_MISSING_URI_RECOMMENDATIONS.tsv
-SSSOM_FULL = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv
-SSSOM_SUBSET = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping_subset.tsv
-SSSOM_URI = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv
 SSSOM_URI_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv
 SSSOM_COMPREHENSIVE = src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv
 SSSOM_STRUCTURAL = data/semantic_exchange/d4d_rocrate_structural_mapping.sssom.tsv
 
-.PHONY: check-sssom-structural gen-core-schema validate-core lint-core gen-sssom gen-sssom-full gen-sssom-subset gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
+.PHONY: check-sssom-structural gen-core-schema validate-core lint-core gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural gen-sssom-all clean-sssom
 
 gen-core-schema: $(D4D_CORE_SCHEMA_ALL) ## Generate merged core exchange schema (data_sheets_schema_core_all.yaml)
 
@@ -435,35 +429,13 @@ lint-core: ## Lint the core exchange schema files
 	$(RUN) linkml-lint src/data_sheets_schema/schema/D4D_Core.yaml
 	$(RUN) linkml-lint $(D4D_CORE_SCHEMA)
 
-gen-sssom: gen-sssom-full gen-sssom-subset ## Generate SSSOM property-level mappings (full and subset)
-
-gen-sssom-all: gen-sssom gen-sssom-uri gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (property + URI + comprehensive + structural)
-
-gen-sssom-full: $(SSSOM_FULL) ## Generate full SSSOM mapping from SKOS alignment
-
-$(SSSOM_FULL): $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(INTERFACE_MAPPING) $(SSSOM_SCRIPT)
-	@echo "Generating full SSSOM mapping..."
-	$(RUN) python $(SSSOM_SCRIPT) \
-		--skos $(SKOS_ALIGNMENT) \
-		--rocrate $(ROCRATE_JSON) \
-		--mapping $(INTERFACE_MAPPING) \
-		--output $(SSSOM_FULL) \
-		--output-subset $(SSSOM_SUBSET)
-
-gen-sssom-subset: $(SSSOM_SUBSET) ## Generate subset SSSOM mapping (interface fields only)
-
-$(SSSOM_SUBSET): $(SSSOM_FULL)
-	@echo "Subset SSSOM generated alongside full mapping"
-
-gen-sssom-uri: $(SSSOM_URI) ## Generate URI-level SSSOM mapping (33 slots with slot_uri)
-
-$(SSSOM_URI): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(ROCRATE_JSON) $(SSSOM_URI_SCRIPT)
-	@echo "Generating URI-level SSSOM mapping (slots with slot_uri only)..."
-	$(RUN) python $(SSSOM_URI_SCRIPT) \
-		--schema $(D4D_SCHEMA_ALL) \
-		--skos $(SKOS_ALIGNMENT) \
-		--rocrate $(ROCRATE_JSON) \
-		--output $(SSSOM_URI)
+# The legacy property-level table, its interface subset and the 33-slot URI
+# table were retired (#3884): no running code read them, they had no drift
+# check, and their generator stamped the run date and left 70 TTL triples
+# untranscribed. The comprehensive pair and the structural table replace them;
+# the SKOS alignment TTL stays the curated input. Their last bytes are in git
+# history (`git log --diff-filter=D -- <path>`).
+gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (comprehensive pair + structural)
 
 gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
 
@@ -513,7 +485,7 @@ $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT
 	@echo "✓ Structural mapping: $(SSSOM_STRUCTURAL)"
 
 clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_FULL) $(SSSOM_SUBSET) $(SSSOM_URI) $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
+	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
@@ -541,8 +513,7 @@ test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (CM4AI example)
 	@echo "Testing FAIRSCAPE → D4D conversion..."
 	$(RUN) python $(FAIRSCAPE_TO_D4D) \
 		--input $(ROCRATE_JSON) \
-		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml \
-		--sssom $(SSSOM_FULL)
+		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml
 
 fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
@@ -551,8 +522,7 @@ fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	fi
 	$(RUN) python $(FAIRSCAPE_TO_D4D) \
 		--input $(INPUT) \
-		--output $(OUTPUT) \
-		--sssom $(SSSOM_FULL)
+		--output $(OUTPUT)
 
 ## ------------------------------------------------------------------
 ## Semantic Review Tools

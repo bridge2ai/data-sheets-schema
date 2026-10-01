@@ -2,7 +2,7 @@
 
 This directory holds the **sssom-py-compatible structural mapping** and the human-readable analysis docs that accompany the D4D ↔ RO-Crate / FAIRSCAPE semantic exchange layer.
 
-The **canonical** SKOS TTL and the label-level / URI-level SSSOM TSVs live under [`src/data_sheets_schema/semantic_exchange/`](../../src/data_sheets_schema/semantic_exchange/). This directory is intentionally lean — only files that aren't already in the canonical source tree.
+The **canonical** SKOS TTL and the comprehensive label-level / URI-level SSSOM TSVs live under [`src/data_sheets_schema/semantic_exchange/`](../../src/data_sheets_schema/semantic_exchange/). This directory is intentionally lean — only files that aren't already in the canonical source tree.
 
 ## Files
 
@@ -25,16 +25,18 @@ The **canonical** SKOS TTL and the label-level / URI-level SSSOM TSVs live under
 | Artifact | Canonical path |
 |---|---|
 | SKOS TTL (authoritative source of all alignments) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_skos_alignment.ttl` |
-| Semantic SSSOM (label-level, 19-col) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping.tsv` |
-| Interface-only subset SSSOM (curated Google-Sheet seed) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_mapping_subset.tsv` |
-| URI-level SSSOM (slots with `slot_uri`) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_mapping.tsv` |
 | URI-level SSSOM (all D4D attributes) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_uri_comprehensive.tsv` |
 | Comprehensive label-level SSSOM (all D4D attributes) | `src/data_sheets_schema/semantic_exchange/d4d_rocrate_sssom_comprehensive.tsv` |
 
-Regenerate everything with:
+Regenerate the comprehensive pair, and check it for drift, with:
 
 ```bash
-make gen-sssom-all
+make gen-sssom-comprehensive gen-sssom-uri-comprehensive
+make check-sssom-comprehensive
 ```
+
+The structural mapping's drift is checked by `tests/test_semantic_exchange/test_structural_mapping_drift.py`, which allows exactly the known underivable rows; `make check-sssom-structural` reports them and exits non-zero.
+
+The legacy property-level table (`d4d_rocrate_sssom_mapping.tsv`), its interface-only subset and the 33-slot URI table were retired in #3884; their last versions are in git history.
 
 See [`docs/semantic_exchange.md`](../../docs/semantic_exchange.md) for the user-facing overview and the `/d4d-add-mapping` workflow.

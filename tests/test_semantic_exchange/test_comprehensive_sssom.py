@@ -702,19 +702,49 @@ class TestNoRowNamesAPerson(_Committed):
                       "generated": {r["subject_id"][len("d4d:"):]: r
                                     for r in generated}}
         cls.curated = curated_sources(cls.schema, cls.names)
-        # Every SSSOM table the repository commits, the legacy
-        # property- and URI-level ones and the structural one included.
+        # Every SSSOM table the repository commits, the structural one
+        # included.
         cls.all_tables = sorted(
             set((REPO / "src/data_sheets_schema/semantic_exchange").glob("*sssom*.tsv"))
             | set((REPO / "data/semantic_exchange").glob("*sssom*.tsv")))
 
+    #: The legacy property-level table, its interface subset and the 33-slot
+    #: URI table, retired with their generators (#3884). Nothing read them,
+    #: no check could hold them to their inputs, and they had fallen 70 TTL
+    #: triples behind; a copy put back would be unchecked again.
+    RETIRED = ("d4d_rocrate_sssom_mapping.tsv",
+               "d4d_rocrate_sssom_mapping_subset.tsv",
+               "d4d_rocrate_sssom_uri_mapping.tsv")
+
     def test_the_repository_commits_the_tables_this_checks(self):
         names = {p.name for p in self.all_tables}
-        for name in (COMP.name, URI.name, "d4d_rocrate_sssom_mapping.tsv",
-                     "d4d_rocrate_sssom_mapping_subset.tsv",
-                     "d4d_rocrate_sssom_uri_mapping.tsv",
+        for name in (COMP.name, URI.name,
                      "d4d_rocrate_structural_mapping.sssom.tsv"):
             self.assertIn(name, names)
+
+    def test_the_retired_tables_and_their_generators_are_gone(self):
+        """#3884: the only SSSOM tables committed are the drift-checked ones,
+        and nothing that wrote or named a retired table is left to recreate
+        it: no generator, no Makefile target, no converter default."""
+        self.assertEqual(
+            {p.name for p in self.all_tables},
+            {COMP.name, URI.name, "d4d_rocrate_structural_mapping.sssom.tsv"})
+        for script in ("generate_sssom_mapping.py",
+                       "generate_sssom_uri_mapping.py"):
+            self.assertFalse((REPO / "src/semantic_exchange" / script).exists(),
+                             script)
+        for path in ("Makefile",
+                     "src/fairscape_integration/fairscape_to_d4d.py",
+                     "src/fairscape_integration/cli.py"):
+            text = (REPO / path).read_text(encoding="utf-8")
+            for name in self.RETIRED:
+                # The converter's comment names the table it no longer
+                # loads; a path to it would be a reader.
+                self.assertNotIn(f"semantic_exchange/{name}", text, path)
+        makefile = (REPO / "Makefile").read_text(encoding="utf-8")
+        for target in ("gen-sssom-full", "gen-sssom-subset", "gen-sssom-uri:",
+                       "gen-sssom:"):
+            self.assertNotIn(target, makefile)
 
     def test_no_table_carries_the_placeholder_or_an_author(self):
         for path in self.all_tables:

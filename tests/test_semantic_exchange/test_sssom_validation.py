@@ -29,7 +29,6 @@ class TestSSSOMValidation(unittest.TestCase):
         self.sssom_files = {
             'structural': self.mappings_dir / "d4d_rocrate_structural_mapping.sssom.tsv",
             'comprehensive': self.src_dir / "d4d_rocrate_sssom_comprehensive.tsv",
-            'uri': self.src_dir / "d4d_rocrate_sssom_uri_mapping.tsv",
             'uri_comprehensive': self.src_dir / "d4d_rocrate_sssom_uri_comprehensive.tsv",
         }
 
@@ -121,23 +120,9 @@ class TestSSSOMValidation(unittest.TestCase):
         self.assertGreater(len(rows), 50,
                           "Structural SSSOM should have at least 50 mappings")
 
-    def test_sssom_uri_mapping_count(self):
-        """Test that URI SSSOM mapping has expected number of mappings."""
-        path = self.sssom_files['uri']
-        if not path.exists():
-            self.skipTest(f"SSSOM file not found: {path}")
-
-        with open(path, 'r', encoding='utf-8') as f:
-            # Skip comment lines
-            lines = [line for line in f if not line.startswith('#')]
-            f_filtered = '\n'.join(lines)
-            import io
-            reader = csv.DictReader(io.StringIO(f_filtered), delimiter='\t')
-            rows = list(reader)
-
-        # URI SSSOM should have some URI mappings
-        self.assertGreater(len(rows), 10,
-                          "URI SSSOM should have at least 10 mappings")
+    # The 33-slot URI table this counted was retired with its generator
+    # (#3884); the comprehensive URI table has one row per schema slot and is
+    # checked in test_comprehensive_sssom.py.
 
     # The comprehensive table's row count is no longer checked here: "more
     # than 200 rows" passed while 17 schema slots had none. Its completeness,
@@ -153,8 +138,7 @@ class TestSSSOMValidation(unittest.TestCase):
             # Skip files that intentionally allow duplicates:
             # - comprehensive: has all attributes
             # - uri_comprehensive: has different structure
-            # - uri: maps D4D → RO-Crate URIs, multiple D4D fields can map to same URI
-            if name in ['comprehensive', 'uri_comprehensive', 'uri']:
+            if name in ['comprehensive', 'uri_comprehensive']:
                 continue
 
             with self.subTest(file=name):
