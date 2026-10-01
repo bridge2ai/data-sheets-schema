@@ -37,6 +37,17 @@ RUN_SCHEMA = {
     },
 }
 
+#: RUN_SCHEMA plus `VariableMetadata.unit` ranged on `uriorcurie`, as the
+#: merged schema 162 of the 283 corpus records name ranged it (six versions,
+#: md5 633a2d2c the most read). Today's ranges `unit` on `string` (#456), so
+#: only the run's identifier slots walk it (#4081).
+UNIT_SCHEMA = {**RUN_SCHEMA, "classes": {
+    **RUN_SCHEMA["classes"],
+    "Dataset": {"attributes": {**RUN_SCHEMA["classes"]["Dataset"]["attributes"],
+                               "variables": {"range": "VariableMetadata", "multivalued": True}}},
+    "VariableMetadata": {"attributes": {"name": {}, "unit": {"range": "uriorcurie"}}},
+}}
+
 GIT = "data_sheets_schema.provenance.committed_bytes_for"
 REBUILT = "data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for"
 
@@ -157,6 +168,15 @@ class Rules(unittest.TestCase):
             persons=frozenset({"lead"}),
             bases=(("https://foo.example.org/", "foo"), ("https://w3id.org/linkml/", "linkml"))))
 
+    def test_a_slot_only_the_run_schema_ranges_on_uriorcurie_is_among_its_identifier_slots(self):
+        """The premise of the `unit` tests below (#4081): the run's rules
+        walk `unit` and today's do not. If a release ranges `unit` on
+        `uriorcurie` again, those tests need a slot today's does not."""
+        from data_sheets_schema.identifiers import uriorcurie_slots
+        self.assertEqual(rs._derive_rules(yaml.safe_dump(UNIT_SCHEMA).encode()).slots,
+                         frozenset({"id", "publisher", "unit"}))
+        self.assertNotIn("unit", uriorcurie_slots())
+
     def test_rules_are_derived_once_per_version(self):
         data = yaml.safe_dump({**RUN_SCHEMA, "name": "derived-once"}).encode()
         rs._RULES_BY_SHA256.pop(hashlib.sha256(data).hexdigest(), None)
@@ -215,12 +235,34 @@ class VersionView(unittest.TestCase):
 
 class FormBlock(unittest.TestCase):
     """The undeclared-prefix count reads the run's declared prefixes, its
-    identifier slots and its Person slots, and says which schema it read."""
+    Person slots and its identifier slots, and so does the organisational-
+    fragment count, which walks the same slots. The block says which schema
+    it read."""
 
     def _records(self, tmp: str, full: dict) -> tuple[Path, Path]:
         paths = Path(tmp) / "P_d4d.yaml", Path(tmp) / "P_d4d_core.yaml"
         paths[0].write_text(yaml.safe_dump(full), encoding="utf-8")
         return paths
+
+    def test_the_counts_walk_the_run_schema_s_identifier_slots(self):
+        """#4081: the run's schema ranged `unit` on `uriorcurie` and today's
+        does not. A CURIE in `unit` is a prefix the run's schema did not
+        declare, and a ROR with a fragment there is an organisational
+        fragment. A walk of today's slots sees neither."""
+        from data_sheets_schema.grounding import form_facts
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = _schema_file(tmp, UNIT_SCHEMA)
+            full, core = self._records(tmp, {"id": "foo:1", "variables": [
+                {"name": "weight", "unit": "qudt:Kilogram"},
+                {"name": "site", "unit": "ROR:032db5x82#bench"}]})
+            run = form_facts(full, core, record={"schema": {"full_path": str(path), "full_sha256": sha}})
+            today = form_facts(full, core)
+        self.assertEqual(run["undeclared_prefixes"], {"qudt": 1, "ROR": 1})
+        self.assertEqual(run["organisational_fragments"], 1)
+        self.assertEqual(run["schema_basis"]["source"], "the run's schema, on disk")
+        # Today's walk reaches `id` only, whose `foo` today's schema does not declare.
+        self.assertEqual(today["undeclared_prefixes"], {"foo": 1})
+        self.assertEqual(today["organisational_fragments"], 0)
 
     def test_the_prefix_count_reads_the_run_schema(self):
         from data_sheets_schema.grounding import form_facts
@@ -295,7 +337,36 @@ class FormBlock(unittest.TestCase):
 
 
 class GroundingBlock(unittest.TestCase):
-    """The identifier walk and the resolver-URL finding read the run's schema."""
+    """The identifier walk reads the run's identifier slots, and the
+    resolver-URL finding reads them and the run's declared bases."""
+
+    def test_the_identifier_walk_reads_the_run_schema_s_slots(self):
+        """#4081: the run's schema ranged `unit` on `uriorcurie` and today's
+        does not. A DOI in `unit` that the bundle lacks is absent, and a URL
+        on a base the run's schema declared is a resolver-URL finding. A walk
+        of today's slots sees neither."""
+        from data_sheets_schema.grounding import check_run
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = _schema_file(tmp, UNIT_SCHEMA)
+            full = Path(tmp) / "P_d4d.yaml"
+            full.write_text(yaml.safe_dump({"id": "doi:10.1234/x", "variables": [
+                {"name": "dose", "unit": "doi:10.5555/not-in-the-bundle"},
+                {"name": "site", "unit": "https://foo.example.org/unit/7"}]}), encoding="utf-8")
+            bundle = Path(tmp) / "bundle.txt"
+            bundle.write_text("The dataset is doi.org/10.1234/x.\n", encoding="utf-8")
+            record = {"schema": {"full_path": str(path), "full_sha256": sha}}
+            run = check_run(full, Path(tmp) / "P_d4d_core.yaml", bundle, record=record)
+            today = check_run(full, Path(tmp) / "P_d4d_core.yaml", bundle)
+        self.assertEqual(run["counts"], {"grounded": 1, "minted_fragment": 0, "absent": 1})
+        self.assertEqual(run["distinct"], {"grounded": 1, "minted_fragment": 0, "absent": 1})
+        self.assertEqual(sorted((f["kind"], f["path"], f.get("identifier") or f.get("value"))
+                                for f in run["findings"]),
+                         [("identifier_not_in_bundle", "$.variables[].unit", "10.5555/not-in-the-bundle"),
+                          ("resolver_url_in_identifier_slot", "$.variables[].unit",
+                           "https://foo.example.org/unit/7")])
+        self.assertEqual(today["counts"], {"grounded": 1, "minted_fragment": 0, "absent": 0})
+        self.assertEqual(today["distinct"], {"grounded": 1, "minted_fragment": 0, "absent": 0})
+        self.assertEqual(today["findings"], [])
 
     def test_the_resolver_url_finding_reads_the_run_schema_bases(self):
         """Where the run's schema declared no `doi`, its resolver URL was the
@@ -367,6 +438,20 @@ class Backfill(unittest.TestCase):
         self.assertEqual(blocks["form"]["undeclared_prefixes"], {"foo": 2})
         self.assertIn("today's schema read: the run's schema is not on disk and git cannot answer "
                       "(shallow clone)", summarise(blocks))
+
+    def test_either_block_alone_names_its_fallback_on_the_report_line(self):
+        """`--blocks form` or `--blocks grounding` computes one block, and
+        that block's fallback is on the report line by itself (#4081)."""
+        from data_sheets_schema.backfill_checks import compute, summarise
+        for only in ({"form"}, {"grounding"}):
+            with self.subTest(only=only), tempfile.TemporaryDirectory() as tmp:
+                provenance = self._layout(tmp, {"full_sha256": "0" * 64})
+                with mock.patch(REBUILT, return_value=None), \
+                        mock.patch(GIT, side_effect=GitUnavailable("shallow clone")):
+                    blocks = compute(provenance, only=only)
+                self.assertEqual(set(blocks), only)
+                self.assertIn("today's schema read: the run's schema is not on disk and git cannot "
+                              "answer (shallow clone)", summarise(blocks))
 
 
 if __name__ == "__main__":
