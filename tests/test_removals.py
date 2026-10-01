@@ -590,10 +590,11 @@ class AmendedDeletions(unittest.TestCase):
         """#3848/#3849 as a class: where no list before the edit can be
         rebuilt, that is no evidence the edit changed another member, so
         the deleted member is ambiguous, not left unmarked as the model's.
-        Here two members are dropped from a list Python cannot read back."""
+        Here the edit drops a member no evidence attests ('other') from a
+        list Python cannot read back."""
         d = datetime.date(2020, 1, 1)
         b = rm.classify(_record(keywords=[d, "voice", "clinic"]), _record(keywords=[d]), _audit(),
-                        amended_paths={"keywords"}, amended_edits={"keywords": [(", 'voice', 'clinic'", "")]})
+                        amended_paths={"keywords"}, amended_edits={"keywords": [(", 'voice', 'other'", "")]})
         self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (0, 2))
         # A member the snapshot never had is admitted as co-removed only
         # where the last phase output holds it: unattested, 'added' ->
@@ -611,7 +612,9 @@ class AmendedDeletions(unittest.TestCase):
         value's path, an ancestor's or a sibling's decide. One whose edit
         gives what its path holds now from this value marks it; one whose
         edit gives it from another value names that value; one that cannot
-        be read (no recorded edit, a sibling's path) is ambiguous."""
+        be read (no recorded edit) is ambiguous. Since #3854 the record
+        before the amend is rebuilt first: where it places the entry, a
+        name the amend did not touch was emptied before it (the model's)."""
         before = _record(creators=[{"name": "Ada"}, {"name": "Bob"}])
         after = _record(creators=[{"name": ""}])
         rows = lambda b: {r["path"]: {k: v for k, v in r.items() if k != "path"} for r in b["unfounded_paths"]}
@@ -624,10 +627,101 @@ class AmendedDeletions(unittest.TestCase):
                                    "creators[1].name": {"curator_amend_ambiguous": True}})
         b = rm.classify(_record(creators=[{"name": "Ada", "role": "PI"}]), _record(creators=[{"name": "", "role": ""}]),
                         _audit(), amended_paths={"creators[0].role"}, amended_edits={"creators[0].role": [("PI", "")]})
-        self.assertEqual(rows(b)["creators[0].name"], {"curator_amend_ambiguous": True})
+        self.assertEqual(rows(b)["creators[0].name"], {})
         self.assertEqual(rows(b)["creators[0].role"], {"curator_amend": True})
         # No amend on the entry: the model's, as before.
         self.assertEqual(rm.classify(before, after, _audit(), amended_paths={"title"})["deleted_curator_amend_ambiguous"], 0)
+
+    def test_a_multi_member_drop_from_a_list_python_cannot_read_back_is_rebuilt(self):
+        """#3853: `[2020-01-01, 'voice', 'clinic']` with `, 'voice',
+        'clinic'` -> ``. The list's text holds `datetime.date(...)`, which
+        `ast.literal_eval` cannot read; the date is read as the final
+        list's member it is the text of, so the list before the edit is
+        rebuilt and both dropped members are the curator's."""
+        d = datetime.date(2020, 1, 1)
+        kw = {"amended_paths": {"keywords"}, "amended_edits": {"keywords": [(", 'voice', 'clinic'", "")]}}
+        b = rm.classify(_record(keywords=[d, "voice", "clinic"]), _record(keywords=[d]), _audit(), **kw)
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (2, 0))
+        # A member the model deleted beside them is no rival once phases say so.
+        b = rm.classify(_record(keywords=[d, "voice", "clinic", "audio"]), _record(keywords=[d]), _audit(),
+                        intermediates=[("reconcile_full", _record(keywords=[d, "voice", "clinic"]))], **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend") for r in b["unfounded_paths"]},
+                         {"keywords[1]": True, "keywords[2]": True, "keywords[3]": None})
+        # A deleted member sharing a dropped member's text keeps both of
+        # those ambiguous; 'clinic' is still the curator's.
+        b = rm.classify(_record(keywords=[d, "voice", "clinic", "voice"]), _record(keywords=[d]), _audit(), **kw)
+        self.assertEqual({r["path"]: r.get("curator_amend", r.get("curator_amend_ambiguous") and "?")
+                          for r in b["unfounded_paths"]},
+                         {"keywords[1]": "?", "keywords[2]": True, "keywords[3]": "?"})
+        # Two dates, one dropped with a string: both read back.
+        b = rm.classify(_record(keywords=[d, "voice", datetime.date(2021, 2, 3)]), _record(keywords=[d]), _audit(),
+                        amended_paths={"keywords"},
+                        amended_edits={"keywords": [(", 'voice', datetime.date(2021, 2, 3)", "")]})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (2, 0))
+
+    def test_read_back_list_reads_a_known_member_that_is_no_literal(self):
+        d, t = datetime.date(2020, 1, 1), datetime.datetime(2020, 1, 1, 9, 30)
+        self.assertEqual(rm._read_back_list(str([d, "voice", t]), [d, t]), [d, "voice", t])
+        self.assertEqual(rm._read_back_list(str(["a", 1]), []), ["a", 1])
+        # A member's text quoted inside a string of a readable list is left as written.
+        self.assertEqual(rm._read_back_list(str(["x datetime.date(2020, 1, 1)"]), [d]),
+                         ["x datetime.date(2020, 1, 1)"])
+        # Unknown non-literal text, or text that is not a list, reads nothing.
+        self.assertIsNone(rm._read_back_list(str([d]), []))
+        self.assertIsNone(rm._read_back_list("'voice'", [d]))
+
+    def test_the_record_before_the_amend_places_an_entry_the_join_lost(self):
+        """#3854: an amend empties the name that identifies a creator, and
+        the join loses the entry. Rebuilt with the edit reversed, the record
+        before the amend places it again: a member of its list the final
+        record still holds is the amend's doing, not the model's; one gone
+        before the amend (or a sibling the model rewrote) is the model's.
+        An entry the rebuild cannot place either stays ambiguous."""
+        rows = lambda b: {r["path"]: {k: v for k, v in r.items() if k != "path"} for r in b["unfounded_paths"]}
+        kw = {"amended_paths": {"creators[0].name"}, "amended_edits": {"creators[0].name": [("Ada", "")]}}
+        # The model dropped Bob; the curator emptied Ada's name. Ada's role
+        # is still in the final record; Bob's cannot be placed either way.
+        b = rm.classify(_record(creators=[{"name": "Ada", "roles": ["PI"]}, {"name": "Bob", "roles": ["PI"]}]),
+                        _record(creators=[{"name": "", "roles": ["PI"]}]), _audit(), **kw)
+        self.assertEqual(rows(b), {"creators[0].name": {"curator_amend": True},
+                                   "creators[0].roles[0]": {"curator_amend": True},
+                                   "creators[1].name": {},
+                                   "creators[1].roles[0]": {"curator_amend_ambiguous": True}})
+        # A member the model dropped before the amend is the model's.
+        b = rm.classify(_record(creators=[{"name": "Ada", "roles": ["PI", "Author"]}]),
+                        _record(creators=[{"name": "", "roles": ["PI"]}]), _audit(), **kw)
+        self.assertEqual(rows(b), {"creators[0].name": {"curator_amend": True}, "creators[0].roles[1]": {}})
+        # A sibling the model rewrote (no scalar left to join on) is the model's.
+        b = rm.classify(_record(creators=[{"name": "Ada", "affiliation": "Univ of X"}]),
+                        _record(creators=[{"name": "", "affiliation": "University of Y"}]), _audit(), **kw)
+        self.assertEqual(rows(b), {"creators[0].name": {"curator_amend": True}, "creators[0].affiliation": {}})
+        # An edit with an empty `with` admits several records before it;
+        # where any of them cannot place the entry, nothing is decided by
+        # the rebuild and the #3850 reading stands.
+        b = rm.classify(_record(creators=[{"name": "AdaX", "roles": ["PI"]}, {"name": "Bob", "roles": ["PI"]}]),
+                        _record(creators=[{"name": "Ada", "roles": ["PI"]}]), _audit(),
+                        amended_paths={"creators[0].name"}, amended_edits={"creators[0].name": [("X", "")]})
+        self.assertEqual(rows(b)["creators[0].name"], {"curator_amend": True})
+        self.assertEqual(rows(b)["creators[0].roles[0]"], {"curator_amend_ambiguous": True})
+        # An amend that cannot be reversed (no recorded edit) leaves the #3850 reading.
+        b = rm.classify(_record(creators=[{"name": "Ada", "affiliation": "Univ of X"}]),
+                        _record(creators=[{"name": "", "affiliation": "University of Y"}]), _audit(),
+                        amended_paths={"creators[0].name"}, amended_edits={"creators[0].name": [None]})
+        self.assertEqual(rows(b), {"creators[0].name": {"curator_amend_ambiguous": True},
+                                   "creators[0].affiliation": {"curator_amend_ambiguous": True}})
+
+    def test_inverse_texts_and_with_leaf(self):
+        self.assertEqual(rm._inverse_texts("", "Ada", ""), ["Ada"])
+        self.assertEqual(rm._inverse_texts("Ada  Lovelace", "Ada", "Ada"), ["Ada Lovelace"])
+        # With an empty `with` every place is tried; only the first
+        # occurrence of `replace` can be the one the edit turned.
+        self.assertEqual(rm._inverse_texts("ab", "x", ""), ["xab", "axb", "abx"])
+        self.assertEqual(rm._inverse_texts("xa", "x", ""), ["xxa"])
+        self.assertEqual(rm._inverse_texts("nothing", "a", "b"), [])
+        rec = _record(creators=[{"name": ""}])
+        self.assertEqual(rm._with_leaf(rec, "creators[0].name", "Ada")["creators"], [{"name": "Ada"}])
+        self.assertEqual(rec["creators"], [{"name": ""}])                     # a copy
+        self.assertIsNone(rm._with_leaf(rec, "creators[1].name", "Ada"))
 
     def test_a_founded_amended_deletion_is_marked_and_not_counted_unfounded(self):
         before = _record(description="Old description words.")
@@ -863,6 +957,43 @@ class RecordedListAmends(unittest.TestCase):
                                                  "curator_amend": True}])
         self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (1, 0))
 
+    def test_a_two_member_drop_from_a_list_holding_a_date(self):
+        """#3853, the issue's case through #903: `[2020-01-01, 'voice',
+        'clinic']` with `, 'voice', 'clinic'` -> ``. Both dropped members
+        are the curator's; the model's own deletion is not."""
+        text = "id: doi:10.1/x\ntitle: A dataset\nkeywords: [2020-01-01, 'voice', 'clinic']\n"
+        out, record, final = self._amend(text, "keywords", ", 'voice', 'clinic'", "")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual(final["keywords"], [datetime.date(2020, 1, 1)])
+        snapshot = {"id": RID, "title": "A dataset",
+                    "keywords": [datetime.date(2020, 1, 1), "voice", "clinic", "audio"]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        self.assertEqual({r["path"]: (r["phase"], r.get("curator_amend")) for r in b["unfounded_paths"]},
+                         {"keywords[1]": ("write", True), "keywords[2]": ("write", True),
+                          "keywords[3]": ("reconcile_full", None)})
+        self.assertEqual((b["deleted_curator_amend"], b["deleted_curator_amend_ambiguous"]), (2, 0))
+
+    def test_an_emptied_name_whose_entry_the_join_loses_with_a_sibling_it_kept(self):
+        """#3854 through #903: the curator empties Ada's name; the model had
+        dropped Bob. Ada's `roles` member is still in the final record, and
+        the rebuilt pre-amend record places it: the curator's, not a
+        deletion of the model's. Bob's member stays ambiguous: no record
+        places his entry."""
+        text = ("id: doi:10.1/x\ntitle: A dataset\ncreators:\n- name: 'Ada'\n  roles:\n  - PI\n")
+        out, record, final = self._amend(text, "creators[0].name", "Ada", "")
+        self.assertEqual(out.exit_code, 0, out.output)
+        self.assertEqual(final["creators"], [{"name": "", "roles": ["PI"]}])
+        snapshot = {"id": RID, "title": "A dataset",
+                    "creators": [{"name": "Ada", "roles": ["PI"]}, {"name": "Bob", "roles": ["PI"]}]}
+        kw = {"amended_paths": rm.amended_paths(record), "amended_edits": rm.amend_edits(record)}
+        b = rm.classify(snapshot, final, _audit(), intermediates=[("reconcile_full", yaml.safe_load(text))], **kw)
+        self.assertEqual({r["path"]: {k: v for k, v in r.items() if k != "path"} for r in b["unfounded_paths"]},
+                         {"creators[0].name": {"phase": "write", "curator_amend": True},
+                          "creators[0].roles[0]": {"phase": "write", "curator_amend": True},
+                          "creators[1].name": {"phase": "reconcile_full"},
+                          "creators[1].roles[0]": {"phase": "reconcile_full"}})
+
     def test_no_scalar_member_path_can_be_recorded_even_in_a_mixed_list(self):
         """`populated_leaves` never reads a scalar member of a list as a
         leaf, so a member path is refused in a list that also holds a
@@ -992,6 +1123,64 @@ class RunSchemaTables(unittest.TestCase):
             self.assertIsNone(tables)
             self.assertEqual(basis, {"source": "today's schema",
                                      "reason": "the record names no merged schema by path and hash"})
+
+    def test_bytes_no_reachable_commit_holds_are_read_from_their_committed_artefact(self):
+        """#3788: a recorded reconstruction is read before git is asked, so a
+        shallow or fresh clone reads it too (#3953), and the basis says the
+        bytes were reconstructed and names the artefact; an OSError reading
+        it is the documented fallback; none recorded falls through to git."""
+        from data_sheets_schema.provenance import GitUnavailable
+        with tempfile.TemporaryDirectory() as tmp:
+            path, sha, _md5 = self._schema_file(tmp)
+            data = path.read_bytes()
+            path.unlink()
+            record = {"schema": {"full_path": str(path), "full_sha256": sha}}
+            entry = {"artefact": "notes/x.yaml.gz", "base_commit": "b" * 40, "matched_on": ["sha256"],
+                     "observed_at": "a branch commit", "issue": 3788}
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            side_effect=GitUnavailable("shallow clone")) as git, \
+                    mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                               return_value=(data, entry)) as got:
+                tables, basis = rm.run_enum_aliases(record)
+            got.assert_called_once_with(str(path), md5=None, sha256=sha)
+            git.assert_not_called()
+            self.assertEqual(tables["relationship_type"]["Foo"], "bar")
+            self.assertEqual((basis["source"], basis["artefact"], basis["base_commit"], basis["observed_at"]),
+                             ("the run's schema, reconstructed", "notes/x.yaml.gz", "b" * 40, "a branch commit"))
+            self.assertIn("#3788", basis["reconstruction"])
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None), \
+                    mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                               side_effect=PermissionError(13, "Permission denied", "x.yaml.gz")):
+                tables, basis = rm.run_enum_aliases(record)
+            self.assertIsNone(tables)
+            self.assertEqual(basis["source"], "today's schema")
+            self.assertIn("its recorded reconstruction could not be read (PermissionError", basis["reason"])
+            with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                            return_value=(data, {"commit": "abc123", "matched_on": ["sha256"]})) as git, \
+                    mock.patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                               return_value=None):
+                tables, basis = rm.run_enum_aliases(record)
+            git.assert_called_once()
+            self.assertEqual((basis["source"], basis["commit"]), ("the run's schema, a git blob", "abc123"))
+
+    def test_the_voice_v4_rep1_record_reads_its_own_schema(self):
+        """#3788 on the record itself: the one checked record whose merged
+        schema no reachable commit holds reads the committed artefact, with
+        no git needed, so CI and a fresh or shallow clone read it (#3953)."""
+        from data_sheets_schema.provenance import _REPO_ROOT
+        from data_sheets_schema.reconstructed_bytes import RECONSTRUCTIONS
+        prov = _REPO_ROOT / ("data/d4d_concatenated/claudecode_agent_core/"
+                             "2026-08-13_claude-opus-5-api-generic-v4_rep1/VOICE_provenance.yaml")
+        if not prov.exists():
+            self.skipTest("needs the corpus record")
+        with mock.patch("data_sheets_schema.provenance.committed_bytes_for",
+                        side_effect=AssertionError("git must not be needed")):
+            tables, basis = rm.run_enum_aliases(yaml.safe_load(prov.read_text(encoding="utf-8")))
+        self.assertIsNotNone(tables)
+        self.assertEqual((basis["source"], basis["artefact"], basis["base_commit"]),
+                         ("the run's schema, reconstructed", RECONSTRUCTIONS[0]["artefact"],
+                          RECONSTRUCTIONS[0]["base_commit"]))
+
 
 class LowConfidence(unittest.TestCase):
     """#3367: a flattening a coincidence could make — a needle of one or two
