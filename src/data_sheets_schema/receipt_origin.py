@@ -238,14 +238,19 @@ string closes where bash closes it, past a `\\'`; and a double-quoted
 here-document or a case pattern's `)` (#3925). A brace expansion with a
 quoted blank in it (`{cd,'/tmp a b'}`) is still read as built at run time
 (#3924). A here-document's body is data, never a command of this shell
-(#3897): where every part of the command is a reader, a builtin `cd`,
-`pushd` or `popd`, or a `python*` interpreter reading its program from
-the here-document it carries (`python3 - <<'EOF'`), and nothing in it
-substitutes, the body is one word, read as a `<<<` string or a `python
--c` program is. Anywhere else -- a shell, `eval`, `source`, `xargs`, a
-program not read, a pipe into one, a body that substitutes -- something
-may run the body as commands, so its lines are read as commands, as
-before; so are those of a here-document in a nested command string.
+(#3897): where every part of the command is a reader other than `sed`
+or `rg` (whose `e` command and `--pre` run commands), a builtin `cd`,
+`pushd` or `popd`, or a plain-named `python*` interpreter reading its
+program from the here-document it carries (`python3 - <<'EOF'`), nothing
+in it substitutes, every delimiter is a plain word (letters, digits,
+`_`, `-`, `.`) bare or wholly inside one pair of single or double quotes
+(#3947), and no `${`, `$[`, `$((`, `((` or backquote appears anywhere in
+the command (#3948), the body is one word, read as a `<<<` string or a
+`python -c` program is. Anywhere else -- a shell, `eval`, `source`,
+`xargs`, a program not read, a pipe into one, a body that substitutes,
+an escaped, partly quoted or `$'...'` delimiter, a `<<` that may be a
+shift or sit in a parameter expansion -- its lines are read as commands,
+as before; so are those of a here-document in a nested command string.
 
 The status is `unknown`, with every reason, and no classification is
 reported when the history cannot be rebuilt: a transcript is missing,
@@ -470,9 +475,12 @@ NON_CHECKS = (
     "(`nohup $X ./derive.sh`), which is not read as detaching; in a command the tokenizer "
     "cannot split, a program word built other than from a leading `$` or backquote (`set${X}sid`, "
     "a glob, a brace expansion), which is not read as detaching there (#3923); and what a program "
-    "does with a here-document body read as its data: where every part of the command is a reader, "
-    "a builtin `cd`, `pushd` or `popd`, or a `python*` interpreter reading its program from the "
-    "here-document it carries, and nothing substitutes, the body is one word, read as a `<<<` string "
+    "does with a here-document body read as its data: where every part of the command is a reader "
+    "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
+    "interpreter reading its program from the here-document it carries, nothing substitutes, every "
+    "delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of "
+    "single or double quotes (#3947), and no `${`, `$[`, `$((`, `((` or backquote appears anywhere "
+    "in the command (#3948), the body is one word, read as a `<<<` string "
     "or a `python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it "
     "carries (`os.system(\"$X ./derive.sh\")`) is read as the same program given to `python -c` is; "
     "anywhere else the body's lines are read as commands (#3897). "
@@ -1176,11 +1184,23 @@ def _word_end(text: str, i: int) -> int | None:
     return i
 
 
+#: The only here-document delimiters read (#3947): a plain word, bare or
+#: wholly inside one pair of single or double quotes.
+_PLAIN_DELIMITER = re.compile(r"[A-Za-z0-9_.-]+")
+
+
 def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
-    """After a `<<` (and a `<<-`'s `-`): the delimiter word, whether any of
-    it was quoted (bash then expands nothing in the body), and the index
-    after it; None where the word is missing or is one this does not read
-    (a `$` or backquote in it, or a span that does not close)."""
+    """After a `<<` (and a `<<-`'s `-`): the delimiter word, whether it was
+    quoted (bash then expands nothing in the body), and the index after it;
+    None where the word is missing or is not one of the two spellings read
+    (#3947): a plain word of letters, digits, `_`, `-` and `.`, bare
+    (`EOF`) or wholly inside one pair of single or double quotes (`'EOF'`,
+    `"EOF"`). Every other spelling -- an escape (`\\EOF`, `E\\'F`), a
+    quote inside the other kind (`"E'F"`), a backslash inside double quotes
+    (`"E\\F"`), a partly quoted word (`'E'F`), `$'...'`, a `$` or a
+    backquote -- is one whose quote removal bash does structurally, and a
+    wrong delimiter would end the body at a line bash runs as a command, so
+    the caller falls back to reading the lines as commands."""
     n = len(text)
     while i < n and text[i] in " \t":
         i += 1
@@ -1188,12 +1208,11 @@ def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
     if end is None or end == i:
         return None
     raw = text[i:end]
-    if "$" in raw.replace("$'", "") or "`" in raw:
-        return None
-    quoted = any(c in raw for c in "'\"\\")
-    word = re.sub(r"\\(.)", r"\1", raw.replace("$'", "'"))
-    word = word.replace("'", "").replace('"', "")
-    return (word, quoted, end) if word else None
+    if _PLAIN_DELIMITER.fullmatch(raw):
+        return raw, False, end
+    if len(raw) > 2 and raw[0] == raw[-1] and raw[0] in "'\"" and _PLAIN_DELIMITER.fullmatch(raw[1:-1]):
+        return raw[1:-1], True, end
+    return None
 
 
 def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
@@ -1350,7 +1369,8 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
       read to its delimiter line and replaced, in the place of that
       delimiter word, by one quoted word carrying the body (`heredoc`):
       data, as a `<<<` string is, never a command of this shell (#3897).
-      One this cannot read (a `$` in its delimiter, no delimiter line)
+      One this cannot read (a delimiter that is not a plain word, bare or
+      wholly quoted, `_heredoc_delimiter`, #3947; no delimiter line)
       raises `_Fallback`."""
     tokens: list[_Word] = []
     scan: list[str] = []
@@ -1537,17 +1557,25 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     return True
 
 
+#: Text in which a `<<` may be no here-document, or a body's end may be
+#: read wrongly (#3948): a parameter expansion `${`, arithmetic `$[`,
+#: `$((` or `((` (where `<<` is a shift), or a backquote. A command carrying
+#: any of them, anywhere, has its here-document lines read as commands.
+_HEREDOC_UNREAD = re.compile(r"\$\{|\$\[|\(\(|`")
+
+
 def _lex(command: str, *, heredoc_data: bool = False) -> tuple[list[_Word], str] | None:
     """The command's tokens (`_scan`) and its comment-free text for the
     substitution scans, or None when it does not tokenise. With
     `heredoc_data` a here-document body is one data word where
-    `_heredocs_are_data` admits every one in the command, and its lines
-    are not read as commands (#3897); otherwise, and anywhere a nested
+    `_heredocs_are_data` admits every one in the command and the command
+    carries none of `_HEREDOC_UNREAD` (#3948), and its lines are not read
+    as commands (#3897); otherwise, and anywhere a nested
     command is lexed (a `-c` string, `eval`'s command, a substitution's
     command), the body's lines are read as commands, as before: a false
     `unknown` at worst."""
     text = command.replace("\\\n", " ")
-    if heredoc_data and ("<<" in text):
+    if heredoc_data and "<<" in text and not _HEREDOC_UNREAD.search(command):
         # Read from the command as written: a body keeps its own line
         # continuations, which bash joins only where the delimiter is not
         # quoted; elsewhere one is a blank, as `text` has it.

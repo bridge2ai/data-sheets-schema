@@ -4082,8 +4082,12 @@ class ShellLexer(Base):
                 self.assertEqual((shell["moves"], shell["detaches"], shell["runs_unread"]), (False, False, True))
         # A quoted delimiter expands nothing: `cat <<'EOF'\n$(echo hi)\nEOF`
         # prints `$(echo hi)`, so its body substitutes nothing and runs nothing.
-        shell = ro._shell("cat > n.txt <<'EOF'\n$(./derive.sh)\n`./derive.sh`\n<(./derive.sh)\nEOF", "/w", [])
+        shell = ro._shell("cat > n.txt <<'EOF'\n$(./derive.sh)\n<(./derive.sh)\nEOF", "/w", [])
         self.assertEqual((shell["runs_unread"], shell["moves"]), (False, False))
+        # A backquote anywhere in the command is never read past (#3948):
+        # its lines are read as commands, as on origin/main.
+        shell = ro._shell("cat > n.txt <<'EOF'\n`./derive.sh`\nEOF", "/w", [])
+        self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
         # The lexer default, and every nested command, still reads the lines.
         self.assertEqual(ro._tokens("cat <<'EOF'\ncd /tmp\nEOF"), ["cat", "<<", "EOF", ";", "cd", "/tmp", ";", "EOF"])
 
@@ -4111,8 +4115,8 @@ class ShellLexer(Base):
     def test_a_body_ends_at_the_line_bash_ends_it_at(self):
         # With a quoted delimiter a trailing backslash is text, so the body
         # ends at the first `EOF` and `cd /tmp` runs (bash prints `foo\` and
-        # then `/tmp`); with an unquoted one bash joins the lines, `fooEOF`
-        # is no delimiter, and `cd /tmp` is body text.
+        # then the listing of /tmp); with an unquoted one bash joins the
+        # lines, `fooEOF` is no delimiter, and `cd /tmp` is body text.
         quoted = "cat <<'EOF'\nfoo\\\nEOF\ncd /tmp\nls"
         unquoted = "cat <<EOF\nfoo\\\nEOF\ncd /tmp\nEOF"
         self.assertIs(ro._shell(quoted, "/w", [])["moves"], True)
@@ -4121,6 +4125,79 @@ class ShellLexer(Base):
         self.assertIs(ro._shell(unquoted, "/w", [])["moves"], False)
         self.assertEqual([t for t in ro._tokens(unquoted, heredoc_data=True) if getattr(t, "heredoc", False)],
                          ["fooEOF\ncd /tmp"])
+        # Only an odd run of trailing backslashes joins (#3952): `foo\\\\` is
+        # an escaped backslash, the line is not joined, the body ends at the
+        # first `EOF` and bash runs `cd /tmp` and then a program `EOF` (not
+        # read, so the lines are read as commands); joining it would hide
+        # the `cd` in a body ending at the last `EOF`.
+        even = "cat <<EOF\nfoo\\\\\nEOF\ncd /tmp\nEOF"
+        self.assertIs(ro._shell(even, "/w", [])["moves"], True)
+        self.assertEqual(ro._tokens(even, heredoc_data=True), ro._tokens(even))
+
+    #: Here-documents whose `<<` or delimiter this does not read (#3947,
+    #: #3948): bash 5.3 runs `cd data` in each, then fails on the last line.
+    UNREAD_HEREDOCS = (
+        "cat <<\"E'F\"\nx\nE'F\ncd data\nEF",          # a quote inside the other kind
+        "cat <<\"E\\F\"\nx\nE\\F\ncd data\nEF",          # a backslash inside double quotes
+        "cat <<E\\'F\nx\nE'F\ncd data\nEF",            # an escaped quote
+        "cat <<\"E\\\"F\"\nx\nE\"F\ncd data\nEF",       # an escaped double quote
+        "cat <<$'E\\x41'\nx\nEA\ncd data\nEx41",       # an ANSI-C delimiter, `EA`
+        "cat <<\\EOF\nx\nEOF\ncd data\nEOF",           # an escaped plain word: not read either
+        "cat <<'E'F\nx\nEF\ncd data\nEOF",              # a partly quoted word
+        "echo ${x:-<<EOF }\ncd data\nEOF",              # `<<` in a parameter expansion
+        "echo ${x:-a<<b}\ncd data\nb}",
+        "echo $[1<<2]\ncd data\n2]",                    # `<<` as a shift
+        "echo $[1<<2 ]\ncd data\n2",
+        "echo $((1<<2))\ncd data\n2))",
+        "echo $((1<<2 ))\ncd data\n2",
+        "(( x <<2 ))\ncd data\n2",
+    )
+
+    def test_a_here_document_this_cannot_read_is_read_as_on_origin_main(self):
+        # Its lines are read as commands, the lexing origin/main had: the
+        # shell moves and runs a program not read, and with a body line
+        # `./derive.sh &` it is open-ended.
+        for command in self.UNREAD_HEREDOCS:
+            with self.subTest(command=command):
+                self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                shell = ro._shell(command, "/w", [])
+                self.assertEqual((shell["moves"], shell["runs_unread"]), (True, True))
+                shell = ro._shell(command.replace("cd data", "./derive.sh &"), "/w", [])
+                self.assertEqual((shell["moves"], shell["runs_unread"], shell["detaches"]), (True, True, True))
+        # A substitution's end is not read past such a delimiter either.
+        self.assertIsNone(ro._comsub_end("cat <<\"E'F\"\n)\nE'F\n) tail", 0))
+        self.assertIsNone(ro._comsub_end("cat <<$'E\\x41'\n)\nEA\n) tail", 0))
+        self.assertIsNone(ro._comsub_end("cat <<\\E\n)\nE\n) tail", 0))
+        # The two spellings read: a plain word, bare or wholly quoted.
+        for delimiter in ("EOF", "'EOF'", '"EOF"', "my_end-1.x"):
+            with self.subTest(delimiter=delimiter):
+                bare = delimiter.strip("'\"")
+                command = f"cat <<{delimiter}\nx\n{bare}\ncd data"
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+                self.assertIs(ro._shell(f"cat <<{delimiter}\ncd data\n{bare}", "/w", [])["moves"], False)
+
+    def test_a_here_document_this_cannot_read_does_not_place_a_later_derive(self):
+        # End to end: the shell is in `data/` when the relative `--full`
+        # derive runs, so it cannot be placed (origin/main: `unknown`).
+        for command in self.UNREAD_HEREDOCS:
+            with self.subTest(command=command):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+
+    def test_a_here_document_reader_excludes_rg_and_an_unplain_python(self):
+        # rg's `--pre` runs a command (#3952), and `./python3` is a program
+        # not read, whatever its name: the body's lines are commands.
+        for command in ("rg --pre sh x <<'EOF'\ncd /tmp\nEOF", "./python3 - <<'EOF'\ncd /tmp\nEOF"):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+                self.assertFalse(any(getattr(t, "heredoc", False)
+                                     for t in ro._tokens(command, heredoc_data=True) or []))
 
     def test_a_here_document_read_as_data_places_a_later_call(self):
         # A python heredoc whose body line starts with a bare word or a glob
@@ -4176,12 +4253,14 @@ class ShellLexer(Base):
         self.assertIsNone(ro._comsub_end("case x in x) ls", 0))
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
-        # A list-valued name raised TypeError in `_history` (#3918).
-        r = self.new_run()
-        r.write(r.receipt, PRE)
-        r.write(r.full, "id: x\n")
+        # A list-valued name raised TypeError in `_history` (#3918). Each
+        # name gets a run of its own, so no earlier case's reason can
+        # satisfy a later one's assertion (#3949).
         for name in (["Bash"], {"tool": "Bash"}, None, ""):
             with self.subTest(name=name):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
                 r.events.append({"type": "assistant", "message": {"content": [
                     {"type": "tool_use", "id": f"bad_{len(r.events)}", "name": name, "input": {"command": "ls"}}]}})
                 r.result(f"bad_{len(r.events) - 1}", "ok")

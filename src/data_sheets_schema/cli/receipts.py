@@ -409,7 +409,22 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s arguments to
     the end are read for a `&` and the like, and one carrying a word supplied at run
     time is open-ended (`bash -c "$X"`); and a command the tokenizer cannot split is
-    open-ended where any word in it starts with `$` or a backquote. A relative `--full`
+    open-ended where any word in it starts with `$` or a backquote. A command is
+    lexed as bash lexes it (#3830): a quoted or escaped operator (`';'`, `'&&'`,
+    `\\;`) is a word, never a join; a `$'...'` string closes where bash closes it,
+    past a `\\'`; a double-quoted `$(...)` runs to the `)` bash closes it at, past
+    a quoted `)`, a nested substitution, a here-document or a case pattern's `)`
+    (#3925); and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
+    is a program built at run time (#3924). A here-document body is one data word,
+    never commands of this shell (#3897), only where every part of the command is
+    a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
+    plain-named `python*` interpreter reading its program from the here-document
+    it carries (`python3 - <<'EOF'`, standard input); nothing substitutes; every
+    delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly
+    inside one pair of single or double quotes (#3947); and no `${`, `$[`, `$((`,
+    `((` or backquote appears anywhere in the command (#3948). Anywhere else, and
+    in a nested command string, the body's lines are read as commands. A tool
+    call whose name is not a non-empty string is a malformed call (#3918). A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`, and after one `eval` runs
     or may run it cannot be placed. Where the
