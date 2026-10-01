@@ -263,6 +263,18 @@ class TestTheScannerSees(unittest.TestCase):
         self.assertTrue(comment)
         self.assertFalse(any(h["violation"] for h in comment))
 
+    def test_a_controller_function_that_renders_model_text_is_model_facing(self):
+        """finalization_controls/contract.py:render_instruction writes the
+        Phase 4 instruction a native model receives (#4023): a project
+        sentence there is a violation; the same sentence in a function that
+        renders nothing for a model is not."""
+        rel = "notes/matched_cborg_2026-09-13/finalization_controls/contract.py"
+        self.assertIn("run_controllers", _discovered()[0].files[rel].approaches)
+        planted, _ = self._planted(rel, "def render_instruction_4026():\n    return 'Use the CHORUS release notes.'\n"
+                                        "def summarize_4026():\n    return 'Use the CHORUS release notes.'")
+        by_function = {h.get("model_text_function"): h["violation"] for h in planted if h["match"] == "CHORUS"}
+        self.assertEqual(by_function, {"render_instruction_4026": True, None: False})
+
     def test_text_above_the_prompt_body_is_header_not_model_facing(self):
         units = list(scan._markdown_units("# v9\nCHORUS rep2 changelog\n## Prompt body\nRead it.\n",
                                           prompt_header=True))
