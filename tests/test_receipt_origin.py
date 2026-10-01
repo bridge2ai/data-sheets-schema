@@ -988,7 +988,8 @@ class EditReplay(Base):
         r.derive()
         block = r.report()
         self.assertEqual(block["status"], "checked", block["reasons"])
-        self.assertEqual(block["instrument"], "receipt_origin v5 (#2933, #3047, #3369, #3693, #3782)")
+        self.assertEqual(block["instrument"], "receipt_origin v6 (#2933, #3047, #3369, #3693, #3782, #3830, "
+                                              "#3897)")
         self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 0})
         self.assertEqual(block["snippets"], {"pre_draft": 3, "at_derive_core": 4, "final": 4})
         self.assertEqual((block["receipt"]["writes"], block["receipt"]["edits"]), (1, 1))
@@ -2099,8 +2100,9 @@ class DeriveSpellings(Base):
                          f"xargs d4d derive <<< \"core --full {self.FULL} {self.OUT}\"",
                          f"xargs d4d derive <<< 'core --full {self.FULL} {self.OUT}'",
                          "xargs d4d derive < \"/tmp/my args-3374.txt\"",
-                         # #3458: a command shlex cannot split (an apostrophe in a
-                         # here-document body) is tested whole for the words
+                         # #3458: a command the lexer cannot split (an apostrophe in a
+                         # here-document body read as commands, as it is beside a
+                         # d4d part, #3897) is tested whole for the words
                          f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
                          f"poetry run d4d derive core --full {self.FULL} {self.OUT}",
                          f"cat > /tmp/notes-3374.txt <<EOF\nit's done\nEOF\n"
@@ -2333,8 +2335,9 @@ class DeriveSpellings(Base):
         # the tokenizer cannot split, and what stays unseen
         self.assertIn("and a `derive` with a redirection directly after it in an xargs command, "
                       "whatever follows (#3457)", text)
-        self.assertIn("A command the tokenizer cannot split (an apostrophe in a here-document body) is "
-                      "tested whole, quote characters removed, by the same rules (#3458)", text)
+        self.assertIn("A command the tokenizer cannot split (an unclosed quote, or an apostrophe in a "
+                      "here-document body read as commands) is tested whole, quote characters removed, by the "
+                      "same rules (#3458)", text)
         # #3478-#3480: the command-wide backstop, its cost, and what no rule sees
         self.assertIn("Last, a command-wide backstop (#3478-#3480): a call carrying more whole-word `derive`s "
                       "than these rules gave rows, whose raw text, quote and escape characters removed, carries the word `derive` as a "
@@ -2418,7 +2421,7 @@ class DeriveSpellings(Base):
                       "which parts a child runs is not read from the tokenizer's brackets and joins, where a "
                       "`)`, `|` or `&` may come from a case pattern, a here-document body, a backquote, a "
                       "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell "
-                      "grammar, #3830), and a case pattern is read as a command, so its word may count", text)
+                      "grammar), and a case pattern is read as a command, so its word may count", text)
         self.assertIn("where both hold the earlier change decides and the `--full` is not placed, as a recorded "
                       "directory may be inherited from the init event and is not trusted after a change (#3812), "
                       "even one the call's own event records (#3824), a false `unknown` in a transcript that "
@@ -2427,10 +2430,15 @@ class DeriveSpellings(Base):
         self.assertIn("Still not read: a function or alias named as a program read here (`cat() { cd x; }`), "
                       "defined in the session or by the profile the session's shell started with; a program bash "
                       "builds at run time behind `nohup`, `exec` or `command` (`nohup $X ./derive.sh`), which is "
-                      "not read as detaching; and, in a command the tokenizer cannot split, a program word built "
+                      "not read as detaching; in a command the tokenizer cannot split, a program word built "
                       "other than from a leading `$` or backquote (`set${X}sid`, a glob, a brace expansion), "
-                      "which is not read as detaching there (#3923); a brace expansion with a quoted or escaped "
-                      "space in it", text)
+                      "which is not read as detaching there (#3923); and what a program does with a "
+                      "here-document body read as its data", text)
+        # #3924 and #3925 are read now: no longer named as gaps.
+        for gone in ("which the tokenizer splits so it is not read as built at run time",
+                     "whose command is read only up to that `)`", "Both wait for a shell grammar"):
+            with self.subTest(gone=gone):
+                self.assertNotIn(gone, text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
                      "Still not read: a detaching program supplied at run time",
                      "runs in a child: it does not count", "unless the call's own event records",
@@ -2446,7 +2454,7 @@ class DeriveSpellings(Base):
         self.assertIn("One in a subshell, an unquoted command or process substitution (`(cd x)`, `$(cd x)`, "
                       "`<(cd x)`), a pipe's left side or a `&` job does not move the shell, but it counts all the "
                       "same, the rule's cost", flat)
-        self.assertIn("that waits for a shell grammar (#3830). A case pattern after the first on a `case ... in` line, or on a line of its own, is read as a command too", flat)
+        self.assertIn("that waits for a shell grammar (#3810). A case pattern after the first on a `case ... in` line, or on a line of its own, is read as a command too", flat)
         self.assertIn("such a part is read as after a change too, and, where no earlier call's change was seen, "
                       "a relative `--full` resolves against the recorded directory, where the call started "
                       "(#3798). Where both hold, the earlier change decides and the `--full` is not placed "
@@ -2554,7 +2562,8 @@ class DeriveSpellings(Base):
                       "invocation", doc)
         self.assertIn("one with a redirection directly after it in an xargs command, whatever follows the "
                       "redirection", doc)
-        self.assertIn("A command the tokenizer cannot split at all (an apostrophe in a here-document's body) "
+        self.assertIn("A command the tokenizer cannot split at all (an unclosed quote, or an apostrophe in a "
+                      "here-document body read as commands) "
                       "is not read part by part: it is tested whole, quote characters removed, for the same "
                       "words, and a match is a derive that cannot be placed (#3458)", doc)
         self.assertIn("as does one carrying any replacement string an `xargs` in the command sets", doc)
@@ -3059,9 +3068,15 @@ class UnseenDerive(Base):
         self.assertEqual(block["possible_unseen_derives"], [])
 
     def test_a_command_the_tokenizer_cannot_split_is_not_read(self):
-        # An apostrophe in a here-document body (#3458): its parts are not read.
-        identity, block = self._run("cat <<EOF\nit's\nEOF")
+        # An apostrophe in a here-document body read as commands (#3458): its
+        # parts are not read. A body with no delimiter line is read so.
+        identity, block = self._run("cat <<EOF\nit's")
         self.assertUnknown(block, f"Bash call {identity} (transcript 0 line 6) runs a program")
+        # One a reader takes as data is one word, and the reader is read
+        # (#3897): it runs nothing this does not read.
+        identity, block = self._run("cat > notes.txt <<EOF\nit's\nEOF")
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["possible_unseen_derives"], [])
 
     def test_an_unsplit_command_that_returned_before_the_draft_is_open_ended_only_as_its_text_says(self):
         # An absolute `--full`: an earlier call here may run a function or a sourced
@@ -3588,8 +3603,11 @@ class EarlierDirectoryChange(Base):
                                     ("echo cd", "/w", False), ("eval 'cd hack'", "/w", True),
                                     ("eval \"ls; pushd hack\"", "/w", True), ("eval ls", "/w", False),
                                     # A command the tokenizer cannot split counts (#3782).
-                                    ("cat <<EOF\nit's\nEOF", "/w", True),
-                                    ("cat <<EOF\nit's\nEOF\ncd /w", "/w", True),
+                                    ("cat <<EOF\nit's", "/w", True), ("cd /w; cat <<EOF\nit's", "/w", True),
+                                    # A body a reader takes as data is not lines of
+                                    # commands, whatever it says (#3897).
+                                    ("cat <<EOF\nit's\nEOF", "/w", False),
+                                    ("cat <<EOF\nit's\nEOF\nls", "/w", False),
                                     # #3797: behind a brace, a compound keyword,
                                     # `!`, `time`, `builtin` or `command`.
                                     ("{ cd hack; }", "/w", True), ("if true; then cd hack; fi", "/w", True),
@@ -3829,8 +3847,8 @@ class EarlierDirectoryChange(Base):
         # The scan follows bash's quoting: an escaped quote character opens
         # nothing, and `\'` inside `$'...'` does not close it, so the run
         # after each is split or kept as bash reads it.
-        self.assertEqual(ro._spaced_operators('echo \\" x);cd y'), 'echo \\" x) ;cd y')
-        self.assertEqual(ro._spaced_operators("echo $'it\\'s);' x);cd y"), "echo $'it\\'s);' x) ;cd y")
+        self.assertEqual(ro._tokens('echo \\" x);cd y'), ["echo", '"', "x", ")", ";", "cd", "y"])
+        self.assertEqual(ro._tokens("echo $'it\\'s);' x);cd y"), ["echo", "$it's);", "x", ")", ";", "cd", "y"])
         # `;;&` ends a case clause, a join; it starts nothing in the background.
         self.assertEqual(ro._layout(ro._tokens("a;;&b"))[0], [["a"], ["b"]])
         self.assertFalse(ro._shell("case x in a) ls;;& b) ls;; esac", "/w", [])["detaches"])
@@ -3897,9 +3915,10 @@ class EarlierDirectoryChange(Base):
                 with self.subTest(sub=sub, op=op, rule="detacher"):
                     self.assertTrue(ro._shell(f"{sub}{op}setsid ./derive.sh", "/w", [])["detaches"])
 
-    #: An apostrophe in a here-document's body: shlex cannot split a command
-    #: carrying it (#3458).
-    UNSPLIT = "; cat <<EOF\nit's\nEOF"
+    #: An apostrophe in a here-document's body, read as commands as one with
+    #: no delimiter line is: the lexer cannot split a command carrying it
+    #: (#3458, #3897).
+    UNSPLIT = "; cat <<EOF\nit's"
 
     def test_an_unsplit_command_reads_at_least_every_move_the_tokenised_path_reads(self):
         # The fallback reads the text for a directory or `eval` word, with
@@ -3922,8 +3941,8 @@ class EarlierDirectoryChange(Base):
                     self.assertIs(ro._shell(command + self.UNSPLIT, "/w", [])["moves"], True)
         # Every such command counts (#3782), not only one whose text carries
         # an `eval`, a quoted or substituted cd word (#3839) or a word
-        # starting with `$` or a backquote (#3844): a here-document body's
-        # lines are commands to the tokenised path, and any word at a
+        # starting with `$` or a backquote (#3844): a here-document body read
+        # as commands is lines of commands to the tokenised path, and any word at a
         # command's start may be a function, an alias or `source`. A false
         # `unknown` is the cost.
         for command in ("eval 'cd x'", "eval \"$GO\"", "eval ls", "X=`cd x`", "echo \"$(cd x)\"", "echo \\cd",
@@ -3990,6 +4009,185 @@ class EarlierDirectoryChange(Base):
             with self.subTest(earlier=earlier):
                 _, block = self._run(earlier, UnseenDerive.VALIDATE)
                 self.assertEqual(block["status"], "checked", block["reasons"])
+
+
+class ShellLexer(Base):
+    """The tokenizer lexes a command as bash does (#3830): quoted operators
+    are words, `$'...'` closes where bash closes it, a double-quoted
+    `$(...)` runs to the `)` bash closes it at (#3925), and a here-document
+    body every part of the command reads as data is one word, not lines of
+    commands (#3897). Each reading below was checked against bash 5.3: what
+    it prints, or `bash --pretty-print`'s parse."""
+
+    FULL = "/w/data/X_d4d.yaml"
+    DERIVE = f"d4d derive core --full {FULL} --out /w/o.yaml"
+
+    def test_a_quoted_or_escaped_operator_is_a_word_not_a_join(self):
+        # `printf '[%s]' ';' \; '&&' $'it\'s'` prints `[;][;][&&][it's]`.
+        for command, segments in (("find . -exec x {} ';'", [["find", ".", "-exec", "x", "{}", ";"]]),
+                                  ("find . -exec x {} \\;", [["find", ".", "-exec", "x", "{}", ";"]]),
+                                  ("echo '&&' b", [["echo", "&&", "b"]]),
+                                  ("echo \"|\" b", [["echo", "|", "b"]]),
+                                  ("echo ';' && ls", [["echo", ";"], ["ls"]])):
+            with self.subTest(command=command):
+                self.assertEqual(ro._layout(ro._tokens(command))[0], segments)
+        tokens = ro._tokens("echo ';' ; ls")
+        self.assertEqual([getattr(t, "quoted", False) for t in tokens], [False, True, False, False])
+        self.assertFalse(ro._punct(tokens[1]))
+        self.assertTrue(ro._punct(tokens[2]))
+        # The derive after a quoted `|` is the command's last part, joined by
+        # `;` alone: its status is the call's (origin/main read a pipe).
+        target = [ro._Target("full", self.FULL)]
+        [row] = ro._shell(f"echo '|' ; {self.DERIVE}", "/w", target)["derives"]
+        self.assertEqual((row["targets_full"], row["basis"]), (True, "command"))
+        # An unquoted operator still joins.
+        [row] = ro._shell(f"echo | {self.DERIVE}", "/w", target)["derives"]
+        self.assertEqual(row["basis"], "none")
+        # A quoted `&` is still a word a program may run as a command, read
+        # by the nested-word rule: never read as less open-ended than before.
+        self.assertTrue(ro._shell("./run.sh '&'", "/w", [])["detaches"])
+
+    def test_an_ansi_c_string_closes_where_bash_closes_it(self):
+        # `$'it\'s'` is one word, `it's`: shlex paired its quotes wrongly and
+        # could not split the command at all.
+        self.assertEqual(ro._tokens("echo $'it\\'s' && cd /w"), ["echo", "$it's", "&&", "cd", "/w"])
+        self.assertEqual(ro._tokens("echo $'a\\'b;' x; cd y"), ["echo", "$a'b;", "x", ";", "cd", "y"])
+        self.assertIs(ro._shell("echo $'it\\'s' && cd /w", "/w", [])["moves"], False)
+        self.assertIs(ro._shell("echo $'it\\'s' && cd /tmp", "/w", [])["moves"], True)
+        # The `$` is kept: as a program it is still a word built at run time.
+        self.assertTrue(ro._shell("$'cd' /tmp", "/w", [])["moves"])
+        self.assertTrue(ro._shell("$'setsid' ./derive.sh", "/w", [])["detaches"])
+        self.assertIsNone(ro._tokens("echo $'it\\'s"))
+
+    def test_a_here_document_body_is_data_where_every_part_reads_it_so(self):
+        # bash prints the body back as here-document text, not commands, and
+        # `cat <<'EOF'\ncd /tmp\nEOF\npwd` does not move the shell.
+        body = "cd /tmp\nx = d[\"k\"]\n$X ./derive.sh\nsource env.sh\nit's"
+        for command in (f"cat > notes.txt <<'EOF'\n{body}\nEOF", f"cat <<EOF | grep x\n{body}\nEOF",
+                        f"cat <<-EOF\n\t{body}\n\tEOF", f"ls && cat > n.txt <<\"EOF\"\n{body}\nEOF",
+                        f"cat <<'A'; cat <<'B'\n{body}\nA\n{body}\nB"):
+            with self.subTest(command=command):
+                shell = ro._shell(command, "/w", [])
+                self.assertEqual((shell["moves"], shell["runs_unread"]), (False, False))
+                words = [t for t in ro._tokens(command, heredoc_data=True) if getattr(t, "heredoc", False)]
+                self.assertTrue(words and all(w.replace("\t", "") == body for w in words), words)
+        # A python interpreter reading its program from the here-document it
+        # carries reads it as `python -c` reads a word: the body's
+        # `d["k"]` (a glob) and bare words are not a run-time program or a
+        # function this shell runs (#3897's corpus calls).
+        for command in ("/opt/py/bin/python - <<'EOF'\nx = d[\"k\"]\nprint(x)\nEOF",
+                        "/opt/py/bin/python3 -u <<'PY'\nimport json\nrows = [r for r in data]\nPY"):
+            with self.subTest(command=command):
+                shell = ro._shell(command, "/w", [])
+                self.assertEqual((shell["moves"], shell["detaches"], shell["runs_unread"]), (False, False, True))
+        # A quoted delimiter expands nothing: `cat <<'EOF'\n$(echo hi)\nEOF`
+        # prints `$(echo hi)`, so its body substitutes nothing and runs nothing.
+        shell = ro._shell("cat > n.txt <<'EOF'\n$(./derive.sh)\n`./derive.sh`\n<(./derive.sh)\nEOF", "/w", [])
+        self.assertEqual((shell["runs_unread"], shell["moves"]), (False, False))
+        # The lexer default, and every nested command, still reads the lines.
+        self.assertEqual(ro._tokens("cat <<'EOF'\ncd /tmp\nEOF"), ["cat", "<<", "EOF", ";", "cd", "/tmp", ";", "EOF"])
+
+    def test_a_here_document_something_may_run_is_still_read_as_commands(self):
+        # A shell, a pipe or a script into one, a program not read, an
+        # interpreter not reading its program from it, a substitution in an
+        # unquoted body, or no delimiter line: the body's lines are commands.
+        for command in ("/bin/bash <<'EOF'\ncd /tmp\nEOF", "cat <<'EOF' | /bin/bash\ncd /tmp\nEOF",
+                        "cat > s.sh <<'EOF'\ncd /tmp\nEOF\n/bin/bash s.sh", "/opt/bin/tool <<'EOF'\ncd /tmp\nEOF",
+                        "/opt/py/bin/python x.py <<'EOF'\ncd /tmp\nEOF",
+                        "/opt/py/bin/python -c 'import sys' <<'EOF'\ncd /tmp\nEOF",
+                        "cat > x.py <<'EOF'\ncd /tmp\nEOF\n/opt/py/bin/python - < x.py",
+                        "cat <<EOF\n$(cd /tmp)\nEOF", "cat <<EOF\n`cd /tmp`\nEOF", "cat <<'EOF'\ncd /tmp",
+                        "cat <<'EOF'\ncd /tmp\nEOF\necho \"$(pwd)\"", "xargs -I{} sh -c {} <<'EOF'\ncd /tmp\nEOF",
+                        "sed -f /dev/stdin f <<'EOF'\ncd /tmp\nEOF", "cat <<'EOF'\ncd /tmp\nEOF\nd4d receipts check"):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+                self.assertFalse(any(getattr(t, "heredoc", False)
+                                     for t in ro._tokens(command, heredoc_data=True) or []))
+        for command in ("bash <<'EOF'\n$X ./derive.sh\nEOF", "cat <<'EOF' | bash\n$X ./derive.sh\nEOF",
+                        "cat > s.sh <<'EOF'\n$X ./derive.sh\nEOF\nbash s.sh"):
+            with self.subTest(command=command):
+                self.assertTrue(ro._shell(command, "/w", [])["detaches"])
+
+    def test_a_body_ends_at_the_line_bash_ends_it_at(self):
+        # With a quoted delimiter a trailing backslash is text, so the body
+        # ends at the first `EOF` and `cd /tmp` runs (bash prints `foo\` and
+        # then `/tmp`); with an unquoted one bash joins the lines, `fooEOF`
+        # is no delimiter, and `cd /tmp` is body text.
+        quoted = "cat <<'EOF'\nfoo\\\nEOF\ncd /tmp\nls"
+        unquoted = "cat <<EOF\nfoo\\\nEOF\ncd /tmp\nEOF"
+        self.assertIs(ro._shell(quoted, "/w", [])["moves"], True)
+        self.assertEqual([t for t in ro._tokens(quoted, heredoc_data=True) if getattr(t, "heredoc", False)],
+                         ["foo\\"])
+        self.assertIs(ro._shell(unquoted, "/w", [])["moves"], False)
+        self.assertEqual([t for t in ro._tokens(unquoted, heredoc_data=True) if getattr(t, "heredoc", False)],
+                         ["fooEOF\ncd /tmp"])
+
+    def test_a_here_document_read_as_data_places_a_later_call(self):
+        # A python heredoc whose body line starts with a bare word or a glob
+        # no longer reads as a possible function or run-time program, so the
+        # next call's relative `--full` is placed (#3897).
+        for earlier, placed in (("/opt/py/bin/python - <<'EOF'\nx = d[\"k\"]\nrun(x)\nEOF", True),
+                                ("/bin/bash <<'EOF'\nrun x\nEOF", False)):
+            with self.subTest(earlier=earlier):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(earlier)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                block = r.report()
+                if placed:
+                    self.assertEqual(block["status"], "checked", block["reasons"])
+                    self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], derive)
+                else:
+                    self.assertUnknown(block, f"derive core {derive} cannot be placed")
+
+    def test_a_brace_expansion_with_a_quoted_blank_is_built_at_run_time(self):
+        # `for w in {echo,'a b'}` iterates `echo` and `a b`: bash expands the
+        # braces around a quoted blank (#3924).
+        for command in ("{cd,'/tmp a b'}", "{cd,/tmp\\ a}", "{cd,\"/tmp a\"} && ls"):
+            with self.subTest(command=command):
+                self.assertIs(ro._shell(command, "/w", [])["moves"], True)
+        self.assertTrue(ro._shell("{setsid,'./derive script.sh'}", "/w", [])["detaches"])
+        target = [ro._Target("full", "/w/data/X_d4d.yaml")]
+        [row] = ro._shell("{cd,'/tmp a b'} && d4d derive core --full data/X_d4d.yaml --out o.yaml", "/w",
+                          target)["derives"]
+        self.assertIsNone(row["targets_full"])
+
+    def test_a_case_pattern_does_not_end_a_quoted_substitution(self):
+        # `X=echo; echo "$(case x in x) $X inner-ran;; esac)"` prints
+        # `inner-ran`: the pattern's `)` is not the substitution's (#3925).
+        word = "$(case x in x) $X ./derive.sh;; esac)"
+        self.assertEqual(ro._substitution_bodies(word), ["case x in x) $X ./derive.sh;; esac"])
+        self.assertEqual(ro._comsub_end(word, 2), len(word))
+        for command in (f"echo \"{word}\"", "echo \"$(case x in (x) $X ./derive.sh;; esac)\"",
+                        "echo \"$(case x in a|b) ls;; x) $X ./derive.sh;; esac)\"",
+                        "echo \"$(echo ')'; $X ./derive.sh)\"", "echo \"$(echo \")\"; $X ./derive.sh)\""):
+            with self.subTest(command=command):
+                self.assertTrue(ro._shell(command, "/w", [])["detaches"])
+        # A quoted `)`, a nested substitution or a here-document inside one
+        # does not end the word either: `echo "$(echo ")"; echo y)"` prints
+        # `)` and `y`.
+        self.assertEqual(ro._tokens("echo \"$(echo \")\"; cd x)\" && ls"),
+                         ["echo", "$(echo \")\"; cd x)", "&&", "ls"])
+        self.assertEqual(ro._comsub_end("cat <<'E'\n)\nE\n) tail", 0), len("cat <<'E'\n)\nE\n)"))
+        self.assertEqual(ro._comsub_end("echo $(a) ')' \\) \"$(b)\") tail", 0), len("echo $(a) ')' \\) \"$(b)\")"))
+        self.assertIsNone(ro._comsub_end("case x in x) ls", 0))
+
+    def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
+        # A list-valued name raised TypeError in `_history` (#3918).
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        for name in (["Bash"], {"tool": "Bash"}, None, ""):
+            with self.subTest(name=name):
+                r.events.append({"type": "assistant", "message": {"content": [
+                    {"type": "tool_use", "id": f"bad_{len(r.events)}", "name": name, "input": {"command": "ls"}}]}})
+                r.result(f"bad_{len(r.events) - 1}", "ok")
+                block = r.report()
+                self.assertUnknown(block, "whose name is not a non-empty string")
+                self.assertFalse(any("no earlier call" in reason for reason in block["reasons"]))
 
 
 class RuntimeDenial(Base):
@@ -4290,8 +4488,9 @@ class Cli(unittest.TestCase):
                       "appends after a `derive` that ends its command, redirections such as `2>&1` aside, "
                       "or after a `derive` with a redirection directly after it) cannot be placed either",
                       text)                                                               # #3426, #3453, #3457
-        self.assertIn("A command the tokenizer cannot split (an apostrophe in a heredoc body) is tested "
-                      "whole for the same words, and a match cannot be placed", text)      # #3458
+        self.assertIn("A command the tokenizer cannot split (an unclosed quote, or an apostrophe in a "
+                      "heredoc body read as commands) is tested whole for the same words, and a match cannot "
+                      "be placed", text)                                                  # #3458, #3897
         self.assertNotIn("supplying `derive` itself) is not seen", text)
         self.assertIn("A derive whose words are not on the command line (a script, an alias, a variable "
                       "supplying `derive` itself, `python -c` building the arguments) is placed by position: a "
@@ -4324,7 +4523,7 @@ class Cli(unittest.TestCase):
         # #3699, #3719, #3723, #3782, #3797, #3812, #3815; #3824 stays open
         self.assertIn("A change in a subshell, an unquoted `$(...)`, `<(...)` or `>(...)`, a pipe's left side "
                       "or a `&` job counts too, though it runs in a child: which parts a child runs is not read "
-                      "(#3830); one in a backquoted or double-quoted substitution is not read; and a command the "
+                      "(#3810); one in a backquoted or double-quoted substitution is not read; and a command the "
                       "tokenizer cannot split counts. Where the transcript records another directory and no "
                       "earlier change was seen, such a part counts as after a change too, and a relative `--full` "
                       "resolves against the recorded directory.", text)          # #3782, #3798, #3810, #3841

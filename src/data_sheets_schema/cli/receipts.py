@@ -358,8 +358,8 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     string it sets, such as `-I%` or `-J %`, or the word xargs appends after a `derive` that
     ends its command, redirections such as `2>&1` aside, or after a `derive` with a
     redirection directly after it) cannot be placed either. A command the tokenizer
-    cannot split (an apostrophe in a heredoc body) is tested whole for the same
-    words, and a match cannot be placed, and so does a derive call with a
+    cannot split (an unclosed quote, or an apostrophe in a heredoc body read as
+    commands) is tested whole for the same words, and a match cannot be placed, and so does a derive call with a
     redirection among its words (`--full 2>/dev/null F`). Last, a command-wide
     backstop: a call carrying more `derive` words than these rules gave
     rows, whose raw text with quotes
@@ -396,7 +396,7 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     such a part counts as after a directory change, and a relative `--full` cannot be
     placed, even where the transcript records a directory for the call. A change in a
     subshell, an unquoted `$(...)`, `<(...)` or `>(...)`, a pipe's left side or a `&` job
-    counts too, though it runs in a child: which parts a child runs is not read (#3830);
+    counts too, though it runs in a child: which parts a child runs is not read (#3810);
     one in a backquoted or double-quoted substitution is not read; and a command the
     tokenizer cannot split counts. Where the transcript records another directory and no
     earlier change was seen, such a part counts as after a change too, and a relative

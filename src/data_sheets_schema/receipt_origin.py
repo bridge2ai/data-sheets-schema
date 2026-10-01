@@ -87,9 +87,10 @@ shell's redirections are set aside (`2>&1`, `>log`, `< args`, #3453), and one wi
 redirection directly after it in an xargs command, whatever follows the
 redirection, since a quoted target holding spaces cannot be told from
 arguments there (`xargs d4d derive <<< "core ..."`, #3457). A command the
-tokenizer cannot split at all (an apostrophe in a here-document's body)
-is not read part by part: it is tested whole, quote characters removed,
-for the same words, and a match is a derive that cannot be placed (#3458),
+tokenizer cannot split at all (an unclosed quote, or an apostrophe in a
+here-document body read as commands) is not read part by part: it is
+tested whole, quote characters removed, for the same words, and a match
+is a derive that cannot be placed (#3458),
 a reader's words included. So is a reader part that carries them where a
 pipe later in the command feeds a program not known to read (`echo '...
 derive core ...' | bash`, `| xargs d4d`, #3384), and, in a command that
@@ -169,7 +170,7 @@ child runs is not read from the tokenizer's brackets and joins, since a
 `)` or `|` it returns may come from a case pattern, a here-document
 body, a backquote, a `${...}` or an arithmetic `$((...))`, where reading
 it so placed a `--full` after a real change (#3810, #3904, #3911,
-#3912); that waits for a shell grammar (#3830). A case pattern after
+#3912); that waits for a shell grammar (#3810). A case pattern after
 the first on a `case ... in` line, or on a line of its own, is read as a
 command too (`a)`, `*)`), so its word may count; the first is read with
 its `case` word. One in a
@@ -230,6 +231,21 @@ moves the directory a later part's `--full` resolves against only where
 that part runs only if the change ran and succeeded -- reached by `;` or
 `&&` and followed by `&&` alone up to the part; otherwise, and in a
 multi-line command, the directory is not known (#3268).
+The command is lexed as bash lexes it (#3830): a quoted or escaped
+operator (`';'`, `'&&'`, `\\;`) is a word, never a join; a `$'...'`
+string closes where bash closes it, past a `\\'`; and a double-quoted
+`$(...)` runs to the `)` bash closes it at, past a quoted `)`, a
+here-document or a case pattern's `)` (#3925). A brace expansion with a
+quoted blank in it (`{cd,'/tmp a b'}`) is still read as built at run time
+(#3924). A here-document's body is data, never a command of this shell
+(#3897): where every part of the command is a reader, a builtin `cd`,
+`pushd` or `popd`, or a `python*` interpreter reading its program from
+the here-document it carries (`python3 - <<'EOF'`), and nothing in it
+substitutes, the body is one word, read as a `<<<` string or a `python
+-c` program is. Anywhere else -- a shell, `eval`, `source`, `xargs`, a
+program not read, a pipe into one, a body that substitutes -- something
+may run the body as commands, so its lines are read as commands, as
+before; so are those of a here-document in a nested command string.
 
 The status is `unknown`, with every reason, and no classification is
 reported when the history cannot be rebuilt: a transcript is missing,
@@ -274,7 +290,6 @@ import hashlib
 import json
 import os
 import re
-import shlex
 import unicodedata
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -282,7 +297,7 @@ from typing import Any
 
 import yaml
 
-INSTRUMENT = "receipt_origin v5 (#2933, #3047, #3369, #3693, #3782)"
+INSTRUMENT = "receipt_origin v6 (#2933, #3047, #3369, #3693, #3782, #3830, #3897)"
 ORIGINS = ("contemporaneous", "phase1_correction", "phase3_backport")
 
 #: The native runtime's refusal to overwrite a file the session has not read
@@ -422,8 +437,8 @@ NON_CHECKS = (
     "`<(cd x)`), a pipe's left side or a `&` job does not move the shell but counts all the same, "
     "the rule's cost: which parts a child runs is not read from the tokenizer's brackets and joins, "
     "where a `)`, `|` or `&` may come from a case pattern, a here-document body, a backquote, a "
-    "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell grammar, "
-    "#3830), and a case pattern is read as a command, so its word may count; one in a backquoted or "
+    "`${...}` or an arithmetic `$((...))` (#3810, #3904, #3911, #3912; it waits for a shell "
+    "grammar), and a case pattern is read as a command, so its word may count; one in a backquoted or "
     "double-quoted substitution is kept in "
     "one word, not read, and moves nothing (#3841), though a backquoted command with a space is "
     "split and its pieces read as parts; and a command the tokenizer cannot split counts, whatever "
@@ -452,13 +467,15 @@ NON_CHECKS = (
     "in it starts with `$` or a backquote. Still not read: a function or alias named as a program "
     "read here (`cat() { cd x; }`), defined in the session or by the profile the session's shell "
     "started with; a program bash builds at run time behind `nohup`, `exec` or `command` "
-    "(`nohup $X ./derive.sh`), which is not read as detaching; and, in a command the tokenizer "
+    "(`nohup $X ./derive.sh`), which is not read as detaching; in a command the tokenizer "
     "cannot split, a program word built other than from a leading `$` or backquote (`set${X}sid`, "
-    "a glob, a brace expansion), which is not read as detaching there (#3923); a brace expansion "
-    "with a quoted or escaped space in it (`{cd,'/tmp/a b'}`, `{setsid,'./derive script.sh'}`), "
-    "which the tokenizer splits so it is not read as built at run time (#3924); and a substitution "
-    "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
-    "command is read only up to that `)` (#3925). Both wait for a shell grammar (#3830). "
+    "a glob, a brace expansion), which is not read as detaching there (#3923); and what a program "
+    "does with a here-document body read as its data: where every part of the command is a reader, "
+    "a builtin `cd`, `pushd` or `popd`, or a `python*` interpreter reading its program from the "
+    "here-document it carries, and nothing substitutes, the body is one word, read as a `<<<` string "
+    "or a `python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it "
+    "carries (`os.system(\"$X ./derive.sh\")`) is read as the same program given to `python -c` is; "
+    "anywhere else the body's lines are read as commands (#3897). "
     "A d4d call whose program, "
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
@@ -472,7 +489,8 @@ NON_CHECKS = (
     "command that sets none, where xargs appends the word (#3426), redirections (`2>&1`, "
     "`>log`, `< args`) aside, since they are the shell's (#3453), and a `derive` with a "
     "redirection directly after it in an xargs command, whatever follows (#3457). A command "
-    "the tokenizer cannot split (an apostrophe in a here-document body) is tested whole, "
+    "the tokenizer cannot split (an unclosed quote, or an apostrophe in a here-document body read "
+    "as commands) is tested whole, "
     "quote characters removed, by the same rules (#3458). A derive call with a redirection "
     "among its words (`--full 2>/dev/null F`) cannot be placed (#3478). Last, a command-wide "
     "backstop (#3478-#3480): a call carrying more whole-word `derive`s than these rules gave "
@@ -633,6 +651,16 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
                 identity = block.get("id")
                 if kind != "assistant" or not isinstance(identity, str) or not identity:
                     malformed.append(f"transcript {t} line {n}: tool call without an id or outside an assistant event")
+                    continue
+                # A name that is not a string (a list, a mapping) names no
+                # tool: the call is malformed, never looked up (#3918). Its id
+                # is kept, so its result is paired and not reported again.
+                if not isinstance(block.get("name"), str) or not block["name"]:
+                    malformed.append(f"transcript {t} line {n}: tool call {identity} whose name is not a "
+                                     "non-empty string")
+                    if identity in by_id:
+                        duplicated.add(identity)
+                    by_id[identity] = None
                     continue
                 if identity in by_id:
                     duplicated.add(identity)
@@ -951,45 +979,6 @@ _UNSPLIT_REMOVED = re.compile(r"\$(?=['\"])|[\"'\\]")
 _PROCESS_SUBSTITUTION = re.compile(r"[<>]\(")
 
 
-def _newlines_as_joins(command: str) -> str:
-    """The (comment-free) command with each unquoted newline read as the
-    command separator it is to bash. shlex takes a newline for a space, so
-    `cd data\\nd4d derive core ...` was one part whose program is `cd`, and
-    the derive on the second line was never seen (#3268). A newline inside
-    quotes stays text. A here-document's body lines become parts too, which
-    can only add a part: never a known directory or a read-only call, since
-    a multi-line command is neither."""
-    out: list[str] = []
-    i, n = 0, len(command)
-    quote: str | None = None
-    while i < n:
-        ch = command[i]
-        if quote is not None:
-            if ch == "\\" and quote != "'" and i + 1 < n:
-                out.append(command[i:i + 2])
-                i += 2
-                continue
-            out.append(ch)
-            if ch == quote[-1]:
-                quote = None
-            i += 1
-            continue
-        if ch == "\\" and i + 1 < n:
-            out.append(command[i:i + 2])
-            i += 2
-            continue
-        if ch == "$" and command[i + 1:i + 2] == "'":
-            quote = "$'"
-            out.append("$'")
-            i += 2
-            continue
-        if ch in "'\"":
-            quote = ch
-        out.append(" ; " if ch == "\n" else ch)
-        i += 1
-    return "".join(out)
-
-
 #: bash's operators, longest first: its lexer takes the longest operator
 #: at each point, and `_tokens` splits a run of operator characters the
 #: same way (#3825). A function definition's `()` is kept as one word, as
@@ -1023,83 +1012,580 @@ def _split_operators(run: str) -> list[str]:
     return out
 
 
-def _spaced_operators(text: str) -> str:
-    """`text` with each unquoted, unescaped run of operator characters
-    written as the operators bash reads in it, a space between each
-    (#3825). shlex's `punctuation_chars` returns such a run as one token,
-    so the `)` closing an unquoted `$(...)` came back joined to the
-    operator after it (`$(pwd);cd data` gave `);`, and `$(pwd)&&cd` gave
-    `)&&`), which `_layout` does not read as a join: the command after it
-    stayed inside the substitution's part, and no rule that reads a part's
-    head (a directory change, `eval`, a brace or keyword prefix, a derive,
-    a validator, a reader) saw it. A quoted run (`grep '<(' f`, `echo
-    ');'`) is text and is left as written."""
-    out: list[str] = []
-    i, n = 0, len(text)
-    quote: str | None = None
-    while i < n:
-        ch = text[i]
-        if quote is not None:
-            if ch == "\\" and quote != "'" and i + 1 < n:
-                out.append(text[i:i + 2])
+class _Word(str):
+    """A token of a shell command, and whether any character of it was
+    quoted or escaped (#3830). bash reads an operator only where its
+    characters are unquoted, so `find . -exec x {} ';'`, `echo '&&' b` and
+    `\\;` carry words, never joins; the lexer marks such a word `quoted`, and
+    every rule that reads an operator reads only an unquoted one. A
+    here-document body read as its command's data (`_lex`, #3897) is a
+    quoted word with `heredoc` set."""
+
+    quoted = False
+    heredoc = False
+    #: A body whose delimiter was quoted: bash expands nothing in it.
+    unexpanded = False
+
+    def __new__(cls, text: str, quoted: bool = False, heredoc: bool = False, unexpanded: bool = False):
+        word = super().__new__(cls, text)
+        word.quoted, word.heredoc, word.unexpanded = quoted, heredoc, unexpanded
+        return word
+
+
+def _punct(token: str) -> bool:
+    """Whether a token is an operator the lexer read unquoted: operator
+    characters only (`&`, `;`, `>&`, ...), none quoted or escaped (#3830).
+    A quoted `';'` or `'&'` is a word bash passes to its program."""
+    return not getattr(token, "quoted", False) and set(token) <= _PUNCT
+
+
+class _Fallback(Exception):
+    """A here-document the lexer does not read as data: the command is
+    lexed again with its body lines read as commands, as before (#3897)."""
+
+
+#: Words after which bash still reads the next word as a command's start:
+#: the reserved words a command may follow, `!` and `time`. `_comsub_end`
+#: reads a `case` there (#3925).
+_COMMAND_FOLLOWS = frozenset({"if", "then", "else", "elif", "while", "until", "do", "!", "{", "time"})
+
+
+def _quoted_end(text: str, i: int) -> int | None:
+    """The index after a quoted span starting at `text[i]` (`'...'`,
+    `$'...'` or `"..."`), or None when it does not close. A double-quoted
+    span may carry `$(...)`, read to its own `)` (`_comsub_end`)."""
+    n = len(text)
+    if text.startswith("$'", i):
+        i += 2
+        while i < n:
+            if text[i] == "\\":
                 i += 2
+            elif text[i] == "'":
+                return i + 1
+            else:
+                i += 1
+        return None
+    if text[i] == "'":
+        end = text.find("'", i + 1)
+        return None if end < 0 else end + 1
+    i += 1                                          # a double quote
+    while i < n:
+        c = text[i]
+        if c == "\\":
+            i += 2
+        elif c == '"':
+            return i + 1
+        elif text.startswith("$(", i) and not text.startswith("$((", i):
+            end = _comsub_end(text, i + 2)
+            if end is None:
+                return None
+            i = end
+        elif c == "`":
+            end = _backquote_end(text, i)
+            if end is None:
+                return None
+            i = end
+        else:
+            i += 1
+    return None
+
+
+def _backquote_end(text: str, i: int) -> int | None:
+    """The index after a backquoted command starting at `text[i]`: the next
+    unescaped backquote, or None."""
+    j = i + 1
+    while j < len(text):
+        if text[j] == "\\":
+            j += 2
+        elif text[j] == "`":
+            return j + 1
+        else:
+            j += 1
+    return None
+
+
+def _paren_end(text: str, i: int) -> int | None:
+    """The index after the `)` balancing the `(` at `text[i]`, quoted spans
+    skipped: an arithmetic `$((...))` or a `${...}`'s brace, read the same
+    way with `{`/`}`."""
+    opening = text[i]
+    closing = {"(": ")", "{": "}"}[opening]
+    depth, n = 0, len(text)
+    while i < n:
+        c = text[i]
+        if c == "\\":
+            i += 2
+            continue
+        if c in "'\"" or text.startswith("$'", i):
+            end = _quoted_end(text, i)
+            if end is None:
+                return None
+            i = end
+            continue
+        if c == opening:
+            depth += 1
+        elif c == closing:
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    return None
+
+
+def _word_end(text: str, i: int) -> int | None:
+    """The index after the shell word starting at `text[i]`, read as bash
+    reads it inside a command substitution: quoted spans, escapes, `$(...)`,
+    `$((...))`, `${...}` and backquotes are part of it; an unquoted blank
+    or metacharacter ends it. None where a span does not close."""
+    n = len(text)
+    while i < n:
+        c = text[i]
+        if c in " \t\r\n;&|()<>":
+            return i
+        if c == "\\":
+            if i + 1 >= n:
+                return None
+            i += 2
+        elif c in "'\"" or text.startswith("$'", i):
+            end = _quoted_end(text, i)
+            if end is None:
+                return None
+            i = end
+        elif text.startswith("$((", i):
+            end = _paren_end(text, i + 1)
+            if end is None:
+                return None
+            i = end
+        elif text.startswith("$(", i):
+            end = _comsub_end(text, i + 2)
+            if end is None:
+                return None
+            i = end
+        elif text.startswith("${", i):
+            end = _paren_end(text, i + 1)
+            if end is None:
+                return None
+            i = end
+        elif c == "`":
+            end = _backquote_end(text, i)
+            if end is None:
+                return None
+            i = end
+        else:
+            i += 1
+    return i
+
+
+def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
+    """After a `<<` (and a `<<-`'s `-`): the delimiter word, whether any of
+    it was quoted (bash then expands nothing in the body), and the index
+    after it; None where the word is missing or is one this does not read
+    (a `$` or backquote in it, or a span that does not close)."""
+    n = len(text)
+    while i < n and text[i] in " \t":
+        i += 1
+    end = _word_end(text, i)
+    if end is None or end == i:
+        return None
+    raw = text[i:end]
+    if "$" in raw.replace("$'", "") or "`" in raw:
+        return None
+    quoted = any(c in raw for c in "'\"\\")
+    word = re.sub(r"\\(.)", r"\1", raw.replace("$'", "'"))
+    word = word.replace("'", "").replace('"', "")
+    return (word, quoted, end) if word else None
+
+
+def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
+                      expands: bool = False) -> tuple[str, int] | None:
+    """A here-document's body from `text[i]`, the start of the line after
+    its command's line, to the line that is its delimiter (leading tabs
+    removed first for `<<-`), and the index after that line; None where no
+    line closes it. Where the delimiter was not quoted (`expands`) a line
+    ending in an unescaped backslash continues on the next, as bash joins
+    them, before it is compared."""
+    lines: list[str] = []
+    n = len(text)
+    while i < n:
+        line, after = "", i
+        while True:
+            end = text.find("\n", after)
+            piece = text[after:] if end < 0 else text[after:end]
+            after = n if end < 0 else end + 1
+            trailing = len(piece) - len(piece.rstrip("\\"))
+            if expands and end >= 0 and trailing % 2 == 1:
+                line += piece[:-1]
                 continue
-            out.append(ch)
-            if ch == quote[-1]:
-                quote = None
+            line += piece
+            break
+        if dash:
+            line = line.lstrip("\t")
+        if line == delimiter:
+            return "\n".join(lines), after
+        lines.append(line)
+        i = after
+    return None
+
+
+def _comsub_end(text: str, i: int) -> int | None:
+    """The index after the `)` that closes a command substitution whose
+    command starts at `text[i]` (just after its `$(`), as bash finds it: by
+    reading the command, so a `)` that is quoted, escaped, in a nested
+    substitution or here-document body, or that closes a case pattern
+    (`$(case x in x) ls;; esac)`, #3925) does not close it. None where
+    nothing does. `case` is read where a command starts, and a pattern
+    list from its `in` to each `)`."""
+    n = len(text)
+    depth = 0
+    cases: list[str] = []                           # "subject", "in", "pattern", "body"
+    heredocs: list[tuple[str, bool, bool]] = []
+    command = True
+    while i < n:
+        c = text[i]
+        if c == "\n":
+            i += 1
+            command = True
+            for delimiter, dash, expands in heredocs:
+                body = _heredoc_body_end(text, i, delimiter, dash, expands)
+                if body is None:
+                    return None
+                i = body[1]
+            heredocs = []
+            continue
+        if c in " \t\r":
             i += 1
             continue
-        if ch == "\\" and i + 1 < n:
-            out.append(text[i:i + 2])
+        if c == "#":
+            end = text.find("\n", i)
+            if end < 0:
+                return None
+            i = end
+            continue
+        if c in ";&|":
+            op = next(o for o in (";;&", ";;", ";&", "&&", "||", "|&", c) if text.startswith(o, i))
+            if op in (";;&", ";;", ";&") and cases and cases[-1] == "body":
+                cases[-1] = "pattern"
+            i += len(op)
+            command = True
+            continue
+        if c == "(":
+            if not (cases and cases[-1] == "pattern"):
+                depth += 1                          # a pattern's optional `(` opens nothing
+            i += 1
+            command = True
+            continue
+        if c == ")":
+            if cases and cases[-1] == "pattern":
+                cases[-1] = "body"
+                command = True
+            elif depth == 0:
+                return i + 1
+            else:
+                depth -= 1
+                command = False
+            i += 1
+            continue
+        if c in "<>":
+            if text.startswith("<<<", i):
+                i += 3
+            elif text.startswith("<<", i):
+                dash = text.startswith("<<-", i)
+                found = _heredoc_delimiter(text, i + 2 + dash)
+                if found is None:
+                    return None
+                heredocs.append((found[0], dash, not found[1]))
+                i = found[2]
+            elif text[i + 1:i + 2] == "(":
+                depth += 1                          # a process substitution's command
+                i += 2
+                command = True
+                continue
+            else:
+                i += 1
+                while i < n and text[i] in ">&|":
+                    i += 1
+            command = False
+            continue
+        end = _word_end(text, i)
+        if end is None:
+            return None
+        word = text[i:end]
+        i = end
+        if cases and cases[-1] == "subject":
+            cases[-1] = "in"
+        elif cases and cases[-1] == "in":
+            if word == "in":
+                cases[-1] = "pattern"
+        elif cases and cases[-1] == "pattern":
+            if word == "esac":
+                cases.pop()
+        elif command and word == "case":
+            cases.append("subject")
+        elif command and word == "esac" and cases and cases[-1] == "body":
+            cases.pop()
+        command = command and word in _COMMAND_FOLLOWS
+    return None
+
+
+def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
+    """The words and operators of `text` as bash's lexer reads them, and
+    the text with comments and here-document bodies removed; None where a
+    quote or an escape does not close, as for shlex (#3830). A
+    backslash-newline outside a here-document body is a blank, as the
+    shlex tokenizer read it once `_lex` had replaced each with a space.
+
+    - A word's quotes and escapes are removed and it is marked `quoted`
+      where it had any; `$'...'` is read as bash reads it, so a `\\'` in it
+      does not close it (shlex kept its `$` and paired its quotes wrongly),
+      and the `$` is kept, so such a word still reads as one built at run
+      time where it stands as a program.
+    - A double-quoted `$(...)` is read to its own `)` (`_comsub_end`), so a
+      quote, a case pattern's `)` or a here-document inside it does not end
+      the word; its text is kept as written, for `_substitution_bodies`.
+    - Each unquoted run of operator characters is split into bash's
+      operators (#3825), an unquoted newline is a `;`, and a `#` at a
+      word's start begins a comment where `heredocs` is set (the caller has
+      removed comments otherwise, `_strip_comments`).
+    - Where `heredocs` is set, each `<<` or `<<-` here-document's body is
+      read to its delimiter line and replaced, in the place of that
+      delimiter word, by one quoted word carrying the body (`heredoc`):
+      data, as a `<<<` string is, never a command of this shell (#3897).
+      One this cannot read (a `$` in its delimiter, no delimiter line)
+      raises `_Fallback`."""
+    tokens: list[_Word] = []
+    scan: list[str] = []
+    buf: list[str] = []
+    quoted = in_word = False
+    delimiter_next: bool | None = None              # after `<<`: whether it was `<<-`
+    pending: list[tuple[int, str, bool, bool]] = []  # (token index, delimiter, quoted, dash)
+    i, n = 0, len(text)
+
+    def end_word() -> None:
+        nonlocal buf, quoted, in_word
+        if in_word:
+            tokens.append(_Word("".join(buf), quoted))
+        buf, quoted, in_word = [], False, False
+
+    while i < n:
+        ch = text[i]
+        if heredocs and delimiter_next is not None and ch not in " \t":
+            found = _heredoc_delimiter(text, i)
+            if found is None or text[i:found[2]].strip() == "":
+                raise _Fallback
+            pending.append((len(tokens), found[0], found[1], delimiter_next))
+            tokens.append(_Word(found[0], found[1]))
+            scan.append(text[i:found[2]])
+            delimiter_next = None
+            i = found[2]
+            continue
+        if ch == "\\":
+            if i + 1 >= n:
+                return None
+            if text[i + 1] == "\n":                 # a line continuation: a blank, as before
+                end_word()
+                scan.append(" ")
+                i += 2
+                continue
+            buf.append(text[i + 1])
+            scan.append(text[i:i + 2])
+            quoted = in_word = True
             i += 2
             continue
-        if ch == "$" and text[i + 1:i + 2] == "'":
-            quote = "$'"
-            out.append("$'")
-            i += 2
+        if ch == "'":
+            end = text.find("'", i + 1)
+            if end < 0:
+                return None
+            buf.append(text[i + 1:end].replace("\\\n", " "))
+            scan.append(text[i:end + 1])
+            quoted = in_word = True
+            i = end + 1
             continue
-        if ch in "'\"":
-            quote = ch
+        if text.startswith("$'", i):
+            end = _quoted_end(text, i)
+            if end is None:
+                return None
+            buf.append("$" + text[i + 2:end - 1].replace("\\'", "'").replace("\\\n", " "))
+            scan.append(text[i:end])
+            quoted = in_word = True
+            i = end
+            continue
+        if ch == '"':
+            quoted = in_word = True
+            j = i + 1
+            while True:
+                if j >= n:
+                    return None
+                c = text[j]
+                if c == '"':
+                    j += 1
+                    break
+                if c == "\\" and j + 1 < n:
+                    buf.append(" " if text[j + 1] == "\n" else
+                               text[j + 1] if text[j + 1] in '"\\' else text[j:j + 2])
+                    j += 2
+                    continue
+                if text.startswith("$(", j) and not text.startswith("$((", j):
+                    end = _comsub_end(text, j + 2)
+                    if end is not None:
+                        buf.append(text[j:end])
+                        j = end
+                        continue
+                buf.append(c)
+                j += 1
+            scan.append(text[i:j])
+            i = j
+            continue
+        if ch == "\n":
+            end_word()
+            tokens.append(_Word(";"))
+            scan.append(ch)
+            i += 1
+            if heredocs and delimiter_next is not None:
+                raise _Fallback
+            for index, delimiter, quiet, dash in pending:
+                body = _heredoc_body_end(text, i, delimiter, dash, not quiet)
+                if body is None:
+                    raise _Fallback
+                tokens[index] = _Word(body[0], True, heredoc=True, unexpanded=quiet)
+                i = body[1]
+            pending = []
+            continue
+        if ch in " \t\r":
+            end_word()
+            scan.append(ch)
+            i += 1
+            continue
+        if heredocs and ch == "#" and not in_word:
+            end = text.find("\n", i)
+            i = n if end < 0 else end
+            continue
         if ch in _PUNCT:
+            end_word()
             j = i
             while j < n and text[j] in _PUNCT:
                 j += 1
-            out.append(" ".join(_split_operators(text[i:j])))
+            ops = _split_operators(text[i:j])
+            tokens.extend(_Word(op) for op in ops)
+            scan.append(text[i:j])
+            if heredocs and "<<" in ops:
+                if delimiter_next is not None or ops[-1] != "<<":
+                    raise _Fallback
+                dash = text.startswith("-", j)
+                delimiter_next = dash
+                j += dash
+                if dash:
+                    scan.append("-")
+            elif heredocs and delimiter_next is not None:
+                raise _Fallback                     # an operator where the delimiter should be
             i = j
             continue
-        out.append(ch)
+        buf.append(ch)
+        scan.append(ch)
+        in_word = True
         i += 1
-    return "".join(out)
+    end_word()
+    if heredocs and (pending or delimiter_next is not None):
+        raise _Fallback
+    return tokens, "".join(scan)
 
 
-def _tokens(command: str) -> list[str] | None:
-    """The command's words and operators, or None when it does not tokenise.
-    Comments are removed first, the way bash removes them, and the lexer's
-    own comment rule is off: shlex ends a word at any `#`, which would drop
-    everything after `s/#//g` (#3184). Each unquoted run of operator
-    characters is split into bash's operators first (`_spaced_operators`,
-    #3825), so a `;`, `&&`, `||` or `|` after an unquoted substitution's
-    `)` is a join and the command after it heads its own part."""
-    text = _spaced_operators(_newlines_as_joins(_strip_comments(command.replace("\\\n", " "))))
-    lexer = shlex.shlex(text, posix=True, punctuation_chars=True)
-    lexer.whitespace_split = True
-    lexer.commenters = ""
-    try:
-        return list(lexer)
-    except ValueError:
-        return None
+#: Readers whose input is text they print or match, never a command:
+#: `READ_ONLY_PROGRAMS` less `sed` (its `e` command runs one) and `rg` (its
+#: `--pre` does) (#3897).
+_DATA_READERS = READ_ONLY_PROGRAMS - {"sed", "rg"}
+#: `python*` options that leave it reading its program from standard input.
+_PYTHON_STDIN_OPTIONS = frozenset({"-", "-u", "-I", "-E", "-B", "-s", "-S", "-q"})
+
+
+def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
+    """Whether every here-document in a command lexed with its bodies as
+    words (`_scan`) is data no part of it runs as a shell command (#3897):
+    no command or process substitution anywhere outside a quoted-delimiter
+    body (`_substitutes`; one in an unquoted body runs), and every part's
+    program, read as `_command_heads` reads it, a reader in `_DATA_READERS`,
+    a builtin `cd`, `pushd` or `popd`, or a `python*` interpreter that reads
+    its program from the here-document it carries (`python3 - <<'EOF'`), as
+    `python -c` reads its program from a word. Anything else -- a shell,
+    `eval`, `source`, `xargs`, `ssh`, a wrapper not read, a program not
+    read, a word built at run time -- may run the body, or text a reader
+    passed on, as commands, so the body's lines are read as commands there,
+    as before."""
+    if _substitutes(scan) or any(getattr(t, "heredoc", False) and not getattr(t, "unexpanded", False)
+                                 and ("$(" in t or "`" in t) for t in tokens):
+        return False
+    for segment in _layout(tokens)[0]:
+        rest = _command_head(segment)
+        if not rest:
+            continue
+        program = os.path.basename(rest[0])
+        if rest[0] in _DATA_READERS or rest[0] in ("cd", "pushd", "popd"):
+            continue
+        if not (_PYTHON.fullmatch(program) and _plain_word(rest[0])):
+            return False
+        args, carries = rest[1:], False
+        while args:
+            skip = _redirection_skip(args)
+            if skip is not None:
+                carries = carries or any(getattr(w, "heredoc", False) for w in args[:skip])
+                args = args[skip:]
+            elif args[0] in _PYTHON_STDIN_OPTIONS:
+                args = args[1:]
+            else:
+                return False
+        if not carries:
+            return False
+    return True
+
+
+def _lex(command: str, *, heredoc_data: bool = False) -> tuple[list[_Word], str] | None:
+    """The command's tokens (`_scan`) and its comment-free text for the
+    substitution scans, or None when it does not tokenise. With
+    `heredoc_data` a here-document body is one data word where
+    `_heredocs_are_data` admits every one in the command, and its lines
+    are not read as commands (#3897); otherwise, and anywhere a nested
+    command is lexed (a `-c` string, `eval`'s command, a substitution's
+    command), the body's lines are read as commands, as before: a false
+    `unknown` at worst."""
+    text = command.replace("\\\n", " ")
+    if heredoc_data and ("<<" in text):
+        # Read from the command as written: a body keeps its own line
+        # continuations, which bash joins only where the delimiter is not
+        # quoted; elsewhere one is a blank, as `text` has it.
+        try:
+            lexed = _scan(command, heredocs=True)
+        except _Fallback:
+            lexed = None
+        if lexed is not None and any(getattr(t, "heredoc", False) for t in lexed[0]) \
+                and _heredocs_are_data(*lexed):
+            return lexed
+    lexed = _scan(_strip_comments(text), heredocs=False)
+    # The scans read the command's own comment-free text, as before.
+    return None if lexed is None else (lexed[0], _strip_comments(command))
+
+
+def _tokens(command: str, *, heredoc_data: bool = False) -> list[str] | None:
+    """The command's words and operators, or None when it does not tokenise
+    (`_lex`, `_scan`). Comments are removed first, the way bash removes
+    them (#3184): a `#` starts one only at a word's start, so `s/#//g` is
+    kept. Each unquoted run of operator characters is split into bash's
+    operators (#3825), so a `;`, `&&`, `||` or `|` after an unquoted
+    substitution's `)` is a join and the command after it heads its own
+    part; a quoted or escaped one is a word (#3830)."""
+    lexed = _lex(command, heredoc_data=heredoc_data)
+    return None if lexed is None else lexed[0]
 
 
 def _layout(tokens: list[str]) -> tuple[list[list[str]], list[list[str]], list[str]]:
     """(segments, joins, leading): the command's parts between operators,
     with joins[i] the operators after part i (before part i + 1, or at the
-    end for the last) and `leading` any before the first."""
+    end for the last) and `leading` any before the first. Only an unquoted
+    operator joins: a quoted `';'` or an escaped `\\;` is a word (#3830)."""
     segments: list[list[str]] = []
     joins: list[list[str]] = []
     leading: list[str] = []
     current: list[str] = []
     for token in tokens:
-        if token in _OPERATORS:
+        if token in _OPERATORS and _punct(token):
             if current:
                 segments.append(current)
                 joins.append([])
@@ -1117,8 +1603,8 @@ def _status_basis(index: int, joins: list[list[str]], leading: list[str], newlin
     """What the command's status tells about part `index` (#3113): `command`
     when it is that part's status, `and_chain` when a success is (every
     later join is `&&`), else `none`. Only `&&` and `;` joins keep it; a
-    trailing `;` changes nothing; an unescaped newline is a join shlex
-    cannot see, so it keeps nothing."""
+    trailing `;` changes nothing; an unescaped newline is a join the
+    caller reads apart (`newline`), so it keeps nothing."""
     tail = list(joins[-1]) if joins else []
     while tail and tail[-1] == ";":
         tail.pop()
@@ -1251,7 +1737,7 @@ def _without_redirections(words: list[str]) -> tuple[list[str], list[bool]]:
     an argument, and a `derive` before `2>&1` or `>log` is still the last
     word xargs receives. A bare operator (`>`, `2>`) takes the next word as
     its target. The command reaches here as the tokenizer's words joined by
-    spaces, and shlex splits `2>&1` into `2`, `>&`, `1`, so a number or
+    spaces, and the lexer splits `2>&1` into `2`, `>&`, `1`, so a number or
     `{name}` word right before an operator is taken for its descriptor;
     where it was an argument (`derive 2 >&1`) the derive is then read as
     unplaceable, a false `unknown` rather than a miss. A quoted target
@@ -1310,13 +1796,13 @@ def _backstop_count(command: str) -> int:
 
 def _redirection_interleaved(words: list[str]) -> bool:
     """Whether a redirection sits among a d4d call's words rather than after
-    them (#3478): shlex splits `--full 2>/dev/null F` into `--full`, `2`,
+    them (#3478): the lexer splits `--full 2>/dev/null F` into `--full`, `2`,
     `>`, `/dev/null`, `F`, so the option would read `2` as its value. Only
     redirections (each with one target, and any descriptor word before its
     operator) may follow the first one; anything else means the words were
     not read as the program receives them, and the derive cannot be placed."""
     def operator(word: str) -> bool:
-        return bool(word) and set(word) <= _PUNCT and ("<" in word or ">" in word)
+        return bool(word) and _punct(word) and ("<" in word or ">" in word)
     first = next((i for i, word in enumerate(words) if operator(word)), None)
     if first is None:
         return False
@@ -1519,7 +2005,7 @@ def _redirection_operator(word: str) -> bool:
     """Whether a token is a redirection operator (`>`, `2>`'s `>`, `>&`,
     `&>`, `<<`, `<<<`, ...): operator characters only, one of them `<` or
     `>`."""
-    return bool(word) and set(word) <= _PUNCT and ("<" in word or ">" in word)
+    return bool(word) and _punct(word) and ("<" in word or ">" in word)
 
 
 def _redirection_skip(rest: list[str]) -> int | None:
@@ -1599,8 +2085,10 @@ def _eval_opaque(text: str) -> bool:
 
 
 #: A brace expansion in a word (`{a,b}`, `{1..3}`), which bash expands
-#: into words before it looks the program up (#3852).
-_BRACE_EXPANSION = re.compile(r"\{[^{}\s]*(?:,|\.\.)[^{}\s]*\}")
+#: into words before it looks the program up (#3852). A blank inside one
+#: word was quoted or escaped, and bash still expands the braces around it
+#: (`{cd,'/tmp a b'}`, #3924), so the class admits it.
+_BRACE_EXPANSION = re.compile(r"\{[^{}]*(?:,|\.\.)[^{}]*\}")
 
 
 def _built_at_run_time(word: str) -> bool:
@@ -1821,8 +2309,9 @@ def _lone_ampersand(token: str) -> bool:
     one character in `_SHELL_OPERATORS` that carry a `&` (`&&`, `|&`, a
     case clause's `;;&` or `;&`, a redirection's `>&`, `<&`, `&>` or
     `&>>`). `_tokens` splits an unquoted run into single operators (#3825),
-    so a run such as `&)` reaches here only as a quoted word, which is read
-    as the operators in it, conservatively."""
+    and its callers pass only an unquoted one (`_punct`): a quoted `'&'` is
+    a word (#3830), read by the nested-word rule instead. A run passed here
+    (`&;&`) is read as the operators in it."""
     return set(token) <= _PUNCT and "&" in _AMPERSAND_JOINS.sub("", token)
 
 
@@ -1842,7 +2331,7 @@ def _nested_detaches(word: str) -> bool:
         return False
     inner = _tokens(word)
     return inner is not None and any(
-        _lone_ampersand(t) if set(t) <= _PUNCT else bool(_NESTED_DETACH.search(t)) for t in inner)
+        _lone_ampersand(t) if _punct(t) else bool(_NESTED_DETACH.search(t)) for t in inner)
 
 
 #: Shell programs whose arguments, given a `-c`, may be a command string,
@@ -1865,23 +2354,30 @@ def _shell_command_strings(args: list[str]) -> list[str]:
     return list(args) if given else []
 
 
+def _command_head(segment: list[str]) -> list[str]:
+    """A part from the program it runs: after assignments, `poetry run`,
+    the prefixes `_DETACH_PREFIXES` names, `builtin`, a redirection
+    (`_redirection_skip`, #3845) and the wrappers `_wrapper_skip` reads, in
+    any order and repeated."""
+    rest = _program(segment)
+    while rest:
+        if rest[0] in _DETACH_PREFIXES or rest[0] == "builtin":
+            rest = _program(rest[1:])
+            continue
+        skip = _redirection_skip(rest)
+        if skip is None:
+            skip = _wrapper_skip(rest)
+        if skip is None or skip >= len(rest):
+            break
+        rest = _program(rest[skip:])
+    return rest
+
+
 def _command_heads(tokens: list[str]):
-    """Each part of a (nested) command from the program it runs: after
-    assignments, `poetry run`, the prefixes `_DETACH_PREFIXES` names,
-    `builtin`, a redirection (`_redirection_skip`, #3845) and the wrappers
-    `_wrapper_skip` reads, in any order and repeated."""
+    """Each part of a (nested) command from the program it runs
+    (`_command_head`)."""
     for segment in _layout(tokens)[0]:
-        rest = _program(segment)
-        while rest:
-            if rest[0] in _DETACH_PREFIXES or rest[0] == "builtin":
-                rest = _program(rest[1:])
-                continue
-            skip = _redirection_skip(rest)
-            if skip is None:
-                skip = _wrapper_skip(rest)
-            if skip is None or skip >= len(rest):
-                break
-            rest = _program(rest[skip:])
+        rest = _command_head(segment)
         if rest:
             yield rest
 
@@ -1950,17 +2446,15 @@ def _nested_open_ended(word: str, *, command: bool = False) -> bool:
 def _substitution_bodies(word: str) -> list[str]:
     """The commands inside the command substitutions a word carries whole
     (a quoted `"$(...)"` or a backquoted one, which the tokenizer keeps in
-    one word), each read to its matching `)` by counting brackets, or to the
-    end where none matches. Arithmetic's `$((` runs no command."""
+    one word), each read to the `)` bash closes it at (`_comsub_end`: not a
+    quoted one, nor a case pattern's, #3925), or to the end where none
+    does. Arithmetic's `$((` runs no command."""
     out, i = [], 0
     while i < len(word):
         if word.startswith("$(", i) and not word.startswith("$((", i):
-            depth, j = 1, i + 2
-            while j < len(word) and depth:
-                depth += {"(": 1, ")": -1}.get(word[j], 0)
-                j += 1
-            out.append(word[i + 2:j - 1] if depth == 0 else word[i + 2:])
-            i = j
+            j = _comsub_end(word, i + 2)
+            out.append(word[i + 2:] if j is None else word[i + 2:j - 1])
+            i = len(word) if j is None else j
         elif word[i] == "`":
             j = word.find("`", i + 1)
             out.append(word[i + 1:] if j < 0 else word[i + 1:j])
@@ -1978,7 +2472,7 @@ def _substituted_runtime_program(word: str) -> bool:
     for body in _substitution_bodies(word):
         inner = _tokens(body)
         if inner is None or any(_dynamic_program(s) for s in _layout(inner)[0]) or any(
-                _substituted_runtime_program(t) for t in inner if not set(t) <= _PUNCT):
+                _substituted_runtime_program(t) for t in inner if not _punct(t)):
             return True
     return False
 
@@ -2226,7 +2720,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     where it is (#3798). `moves`
     in the result says the command itself may change the directory the next
     call starts in."""
-    tokens = _tokens(command)
+    # A here-document body every part reads as data is one quoted word,
+    # not lines of commands (#3897), and `scan` is then the command with
+    # the bodies and comments removed, for the substitution scans.
+    lexed = _lex(command, heredoc_data=True)
+    tokens, scan = lexed if lexed is not None else (None, _strip_comments(command))
     named = [x for x in targets if x.name in command]
     # `runs_unread`: some part runs a program this does not read -- neither a
     # reader, a builtin directory change (#3753), nor a d4d call of a literal subcommand --
@@ -2240,8 +2738,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     out: dict[str, Any] = {"named": [], "read_only": False, "derives": [], "runs_unread": True,
                            "detaches": True, "moves": True}
     if tokens is None:
-        # A command shlex cannot split (an apostrophe in a here-document's
-        # body, #3458) is not read part by part, but the words may still be
+        # A command the lexer cannot split (an unclosed quote, or an
+        # apostrophe in a here-document body read as commands, #3458, #3897)
+        # is not read part by part, but the words may still be
         # on it: the whole command, quote characters removed, is tested for
         # them, and a match is a derive that cannot be placed, never none.
         out["named"] = [x.kind for x in named]
@@ -2298,11 +2797,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # it carries a word supplied at run time (`bash -c "$X"`, #3852). Any
     # other word is an argument: `echo "$(bash derive.sh)"` is not.
     out["detaches"] = any(
-        _lone_ampersand(t)
-        or (not set(t) <= _PUNCT and (_nested_open_ended(t) or _substituted_runtime_program(t)))
+        (_punct(t) and _lone_ampersand(t))
+        or (not _punct(t) and (_nested_open_ended(t) or _substituted_runtime_program(t)))
         for t in tokens) or any(_detacher(s) or _dynamic_program(s)
                                 for s in segments) or _process_substitutes(
-        _strip_comments(command)) or _opaque_eval(tokens) or any(
+        scan) or _opaque_eval(tokens) or any(
         _nested_open_ended(w, command=True) for w in _command_strings(tokens))
     changes_directory = any(_program(s)[:1] in (["cd"], ["pushd"], ["popd"]) or _changes_directory(s)
                             or _may_run_code_here(s) for s in segments)
@@ -2320,10 +2819,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # Read-only: no redirection except to /dev/null or a descriptor, no
     # unescaped newline (a second command), and every program known to read.
     # A command substitution hides its command inside a word (#3240).
-    substitutes = _substitutes(_strip_comments(command))
+    substitutes = _substitutes(scan)
     read_only = not newline and not substitutes
     for i, token in enumerate(tokens):
-        if set(token) <= _PUNCT and ">" in token:
+        if _punct(token) and ">" in token:
             following = tokens[i + 1] if i + 1 < len(tokens) else ""
             if not (following == "/dev/null" or (token == ">&" and following.isdigit())):
                 read_only = False
@@ -2342,8 +2841,8 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # bracket), and every join from it to the part is `&&`. `cd /missing;
     # derive` runs the derive where the call started, and `false && cd X;
     # derive` skips the cd: neither leaves a known directory. In a
-    # multi-line command a here-document's lines read as parts too
-    # (`_newlines_as_joins`), so a change in one leaves none either.
+    # multi-line command a here-document's lines may read as parts too
+    # (`_lex`, #3897), so a change in one leaves none either.
     unsettled = False                               # a change was made; only `&&` keeps it
     # Per part: whether it runs a program not read here (`runs_unknown`),
     # and the reader parts that carry the words `derive core` without a row.
@@ -2531,9 +3030,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # x; pwd)`, `<(cd x)`), a pipe's left side or a `&` job does not move
     # this shell, but it is read as one all the same, which is the rule's
     # cost: the segmenter does not say which parts a child runs, and
-    # reading that from shlex's tokens has placed a `--full` after a real
+    # reading that from the lexer's tokens has placed a `--full` after a real
     # parent-shell change more than once (#3810, #3904, #3911, #3912); it
-    # waits for a shell grammar (#3830). One in a backquoted or
+    # waits for a shell grammar (#3810). One in a backquoted or
     # double-quoted substitution (`` X=`cd x` ``, `echo "$(cd x)"`) is not read, as the
     # tokenizer keeps it inside one word; it moves nothing, so nothing is
     # missed (#3841). `eval` runs its words in this shell, so a
