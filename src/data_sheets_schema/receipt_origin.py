@@ -247,17 +247,24 @@ never a command of this shell (#3897), read as a `<<<` string or a
 `python -c` program is, where one part carries the here-documents, every
 part before it is `cd WORD` or `mkdir [-p] WORD...` with every word
 unquoted and plain (#4028: `printf -v PATH %s ./bin; cat` runs
-`./bin/cat`), that part and every part after it is plainly run (#3996: its
-program is its first word, with no assignment, `env`, `poetry run`, other
-wrapper or redirection before it, since `PATH=./bin cat` may run any
-program) and is a reader other than `sed` or `rg` (whose `e` command and
-`--pre` run commands), a builtin `cd`, `pushd` or `popd`, or a plain-named
-`python*` interpreter reading its program from the here-document it
-carries (`python3 - <<'EOF'`), nothing substitutes, and every delimiter
-is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one
-pair of single or double quotes (#3947). Every other command -- among
-them one with a here-document a shell, `eval`, `source`, `xargs`, a
-program not read or a pipe into one may run, or one v6 cannot split that
+`./bin/cat`), that part carries no redirection but an input one (`<`,
+`<<`, `<<<`) and no pipe joins it to another part, so what it prints, a
+reader's copy of the body or a python program's output, goes nowhere but
+the call's own output (#4070: `cat <<'EOF' > s.sh` and then `printf -v
+'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs the body as a script, and a
+later call may run the file too; `tee`, which writes to the files it
+names, is no reader), that part and every part after it is plainly run
+(#3996: its program is its first word, with no assignment, `env`, `poetry
+run`, other wrapper or redirection before it, since `PATH=./bin cat` may
+run any program) and is a reader other than `sed` or `rg` (whose `e`
+command and `--pre` run commands), a builtin `cd`, `pushd` or `popd`, or
+a plain-named `python*` interpreter reading its program from the
+here-document it carries (`python3 - <<'EOF'`), nothing substitutes, and
+every delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or
+wholly inside one pair of single or double quotes (#3947). Every other
+command -- among them one with a here-document a shell, `eval`, `source`,
+`xargs`, a program not read or a pipe into one may run, one whose copy of
+a body goes to a file or a pipe, or one v6 cannot split that
 origin/main's tokenizer splits -- is read exactly as origin/main read it:
 its tokenizer (kept unchanged as `_origin_tokens`), the text it gave the
 substitution scans and its brace-expansion pattern, so its result is
@@ -512,17 +519,24 @@ NON_CHECKS = (
     "what a program does with a here-document body read as its data, in a command v6 reads: where "
     "one part carries the here-documents, every part before it is `cd WORD` or `mkdir [-p] "
     "WORD...` with every word unquoted and plain (#4028: `printf -v PATH %s ./bin; cat` runs "
-    "`./bin/cat`), that part and every part after it is plainly run -- its program its first word, "
-    "with no assignment, `env`, `poetry run`, other wrapper or redirection before it, since "
-    "`PATH=./bin cat` may run any program (#3996) -- and is a reader other than `sed` or `rg`, a "
-    "builtin `cd`, `pushd` or `popd`, or a plain-named `python*` interpreter reading its program "
-    "from the here-document it carries, nothing substitutes, and every delimiter is a plain word "
-    "(letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of single or double quotes "
-    "(#3947), the body is one word, read as a `<<<` string or a `python -c` program is, so a "
-    "`python3 - <<'EOF'` program that runs a shell string it carries (`os.system(\"$X "
-    "./derive.sh\")`) is read as the same program given to `python -c` is, and a function or alias "
-    "named `cd` or `mkdir` that changes which program a later word names is not seen; anywhere "
-    "else the body's lines are read as commands (#3897). "
+    "`./bin/cat`), that part carries no redirection but an input one (`<`, `<<`, `<<<`) and no "
+    "pipe joins it to another part, so what it prints goes nowhere but the call's own output "
+    "(#4070: `cat <<'EOF' > s.sh` and then `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs "
+    "the body as a script; `tee` is no reader), that part and every part after it is plainly run "
+    "-- its program its first word, with no assignment, `env`, `poetry run`, other wrapper or "
+    "redirection before it, since `PATH=./bin cat` may run any program (#3996) -- and is a reader "
+    "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
+    "interpreter reading its program from the here-document it carries, nothing substitutes, and "
+    "every delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one "
+    "pair of single or double quotes (#3947), the body is one word, read as a `<<<` string or a "
+    "`python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it carries "
+    "(`os.system(\"$X ./derive.sh\")`), or writes one to a file a later part or a later call runs, "
+    "is read as the same program given to `python -c` is; a function, alias or command-hash entry "
+    "for the reader's own word that the session's shell kept from an earlier call, or its profile "
+    "set (an earlier `printf -v 'BASH_CMDS[cat]' %s /bin/sh`, then `cat <<'EOF'`, runs the body), "
+    "is not seen, as for every reader, where origin/main, reading the body's lines as commands, "
+    "saw them; and a function or alias named `cd` or `mkdir` that changes which program a later "
+    "word names is not seen; anywhere else the body's lines are read as commands (#3897). "
     "A d4d call whose program, "
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
@@ -1328,10 +1342,21 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
 
 #: Readers whose input is text they print or match, never a command:
 #: `READ_ONLY_PROGRAMS` less `sed` (its `e` command runs one) and `rg` (its
-#: `--pre` does) (#3897).
+#: `--pre` does) (#3897). `tee` is not among them: it writes its input to
+#: every file it names (#4070).
 _DATA_READERS = READ_ONLY_PROGRAMS - {"sed", "rg"}
 #: `python*` options that leave it reading its program from standard input.
 _PYTHON_STDIN_OPTIONS = frozenset({"-", "-u", "-I", "-E", "-B", "-s", "-S", "-q"})
+#: The only redirections the part carrying here-documents read as data may
+#: carry: input ones (`<`, `<<` or `<<-`, `<<<`). Any other -- `>`, `>>`,
+#: `>|`, `&>`, `&>>`, `>&`, `<&` or `<>`, with or without a descriptor --
+#: may send what that part prints, a reader's copy of the body or a python
+#: program's output, to a file a later part or a later call runs (#4070:
+#: `cat <<'EOF' > s.sh` and then `printf -v 'BASH_CMDS[cat]' %s /bin/sh;
+#: cat s.sh` runs the body as a script); `1<&3` and `1<>F` write there too.
+#: The rule is blunt: it refuses one whatever its target (`2>&1`,
+#: `2>/dev/null`), and such a command reads as on origin/main.
+_HEREDOC_CARRIER_REDIRECTIONS = frozenset({"<", "<<", "<<<"})
 
 
 def _heredoc_reader_head(segment: list[str]) -> list[str] | None:
@@ -1379,32 +1404,46 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     body (`_substitutes`; one in an unquoted body runs); one part carries
     the here-documents, and every part before it is `cd WORD` or `mkdir
     [-p] WORD...` (`_setup_part`, #4028: `printf -v PATH %s ./bin; cat`
-    runs `./bin/cat`); and that part and every part after it is plainly run
-    (`_heredoc_reader_head`, #3996: no assignment in it or in a part of its
-    own, no `env`, `poetry run`, other wrapper or redirection before its
-    program, a plain program word) with a program that is a reader in
-    `_DATA_READERS`, a builtin `cd`, `pushd` or `popd`, or a plain-named
-    `python*` interpreter that reads its program from the here-document it
-    carries (`python3 - <<'EOF'`), as `python -c` reads its program from a
-    word. Anything else -- a shell, `eval`, `source`, `xargs`, `ssh`, a
-    wrapper, an assignment that may change which program a word names
-    (`PATH=./bin cat`), a program not read, a word built at run time, a
-    second part carrying a here-document -- may run the body, or text a
-    reader passed on, as commands, so the command is read as origin/main
-    read it, its body's lines as commands (`_lex`). The substitution test
-    is the gate's as well (`_v6_admissible` refuses any `$(`, `<(`, `>(` or
-    backquote); it is kept so that this answer holds on its own."""
+    runs `./bin/cat`); that part sends what it prints nowhere but the
+    call's own output (#4070): it carries no redirection but an input one
+    (`_HEREDOC_CARRIER_REDIRECTIONS`) and no `|` or `|&` joins it to a
+    part on either side, whatever its program, so neither a reader's copy
+    of the body nor a python program's output reaches a file or a pipe a
+    later part or a later call may run (`cat <<'EOF' > s.sh` and then
+    `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs the body), and
+    `tee`, which writes to the files it names, is no reader here; and that
+    part and every part after it is plainly run (`_heredoc_reader_head`,
+    #3996: no assignment in it or in a part of its own, no `env`, `poetry
+    run`, other wrapper or redirection before its program, a plain program
+    word) with a program that is a reader in `_DATA_READERS`, a builtin
+    `cd`, `pushd` or `popd`, or a plain-named `python*` interpreter that
+    reads its program from the here-document it carries (`python3 -
+    <<'EOF'`), as `python -c` reads its program from a word. Anything else
+    -- a shell, `eval`, `source`, `xargs`, `ssh`, a wrapper, an assignment
+    that may change which program a word names (`PATH=./bin cat`), a
+    program not read, a word built at run time, a second part carrying a
+    here-document, a copy of the body sent to a file or a pipe -- may run
+    the body, or text a reader passed on, as commands, so the command is
+    read as origin/main read it, its body's lines as commands (`_lex`). The
+    substitution test is the gate's as well (`_v6_admissible` refuses any
+    `$(`, `<(`, `>(` or backquote); it is kept so that this answer holds on
+    its own."""
     if _substitutes(scan) or any(getattr(t, "heredoc", False) and not getattr(t, "unexpanded", False)
                                  and ("$(" in t or "`" in t) for t in tokens):
         return False
-    segments = _layout(tokens)[0]
+    segments, joins, leading = _layout(tokens)
     carriers = [index for index, segment in enumerate(segments)
                 if any(getattr(word, "heredoc", False) for word in segment)]
     if len(carriers) != 1:
         return False
-    if not all(_setup_part(segment) for segment in segments[:carriers[0]]):
+    carrier = carriers[0]
+    if not all(_setup_part(segment) for segment in segments[:carrier]):
         return False
-    for segment in segments[carriers[0]:]:
+    around = (leading if carrier == 0 else joins[carrier - 1]) + joins[carrier]
+    if {"|", "|&"} & set(around) or any(_punct(word) and word not in _HEREDOC_CARRIER_REDIRECTIONS
+                                         for word in segments[carrier]):
+        return False
+    for segment in segments[carrier:]:
         rest = _heredoc_reader_head(segment)
         if rest is None:
             return False
@@ -1578,8 +1617,9 @@ def _v6_lex(command: str) -> tuple[list[_Word], str] | None:
     not read it. A command carrying `<<` is read only where `_scan` reads a
     here-document in it and `_heredocs_are_data` admits every one, its
     bodies then one data word each and the text without them (#3897); a
-    delimiter not read, no delimiter line, or a part that may run a body
-    is None (`_Fallback`). Any other command is `_scan`ned with its
+    delimiter not read, no delimiter line, a part that may run a body, or
+    a carrying part whose output may go to a file or a pipe (#4070) is
+    None (`_Fallback`). Any other command is `_scan`ned with its
     comments removed, and the scans read `_strip_comments(command)`, the
     text origin/main gave them; None where a quote does not close."""
     if "<<" in command:

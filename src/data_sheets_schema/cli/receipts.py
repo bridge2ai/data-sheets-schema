@@ -426,11 +426,16 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     A here-document body is one data word, never commands of this shell (#3897), only
     where one part of the command carries the here-documents; every part before it is
     `cd WORD` or `mkdir [-p] WORD...`, every word unquoted and plain (#4028); that part
+    carries no redirection but an input one (`<`, `<<`, `<<<`) and no pipe joins it to
+    another part, so what it prints goes nowhere but the call's own output (#4070: `cat
+    <<'EOF' > s.sh` and then `printf -v 'BASH_CMDS[cat]' %s /bin/sh; cat s.sh` runs the
+    body as a script; `tee` is no reader); that part
     and every part after it is plainly run -- its program its first word, with no
     assignment, `env`, `poetry run`, other wrapper or redirection before it (#3996) --
     and is a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
     plain-named `python*` interpreter reading its program from the here-document it
-    carries (`python3 - <<'EOF'`, standard input); nothing substitutes; and every
+    carries (`python3 - <<'EOF'`, standard input), whose program is read as `python -c`
+    reads one, what it writes included; nothing substitutes; and every
     delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly inside
     one pair of single or double quotes (#3947). Anywhere else the body's lines are
     read as commands, as origin/main read them. A tool
