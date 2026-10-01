@@ -920,6 +920,8 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
                 summary_bytes=summary[:last] + b"x" + summary[last + 1:]),
             "summary with a space before a line ending": copy(
                 "space", summary_bytes=summary.replace(b"\n", b" \n", 1)),
+            "summary with its final newline trimmed": copy(
+                "trimmed", summary_bytes=summary[:-1]),
             "no mapping": copy("no-mapping", text=False),
             "no summary": copy("no-summary", summary_bytes=False),
             "a mapping that is not UTF-8": copy(
@@ -946,14 +948,47 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
         cls._tmp.cleanup()
 
     @staticmethod
-    def _verdict(column, kind):
-        """The verdict the table the statement prints, EDIT_VERDICTS, gives a
-        change to `column` on a row of `kind`."""
-        named = {c: entry for entry in gsm.EDIT_VERDICTS if entry[0]
-                 for c in entry[0]}
-        _, produced, known = named.get(column) or next(
-            entry for entry in gsm.EDIT_VERDICTS if entry[0] is None)
+    def _printed_verdicts():
+        """The verdict table as CHECK_STATEMENT prints it, read back from the
+        text (#4101): a heading line naming its columns, or `any other
+        column`, then the verdict on each kind of row. The behaviour test
+        reads this, not EDIT_VERDICTS, so a statement that prints a verdict
+        the check does not give fails there."""
+        lines = gsm.CHECK_STATEMENT.splitlines()
+        table = {}
+        for i, line in enumerate(lines[:-2]):
+            head = re.fullmatch(r"  (\S.*):", line)
+            produced = re.fullmatch(
+                r" {6}(fails|passes) on a row regeneration produces", lines[i + 1])
+            known = re.fullmatch(
+                r" {6}(fails|passes) on a KNOWN_UNDERIVABLE row", lines[i + 2])
+            if head and produced and known:
+                name = head.group(1)
+                key = (None if name == "any other column"
+                       else tuple(c.strip() for c in name.split(",")))
+                table[key] = (produced.group(1), known.group(1))
+        return table
+
+    @classmethod
+    def _verdict(cls, column, kind):
+        """The verdict the printed statement gives a change to `column` on a
+        row of `kind`."""
+        table = cls._printed_verdicts()
+        named = {c: verdicts for columns, verdicts in table.items() if columns
+                 for c in columns}
+        produced, known = named.get(column) or table[None]
         return produced if kind == "produced" else known
+
+    def test_the_printed_table_is_the_one_the_check_is_held_to(self):
+        """The statement prints every EDIT_VERDICTS entry, and nothing else,
+        and its compared-columns bullet names every structural column
+        (#4101)."""
+        self.assertEqual(self._printed_verdicts(),
+                         {tuple(columns) if columns else None: (produced, known)
+                          for columns, produced, known in gsm.EDIT_VERDICTS})
+        flat = " ".join(gsm.CHECK_STATEMENT.split())
+        self.assertIn(", ".join(gsm.STRUCTURAL_COLUMNS[:-1])
+                      + f" and {gsm.STRUCTURAL_COLUMNS[-1]}, on each row", flat)
 
     def _assert_passes(self, case):
         code, out = self.results[case]
@@ -984,10 +1019,10 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
             self.assertLessEqual({produced, known}, {"fails", "passes"})
 
     def test_each_changed_value_has_the_verdict_the_statement_prints(self):
-        """Every column, on each of the four rows, against the verdict
-        EDIT_VERDICTS gives it there. A check that compared more or less
-        than the table says fails here, and so does a table changed without
-        the check."""
+        """Every column, on each of the four rows, against the verdict the
+        printed statement gives it there. A check that compared more or less
+        than the statement says fails here, and so does a statement changed
+        without the check."""
         self.assertEqual(len(self.edits), 4 * len(self.names))
         for (kind, row, column), (code, out) in self.edits.items():
             verdict = self._verdict(column, kind)
@@ -1058,9 +1093,12 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
                      "summary with CR line endings"):
             with self.subTest(case=case):
                 self._assert_passes(case)
+        # Only the form of a line ending is not compared (#4101): one
+        # trimmed, as an editor's trim-final-newline setting does, fails.
         for case in ("summary's first character changed",
                      "summary's last character changed",
-                     "summary with a space before a line ending"):
+                     "summary with a space before a line ending",
+                     "summary with its final newline trimmed"):
             code, out = self.results[case]
             with self.subTest(case=case):
                 self.assertEqual(code, 1, out)

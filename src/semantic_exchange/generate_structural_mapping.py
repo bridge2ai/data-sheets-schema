@@ -690,7 +690,9 @@ def _check_statement(width: int = 76) -> str:
         bullet("""A repeated triple is not seen: the rows are a set, and
             those columns are read from the last row that carries the
             triple."""),
-        bullet("The summary's whole text, except its line endings."),
+        bullet("""The summary's whole text, except the form of its line
+            endings: CRLF and CR are read as LF, but a line ending added,
+            removed or moved is a difference."""),
         text("""Both files are read as UTF-8 text. The rows are read with
             Python's csv module from the lines of the tab-separated mapping
             that do not start with #, the first of which is its header, so
