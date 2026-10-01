@@ -768,23 +768,28 @@ def replicate_structure_section(data) -> list[str]:
             + (", ".join(f"`{k}`" for k in sorted(outside)) if outside else "none") + ".", ""]
 
 
-_RECEIPT_CACHE: dict[tuple[str, str, str], tuple[dict[str, int] | None, dict[str, Any] | None]] = {}
+_RECEIPT_CACHE: dict[tuple[str, str, str], tuple[dict[str, int] | None, dict[str, Any] | None, str | None]] = {}
 
 
-def _replicate_receipt(label: str, project: str) -> tuple[dict[str, int] | None, dict[str, Any] | None]:
+def _replicate_receipt(label: str, project: str) -> tuple[dict[str, int] | None, dict[str, Any] | None, str | None]:
     """(`replicate_structure.verified_by_path` of one record's coverage
-    receipt, its phase-1 snapshot), the first None where it wrote no receipt
-    or its chunk texts cannot be recovered, the second where the run left no
-    usable snapshot (the agentic path writes none). Memoised."""
+    receipt, its phase-1 snapshot, why the snapshot is unusable). The first
+    is None where it wrote no receipt or its chunk texts cannot be
+    recovered; the second is None where the run left no usable snapshot;
+    the third is None unless a snapshot is present and unusable
+    (`receipts.phase1_snapshot_state`: a parse error, bytes that are not
+    UTF-8, an empty document, a list or a scalar), so an absent snapshot
+    (the agentic path writes none) is told apart from one that cannot be
+    read (#3954, the #1124 precedent). Memoised."""
     key = (str(CONCAT), label, project)
     if key in _RECEIPT_CACHE:
         return _RECEIPT_CACHE[key]
-    from data_sheets_schema.receipts import load_receipt, phase1_snapshot
+    from data_sheets_schema.receipts import load_receipt, phase1_snapshot_state
     from data_sheets_schema.replicate_structure import record_chunk_texts, verified_by_path
     core_dir = CONCAT / f"{_method_for(label, project)}_core" / label
     receipt = core_dir / f"{project}_coverage_receipt.yaml"
     prov = core_dir / f"{project}_provenance.yaml"
-    out: tuple[dict[str, int] | None, dict[str, Any] | None] = (None, None)
+    out: tuple[dict[str, int] | None, dict[str, Any] | None, str | None] = (None, None, None)
     if receipt.exists() and prov.exists():
         try:
             rec = load_receipt(receipt)
@@ -793,7 +798,9 @@ def _replicate_receipt(label: str, project: str) -> tuple[dict[str, int] | None,
         if rec is not None:
             texts, _basis = record_chunk_texts(load(prov).get("inputs") or {}, ROOT)
             if texts is not None:
-                out = (verified_by_path(rec, texts), phase1_snapshot(receipt))
+                state, _path, snapshot, why = phase1_snapshot_state(receipt)
+                out = (verified_by_path(rec, texts), snapshot,
+                       (why or "unusable") if state == "unusable" else None)
     _RECEIPT_CACHE[key] = out
     return out
 
@@ -805,7 +812,7 @@ def _replicate_verified(label: str, project: str) -> dict[str, int] | None:
     `_replicate_receipt`'s per-path counts, which is what `verified_by_slot`
     does."""
     from data_sheets_schema.replicate_structure import top_slot
-    paths, _snapshot = _replicate_receipt(label, project)
+    paths, _snapshot, _unusable = _replicate_receipt(label, project)
     if paths is None:
         return None
     out: dict[str, int] = {}
@@ -981,11 +988,11 @@ def entry_omission_section(data) -> list[str]:
         for p, tags, recs in _replicate_groups(data, key):
             resolved, basis = {}, {}
             for t, lab in tags.items():
-                paths, snapshot = _replicate_receipt(lab, p)
+                paths, snapshot, unusable = _replicate_receipt(lab, p)
                 if paths is None:
                     resolved[t] = None
                     continue
-                rv = resolve_verified(paths, snapshot, recs[t])
+                rv = resolve_verified(paths, snapshot, recs[t], unusable=unusable)
                 resolved[t] = rv["paths"]
                 for b, n in rv["basis"].items():
                     basis[b] = basis.get(b, 0) + n
@@ -1019,7 +1026,10 @@ def entry_omission_section(data) -> list[str]:
             "the list (#721). A receipt path is followed into the final record by identity where "
             "the run left a phase-1 snapshot (`receipts.remap_path`, #899: `same`, `by_<key>`, "
             "`by_overlap`, `same_key_stripped`), read as written where it left none "
-            "(`no_snapshot`, the agentic path: an index join), and resolves nowhere where its "
+            "(`no_snapshot`, the agentic path: an index join), is not followed at all where the "
+            "snapshot is present but unusable — a parse error, bytes that are not UTF-8, an empty "
+            "document, a list or a scalar (`snapshot_unusable`, #1124: no index join stands in for "
+            "it, so that replicate counts as having no readable receipt here), and resolves nowhere where its "
             "entry or leaf is gone (`entry_dropped`, `leaf_dropped`, `ambiguous`) or the snapshot "
             "never had it (`not_in_snapshot`); **receipt paths by basis** counts the group's "
             "verified snippets, resolved or not. **not** and **unmeasured** as above, and `–` "
@@ -1040,7 +1050,7 @@ def receipted_where_empty_section(data) -> list[str]:
         compare_structure, dataset_slots, receipted_where_empty, removal_status,
     )
     slots = dataset_slots()
-    rows, status_tot = [], {}
+    rows, status_tot, status_reps = [], {}, {}
     for key, disp, _pfx, _rt, _role in ARMS:
         if key in NOT_REPLICATES:
             continue
@@ -1059,6 +1069,7 @@ def receipted_where_empty_section(data) -> list[str]:
                     prov = CONCAT / f"{_method_for(lab, p)}_core" / lab / f"{p}_provenance.yaml"
                     st = removal_status(for_record(prov, record=load(prov)), name)
                     status_tot[st] = status_tot.get(st, 0) + 1
+                    status_reps.setdefault(st, set()).add((key, p, t))
                     said.append(f"{t} {verified[t][name]}, {st}")
                 cells.append(f"`{name}` (filled {r['n_present']}/{r['n_replicates']}; {'; '.join(said)})")
             rows.append(f"| {disp} | {p} | {len(found)} | " + (", ".join(cells) or "none") + " |")
@@ -1080,7 +1091,10 @@ def receipted_where_empty_section(data) -> list[str]:
             "| arm | project | slots | slot (replicates filling it; per receipting replicate: verified "
             "snippets, removals) |",
             "|---|---|---|---|", *(rows or ["| – | – | – | – |"]), "",
-            "Receipting replicates by removals status: "
+            "Receipting replicates by removals status (distinct arm × project × replicate; one "
+            "with slots of two statuses is counted under each): "
+            + (", ".join(f"{k} {len(v)}" for k, v in sorted(status_reps.items())) or "none")
+            + ". Slot × replicate instances by removals status: "
             + (", ".join(f"{k} {v}" for k, v in sorted(status_tot.items())) or "none") + ".", ""]
 
 

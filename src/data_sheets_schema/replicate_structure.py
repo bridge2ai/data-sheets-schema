@@ -520,7 +520,7 @@ def omission_candidates(result: Mapping[str, Any],
 
 # ------------------------- below the top level, and where empty (#3880)
 def resolve_verified(paths: Mapping[str, int], snapshot: Mapping[str, Any] | None,
-                     final: Mapping[str, Any]) -> dict[str, Any]:
+                     final: Mapping[str, Any], *, unusable: str | None = None) -> dict[str, Any]:
     """Where each verified receipt path (`verified_by_path`, as the receipt
     wrote it) sits in the final record, and on what basis. Pure.
 
@@ -528,11 +528,24 @@ def resolve_verified(paths: Mapping[str, int], snapshot: Mapping[str, Any] | Non
     reorders, inserts and drops entries after it (#742), so an index in a
     receipt path is followed by identity with `receipts.remap_path` where
     the run left a phase-1 snapshot (#899) — `same`, `by_<key>`,
-    `by_overlap`, `same_key_stripped` — and read as written where it did not
-    (`no_snapshot`: an index join, the agentic path's). A path the snapshot
-    never had (`not_in_snapshot`) or whose entry or leaf is gone resolves
-    nowhere, as in `receipts.claim_receipts`. Returns `paths` (resolved path
-    -> snippets) and `basis` (basis -> snippets, resolved or not)."""
+    `by_overlap`, `same_key_stripped` — and read as written where it left
+    none (`no_snapshot`: an index join, the agentic path's). A path the
+    snapshot never had (`not_in_snapshot`) or whose entry or leaf is gone
+    resolves nowhere, as in `receipts.claim_receipts`.
+
+    `unusable` is why a snapshot that is present cannot be read
+    (`receipts.phase1_snapshot_state`'s `unusable` state: a parse error,
+    bytes that are not UTF-8, an empty document, a list or a scalar). Such a
+    snapshot is not an absent one: the receipt join refuses it rather than
+    falling back to an index join (#1124, #3954), so `paths` is None — no
+    readable receipt for an entry — and every snippet is counted under
+    `snapshot_unusable`.
+
+    Returns `paths` (resolved path -> snippets, or None as above) and
+    `basis` (basis -> snippets, resolved or not)."""
+    if unusable is not None:
+        total = sum(paths.values())
+        return {"paths": None, "basis": {"snapshot_unusable": total} if total else {}}
     from data_sheets_schema.receipts import remap_path
     out: Counter[str] = Counter()
     basis: Counter[str] = Counter()

@@ -578,6 +578,14 @@ def test_receipt_paths_follow_the_entry_by_identity_where_a_snapshot_exists():
     assert got["paths"] == {"s[0].name": 2} and got["basis"] == {"no_snapshot": 3}
 
 
+def test_an_unusable_snapshot_is_refused_not_read_as_absent():
+    """#3954: a snapshot that is present and unusable is not an absent one;
+    no index join stands in for it (#1124)."""
+    final = {"s": [{"name": "B"}]}
+    got = resolve_verified({"s[0].name": 1, "t": 2}, None, final, unusable="the document is a list, not a mapping")
+    assert got == {"paths": None, "basis": {"snapshot_unusable": 3}}
+
+
 def _entry_group():
     recs = {"r1": {"s": [{"name": "A"}, {"name": "B"}, {"description": "k"}], "t": ["x"]},
             "r2": {"s": [{"name": "A"}, {"description": "k"}], "t": ["x"]},
@@ -655,14 +663,45 @@ def test_the_nested_section_prints_counts_by_basis(tmp_path, monkeypatch):
 def test_the_entry_section_dashes_a_group_without_receipts(tmp_path, monkeypatch):
     recs = {"rep1": {"purposes": [{"name": "A"}, {"name": "B"}]}, "rep2": {"purposes": [{"name": "A"}]}}
     m, data = _section_fixture(tmp_path, monkeypatch, recs)
-    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (None, None))
+    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (None, None, None))
     text = "\n".join(m.entry_omission_section(data))
     assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | – | 0 | – | – |" in text
     assert "**all projects**" not in text
     monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (
-        ({"purposes[1].name": 1}, None) if label.endswith("rep1") else ({}, None)))
+        ({"purposes[1].name": 1}, None, None) if label.endswith("rep1") else ({}, None, None)))
     text = "\n".join(m.entry_omission_section(data))
     assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | 1 / 0 / 0 | 0 | no_snapshot 1 | rep1 0 · rep2 1 |" in text
+    # The same receipt beside an unusable snapshot (#3954): not read by
+    # index, so the only holder has no readable receipt for the entry.
+    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (
+        ({"purposes[1].name": 1}, None, "empty document") if label.endswith("rep1") else ({}, None, None)))
+    text = "\n".join(m.entry_omission_section(data))
+    assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | 0 / 0 / 1 | 0 | snapshot_unusable 1 | rep1 0 · rep2 0 |" in text
+
+
+def test_replicate_receipt_tells_an_unusable_snapshot_from_an_absent_one(tmp_path, monkeypatch):
+    """#3954: `_replicate_receipt` reads `phase1_snapshot_state`, so a
+    snapshot file that parses to a list is reported unusable, not absent."""
+    import data_sheets_schema.receipts as receipts
+    import data_sheets_schema.replicate_structure as rs
+    m = _arm_comparison()
+    monkeypatch.setattr(m, "CONCAT", tmp_path)
+    monkeypatch.setattr(m, "_method_for", lambda label, project: "claudecode_api")
+    monkeypatch.setattr(m, "_RECEIPT_CACHE", {})
+    monkeypatch.setattr(receipts, "load_receipt", lambda path: {"chunks": []})
+    monkeypatch.setattr(rs, "record_chunk_texts", lambda inputs, root: ({"c001": "x"}, "bundle on disk"))
+    monkeypatch.setattr(rs, "verified_by_path", lambda rec, texts: {"s[0].name": 1})
+    for label, snap in (("L_absent", None), ("L_list", "- a\n"), ("L_ok", "s: [{name: A}]\n")):
+        d = tmp_path / "claudecode_api_core" / label
+        (d / "intermediate").mkdir(parents=True)
+        (d / "VOICE_coverage_receipt.yaml").write_text("chunks: []\n")
+        (d / "VOICE_provenance.yaml").write_text("run: {project: VOICE}\ninputs: {}\n")
+        if snap is not None:
+            (d / "intermediate" / "VOICE_full.yaml").write_text(snap)
+    assert m._replicate_receipt("L_absent", "VOICE") == ({"s[0].name": 1}, None, None)
+    paths, snapshot, why = m._replicate_receipt("L_list", "VOICE")
+    assert paths == {"s[0].name": 1} and snapshot is None and why and "list" in why
+    assert m._replicate_receipt("L_ok", "VOICE") == ({"s[0].name": 1}, {"s": [{"name": "A"}]}, None)
 
 
 def test_the_receipted_where_empty_section_cross_references_removals(tmp_path, monkeypatch):
@@ -678,7 +717,28 @@ def test_the_receipted_where_empty_section_cross_references_removals(tmp_path, m
         "checked": True, "unfounded_paths": [{"path": "splits[0]"}]})
     text = "\n".join(m.receipted_where_empty_section(data))
     assert "| v8 API production (2026-09-04f/g) | VOICE | 1 | `splits` (filled 1/2; rep2 2, deleted) |" in text
-    assert "Receipting replicates by removals status: deleted 1." in text
+    assert ("Receipting replicates by removals status (distinct arm × project × replicate; one with slots "
+            "of two statuses is counted under each): deleted 1. Slot × replicate instances by removals "
+            "status: deleted 1.") in text
+
+
+def test_the_receipted_where_empty_total_counts_replicates_not_slot_instances(tmp_path, monkeypatch):
+    """#3955: one replicate receipting three slots it leaves empty is one
+    replicate and three slot instances; a second status counts it again."""
+    import data_sheets_schema.removals as removals
+    recs = {"rep1": {"splits": ["x"], "subsets": ["y"], "title": "T"}, "rep2": {"license": "L"}}
+    m, data = _section_fixture(tmp_path, monkeypatch, recs)
+    for rep in recs:
+        d = tmp_path / "claudecode_api_core" / f"2026-09-04_x_{rep}"
+        d.mkdir(parents=True)
+        (d / "VOICE_provenance.yaml").write_text("{}\n")
+    monkeypatch.setattr(m, "_replicate_verified", lambda label, project: (
+        {"splits": 1, "subsets": 1, "title": 1} if label.endswith("rep2") else {}))
+    monkeypatch.setattr(removals, "for_record", lambda prov, record=None: {
+        "checked": True, "unfounded_paths": [{"path": "splits[0]"}, {"path": "subsets"}]})
+    text = "\n".join(m.receipted_where_empty_section(data))
+    assert ("counted under each): deleted 1, no removal row 1. Slot × replicate instances by removals "
+            "status: deleted 2, no removal row 1.") in text
 
 
 @pytest.mark.corpus
