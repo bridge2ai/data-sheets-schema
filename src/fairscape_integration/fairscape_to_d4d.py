@@ -8,15 +8,23 @@ Features:
 - Field mapping written out in this module's extraction methods
 - Vocabulary translation (schema.org → dcterms, etc.)
 - Pydantic validation of input RO-Crate
+- Output fitted to the schema's Dataset class: a key the class does not
+  declare, or a value that cannot be shaped to its slot, is left out and
+  named in `dropped` (#3969)
 - LinkML validation of output D4D
 """
 
 import json
+import re
 import sys
 import yaml
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
+
+from data_sheets_schema.resources import resource_path
+from data_sheets_schema.rocrate_map import FULL_SCHEMA, TARGET_CLASS, _coerce
+from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.scope import bare_doi
 
 # Add fairscape_models to path
 fairscape_path = Path(__file__).parent.parent.parent / 'fairscape_models'
@@ -31,6 +39,44 @@ except ImportError:
     print("Warning: FAIRSCAPE models not available")
 
 
+#: An ARK in the shape `grounding` matches, without a resolver: the `ark:`
+#: label, an optional `/`, a NAAN of five to nine digits, `/` and the name.
+ARK = re.compile(r"^ark:/?\d{5,9}/\S+$", re.IGNORECASE)
+
+#: The global resolver the ARK specification names.
+N2T_RESOLVER = "https://n2t.net/"
+
+
+def resolvable_id(value: Any) -> Any:
+    """An ARK as its n2t.net resolver URL; any other value as written (#3969).
+
+    The schema's prefixes declare no `ark`, so `ark:59853/x` expands to
+    nothing under them and `identifiers.classify` can only call it
+    `uri_unverified`. `https://n2t.net/ark:59853/x` is an absolute IRI at
+    the resolver the ARK specification names, which needs no declared
+    prefix (`uri`). The ARK is kept as written after the resolver. A value
+    already in a resolver's form, or one that is not an ARK, is left as it
+    is.
+    """
+    if isinstance(value, str) and ARK.match(value.strip()):
+        return N2T_RESOLVER + value.strip()
+    return value
+
+
+def _plain(value: Any) -> Any:
+    """`value` with every mapping key a plain `str`.
+
+    `rocrate_map._coerce` can key an object by a slot's name, a str subclass
+    that `yaml.dump` (which `fairscape-cli rocrate-to-d4d` uses) writes as a
+    python object tag rather than as the name.
+    """
+    if isinstance(value, dict):
+        return {str(key): _plain(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_plain(item) for item in value]
+    return value
+
+
 class FairscapeToD4DConverter:
     """Convert FAIRSCAPE RO-Crate to D4D YAML."""
 
@@ -39,6 +85,15 @@ class FairscapeToD4DConverter:
     # attribute nothing read: the output was identical with it, with another
     # table and with none, apart from the `generated_date` timestamp every run
     # stamps. The field mapping is the code below.
+
+    def __init__(self):
+        #: What the last `convert` left out of the record, as (source,
+        #: reason) pairs. The source is the crate property, or the path
+        #: inside an object this converter built (#3969).
+        self.dropped: List[Tuple[str, str]] = []
+        self._view = None
+        self._slots: Dict[str, Dict[str, Any]] = {}
+        self._minted: Dict[str, int] = {}
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """
@@ -50,6 +105,9 @@ class FairscapeToD4DConverter:
         Returns:
             D4D dictionary
         """
+        self.dropped = []
+        self._minted = {}
+
         # Load RO-Crate data
         if isinstance(rocrate_input, dict):
             rocrate_data = rocrate_input
@@ -133,6 +191,13 @@ class FairscapeToD4DConverter:
         """
         Build D4D dictionary from RO-Crate Dataset entity.
 
+        The mappings name the D4D slot each crate property goes to. The
+        record is then fitted to the schema's Dataset class (`_fit`), so it
+        carries only keys the class declares, each shaped to its slot's
+        range; what cannot be placed is recorded in `dropped` (#3969). The
+        record no longer carries the converter's own `schema_version`,
+        `generated_date` and `source` stamps, which are not D4D slots.
+
         Args:
             dataset: Main Dataset entity
             nested_datasets: Nested Dataset entities (FileCollections)
@@ -141,57 +206,177 @@ class FairscapeToD4DConverter:
         Returns:
             D4D dictionary
         """
+        d4d: Dict[str, Any] = {}
+        # slot -> the crate property it was filled from, for `dropped`
+        origin: Dict[str, str] = {}
 
-        d4d = {
-            # Required D4D metadata
-            'schema_version': '1.1',  # Updated to 1.1 for FileCollection support
-            'generated_date': datetime.now().isoformat(),
-            'source': 'FAIRSCAPE RO-Crate',
-        }
-
-        # Map basic properties
-        basic_props = self._map_basic_properties(dataset)
+        record_id = self._record_id(dataset)
+        if record_id:
+            d4d['id'] = record_id
+            origin['id'] = 'identifier' if dataset.get('identifier') else '@id'
 
         # Convert nested Datasets to FileCollections
-        has_file_collections = False
-        if nested_datasets:
-            file_collections = self._build_file_collections(nested_datasets)
-            if file_collections:
-                d4d['file_collections'] = file_collections
-                has_file_collections = True
+        file_collections = (self._build_file_collections(nested_datasets)
+                            if nested_datasets else [])
+        if file_collections:
+            d4d['file_collections'] = file_collections
+            origin['file_collections'] = 'hasPart'
 
-                # For schema 1.1 with file_collections: map contentSize to total_size_bytes
-                if 'bytes' in basic_props:
-                    basic_props['total_size_bytes'] = basic_props.pop('bytes')
+        # A hasPart reference already converted to a FileCollection is not
+        # repeated under resources.
+        fc_ids = {fc.get('id') for fc in file_collections}
+        complex_props = [
+            (prop, slot, [r for r in value if r.get('id') not in fc_ids]
+             if slot == 'resources' else value)
+            for prop, slot, value in self._map_complex_properties(dataset)
+        ]
 
-        d4d.update(basic_props)
+        # In this order a later mapping supersedes an earlier one in a
+        # single-valued slot (`_place`).
+        for prop, slot, value in (self._map_basic_properties(dataset)
+                                  + complex_props
+                                  # EVI properties (computational provenance)
+                                  + self._map_evi_properties(dataset)
+                                  # RAI properties (responsible AI)
+                                  + self._map_rai_properties(dataset)
+                                  # custom D4D properties
+                                  + self._map_d4d_properties(dataset)):
+            self._place(d4d, origin, slot, value, prop)
 
-        # Map complex properties (skip hasPart mapping if we have file_collections)
-        complex_props = self._map_complex_properties(dataset)
-        if has_file_collections and 'resources' in complex_props:
-            # Filter out resources that are already in file_collections
-            fc_ids = {fc.get('id') for fc in d4d.get('file_collections', [])}
-            if isinstance(complex_props['resources'], list):
-                complex_props['resources'] = [
-                    r for r in complex_props['resources']
-                    if r not in fc_ids
-                ]
-                # Remove resources if empty
-                if not complex_props['resources']:
-                    del complex_props['resources']
+        return self._fit(d4d, TARGET_CLASS, origin)
 
-        d4d.update(complex_props)
+    def _record_id(self, dataset: Dict) -> Optional[str]:
+        """The record's required `id`, taken from the crate root (#3969).
 
-        # Map EVI properties (computational provenance)
-        d4d.update(self._map_evi_properties(dataset))
+        The rule `rocrate_map.map_crate` applies to a crate root: its
+        `identifier`, else its `@id`, never a minted value, so the record
+        points back at the crate it came from. A DOI is written as the
+        `doi:` CURIE (#974), an ARK as its n2t.net resolver URL. A root
+        whose only identifier is an attached crate's `./` gives `./`, which
+        is all such a crate supplies.
+        """
+        value = dataset.get('identifier') or dataset.get('@id')
+        if isinstance(value, list):
+            value = value[0] if value else None
+        if not value:
+            return None
+        doi = bare_doi(value)
+        return f"doi:{doi}" if doi else resolvable_id(str(value))
 
-        # Map RAI properties (responsible AI)
-        d4d.update(self._map_rai_properties(dataset))
+    def _place(self, d4d: Dict[str, Any], origin: Dict[str, str],
+               slot: str, value: Any, prop: str) -> None:
+        """Put `value`, read from crate property `prop`, in `slot`.
 
-        # Map custom D4D properties
-        d4d.update(self._map_d4d_properties(dataset))
+        Two crate properties can map to one slot: an `additionalProperty`
+        entry and the property it duplicates, or the FAIRSCAPE spelling of
+        a key and the one this repo's d4d_to_fairscape.py writes. A
+        multivalued slot keeps each distinct value of both, so neither is
+        chosen over the other. A single-valued slot keeps one value and
+        records the other as dropped: a dedicated property's over an
+        `additionalProperty` entry, FAIRSCAPE's own precedence (its
+        datasheet mapping reads each dedicated key first and falls back to
+        the `additionalProperty` entry), and otherwise the later mapping's.
+        """
+        if value in (None, '', [], {}):
+            return
+        if slot not in d4d:
+            d4d[slot], origin[slot] = value, prop
+            return
+        held = d4d[slot]
+        if held == value:
+            return
+        declared = self._class_slots(TARGET_CLASS).get(slot)
+        if declared is not None and declared.multivalued:
+            items = list(held) if isinstance(held, list) else [held]
+            for item in (value if isinstance(value, list) else [value]):
+                if item not in items:
+                    items.append(item)
+            d4d[slot], origin[slot] = items, f"{origin[slot]} + {prop}"
+            return
+        fallback = 'additionalProperty['
+        if prop.startswith(fallback) and not origin[slot].startswith(fallback):
+            self.dropped.append(
+                (prop, f"superseded by {origin[slot]}, which also maps to `{slot}`"))
+            return
+        self.dropped.append(
+            (origin[slot], f"superseded by {prop}, which also maps to `{slot}`"))
+        d4d[slot], origin[slot] = value, prop
 
-        return d4d
+    def _schema_view(self):
+        """The merged schema, read from any working directory (#1301)."""
+        if self._view is None:
+            self._view = shared_view(resource_path(FULL_SCHEMA))
+        return self._view
+
+    def _class_slots(self, cls: str) -> Dict[str, Any]:
+        """The induced slots of `cls`, by name."""
+        if cls not in self._slots:
+            self._slots[cls] = {
+                s.name: s for s in self._schema_view().class_induced_slots(cls)
+            }
+        return self._slots[cls]
+
+    def _fit(self, obj: Dict[str, Any], cls: str, origin: Dict[str, str],
+             where: str = '') -> Dict[str, Any]:
+        """`obj` with only the keys `cls` declares, each value shaped to its
+        slot by `_shape`.
+
+        A key the class does not declare, and a value `_shape` cannot fit
+        to its slot, are left out and recorded in `dropped` (#3969). `where`
+        is the path of a nested object, which names what was dropped from it.
+        """
+        slots = self._class_slots(cls)
+        fitted: Dict[str, Any] = {}
+        for key, value in obj.items():
+            source = origin.get(key) or f"{where}{key}"
+            slot = slots.get(key)
+            if slot is None:
+                self.dropped.append(
+                    (source, f"the schema declares no `{key}` slot on {cls}"))
+                continue
+            if value in (None, '', [], {}):
+                continue
+            shaped, why = self._shape(value, slot, f"{where}{key}")
+            if shaped is None:
+                self.dropped.append((source, f"not placed in `{key}`: {why}"))
+                continue
+            fitted[key] = shaped
+        return fitted
+
+    def _shape(self, value: Any, slot: Any, where: str) -> Tuple[Any, str]:
+        """`(value, note)` shaped to `slot`'s range and cardinality.
+
+        Crate values take the static-map arm's rule (`rocrate_map._coerce`):
+        a DOI is the bare DOI, dates are date-times, enum values are kept
+        only where permitted, and text becomes an object of a class range;
+        so a crate value reaches a slot in one form whichever converter
+        writes it. An object this converter built (a creator, a reference,
+        a file collection) is fitted key by key, as the record is. The
+        value is None, with the reason, when it cannot be shaped to the slot.
+        """
+        view = self._schema_view()
+        cls = slot.range if slot.range and view.get_class(slot.range) else None
+        items = value if isinstance(value, list) else [value]
+        if cls and all(isinstance(item, dict)
+                       and not any(str(k).startswith('@') for k in item)
+                       for item in items):
+            built = [self._fit(item, cls, {}, f"{where}[{n}].")
+                     for n, item in enumerate(items)]
+            built = [obj for obj in built if obj]
+            if not built:
+                return None, f"no {cls} slot holds any of its keys"
+            if slot.multivalued:
+                return built, ''
+            if len(built) == 1:
+                return built[0], ''
+            return None, f"{len(built)} objects for a single-valued slot"
+        if cls and not slot.multivalued and isinstance(value, list) and len(value) > 1:
+            # `_coerce` joins a single-valued slot's list after shaping each
+            # item into an object, which would join the objects; join the
+            # text first, so the slot holds one object.
+            value = '; '.join(str(item) for item in value)
+        shaped, note = _coerce(value, slot, view, 'fairscape', self._minted)
+        return _plain(shaped), note
 
     def _build_file_collections(self, nested_datasets: List[Dict]) -> List[Dict[str, Any]]:
         """
@@ -210,7 +395,7 @@ class FairscapeToD4DConverter:
 
             # Map basic properties
             if '@id' in dataset:
-                collection['id'] = dataset['@id']
+                collection['id'] = resolvable_id(dataset['@id'])
 
             if 'name' in dataset:
                 collection['name'] = dataset['name']
@@ -225,10 +410,13 @@ class FairscapeToD4DConverter:
             if 'contentSize' in dataset:
                 # Parse size string to total_bytes (aggregate size)
                 size_str = dataset['contentSize']
-                if isinstance(size_str, str):
-                    collection['total_bytes'] = self._parse_size(size_str)
+                size = self._parse_size(size_str) if isinstance(size_str, str) else size_str
+                if size is None:
+                    self.dropped.append((f"{dataset.get('@id')}.contentSize",
+                                         f"{size_str!r} is not a size in bytes "
+                                         "this converter can read"))
                 else:
-                    collection['total_bytes'] = size_str
+                    collection['total_bytes'] = size
 
             if 'contentUrl' in dataset:
                 collection['path'] = dataset['contentUrl']
@@ -238,11 +426,9 @@ class FairscapeToD4DConverter:
 
             # Map D4D-specific properties
             if 'd4d:collectionType' in dataset:
-                # collection_type is multivalued, wrap scalar as array
-                collection_type = dataset['d4d:collectionType']
-                collection['collection_type'] = (
-                    collection_type if isinstance(collection_type, list) else [collection_type]
-                )
+                # Single-valued in the schema: `_fit` unwraps a one-item
+                # list and keeps only a FileCollectionTypeEnum value.
+                collection['collection_type'] = dataset['d4d:collectionType']
 
             if 'd4d:fileCount' in dataset:
                 collection['file_count'] = dataset['d4d:fileCount']
@@ -258,8 +444,8 @@ class FairscapeToD4DConverter:
 
         return file_collections
 
-    def _map_basic_properties(self, dataset: Dict) -> Dict[str, Any]:
-        """Map basic Schema.org properties to D4D."""
+    def _map_basic_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
+        """Map basic Schema.org properties to D4D, as (crate property, slot, value)."""
 
         mapping = {
             # Direct mappings (same name)
@@ -278,10 +464,13 @@ class FairscapeToD4DConverter:
             'author': 'creators',
             'url': 'page',
             'contentUrl': 'download_url',
-            'contentSize': 'bytes',
+            # The schema has no Dataset `bytes`; its byte-size slot is
+            # `total_size_bytes` (dcat:byteSize), the slot
+            # rocrate_normalize remaps `bytes` to (#3969).
+            'contentSize': 'total_size_bytes',
         }
 
-        d4d_props = {}
+        found = []
 
         for rocrate_prop, d4d_prop in mapping.items():
             if rocrate_prop in dataset:
@@ -289,50 +478,69 @@ class FairscapeToD4DConverter:
 
                 # Handle special transformations
                 if rocrate_prop == 'author' and isinstance(value, str):
-                    # Convert semicolon-separated string to Person list
-                    d4d_props[d4d_prop] = self._parse_authors(value)
+                    # Convert semicolon-separated string to Creator list
+                    value = self._parse_authors(value)
                 elif rocrate_prop == 'contentSize' and isinstance(value, str):
                     # Parse size string (e.g., "19.1 TB") to bytes
-                    d4d_props[d4d_prop] = self._parse_size(value)
-                else:
-                    d4d_props[d4d_prop] = value
+                    size = self._parse_size(value)
+                    if size is None:
+                        self.dropped.append((rocrate_prop,
+                                             f"{value!r} is not a size in bytes "
+                                             "this converter can read"))
+                        continue
+                    value = size
 
-        return d4d_props
+                found.append((rocrate_prop, d4d_prop, value))
 
-    def _map_complex_properties(self, dataset: Dict) -> Dict[str, Any]:
-        """Map complex/nested properties."""
+        return found
 
-        d4d_props = {}
+    def _map_complex_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
+        """Map complex/nested properties, as (crate property, slot, value)."""
 
-        # hasPart → resources
+        found = []
+
+        # hasPart → resources (schema:hasPart), each a Dataset object
         if 'hasPart' in dataset:
             has_part = dataset['hasPart']
             if isinstance(has_part, list):
-                # Extract IDs or convert to resource list
-                d4d_props['resources'] = [
-                    item.get('@id') if isinstance(item, dict) else item
-                    for item in has_part
-                ]
+                found.append(('hasPart', 'resources',
+                              self._references('hasPart', has_part)))
 
-        # isPartOf → parent collections
+        # isPartOf → parent_datasets, the Dataset slot whose slot_uri is
+        # schema:isPartOf; there is no `is_part_of` slot (#3969)
         if 'isPartOf' in dataset:
             is_part_of = dataset['isPartOf']
             if isinstance(is_part_of, list):
-                d4d_props['is_part_of'] = [
-                    item.get('@id') if isinstance(item, dict) else item
-                    for item in is_part_of
-                ]
+                found.append(('isPartOf', 'parent_datasets',
+                              self._references('isPartOf', is_part_of)))
 
         # additionalProperty → custom metadata
         if 'additionalProperty' in dataset:
             additional = dataset['additionalProperty']
             if isinstance(additional, list):
-                d4d_props.update(self._parse_additional_properties(additional))
+                found.extend(self._parse_additional_properties(additional))
 
-        return d4d_props
+        return found
 
-    def _map_evi_properties(self, dataset: Dict) -> Dict[str, Any]:
-        """Map EVI (Evidence) namespace properties."""
+    def _references(self, prop: str, items: List[Any]) -> List[Dict[str, Any]]:
+        """Crate references as the `{id: …}` objects a Dataset-ranged slot
+        holds, an ARK as its resolver URL; an entry with no id is recorded
+        in `dropped`."""
+        references = []
+        for item in items:
+            ref = item.get('@id') if isinstance(item, dict) else item
+            if isinstance(ref, str) and ref.strip():
+                references.append({'id': resolvable_id(ref)})
+            else:
+                self.dropped.append((prop, f"an entry with no @id: {item!r}"))
+        return references
+
+    def _map_evi_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
+        """Map EVI (Evidence) namespace properties, as (crate property, slot, value).
+
+        Only `evi:formats` has a Dataset slot. The roll-up counts and the
+        checksums name none, and `_fit` records them as dropped (#3969).
+        """
 
         evi_mapping = {
             'evi:datasetCount': 'dataset_count',
@@ -345,16 +553,12 @@ class FairscapeToD4DConverter:
             'evi:sha256': 'sha256',
         }
 
-        d4d_props = {}
+        return [(evi_prop, d4d_prop, dataset[evi_prop])
+                for evi_prop, d4d_prop in evi_mapping.items()
+                if evi_prop in dataset]
 
-        for evi_prop, d4d_prop in evi_mapping.items():
-            if evi_prop in dataset:
-                d4d_props[d4d_prop] = dataset[evi_prop]
-
-        return d4d_props
-
-    def _map_rai_properties(self, dataset: Dict) -> Dict[str, Any]:
-        """Map RAI (Responsible AI) namespace properties."""
+    def _map_rai_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
+        """Map RAI (Responsible AI) properties, as (crate property, slot, value)."""
 
         rai_mapping = {
             'rai:dataUseCases': 'intended_uses',
@@ -364,28 +568,37 @@ class FairscapeToD4DConverter:
             'rai:dataCollectionMissingData': 'missing_data_documentation',
             'rai:dataCollectionRawData': 'raw_data_sources',
             'rai:dataCollectionTimeframe': 'collection_timeframes',
+            # FAIRSCAPE's ROCrateMetadataElem declares these three as
+            # unprefixed `prohibitedUses` and `ethicalReview` and as
+            # `rai:dataImputationProtocol`, so the `rai:` spellings never
+            # matched a FAIRSCAPE crate (#3973). The `rai:` spellings stay
+            # because d4d_to_fairscape.py writes them, and this repo's own
+            # round trip reads them back. The three slots are multivalued,
+            # so a crate carrying both spellings keeps both values (`_place`).
             'rai:prohibitedUses': 'prohibited_uses',
+            'prohibitedUses': 'prohibited_uses',
             'rai:ethicalReview': 'ethical_reviews',
+            'ethicalReview': 'ethical_reviews',
             'rai:personalSensitiveInformation': 'confidential_elements',
             'rai:dataSocialImpact': 'data_protection_impacts',
             'rai:dataReleaseMaintenancePlan': 'updates',
             'rai:dataPreprocessingProtocol': 'preprocessing_strategies',
             'rai:dataAnnotationProtocol': 'labeling_strategies',
             'rai:dataAnnotationAnalysis': 'annotation_analyses',
-            'rai:machineAnnotationTools': 'machine_annotation_analyses',
+            # MachineAnnotationTools is the class the schema maps to
+            # rai:machineAnnotationTools; there is no
+            # `machine_annotation_analyses` slot (#3969).
+            'rai:machineAnnotationTools': 'machine_annotation_tools',
             'rai:imputationProtocol': 'imputation_protocols',
+            'rai:dataImputationProtocol': 'imputation_protocols',
         }
 
-        d4d_props = {}
+        return [(rai_prop, d4d_prop, dataset[rai_prop])
+                for rai_prop, d4d_prop in rai_mapping.items()
+                if rai_prop in dataset]
 
-        for rai_prop, d4d_prop in rai_mapping.items():
-            if rai_prop in dataset:
-                d4d_props[d4d_prop] = dataset[rai_prop]
-
-        return d4d_props
-
-    def _map_d4d_properties(self, dataset: Dict) -> Dict[str, Any]:
-        """Map D4D-specific namespace properties."""
+    def _map_d4d_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
+        """Map D4D-specific namespace properties, as (crate property, slot, value)."""
 
         d4d_mapping = {
             'd4d:addressingGaps': 'addressing_gaps',
@@ -393,28 +606,26 @@ class FairscapeToD4DConverter:
             'd4d:contentWarning': 'content_warnings',
             'd4d:informedConsent': 'informed_consent',
             'd4d:humanSubject': 'human_subject_research',
-            'd4d:atRiskPopulations': 'vulnerable_populations',
+            # The slot whose slot_uri is d4d:atRiskPopulations; there is no
+            # `vulnerable_populations` slot (#3969).
+            'd4d:atRiskPopulations': 'at_risk_populations',
         }
 
-        d4d_props = {}
-
-        for d4d_ns_prop, d4d_prop in d4d_mapping.items():
-            if d4d_ns_prop in dataset:
-                d4d_props[d4d_prop] = dataset[d4d_ns_prop]
-
-        return d4d_props
+        return [(d4d_ns_prop, d4d_prop, dataset[d4d_ns_prop])
+                for d4d_ns_prop, d4d_prop in d4d_mapping.items()
+                if d4d_ns_prop in dataset]
 
     def _parse_authors(self, author_string: str) -> List[Dict[str, str]]:
-        """Parse semicolon-separated author string to Person list."""
+        """Parse semicolon-separated author string to Creator list.
+
+        A Creator declares no `type` slot, so none is written (#3969).
+        """
         authors = []
 
         for name in author_string.split(';'):
             name = name.strip()
             if name:
-                authors.append({
-                    'name': name,
-                    'type': 'Person'
-                })
+                authors.append({'name': name})
 
         return authors
 
@@ -447,9 +658,14 @@ class FairscapeToD4DConverter:
             # Could not parse
             return None
 
-    def _parse_additional_properties(self, additional: List[Dict]) -> Dict[str, Any]:
-        """Parse additionalProperty list to D4D fields."""
-        d4d_props = {}
+    def _parse_additional_properties(self, additional: List[Dict]) -> List[Tuple[str, str, Any]]:
+        """Parse additionalProperty list to D4D fields, as (source, slot, value).
+
+        `Completeness` and `Data Governance Committee` name no Dataset slot,
+        and `_fit` records them as dropped, as it does any other name that
+        is not one (#3969).
+        """
+        found = []
 
         for prop in additional:
             if not isinstance(prop, dict):
@@ -474,9 +690,9 @@ class FairscapeToD4DConverter:
             }
 
             d4d_field = name_mapping.get(name, name.lower().replace(' ', '_'))
-            d4d_props[d4d_field] = value
+            found.append((f"additionalProperty[{name}]", d4d_field, value))
 
-        return d4d_props
+        return found
 
     def convert_and_save(
         self,
@@ -506,6 +722,11 @@ class FairscapeToD4DConverter:
 
         print(f"✓ D4D YAML saved to {output_file}")
 
+        if self.dropped:
+            print(f"⚠ {len(self.dropped)} crate value(s) not placed in the record:")
+            for source, reason in self.dropped:
+                print(f"  - {source}: {reason}")
+
         # Validate if requested
         is_valid = True
         if validate:
@@ -519,11 +740,14 @@ class FairscapeToD4DConverter:
             from linkml.validator import validate
             from linkml_runtime.loaders import yaml_loader
 
-            schema_file = Path('src/data_sheets_schema/schema/data_sheets_schema_all.yaml')
+            # From any working directory (#1301). A schema that cannot be
+            # found means the record was not validated, which is not a pass
+            # (#3969).
+            schema_file = resource_path(FULL_SCHEMA)
 
             if not schema_file.exists():
-                print(f"⚠ Warning: Schema not found: {schema_file}")
-                return True
+                print(f"✗ Schema not found: {schema_file}; the record was not validated")
+                return False
 
             # Load D4D data
             with open(d4d_file) as f:

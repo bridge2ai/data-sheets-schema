@@ -118,6 +118,10 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
         else:
             click.echo(yaml_output)
 
+        # What the record could not hold, on stderr so stdout stays YAML (#3969)
+        for source, reason in converter.dropped:
+            click.echo(f"⚠ not placed: {source}: {reason}", err=True)
+
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
         sys.exit(1)

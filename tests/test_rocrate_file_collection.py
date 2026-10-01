@@ -200,7 +200,8 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         # Note: format, bytes, sha256 are now file-level properties, not collection-level
         # Collection has aggregate total_bytes from RO-Crate contentSize
         self.assertEqual(raw_collection.get('total_bytes'), 2097152)
-        self.assertEqual(raw_collection['collection_type'], ['raw_data'])
+        # FileCollection.collection_type is single-valued in the schema (#3969)
+        self.assertEqual(raw_collection['collection_type'], 'raw_data')
         self.assertEqual(raw_collection['file_count'], 200)
 
     def test_roundtrip_preservation(self):
@@ -216,7 +217,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                     'id': 'test-collection',
                     'name': 'Test Files',
                     'description': 'Test data',
-                    'collection_type': ['test_split'],
+                    'collection_type': 'test_split',  # single-valued (#3969)
                     'total_bytes': 1024,
                     'file_count': 10,
                     'path': '/data/test/',
