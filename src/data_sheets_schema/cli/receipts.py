@@ -409,27 +409,30 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     -ceo pipefail 'cmd'`), the command `eval` runs and each run of `ssh`'s arguments to
     the end are read for a `&` and the like, and one carrying a word supplied at run
     time is open-ended (`bash -c "$X"`); and a command the tokenizer cannot split is
-    open-ended where any word in it starts with `$` or a backquote. A command is
-    lexed as bash lexes it (#3830): a quoted or escaped operator (`';'`, `'&&'`,
-    `\\;`) is a word, never a join; a `$'...'` string closes where bash closes it,
-    past a `\\'`, except in a command that also carries `$$`, which is read as
-    origin/main read it (#4005: `$$'\\'` is `$$` and a plain quote); and a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
-    is a program built at run time (#3924). A double-quoted word still ends at its
-    first `"`, inside a `$(...)` too, and a substitution is read to its `)` by
-    counting brackets, so a case pattern's `)` ends it (#3925: these wait for a
-    shell grammar). A here-document body is one data word,
-    never commands of this shell (#3897), only where every part of the command is
-    plainly run -- its program its first word, with no assignment, `env`, `poetry
-    run`, other wrapper or redirection before it and no assignment-only part
-    (#3996) -- and is a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
-    plain-named `python*` interpreter reading its program from the here-document
-    it carries (`python3 - <<'EOF'`, standard input); nothing substitutes; every
-    delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly
-    inside one pair of single or double quotes (#3947); and no `${`, `$[`, `$((`,
-    `((` or backquote appears anywhere in the command (#3948); and the command
-    carries no backslash-newline (#4005: bash removes one, so `cat\\` then a newline
-    then `x` runs `catx`). Anywhere else, and
-    in a nested command string, the body's lines are read as commands. A tool
+    open-ended where any word in it starts with `$` or a backquote. One gate on a
+    command's text, before any lexing, chooses its reading (#4028): v6 reads a command
+    of printable ASCII, tabs and newlines only, with no backslash-newline, no `$$`, no
+    `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or backquote anywhere, and not both a `<<`
+    and a `$'`, where its here-documents are data and it can split it; every other
+    command is read exactly as origin/main read it, and a nested command string (a
+    substitution's command, a `-c` string, `eval`'s command) is always split as
+    origin/main split it (#4029). v6 lexes as bash lexes (#3830): a quoted or escaped
+    operator (`';'`, `'&&'`, `\\;`) is a word, never a join; a `$'...'` string closes
+    where bash closes it, past a `\\'`; and a brace expansion with a quoted blank in it
+    (`{cd,'/tmp a b'}`) is a program built at run time (#3924). A double-quoted word
+    still ends at its first `"`, and a substitution is read to its `)` by counting
+    brackets, so a case pattern's `)` ends it (#3925: these wait for a shell grammar).
+    A here-document body is one data word, never commands of this shell (#3897), only
+    where one part of the command carries the here-documents; every part before it is
+    `cd WORD` or `mkdir [-p] WORD...`, every word unquoted and plain (#4028); that part
+    and every part after it is plainly run -- its program its first word, with no
+    assignment, `env`, `poetry run`, other wrapper or redirection before it (#3996) --
+    and is a reader other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a
+    plain-named `python*` interpreter reading its program from the here-document it
+    carries (`python3 - <<'EOF'`, standard input); nothing substitutes; and every
+    delimiter is a plain word (letters, digits, `_`, `-`, `.`), bare or wholly inside
+    one pair of single or double quotes (#3947). Anywhere else the body's lines are
+    read as commands, as origin/main read them. A tool
     call whose name is not a non-empty string is a malformed call (#3918). A relative `--full`
     after a `cd`, `pushd` or `popd` resolves against the new directory only
     where every join from the change to the derive is `&&`, and after one `eval` runs

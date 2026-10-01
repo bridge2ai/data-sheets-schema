@@ -2435,17 +2435,29 @@ class DeriveSpellings(Base):
                       "which is not read as detaching there (#3923); a substitution whose command holds a "
                       "case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose command is read "
                       "only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending at that "
-                      "quote (#3925; both wait for a shell grammar); a command carrying `$$` and `$'`, read "
-                      "with origin/main's tokenizer, whose comment, newline, operator and substitution scans, "
-                      "as on origin/main, still take the `'` after `$$` to open an ANSI-C string, so `echo "
-                      "$$'\\'`, a newline and `cd data` reads the newline as quoted and the `cd` as an "
-                      "argument, and `cat $$'\\' <(./derive.sh) '\\'` is not read as open-ended (#4005; a "
-                      "gap origin/main has); and what a program does with a here-document body read as its "
-                      "data", text)
-        self.assertIn("and no backslash-newline does either (#4005), the body is one word", text)
-        # #3924 is read now: no longer named as a gap. #3925 is again (#3983).
+                      "quote (#3925; both wait for a shell grammar); every gap origin/main's reading has, in a "
+                      "command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
+                      "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or "
+                      "backquote anywhere, or both a `<<` and a `$'`), one with a here-document not read as "
+                      "data, and one v6 cannot split is read exactly as origin/main read it (#4028), so a "
+                      "quoted operator there joins, a `$'...'` holding `\\'` is split at shlex's quotes or "
+                      "not at all, a brace expansion with a quoted blank (`{cd,'/tmp a b'}`) is not read as "
+                      "built at run time (#3924), `echo $$'\\'`, a newline and `cd data` reads the newline as "
+                      "quoted and the `cd` as an argument, and `cat $$'\\' <(./derive.sh) '\\'` is not read "
+                      "as open-ended (#4005); a nested command string (a substitution's command, a `-c` "
+                      "string, `eval`'s command) is split with origin/main's tokenizer whatever the command "
+                      "around it (#4029), so a quoted operator there joins too; and what a program does with "
+                      "a here-document body read as its data, in a command v6 reads", text)
+        self.assertIn("every part before it is `cd WORD` or `mkdir [-p] WORD...` with every word unquoted and "
+                      "plain (#4028: `printf -v PATH %s ./bin; cat` runs `./bin/cat`)", text)
+        self.assertIn("and a function or alias named `cd` or `mkdir` that changes which program a later word "
+                      "names is not seen; anywhere else the body's lines are read as commands (#3897)", text)
+        # #3924 is read in a command v6 reads, and named as a gap only in one
+        # read as origin/main read it. #3925 is a gap again (#3983). The
+        # round-4 guards are gone into the one gate (#4028).
         for gone in ("which the tokenizer splits so it is not read as built at run time",
-                     "Both wait for a shell grammar (#3830)"):
+                     "Both wait for a shell grammar (#3830)", "a command carrying `$$` and `$'`, read",
+                     "and no backslash-newline does either (#4005)"):
             with self.subTest(gone=gone):
                 self.assertNotIn(gone, text)
         for gone in ("a directory a `source`d script or a function changed to is not seen",
@@ -4024,10 +4036,12 @@ class ShellLexer(Base):
     """The tokenizer lexes a command as bash does (#3830): quoted operators
     are words, `$'...'` closes where bash closes it, and a here-document
     body every part of the command reads as data is one word, not lines of
-    commands (#3897). A double-quoted word still ends at its first `"`, as
-    on origin/main, inside a `$(...)` too (#3925 waits for a shell grammar,
-    #3983). Each reading below was checked against bash 5.3: what it
-    prints, or `bash --pretty-print`'s parse."""
+    commands (#3897). Only where `_v6_admissible` admits the command's text
+    and v6 reads it (#4028); every other command, and every nested command
+    string, reads exactly as on origin/main. A double-quoted word still
+    ends at its first `"`, as on origin/main (#3925 waits for a shell
+    grammar, #3983). Each reading below was checked against bash 5.3: what
+    it prints, or `bash --pretty-print`'s parse."""
 
     FULL = "/w/data/X_d4d.yaml"
     DERIVE = f"d4d derive core --full {FULL} --out /w/o.yaml"
@@ -4067,20 +4081,34 @@ class ShellLexer(Base):
         # The `$` is kept: as a program it is still a word built at run time.
         self.assertTrue(ro._shell("$'cd' /tmp", "/w", [])["moves"])
         self.assertTrue(ro._shell("$'setsid' ./derive.sh", "/w", [])["detaches"])
-        self.assertIsNone(ro._tokens("echo $'it\\'s"))
+        # One that does not close is a command v6 cannot split; origin/main's
+        # tokenizer splits it, so it is read as origin/main read it (#4028).
+        self.assertIsNone(ro._scan("echo $'it\\'s", heredocs=False))
+        self.assertEqual(ro._lex("echo $'it\\'s")[2], False)
+        self.assertEqual(ro._tokens("echo $'it\\'s"), ro._origin_tokens("echo $'it\\'s"))
+        self.assertIsNotNone(ro._tokens("echo $'it\\'s"))
 
     def test_a_here_document_body_is_data_where_every_part_reads_it_so(self):
         # bash prints the body back as here-document text, not commands, and
         # `cat <<'EOF'\ncd /tmp\nEOF\npwd` does not move the shell.
         body = "cd /tmp\nx = d[\"k\"]\n$X ./derive.sh\nsource env.sh\nit's"
         for command in (f"cat > notes.txt <<'EOF'\n{body}\nEOF", f"cat <<EOF | grep x\n{body}\nEOF",
-                        f"cat <<-EOF\n\t{body}\n\tEOF", f"ls && cat > n.txt <<\"EOF\"\n{body}\nEOF",
-                        f"cat <<'A'; cat <<'B'\n{body}\nA\n{body}\nB"):
+                        f"cat <<-EOF\n\t{body}\n\tEOF", f"cat > n.txt <<\"EOF\"\n{body}\nEOF\nls",
+                        f"cat <<'A' <<'B'\n{body}\nA\n{body}\nB"):
             with self.subTest(command=command):
                 shell = ro._shell(command, "/w", [])
                 self.assertEqual((shell["moves"], shell["runs_unread"]), (False, False))
-                words = [t for t in ro._tokens(command, heredoc_data=True) if getattr(t, "heredoc", False)]
+                words = [t for t in ro._tokens(command) if getattr(t, "heredoc", False)]
                 self.assertTrue(words and all(w.replace("\t", "") == body for w in words), words)
+        # Before the part that carries it, only `cd WORD` or `mkdir [-p]
+        # WORD...` (#4028); the body is data there too, though the `cd`
+        # itself moves and `mkdir` is a program not read.
+        for command in (f"cd sub && cat > n.txt <<'EOF'\n{body}\nEOF",
+                        f"mkdir -p out && cat > out/n.txt <<'EOF'\n{body}\nEOF"):
+            with self.subTest(command=command):
+                words = [t for t in ro._tokens(command) if getattr(t, "heredoc", False)]
+                self.assertEqual(words, [body])
+                self.assertIs(ro._shell(command, "/w", [])["detaches"], False)
         # A python interpreter reading its program from the here-document it
         # carries reads it as `python -c` reads a word: the body's
         # `d["k"]` (a glob) and bare words are not a run-time program or a
@@ -4090,16 +4118,22 @@ class ShellLexer(Base):
             with self.subTest(command=command):
                 shell = ro._shell(command, "/w", [])
                 self.assertEqual((shell["moves"], shell["detaches"], shell["runs_unread"]), (False, False, True))
-        # A quoted delimiter expands nothing: `cat <<'EOF'\n$(echo hi)\nEOF`
-        # prints `$(echo hi)`, so its body substitutes nothing and runs nothing.
-        shell = ro._shell("cat > n.txt <<'EOF'\n$(./derive.sh)\n<(./derive.sh)\nEOF", "/w", [])
-        self.assertEqual((shell["runs_unread"], shell["moves"]), (False, False))
+        # A quoted delimiter expands nothing (`cat <<'EOF'\n$(echo hi)\nEOF`
+        # prints `$(echo hi)`), but a `$(` or `<(` anywhere in the text takes
+        # the command to origin/main's reading, which reads the lines as
+        # commands (#4028): here a false `unknown`, as on origin/main.
+        command = "cat > n.txt <<'EOF'\n$(./derive.sh)\n<(./derive.sh)\nEOF"
+        self.assertIs(ro._lex(command)[2], False)
+        shell = ro._shell(command, "/w", [])
+        self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
         # A backquote anywhere in the command is never read past (#3948):
         # its lines are read as commands, as on origin/main.
         shell = ro._shell("cat > n.txt <<'EOF'\n`./derive.sh`\nEOF", "/w", [])
         self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
-        # The lexer default, and every nested command, still reads the lines.
-        self.assertEqual(ro._tokens("cat <<'EOF'\ncd /tmp\nEOF"), ["cat", "<<", "EOF", ";", "cd", "/tmp", ";", "EOF"])
+        # origin/main's tokenizer, which reads every nested command string,
+        # still reads the lines as commands.
+        self.assertEqual(ro._origin_tokens("cat <<'EOF'\ncd /tmp\nEOF"),
+                         ["cat", "<<", "EOF", ";", "cd", "/tmp", ";", "EOF"])
 
     def test_a_here_document_something_may_run_is_still_read_as_commands(self):
         # A shell, a pipe or a script into one, a program not read, an
@@ -4115,30 +4149,32 @@ class ShellLexer(Base):
                         "sed -f /dev/stdin f <<'EOF'\ncd /tmp\nEOF", "cat <<'EOF'\ncd /tmp\nEOF\nd4d receipts check"):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
-                self.assertFalse(any(getattr(t, "heredoc", False)
-                                     for t in ro._tokens(command, heredoc_data=True) or []))
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
         for command in ("bash <<'EOF'\n$X ./derive.sh\nEOF", "cat <<'EOF' | bash\n$X ./derive.sh\nEOF",
                         "cat > s.sh <<'EOF'\n$X ./derive.sh\nEOF\nbash s.sh"):
             with self.subTest(command=command):
                 self.assertTrue(ro._shell(command, "/w", [])["detaches"])
 
     def test_a_body_with_a_backslash_newline_is_read_as_commands(self):
-        # A backslash-newline anywhere in the command keeps every body's
-        # lines read as commands, as on origin/main (#4005): bash removes a
-        # line continuation outright, and reading its body as data needs
-        # bash's joining exactly right. With a quoted delimiter a trailing
-        # backslash is text and bash runs `cd /tmp`; with an unquoted one
-        # bash joins the lines and `cd /tmp` is body text -- both now read
-        # as moving, the second a false `unknown` at worst. An even run
-        # (`foo\\\\`, #3952) reads the same way.
+        # A backslash-newline anywhere in the command takes it to
+        # origin/main's reading, every body's lines read as commands
+        # (#4005, #4028): bash removes a line continuation outright, and
+        # reading its body as data needs bash's joining exactly right. With
+        # a quoted delimiter a trailing backslash is text and bash runs `cd
+        # /tmp`; with an unquoted one bash joins the lines and `cd /tmp` is
+        # body text -- both read as moving, the second a false `unknown`, as
+        # on origin/main. An even run (`foo\\\\`, #3952) reads the same way.
         for command in ("cat <<'EOF'\nfoo\\\nEOF\ncd /tmp\nls",
                         "cat <<EOF\nfoo\\\nEOF\ncd /tmp\nEOF",
                         "cat <<EOF\nfoo\\\\\nEOF\ncd /tmp\nEOF"):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
-                self.assertFalse(any(getattr(t, "heredoc", False)
-                                     for t in ro._tokens(command, heredoc_data=True)))
-                self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                self.assertIs(ro._v6_admissible(command), False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                # v6's own scan refuses one too, never reading it as a blank.
+                self.assertIsNone(ro._scan(command, heredocs=True))
+                self.assertIsNone(ro._scan(command, heredocs=False))
 
     #: Here-documents whose `<<` or delimiter this does not read (#3947,
     #: #3948): bash 5.3 runs `cd data` in each, then fails on the last line.
@@ -4165,7 +4201,7 @@ class ShellLexer(Base):
         # `./derive.sh &` it is open-ended.
         for command in self.UNREAD_HEREDOCS:
             with self.subTest(command=command):
-                self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
                 shell = ro._shell(command, "/w", [])
                 self.assertEqual((shell["moves"], shell["runs_unread"]), (True, True))
                 shell = ro._shell(command.replace("cd data", "./derive.sh &"), "/w", [])
@@ -4206,8 +4242,7 @@ class ShellLexer(Base):
         for command in ("rg --pre sh x <<'EOF'\ncd /tmp\nEOF", "./python3 - <<'EOF'\ncd /tmp\nEOF"):
             with self.subTest(command=command):
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
-                self.assertFalse(any(getattr(t, "heredoc", False)
-                                     for t in ro._tokens(command, heredoc_data=True) or []))
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
 
     def test_a_here_document_read_as_data_places_a_later_call(self):
         # A python heredoc whose body line starts with a bare word or a glob
@@ -4262,7 +4297,7 @@ class ShellLexer(Base):
             for body in ("cd data", "$X ./derive.sh"):
                 command = template.format(body=body)
                 with self.subTest(command=command):
-                    self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                    self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
                     shell = ro._shell(command, "/w", [])
                     self.assertEqual((shell["moves"], shell["runs_unread"]), (True, True))
                     self.assertIs(shell["detaches"], body.startswith("$X"))
@@ -4274,7 +4309,7 @@ class ShellLexer(Base):
             with self.subTest(command=command):
                 shell = ro._shell(command, "/w", [])
                 self.assertEqual((shell["moves"], shell["detaches"]), (False, False))
-                self.assertNotEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+                self.assertNotEqual(ro._tokens(command), ro._origin_tokens(command))
 
     def test_a_reader_head_is_the_first_word_of_a_part_plainly_run(self):
         # `_heredoc_reader_head` on its own (#3996): anything before the
@@ -4361,12 +4396,12 @@ class ShellLexer(Base):
         # for a shell grammar, #3983).
         command = "echo \"$(echo \")\"; cd x)\" && ls"
         self.assertEqual(ro._tokens(command), ["echo", "$(echo ", ")", "; cd x)", "&&", "ls"])
-        self.assertEqual(ro._tokens(command, heredoc_data=True), ro._tokens(command))
+        self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
         for command in self.QUOTED_SUBSTITUTIONS:
             with self.subTest(command=command):
                 # A `cd` word at top level, or (the last, whose quotes do not
                 # pair) a command not split, read whole and counted.
-                tokens = ro._tokens(command, heredoc_data=True)
+                tokens = ro._tokens(command)
                 self.assertTrue(tokens is None or "cd" in tokens, tokens)
                 self.assertIs(ro._shell(command, "/w", [])["moves"], True)
         # A substitution's command is read to its `)` by counting brackets,
@@ -4409,7 +4444,7 @@ class ShellLexer(Base):
             for body in self.DOLLAR_DOLLAR_BODIES:
                 command = template.format(body=body)
                 with self.subTest(command=command):
-                    tokens = ro._tokens(command, heredoc_data=True)
+                    tokens = ro._tokens(command)
                     self.assertEqual(tokens, ro._origin_tokens(command))
                     self.assertIn(";", tokens[:4])
                     shell = ro._shell(command, "/w", [])
@@ -4422,20 +4457,23 @@ class ShellLexer(Base):
         # are joins here too; and without `$$` a `$'...'` is read as bash
         # reads it, past its `\'`.
         command = "echo \\$'\\'; cd data; echo '\\'"
-        self.assertEqual(ro._tokens(command, heredoc_data=True)[:4], ["echo", "$\\", ";", "cd"])
+        self.assertEqual(ro._tokens(command)[:4], ["echo", "$\\", ";", "cd"])
         self.assertIs(ro._shell(command, "/w", [])["moves"], True)
         self.assertEqual(ro._tokens("echo $'\\'; cd data; echo '"), ["echo", "$'; cd data; echo "])
-        self.assertFalse(ro._origin_reading("echo $'\\'; cd data; echo '"))
-        self.assertFalse(ro._origin_reading("echo $$; cat <<'EOF'\nx\nEOF"))
+        self.assertIs(ro._lex("echo $'\\'; cd data; echo '")[2], True)
+        # A `$$` anywhere takes a command to origin/main's reading (#4028),
+        # a here-document beside it included.
+        self.assertIs(ro._v6_admissible("echo $$; cat <<'EOF'\nx\nEOF"), False)
+        self.assertEqual(ro._tokens("echo $$; cat <<'EOF'\nx\nEOF"), ro._origin_tokens("echo $$; cat <<'EOF'\nx\nEOF"))
 
     def test_a_backslash_newline_keeps_here_document_lines_read_as_commands(self):
         for template in self.CONTINUED_READER:
             for body in ("cd data", "$X ./derive.sh"):
                 command = template.format(body=body)
                 with self.subTest(command=command):
-                    tokens = ro._tokens(command, heredoc_data=True)
+                    tokens = ro._tokens(command)
                     self.assertFalse(any(getattr(t, "heredoc", False) for t in tokens))
-                    self.assertEqual(tokens, ro._tokens(command))
+                    self.assertEqual(tokens, ro._origin_tokens(command))
                     shell = ro._shell(command, None, [])
                     self.assertEqual((shell["runs_unread"], shell["moves"]), (True, True))
                     self.assertIs(shell["detaches"], body.startswith("$X"))
@@ -4470,6 +4508,201 @@ class ShellLexer(Base):
                     r.write(r.receipt, Boundaries.C003)
                     r.derive(full=r.full)
                     self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
+
+    def test_v6_admits_a_command_only_by_its_text_as_written(self):
+        # One gate, decided on the text before any lexing (#4028): v6's
+        # readings apply only to printable ASCII, a tab and a newline, with
+        # no backslash-newline, no `$$`, no construct bash reads to a
+        # closing bracket, and not both a `<<` and a `$'`. Every other
+        # command is lexed as origin/main lexed it.
+        for command in ("echo ';' && ls", "echo $'it\\'s' && cd /w", "cat <<'EOF'\ncd data\nEOF",
+                        "find . -exec x {} \\;\tls", "printf '%s' a; echo \"b c\""):
+            with self.subTest(command=command):
+                self.assertIs(ro._v6_admissible(command), True)
+                self.assertIs(ro._lex(command)[2], True)
+        for command in ("cat\r <<'EOF'\nx\nEOF", "echo ';'\r", "echo ';' \x0b", "echo ';' \x00", "echo 'é' ';'",
+                        "echo '\u2014' ';'", "echo ';'\u2028ls", "echo ';' \\\nls", "echo $$ ';'", "echo `x` ';'",
+                        "echo \"$(x)\" ';'", "echo ${x} ';'", "echo $[1] ';'", "echo $((1)) ';'", "(( x )); echo ';'",
+                        "cat <(x) ';'", "tee >(x) ';'", "cat <<'EOF'\n$'x'\nEOF", "echo $'x'; cat <<'EOF'\nx\nEOF"):
+            with self.subTest(command=command):
+                self.assertIs(ro._v6_admissible(command), False)
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                self.assertEqual(ro._lex(command)[1], ro._strip_comments(command))
+
+    #: origin/main's `_shell` for every counterexample of this lexer's review
+    #: rounds (#3947, #3948, #3983, #3985, #3996, #4005, #4028, #4029),
+    #: computed with the merge base's module (c962a6cc8) and pinned (#4028).
+    MAIN_READINGS = Path(__file__).parent / "data" / "receipt_origin_main_readings.json"
+
+    def test_a_command_v6_does_not_admit_reads_exactly_as_on_origin_main(self):
+        # Field for field, not merely no looser: its tokens, the text the
+        # substitution scans read, every nested command string and the
+        # brace-expansion pattern are origin/main's (#4028, #4029).
+        pinned = json.loads(self.MAIN_READINGS.read_text(encoding="utf-8"))
+        self.assertEqual({entry["issue"].split(" ")[0].rstrip(",:") for entry in pinned["commands"]},
+                         {"#3947", "#3983", "#3996", "#4005", "#4028", "#4029"})
+        for entry in pinned["commands"]:
+            command = entry["command"]
+            with self.subTest(issue=entry["issue"], command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                for (cwd, moved), reading in zip(pinned["cases"], entry["readings"]):
+                    targets = [ro._Target(kind, path) for kind, path in pinned["targets"]]
+                    self.assertEqual(ro._shell(command, cwd, targets, moved=moved), reading)
+
+    def test_a_command_read_as_on_origin_main_keeps_its_brace_pattern(self):
+        # Its whole reading is origin/main's, so the #3924 gap stays there: a
+        # brace expansion with a quoted blank is read as built at run time
+        # only in a command v6 admits. The pattern is the call's own and is
+        # reset after it.
+        self.assertIs(ro._shell("{cd,'/tmp a b'}", "/w", [])["moves"], True)
+        self.assertIs(ro._shell("echo $$; {cd,'/tmp a b'}", "/w", [])["moves"], False)
+        self.assertIs(ro._BRACES.get(), ro._BRACE_EXPANSION)
+        self.assertIs(ro._shell("{cd,'/tmp a b'}", "/w", [])["moves"], True)
+
+    def test_a_nested_command_is_read_with_origin_mains_tokenizer(self):
+        # #4029: eval's command, a `-c` string and a substitution's command
+        # are split with origin/main's tokenizer for every command, so a
+        # quoted `;` there joins as it did on origin/main (bash would print
+        # it), and never hides a part.
+        self.assertIs(ro._lex("eval \"echo ';' cd data\"")[2], True)
+        self.assertIs(ro._shell("eval \"echo ';' cd data\"", "/w", [])["moves"], True)
+        self.assertIs(ro._shell("bash -c \"echo ';' setsid ./derive.sh\"", "/w", [])["detaches"], True)
+        self.assertIs(ro._shell("echo \"$(echo $'\\'; $X ./derive.sh; echo ')\"", "/w", [])["detaches"], True)
+        self.assertTrue(ro._nested_open_ended("echo ';' setsid ./derive.sh", command=True))
+        # A here-document in nested text is lines of commands there, so a
+        # body origin/main's tokenizer cannot split leaves eval's command
+        # opaque, and a `&` in a body line is a background `&`.
+        self.assertIs(ro._shell("eval \"cat <<'EOF'\nit's\nEOF\"", "/w", [])["moves"], True)
+        self.assertIs(ro._shell("bash -c \"cat <<'EOF'\na &b\nEOF\"", "/w", [])["detaches"], True)
+
+    def test_a_here_document_follows_only_a_cd_or_mkdir_part(self):
+        # #4028: `printf -v PATH %s ./bin; cat` runs `./bin/cat`, as
+        # `PATH=./bin; cat` does (#3996). Before the part that carries a
+        # here-document read as data, only `cd WORD` and `mkdir [-p]
+        # WORD...` may stand, every word unquoted and plain; anything else
+        # takes the command to origin/main's reading.
+        body = "$X ./derive.sh"
+        for prefix in ("cd sub && ", "cd sub; ", "mkdir out && ", "mkdir -p out a/b; ", "cd sub && mkdir -p o && "):
+            command = f"{prefix}cat > n.txt <<'EOF'\n{body}\nEOF"
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], True)
+                self.assertIs(ro._shell(command, "/w", [])["detaches"], False)
+        for prefix in ("printf -v PATH %s ./bin; ", "printf -vPATH %s ./bin && ", "export PATH=./bin; ",
+                       "PATH=./bin; ", "declare -x PATH=./bin; ", "hash -p ./bin/cat cat; ", "enable -n cat; ",
+                       "alias cat=sh; ", "source env.sh; ", "eval x; ", "f() { :; }; ", "ls && ", "echo x; ",
+                       "cd; ", "cd -; ", "cd -P sub; ", "cd 'sub'; ", "cd $D; ", "cd sub dir; ", "mkdir; ",
+                       "mkdir -m 700 o; ", "mkdir -p 'o'; ", "pushd sub; ", "cat <<'A'\nx\nA\n"):
+            command = f"{prefix}cat > n.txt <<'EOF'\n{body}\nEOF"
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                self.assertEqual(ro._tokens(command), ro._origin_tokens(command))
+                self.assertIs(ro._shell(command, "/w", [])["detaches"], True)
+
+    def test_a_carriage_return_is_a_word_character(self):
+        # #4028: bash's blanks are a space and a tab, so `cat\r` is the
+        # program bash runs ("$'cat\r': command not found"), never the reader
+        # `cat`. A command carrying one is read as on origin/main.
+        self.assertEqual(ro._scan("cat\r x", heredocs=False)[0], ["cat\r", "x"])
+        for command in ("cat\r <<'EOF'\n$X ./derive.sh\nEOF", "cat\r<<'EOF'\n$X ./derive.sh\nEOF",
+                        "\rcat <<'EOF'\n$X ./derive.sh\nEOF", "head\r -n1 <<'EOF'\n$X ./derive.sh\nEOF"):
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                shell = ro._shell(command, "/w", [])
+                self.assertEqual((shell["runs_unread"], shell["detaches"], shell["moves"]), (True, True, True))
+
+    def test_a_command_v6_cannot_split_reads_as_origin_main_splits_it(self):
+        # #4028: v6 cannot split `echo x$'\'` (the ANSI-C string never
+        # closes), where origin/main's tokenizer did; bash runs the first
+        # line before it fails on the second, so the detacher behind `env`
+        # is seen, as on origin/main.
+        command = "env setsid ./derive.sh\necho x$'\\'"
+        self.assertIs(ro._v6_admissible(command), True)
+        self.assertIsNone(ro._v6_lex(command))
+        self.assertIsNotNone(ro._origin_tokens(command))
+        self.assertIs(ro._lex(command)[2], False)
+        self.assertIs(ro._shell(command, "/w", [])["detaches"], True)
+
+    def test_a_quoted_operator_after_a_double_quoted_substitution_reads_as_on_origin_main(self):
+        # Found while fixing #4028: `"$(echo '"')"` ends, for v6 as for
+        # shlex, at the `"` inside the substitution, so the quotes after it
+        # pair out of step with bash's, and in `' ';' x'` bash reads the `;`
+        # as a join (`bash --pretty-print` prints `' '; ' x'`). A command
+        # carrying `$(` is not admitted, so the `;` joins, as on origin/main.
+        tail = " \"$(echo '\"')\"' ';' x' # '"
+        target = [ro._Target("full", self.FULL)]
+        [row] = ro._shell(self.DERIVE + tail, "/w", target)["derives"]
+        self.assertEqual((row["targets_full"], row["basis"]), (True, "none"))
+        self.assertIs(ro._shell("./derive.sh \"$(echo '\"')\"' '&' x' # '", "/w", [])["moves"], True)
+        # End to end: the call's status is the later part's, so the derive
+        # in it is ambiguous and the later one is not the boundary alone.
+        r = self.new_run()
+        r.write(r.receipt, PRE)
+        r.write(r.full, "id: x\n")
+        identity = r.bash(f"poetry run d4d derive core --full {r.full.relative_to(r.root)} --out "
+                          f"data/claudecode_direct_core/L/CHORUS_d4d_core.yaml" + tail)
+        r.write(r.receipt, DeriveStatus.ADDED)
+        r.derive()
+        self.assertUnknown(r.report(), f"derive core {identity} cannot be placed")
+
+    #: Review round 5's counterexamples (#4028), each checked with bash 5.3
+    #: and 3.2: a `cd data` bash runs at the top level...
+    ROUND5_MOVES = (
+        "cat <<\\EOF\necho $'\\'\nEOF\ncd data # '",
+        "/usr/bin/python3 -c pass <<'EOF'\necho $'\\'\nEOF\ncd data\ntrue # '",
+        "cat <<\\true\necho $'\\'\ntrue\ncd data\ncat <<\\true\n'\ntrue",
+        "echo `echo $'\\\\\\'`; cd data # '\ntrue",
+        "cat > run.sh <<'EOF'\necho ${HOME}\necho $'\\'\nEOF\ncd data # '",
+        "cat\r <<'EOF'\ncd data\nEOF",
+        "printf -v PATH %s ./bin; cat <<'EOF'\ncd data\nEOF",
+    )
+    #: ... or a job that may run on after the call returns.
+    ROUND5_DETACHES = (
+        "cat <<\\EOF\necho $'\\'\nEOF\n./derive.sh & # '",
+        "cat <<\\EOF\necho $'\\'\nEOF\n$X ./derive.sh # '",
+        "echo $$; echo \"$(cat <<'X'\necho $'\\'\nX\n$X ./derive.sh # '\n)\"",
+        "echo \"$(cat <<'X'\necho $'\\'\nX\n$X ./derive.sh # '\n)\"",
+        "cat\r <<'EOF'\n$X ./derive.sh\nEOF",
+        "cat\r <<'EOF'\n./derive.sh &\nEOF",
+        "python3\r - <<'EOF'\n$X ./derive.sh\nEOF",
+        "printf -v PATH %s ./bin; cat <<'EOF'\n$X ./derive.sh\nEOF",
+        "printf -v PATH %s ./bin && cat <<'EOF'\n$X ./derive.sh\nEOF",
+        "printf -vPATH %s ./bin; cat <<'EOF'\n$X ./derive.sh\nEOF",
+        "printf -v PATH %s ./bin; python3 - <<'EOF'\n$X ./derive.sh\nEOF",
+        "env setsid ./derive.sh\ncat > notes.txt <<'EOF'\nuse x$'\\' here\nEOF",
+        "timeout 600 setsid ./derive.sh\ncat > notes.txt <<'EOF'\nuse x$'\\' here\nEOF",
+        "2>/dev/null setsid ./derive.sh\ncat > notes.txt <<'EOF'\nuse x$'\\' here\nEOF",
+        "bash -c './derive.sh&echo started'\ncat > notes.txt <<'EOF'\nuse x$'\\' here\nEOF",
+        "env setsid ./derive.sh\necho x$'\\'",
+    )
+
+    def test_each_review_round_5_counterexample_reads_as_on_origin_main_end_to_end(self):
+        # End to end (#4028: the round-5 head said `checked` for each): a
+        # `cd data` bash runs leaves the later relative `--full`
+        # unplaceable, and a job it may leave running keeps a call issued
+        # before the draft in flight with it, both as on origin/main.
+        for command in self.ROUND5_MOVES:
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                derive = r.derive()
+                r.write(r.receipt, Boundaries.C004)
+                self.assertUnknown(r.report(), f"derive core {derive} cannot be placed")
+        for command in self.ROUND5_DETACHES:
+            with self.subTest(command=command):
+                self.assertIs(ro._lex(command)[2], False)
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                identity = r.bash(command)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                r.derive(full=r.full)
+                self.assertUnknown(r.report(), f"Bash call {identity} (transcript 0 line 4) runs a program")
 
     def test_a_tool_call_whose_name_is_not_a_string_is_malformed(self):
         # A list-valued name raised TypeError in `_history` (#3918). Each

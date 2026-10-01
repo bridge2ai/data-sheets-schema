@@ -231,33 +231,43 @@ moves the directory a later part's `--full` resolves against only where
 that part runs only if the change ran and succeeded -- reached by `;` or
 `&&` and followed by `&&` alone up to the part; otherwise, and in a
 multi-line command, the directory is not known (#3268).
-The command is lexed as bash lexes it (#3830): a quoted or escaped
-operator (`';'`, `'&&'`, `\\;`) is a word, never a join; and a `$'...'`
-string closes where bash closes it, past a `\\'`. A command carrying `$'`
-and `$$` (bash reads `$$'\\'` as `$$` and a plain single-quoted string)
-is read with origin/main's tokenizer, as origin/main read it (#4005). A double-quoted word
-still ends at its first unescaped `"`, inside a `$(...)` too, as shlex
-ended it on origin/main, where bash reads on (`"$(echo ")"; ls)"`), and
-a substitution's command is read to its `)` by counting brackets (#3925;
-it waits for a shell grammar, #3983). A brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
-is still read as built at run time (#3924). A here-document's body is
-data, never a command of this shell (#3897): where every part of the command is plainly run (#3996: its
+A command is lexed by one of two readings, chosen by one gate on its
+text as written, before any lexing (`_v6_admissible`, #4028). v6 reads it
+where it holds only printable ASCII, tabs and newlines, no
+backslash-newline, no `$$`, no construct bash reads to a closing bracket
+with its own grammar (`$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(`, a
+backquote), and not both a `<<` and a `$'`; where every here-document in
+it is read as data (below); and where v6 can split it. v6 lexes it as
+bash does (#3830): a quoted or escaped operator (`';'`, `'&&'`, `\\;`) is
+a word, never a join; a `$'...'` string closes where bash closes it, past
+a `\\'`; a brace expansion with a quoted blank in it (`{cd,'/tmp a b'}`)
+is read as built at run time (#3924); and a here-document's body is data,
+never a command of this shell (#3897), read as a `<<<` string or a
+`python -c` program is, where one part carries the here-documents, every
+part before it is `cd WORD` or `mkdir [-p] WORD...` with every word
+unquoted and plain (#4028: `printf -v PATH %s ./bin; cat` runs
+`./bin/cat`), that part and every part after it is plainly run (#3996: its
 program is its first word, with no assignment, `env`, `poetry run`, other
-wrapper or redirection before it and no assignment-only part, since
-`PATH=./bin cat` may run any program) and is a reader other than `sed`
-or `rg` (whose `e` command and `--pre` run commands), a builtin `cd`,
-`pushd` or `popd`, or a plain-named `python*` interpreter reading its
-program from the here-document it carries (`python3 - <<'EOF'`), nothing
-in it substitutes, every delimiter is a plain word (letters, digits,
-`_`, `-`, `.`) bare or wholly inside one pair of single or double quotes
-(#3947), no `${`, `$[`, `$((`, `((` or backquote appears anywhere in
-the command (#3948), and no backslash-newline does either (#4005: bash
-removes one, so `cat\\` then a newline then `x` runs `catx`), the body is one word, read as a `<<<` string or a
-`python -c` program is. Anywhere else -- a shell, `eval`, `source`,
-`xargs`, a program not read, a pipe into one, a body that substitutes,
-an escaped, partly quoted or `$'...'` delimiter, a `<<` that may be a
-shift or sit in a parameter expansion -- its lines are read as commands,
-as before; so are those of a here-document in a nested command string.
+wrapper or redirection before it, since `PATH=./bin cat` may run any
+program) and is a reader other than `sed` or `rg` (whose `e` command and
+`--pre` run commands), a builtin `cd`, `pushd` or `popd`, or a plain-named
+`python*` interpreter reading its program from the here-document it
+carries (`python3 - <<'EOF'`), nothing substitutes, and every delimiter
+is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one
+pair of single or double quotes (#3947). Every other command -- among
+them one with a here-document a shell, `eval`, `source`, `xargs`, a
+program not read or a pipe into one may run, or one v6 cannot split that
+origin/main's tokenizer splits -- is read exactly as origin/main read it:
+its tokenizer (kept unchanged as `_origin_tokens`), the text it gave the
+substitution scans and its brace-expansion pattern, so its result is
+origin/main's, field for field, and a here-document's lines are read as
+commands there. A nested command string -- a substitution's command, a
+`-c` string, `eval`'s command -- is split with origin/main's tokenizer
+whichever reading its command has (#4029). A double-quoted word ends at
+its first unescaped `"` in either reading, as shlex ended it; inside a
+`$(...)`, which only origin/main's reading meets, bash reads on (`"$(echo
+")"; ls)"`), and a substitution's command is read to its `)` by counting
+brackets (#3925; it waits for a shell grammar, #3983).
 
 The status is `unknown`, with every reason, and no classification is
 reported when the history cannot be rebuilt: a transcript is missing,
@@ -298,6 +308,7 @@ snippet text or tool payloads: transcripts hold model output.
 """
 from __future__ import annotations
 
+import contextvars
 import hashlib
 import json
 import os
@@ -485,25 +496,31 @@ NON_CHECKS = (
     "a glob, a brace expansion), which is not read as detaching there (#3923); a substitution "
     "whose command holds a case pattern's `)` (`\"$(case x in x) $X ./derive.sh;; esac)\"`), whose "
     "command is read only up to that `)`, and a double-quoted `$(...)` holding a `\"`, read as ending "
-    "at that quote (#3925; both wait for a shell grammar); a command carrying `$$` and `$'`, read "
-    "with origin/main's tokenizer, whose comment, newline, operator and substitution scans, as on "
-    "origin/main, still take the `'` after `$$` to open an ANSI-C string, so `echo $$'\\'`, a "
-    "newline and `cd data` reads the newline as quoted and the `cd` as an argument, and `cat "
-    "$$'\\' <(./derive.sh) '\\'` is not read as open-ended (#4005; a gap origin/main has); and "
-    "what a program "
-    "does with a here-document body read as its data: where every part of the command is plainly "
-    "run -- its program its first word, with no assignment, `env`, `poetry run`, other wrapper or "
-    "redirection before it and no assignment-only part, since `PATH=./bin cat` may run any program "
-    "(#3996) -- and is a reader "
-    "other than `sed` or `rg`, a builtin `cd`, `pushd` or `popd`, or a plain-named `python*` "
-    "interpreter reading its program from the here-document it carries, nothing substitutes, every "
-    "delimiter is a plain word (letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of "
-    "single or double quotes (#3947), and no `${`, `$[`, `$((`, `((` or backquote appears anywhere "
-    "in the command (#3948), and no backslash-newline does either (#4005), the body is one word, "
-    "read as a `<<<` string "
-    "or a `python -c` program is, so a `python3 - <<'EOF'` program that runs a shell string it "
-    "carries (`os.system(\"$X ./derive.sh\")`) is read as the same program given to `python -c` is; "
-    "anywhere else the body's lines are read as commands (#3897). "
+    "at that quote (#3925; both wait for a shell grammar); every gap origin/main's reading has, in "
+    "a command read so: one `_v6_admissible` refuses (anything but printable ASCII, a tab and a "
+    "newline, a backslash-newline, `$$`, a `$(`, `${`, `$[`, `$((`, `((`, `<(`, `>(` or backquote "
+    "anywhere, or both a `<<` and a `$'`), one with a here-document not read as data, and one v6 "
+    "cannot split is read exactly as origin/main read it (#4028), so a quoted operator there "
+    "joins, a `$'...'` holding `\\'` is split at shlex's quotes or not at all, a brace expansion "
+    "with a quoted blank (`{cd,'/tmp a b'}`) is not read as built at run time (#3924), `echo "
+    "$$'\\'`, a newline and `cd data` reads the newline as quoted and the `cd` as an argument, and "
+    "`cat $$'\\' <(./derive.sh) '\\'` is not read as open-ended (#4005); a nested command string "
+    "(a substitution's command, a `-c` string, `eval`'s command) is split with origin/main's "
+    "tokenizer whatever the command around it (#4029), so a quoted operator there joins too; and "
+    "what a program does with a here-document body read as its data, in a command v6 reads: where "
+    "one part carries the here-documents, every part before it is `cd WORD` or `mkdir [-p] "
+    "WORD...` with every word unquoted and plain (#4028: `printf -v PATH %s ./bin; cat` runs "
+    "`./bin/cat`), that part and every part after it is plainly run -- its program its first word, "
+    "with no assignment, `env`, `poetry run`, other wrapper or redirection before it, since "
+    "`PATH=./bin cat` may run any program (#3996) -- and is a reader other than `sed` or `rg`, a "
+    "builtin `cd`, `pushd` or `popd`, or a plain-named `python*` interpreter reading its program "
+    "from the here-document it carries, nothing substitutes, and every delimiter is a plain word "
+    "(letters, digits, `_`, `-`, `.`) bare or wholly inside one pair of single or double quotes "
+    "(#3947), the body is one word, read as a `<<<` string or a `python -c` program is, so a "
+    "`python3 - <<'EOF'` program that runs a shell string it carries (`os.system(\"$X "
+    "./derive.sh\")`) is read as the same program given to `python -c` is, and a function or alias "
+    "named `cd` or `mkdir` that changes which program a later word names is not seen; anywhere "
+    "else the body's lines are read as commands (#3897). "
     "A d4d call whose program, "
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
@@ -1068,8 +1085,8 @@ def _punct(token: str) -> bool:
 
 
 class _Fallback(Exception):
-    """A here-document the lexer does not read as data: the command is
-    lexed again with its body lines read as commands, as before (#3897)."""
+    """A here-document the lexer does not read as data: the command is read
+    as origin/main read it, its body lines as commands (`_lex`, #3897)."""
 
 
 def _ansi_c_end(text: str, i: int) -> int | None:
@@ -1104,7 +1121,7 @@ def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
     (`"E\\F"`), a partly quoted word (`'E'F`), `$'...'`, a `$` or a
     backquote -- is one whose quote removal bash does structurally, and a
     wrong delimiter would end the body at a line bash runs as a command, so
-    the caller falls back to reading the lines as commands."""
+    the command is read as origin/main read it (`_lex`)."""
     n = len(text)
     while i < n and text[i] in " \t":
         i += 1
@@ -1126,30 +1143,19 @@ def _heredoc_delimiter(text: str, i: int) -> tuple[str, bool, int] | None:
     return word, quoted, end
 
 
-def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
-                      expands: bool = False) -> tuple[str, int] | None:
+def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool) -> tuple[str, int] | None:
     """A here-document's body from `text[i]`, the start of the line after
     its command's line, to the line that is its delimiter (leading tabs
     removed first for `<<-`), and the index after that line; None where no
-    line closes it. Where the delimiter was not quoted (`expands`) a line
-    ending in an unescaped backslash continues on the next, as bash joins
-    them, before it is compared. `_lex` never reaches this with a
-    backslash-newline in the command (#4005), so the join serves a direct
-    caller only."""
+    line closes it. Each line is compared as written: `_scan` refuses a
+    text carrying a backslash-newline, the one place bash joins a body's
+    lines before comparing them (#4005, #4028)."""
     lines: list[str] = []
     n = len(text)
     while i < n:
-        line, after = "", i
-        while True:
-            end = text.find("\n", after)
-            piece = text[after:] if end < 0 else text[after:end]
-            after = n if end < 0 else end + 1
-            trailing = len(piece) - len(piece.rstrip("\\"))
-            if expands and end >= 0 and trailing % 2 == 1:
-                line += piece[:-1]
-                continue
-            line += piece
-            break
+        end = text.find("\n", i)
+        line = text[i:] if end < 0 else text[i:end]
+        after = n if end < 0 else end + 1
         if dash:
             line = line.lstrip("\t")
         if line == delimiter:
@@ -1162,29 +1168,24 @@ def _heredoc_body_end(text: str, i: int, delimiter: str, dash: bool,
 def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
     """The words and operators of `text` as bash's lexer reads them, and
     the text with comments and here-document bodies removed; None where a
-    quote or an escape does not close, as for shlex (#3830). `_lex`
-    replaces each backslash-newline with a space before this reads a
-    command, as origin/main did (which joins an even backslash run's line
-    to the next, #3985), except on the here-document path, which it takes
-    only for a command carrying no backslash-newline at all (#4005): bash
-    removes a line continuation outright, joining the words on either side
-    (`cat\\` then a newline then `x` is the program `catx`), so the blank
-    this reads one as (a split word) is never the ground for a data
-    reading. Called directly with one, it is still read as a blank.
+    quote or an escape does not close, as for shlex (#3830), and None for
+    any text carrying a backslash-newline, which bash removes outright,
+    joining the words on either side (`cat\\` then a newline then `x` is
+    the program `catx`, #4005). `_lex` calls this only for a command
+    `_v6_admissible` admits, where every quote closes where bash closes it:
+    no construct bash reads to a closing bracket with its own grammar
+    (`$(`, `$((`, `${`, `$[`, `((`, `<(`, `>(`, a backquote), no `$$`, and
+    nothing but printable ASCII, a tab and a newline (#4028).
 
     - A word's quotes and escapes are removed and it is marked `quoted`
       where it had any; `$'...'` is read as bash reads it, so a `\\'` in it
       does not close it (shlex kept its `$` and paired its quotes wrongly),
       and the `$` is kept, so such a word still reads as one built at run
-      time where it stands as a program. `_lex` never passes a command
-      where a `$'` may follow the special parameter `$$` (`$$'\\'` is `$$`
-      and a plain single-quoted string to bash): `_origin_reading`, #4005.
+      time where it stands as a program.
     - A double-quoted word ends at the first unescaped `"`, as shlex ended
-      it on origin/main, even inside a `$(...)` it carries: reading such a
-      substitution to the `)` bash closes it at needs bash's grammar (a
-      here-document inside it ends at a line like `EOF)`, a `<<` in
-      arithmetic is a shift), and a reading that ended the word later than
-      bash does hid top-level commands (#3925, #3983).
+      it on origin/main and as bash ends one that holds no substitution.
+    - A blank is a space or a tab, as for bash: a carriage return is a
+      character of the word (`cat\\r` is the program bash runs, #4028).
     - Each unquoted run of operator characters is split into bash's
       operators (#3825), an unquoted newline is a `;`, and a `#` at a
       word's start begins a comment where `heredocs` is set (the caller has
@@ -1196,6 +1197,8 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
       One this cannot read (a delimiter that is not a plain word, bare or
       wholly quoted, `_heredoc_delimiter`, #3947; no delimiter line)
       raises `_Fallback`."""
+    if "\\\n" in text:
+        return None
     tokens: list[_Word] = []
     scan: list[str] = []
     buf: list[str] = []
@@ -1225,11 +1228,6 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
         if ch == "\\":
             if i + 1 >= n:
                 return None
-            if text[i + 1] == "\n":                 # a blank; `_lex` never passes one (#4005)
-                end_word()
-                scan.append(" ")
-                i += 2
-                continue
             buf.append(text[i + 1])
             scan.append(text[i:i + 2])
             quoted = in_word = True
@@ -1239,7 +1237,7 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
             end = text.find("'", i + 1)
             if end < 0:
                 return None
-            buf.append(text[i + 1:end].replace("\\\n", " "))
+            buf.append(text[i + 1:end])
             scan.append(text[i:end + 1])
             quoted = in_word = True
             i = end + 1
@@ -1248,7 +1246,7 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
             end = _ansi_c_end(text, i)
             if end is None:
                 return None
-            buf.append("$" + text[i + 2:end - 1].replace("\\'", "'").replace("\\\n", " "))
+            buf.append("$" + text[i + 2:end - 1].replace("\\'", "'"))
             scan.append(text[i:end])
             quoted = in_word = True
             i = end
@@ -1264,8 +1262,7 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
                     j += 1
                     break
                 if c == "\\" and j + 1 < n:
-                    buf.append(" " if text[j + 1] == "\n" else
-                               text[j + 1] if text[j + 1] in '"\\' else text[j:j + 2])
+                    buf.append(text[j + 1] if text[j + 1] in '"\\' else text[j:j + 2])
                     j += 2
                     continue
                 buf.append(c)
@@ -1281,14 +1278,14 @@ def _scan(text: str, *, heredocs: bool) -> tuple[list[_Word], str] | None:
             if heredocs and delimiter_next is not None:
                 raise _Fallback
             for index, delimiter, quiet, dash in pending:
-                body = _heredoc_body_end(text, i, delimiter, dash, not quiet)
+                body = _heredoc_body_end(text, i, delimiter, dash)
                 if body is None:
                     raise _Fallback
                 tokens[index] = _Word(body[0], True, heredoc=True, unexpanded=quiet)
                 i = body[1]
             pending = []
             continue
-        if ch in " \t\r":
+        if ch in " \t":
             end_word()
             scan.append(ch)
             i += 1
@@ -1354,26 +1351,58 @@ def _heredoc_reader_head(segment: list[str]) -> list[str] | None:
     return list(segment)
 
 
+def _setup_part(segment: list[str]) -> bool:
+    """Whether a part is `cd WORD` or `mkdir [-p] WORD...`, every word
+    unquoted and each WORD a plain path (`_CLEAN_PATH`, not an option): the
+    only parts a here-document read as data may follow (#4028). Neither
+    changes which program a later word names, as an assignment, `printf
+    -v`, `export`, `declare`, a function definition, `hash`, `enable`,
+    `alias`, `source` or `eval` may."""
+    if any(getattr(word, "quoted", False) for word in segment):
+        return False
+    words = segment[1:]
+    if segment[:1] == ["cd"]:
+        return len(words) == 1 and _CLEAN_PATH.fullmatch(words[0]) is not None and not words[0].startswith("-")
+    if segment[:1] == ["mkdir"]:
+        if words[:1] == ["-p"]:
+            words = words[1:]
+        return bool(words) and all(_CLEAN_PATH.fullmatch(w) and not w.startswith("-") for w in words)
+    return False
+
+
 def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     """Whether every here-document in a command lexed with its bodies as
     words (`_scan`) is data no part of it runs as a shell command (#3897):
     no command or process substitution anywhere outside a quoted-delimiter
-    body (`_substitutes`; one in an unquoted body runs), and every part
-    plainly run (`_heredoc_reader_head`, #3996: no assignment in it or in a
-    part of its own, no `env`, `poetry run`, other wrapper or redirection
-    before its program, a plain program word) with a program that is a reader in
+    body (`_substitutes`; one in an unquoted body runs); one part carries
+    the here-documents, and every part before it is `cd WORD` or `mkdir
+    [-p] WORD...` (`_setup_part`, #4028: `printf -v PATH %s ./bin; cat`
+    runs `./bin/cat`); and that part and every part after it is plainly run
+    (`_heredoc_reader_head`, #3996: no assignment in it or in a part of its
+    own, no `env`, `poetry run`, other wrapper or redirection before its
+    program, a plain program word) with a program that is a reader in
     `_DATA_READERS`, a builtin `cd`, `pushd` or `popd`, or a plain-named
     `python*` interpreter that reads its program from the here-document it
     carries (`python3 - <<'EOF'`), as `python -c` reads its program from a
     word. Anything else -- a shell, `eval`, `source`, `xargs`, `ssh`, a
     wrapper, an assignment that may change which program a word names
-    (`PATH=./bin cat`), a program not read, a word built at run time -- may
-    run the body, or text a reader passed on, as commands, so the body's
-    lines are read as commands there, as on origin/main."""
+    (`PATH=./bin cat`), a program not read, a word built at run time, a
+    second part carrying a here-document -- may run the body, or text a
+    reader passed on, as commands, so the command is read as origin/main
+    read it, its body's lines as commands (`_lex`). The substitution test
+    is the gate's as well (`_v6_admissible` refuses any `$(`, `<(`, `>(` or
+    backquote); it is kept so that this answer holds on its own."""
     if _substitutes(scan) or any(getattr(t, "heredoc", False) and not getattr(t, "unexpanded", False)
                                  and ("$(" in t or "`" in t) for t in tokens):
         return False
-    for segment in _layout(tokens)[0]:
+    segments = _layout(tokens)[0]
+    carriers = [index for index, segment in enumerate(segments)
+                if any(getattr(word, "heredoc", False) for word in segment)]
+    if len(carriers) != 1:
+        return False
+    if not all(_setup_part(segment) for segment in segments[:carriers[0]]):
+        return False
+    for segment in segments[carriers[0]:]:
         rest = _heredoc_reader_head(segment)
         if rest is None:
             return False
@@ -1397,17 +1426,59 @@ def _heredocs_are_data(tokens: list[str], scan: str) -> bool:
     return True
 
 
-#: Text in which a `<<` may be no here-document, or a body's end may be
-#: read wrongly (#3948): a parameter expansion `${`, arithmetic `$[`,
-#: `$((` or `((` (where `<<` is a shift), or a backquote. A command carrying
-#: any of them, anywhere, has its here-document lines read as commands.
-_HEREDOC_UNREAD = re.compile(r"\$\{|\$\[|\(\(|`")
+#: The only characters v6 reads in its own way (`_v6_admissible`):
+#: printable ASCII, a tab and a newline. bash's blanks are a space and a
+#: tab, so a carriage return is a character of a word (`cat\r` is the
+#: program bash runs, #4028); any other control or non-ASCII character
+#: takes the command to origin/main's reading.
+_V6_TEXT = re.compile(r"[\t\n -~]*")
+#: Constructs bash reads to a closing bracket with its own grammar, inside
+#: double quotes as well: a command or process substitution (`$(`, `<(`,
+#: `>(`), a parameter expansion (`${`), arithmetic (`$[`, `$((`, `((`, where
+#: `<<` is a shift), and a backquote. A double-quoted word ends at its
+#: first `"` for v6, as it did for shlex; bash reads on inside such a
+#: construct, so every quote, `$'`, operator and here-document after it may
+#: stand somewhere other than where v6 finds it (#3925, #3948, #3983, #4028:
+#: `echo "$(echo '"')"' ';' x' # '` runs ` x` after a `;` bash reads).
+_V6_NESTING = re.compile(r"\$[({\[]|\(\(|[<>]\(|`")
 
 
-#: The origin/main tokenizer (receipt_origin v5), kept whole for the
-#: commands the v6 lexer refuses to read in its own way (`_origin_reading`):
-#: a guarded command reads exactly as it did on origin/main, so a guard can
-#: only move a command back to that reading, never past it (#4005).
+def _v6_admissible(command: str) -> bool:
+    """Whether v6's own readings -- a quoted operator as a word (#3830), a
+    `$'...'` string closing past a `\\'` (#3830), a here-document body as
+    data (#3897) -- may apply to a command; any other command is read
+    exactly as origin/main read it (`_lex`, #4028). Decided on the text as
+    written, before any lexing, as a whitelist: v6's span detection is
+    trusted only where bash reads quotes no other way. Every one of these
+    must hold:
+
+    - only printable ASCII, a tab and a newline (`_V6_TEXT`): no carriage
+      return, no other control character, nothing outside ASCII;
+    - no backslash-newline: bash removes a line continuation outright,
+      joining the words on either side (#4005);
+    - no `$$`: bash reads `$$'\\'` as the special parameter and a plain
+      single-quoted string (#4005);
+    - no construct bash reads to a closing bracket (`_V6_NESTING`: `$(`,
+      `${`, `$[`, `$((`, `((`, `<(`, `>(`, a backquote), anywhere;
+    - not both a `<<` and a `$'`: a `$'` reads as ANSI-C only where no
+      here-document body may hold it (#4028).
+
+    A command carrying `<<` is read by v6 only where its here-documents are
+    data (`_heredocs_are_data`), and any command only where v6 can split
+    it; `_lex` decides both."""
+    if not _V6_TEXT.fullmatch(command) or "\\\n" in command or "$$" in command:
+        return False
+    if _V6_NESTING.search(command):
+        return False
+    return not ("<<" in command and "$'" in command)
+
+
+#: The origin/main tokenizer (receipt_origin v5, merge base c962a6cc8): its
+#: three functions with their code unchanged, their names prefixed
+#: `_origin_` and their docstrings shortened. It reads every command
+#: `_v6_admissible` refuses or v6 cannot read (`_lex`), and every nested
+#: command string at any depth -- a substitution's command, a `-c` string,
+#: `eval`'s command -- whatever the command around it (#4028, #4029).
 def _origin_newlines_as_joins(command: str) -> str:
     """origin/main's `_newlines_as_joins`, unchanged: the (comment-free)
     command with each unquoted newline written as ` ; `."""
@@ -1499,75 +1570,59 @@ def _origin_tokens(command: str) -> list[str] | None:
         return None
 
 
-def _origin_reading(command: str) -> bool:
-    """Whether a command is read with origin/main's tokenizer
-    (`_origin_tokens`) rather than v6's (#4005): where it carries `$$` --
-    after line continuations are removed, as bash removes them, so `$\\`
-    then a newline then `$` counts -- and a `$'`. bash reads `$$` as the
-    special parameter, so a `'` after it opens a plain single-quoted
-    string, not an ANSI-C one, and a `\\'` in it does not escape the quote
-    (`echo $$'\\'; cd data; echo '\\'` runs `cd data`). v6 reads `$'...'`
-    as ANSI-C only where no `$$` can stand before it. Blunt by design: a
-    `$$` anywhere, quoted or not, takes the command back to origin/main's
-    reading, which carries no quoted-operator, ANSI-C or here-document
-    reading of v6's. An escaped `\\$'` never opens an ANSI-C string in any
-    reading: the escape takes the `$` first."""
-    return "$'" in command and "$$" in command.replace("\\\n", "")
-
-
-def _lex(command: str, *, heredoc_data: bool = False) -> tuple[list[_Word], str] | None:
-    """The command's tokens (`_scan`) and its comment-free text for the
-    substitution scans, or None when it does not tokenise. With
-    `heredoc_data` a here-document body is one data word where
-    `_heredocs_are_data` admits every one in the command and the command
-    carries none of `_HEREDOC_UNREAD` (#3948), and its lines are not read
-    as commands (#3897); otherwise, and anywhere a nested
-    command is lexed (a `-c` string, `eval`'s command, a substitution's
-    command), the body's lines are read as commands, as before: a false
-    `unknown` at worst.
-
-    Two guards take a command back to origin/main's reading (#4005), and
-    neither can move one past it. A command `_origin_reading` names (a `$$`
-    and a `$'`) is lexed by origin/main's tokenizer and scanned as
-    origin/main scanned it. A command with a backslash-newline anywhere
-    never has its here-document bodies read as data: bash removes a line
-    continuation outright, so `cat\\` then a newline then `x <<'EOF'` runs
-    `catx`, not the reader `cat` a word split there would name; its lines
-    are read as commands, as on origin/main. Under either guard the
-    substitution scans (`_substitutes`, `_process_substitutes`) read
-    `_strip_comments(command)`, exactly the text origin/main gave them,
-    never the here-document path's scan."""
-    if _origin_reading(command):
-        tokens = _origin_tokens(command)
-        return None if tokens is None else (tokens, _strip_comments(command))
-    text = command.replace("\\\n", " ")
-    if heredoc_data and "<<" in text and "\\\n" not in command and not _HEREDOC_UNREAD.search(command):
-        # Read from the command as written, which carries no line
-        # continuation here (#4005): bash removes one outright, joining the
-        # words on either side, and a reading that split them could name a
-        # reader bash never runs.
+def _v6_lex(command: str) -> tuple[list[_Word], str] | None:
+    """v6's reading of a command `_v6_admissible` admits: its tokens and its
+    comment-free text for the substitution scans, or None where v6 does
+    not read it. A command carrying `<<` is read only where `_scan` reads a
+    here-document in it and `_heredocs_are_data` admits every one, its
+    bodies then one data word each and the text without them (#3897); a
+    delimiter not read, no delimiter line, or a part that may run a body
+    is None (`_Fallback`). Any other command is `_scan`ned with its
+    comments removed, and the scans read `_strip_comments(command)`, the
+    text origin/main gave them; None where a quote does not close."""
+    if "<<" in command:
         try:
             lexed = _scan(command, heredocs=True)
         except _Fallback:
-            lexed = None
-        if lexed is not None and any(getattr(t, "heredoc", False) for t in lexed[0]) \
-                and _heredocs_are_data(*lexed):
-            return lexed
-    lexed = _scan(_strip_comments(text), heredocs=False)
-    # The scans read the command's own comment-free text, as before.
+            return None
+        if lexed is None or not any(getattr(t, "heredoc", False) for t in lexed[0]) \
+                or not _heredocs_are_data(*lexed):
+            return None
+        return lexed
+    lexed = _scan(_strip_comments(command), heredocs=False)
     return None if lexed is None else (lexed[0], _strip_comments(command))
 
 
-def _tokens(command: str, *, heredoc_data: bool = False) -> list[str] | None:
-    """The command's words and operators, or None when it does not tokenise
-    (`_lex`, `_scan`). Comments are removed first, the way bash removes
-    them (#3184): a `#` starts one only at a word's start, so `s/#//g` is
-    kept. Each unquoted run of operator characters is split into bash's
+def _lex(command: str) -> tuple[list[str] | None, str, bool]:
+    """(tokens, scan, admitted): a top-level command's words and operators
+    (None when it does not tokenise), its comment-free text for the
+    substitution scans (`_substitutes`, `_process_substitutes`), and
+    whether v6 read it. v6 reads it (`_v6_lex`) where `_v6_admissible`
+    admits it, its here-documents, if any, are data, and v6 can split it;
+    every other command is read exactly as origin/main read it, with
+    origin/main's tokenizer (`_origin_tokens`) and the text origin/main
+    gave the scans (#4028). That includes a command v6 cannot split, which
+    origin/main's tokenizer may (`env setsid ./derive.sh` then a line
+    `echo x$'\\'`, which bash runs before it fails). A nested command
+    string is never lexed here: `_origin_tokens` reads it, for every
+    command (#4029)."""
+    if _v6_admissible(command):
+        lexed = _v6_lex(command)
+        if lexed is not None:
+            return lexed[0], lexed[1], True
+    return _origin_tokens(command), _strip_comments(command), False
+
+
+def _tokens(command: str) -> list[str] | None:
+    """A top-level command's words and operators, or None when it does not
+    tokenise: v6's where `_lex` admits the command, origin/main's
+    otherwise. Comments are removed first, the way bash removes them
+    (#3184): a `#` starts one only at a word's start, so `s/#//g` is kept.
+    Each unquoted run of operator characters is split into bash's
     operators (#3825), so a `;`, `&&`, `||` or `|` after an unquoted
     substitution's `)` is a join and the command after it heads its own
-    part; a quoted or escaped one is a word (#3830)."""
-    lexed = _lex(command, heredoc_data=heredoc_data)
-    return None if lexed is None else lexed[0]
+    part; in a command v6 reads, a quoted or escaped one is a word (#3830)."""
+    return _lex(command)[0]
 
 
 def _layout(tokens: list[str]) -> tuple[list[list[str]], list[list[str]], list[str]]:
@@ -2075,8 +2130,9 @@ def _eval_opaque(text: str) -> bool:
     joins them, is not known by its words: one supplied at run time (a `$`
     or a backquote anywhere in it) or one the tokenizer cannot split. Such
     an eval may run anything, so it counts as a possible directory change
-    and as open-ended (#3844, #3846)."""
-    return "$" in text or "`" in text or _tokens(text) is None
+    and as open-ended (#3844, #3846). A nested command, read with
+    origin/main's tokenizer (#4029)."""
+    return "$" in text or "`" in text or _origin_tokens(text) is None
 
 
 #: A brace expansion in a word (`{a,b}`, `{1..3}`), which bash expands
@@ -2084,6 +2140,14 @@ def _eval_opaque(text: str) -> bool:
 #: word was quoted or escaped, and bash still expands the braces around it
 #: (`{cd,'/tmp a b'}`, #3924), so the class admits it.
 _BRACE_EXPANSION = re.compile(r"\{[^{}]*(?:,|\.\.)[^{}]*\}")
+#: origin/main's pattern, which admits no blank. A command `_lex` reads as
+#: origin/main read it is read with this one, so its whole reading is
+#: origin/main's, the #3924 gap included (#4028).
+_ORIGIN_BRACE_EXPANSION = re.compile(r"\{[^{}\s]*(?:,|\.\.)[^{}\s]*\}")
+#: The pattern of the `_shell` call in progress (`_shell` sets it): #3924's
+#: for a command v6 reads, origin/main's for any other.
+_BRACES: contextvars.ContextVar[re.Pattern[str]] = contextvars.ContextVar("receipt_origin_braces",
+                                                                          default=_BRACE_EXPANSION)
 
 
 def _built_at_run_time(word: str) -> bool:
@@ -2091,8 +2155,8 @@ def _built_at_run_time(word: str) -> bool:
     as spelled (#3852): a `$` or backquote anywhere in it (`$C`, `c${X}d`,
     the bare `$` the tokenizer leaves of `$(echo cd)`), a glob character
     (`*`, `?`, `[`, but not the programs `[` and `[[`), or a brace
-    expansion. With `X` empty, `c${X}d` is `cd`."""
-    return (any(c in word for c in "$`") or bool(_BRACE_EXPANSION.search(word))
+    expansion (`_BRACES`). With `X` empty, `c${X}d` is `cd`."""
+    return (any(c in word for c in "$`") or bool(_BRACES.get().search(word))
             or (word not in ("[", "[[") and any(c in word for c in "*?[")))
 
 
@@ -2180,12 +2244,13 @@ def _eval_may_change_directory(segment: list[str]) -> bool:
     may a part of it that runs code not on the command line
     (`_may_run_code_here`, `eval myfunc`, #3782). `eval` runs its words in
     this shell, so the change holds for the parts after it and the calls
-    after this one."""
+    after this one. The joined text is a nested command, read with
+    origin/main's tokenizer (#4029)."""
     for rest in (_unwrapped(segment), _behind_prefixes(segment)[0]):
         if rest[:1] == ["eval"]:
             text = " ".join(rest[1:])
             if _eval_opaque(text) or any(_changes_directory(part) or _may_run_code_here(part)
-                                         for part in _layout(_tokens(text) or [])[0]):
+                                         for part in _layout(_origin_tokens(text) or [])[0]):
                 return True
     return False
 
@@ -2319,12 +2384,14 @@ def _nested_detaches(word: str) -> bool:
     `_NESTED_DETACH` alone; `_nested_open_ended` reads the words a shell
     nested in this one runs as a command by the whole rule (#3748). Its
     cost is a false open-ended run for such a word that is not a command, a
-    message `R&D work`, where the call also runs a program not read."""
+    message `R&D work`, where the call also runs a program not read. The
+    word is split with origin/main's tokenizer, as every nested command is
+    (#4029)."""
     if _NESTED_DETACH.search(word):
         return True
     if not re.search(r"\s", word):
         return False
-    inner = _tokens(word)
+    inner = _origin_tokens(word)
     return inner is not None and any(
         _lone_ampersand(t) if _punct(t) else bool(_NESTED_DETACH.search(t)) for t in inner)
 
@@ -2425,14 +2492,16 @@ def _nested_open_ended(word: str, *, command: bool = False) -> bool:
     `eval` of it may (`bash -c "$X"`, `_eval_opaque`), and a program word
     built at run time at a command's head in it may be a detaching program
     (`_dynamic_program`, #3852); any other word is not read so, since it
-    may be no command at all (`echo "$(bash derive.sh)"`)."""
+    may be no command at all (`echo "$(bash derive.sh)"`). The word is
+    split with origin/main's tokenizer, as every nested command is: v6's
+    readings apply to a top-level command only (#4029)."""
     if _nested_detaches(word) or (command and _eval_opaque(word)):
         return True
     if not re.search(r"\s", word) and not command:
         return False
     if _NESTED_DETACHER.search(word) or _process_substitutes(word):
         return True
-    inner = _tokens(word)
+    inner = _origin_tokens(word)
     return inner is not None and (_opaque_eval(inner) or any(_detacher(s) or (command and _dynamic_program(s))
                                                              for s in _layout(inner)[0])
                                   or any(_nested_open_ended(w, command=True) for w in _command_strings(inner)))
@@ -2465,9 +2534,12 @@ def _substituted_runtime_program(word: str) -> bool:
     """Whether a command substitution a word carries whole runs, at a
     command's head, a program word built at run time (`"$($X ./derive.sh)"`,
     `_dynamic_program`), however deep, or cannot be split (#3852). Its
-    other words are arguments: `"$(bash derive.sh)"` is not such a word."""
+    other words are arguments: `"$(bash derive.sh)"` is not such a word.
+    Each command is split with origin/main's tokenizer, as every nested
+    command is (#4029): a `$'` or a here-document line in it is read as
+    origin/main read it, never as v6 reads one at the top level (#4028)."""
     for body in _substitution_bodies(word):
-        inner = _tokens(body)
+        inner = _origin_tokens(body)
         if inner is None or any(_dynamic_program(s) for s in _layout(inner)[0]) or any(
                 _substituted_runtime_program(t) for t in inner if not _punct(t)):
             return True
@@ -2716,12 +2788,27 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     that is not known (an earlier call's change) and the recorded directory
     where it is (#3798). `moves`
     in the result says the command itself may change the directory the next
-    call starts in."""
-    # A here-document body every part reads as data is one quoted word,
-    # not lines of commands (#3897), and `scan` is then the command with
-    # the bodies and comments removed, for the substitution scans.
-    lexed = _lex(command, heredoc_data=True)
-    tokens, scan = lexed if lexed is not None else (None, _strip_comments(command))
+    call starts in.
+
+    The command is read as `_lex` reads it (#4028): with v6's readings
+    where `_v6_admissible` admits it (a here-document body every part
+    reads as data is then one quoted word, not lines of commands, #3897,
+    and `scan` the command with the bodies and comments removed), and
+    otherwise exactly as origin/main read it -- its tokenizer, the text it
+    gave the substitution scans and its brace-expansion pattern (`_BRACES`)
+    -- so such a command's result is origin/main's, field for field. A
+    nested command is read with origin/main's tokenizer either way."""
+    tokens, scan, admitted = _lex(command)
+    braces = _BRACES.set(_BRACE_EXPANSION if admitted else _ORIGIN_BRACE_EXPANSION)
+    try:
+        return _shell_read(command, tokens, scan, cwd, targets, moved)
+    finally:
+        _BRACES.reset(braces)
+
+
+def _shell_read(command: str, tokens: list[str] | None, scan: str, cwd: str | None, targets: list[_Target],
+                moved: bool) -> dict[str, Any]:
+    """`_shell` of a command `_lex` has read into `tokens` and `scan`."""
     named = [x for x in targets if x.name in command]
     # `runs_unread`: some part runs a program this does not read -- neither a
     # reader, a builtin directory change (#3753), nor a d4d call of a literal subcommand --
