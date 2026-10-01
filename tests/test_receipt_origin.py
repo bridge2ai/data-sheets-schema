@@ -4818,13 +4818,15 @@ class ShellLexer(Base):
                                  {k: later[k] for k in ("runs_unread", "detaches", "moves")})
 
     def test_a_here_document_copied_to_a_file_a_later_part_or_call_runs_reads_as_on_origin_main_end_to_end(self):
-        # #4070, end to end (the round-5 head said `checked` for each): the
-        # issue's command, and its cross-call form -- call 1 writes s.sh
-        # from the here-document, call 2 makes `cat` run it -- for a reader
-        # and for a python program's output. A `$X ./derive.sh` line may
-        # run on after the call returns, so a call issued before the draft
-        # is in flight with it; a `cd data` line leaves the later relative
-        # `--full` unplaceable. Both read so on origin/main.
+        # #4070, end to end: the issue's command, and its cross-call form --
+        # call 1 writes s.sh from the here-document, call 2 makes `cat` run
+        # it -- for a reader and for a python program's output. A `$X
+        # ./derive.sh` line may run on after the call returns, so a call
+        # issued before the draft is in flight with it; a `cd data` line
+        # leaves the later relative `--full` unplaceable. Both read so on
+        # origin/main. The round-5 head (a3876eb64) said `checked` for each
+        # but the bare `python3` writer under `cd data`, which was already
+        # `unknown`: a bare program word may be a function (#3782).
         writers = ("cat <<'EOF' > s.sh\n{body}\nEOF", "cat > s.sh <<'EOF'\n{body}\nEOF",
                    "/opt/py/bin/python3 - <<'EOF' > s.sh\nprint(\"{body}\")\nEOF",
                    "python3 - <<'EOF' | cat > s.sh\nprint(\"{body}\")\nEOF")
