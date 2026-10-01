@@ -771,7 +771,8 @@ class TestTheCheckDoesWhatItsStatementSays(unittest.TestCase):
     - lines that are not rows (a # line before the header and after it,
       and an empty line), and a value in double quotes;
     - the summary's line endings (CRLF, and CR), and its text: its first
-      character, its last, and a space before a line ending;
+      character, its last character that is not whitespace, and a space
+      before a line ending;
     - no mapping, no summary, a mapping without each column the statement
       names, and a mapping or a summary in UTF-16.
 
