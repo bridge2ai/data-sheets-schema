@@ -11,8 +11,8 @@
 # ==============================================================================
 # D4D to RO-Crate SKOS Semantic Alignment
 # ==============================================================================
-# Version: 1.2
-# Date: 2026-04-26
+# Version: 1.3
+# Date: 2026-09-30
 # Description: Formal semantic mappings between D4D LinkML schema and RO-Crate
 #              properties using SKOS mapping predicates.
 #
@@ -62,30 +62,54 @@ d4d:CoreDistribution skos:exactMatch schema:DataDownload .
 d4d:CoreDistribution skos:closeMatch dcat:Distribution .
 
 # Added 2026-04-26 — sub-entity classes referenced via RO-Crate properties
+# Reviewed 2026-09-30 (#3942). A class is aligned to the RO-Crate, schema.org
+# or RAI term that carries the same entity or the same datasheet answer; a
+# DatasetProperty class answering a datasheet question aligns with the
+# property that carries the answer, as the schema's own class exact_mappings
+# do (CleaningStrategy, ImputationProtocol, ...). Removed or corrected
+# triples are recorded in comments written without their d4d:/skos: prefixes
+# so neither the generators' line pattern nor a Turtle parser reads them.
 d4d:Person skos:exactMatch schema:Person .
-d4d:Creator skos:exactMatch schema:Person .
 d4d:Organization skos:exactMatch schema:Organization .
-d4d:Grantor skos:exactMatch schema:Organization .
+# Grantor is_a Organization, so schema:Organization is the broader term (was exactMatch).
+d4d:Grantor skos:broadMatch schema:Organization .
 d4d:Grant skos:exactMatch schema:Grant .
-d4d:FundingMechanism skos:exactMatch schema:Grant .
 d4d:VariableMetadata skos:exactMatch schema:PropertyValue .
 d4d:Software skos:exactMatch schema:SoftwareApplication .
-d4d:Maintainer skos:exactMatch schema:Person .
-d4d:DataCollector skos:exactMatch schema:Person .
+# Removed (#3942):
+# - Creator exactMatch schema:Person. Creator is a team or group wrapper (a
+#   principal_investigator Person, affiliations, credit_roles), not a person.
+#   The alignment is carried by the creators slot (closeMatch schema:author).
+# - Maintainer exactMatch schema:Person and DataCollector exactMatch
+#   schema:Person. Both are role wrappers (role plus maintainer_details /
+#   collector_details) whose subject may be a person or an organization; the
+#   maintainers and data_collectors slots carry their alignments.
+# - FundingMechanism exactMatch schema:Grant. FundingMechanism wraps a grantor
+#   and its grants; Grant is the class that matches schema:Grant, and the
+#   funders slot carries the alignment (exactMatch schema:funder).
 
 # Added 2026-04-26 — DatasetProperty subclasses with natural RO-Crate / RAI analogues
-d4d:Instance skos:closeMatch schema:variableMeasured .
+# Instance describes what the instances represent (type, topic, counts,
+# labels), not a measured variable: related, as the instances slot says (was closeMatch).
+d4d:Instance skos:relatedMatch schema:variableMeasured .
+# TODO(#3942): evi:samplingPlan is not in the EVI terms fairscape_models uses
+# and could not be confirmed offline; the class also says exactMatch where
+# the sampling_strategies slot says relatedMatch. Left as found.
 d4d:SamplingStrategy skos:exactMatch evi:samplingPlan .
-d4d:LabelingStrategy skos:exactMatch rai:dataAnnotationProtocol .
+# LabelingStrategy bundles the annotation protocol, platform, annotations per
+# item and annotator demographics; its data_annotation_protocol attribute is
+# the schema's exact match for rai:dataAnnotationProtocol, so the RAI term is
+# the narrower one (was exactMatch).
+d4d:LabelingStrategy skos:narrowMatch rai:dataAnnotationProtocol .
 d4d:InstanceAcquisition skos:closeMatch rai:dataCollection .
-d4d:HumanSubjectResearch skos:exactMatch d4d:humanSubject .
-d4d:InformedConsent skos:exactMatch d4d:informedConsent .
-d4d:Deidentification skos:closeMatch rai:confidentialityLevel .
 d4d:RawDataSource skos:exactMatch rai:dataCollectionRawData .
-d4d:RawData skos:exactMatch rai:dataCollectionRawData .
+# RawData records whether raw data was kept and where it is; RawDataSource
+# carries the schema's exact_mappings to the same term (was exactMatch).
+d4d:RawData skos:closeMatch rai:dataCollectionRawData .
 d4d:ImputationProtocol skos:exactMatch rai:dataImputationProtocol .
-d4d:AtRiskPopulations skos:exactMatch d4d:atRiskPopulations .
-d4d:Subpopulation skos:closeMatch schema:variableMeasured .
+# Subpopulation describes how subpopulations are identified and distributed,
+# not a measured variable: related, as the subpopulations slot says (was closeMatch).
+d4d:Subpopulation skos:relatedMatch schema:variableMeasured .
 d4d:CollectionTimeframe skos:exactMatch rai:dataCollectionTimeframe .
 d4d:MissingDataDocumentation skos:exactMatch rai:dataCollectionMissingData .
 d4d:MachineAnnotationTools skos:exactMatch rai:machineAnnotationTools .
@@ -93,51 +117,86 @@ d4d:IntendedUse skos:exactMatch rai:dataUseCases .
 d4d:Purpose skos:closeMatch rai:dataUseCases .
 d4d:Task skos:closeMatch rai:dataUseCases .
 d4d:OtherTask skos:closeMatch rai:dataUseCases .
-d4d:ExistingUse skos:exactMatch rai:dataUseCases .
-d4d:DiscouragedUse skos:exactMatch rai:prohibitedUses .
-d4d:ProhibitedUse skos:exactMatch rai:prohibitedUses .
+# ExistingUse records uses already made; IntendedUse carries the schema's
+# exact_mappings to rai:dataUseCases (was exactMatch).
+d4d:ExistingUse skos:closeMatch rai:dataUseCases .
 d4d:DatasetBias skos:exactMatch rai:dataBiases .
 d4d:DatasetLimitation skos:exactMatch rai:dataLimitations .
-d4d:VersionAccess skos:closeMatch schema:version .
-d4d:EthicalReview skos:exactMatch rai:ethicalReview .
+# VersionAccess is about support for older versions, not the version string:
+# related, as the version_access slot says (was closeMatch).
+d4d:VersionAccess skos:relatedMatch schema:version .
 d4d:LicenseAndUseTerms skos:closeMatch schema:license .
-d4d:Confidentiality skos:closeMatch rai:personalSensitiveInformation .
-d4d:ContentWarning skos:exactMatch d4d:contentWarning .
-d4d:SensitiveElement skos:closeMatch rai:personalSensitiveInformation .
+# Confidentiality is about why data must be withheld: its examples are
+# legal privilege, patient data and non-public communications. Patient
+# data overlaps the personal attributes (gender, age, location ...) that
+# rai:personalSensitiveInformation lists, but privilege and private
+# communications do not, and the class records a confidentiality basis,
+# not attribute categories. Related, not close; SensitiveElement is
+# that term's exact match (was closeMatch).
+d4d:Confidentiality skos:relatedMatch rai:personalSensitiveInformation .
+# The schema declares SensitiveElement exact_mappings rai:personalSensitiveInformation (was closeMatch).
+d4d:SensitiveElement skos:exactMatch rai:personalSensitiveInformation .
 d4d:Erratum skos:closeMatch schema:correction .
 d4d:UpdatePlan skos:exactMatch rai:dataReleaseMaintenancePlan .
-d4d:RetentionLimits skos:closeMatch schema:conditionsOfAccess .
-d4d:ExtensionMechanism skos:closeMatch schema:license .
-d4d:AddressingGap skos:exactMatch d4d:addressingGaps .
-d4d:DataAnomaly skos:exactMatch d4d:dataAnomalies .
+# Limits on keeping people's data are related to, not close to, the
+# conditions of access to an item (was closeMatch).
+d4d:RetentionLimits skos:relatedMatch schema:conditionsOfAccess .
 d4d:CollectionMechanism skos:exactMatch rai:dataCollection .
 d4d:PreprocessingStrategy skos:exactMatch rai:dataPreprocessingProtocol .
 d4d:CleaningStrategy skos:exactMatch rai:dataManipulationProtocol .
 d4d:FutureUseImpact skos:exactMatch rai:dataSocialImpact .
-d4d:DataProtectionImpact skos:exactMatch rai:dataSocialImpact .
+# A data protection impact analysis concerns the data subjects, part of the
+# social impact FutureUseImpact matches exactly (was exactMatch).
+d4d:DataProtectionImpact skos:broadMatch rai:dataSocialImpact .
 d4d:IPRestrictions skos:closeMatch schema:conditionsOfAccess .
 d4d:DistributionFormat skos:closeMatch evi:formats .
-d4d:DistributionDate skos:closeMatch schema:dateCreated .
-d4d:HumanSubjectCompensation skos:exactMatch d4d:participantCompensation .
-d4d:UseRepository skos:closeMatch schema:relatedLink .
+# A distribution date is a release date, not a creation date; the class's
+# release_dates attribute declares dcterms:available (was schema:dateCreated).
+d4d:DistributionDate skos:closeMatch schema:datePublished .
+# A repository of known uses is related to a link, as the use_repository slot says (was closeMatch).
+d4d:UseRepository skos:relatedMatch schema:relatedLink .
 d4d:ExternalResource skos:closeMatch schema:relatedLink .
 d4d:DatasetRelationship skos:closeMatch schema:isRelatedTo .
 d4d:AnnotationAnalysis skos:exactMatch rai:dataAnnotationAnalysis .
 d4d:ParticipantPrivacy skos:closeMatch rai:personalSensitiveInformation .
-d4d:Splits skos:closeMatch schema:hasPart .
-d4d:Relationships skos:closeMatch schema:isRelatedTo .
+# Splits describes recommended splits in prose; schema:hasPart links a
+# dataset to its parts, which DataSubset models (was closeMatch).
+d4d:Splits skos:relatedMatch schema:hasPart .
+# Removed (#3942):
+# - HumanSubjectResearch, InformedConsent, AtRiskPopulations, ContentWarning,
+#   AddressingGap, DataAnomaly and HumanSubjectCompensation exactMatch a d4d:
+#   term (humanSubject, informedConsent, atRiskPopulations, contentWarning,
+#   addressingGaps, dataAnomalies, participantCompensation). A D4D target is
+#   not an alignment to an external vocabulary (#3054).
+# - Deidentification closeMatch rai:confidentialityLevel. confidentialityLevel
+#   is an access classification, not a de-identification statement
+#   (notes/D4D_GENERATION_ARMS.md, "Two left deliberately unfixed").
+# - ExtensionMechanism closeMatch schema:license. A mechanism for others to
+#   contribute to the dataset is not its license.
+# - DiscouragedUse exactMatch rai:prohibitedUses, ProhibitedUse exactMatch
+#   rai:prohibitedUses and EthicalReview exactMatch rai:ethicalReview. Neither
+#   target is one of the 20 properties Croissant RAI 1.0 defines (the
+#   reference table in data/schema_comparison/schemas/croissant_rai/, and the
+#   RAI fields of fairscape_models' Croissant model), and schema.org defines
+#   neither prohibitedUses nor ethicalReview, the unprefixed names FAIRSCAPE
+#   crates emit (notes/D4D_GENERATION_ARMS.md). A discouraged use is also not
+#   a prohibited one: ProhibitedUse is "stronger than DiscouragedUse".
+# - Relationships closeMatch schema:isRelatedTo. Relationships documents links
+#   between instances inside the data (ratings, social links), not between
+#   datasets; DatasetRelationship is the class for the latter.
 
 # Added 2026-04-26 — final gap-fill (consent workflow + access control)
-d4d:CollectionConsent skos:closeMatch rai:personalSensitiveInformation .
-d4d:CollectionNotification skos:closeMatch rai:personalSensitiveInformation .
-d4d:ConsentRevocation skos:closeMatch rai:personalSensitiveInformation .
 d4d:DirectCollection skos:closeMatch rai:dataCollection .
 d4d:ExportControlRegulatoryRestrictions skos:closeMatch schema:conditionsOfAccess .
 d4d:MissingInfo skos:closeMatch rai:dataCollectionMissingData .
 d4d:ThirdPartySharing skos:closeMatch schema:conditionsOfAccess .
 d4d:FormatDialect skos:closeMatch schema:encodingFormat .
+# Removed (#3942): CollectionConsent, CollectionNotification and
+# ConsentRevocation closeMatch rai:personalSensitiveInformation. Consent,
+# notice and revocation are not sensitive personal attributes, and no
+# offline vocabulary here names a consent term.
 
-# Direct/Exact Mappings (52 properties)
+# Direct/Exact Mappings (60 triples)
 # ==============================================================================
 # These properties map directly without transformation
 
@@ -172,14 +231,32 @@ d4d:informed_consent skos:exactMatch d4d:informedConsent .
 d4d:acquisition_methods skos:exactMatch rai:dataCollection .
 d4d:collection_mechanisms skos:exactMatch rai:dataCollection .
 d4d:collection_timeframes skos:exactMatch rai:dataCollectionTimeframe .
+# TODO(#3942): the Confidentiality class is relatedMatch to this term (see
+# above), so this slot-level exact match disagrees with it (#3995). Left for
+# the slot-level change, because changing it moves comprehensive SSSOM rows.
 d4d:confidential_elements skos:exactMatch rai:personalSensitiveInformation .
+# TODO(#3942): the DataProtectionImpact class is now broadMatch to this term
+# (part of the social impact FutureUseImpact matches exactly), so this
+# slot-level exact match disagrees with it. Left for the slot-level change.
 d4d:data_protection_impacts skos:exactMatch rai:dataSocialImpact .
 d4d:future_use_impacts skos:exactMatch rai:dataSocialImpact .
+# TODO(#3942): rai:prohibitedUses (here) and rai:ethicalReview (further down) are not
+# Croissant RAI 1.0 properties; the class-level triples on them were removed
+# (see above). These slot-level triples are unchanged here, because changing
+# them moves the comprehensive SSSOM rows; a separate change settles them.
 d4d:discouraged_uses skos:exactMatch rai:prohibitedUses .
 d4d:prohibited_uses skos:exactMatch rai:prohibitedUses .
+# TODO(#3942): a distribution date is a release date; the DistributionDate
+# class now says closeMatch schema:datePublished (its release_dates attribute
+# declares dcterms:available). This slot-level triple still names the
+# creation date. Left for the slot-level change.
 d4d:distribution_dates skos:exactMatch schema:dateCreated .
 d4d:errata skos:exactMatch schema:correction .
+# TODO(#3942): rai:ethicalReview, as the prohibitedUses comment above says.
 d4d:ethical_reviews skos:exactMatch rai:ethicalReview .
+# TODO(#3942): the ExistingUse class is now closeMatch to this term, because
+# IntendedUse carries the schema's exact_mappings; this slot-level exact match
+# disagrees with it. Left for the slot-level change.
 d4d:existing_uses skos:exactMatch rai:dataUseCases .
 d4d:intended_uses skos:exactMatch rai:dataUseCases .
 d4d:other_tasks skos:exactMatch rai:dataUseCases .
@@ -187,7 +264,9 @@ d4d:tasks skos:exactMatch rai:dataUseCases .
 d4d:purposes skos:closeMatch rai:dataUseCases .
 d4d:known_biases skos:exactMatch rai:dataBiases .
 d4d:known_limitations skos:exactMatch rai:dataLimitations .
-d4d:imputation_protocols skos:exactMatch rai:imputationProtocol .
+# rai:dataImputationProtocol, as the ImputationProtocol class, its schema
+# exact_mappings and fairscape_models name it (#3926; was rai:imputationProtocol).
+d4d:imputation_protocols skos:exactMatch rai:dataImputationProtocol .
 d4d:missing_data_documentation skos:exactMatch rai:dataCollectionMissingData .
 d4d:raw_data_sources skos:exactMatch rai:dataCollectionRawData .
 d4d:raw_sources skos:exactMatch rai:dataCollectionRawData .
@@ -214,7 +293,7 @@ d4d:id skos:exactMatch rdf:ID .
 # D4D-specific properties
 d4d:participant_compensation skos:exactMatch d4d:participantCompensation .
 
-# Close Matches (20 properties)
+# Close Matches (19 triples)
 # ==============================================================================
 # Semantically close but require transformation
 
@@ -224,6 +303,9 @@ d4d:created_by skos:closeMatch schema:creator .
 d4d:modified_by skos:closeMatch schema:contributor .
 
 # Sensitive data (similar to confidential but not identical)
+# TODO(#3942): the SensitiveElement class is exactMatch to this term, as the
+# schema declares; this slot-level close match disagrees with it (#3995).
+# Left for the slot-level change.
 d4d:sensitive_elements skos:closeMatch rai:personalSensitiveInformation .
 
 # String to structured object array
@@ -236,6 +318,9 @@ d4d:machine_annotation_tools skos:closeMatch rai:machineAnnotationTools .
 # Multiple properties to single field
 d4d:license_and_use_terms skos:closeMatch schema:license .
 d4d:ip_restrictions skos:closeMatch schema:conditionsOfAccess .
+# TODO(#3942): the ExtensionMechanism class triple on schema:license was
+# removed (an extension mechanism is not a license); this slot-level triple
+# is unchanged. Left for the slot-level change.
 d4d:extension_mechanism skos:closeMatch schema:license .
 d4d:regulatory_restrictions skos:closeMatch schema:conditionsOfAccess .
 
@@ -253,7 +338,7 @@ d4d:themes skos:closeMatch schema:about .
 # External resource relationship
 d4d:external_resources skos:closeMatch schema:relatedLink .
 
-# Related Matches (9 properties)
+# Related Matches (9 triples)
 # ==============================================================================
 # Related concepts requiring complex or partial mapping
 
@@ -280,7 +365,7 @@ d4d:version_access skos:relatedMatch schema:version .
 # Repository tracking
 d4d:use_repository skos:relatedMatch schema:relatedLink .
 
-# Narrow/Broad Matches (4 properties)
+# Narrow/Broad Matches (6 triples)
 # ==============================================================================
 # Where scope differs between D4D and RO-Crate
 
@@ -288,12 +373,17 @@ d4d:use_repository skos:relatedMatch schema:relatedLink .
 d4d:path skos:narrowMatch schema:contentUrl .
 
 # D4D deidentification is narrower than general confidentiality
+# TODO(#3942): rai:confidentialityLevel is not a Croissant RAI 1.0 property
+# and holds an access classification; the Deidentification class triple on it
+# was removed (see above). This slot-level triple is left for a separate change.
 d4d:is_deidentified skos:narrowMatch rai:confidentialityLevel .
 
 # D4D tabular flag is narrower than general format
 d4d:is_tabular skos:narrowMatch schema:encodingFormat .
 
 # D4D retention is narrower than general data management
+# TODO(#3942): the RetentionLimits class is relatedMatch to this term; this
+# slot-level narrowMatch disagrees with it. Left for the slot-level change.
 d4d:retention_limit skos:narrowMatch schema:conditionsOfAccess .
 
 # D4D schema/class conformance is narrower than general conformsTo
@@ -303,20 +393,28 @@ d4d:conforms_to_schema skos:narrowMatch schema:conformsTo .
 # ==============================================================================
 # Alignment Statistics
 # ==============================================================================
-# Total mappings: 189 SKOS triples (class-level + slot-level)
-# - Exact matches: 112 (59.3%)
-# - Close matches: 59 (31.2%)
-# - Related matches: 10 (5.3%)
-# - Narrow matches:  7 (3.7%)
-# - Broad matches:   1 (0.5%)
+# Total mappings: 164 SKOS triples
+# - Class-level: 64
+# - Class-scoped slot (d4d:<Class>_<slot>): 6
+# - Slot-level: 94
 #
-# Coverage by target namespace:
-# - schema.org: 57 mappings
-# - rai (Responsible AI): 29 mappings
-# - d4d (D4D-internal): 10 mappings
-# - evi (FAIRSCAPE Evidence): 7 mappings
-# - dcat (Data Catalog Vocabulary): 3 mappings
-# - rdf: 1 mapping
+# By predicate:
+# - Exact matches: 93 (56.7%)
+# - Close matches: 46 (28.0%)
+# - Related matches: 16 (9.8%)
+# - Narrow matches: 7 (4.3%)
+# - Broad matches: 2 (1.2%)
+#
+# Triples by target namespace:
+# - schema.org: 82
+# - rai (Responsible AI): 56
+# - d4d (D4D-internal): 10
+# - evi (FAIRSCAPE Evidence): 9
+# - dcat (Data Catalog Vocabulary): 6
+# - rdf: 1
+#
+# These counts are of the triples above and are checked by
+# tests/test_semantic_exchange/test_skos_alignment_header.py (#3942).
 #
 # Note: Some D4D properties map to the same RO-Crate property when they represent
 #       synonyms or alternative expressions of the same concept.
