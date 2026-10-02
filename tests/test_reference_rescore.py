@@ -1180,6 +1180,59 @@ def test_both_v3_rubrics_validate_with_the_complete_isolated_instrument(environm
     assert json.loads((root / job["output"]).read_bytes()) == doc
 
 
+@pytest.mark.parametrize("environment", [10, 20], indirect=True)
+def test_registered_semantic_validator_has_no_ambient_repository_imports(environment, monkeypatch):
+    """#4224: pin closure is tested with every outside package module refused.
+
+    The guard runs in the real evaluator and controller subprocesses. Filtering
+    namespace-package search paths prevents an editable install from filling a
+    missing copied dependency, even one not anticipated by this regression.
+    """
+    root, manifest, job, doc = environment
+    guard = root / "import-guard"
+    guard.mkdir()
+    imported = root / "imports.jsonl"
+    (guard / "sitecustomize.py").write_text(f'''import importlib.abc
+import importlib.machinery
+import json
+from pathlib import Path
+import sys
+
+class PinnedRepositoryOnly(importlib.abc.MetaPathFinder):
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname != "data_sheets_schema" and not fullname.startswith("data_sheets_schema."):
+            return None
+        allowed = (Path.cwd() / "src").resolve()
+        spec = importlib.machinery.PathFinder.find_spec(fullname, path)
+        if spec is None:
+            raise ModuleNotFoundError("missing registered module: " + fullname)
+        if spec.origin is not None and not Path(spec.origin).resolve().is_relative_to(allowed):
+            raise ImportError("unregistered ambient module: " + fullname)
+        if spec.submodule_search_locations is not None:
+            spec.submodule_search_locations = [p for p in spec.submodule_search_locations
+                if Path(p).resolve().is_relative_to(allowed)]
+            if not spec.submodule_search_locations:
+                raise ImportError("unregistered ambient package: " + fullname)
+        with Path({str(imported)!r}).open("a") as stream:
+            stream.write(json.dumps({{"module": fullname, "cwd": str(Path.cwd()), "origin": spec.origin}}) + "\\n")
+        return spec
+
+sys.meta_path.insert(0, PinnedRepositoryOnly())
+''')
+    monkeypatch.setenv("PYTHONPATH", str(guard))
+    trace = events(doc)
+    trace.insert(0, {"type": "system", "subtype": "init", "cwd": "__ISOLATED__"})
+    cli = fake_cli(root / "fake-claude", doc, trace, run_validator=True)
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "passed", receipt
+    assert json.loads((root / job["output"]).read_bytes()) == doc
+    imports = [json.loads(line) for line in imported.read_text().splitlines()]
+    locations = {entry["cwd"] for entry in imports}
+    assert str(root) in locations  # Controller validator.
+    assert any(Path(cwd).parent == root / "temporary" for cwd in locations)  # Evaluator validator.
+    assert "data_sheets_schema.semantic_evidence" in {entry["module"] for entry in imports}
+
+
 @pytest.mark.parametrize("evidence, code", [
     ({"absent": [{"path": "id"}]}, "absent_path_populated"),
     ({"absent": [{"path": "was_generated_by"}]}, "unknown_absence_name"),

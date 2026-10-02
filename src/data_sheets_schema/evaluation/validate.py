@@ -93,7 +93,10 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
     schema_dir = schema_dir or resource_path("src/download/prompts")
     names = {"rubric10-semantic": "rubric10_semantic_schema.json",
              "rubric20-semantic": "rubric20_semantic_schema.json"}
-    from data_sheets_schema.field_agent_contract import RUBRICS, validate_output
+    # An isolated semantic instrument copies only its registered support files.
+    # Recognize the field family without importing that unrelated contract and
+    # its dependencies into semantic acceptance (#4224).
+    field_rubrics = {"rubric10", "rubric20"}
     failed = not paths
     for path in paths:
         try:
@@ -101,15 +104,16 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
             if not isinstance(doc, dict):
                 raise ValueError("evaluation must be a JSON object")
             declared = doc.get("rubric")
-            if not isinstance(declared, str) or declared not in names.keys() | RUBRICS:
+            if not isinstance(declared, str) or declared not in names.keys() | field_rubrics:
                 raise ValueError(f"no evaluation contract for rubric {declared!r}")
             if rubric is not None and declared != rubric:
                 raise ValueError(f"expected {rubric}, found {declared}")
-            expected_version = "2.0" if declared in RUBRICS else "3.0"
+            expected_version = "2.0" if declared in field_rubrics else "3.0"
             if doc.get("version") != expected_version:
                 raise ValueError(f"new-output acceptance requires instrument version {expected_version}; "
                                  "use historical classification for earlier instruments")
-            if declared in RUBRICS:
+            if declared in field_rubrics:
+                from data_sheets_schema.field_agent_contract import validate_output
                 validate_output(path, rubric=declared, project=project, method=method,
                                 input_path=input_path, definition_path=definition_path,
                                 context_path=context_path)
