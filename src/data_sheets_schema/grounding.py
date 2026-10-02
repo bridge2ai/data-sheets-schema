@@ -38,6 +38,18 @@ import re
 from pathlib import Path
 from typing import Any, Iterator
 
+#: First explicitly recorded grounding instrument (#4090), not a version
+#: retroactively assigned to historical blocks. The unversioned checker gained
+#: resolver-URL findings in f23c7af1e (#591), ARK counts in f1e2ba809 (#671),
+#: and run-schema rules/basis in 916d3c2e5 (#3931). NID-aware URN handling in
+#: f1e2ba809 belongs to the separate prefix/form instrument.
+#: Bump the version whenever a rule can move counts, distinct or findings on
+#: unchanged inputs. The first token is the version; schema_basis still names
+#: the schema those rules read. Historical blocks without a version stay so.
+GROUNDING_INSTRUMENT = (
+    "v1 (#4090): external identifiers with ARKs, resolver-URL findings, run-schema basis"
+)
+
 #: Authorities whose identifiers name something in the world, so a record can
 #: only have got one from its evidence or from memory. A locally minted `urn:`
 #: or a bare token has no external referent to check against and is out of
@@ -616,14 +628,15 @@ def check_run(full: Path, core: Path, bundle: Path,
 
     from data_sheets_schema.identifiers import uriorcurie_slots
     if not bundle.exists():
-        return {"checked": False, "reason": f"bundle absent: {bundle}"}
+        return {"checked": False, "instrument": GROUNDING_INSTRUMENT,
+                "reason": f"bundle absent: {bundle}"}
     # Both records absent read as `checked: true` with three zeroes, which
     # `runs check` reported as fully grounded (#578). Zero identifiers found in
     # a file that is not there is not a measurement — the same distinction
     # `pair_consistency` draws with `ran: false`, missed here.
     missing = [str(p) for p in (full, core) if not p.exists()]
     if len(missing) == 2:
-        return {"checked": False,
+        return {"checked": False, "instrument": GROUNDING_INSTRUMENT,
                 "reason": f"neither record is on disk: {', '.join(missing)}"}
     rules = basis = None
     if record is not None:
@@ -632,7 +645,7 @@ def check_run(full: Path, core: Path, bundle: Path,
     if slots is None:
         slots = rules.slots if rules is not None else uriorcurie_slots()
     text = bundle.read_text(encoding="utf-8", errors="replace")
-    out: dict[str, Any] = {"checked": True,
+    out: dict[str, Any] = {"checked": True, "instrument": GROUNDING_INSTRUMENT,
                            "counts": {"grounded": 0, "minted_fragment": 0,
                                       "absent": 0},
                            "findings": []}
