@@ -1776,10 +1776,15 @@ class TestTheRecordValidates(unittest.TestCase):
                     slot in record or key in named
                     or any(source.startswith(slot) for source in named),
                     f"{key} is neither in `{slot}` nor named in `dropped`")
-        # The end date's month is 13: the date rule writes it, the schema
-        # does not accept it
-        self.assertIn("'2026-13-45' is not a 'date'",
-                      reasons(dropped, "collection_timeframes[0].end_date"))
+        # The end date's month is 13. The static-map arm's date rule refuses
+        # it as no calendar date, so it never reaches the validator (#4168);
+        # the rule had written it, and the schema rejected it as "not a
+        # 'date'". The start date is kept.
+        self.assertEqual(reasons(dropped, "collection_timeframes[0].end_date"),
+                         "not placed in `end_date`: not a calendar date "
+                         "'2026-13-45': month 13 is not in 1-12; dropped")
+        self.assertEqual(record["collection_timeframes"],
+                         [{"start_date": "2022-09-01"}])
 
     def test_a_wrong_value_in_a_reference_goes_alone(self):
         """An item of `parent_datasets` or `resources` may be a Dataset or a
