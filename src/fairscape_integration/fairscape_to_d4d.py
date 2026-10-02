@@ -1419,6 +1419,14 @@ class FairscapeToD4DConverter:
         the `@graph`'s entities instead (`_parts`), and is never written as
         an `id` itself.
 
+        The text is recorded rather than placed in another slot. A parent
+        needs an `id`, which `_to_object` would mint, asserting a dataset
+        the crate does not identify; `related_datasets` can say
+        `is_part_of`, but needs the dataset's identifier or URL as its
+        `target_dataset` just as much. That leaves `notes`, and this
+        converter moves no value it cannot place into a slot other than
+        its own.
+
         The list keeps each reference at its position in the crate's list,
         with None for an entry that is not one, so a `dropped` path counts
         the crate's entries (#4126). None when no entry is a reference.
