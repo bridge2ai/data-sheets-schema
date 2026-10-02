@@ -35,7 +35,8 @@ is not UTF-8 is refused with its `CrateEncodingError`, by the converter, its
 script and `fairscape-cli`. #4192: as those take any path, the refusal says
 to transcode the file instead of pointing to crate_manifest.yaml's
 `encoding_note`, and a file whose JSON is not one object is refused by
-saying what it holds.
+saying what it holds. #4175: a list among a value's items is named as a list
+inside a list, not as a crate reference or object.
 """
 
 import contextlib
@@ -1219,6 +1220,31 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                     "not hold)"))])
                 self.assertEqual(problems(record), [])
 
+    def test_a_list_inside_the_list_is_named_as_one(self):
+        """#4175. A list among a value's items is neither a crate reference
+        nor an object, and the reason says what it is: beside text, which is
+        placed; beside a reference, each named as what it is; and among what
+        a single-valued class slot does not join into one object."""
+        record, dropped = converted(crate({"keywords": ["a", ["b"]]}))
+        self.assertEqual(record["keywords"], ["a"])
+        self.assertEqual(dropped, [("keywords", (
+            'part of the value not placed in `keywords`: ["b"] (a list inside '
+            "a list, which a `string` slot does not hold)"))])
+        self.assertEqual(problems(record), [])
+        record, dropped = converted(crate({"license": [["MIT"], {"@id": "#l"}]}))
+        self.assertNotIn("license", record)
+        self.assertEqual(dropped, [("license", (
+            "not placed in `license`: a list inside a list and a crate "
+            "reference or object, which a `string` slot does not hold: "
+            '[["MIT"], {"@id": "#l"}]'))])
+        record, dropped = converted(crate(
+            {"rai:dataReleaseMaintenancePlan": ["Annual.", ["b"]]}))
+        self.assertNotIn("updates", record)
+        self.assertEqual(reasons(dropped, "rai:dataReleaseMaintenancePlan"), (
+            "not placed in `updates`: 2 values for a single-valued slot, not "
+            "all of them text: text is joined into one UpdatePlan, and a "
+            "reference, an object or a list inside the list is not"))
+
     def test_an_is_part_of_entry_with_no_id_is_recorded(self):
         record, dropped = converted(crate({"isPartOf": [
             {"name": "Project X"}, {"@id": "ark:59852/project-y"}]}))
@@ -1993,10 +2019,15 @@ class TestTheRecordValidates(unittest.TestCase):
                     slot in record or key in named
                     or any(source.startswith(slot) for source in named),
                     f"{key} is neither in `{slot}` nor named in `dropped`")
-        # The end date's month is 13: the date rule writes it, the schema
-        # does not accept it
-        self.assertIn("'2026-13-45' is not a 'date'",
-                      reasons(dropped, "collection_timeframes[0].end_date"))
+        # The end date's month is 13. The static-map arm's date rule refuses
+        # it as no calendar date, so it never reaches the validator (#4168);
+        # the rule had written it, and the schema rejected it as "not a
+        # 'date'". The start date is kept.
+        self.assertEqual(reasons(dropped, "collection_timeframes[0].end_date"),
+                         "not placed in `end_date`: not a calendar date "
+                         "'2026-13-45': month 13 is not in 1-12; dropped")
+        self.assertEqual(record["collection_timeframes"],
+                         [{"start_date": "2022-09-01"}])
 
     def test_a_wrong_value_in_a_reference_goes_alone(self):
         """An item of `parent_datasets` or `resources` may be a Dataset or a

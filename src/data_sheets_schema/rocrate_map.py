@@ -23,8 +23,9 @@ import csv
 import json
 import re
 import subprocess
+from calendar import monthrange
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import MAXYEAR, MINYEAR, date, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -263,8 +264,25 @@ def _to_object(value: Any, cls_name: str, sv: SchemaView, project: str,
     return obj, note
 
 
-ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+ISO_DATE = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
 SLASH_DATE = re.compile(r"^(\d{1,2})/(\d{1,2})/(\d{4})$")
+
+
+def _not_a_calendar_date(year: int, month: int, day: int) -> str:
+    """Why `year`, `month` and `day` name no calendar date, or "" when they
+    name one (#4168). `datetime.date` decides. The reason names the first
+    part out of range, read in the order month, year, day, since the days a
+    month has depend on the other two."""
+    try:
+        date(year, month, day)
+    except ValueError:
+        if not 1 <= month <= 12:
+            return f"month {month} is not in 1-12"
+        if not MINYEAR <= year <= MAXYEAR:
+            return f"year {year:04d} is not in {MINYEAR:04d}-{MAXYEAR}"
+        return (f"day {day} is not in 1-{monthrange(year, month)[1]} "
+                f"for {year:04d}-{month:02d}")
+    return ""
 
 
 def _normalize_datetime(value: Any) -> tuple[Any, str]:
@@ -272,7 +290,18 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
 
     ``12/16/2025`` is unambiguous (16 cannot be a month) so it resolves.
     ``03/04/2026`` is not — the crates are known to mix DD/MM and MM/DD — so it
-    is dropped rather than silently resolved to one reading.
+    is dropped rather than silently resolved to one reading. A slash date is
+    ambiguous only where both orders read a calendar date (#4183).
+
+    A value in either form that is not a calendar date is dropped too, with
+    a reason that says so; it is never widened (#4168). `datetime.date`
+    checks the year, month and day before a date-time is written. That
+    covers an ISO date such as ``2026-13-45``, and a slash date that
+    neither order reads as a date: ``13/13/2026``, ``31/02/2026``,
+    ``0/0/2026``, ``01/02/0000``. Such a slash date had been called
+    ambiguous, as though both orders read a date, or widened to a date-time
+    the schema rejects. Year ``0000`` is no year to `datetime.date`, and the
+    schema's date-time check rejects it too.
 
     It reads one text value. Anything else, a list included, comes back
     unchanged with no note, as does text in neither form; `_coerce`
@@ -282,18 +311,36 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     if not isinstance(value, str):
         return value, ""
     text = value.strip()
-    if ISO_DATE.match(text):
+    m = ISO_DATE.match(text)
+    if m:
+        why = _not_a_calendar_date(*(int(part) for part in m.groups()))
+        if why:
+            return None, f"not a calendar date {text!r}: {why}; dropped"
         return f"{text}T00:00:00Z", "date -> date-time"
     m = SLASH_DATE.match(text)
     if m:
-        a, b, year = int(m.group(1)), int(m.group(2)), m.group(3)
-        if a > 12 and b <= 12:      # DD/MM
-            return f"{year}-{b:02d}-{a:02d}T00:00:00Z", "DD/MM/YYYY -> date-time"
-        if b > 12 and a <= 12:      # MM/DD
-            return f"{year}-{a:02d}-{b:02d}T00:00:00Z", "MM/DD/YYYY -> date-time"
-        return None, (f"ambiguous date {text!r}: both components are <= 12, so "
-                      "DD/MM and MM/DD cannot be distinguished; dropped rather "
-                      "than guessed")
+        a, b, year = (int(part) for part in m.groups())
+        # Each order's (month, day), and why it reads no calendar date, or ""
+        # where it reads one. The value is ambiguous only where both orders
+        # read a date: both components are then months, but two months are
+        # not enough, since `01/02/0000` reads no date in either order
+        # (#4183). Where one order reads a date, the value is that date: a
+        # component above 12 is no month, and 0 is neither a day nor a month.
+        orders = {"DD/MM/YYYY": (b, a), "MM/DD/YYYY": (a, b)}
+        why = {form: _not_a_calendar_date(year, month, day)
+               for form, (month, day) in orders.items()}
+        dates = [form for form in orders if not why[form]]
+        if len(dates) == 2:
+            return None, (f"ambiguous date {text!r}: both components are <= 12, so "
+                          "DD/MM and MM/DD cannot be distinguished; dropped rather "
+                          "than guessed")
+        if dates:
+            month, day = orders[dates[0]]
+            return (f"{year:04d}-{month:02d}-{day:02d}T00:00:00Z",
+                    f"{dates[0]} -> date-time")
+        return None, (f"not a calendar date {text!r}: as DD/MM/YYYY, "
+                      f"{why['DD/MM/YYYY']}, and as MM/DD/YYYY, "
+                      f"{why['MM/DD/YYYY']}; dropped")
     return value, ""
 
 
@@ -379,6 +426,72 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     """Shape a crate value to the slot's cardinality and range."""
     notes: list[str] = []
 
+    # Two list shapes are settled before any rule reads the value, so a row
+    # reports them alike whatever its slot (#4164). A list whose every item
+    # is null holds no value: the row is empty, and its reason names the
+    # null, as `resolve_path` names an empty root property. That is decided
+    # here, not in `resolve_path`, which passes an empty value by and reads
+    # the next entity of the type: there the null would change which entity
+    # a row reads. Here the entity is the same, and what changes is the row:
+    # its reason everywhere, and its status and record wherever the rules
+    # below had made the null a value. A null beside a value is not read
+    # here (#4172). A list inside the list fits no slot, which holds one
+    # value or a list of single values, so it is dropped, never flattened
+    # one level. The rest of the list is shaped as though the crate held it
+    # alone, and the row's detail names each list dropped before what the
+    # rest's rules say, as the enum rule's `kept k/n` reports what it left
+    # out (#4183). A list holding nothing but lists and nulls leaves nothing
+    # to shape, so it is refused. The rules below had read both shapes as
+    # values: the enum rule raised TypeError on a list item, the class step
+    # made `{name: 'None'}` of a null and `{name: "['x']"}` of a list, the
+    # cardinality step unwrapped `[[x]]` into a list in a single-valued slot
+    # and joined `["x", ["y"]]` into `x; ['y']` and `[null, null]` into
+    # `None; None`, and a multivalued text slot kept both shapes as written.
+    #
+    # Where this arm and the FAIRSCAPE converter of PR #4042 (`_shape`)
+    # agree, checked by running both on each shape, with text, dates,
+    # numbers, a boolean, URLs, references and objects, for every crate
+    # property they map to the same `Dataset` slot: neither writes anything
+    # for a list of only nulls, of only lists, or of nulls and lists. On a
+    # list that mixes values with lists, this arm writes what it writes for
+    # those values alone. So does the converter, except in two places, the
+    # only ones where the arms agree on the values alone and not on the
+    # list (#4194):
+    # - A single-valued slot whose range is a class (`updates`,
+    #   `human_subject_research`). The converter, which joins only text into
+    #   one object, refuses the whole list, and this arm keeps the value.
+    # - `collection_timeframes`, from a `rai:dataCollectionTimeframe` list
+    #   holding an item written as a date (`2022`, `2022-09-01`,
+    #   `9/1/2022`). The converter's `_timeframe` reads that list before
+    #   `_shape` does: two items are a start and an end, a list inside the
+    #   list counting as one of them, and three or more are dropped whole.
+    #   So for `["2022-09-01", ["2026-01-31"]]` the converter writes one
+    #   timeframe from 2022-09-01 to 2026-01-31, with nothing in `dropped`,
+    #   and for `["2022-09-01", ["y"], ["z"]]` nothing. This arm writes
+    #   `[{name: '2022-09-01'}]` for each, as for `["2022-09-01"]` alone,
+    #   and names each list it dropped.
+    # They do not agree on a null beside a value, which the converter drops
+    # (#4172).
+    if isinstance(value, list) and value:
+        if all(item is None for item in value):
+            return None, f"no value: the list holds only null ({_preview(value)})"
+        nested = [item for item in value if isinstance(item, list)]
+        if nested:
+            holds = "a list of single values" if slot.multivalued else "one value"
+            rest = [item for item in value if not isinstance(item, list)]
+            if all(item is None for item in rest):
+                return None, (f"a list inside a list, for a slot that holds {holds}: "
+                              f"{_preview(value)}; dropped rather than flattened")
+            left_out = (
+                f"{len(nested)} of {len(value)} list items "
+                f"{'is a list' if len(nested) == 1 else 'are lists'} inside the "
+                f"list, for a slot that holds {holds}: "
+                f"{_preview(', '.join(_preview(item) for item in nested))}; "
+                "dropped rather than flattened")
+            # `rest` holds no list, so this goes one call deep.
+            value, note = _coerce(rest, slot, sv, project, counter)
+            return value, "; ".join(part for part in (left_out, note) if part)
+
     # Every class's `doi` slot carries the same anchored pattern, so a row
     # that fills a nested class's `doi` is shaped the same way as the
     # Dataset's own, against that slot's pattern.
@@ -411,9 +524,10 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
         # (#4109). The rule makes text into text or nothing, never a list,
         # so that step then finds no list: a value the rule keeps carries
         # the note once, and one it refuses carries the refusal alone, as
-        # its scalar form does. A one-item list whose item is not text
-        # (`[null]`, a nested list) is not the rule's to read; it is left
-        # to that step, which unwraps it once (#4154).
+        # its scalar form does. A one-item list whose item is not text (a
+        # number, a reference) is not the rule's to read; it is left to that
+        # step, which unwraps it once (#4154). `[null]` and a list inside a
+        # list never reach here (#4164).
         if (not slot.multivalued and isinstance(value, list) and len(value) == 1
                 and isinstance(value[0], str)):
             value = value[0]
