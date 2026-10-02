@@ -1,6 +1,8 @@
 """Publication failures must never expose a partial record or overwrite a winner."""
 from concurrent.futures import ThreadPoolExecutor
+import os
 from pathlib import Path
+import stat
 from threading import Barrier
 
 import pytest
@@ -24,29 +26,17 @@ def publication(tmp_path):
 
 def test_partial_write_failure_leaves_no_record_and_can_be_retried(publication, monkeypatch):
     publish, target = publication
-    real_tempfile = normalizer.tempfile.NamedTemporaryFile
+    write_text = Path.write_text
 
-    class PartialWrite:
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *exc):
-            self.stream.close()
-
-        def write(self, text):
-            self.stream.write(text[:len(text) // 2])
-            self.stream.flush()
-            assert not target.exists()
-            raise OSError("disk full")
-
-    def temporary(**kwargs):
-        wrapper = PartialWrite()
-        wrapper.stream = real_tempfile(**kwargs)
-        wrapper.name = wrapper.stream.name
-        return wrapper
+    def partial_write(path, text, **kwargs):
+        if path.suffix != ".tmp":
+            return write_text(path, text, **kwargs)
+        write_text(path, text[:len(text) // 2], **kwargs)
+        assert not target.exists()
+        raise OSError("disk full")
 
     with monkeypatch.context() as patch:
-        patch.setattr(normalizer.tempfile, "NamedTemporaryFile", temporary)
+        patch.setattr(Path, "write_text", partial_write)
         with pytest.raises(OSError, match="disk full"):
             publish()
     assert not target.exists()
@@ -110,4 +100,20 @@ def test_staging_cleanup_failure_does_not_report_published_record_as_failed(
     monkeypatch.setattr(Path, "unlink", fail_for_staging)
     assert publish() == target
     assert target.read_text(encoding="utf-8").endswith("id: ALPHA\nname: Café\n")
-    assert "Could not remove publication temporary file" in caplog.text
+    assert "Could not remove publication temporary path" in caplog.text
+
+
+@pytest.mark.parametrize("mask", [0o022, 0o002, 0o077])
+def test_published_permissions_match_ordinary_file_creation(publication, tmp_path, mask):
+    publish, target = publication
+    # Only the test changes umask, restoring it even on failure. Production
+    # leaves that process-global setting alone.
+    previous = os.umask(mask)
+    try:
+        ordinary = tmp_path / "ordinary.yaml"
+        ordinary.write_text("id: ALPHA\n", encoding="utf-8")
+        publish()
+    finally:
+        os.umask(previous)
+    assert stat.S_IMODE(target.stat().st_mode) == stat.S_IMODE(ordinary.stat().st_mode)
+    assert stat.S_IMODE(target.stat().st_mode) == 0o666 & ~mask

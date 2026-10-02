@@ -753,15 +753,15 @@ def emit_deterministic_arm(
     body = "\n".join(
         line for line in body.splitlines() if not line.startswith("#")
     ).lstrip("\n")
-    staged = None
+    # A private directory hides the unfinished record. Creating the file
+    # normally inside it preserves the umask-derived permissions of the old
+    # write_text path; NamedTemporaryFile would publish mode 0600 (#4209).
+    staging_dir = Path(tempfile.mkdtemp(dir=out_dir, prefix=f".{target.name}."))
+    staged = staging_dir / "record.tmp"
     try:
         # Close (and flush) before linking. A failed write leaves no published
         # record; link refuses an existing target atomically, unlike replace.
-        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=out_dir,
-                                         prefix=f".{target.name}.", suffix=".tmp",
-                                         delete=False) as stream:
-            staged = Path(stream.name)
-            stream.write(header + body + "\n")
+        staged.write_text(header + body + "\n", encoding="utf-8")
         try:
             os.link(staged, target)
         except FileExistsError as exc:
@@ -770,14 +770,16 @@ def emit_deterministic_arm(
                 "overwriting a published run"
             ) from exc
     finally:
-        if staged is not None:
+        for temporary, remove in ((staged, staged.unlink), (staging_dir, staging_dir.rmdir)):
             try:
-                staged.unlink()
+                remove()
+            except FileNotFoundError:
+                pass
             except OSError:
                 # The record may already be published. A leftover hidden .tmp
                 # must not turn that success into a false 'not published'.
                 logging.getLogger(__name__).warning(
-                    "Could not remove publication temporary file %s", staged,
+                    "Could not remove publication temporary path %s", temporary,
                     exc_info=True,
                 )
     return target
