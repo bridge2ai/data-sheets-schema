@@ -41,7 +41,7 @@ _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -64,8 +64,15 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     resolved = (Path(bundle) if bundle else
                 reg.bundle(project) if arm == "baseline" else
                 reg.anchored(BUNDLE_DIR) / pattern.format(p=project))
+    try:
+        registration_text = (Path(receipt_completion_registration).read_bytes().decode('utf-8')
+                             if receipt_completion_registration else None)
+    except (OSError, UnicodeError) as exc:
+        raise click.ClickException(f'receipt completion registration is unreadable: {exc}') from exc
     kw = {"api_playbook_version": api_playbook_version, "removal_repair_version": removal_repair_version, "manifest": selected,
-          "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
+          "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None,
+          "receipt_completion_version": receipt_completion_version,
+          "receipt_completion_registration": registration_text}
     if runtime:
         kw["runtime"] = runtime
     if provider:
@@ -215,6 +222,10 @@ def api():
 
 
 @api.command("render-prompt")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -242,7 +253,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -265,7 +276,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     from data_sheets_schema.api_runner import resolve_prompt
 
     spec = _spec(project, arm, label, condition, bundle,
-                 runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version,
+                 runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
@@ -297,6 +308,10 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
 
 @api.command("plan")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -319,10 +334,10 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version):
+def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
@@ -350,6 +365,10 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -375,12 +394,12 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -420,6 +439,10 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 
 @api.command("batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -459,7 +482,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -490,7 +513,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     for p in names:
         for n in range(1, replicates + 1):
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
-                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version)
+                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration)
             # As `plan` and `run` do: a project no selected manifest declares
             # needs an explicit bundle, never the repository's by convention
             # (#1367 round 2, #1386).
@@ -499,6 +522,12 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             _refuse_condition_mismatch(s, allow_condition_mismatch)   # before any spend (#1094)
             specs.append(s)
 
+    if receipt_completion_version and not dry_run:
+        from data_sheets_schema.receipt_completion import registration
+        if no_canary_gate:
+            raise click.ClickException("registered receipt completion cannot bypass its canary/coverage gate")
+        if len(specs) > 1 and any(registration(s)["coverage_floor"]["state"] == "pending" for s in specs):
+            raise click.ClickException("diagnostic receipt completion floor is pending; fan-out is blocked")
     plans = [_plan_or_refuse(s) for s in specs]
     total = sum(x["approx_total_input_tokens"] for x in plans)
     click.echo(f"📦 {len(specs)} runs — {len(names)} projects x {replicates} "

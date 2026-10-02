@@ -189,7 +189,7 @@ def test_default_snapshot_cannot_silently_select_new_record_policy(disk):
 @pytest.fixture
 def disk(tmp_path):
     from data_sheets_schema.chunking import build_manifest, dump_manifest
-    from test_receipts import BUNDLE, FULL, _receipt
+    from tests.test_receipts import BUNDLE, FULL, _receipt
     bundle, full, receipt, manifest = (tmp_path / n for n in ("P.txt", "P_d4d.yaml", "P_coverage_receipt.yaml", "chunks.yaml"))
     bundle.write_text(BUNDLE)
     full.write_text(f"# Source bundle: {bundle}\n" + yaml.safe_dump(FULL))

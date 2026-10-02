@@ -307,6 +307,11 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
     require_removal_repair_admission(spec, phase=phase)
+    if getattr(spec, "receipt_completion_version", 0):
+        from data_sheets_schema.receipt_completion import require_admission, PHASE as RECEIPT_PHASE
+        require_admission(spec, phase)
+        if phase == RECEIPT_PHASE:
+            data["receipt_completion"]["state"] = "admitted"
     if phase == "removal_repair_full":
         if removal_repair_attempted(spec):
             raise UsageLedgerError("this generation already admitted its one removal repair")
