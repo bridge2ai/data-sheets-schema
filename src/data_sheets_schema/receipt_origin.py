@@ -593,7 +593,7 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
     every call under it ambiguous (#2077), a result with no earlier call is
     foreign evidence, and a second result for one call is ambiguous."""
     calls: list[dict] = []
-    by_id: dict[str, dict] = {}
+    by_id: dict[str, dict | None] = {}  # None: a malformed-name call, kept for pairing (#3918)
     results: dict[str, dict] = {}
     duplicated: set[str] = set()
     malformed: list[str] = []
