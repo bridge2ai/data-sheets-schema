@@ -112,19 +112,42 @@ after an escaped backslash kept as the command separator it is, where
 the tokenizer reads a blank (#3985); where that reading cannot be split,
 or splits the command into other parts (`echo
 x\\\\<newline>PATH=./bin:$PATH;`), no derive in the command is placed
-(#4140, #4161). Its cost is a false `unknown` where such a word assigns
-nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ '
-f;`, ``echo `date`;``), or where the two readings cannot be paired and
-nothing assigns (`echo hi &\\<newline>> /dev/null;`). A route those words
-do not name -- such as a function, defined in the command or outside it
-(`d4d() { ./x; };`), `getopts`, `unset`, `coproc`, `trap`, `compgen -V`,
-an arithmetic assignment (`(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH
-= 1 ))`, among the derive's own words too, or one in an array subscript
-or a `[[ -eq ]]` operand) or a word built at run time (`$X`, `printf
--${X}v`, a brace expansion), #4135 -- is not read, nor is an assignment,
-option or definition made outside the command (an earlier call's
-`export`, the inherited environment), so a derive after `unset PATH;` is
-placed. Any
+(#4140, #4161). No derive is placed either where the tokenizer may pair
+the command's quotes otherwise than bash, which reads a `$(...)` or
+`${...}` inside `"..."` as a command or a word of its own, in which a
+quote pairs anew, ends a backquote at the next unescaped backquote
+whatever quote stands open in it, and reads a `\\'` inside `$'...'` as a
+quote character, where shlex does none of these: wherever a `'` or `"`
+stands inside such a double-quoted substitution or inside a backquote,
+quoted or not, a `case` word stands inside the former, as a pattern's
+`)` closes nothing there, a `\\'` stands inside `$'...'`, or a backquote
+is still open where the comment rule took a `#` inside it for a
+comment's start (`echo "$(grep -c "it's" f)"; export PATH=./bin:$PATH;
+echo "$(grep -c "don't" f)"; d4d derive core ...` is two parts to the
+tokenizer and four to bash, #4182); nor where an operator character
+(`;`, `&`, `|`, `(`, `)`, `<`, `>`) stands quoted or escaped anywhere in
+the command, a double-quoted substitution's own brackets included, as
+shlex returns a quoted `&&` bare and the tokenizer reads it as a join
+(`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d
+derive core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Its cost
+is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls
+.;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo `date`;``),
+or where the two readings cannot be paired and nothing assigns (`echo hi
+&\\<newline>> /dev/null;`, `echo "$(date)";`, `grep -E 'a|b' f;`). A
+route those words do not name -- such as a function, defined in the
+command or outside it (`d4d() { ./x; };`), `getopts`, `unset`, `coproc`,
+`trap`, `compgen -V`, an arithmetic assignment (`(( PATH = 1 ))`, `let
+'PATH = 1'`, `$(( PATH = 1 ))`, among the derive's own words too, or one
+in an array subscript or a `[[ -eq ]]` operand) or a word built at run
+time (`$X`, `printf -${X}v`, a brace expansion), #4135 -- is not read,
+nor is an assignment, option or definition made outside the command (an
+earlier call's `export`, the inherited environment), so a derive after
+`unset PATH;` is placed. Nor is a comment read where the comment rule
+(#3184) ends it otherwise than bash: at a `#` inside an unquoted
+`${...}`, which bash reads as text (`echo ${X:- #x} || true`), or past
+the end of one that ends in a backslash-newline, which bash ends at the
+newline (`# x \\<newline>true`); a part bash runs there, which may make
+the call's status not the derive's, is not read. Any
 other part that carries the words `derive core` and is neither a d4d call
 of another subcommand nor a program known to read is a derive that cannot
 be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
@@ -545,16 +568,34 @@ NON_CHECKS = (
     "quote included (`$\\<newline>'\\x2dv'`), and a newline after an escaped backslash kept as the "
     "command separator it is, where the tokenizer reads a blank (#3985); where that reading cannot "
     "be split, or splits the command into other parts (`echo x\\\\<newline>PATH=./bin:$PATH;`), no "
-    "derive in the command is placed (#4140, #4161). The cost is a false `unknown` where such a word "
-    "assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo "
-    "`date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
-    "&\\<newline>> /dev/null;`). A route those words do not name is not read (such as a function, "
+    "derive in the command is placed (#4140, #4161). No derive is placed either where the tokenizer "
+    "may pair the command's quotes otherwise than bash, which reads a `$(...)` or `${...}` inside "
+    "`\"...\"` as a command or a word of its own, in which a quote pairs anew, ends a backquote at the "
+    "next unescaped backquote whatever quote stands open in it, and reads a `\\'` inside `$'...'` as a "
+    "quote character, where shlex does none of these: wherever a `'` or `\"` stands inside such a "
+    "double-quoted substitution or inside a backquote, quoted or not, a `case` word stands inside the "
+    "former, since a pattern's `)` closes nothing there, a `\\'` stands inside `$'...'`, or a backquote "
+    "is still open where the comment rule took a `#` inside it for a comment's start (`echo \"$(grep "
+    "-c \"it's\" f)\"; export PATH=./bin:$PATH; echo \"$(grep -c \"don't\" f)\"; d4d derive core ...` "
+    "is two parts to the tokenizer and four to bash, #4182); nor where an operator character (`;`, "
+    "`&`, `|`, `(`, `)`, `<`, `>`) stands quoted or escaped anywhere in the command, a double-quoted "
+    "substitution's own brackets included, since shlex returns a quoted `&&` bare and the tokenizer "
+    "reads it as a join (`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d derive "
+    "core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). The cost is a false `unknown` where such "
+    "a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, "
+    "``echo `date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
+    "&\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`). A route those words do not "
+    "name is not read (such as a function, "
     "defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, `coproc`, `trap`, "
     "`compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH = 1 ))`, "
     "among the derive's own words too, or one in an array subscript or a `[[ -eq ]]` operand, or a "
     "word built at run time, `$X`, `printf -${X}v` or a brace expansion, #4135), nor an assignment, "
     "option or definition made outside the command (an earlier call's `export`, the inherited "
-    "environment), so a derive after `unset PATH;` is placed. The words are matched "
+    "environment), so a derive after `unset PATH;` is placed. Nor is a comment read where the comment "
+    "rule (#3184) ends it otherwise than bash: at a `#` inside an unquoted `${...}`, which bash reads "
+    "as text (`echo ${X:- #x} || true`), or past the end of one that ends in a backslash-newline, "
+    "which bash ends at the newline (`# x \\<newline>true`); a part bash runs there, which may make "
+    "the call's status not the derive's, is not read. The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -634,6 +675,13 @@ _SUBSCRIPT_SUBSTITUTION = re.compile(r"\[[^\]]*\$(?:[({]|\Z)")
 #: "$'x'"`) carries no mark.
 _DOLLAR_QUOTE_MARKS = {"'": "\x01", '"': "\x02"}
 _DOLLAR_QUOTED = frozenset(_DOLLAR_QUOTE_MARKS.values())
+#: `str.translate` table that drops those marks again, for a scan that reads
+#: the text `_bash_spelling` gives as bash's own (`_pairs_otherwise`).
+_UNMARKED = dict.fromkeys(map(ord, _DOLLAR_QUOTED))
+#: A `case` word. Inside a substitution `_pairs_otherwise` follows by its
+#: brackets, a pattern's `)` closes nothing (`"$(case x in x) ...;; esac)"`),
+#: so the brackets no longer say where the substitution ends (#4182).
+_CASE_WORD = re.compile(r"(?<![\w.-])case(?![\w.-])")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
 _VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
 _DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
@@ -926,7 +974,7 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     wherever they stand, in an expansion among the part's own words or an
     earlier part's, or on the part under keyword mode, which may make it
     run other code, or a command whose words cannot be read part by part as
-    bash reads them, #3781, #4123, #4124, #4160, #4161). A part whose
+    bash reads them, #3781, #4123, #4124, #4160, #4161, #4182). A part whose
     status the result does not carry is `ambiguous`, unless the call was
     `denied` -- by the native control or, corroborated, by the runtime
     (#3201) -- and so never ran. `inputs` are the call's, for
@@ -2022,6 +2070,128 @@ def _bash_spelling(command: str) -> str:
     return "".join(out)
 
 
+def _pairs_otherwise(text: str) -> bool:
+    """Whether the tokenizer may pair the quotes of `text`, a command with
+    its comments removed and its line continuations deleted, otherwise than
+    bash (#4182). shlex knows no substitution and no `$'...'` escape. It
+    ends a double-quoted word at the next unescaped `"`, where bash reads a
+    `$(...)` or `${...}` inside one as a command or a word of its own, in
+    which a quote pairs anew (`echo "$(grep -c "it's" f)"`). It pairs a
+    quote across a backquote, which bash ends at the next unescaped
+    backquote whatever quote stands open in it. And it ends a `$'...'`
+    quote at a `\\'`, which bash reads as a quote character in it. Each
+    can hide a part from both readings: `echo "$(sed -n "s/'//p" R)";
+    PATH=./bin:$PATH; echo "$(sed -n "s/'//p" R)"; d4d derive core ...` is
+    two parts to the tokenizer, `PATH=` swallowed into the first, and four
+    to bash, which runs `./bin/d4d`. So it may wherever a `'` or `"` stands
+    inside a `$(...)` or `${...}` that is itself inside `"..."`, or inside a
+    backquote substitution, quoted or not; wherever a `case` word stands in
+    the former, as a pattern's `)` there closes nothing, so its brackets no
+    longer say where it ends (`_CASE_WORD`); wherever a `\\'` stands inside
+    `$'...'`; and wherever such a substitution is still open at the end, as
+    where the comment rule took a `#` inside a backquote for a comment's
+    start (`_strip_comments`). A substitution is followed by its brackets
+    (`(` and `)`, `{` and `}`, the `(` or `{` of a `$(` or `${` opening one)
+    and its backquotes, a backslash escaping the character after it. An
+    unquoted `$(...)` or `${...}` is not followed: the quotes in it pair the
+    same way to both. The cost is a false `unknown` where the quotes pair
+    the same way all the same (``echo `git log --format="%h"`;``,
+    `"${X:-"y"}"`)."""
+    i, n = 0, len(text)
+    quote: str | None = None                        # "'", "$'" or '"', outside the substitutions followed
+    nest: list[str] = []                            # the closer each open substitution waits for
+    while i < n:
+        ch = text[i]
+        if nest:
+            if ch == "\\":
+                i += 2
+                continue
+            if ch in "'\"":
+                return True
+            if nest[-1] == "`":
+                if ch == "`":
+                    nest.pop()
+            elif _CASE_WORD.match(text, i):
+                return True
+            elif ch == "`":
+                nest.append("`")
+            elif ch in "({":
+                nest.append(")" if ch == "(" else "}")
+            elif ch == nest[-1]:
+                nest.pop()
+            i += 1
+            continue
+        if quote in ("'", "$'"):
+            if ch == "\\" and quote == "$'":
+                if text[i + 1:i + 2] == "'":
+                    return True
+                i += 2
+                continue
+            if ch == "'":
+                quote = None
+            i += 1
+            continue
+        if ch == "\\":
+            i += 2
+            continue
+        if ch == "`":
+            nest.append("`")
+        elif quote == '"':
+            if text.startswith(("$(", "${"), i):
+                nest.append(")" if text[i + 1] == "(" else "}")
+                i += 2
+                continue
+            if ch == '"':
+                quote = None
+        elif ch == "$" and text[i + 1:i + 2] in ("'", '"'):
+            quote = "$'" if text[i + 1] == "'" else '"'
+            i += 2
+            continue
+        elif ch in "'\"":
+            quote = ch
+        i += 1
+    return bool(nest)
+
+
+def _quoted_operator(text: str) -> bool:
+    """Whether an operator character (`;`, `&`, `|`, `(`, `)`, `<`, `>`)
+    stands quoted or escaped anywhere in `text`, a command with its comments
+    removed: inside `'...'`, `$'...'` or `"..."`, the brackets and
+    operators of a double-quoted substitution included (`"$(date)"`), or
+    after a backslash (#4182). shlex removes the quotes and the escape, so
+    a quoted `&&` (`'&&'`, `"&&"`, `\\&\\&`) or `;` (`\\;`) comes back as the
+    bare operator, which `_layout` reads as a join (#3830): to the tokenizer
+    `echo hi '&&' d4d derive core ...` is a derive after `echo hi`, where
+    bash runs `echo` alone, and `d4d derive core ... '&&'
+    ${BASH_CMDS[d4d]:=./x}` puts the expansion, one of the derive's own
+    words to bash, in a part after it, where bash 5.3 runs `./x`. Which
+    quoted operator comes back bare is not read, which is the point: the
+    cost is a false `unknown` where none does (`grep -E 'a|b' f;`, `echo
+    "$(date)";`)."""
+    i, n = 0, len(text)
+    quote: str | None = None                        # "'", "$'" or '"'
+    while i < n:
+        ch = text[i]
+        if ch == "\\" and quote != "'":
+            if text[i + 1:i + 2] in _PUNCT:
+                return True
+            i += 2
+            continue
+        if quote is None:
+            if ch == "$" and text[i + 1:i + 2] == "'":
+                quote = "$'"
+                i += 2
+                continue
+            if ch in "'\"":
+                quote = ch
+        elif ch == quote[-1]:
+            quote = None
+        elif ch in _PUNCT:
+            return True
+        i += 1
+    return False
+
+
 def _bash_parts(command: str, segments: list[list[str]]) -> list[list[str]] | None:
     """The command's parts with their words as bash reads them where
     `_tokens` reads them otherwise (`_bash_spelling`), for the assignment
@@ -2036,7 +2206,16 @@ def _bash_parts(command: str, segments: list[list[str]]) -> list[list[str]] | No
     words read so cannot be split, or split into a number of parts other
     than `segments`'s, so that the two readings cannot be paired part by
     part (`echo x\\\\<newline>PATH=./bin:$PATH; d4d`: three parts to bash,
-    two to `_tokens`)."""
+    two to `_tokens`). None too, whatever the words, where the tokenizer may
+    pair the command's quotes otherwise than bash (`_pairs_otherwise`), or
+    an operator character stands quoted or escaped in it, which the
+    tokenizer may read as an operator (`_quoted_operator`): neither reading
+    is then bash's, as both are split by shlex (#4182). Both are asked of
+    the command with its comments removed (`_strip_comments`), the first
+    with its line continuations deleted too, as bash deletes them."""
+    text = _strip_comments(command)
+    if _pairs_otherwise(_bash_spelling(text).translate(_UNMARKED)) or _quoted_operator(text):
+        return None
     if "\\\n" not in command and "$'" not in command and '$"' not in command:
         return segments
     tokens = _token_list(_bash_spelling(command))
@@ -2702,7 +2881,11 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # does, a line continuation deleted and a `$'...'` or `$"..."` quote
     # marked (`_bash_parts`, #4140, #4161), and counts where either reading
     # says so. Where the two readings cannot be paired part by part, every
-    # part counts, the derive's own included, so no derive is placed.
+    # part counts, the derive's own included, so no derive is placed. They
+    # are not paired either where the tokenizer may pair the command's
+    # quotes otherwise than bash (`_pairs_otherwise`), or read a quoted or
+    # escaped operator character as an operator (`_quoted_operator`): both
+    # readings are split by shlex, so neither is then bash's (#4182).
     as_bash = _bash_parts(command, segments)
     readings = [segments] if as_bash is None else [segments, as_bash]
     assigning = [as_bash is None or any(_may_assign(reading[index]) for reading in readings)
@@ -3331,9 +3514,11 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                                            "(`${BASH_CMDS[d4d]:=./x}`, a bash 5.3 `${ ...; }`, a backquote); "
                                            "on the part itself where the command may turn on keyword mode "
                                            "(`set -k`); or anywhere in a command whose words cannot be read "
-                                           "part by part as bash reads them; it may make the part run code "
-                                           "other than the derive its words spell, and no assignment is "
-                                           "exempt (#3781)",
+                                           "part by part as bash reads them, as where a quote stands inside "
+                                           "a double-quoted substitution or a backquote, or an operator "
+                                           "character is quoted or escaped (`'&&'`); it may make the part "
+                                           "run code other than the derive its words spell, and no "
+                                           "assignment is exempt (#3781)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "
