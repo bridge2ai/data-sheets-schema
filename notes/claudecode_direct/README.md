@@ -176,11 +176,40 @@ controller's own stop state.
 ```bash
 cd <checkout>
 poetry run python notes/claudecode_direct/prepare_direct.py --output <fresh dir>   # offline; no model call
-# independent review of the registration; CI on the exact commit; the maintainer's launch word
-poetry run python notes/claudecode_direct/run_direct_canary.py \
-    --registration <dir>/registration.json --review <review.json> \
+poetry run python notes/claudecode_direct/run_direct_canary_awake.py prepare \
+    --registration <dir>/registration.json --out <dir>/registration-awake.json
+# independent review of registration-awake.json; CI on the exact commit; the maintainer's launch word
+poetry run python notes/claudecode_direct/run_direct_canary_awake.py launch \
+    --registration <dir>/registration-awake.json --review <review.json> \
     --launch-word <word.json> --job CHORUS_direct_rep1
 ```
+
+The opt-in macOS launcher (#2445) acquires the IOKit assertions corresponding
+to `caffeinate -ims` before invoking the original launcher's checks or child.
+It holds them through native child cleanup and the final result write, then
+releases them. Unsupported platforms or failed acquisition stop before launch.
+`started.json` and `result.json` record the acquired assertion IDs, policy and
+limitations; `keep_awake_cleanup.json` separately records release return codes.
+Missing cleanup evidence is not a successful release. SIGINT/SIGTERM use the
+native child's existing exception cleanup; repeated signals do not interrupt
+that cleanup. The command retains the launcher's exit status, or returns
+128 plus the received signal number.
+
+This is a new launch policy, not a change to a historical condition. Preparation
+writes a separate registration beside the original, pins the new wrapper and
+binds the original registration's hash. It changes no prompt, original launcher,
+old registration or prior attempt. Review and launch words must bind the new
+hash; a consumed attempt cannot be relaunched through this wrapper. Keep both
+registration files. Preparation makes no login probe or model call.
+
+The receipt reports API acquisition, not proof that the machine never slept.
+The system-sleep assertion applies on AC power; forced sleep, lid closure,
+thermal/battery policy and power loss can still interrupt work. The display
+may sleep. See [Apple's assertion API](https://github.com/apple-oss-distributions/IOKitUser/blob/main/pwr_mgt.subproj/IOPMLib.h)
+and [caffeinate's assertion mapping](https://github.com/apple-oss-distributions/PowerManagement/blob/main/caffeinate/caffeinate.c).
+For a historical launch whose existing review explicitly permits an external
+wrapper, the manual form is `caffeinate -ims <original launcher command>`;
+it does not add the new receipt fields or authorize a spent attempt.
 
 The launcher needs three files: the registration, a review binding its hash
 to an approving verdict and a successful CI run, and the maintainer's launch
@@ -195,10 +224,10 @@ native launcher (#2251):
 
 ```bash
 poetry run python notes/claudecode_direct/bind_direct_launch.py review \
-    --registration <dir>/registration.json --independent-review <report.json> \
+    --registration <dir>/registration-awake.json --independent-review <report.json> \
     --ci-run <run id> --out <dir>/review.json
 poetry run python notes/claudecode_direct/bind_direct_launch.py word \
-    --registration <dir>/registration.json --exact-response "<the maintainer's words>" \
+    --registration <dir>/registration-awake.json --exact-response "<the maintainer's words>" \
     --quoted-request "<the question they answered>" --out <dir>/word.json
 ```
 
