@@ -31,6 +31,8 @@ DATE = "2026-09-11"
 PLAN = ROOT / f"notes/reference_rescore_{DATE}"
 MODEL = "claude-opus-5[1m]"
 PROJECTS = ("AI_READI", "CHORUS", "CM4AI", "VOICE")
+SEMANTIC_VERSION = "3.0"
+EVIDENCE_AUTHORITY = "data/rubric/semantic_evidence_authority_v3.json"
 VALIDATOR_SUPPORT = (
     "src/data_sheets_schema/resources.py",
     "src/data_sheets_schema/evaluation/__init__.py",
@@ -38,6 +40,9 @@ VALIDATOR_SUPPORT = (
     "src/data_sheets_schema/evaluation_context.py",
     "src/data_sheets_schema/judge_contract.py",
     "src/data_sheets_schema/semantic_scope.py",
+    "src/data_sheets_schema/semantic_evidence.py",
+    "src/data_sheets_schema/semantic_evidence_authority.py",
+    EVIDENCE_AUTHORITY,
 )
 INSTRUMENT_SUPPORT = (*VALIDATOR_SUPPORT, "src/data_sheets_schema/agent_pin.py")
 
@@ -119,6 +124,7 @@ def freeze() -> dict:
         files.update((definition, rubric, schema))
         preamble = spawn_preamble(agent)  # Refuse an unchallengeable definition.
         instruments[f"rubric{n}-semantic"] = {
+            "version": SEMANTIC_VERSION,
             "agent": agent, "definition": definition, "definition_sha256": digest(ROOT / definition),
             "rubric": rubric, "schema": schema, "preamble": preamble,
         }
@@ -145,9 +151,11 @@ def verify_frozen(manifest: dict) -> None:
     required = {*INSTRUMENT_SUPPORT, "scripts/validate_evaluation_schema.py", "scripts/reference_rescore.py",
                 "pyproject.toml", "poetry.lock", *(job["input"] for job in manifest["jobs"])}
     for instrument in manifest["instruments"].values():
+        if instrument.get("version") != SEMANTIC_VERSION:
+            raise ValueError("registration uses another semantic version; retain its pinned validator")
         required.update((instrument["definition"], instrument["rubric"], instrument["schema"]))
     if required - manifest["pinned_files"].keys():
-        raise ValueError("registration does not pin the complete version-2 validator instrument")
+        raise ValueError("registration does not pin the complete version-3 validator instrument")
     for section in ("pinned_files", "prior_evaluations"):
         for path, expected in manifest[section].items():
             if digest(ROOT / path) != expected:
@@ -411,9 +419,12 @@ def validate_candidate(path: Path, job: dict, manifest: dict, events: list[dict]
         raise ValueError("evaluator did not identify the pinned input bytes")
     from data_sheets_schema.evaluation_context import context_digest, normalize_context
     context = normalize_context(job.get("applicability_context"))
-    if (doc.get("version") != "2.0" or doc.get("applicability_context") != context
+    if (doc.get("version") != SEMANTIC_VERSION or instrument.get("version") != SEMANTIC_VERSION
+            or doc.get("applicability_context") != context
             or metadata.get("context_sha256") != context_digest(context)):
-        raise ValueError("evaluator did not use the registered version-2 applicability context")
+        raise ValueError("evaluator did not use the registered version-3 applicability context")
+    if metadata.get("evidence_authority_sha256") != manifest["pinned_files"].get(EVIDENCE_AUTHORITY):
+        raise ValueError("evaluator did not identify the pinned evidence-name authority")
     quote, models = transcript_evidence(events)
     verify_echo(job["agent"], quote)
     if not evaluator_validated(events, job["rubric"], context_required=bool(context)):
@@ -503,7 +514,10 @@ def job_prompt(manifest: dict, job: dict) -> str:
         f"Set metadata.input_sha256 to {manifest['pinned_files'][job['input']]} and "
         f"metadata.instrument_sha256 to {instrument['definition_sha256']}, with metadata.instrument_kind agent_definition. "
         f"Set metadata.rubric_sha256 to {manifest['pinned_files'][instrument['rubric']]}.\n"
-        "Use version 2.0 and score every resource separately under evaluation_scope. "
+        "Use version 3.0 and score every resource separately under evaluation_scope. "
+        "Supply structured cited/absent/counts/considered evidence for each resource and "
+        "closed issue categories/types with item_ids and score_effect, as the definition requires. "
+        f"Set metadata.evidence_authority_sha256 to {manifest['pinned_files'][EVIDENCE_AUTHORITY]}.\n"
         "Use exactly this applicability_context; undeclared predicates remain unknown and in the denominator:\n"
         + json.dumps(context, sort_keys=True) + "\n"
         f"Set metadata.context_sha256 to {context_digest(context)}.\n"

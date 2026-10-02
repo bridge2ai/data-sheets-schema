@@ -25,6 +25,7 @@ include = [
     { path = ".claude/agents/*.md", format = ["sdist", "wheel"] },
     { path = ".claude/agents/_preimages.json", format = ["sdist", "wheel"] },
     { path = "data/rubric/rubric*.txt", format = ["sdist", "wheel"] },   # the rubrics, not the reviewer files (#1637)
+    { path = "data/rubric/semantic_evidence_authority_v3.json", format = ["sdist", "wheel"] },
     { path = "src/data_sheets_schema/rendering/*.css", format = ["sdist", "wheel"] },
     { path = ".github/workflows/*.config", format = ["sdist", "wheel"] },
 ]
