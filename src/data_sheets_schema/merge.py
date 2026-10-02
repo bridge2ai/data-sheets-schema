@@ -80,6 +80,7 @@ class ReferentJudgement:
 
     same_referent: bool
     reason: str = ""
+    evaluation_model: dict[str, Any] | None = None
 
 
 class ReferentJudge(Protocol):
@@ -95,6 +96,7 @@ class SlotFinding:
     missing: list[str] = field(default_factory=list)
     values: dict[str, str] = field(default_factory=dict)
     reason: str = ""
+    evaluation_model: dict[str, Any] | None = None
 
     @property
     def blocks_merge(self) -> bool:
@@ -205,7 +207,8 @@ def referent_report(records: dict[str, dict[str, Any]],
         report.findings.append(SlotFinding(
             slot=slot,
             kind=REPRESENTATIONAL if j.same_referent else REFERENTIAL,
-            holders=holders, values=vals, reason=j.reason))
+            holders=holders, values=vals, reason=j.reason,
+            evaluation_model=getattr(j, "evaluation_model", None)))
 
     return report
 
@@ -414,6 +417,7 @@ class LLMReferentJudge:
                  max_tokens: int = 8000):
         self._client = client
         self._model = model
+        self.evaluation_model = None
         # Sized for reasoning, not the answer — see evidence_score.LLMSlotScorer.
         self.max_tokens = max_tokens
         self.calls = 0
@@ -422,10 +426,13 @@ class LLMReferentJudge:
                  ) -> ReferentJudgement:
         from data_sheets_schema import api_runner
         client = self._client or api_runner._client()
-        # Resolved as an evaluation model (#2928); today that is the
-        # generation model, as before.
-        from data_sheets_schema.evaluation_model import evaluation_model_name
-        model = self._model or evaluation_model_name()
+        # One judge instance has one instrument, even if the configuration is
+        # edited between fields of a report (#4231).
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
+        model = self._model
 
         rendered = "\n".join(f"  {lab}: {v[:600]}"
                              for lab, v in sorted(values.items()))
@@ -439,7 +446,10 @@ class LLMReferentJudge:
         self.calls += 1
         text = "".join(b.text for b in resp.content
                        if getattr(b, "type", "") == "text")
-        return _parse_referent(text)
+        result = _parse_referent(text)
+        from copy import deepcopy
+        result.evaluation_model = deepcopy(self.evaluation_model)
+        return result
 
 
 def _parse_referent(text: str) -> ReferentJudgement:

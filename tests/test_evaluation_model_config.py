@@ -139,3 +139,41 @@ def test_api_rubric_retains_its_separate_registered_default(config, monkeypatch)
     assert em.evaluation_model_name() == "independent-judge"
     assert LLMEvaluationConfig().model == "claude-sonnet-4-5-20250929"
     assert LLMEvaluationConfig(model="registered-other").model == "registered-other"
+
+
+def test_referent_report_binds_one_judge_model_across_config_changes(config, monkeypatch):
+    from data_sheets_schema.merge import LLMReferentJudge, referent_report
+    before = hashlib.sha256(config.read_bytes()).hexdigest()
+    calls = []
+    def call(client, **kwargs):
+        calls.append(kwargs["model"])
+        config.write_text("version: 1\nmodel: changed-mid-report\n")
+        return response('{"same_referent": true, "reason": "fixture"}')
+    monkeypatch.setattr(api_runner, "_call_with_retry", call)
+    j = LLMReferentJudge(client=object())
+    report = referent_report({"a": {"title": "A", "description": "One"},
+                              "b": {"title": "B", "description": "Two"}},
+                             judge=j, slots=("title", "description"))
+    assert calls == ["independent-judge", "independent-judge"]
+    for finding in report.findings:
+        assert finding.evaluation_model["name"] == "independent-judge"
+        assert finding.evaluation_model["basis"] == "evaluation_config"
+        assert finding.evaluation_model["configuration"]["sha256"] == before
+    report.findings[0].evaluation_model["configuration"]["sha256"] = "changed-output"
+    assert report.findings[1].evaluation_model["configuration"]["sha256"] == before
+    assert j.evaluation_model["configuration"]["sha256"] == before
+    LLMReferentJudge(client=object())(slot="title", values={"a": "A", "b": "B"})
+    assert calls[-1] == "changed-mid-report"
+
+
+def test_referent_explicit_model_and_unjudged_findings_do_not_invent_basis(config, monkeypatch):
+    from data_sheets_schema.merge import LLMReferentJudge, referent_report
+    config.write_text("invalid configuration")
+    monkeypatch.setattr(api_runner, "_call_with_retry", lambda *a, **kw: response('{"same_referent": false}'))
+    j = LLMReferentJudge(client=object(), model="explicit")
+    result = j(slot="title", values={"a": "A", "b": "B"})
+    assert result.evaluation_model == {"name": "explicit", "basis": "explicit_override"}
+    for records in ({"a": {"title": "A"}, "b": {"title": "A"}},
+                    {"a": {"title": "A"}, "b": {"title": "B"}}):
+        report = referent_report(records)
+        assert all(f.evaluation_model is None for f in report.findings)

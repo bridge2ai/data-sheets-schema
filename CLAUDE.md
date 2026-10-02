@@ -1382,7 +1382,7 @@ directory. Unknown settings, duplicate keys and invalid identifiers are refused.
 Caller-supplied models take precedence. Form-subtype reproduction still prefers
 the single model recorded in its cache, refusing pooled instruments.
 
-New judgement caches/reasoning logs and agreement matrices record
+New judgement caches/reasoning logs, semantic referent findings and agreement matrices record
 `evaluation_model` with the selected name and basis (configuration, generation
 default, explicit override, or recorded cache model). Config-derived selections
 include the config's SHA256. This describes selection for the new output;
