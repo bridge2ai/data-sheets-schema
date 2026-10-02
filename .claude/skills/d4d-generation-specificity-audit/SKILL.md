@@ -180,8 +180,8 @@ judges a hit by its own role:
   agent, loaded instruction or controller text names it for the model to
   Read (the Read tool returns comments), and the schemas the toolchain hands
   a native run. A schema module only the digest renders drops its comments;
-- in run-shaping code, a string literal counts as text when it is model text:
-  the body of a run-controller function named for it (`render_*`,
+- in run-shaping code, a string literal counts as text when it is model
+  text: the body of a run-controller function named for it (`render_*`,
   `*instruction`, `*_system`, `*prompt*`), or code found by data flow. From
   every argv element after `--system-prompt` or `--append-system-prompt` (or
   the value its `=` spelling carries) in a controller, from every value a
@@ -195,23 +195,23 @@ judges a hit by its own role:
   turn, across imports) and a module constant the text is built from
   (`SYSTEM`, which `render_system` returns). A constant so marked is
   followed in turn: every statement at the top of its module that writes it
-  (an assignment, plain, annotated or augmented, an item assignment on it, a
-  method call on it such as `.append(...)`) is model text, and so is what
-  that statement builds it from, recursively and each constant once: the
-  constants it names, of its module or imported by name (`POLICY` in
-  `SYSTEM = POLICY + '...'`), the functions whose results become part of
-  it, its literals. A hook field built from its
-  function's parameters, directly or through its locals
-  (`hook_output(classification, basis)`), is fed through threads and queues
-  no data flow follows, so the classifiers that feed it are found by their
-  decision: every controller function that returns a tuple whose
-  decision element is a literal the hook function compares its decision
-  parameter with (`'prescribed'`), widened by the other decisions such
-  functions return (`'not_prescribed'`); the element in the reason's
-  position is model text. Today that finds, among others, the `SYSTEM`
-  constants of the audit and finalization preparers, `command_guidance` and
-  `lookup_guidance`, the deny-reason text in `hook_output` and the reasons
-  of the command, file and audit-validator classifiers;
+  (an assignment, plain, annotated or augmented, an item or attribute
+  assignment on it, a method call on it such as `.append(...)`) is model
+  text, and so is what that statement builds it from, recursively and each
+  constant once: the constants it names, of its module or imported by name
+  (`POLICY` in `SYSTEM = POLICY + '...'`), the functions whose results
+  become part of it, its literals. A hook field built from its function's
+  parameters, directly or through its locals (`hook_output(classification,
+  basis)`), is fed through threads and queues no data flow follows, so the
+  classifiers that feed it are found by their decision: every controller
+  function that returns a tuple whose decision element is a literal the hook
+  function compares its decision parameter with (`'prescribed'`), widened by
+  the other decisions such functions return (`'not_prescribed'`); the
+  element in the reason's position is model text. Today that finds, among
+  others, the `SYSTEM` constants of the audit and finalization preparers,
+  `command_guidance` and `lookup_guidance`, the deny-reason text in
+  `hook_output` and the reasons of the command, file and audit-validator
+  classifiers;
 - a code branch or table counts unless the role is exposed, in Python and in
   a YAML, config, JSON or shell file that no approach hands to a model
   (below);
@@ -556,11 +556,11 @@ owner's approval before anything is billed.
   resolved. A module constant marked as model text is followed through the
   statements at the top of its module that write it, recursively (#4156); a
   write inside a block there (`if`, `try`) or in a function (a `global`
-  assignment, a method call on the constant), a constant reached as a
-  module attribute (`m.C`) or re-exported through another module, and one
-  bound only by unpacking are not followed. A model-facing module outside
-  `MODEL_FACING_MODULES` whose text reaches a model only through another
-  module's variable is classed by its role, not traced.
+  assignment, a method call on the constant), a constant reached as a module
+  or class attribute (`m.C`, `Cls.C`) or re-exported through another module,
+  and one bound only by unpacking are not followed. A model-facing module
+  outside `MODEL_FACING_MODULES` whose text reaches a model only through
+  another module's variable is classed by its role, not traced.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and

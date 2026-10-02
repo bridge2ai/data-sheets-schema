@@ -2136,6 +2136,8 @@ class TestLaunchFlags(unittest.TestCase):
         "import": ("    import argv\n", "`argv` is bound by an import"),
         "closure": ("    def cb():\n        argv.clear()\n", "`argv` is the object of `.clear()`"),
         "nonlocal": ("    def cb():\n        nonlocal argv\n        argv = []\n", "`argv` is declared `nonlocal`"),
+        "nested parameter": ("    def cb(argv):\n        return argv\n", "`argv` is a parameter of a nested function"),
+        "match": ("    match p:\n        case [*argv]:\n            pass\n", "`argv` is bound by a `match` pattern"),
     }
 
     def test_any_other_use_of_the_name_that_holds_the_argv_is_not_shown(self):
@@ -2423,31 +2425,34 @@ class TestConstantText(unittest.TestCase):
         self.assertTrue(hits[0]["model_text_function"].startswith("POLICY (part of SYSTEM"), hits)
 
     #: A controller whose `render_system()` returns a constant built from
-    #: other constants, a function, a constant imported by name, in-place
-    #: writes and a cycle, beside a constant nothing builds the text from.
-    PROMPTS = ("from base import SHARED\n"            # 1
-               "def tail():\n"                        # 2
-               "    return 'Tail text.'\n"            # 3
-               "POLICY = 'Policy text.'\n"            # 4
-               "BODY = POLICY + ' Body text.'\n"      # 5
-               "SYSTEM = BODY + SHARED + tail()\n"    # 6
-               "SYSTEM += ' Appended text.'\n"        # 7
-               "PARTS = ['Part one.']\n"              # 8
-               "PARTS.append('Part two.')\n"          # 9
-               "CYCLE_A = 'Cycle a.'\n"               # 10
-               "CYCLE_B = CYCLE_A + ' b.'\n"          # 11
-               "CYCLE_A = CYCLE_B + ' again.'\n"      # 12
-               "UNRELATED = 'Not model text.'\n"      # 13
-               "def render_system():\n"               # 14
-               "    return SYSTEM + ' '.join(PARTS) + CYCLE_A\n")  # 15
+    #: other constants, a function, a constant imported by name, every kind
+    #: of write (plain, augmented, annotated, an item assignment, a method
+    #: call) and a cycle, beside a constant nothing builds the text from.
+    PROMPTS = ("from base import SHARED\n"                     # 1
+               "def tail():\n"                                 # 2
+               "    return 'Tail text.'\n"                     # 3
+               "POLICY = 'Policy text.'\n"                     # 4
+               "BODY = POLICY + ' Body text.'\n"               # 5
+               "SYSTEM = BODY + SHARED + tail()\n"             # 6
+               "SYSTEM += ' Appended text.'\n"                 # 7
+               "PARTS = ['Part one.']\n"                       # 8
+               "PARTS.append('Part two.')\n"                   # 9
+               "TABLE: dict = {'a': 'Table text.'}\n"          # 10
+               "TABLE['b'] = 'More table text.'\n"             # 11
+               "CYCLE_A = 'Cycle a.'\n"                        # 12
+               "CYCLE_B = CYCLE_A + ' b.'\n"                   # 13
+               "CYCLE_A = CYCLE_B + ' again.'\n"               # 14
+               "UNRELATED = 'Not model text.'\n"               # 15
+               "def render_system():\n"                        # 16
+               "    return SYSTEM + ' '.join(PARTS) + TABLE['b'] + CYCLE_A\n")  # 17
 
     def test_the_constants_a_model_text_constant_is_built_from_are_model_text(self):
         """Every statement at the top of the module that writes a marked
-        constant (`=`, `+=`, a method call on it) is model text, and so is
-        what it is built from: the constants it names, of its module or
-        imported by name, recursively, the functions whose results become
-        part of it; a cycle ends; a constant nothing builds the text from is
-        not marked."""
+        constant (`=`, `+=`, an annotated assignment, an item assignment, a
+        method call on it) is model text, and so is what it is built from:
+        the constants it names, of its module or imported by name,
+        recursively, the functions whose results become part of it; a cycle
+        ends; a constant nothing builds the text from is not marked."""
         with tempfile.TemporaryDirectory() as d:
             root = Path(d).resolve()
             base = root / "notes/exp_4156c"
@@ -2461,7 +2466,7 @@ class TestConstantText(unittest.TestCase):
             spans = scan.model_text_spans(root, parsed, index, controllers)
         self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4156c/prompts.py"]},
                          {(2, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12),
-                          (14, 15)})
+                          (13, 13), (14, 14), (16, 17)})
         self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4156c/base.py"]}, {(1, 1)})
 
 
