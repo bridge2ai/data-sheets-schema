@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from datetime import date, datetime
 import hashlib
 import json
 import math
@@ -28,7 +29,9 @@ BLOCKERS = ("independent_empirical_calibration_3343", "paid_run_authorization",
 
 SYSTEM = """Judge the specified assertion facet against the supplied source documents.
 The target is identified by its exact document pointer, class/slot chain and
-specification. For relationship_edge, judge only whether this entity/reference
+specification. value_yaml preserves native YAML dates/timestamps; the JSON value
+preview tags those temporal values rather than turning them into quoted strings.
+For relationship_edge, judge only whether this entity/reference
 occupies the relationship the containing slot asserts; do not grade all its
 descendant attributes again. For attribute_value, judge this value in its owning
 field's meaning. Context, sibling prose and declarations are claims under test,
@@ -53,12 +56,41 @@ verdict and a nonempty reason, with no other keys. This draft is uncalibrated.
 
 
 def _canonical(value: Any) -> str:
+    def temporal(item):
+        if isinstance(item, datetime):
+            return {"$yaml_type": "datetime", "value": item.isoformat(timespec="microseconds")}
+        if isinstance(item, date):
+            return {"$yaml_type": "date", "value": item.isoformat()}
+        raise ValueError(f"unsupported value type: {type(item).__name__}")
     return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"),
-                      allow_nan=False)
+                      allow_nan=False, default=temporal)
+
+
+def _typed(value: Any) -> list:
+    """Tag every node so native dates, strings and tag-like maps stay distinct."""
+    if value is None:
+        return ["null"]
+    if isinstance(value, bool):
+        return ["bool", value]
+    if isinstance(value, int):
+        return ["int", str(value)]
+    if isinstance(value, float):
+        return ["float", value.hex()]
+    if isinstance(value, datetime):
+        return ["datetime", value.isoformat(timespec="microseconds")]
+    if isinstance(value, date):
+        return ["date", value.isoformat()]
+    if isinstance(value, str):
+        return ["str", value]
+    if isinstance(value, list):
+        return ["list", [_typed(v) for v in value]]
+    if isinstance(value, dict):
+        return ["map", [[k, _typed(v)] for k, v in sorted(value.items())]]
+    raise ValueError(f"unsupported value type: {type(value).__name__}")
 
 
 def _digest(value: Any) -> str:
-    return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
+    return hashlib.sha256(_canonical(_typed(value)).encode("utf-8")).hexdigest()
 
 
 def _token(value: str) -> str:
@@ -131,8 +163,8 @@ def _validate_json(value: Any, *, max_nodes: int, max_depth: int) -> None:
             for child in v.values() if isinstance(v, dict) else v:
                 visit(child, depth + 1)
             active.remove(id(v))
-        elif v is not None and not isinstance(v, (str, bool, int, float)):
-            raise ValueError("record values must have JSON types; quote dates explicitly")
+        elif v is not None and not isinstance(v, (str, bool, int, float, date, datetime)):
+            raise ValueError(f"unsupported record value type: {type(v).__name__}")
         elif isinstance(v, float) and not math.isfinite(v):
             raise ValueError("nonfinite record numbers are unsupported")
     visit(value, 0)
@@ -300,13 +332,15 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 "slot": selected["slot"], "range_class": selected["range_class"],
                 "enums": schema["enums"], "vocabulary": schema["vocabulary"]}
         context = {"containing_entity": {"pointer": owner_pointer, "class": owner_class,
-                                          "value": owner, "sha256": _digest(owner)},
+                                          "value": owner, "sha256": _digest(owner),
+                                          "value_yaml": yaml.safe_dump(owner, sort_keys=True)},
                    "ancestors": ancestors, "declarations": declared,
                    "collection_metadata_inherited": False}
         first = pointer_tokens(pointer)[0]
         payload = {"instrument": INSTRUMENT, "axis": AXIS, "policy": POLICY,
                    "pointer": pointer, "kind": kind, "artifact": artifact,
                    "value": value, "value_sha256": _digest(value),
+                   "value_type": _typed(value)[0], "value_yaml": yaml.safe_dump(value, sort_keys=True),
                    "specification": spec, "context": context,
                    "context_sha256": _digest(context),
                    "fitness": {"basis": "top_level_only", "mapping": "many_to_one",

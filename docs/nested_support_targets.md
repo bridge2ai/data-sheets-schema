@@ -61,8 +61,12 @@ paths are refused. Zero and false are populated. Unknown schema fields, invalid
 container/cardinality shapes, keyed inline maps, unions/conditional constraints,
 type-discriminator transitions, and missing vocabularies are reported as blocked
 paths. URI references are never followed. Non-inline class references retain
-their relationship assertion as a string-valued edge. Duplicate YAML keys,
-non-JSON scalar types, nonfinite numbers and invalid roots are refused. Empty or
+their relationship assertion as a string-valued edge. Native YAML dates and
+timestamps retain typed identities and faithful `value_yaml` rendering, including
+time zones; their JSON previews are tagged. Every node is tagged for value and
+context hashes, so dates, quoted date strings and ordinary tag-shaped mappings
+remain distinct. Input bytes are never rewritten. Duplicate YAML keys,
+unsupported scalar types such as binary values, nonfinite numbers and invalid roots are refused. Empty or
 null fields do not create targets; empty/null members of a populated list are
 reported as blocked.
 

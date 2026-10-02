@@ -1,5 +1,7 @@
 """Neutral offline tests for nested assertion identity, never calibration."""
 import copy
+from datetime import date, datetime, timedelta, timezone
+import hashlib
 import json
 from pathlib import Path
 
@@ -46,6 +48,9 @@ def schema_path(tmp_path):
         },
     }
     source["classes"]["Entity"]["attributes"]["id"]["identifier"] = True
+    source["classes"]["Entity"]["attributes"].update(
+        issued={"range": "date"}, modified={"range": "datetime"})
+    source["classes"]["Dataset"]["attributes"]["dates"] = {"range": "date", "multivalued": True}
     path = tmp_path / "schema.yaml"
     path.write_text(yaml.safe_dump(source, sort_keys=False))
     return path
@@ -188,7 +193,7 @@ def test_schema_snapshot_is_frozen_and_independent_of_later_file_change(schema_p
     assert spec.to_dict()["classes"]
 
 
-@pytest.mark.parametrize("raw", [b'{"name":"A", "name":"B"}', b"1: bad\n", b"name: .nan\n", b"name: 2026-01-01\n", b"- name: A\n"])
+@pytest.mark.parametrize("raw", [b'{"name":"A", "name":"B"}', b"1: bad\n", b"name: .nan\n", b"name: !!binary SGVsbG8=\n", b"- name: A\n"])
 def test_ambiguous_non_json_or_wrong_root_documents_refused(schema, raw):
     with pytest.raises(ValueError):
         inventory_targets(raw, schema, artifact_kind="full")
@@ -220,6 +225,39 @@ def test_public_offline_path_never_initializes_provider_or_opens_network(schema_
     spec = NestedSupportSchema.from_schema(schema_path)
     targets = inventory({"name": "Neutral record"}, spec)
     render_request(targets.targets[0], bundle="A source document", model="explicit-test-model")
+
+
+@pytest.mark.parametrize("value", [date(2026, 1, 2), datetime(2026, 1, 2, 3, 4, 5),
+    datetime(2026, 1, 2, 3, 4, 5, 123456, tzinfo=timezone(timedelta(hours=5, minutes=30)))])
+def test_native_dates_keep_type_and_exact_input_identity_without_rewriting(schema, tmp_path, value):
+    slot = "modified" if isinstance(value, datetime) else "issued"
+    doc = {"creators": [{"name": "A", slot: value}], "dates": [date(2026, 1, 2)]}
+    raw = yaml.safe_dump(doc, sort_keys=False).encode()
+    source = tmp_path / "input.yaml"; source.write_bytes(raw)
+    result = inventory_targets(source.read_bytes(), schema, artifact_kind="full")
+    target = result.target(f"/creators/0/{slot}", kind="attribute_value")
+    payload = target.to_dict()
+    assert payload["artifact"]["input_sha256"] == hashlib.sha256(raw).hexdigest()
+    assert source.read_bytes() == raw
+    assert yaml.safe_load(payload["value_yaml"]) == value
+    assert type(yaml.safe_load(payload["value_yaml"])) is type(value)
+    assert yaml.safe_load(payload["context"]["containing_entity"]["value_yaml"])[slot] == value
+    assert result.target("/dates/0", kind="attribute_value").to_dict()["value_type"] == "date"
+    request = render_request(target, bundle="Source", model="test")
+    rendered = json.loads(request["messages"][0]["content"][1]["text"].split("\n\n", 1)[1])
+    assert yaml.safe_load(rendered["value_yaml"]) == value
+    text = inventory({"creators": [{"name": "A", slot: value.isoformat()}]}, schema)
+    assert text.target(f"/creators/0/{slot}", kind="attribute_value").to_dict()["value_sha256"] != payload["value_sha256"]
+
+
+def test_typed_value_hashes_distinguish_date_string_and_tag_shaped_mapping():
+    from data_sheets_schema.support_targets import _digest
+    day = date(2026, 1, 2)
+    values = [day, day.isoformat(), {"$yaml_type": "date", "value": day.isoformat()},
+              ["date", day.isoformat()], datetime(2026, 1, 2),
+              datetime(2026, 1, 2, tzinfo=timezone.utc), False, 0, 0.0, -0.0]
+    assert len({_digest(value) for value in values}) == len(values)
+    assert _digest({"a": day, "b": [False]}) == _digest({"b": [False], "a": day})
 
 
 def test_real_d4d_specs_have_nested_meaning_without_loading_private_records():
