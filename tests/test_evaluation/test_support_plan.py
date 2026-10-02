@@ -127,6 +127,53 @@ def test_explicit_evaluator_basis_and_family(fixture, model, expected):
     assert manifest["records"][0]["same_family"] == expected
 
 
+def test_default_evaluator_config_is_copied_and_requests_survive_its_removal(fixture, monkeypatch):
+    from data_sheets_schema import evaluation_model
+    root, output = fixture
+    config = root / "judge.yaml"
+    raw = b"version: 1\nmodel: independent-judge\n"
+    config.write_bytes(raw)
+    monkeypatch.setattr(evaluation_model, "CONFIG_PATH", config)
+    manifest = build(fixture)
+    selection = manifest["model"]
+    assert selection["name"] == "independent-judge"
+    assert selection["basis"] == "evaluation_config"
+    pin = selection["configuration"]["artifact"]
+    assert pin == {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+    assert (output / "artifacts" / pin["sha256"]).read_bytes() == raw
+    assert "duplicate_keys.py" in manifest["planning_code"]["files"]
+    config.unlink()
+    for target in manifest["targets"]:
+        assert support_plan.materialize_request(output, target["id"])["model"] == "independent-judge"
+
+
+@pytest.mark.parametrize("remove", [False, True])
+def test_default_config_race_fails_before_publishing(fixture, monkeypatch, remove):
+    from data_sheets_schema import evaluation_model
+    root, output = fixture
+    config = root / "judge.yaml"
+    config.write_text("version: 1\nmodel: initial-judge\n")
+    monkeypatch.setattr(evaluation_model, "CONFIG_PATH", config)
+    def resolve_then_change():
+        selected = evaluation_model.evaluation_model_settings()
+        if remove:
+            config.unlink()
+        else:
+            config.write_text("version: 1\nmodel: later-judge\n")
+        return selected
+    monkeypatch.setattr(support_plan, "evaluation_model_settings", resolve_then_change)
+    with pytest.raises(support_plan.PlanError, match="evaluation config .*after model selection"):
+        build(fixture)
+    assert not output.exists()
+
+
+def test_explicit_plan_model_does_not_read_default_config(fixture, monkeypatch):
+    from data_sheets_schema import evaluation_model
+    monkeypatch.setattr(evaluation_model, "CONFIG_PATH", fixture[0] / "missing-config.yaml")
+    manifest = build(fixture, model="explicit-judge")
+    assert manifest["model"] == {"name": "explicit-judge", "basis": "explicit_override"}
+
+
 def test_saved_request_equals_both_live_judge_boundaries(fixture, monkeypatch):
     root, output = fixture
     manifest = build(fixture, model="judge", max_tokens=417)

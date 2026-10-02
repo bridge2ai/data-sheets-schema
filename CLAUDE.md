@@ -1394,6 +1394,10 @@ evaluator deliberately retains `claude-sonnet-4-5-20250929` (#3326): it is an
 already registered instrument with its own request identity. Changing the shared
 support/fitness setting must not silently change that rubric baseline. A new API
 rubric registration can explicitly supply `LLMEvaluationConfig(model=...)`.
+Offline support plans copy the config bytes that selected their default model
+and refuse a config change during selection. Saved requests remain inspectable
+after the original config changes or disappears. Explicit model overrides do
+not require the default config.
 
 ## D4D LLM-based Evaluation (Quality Assessment)
 
