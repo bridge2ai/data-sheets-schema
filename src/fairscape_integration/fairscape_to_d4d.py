@@ -21,8 +21,9 @@ Features:
   validator's message, and the record is validated again, until it passes
   (#4098). So every record `convert` returns validates, and every value of
   what it reads that the record does not hold is named in `dropped`. That
-  holds whatever the per-slot rules miss, and a record that cannot be made
-  valid by leaving values out is an error, not a record.
+  holds whatever the per-slot rules miss. A record with an error that no
+  value left out can fix, such as a missing `id`, is an error, not a
+  record; there is no other limit (#4126).
 - LinkML validation of output D4D
 """
 
@@ -94,14 +95,6 @@ IEC_SIZE = re.compile(
 SIZE_WITH_UNIT = re.compile(
     r"^\s*\d[\d,]*(?:\.\d+)?\s*"
     r"(?i:[KMGTPEZY]B|(?:kilo|mega|giga|tera|peta|exa|zetta|yotta)bytes?)\s*$")
-
-#: The most passes `_settle` makes, each validating the record and leaving
-#: out what the schema rejects, before it gives up (#4098). A pass leaves
-#: out every value the validator rejects at once, so another pass is needed
-#: only where leaving a value out leaves its object without a required key.
-#: That moves the problem one level up, so a record needs at most one pass
-#: per level of nesting, plus the pass that finds it valid.
-MAX_VALIDATION_PASSES = 20
 
 #: What `_normalize_datetime` makes of a calendar date.
 MIDNIGHT = re.compile(r"^(\d{4}-\d{2}-\d{2})T00:00:00Z$")
@@ -275,15 +268,6 @@ def record_validator(schema: str):
                      validation_plugins=[JsonschemaValidationPlugin(closed=True)])
 
 
-def _record_path(path: Tuple[Any, ...]) -> str:
-    """`creators[0].name` for the path `('creators', 0, 'name')`."""
-    text = ''
-    for part in path:
-        text += f"[{part}]" if isinstance(part, int) else (
-            f".{part}" if text else str(part))
-    return text
-
-
 def _at(record: Any, path: Tuple[Any, ...]) -> Any:
     """The value at `path` in `record`."""
     for part in path:
@@ -301,49 +285,105 @@ def _position(record: Any, path: Tuple[Any, ...]) -> Tuple[int, ...]:
     return tuple(place)
 
 
-def _rejected(results: List[Any]) -> Dict[Tuple[Any, ...], List[str]]:
-    """The values to leave out of a record the validator rejects, each
-    path with the validator's messages about it (#4098).
+#: What `_causes` gives for each value to leave out: the value's path in
+#: the record, the path of the error about it, and the validator's message.
+Cause = Tuple[Tuple[Any, ...], Tuple[Any, ...], str]
 
-    Each error points at a value: one of the wrong type, format, pattern or
-    enum, or an object that lacks a required key, which goes whole. An
-    `additionalProperties` error points at the object, and the keys its
-    class does not declare go by name. A value inside one that goes, goes
-    with it, and its messages are given with that value's. An error that
-    points at the record itself names nothing that can be left out, so the
-    record cannot be made valid this way, and that is a ValueError.
+
+def _causes(error: Any) -> List[Cause]:
+    """The values one jsonschema error says to leave out (#4098, #4125).
+
+    An error points at a value, and that value goes: one of the wrong
+    type, format, pattern or enum goes alone, and an object that lacks a
+    required key goes whole. An `additionalProperties` error points at the
+    object, and the keys its class does not declare go by name.
+
+    An `anyOf` error is about a whole value, and the errors each branch
+    found are its context. LinkML writes `anyOf` where a slot may hold
+    either of two classes, as an item of `parent_datasets` or `resources`
+    may be a Dataset or a DataSubset, and where a single-valued slot may
+    hold its class or nothing (`human_subject_research`, `updates`). Each
+    branch's errors say what would make the value valid under it, so the
+    branch that leaves out the fewest values is taken, the earlier of two
+    that leave out as many. LinkML writes the slot's own class first. The
+    values that branch rejects go, each alone. A branch that rejects the
+    value itself, as the branch of nothing (`{"type": "null"}`) rejects
+    any object, leaves it out whole, and the value goes whole only when
+    every branch does, for the reasons the first branch, the slot's own
+    class, gives.
+
+    LinkML reports the `best_match` of each error, which does not find the
+    value at fault here. It stops at the `anyOf` error when the two
+    branches report the same error, so a reference went whole for one key
+    of the wrong type, and otherwise it descends to one error, so an object
+    slot lost one wrong value a pass (#4125, #4126).
     """
-    found: Dict[Tuple[Any, ...], List[str]] = {}
+    here = tuple(error.absolute_path)
+    if error.validator == 'anyOf' and error.context:
+        branches: Dict[int, List[Any]] = {}
+        for sub in error.context:
+            branches.setdefault(sub.relative_schema_path[0], []).append(sub)
+        options = [[cause for sub in branches[n] for cause in _causes(sub)]
+                   for n in sorted(branches)]
+        parts = [causes for causes in options
+                 if all(value != here for value, _, _ in causes)]
+        if parts:
+            return min(parts, key=lambda causes: len({value for value, _, _ in causes}))
+        return options[0]
+    if (error.validator == 'additionalProperties'
+            and isinstance(error.instance, dict)
+            and isinstance(error.schema, dict)):
+        declared = error.schema.get('properties', {})
+        patterns = error.schema.get('patternProperties', {})
+        keys = [key for key in error.instance if key not in declared
+                and not any(re.search(p, key) for p in patterns)]
+        if keys:
+            return [(here + (key,), here, error.message) for key in keys]
+    return [(here, here, error.message)]
+
+
+def _rejected(results: List[Any]
+              ) -> Dict[Tuple[Any, ...], List[Tuple[Tuple[Any, ...], str]]]:
+    """The values to leave out of a record the validator rejects, each
+    path with the errors about it, as (the error's path, its message)
+    (#4098).
+
+    LinkML reports one result for each error the JSON Schema check finds,
+    and its `source` is that error's `best_match`, which is not always the
+    value at fault. So the error it came from is read whole (`_causes`,
+    #4125).
+    A value inside one that goes, goes with it, and its errors are given
+    with that value's. An error that points at the record itself names
+    nothing that can be left out, so the record cannot be made valid this
+    way, and that is a ValueError.
+    """
+    found: Dict[Tuple[Any, ...], List[Tuple[Tuple[Any, ...], str]]] = {}
+    read: List[Any] = []
     for result in results:
         error = result.source
         if error is None:
             raise ValueError(f"a validation error with no location: {result.message}")
-        path = tuple(error.absolute_path)
-        targets = [path]
-        if (error.validator == 'additionalProperties'
-                and isinstance(error.instance, dict)
-                and isinstance(error.schema, dict)):
-            declared = error.schema.get('properties', {})
-            patterns = error.schema.get('patternProperties', {})
-            targets = [path + (key,) for key in error.instance
-                       if key not in declared
-                       and not any(re.search(p, key) for p in patterns)] or targets
-        for target in targets:
-            if not target:
+        while error.parent is not None:
+            error = error.parent
+        if any(error is other for other in read):
+            continue
+        read.append(error)
+        for value, at, message in _causes(error):
+            if not value:
                 raise ValueError(
                     "the record cannot be made valid by leaving values out: "
-                    f"{result.message}")
-            messages = found.setdefault(target, [])
-            if result.message not in messages:
-                messages.append(result.message)
-    outer: Dict[Tuple[Any, ...], List[str]] = {}
+                    f"{message}")
+            errors = found.setdefault(value, [])
+            if (at, message) not in errors:
+                errors.append((at, message))
+    outer: Dict[Tuple[Any, ...], List[Tuple[Tuple[Any, ...], str]]] = {}
     for path in sorted(found, key=len):
         holder = next((path[:n] for n in range(1, len(path))
                        if path[:n] in outer), None)
         if holder is None:
             outer[path] = list(found[path])
         else:
-            outer[holder] += [m for m in found[path] if m not in outer[holder]]
+            outer[holder] += [e for e in found[path] if e not in outer[holder]]
     return outer
 
 
@@ -382,6 +422,20 @@ class FairscapeToD4DConverter:
         #: path inside an object this converter built. The reason names the
         #: slot, so a value one slot could not hold may still be in another:
         #: an `identifier` written as the `id` is not a DOI for `doi`.
+        #:
+        #: A path numbers the items of a list the crate's way (#4126): an
+        #: object is named by its position in the list the converter read
+        #: for that slot, before any item was shaped or left out, so
+        #: `creators[1]` is the object made from the crate's second
+        #: `author`. That is the one numbering every item has, an item that
+        #: yields no object and one validation leaves out included, and no
+        #: validation pass changes it. Where the converter makes the list
+        #: itself, the position is in that list: the names in an author
+        #: text, the one timeframe a start and an end date make, the file
+        #: collections in `@graph` order, and, for a slot two properties
+        #: fill, the items of the property read first, then those of the
+        #: other that are not among them (`_place`). A text or a number in
+        #: a list is named by its value in the reason, not by a position.
         self.dropped: List[Tuple[str, str]] = []
         self._view = None
         self._slots: Dict[str, Dict[str, Any]] = {}
@@ -390,6 +444,14 @@ class FairscapeToD4DConverter:
         #: parts already written as file collections, for `_parts`.
         self._described: Dict[str, Dict[str, Any]] = {}
         self._collected: set = set()
+        #: Each object `_shape_objects` built for a list, by `id()`, with
+        #: its position in the list it was read from, for `_named`. The
+        #: object is kept, so its `id()` names no other while it is here.
+        self._read_at: Dict[int, Tuple[Dict[str, Any], int]] = {}
+        #: `dropped` entries for a value a top-level single-valued slot did
+        #: not take, by index, with the slot: once the record is valid,
+        #: `_settle` says which value the slot holds instead (#4125).
+        self._instead: List[Tuple[int, str]] = []
 
     def convert(self, rocrate_input: Any) -> Dict[str, Any]:
         """
@@ -403,10 +465,13 @@ class FairscapeToD4DConverter:
 
         Raises:
             ValueError: the crate has no root data entity, or the record
-                cannot be made valid by leaving values out (`_settle`)
+                has an error no value left out can fix, such as a missing
+                `id` (`_settle`)
         """
         self.dropped = []
         self._minted = {}
+        self._read_at = {}
+        self._instead = []
 
         # Load RO-Crate data
         if isinstance(rocrate_input, dict):
@@ -703,13 +768,15 @@ class FairscapeToD4DConverter:
         value) pairs, that `_shape` can fit to `slot` (#4098).
 
         Each candidate that cannot be shaped is recorded in `dropped` with
-        the reason, and that entry says which value the slot holds instead.
-        The candidates after the one placed wait in `rivals[key]`: `_settle`
-        tries them if the schema rejects the value placed, and records the
-        rest as superseded. Each part of a value its slot does not hold is
-        recorded as before (#4073). False when no candidate fits.
+        the reason. For a top-level slot, `_settle` adds to that entry which
+        value the slot holds instead, once the record is valid, and only if
+        the slot then holds one: the schema may yet reject the value placed
+        here, and every value after it (#4125). The candidates after the one
+        placed wait in `rivals[key]`: `_settle` tries them if the schema
+        rejects the value placed, and records the rest as superseded. Each
+        part of a value its slot does not hold is recorded as before
+        (#4073). False when no candidate fits.
         """
-        refused: List[int] = []
         while candidates:
             source, value = candidates.pop(0)
             if value in (None, '', [], {}):
@@ -721,22 +788,32 @@ class FairscapeToD4DConverter:
                     f"{_preview(part)} ({reason})")))
             if shaped is None:
                 self.dropped.append((source, f"not placed in `{key}`: {why}"))
-                refused.append(len(self.dropped) - 1)
+                if rivals is not None:
+                    self._instead.append((len(self.dropped) - 1, key))
                 continue
             record[key], origin[key] = shaped, source
             if candidates and rivals is not None:
                 rivals[key] = candidates
-            self._say_instead(refused, key, source)
             return True
         return False
 
-    def _say_instead(self, entries: List[int], key: str, source: str) -> None:
-        """Add to each of these `dropped` entries which crate property's
-        value `key` holds in place of the one it names (#4098)."""
-        for n in entries:
-            src, reason = self.dropped[n]
-            self.dropped[n] = (src, f"{reason}; `{key}` holds the value of "
-                                    f"{source} instead")
+    def _say_instead(self, record: Dict[str, Any],
+                     origin: Dict[str, str]) -> None:
+        """Add to each `dropped` entry for a value a single-valued slot did
+        not take which crate property's value the slot holds instead, from
+        the record as `_settle` returns it (#4125).
+
+        An entry for a slot that ends empty says nothing more: the values
+        it might have held are each recorded as left out. Until #4125 the
+        clause was written as soon as a value was placed, so it could name
+        a value the schema then rejected, or a slot that ended empty.
+        """
+        for n, key in self._instead:
+            if key in record:
+                source, reason = self.dropped[n]
+                self.dropped[n] = (source, f"{reason}; `{key}` holds the value "
+                                           f"of {origin[key]} instead")
+        self._instead = []
 
     def _settle(self, record: Dict[str, Any], origin: Dict[str, str],
                 rivals: Dict[str, List[Tuple[str, Any]]]) -> Dict[str, Any]:
@@ -745,60 +822,94 @@ class FairscapeToD4DConverter:
         The record is validated with `record_validator`, the check the
         script runs on the file it writes. Each value the validator rejects
         is left out and recorded in `dropped` with the validator's message
-        (`_leave_out`), and the record is validated again. A single-valued
-        slot left empty takes the next value waiting for it, if any can be
-        shaped (`_take`). The per-slot rules in `_shape` already fit most
-        values. This pass makes the record valid however many of them a
-        crate gets past, and makes every value it leaves out a `dropped`
-        entry: a date-time `_coerce` leaves as written (`11/17/25`), a count
-        written as text, an object that lacks a required key.
+        (`_rejected`, `_leave_out`), and the record is validated again. A
+        single-valued slot left empty takes the next value waiting for it,
+        if any can be shaped (`_take`). The per-slot rules in `_shape`
+        already fit most values. This makes every value the schema still
+        rejects a `dropped` entry: a date-time `_coerce` leaves as written
+        (`11/17/25`), a count written as text, an object that lacks a
+        required key.
 
-        After `MAX_VALIDATION_PASSES` passes, a record that still fails is a
-        ValueError, as is an error that names no value to leave out (an
-        `id` the record lacks). The values still waiting for a slot that
-        holds a value are recorded as superseded by it.
+        The passes end, and need no limit (#4126). Each one finds the
+        record valid, or leaves out at least one value, or raises: an error
+        that names no value to leave out (an `id` the record lacks) is a
+        ValueError. A value left out does not come back, and each value
+        waiting for a slot is tried once. So there are no more passes than
+        the values the record holds, nested ones included, and the values
+        waiting for its slots, plus the one that finds the record valid.
+        Until #4126 the passes stopped at 20. An object slot then lost one
+        wrong value a pass, and a slot still tries its waiting values one a
+        pass, so 21 of either made an error of a crate that leaving them
+        out makes valid.
+
+        Once the record is valid, the values still waiting for a slot that
+        holds a value are recorded as superseded by it, and each entry for
+        a value a slot did not take says which value it holds instead
+        (`_say_instead`).
         """
         validator = record_validator(str(resource_path(FULL_SCHEMA)))
         order = list(record)
-        for _ in range(MAX_VALIDATION_PASSES):
+        while True:
             results = list(validator.iter_results(record, TARGET_CLASS))
             if not results:
                 break
             entries = self._leave_out(record, origin, _rejected(results))
             for key in [key for key in rivals if key not in record]:
-                if self._take(record, origin, key,
-                              self._class_slots(TARGET_CLASS)[key],
-                              rivals.pop(key), '', rivals):
-                    self._say_instead(entries.get(key, []), key, origin[key])
+                self._instead += [(n, key) for n in entries.get(key, [])]
+                self._take(record, origin, key,
+                           self._class_slots(TARGET_CLASS)[key],
+                           rivals.pop(key), '', rivals)
             record = {key: record[key]
                       for key in sorted(record, key=order.index)}
-        else:
-            problems = [result.message for result in
-                        validator.iter_results(record, TARGET_CLASS)]
-            if problems:
-                passes = MAX_VALIDATION_PASSES
-                raise ValueError(
-                    "the record still fails validation after leaving out what "
-                    f"the schema rejected in {passes} "
-                    f"pass{'' if passes == 1 else 'es'}: {'; '.join(problems)}")
         for key, waiting in rivals.items():
             for source, _ in waiting:
                 self.dropped.append((source, (
                     f"superseded by {origin[key]}, which also maps to `{key}`")))
+        self._say_instead(record, origin)
         return record
 
+    def _named(self, value: Any, path: Tuple[Any, ...]) -> str:
+        """`path`, from `value` down, as `dropped` names it: `creators[1].name`.
+
+        An object in a list is numbered by its position in the list it was
+        read from (`_read_at`), not by where it now is in the record, which
+        changes as earlier items are left out (#4126). An object this
+        converter did not build keeps its place in the record. A text or a
+        number in a list is not numbered: the reason quotes it.
+        """
+        text = ''
+        for part in path:
+            if isinstance(part, int):
+                held = value[part]
+                if isinstance(held, dict):
+                    read = self._read_at.get(id(held))
+                    text += f"[{read[1] if read and read[0] is held else part}]"
+            else:
+                text += f".{part}" if text else str(part)
+            value = value[part]
+        return text
+
     def _leave_out(self, record: Dict[str, Any], origin: Dict[str, str],
-                   rejected: Dict[Tuple[Any, ...], List[str]]
+                   rejected: Dict[Tuple[Any, ...],
+                                  List[Tuple[Tuple[Any, ...], str]]]
                    ) -> Dict[str, List[int]]:
         """Move each value `rejected` names out of `record` and into
         `dropped`, with the validator's messages as the reason (#4098).
 
         A value of a top-level slot, or an item of one, is named by the
         crate property the slot was filled from, as `_fit` names it. A value
-        inside an object is named by its path in the record, as `_object`
-        names it. An object or list left empty is removed, since the record
-        writes no empty value, and holds nothing left to report. Returns the
-        indexes of the `dropped` entries made, by top-level slot.
+        inside an object is named by its path, as `_object` names it: an
+        object in a list by its position in the list it was read from
+        (`_named`), whichever pass leaves the value out (#4126).
+
+        The reason gives jsonschema's message for each error. An error
+        about a value inside the one left out says where, below it. LinkML
+        adds a pointer into the record as that pass validated it, which
+        numbers the items of a list otherwise, and is not repeated (#4126).
+
+        An object or list left empty is removed, since the record writes no
+        empty value, and holds nothing left to report. Returns the indexes
+        of the `dropped` entries made, by top-level slot.
         """
         order = sorted(rejected, key=lambda path: _position(record, path))
         entries: Dict[str, List[int]] = {}
@@ -809,11 +920,16 @@ class FairscapeToD4DConverter:
             if len(path) == 1 or (len(path) == 2 and item):
                 source = origin.get(path[0]) or path[0]
             else:
-                source = _record_path(path[:-1] if item else path)
+                source = self._named(record, path[:-1] if item else path)
+            value = _at(record, path)
+            said = []
+            for at, message in rejected[path]:
+                below = self._named(value, at[len(path):])
+                said.append(f"{message} in `{below}`" if below else message)
             self.dropped.append((source, (
                 f"{'part of the value ' if part else ''}not placed in "
-                f"`{key}`: {_preview(_at(record, path))} (the schema rejects "
-                f"it: {'; '.join(rejected[path])})")))
+                f"`{key}`: {_preview(value)} (the schema rejects "
+                f"it: {'; '.join(said)})")))
             entries.setdefault(path[0], []).append(len(self.dropped) - 1)
         # Last first, so no index a later deletion uses has moved
         for path in reversed(order):
@@ -954,21 +1070,32 @@ class FairscapeToD4DConverter:
         placed. Each part that is left out is recorded in `dropped` by
         `_object` or `_fit`. Those name the path inside the object, so
         `left` is always empty here.
+
+        An item of a multivalued slot is named by its position in the list
+        read, `None` items counted, and its object is kept with that
+        position (`_read_at`), so that `_leave_out` names it the same way
+        in every pass, however many items before it yield nothing or are
+        left out (#4126).
         """
-        items = [item for item in _as_list(value) if item is not None]
-        if not slot.multivalued and len(items) > 1:
-            if not all(_is_text(item) for item in items):
+        items = _as_list(value)
+        present = [item for item in items if item is not None]
+        if not slot.multivalued and len(present) > 1:
+            if not all(_is_text(item) for item in present):
                 return None, (
-                    f"{len(items)} values for a single-valued slot, not all "
+                    f"{len(present)} values for a single-valued slot, not all "
                     f"of them text: text is joined into one {cls}, and a "
                     "reference or an object is not"), []
-            items = ['; '.join(str(item) for item in items)]
+            items = ['; '.join(str(item) for item in present)]
         built = []
         for n, item in enumerate(items):
+            if item is None:
+                continue
             path = f"{where}[{n}]." if slot.multivalued else f"{where}."
             obj = self._object(item, cls, slot, path)
             if obj:
                 built.append(obj)
+                if slot.multivalued:
+                    self._read_at[id(obj)] = (obj, n)
         if not built:
             return None, f"no part of it could be placed in a {cls}", []
         return (built if slot.multivalued else built[0]), '', []
@@ -1167,7 +1294,8 @@ class FairscapeToD4DConverter:
         # isPartOf → parent_datasets, the Dataset slot whose slot_uri is
         # schema:isPartOf; there is no `is_part_of` slot (#3969). What the
         # crate names there is not checked to be a dataset (#4047). Each
-        # reference's keys are fitted to Dataset or recorded (#4098).
+        # reference's keys are fitted to Dataset or recorded (#4098), and
+        # text, which is not a reference, is recorded (#4125).
         if 'isPartOf' in dataset:
             found.append(('isPartOf', 'parent_datasets',
                           self._references('isPartOf',
@@ -1206,9 +1334,15 @@ class FairscapeToD4DConverter:
 
         Until #4074 every member was written as a Dataset, whatever its
         type.
+
+        The list keeps each part at its position in the crate's `hasPart`,
+        with None for a member that is not written to `resources`, so a
+        `dropped` path counts the crate's members (#4126). None when no
+        member is written there.
         """
-        parts = []
+        parts: List[Optional[Dict[str, Any]]] = []
         for item in _as_list(has_part):
+            parts.append(None)
             ref = _ref_id(item)
             if ref is None:
                 self.dropped.append(('hasPart', f"an entry with no `@id`: {_preview(item)}"))
@@ -1236,8 +1370,8 @@ class FairscapeToD4DConverter:
             else:
                 # Only a reference that types itself reaches here: one the
                 # `@graph` describes as a dataset is a file collection.
-                parts.append(item)
-        return parts
+                parts[-1] = item
+        return parts if any(part is not None for part in parts) else None
 
     def _keys_not_taken(self, item: Any, ref: str) -> None:
         """Record each key a `hasPart` reference states that the member's
@@ -1261,24 +1395,48 @@ class FairscapeToD4DConverter:
                 "states for it, is not what the `@graph`'s entity for it "
                 "states, and its file collection is made from that entity")))
 
-    def _references(self, prop: str, items: List[Any]) -> List[Dict[str, Any]]:
+    def _references(self, prop: str, items: List[Any]
+                    ) -> Optional[List[Optional[Dict[str, Any]]]]:
         """The crate references `items`, for a Dataset-ranged slot (#4098).
 
         A reference keeps its `@id` as the object's `id`, an ARK as its
         resolver URL, and `_object` fits its other keys to Dataset: a key
         the class declares, such as `name` or `description`, is kept, and
         any other is recorded in `dropped`. Until #4098 only the `@id` was
-        kept, and every other key was lost without a word. An entry with no
-        `@id` is recorded in `dropped`.
+        kept, and every other key was lost without a word.
+
+        An entry with no `@id` is recorded in `dropped`, and so is text
+        (#4125). JSON-LD reads a string under `isPartOf` as text, not as a
+        reference, unless the context types the property `@id`, and
+        RO-Crate's context does not; `{"@value": …}` is the same text
+        written out, and was already recorded. Text names no dataset the
+        record can point at. It was written as the reference's `id`, so a
+        name (`Cell Maps for AI project`) went where an identifier goes, and
+        the record still validated. This converter reads a crate as
+        RO-Crate's context writes it, and does not apply a crate's own
+        `@context`. A `hasPart` member written as text is looked up among
+        the `@graph`'s entities instead (`_parts`), and is never written as
+        an `id` itself.
+
+        The list keeps each reference at its position in the crate's list,
+        with None for an entry that is not one, so a `dropped` path counts
+        the crate's entries (#4126). None when no entry is a reference.
         """
-        references = []
+        references: List[Optional[Dict[str, Any]]] = []
         for item in items:
-            ref = _ref_id(item)
-            if ref is not None:
-                references.append(item if isinstance(item, dict) else {'@id': ref})
+            if isinstance(item, dict) and _ref_id(item) is not None:
+                references.append(item)
+                continue
+            references.append(None)
+            if isinstance(item, str) and item.strip():
+                self.dropped.append((prop, (
+                    f"text, not a reference: {_preview(item)} (under "
+                    f"RO-Crate's context JSON-LD reads text under `{prop}` as "
+                    "a literal, which names no dataset the record can point "
+                    "at; a reference is written `{\"@id\": …}`)")))
             else:
                 self.dropped.append((prop, f"an entry with no `@id`: {_preview(item)}"))
-        return references
+        return references if any(ref is not None for ref in references) else None
 
     def _map_evi_properties(self, dataset: Dict) -> List[Tuple[str, str, Any]]:
         """Map EVI (Evidence) namespace properties, as (crate property, slot, value).

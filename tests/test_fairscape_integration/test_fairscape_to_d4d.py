@@ -13,6 +13,10 @@ Python repr. #4074: `resources` holds only hasPart members the crate types
 as datasets, and `total_size_bytes` only a byte count. #4098: the record is
 validated before it is returned, and each value the schema rejects is left
 out and recorded with the validator's message, so every record validates.
+#4125: the value at fault goes alone where a slot may hold either of two
+classes, text in `isPartOf` is not a reference, and "holds the value of X
+instead" is said of the record as returned. #4126: the passes have no
+limit, and a `dropped` path numbers an object by its place in the crate.
 """
 
 import contextlib
@@ -383,9 +387,48 @@ class TestSharedSlots(unittest.TestCase):
         self.assertEqual(list(record), ["id", "title", "issued", "page"])
         self.assertEqual(dropped, [("datePublished", (
             "not placed in `issued`: June 2026 (the schema rejects it: 'June "
-            "2026' is not a 'date-time' in /issued); `issued` holds the value "
-            "of additionalProperty[Issued] instead"))])
+            "2026' is not a 'date-time'); `issued` holds the value of "
+            "additionalProperty[Issued] instead"))])
         self.assertEqual(problems(record), [])
+
+    def test_the_instead_clause_names_the_value_the_slot_ends_with(self):
+        """Written once the record is valid (#4125). The next value can be
+        rejected too, and then the slot is empty and no entry says what it
+        holds; or a later value can replace it, and every entry names the
+        one the slot ends with. The clause used to be written when a value
+        was placed, before the schema had seen it."""
+        for root, slot, first, second, key in (
+                ({"license": {"@id": "https://spdx.org/licenses/MIT"},
+                  "additionalProperty": [property_value("License", 5)]},
+                 "license", "license", "additionalProperty[License]", "license"),
+                ({"datePublished": {"@value": "2026"},
+                  "additionalProperty": [property_value("Issued", "June 2026")]},
+                 "issued", "datePublished", "additionalProperty[Issued]", "issued"),
+                ({"d4d:humanSubject": True, "additionalProperty": [
+                    property_value("Human Subject", {"name": 5})]},
+                 "human_subject_research", "d4d:humanSubject",
+                 "human_subject_research.name", "name")):
+            with self.subTest(slot=slot):
+                record, dropped = converted(crate(root))
+                self.assertNotIn(slot, record)
+                self.assertEqual(problems(record), [])
+                self.assertIn(f"not placed in `{slot}`", reasons(dropped, first))
+                self.assertIn(f"not placed in `{key}`", reasons(dropped, second))
+                self.assertNotIn("instead", str(dropped))
+        record, dropped = converted(crate({
+            "datePublished": "June 2026",
+            "additionalProperty": [property_value("Issued", "2026-06-30"),
+                                   property_value("issued", "July 2026")]}))
+        self.assertEqual(record["issued"], "2026-06-30T00:00:00Z")
+        self.assertEqual(dropped, [
+            ("datePublished", (
+                "not placed in `issued`: June 2026 (the schema rejects it: "
+                "'June 2026' is not a 'date-time'); `issued` holds the value "
+                "of additionalProperty[Issued] instead")),
+            ("additionalProperty[issued]", (
+                "not placed in `issued`: July 2026 (the schema rejects it: "
+                "'July 2026' is not a 'date-time'); `issued` holds the value "
+                "of additionalProperty[Issued] instead"))])
 
     def test_the_same_value_from_two_properties_is_not_dropped(self):
         """Nothing is left out when two properties state one value, and a
@@ -491,6 +534,32 @@ def converted(crate_or_path):
 def reasons(dropped, source):
     """Every reason `dropped` gives for `source`, joined."""
     return " | ".join(reason for src, reason in dropped if src == source)
+
+
+def validated(crate_json):
+    """`(record, dropped, validations)`: one conversion, and how many times
+    `_settle` validated the record on the way."""
+    real = fairscape_to_d4d.record_validator
+    count = [0]
+
+    def counting(schema):
+        validator = real(schema)
+
+        class Counting:
+            def iter_results(self, *args):
+                count[0] += 1
+                return validator.iter_results(*args)
+
+        return Counting()
+
+    with mock.patch.object(fairscape_to_d4d, "record_validator", counting):
+        record, dropped = converted(crate_json)
+    return record, dropped, count[0]
+
+
+def property_value(name, value):
+    """An `additionalProperty` entry."""
+    return {"@type": "PropertyValue", "name": name, "value": value}
 
 
 ROCRATE = ["Dataset", "https://w3id.org/EVI#ROCrate"]
@@ -762,6 +831,32 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                          [{"id": "https://n2t.net/ark:59852/project-y"}])
         self.assertEqual(dropped, [("isPartOf", (
             'an entry with no `@id`: {"name": "Project X"}'))])
+
+    def test_text_in_is_part_of_is_not_a_reference(self):
+        """JSON-LD reads a string under `isPartOf` as text, as it reads
+        `{"@value": …}`: it names no dataset, and is recorded, not written
+        as a parent's `id` (#4125)."""
+        def said(text):
+            return ("isPartOf", (
+                f"text, not a reference: {text} (under RO-Crate's context "
+                "JSON-LD reads text under `isPartOf` as a literal, which names "
+                "no dataset the record can point at; a reference is written "
+                '`{"@id": …}`)'))
+        names = ["Cell Maps for AI project", "University of California San Diego"]
+        for value in (names[0], names):
+            with self.subTest(value=value):
+                record, dropped = converted(crate({"isPartOf": value}))
+                self.assertNotIn("parent_datasets", record)
+                self.assertEqual(dropped, [said(name) for name in
+                                           ([value] if isinstance(value, str)
+                                            else value)])
+        record, dropped = converted(crate({"isPartOf": [
+            names[0], {"@value": names[1]}, {"@id": "ark:59852/project-y"}]}))
+        self.assertEqual(record["parent_datasets"],
+                         [{"id": "https://n2t.net/ark:59852/project-y"}])
+        self.assertEqual(dropped, [said(names[0]), ("isPartOf", (
+            f'an entry with no `@id`: {{"@value": "{names[1]}"}}'))])
+        self.assertEqual(problems(record), [])
 
     def test_a_single_valued_identifier_slot_keeps_one_identifier(self):
         record, dropped = converted(crate(
@@ -1044,7 +1139,7 @@ class TestTheRecordValidates(unittest.TestCase):
         _, dropped = self.assert_left_out(
             crate_json, "issued", "datePublished",
             "not placed in `issued`: 11/17/25 (the schema rejects it: "
-            "'11/17/25' is not a 'date-time' in /issued)")
+            "'11/17/25' is not a 'date-time')")
         self.assertEqual({source for source, _ in dropped},
                          {"contentSize", "datePublished"})
 
@@ -1057,7 +1152,7 @@ class TestTheRecordValidates(unittest.TestCase):
                 self.assert_left_out(
                     crate({key: value}), slot, key,
                     f"not placed in `{slot}`: {value} (the schema rejects it: "
-                    f"'{value}' is not a 'date-time' in /{slot})")
+                    f"'{value}' is not a 'date-time')")
 
     def test_a_one_item_list_is_read_as_its_item(self):
         """For a single-valued slot, before the date in it is read: as
@@ -1086,7 +1181,7 @@ class TestTheRecordValidates(unittest.TestCase):
                          [{"id": "#raw", "name": "Raw files"}])
         self.assertEqual(dropped, [("file_collections[0].file_count", (
             "not placed in `file_count`: 200 (the schema rejects it: '200' is "
-            "not of type 'integer', 'null' in /file_collections/0/file_count)"))])
+            "not of type 'integer', 'null')"))])
         self.assertEqual(problems(record), [])
 
     def test_an_object_without_a_required_key_is_left_out_whole(self):
@@ -1094,8 +1189,7 @@ class TestTheRecordValidates(unittest.TestCase):
             crate({"rai:dataCollectionRawData": {"@id": "#raw"}}),
             "raw_data_sources", "rai:dataCollectionRawData",
             'not placed in `raw_data_sources`: {"id": "#raw"} (the schema '
-            "rejects it: 'source_description' is a required property in "
-            "/raw_data_sources/0)")
+            "rejects it: 'source_description' is a required property)")
         # Beside one its class can hold, it is a part of the value
         record, dropped = converted(crate({"rai:dataCollectionRawData": [
             {"@id": "#raw"}, "Survey responses."]}))
@@ -1108,53 +1202,47 @@ class TestTheRecordValidates(unittest.TestCase):
 
     def test_leaving_a_required_value_out_leaves_its_object_out(self):
         """The schema rejects the object's required key, and then the object
-        that lacks it, a pass later."""
+        that lacks it, a pass later: three validations, the last of them
+        the one that finds the record valid."""
         crate_json = crate({"rai:dataCollectionRawData": [
             {"@id": "#raw", "source_description": 5}]})
-        record, dropped = converted(crate_json)
+        record, dropped, passes = validated(crate_json)
         self.assertNotIn("raw_data_sources", record)
         self.assertEqual(dropped, [
             ("raw_data_sources[0].source_description", (
                 "not placed in `source_description`: 5 (the schema rejects it: "
-                "5 is not of type 'string' in "
-                "/raw_data_sources/0/source_description)")),
+                "5 is not of type 'string')")),
             ("rai:dataCollectionRawData", (
                 'not placed in `raw_data_sources`: {"id": "#raw"} (the schema '
-                "rejects it: 'source_description' is a required property in "
-                "/raw_data_sources/0)"))])
+                "rejects it: 'source_description' is a required property)"))])
         self.assertEqual(problems(record), [])
-        # With one pass the record is still invalid, and that is an error
-        with mock.patch.object(fairscape_to_d4d, "MAX_VALIDATION_PASSES", 1):
-            with self.assertRaisesRegex(
-                    ValueError, "still fails validation after leaving out what "
-                                "the schema rejected in 1 pass: 'source_desc"):
-                converted(crate_json)
+        self.assertEqual(passes, 3)
 
     def test_a_value_inside_one_left_out_goes_with_it(self):
         """The object lacks its required key, and its `id` is not text: it
-        is left out once, with both messages."""
+        is left out once, with both messages, the second saying where in
+        the object it is (#4126)."""
         record, dropped = converted(crate(
             {"rai:dataCollectionRawData": [{"@id": "#raw", "id": 5}]}))
         self.assertNotIn("raw_data_sources", record)
         self.assertEqual(reasons(dropped, "rai:dataCollectionRawData"), (
             'not placed in `raw_data_sources`: {"id": 5} (the schema rejects '
-            "it: 'source_description' is a required property in "
-            "/raw_data_sources/0; 5 is not of type 'string', 'null' in "
-            "/raw_data_sources/0/id)"))
+            "it: 'source_description' is a required property; 5 is not of "
+            "type 'string', 'null' in `id`)"))
         self.assertEqual([source for source, _ in dropped],
                          ["raw_data_sources[0].@id", "rai:dataCollectionRawData"])
 
     def test_each_rejected_item_of_a_list_is_named(self):
-        """Left out last first, so each is the item named."""
+        """Left out last first, so each is the item named; the reason
+        quotes the item, which is text or a number, and gives no position
+        (#4126)."""
         record, dropped = converted(crate({"keywords": [7, "a", 8]}))
         self.assertEqual(record["keywords"], ["a"])
         self.assertEqual(dropped, [
             ("keywords", "part of the value not placed in `keywords`: 7 (the "
-                         "schema rejects it: 7 is not of type 'string' in "
-                         "/keywords/0)"),
+                         "schema rejects it: 7 is not of type 'string')"),
             ("keywords", "part of the value not placed in `keywords`: 8 (the "
-                         "schema rejects it: 8 is not of type 'string' in "
-                         "/keywords/2)")])
+                         "schema rejects it: 8 is not of type 'string')")])
 
     def test_a_key_its_class_does_not_declare_is_left_out_by_name(self):
         """`_fit` keeps only declared keys, so this reaches `_settle` only
@@ -1170,11 +1258,10 @@ class TestTheRecordValidates(unittest.TestCase):
         self.assertEqual(converter.dropped, [
             ("alternateName", (
                 "not placed in `alias`: C (the schema rejects it: Additional "
-                "properties are not allowed ('alias' was unexpected) in /)")),
+                "properties are not allowed ('alias' was unexpected))")),
             ("creators[0].nickname", (
                 "not placed in `nickname`: B (the schema rejects it: Additional "
-                "properties are not allowed ('nickname' was unexpected) in "
-                "/creators/0)"))])
+                "properties are not allowed ('nickname' was unexpected))"))])
 
     def test_a_record_no_value_left_out_can_make_valid_is_an_error(self):
         """A root with no `@id` and no `identifier` gives no `id`, which the
@@ -1224,6 +1311,181 @@ class TestTheRecordValidates(unittest.TestCase):
         # does not accept it
         self.assertIn("'2026-13-45' is not a 'date'",
                       reasons(dropped, "collection_timeframes[0].end_date"))
+
+    def test_a_wrong_value_in_a_reference_goes_alone(self):
+        """An item of `parent_datasets` or `resources` may be a Dataset or a
+        DataSubset, and the validator reports one error for the whole item.
+        The value at fault goes, named by its key, and the reference stays
+        (#4125). The whole reference used to go, under a reason that named
+        no key."""
+        record, dropped = converted(crate({
+            "isPartOf": [{"@id": "ark:59852/project-x", "name": "Project X",
+                          "version": 2, "keywords": ["a", 7]}],
+            "hasPart": [{"@id": "ark:59853/rocrate-y", "@type": "Dataset",
+                         "name": "Y", "license": 5}]}))
+        self.assertEqual(record["parent_datasets"], [{
+            "id": "https://n2t.net/ark:59852/project-x", "name": "Project X",
+            "keywords": ["a"]}])
+        self.assertEqual(record["resources"], [{
+            "id": "https://n2t.net/ark:59853/rocrate-y", "name": "Y"}])
+        self.assertEqual(dropped, [
+            ("resources[0].license", (
+                "not placed in `license`: 5 (the schema rejects it: 5 is not "
+                "of type 'string', 'null')")),
+            ("parent_datasets[0].version", (
+                "not placed in `version`: 2 (the schema rejects it: 2 is not "
+                "of type 'string', 'null')")),
+            ("parent_datasets[0].keywords", (
+                "part of the value not placed in `keywords`: 7 (the schema "
+                "rejects it: 7 is not of type 'string')"))])
+        self.assertEqual(problems(record), [])
+
+    def test_the_class_that_needs_the_fewest_values_left_out_is_taken(self):
+        """As a Dataset this parent loses `is_data_split` and `version`; as
+        a DataSubset, which declares `is_data_split`, only `version`."""
+        converter = FairscapeToD4DConverter()
+        record = converter._settle(
+            {"id": "./", "parent_datasets": [
+                {"id": "#p", "is_data_split": True, "version": 2}]},
+            {"parent_datasets": "isPartOf"}, {})
+        self.assertEqual(record, {"id": "./", "parent_datasets": [
+            {"id": "#p", "is_data_split": True}]})
+        self.assertEqual(converter.dropped, [("parent_datasets[0].version", (
+            "not placed in `version`: 2 (the schema rejects it: 2 is not of "
+            "type 'string', 'null')"))])
+        self.assertEqual(problems(record), [])
+
+    def test_a_value_every_class_rejects_goes_whole(self):
+        """An object that lacks a required key is rejected whole by both
+        classes, and a number by a class and by nothing: each goes whole,
+        for the reasons its slot's own class gives, a value inside it
+        named by where it is in it (#4125)."""
+        converter = FairscapeToD4DConverter()
+        record = converter._settle(
+            {"id": "./",
+             "parent_datasets": [{"name": "no id", "version": 2,
+                                  "keywords": ["a", 7]}],
+             "human_subject_research": 5},
+            {"parent_datasets": "isPartOf",
+             "human_subject_research": "d4d:humanSubject"}, {})
+        self.assertEqual(record, {"id": "./"})
+        self.assertEqual(converter.dropped, [
+            ("isPartOf", (
+                'not placed in `parent_datasets`: {"name": "no id", "version": '
+                '2, "keywords": ["a", 7]} (the schema rejects it: \'id\' is a '
+                "required property; 2 is not of type 'string', 'null' in "
+                "`version`; 7 is not of type 'string' in `keywords`)")),
+            ("d4d:humanSubject", (
+                "not placed in `human_subject_research`: 5 (the schema rejects "
+                "it: 5 is not of type 'object')"))])
+
+    def test_an_object_slot_leaves_out_every_wrong_value_in_one_pass(self):
+        """A single-valued object slot may hold its class or nothing, and
+        the validator reports one error for the whole object. Every value
+        its class rejects goes in the same pass (#4125, #4126): it used to
+        be one a pass, and 25 IRB numbers ran past the 20-pass limit."""
+        numbers = list(range(2019001, 2019026))
+        record, dropped, passes = validated(crate({"d4d:humanSubject": {
+            "@id": "#hsr", "description": "Approved.", "irb_approval": numbers,
+            "ethics_review_board": 6, "name": 8}}))
+        self.assertEqual(record["human_subject_research"],
+                         {"id": "#hsr", "description": "Approved."})
+        self.assertEqual(passes, 2)
+        self.assertEqual(
+            [reason for source, reason in dropped
+             if source == "human_subject_research.irb_approval"],
+            [f"part of the value not placed in `irb_approval`: {n} (the schema "
+             f"rejects it: {n} is not of type 'string')" for n in numbers])
+        self.assertEqual(
+            {source for source, _ in dropped},
+            {"human_subject_research.irb_approval",
+             "human_subject_research.ethics_review_board",
+             "human_subject_research.name"})
+        self.assertEqual(problems(record), [])
+
+    def test_any_number_of_rejected_values_for_one_slot_is_left_out(self):
+        """Each value waiting for a single-valued slot is tried once, a pass
+        each; there is no limit on passes, which end because each leaves a
+        value out (#4126). 26 `issued` values ran past the 20-pass limit,
+        and the crate was an error although leaving them out makes it
+        valid."""
+        values = [f"Month {n} 2026" for n in range(25)]
+        record, dropped = converted(crate({
+            "datePublished": "Month X 2026",
+            "additionalProperty": [property_value("Issued", value)
+                                   for value in values]}))
+        self.assertNotIn("issued", record)
+        self.assertEqual(problems(record), [])
+        self.assertEqual(sorted(reason for _, reason in dropped), sorted(
+            f"not placed in `issued`: {value} (the schema rejects it: "
+            f"'{value}' is not a 'date-time')"
+            for value in ["Month X 2026", *values]))
+
+
+class TestDroppedPaths(unittest.TestCase):
+    """#4126: a `dropped` path numbers the items of a list one way, by the
+    item's position in the list the converter read for the slot, the
+    crate's list for a crate property. That position is the same in every
+    validation pass, and whether or not the item reached the record."""
+
+    def test_an_object_is_numbered_by_its_place_in_the_crate(self):
+        """The first author yields no Creator, the first `isPartOf` entry is
+        text and the first `hasPart` member is software, so the object made
+        from each second one is the first of its list in the record. It is
+        named by its place in the crate both by `_object`, which reads it,
+        and by `_leave_out`, which validates it. They used to number it
+        apart: `creators[1].email` and `creators[0].name`."""
+        record, dropped = converted(crate({
+            "author": [{"@type": "Person"},
+                       {"@id": "#b", "name": 5, "email": "b@example.org"}],
+            "isPartOf": ["Project X", {"@id": "ark:59852/project-y",
+                                       "version": 2}],
+            "hasPart": [{"@id": "#tool"},
+                        {"@id": "ark:59853/rocrate-y", "@type": "Dataset",
+                         "license": 5}]},
+            {"@id": "#tool", "@type": "https://w3id.org/EVI#Software",
+             "name": "T"}))
+        self.assertEqual(record["creators"], [{"id": "#b"}])
+        self.assertEqual(record["parent_datasets"],
+                         [{"id": "https://n2t.net/ark:59852/project-y"}])
+        self.assertEqual(record["resources"],
+                         [{"id": "https://n2t.net/ark:59853/rocrate-y"}])
+        self.assertEqual(
+            [source for source, _ in dropped
+             if source.startswith(("creators", "parent_datasets", "resources"))],
+            ["creators[1].email", "creators[1].name", "resources[1].license",
+             "parent_datasets[1].version"])
+        self.assertEqual(problems(record), [])
+        # A JSON null is an item of the crate's list too
+        record, dropped = converted(crate({"author": [
+            None, {"@id": "#b", "name": 5}]}))
+        self.assertEqual(record["creators"], [{"id": "#b"}])
+        self.assertEqual([source for source, _ in dropped], ["creators[1].name"])
+
+    def test_an_object_keeps_its_number_from_pass_to_pass(self):
+        """`#r1`'s software loses its `id` in the first pass, and is left
+        out in the second, after `#r0` went in the first; it was named
+        `raw_data_sources[1]` and then `raw_data_sources[0]`. No reason
+        quotes LinkML's pointer, which numbers the record as one pass saw
+        it."""
+        record, dropped = converted(crate({"rai:dataCollectionRawData": [
+            {"@id": "#r0"},
+            {"@id": "#r1", "source_description": "Survey.",
+             "used_software": [{"id": 5, "name": "tool"}]}]}))
+        self.assertEqual(record["raw_data_sources"],
+                         [{"id": "#r1", "source_description": "Survey."}])
+        self.assertEqual(dropped, [
+            ("rai:dataCollectionRawData", (
+                'part of the value not placed in `raw_data_sources`: {"id": '
+                "\"#r0\"} (the schema rejects it: 'source_description' is a "
+                "required property)")),
+            ("raw_data_sources[1].used_software[0].id", (
+                "not placed in `id`: 5 (the schema rejects it: 5 is not of "
+                "type 'string')")),
+            ("raw_data_sources[1].used_software", (
+                'not placed in `used_software`: {"name": "tool"} (the schema '
+                "rejects it: 'id' is a required property)"))])
+        self.assertEqual(problems(record), [])
 
 
 class TestValidationIsNotVacuous(unittest.TestCase):
