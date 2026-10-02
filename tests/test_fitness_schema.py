@@ -295,6 +295,8 @@ def test_class_constraints_are_declared_and_class_union_refuses(schema):
 
 def test_legacy_request_and_cache_bytes_match_pre_activation_instrument(tmp_path, monkeypatch):
     # Captured independently from bb336b7e, before the opt-in implementation.
+    # #3325 adds disclosure to new cache rows, never to the cache identity.
+    # Keep the original payload hashes, with that additive field checked apart.
     path = tmp_path / 'data_sheets_schema_all.yaml'
     path.write_text('id: https://example.invalid/stable\nname: stable\ndefault_range: string\ntypes:\n  string: {base: str}\nclasses:\n  Dataset:\n    attributes:\n      item: {description: Operating condition., range: Item, inlined: true}\n  Item:\n    attributes:\n      label: {description: Catalog title.}\n')
     calls = []
@@ -309,16 +311,42 @@ def test_legacy_request_and_cache_bytes_match_pre_activation_instrument(tmp_path
     row = json.loads(fitness_cache.read_text())
     classifier = FormSubtypeClassifier(client=object(), model='synthetic', class_name='Dataset', schema_path=path,
                                        profile=NEUTRAL, cache_path=subtype_cache)
-    classifier(FormFailure('synthetic', 'item', json.dumps([{}]), 'synthetic', 0,
-                           schema=row['schema'], specification=row['specification']))
+    failure = FormFailure('synthetic', 'item', json.dumps([{}]), 'synthetic', 0,
+                          schema=row['schema'], specification=row['specification'])
+    classifier(failure)
     sha = lambda data: hashlib.sha256(data).hexdigest()
     assert [sha(json.dumps(call, sort_keys=True).encode()) for call in calls] == [
         'f36075a9e36f6419a4d5b35be214919cf105b542b366c42abfb6b4325d515976',
         'ceb867b5ee313c01218f9dee211b95227420a2e4f07860e6482495090cf4a1ef']
-    assert sha(fitness_cache.read_bytes()) == '94726d7021c3037c47349c35215fb5e387eddc73eb28d0ab96444eac67cb0c5f'
-    assert sha(subtype_cache.read_bytes()) == 'faa4e8f70089b4de885f21b370b66e3070e98fb9751f858b78e80d27a1bc7f62'
+    legacy_paths = []
+    for cache, expected in (
+        (fitness_cache, '94726d7021c3037c47349c35215fb5e387eddc73eb28d0ab96444eac67cb0c5f'),
+        (subtype_cache, 'faa4e8f70089b4de885f21b370b66e3070e98fb9751f858b78e80d27a1bc7f62'),
+    ):
+        cached = json.loads(cache.read_text())
+        assert cached.pop('evaluation_model') == {'name': 'synthetic', 'basis': 'explicit_override'}
+        legacy_bytes = (json.dumps(cached) + '\n').encode()
+        assert sha(legacy_bytes) == expected
+        legacy_path = cache.with_name('legacy_' + cache.name)
+        legacy_path.write_bytes(legacy_bytes)
+        legacy_paths.append((legacy_path, legacy_bytes))
     assert row['schema'] == '05db576091889da8dc9b6ea9a4002774'
     assert row['specification'] == '89faf5db31eb95ab16462fba08afd335c133fa9bdb48ec41f64e632626e9de2b'
+
+    # A fresh object must recover old rows without spending or restamping them.
+    monkeypatch.setattr(api_runner, '_call_with_retry', lambda *a, **k: pytest.fail('legacy cache missed'))
+    replay = LLMSlotFitnessScorer(client=object(), model='synthetic', class_name='Dataset',
+                                 schema_path=path, profile=NEUTRAL, cache_path=legacy_paths[0][0])
+    judged = replay(project='synthetic', slot='item', value=[{}])
+    assert (judged.fitness, judged.failure, judged.reason) == (0.0, 'form', 'synthetic')
+    assert replay.memo_hits == 1 and replay.calls == 0
+    replay_subtype = FormSubtypeClassifier(client=object(), model='synthetic', class_name='Dataset',
+                                          schema_path=path, profile=NEUTRAL,
+                                          cache_path=legacy_paths[1][0], offline=True)
+    assert replay_subtype(failure) == ('hollow_object', 'synthetic')
+    assert replay_subtype.memo_hits == 1
+    for legacy_path, legacy_bytes in legacy_paths:
+        assert legacy_path.read_bytes() == legacy_bytes
 
 
 def test_subtype_cli_selected_frozen_replay_preserves_explicit_class(schema, monkeypatch, tmp_path):
