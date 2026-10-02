@@ -583,7 +583,7 @@
 <tr>
 <td><code>generate_structural_mapping.py</code></td>
 <td><code>make gen-sssom-structural</code></td>
-<td>sssom-py-compatible structural SSSOM</td>
+<td>sssom-py-compatible structural SSSOM; not run by <code>make gen-sssom-all</code> (see below)</td>
 </tr>
 <tr>
 <td><code>add_module_column.py</code>, <code>add_slot_uris.py</code>, <code>implement_uri_mappings.py</code></td>
@@ -596,7 +596,7 @@
 <pre><code class="language-bash">make gen-sssom-comprehensive gen-sssom-uri-comprehensive
 make check-sssom-comprehensive
 </code></pre>
-<p>The structural mapping carries rows its generator cannot produce, so it is checked by <code>tests/test_semantic_exchange/test_structural_mapping_drift.py</code>, which allows exactly those; <code>make check-sssom-structural</code> reports them and exits non-zero, and regenerating it drops them.</p>
+<p>The structural mapping carries rows its generator cannot produce, listed with their reasons as <code>KNOWN_UNDERIVABLE</code> in <code>generate_structural_mapping.py</code> (#294). Rewriting the table with <code>make gen-sssom-structural</code> drops those rows, so <code>make gen-sssom-all</code> regenerates only the comprehensive pair and <code>make clean-sssom</code> deletes only that pair (#3967). <code>make check-sssom-structural</code> checks the table and its summary against what the generator writes, allowing for those rows, and names any of them a rewrite dropped, to restore from git before committing; <code>python src/semantic_exchange/generate_structural_mapping.py --help</code> states exactly what it compares (#4076).</p>
 <h2 id="validation">Validation</h2>
 <pre><code class="language-bash">poetry run pytest tests/test_semantic_exchange tests/test_fairscape_integration -v
 </code></pre>
