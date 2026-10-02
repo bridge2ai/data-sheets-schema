@@ -358,26 +358,59 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
     repeated name once, in the order first given, with one stderr line for
     each repeated name, in the same order, and the #3638 count counts projects.
 
-    BETA is given first and last, and ALPHA three times between them. The
-    order first given, BETA then ALPHA, is then the reverse of each order a
-    loop might keep instead: alphabetical, the manifest's, by how often a name
-    was given, and by where a name was last given. The input before #4185
-    gave its first name most often, so an order by count matched the order
-    first given and no test could tell them apart. Each line must give its
-    own name's number of times. normalize and map run with their library
-    function replaced by a recorder, as #4165 was reproduced; the others run
-    for real.
+    BETA is given first and last; between them ALPHA is given four times and
+    then GAMMA three times. In the order first given, BETA, ALPHA, GAMMA,
+    ALPHA is in the middle. Ordered by how often each name was given
+    (ALPHA 4, GAMMA 3, BETA 2) or by where each was last given (ALPHA,
+    GAMMA, BETA), GAMMA is in the middle; alphabetically or in the
+    manifest's order, BETA is. Reversing three names keeps the middle one,
+    so the order first given is none of these orders in either direction:
+    most or fewest repeats first, the earliest or the latest last mention
+    first (a scan from the end gives the latest), A to Z or Z to A, the
+    manifest's order or its reverse. All three names repeat, so the three
+    notice lines must come in that order too, and since no two names were
+    given the same number of times, each line must give its own name's count.
+
+    Earlier inputs could not tell some of those orders apart. Before #4185
+    the first name was also the most repeated, so the order by count matched
+    the order first given. Before #4198 only two names repeated, and two
+    names can only be in the order first given or its reverse, so one
+    direction of each order matched it. normalize and map run with their
+    library function replaced by a recorder, as #4165 was reproduced; the
+    others run for real.
     """
 
-    NAMES = ("BETA", "ALPHA", "ALPHA", "ALPHA", "BETA")
+    NAMES = ("BETA", "ALPHA", "ALPHA", "ALPHA", "ALPHA", "GAMMA", "GAMMA", "GAMMA", "BETA")
+    ONCE_EACH = ["BETA", "ALPHA", "GAMMA"]
     NOTICES = ["⚠️  --project BETA was given 2 times; it runs once",
-               "⚠️  --project ALPHA was given 3 times; it runs once"]
+               "⚠️  --project ALPHA was given 4 times; it runs once",
+               "⚠️  --project GAMMA was given 3 times; it runs once"]
 
     def _assert_ran_once_each(self, r, library):
-        self.assertEqual([c.args[0] for c in library.call_args_list], ["BETA", "ALPHA"],
+        self.assertEqual([c.args[0] for c in library.call_args_list], self.ONCE_EACH,
                          r.stdout + r.stderr)
         self.assertEqual([line for line in r.stderr.splitlines() if "runs once" in line],
                          self.NOTICES, r.stderr)
+
+    def test_the_input_tells_the_order_first_given_from_each_other_order(self):
+        """What the five command tests below rely on, checked on NAMES itself
+        so a later edit cannot lose it unnoticed: every name repeats, no two
+        as often, and neither direction of the order by count, by last
+        mention, alphabetical or the manifest's is the order first given
+        (#4198)."""
+        counts = [self.NAMES.count(name) for name in self.ONCE_EACH]
+        last = {name: i for i, name in enumerate(self.NAMES)}     # a name's last index
+        self.assertEqual(list(dict.fromkeys(self.NAMES)), self.ONCE_EACH)
+        self.assertGreater(min(counts), 1)                         # a notice line apiece
+        self.assertEqual(len(set(counts)), len(counts))            # no tie to break
+        others = {"by count": sorted(self.ONCE_EACH, key=self.NAMES.count),
+                  "by last mention": sorted(self.ONCE_EACH, key=last.get),
+                  "alphabetical": sorted(self.ONCE_EACH),
+                  "the manifest's": [p for p in self.PROJECTS if p in self.ONCE_EACH]}
+        for label, order in others.items():
+            for direction in (order, order[::-1]):
+                with self.subTest(order=label, direction=direction):
+                    self.assertNotEqual(direction, self.ONCE_EACH)
 
     def test_normalize_runs_a_repeated_project_once(self):
         from data_sheets_schema.rocrate_normalize import Result
@@ -393,9 +426,10 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
     def test_bundle_runs_a_repeated_project_once_and_counts_projects(self):
         from data_sheets_schema import rocrate_normalize
         real = rocrate_normalize.build_crate_bundle
-        self.docs.mkdir()                                  # BETA has no document bundle
-        (self.docs / "ALPHA_preprocessed.txt").write_text("ALPHA", encoding="utf-8")
-        (self.packages / "ALPHA" / "processed").mkdir(parents=True)
+        self.docs.mkdir()
+        for name in ("ALPHA", "GAMMA"):                    # BETA has no document bundle
+            (self.docs / f"{name}_preprocessed.txt").write_text(name, encoding="utf-8")
+            (self.packages / name / "processed").mkdir(parents=True)
         with patch("data_sheets_schema.rocrate_normalize.build_crate_bundle",
                    side_effect=lambda name, root: real(name, root, docs_dir=self.docs)) as build:
             r = self._invoke("bundle", projects=self.NAMES)
@@ -405,12 +439,13 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
         self._assert_ran_once_each(r, build)
         self.assertEqual(r.stderr.count("No document bundle"), 1, r.stderr)
         self.assertEqual(r.stderr.splitlines()[-1:],
-                         ["❌ 1 of 2 bundle(s) not written"], r.stderr)   # was 2 of 5
-        self.assertEqual([p.name for p in self.docs.glob("*_with_crate.txt")],
-                         ["ALPHA_preprocessed_with_crate.txt"])
+                         ["❌ 1 of 3 bundle(s) not written"], r.stderr)   # was 2 of 9
+        self.assertEqual(sorted(p.name for p in self.docs.glob("*_with_crate.txt")),
+                         ["ALPHA_preprocessed_with_crate.txt",
+                          "GAMMA_preprocessed_with_crate.txt"])
 
     def test_emit_arm_runs_a_repeated_project_once(self):
-        for name in ("ALPHA", "BETA"):
+        for name in self.PROJECTS:
             self._record(name, "crate_d4d")
         with self._publishing_into_tmp() as emit:
             r = self._invoke("emit-arm", "--version", "v1", projects=self.NAMES)
@@ -421,7 +456,7 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
         self.assertEqual(r.stdout.splitlines()[-1:],
                          ["✅ Deterministic arm published under version v1"])
         self.assertEqual(sorted(p.name for p in (self.concat / "rocrate_mapped" / "v1").iterdir()),
-                         ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+                         ["ALPHA_d4d.yaml", "BETA_d4d.yaml", "GAMMA_d4d.yaml"])
 
     def test_map_runs_a_repeated_project_once(self):
         from data_sheets_schema.rocrate_map import MapResult
@@ -437,7 +472,7 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
         self.assertEqual(r.stdout.splitlines()[-1:], ["✅ Static mapping complete"])
 
     def test_emit_map_arm_runs_a_repeated_project_once(self):
-        for name in ("ALPHA", "BETA"):
+        for name in self.PROJECTS:
             self._record(name, "crate_mapped_d4d")
         with self._publishing_into_tmp() as emit:
             r = self._invoke("emit-map-arm", "--version", "v1", projects=self.NAMES)
@@ -448,16 +483,17 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
         self.assertEqual(r.stdout.splitlines()[-1:], ["✅ our-mapping arm published under v1"])
         self.assertEqual(
             sorted(p.name for p in (self.concat / "rocrate_static_map" / "v1").iterdir()),
-            ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+            ["ALPHA_d4d.yaml", "BETA_d4d.yaml", "GAMMA_d4d.yaml"])
 
     def test_each_repeated_name_gets_its_own_line_in_the_order_first_given(self):
         """Two names repeated, each a different number of times, and one given
         once: a line apiece for the two, in the order first given, none for
         the third. GAMMA comes first and last, ALPHA after it and more often,
-        and BETA once. In the order first given the runs are GAMMA, ALPHA,
-        BETA and the lines GAMMA's then ALPHA's; in the order by count, the
-        alphabetical one or the order by where a name was last given, neither
-        would be, and both are asserted (#4185)."""
+        and BETA once, so the runs must be GAMMA, ALPHA, BETA and the lines
+        GAMMA's then ALPHA's. Two lines can only be in the order first given
+        or its reverse, so one direction of each other order would print them
+        as here; the class's input, where three names repeat, is the one that
+        tells those orders apart (#4198)."""
         from data_sheets_schema.rocrate_normalize import Result
         with patch("data_sheets_schema.rocrate_normalize.normalize_project",
                    side_effect=lambda name, root, sv=None: Result(project=name)) as run:
