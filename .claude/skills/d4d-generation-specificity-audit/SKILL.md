@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.7.0
+  version: 1.8.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -109,6 +109,11 @@ generation surface. The skill's tests check that:
   and what a `tuned` instruction carries; a monolithic runner is reported
   monolithic; a renderer is read in any spelling; each derivation fails
   loudly when the code changes shape;
+- optional helper turns retain their actual imported model-call phase and source
+  location, validated RunSpec option/default/API-renderer restriction, and positive
+  caller guard. They appear separately from default-condition follow-ups. Unknown
+  or compound selectors, unbound/shadowed imports, missing or mismatched phases,
+  else-branch or unguarded calls, and unsupported helper indirection fail closed;
 - a violation is exit 1, a clean scan 0, and a scan that did not happen 2,
   including a Python file that does not parse.
 
@@ -405,6 +410,17 @@ None falls back to a constant (#4025).
   make a turn comes from `plan()`'s `conditional_calls` (re-addressing only
   under `RECEIPT_CONDITIONS`); a turn `plan()` does not list is made under
   every condition when no condition test guards its call path.
+- Direct imported helpers in the runner's package import closure are also read
+  for calls to that same runner wrapper, resolving function/module aliases and
+  literal helper phase constants. Optional turns must agree with the plan and
+  have an exact positive `if spec.<option>` caller guard. A recognized option has
+  an annotated integer RunSpec field with default zero and unconditional raising
+  validation of its finite integer domain and API-only renderer restriction.
+  The JSON records the selection and call-path evidence; Markdown lists the
+  option, default, runtime and renderer. Default condition shapes/lists exclude
+  these opt-in turns. This bounded derivation does not assume arbitrary compound
+  selectors, helper delegation or nested dead functions are equivalent; changed
+  shapes stop with “not derived” until explicitly supported and tested (#4263).
 - The guard in `build_phase` that raises on `render_version >= N` and
   `phase == "audit"`, in either order, gives the renderer from which the
   audit is a registered native batch. RunSpec's `render_version not in
