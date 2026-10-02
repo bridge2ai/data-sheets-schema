@@ -677,8 +677,8 @@ class RunSpec:
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
                    api_playbook_version=recorded.get("api_playbook_version", 0), _replay_only=True)
-        from data_sheets_schema.api_playbook import POLICY_SHA256
         if spec.api_playbook_version:
+            from data_sheets_schema.api_playbook import POLICY_SHA256
             if recorded.get("api_playbook_sha256") != POLICY_SHA256:
                 raise ValueError("invalid recorded API playbook v1 SHA256")
         elif "api_playbook_sha256" in recorded or "api_playbook_version" in recorded:
@@ -798,9 +798,12 @@ class RunSpec:
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
         """
-        from data_sheets_schema.api_playbook import POLICY_SHA256
-        return {**({"api_playbook_version": self.api_playbook_version,
-                    "api_playbook_sha256": POLICY_SHA256} if self.api_playbook_version else {}),
+        policy_metadata = {}
+        if self.api_playbook_version:
+            from data_sheets_schema.api_playbook import POLICY_SHA256
+            policy_metadata = {"api_playbook_version": self.api_playbook_version,
+                               "api_playbook_sha256": POLICY_SHA256}
+        return {**policy_metadata,
                 **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
                 **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],

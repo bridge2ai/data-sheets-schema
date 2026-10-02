@@ -227,3 +227,26 @@ def test_cli_run_and_batch_propagate_axis_before_spend(external, monkeypatch):
     assert batch.exit_code == 0, batch.output
     assert len(plans) == 1 and plans[0].api_playbook_version == 1
     assert len(captured) == 1
+
+
+@pytest.mark.parametrize("renderer", [1, 8, 23])
+def test_historical_replay_does_not_require_new_policy_module(external, monkeypatch, renderer):
+    # Frozen support closures may include api_runner without this new opt-in
+    # dependency. A default rendering must keep working in that environment.
+    import builtins
+    real_import = builtins.__import__
+    def guarded(name, *args, **kwargs):
+        if name == "data_sheets_schema.api_playbook":
+            raise ImportError("new policy module absent from historical closure")
+        return real_import(name, *args, **kwargs)
+    monkeypatch.setattr(builtins, "__import__", guarded)
+    spec = replace(external, render_version=renderer, manifest=None,
+                   manifest_line=api.RunSpec.header_for_manifest(None))
+    recorded = spec.render_spec()
+    replay = api.RunSpec.from_render_spec(recorded, project=spec.project,
+                                        method=spec.method, label=spec.label)
+    assert replay.render_spec() == recorded
+    assert replay.instruction == spec.instruction
+    if renderer == 8:
+        with pytest.raises(ImportError, match="historical closure"):
+            replace(external, api_playbook_version=1).render_spec()
