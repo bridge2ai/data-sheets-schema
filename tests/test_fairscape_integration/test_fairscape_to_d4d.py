@@ -29,7 +29,10 @@ key from the entity; a value is a repeat of another only as JSON reads
 them, and a repeat keeps the higher place; a byte count too long for
 Python to read is recorded, not raised. #4167: where two `@graph` nodes
 share an `@id`, a `hasPart` reference is compared with the node its file
-collection is made from; a value nested however deep is compared.
+collection is made from; a value nested however deep is compared. #4089: a
+crate given as a path is read as the static-map arm reads one, and one that
+is not UTF-8 is refused with its `CrateEncodingError`, by the converter, its
+script and `fairscape-cli`.
 """
 
 import contextlib
@@ -53,6 +56,7 @@ repo_root = Path(__file__).parent.parent.parent
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
+from data_sheets_schema.rocrate_map import CrateEncodingError, read_crate_json
 from src.fairscape_integration import fairscape_to_d4d
 from src.fairscape_integration.fairscape_to_d4d import (
     FairscapeToD4DConverter,
@@ -67,7 +71,9 @@ SCHEMA = repo_root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml"
 #: `make test-fairscape-to-d4d` converts. The FAIRSCAPE release crates under
 #: data/ro-crate_packages/ are not among them. `TestRootDataEntity` converts
 #: CM4AI's and CHORUS's, and `TestTheRecordValidates` AI_READI's, decoded
-#: from windows-1252 because it is not UTF-8 (#4089).
+#: from windows-1252 here: it is not UTF-8, and given its path the
+#: converter refuses it with a `CrateEncodingError` (`TestCrateEncoding`,
+#: #4089).
 BUNDLED = (
     "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json",
     "data/ro-crate/examples/CM4AI_roundtrip.json",
@@ -88,9 +94,15 @@ CM4AI_REDUCED = (repo_root / "data/ro-crate_packages/CM4AI/processed/"
 CM4AI_RELEASE = ("https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-"
                  "artificial-intelligence-June-2026-data-release")
 
-#: The AI-READI v3.0.0 release crate, which is windows-1252, not UTF-8
-#: (#4089). Its root's `datePublished` is `11/17/25` (#4098).
+#: The AI-READI v3.0.0 release crate, which is windows-1252, not UTF-8:
+#: given its path, `convert` refuses it with a `CrateEncodingError` naming
+#: the first byte that does not decode (#4089). Its root's `datePublished`
+#: is `11/17/25` (#4098).
 AI_READI = repo_root / "data/ro-crate_packages/AI_READI/raw/ro-crate-metadata.json"
+#: Its copy among the raw downloads, not byte for byte the same, which is
+#: refused the same way (#4089).
+AI_READI_DOWNLOAD = (repo_root / "data/raw/AI_READI/"
+                     "aireadi_ro_crate_metadata_2026-08-12.json")
 CHORUS = repo_root / "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json"
 
 
@@ -174,6 +186,115 @@ class TestBundledCratesValidate(unittest.TestCase):
         self.assertEqual(first, second)
         for stamp in ("schema_version", "generated_date", "source"):
             self.assertNotIn(stamp, first)
+
+
+class TestCrateEncoding(unittest.TestCase):
+    """#4089: a crate given as a path is read as the static-map arm reads
+    one (`rocrate_map.read_crate_json`), and one that is not UTF-8 is
+    refused with the same `CrateEncodingError`. `convert` and
+    `fairscape-cli rocrate-to-d4d` opened it in the platform's default
+    encoding, and the AI-READI release crate, which is windows-1252, ended
+    both with a bare UnicodeDecodeError."""
+
+    #: What the refusal says of either tracked AI-READI copy: the numbers
+    #: crate_manifest.yaml's `encoding_note` gives for the crate.
+    SAID = ("is not UTF-8, as RFC 8259 requires of JSON: byte 0xa9 at "
+            "offset 5096, 31 undecodable byte(s) in all")
+
+    def refusal(self, path):
+        """The static-map arm's refusal of `path`, word for word."""
+        with self.assertRaises(CrateEncodingError) as cm:
+            read_crate_json(path)
+        message = str(cm.exception)
+        self.assertIn(f"{path} {self.SAID}", message)
+        self.assertIn("`encoding_note` in crate_manifest.yaml", message)
+        return message
+
+    @staticmethod
+    def runner():
+        """Stderr kept apart from stdout, under Click 8.1 and 8.2."""
+        from click.testing import CliRunner
+        try:
+            return CliRunner(mix_stderr=False)
+        except TypeError:
+            return CliRunner()
+
+    def test_convert_refuses_a_crate_that_is_not_utf8(self):
+        for path in (AI_READI, AI_READI_DOWNLOAD):
+            for given in (path, str(path)):
+                with self.subTest(crate=path.name, given=type(given).__name__):
+                    converter = FairscapeToD4DConverter()
+                    printed = io.StringIO()
+                    with self.assertRaises(CrateEncodingError) as cm, \
+                            contextlib.redirect_stdout(printed):
+                        converter.convert(given)
+                    self.assertIsInstance(cm.exception, ValueError)
+                    self.assertEqual(str(cm.exception), self.refusal(path))
+                    # Refused before any of it is read as a crate
+                    self.assertEqual(printed.getvalue(), "")
+                    self.assertEqual(converter.dropped, [])
+
+    def test_the_script_says_why_and_writes_nothing(self):
+        """`make fairscape-to-d4d` runs the script, which reports a failed
+        conversion as it reports any other."""
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "record.yaml"
+            argv = ["fairscape_to_d4d.py", "--input", str(AI_READI),
+                    "--output", str(output)]
+            printed = io.StringIO()
+            with mock.patch.object(sys, "argv", argv), \
+                    contextlib.redirect_stdout(printed), \
+                    contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(main(), 1)
+            self.assertFalse(output.exists())
+        self.assertIn(f"✗ Conversion failed: {self.refusal(AI_READI)}\n",
+                      printed.getvalue())
+
+    def test_fairscape_cli_reports_the_refusal_and_exits_1(self):
+        """On stderr, as the command reports any other error: one line, no
+        traceback, and no record written."""
+        from src.fairscape_integration.cli import cli
+
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "record.yaml"
+            result = self.runner().invoke(
+                cli, ["rocrate-to-d4d", str(AI_READI), "-o", str(output)])
+            self.assertFalse(output.exists())
+        self.assertEqual(result.exit_code, 1)
+        self.assertIsInstance(result.exception, SystemExit)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(result.stderr, f"✗ Error: {self.refusal(AI_READI)}\n")
+
+    def test_fairscape_cli_info_reports_it_the_same_way(self):
+        """`info` reads a `.json` file as a crate (#4089)."""
+        from src.fairscape_integration.cli import cli
+
+        result = self.runner().invoke(cli, ["info", str(AI_READI)])
+        self.assertEqual(result.exit_code, 1)
+        self.assertIsInstance(result.exception, SystemExit)
+        self.assertEqual(result.stdout, "")
+        self.assertEqual(result.stderr, f"✗ Error: {self.refusal(AI_READI)}\n")
+
+    def test_a_utf8_crate_converts_from_its_path_as_from_its_json(self):
+        """Text that is not ASCII is read as written, in a value the record
+        holds and in one it leaves out: the JSON is decoded as UTF-8. Read
+        as windows-1252, the description would be `DonnÃ©es Â© 2025…`."""
+        crate_json = crate({"description": "Données © 2025, the ‘test’ crate",
+                            "keywords": ["café", "naïve"],
+                            "contentSize": "à peu près 2 Go"})
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "ro-crate-metadata.json"
+            path.write_bytes(json.dumps(crate_json, ensure_ascii=False)
+                             .encode("utf-8"))
+            from_path = converted(path)
+            self.assertEqual(converted(str(path)), from_path)
+        record, dropped = from_path
+        self.assertEqual((record, dropped), converted(crate_json))
+        self.assertEqual(record["description"], "Données © 2025, the ‘test’ crate")
+        self.assertEqual(record["keywords"], ["café", "naïve"])
+        self.assertIn("à peu près 2 Go is not a byte count",
+                      reasons(dropped, "contentSize"))
+        self.assertEqual(problems(record), [])
 
 
 class TestDroppedValuesAreRecorded(unittest.TestCase):
@@ -1603,7 +1724,9 @@ class TestTheRecordValidates(unittest.TestCase):
     def test_the_ai_readi_release_date_is_left_out(self):
         """The tracked AI-READI v3.0.0 release crate's root has
         `datePublished: 11/17/25`, which `_coerce` leaves as written. The
-        file is windows-1252 (#4089), so it is decoded as that here."""
+        file is windows-1252, which `convert` refuses given its path
+        (`TestCrateEncoding`, #4089), so it is decoded as that here and its
+        JSON converted: the transcode is this test's, not the converter's."""
         crate_json = json.loads(AI_READI.read_bytes().decode("cp1252"))
         _, dropped = self.assert_left_out(
             crate_json, "issued", "datePublished",

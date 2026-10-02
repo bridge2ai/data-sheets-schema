@@ -96,16 +96,15 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
         fairscape-cli rocrate-to-d4d ro-crate-metadata.json -o output.yaml
     """
     import yaml
-    import json
 
     try:
-        # Load RO-Crate JSON-LD
-        with open(input_file, 'r') as f:
-            rocrate_data = json.load(f)
-
-        # Convert to D4D
+        # Convert to D4D. `convert` reads the crate as the static-map arm
+        # does (`rocrate_map.read_crate_json`): one that is not UTF-8 is a
+        # CrateEncodingError naming the first byte that does not decode,
+        # reported below like any other error. Until #4089 it was read
+        # here, in the platform's default encoding.
         converter = FairscapeToD4DConverter()
-        d4d_data = converter.convert(rocrate_data)
+        d4d_data = converter.convert(Path(input_file))
 
         # Serialize to YAML
         yaml_output = yaml.dump(d4d_data, default_flow_style=False, sort_keys=False)
@@ -209,8 +208,12 @@ def info(input_file: str, format: str):
                 data = yaml.safe_load(f)
             file_type = "D4D YAML"
         elif file_path.suffix == '.json':
-            with open(file_path, 'r') as f:
-                data = json.load(f)
+            # Read as the static-map arm reads a crate: JSON that is not
+            # UTF-8, as RFC 8259 requires, is refused with a
+            # CrateEncodingError naming the first byte that does not decode,
+            # and is not decoded in the platform's default encoding (#4089).
+            from data_sheets_schema.rocrate_map import read_crate_json
+            data = read_crate_json(file_path)
 
             # Check if it's RO-Crate by looking for @graph
             if '@graph' in data:

@@ -9,6 +9,14 @@ Features:
 - The record describes the crate's root data entity, the one the metadata
   descriptor is `about` (#4072)
 - Vocabulary translation (schema.org → dcterms, etc.)
+- A crate given as a path is read as the static-map arm reads one
+  (`rocrate_map.read_crate_json`): as UTF-8, which RFC 8259 requires of
+  JSON, and in no other encoding. A file that is not UTF-8, such as
+  AI-READI's windows-1252 release crate, is refused with a
+  `CrateEncodingError` naming the first byte that does not decode, its
+  offset and how many such bytes it holds, and pointing to the crate
+  manifest's `encoding_note`. Until #4089 a path was opened in the
+  platform's default encoding.
 - Pydantic validation of input RO-Crate
 - Output fitted to the schema's Dataset class: of what this converter
   reads, a key the class does not declare, a value that cannot be shaped
@@ -29,7 +37,6 @@ Features:
 - LinkML validation of output D4D
 """
 
-import json
 import re
 import sys
 import yaml
@@ -48,6 +55,7 @@ from data_sheets_schema.rocrate_map import (
     _to_object,
     _type_matches,
     doi_for_slot,
+    read_crate_json,
 )
 from data_sheets_schema.schema_view import shared_view
 from data_sheets_schema.scope import _norm, bare_doi
@@ -569,12 +577,28 @@ class FairscapeToD4DConverter:
         Convert FAIRSCAPE RO-Crate to D4D dictionary.
 
         Args:
-            rocrate_input: FAIRSCAPE RO-Crate (dict, Path, or ROCrateV1_2)
+            rocrate_input: FAIRSCAPE RO-Crate: a dict, the path of its JSON
+                (str or Path), or a ROCrateV1_2
 
         Returns:
             D4D dictionary, which the schema accepts as a Dataset (#4098)
 
         Raises:
+            CrateEncodingError: a ValueError. The file at the path is not
+                UTF-8, as RFC 8259 requires of JSON, and nothing is
+                converted. AI-READI's v3.0.0 release crate is windows-1252.
+                A path is read as the static-map arm reads a crate
+                (`rocrate_map.read_crate_json`), and the refusal is its
+                message: the first byte that does not decode, its offset,
+                how many such bytes the file holds, and the crate
+                manifest's `encoding_note`. No other encoding is tried:
+                most single-byte encodings decode any bytes as something,
+                so a fallback would be a silent guess, and transcoding a
+                crate is a curation decision, declared, not made here.
+                Until #4089 a path was opened in the platform's default
+                encoding: where that is UTF-8 the AI-READI crate raised a
+                bare UnicodeDecodeError, and elsewhere a crate could be
+                decoded in an encoding it is not written in.
             ValueError: the input is not a crate this reads (a type it does
                 not take, or a file Python cannot read as JSON, such as one
                 holding a number of more digits than Python reads as one
@@ -592,8 +616,8 @@ class FairscapeToD4DConverter:
         if isinstance(rocrate_input, dict):
             rocrate_data = rocrate_input
         elif isinstance(rocrate_input, (str, Path)):
-            with open(rocrate_input) as f:
-                rocrate_data = json.load(f)
+            # As the static-map arm reads a crate: UTF-8, or refused (#4089)
+            rocrate_data = read_crate_json(Path(rocrate_input))
         elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
             rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
         else:
