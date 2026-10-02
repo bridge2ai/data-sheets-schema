@@ -27,7 +27,9 @@ reference to an entity in the `@graph` included. #4159: a `hasPart`
 reference's key is passed over only where its file collection reads that
 key from the entity; a value is a repeat of another only as JSON reads
 them, and a repeat keeps the higher place; a byte count too long for
-Python to read is recorded, not raised.
+Python to read is recorded, not raised. #4167: where two `@graph` nodes
+share an `@id`, a `hasPart` reference is compared with the node its file
+collection is made from; a value nested however deep is compared.
 """
 
 import contextlib
@@ -35,6 +37,7 @@ import io
 import json
 import sys
 import tempfile
+import threading
 import unittest
 import zipfile
 from functools import lru_cache
@@ -550,6 +553,64 @@ class TestSharedSlots(unittest.TestCase):
         self.assertEqual(dropped, [("contentSize", (
             "superseded by evi:totalContentSizeBytes, which also maps to "
             "`total_size_bytes`"))])
+
+    def test_a_value_nested_however_deep_is_compared(self):
+        """`_same` called itself for each level of an object or a list, so a
+        value nested 600 levels deep raised `RecursionError` and ended the
+        conversion (#4167). Codex's case, on the tracked VOICE crate read
+        from JSON: `d4d:humanSubject` and an `additionalProperty` entry
+        state that value, and another entry the IRB text, which the record
+        held at 594d34641, before `_same`, and holds again. The deep value
+        comes first, as the dedicated property's, and is recorded with the
+        key no class declares in it; its repeat is not. At that depth a
+        boolean is still not a number, `1` and `1.0` are one number, an
+        object's keys compare as a set and a list's items by place. A value
+        that holds itself is compared to an end."""
+        def nested(leaf, depth=600):
+            for _ in range(depth):
+                leaf = {"x": leaf}
+            return leaf
+
+        crate_json, root = tracked_voice_crate()
+        root["additionalProperty"] = [
+            {"name": "Human Subject", "value": nested("x")},
+            {"name": "Human Subject Research", "value": "Approved by the IRB."}]
+        root["d4d:humanSubject"] = nested("x")
+        record, dropped = converted(json.loads(json.dumps(crate_json)))
+        self.assertEqual(record["human_subject_research"],
+                         {"name": "Approved by the IRB."})
+        self.assertEqual(dropped, [
+            ("human_subject_research.x",
+             "the schema declares no `x` slot on HumanSubjectResearch"),
+            ("d4d:humanSubject", (
+                "not placed in `human_subject_research`: no part of it could "
+                "be placed in a HumanSubjectResearch; `human_subject_research` "
+                "holds the value of additionalProperty[Human Subject Research] "
+                "instead"))])
+        self.assertEqual(problems(record), [])
+        same = fairscape_to_d4d._same
+        for a, b, alike in (
+                (True, True, True), (True, 1, False), (False, 0, False),
+                (1, 1.0, True), ({"a": 1, "b": [2]}, {"b": [2], "a": 1}, True),
+                ({"a": 1}, {"a": 1, "b": 1}, False), ([1, 2], [2, 1], False),
+                ([1], [1, 1], False), ("x", {"x": "x"}, False),
+                # Items compared after two alike still count
+                ([1, True, "x"], [2, True, "x"], False)):
+            with self.subTest(a=a, b=b):
+                self.assertIs(same(nested(a), nested(b)), alike)
+        # A Python value can hold itself, which no JSON value does. The
+        # comparison ends, and a pair met again is skipped, not taken as
+        # alike: the `y` values that differ are compared after the `x`
+        # pair, which meets itself. In a thread, so that a loop fails the
+        # test rather than hanging it.
+        held, other, unlike = {}, {}, {"y": 1}
+        held["x"], other["x"], unlike["x"] = held, other, unlike
+        answers = []
+        thread = threading.Thread(daemon=True, target=lambda: answers.extend(
+            [same(held, other), same({"y": 2, "x": unlike}, unlike)]))
+        thread.start()
+        thread.join(30)
+        self.assertEqual(answers, [True, False])
 
     def test_each_value_for_a_slot_the_class_does_not_declare_is_named(self):
         record, dropped = converted(crate({"additionalProperty": [
@@ -1455,6 +1516,38 @@ class TestDatasetParts(unittest.TestCase):
             "compression": "gzip", "collection_type": "raw_data",
             "file_count": 3}])
         self.assertEqual([source for source, _ in dropped], ["#raw.contentSize"])
+
+    def test_a_part_reference_is_compared_with_the_node_its_collection_reads(self):
+        """Two `@graph` nodes can share an `@id`. The file collection is made
+        from the first typed as a dataset (`_extract_datasets`), and the
+        `hasPart` reference is now compared with that node (#4167). It was
+        compared with the first node of the `@id`. So on the tracked VOICE
+        crate, a reference stating `evi:totalContentSizeBytes` 4096 as a
+        `Thing` node before the Dataset node did was passed over, while
+        the file collection held the Dataset node's 2048: the 4096 was in
+        neither the record nor `dropped` (Codex's case, the first below).
+        A reference stating what the Dataset node states says nothing more,
+        whatever a node before or after it states."""
+        size = "evi:totalContentSizeBytes"
+        thing = {"@id": "#part", "@type": "Thing"}
+        part = {"@id": "#part", "@type": "https://schema.org/Dataset",
+                "name": "Part"}
+        for nodes, held in (([{**thing, size: 4096}, {**part, size: 2048}], 2048),
+                            ([{**part, size: 2048}, {**thing, size: 4096}], 2048),
+                            ([{**thing, size: 2048}, {**part, size: 4096}], 4096),
+                            ([{**part, size: 4096}, {**thing, size: 2048}], 4096)):
+            with self.subTest(nodes=[node["@type"] for node in nodes], held=held):
+                crate_json, root = tracked_voice_crate()
+                root["hasPart"] = [{"@id": "#part", size: 4096}]
+                crate_json["@graph"] += nodes
+                record, dropped = converted(crate_json)
+                self.assertEqual(record["file_collections"], [
+                    {"id": "#part", "name": "Part", "total_bytes": held}])
+                self.assertEqual(dropped, [] if held == 4096 else [("hasPart", (
+                    f"#part: `{size}` 4096, which the root's `hasPart` states "
+                    "for it, is not what the `@graph`'s entity for it states, "
+                    "and its file collection is made from that entity"))])
+                self.assertEqual(problems(record), [])
 
     def test_an_ark_in_any_identifier_slot_is_its_resolver_url(self):
         record, _ = converted(crate({

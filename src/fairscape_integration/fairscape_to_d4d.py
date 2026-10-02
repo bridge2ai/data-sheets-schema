@@ -207,17 +207,44 @@ def _same(a: Any, b: Any) -> bool:
     Python's `==` takes `True` for `1` and `False` for `0`, inside lists
     and objects too, where JSON keeps a boolean apart from a number. So a
     boolean is the same only as a boolean. Numbers compare by value, so
-    `1` and `1.0` are one number, and lists and objects item by item.
-    Every comparison that keeps one of two values as a repeat of the other
-    uses this.
+    `1` and `1.0` are one number. Two objects have the same keys, as sets,
+    and the same value under each; two lists the same values in the same
+    places. Every comparison that keeps one of two values as a repeat of
+    the other uses this.
+
+    The pairs still to compare wait on a list, not on Python's call stack,
+    so a value nested however deep is compared (#4167). Written as a
+    recursion, this raised `RecursionError` on a value nested 600 levels
+    deep that two properties stated alike, and the conversion ended; the
+    `==` it replaced compared that value. A pair of objects or lists is
+    opened once. In a value read from JSON no pair comes twice, and in a
+    Python value a pair that comes again has its contents on the list or
+    compared already, so skipping it changes no answer. It ends the
+    comparison of a value that holds itself, which would otherwise go
+    round for ever.
     """
-    if isinstance(a, bool) or isinstance(b, bool):
-        return isinstance(a, bool) and isinstance(b, bool) and a == b
-    if isinstance(a, dict) and isinstance(b, dict):
-        return a.keys() == b.keys() and all(_same(a[key], b[key]) for key in a)
-    if isinstance(a, list) and isinstance(b, list):
-        return len(a) == len(b) and all(map(_same, a, b))
-    return a == b
+    pairs: List[Tuple[Any, Any]] = [(a, b)]
+    opened = set()
+    while pairs:
+        a, b = pairs.pop()
+        if isinstance(a, bool) or isinstance(b, bool):
+            if not (isinstance(a, bool) and isinstance(b, bool) and a == b):
+                return False
+        elif isinstance(a, dict) and isinstance(b, dict):
+            if a.keys() != b.keys():
+                return False
+            if (id(a), id(b)) not in opened:
+                opened.add((id(a), id(b)))
+                pairs.extend((a[key], b[key]) for key in a)
+        elif isinstance(a, list) and isinstance(b, list):
+            if len(a) != len(b):
+                return False
+            if (id(a), id(b)) not in opened:
+                opened.add((id(a), id(b)))
+                pairs.extend(zip(a, b))
+        elif not a == b:
+            return False
+    return True
 
 
 def _among(value: Any, values: List[Any]) -> bool:
@@ -522,10 +549,11 @@ class FairscapeToD4DConverter:
         self._view = None
         self._slots: Dict[str, Dict[str, Any]] = {}
         self._minted: Dict[str, int] = {}
-        #: The `@graph`'s entities by `@id`, and the `@id`s of the root's
-        #: parts already written as file collections, for `_parts`.
+        #: The `@graph`'s entities by `@id`, the first of any that share one,
+        #: and the root's parts written as file collections, by `@id`, each
+        #: with the entity its file collection is made from, for `_parts`.
         self._described: Dict[str, Dict[str, Any]] = {}
-        self._collected: set = set()
+        self._collected: Dict[str, Dict[str, Any]] = {}
         #: Each object `_shape_objects` built for a list, by `id()`, with
         #: its position in the list it was read from, for `_named`. The
         #: object is kept with it, so no other object can take its `id()`
@@ -608,8 +636,10 @@ class FairscapeToD4DConverter:
 
         A nested dataset is an entity of the `@graph` that the root's
         `hasPart` names and that is typed as a dataset (`is_dataset`), in
-        `@graph` order. The parts of a sub-crate are that sub-crate's, not
-        the root's.
+        `@graph` order. Of the nodes that share an `@id`, the first typed
+        as a dataset is taken, and its `hasPart` reference is compared with
+        that node (`_keys_not_taken`, #4167). The parts of a sub-crate are
+        that sub-crate's, not the root's.
 
         Returns:
             Tuple of (root, nested_datasets_list)
@@ -666,8 +696,13 @@ class FairscapeToD4DConverter:
             if isinstance(entity, dict) and isinstance(entity.get('@id'), str):
                 self._described.setdefault(entity['@id'], entity)
         # A hasPart member converted to a FileCollection is not repeated
-        # under resources (`_parts`).
-        self._collected = {entity.get('@id') for entity in nested_datasets}
+        # under resources, and its reference is compared with the entity
+        # the file collection is made from (`_parts`). Where two `@graph`
+        # nodes share its `@id`, that is the one `_extract_datasets`
+        # selected, which need not be the first, the one `_described`
+        # holds (#4167).
+        self._collected = {entity.get('@id'): entity
+                           for entity in nested_datasets}
 
         record_id, id_source = self._record_id(dataset)
         if record_id:
@@ -1442,7 +1477,9 @@ class FairscapeToD4DConverter:
           reference states that the entity does not, or states otherwise,
           is recorded in `dropped` (`_keys_not_taken`, #4098), and so is
           one the file collection does not read from the entity, whatever
-          the entity states (#4159).
+          the entity states (#4159). Where two `@graph` nodes share the
+          member's `@id`, the entity is the one the file collection is made
+          from, the first typed as a dataset (#4167).
         - A member the `@graph` describes as anything else (a person, a
           defined term, software, a computation, a schema) is not a dataset
           part, and is recorded in `dropped`.
@@ -1473,7 +1510,7 @@ class FairscapeToD4DConverter:
                 self.dropped.append(('hasPart', f"an entry with no `@id`: {_preview(item)}"))
                 continue
             if ref in self._collected:
-                self._keys_not_taken(item, ref)
+                self._keys_not_taken(item, ref, self._collected[ref])
                 continue
             if ref == root_id:
                 self.dropped.append(('hasPart', (
@@ -1498,13 +1535,14 @@ class FairscapeToD4DConverter:
                 parts[-1] = item
         return parts if any(part is not None for part in parts) else None
 
-    def _keys_not_taken(self, item: Any, ref: str) -> None:
+    def _keys_not_taken(self, item: Any, ref: str,
+                        entity: Dict[str, Any]) -> None:
         """Record each key a `hasPart` reference states that the member's
         file collection does not take from it (#4098, #4159).
 
-        The file collection is made from the `@graph`'s entity for the
-        member, from the properties `FILE_COLLECTION_SLOTS` names, and each
-        value read from them is kept there or recorded in `dropped`
+        The file collection is made from `entity`, the `@graph`'s entity for
+        the member, from the properties `FILE_COLLECTION_SLOTS` names, and
+        each value read from them is kept there or recorded in `dropped`
         (`_build_file_collections`). A reference may state such a value
         again, as CHORUS's root does with `name`, and then says nothing the
         entity does not. Any other key it states is not in the record: one
@@ -1515,10 +1553,17 @@ class FairscapeToD4DConverter:
         reached neither the record nor `dropped`. Values compare as JSON
         values (`_same`). An empty value states nothing and is not
         recorded, as `_place` and `_take` record none.
+
+        `entity` is the node `_extract_datasets` selected and
+        `_build_file_collections` read: of the `@graph` nodes that share
+        the member's `@id`, the first typed as a dataset. Until #4167 the
+        reference was compared with the first node of that `@id`
+        (`_described`), which can be another. A value the reference stated
+        as that node did was passed over while the file collection held
+        the other node's, so it was in neither the record nor `dropped`.
         """
         if not isinstance(item, dict):
             return
-        entity = self._described.get(ref, {})
         for key, value in item.items():
             if key in ('@id', '@type', '@context') or value in (None, '', [], {}):
                 continue
