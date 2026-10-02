@@ -20,17 +20,18 @@ import yaml
 
 INSTRUMENT = "support_targets v3 draft (#3342)"
 AXIS = "grounding_v3"
-POLICY = "relationship_edge_and_attribute_value_v1"
+POLICY = "relationship_edge_and_attribute_value_v2"
 KINDS = ("relationship_edge", "attribute_value")
 DECLARATIONS = ("attributed_to", "claim_status", "source_status")
 IDENTITY = ("id", "name", "title", "doi", "version")
+QUALIFIERS = (*DECLARATIONS, "description", "notes", "source_caveats")
 BLOCKERS = ("independent_empirical_calibration_3343", "paid_run_authorization",
-            "nested_planner_integration_3342", "instrument_review_3342")
+            "nested_planner_integration_3342", "instrument_review_3342",
+            "context_projection_review_3342")
 
 SYSTEM = """Judge the specified assertion facet against the supplied source documents.
 The target is identified by its exact document pointer, class/slot chain and
-specification. value_yaml preserves native YAML dates/timestamps; the JSON value
-preview tags those temporal values rather than turning them into quoted strings.
+specification. value_yaml preserves native YAML types including dates/timestamps.
 For relationship_edge, judge only whether this entity/reference
 occupies the relationship the containing slot asserts; do not grade all its
 descendant attributes again. For attribute_value, judge this value in its owning
@@ -206,6 +207,8 @@ class NestedSupportSchema:
             if name in classes:
                 continue
             definition = view.get_class(name)
+            pending.extend(str(parent) for parent in [definition.is_a, *(definition.mixins or [])]
+                           if parent and view.get_class(str(parent)) is not None)
             slots = {}
             classes[name] = {"definition": json.loads(json_dumper.dumps(definition)), "slots": slots}
             for slot in view.class_induced_slots(name):
@@ -229,10 +232,13 @@ class NestedSupportSchema:
 @dataclass(frozen=True)
 class SupportTarget:
     payload_json: str
+    specification_json: str
 
     def to_dict(self):
-        """A fresh copy; callers cannot modify the captured request identity."""
-        return json.loads(self.payload_json)
+        """Expand the shared specification into a private request-ready copy."""
+        payload = json.loads(self.payload_json)
+        payload["specification"] = json.loads(self.specification_json)
+        return payload
 
     @property
     def pointer(self):
@@ -252,6 +258,7 @@ class TargetInventory:
     targets: tuple[SupportTarget, ...]
     blocked_json: str
     artifact_json: str
+    specifications_json: str
 
     def target(self, pointer: str, *, kind: str) -> SupportTarget:
         pointer_tokens(pointer)
@@ -267,8 +274,9 @@ class TargetInventory:
                 "eligible_by_kind": {k: counts[k] for k in KINDS},
                 "blocked": json.loads(self.blocked_json),
                 "readiness_blockers": list(BLOCKERS),
+                "specifications": json.loads(self.specifications_json),
                 "fitness_basis": "top_level_only; many nested targets map to one parent field",
-                "targets": [t.to_dict() for t in self.targets]}
+                "targets": [json.loads(t.payload_json) for t in self.targets]}
 
 
 def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *,
@@ -300,7 +308,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 "root_fields": sorted(document), "specification_sha256": specification.digest,
                 "max_nodes": max_nodes, "max_depth": max_depth,
                 "max_input_bytes": max_input_bytes, "max_inventory_bytes": max_inventory_bytes}
-    targets, blocked = [], []
+    targets, blocked, specifications = [], [], {}
     rendered_bytes = 0
 
     def block(pointer, code):
@@ -319,21 +327,71 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 result.update(declarations(v, pointer + f"/{i}"))
         return result
 
+    def class_meaning(name):
+        # Slots are induced separately. Repeating a complete ClassDefinition
+        # would inject unrelated attributes and every sibling collection.
+        definition = classes[name]["definition"]
+        meaning = {k: definition[k] for k in ("name", "description", "is_a", "mixins", "class_uri")
+                   if k in definition}
+        pending = [definition.get("is_a"), *definition.get("mixins", [])]
+        parents, seen = [], {name}
+        while pending:
+            parent = pending.pop()
+            if not parent or parent in seen:
+                continue
+            seen.add(parent)
+            inherited = classes[parent]["definition"]
+            parents.append({k: inherited[k] for k in ("name", "description", "class_uri") if k in inherited})
+            pending.extend([inherited.get("is_a"), *inherited.get("mixins", [])])
+        if parents:
+            meaning["ancestor_meanings"] = sorted(parents, key=lambda item: item["name"])
+        return meaning
+
+    def owner_context(owner, pointer, selected_slot):
+        kept, omitted = {}, []
+        for name, value in owner.items():
+            if name == selected_slot:
+                continue  # the exact selected value is supplied separately
+            scalar_or_scalar_list = (not isinstance(value, (dict, list)) or
+                                    isinstance(value, list) and
+                                    all(not isinstance(v, (dict, list)) for v in value))
+            if scalar_or_scalar_list or name in QUALIFIERS or name in IDENTITY:
+                kept[name] = value
+            else:
+                omitted.append({"pointer": pointer + "/" + _token(name),
+                                "sha256": _digest(value), "size": len(value),
+                                "reason": "other_container_not_selected_assertion"})
+        return kept, sorted(omitted, key=lambda item: item["pointer"])
+
     def emit(pointer, kind, value, owner, owner_pointer, owner_class, chain, ancestors):
         nonlocal rendered_bytes
-        # Complete nearest mapping preserves anonymous subjects and sibling
-        # qualifiers. Ancestors carry identity/path only; no metadata inheritance.
+        # Retain complete scalar siblings and named qualifier fields without
+        # repeating unrelated containers. Every omission is explicit and pinned.
         declared = declarations(value, pointer)
         for k in DECLARATIONS:
             if k in owner:
                 declared[owner_pointer + "/" + _token(k)] = owner[k]
         selected = chain[-1]
-        spec = {"class_slot_chain": chain, "owning_class": classes[owner_class]["definition"],
+        enum_names = {edge["slot"].get("range") for edge in chain}
+        vocabulary_names = {str(v) for edge in chain for v in edge["slot"].get("values_from", [])}
+        spec = {"class_slot_chain": chain, "owning_class": class_meaning(owner_class),
                 "slot": selected["slot"], "range_class": selected["range_class"],
-                "enums": schema["enums"], "vocabulary": schema["vocabulary"]}
+                "enums": {name: schema["enums"][name] for name in sorted(enum_names - {None})
+                          if name in schema["enums"]},
+                "vocabulary": {name: schema["vocabulary"][name] for name in sorted(vocabulary_names)}}
+        spec_json = _canonical(spec)
+        spec_key = hashlib.sha256(spec_json.encode("utf-8")).hexdigest()
+        if spec_key not in specifications:
+            specifications[spec_key] = spec_json
+            rendered_bytes += len(spec_json.encode("utf-8"))
+        kept, omitted = owner_context(owner, owner_pointer, selected["slot"]["name"])
         context = {"containing_entity": {"pointer": owner_pointer, "class": owner_class,
-                                          "value": owner, "sha256": _digest(owner),
-                                          "value_yaml": yaml.safe_dump(owner, sort_keys=True)},
+                                          "value": kept, "source_mapping_sha256": _digest(owner),
+                                          "value_sha256": _digest(kept),
+                                          "value_yaml": yaml.safe_dump(kept, sort_keys=True),
+                                          "projection": "scalar_siblings_and_explicit_qualifiers_v1",
+                                          "selected_slot_supplied_as_target": selected["slot"]["name"],
+                                          "omitted_containers": omitted},
                    "ancestors": ancestors, "declarations": declared,
                    "collection_metadata_inherited": False}
         first = pointer_tokens(pointer)[0]
@@ -341,7 +399,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                    "pointer": pointer, "kind": kind, "artifact": artifact,
                    "value": value, "value_sha256": _digest(value),
                    "value_type": _typed(value)[0], "value_yaml": yaml.safe_dump(value, sort_keys=True),
-                   "specification": spec, "context": context,
+                   "specification_ref": spec_key, "context": context,
                    "context_sha256": _digest(context),
                    "fitness": {"basis": "top_level_only", "mapping": "many_to_one",
                                "pointer": "/" + _token(first)}}
@@ -349,10 +407,13 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
         rendered_bytes += len(encoded.encode("utf-8"))
         if rendered_bytes > max_inventory_bytes:
             raise ValueError("target context exceeds max_inventory_bytes; no partial inventory returned")
-        targets.append(SupportTarget(encoded))
+        targets.append(SupportTarget(encoded, specifications[spec_key]))
 
     def walk(entity, class_name, pointer, chain, ancestors):
         cls = classes[class_name]
+        if any(cls["definition"].get(k) for k in ("rules", "any_of", "all_of", "exactly_one_of", "none_of")):
+            block(pointer, "unsupported_class_constraint")
+            return
         identity = {k: entity[k] for k in IDENTITY if k in entity and
                     isinstance(entity[k], (str, int, float)) and not isinstance(entity[k], bool)}
         ancestry = ancestors + [{"pointer": pointer, "class": class_name, "identity": identity}]
@@ -374,7 +435,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 continue
             rng = slot.get("range")
             edge = {"owner_class": class_name, "slot": slot,
-                    "range_class": classes[rng]["definition"] if entry["range_class"] else None}
+                    "range_class": class_meaning(rng) if entry["range_class"] else None}
             next_chain = chain + [edge]
             many = bool(slot.get("multivalued"))
             if many != isinstance(value, list):
@@ -406,7 +467,8 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                          next_chain, ancestors)
 
     walk(document, root_class, "", [], [])
-    return TargetInventory(tuple(targets), _canonical(blocked), _canonical(artifact))
+    return TargetInventory(tuple(targets), _canonical(blocked), _canonical(artifact),
+                           _canonical({key: json.loads(value) for key, value in specifications.items()}))
 
 
 def render_request(target: SupportTarget, *, bundle: str, model: str,
@@ -418,12 +480,17 @@ def render_request(target: SupportTarget, *, bundle: str, model: str,
         raise ValueError("explicit model is required")
     if type(max_tokens) is not int or max_tokens < 1:
         raise ValueError("max_tokens must be a positive integer")
+    payload = target.to_dict()
+    # YAML already carries the complete value and native types. Avoid sending
+    # the JSON preview as a second copy of every source/context paragraph.
+    payload.pop("value")
+    payload["context"]["containing_entity"].pop("value")
     return {"model": model, "max_tokens": max_tokens, "temperature": None,
             "system": SYSTEM, "messages": [{"role": "user", "content": [
                 {"type": "text", "text": "# Source documents\n\n" + bundle,
                  "cache_control": {"type": "ephemeral"}},
                 {"type": "text", "text": "# Exact assertion target and untrusted record context\n\n"
-                 + target.payload_json}]}]}
+                 + _canonical(payload)}]}]}
 
 
 def request_identity(target: SupportTarget, *, bundle: str, model: str,

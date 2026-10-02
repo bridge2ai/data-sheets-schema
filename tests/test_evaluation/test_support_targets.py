@@ -173,7 +173,10 @@ def test_exact_artifact_and_context_bind_request_identity_and_v2_is_distinct(sch
     request = render_request(full, bundle="Document one\nA fact.", model="test-model")
     assert request["system"] != SUPPORT_V2_SYSTEM
     assert "Do not judge unrelated" in request["system"]
-    assert json.loads(request["messages"][0]["content"][1]["text"].split("\n\n", 1)[1]) == full.to_dict()
+    expected = full.to_dict()
+    expected.pop("value")
+    expected["context"]["containing_entity"].pop("value")
+    assert json.loads(request["messages"][0]["content"][1]["text"].split("\n\n", 1)[1]) == expected
     assert request_identity(full, bundle="Different document", model="test-model") != keys[0]
     assert request_identity(full, bundle="Document one\nA fact.", model="other-model") != keys[0]
     request["messages"][0]["content"][1]["text"] = "changed"
@@ -188,7 +191,7 @@ def test_schema_snapshot_is_frozen_and_independent_of_later_file_change(schema_p
     newer = NestedSupportSchema.from_schema(schema_path)
     assert spec.digest == before != newer.digest
     target = inventory({"creators": [{"name": "A"}]}, spec).targets[0]
-    assert "not merely leadership" in target.payload_json
+    assert "not merely leadership" in json.dumps(target.to_dict())
     copy_spec = spec.to_dict(); copy_spec["classes"].clear()
     assert spec.to_dict()["classes"]
 
@@ -241,8 +244,10 @@ def test_native_dates_keep_type_and_exact_input_identity_without_rewriting(schem
     assert source.read_bytes() == raw
     assert yaml.safe_load(payload["value_yaml"]) == value
     assert type(yaml.safe_load(payload["value_yaml"])) is type(value)
-    assert yaml.safe_load(payload["context"]["containing_entity"]["value_yaml"])[slot] == value
+    assert yaml.safe_load(payload["context"]["containing_entity"]["value_yaml"])["name"] == "A"
     assert result.target("/dates/0", kind="attribute_value").to_dict()["value_type"] == "date"
+    name_context = result.target("/creators/0/name", kind="attribute_value").to_dict()["context"]
+    assert yaml.safe_load(name_context["containing_entity"]["value_yaml"])[slot] == value
     request = render_request(target, bundle="Source", model="test")
     rendered = json.loads(request["messages"][0]["content"][1]["text"].split("\n\n", 1)[1])
     assert yaml.safe_load(rendered["value_yaml"]) == value
@@ -269,3 +274,50 @@ def test_real_d4d_specs_have_nested_meaning_without_loading_private_records():
     assert "as it appears in the data files" in variable["specification"]["slot"]["description"]
     contact = result.target("/data_governance/committee_contact", kind="relationship_edge").to_dict()
     assert "policy, procedure and oversight" in contact["specification"]["slot"]["description"]
+
+
+def test_context_keeps_qualifiers_but_excludes_unrelated_sibling_containers(schema):
+    notes = "Important qualifier. " * 300
+    document = {"id": "dataset:one", "notes": notes,
+                "creators": [{"name": "A"}, {"name": "B"}],
+                "variables": [{"variable_name": "irrelevant-wide-container" * 100}]}
+    result = inventory(document, schema)
+    target = result.target("/creators/0", kind="relationship_edge").to_dict()
+    owner = target["context"]["containing_entity"]
+    assert owner["value"] == {"id": "dataset:one", "notes": notes}
+    assert owner["omitted_containers"][0]["pointer"] == "/variables"
+    assert owner["selected_slot_supplied_as_target"] == "creators"
+    assert "context_projection_review_3342" in result.to_dict()["readiness_blockers"]
+    prompt = render_request(result.target("/creators/0", kind="relationship_edge"), bundle="source", model="test")
+    assert "irrelevant-wide-container" not in json.dumps(prompt)
+    assert yaml.safe_load(target["context"]["containing_entity"]["value_yaml"])["notes"] == notes
+
+
+def test_specs_are_deduplicated_and_only_selected_semantics_expand(schema):
+    result = inventory({"creators": [{"name": "A"}, {"name": "B"}]}, schema)
+    encoded = result.to_dict()
+    edges = [t for t in encoded["targets"] if t["kind"] == "relationship_edge"]
+    assert edges[0]["specification_ref"] == edges[1]["specification_ref"]
+    assert all("specification" not in t for t in encoded["targets"])
+    assert len(encoded["specifications"]) < len(encoded["targets"])
+    target = result.target("/creators/0", kind="relationship_edge").to_dict()
+    assert "attributes" not in target["specification"]["owning_class"]
+    assert "attributes" not in target["specification"]["range_class"]
+    assert "variables" not in json.dumps(target["specification"])
+    assert "not merely leadership" in json.dumps(target["specification"])
+
+
+@pytest.mark.corpus
+def test_first_public_reference_record_fits_default_inventory_limits_without_rewrites():
+    root = Path(__file__).resolve().parents[2]
+    source = root / "data/d4d_concatenated/claudecode_agent/2026-09-01_claude-opus-5-api-generic-v7_rep1/AI_READI_d4d.yaml"
+    before = source.read_bytes()
+    assert hashlib.sha256(before).hexdigest() == "dd656a3a6e8b6bc0f00a50c5d1a5e75c6d2eae8407866c2ba3d2cc3c63b8fdb5"
+    spec = NestedSupportSchema.from_schema(root / "src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
+    result = inventory_targets(before, spec, artifact_kind="full")
+    encoded = result.to_dict()
+    assert all(encoded["eligible_by_kind"][kind] > 0 for kind in ("relationship_edge", "attribute_value"))
+    assert len(json.dumps(encoded).encode()) < 64_000_000
+    target = result.target("/creators/0", kind="relationship_edge")
+    assert len(json.dumps(render_request(target, bundle="source", model="test")).encode()) < 30_000
+    assert source.read_bytes() == before

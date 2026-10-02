@@ -27,8 +27,11 @@ identity = request_identity(target, bundle="Document A\nSource text.", model="ex
 
 The schema must be explicitly selected. Local transitive imports are captured
 once; uncaptured remote imports are refused. Specifications include complete
-induced slot descriptions, class definitions along the path, enums and the
-explicit caller vocabulary snapshot. No ambient profile is selected. A slot's
+induced slot descriptions, class and ancestor meanings along the path, relevant
+enums and the explicit caller vocabulary snapshot. Full unrelated class attribute
+inventories are not sent. Inventory specifications are deduplicated in a shared
+catalog; each target pins its specification reference. A single target expands
+that specification for request rendering. No ambient profile is selected. A slot's
 `values_from` names must have entries in that vocabulary or the target is blocked.
 Profile-specific registry resolution and manifest selection belong to the later
 planner integration.
@@ -44,8 +47,17 @@ container's meaning. The two kinds have separate counts; there is no combined
 support percentage or arbitrary conversion of typed verdicts to points.
 
 Every target binds exact input bytes, artifact kind, root class/field inventory,
-value, full specification and context. The nearest containing mapping is
-included in full as untrusted context, with its pointer, class and digest.
+value, selected specification and context. The nearest containing mapping's
+complete scalar siblings, scalar-list siblings and explicit qualifier fields
+(`description`, `notes`, `source_caveats` and declaration fields) are included as
+untrusted context, with its pointer, class, full-source digest and projected-value
+digest. The selected slot is supplied separately as the target; unrelated
+container siblings are omitted with their pointer, content hash and size recorded.
+No retained description or qualifier is truncated. Anonymous mappings retain
+this projected context and their path even without an identifier. The context
+projection is versioned and remains an explicit readiness blocker pending review;
+an application requiring an omitted container must expand/review the context
+policy before execution, not treat an omission as evidence of absence.
 Ancestor mappings supply identity and path, without automatically inheriting
 collection metadata. A resource's creator is asserted of that resource, not the
 outer collection. Anonymous entities retain their mapping and pointer. Context
@@ -65,17 +77,19 @@ their relationship assertion as a string-valued edge. Native YAML dates and
 timestamps retain typed identities and faithful `value_yaml` rendering, including
 time zones; their JSON previews are tagged. Every node is tagged for value and
 context hashes, so dates, quoted date strings and ordinary tag-shaped mappings
-remain distinct. Input bytes are never rewritten. Duplicate YAML keys,
+remain distinct. The request sends the faithful YAML representation once, without
+also repeating the JSON preview of the same text. Input bytes are never rewritten. Duplicate YAML keys,
 unsupported scalar types such as binary values, nonfinite numbers and invalid roots are refused. Empty or
 null fields do not create targets; empty/null members of a populated list are
 reported as blocked.
 
 Traversal defaults to 100,000 nodes and depth 64, at most 4 MB input and 64 MB
-total rendered target data. Limits are explicit and pinned in the artifact
+total compact target data plus shared specification catalog. Limits are explicit and pinned in the artifact
 identity. Exceeding a limit raises instead of returning a truncated inventory.
-Including complete nearest mappings is conservative and can be expensive;
-future context reduction changes the instrument and must be reviewed before
-calibration. The renderer is pure: no client initialization, token-count API,
+Future context-policy changes alter the instrument and must be reviewed before
+calibration. The public AI_READI v7 rep1 regression exercises the default limits
+on its original 89 KB record, including a bounded per-creator request rather than
+a copy of unrelated sibling collections. The renderer is pure: no client initialization, token-count API,
 retry, network request or output-file write occurs.
 
 The draft `grounding_v3` axis and `support_targets v3 draft (#3342)` identity are
