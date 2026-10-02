@@ -36,7 +36,9 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
                    "exists and the full record's header does not name it")
 @click.option("--chunk-manifest", type=click.Path(dir_okay=False, path_type=Path),
               help="selected chunk manifest, including before provenance exists; recorded hashes still apply")
-def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="pinned completion registration before provenance exists; must match an existing run declaration")
+def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -58,6 +60,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
     from data_sheets_schema import receipts as rc
 
     p = _run_paths(method, label, project)
+    record = None
     if p["provenance"].exists():
         record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
         inputs = record.get("inputs") or {}
@@ -92,12 +95,33 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest):
         recovery["allow_manifest_discovery"] = False
     if chunk_manifest is not None:
         recovery["manifest"] = chunk_manifest
+    if receipt_completion_registration is not None:
+        from data_sheets_schema import receipt_completion_policy as cp
+        from data_sheets_schema.api_runner import RUNTIME
+        try:
+            raw = receipt_completion_registration.read_bytes()
+            registration = cp.parse_registration(raw)
+            declaration = {"receipt_completion_version": 1,
+                           "receipt_completion_policy_sha256": registration["runtime_policy_sha256"],
+                           "receipt_completion_registration": cp.registration_identity(raw),
+                           "condition": registration["condition"], "runtime": RUNTIME, "render_version": 8}
+            if record is not None and cp.select_policy(record=record) is None:
+                raise ValueError("an existing historical run cannot acquire a new receipt policy")
+            cp.select_policy(render_spec=declaration, record=record)
+        except (OSError, ValueError) as exc:
+            raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
+        recovery["receipt_render_spec"] = declaration
     block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
     else:
         click.echo(f"   {block['summary']}")
+        if "coverage_floor" in block:
+            floor = block["coverage_floor"]
+            click.echo(f"   · registered receipt coverage: {floor['state']} "
+                       f"({floor['with_receipt']}/{floor['receiptable']}); "
+                       f"registration {floor['registration_sha256']}")
         for f in block["findings"]:
             click.echo("   ❌ " + ", ".join(f"{k}={v}" for k, v in f.items()))
         for nc in block["non_checks"]:

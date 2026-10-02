@@ -1552,7 +1552,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
               bundle_rel_path: str | None = None, record_bundle_sha256: str | None = None,
               record_chunks: dict[str, Any] | None = None, *,
               snapshot_spec=None, snapshot_record: dict | None = None,
-              allow_manifest_discovery: bool = True) -> dict[str, Any]:
+              allow_manifest_discovery: bool = True,
+              receipt_render_spec: dict | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1586,6 +1587,16 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     from data_sheets_schema.chunking import manifest_for, canonical_name, validate_manifest_mapping
 
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
+    from data_sheets_schema import receipt_completion_policy as selected_receipts
+    try:
+        spec_declaration = (snapshot_spec.render_spec() if snapshot_spec is not None
+                            and getattr(snapshot_spec, "receipt_completion_version", 0) else receipt_render_spec)
+        policy = selected_receipts.select_policy(render_spec=spec_declaration, record=snapshot_record)
+    except ValueError as exc:
+        return {**base, "expected": True, "checked": False,
+                "reason": f"receipt policy selection refused: {exc}"}
+    if policy is not None:
+        base.update(expected=True, **{selected_receipts.BLOCK_KEY: selected_receipts.block_identity(policy)})
     if not receipt.exists():
         return {**base, "checked": False, "reason": f"no coverage receipt at {receipt}"}
     try:
@@ -1782,7 +1793,13 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": f"the phase-1 snapshot {snap_path} is present but not usable ({snap_why}); "
                           "receipt paths cannot be joined to the record by entry identity, and an index "
                           "join would credit the wrong entries (#899)"}
-    block = check(rec, m, texts, full, record_bundle_md5, original)
+    block = check(rec, m, texts, full, record_bundle_md5, original,
+                  **({"instrument_version": 4} if policy is not None else {}))
+    if policy is not None and block.get("checked"):
+        try:
+            block["coverage_floor"] = selected_receipts.evaluate_floor(block.get("slots"), policy)
+        except ValueError as exc:
+            return {**base, "checked": False, "reason": f"receipt coverage counters refused: {exc}"}
     block["artifacts"] = {
         "receipt": {"path": str(receipt), "sha256": hashlib.sha256(receipt_bytes).hexdigest()},
         "manifest": ({"path": str(mpath), "sha256": hashlib.sha256(manifest_bytes).hexdigest()}
