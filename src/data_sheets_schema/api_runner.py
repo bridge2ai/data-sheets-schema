@@ -5340,7 +5340,8 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
                      sleep=time.sleep, wall_clock: float | None = None,
-                     thinking: dict[str, Any] | None = None, effort: str | None = None):
+                     thinking: dict[str, Any] | None = None, effort: str | None = None,
+                     transport_attempts: int | None = None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -5349,6 +5350,9 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     sees the real problem.
     """
     import anthropic
+    limit = MAX_ATTEMPTS if transport_attempts is None else transport_attempts
+    if type(limit) is not int or limit < 1:
+        raise ValueError("transport_attempts must be a positive integer")
     # Omitted rather than defaulted: claude-opus-5 rejects the parameter with
     # 400 "`temperature` is deprecated for this model", so passing 0.0 fails
     # the request. Sending it only where the model accepts it keeps one code
@@ -5375,7 +5379,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
 
     last: Exception | None = None
     incomplete = 0
-    for attempt in range(1, MAX_ATTEMPTS + 1):
+    for attempt in range(1, limit + 1):
         t_call = time.monotonic()
         trace = StreamTrace(t_call)
         holder: dict[str, Any] = {}
@@ -5525,7 +5529,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
                 print(f"   attempt {attempt} abandoned by the watchdog after the wall clock"
-                      + ("; retrying" if attempt < MAX_ATTEMPTS else "; giving up"))
+                      + ("; retrying" if attempt < limit else "; giving up"))
             if isinstance(exc, IncompleteStreamError):
                 # Bounded below MAX_ATTEMPTS: two clean early closes in one
                 # call are a systemic problem, not noise, and a 15-minute
@@ -5562,8 +5566,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 except Exception as rec_exc:               # noqa: BLE001
                     print(f"   could not record the abandoned attempt: {rec_exc}")
                 print(f"   attempt {attempt} {exc}"
-                      + ("; retrying" if transient and attempt < MAX_ATTEMPTS else "; giving up"))
-            if not transient or attempt == MAX_ATTEMPTS:
+                      + ("; retrying" if transient and attempt < limit else "; giving up"))
+            if not transient or attempt == limit:
                 raise
             last = exc
             # A rate limit is not the same shape of transient as a dropped

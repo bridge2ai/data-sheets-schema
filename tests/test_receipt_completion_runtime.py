@@ -107,6 +107,8 @@ class Messages(FakeMessages):
 def client(spec, mode='unsupported', **kwargs):
     c = FakeClient()
     c.messages = Messages(spec, mode, **kwargs)
+    c.max_retries = 2
+    c.with_options = lambda **options: SimpleNamespace(messages=c.messages, max_retries=options['max_retries'])
     return c
 
 
@@ -561,6 +563,9 @@ def test_unknown_completion_usage_never_readmits_or_restarts_full(selected, monk
     first = client(selected)
     with pytest.raises(ledger.UsageLedgerError): api.execute(selected, client=first)
     assert len(first.messages.completion_calls) == 1 and selected.full_path.exists()
+    envelope = rc._load(rc._state(selected)['response'])
+    assert envelope['text'].startswith('rereceipt:')
+    assert envelope['reasoning_entry']['reasoning_available'] is True
     monkeypatch.setattr(api, '_append_usage', original)
     second = client(selected)
     with pytest.raises(ledger.UsageLedgerError): api.execute(replace(selected), client=second)
@@ -616,3 +621,109 @@ def test_new_axis_does_not_reopen_terminal_generation_admission(selected, termin
     with pytest.raises(ledger.UsageLedgerError, match='evidence refusal|source-review admission|after removal repair'):
         ledger.begin_call(selected, phase, 1, 'synthetic')
     assert ledger._read(selected) == data
+
+
+def test_transient_completion_does_not_retry_controller_or_regenerate(selected, monkeypatch):
+    import httpx
+    c = client(selected)
+    create = c.messages.create
+    attempts = []
+    monkeypatch.setattr(api, 'MAX_ATTEMPTS', 3)
+    def transient(**kw):
+        content = kw['messages'][-1]['content']
+        if isinstance(content, list) and any(p.get('text') == rc.policy_text() for p in content):
+            attempts.append(kw)
+            raise httpx.ReadError('synthetic read loss with no final usage')
+        return create(**kw)
+    monkeypatch.setattr(c.messages, 'create', transient)
+    with pytest.raises(httpx.ReadError): api.execute(selected, client=c)
+    state = rc._state(selected)
+    assert state['state'] == 'failed' and state['usage_id']
+    assert len(attempts) == 1 and selected.full_path.exists()
+    second = client(selected)
+    with pytest.raises(ledger.UsageLedgerError): api.execute(replace(selected), client=second)
+    assert not second.messages.calls and not second.messages.count_calls
+
+
+def test_sdk_retry_configuration_is_real_and_does_not_mutate_original_client():
+    import anthropic
+    import httpx
+    calls = []
+    def failed(request):
+        calls.append(request)
+        return httpx.Response(503, headers={'retry-after-ms': '1'},
+                              json={'type': 'error', 'error': {'type': 'overloaded_error', 'message': 'synthetic'}})
+    original = anthropic.Anthropic(api_key='synthetic-local-only', base_url='https://synthetic.invalid',
+        max_retries=2, http_client=httpx.Client(transport=httpx.MockTransport(failed)))
+    bounded = rc._single_attempt_client(original)
+    assert bounded.max_retries == 0 and original.max_retries == 2
+    assert bounded.base_url == original.base_url and bounded._client is original._client
+    request = {'model': 'synthetic', 'max_tokens': 1, 'messages': [{'role': 'user', 'content': 'synthetic'}]}
+    with pytest.raises(anthropic.InternalServerError): bounded.messages.create(**request)
+    assert len(calls) == 1
+    calls.clear()
+    with pytest.raises(anthropic.InternalServerError): original.messages.create(**request)
+    assert len(calls) == 3  # Legacy SDK retry behavior is untouched.
+    original.close()
+
+
+def test_legacy_controller_transport_retry_default_is_unchanged(monkeypatch):
+    import httpx
+    monkeypatch.setattr(api, 'MAX_ATTEMPTS', 2)
+    c = FakeClient()
+    calls = []
+    def transient(**kw):
+        calls.append(kw)
+        if len(calls) == 1: raise httpx.ReadError('synthetic legacy retry')
+        return FakeResponse('done')
+    c.messages.create = transient
+    response = api._call_with_retry(c, model='synthetic', max_tokens=1, temperature=None,
+                                   system='synthetic', messages=[], sleep=lambda _: None)
+    assert len(calls) == 2 and response.content[0].text == 'done'
+
+
+@pytest.mark.parametrize('reported', [None, True, -1, 1, '0'])
+def test_unverifiable_sdk_retry_setting_refuses(reported):
+    c = SimpleNamespace(with_options=lambda **kw: SimpleNamespace(max_retries=reported))
+    with pytest.raises(ledger.UsageLedgerError, match='disable SDK retries'):
+        rc._single_attempt_client(c)
+
+
+@pytest.mark.parametrize('field,value', [('input_tokens', None), ('output_tokens', None),
+    ('input_tokens', True), ('output_tokens', -1), ('output_tokens', float('nan'))])
+def test_delivered_invalid_usage_preserves_response_and_known_counters_terminally(selected, monkeypatch, field, value):
+    c = client(selected)
+    create = c.messages.create
+    def missing(**kw):
+        response = create(**kw)
+        content = kw['messages'][-1]['content']
+        if isinstance(content, list) and any(p.get('text') == rc.policy_text() for p in content):
+            setattr(response.usage, field, value)
+        return response
+    monkeypatch.setattr(c.messages, 'create', missing)
+    with pytest.raises(ledger.UsageLedgerError, match='unresolved usage'):
+        api.execute(selected, client=c)
+    state = rc._state(selected)
+    assert state['state'] == 'failed' and state['failure_type'] == 'unresolved_usage'
+    envelope = rc._load(state['response'])
+    assert envelope['text'].startswith('rereceipt:')
+    assert envelope['reasoning_entry']['blocks'][0]['thinking'] == 'Synthetic disclosed reasoning summary'
+    rows = ledger.merge_usage(selected, [])
+    assert [r['phase'] for r in rows] == ['full', rc.PHASE]
+    row = rows[-1]
+    assert row == envelope['usage'] and row[field] == rc._counter_evidence(value)
+    other = 'output_tokens' if field == 'input_tokens' else 'input_tokens'
+    assert type(row[other]) is int and row[other] > 0
+    assert not selected.core_path.exists() and not selected.provenance_path.exists()
+    second = client(selected)
+    with pytest.raises(ledger.UsageLedgerError): api.execute(replace(selected), client=second)
+    assert not second.messages.calls and not second.messages.count_calls
+
+
+def test_complete_recovery_refuses_edited_accounted_token_counters(selected):
+    api.execute(selected, client=client(selected))
+    data = ledger._read(selected)
+    next(r for r in data['rows'] if r['phase'] == rc.PHASE)['input_tokens'] = None
+    ledger._write(selected, data)
+    with pytest.raises(ledger.UsageLedgerError, match='usage is unresolved'):
+        rc.recover(selected)

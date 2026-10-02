@@ -326,6 +326,8 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
         # discarded, or the transport later fails (#1821).
         data["report_regate_attempted"] = True
     identifier = uuid.uuid4().hex
+    if getattr(spec, "receipt_completion_version", 0) and phase == RECEIPT_PHASE:
+        data["receipt_completion"]["usage_id"] = identifier
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)

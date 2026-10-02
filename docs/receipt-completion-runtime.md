@@ -64,14 +64,21 @@ neither a byte bound nor the assertion independently establishes actual capacity
 No path is silently truncated. Empty inventories record explicit no-work without
 a counter or completion call. A saved intent reuses its pinned count.
 
-One durable admitted completion request uses the existing bounded transport
-retry/accounting machinery. There is no answer retry or restart of full. Raw
+One durable admitted completion request uses exactly one controller transport
+attempt and a client configured with SDK retries disabled. The same bounded
+client performs the context count and completion call. A client that cannot
+prove this retry configuration is refused before admission. Other phases keep
+their existing retry behavior. There is no answer retry or restart of full. Raw
 response, finish reason, usage, reasoning and checked result are preserved in
 separate hash-bound snapshots. Unknown usage, source-review/evidence refusals,
 and accepted-restoration restrictions retain their existing terminal semantics.
 The response envelope includes the full captured reasoning entry. Recovery
 appends a missing entry exactly once and refuses contradictory logs, so a crash
 between response publication and reasoning append does not discard disclosure.
+The envelope is durable before usage persistence. Missing, boolean, negative,
+or otherwise invalid input/output counters remain visible alongside all known
+usage, but make the attempt terminal; no zero is fabricated. Recovery also
+revalidates the captured counters against the ledger before accepting a result.
 
 The existing typed receipt parser, quote checker and validated merge produce
 v4 counts. Verified partial additions may be published, but an incomplete answer

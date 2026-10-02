@@ -40,6 +40,7 @@ def policy_identity() -> dict:
     from data_sheets_schema.receipts import RERECEIPTS_INSTRUMENT
     return {'version': 1, 'path': str(POLICY_PATH), 'sha256': POLICY_SHA256,
             'receipt_instrument_version': 4, 'receipt_instrument': copy.deepcopy(RERECEIPTS_INSTRUMENT),
+            'transport_attempts': 1, 'sdk_max_retries': 0,
             'phase': PHASE, 'audit_header': AUDIT_HEADER}
 
 
@@ -256,6 +257,56 @@ def _context_check(value, payload, reg) -> None:
         raise UsageLedgerError('receipt completion context count unavailable, unbound, or exceeds registered window')
 
 
+def _single_attempt_client(client):
+    """Disable hidden SDK retries as well as the controller's retry loop."""
+    from data_sheets_schema.usage_ledger import UsageLedgerError
+    configure = getattr(client, 'with_options', None)
+    if not callable(configure):
+        raise UsageLedgerError('receipt completion requires a client with configurable SDK retries')
+    try:
+        bounded = configure(max_retries=0)
+    except Exception as exc:
+        raise UsageLedgerError(f'cannot disable receipt completion SDK retries: {exc}') from exc
+    if type(getattr(bounded, 'max_retries', None)) is not int or bounded.max_retries != 0:
+        raise UsageLedgerError('receipt completion client did not disable SDK retries')
+    return bounded
+
+
+def _counter_evidence(value):
+    """Keep invalid counters visible without emitting invalid JSON or zeros."""
+    import math
+    if value is None or isinstance(value, (str, bool, int)) or (isinstance(value, float) and math.isfinite(value)):
+        return value
+    return {'invalid_type': type(value).__name__, 'representation': repr(value)}
+
+
+def _usage_problems(row) -> list[str]:
+    if not isinstance(row, dict):
+        return ['usage is not a mapping']
+    problems = []
+    for key in ('input_tokens', 'output_tokens', 'cache_read', 'cache_write', 'thinking_tokens'):
+        value = row.get(key)
+        if value is None and key not in ('input_tokens', 'output_tokens'):
+            continue  # Optional provider breakdown; not fabricated as zero.
+        if type(value) is not int or value < 0:
+            problems.append(f'{key} is not a reported nonnegative integer')
+    return problems
+
+
+def _reasoning_entry(spec, row, resp, model):
+    from data_sheets_schema import api_runner as api, reasoning
+    captured = reasoning.capture(resp)
+    observed = captured.output_tokens
+    if type(observed) is not int or observed < 0:
+        captured.output_tokens = None  # Cannot calculate an estimate from an invalid counter.
+    captured.thinking_tokens = (captured.thinking_tokens if type(captured.thinking_tokens) is int
+                               and captured.thinking_tokens >= 0 else None)
+    value = captured.to_dict()
+    value['output_tokens'] = _counter_evidence(observed)
+    return {'phase': PHASE, 'label': spec.label, 'project': spec.project,
+            'model': model, 'attempt': 1, **api._reasoning_usage(spec, row), **value}
+
+
 def _count_context(client, payload, reg) -> dict:
     """Endpoint-reported count against a caller-asserted window; no generation."""
     from data_sheets_schema.usage_ledger import UsageLedgerError
@@ -376,6 +427,9 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
         matching = [r for r in rows if r.get('usage_id') == response['usage_id'] and r.get('phase') == PHASE]
         if len(matching) != 1:
             raise ledger.UsageLedgerError('completion response has no unique matching accounted usage')
+        if (state.get('usage_id') != response['usage_id'] or response.get('usage') != matching[0]
+                or _usage_problems(matching[0])):
+            raise ledger.UsageLedgerError('receipt completion response usage is unresolved or conflicts with its captured counters')
         _recover_reasoning(spec, response, matching[0], payload)
     if state['state'] == 'response':
         result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
@@ -420,6 +474,7 @@ def run(spec, client, settings: dict, usage: list) -> dict:
     if old is not None:
         return old
     state = _state(spec)
+    bounded_client = None
     if state is None:
         inputs = _inputs(spec)
         inputs['request_settings'] = copy.deepcopy(settings)
@@ -427,7 +482,9 @@ def run(spec, client, settings: dict, usage: list) -> dict:
         payload = request_payload(req, settings, reg)
         if inventory['requested_paths'] and len(canonical(payload)) > reg['max_request_bytes']:
             raise ledger.UsageLedgerError('complete receipt request exceeds registered byte limit; inventory not truncated')
-        context = (_save(spec, 'receipt_completion_context.json', _count_context(client, payload, reg))
+        if inventory['requested_paths']:
+            bounded_client = _single_attempt_client(client)
+        context = (_save(spec, 'receipt_completion_context.json', _count_context(bounded_client, payload, reg))
                    if inventory['requested_paths'] else None)
         state = {'state': 'intent', 'inputs': _save(spec, 'receipt_completion_inputs.json', inputs),
                  'request': _save(spec, 'receipt_completion_request.json', payload), 'context': context,
@@ -438,6 +495,8 @@ def run(spec, client, settings: dict, usage: list) -> dict:
         req, inventory = build_request(inputs)
         if _load(state['request']) != request_payload(req, settings, reg):
             raise ledger.UsageLedgerError('receipt completion request differs from saved intent')
+        if state['requested_paths']:
+            bounded_client = _single_attempt_client(client)
     if sha(spec.full_path.read_bytes()) != sha(inputs['record'].encode()):
         raise ledger.UsageLedgerError('full record changed before receipt completion admission')
     if sha(api._receipt_path(spec).read_bytes()) != sha(inputs['receipt'].encode()):
@@ -447,7 +506,7 @@ def run(spec, client, settings: dict, usage: list) -> dict:
     else:
         started, start = datetime.now(timezone.utc).isoformat(timespec='seconds'), time.monotonic()
         try:
-            resp, call_id = api._call_with_usage(spec, PHASE, 1, started, client,
+            resp, call_id = api._call_with_usage(spec, PHASE, 1, started, bounded_client, transport_attempts=1,
                 model=settings['name'], thinking=settings.get('thinking'), effort=settings.get('effort'),
                 max_tokens=reg['max_output_tokens'], temperature=settings['temperature'],
                 system=req.system, messages=req.messages,
@@ -455,27 +514,36 @@ def run(spec, client, settings: dict, usage: list) -> dict:
                     info, usage, max_tokens=reg['max_output_tokens']))
         except ledger.UsageLedgerError:
             raise
-        except Exception:
+        except Exception as exc:
             state = _state(spec)
-            state['state'] = 'failed'
+            state.update(state='failed', failure_type=type(exc).__name__)
             _set_state(spec, state)
             raise
-        row = api._append_usage(spec, usage, {'usage_id': call_id, 'phase': PHASE, 'attempt': 1,
+        delivered_usage = getattr(resp, 'usage', None)
+        row = {'usage_id': call_id, 'phase': PHASE, 'attempt': 1,
             'started_at': started, 'seconds': round(time.monotonic() - start, 3),
-            'input_tokens': getattr(resp.usage, 'input_tokens', None),
-            'output_tokens': getattr(resp.usage, 'output_tokens', None),
-            'thinking_tokens': reasoning.thinking_tokens(resp),
-            'cache_read': getattr(resp.usage, 'cache_read_input_tokens', None),
-            'cache_write': getattr(resp.usage, 'cache_creation_input_tokens', None),
-            'max_tokens': reg['max_output_tokens'], 'stop_reason': getattr(resp, 'stop_reason', None)})
+            'input_tokens': _counter_evidence(getattr(delivered_usage, 'input_tokens', None)),
+            'output_tokens': _counter_evidence(getattr(delivered_usage, 'output_tokens', None)),
+            'thinking_tokens': _counter_evidence(reasoning.thinking_tokens(resp)),
+            'cache_read': _counter_evidence(getattr(delivered_usage, 'cache_read_input_tokens', None)),
+            'cache_write': _counter_evidence(getattr(delivered_usage, 'cache_creation_input_tokens', None)),
+            'max_tokens': reg['max_output_tokens'], 'stop_reason': getattr(resp, 'stop_reason', None)}
         response = {'text': ''.join(b.text for b in resp.content if getattr(b, 'type', '') == 'text'),
                     'usage_id': call_id, 'stop_reason': getattr(resp, 'stop_reason', None),
-                    'reasoning_entry': {'phase': PHASE, 'label': spec.label,
-                        'project': spec.project, 'model': settings['name'], 'attempt': 1,
-                        **api._reasoning_usage(spec, row), **reasoning.capture(resp).to_dict()}}
-        # Preserve full delivered response before reasoning/parse/result side effects.
+                    'usage': copy.deepcopy(row),
+                    'reasoning_entry': _reasoning_entry(spec, row, resp, settings['name'])}
+        # Keep delivered evidence even if usage persistence/validation fails.
+        # The admitted state remains terminal until accounting is settled.
         state = _state(spec)
-        state.update(state='response', response=_save(spec, 'receipt_completion_response.json', response, usage_id=call_id))
+        state['response'] = _save(spec, 'receipt_completion_response.json', response, usage_id=call_id)
+        _set_state(spec, state)
+        api._append_usage(spec, usage, row)
+        problems = _usage_problems(row)
+        if problems:
+            state.update(state='failed', failure_type='unresolved_usage', usage_problems=problems)
+            _set_state(spec, state)
+            raise ledger.UsageLedgerError('receipt completion response has unresolved usage; full and delivered evidence preserved')
+        state['state'] = 'response'
         _set_state(spec, state)
         return recover(spec)
     state.update(state='response', response=_save(spec, 'receipt_completion_response.json', response))
