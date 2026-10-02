@@ -1371,6 +1371,34 @@ make eval-details PROJECT=VOICE METHOD=claudecode
 
 Individual files (single-source): Claude Code and GPT-5 identical at 18.8% (R10), 26.3% (R20).
 
+## Evaluation model selection (#3325)
+
+`src/data_sheets_schema/evaluation_config.yaml` selects the default for support,
+fitness, referent, equivalence and form-subtype judges. The shipped `model: null`
+preserves the generation-model default. To select a different evaluator, set
+`model` to its exact provider model identifier; keep `version: 1`. The file ships
+with the package and is read beside the imported implementation, from any working
+directory. Unknown settings, duplicate keys and invalid identifiers are refused.
+Caller-supplied models take precedence. Form-subtype reproduction still prefers
+the single model recorded in its cache, refusing pooled instruments.
+
+New judgement caches/reasoning logs, semantic referent findings and agreement matrices record
+`evaluation_model` with the selected name and basis (configuration, generation
+default, explicit override, or recorded cache model). Config-derived selections
+include the config's SHA256. This describes selection for the new output;
+replaying an old cache does not establish the original selection basis. Existing
+cache identities, prompts and historical outputs are unchanged. A deliberate
+model switch requires a newly registered/calibrated measurement; this setting
+alone supplies no evidence of independence or agreement. The separate API rubric
+evaluator deliberately retains `claude-sonnet-4-5-20250929` (#3326): it is an
+already registered instrument with its own request identity. Changing the shared
+support/fitness setting must not silently change that rubric baseline. A new API
+rubric registration can explicitly supply `LLMEvaluationConfig(model=...)`.
+Offline support plans copy the config bytes that selected their default model
+and refuse a config change during selection. Saved requests remain inspectable
+after the original config changes or disappears. Explicit model overrides do
+not require the default config.
+
 ## D4D LLM-based Evaluation (Quality Assessment)
 
 LLM-as-judge agents provide quality assessment complementing field-presence detection.

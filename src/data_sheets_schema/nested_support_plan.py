@@ -81,12 +81,9 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
         raise common.PlanError("collection requires an explicit collection root class and schema")
     if type(max_tokens) is not int or max_tokens < 1:
         raise common.PlanError("max_tokens must be a positive integer")
-    settings = ({"name": model, "basis": "explicit_override"} if model is not None
-                else common.evaluation_model_settings())
-    model = settings["name"]
-    if not isinstance(model, str) or not model.strip():
-        raise common.PlanError("model must be a nonempty identifier")
     artifacts = common.Artifacts()
+    settings = common.plan_model_selection(model, artifacts)
+    model = settings["name"]
     price = common._prices(prices, model, artifacts)
     roster_raw = Path(roster).read_bytes()
     grouped, pins = common._roster_records(roster_raw)
@@ -195,7 +192,7 @@ def build_nested_plan(roster: Path, output: Path, *, model: str | None,
 
     source_files = ["nested_support_plan.py", "support_targets.py", "support_plan.py", "support_judge.py",
                     "evidence_score.py", "schema_digest.py", "schema_snapshot.py", "schema_view.py",
-                    "profiles.py", "evaluation_model.py", "api_runner.py", "resources.py"]
+                    "profiles.py", "evaluation_model.py", "duplicate_keys.py", "api_runner.py", "resources.py"]
     blockers = list(BLOCKERS)
     if all_blocked:
         blockers.append("unresolved_target_paths")
