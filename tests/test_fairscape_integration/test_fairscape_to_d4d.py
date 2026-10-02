@@ -23,7 +23,11 @@ property maps to it; a key of either name inside a reference, or in another
 nested Dataset, is recorded and no dataset is minted for it. #4139: a value
 waiting for a slot can cost a pass for each level it nests. #4152: an
 `additionalProperty` entry with no name is recorded whatever it carries, a
-reference to an entity in the `@graph` included.
+reference to an entity in the `@graph` included. #4159: a `hasPart`
+reference's key is passed over only where its file collection reads that
+key from the entity; a value is a repeat of another only as JSON reads
+them, and a repeat keeps the higher place; a byte count too long for
+Python to read is recorded, not raised.
 """
 
 import contextlib
@@ -68,6 +72,9 @@ BUNDLED = (
     "data/ro-crate/examples/voice_fairscape_test.json",
 )
 FULL = repo_root / BUNDLED[0]
+#: Its root is `./`, with empty `hasPart` and `isPartOf`, and its record
+#: leaves nothing out (#4159).
+VOICE = repo_root / BUNDLED[2]
 
 #: The CM4AI June 2026 release crate as published, and as `d4d rocrate
 #: normalize` reduced it: ten entities typed ROCrate, the release and nine
@@ -463,6 +470,87 @@ class TestSharedSlots(unittest.TestCase):
                                     "superseded by license, which also maps "
                                     "to `license`")])
 
+    def test_a_value_is_a_repeat_only_of_the_same_json_value(self):
+        """`true` is not `1`, which Python's `==` takes it for (#4159). On
+        the tracked VOICE crate a dedicated `d4d:humanSubject` with
+        `involves_human_subjects: true` was dropped as a repeat of an
+        `additionalProperty` value with `1`. The schema then rejected the
+        `1`, so the slot ended empty, and `dropped` held only the `1`. The
+        dedicated value now comes first and the other is superseded. So at
+        every other place a value is kept as a repeat of another: a
+        multivalued slot's items, the items after the first that a
+        single-valued slot does not keep, the enum values left out, and a
+        `hasPart` reference's keys. `1` and `1.0` are one number. With a
+        third value read between them, the `1` waits behind it rather than
+        being the value the slot holds, and is a repeat in neither place."""
+        one = {"name": "Human Subject", "value": {"involves_human_subjects": 1}}
+        text = {"name": "Human Subject Research", "value": "Approved by the IRB."}
+        for entries in ([one], [one, text]):
+            with self.subTest(entries=len(entries)):
+                crate_json, root = tracked_voice_crate()
+                root["d4d:humanSubject"] = {"involves_human_subjects": True}
+                root["additionalProperty"] = entries
+                record, dropped = converted(crate_json)
+                self.assertEqual(record["human_subject_research"],
+                                 {"involves_human_subjects": True})
+                self.assertEqual(dropped, [
+                    (f"additionalProperty[{entry['name']}]", (
+                        "superseded by d4d:humanSubject, which also maps to "
+                        "`human_subject_research`"))
+                    for entry in reversed(entries)])
+                self.assertEqual(problems(record), [])
+        record, dropped = converted(crate({
+            "keywords": [1],
+            "additionalProperty": [property_value("Keywords", [True])]}))
+        self.assertNotIn("keywords", record)
+        self.assertEqual(dropped, [
+            ("keywords + additionalProperty[Keywords]", (
+                f"part of the value not placed in `keywords`: {shown} (the "
+                f"schema rejects it: {said} is not of type 'string')"))
+            for shown, said in (("1", "1"), ("true", "True"))])
+        for value, left in (([1, True], ["true"]), ([1, 1.0], [])):
+            with self.subTest(value=value):
+                record, dropped = converted(crate({"additionalProperty": [
+                    property_value("Total Size Bytes", value)]}))
+                self.assertEqual(record["total_size_bytes"], 1)
+                self.assertEqual(dropped, [
+                    ("additionalProperty[Total Size Bytes]", (
+                        f"part of the value not placed in `total_size_bytes`: "
+                        f"{shown} (`total_size_bytes` is single-valued and "
+                        "holds the first of 2 list items)"))
+                    for shown in left])
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#raw", "d4d:fileCount": True}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw",
+             "d4d:fileCount": 1, "d4d:collectionType": ["raw_data", 1, True]}))
+        self.assertEqual(record["file_collections"], [
+            {"id": "#raw", "name": "Raw", "collection_type": "raw_data",
+             "file_count": 1}])
+        self.assertEqual(dropped, [
+            ("hasPart", (
+                "#raw: `d4d:fileCount` true, which the root's `hasPart` "
+                "states for it, is not what the `@graph`'s entity for it "
+                "states, and its file collection is made from that entity")),
+            *[("file_collections[0].collection_type", (
+                f"part of the value not placed in `collection_type`: {shown} "
+                "(not a FileCollectionTypeEnum value)"))
+              for shown in ("1", "true")]])
+
+    def test_a_repeated_value_keeps_the_higher_place(self):
+        """`evi:totalContentSizeBytes` supersedes `contentSize`. When an
+        `additionalProperty` entry, which ranks behind both, stated its
+        value too, `evi:totalContentSizeBytes` was dropped as a repeat of
+        that entry, and so ranked behind `contentSize`: the record held
+        `contentSize`, and the byte count the interface mapping declares
+        was in neither the record nor `dropped` (#4159)."""
+        record, dropped = converted(crate({
+            "contentSize": "2048", "evi:totalContentSizeBytes": 4096,
+            "additionalProperty": [property_value("Total Size Bytes", 4096)]}))
+        self.assertEqual(record["total_size_bytes"], 4096)
+        self.assertEqual(dropped, [("contentSize", (
+            "superseded by evi:totalContentSizeBytes, which also maps to "
+            "`total_size_bytes`"))])
+
     def test_each_value_for_a_slot_the_class_does_not_declare_is_named(self):
         record, dropped = converted(crate({"additionalProperty": [
             {"@type": "PropertyValue", "name": "Completeness", "value": "a"},
@@ -583,6 +671,13 @@ def tracked_full_crate():
     crate_json = json.loads(FULL.read_text(encoding="utf-8"))
     root = next(e for e in crate_json["@graph"]
                 if "Dataset" in e.get("@type", []))
+    return crate_json, root
+
+
+def tracked_voice_crate():
+    """The tracked VOICE example's JSON, read afresh, and its root in it."""
+    crate_json = json.loads(VOICE.read_text(encoding="utf-8"))
+    root = next(e for e in crate_json["@graph"] if e.get("@id") == "./")
     return crate_json, root
 
 
@@ -1230,6 +1325,40 @@ class TestDatasetParts(unittest.TestCase):
                 self.assertIn(said, reasons(dropped, "contentSize"))
                 self.assertNotIn(unsaid, reasons(dropped, "contentSize"))
 
+    def test_a_byte_count_too_long_to_read_is_recorded(self):
+        """`int()` raises past `sys.get_int_max_str_digits()`, 4300 digits
+        by default, and on the tracked VOICE crate a `contentSize` of 4,301
+        nines ended the conversion with that `ValueError`, though
+        `evi:totalContentSizeBytes` held a byte count (#4159). The text is
+        recorded and the slot takes the count, for the root and for a file
+        collection alike. The limit is set to its default here, since an
+        environment can raise it."""
+        if not hasattr(sys, "set_int_max_str_digits"):
+            self.skipTest("this Python reads any number of digits as one integer")
+        self.addCleanup(sys.set_int_max_str_digits, sys.get_int_max_str_digits())
+        sys.set_int_max_str_digits(4300)
+        nines = "9" * 4301
+
+        def said(slot):
+            return (f"not placed in `{slot}`: {'9' * 89}… is 4301 digits "
+                    "long, more than Python reads as one integer, so it is not "
+                    "read as a byte count")
+
+        crate_json, root = tracked_voice_crate()
+        root["contentSize"] = nines
+        root["evi:totalContentSizeBytes"] = 1024
+        record, dropped = converted(crate_json)
+        self.assertEqual(record["total_size_bytes"], 1024)
+        self.assertEqual(dropped, [("contentSize", said("total_size_bytes"))])
+        self.assertEqual(problems(record), [])
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#raw"}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw files",
+             "contentSize": nines, "evi:totalContentSizeBytes": 1024}))
+        self.assertEqual(record["file_collections"],
+                         [{"id": "#raw", "name": "Raw files", "total_bytes": 1024}])
+        self.assertEqual(dropped, [("#raw.contentSize", said("total_bytes"))])
+
     def test_a_part_typed_only_as_a_crate_is_a_file_collection(self):
         """An RO-Crate is a dataset of its own (`is_dataset`, #4099)."""
         record, dropped = converted(crate(
@@ -1283,6 +1412,40 @@ class TestDatasetParts(unittest.TestCase):
         self.assertIn("#other: `name` Another name", why)
         self.assertNotIn("#raw: `name`", why)
         self.assertEqual(len(dropped), 2)
+
+    def test_a_part_reference_key_its_file_collection_does_not_read_is_recorded(self):
+        """A key the reference states as the entity does is passed over only
+        when the file collection reads it from the entity
+        (`FILE_COLLECTION_SLOTS`), where its value is kept or recorded. On
+        the tracked VOICE crate, `parent_datasets` or `license` stated alike
+        in both reached neither the record nor `dropped` (#4159). An empty
+        value states nothing, and is not recorded."""
+        for key, value in (("parent_datasets", "Project Z"), ("license", "MIT")):
+            with self.subTest(key=key):
+                crate_json, root = tracked_voice_crate()
+                root["hasPart"] = [{"@id": "#part", key: value}]
+                crate_json["@graph"].append(
+                    {"@id": "#part", "@type": "https://schema.org/Dataset",
+                     "name": "Part", key: value})
+                record, dropped = converted(crate_json)
+                self.assertEqual(record["file_collections"],
+                                 [{"id": "#part", "name": "Part"}])
+                self.assertEqual(dropped, [("hasPart", (
+                    f"#part: `{key}` {value}, which the root's `hasPart` and "
+                    "the `@graph`'s entity for it both state, is not a "
+                    "property its file collection is made from"))])
+                self.assertEqual(problems(record), [])
+        # What the file collection reads is kept there or recorded under it,
+        # and the reference stating it too adds nothing
+        record, dropped = converted(crate(
+            {"hasPart": [{"@id": "#raw", "name": "Raw", "contentSize": "2 GB",
+                          "d4d:fileCount": 3, "description": "",
+                          "license": None}]},
+            {"@id": "#raw", "@type": "Dataset", "name": "Raw",
+             "contentSize": "2 GB", "d4d:fileCount": 3}))
+        self.assertEqual(record["file_collections"],
+                         [{"id": "#raw", "name": "Raw", "file_count": 3}])
+        self.assertEqual([source for source, _ in dropped], ["#raw.contentSize"])
 
     def test_an_ark_in_any_identifier_slot_is_its_resolver_url(self):
         record, _ = converted(crate({

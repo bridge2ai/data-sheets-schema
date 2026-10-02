@@ -90,6 +90,28 @@ DATASET_SLOTS = {
     'parent_datasets': ('isPartOf', "a reference under the root's `isPartOf`"),
 }
 
+#: What a file collection is made from: each property of a `hasPart`
+#: member's `@graph` entity that `_build_file_collections` reads, with the
+#: FileCollection slot it fills, in the order the collection is written.
+#: Both sizes fill `total_bytes`, from a byte count only, and
+#: `evi:totalContentSizeBytes` first (#4074). Each value read is kept in
+#: the file collection or recorded in `dropped`, so a `hasPart` reference
+#: that states one of these as the entity does says nothing more, and any
+#: other key it states is recorded (`_keys_not_taken`, #4159).
+FILE_COLLECTION_SLOTS = {
+    'name': 'name',
+    'description': 'description',
+    'evi:totalContentSizeBytes': 'total_bytes',
+    'contentSize': 'total_bytes',
+    'contentUrl': 'path',
+    'fileFormat': 'compression',
+    # Single-valued in the schema: `_fit` unwraps a one-item list and keeps
+    # the first FileCollectionTypeEnum value of a longer one, recording
+    # every other value in `dropped`.
+    'd4d:collectionType': 'collection_type',
+    'd4d:fileCount': 'file_count',
+}
+
 #: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
 #: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
 DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
@@ -179,6 +201,39 @@ def _is_text(value: Any) -> bool:
     return isinstance(value, (str, int, float)) and not isinstance(value, bool)
 
 
+def _same(a: Any, b: Any) -> bool:
+    """Whether `a` and `b` are one JSON value (#4159).
+
+    Python's `==` takes `True` for `1` and `False` for `0`, inside lists
+    and objects too, where JSON keeps a boolean apart from a number. So a
+    boolean is the same only as a boolean. Numbers compare by value, so
+    `1` and `1.0` are one number, and lists and objects item by item.
+    Every comparison that keeps one of two values as a repeat of the other
+    uses this.
+    """
+    if isinstance(a, bool) or isinstance(b, bool):
+        return isinstance(a, bool) and isinstance(b, bool) and a == b
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_same(a[key], b[key]) for key in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(map(_same, a, b))
+    return a == b
+
+
+def _among(value: Any, values: List[Any]) -> bool:
+    """Whether `value` is one of `values`, as JSON reads them (`_same`)."""
+    return any(_same(value, other) for other in values)
+
+
+def _distinct(values: List[Any]) -> List[Any]:
+    """`values` in order, each once, as JSON reads them (`_same`)."""
+    kept: List[Any] = []
+    for value in values:
+        if not _among(value, kept):
+            kept.append(value)
+    return kept
+
+
 def is_rocrate(entity: Dict[str, Any]) -> bool:
     """ROCrate-typed, by the test `rocrate_map.crate_root` applies."""
     return any('ROCrate' in t for t in _types(entity))
@@ -240,13 +295,25 @@ def exact_bytes(value: Any) -> Tuple[Optional[int], str]:
     (d4d_rocrate_interface_mapping.tsv) takes `Dataset.total_size_bytes`
     from `evi:totalContentSizeBytes` and not from `contentSize` for this
     reason. Any other value is not a byte count.
+
+    Digits too many for Python to read as one integer are not read: CPython
+    raises past `sys.get_int_max_str_digits()`, 4300 by default. Until
+    #4159 that `ValueError` ended the conversion, though the crate could
+    hold a byte count the record could take instead.
     """
     if isinstance(value, int) and not isinstance(value, bool) and value >= 0:
         return value, ''
     if isinstance(value, str):
         count = BYTE_COUNT.match(value)
         if count:
-            return int(count.group(1).replace(',', '')), ''
+            digits = count.group(1).replace(',', '')
+            try:
+                return int(digits), ''
+            except ValueError:
+                return None, (
+                    f"{_preview(value)} is {len(digits)} digits long, more "
+                    "than Python reads as one integer, so it is not read as "
+                    "a byte count")
         why = ("so a number made from it could give an approximate size as an "
                "exact one (the interface mapping takes "
                "Dataset.total_size_bytes from evi:totalContentSizeBytes for "
@@ -687,7 +754,7 @@ class FairscapeToD4DConverter:
                 continue
             kept = items.index(first)
             rest = [item for n, item in enumerate(items)
-                    if n != kept and item != first]
+                    if n != kept and not _same(item, first)]
             if rest:
                 self.dropped.append((source, (
                     f"part of the value not placed in `id`: {_preview(rest)} "
@@ -720,6 +787,16 @@ class FairscapeToD4DConverter:
         dedicated key first and falls back to the `additionalProperty`
         entry), and otherwise the later mapping first. `d4d[slot]` holds
         the first value and `rivals[slot]` the rest.
+
+        A value two properties state alike is kept once, as JSON reads
+        them (`_same`, #4159): `true` is not `1`, and `1` and `1.0` are one
+        number. Python's `==` took a dedicated `true` for an
+        `additionalProperty` entry's `1`, and dropped it as a repeat; the
+        schema then rejected the `1`, and the slot ended empty. A repeat
+        takes the higher of the two places in the order. Until #4159 it was
+        dropped wherever it ranked, so `evi:totalContentSizeBytes` stating
+        what an `additionalProperty` entry stated ranked behind a
+        `contentSize` it supersedes, and the slot held that `contentSize`.
         """
         if value in (None, '', [], {}):
             return
@@ -727,25 +804,29 @@ class FairscapeToD4DConverter:
             d4d[slot], origin[slot] = value, prop
             return
         held = d4d[slot]
-        if held == value:
+        if _same(held, value):
             return
         declared = self._class_slots(TARGET_CLASS).get(slot)
         if declared is not None and declared.multivalued:
             items = list(held) if isinstance(held, list) else [held]
             for item in (value if isinstance(value, list) else [value]):
-                if item not in items:
+                if not _among(item, items):
                     items.append(item)
             d4d[slot], origin[slot] = items, f"{origin[slot]} + {prop}"
             return
         fallback = 'additionalProperty['
         order = [(origin[slot], held)] + rivals.get(slot, [])
-        if any(value == other for _, other in order):
-            return
         # The latest mapping goes before every value of its own kind, and a
         # dedicated property before every additionalProperty entry
         at = next((n for n, (source, _) in enumerate(order)
                    if source.startswith(fallback)
                    or not prop.startswith(fallback)), len(order))
+        same = next((n for n, (_, other) in enumerate(order)
+                     if _same(value, other)), None)
+        if same is not None:
+            if same <= at:
+                return
+            del order[same]
         order.insert(at, (prop, value))
         (origin[slot], d4d[slot]), rivals[slot] = order[0], order[1:]
 
@@ -1055,7 +1136,7 @@ class FairscapeToD4DConverter:
                 and slot.range != 'string'):
             left += [(item, f"`{slot.name}` is single-valued and holds the "
                             f"first of {len(value)} list items")
-                     for item in value[1:] if item != value[0]]
+                     for item in value[1:] if not _same(item, value[0])]
             value = value[0]
         if slot.range == 'date':
             dates = []
@@ -1090,7 +1171,8 @@ class FairscapeToD4DConverter:
         enum slot, only the first of them. For a list in a `doi` slot it
         keeps the one DOI among its items. It does not report any of these,
         and for a single-valued enum slot given two permitted values it
-        writes no note at all.
+        writes no note at all. Each value is reported once, as JSON reads
+        them (`_same`, #4159): `dict.fromkeys` took `true` for `1`.
         """
         items = _as_list(value)
         kept = _as_list(shaped)
@@ -1099,7 +1181,7 @@ class FairscapeToD4DConverter:
             return [(item, f"not a {slot.range} value" if item not in permitted
                      else f"`{slot.name}` is single-valued and holds "
                           f"{kept[0]!r}")
-                    for item in dict.fromkeys(items) if item not in kept]
+                    for item in _distinct(items) if not _among(item, kept)]
         if slot.name == DOI_SLOT and isinstance(value, list):
             doi = _norm(shaped)
             left = []
@@ -1210,6 +1292,10 @@ class FairscapeToD4DConverter:
         """
         Convert nested RO-Crate Datasets to D4D FileCollections.
 
+        A file collection is made from the entity's `@id` and the
+        properties `FILE_COLLECTION_SLOTS` names, and from nothing else
+        (#4159).
+
         Args:
             nested_datasets: List of nested Dataset entities from RO-Crate
 
@@ -1225,52 +1311,29 @@ class FairscapeToD4DConverter:
             if '@id' in dataset:
                 collection['id'] = resolvable_id(dataset['@id'])
 
-            if 'name' in dataset:
-                collection['name'] = dataset['name']
-
-            if 'description' in dataset:
-                collection['description'] = dataset['description']
-
-            # Map collection-level properties
             # Note: encodingFormat, sha256, md5, format, bytes, encoding are now
             # file-level properties (on File objects), not FileCollection properties
-
-            # The aggregate size, from a byte count only (#4074):
-            # evi:totalContentSizeBytes first, the property the interface
-            # mapping declares for a byte size, then a contentSize written in
-            # bytes. A contentSize with a unit (`441.2 GB`) is not converted.
-            total_bytes = None
-            for prop in ('evi:totalContentSizeBytes', 'contentSize'):
+            for prop, slot in FILE_COLLECTION_SLOTS.items():
                 if prop not in dataset:
                     continue
+                if slot != 'total_bytes':
+                    collection[slot] = dataset[prop]
+                    continue
+                # The aggregate size, from a byte count only (#4074):
+                # evi:totalContentSizeBytes first, the property the interface
+                # mapping declares for a byte size, then a contentSize written
+                # in bytes. A contentSize with a unit (`441.2 GB`) is not
+                # converted.
                 size, why = exact_bytes(dataset[prop])
                 where = f"{dataset.get('@id')}.{prop}"
                 if size is None:
                     self.dropped.append((where, f"not placed in `total_bytes`: {why}"))
-                elif total_bytes is None:
-                    total_bytes = size
-                elif size != total_bytes:
+                elif 'total_bytes' not in collection:
+                    collection['total_bytes'] = size
+                elif size != collection['total_bytes']:
                     self.dropped.append((where, (
                         f"not placed in `total_bytes`: {size}; superseded by "
-                        f"evi:totalContentSizeBytes, {total_bytes}")))
-            if total_bytes is not None:
-                collection['total_bytes'] = total_bytes
-
-            if 'contentUrl' in dataset:
-                collection['path'] = dataset['contentUrl']
-
-            if 'fileFormat' in dataset:
-                collection['compression'] = dataset['fileFormat']
-
-            # Map D4D-specific properties
-            if 'd4d:collectionType' in dataset:
-                # Single-valued in the schema: `_fit` unwraps a one-item
-                # list and keeps the first FileCollectionTypeEnum value of a
-                # longer one, recording every other value in `dropped`.
-                collection['collection_type'] = dataset['d4d:collectionType']
-
-            if 'd4d:fileCount' in dataset:
-                collection['file_count'] = dataset['d4d:fileCount']
+                        f"evi:totalContentSizeBytes, {collection['total_bytes']}")))
 
             # TODO: Parse nested Dataset's hasPart to build FileCollection.resources
             # Currently, file-level information in RO-Crate File entities is not converted
@@ -1373,7 +1436,9 @@ class FairscapeToD4DConverter:
           collection (`_extract_datasets`) and is not repeated. The file
           collection is made from the `@graph`'s entity, so a key the
           reference states that the entity does not, or states otherwise,
-          is recorded in `dropped` (`_keys_not_taken`, #4098).
+          is recorded in `dropped` (`_keys_not_taken`, #4098), and so is
+          one the file collection does not read from the entity, whatever
+          the entity states (#4159).
         - A member the `@graph` describes as anything else (a person, a
           defined term, software, a computation, a schema) is not a dataset
           part, and is recorded in `dropped`.
@@ -1431,25 +1496,38 @@ class FairscapeToD4DConverter:
 
     def _keys_not_taken(self, item: Any, ref: str) -> None:
         """Record each key a `hasPart` reference states that the member's
-        file collection does not take from it (#4098).
+        file collection does not take from it (#4098, #4159).
 
         The file collection is made from the `@graph`'s entity for the
-        member (`_build_file_collections`). A reference may state the
-        member's keys again, as CHORUS's root does with `name`. A key it
-        states with the entity's own value says nothing the entity does
-        not, and goes where the entity's does. A key the entity does not
-        carry, or carries with another value, is not in the record.
+        member, from the properties `FILE_COLLECTION_SLOTS` names, and each
+        value read from them is kept there or recorded in `dropped`
+        (`_build_file_collections`). A reference may state such a value
+        again, as CHORUS's root does with `name`, and then says nothing the
+        entity does not. Any other key it states is not in the record: one
+        the entity does not carry, or carries with another value, and one
+        the file collection does not read, whatever the entity carries.
+        Until #4159 every key the entity carried with the same value was
+        passed over, so a `parent_datasets` or a `license` both stated
+        reached neither the record nor `dropped`. Values compare as JSON
+        values (`_same`), and an empty value states nothing and is not
+        recorded, as elsewhere.
         """
         if not isinstance(item, dict):
             return
         entity = self._described.get(ref, {})
         for key, value in item.items():
-            if key in ('@id', '@type', '@context') or entity.get(key) == value:
+            if key in ('@id', '@type', '@context') or value in (None, '', [], {}):
                 continue
+            same = _same(entity.get(key), value)
+            if same and key in FILE_COLLECTION_SLOTS:
+                continue
+            said = ("and the `@graph`'s entity for it both state, is not a "
+                    "property its file collection is made from" if same else
+                    "states for it, is not what the `@graph`'s entity for it "
+                    "states, and its file collection is made from that entity")
             self.dropped.append(('hasPart', (
                 f"{ref}: `{key}` {_preview(value)}, which the root's `hasPart` "
-                "states for it, is not what the `@graph`'s entity for it "
-                "states, and its file collection is made from that entity")))
+                f"{said}")))
 
     def _references(self, prop: str, items: List[Any]
                     ) -> Optional[List[Optional[Dict[str, Any]]]]:
