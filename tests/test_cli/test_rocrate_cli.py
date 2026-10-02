@@ -198,9 +198,10 @@ class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
     With none, which is how notes/D4D_GENERATION_ARMS.md runs all three, they
     are the declared projects that have the input the command looks for.
 
-    In the mixed runs that name all three projects, BETA fails and ALPHA and
-    GAMMA succeed, so the count, the total and the number that succeeded all
-    differ. In the no-project runs (#4155) only ALPHA and BETA have the
+    In the mixed runs, which name all three projects and BETA twice, BETA
+    fails and ALPHA and GAMMA succeed, so the count, the total and the number
+    that succeeded all differ, and a count of the names given would read
+    "2 of 4". In the no-project runs (#4155) only ALPHA and BETA have the
     command's input. GAMMA, declared too, has what another command reads
     instead (a crate never normalized, or the other emit command's record) and
     is never tried. ALPHA is done and BETA fails, so the total, 2, is neither
@@ -213,6 +214,8 @@ class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
     patch missed: never in the checkout's data/.
     """
 
+    MIXED = ("ALPHA", "BETA", "GAMMA", "BETA")             # BETA, which fails, twice (#4165)
+
     def test_bundle_counts_the_bundles_it_did_not_write(self):
         from data_sheets_schema import rocrate_normalize
         real = rocrate_normalize.build_crate_bundle
@@ -222,7 +225,7 @@ class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
             (self.packages / name / "processed").mkdir(parents=True)
         with patch("data_sheets_schema.rocrate_normalize.build_crate_bundle",
                    side_effect=lambda name, root: real(name, root, docs_dir=self.docs)):
-            r = self._invoke("bundle")
+            r = self._invoke("bundle", projects=self.MIXED)
             ok = self._invoke("bundle", projects=("ALPHA",))
 
         self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)   # not a crash
@@ -242,7 +245,7 @@ class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
         for name in ("ALPHA", "GAMMA"):                    # BETA has no normalized record
             self._record(name, "crate_d4d")
         with self._publishing_into_tmp():
-            r = self._invoke("emit-arm", "--version", "v1")
+            r = self._invoke("emit-arm", "--version", "v1", projects=self.MIXED)
             ok = self._invoke("emit-arm", "--version", "v2", projects=("ALPHA",))
 
         self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
@@ -265,7 +268,7 @@ class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
         earlier.parent.mkdir(parents=True)
         earlier.write_text("an earlier run's record\n", encoding="utf-8")   # refused, kept
         with self._publishing_into_tmp():
-            r = self._invoke("emit-map-arm", "--version", "v1")
+            r = self._invoke("emit-map-arm", "--version", "v1", projects=self.MIXED)
             ok = self._invoke("emit-map-arm", "--version", "v2", projects=("ALPHA",))
 
         self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
@@ -438,6 +441,22 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
             sorted(p.name for p in (self.concat / "rocrate_static_map" / "v1").iterdir()),
             ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
 
+    def test_each_repeated_name_gets_its_own_line_in_the_order_first_given(self):
+        """Two names repeated, each a different number of times, and one given
+        once: a line apiece for the two, in the order first given, none for
+        the third."""
+        from data_sheets_schema.rocrate_normalize import Result
+        with patch("data_sheets_schema.rocrate_normalize.normalize_project",
+                   side_effect=lambda name, root, sv=None: Result(project=name)) as run:
+            r = self._invoke("normalize",
+                             projects=("GAMMA", "ALPHA", "BETA", "GAMMA", "ALPHA", "GAMMA"))
+
+        self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)
+        self.assertEqual([c.args[0] for c in run.call_args_list], ["GAMMA", "ALPHA", "BETA"])
+        self.assertEqual(r.stderr.splitlines(),
+                         ["⚠️  --project GAMMA was given 3 times; it runs once",
+                          "⚠️  --project ALPHA was given 2 times; it runs once"], r.stderr)
+
 
 class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
     """#4147 and #4148. The emit commands caught only their two refusals, so
@@ -448,8 +467,9 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
 
     bundle printed the bare message, so a KeyError read as its quoted key and a
     message-less error as nothing at all. Each error line now names the type of
-    anything but an expected refusal, whose text is unchanged. KeyboardInterrupt
-    and SystemExit are not Exceptions, and still stop the loop.
+    anything but an expected refusal, whose text is unchanged, and an error with
+    no message, a refusal's type included, reads as its type alone.
+    KeyboardInterrupt and SystemExit are not Exceptions, and still stop the loop.
     """
 
     EMITS = (("emit-arm", "rocrate_mapped", "crate_d4d"),
@@ -473,7 +493,8 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
         errors = ((PermissionError(13, "Permission denied", "ALPHA_d4d.yaml"),
                    "PermissionError: [Errno 13] Permission denied: 'ALPHA_d4d.yaml'"),
                   (KeyError("x"), "KeyError: 'x'"),
-                  (PermissionError(), "PermissionError"))              # no message
+                  (PermissionError(), "PermissionError"),         # no message
+                  (FileNotFoundError(), "FileNotFoundError"))     # a refusal's type, no message
         for n, (exc, reason) in enumerate(errors):
             version = f"v{n}"
             with self.subTest(reason=reason), \
@@ -520,7 +541,8 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
         withheld = "'ALPHA_crate_d4d.yaml' is withheld from the de novo fork: already D4D"
         for exc, line in ((KeyError("x"), "  ❌ KeyError: 'x'"),
                           (RuntimeError(), "  ❌ RuntimeError"),          # no message
-                          (DeNovoPolicyError(withheld), f"  ❌ {withheld}")):   # a refusal
+                          (DeNovoPolicyError(withheld), f"  ❌ {withheld}"),   # a refusal
+                          (FileNotFoundError(), "  ❌ FileNotFoundError")):   # one with no message
             with self.subTest(line=line), \
                  self._alpha_raises("build_crate_bundle", exc, docs_dir=self.docs) as build:
                 r = self._invoke("bundle", projects=("ALPHA", "BETA"))
