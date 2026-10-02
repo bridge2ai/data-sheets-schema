@@ -17,6 +17,7 @@ def registration(floor=None):
     return {"format": cp.FORMAT, "registration_id": "supplied-test-only", "condition": "generic",
             "runtime_policy_sha256": POLICY_SHA256, "receipt_instrument_version": 4,
             "max_output_tokens": 4096, "max_request_bytes": 1_000_000,
+            "context_limit_tokens": 1_000_000, "context_limit_basis": "synthetic test capacity, not a route claim",
             "coverage_floor": floor or {"state": "registered", "numerator": 2, "denominator": 3}}
 
 
@@ -35,6 +36,8 @@ def policy(floor=None):
     {"max_output_tokens": True}, {"max_output_tokens": 0}, {"max_request_bytes": -1},
     {"receipt_instrument_version": 3}, {"runtime_policy_sha256": "0" * 64},
     {"extra": 1}, {"registration_id": " "}, {"condition": []},
+    {"context_limit_tokens": True}, {"context_limit_tokens": 0}, {"context_limit_tokens": 1024},
+    {"context_limit_basis": " "}, {"context_limit_basis": None},
     {"coverage_floor": {"state": "pending"}},
     {"coverage_floor": {"state": "registered", "numerator": 1, "denominator": True}},
     {"coverage_floor": {"state": "registered", "numerator": 4, "denominator": 3}},

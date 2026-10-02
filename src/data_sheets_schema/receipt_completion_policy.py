@@ -43,10 +43,11 @@ def parse_registration(raw: bytes) -> dict:
     except (UnicodeError, RecursionError, json.JSONDecodeError) as exc:
         raise ValueError("registration is not strict UTF-8 JSON") from exc
     keys = {"format", "registration_id", "condition", "runtime_policy_sha256",
-            "receipt_instrument_version", "max_output_tokens", "max_request_bytes", "coverage_floor"}
+            "receipt_instrument_version", "max_output_tokens", "max_request_bytes",
+            "context_limit_tokens", "context_limit_basis", "coverage_floor"}
     if not isinstance(value, dict) or set(value) != keys or value["format"] != FORMAT:
         raise ValueError("registration fields do not match receipt_completion_registration_v1")
-    for name in ("registration_id", "condition"):
+    for name in ("registration_id", "condition", "context_limit_basis"):
         if not isinstance(value[name], str) or not value[name].strip():
             raise ValueError(f"registration {name} must be a nonempty string")
     if value["runtime_policy_sha256"] != POLICY_SHA256:
@@ -55,6 +56,9 @@ def parse_registration(raw: bytes) -> dict:
         raise ValueError("registration must select receipt instrument 4")
     _integer(value["max_output_tokens"], "max_output_tokens", 1)
     _integer(value["max_request_bytes"], "max_request_bytes", 1)
+    _integer(value["context_limit_tokens"], "context_limit_tokens", 1)
+    if value["max_output_tokens"] > value["context_limit_tokens"]:
+        raise ValueError("output cap alone exceeds the registered context window")
     floor = value["coverage_floor"]
     if not isinstance(floor, dict):
         raise ValueError("coverage_floor must be a mapping")
