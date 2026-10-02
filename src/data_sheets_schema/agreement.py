@@ -358,6 +358,7 @@ class EquivalenceJudge:
                  max_tokens: int = 16000, cache_path: Path | None = None,
                  offline: bool = False):
         self._client, self._model = client, model
+        self.evaluation_model = None
         self.max_tokens = max_tokens
         self.cache_path = Path(cache_path) if cache_path else None
         self.offline = offline
@@ -375,11 +376,10 @@ class EquivalenceJudge:
         Needed at load time to scope the cache, and offline mode must not need
         credentials just to read a file.
         """
-        if self._model is None:
-            # The evaluation model (#2928), which defaults to the generation
-            # pin — the cache scope is unchanged.
-            from data_sheets_schema.evaluation_model import evaluation_model_name
-            self._model = evaluation_model_name()
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._model
 
     def _resolve(self):
@@ -410,6 +410,7 @@ class EquivalenceJudge:
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(EQUIVALENCE_SYSTEM),
                                  "model": self.model,
+                                 "evaluation_model": self.evaluation_model,
                                  "judge_chars": JUDGE_VALUE_CHARS,
                                  "key": key, "slot": slot,
                                  "equivalent": ok, "reason": reason}) + "\n")
@@ -661,6 +662,7 @@ def build_matrix(*, root: Path = DEFAULT_ROOT, method: str = DEFAULT_METHOD,
                 # when it is not (#253).
                 "similarity_absent": sum(r.similarity is None for r in result),
                 "judge_model": judge.model,
+                "evaluation_model": judge.evaluation_model,
                 "judge_chars": JUDGE_VALUE_CHARS,
                 "replicates": sorted(records),
             }

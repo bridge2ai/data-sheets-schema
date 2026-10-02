@@ -75,7 +75,7 @@ def test_version_is_an_exact_closed_integer(external, value):
 
 @pytest.mark.parametrize("runtime,renderer", [("Claude Code", 8), ("Codex CLI", 8),
     ("Claude Code (direct)", 7), (api.RUNTIME, 1), (api.RUNTIME, 7),
-    (api.RUNTIME, 9), (api.RUNTIME, 19), (api.RUNTIME, 23)])
+    (api.RUNTIME, 9), (api.RUNTIME, 19), (api.RUNTIME, 23), (api.RUNTIME, 24)])
 def test_unsupported_combinations_refuse_before_execution(external, runtime, renderer):
     with pytest.raises(ValueError, match="only API renderer 8"):
         replace(external, runtime=runtime, render_version=renderer, api_playbook_version=1)

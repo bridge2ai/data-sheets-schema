@@ -96,7 +96,7 @@ def test_the_default_is_todays_shipped_generation_model():
     config moves, this fails — and the judge identity would move with it,
     which is a decision to make on purpose, not a side effect."""
     settings = evaluation_model_settings()
-    assert settings == {"name": "claude-opus-5",
+    assert {k: settings[k] for k in ("name", "basis", "generation_model")} == {"name": "claude-opus-5",
                         "basis": BASIS_GENERATION_DEFAULT,
                         "generation_model": "claude-opus-5"}
 

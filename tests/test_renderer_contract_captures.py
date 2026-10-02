@@ -1,11 +1,13 @@
-"""Byte captures of what renderers 1-23 send, before #2924 deduplicates the contracts.
+"""Historical renderer captures plus the API-only receipt renderer 24.
 
 #2924 proposes a renderer that emits the v15-v17 contracts once. Every earlier
 renderer must keep its bytes: frozen records replay their instruction, and
 registrations pin it. These captures bind, for each accepted renderer, the
 instruction both runtimes receive on the two existing fixtures, the per-phase
 suffix the API path appends after the carried artifacts, and the assembly
-digest. They were computed at origin/main cce0ba2ff, before any #2924 change.
+digest. Versions 1-23 were computed at origin/main cce0ba2ff, before any #2924
+change. Renderer 24 adds only API instructions and its new receipt phase;
+all historical captures remain unchanged.
 
 The probe below records today's duplication: the v15, v16 and v17 texts occur
 once per evidence phase contract, so three times in the joined contracts
@@ -25,8 +27,10 @@ from tests.test_evidence_generation_gate import specification
 from tests.test_source_metadata_renderer import fixture as metadata_fixture
 
 
-RENDERERS = range(1, 24)
+RENDERERS = range(1, 25)
+NATIVE_RENDERERS = range(1, 24)
 PHASES = ('audit', 'reconcile_full', 'report', 'report_regate')
+PHASE_RENDERERS = {**{phase: RENDERERS for phase in PHASES}, 'full_rereceipt': (24,)}
 RUNTIMES = {'api': 'Claude API (direct)', 'native': 'Claude Code'}
 RUN_DATE = '2026-09-15'
 ROOT_TOKEN = '<ROOT>'
@@ -80,7 +84,7 @@ def instructions(root: Path) -> dict[str, dict[int, str]]:
     texts = {}
     for key, spec in fixtures(root).items():
         texts[key] = {}
-        for version in RENDERERS:
+        for version in NATIVE_RENDERERS if spec.is_agentic else RENDERERS:
             text = replace(spec, render_version=version).instruction
             for spelling in sorted({str(root.resolve()), str(root)}, key=len, reverse=True):
                 text = text.replace(spelling, ROOT_TOKEN)
@@ -96,8 +100,8 @@ def captures(root: Path) -> dict:
     return {
         'instruction': {key: {v: sha256(text) for v, text in by_version.items()}
                         for key, by_version in instructions(root).items()},
-        'phase': {phase: {v: sha256(api.phase_instruction(phase, v)) for v in RENDERERS}
-                  for phase in PHASES},
+        'phase': {phase: {v: sha256(api.phase_instruction(phase, v)) for v in versions}
+                  for phase, versions in PHASE_RENDERERS.items()},
         'assembly': {v: api.assembly_digest(v)['sha256'] for v in RENDERERS},
     }
 
@@ -159,6 +163,7 @@ INSTRUCTION = {
         21: 'cb38f52695415299cfb65d9bc0499c155accbf390f01375d2ba96da516575e82',
         22: 'b6b7cd7cdf2020bbda2f1fd8fe4d9eae7084d285744fee9006a22519b207e34a',
         23: 'd2f73e1d51df6330952df9fe479dc3dc299fedbe18b84efd1c40dcee0e8acbf0',
+        24: '4e8733e3909ea2bbaa95fa2eaeceef6cbafd108c04ac060ff7f353f39473556f',
     },
     'metadata/api': {
         1: 'fd4058b4565403d3d58087d9e0ac51b0c2fed7474c084dfb8e85a471b433986e',
@@ -184,6 +189,7 @@ INSTRUCTION = {
         21: '330fdade6ee197b6ea043480036c7dc6d85fe5fbc67464bbf73785af93adaf46',
         22: 'f0eae7739a92f84e4c2db25148493777f79f94f36d798aed01b44c3d3a6043f8',
         23: '0047034a4ec5c05abe98abc2ad4d101f802ceafa3fe51f15826eb6b95fde140b',
+        24: '53e78e9d681cb0c8d6f282c95aa18f96f36d51d79efaef5451e272ad8bdc41d3',
     },
     'specification/native': {
         1: '0affe05e41e12f5002044490dbabbcd604d1e3d51b4eec4f75cdebb99742af5f',
@@ -261,6 +267,7 @@ PHASE = {
         21: '2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111',
         22: '2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111',
         23: '2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111',
+        24: '2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111',
     },
     'reconcile_full': {
         1: 'c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf',
@@ -286,6 +293,7 @@ PHASE = {
         21: 'd9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958',
         22: 'd9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958',
         23: 'd9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958',
+        24: 'd9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958',
     },
     'report': {
         1: 'eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b',
@@ -311,6 +319,7 @@ PHASE = {
         21: '96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a',
         22: '96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a',
         23: '96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a',
+        24: '96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a',
     },
     'report_regate': {
         1: '24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f',
@@ -336,7 +345,9 @@ PHASE = {
         21: 'ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff',
         22: 'ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff',
         23: 'ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff',
+        24: 'ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff',
     },
+    'full_rereceipt': {24: '763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401'},
 }
 ASSEMBLY = {
     1: '39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3',
@@ -362,6 +373,7 @@ ASSEMBLY = {
     21: 'd6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14',
     22: 'd6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14',
     23: 'd6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14',
+    24: '12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc',
 }
 CAPTURED = {'instruction': INSTRUCTION, 'phase': PHASE, 'assembly': ASSEMBLY}
 
@@ -377,10 +389,21 @@ def test_every_accepted_renderer_is_captured(tmp_path):
         accepted.append(version)
     # A new renderer must add its captures here; the old ones stay as they are.
     assert accepted == list(RENDERERS)
+    native = replace(spec, runtime='Claude Code')
+    native_accepted = []
+    for version in range(0, 40):
+        try:
+            replace(native, render_version=version)
+        except ValueError:
+            continue
+        native_accepted.append(version)
+    assert native_accepted == list(NATIVE_RENDERERS)
     assert set(ASSEMBLY) == set(RENDERERS)
     assert {key: set(rows) for key, rows in INSTRUCTION.items()} == {
-        f'{kind}/{name}': set(RENDERERS) for kind in ('specification', 'metadata') for name in RUNTIMES}
-    assert {phase: set(rows) for phase, rows in PHASE.items()} == {phase: set(RENDERERS) for phase in PHASES}
+        f'{kind}/{name}': set(NATIVE_RENDERERS if name == 'native' else RENDERERS)
+        for kind in ('specification', 'metadata') for name in RUNTIMES}
+    assert {phase: set(rows) for phase, rows in PHASE.items()} == {
+        phase: set(versions) for phase, versions in PHASE_RENDERERS.items()}
 
 
 def test_captures_match_the_rendered_bytes(tmp_path, stable):
@@ -391,14 +414,24 @@ def test_assembly_captures_agree_with_the_existing_historical_pins():
     assert {v: ASSEMBLY[v] for v in HISTORICAL} == HISTORICAL
 
 
-def test_a_v17_mutation_moves_captures_for_renderers_17_to_23_only(tmp_path, stable, monkeypatch):
+def test_a_v17_mutation_moves_only_its_contracts_at_renderers_17_and_later(tmp_path, stable, monkeypatch):
     before = flatten(captures(tmp_path / 'before'))
     monkeypatch.setattr(api, 'CLAIM_CLARIFICATION_CONTRACT_V17',
                         api.CLAIM_CLARIFICATION_CONTRACT_V17 + 'Changed.\n')
     after = flatten(captures(tmp_path / 'after'))
     assert before.keys() == after.keys()
     moved = {key for key in before if before[key] != after[key]}
-    assert moved == {key for key in before if key[2] >= 17}
+    assert moved == {key for key in before if key[2] >= 17 and key[:2] != ('phase', 'full_rereceipt')}
+
+
+def test_receipt_instruction_mutation_moves_new_captures_without_rewriting_history(tmp_path, stable, monkeypatch):
+    from data_sheets_schema import rereceipt
+    before = flatten(captures(tmp_path / 'before'))
+    monkeypatch.setattr(rereceipt, 'INSTRUCTION', rereceipt.INSTRUCTION + ' Changed.\n')
+    after = flatten(captures(tmp_path / 'after'))
+    moved = {key for key in before if before[key] != after[key]}
+    assert {('phase', 'full_rereceipt', 24), ('assembly', None, 24)} <= moved
+    assert all(key[2] == 24 for key in moved)
 
 
 def test_probe_shared_contracts_occur_three_times_in_the_joined_section(tmp_path, stable):

@@ -353,6 +353,7 @@ class SupportJudgeV2:
         # `explicit` when the caller named the model; otherwise the basis
         # `evaluation_model` reports, for a run manifest to disclose.
         self.model_basis = "explicit" if model is not None else None
+        self.evaluation_model = None
         self._specification = specification
         self.class_name = class_name
         self.schema_path = schema_path
@@ -384,10 +385,12 @@ class SupportJudgeV2:
         from data_sheets_schema import api_runner
         if self._client is None:
             self._client = api_runner._client()
-        if self._model is None:
-            from data_sheets_schema.evaluation_model import evaluation_model_settings
-            settings = evaluation_model_settings()
-            self._model, self.model_basis = settings["name"], settings.get("basis")
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
+            self.model_basis = ("explicit" if self.evaluation_model.get("basis") == "explicit_override"
+                                else self.evaluation_model.get("basis"))
         return self._client, self._model
 
     def context(self, model: str, bundle: str) -> JudgementContext:
@@ -488,7 +491,7 @@ class SupportJudgeV2:
         self.calls += 1
         u = getattr(resp, "usage", None)
         self.usage.append({
-            "slot": slot,
+            "slot": slot, "model": model, "evaluation_model": self.evaluation_model,
             "input": getattr(u, "input_tokens", None),
             "cache_read": getattr(u, "cache_read_input_tokens", None),
             "cache_write": getattr(u, "cache_creation_input_tokens", None),
@@ -496,6 +499,7 @@ class SupportJudgeV2:
         })
         cap = reasoning.capture(resp)
         entry = {"project": project, "slot": slot, "model": model, "axis": AXIS,
+                 "evaluation_model": self.evaluation_model,
                  **cap.to_dict()}
         self.reasoning.append(entry)
         if self.log_path is not None:
@@ -513,6 +517,7 @@ class SupportJudgeV2:
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
                     **ctx.as_entry(), "instrument": INSTRUMENT,
+                    "evaluation_model": self.evaluation_model,
                     "project": project, "slot": slot, "value": value_key,
                     "value_context": vctx.digest(), "verdict": verdict,
                     "reason": reason, "propagated": False},

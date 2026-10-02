@@ -2542,7 +2542,6 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
 
     from data_sheets_schema.backfill_checks import apply, compute, summarise
     from data_sheets_schema.provenance import CONCAT_DIR
-    from data_sheets_schema.report_claims import declared_slots
 
     paths = sorted(_corpus_path(CONCAT_DIR).glob("*_core/*/*_provenance.yaml"))
     if method:
@@ -2569,12 +2568,8 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
         if unknown:
             raise click.ClickException(f"unknown block(s) {sorted(unknown)}; choose from {list(BLOCKS)}")
 
-    # Built once. Each call loads two SchemaViews, which over 122 records is
-    # the difference between seconds and minutes. Both maps, together, so
-    # they describe one core schema (#994).
-    from data_sheets_schema.report_claims import declared_ranges
-    declared = declared_slots()
-    ranges = declared_ranges()
+    # Each record selects the full/core schema bytes it was generated under.
+    # Supplying one current-schema map to the entire corpus erases that history.
     written = skipped = 0
     import yaml as _yaml
     from datetime import datetime, timezone
@@ -2584,7 +2579,7 @@ def backfill_checks(execute, method, label, project, overwrite, blocks):
     for p in paths:
         withheld: list[str] = []
         try:
-            blocks = compute(p, declared, only=wanted, ranges=ranges)
+            blocks = compute(p, only=wanted)
             if "form" in blocks and overwrite:
                 # The audit trail of a form recompute (#907 review): the
                 # prior instrument note and British count are carried

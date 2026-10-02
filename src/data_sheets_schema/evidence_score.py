@@ -475,6 +475,7 @@ class LLMSlotScorer:
                  cache_path: Path | None = None):
         self._client = client
         self._model = model
+        self.evaluation_model = None
         self.max_tokens = max_tokens
         self.log_path = Path(log_path) if log_path else None
         # Judging one slot reads the whole bundle from cache — 7.5M cached-read
@@ -499,11 +500,10 @@ class LLMSlotScorer:
         from data_sheets_schema import api_runner
         if self._client is None:
             self._client = api_runner._client()
-        if self._model is None:
-            # The evaluation model, not the generation model (#2928); today
-            # the one defaults to the other, so the cache scope is unchanged.
-            from data_sheets_schema.evaluation_model import evaluation_model_name
-            self._model = evaluation_model_name()
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._client, self._model
 
     def _load_cache(self, ctx: "JudgementContext") -> None:
@@ -568,7 +568,7 @@ class LLMSlotScorer:
         self.calls += 1
         u = getattr(resp, "usage", None)
         self.usage.append({
-            "slot": slot,
+            "slot": slot, "model": model, "evaluation_model": self.evaluation_model,
             "input": getattr(u, "input_tokens", None),
             "cache_read": getattr(u, "cache_read_input_tokens", None),
             "cache_write": getattr(u, "cache_creation_input_tokens", None),
@@ -580,6 +580,7 @@ class LLMSlotScorer:
         # is. Captured per judgement, and written out if a log path was given.
         cap = reasoning.capture(resp)
         entry = {"project": project, "slot": slot, "model": model,
+                 "evaluation_model": self.evaluation_model,
                  **cap.to_dict()}
         self.reasoning.append(entry)
         if self.log_path is not None:
@@ -609,7 +610,7 @@ class LLMSlotScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    **ctx.as_entry(), "slot": slot, "value": key[2],
+                    **ctx.as_entry(), "evaluation_model": self.evaluation_model, "slot": slot, "value": key[2],
                     "supported": judgement.supported,
                     "reason": judgement.reason}, ensure_ascii=False) + "\n")
         return judgement
@@ -854,6 +855,7 @@ class LLMSlotFitnessScorer:
             raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client = client
         self._model = model
+        self.evaluation_model = None
         self.class_name = class_name
         self.schema_path = schema_path
         # The instrument the judged record was generated under (#1462);
@@ -880,11 +882,10 @@ class LLMSlotFitnessScorer:
         from data_sheets_schema import api_runner
         if self._client is None:
             self._client = api_runner._client()
-        if self._model is None:
-            # The evaluation model, not the generation model (#2928); today
-            # the one defaults to the other, so the cache scope is unchanged.
-            from data_sheets_schema.evaluation_model import evaluation_model_name
-            self._model = evaluation_model_name()
+        if self.evaluation_model is None:
+            from data_sheets_schema.evaluation_model import model_selection
+            self.evaluation_model = model_selection(self._model)
+            self._model = self.evaluation_model["name"]
         return self._client, self._model
 
     def _snapshot(self) -> tuple:
@@ -999,7 +1000,7 @@ class LLMSlotFitnessScorer:
             specification=self._spec_from_snapshot(slot, *snapshot)))
         self.calls += 1
         u = getattr(resp, "usage", None)
-        self.usage.append({"slot": slot,
+        self.usage.append({"slot": slot, "model": model, "evaluation_model": self.evaluation_model,
                            "input": getattr(u, "input_tokens", None),
                            "output": getattr(u, "output_tokens", None)})
 
@@ -1020,6 +1021,7 @@ class LLMSlotFitnessScorer:
 
         cap = reasoning.capture(resp)
         entry = {"project": project, "slot": slot, "model": model,
+                 "evaluation_model": self.evaluation_model,
                  "axis": "fitness", **cap.to_dict()}
         self.reasoning.append(entry)
         if self.log_path is not None:
@@ -1030,7 +1032,7 @@ class LLMSlotFitnessScorer:
             self.cache_path.parent.mkdir(parents=True, exist_ok=True)
             with self.cache_path.open("a", encoding="utf-8") as fh:
                 fh.write(json.dumps({
-                    **ctx.as_entry(),
+                    **ctx.as_entry(), "evaluation_model": self.evaluation_model,
                     **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
                        if self.schema_guidance else {}),
                     "slot": slot, "value": key[2],
