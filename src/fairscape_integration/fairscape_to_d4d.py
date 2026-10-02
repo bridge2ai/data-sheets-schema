@@ -446,7 +446,8 @@ class FairscapeToD4DConverter:
         self._collected: set = set()
         #: Each object `_shape_objects` built for a list, by `id()`, with
         #: its position in the list it was read from, for `_named`. The
-        #: object is kept, so its `id()` names no other while it is here.
+        #: object is kept with it, so no other object can take its `id()`
+        #: while the entry is here, as one could once it was left out.
         self._read_at: Dict[int, Tuple[Dict[str, Any], int]] = {}
         #: `dropped` entries for a value a top-level single-valued slot did
         #: not take, by index, with the slot: once the record is valid,
@@ -883,7 +884,7 @@ class FairscapeToD4DConverter:
                 held = value[part]
                 if isinstance(held, dict):
                     read = self._read_at.get(id(held))
-                    text += f"[{read[1] if read and read[0] is held else part}]"
+                    text += f"[{read[1] if read else part}]"
             else:
                 text += f".{part}" if text else str(part)
             value = value[part]

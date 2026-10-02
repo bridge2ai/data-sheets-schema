@@ -429,6 +429,15 @@ class TestSharedSlots(unittest.TestCase):
                 "not placed in `issued`: July 2026 (the schema rejects it: "
                 "'July 2026' is not a 'date-time'); `issued` holds the value "
                 "of additionalProperty[Issued] instead"))])
+        # Only a slot of the record itself is said to hold a value instead:
+        # a reference's `description` is not the record's
+        record, dropped = converted(crate({
+            "description": "The root.",
+            "isPartOf": [{"@id": "ark:59852/p", "description": {"@id": "#d"}}]}))
+        self.assertEqual(record["description"], "The root.")
+        self.assertEqual(dropped, [("parent_datasets[0].description", (
+            "not placed in `description`: a crate reference or object, which "
+            'a `string` slot does not hold: {"@id": "#d"}'))])
 
     def test_the_same_value_from_two_properties_is_not_dropped(self):
         """Nothing is left out when two properties state one value, and a
