@@ -95,15 +95,17 @@ def test_findings_render_locations_escape_markup_and_keep_warning_nonfatal():
     assert "No mechanical evidence findings" in render_evidence_findings(EvidenceReport(()))
 
 
-def _real_rating(tmp_path, *, mismatch=False):
+def _real_rating(tmp_path, *, mismatch=False, rubric="rubric20"):
     from data_sheets_schema.evaluation_context import load_document
     from data_sheets_schema.semantic_evidence_authority import authority_digest
     from tests.test_evaluation.test_semantic_evidence import _rating, _groups, _row, CONTEXT
     inp = tmp_path / "record.yaml"
     inp.write_text(yaml.safe_dump({"id": "test:dataset", "title": "Test", "creators": [{"name": "Ada"}]}))
-    doc = _rating("rubric20", load_document(inp))
+    doc = _rating(rubric, load_document(inp))
     doc["version"] = "3.0"
     doc["metadata"]["evidence_authority_sha256"] = authority_digest()
+    definition = ROOT / f".claude/agents/d4d-{rubric}-semantic.md"
+    doc["metadata"]["instrument_sha256"] = hashlib.sha256(definition.read_bytes()).hexdigest()
     for _group, items in _groups(doc):
         for item in items:
             for row in item["unit_scores"]:
@@ -128,6 +130,40 @@ def test_report_recomputes_false_claim_instead_of_trusting_rating_clean_flag(tmp
     assert "Q1" in text and "creators" in text
     assert hashlib.sha256(inp.read_bytes()).hexdigest() in text
     assert [p.read_bytes() for p in (path, inp, context)] == before
+
+
+@pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
+@pytest.mark.parametrize("evidence", [
+    {"cited": [{"path": "creators", "quoted": "Entirely fabricated quotation"}]},
+    {"cited": [{"path": "creators", "quote": 42}]},
+    {"counts": [{"path": "creators", "claimed": "1"}]},
+    {"considered": "creators"},
+])
+def test_report_rejects_malformed_v3_before_claiming_clean_evidence(tmp_path, rubric, evidence):
+    from report_semantic_comparison import report
+    from tests.test_evaluation.test_semantic_evidence import _groups
+    path, inp, context = _real_rating(tmp_path, rubric=rubric)
+    doc = json.loads(path.read_bytes())
+    _group, items = next(_groups(doc))
+    items[0]["unit_scores"][0].update(evidence)
+    path.write_text(json.dumps(doc))
+    before = [p.read_bytes() for p in (path, inp, context)]
+    for inputs, contexts in (({}, {}), ({path: inp}, {path: context})):
+        text = report([path], evidence_inputs=inputs, evidence_contexts=contexts)
+        assert "not established" in text and "invalid v3 output structure" in text
+        assert "No mechanical evidence findings" not in text
+        assert "0 error(s)" not in text
+        assert "evaluator_declared_v3" not in text
+    assert [p.read_bytes() for p in (path, inp, context)] == before
+
+
+@pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
+def test_valid_v3_still_reports_recomputed_clean_evidence(tmp_path, rubric):
+    from report_semantic_comparison import report
+    path, inp, context = _real_rating(tmp_path, rubric=rubric)
+    text = report([path], evidence_inputs={path: inp}, evidence_contexts={path: context})
+    assert "No mechanical evidence findings" in text
+    assert "not established" not in text
 
 
 def test_report_missing_input_or_wrong_context_never_claims_clean(tmp_path):

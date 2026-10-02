@@ -146,6 +146,29 @@ def _evidence_section(path: Path, doc: dict, input_path: Path | None,
     from data_sheets_schema.semantic_scope import validate_scope
 
     lines = [f"### {markdown_cell(path)}", ""]
+    if doc.get("version") == "3.0":
+        # Mechanical checks assume the output contract: an unrecognized citation
+        # key, for example, must not silently become an absent quotation (#4245).
+        from jsonschema import SchemaError, ValidationError, validate
+        from data_sheets_schema.resources import resource_path
+
+        try:
+            schema_name = {
+                "rubric10-semantic": "rubric10_semantic_schema.json",
+                "rubric20-semantic": "rubric20_semantic_schema.json",
+            }[doc["rubric"]]
+            schema = json.loads(resource_path(f"src/download/prompts/{schema_name}").read_bytes())
+            validate(doc, schema)
+        except ValidationError as exc:
+            location = "/".join(str(part) for part in exc.absolute_path) or "#"
+            lines.extend([
+                "Evidence verification: **not established** — invalid v3 output structure at "
+                f"{markdown_cell(location)}: {markdown_cell(exc.message)}.", "",
+            ])
+            return lines
+        except (OSError, ValueError, SchemaError) as exc:
+            lines.extend([f"Evidence verification: **not established** — {markdown_cell(exc)}.", ""])
+            return lines
     try:
         lines.extend([render_issue_taxonomy(doc).rstrip(), ""])
     except ValueError as exc:
