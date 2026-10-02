@@ -63,35 +63,49 @@ def test_real_local_timeout_retains_candidate_and_waits_for_process(environment,
                           "Path('candidate_written').touch()\n"
                           "print('{\"type\":\"assistant\"}',flush=True)\ntime.sleep(60)\n")
     executable.chmod(0o700)
-    evaluators = []
+    evaluators, bound, signalled = [], 300, "the evaluator signalled candidate_written"
 
     class CandidateFirstPopen(subprocess.Popen):
-        """Return only once the synthetic evaluator has written its partial candidate.
+        """Return once the synthetic evaluator signals, exits or outlasts `bound`, and record which.
 
         `subprocess.run` starts its deadline when Popen returns, before the new
         interpreter has run a line, so on a loaded machine the 0.5 s could expire
-        before the candidate existed (#4065). Waiting here for the evaluator's own
-        signal starts the real deadline after the candidate however slowly the
-        interpreter starts; the 300 s only bounds an evaluator that never signals.
+        before the candidate existed (#4065). This waits for the first of three
+        endings and records it as `gate_ending`: the evaluator touches
+        `candidate_written` after its candidate; it exits without touching it; or
+        it is still running, unsignalled, after `bound` (300) seconds. Only the
+        first starts the real deadline after the candidate however slowly the
+        interpreter starts, so the test asserts it before it reads the receipt. An
+        evaluator that exits unsignalled leaves no TimeoutExpired to find (#4193).
         """
 
         def __init__(self, args, *rest, **kwargs):
             super().__init__(args, *rest, **kwargs)
             if args[:1] == [str(executable)]:
                 evaluators.append(self)
-                written, limit = Path(kwargs["cwd"]) / "candidate_written", time.monotonic() + 300
+                written, limit = Path(kwargs["cwd"]) / "candidate_written", time.monotonic() + bound
                 while not written.exists() and self.poll() is None and time.monotonic() < limit:
                     time.sleep(0.01)
-                self.candidate_written = written.exists()
+                # The file first: an evaluator that signalled and then exited did signal.
+                self.gate_ending = (
+                    signalled if written.exists()
+                    else f"the evaluator exited with status {self.returncode} without signalling"
+                    if self.returncode is not None
+                    else f"the {bound} s bound was reached with the evaluator still running, unsignalled")
 
     monkeypatch.setattr(subprocess, "Popen", CandidateFirstPopen)
     monkeypatch.setattr(deadline, "SECONDS", 0.5)
     proxy = deadline.DeadlineSubprocess(runner, subprocess, str(executable), {"synthetic_probe": True})
     monkeypatch.setattr(runner, "subprocess", proxy)
     receipt = runner.run_job(manifest, job, str(executable))
-    assert receipt["status"] == "incomplete" and receipt["error"].startswith("TimeoutExpired:")
+    # How the wait ended comes before the receipt, which would misreport an evaluator that
+    # exited unsignalled as a deadline that never fired (#4193).
+    assert len(evaluators) == 1, (
+        f"the gate saw {len(evaluators)} launches of the synthetic evaluator; receipt error: {receipt.get('error')}")
     evaluator, = evaluators
-    assert evaluator.candidate_written, "the synthetic evaluator never wrote its partial candidate"
+    assert evaluator.gate_ending == signalled, (
+        f"the wait for the synthetic evaluator's candidate_written signal ended because {evaluator.gate_ending}")
+    assert receipt["status"] == "incomplete" and receipt["error"].startswith("TimeoutExpired:")
     attempt, = (runner.PLAN / "attempts" / job["id"]).iterdir()
     assert (attempt / "candidate.json").read_text() == "original partial candidate"
     assert json.loads((attempt / "execution_deadline.json").read_bytes())["timed_out"] is True
