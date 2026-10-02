@@ -38,6 +38,12 @@ reports is derived from the code that decides it:
   `+=` or `.setdefault()`, or from a local, is model text with the
   classifier reasons that feed it; a JSON hook command with escapes is read
   as shell (#4142);
+- a launch is shown to pass a flag only where the flag is a literal element
+  of the argv list it hands over as built: a concatenation (Codex's
+  reproduction, with a removal or without one), a starred element, a value
+  wrapped in a call and a holder used any other way than to hand the list
+  on are not shown, so no registered launch of this checkout is; and the
+  constants a model-text constant is built from are model text too (#4156);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -69,6 +75,13 @@ SKILL = ROOT / ".claude" / "skills" / "d4d-generation-specificity-audit"
 #: The trees discovery must read, written out here rather than read from the
 #: scanner, so a scanner that drops one fails the cross-check (#4054).
 DISCOVERY_TREES = ("src", "notes", "scripts")
+#: Where a violation in an interactive-session surface of this checkout
+#: gates (#4156): no registered native launch is shown to pass `--safe-mode`
+#: or `--bare`, since each takes its flags from a starred module constant or
+#: record field, which the sound rule does not follow
+#: (`test_no_registered_launch_is_shown_to_switch_the_session_off` pins
+#: that), so every session surface is a run_controllers surface too.
+SESSION_GATES = ["interactive_session", "run_controllers"]
 
 
 def _load_scanner():
@@ -146,43 +159,59 @@ def _plant(rel: str, line: str, after: str | None = None, surface=None):
     return [h for h in hits if first <= h["line"] <= last], hits
 
 
+#: Launch rows a mocked `launch_flags` returns in place of this checkout's,
+#: whose four launches are all "not shown" (#4156): one passing no flag, one
+#: passing `--bare` alone, one shown to pass `--safe-mode`.
+UNSAFE_LAUNCH = {"site": "notes/exp_4092/launch.py:9 --system-prompt", "carries": False,
+                 "evidence": ["notes/exp_4092/launch.py:8 no element of the argv list is the literal `--safe-mode`"],
+                 "memory_off": False,
+                 "memory_evidence": ["notes/exp_4092/launch.py:8 no element of the argv list is the literal "
+                                     "`--safe-mode` or `--bare`"]}
+BARE_LAUNCH = {"site": "notes/exp_4131/launch.py:9 --system-prompt", "carries": False,
+               "evidence": ["notes/exp_4131/launch.py:8 no element of the argv list is the literal `--safe-mode`"],
+               "memory_off": True, "memory_evidence": ["notes/exp_4131/launch.py:8 --bare"]}
+SAFE_LAUNCH = {"site": "notes/exp_4156/launch.py:9 --system-prompt", "carries": True,
+               "evidence": ["notes/exp_4156/launch.py:8 --safe-mode"], "memory_off": True,
+               "memory_evidence": ["notes/exp_4156/launch.py:8 --safe-mode"]}
+
+
+def _with_launches(rows: list):
+    """A `launch_flags` side effect that returns `rows` in place of the
+    launches discovery reads."""
+    return mock.patch.object(scan, "launch_flags", side_effect=lambda *a, **k: [dict(r) for r in rows])
+
+
 @lru_cache(maxsize=None)
 def _discovered_with_a_loading_workflow_and_an_unsafe_launch():
     """discover() of this checkout with two things it does not do today
     (#4092, #4093): the @d4dassistant workflow names an instruction file
-    (d4d_assistant_edit.md), and one registered native launch passes no
-    --safe-mode. Computed once; the mocks are gone when it returns."""
+    (d4d_assistant_edit.md), and its one registered native launch passes
+    no --safe-mode. Computed once; the mocks are gone when it returns."""
     workflow = (ROOT / ".github/workflows/d4d-agent.yml").read_text(encoding="utf-8")
-    real_named, real_launches = scan._named_files, scan.launch_flags
+    real_named = scan._named_files
 
     def named(root, text, claude_names):
         got = real_named(root, text, claude_names)
         return {**got, ".github/workflows/d4d_assistant_edit.md": False} if text == workflow else got
 
-    def launches(*args, **kwargs):
-        return real_launches(*args, **kwargs) + [
-            {"site": "notes/exp_4092/launch.py:9 --system-prompt", "carries": False,
-             "evidence": ["no element holds `--safe-mode`"], "memory_off": False,
-             "memory_evidence": ["no element holds `--safe-mode` or `--bare`"]}]
-
-    with mock.patch.object(scan, "_named_files", side_effect=named), \
-            mock.patch.object(scan, "launch_flags", side_effect=launches):
+    with mock.patch.object(scan, "_named_files", side_effect=named), _with_launches([UNSAFE_LAUNCH]):
         return scan.discover(ROOT)
 
 
 @lru_cache(maxsize=None)
 def _discovered_with_a_bare_launch():
-    """discover() of this checkout with one more registered native launch,
-    which passes `--bare` and not `--safe-mode` (#4131). Computed once."""
-    real_launches = scan.launch_flags
+    """discover() of this checkout whose registered native launches are one
+    shown to pass `--safe-mode` and one that passes `--bare` and not
+    `--safe-mode` (#4131). Computed once."""
+    with _with_launches([SAFE_LAUNCH, BARE_LAUNCH]):
+        return scan.discover(ROOT)
 
-    def launches(*args, **kwargs):
-        return real_launches(*args, **kwargs) + [
-            {"site": "notes/exp_4131/launch.py:9 --system-prompt", "carries": False,
-             "evidence": ["no element holds `--safe-mode`"], "memory_off": True,
-             "memory_evidence": ["notes/exp_4131/launch.py:9 --bare"]}]
 
-    with mock.patch.object(scan, "launch_flags", side_effect=launches):
+@lru_cache(maxsize=None)
+def _discovered_with_every_launch_shown():
+    """discover() of this checkout whose registered native launches are all
+    shown to pass `--safe-mode` (#4156). Computed once."""
+    with _with_launches([SAFE_LAUNCH]):
         return scan.discover(ROOT)
 
 
@@ -203,21 +232,16 @@ AUDIT_ARGV = ("    argv = [str(executable), *CLI_FLAGS,", "    argv: list[str] =
 AUDIT_ARGV_END = "        '--system-prompt', Path(job['system_prompt']).read_text()]\n"
 
 
-@lru_cache(maxsize=None)
-def _discovered_with_the_round_five_rewrites():
-    """discover() of this checkout with two rewrites a reviewer made
-    (#4142): `hook_output` sets the deny reason by item assignment, and the
-    audit continuation binds its argv by an annotated assignment and then
-    removes `--safe-mode` from it. Returns (surfaces, facts, the rewritten
-    texts by path). Computed once; the mock is gone when it returns."""
+def _discovered_with_rewrites(edits: tuple) -> tuple:
+    """discover() of this checkout with files rewritten in memory: `edits`
+    is ((path, old, new), ...), each `old` once in its file. Returns
+    (surfaces, facts, the rewritten texts by path); the mock is gone when it
+    returns."""
     texts = {}
-    text = (ROOT / NATIVE_CONTROL).read_text(encoding="utf-8")
-    assert text.count(HOOK_OUTPUT_DICT) == 1, NATIVE_CONTROL
-    texts[NATIVE_CONTROL] = text.replace(HOOK_OUTPUT_DICT, HOOK_OUTPUT_ITEM)
-    text = (ROOT / AUDIT_NATIVE).read_text(encoding="utf-8")
-    assert text.count(AUDIT_ARGV[0]) == 1 and text.count(AUDIT_ARGV_END) == 1, AUDIT_NATIVE
-    texts[AUDIT_NATIVE] = text.replace(AUDIT_ARGV[0], AUDIT_ARGV[1]).replace(
-        AUDIT_ARGV_END, AUDIT_ARGV_END + "    argv.remove('--safe-mode')\n")
+    for rel, old, new in edits:
+        text = texts.get(rel) or (ROOT / rel).read_text(encoding="utf-8")
+        assert text.count(old) == 1, (rel, old)
+        texts[rel] = text.replace(old, new)
     rewritten = {(ROOT / rel).resolve(): t for rel, t in texts.items()}
     real_parse = scan._parse
 
@@ -228,6 +252,52 @@ def _discovered_with_the_round_five_rewrites():
     with mock.patch.object(scan, "_parse", side_effect=parse):
         surfaces, facts = scan.discover(ROOT)
     return surfaces, facts, texts
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_the_round_five_rewrites():
+    """discover() of this checkout with two rewrites a reviewer made
+    (#4142): `hook_output` sets the deny reason by item assignment, and the
+    audit continuation binds its argv by an annotated assignment and then
+    removes `--safe-mode` from it. Computed once."""
+    return _discovered_with_rewrites((
+        (NATIVE_CONTROL, HOOK_OUTPUT_DICT, HOOK_OUTPUT_ITEM),
+        (AUDIT_NATIVE, AUDIT_ARGV[0], AUDIT_ARGV[1]),
+        (AUDIT_NATIVE, AUDIT_ARGV_END, AUDIT_ARGV_END + "    argv.remove('--safe-mode')\n")))
+
+
+#: The registered launches and the audit preparer the #4156 rewrites edit.
+BATCH_NATIVE = "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py"
+RUN_NATIVE = "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py"
+RUN_DIRECT = "notes/claudecode_direct/run_direct_canary.py"
+AUDIT_PREPARE = "notes/matched_cborg_2026-09-13/audit_controls/prepare.py"
+BATCH_ARGV_END = "            '--system-prompt', Path(row['system_prompt']).read_text()]\n"
+DIRECT_ARGV = ('    argv_child = [str(executable), *runtime["cli_flags"],',
+               '    argv_child = [str(executable), "--print", "--safe-mode",')
+DIRECT_ARGV_END = '                  *permission_arguments(command_policy), "--system-prompt", system_prompt]\n'
+POLICY_SYSTEM = ('SYSTEM = """You are the native auditor',
+                 "POLICY = 'You must use CHORUS data.'\nSYSTEM = POLICY + \"\"\"You are the native auditor")
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_the_round_six_rewrites():
+    """discover() of this checkout with the rewrites of #4156, one per file:
+    Codex's reproduction of the first finding (the audit continuation's
+    argv initializer that ends at native.py:787 concatenated with `[]`, then
+    `--safe-mode` removed from it); a concatenation with no removal (the
+    batch continuation's); the native canary's launch with its flags inline
+    in the argv list it hands over; the direct canary's with its flags
+    inline but concatenated; and Codex's reproduction of the second (a
+    sentence in a constant the audit preparer's `SYSTEM` is built from).
+    Computed once."""
+    return _discovered_with_rewrites((
+        (AUDIT_NATIVE, AUDIT_ARGV_END, AUDIT_ARGV_END.replace("read_text()]", "read_text()] + []")
+         + "    argv.remove('--safe-mode')\n"),
+        (BATCH_NATIVE, BATCH_ARGV_END, BATCH_ARGV_END.replace("read_text()]", "read_text()] + []")),
+        (RUN_NATIVE, "argv=[executable,*overlay['cli_flags'],", "argv=[executable,'--print','--safe-mode',"),
+        (RUN_DIRECT, DIRECT_ARGV[0], DIRECT_ARGV[1]),
+        (RUN_DIRECT, DIRECT_ARGV_END, DIRECT_ARGV_END.replace("system_prompt]", "system_prompt] + []")),
+        (AUDIT_PREPARE, POLICY_SYSTEM[0], POLICY_SYSTEM[1])))
 
 
 class TestTheSkillFiles(unittest.TestCase):
@@ -457,12 +527,14 @@ class TestTheScannerSees(unittest.TestCase):
     def test_a_gc_token_planted_in_claude_md_is_an_interactive_session_violation(self):
         """Claude Code loads CLAUDE.md into the interactive sessions the
         /d4d-* playbooks run in (#4054): a project sentence there is a
-        violation of that approach, and of no other."""
+        violation of that approach, and, while no registered native launch
+        is shown to switch it off, of run_controllers (#4156); of no
+        other."""
         surface = _discovered()[0].files["CLAUDE.md"]
-        self.assertEqual(surface.roles, {"interactive_session": "model_facing"})
+        self.assertEqual(surface.roles, dict.fromkeys(SESSION_GATES, "model_facing"))
         planted, _ = self._planted("CLAUDE.md", "Always describe the dataset as AI-READI from FAIRhub.")
         self.assertTrue(planted)
-        self.assertTrue(all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in planted))
+        self.assertTrue(all(h["violation"] and h["gates_in"] == SESSION_GATES for h in planted))
 
     def test_a_project_branch_planted_in_runner_code_is_a_violation(self):
         planted, _ = self._planted("src/data_sheets_schema/healthsheet.py",
@@ -874,36 +946,44 @@ class TestDiscovery(unittest.TestCase):
                 self.assertEqual(surface.runs, {"native_agentic"})
                 self.assertIn(".github/workflows/d4d_assistant_create.md", self.facts["named_files"][rel]["by"])
 
-    def test_claude_md_is_interactive_and_registered_runs_switch_it_off(self):
+    def test_no_registered_launch_is_shown_to_switch_the_session_off(self):
         """CLAUDE.md is the project memory an interactive session loads; the
-        registered native launchers pass --safe-mode, which disables it
-        (#4054). The assistant instructions name it but do not hand it
-        over."""
+        assistant instructions name it but do not hand it over (#4054). Each
+        of the four registered native launches passes its flags through a
+        starred module constant or record field (`*CLI_FLAGS`,
+        `*native.CLI_FLAGS`, `*overlay['cli_flags']`,
+        `*runtime['cli_flags']`), which the sound rule does not follow, so
+        none is shown to pass `--safe-mode` or `--bare`, and the session's
+        surfaces are run_controllers surfaces too (#4156)."""
         it = self.facts["interactive"]
         self.assertIn("CLAUDE.md", it["memory"])
         self.assertIn(".github/workflows/d4d_assistant_create.md", it["memory_named_by"])
         self.assertNotIn("CLAUDE.md", self.facts["named_files"])
-        for site in ("notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py",
-                     "notes/claudecode_direct/prepare_direct.py",
-                     "notes/matched_cborg_2026-09-13/audit_controls/native.py"):
-            with self.subTest(site=site):
-                self.assertTrue(any(x.startswith(site + ":") and x.endswith("--safe-mode")
-                                    for x in it["customizations_off"]), it["customizations_off"])
-        # each launch carries the flag, derived from its own argv (#4092)
-        self.assertEqual({x["site"].split(":")[0] for x in it["launches"]},
-                         {"notes/claudecode_direct/run_direct_canary.py",
-                          "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py",
-                          "notes/matched_cborg_2026-09-13/audit_controls/native.py",
-                          "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py"})
-        self.assertTrue(all(x["carries"] is True for x in it["launches"]), it["launches"])
-        self.assertEqual(it["launches_without_customizations_off"], [])
-        self.assertEqual(self.surfaces.files["CLAUDE.md"].roles, {"interactive_session": "model_facing"})
+        spread = {"notes/claudecode_direct/run_direct_canary.py": "`*runtime['cli_flags']`",
+                  "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": "`*native.CLI_FLAGS`",
+                  "notes/matched_cborg_2026-09-13/audit_controls/native.py": "`*CLI_FLAGS`",
+                  "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "`*overlay['cli_flags']`"}
+        self.assertEqual({x["site"].split(":")[0] for x in it["launches"]}, set(spread))
+        for x in it["launches"]:
+            with self.subTest(site=x["site"]):
+                self.assertIsNone(x["carries"])
+                self.assertIsNone(x["memory_off"])
+                # its argv list is shown to be what it hands over: only the
+                # starred elements stop the proof
+                self.assertEqual(len(x["evidence"]), 1, x["evidence"])
+                self.assertIn(spread[x["site"].split(":")[0]], x["evidence"][0])
+                self.assertIn("are not followed", x["evidence"][0])
+        self.assertEqual(it["launches_without_customizations_off"], sorted(x["site"] for x in it["launches"]))
+        self.assertEqual(it["launches_without_memory_off"], sorted(x["site"] for x in it["launches"]))
+        self.assertEqual(it["customizations_off"], [])
+        self.assertEqual(self.surfaces.files["CLAUDE.md"].roles, dict.fromkeys(SESSION_GATES, "model_facing"))
 
     def test_the_project_settings_and_the_hooks_they_run_are_session_surfaces(self):
         """The settings files and the scripts their hooks run, read here with
         json, independently of the scanner, are interactive_session
         surfaces; a project default in a hook script or in the settings' env
-        block gates there (#4131, #4130)."""
+        block gates there (#4131, #4130), and in run_controllers while no
+        registered launch is shown to switch them off (#4156)."""
         settings = [rel for rel in (".claude/settings.json", ".claude/settings.local.json") if (ROOT / rel).is_file()]
         self.assertIn(".claude/settings.json", settings)
         commands = []
@@ -930,11 +1010,11 @@ class TestDiscovery(unittest.TestCase):
             self.assertIn("interactive_session", self.surfaces.files[rel].runs)
         planted, _ = _plant(hooks[0], 'DEFAULT_PROJECT_4131 = "CHORUS"')
         self.assertTrue(planted)
-        self.assertTrue(all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in planted), planted)
+        self.assertTrue(all(h["violation"] and h["gates_in"] == SESSION_GATES for h in planted), planted)
         env, _ = _plant(".claude/settings.json", '  "env": {"D4D_MANIFEST": "data/preprocessed/CHORUS_manifest.yaml"},',
                         after="{")
         self.assertTrue(env)
-        self.assertTrue(all(h["context"] == "code_table" and h["violation"] and h["gates_in"] == ["interactive_session"]
+        self.assertTrue(all(h["context"] == "code_table" and h["violation"] and h["gates_in"] == SESSION_GATES
                             for h in env), env)
 
     def test_an_evaluator_a_generation_closure_reaches_gates(self):
@@ -950,7 +1030,7 @@ class TestDiscovery(unittest.TestCase):
         self.assertTrue([h for h in planted if h["match"] == "CHORUS" and h["violation"]
                          and h["gates_in"] == ["native_agentic"]])
         rubric, _ = _plant(".claude/agents/d4d-rubric10.md", "  Example: score the CHORUS record.", after="description:")
-        self.assertTrue(rubric and all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in rubric))
+        self.assertTrue(rubric and all(h["violation"] and h["gates_in"] == SESSION_GATES for h in rubric))
         skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
         self.assertNotIn("Evaluation is out of scope", skill)
         self.assertIn("evaluate_d4d_llm.py", skill)
@@ -1685,7 +1765,7 @@ class TestSessionDescriptions(unittest.TestCase):
         rel = ".claude/agents/d4d-schema-expert.md"
         planted, _ = _plant(rel, '    - "Describe the CM4AI release"', after="Examples:")
         self.assertTrue(planted)
-        self.assertTrue(all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in planted), planted)
+        self.assertTrue(all(h["violation"] and h["gates_in"] == SESSION_GATES for h in planted), planted)
         body, _ = _plant(rel, "Prefer the CM4AI release notes.")
         self.assertTrue(body and not any(h["violation"] for h in body))
         readme = ".claude/commands/README.md"
@@ -1694,7 +1774,7 @@ class TestSessionDescriptions(unittest.TestCase):
         text[first] += " for CM4AI"
         hits = [h for h in _scan_text(readme, "\n".join(text) + "\n", _discovered()[0].files[readme])
                 if h["line"] == first + 1]
-        self.assertTrue(hits and all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in hits))
+        self.assertTrue(hits and all(h["violation"] and h["gates_in"] == SESSION_GATES for h in hits))
 
 
 class TestRawYamlComments(unittest.TestCase):
@@ -1842,10 +1922,10 @@ class TestRunShapingYamlAndShell(unittest.TestCase):
         handed = {c for _, c, _, _ in scan.units_for(Path("s.json"), "s.json", text, code=False)}
         self.assertEqual(handed, {"value"})
         surfaces = _discovered()[0]
-        for rel, approach in ((".claude/settings.json", "interactive_session"),
-                              (".github/ai-controllers.json", "github_assistant")):
+        for rel, approaches in ((".claude/settings.json", SESSION_GATES),
+                                (".github/ai-controllers.json", ["github_assistant"])):
             with self.subTest(rel=rel):
-                self.assertEqual(surfaces.files[rel].roles, {approach: "run_shaping"})
+                self.assertEqual(surfaces.files[rel].roles, dict.fromkeys(approaches, "run_shaping"))
 
     def test_a_json_hook_command_with_escapes_is_read_as_shell(self):
         """A hook `command` is read as the shell gets it: its JSON escapes
@@ -1884,7 +1964,7 @@ class TestRunShapingYamlAndShell(unittest.TestCase):
                                     '"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/protect_schema_hook.py"')
                 hits = [h for h in planted if h["match"] == "CHORUS"]
                 self.assertEqual([(h["context"], h["violation"], h["gates_in"]) for h in hits],
-                                 [("code_table", True, ["interactive_session"])])
+                                 [("code_table", True, SESSION_GATES)])
 
 
 class TestParseFailures(unittest.TestCase):
@@ -1947,8 +2027,29 @@ class TestParseFailures(unittest.TestCase):
 
 class TestLaunchFlags(unittest.TestCase):
     """Whether registered native runs load what an interactive session
-    loads is derived from each launch's own argv (#4092)."""
+    loads is derived from each launch's own argv (#4092), soundly by
+    construction (#4156): a launch is shown to pass a flag only where the
+    flag is a literal element of the argv list it hands over, unchanged."""
 
+    def _rows(self, files: dict) -> dict:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            for rel, text in files.items():
+                _write(root / rel, text)
+            parsed = _parsed(root, "notes")
+            controllers = {p.relative_to(root).as_posix(): p for p in parsed}
+            rows = scan.launch_flags(controllers, parsed)
+        return {r["site"].split(":")[0].rsplit("/", 1)[-1]: r for r in rows}
+
+    def _launches(self, files: dict) -> dict:
+        return {name: row["carries"] for name, row in self._rows(files).items()}
+
+    #: One launch per file. Shown: a flag literal in the list a function
+    #: returns, hands to a call made as a statement or a `with` item, or binds
+    #: to a name it otherwise only hands on whole or reads. Not shown: a flag
+    #: a starred element would bring (a constant, an imported constant, a
+    #: comprehension, a record field, a sum), a list handed to a call whose
+    #: value is kept, a launch flag outside a list (#4156).
     FLAGS = {"notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\nPLAIN = ['--print']\n",
              "notes/x/a_literal.py": "def go(exe, p):\n    return [exe, '--safe-mode', '--system-prompt', p]\n",
              "notes/x/b_constant.py": "CLI_FLAGS = ['--print', '--safe-mode']\n"
@@ -1965,91 +2066,188 @@ class TestLaunchFlags(unittest.TestCase):
              "notes/x/h_none.py": "def go(exe, p):\n    return [exe, '--print', '--system-prompt', p]\n",
              "notes/x/i_append.py": "def go(exe, p):\n    argv = [exe, '--safe-mode']\n"
                                     "    argv.append('--system-prompt')\n    return argv + [p]\n",
+             "notes/x/j_bare.py": "def go(exe, p):\n    return [exe, '--bare', '--system-prompt', p]\n",
+             "notes/x/k_statement.py": "import subprocess\ndef go(exe, p):\n"
+                                       "    subprocess.run([exe, '--safe-mode', '--system-prompt', p], check=True)\n",
+             "notes/x/l_with.py": "import subprocess\ndef go(exe, p):\n"
+                                  "    with subprocess.Popen([exe, '--safe-mode', '--system-prompt', p]) as proc:\n"
+                                  "        return proc.wait()\n",
+             "notes/x/m_kept.py": "import subprocess\ndef go(exe, p):\n"
+                                  "    proc = subprocess.Popen([exe, '--safe-mode', '--system-prompt', p])\n"
+                                  "    return proc.wait()\n",
+             "notes/x/n_held.py": "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                  "    if '--safe-mode' not in argv:\n        raise ValueError(f'unsafe {argv}')\n"
+                                  "    return run(argv, timeout=1)\n",
+             "notes/x/o_keyword.py": "import subprocess\ndef go(exe, p):\n"
+                                     "    argv = (exe, '--safe-mode', '--system-prompt', p)\n"
+                                     "    return subprocess.run(args=argv)\n",
+             "notes/x/p_yielded.py": "def go(exe, p):\n    yield [exe, '--safe-mode', '--system-prompt', p]\n",
              "notes/x/writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n"}
 
-    def _rows(self, files: dict) -> dict:
-        with tempfile.TemporaryDirectory() as d:
-            root = Path(d).resolve()
-            for rel, text in files.items():
-                _write(root / rel, text)
-            parsed = _parsed(root, "notes")
-            controllers = {p.relative_to(root).as_posix(): p for p in parsed}
-            rows = scan.launch_flags(root, controllers, parsed, scan._notes_index(root, parsed))
-        return {r["site"].split(":")[0].rsplit("/", 1)[-1]: r for r in rows}
+    def test_a_flag_is_shown_only_as_a_literal_of_the_list_handed_over(self):
+        """`carries` is `--safe-mode` itself, True only where the literal is
+        an element of the argv list the launch hands over as built: a flag a
+        starred element would bring (a constant, an imported one, a record
+        field whoever writes it, a sum) is never followed, a list handed to
+        a call whose value is kept may be what that call rebuilds, and
+        `--bare` alone (j_bare) does not switch the command, agent and skill
+        descriptions off (#4131, #4156)."""
+        rows = self._rows(self.FLAGS)
+        self.assertEqual({n: r["carries"] for n, r in rows.items()},
+                         {"a_literal.py": True, "b_constant.py": None, "c_imported.py": None, "d_from.py": None,
+                          "e_filtered.py": None, "f_field.py": None, "g_sum.py": None, "h_none.py": False,
+                          "i_append.py": None, "j_bare.py": False, "k_statement.py": True, "l_with.py": True,
+                          "m_kept.py": None, "n_held.py": True, "o_keyword.py": True, "p_yielded.py": True})
+        self.assertEqual({n: rows[n]["memory_off"] for n in ("a_literal.py", "g_sum.py", "h_none.py", "j_bare.py")},
+                         {"a_literal.py": True, "g_sum.py": None, "h_none.py": False, "j_bare.py": True})
+        for name, spread in (("b_constant.py", "`*CLI_FLAGS`"), ("c_imported.py", "`*flags.PLAIN`"),
+                             ("d_from.py", "`*SAFE`"), ("f_field.py", "`*rec['cli_flags']`"),
+                             ("g_sum.py", "`*(BASE + ['--bare'])`")):
+            with self.subTest(launch=name):
+                self.assertTrue(any(spread in e and "are not followed" in e for e in rows[name]["evidence"]),
+                                rows[name]["evidence"])
+        self.assertTrue(any("whose value is kept" in e for e in rows["m_kept.py"]["evidence"]), rows["m_kept.py"])
+        self.assertTrue(any("is not in an argv list" in e for e in rows["i_append.py"]["evidence"]))
+        self.assertIn("notes/x/n_held.py:2 --safe-mode", rows["n_held.py"]["evidence"])
 
-    def _launches(self, files: dict) -> dict:
-        return {name: row["carries"] for name, row in self._rows(files).items()}
+    #: One launch whose argv is bound to a name and handed on whole, shown;
+    #: with each edit, another use of that name, not shown, with the words
+    #: its reason uses (#4156).
+    HOLDER = "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n{edit}    return run(argv)\n"
+    HOLDER_EDITS = {
+        "remove": ("    argv.remove('--safe-mode')\n", "`argv` is the object of `.remove()`"),
+        "pop": ("    argv.pop(1)\n", "`argv` is the object of `.pop()`"),
+        "clear": ("    argv.clear()\n", "`argv` is the object of `.clear()`"),
+        "extend": ("    argv.extend(['--verbose'])\n", "`argv` is the object of `.extend()`"),
+        "del item": ("    del argv[1]\n", "`argv` is subscripted"),
+        "item": ("    argv[1] = '--verbose'\n", "`argv` is subscripted"),
+        "slice": ("    argv[1:2] = []\n", "`argv` is subscripted"),
+        "augmented": ("    argv += ['--verbose']\n", "`argv` is assigned again"),
+        "reassigned": ("    argv = argv[2:]\n", "`argv` is assigned again"),
+        "alias": ("    flags = argv\n    flags.remove('--safe-mode')\n", "`argv` is bound to another name"),
+        "starred": ("    cmd = [*argv]\n", "`argv` is a starred element"),
+        "concatenated": ("    cmd = argv + []\n", "`argv` is an operand of `+`"),
+        "loop": ("    for argv in [argv]:\n        pass\n", "`argv` is assigned again"),
+        "with": ("    with open(p) as argv:\n        pass\n", "`argv` is assigned again"),
+        "walrus": ("    (argv := [])\n", "`argv` is assigned again"),
+        "deleted": ("    del argv\n", "`argv` is deleted"),
+        "except": ("    try:\n        pass\n    except ValueError as argv:\n        pass\n",
+                   "`argv` is bound by `except ... as`"),
+        "import": ("    import argv\n", "`argv` is bound by an import"),
+        "closure": ("    def cb():\n        argv.clear()\n", "`argv` is the object of `.clear()`"),
+        "nonlocal": ("    def cb():\n        nonlocal argv\n        argv = []\n", "`argv` is declared `nonlocal`"),
+    }
 
-    def test_each_launch_is_read_for_the_flag(self):
-        """`carries` is `--safe-mode` itself: `--bare` alone (g_sum) does
-        not switch the command, agent and skill descriptions off (#4131)."""
-        self.assertEqual(self._launches(self.FLAGS),
-                         {"a_literal.py": True, "b_constant.py": True, "c_imported.py": False, "d_from.py": True,
-                          "e_filtered.py": None, "f_field.py": True, "g_sum.py": False, "h_none.py": False,
-                          "i_append.py": None})
-        self.assertTrue(self._rows(self.FLAGS)["g_sum.py"]["memory_off"])
-        # a field one writer fills without the flag is not shown to carry it
-        other = {**self.FLAGS, "notes/x/writer2.py": "def make():\n    return {'cli_flags': ['--print']}\n"}
-        self.assertIsNone(self._launches(other)["f_field.py"])
+    def test_any_other_use_of_the_name_that_holds_the_argv_is_not_shown(self):
+        """Codex's reproduction of #4156 removed `--safe-mode` from an argv
+        whose binding no listed removal form was read on. Now the name an
+        argv list is bound to must be handed on whole (a call's argument, a
+        returned value) or only read (a comparison, an f-string); any other
+        use, whatever its form, leaves the launch not shown, and so does a
+        `global` declaration."""
+        self.assertTrue(self._launches({"notes/x/go.py": self.HOLDER.format(edit="")})["go.py"])
+        for kind, (edit, words) in self.HOLDER_EDITS.items():
+            with self.subTest(edit=kind):
+                row = self._rows({"notes/x/go.py": self.HOLDER.format(edit=edit)})["go.py"]
+                self.assertIsNone(row["carries"])
+                self.assertIsNone(row["memory_off"])
+                self.assertTrue(any(words in e for e in row["evidence"]), row["evidence"])
+        row = self._rows({"notes/x/go.py": "def go(exe, p):\n    global argv\n"
+                                           "    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                           "    return run(argv)\n"})["go.py"]
+        self.assertIsNone(row["carries"])
+        self.assertTrue(any("`argv` is declared `global`" in e for e in row["evidence"]), row["evidence"])
 
-    #: Launches whose flag list something can shorten, each beside the same
-    #: launch without the removal (#4131).
-    SHORTENED = {
-        "notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\n",
-        "notes/x/j_module.py": "CLI_FLAGS = ['--print', '--safe-mode']\nCLI_FLAGS.remove('--safe-mode')\n"
-                               "def go(exe, p):\n    return [exe, *CLI_FLAGS, '--system-prompt', p]\n",
-        "notes/x/k_local.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    flags.remove('--safe-mode')\n"
-                              "    return [exe, *flags, '--system-prompt', p]\n",
-        "notes/x/l_argv.py": "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
-                             "    argv.remove('--safe-mode')\n    return argv\n",
-        "notes/x/m_imported.py": "from flags import SAFE\ndef go(exe, p):\n    return [exe, *SAFE, '--system-prompt', p]\n",
-        "notes/x/n_mutator.py": "import flags\ndef strip():\n    flags.SAFE.pop()\n",
-        "notes/x/o_global.py": "FLAGS = ['--safe-mode']\ndef reset():\n    global FLAGS\n    FLAGS = ['--print']\n"
-                               "def go(exe, p):\n    return [exe, *FLAGS, '--system-prompt', p]\n",
-        "notes/x/p_field.py": "def go(exe, p, rec):\n    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
-        "notes/x/q_writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n",
-        "notes/x/r_field_mutator.py": "def strip(rec):\n    rec['cli_flags'].remove('--safe-mode')\n",
-        "notes/x/s_item.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    flags[1] = '--verbose'\n"
-                             "    return [exe, *flags, '--system-prompt', p]\n",
-        "notes/x/t_del.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    del flags[1]\n"
-                            "    return [exe, *flags, '--system-prompt', p]\n"}
-    INTACT = {
-        "notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\n",
-        "notes/x/j_module.py": "CLI_FLAGS = ['--print', '--safe-mode']\n"
-                               "def go(exe, p):\n    return [exe, *CLI_FLAGS, '--system-prompt', p]\n",
-        "notes/x/k_local.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
-                              "    return [exe, *flags, '--system-prompt', p]\n",
-        "notes/x/l_argv.py": "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n    return argv\n",
-        "notes/x/m_imported.py": "from flags import SAFE\ndef go(exe, p):\n    return [exe, *SAFE, '--system-prompt', p]\n",
-        "notes/x/o_global.py": "FLAGS = ['--safe-mode']\n"
-                               "def go(exe, p):\n    return [exe, *FLAGS, '--system-prompt', p]\n",
-        "notes/x/p_field.py": "def go(exe, p, rec):\n    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
-        "notes/x/q_writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n",
-        "notes/x/s_item.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
-                             "    return [exe, *flags, '--system-prompt', p]\n",
-        "notes/x/t_del.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
-                            "    return [exe, *flags, '--system-prompt', p]\n"}
+    #: The argv list built or bound any other way than as the value handed
+    #: over, each with the words its reason uses (#4156).
+    CONSTRUCTIONS = {
+        "concatenated": ("def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p] + []\n"
+                         "    return run(argv)\n", "the argv list is an operand of `+`"),
+        "concatenated, then removed": ("def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p] + []\n"
+                                       "    argv.remove('--safe-mode')\n    return run(argv)\n",
+                                       "the argv list is an operand of `+`"),
+        "wrapped": ("def go(exe, p):\n    argv = list([exe, '--safe-mode', '--system-prompt', p])\n"
+                    "    return run(argv)\n", "the argv list is passed to `list`, whose value is kept"),
+        "wrapped in the launch": ("def go(exe, p):\n    run(list([exe, '--safe-mode', '--system-prompt', p]))\n",
+                                  "the argv list is passed to `list`, whose value is kept"),
+        "comprehension": ("def go(exe, p):\n    argv = [a for a in [exe, '--safe-mode', '--system-prompt', p]]\n"
+                          "    return run(argv)\n", "the argv list is iterated by a comprehension"),
+        "starred": ("def go(exe, p):\n    argv = [*[exe, '--safe-mode', '--system-prompt', p]]\n"
+                    "    return run(argv)\n", "the argv list is a starred element"),
+        "conditional": ("def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p] if p else []\n"
+                        "    return run(argv)\n", "the argv list is a branch of a conditional expression"),
+        "or": ("def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p] or []\n"
+               "    return run(argv)\n", "the argv list is an operand of `or`"),
+        "augmented": ("def go(exe, p):\n    argv = [exe]\n    argv += ['--safe-mode', '--system-prompt', p]\n"
+                      "    return run(argv)\n", "the argv list is the value of an augmented assignment"),
+        "chained": ("def go(exe, p):\n    argv = cmd = [exe, '--safe-mode', '--system-prompt', p]\n"
+                    "    return run(argv)\n", "the argv list is bound to 2 targets at once"),
+        "unpacked": ("def go(exe, p):\n    argv, env = [exe, '--safe-mode', '--system-prompt', p], {}\n"
+                     "    return run(argv, env)\n", "the argv list is an element of a tuple"),
+        "walrus": ("def go(exe, p):\n    return run(argv := [exe, '--safe-mode', '--system-prompt', p])\n",
+                   "the argv list is bound by `:=`"),
+        "yield from": ("def go(exe, p):\n    yield from [exe, '--safe-mode', '--system-prompt', p]\n",
+                       "the argv list is handed on element by element by `yield from`"),
+        "deep holder": ("class L:\n    def go(self, exe, p):\n"
+                        "        self.cfg.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                        "        return run(self.cfg.argv)\n", "which cannot be resolved"),
+        "module": ("ARGV = ['claude', '--safe-mode', '--system-prompt', 'x']\ndef go():\n    return run(ARGV)\n",
+                   "is bound at module level"),
+        "class body": ("def go(p):\n    class Job:\n        argv = ['claude', '--safe-mode', '--system-prompt', p]\n"
+                       "    return run(Job.argv)\n", "is bound in a class body"),
+    }
 
-    def test_a_flag_list_something_can_shorten_is_not_shown_to_carry_the_flag(self):
-        """A later `.remove()`, `.pop()`, `del`, item assignment or a
-        reassignment can drop `--safe-mode` from the list a launch reads: in
-        the launch's function, in the constant's module, in a controller that
-        imports the constant, or on the record field (#4131)."""
-        launches = ("j_module.py", "k_local.py", "l_argv.py", "m_imported.py", "o_global.py", "p_field.py",
-                    "s_item.py", "t_del.py")
-        shortened = self._rows(self.SHORTENED)
-        self.assertEqual({n: shortened[n]["carries"] for n in launches}, dict.fromkeys(launches))
-        self.assertTrue(all("can drop" in " ".join(shortened[n]["evidence"]) for n in launches))
-        self.assertEqual(self._launches(self.INTACT), dict.fromkeys(launches, True))
-        # a controller that writes the field by item assignment is a writer
-        assigned = {**self.INTACT, "notes/x/u_assigner.py": "def fill(rec):\n    rec['cli_flags'] = ['--print']\n"}
-        self.assertIsNone(self._launches(assigned)["p_field.py"])
-        text = scan._session_statement({"launches": list(shortened.values())})
-        self.assertNotIn("does not change a registered run's verdict", text)
+    def test_an_argv_list_built_any_other_way_is_not_shown(self):
+        """Codex's reproduction of #4156 bound an argv concatenated with
+        `[]`. The list a launch hands over is shown only where it is a
+        call's argument itself (in a call whose value nothing keeps), a
+        returned value, or the whole value of a plain or annotated
+        assignment, in a function, to a name, attribute or literal-key
+        item. A concatenation (with a later removal or without one), a value
+        wrapped in a call, a comprehension, a starred element, a
+        conditional, an `or`, an augmented assignment, several targets,
+        unpacking, `:=`, `yield from` (which hands on the elements), a
+        holder that cannot be resolved, and a holder at module or class
+        level are not shown."""
+        for kind, (source, words) in self.CONSTRUCTIONS.items():
+            with self.subTest(construction=kind):
+                row = self._rows({"notes/x/go.py": source})["go.py"]
+                self.assertIsNone(row["carries"])
+                self.assertIsNone(row["memory_off"])
+                self.assertTrue(any(words in e for e in row["evidence"]), row["evidence"])
+
+    def test_codex_reproduction_and_a_concatenation_are_not_shown(self):
+        """Codex's reproduction of #4156: the audit continuation's argv
+        initializer that ends at native.py:787 concatenated with `[]`, then
+        `--safe-mode` removed. Discovery read it as carrying the flag, the
+        report said every registered launch passes it, and CLAUDE.md stayed
+        out of run_controllers. Under the sound rule it is not shown, and so
+        is the batch continuation's concatenated with no removal; the native
+        canary's launch with its flags inline in the list it hands over is
+        shown, and the direct canary's, inline but concatenated, is not."""
+        surfaces, facts, texts = _discovered_with_the_round_six_rewrites()
+        it = facts["interactive"]
+        rows = {x["site"].split(":")[0]: x for x in it["launches"]}
+        line = texts[AUDIT_NATIVE][:texts[AUDIT_NATIVE].index("read_text()] + []")].count("\n") + 1
+        self.assertEqual(rows[AUDIT_NATIVE]["site"], f"{AUDIT_NATIVE}:{line} --system-prompt")
+        for rel in (AUDIT_NATIVE, BATCH_NATIVE, RUN_DIRECT):
+            with self.subTest(rel=rel):
+                row = rows[rel]
+                self.assertIsNone(row["carries"])
+                self.assertIsNone(row["memory_off"])
+                self.assertTrue(any("the argv list is an operand of `+`" in e for e in row["evidence"]), row)
+                self.assertIn(row["site"], it["launches_without_customizations_off"])
+        shown = rows[RUN_NATIVE]
+        self.assertTrue(shown["carries"] and shown["memory_off"], shown)
+        self.assertNotIn(shown["site"], it["launches_without_customizations_off"])
+        self.assertEqual(surfaces.files["CLAUDE.md"].roles, dict.fromkeys(SESSION_GATES, "model_facing"))
+        statement = scan._session_statement(it)
+        self.assertNotIn("does not change a registered run's verdict", statement)
+        self.assertIn(f"`{rows[AUDIT_NATIVE]['site']}` cannot be shown to pass `--safe-mode`", statement)
 
     #: An argv bound by an annotated assignment, held by an attribute or by an
-    #: item, then shortened in the function that builds it (the module, at
-    #: module level), each beside the same launch left whole (#4142).
+    #: item, then shortened in the function that builds it, each beside the
+    #: same launch left whole (#4142), with the words its reason uses (#4156).
     HELD_SHORTENED = {
         "notes/x/v_annotated.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
                                   "    argv.remove('--safe-mode')\n    return argv\n",
@@ -2068,6 +2266,13 @@ class TestLaunchFlags(unittest.TestCase):
         "notes/x/zb_annotated_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
                                              "        self.argv: list = [exe, '--safe-mode', '--system-prompt', p]\n"
                                              "        self.argv.pop(1)\n        return self.argv\n"}
+    HELD_REASONS = {"v_annotated.py": "`argv` is the object of `.remove()`",
+                    "w_annotated_again.py": "`argv` is assigned again",
+                    "x_annotated_module.py": "is bound at module level",
+                    "y_attribute.py": "`self.argv` is the object of `.remove()`",
+                    "z_attribute_again.py": "`self.argv` is assigned again",
+                    "za_item.py": "`job['argv']` is subscripted",
+                    "zb_annotated_attribute.py": "`self.argv` is the object of `.pop()`"}
     HELD_INTACT = {
         "notes/x/v_annotated.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
                                   "    return argv\n",
@@ -2087,41 +2292,44 @@ class TestLaunchFlags(unittest.TestCase):
 
     def test_an_annotated_attribute_or_item_argv_is_read_for_changes(self):
         """`argv: list[str] = [...]` is read like `argv = [...]`, and an argv
-        held by an attribute or an item (`self.argv`, `job['argv']`) is read
-        for a removal or another assignment in the function that builds it
-        (#4142). A record field written by an annotated item assignment or
-        `.setdefault()` is a writer, like a dict entry."""
-        launches = tuple(n.rsplit("/", 1)[-1] for n in self.HELD_SHORTENED)
+        held by an attribute or an item (`self.argv`, `job['argv']`) is held
+        to the same rule as a name, and so is the name that holds it (#4142,
+        #4156). A module-level argv is not shown even left whole: every
+        module that imports it can change it."""
         shortened = self._rows(self.HELD_SHORTENED)
-        self.assertEqual({n: shortened[n]["carries"] for n in shortened}, dict.fromkeys(launches))
-        for n in launches:
-            with self.subTest(launch=n):
-                self.assertTrue(any("can drop" in e for e in shortened[n]["evidence"]), shortened[n]["evidence"])
-        self.assertEqual(self._launches(self.HELD_INTACT), dict.fromkeys(launches, True))
-        field = {"notes/x/f_field.py": "def go(exe, p, rec):\n"
-                                       "    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
-                 "notes/x/writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n"}
-        for second in ("def fill(rec):\n    rec['cli_flags']: list = ['--print']\n",
-                       "def fill(rec):\n    rec.setdefault('cli_flags', ['--print'])\n"):
-            with self.subTest(writer=second):
-                self.assertIsNone(self._launches({**field, "notes/x/writer2.py": second})["f_field.py"])
-                carried = second.replace("['--print']", "['--print', '--safe-mode']")
-                self.assertTrue(self._launches({**field, "notes/x/writer2.py": carried})["f_field.py"])
+        self.assertEqual({n: r["carries"] for n, r in shortened.items()}, dict.fromkeys(self.HELD_REASONS))
+        for name, words in self.HELD_REASONS.items():
+            with self.subTest(launch=name):
+                self.assertTrue(any(words in e for e in shortened[name]["evidence"]), shortened[name]["evidence"])
+        self.assertEqual(self._launches(self.HELD_INTACT),
+                         {**dict.fromkeys(self.HELD_REASONS, True), "x_annotated_module.py": None})
+        base = self._rows({"notes/x/za_item.py": "def go(exe, p, job):\n"
+                                                 "    job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                                 "    job.update(argv=[exe])\n    return job\n",
+                           "notes/x/y_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
+                                                     "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                                     "        self.reset()\n        return self.argv\n"})
+        for name, words in (("za_item.py", "`job`, which holds the argv, is the object of `.update()`"),
+                            ("y_attribute.py", "`self`, which holds the argv, is the object of `.reset()`")):
+            with self.subTest(base=name):
+                self.assertIsNone(base[name]["carries"])
+                self.assertTrue(any(words in e for e in base[name]["evidence"]), base[name]["evidence"])
 
     def test_a_registered_launch_whose_annotated_argv_is_shortened_is_not_shown(self):
         """The reviewer's rewrite of the audit continuation (#4142): bound by
         an annotated assignment and then shortened, its argv is not shown to
-        pass `--safe-mode`, so the session surfaces are its too."""
+        pass `--safe-mode`; the removal is named beside the starred
+        `*CLI_FLAGS` the sound rule never follows (#4156)."""
         surfaces, facts, texts = _discovered_with_the_round_five_rewrites()
         text = texts[AUDIT_NATIVE]
         line = text[:text.index(AUDIT_ARGV_END)].count("\n") + 1
         site = f"{AUDIT_NATIVE}:{line} --system-prompt"
-        self.assertEqual(facts["interactive"]["launches_without_customizations_off"], [site])
+        self.assertIn(site, facts["interactive"]["launches_without_customizations_off"])
         row = next(x for x in facts["interactive"]["launches"] if x["site"] == site)
         self.assertIsNone(row["carries"])
-        self.assertTrue(any("`.remove()` on `argv`" in e and "can drop" in e for e in row["evidence"]), row)
-        self.assertEqual(surfaces.files["CLAUDE.md"].roles,
-                         {"interactive_session": "model_facing", "run_controllers": "model_facing"})
+        self.assertTrue(any("`argv` is the object of `.remove()`" in e for e in row["evidence"]), row)
+        self.assertTrue(any("`*CLI_FLAGS`" in e for e in row["evidence"]), row)
+        self.assertEqual(surfaces.files["CLAUDE.md"].roles, dict.fromkeys(SESSION_GATES, "model_facing"))
         self.assertNotIn("does not change a registered run's verdict", scan._session_statement(facts["interactive"]))
 
     def test_a_system_prompt_file_launch_is_a_launch(self):
@@ -2143,20 +2351,30 @@ class TestLaunchFlags(unittest.TestCase):
         still resolve via /skill-name" (#4131). A run launched with `--bare`
         alone loads the command, agent and skill descriptions, so those, and
         not CLAUDE.md, are its surfaces too."""
-        bare = {"site": "b.py:1 --system-prompt", "carries": False, "evidence": ["no element holds `--safe-mode`"],
-                "memory_off": True, "memory_evidence": ["b.py:1 --bare"]}
-        text = scan._session_statement({"launches": [bare]})
+        text = scan._session_statement({"launches": [BARE_LAUNCH]})
         self.assertNotIn("does not change a registered run's verdict", text)
         self.assertIn("it passes `--bare`", text)
         surfaces, facts = _discovered_with_a_bare_launch()
-        self.assertEqual(facts["interactive"]["launches_without_customizations_off"],
-                         ["notes/exp_4131/launch.py:9 --system-prompt"])
+        self.assertEqual(facts["interactive"]["launches_without_customizations_off"], [BARE_LAUNCH["site"]])
         self.assertEqual(facts["interactive"]["launches_without_memory_off"], [])
         self.assertEqual(surfaces.files["CLAUDE.md"].roles, {"interactive_session": "model_facing"})
         self.assertNotIn("run_controllers", surfaces.files[".claude/settings.json"].roles)
         review = surfaces.files[".claude/agents/d4d-review-record.md"]
         self.assertEqual(review.roles.get("run_controllers"), "exposed")
         self.assertEqual(review.loaded["run_controllers"], review.loaded["interactive_session"])
+
+    def test_where_every_launch_is_shown_the_session_is_interactive_only(self):
+        """Where every registered native launch is shown to pass
+        `--safe-mode`, no session surface is a run_controllers surface and
+        the report says registered runs are unaffected (#4156)."""
+        surfaces, facts = _discovered_with_every_launch_shown()
+        it = facts["interactive"]
+        self.assertEqual(it["launches_without_customizations_off"], [])
+        self.assertEqual(it["launches_without_memory_off"], [])
+        for rel in ("CLAUDE.md", ".claude/settings.json", ".claude/agents/d4d-review-record.md"):
+            with self.subTest(rel=rel):
+                self.assertNotIn("run_controllers", surfaces.files[rel].roles)
+        self.assertIn("does not change a registered run's verdict", scan._session_statement(it))
 
     def test_the_report_says_unaffected_only_when_every_launch_carries_the_flag(self):
         ok = {"site": "a.py:1 --system-prompt", "carries": True, "evidence": ["b.py:2 --safe-mode"]}
@@ -2175,8 +2393,7 @@ class TestLaunchFlags(unittest.TestCase):
         """A registered run so launched loads CLAUDE.md and the session
         descriptions, so their violations count in run_controllers too."""
         surfaces, facts = _discovered_with_a_loading_workflow_and_an_unsafe_launch()
-        self.assertEqual(facts["interactive"]["launches_without_customizations_off"],
-                         ["notes/exp_4092/launch.py:9 --system-prompt"])
+        self.assertEqual(facts["interactive"]["launches_without_customizations_off"], [UNSAFE_LAUNCH["site"]])
         claude = surfaces.files["CLAUDE.md"]
         self.assertEqual(claude.roles, {"interactive_session": "model_facing", "run_controllers": "model_facing"})
         review = surfaces.files[".claude/agents/d4d-review-record.md"]
@@ -2184,6 +2401,68 @@ class TestLaunchFlags(unittest.TestCase):
         planted, _ = _plant("CLAUDE.md", "Always describe the dataset as AI-READI.", surface=claude)
         self.assertTrue(planted)
         self.assertTrue(all(h["gates_in"] == ["interactive_session", "run_controllers"] for h in planted))
+
+
+class TestConstantText(unittest.TestCase):
+    """A module constant a model receives is model text, and so is all it is
+    built from, followed recursively and each constant once (#4156)."""
+
+    def test_codex_reproduction_a_sentence_in_a_constant_system_is_built_from_gates(self):
+        """Codex's reproduction: in the audit preparer, `POLICY = 'You must
+        use CHORUS data.'` and `SYSTEM = POLICY + <the existing literal>`.
+        `render_system()` returns that text, yet the CHORUS hit was neither
+        model-facing nor gating; now it is a run_controllers violation."""
+        surfaces, _, texts = _discovered_with_the_round_six_rewrites()
+        text = texts[AUDIT_PREPARE]
+        line = text[:text.index("'You must use CHORUS data.'")].count("\n") + 1
+        hits = [h for h in _scan_text(AUDIT_PREPARE, text, surfaces.files[AUDIT_PREPARE])
+                if h["match"] == "CHORUS" and h["line"] == line]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertTrue(hits[0]["model_facing"] and hits[0]["violation"], hits)
+        self.assertEqual(hits[0]["gates_in"], ["run_controllers"])
+        self.assertTrue(hits[0]["model_text_function"].startswith("POLICY (part of SYSTEM"), hits)
+
+    #: A controller whose `render_system()` returns a constant built from
+    #: other constants, a function, a constant imported by name, in-place
+    #: writes and a cycle, beside a constant nothing builds the text from.
+    PROMPTS = ("from base import SHARED\n"            # 1
+               "def tail():\n"                        # 2
+               "    return 'Tail text.'\n"            # 3
+               "POLICY = 'Policy text.'\n"            # 4
+               "BODY = POLICY + ' Body text.'\n"      # 5
+               "SYSTEM = BODY + SHARED + tail()\n"    # 6
+               "SYSTEM += ' Appended text.'\n"        # 7
+               "PARTS = ['Part one.']\n"              # 8
+               "PARTS.append('Part two.')\n"          # 9
+               "CYCLE_A = 'Cycle a.'\n"               # 10
+               "CYCLE_B = CYCLE_A + ' b.'\n"          # 11
+               "CYCLE_A = CYCLE_B + ' again.'\n"      # 12
+               "UNRELATED = 'Not model text.'\n"      # 13
+               "def render_system():\n"               # 14
+               "    return SYSTEM + ' '.join(PARTS) + CYCLE_A\n")  # 15
+
+    def test_the_constants_a_model_text_constant_is_built_from_are_model_text(self):
+        """Every statement at the top of the module that writes a marked
+        constant (`=`, `+=`, a method call on it) is model text, and so is
+        what it is built from: the constants it names, of its module or
+        imported by name, recursively, the functions whose results become
+        part of it; a cycle ends; a constant nothing builds the text from is
+        not marked."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            base = root / "notes/exp_4156c"
+            _write(base / "launch.py", "from data_sheets_schema.api_runner import RunSpec\nimport prompts\n"
+                                       "spec = RunSpec\n")
+            _write(base / "prompts.py", self.PROMPTS)
+            _write(base / "base.py", "SHARED = 'Shared text.'\nOTHER = 'Not model text either.'\n")
+            parsed = _parsed(root, "notes")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            spans = scan.model_text_spans(root, parsed, index, controllers)
+        self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4156c/prompts.py"]},
+                         {(2, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12),
+                          (14, 15)})
+        self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4156c/base.py"]}, {(1, 1)})
 
 
 class TestAssistantInstructions(unittest.TestCase):
@@ -2483,18 +2762,25 @@ class TestTheWholeAudit(unittest.TestCase):
         for live in result["facts"]["conditions"]["live"]:
             self.assertIn(f"| {live} |", markdown)
         self.assertNotIn("renderer None", markdown)
-        # the report names where the registered launchers switch CLAUDE.md off
-        self.assertRegex(markdown, r"native_controls/prepare_overlay\.py:\d+ --safe-mode")
-        self.assertRegex(markdown, r"claudecode_direct/prepare_direct\.py:\d+ --safe-mode")
+        # the report names every registered launch not shown to switch the
+        # session off, and the starred element that stops the proof (#4156)
+        unshown = result["facts"]["interactive"]["launches_without_customizations_off"]
+        self.assertEqual(len(unshown), 4, unshown)
+        for site in unshown:
+            self.assertIn(f"`{site}` cannot be shown to pass `--safe-mode`", markdown)
+        for spread in ("`*CLI_FLAGS`", "`*native.CLI_FLAGS`", "`*overlay['cli_flags']`", "`*runtime['cli_flags']`"):
+            self.assertIn(spread, markdown)
+        self.assertNotIn("does not change a registered run's verdict", markdown)
 
     def test_claude_md_and_the_agent_script_demo_are_judged_as_they_run(self):
-        """CLAUDE.md's GC names are interactive-session violations; the
-        field_prioritizer demo list in a __main__ block no approach runs is
-        not a violation (#4054)."""
+        """CLAUDE.md's GC names are interactive-session violations, and
+        run_controllers ones while no registered launch is shown to switch
+        it off (#4156); the field_prioritizer demo list in a __main__ block
+        no approach runs is not a violation (#4054)."""
         result = _full_run()
         claude = [v for v in result["violations"] if v["path"] == "CLAUDE.md"]
         self.assertTrue(claude)
-        self.assertTrue(all(v["gates_in"] == ["interactive_session"] for v in claude))
+        self.assertTrue(all(v["gates_in"] == SESSION_GATES for v in claude))
         demo = [h for h in result["hits"] if h["path"] == ".claude/agents/scripts/field_prioritizer.py"
                 and h.get("main_block") and h["category"] == "gc_project"]
         self.assertTrue(demo)
@@ -2502,22 +2788,25 @@ class TestTheWholeAudit(unittest.TestCase):
 
     def test_the_review_round_three_findings_are_violations(self):
         """The GC names in d4d-review-record's description (interactive
-        sessions), the renderer's study-group table and the YAML comments a
-        playbook's Read returns (native_agentic) all gate (#4091); the
-        report says registered runs are unaffected because every launch
-        carries --safe-mode, and names the instruction file nothing loads
-        (#4092, #4093)."""
+        sessions, and run_controllers while no registered launch is shown to
+        switch them off), the renderer's study-group table and the YAML
+        comments a playbook's Read returns (native_agentic) all gate
+        (#4091); the report says registered runs are unaffected only where
+        every launch is shown to pass --safe-mode, which no launch of this
+        checkout is (#4092, #4156), and names the instruction file nothing
+        loads (#4093)."""
         result = _full_run()
         found = {(v["path"], v["match"].lower(), tuple(v["gates_in"])) for v in result["violations"]}
-        for want in ((".claude/agents/d4d-review-record.md", "chorus", ("interactive_session",)),
-                     (".claude/agents/d4d-review-record.md", "ai_readi", ("interactive_session",)),
+        for want in ((".claude/agents/d4d-review-record.md", "chorus", tuple(SESSION_GATES)),
+                     (".claude/agents/d4d-review-record.md", "ai_readi", tuple(SESSION_GATES)),
                      ("src/data_sheets_schema/rendering/human_readable_renderer.py", "diabet", ("native_agentic",)),
                      ("src/data_sheets_schema/schema/D4D_Core.yaml", "ai_readi", ("native_agentic",)),
                      ("src/data_sheets_schema/schema/D4D_Base_import.yaml", "ai-readi", ("native_agentic",))):
             with self.subTest(want=want):
                 self.assertIn(want, found)
         markdown = scan.render_markdown(result)
-        self.assertIn("Every registered native launch passes `--safe-mode`, which switches these off", markdown)
+        self.assertIn("NOT every registered native launch is shown to pass `--safe-mode`", markdown)
+        self.assertNotIn("Every registered native launch passes `--safe-mode`", markdown)
         self.assertIn("`.github/workflows/d4d_assistant_edit.md` (loaded by nothing: not a surface)", markdown)
 
     def test_the_skills_own_description_has_a_recorded_reason(self):

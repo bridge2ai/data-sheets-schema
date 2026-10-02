@@ -74,7 +74,7 @@ APPROACHES = {
     "interactive_session": (True, "a person's Claude Code session in a checkout, where the /d4d-* playbooks run "
                                   "interactively: the project memory (CLAUDE.md), the settings hooks and the "
                                   "descriptions of every command, agent and skill Claude Code loads into it. A "
-                                  "registered native launch that does not pass --safe-mode loads them too (with "
+                                  "registered native launch not shown to pass --safe-mode may load them too (with "
                                   "--bare alone, the descriptions; see run_controllers)"),
     "api": (True, "d4d api run|batch: api_runner and its condition prompts"),
     "github_assistant": (True, "the @d4dassistant workflow, what it names or runs, the condition its d4d api run "
@@ -2509,31 +2509,6 @@ def session_description_lines(text: str) -> list[tuple[int, int, str]]:
     return spans + ([(first + 1, first + 1, "description (the first line)")] if first is not None else [])
 
 
-#: Methods that can drop an element from a list or a set (#4131).
-_REMOVING_METHODS = frozenset({"remove", "pop", "clear", "discard", "difference_update", "intersection_update",
-                               "symmetric_difference_update", "__delitem__", "__setitem__"})
-
-
-def _removals(tree) -> list[tuple[ast.AST, int, str]]:
-    """(the expression changed, line, how) for every statement in a module
-    that can drop an element from a list or a set (#4131): `.remove()`,
-    `.pop()`, `.clear()`, `.discard()` and the like, `del x[...]`, an item or
-    slice assignment, and an augmented assignment other than `+=` and `|=`."""
-    out = []
-    for n in ast.walk(tree):
-        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr in _REMOVING_METHODS:
-            out.append((n.func.value, n.lineno, f"`.{n.func.attr}()`"))
-        elif isinstance(n, ast.Delete):
-            out += [(t.value, n.lineno, "`del`") for t in n.targets if isinstance(t, ast.Subscript)]
-        elif isinstance(n, (ast.Assign, ast.AnnAssign)):
-            targets = n.targets if isinstance(n, ast.Assign) else [n.target]
-            out += [(t.value, n.lineno, "an item assignment") for tt in targets for t in ast.walk(tt)
-                    if isinstance(t, ast.Subscript) and isinstance(t.ctx, ast.Store)]
-        elif isinstance(n, ast.AugAssign) and not isinstance(n.op, (ast.Add, ast.BitOr)):
-            out.append((n.target, n.lineno, "an augmented assignment"))
-    return out
-
-
 def _literal_key(node) -> str | None:
     """The key a subscript or a call argument spells as a string literal."""
     return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
@@ -2541,7 +2516,8 @@ def _literal_key(node) -> str | None:
 
 def _field_writes(tree, keys, *, appends: bool = False) -> list[tuple[str, ast.AST]]:
     """(key, value) for every value a module writes to a record field whose
-    key is a string literal in `keys` (#4130, #4131, #4142): a dict entry
+    key is a string literal in `keys`, the hook fields Claude Code shows the
+    model (#4130, #4142): a dict entry
     (`{'k': v}`), a keyword argument (`dict(k=v)`, `x.update(k=v)`), an item
     assignment, plain, chained or annotated (`x['k'] = v`, `x['k']: T = v`),
     and `x.setdefault('k', v)`; with `appends`, also `x['k'] += v`, whose
@@ -2581,231 +2557,280 @@ def _launch_flag(e) -> str | None:
     return head if "=" in text and head in LAUNCH_FLAGS else None
 
 
-def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: dict) -> list[dict]:
-    """Whether each registered native launch switches off what an interactive
-    session loads (#4092, #4131). A launch is an argv in a run controller
-    that hands a native runtime a system prompt (`--system-prompt`,
-    `--append-system-prompt`) or a system-prompt file (`--system-prompt-file`,
-    `--append-system-prompt-file`). Each launch is read twice: `carries`,
-    whether it passes `--safe-mode`, which switches off every session
-    customization (CLAUDE.md, hooks, commands, agents, skills); and
-    `memory_off`, whether it passes `--safe-mode` or `--bare`, which switches
-    off CLAUDE.md and the settings hooks (`--bare` leaves skills resolving,
-    so it does not switch the command, agent and skill descriptions off).
+def _parents(tree) -> dict[int, ast.AST]:
+    """Each node's parent in a module, keyed by the child's id."""
+    out: dict[int, ast.AST] = {}
+    for n in ast.walk(tree):
+        for c in ast.iter_child_nodes(n):
+            out[id(c)] = n
+    return out
 
-    A flag counts when an element is that literal, or a list that holds it:
-    a starred local, module constant or imported constant, a sum of lists,
-    or a field of a record (`overlay['cli_flags']`) every controller that
-    writes that field fills with it (`_field_writes`: a dict entry, a
-    keyword, an item assignment, plain or annotated, `.setdefault()`). What
-    can drop the flag makes the launch `None` ("not shown"), never assumed
-    to carry it: a computed list (a comprehension, a call), a removal
-    (`.remove()`, `.pop()`, `del`, an item assignment, `-=`) on the list,
-    the name or the field that holds it, anywhere it is visible (a local's
-    function; a module constant's module and every controller that imports
-    it; a field's every controller), and another assignment to a module
-    constant. The argv itself is held by a name bound by a plain or
-    annotated assignment, read like any local or constant, or by an
-    attribute or an item (`self.argv = [...]`, `job['argv'] = [...]`), read
-    for removals and other assignments in the function that builds it, the
-    module at module level (#4142). Returns one row per launch: its site,
-    `carries` and `memory_off` (True, False or None) and the evidence or the
-    reason for each."""
-    consts_of, binds_of, removals_of = {}, {}, {}
 
-    def rel(q):
-        return _rel(root, q)
+def _handed_on(node, parents: dict) -> tuple[str, ast.AST | None] | None:
+    """How an expression is handed on whole to code its function does not
+    run itself (#4156): a direct argument of a call (positional and not
+    starred, or a keyword's value), with the call; a value the function
+    returns or yields, with None (`yield from` hands on its elements, not
+    the list). None for anything else."""
+    up = parents.get(id(node))
+    if isinstance(up, ast.keyword) and up.value is node:
+        call = parents.get(id(up))
+        return (f"passed to `{ast.unparse(call.func)}`", call) if isinstance(call, ast.Call) else None
+    if isinstance(up, ast.Call) and any(a is node for a in up.args):
+        return f"passed to `{ast.unparse(up.func)}`", up
+    if isinstance(up, ast.Return) and up.value is node:
+        return "returned", None
+    if isinstance(up, ast.Yield) and up.value is node:
+        return "yielded", None
+    return None
 
-    def consts(q):
-        if q not in consts_of:
-            consts_of[q] = _module_assignments(parsed[q][1])
-        return consts_of[q]
 
-    def binds(q):
-        if q not in binds_of:
-            binds_of[q] = _bindings(root, q, parsed[q][1], index)
-        return binds_of[q]
+def _value_unkept(call, parents: dict) -> str | None:
+    """Where a call's value is not kept (#4156): a statement of its own, also
+    awaited, or a `with` item, whose value is a context manager and never a
+    list. None where something keeps it: there the call may be what builds
+    the list that is launched (`argv = list([...])`)."""
+    up = parents.get(id(call))
+    if isinstance(up, ast.Await):
+        call, up = up, parents.get(id(up))
+    if isinstance(up, ast.Expr) and up.value is call:
+        return "a call made as a statement"
+    if isinstance(up, ast.withitem) and up.context_expr is call:
+        return "a `with` item"
+    return None
 
-    def removals(q):
-        if q not in removals_of:
-            removals_of[q] = _removals(parsed[q][1])
-        return removals_of[q]
 
-    def local_changes(q, fn, name):
-        """Removals on a local name inside its function."""
-        return [f"{rel(q)}:{line} {how} on `{name}`" for t, line, how in removals(q)
-                if isinstance(t, ast.Name) and t.id == name and fn.lineno <= line <= fn.end_lineno]
+_OPERATORS = {ast.Add: "+", ast.Sub: "-", ast.Mult: "*", ast.MatMult: "@", ast.Div: "/", ast.FloorDiv: "//",
+              ast.Mod: "%", ast.Pow: "**", ast.LShift: "<<", ast.RShift: ">>", ast.BitOr: "|", ast.BitXor: "^",
+              ast.BitAnd: "&"}
 
-    def held_changes(q, fn, target, holder):
-        """Removals on the attribute or item that holds an argv (`self.argv`,
-        `job['argv']`), and other assignments to it, in the function that
-        builds it, the module at module level (#4142). The same expression
-        in another function (another method, the object passed on) is not
-        read."""
-        text = ast.unparse(target)
-        lo, hi = (fn.lineno, fn.end_lineno) if fn is not None else (1, sys.maxsize)
-        out = [f"{rel(q)}:{line} {how} on `{text}`" for t, line, how in removals(q)
-               if lo <= line <= hi and ast.unparse(t) == text]
-        for x in ast.walk(fn if fn is not None else parsed[q][1]):
-            if x is holder or not isinstance(x, (ast.Assign, ast.AnnAssign, ast.AugAssign)) or (
-                    isinstance(x, ast.AnnAssign) and x.value is None):
-                continue
-            targets = x.targets if isinstance(x, ast.Assign) else [x.target]
-            if any(isinstance(getattr(e, "ctx", None), ast.Store) and ast.unparse(e) == text
-                   for t in targets for e in ast.walk(t)):
-                out.append(f"{rel(q)}:{x.lineno} `{text}` is assigned again")
-        return out
 
-    def constant_changes(q, name):
-        """Removals on a module constant in its module (any scope) and in
-        every controller that imports it, and other assignments to it: nested
-        at module level, or in a function that declares it `global`."""
-        tree = parsed[q][1]
-        out = [f"{rel(q)}:{line} {how} on `{name}`" for t, line, how in removals(q)
-               if isinstance(t, ast.Name) and t.id == name]
-        used = consts(q).get(name)
-        for n in ast.walk(tree):
-            if n is used or not isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)):
-                continue
-            targets = n.targets if isinstance(n, ast.Assign) else [n.target]
-            if not any(isinstance(x, ast.Name) and x.id == name and isinstance(x.ctx, ast.Store)
-                       for t in targets for x in ast.walk(t)):
-                continue
-            fn = _innermost_function(tree, n.lineno)
-            if fn is None or any(isinstance(g, ast.Global) and name in g.names for g in ast.walk(fn)):
-                out.append(f"{rel(q)}:{n.lineno} `{name}` is assigned again")
-        for m in sorted(controllers.values()):
-            if m == q:
-                continue
-            b = binds(m)
-            for t, line, how in removals(m):
-                if (isinstance(t, ast.Name) and b.get(t.id) == (q, name)) or (
-                        isinstance(t, ast.Attribute) and t.attr == name and isinstance(t.value, ast.Name)
-                        and b.get(t.value.id) == (q, None)):
-                    out.append(f"{rel(m)}:{line} {how} on `{name}` (imported from {rel(q)})")
-        return out
+def _use(node, parents: dict) -> str:
+    """What the code around an expression does with it, in words: the
+    reason a launch is not shown to pass a flag (#4156)."""
+    up = parents.get(id(node))
+    if isinstance(up, ast.BinOp):
+        return f"an operand of `{_OPERATORS.get(type(up.op), type(up.op).__name__)}`, which builds another value"
+    if isinstance(up, ast.BoolOp):
+        return f"an operand of `{'and' if isinstance(up.op, ast.And) else 'or'}`"
+    if isinstance(up, ast.Starred):
+        return "a starred element, spread into another value"
+    if isinstance(up, ast.Attribute):
+        called = isinstance(parents.get(id(up)), ast.Call) and parents[id(up)].func is up
+        return f"the object of `.{up.attr}{'()' if called else ''}`"
+    if isinstance(up, ast.Subscript):
+        return "subscripted" if up.value is node else "a subscript"
+    if isinstance(up, (ast.List, ast.Tuple, ast.Set, ast.Dict)):
+        return f"an element of a {type(up).__name__.lower()}"
+    if isinstance(up, ast.comprehension):
+        return "iterated by a comprehension"
+    if isinstance(up, (ast.ListComp, ast.SetComp, ast.GeneratorExp, ast.DictComp)):
+        return "the element of a comprehension"
+    if isinstance(up, ast.For):
+        return "iterated by a `for` loop"
+    if isinstance(up, ast.IfExp):
+        return "a branch of a conditional expression"
+    if isinstance(up, ast.NamedExpr):
+        return "bound by `:=`"
+    if isinstance(up, (ast.Assign, ast.AnnAssign)):
+        return "bound to another name (an alias)"
+    if isinstance(up, ast.AugAssign):
+        return "the value of an augmented assignment"
+    if isinstance(up, ast.Lambda):
+        return "the value of a lambda"
+    if isinstance(up, ast.YieldFrom):
+        return "handed on element by element by `yield from`"
+    return f"used in `{ast.unparse(up)[:60]}`" if up is not None else "used"
 
-    def field_of(e):
-        if isinstance(e, ast.Subscript) and isinstance(e.slice, ast.Constant) and isinstance(e.slice.value, str):
-            return e.slice.value
-        if isinstance(e, ast.Call) and _attr_or_name(e.func) == "get" and e.args and \
-                isinstance(e.args[0], ast.Constant) and isinstance(e.args[0].value, str):
-            return e.args[0].value
-        return None
 
-    def field_changes(key):
-        return [f"{rel(m)}:{line} {how} on the field `{key}`" for m in sorted(controllers.values())
-                for t, line, how in removals(m) if field_of(t) == key]
+def _reads(node, parents: dict) -> bool:
+    """A use that only reads a list: an operand of a comparison
+    (`'--x' in argv`) or a value formatted into a string (#4156)."""
+    return isinstance(parents.get(id(node)), (ast.Compare, ast.FormattedValue))
 
-    def writers(key):
-        """Every value a controller writes to a record field: a dict entry, a
-        keyword argument, an item assignment, plain or annotated
-        (`rec['cli_flags'] = [...]`), `.setdefault()` (`_field_writes`)."""
-        return [(p, v) for _, p in sorted(controllers.items()) for _, v in _field_writes(parsed[p][1], {key})]
 
-    def reader(flags):
-        """The resolution of one flag set: (True, where the flag is) |
-        (False, why) | (None, why) for an argv's elements."""
-        named = " or ".join(f"`{f}`" for f in sorted(flags, reverse=True))
+def _scope_of(node, parents: dict):
+    """The innermost function or class whose body holds `node`, or None at
+    module level."""
+    up = parents.get(id(node))
+    while up is not None and not isinstance(up, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        up = parents.get(id(up))
+    return up
 
-        def combine(results, what):
-            """Every value a name or a field can hold must hold the flag."""
-            if results and all(ok for ok, _ in results):
-                return True, [e for _, ev in results for e in ev]
-            if all(ok is False for ok, _ in results):
-                return False, [e for _, ev in results for e in ev]
-            reasons = [e for ok, ev in results if ok is None for e in ev]
-            if any(ok is False for ok, _ in results):
-                reasons.append(f"not every {what} holds {named}")
-            return None, reasons
 
-        def unchanged(result, changes):
-            """A list that something can shorten is not shown to hold a flag."""
-            if changes and result[0]:
-                return None, [f"{c}, which can drop {named}" for c in changes]
-            return result
+def _rebinding(n, name: str, fn) -> str | None:
+    """How a node binds `name` other than through an `ast.Name` (which
+    carries its own context): a parameter of a nested function or lambda,
+    `except ... as`, an import, a nested definition, `global` or
+    `nonlocal`, a match capture. The function's own parameters bind before
+    its body runs and are not counted."""
+    if isinstance(n, ast.arg) and n.arg == name:
+        own = fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs + [fn.args.vararg, fn.args.kwarg]
+        return None if any(n is a for a in own) else "a parameter of a nested function"
+    if isinstance(n, ast.ExceptHandler) and n.name == name:
+        return "bound by `except ... as`"
+    if isinstance(n, ast.alias) and (n.asname or n.name.split(".")[0]) == name:
+        return "bound by an import"
+    if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)) and n is not fn and n.name == name:
+        return "bound by a nested definition"
+    if isinstance(n, (ast.Global, ast.Nonlocal)) and name in n.names:
+        return f"declared `{type(n).__name__.lower()}`"
+    if isinstance(n, (ast.MatchAs, ast.MatchStar)) and n.name == name or \
+            isinstance(n, ast.MatchMapping) and n.rest == name:
+        return "bound by a `match` pattern"
+    return None
 
-        def resolve(q, fn, e, seen):
-            here = f"{rel(q)}:{getattr(e, 'lineno', '?')}"
-            if isinstance(e, (ast.List, ast.Tuple)):
-                return elements(q, fn, e.elts, seen)
-            if isinstance(e, ast.BinOp) and isinstance(e.op, ast.Add):
-                a, b = resolve(q, fn, e.left, seen), resolve(q, fn, e.right, seen)
-                if a[0] or b[0]:
-                    return True, (a[1] if a[0] else []) + (b[1] if b[0] else [])
-                return (False, a[1] + b[1]) if a[0] is False and b[0] is False else \
-                    (None, (a[1] if a[0] is None else []) + (b[1] if b[0] is None else []))
-            if isinstance(e, ast.Call) and _attr_or_name(e.func) in {"list", "tuple"} and len(e.args) == 1:
-                return resolve(q, fn, e.args[0], seen)
-            if isinstance(e, ast.Name):
-                key = (q, id(fn), e.id)
-                if key in seen:
-                    return None, [f"{here} `{e.id}` refers to itself"]
-                seen = seen | {key}
-                local = _local_assignments(fn).get(e.id) if fn is not None else None
-                if local:
-                    return unchanged(combine([resolve(q, fn, v, seen) for v in local], "assignment"),
-                                     local_changes(q, fn, e.id))
-                if e.id in consts(q):
-                    return unchanged(resolve(q, None, consts(q)[e.id].value, seen), constant_changes(q, e.id))
-                target, attr = binds(q).get(e.id, (None, None))
-                if target is not None and attr and target in parsed and attr in consts(target):
-                    return unchanged(resolve(target, None, consts(target)[attr].value, seen),
-                                     constant_changes(target, attr))
-                return None, [f"{here} `{e.id}` cannot be read"]
-            if isinstance(e, ast.Attribute) and isinstance(e.value, ast.Name):
-                target, attr = binds(q).get(e.value.id, (None, None))
-                if target is not None and attr is None and target in parsed and e.attr in consts(target):
-                    return unchanged(resolve(target, None, consts(target)[e.attr].value, seen),
-                                     constant_changes(target, e.attr))
-                return None, [f"{here} `{ast.unparse(e)}` cannot be read"]
-            field_name = field_of(e)
-            if field_name is not None:
-                key = ("field", field_name)
-                if key in seen:
-                    return None, [f"{here} the field `{field_name}` refers to itself"]
-                ws = writers(field_name)
-                if not ws:
-                    return None, [f"{here} no run controller writes the field `{field_name}`"]
-                return unchanged(combine([resolve(wq, _innermost_function(parsed[wq][1], v.lineno), v,
-                                                  seen | {key}) for wq, v in ws], "writer of `" + field_name + "`"),
-                                 field_changes(field_name))
-            return None, [f"{here} `{ast.unparse(e)[:60]}` is computed (a comprehension or a call can drop a flag)"]
 
-        def elements(q, fn, elts, seen):
-            results = []
-            for x in elts:
-                if isinstance(x, ast.Starred):
-                    results.append(resolve(q, fn, x.value, seen))
-                elif isinstance(x, ast.Constant) and x.value in flags:
-                    results.append((True, [f"{rel(q)}:{x.lineno} {x.value}"]))
-                elif isinstance(x, ast.Name) and _str_value(x, fn, _module_constants(q)) in flags:
-                    results.append((True, [f"{rel(q)}:{x.lineno} {_str_value(x, fn, _module_constants(q))}"]))
-            if any(ok for ok, _ in results):
-                return True, [e for ok, ev in results if ok for e in ev]
-            unknown = [e for ok, ev in results if ok is None for e in ev]
-            return (None, unknown) if unknown else (False, [e for _, ev in results for e in ev])
+def _holder_shown(rel: str, parents: dict, assign) -> tuple[bool, list[str]]:
+    """Whether the name, attribute or item a plain or annotated assignment
+    binds an argv list to holds that list, unchanged, wherever its function
+    hands it on (#4156). Shown only for one target, in a function, that is a
+    name or an attribute or literal-key item of a name (`argv`, `self.argv`,
+    `job['argv']`), where every other occurrence of it in the function
+    (nested functions and classes included) hands it on whole (a direct
+    argument of a call, a returned or yielded value) or only reads it (a
+    comparison, an f-string). For an attribute or item, the name that holds
+    it is held to the same rule. Anything else, a binding, a deletion or a
+    use of any other kind, is a reason it is not shown."""
+    at = f"{rel}:{assign.lineno}"
+    targets = assign.targets if isinstance(assign, ast.Assign) else [assign.target]
+    if len(targets) != 1:
+        return False, [f"{at} the argv list is bound to {len(targets)} targets at once"]
+    target = targets[0]
+    held = ast.unparse(target)
+    fn = _scope_of(assign, parents)
+    if fn is None:
+        return False, [f"{at} the argv `{held}` is bound at module level, where every module that imports it "
+                       "can change it"]
+    if isinstance(fn, ast.ClassDef):
+        return False, [f"{at} the argv `{held}` is bound in a class body, where the class and its instances can "
+                       "change it"]
+    if isinstance(target, ast.Name):
+        base, part = target.id, None
+    elif isinstance(target, ast.Attribute) and isinstance(target.value, ast.Name):
+        base, part = target.value.id, ("attribute", target.attr)
+    elif isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name) and \
+            isinstance(target.slice, ast.Constant) and type(target.slice.value) in (str, int):
+        base, part = target.value.id, ("item", target.slice.value)
+    else:
+        return False, [f"{at} the argv list is held by `{held}`, which cannot be resolved"]
 
-        return elements, named
+    def is_holder(x) -> bool:
+        if part is None or not isinstance(x, (ast.Attribute, ast.Subscript)) or not \
+                (isinstance(x.value, ast.Name) and x.value.id == base):
+            return False
+        if part[0] == "attribute":
+            return isinstance(x, ast.Attribute) and x.attr == part[1]
+        return isinstance(x, ast.Subscript) and isinstance(x.slice, ast.Constant) and \
+            type(x.slice.value) is type(part[1]) and x.slice.value == part[1]
 
-    safe, safe_named = reader(frozenset({SAFE_MODE}))
-    memory, memory_named = reader(MEMORY_OFF_FLAGS)
+    problems, uses = [], []
+    for n in ast.walk(fn):
+        how = _rebinding(n, base, fn)
+        if how is not None:
+            problems.append(f"{rel}:{getattr(n, 'lineno', assign.lineno)} `{base}` is {how}")
+            continue
+        if not isinstance(n, ast.Name) or n.id != base or n is target or (part is not None and n is target.value):
+            continue
+        x, what = n, f"`{held}`"
+        if part is not None:
+            up = parents.get(id(n))
+            if is_holder(up):
+                x = up
+            else:
+                what = f"`{base}`, which holds the argv,"
+        if isinstance(x.ctx, ast.Store):
+            problems.append(f"{rel}:{x.lineno} {what} is assigned again")
+        elif isinstance(x.ctx, ast.Del):
+            problems.append(f"{rel}:{x.lineno} {what} is deleted")
+        elif (h := _handed_on(x, parents)) is not None:
+            uses.append(f"line {x.lineno}: {what.strip(',')} {h[0]}")
+        elif _reads(x, parents):
+            uses.append(f"line {x.lineno}: {what.strip(',')} read")
+        else:
+            problems.append(f"{rel}:{x.lineno} {what} is {_use(x, parents)}")
+    if problems:
+        return False, problems
+    return True, [f"{at} the argv list is bound to `{held}` as it is, which the function otherwise only hands on "
+                  "whole or reads (" + ("; ".join(uses) or "no other use") + ")"]
 
-    def judged(ok, ev, named):
-        return sorted(set(ev)) if ok else ev or [f"no element holds {named}"]
 
+def _argv_shown(rel: str, parents: dict, lst) -> tuple[bool, list[str]]:
+    """Whether a launch's argv list literal is, unchanged, the list its
+    function hands over (#4156): the call's argument itself, in a call
+    nothing keeps the value of (`subprocess.run([...])`, `with
+    Popen([...]) as p:`); returned or yielded as it is; or the whole value
+    of a plain or annotated assignment to a holder its function never
+    changes (`_holder_shown`). (True, how) or (False, why not)."""
+    at = f"{rel}:{lst.lineno}"
+    handed = _handed_on(lst, parents)
+    if handed is not None:
+        how, call = handed
+        if call is None:
+            return True, [f"{at} the argv list is {how} as it is"]
+        where = _value_unkept(call, parents)
+        if where is None:
+            return False, [f"{at} the argv list is {how}, whose value is kept, so that call can be what builds the "
+                           "list launched (`argv = list([...])`)"]
+        return True, [f"{at} the argv list is {how} as it is, in {where}"]
+    up = parents.get(id(lst))
+    if isinstance(up, (ast.Assign, ast.AnnAssign)) and up.value is lst:
+        return _holder_shown(rel, parents, up)
+    return False, [f"{at} the argv list is {_use(lst, parents)}"]
+
+
+def _flags_shown(rel: str, lst, flags: frozenset, named: str, shown: bool, how: list[str]) -> tuple:
+    """(True | False | None, evidence) for one flag set in one launch
+    (#4156): True only where a literal element of the argv list is a flag
+    and the list is shown to be what the launch hands over; False where it
+    is shown and holds neither such a literal nor a starred element; None
+    otherwise. A starred element (`*CLI_FLAGS`, `*overlay['cli_flags']`) is
+    never followed: a name or field can hold anything by the time the list
+    is built."""
+    lits = sorted({f"{rel}:{e.lineno} {e.value}" for e in lst.elts
+                   if isinstance(e, ast.Constant) and isinstance(e.value, str) and e.value in flags})
+    stars = [e for e in lst.elts if isinstance(e, ast.Starred)]
+    loose = (ast.BinOp, ast.BoolOp, ast.IfExp, ast.Compare, ast.UnaryOp, ast.Lambda, ast.NamedExpr, ast.Await)
+    spread = [f"{rel}:{lst.lineno} no element of the argv list is the literal {named}; its starred elements ("
+              + ", ".join("`*" + (f"({ast.unparse(s.value)})" if isinstance(s.value, loose) else ast.unparse(s.value))
+                          + "`" for s in stars) + ") are not followed"] if stars else []
+    if not shown:
+        return None, how + ([] if lits else spread)
+    if lits:
+        return True, lits + how
+    if spread:
+        return None, spread
+    return False, [f"{rel}:{lst.lineno} no element of the argv list is the literal {named}"]
+
+
+def launch_flags(controllers: dict[str, Path], parsed: dict) -> list[dict]:
+    """Whether each registered native launch is shown to switch off what an
+    interactive session loads (#4092, #4131, #4156). A launch is a list or
+    tuple literal in a run controller that holds `--system-prompt`,
+    `--append-system-prompt` or either's `-file` form (also as
+    `--flag=value`). Each is read twice: `carries`, whether it passes
+    `--safe-mode`, which switches off every session customization
+    (CLAUDE.md, hooks, commands, agents, skills); and `memory_off`, whether
+    it passes `--safe-mode` or `--bare`, which switches off CLAUDE.md and
+    the settings hooks (`--bare` leaves skills resolving, so it does not
+    switch the command, agent and skill descriptions off).
+
+    Sound by construction rather than by a list of the ways a flag can be
+    dropped (#4156): a flag is shown only where it is a literal element of
+    that list and the list is shown to be what the function hands over,
+    unchanged (`_argv_shown`). Nothing the list is built from is followed:
+    a starred element, a name, a module constant, an imported constant or a
+    record field is "not shown" (`None`), as is a list built any other way
+    (a concatenation, a comprehension, a value wrapped in a call) or held
+    by a holder used any other way. What the code the list is handed to
+    does with it (a callee, a caller) is not read. A launch flag outside a
+    list or tuple literal is a launch whose flags cannot be read. Returns
+    one row per launch: its site, `carries` and `memory_off` (True, False
+    or None) and the evidence or the reasons for each."""
     rows = []
     for crel, p in sorted(controllers.items()):
         tree = parsed[p][1]
-        # what an argv list is bound to: a name, an attribute or an item (not
-        # a slice), by a plain or an annotated assignment (#4142)
-        holders: dict[int, list[tuple[ast.AST, ast.AST]]] = {}
-        for n in ast.walk(tree):
-            if isinstance(n, (ast.Assign, ast.AnnAssign)) and isinstance(n.value, (ast.List, ast.Tuple)):
-                targets = n.targets if isinstance(n, ast.Assign) else [n.target]
-                holders.setdefault(id(n.value), []).extend(
-                    (t, n) for t in targets if isinstance(t, (ast.Name, ast.Attribute))
-                    or (isinstance(t, ast.Subscript) and not isinstance(t.slice, ast.Slice)))
+        parents = _parents(tree)
         read = set()
         for n in ast.walk(tree):
             if not isinstance(n, (ast.List, ast.Tuple)):
@@ -2814,25 +2839,13 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
             if flag_node is None:
                 continue
             read.update(id(v) for v in ast.walk(flag_node))
-            fn = _innermost_function(tree, n.lineno)
-            # the argv itself, once assigned, can be shortened before it runs
-            changes = []
-            for target, holder in holders.get(id(n), []):
-                if not isinstance(target, ast.Name):
-                    changes += held_changes(p, fn, target, holder)
-                elif fn is not None:
-                    changes += local_changes(p, fn, target.id)
-                    if len(_local_assignments(fn).get(target.id, [])) > 1:
-                        changes.append(f"{crel}:{n.lineno} the argv `{target.id}` is assigned again")
-                else:
-                    changes += constant_changes(p, target.id)
+            shown, how = _argv_shown(crel, parents, n)
             row = {"site": f"{crel}:{flag_node.lineno} {_launch_flag(flag_node)}"}
-            for key, elements, named in (("carries", safe, safe_named), ("memory_off", memory, memory_named)):
-                ok, ev = elements(p, fn, n.elts, frozenset())
-                if changes and ok:
-                    ok, ev = None, [f"{c}, which can drop {named}" for c in changes]
+            for key, flags, named in (("carries", frozenset({SAFE_MODE}), "`--safe-mode`"),
+                                      ("memory_off", MEMORY_OFF_FLAGS, "`--safe-mode` or `--bare`")):
+                ok, ev = _flags_shown(crel, n, flags, named, shown, how)
                 row[key] = ok
-                row["evidence" if key == "carries" else "memory_evidence"] = judged(ok, ev, named)
+                row["evidence" if key == "carries" else "memory_evidence"] = ev
             rows.append(row)
         # a launch flag outside an argv list (appended, or in a set) is a
         # launch whose flags cannot be read: never assumed to carry one
@@ -2865,6 +2878,42 @@ def _module_assignments(tree) -> dict[str, ast.AST]:
                     out[t.id] = n
         elif isinstance(n, ast.AnnAssign) and n.value is not None and isinstance(n.target, ast.Name):
             out[n.target.id] = n
+    return out
+
+
+def _writes_name(target, name: str) -> bool:
+    """Whether an assignment target writes the name, or the object a name
+    holds: `NAME`, `A, NAME`, `*NAME`, `NAME[k]`, `NAME.x`, `NAME[k].x`."""
+    if isinstance(target, ast.Name):
+        return target.id == name
+    if isinstance(target, (ast.Tuple, ast.List)):
+        return any(_writes_name(e, name) for e in target.elts)
+    if isinstance(target, ast.Starred):
+        return _writes_name(target.value, name)
+    while isinstance(target, (ast.Subscript, ast.Attribute)):
+        target = target.value
+    return isinstance(target, ast.Name) and target.id == name
+
+
+def _constant_writes(tree, name: str) -> list[tuple[ast.stmt, list[ast.AST]]]:
+    """Every statement at the top of a module that writes the module
+    constant `name`, with the expressions whose values become part of it
+    (#4156): an assignment to it, plain (also unpacked or chained),
+    annotated or augmented (`NAME += ...`), or to an item or attribute of it
+    (`NAME[k] = v`), and its value; a method call on it made as a statement
+    (`NAME.append(v)`), and its arguments. A write inside a block (`if`,
+    `try`) or a function is not read."""
+    out = []
+    for stmt in tree.body:
+        if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and stmt.value is not None:
+            targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
+            if any(_writes_name(t, name) for t in targets):
+                out.append((stmt, [stmt.value]))
+        elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call) and \
+                isinstance(stmt.value.func, ast.Attribute) and _writes_name(stmt.value.func.value, name):
+            call = stmt.value
+            out.append((stmt, [a.value if isinstance(a, ast.Starred) else a for a in call.args]
+                        + [k.value for k in call.keywords]))
     return out
 
 
@@ -2911,9 +2960,14 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
     assignments: a literal that becomes part of the text is model text, a
     function whose result does is model text (and its returns are followed
     in turn, across modules through imports), and a module constant the text
-    is built from (`SYSTEM`, returned by `render_system`) is model text. A
-    call's arguments are followed for the constants they pass, not for the
-    functions that compute them.
+    is built from (`SYSTEM`, returned by `render_system`) is model text,
+    with every statement at the top of its module that writes it, and all
+    that statement's value is built from in turn, recursively and each
+    constant once: the constants it names, of its module or imported by
+    name (`POLICY` in `SYSTEM = POLICY + '...'`, #4156), the functions
+    whose results become part of it, and its literals. A call's arguments
+    are followed for the constants they pass, not for the functions that
+    compute them.
 
     A hook field built from a parameter (`hook_output(classification,
     basis)`), directly or through the function's locals, is fed by
@@ -2956,9 +3010,19 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         todo.append((q, name))
 
     def mark_constant(q, name, why):
-        node = consts(q).get(name) if q in parsed else None
-        if node is not None:
-            spans.setdefault(q, {}).setdefault((node.lineno, node.end_lineno), f"{name} ({why})")
+        """A module constant the text is built from is model text, and so is
+        all it is built from (#4156): each statement at the top of its
+        module that writes it (`_constant_writes`) is marked, and what that
+        statement puts in it is followed as model text in turn: the
+        constants it names (of its module, or imported by name), each marked
+        the same way, recursively; the functions whose results become part
+        of it; its literals. Each constant once, so a cycle ends."""
+        if q not in parsed or name not in consts(q) or ("constant", q, name) in marked:
+            return
+        marked.add(("constant", q, name))
+        for stmt, values in _constant_writes(parsed[q][1], name):
+            spans.setdefault(q, {}).setdefault((stmt.lineno, stmt.end_lineno), f"{name} ({why})")
+            flow(q, None, values, f"part of {name}, {why}")
 
     def callee(q, f):
         if isinstance(f, ast.Name):
@@ -3440,7 +3504,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.files[rel].loaded["interactive_session"] = session_description_lines(p.read_text(encoding="utf-8"))
     skills = sorted(_rel(root, p) for p in (root / ".claude/skills").glob("*/SKILL.md"))
     described_set = {_rel(root, p) for p in described}
-    launches = launch_flags(root, controllers, parsed, index)
+    launches = launch_flags(controllers, parsed)
     # not shown to pass --safe-mode: the session descriptions stay on; not
     # shown to pass --safe-mode or --bare: the memory and the hooks too (#4131)
     unsafe = [x["site"] for x in launches if not x["carries"]]
@@ -3474,10 +3538,11 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                       f"imported by {rel}, which is run in {approach}", runs=False)
     facts["run_script_imports"] = {k: sorted(v) for k, v in sorted(script_imports.items())}
 
-    # a registered launch that does not switch them off loads what an
-    # interactive session loads (#4092): those surfaces, and what the hooks
-    # import, are its too. A launch with `--bare` alone skips the memory and
-    # the hooks but still lists the commands, agents and skills (#4131).
+    # a registered launch not shown to switch them off may load what an
+    # interactive session loads (#4092, #4156): those surfaces, and what the
+    # hooks import, are its too. A launch with `--bare` alone skips the
+    # memory and the hooks but still lists the commands, agents and skills
+    # (#4131).
     if unsafe:
         for rel, surf in sorted(s.files.items()):
             role = surf.roles.get("interactive_session")
@@ -3486,8 +3551,8 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
             loaders = unsafe if rel in described_set else memory_on
             if not loaders:
                 continue
-            s.add(rel, "run_controllers", role, "live", "loaded by a registered native launch that does not switch "
-                  "it off (" + ", ".join(loaders) + ")",
+            s.add(rel, "run_controllers", role, "live", "may be loaded by a registered native launch not shown to "
+                  "switch it off (" + ", ".join(loaders) + ")",
                   runs="interactive_session" in surf.runs, raw="interactive_session" in surf.raw)
             if "interactive_session" in surf.loaded:
                 surf.loaded["run_controllers"] = list(surf.loaded["interactive_session"])
@@ -4803,11 +4868,12 @@ def _why_quiet(h: dict) -> str:
 
 def _session_statement(it: dict) -> str:
     """What the report may say about registered runs and session
-    customizations, derived from each launch's flags (#4092, #4131):
+    customizations, derived from each launch's flags (#4092, #4131, #4156):
     unaffected only where every registered native launch is shown to pass
-    `--safe-mode`. `--bare` skips CLAUDE.md and the settings hooks but leaves
-    skills resolving, so a launch with `--bare` alone still lists the
-    command, agent and skill descriptions."""
+    `--safe-mode`, as a literal element of the argv list it hands over.
+    `--bare` skips CLAUDE.md and the settings hooks but leaves skills
+    resolving, so a launch with `--bare` alone still lists the command,
+    agent and skill descriptions."""
     launches = it.get("launches") or []
     if not launches:
         return ("No run controller launches a native runtime with a system prompt or a system-prompt file, so no "
@@ -4815,24 +4881,25 @@ def _session_statement(it: dict) -> str:
     ok = [x for x in launches if x["carries"]]
     if len(ok) == len(launches):
         return ("Every registered native launch passes `--safe-mode`, which switches these off: " + "; ".join(
-            f"`{x['site']}` (" + ", ".join(f"`{e}`" for e in x["evidence"]) + ")" for x in launches)
+            f"`{x['site']}` (" + "; ".join(x["evidence"]) + ")" for x in launches)
             + ". So the interactive_session approach covers interactive sessions only; it does not change a "
             "registered run's verdict.")
     bad = [x for x in launches if not x["carries"]]
 
     def why(x):
-        said = ("does not pass `--safe-mode`" if x["carries"] is False else "cannot be shown to pass `--safe-mode`") \
-            + " (" + "; ".join(x["evidence"]) + ")"
+        said = ("has no `--safe-mode` element" if x["carries"] is False else
+                "cannot be shown to pass `--safe-mode`") + " (" + "; ".join(x["evidence"]) + ")"
         if x.get("memory_off"):
-            return said + "; it passes `--bare` (" + ", ".join(f"`{e}`" for e in x["memory_evidence"]) + \
+            return said + "; it passes `--bare` (" + "; ".join(x["memory_evidence"]) + \
                 "), which skips CLAUDE.md and the settings hooks but still lists the commands, agents and skills"
-        return said + ("; nor `--bare`" if x.get("memory_off") is False else
+        return said + ("; nor a `--bare` element" if x.get("memory_off") is False else
                        "; nor can it be shown to pass `--bare`")
-    return ("NOT every registered native launch passes `--safe-mode`: " + "; ".join(
-        f"`{x['site']}` " + why(x) for x in bad)
-        + (". The others do: " + "; ".join(f"`{x['site']}`" for x in ok) if ok else "")
-        + ". A run so launched loads what an interactive session loads and it does not switch off, so those "
-        "interactive_session surfaces are also run_controllers surfaces, and their violations count there.")
+    return ("NOT every registered native launch is shown to pass `--safe-mode` (a launch is shown to pass it only "
+            "where the literal is an element of the argv list the launch hands over, unchanged): " + "; ".join(
+                f"`{x['site']}` " + why(x) for x in bad)
+            + (". The others are: " + "; ".join(f"`{x['site']}`" for x in ok) if ok else "")
+            + ". A run so launched may load what an interactive session loads and it is not shown to switch off, so "
+            "those interactive_session surfaces are also run_controllers surfaces, and their violations count there.")
 
 
 def _unused_exceptions(exceptions: list[dict], surfaces) -> str | None:

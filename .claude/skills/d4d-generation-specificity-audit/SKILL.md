@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.5.0
+  version: 1.6.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -64,7 +64,8 @@ generation surface. The skill's tests check that:
 - the scanner sees: the self-test, and a token planted in a copy of a real
   surface under the role `discover()` gives it, including CLAUDE.md, the
   descriptions a session lists, a YAML comment a playbook's Read returns,
-  and the controller text that reaches a model by data flow;
+  and the controller text that reaches a model by data flow, a sentence in
+  a constant that a model-text constant is built from included;
 - project-keyed tables, defaults, keys and arguments gate in run-shaping
   code (an `or` default, a value wrapped in `Path(...)`, an f-string or a
   `+` join, `click.Choice([...])`, a positional argument, `argv.append`, a
@@ -84,12 +85,15 @@ generation surface. The skill's tests check that:
   from the code; an assistant instruction file nothing loads is not a
   surface;
 - whether a registered native run loads what an interactive session loads
-  is read from each launch's argv: `--safe-mode` switches all of it off,
-  `--bare` only the memory and the hooks, a flag list something can shorten
-  (`.remove()`, `del`, a computed list) is not shown to switch anything off,
-  also where the argv is bound by an annotated assignment or held by an
-  attribute or an item, and a `--system-prompt-file` launch is a launch; the
-  project settings and the hook scripts they run are found;
+  is read from each launch's argv, and a launch is shown to pass a flag
+  only where the flag is a literal element of the argv list it hands over
+  as built: `--safe-mode` switches all of it off, `--bare` only the memory
+  and the hooks; a flag a starred element would bring (a constant, a record
+  field), a list built any other way (a concatenation such as `[...] + []`,
+  a value wrapped in a call, a comprehension) and a name, attribute or item
+  holding the list that is used any other way than to hand it on are not
+  shown to switch anything off; a `--system-prompt-file` launch is a
+  launch; the project settings and the hook scripts they run are found;
 - the reason a PreToolUse hook gives a native run's model for a denial, and
   the classifier reasons that feed it, are model text, whether the
   controller sets the field as a dict entry, by item assignment, `+=`,
@@ -137,12 +141,12 @@ and the names a file uses. What is left by hand, and why:
 | approach | gates | discovered from |
 |---|---|---|
 | `native_agentic` | yes | `.claude/commands/d4d-*.md`; every playbook or agent that a playbook, a live condition prompt, a run controller or a loaded assistant instruction names, by path, bare name (`d4d-validator`) or slash command (`/d4d-full-core`), followed through the playbooks and agents they name (model-facing); every other file `agentic_runtime.toolchain()` hands a native run (it lists `*.md` in `.claude/commands` and `.claude/agents`, read with ast) is `exposed`; every other file those texts name by path or run (`python x.py`, `python -m mod`), with the namer's status (a named YAML is read raw, so its comments count); what each script they run imports (`src/html/human_readable_renderer.py` reaches `data_sheets_schema.rendering.human_readable_renderer`); the import closure of `agentic_runtime`, of every CLI group they run (`d4d utils status` from `/d4d-agent`; a group only an exposed agent runs is exposed), and of the package modules the run controllers import |
-| `interactive_session` | yes | what Claude Code loads into a person's session in a checkout, where the `/d4d-*` playbooks run interactively: the project memory (`CLAUDE.md`, model-facing), the project settings (run-shaping; read as code, so a project value in their `env` block gates) and the hook scripts they run (and what those import), and the name and description of every command, agent and skill, model-facing on those lines while the body is exposed. The report states, from each registered native launch's argv, whether every one passes `--safe-mode`; where one does not, the surfaces it does not switch off are also `run_controllers` surfaces (`--bare` switches off the memory and the hooks, not the command, agent and skill descriptions) |
+| `interactive_session` | yes | what Claude Code loads into a person's session in a checkout, where the `/d4d-*` playbooks run interactively: the project memory (`CLAUDE.md`, model-facing), the project settings (run-shaping; read as code, so a project value in their `env` block gates) and the hook scripts they run (and what those import), and the name and description of every command, agent and skill, model-facing on those lines while the body is exposed. The report states, from each registered native launch's argv, whether every one is shown to pass `--safe-mode`; where one is not, the surfaces it is not shown to switch off are also `run_controllers` surfaces (`--bare` switches off the memory and the hooks, not the command, agent and skill descriptions). Today none of the four is: each takes its flags from a starred module constant or record field, which the sound rule does not follow (#4156), so every session surface counts in `run_controllers` too |
 | `api` | yes | the import closure of `cli/api.py` and `api_runner.py`; every condition in `api_runner.CONDITION_PROMPTS` (the newest `generic_vN`, the CLI default and the condition the GitHub assistant runs are **live**, the rest **historical**); the `tuned` components `resolve_prompt` inserts (`d4d_tuned_arm_prompt.md` is only hashed and named in a header, so it is run-shaping); evidence protocols (newest live); every file pinned in `canonical_hashes.yaml` |
 | `github_assistant` | yes | the `@d4dassistant` workflow `d4d-agent.yml`, every file it names or runs (an instruction it hands a model is model-facing, the rest run-shaping: the deterministic config, `.github/ai-controllers.json`, the schema it validates against), the condition its `d4d api run` runs, and an assistant instruction file only where the workflow loads it (today none: the workflow runs `d4d api run` and loads no instruction file). The runner it starts is the `api` approach |
 | `shared_schema` | yes | the import closure of `data_sheets_schema.yaml` and `data_sheets_schema_core.yaml`, the schemas `agentic_runtime.toolchain()` hands a native run, and the hand-kept files above |
 | `deterministic` | yes | the arm commands: every CLI group outside the generation closures that names the bundle of an arm in `cli/api.py` `ARMS` other than the default one (today `cli/healthsheet.py` and `cli/rocrate.py`), and their import closure, followed through `data_sheets_schema`, `src.*` and the directories the code puts on `sys.path` (`setup_repo_imports` adds `.claude/agents/scripts`) |
-| `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface a registered native launch does not switch off. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), no module importing it (an entry point), or its own `__main__` block calling a module function that launches a run (an argv with a system prompt or a system-prompt file, the runner's `execute`: `run_native_canary.py`, `run_api_canary.py`) or a command-line interface (argparse, click) that nothing else calls (`prepare_registration.py`) |
+| `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface a registered native launch is not shown to switch off. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), no module importing it (an entry point), or its own `__main__` block calling a module function that launches a run (an argv with a system prompt or a system-prompt file, the runner's `execute`: `run_native_canary.py`, `run_api_canary.py`) or a command-line interface (argparse, click) that nothing else calls (`prepare_registration.py`) |
 | `legacy_monolithic` | yes | every module under `src/` or `scripts/`, outside the generation closures, that calls a model client and names D4D or a datasheet (not an evaluator); the pre-runner helpers in `src/download` (the name glob); `d4d_concatenated_*.txt`; every prompt set beside the conditions (`src/download/prompts/*/` other than the tuned components) |
 | `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops |
 | `other_model_client` | no | a model client outside generation and outside every generation closure: under `notes/`, one outside the controller set (diagnostic probes, transports); the `notes/` evaluation modules a controller imports or that import one, and their imports; under `src/` or `scripts/`, an evaluator or a client that names no D4D record. An evaluator a generation closure reaches is that approach's surface and gates there: `evaluation/evaluate_d4d_llm.py`, which the controller `prepare_registration.py` imports from the package, is in the native closure |
@@ -189,7 +193,14 @@ judges a hit by its own role:
   values, the flow follows local assignments, marks a literal that becomes
   part of the text, a function whose result does (and follows its returns in
   turn, across imports) and a module constant the text is built from
-  (`SYSTEM`, which `render_system` returns). A hook field built from its
+  (`SYSTEM`, which `render_system` returns). A constant so marked is
+  followed in turn: every statement at the top of its module that writes it
+  (an assignment, plain, annotated or augmented, an item assignment on it, a
+  method call on it such as `.append(...)`) is model text, and so is what
+  that statement builds it from, recursively and each constant once: the
+  constants it names, of its module or imported by name (`POLICY` in
+  `SYSTEM = POLICY + '...'`), the functions whose results become part of
+  it, its literals. A hook field built from its
   function's parameters, directly or through its locals
   (`hook_output(classification, basis)`), is fed through threads and queues
   no data flow follows, so the classifiers that feed it are found by their
@@ -197,8 +208,8 @@ judges a hit by its own role:
   decision element is a literal the hook function compares its decision
   parameter with (`'prescribed'`), widened by the other decisions such
   functions return (`'not_prescribed'`); the element in the reason's
-  position is model text. Today that finds the `SYSTEM` constants of the
-  audit and finalization preparers, `command_guidance` and
+  position is model text. Today that finds, among others, the `SYSTEM`
+  constants of the audit and finalization preparers, `command_guidance` and
   `lookup_guidance`, the deny-reason text in `hook_output` and the reasons
   of the command, file and audit-validator classifiers;
 - a code branch or table counts unless the role is exposed, in Python and in
@@ -283,10 +294,11 @@ Every hit is classified by context:
    counts and violations per approach are plausible and that the controllers,
    named files and model clients listed are what you expect. A zero means
    discovery broke. The interactive-sessions bullet says that registered runs
-   are unaffected only when every registered native launch's argv passes
-   `--safe-mode`; otherwise it names the launch, says whether it passes
-   `--bare` (which switches off only the memory and the hooks), and the
-   session surfaces it does not switch off count in `run_controllers` too.
+   are unaffected only when every registered native launch is shown to pass
+   `--safe-mode`; otherwise it names the launch and why it is not shown,
+   says whether it is shown to pass `--bare` (which switches off only the
+   memory and the hooks), and the session surfaces it is not shown to switch
+   off count in `run_controllers` too.
    The controller table says how each controller runs as a script, or that
    it is imported only.
 3. **gc_project violations.** These are the findings that fail the run. A
@@ -483,37 +495,53 @@ owner's approval before anything is billed.
 - A Python file a text names without running it is judged as run-shaping
   code; its comments and docstrings are not counted even if the model reads
   it.
-- A registered launch is an argv list in a run controller that holds
-  `--system-prompt`, `--append-system-prompt` or either's `-file` form, also
-  as `--flag=value`; an argv that hands a native runtime neither (`claude
-  -p` with the prompt on stdin) is not found. Its flags are read through
-  starred lists, constants, imported constants, sums and record fields
-  every writer fills (a dict entry, a keyword, an item assignment, plain or
-  annotated, `.setdefault()`; a field written under a key held in a name,
-  through `setattr` or from a list of pairs is not read as a writer). What
-  can drop a flag makes the launch "not shown" to switch customizations
-  off, never "switches them off": a computed list (a comprehension, a
-  call); a removal (`.remove()`, `.pop()`, `.clear()`, `del`, an item
-  assignment, `-=`) on the argv, the name or the field that holds the
-  flags, where it is visible (a local's function; a module constant's
-  module and every controller that imports it; a record field's every
-  controller); another assignment to the argv or the module constant; and a
-  launch flag outside an argv list (an argv built by `.append` calls). The
-  argv is read where a plain or annotated assignment binds it: to a name,
-  read like any local or module constant, or to an attribute or an item
-  (`self.argv = [...]`, `job['argv'] = [...]`), read for a removal or
-  another assignment in the function that builds it (the module, at module
-  level). The argv is followed in the function that builds it: a callee
-  that changes the list it is passed, a caller that changes a list a
-  function returns, a change to an attribute- or item-held argv in another
-  function (another method of its class, code holding the object), an argv
-  bound any other way (unpacking, `:=`, a slice assignment), and a removal
-  through an alias (`flags = CLI_FLAGS; flags.remove(...)`) are not read.
-  Only `--safe-mode` is read as switching off the command, agent and skill
-  descriptions; `--bare` switches off the memory and the hooks, since its
-  help says skills still resolve. A launch's `--add-dir`, `--settings`,
-  `--agents` and `--setting-sources`, which can hand a run context
-  explicitly, are not read.
+- A registered launch is a list or tuple literal in a run controller that
+  holds `--system-prompt`, `--append-system-prompt` or either's `-file`
+  form, also as `--flag=value`; an argv that hands a native runtime
+  neither (`claude -p` with the prompt on stdin) is not found, and a
+  launch flag outside a list or tuple literal (an argv built by `.append`
+  calls) is a launch whose flags cannot be read. Whether it passes
+  `--safe-mode` (or `--bare`) is sound by construction (#4156): it is
+  shown only where the flag is a literal element of that list, and the
+  list is shown to be what the launch hands over, as built. That is so
+  where the list is a call's argument itself, in a call whose value
+  nothing keeps (a statement of its own, a `with` item); a value returned
+  or yielded as it is; or the whole value of a plain or annotated
+  assignment, in a function, to one name, or to an attribute or
+  literal-key item of a name (`argv`, `self.argv`, `job['argv']`), that
+  the function, nested functions and classes included, otherwise only
+  hands on whole (a direct argument of a call, a returned or yielded
+  value) or reads (a comparison, an f-string), with the name that holds an
+  attribute or item held to the same rule. Everything else is "not shown",
+  never "switches them off": a flag a starred element would bring (a
+  module constant, an imported constant, a record field, a sum, a
+  comprehension: `*CLI_FLAGS`, `*overlay['cli_flags']`), which is why none
+  of the four registered launches is shown today; a list built any other
+  way (a concatenation such as `[...] + []`; a call's argument where the
+  call's value is kept, since that call may build the list launched, `argv
+  = list([...])`, and so `proc = Popen([...])` too; a comprehension, a
+  conditional, `or`, an augmented assignment, unpacking, `:=`, `yield
+  from`); a list bound at module level or in a class body, bound to
+  several targets, or held by something else (`self.cfg.argv`); and a
+  holder used any other way (a method or attribute of it, an item or slice
+  of it, `del`, `+=`, any other binding of the name by any statement,
+  `global` or `nonlocal`, an alias, a star). Not read: what the code the
+  list, or the object holding it, is handed to does with it (a callee that
+  changes the list it is passed, or returns a new list that the function
+  changes and launches in its place, `cmd = list(argv)`; a caller that
+  changes a list a function returns); other code that holds that object
+  meanwhile (another thread, a callback); code that reaches the function's
+  names dynamically (`exec`, `eval`, frame objects); and how the command
+  line parses the list: an element spelled `--safe-mode` is read as the
+  flag even where the option before it takes it as its value (`'--name',
+  '--safe-mode'`) or it follows `--`. "Has no `--safe-mode` element"
+  (`carries` False) means the list is shown and holds neither the literal
+  nor a starred element; a name or a call among its elements is read as
+  some other argument. Only `--safe-mode` is read as switching off the
+  command, agent and skill descriptions; `--bare` switches off the memory
+  and the hooks, since its help says skills still resolve. A launch's
+  `--add-dir`, `--settings`, `--agents` and `--setting-sources`, which can
+  hand a run context explicitly, are not read.
 - A controller module that another module imports runs as a script only
   where an argv, a document or docstring, or its own `__main__` block says
   so: a block that calls a module function launching a run (in that
@@ -525,9 +553,14 @@ owner's approval before anything is billed.
   imported functions and constants; a call's arguments are followed for the
   constants they pass, not for the functions that compute them or the
   literals they pass, and a method on an object (`self.render()`) is not
-  resolved. A model-facing module outside `MODEL_FACING_MODULES` whose text
-  reaches a model only through another module's variable is classed by its
-  role, not traced.
+  resolved. A module constant marked as model text is followed through the
+  statements at the top of its module that write it, recursively (#4156); a
+  write inside a block there (`if`, `try`) or in a function (a `global`
+  assignment, a method call on the constant), a constant reached as a
+  module attribute (`m.C`) or re-exported through another module, and one
+  bound only by unpacking are not followed. A model-facing module outside
+  `MODEL_FACING_MODULES` whose text reaches a model only through another
+  module's variable is classed by its role, not traced.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and
