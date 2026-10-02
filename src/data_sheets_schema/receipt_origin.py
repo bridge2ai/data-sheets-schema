@@ -187,7 +187,26 @@ line continuation, which bash deletes first, and past a comment that
 ends in a backslash-newline, which bash ends at the newline. For the
 derive rule each is moot, as above. The read-only, position and
 directory rules still read such a command as the comment rule cuts it,
-so a part or a word bash runs there may be hidden from them (#4195). Any
+so a part or a word bash runs there may be hidden from them (#4195).
+Nor, since #4205, is a `derive core` of the full record placed whose own
+words, in either reading, carry `--help` or `-h`, as a help option may make
+the CLI return 0 without deriving (`d4d derive core --full F --out
+O --help`; `-h` is not this CLI's, and a derive carrying it fails with a
+usage error, but a CLI that registers it prints its help), or that
+follows a part whose words, in either reading and wherever they stand,
+carry `exit`, `exec`, `return`, `logout`, `break`, `continue`, `kill` or
+`suspend`, as each may end the shell or leave the rest of the command
+unrun while the call returns that part's status (`if test -d /; then
+exit 0; fi; d4d derive core ...`, `exec /usr/bin/true; d4d derive core
+...` and `trap 'exit 0' TERM; kill $$; d4d derive core ...` run no `d4d`
+and return 0 under bash 3.2.57 and 5.3.3). Its cost is a false `unknown`
+where such a word ends nothing or such an option asks for no help (`echo
+exit;`, `exec 2>/dev/null;`, `until false; do break; done;`, `return 0;`
+outside a function, `--out -h`). Not read: such a word or option
+supplied at run time (`$X 0;` with `X` holding `exit`, or `$X` among the
+derive's own words holding `--help`), one a trap runs (`trap 'exit 0'
+DEBUG;`), and one a function or alias defined outside the command runs
+(#4205). Any
 other part that carries the words `derive core` and is neither a d4d call
 of another subcommand nor a program known to read is a derive that cannot
 be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
@@ -664,7 +683,20 @@ NON_CHECKS = (
     "past a comment that ends in a backslash-newline, which bash ends at the newline. For the derive "
     "rule each is moot, as above. The read-only, position and directory rules still read such a "
     "command as the comment rule cuts it, so a part or a word bash runs there may be hidden from them "
-    "(#4195). The words are matched "
+    "(#4195). Nor, since #4205, is a `derive core` of the full record placed whose own words, in either "
+    "reading, carry `--help` or `-h`, since a help option may make the CLI return 0 without deriving "
+    "(`d4d derive core --full F --out O --help`; `-h` is not this CLI's, and a derive carrying it fails "
+    "with a usage error, but a CLI that registers it prints its help), or that follows a part whose "
+    "words, in either reading and wherever they stand, carry `exit`, `exec`, `return`, `logout`, `break`, "
+    "`continue`, `kill` or `suspend`, since each may end the shell or leave the rest of the command unrun "
+    "while the call returns that part's status (`if test -d /; then exit 0; fi; d4d derive core ...`, "
+    "`exec /usr/bin/true; d4d derive core ...` and `trap 'exit 0' TERM; kill $$; d4d derive core ...` "
+    "run no `d4d` and return 0 under bash 3.2.57 and 5.3.3). The cost is a false `unknown` where such a "
+    "word ends nothing or such an option asks for no help (`echo exit;`, `exec 2>/dev/null;`, `until "
+    "false; do break; done;`, `return 0;` outside a function, `--out -h`). Not read: such a word or "
+    "option supplied at run time (`$X 0;` with `X` holding `exit`, or `$X` among the derive's own words "
+    "holding `--help`), one a trap runs (`trap 'exit 0' DEBUG;`), and one a function or alias defined "
+    "outside the command runs (#4205). The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -712,6 +744,23 @@ _ASSIGNMENT_WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\+?=.*")
 _ASSIGNING_WORDS = frozenset({"export", "declare", "typeset", "local", "readonly", "read", "mapfile",
                               "readarray", "wait", "eval", "source", ".", "set", "shopt", "alias", "hash",
                               "enable", "for", "select"})
+#: Words that may end the shell, or leave the rest of the command unrun,
+#: read wherever they stand in a part (#4205): `exit` and `logout`, which
+#: end it; `exec`, which replaces it with a program whose status the call
+#: then returns; `return`, which leaves a function or a sourced script;
+#: `break` and `continue`, which leave a loop body; `kill`, which may
+#: signal the shell itself (`kill $$`); and `suspend`, which stops it. A
+#: derive after a part carrying one is not placed: `if test -d /; then exit
+#: 0; fi; d4d derive core ...` and `exec /usr/bin/true; d4d derive core
+#: ...` return 0 under bash 3.2.57 and 5.3.3 and run no `d4d`.
+_ENDING_WORDS = frozenset({"exit", "exec", "return", "logout", "break", "continue", "kill", "suspend"})
+#: Help options (#4205). With `--help` as an option among a d4d call's words
+#: the CLI prints its help and returns 0 without running the command, as
+#: Click reads the option first; a derive carrying one is not placed. `-h`
+#: is not one of this CLI's (Click's default is `--help` alone), and a
+#: derive carrying it fails with a usage error; it is read all the same,
+#: as a CLI that registers it prints its help instead.
+_HELP_WORDS = frozenset({"--help", "-h"})
 #: A `{NAME}` word, a subscripted name included (`{PATH}`, `{A[1]}`). Before
 #: a redirection operator bash 4.1 and later open a descriptor and assign
 #: its number to NAME, in this shell where the command is a builtin (`echo
@@ -1058,7 +1107,13 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     earlier part's, or on the part under keyword mode, which may make it
     run other code, or a command whose words cannot be read part by part as
     bash reads them, or whose two readings give the part's own words
-    otherwise, #3781, #4123, #4124, #4160, #4161, #4182, #4199). A part whose
+    otherwise, #3781, #4123, #4124, #4160, #4161, #4182, #4199),
+    `help_option` (the part's own words carry `--help` or `-h`, which may
+    request help without deriving, #4205) or `ending_word` (an
+    earlier part carries `exit`, `exec`, `return`, `logout`, `break`,
+    `continue`, `kill` or `suspend`, which may end the shell or leave the
+    rest of the command unrun, so the call's status may be that part's,
+    #4205). A part whose
     status the result does not carry is `ambiguous`, unless the call was
     `denied` -- by the native control or, corroborated, by the runtime
     (#3201) -- and so never ran. `inputs` are the call's, for
@@ -3046,6 +3101,19 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     keyword = any(_keyword_mode(reading) for reading in readings)
     keyword_words = [any(_ASSIGNMENT_WORD.fullmatch(word) for reading in readings for word in reading[index])
                      for index in range(len(segments))]
+    # A derive may also not have run as its words spell where the call
+    # returned 0 (#4205): its own words carry a help option (`_HELP_WORDS`),
+    # which may request help without deriving, or an earlier
+    # part's words, wherever they stand, carry a word that may end the shell
+    # or leave the rest of the command unrun (`_ENDING_WORDS`), after which
+    # the call may return that part's status (`if test -d /; then exit 0;
+    # fi; d4d derive core ...`). Each is read in both readings, as the
+    # clauses above are; for the derive's own part `reworded` subsumes the
+    # second reading, as it does for `expanding`.
+    helping = [any(word in _HELP_WORDS for reading in readings for word in reading[index])
+               for index in range(len(segments))]
+    ending = [any(word in _ENDING_WORDS for reading in readings for word in reading[index])
+              for index in range(len(segments))]
     # `moved`: whether a directory change has run, in this command or, as
     # the caller says, an earlier call (#3719): `python -c` and `python -m`
     # put the directory they start in first on `sys.path`, so after one the
@@ -3191,7 +3259,12 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 # record where the call started, #4182). So too where they
                 # are paired but give the derive's own part other words
                 # (`reworded`, #4199): its `--full` is then not the one bash
-                # passed. Its cost is a false `unknown`; a route the words do
+                # passed. Nor is one placed whose own words carry a help
+                # option (`helping`), or that follows a part whose words
+                # carry a word that may end the shell (`ending`, #4205):
+                # either may return 0 with no derive run. Each is asked
+                # after the rules above, so a row they unplace keeps its
+                # basis. Its cost is a false `unknown`; a route the words do
                 # not name is not read.
                 if verdict is False and as_bash is not None and not reworded[index]:
                     basis = _status_basis(index, joins, leading, newline)
@@ -3200,6 +3273,10 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 elif (any(assigning[:index]) or expanding[index] or reworded[index] or not _plainly_run(segment)
                       or (keyword and keyword_words[index])):
                     verdict, basis = None, "assigned_environment"
+                elif helping[index]:
+                    verdict, basis = None, "help_option"
+                elif any(ending[:index]):
+                    verdict, basis = None, "ending_word"
                 else:
                     basis = _status_basis(index, joins, leading, newline)
                 out["derives"].append({"targets_full": verdict, "segment": index, "basis": basis})
@@ -3681,6 +3758,13 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                                            "derive's own words otherwise; it may make the part run code "
                                            "other than the derive its words spell, and no assignment is "
                                            "exempt (#3781)",
+                   "help_option": "its own words carry `--help` or `-h`, which may request help without deriving; "
+                                  "a successful call does not establish that the derive ran (#4205)",
+                   "ending_word": "an earlier part of the command carries, wherever it stands, a word that may "
+                                  "end the shell or leave the rest of the command unrun (`exit`, `exec`, `return`, "
+                                  "`logout`, `break`, `continue`, `kill` or `suspend`: `if ...; then exit 0; fi;`, "
+                                  "`exec /usr/bin/true;`), so the call's status may be that part's and the derive "
+                                  "may not have run (#4205)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "

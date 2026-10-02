@@ -399,7 +399,15 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     unquoted `${...}`, right after the `))` or `)` closing a `$((...))` or
     `$(...)`, or where a comment and a backslash-newline meet) is moot for
     the derive rule; the other rules still read the command as cut there
-    (#4195). Three kinds of part carrying
+    (#4195). Nor is one placed whose own words carry `--help` or `-h` (a
+    help option may make the CLI return 0 without deriving), or that
+    follows a part carrying, wherever it stands, `exit`, `exec`, `return`,
+    `logout`, `break`, `continue`, `kill` or `suspend`, which may end the
+    shell or leave the rest of the command unrun (`if test -d /; then exit
+    0; fi;` and `exec /usr/bin/true;` return 0 and run no `d4d`). Its cost
+    is a false `unknown` (`echo exit;`); such a word supplied at run time
+    (`$X`) or run by a trap (`trap 'exit 0' DEBUG;`) is not read (#4205).
+    Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a

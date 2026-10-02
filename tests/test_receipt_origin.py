@@ -2316,6 +2316,40 @@ class DeriveSpellings(Base):
                               "BASH_CMDS[a; d4d {derive}]=./x",
                               "X[a&& d4d {derive}]")
 
+    #: #4205 (Codex review): a derive whose own words carry a help option.
+    #: The CLI prints its help and returns 0 without deriving wherever
+    #: `--help` stands among its words, as Click reads it first (the test
+    #: below runs it). Each block read `checked` at 18cbe867d, as on
+    #: origin/main 8a19955b5, with this call as the derive boundary and the
+    #: snippet written after it read as a Phase 3 back-port. `-h` is not this
+    #: CLI's, which fails with a usage error then; the `-h` spelling stands
+    #: for a CLI that registers it, which prints its help and returns 0.
+    HELP_4205 = ("d4d {derive} --help",
+                 "poetry run d4d derive core --help --full " + FULL + " " + OUT,
+                 "/venv/bin/python -m data_sheets_schema.cli {derive} --help > /tmp/help-4205.txt 2>&1",
+                 "timeout 60 d4d {derive} --help && d4d receipts check --label L",
+                 "python3 -m data_sheets_schema.cli {derive} -h")
+    #: #4205 (Codex review): a derive after a part carrying a word that may
+    #: end the shell or leave the rest of the command unrun. Under `env -i`,
+    #: with a real and with a failing `d4d` first on `PATH`, bash 3.2.57 and
+    #: 5.3.3 return 0 after each and run no `d4d`, so the call's success is
+    #: the earlier part's, not the derive's. Each block read `checked` at
+    #: 18cbe867d, as on origin/main 8a19955b5, with this call as the derive
+    #: boundary. The first two are the issue's.
+    ENDING_4205 = ("if test -d /; then exit 0; fi; d4d {derive}",
+                   "exec /usr/bin/true; d4d {derive}",
+                   "true && exit 0; d4d {derive}",
+                   "{{ exit 0; }}; d4d {derive}",
+                   "builtin exit 0 && poetry run d4d {derive}",
+                   "command exec /usr/bin/true; d4d {derive}")
+    #: The same with the absolute `--full`, as the tokenizer reads the
+    #: earlier part's first word as a bare program word not read here, which
+    #: may be a function that changes directory (#3782): `trap`, and `ex`,
+    #: the tokenizer's first word of `ex\<newline>it`, which bash reads as
+    #: `exit` (the second reading alone carries the word there).
+    ENDING_4205_ABSOLUTE = ("trap 'exit 0' TERM; kill $$; d4d {derive}",
+                            "ex\\\nit 0; d4d {derive}")
+
     #: The reason `_boundaries` gives for a derive this rule leaves unplaced.
     ASSIGNED_REASON = ("(assigned_environment: an assignment may come before its program: on the part or given "
                        "to `env` (`PYTHONPATH=src`); in an earlier part of the command, read by its words wherever "
@@ -2331,6 +2365,18 @@ class DeriveSpellings(Base):
                        "than bash ends it, or whose two readings give the derive's own words otherwise; it may "
                        "make the part run code other than the derive its words spell, and no assignment is "
                        "exempt (#3781))")
+    #: The reasons `_boundaries` gives for a derive the #4205 clauses leave
+    #: unplaced.
+    HELP_REASON = ("(help_option: its own words carry `--help` or `-h`, which may request help without deriving; "
+                   "a successful call does not establish that the derive ran (#4205))")
+    ENDING_REASON = ("(ending_word: an earlier part of the command carries, wherever it stands, a word that may end "
+                     "the shell or leave the rest of the command unrun (`exit`, `exec`, `return`, `logout`, `break`, "
+                     "`continue`, `kill` or `suspend`: `if ...; then exit 0; fi;`, `exec /usr/bin/true;`), so the "
+                     "call's status may be that part's and the derive may not have run (#4205))")
+    #: The words an earlier part may carry anywhere that leave a derive after
+    #: it unplaced (#4205), spelled out here, not read from the module, so a
+    #: word dropped there fails.
+    ENDING = ("exit", "exec", "return", "logout", "break", "continue", "kill", "suspend")
 
     #: The text bash reads whole (#4199), spelled here rather than read from
     #: the module: a `${`, `$((` or `$[`, a backquote, a `[` directly after
@@ -2692,6 +2738,212 @@ class DeriveSpellings(Base):
                                 (f"d4d {derive} && echo $(date) #x", "none")):
             with self.subTest(spelling=spelling):
                 self.assertEqual(rows(spelling), [(True, basis)])
+
+    def test_a_derive_that_asks_for_help_is_not_placed(self):
+        # #4205, with the real CLI's help, end to end and through `_shell`.
+        from data_sheets_schema.cli import cli
+        full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
+        rows = lambda command: [(d["targets_full"], d["basis"]) for d in ro._shell(command, "/w", [full])["derives"]]
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        # The CLI prints its help and returns 0, writing no core, wherever
+        # `--help` stands among the derive's words, a `--full` that does not
+        # exist included; `-h` is a usage error to it.
+        with tempfile.TemporaryDirectory() as tmp:
+            record, core = Path(tmp) / "F_d4d.yaml", Path(tmp) / "O_core.yaml"
+            record.write_text("id: x\n", encoding="utf-8")
+            outputs = []
+            for args in (["--full", str(record), "--out", str(core), "--help"],
+                         ["--help", "--full", str(record), "--out", str(core)],
+                         ["--full", str(Path(tmp) / "missing.yaml"), "--out", str(core), "--help"]):
+                with self.subTest(args=args[:2]):
+                    out = CliRunner().invoke(cli, ["derive", "core", *args])
+                    self.assertEqual(out.exit_code, 0, out.output)
+                    self.assertTrue(out.output.startswith("Usage: "), out.output)
+                    self.assertFalse(core.exists())
+                    outputs.append(out.output)
+            usage = CliRunner().invoke(cli, ["derive", "core", "--full", str(record), "--out", str(core), "-h"])
+            self.assertEqual(usage.exit_code, 2, usage.output)
+            self.assertFalse(core.exists())
+        # The call returned the help's output, as the runtime records a
+        # successful call. A plain derive in its place is the boundary, and
+        # the snippet written after it a Phase 3 back-port, as each of these
+        # read at 18cbe867d; with the help option the block is `unknown`.
+        printed = {"stdout": outputs[0], "stderr": "", "interrupted": False, "isImage": False}
+        identity, block = self._derived(f"d4d {derive}", content=outputs[0], metadata=printed)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["boundaries"]["derive_core"]["tool_use_id"], identity)
+        self.assertEqual(block["origin"], {"contemporaneous": 3, "phase1_correction": 1, "phase3_backport": 1})
+        for spelling in self.HELP_4205:
+            spelling = spelling.format(derive=derive)
+            with self.subTest(spelling=spelling):
+                identity, block = self._derived(spelling, content=outputs[0], metadata=printed)
+                self.assertIsNone(block["boundaries"]["derive_core"])
+                self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but its "
+                                          f"status is not the derive's own {self.HELP_REASON}")
+                attempt = block["derive_core_attempts"][0]
+                self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                 (None, "help_option", "ambiguous"))
+                self.assertEqual(rows(spelling), [(None, "help_option")])
+                # Aimed at another record it places nothing either way.
+                other = ro._shell(spelling.replace(self.FULL, "/o/full.yaml"), "/w", [full])
+                self.assertEqual([d["targets_full"] for d in other["derives"]], [False])
+        # `-h` as this CLI reads it: a usage error, so the call failed. The
+        # row is read all the same, a false `unknown`, the rule's cost; at
+        # 18cbe867d the block read `checked` with no derive boundary.
+        identity, block = self._derived(f"d4d {derive} -h", ok=False, content=usage.output,
+                                        metadata="Error: Exit code 2")
+        self.assertUnknown(block, f"derive core {identity} cannot be placed: the call failed but its status is not "
+                                  f"the derive's own {self.HELP_REASON}")
+        # One the native control refused never ran.
+        identity, block = self._derived(f"d4d {derive} --help", ok=False,
+                                        content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+                                        metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+        # The rule's cost: `-h` as the value of `--out`, which the CLI takes
+        # for the file it writes.
+        self.assertEqual(rows(f"d4d derive core --full {self.FULL} --out -h"), [(None, "help_option")])
+        # Nothing else: a help option on another part, before or after the
+        # derive, or a word that only contains one.
+        for spelling, basis in ((f"d4d receipts check --help && d4d {derive}", "command"),
+                                (f"d4d {derive} && d4d receipts check --help", "and_chain"),
+                                (f"d4d {derive} --label --helpful", "command"),
+                                (f"d4d {derive} --label -hx", "command")):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(True, basis)])
+        # Not read: a help option supplied at run time (`$X` holding
+        # `--help`, after which bash passes it to the CLI). The pin moves if
+        # the rule is widened.
+        self.assertEqual(rows(f"d4d {derive} $X"), [(True, "command")])
+
+    def test_a_derive_after_a_part_that_may_end_the_shell_is_not_placed(self):
+        # #4205, end to end and through `_shell`.
+        full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
+        rows = lambda command: [(d["targets_full"], d["basis"]) for d in ro._shell(command, "/w", [full])["derives"]]
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        absolute = f"derive core --full /w/{self.FULL} {self.OUT}"
+        for spellings, is_absolute in ((self.ENDING_4205, False), (self.ENDING_4205_ABSOLUTE, True)):
+            for spelling in spellings:
+                spelling = spelling.format(derive=derive)
+                with self.subTest(spelling=spelling):
+                    identity, block = self._derived(spelling, absolute=is_absolute)
+                    self.assertIsNone(block["boundaries"]["derive_core"])
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but "
+                                              f"its status is not the derive's own {self.ENDING_REASON}")
+                    attempt = block["derive_core_attempts"][0]
+                    self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                     (None, "ending_word", "ambiguous"))
+                    command = spelling.replace(self.FULL, f"/w/{self.FULL}") if is_absolute else spelling
+                    self.assertEqual(rows(command), [(None, "ending_word")])
+                    # Aimed at another record it places nothing either way.
+                    other = ro._shell(spelling.replace(self.FULL, "/o/full.yaml"), "/w", [full])
+                    self.assertEqual([d["targets_full"] for d in other["derives"]], [False])
+        # One the native control refused never ran.
+        identity, block = self._derived(f"exec /usr/bin/true; d4d {derive}", ok=False,
+                                        content=ro.NATIVE_DENIAL_PREFIX + "not registered",
+                                        metadata="Error: " + ro.NATIVE_DENIAL_PREFIX)
+        self.assertEqual(block["status"], "checked", block["reasons"])
+        self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
+        # Each word, wherever it stands in an earlier part: at its head,
+        # behind `{` or `builtin`, or as an argument.
+        self.assertEqual(ro._ENDING_WORDS, frozenset(self.ENDING))
+        for word in self.ENDING:
+            for earlier in (word, f"{{ {word}; }}", f"builtin {word} 0", f"echo {word}"):
+                spelling = f"{earlier}; d4d {absolute}"
+                with self.subTest(spelling=spelling):
+                    self.assertEqual(rows(spelling), [(None, "ending_word")])
+        # The rule's cost: such a word that ends nothing. `exec` with only a
+        # redirection replaces no shell, the loop's `break` leaves only the
+        # loop, and bash runs the derive after a `return` outside a function
+        # (3.2.57 and 5.3.3, under `env -i`).
+        for spelling in (f"echo exit; d4d {derive}", f"exec 2>/dev/null; d4d {derive}",
+                         f"until false; do break; done; d4d {derive}", f"return 0; d4d {derive}"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(None, "ending_word")])
+        # Nothing else: such a word among the derive's own words or in a
+        # later part, which runs after it (`&& exit 0` runs only after a
+        # derive that succeeded), or a word that only contains one.
+        for spelling, basis in ((f"d4d {derive} --label exit", "command"), (f"d4d {derive} && exit 0", "and_chain"),
+                                (f"echo exited; d4d {derive}", "command"), (f"cat kill.txt; d4d {derive}", "command")):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(True, basis)])
+        # Not read, as NON_CHECKS says: such a word supplied at run time
+        # (`$X` holding `exit`), one a trap runs (`trap 'exit 0' DEBUG`), and
+        # one a function defined outside the command runs (`f`). bash 3.2.57
+        # and 5.3.3 return 0 after each and run no `d4d`. Each pin moves if
+        # the rule is widened.
+        for spelling in (f"$X 0; d4d {absolute}", f"trap 'exit 0' DEBUG; d4d {absolute}", f"f; d4d {absolute}"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(True, "command")])
+
+    def test_successful_bash_exit_or_exec_does_not_establish_a_derive(self):
+        # Execute the two reported #4205 failures in a clean shell. The
+        # fixture d4d writes a marker and returns a distinctive status, so
+        # the successful call cannot be mistaken for a successful derive.
+        import shutil
+        import subprocess
+
+        shells = sorted({str(Path(shell).resolve()) for shell in ("/bin/bash", shutil.which("bash"))
+                         if shell and Path(shell).is_file()})
+        if not shells:
+            self.skipTest("bash is unavailable")
+        derive = f"d4d derive core --full {self.FULL} {self.OUT}"
+        cases = ((derive, 17, True),
+                 (f"if test -d /; then exit 0; fi; {derive}", 0, False),
+                 (f"exec /usr/bin/true; {derive}", 0, False),
+                 (f"{{ builtin exit 0; }}; {derive}", 0, False))
+        for shell in shells:
+            for command, status, ran in cases:
+                with self.subTest(shell=shell, command=command), tempfile.TemporaryDirectory() as tmp:
+                    result = subprocess.run(
+                        [shell, "--noprofile", "--norc", "-c",
+                         "d4d() { printf invoked > derive-marker; return 17; }\n" + command],
+                        cwd=tmp, env={"PATH": "/usr/bin:/bin"}, capture_output=True, text=True, timeout=5,
+                    )
+                    self.assertEqual(result.returncode, status, result.stderr)
+                    self.assertEqual((Path(tmp) / "derive-marker").exists(), ran)
+                    if not ran:
+                        identity, block = self._derived(
+                            command, content=result.stdout,
+                            metadata={"stdout": result.stdout, "stderr": result.stderr,
+                                      "interrupted": False, "isImage": False},
+                        )
+                        self.assertIsNone(block["boundaries"]["derive_core"])
+                        self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded "
+                                                  f"but its status is not the derive's own {self.ENDING_REASON}")
+
+    def test_the_report_of_a_help_or_ended_derive_is_unknown_end_to_end(self):
+        # #4205 through `d4d receipts origin`, as a reviewer runs it: the
+        # block is `unknown`, the derive row is not placed, and no Phase 1 /
+        # Phase 3 split is reported. Each read `checked` at 18cbe867d.
+        from data_sheets_schema.cli.receipts import receipts
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spelling, basis in ((f"d4d {derive} --help", "help_option"),
+                                (f"if test -d /; then exit 0; fi; d4d {derive}", "ending_word"),
+                                (f"exec /usr/bin/true; d4d {derive}", "ending_word")):
+            with self.subTest(spelling=spelling):
+                r = self.new_run()
+                r.write(r.receipt, PRE)
+                r.write(r.full, "id: x\n")
+                r.write(r.receipt, Boundaries.C003)
+                identity = r.bash(spelling)
+                r.write(r.receipt, Boundaries.C004)
+                r.receipt.write_text(r.last_receipt, encoding="utf-8")
+                args = ["origin", "--transcript", str(r.transcript()), "--receipt", str(r.receipt),
+                        "--full", str(r.full)]
+                out = CliRunner().invoke(receipts, args + ["--json"])
+                self.assertEqual(out.exit_code, 0, out.output)
+                block = json.loads(out.output)
+                self.assertEqual(block["status"], "unknown")
+                self.assertIsNone(block["boundaries"]["derive_core"])
+                self.assertEqual([(a["tool_use_id"], a["targets_full"], a["status_basis"], a["outcome"])
+                                  for a in block["derive_core_attempts"]],
+                                 [(identity, None, basis, "ambiguous")])
+                for key in ("origin", "snippets", "deltas"):
+                    self.assertNotIn(key, block)
+                self.assertTrue(block["reasons"][0].startswith(f"derive core {identity} cannot be placed: the call "
+                                                               f"succeeded but its status is not the derive's own "
+                                                               f"({basis}: "), block["reasons"])
 
     def test_read_whole(self):
         # A `${`, `$((` or `$[`, a backquote, a `[` directly after a letter,
