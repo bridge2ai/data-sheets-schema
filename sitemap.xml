@@ -1731,6 +1731,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/nested_support_targets/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/node_property/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>

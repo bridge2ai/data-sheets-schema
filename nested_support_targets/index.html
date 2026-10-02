@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/nested_support_targets/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Draft nested support targets - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#draft-nested-support-targets" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Draft nested support targets
             
           </span>
         </div>
@@ -316,56 +316,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#remaining-work-before-3342-completion-or-paid-calibration" class="md-nav__link">
+    Remaining work before #3342 completion or paid calibration
   </a>
   
 </li>
@@ -384,110 +336,134 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/nested_support_targets.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
+<h1 id="draft-nested-support-targets">Draft nested support targets</h1>
+<p><code>data_sheets_schema.support_targets</code> supplies an offline engineering slice of
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/3342">#3342</a>: a captured
+schema, target inventory, contextual specifications and pure request rendering.
+It does not execute a judge, reuse caches, calibrate a model, or authorize a run.
+The existing support-v2 instrument, prompts, caches and behavior are unchanged.</p>
+<pre><code class="language-python">from pathlib import Path
+from data_sheets_schema.support_targets import (
+    NestedSupportSchema, inventory_targets, render_request, request_identity,
+)
 
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
+schema = NestedSupportSchema.from_schema(
+    Path(&quot;src/data_sheets_schema/schema/data_sheets_schema_all.yaml&quot;),
+    root_class=&quot;Dataset&quot;,
+    vocabulary={},  # Explicit captured registry values when the schema requires them.
+)
+inventory = inventory_targets(
+    Path(&quot;record.yaml&quot;).read_bytes(), schema, artifact_kind=&quot;full&quot;,
+)
+target = inventory.target(&quot;/creators/0&quot;, kind=&quot;relationship_edge&quot;)
+arguments = render_request(target, bundle=&quot;Document A\nSource text.&quot;, model=&quot;explicit-model&quot;)
+identity = request_identity(target, bundle=&quot;Document A\nSource text.&quot;, model=&quot;explicit-model&quot;)
 </code></pre>
-
-</details>
+<p>The schema must be explicitly selected. Local transitive imports are captured
+once; uncaptured remote imports are refused. Specifications include complete
+induced slot descriptions, class and ancestor meanings along the path, relevant
+enums and the explicit caller vocabulary snapshot. Full unrelated class attribute
+inventories are not sent. Inventory specifications are deduplicated in a shared
+catalog; each target pins its specification reference. A single target expands
+that specification for request rendering. No ambient profile is selected. A slot's
+<code>values_from</code> names must have entries in that vocabulary or the target is blocked.
+Profile-specific registry resolution and manifest selection belong to the later
+planner integration.</p>
+<p>Each populated inline object or list member has a <code>relationship_edge</code> target,
+such as <code>/creators/1</code> or <code>/data_governance/committee_contact</code>. Its question is
+whether this entity occupies that relationship, independent of the truth of all
+its attributes. Scalar fields and scalar-list members have <code>attribute_value</code>
+targets, such as <code>/creators/1/name</code>, <code>/variables/0/variable_name</code>, and <code>/flags/0</code>.
+This distinguishes an accurate name from an unsupported creator relationship.
+The target keeps the slot chain so a generic nested name does not lose the
+container's meaning. The two kinds have separate counts; there is no combined
+support percentage or arbitrary conversion of typed verdicts to points.</p>
+<p>Every target binds exact input bytes, artifact kind, root class/field inventory,
+value, selected specification and context. The nearest containing mapping's
+complete scalar siblings, scalar-list siblings and explicit qualifier fields
+(<code>description</code>, <code>notes</code>, <code>source_caveats</code> and declaration fields) are included as
+untrusted context, with its pointer, class, full-source digest and projected-value
+digest. The selected slot is supplied separately as the target; unrelated
+container siblings are omitted with their pointer, content hash and size recorded.
+No retained description or qualifier is truncated. Anonymous mappings retain
+this projected context and their path even without an identifier. The context
+projection is versioned and remains an explicit readiness blocker pending review;
+an application requiring an omitted container must expand/review the context
+policy before execution, not treat an omission as evidence of absence.
+Ancestor mappings supply identity and path, without automatically inheriting
+collection metadata. A resource's creator is asserted of that resource, not the
+outer collection. Anonymous entities retain their mapping and pointer. Context
+declarations come from the selected value and direct containing mapping;
+unrelated siblings' declarations and ancestor declarations are not inherited.
+Publication <code>status</code> and <code>was_derived_from</code> remain value/context fields rather
+than citation declarations. Natural-language attribution inside a value remains
+visible to the model.</p>
+<p>Pointers address the exact original document: wrappers are not stripped. RFC
+6901 escaping is strict; array append, negative/leading-zero indices and missing
+paths are refused. Zero and false are populated. Unknown schema fields, invalid
+container/cardinality shapes, keyed inline maps, unions/conditional constraints,
+type-discriminator transitions, and missing vocabularies are reported as blocked
+paths. Unsupported class constraints are refused across the complete <code>is_a</code> and
+mixin ancestry, including shared ancestors (#4232). URI references are never followed. Non-inline class references retain
+their relationship assertion as a string-valued edge. Native YAML dates and
+timestamps retain typed identities and faithful <code>value_yaml</code> rendering, including
+time zones; their JSON previews are tagged. Every node is tagged for value and
+context hashes, so dates, quoted date strings and ordinary tag-shaped mappings
+remain distinct. The request sends the faithful YAML representation once, without
+also repeating the JSON preview of the same text. Input bytes are never rewritten. Duplicate YAML keys,
+unsupported scalar types such as binary values, nonfinite numbers and invalid roots are refused. Empty or
+null fields do not create targets; empty/null members of a populated list are
+reported as blocked.</p>
+<p>Traversal defaults to 100,000 nodes and depth 64, at most 4 MB input and 64 MB
+total compact target data plus shared specification catalog. Limits are explicit and pinned in the artifact
+identity. Exceeding a limit raises instead of returning a truncated inventory.
+Future context-policy changes alter the instrument and must be reviewed before
+calibration. The public AI_READI v7 rep1 regression exercises the default limits
+on its original 89 KB record, including a bounded per-creator request rather than
+a copy of unrelated sibling collections. The renderer is pure: no client initialization, token-count API,
+retry, network request or output-file write occurs.</p>
+<p>The draft <code>grounding_v3</code> axis and <code>support_targets v3 draft (#3342)</code> identity are
+distinct from v2. Request identity hashes all rendered arguments, including
+model, output limit, prompt, exact target/context and bundle text. This is an
+identity receipt, not a cache loader. Different artifact bytes, full/core kinds,
+entity contexts, pointer positions or specifications cannot silently share an
+old verdict. Returned dictionaries are private copies of immutable captured JSON.</p>
+<p>Fitness remains explicitly top-level. Each nested target records a many-to-one
+mapping to its original top-level field, without inventing a per-target fitness
+verdict. For example <code>/resources/0/creators/1</code> maps to the old <code>/resources</code> field.
+An independently versioned nested fitness instrument can replace that basis in
+a later, reviewed integration.</p>
+<h2 id="remaining-work-before-3342-completion-or-paid-calibration">Remaining work before #3342 completion or paid calibration</h2>
+<ul>
+<li>Independently review this resolver, context and question contract, including
+  the choice of edge versus attribute strata and their reporting denominators.</li>
+<li>Review the opt-in offline planner version 2 in <a href="../offline_support_plan/">offline_support_plan.md</a>,
+  including nested target counts, blocked-path coverage, requests and costs for
+  the selected roster. Old top-level manifests and historical caches remain intact.</li>
+<li>Decide and test missing registry/profile coverage, unsupported schema shapes,
+  and collection inheritance policies before calling the inventory complete for
+  a real roster. The current report always carries unresolved readiness blockers.</li>
+<li>Freeze curator-adjudicated positive and supported controls, with exact local
+  original/bundle hashes. Public tests here use neutral synthetic records and
+  the public D4D schema; private rejected outputs are not distributed as fixtures.</li>
+<li>Separate record-support, artifact-local references and audit-classification
+  controls. Supplying full/core context does not establish that this draft prompt
+  detects self-reference defects. A multi-clause string still yields one verdict
+  under declared precedence, not independent coverage of every clause.</li>
+<li>Version and review execution, output validation, usage/reasoning ledgers and
+  any cache loader. There is currently no v3 provider execution route.</li>
+<li>Complete independent empirical calibration (#3343) and obtain the required
+  paid-run authorization before a canary or the 24-record cohort.</li>
+</ul>
+<p>Offline tests establish binding and rendering behavior, not model recall or
+false-positive rates. This slice does not close #3342, #3343, #2929, or the
+preserved generation-acceptance findings.</p>
 
 
 
