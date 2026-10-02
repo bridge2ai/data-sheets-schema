@@ -200,7 +200,8 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         # Note: format, bytes, sha256 are now file-level properties, not collection-level
         # Collection has aggregate total_bytes from RO-Crate contentSize
         self.assertEqual(raw_collection.get('total_bytes'), 2097152)
-        self.assertEqual(raw_collection['collection_type'], ['raw_data'])
+        # FileCollection.collection_type is single-valued in the schema (#3969)
+        self.assertEqual(raw_collection['collection_type'], 'raw_data')
         self.assertEqual(raw_collection['file_count'], 200)
 
     def test_roundtrip_preservation(self):
@@ -216,7 +217,7 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
                     'id': 'test-collection',
                     'name': 'Test Files',
                     'description': 'Test data',
-                    'collection_type': ['test_split'],
+                    'collection_type': 'test_split',  # single-valued (#3969)
                     'total_bytes': 1024,
                     'file_count': 10,
                     'path': '/data/test/',
@@ -257,6 +258,21 @@ class TestFileCollectionROCrateTransformation(unittest.TestCase):
         self.assertEqual(recovered_collection['file_count'], original_collection['file_count'])
         self.assertEqual(recovered_collection['collection_type'], original_collection['collection_type'])
         # Note: File-level properties (format, encoding, sha256) are in resources, not on collection
+
+    def test_a_listed_collection_type_comes_back_with_the_rest_reported(self):
+        """An older record lists several collection types; the crate carries
+        the list, and the single-valued slot keeps one and names the rest
+        (#4073), where it used to keep the first without a word."""
+        rocrate = self.d4d_to_rocrate.convert({
+            'id': 'roundtrip-dataset', 'title': 'Round-trip Test Dataset',
+            'file_collections': [{'id': 'test-collection', 'name': 'Test Files',
+                                  'collection_type': ['processed_data', 'metadata']}]})
+        recovered = self.rocrate_to_d4d.convert(
+            rocrate.model_dump(by_alias=True, exclude_none=True))
+        collection = recovered['file_collections'][0]
+        self.assertEqual(collection['collection_type'], 'processed_data')
+        dropped = dict(self.rocrate_to_d4d.dropped)
+        self.assertIn('metadata', dropped['file_collections[0].collection_type'])
 
     def test_backward_compatibility_no_filecollections(self):
         """Test that D4D without FileCollections still works."""
