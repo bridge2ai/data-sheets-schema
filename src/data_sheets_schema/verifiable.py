@@ -69,7 +69,8 @@ import hashlib
 from functools import lru_cache
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Iterator
+from types import MappingProxyType
+from typing import Any, Iterator, Mapping
 
 # The corpus lookups below are anchored on the checkout (running the CLI
 # from a subdirectory tried to open `tests/src/...`); the schema is a
@@ -197,19 +198,58 @@ def _identifier_slots_of(sv) -> set[str]:
     return out
 
 
+@dataclass(frozen=True)
+class _OwnerSlot:
+    exempt_scalar: bool
+    target_class: str | None
+    multivalued: bool
+    keyed: bool
+    unsupported: bool
+
+
+@dataclass(frozen=True)
+class _OwnerClass:
+    slots: Mapping[str, _OwnerSlot]
+    unsupported: bool
+
+
 @lru_cache(maxsize=8)
-def _captured_identifier_slots(raw: bytes, kind: str) -> frozenset[str]:
-    """Bounded immutable results; no historical SchemaView survives the call."""
+def _captured_owner_rules(raw: bytes, kind: str) -> Mapping[str, _OwnerClass]:
+    """Immutable induced rules by actual owner; no SchemaView is retained.
+
+    A global slot name cannot distinguish an object reference in one class
+    from a literal assertion in another (#4269). Inheritance, slot_usage and
+    class-local attributes are resolved before projecting these small rules.
+    Conditional ranges and type designators are explicitly unsupported; they
+    must not quietly borrow an unrelated owner's identifier exemption.
+    """
     from data_sheets_schema.schema_view import version_document, version_view
     from data_sheets_schema.provenance import CORE_SCHEMA
     path = CORE_SCHEMA if kind == "core" else FULL_SCHEMA
     root = "CoreDataset" if kind == "core" else "Dataset"
     with version_view(path, version_document(raw)) as view:
-        if root not in view.all_classes():
+        classes = view.all_classes()
+        if root not in classes:
             raise ValueError(f"selected {kind} schema does not declare {root}")
-        for name in view.all_classes():
-            view.class_induced_slots(name)
-        return frozenset(_identifier_slots_of(view))
+        ranges = set(classes) | set(view.all_types()) | set(view.all_enums())
+        constraints = ("any_of", "all_of", "exactly_one_of", "none_of")
+        rules = {}
+        for name in classes:
+            unsupported = any(
+                getattr(classes[parent], key, None)
+                for parent in view.class_ancestors(name)
+                for key in (*constraints, "rules"))
+            slots = {}
+            for slot in view.class_induced_slots(name):
+                target = str(slot.range) if slot.range in classes else None
+                slots[str(slot.name)] = _OwnerSlot(
+                    exempt_scalar=bool(slot.identifier or target), target_class=target,
+                    multivalued=bool(slot.multivalued),
+                    keyed=bool(slot.inlined and not slot.inlined_as_list),
+                    unsupported=bool(slot.range not in ranges or slot.designates_type or
+                                     any(getattr(slot, key, None) for key in constraints)))
+            rules[str(name)] = _OwnerClass(MappingProxyType(slots), unsupported)
+        return MappingProxyType(rules)
 
 
 def _pins(section: dict, prefix: str) -> dict[str, str]:
@@ -225,7 +265,7 @@ def _pins(section: dict, prefix: str) -> dict[str, str]:
     return out
 
 
-def _selected_schema(record: dict, kind: str) -> tuple[frozenset[str], dict]:
+def _selected_schema(record: dict, kind: str) -> tuple[Mapping[str, _OwnerClass], dict]:
     from data_sheets_schema.provenance import CORE_SCHEMA
     from data_sheets_schema.resources import resource_path
     from data_sheets_schema.run_schema import TODAY, run_schema_bytes
@@ -247,10 +287,55 @@ def _selected_schema(record: dict, kind: str) -> tuple[frozenset[str], dict]:
         raise ValueError("recovered schema bytes contradict the recorded hashes")
     # A recovered but unusable historical authority is not a current-schema
     # success. Parsing errors are reported as unchecked by check_run.
-    slots = _captured_identifier_slots(raw, kind)
-    return slots, {**basis, "kind": kind, "actual_sha256": hashlib.sha256(raw).hexdigest(),
+    rules = _captured_owner_rules(raw, kind)
+    return rules, {**basis, "kind": kind, "actual_sha256": hashlib.sha256(raw).hexdigest(),
                    "status": "current_fallback" if basis["source"] == TODAY else "recorded",
-                   "selection_instrument": "verifiable-run-schema-v1"}
+                   "selection_instrument": "verifiable-run-schema-v1",
+                   "claim_exclusion_rule": "actual_owner_induced_slots_v1"}
+
+
+def _owned_claims(document: dict, rules: Mapping[str, _OwnerClass], root: str) -> Iterator[Claim]:
+    """Walk only established class/slot ownership, preserving token semantics."""
+    def pointer(path, key):
+        return path + "/" + str(key).replace("~", "~0").replace("/", "~1")
+
+    def entity(node, owner, path):
+        rule = rules[owner]
+        if rule.unsupported:
+            raise ValueError(f"cannot establish unconditional schema ownership for {owner} at {path or '/'}")
+        for name, value in node.items():
+            here = pointer(path, name)
+            slot = rule.slots.get(name)
+            if slot is None:
+                raise ValueError(f"unknown schema slot {owner}.{name} at {here}")
+            if slot.unsupported:
+                raise ValueError(f"unknown/conditional range or type designator at {here}")
+            if value is None:
+                continue
+            if isinstance(value, dict) and slot.multivalued:
+                if not slot.keyed or slot.target_class is None:
+                    raise ValueError(f"cannot establish keyed-map ownership at {here}")
+                # Keys are identifiers of entries, not attributes of the owner.
+                for key, member in value.items():
+                    if not isinstance(member, dict):
+                        raise ValueError(f"keyed-map entry is not an entity at {pointer(here, key)}")
+                    yield from entity(member, slot.target_class, pointer(here, key))
+                continue
+            members = enumerate(value) if isinstance(value, list) else [(None, value)]
+            for index, member in members:
+                location = pointer(here, index) if index is not None else here
+                if isinstance(member, dict):
+                    if slot.target_class is None:
+                        raise ValueError(f"no class range for nested entity at {location}")
+                    yield from entity(member, slot.target_class, location)
+                elif isinstance(member, list):
+                    raise ValueError(f"no schema owner for nested list at {location}")
+                elif not slot.exempt_scalar:
+                    # Use the unchanged lexical extractor, explicitly disabling
+                    # its historical global-name exclusions for this one value.
+                    yield from extract({name: member}, skip_slots=set())
+
+    yield from entity(document, root, "")
 
 
 def _selected_source(record: dict, provenance: Path, fallback: Path | None) -> tuple[bytes, dict]:
@@ -294,6 +379,9 @@ def check_run(record_path: Path, provenance_path: Path, *, kind: str = "full",
     Unusable recovered schemas and unavailable/contradictory pinned source
     bytes are unchecked, never zero claims or an implicit current-source score.
     Legacy unpinned sources remain usable only as explicitly unverified files.
+    Exemptions follow induced slots of the actual owning class. Unknown slots,
+    conditional ownership and unsupported container shapes are unchecked; this
+    lexical measurement does not substitute for full schema validation.
     Low-level check_record retains its existing caller-supplied inputs contract.
     """
     import yaml
@@ -322,10 +410,14 @@ def check_run(record_path: Path, provenance_path: Path, *, kind: str = "full",
             provenance_raw = None
         out["provenance_sha256"] = hashlib.sha256(provenance_raw).hexdigest() if provenance_raw is not None else None
         provenance = mapping(provenance_raw, "provenance") if provenance_raw is not None else {}
-        skip, out["schema_basis"] = _selected_schema(provenance, kind)
+        rules, out["schema_basis"] = _selected_schema(provenance, kind)
         source_raw, out["source_basis"] = _selected_source(provenance, provenance_path, fallback_bundle)
-        assessment = check_record(document, source_raw.decode("utf-8"), project=project, label=label,
-                                  skip_slots=skip)
+        haystack = normalise_bundle(source_raw.decode("utf-8"))
+        assessment = RecordCheck(project=project, label=label)
+        for claim in _owned_claims(document, rules, "CoreDataset" if kind == "core" else "Dataset"):
+            claim.grounded = any(grounded_in(claim.kind, rendering, haystack)
+                                 for rendering in renderings(claim.kind, claim.value))
+            assessment.claims.append(claim)
     except (OSError, ValueError, TypeError, RecursionError, yaml.YAMLError) as exc:
         out["reason"] = f"{type(exc).__name__}: {exc}"
         return out

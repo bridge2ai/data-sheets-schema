@@ -291,3 +291,95 @@ def test_cli_does_not_silently_drop_missing_selected_record(tmp_path):
     rows = json.loads(result.output)["records"]
     assert len(rows) == 1 and not rows[0]["checked"]
     assert rows[0]["rate"] is None and "FileNotFoundError" in rows[0]["reason"]
+
+
+@pytest.mark.parametrize("placement", ["slot_usage", "attributes"])
+@pytest.mark.parametrize("global_range,effective_range,stated", [
+    ("string", "Grantor", 1), ("Grantor", "string", 2)])
+def test_recorded_exclusion_uses_induced_owner_slot(tmp_path, placement, global_range, effective_range, stated):
+    schema = yaml.safe_load(schema_bytes(grantor=global_range))
+    schema["classes"]["Dataset"][placement] = {"grantor": {"range": effective_range}}
+    result = measure(fixture(tmp_path, raw=yaml.safe_dump(schema).encode()))
+    assert result["checked"] and result["stated"] == stated
+    assert result["schema_basis"]["claim_exclusion_rule"] == "actual_owner_induced_slots_v1"
+
+
+@pytest.mark.parametrize("global_range", ["Grantor", "string"])
+@pytest.mark.parametrize("inheritance", ["is_a", "mixins"])
+def test_same_name_resolves_separate_nested_and_inherited_owners(tmp_path, global_range, inheritance):
+    schema = yaml.safe_load(schema_bytes(grantor=global_range))
+    schema["classes"].update({
+        "RefParent": {"slots": ["grantor"], "slot_usage": {"grantor": {"range": "Grantor"}}},
+        "RefOwner": {inheritance: "RefParent" if inheritance == "is_a" else ["RefParent"]},
+        "TextOwner": {"slots": ["grantor"], "slot_usage": {"grantor": {"range": "string"}}},
+    })
+    for name, owner in (("ref_items", "RefOwner"), ("text_items", "TextOwner")):
+        schema["slots"][name] = {"range": owner, "multivalued": True, "inlined_as_list": True}
+        schema["classes"]["Dataset"]["slots"].append(name)
+    document = {"description": "Released on 2026-01-01.",
+                "ref_items": [{"grantor": "https://example.invalid/reference"}],
+                "text_items": [{"grantor": "https://example.invalid/literal"}]}
+    result = measure(fixture(tmp_path, raw=yaml.safe_dump(schema).encode(), document=document))
+    assert result["checked"], result
+    assert (result["stated"], result["grounded"], result["rate"]) == (2, 1, 0.5)
+    assert [c["value"] for c in result["claims"] if c["kind"] == "url"] == ["https://example.invalid/literal"]
+
+
+@pytest.mark.parametrize("identifier", [True, False])
+def test_local_identifier_override_controls_only_its_owner(tmp_path, identifier):
+    schema = yaml.safe_load(schema_bytes(grantor="string"))
+    schema["slots"]["grantor"]["identifier"] = not identifier
+    schema["classes"]["Dataset"]["slot_usage"] = {"grantor": {"identifier": identifier}}
+    result = measure(fixture(tmp_path, raw=yaml.safe_dump(schema).encode()))
+    assert result["checked"]
+    assert result["stated"] == (1 if identifier else 2)
+
+
+def test_keyed_entities_and_mixed_references_use_the_declared_class(tmp_path):
+    schema = yaml.safe_load(schema_bytes())
+    schema["slots"].update({
+        "keyed": {"range": "Grantor", "multivalued": True, "inlined": True, "inlined_as_list": False},
+        "mixed": {"range": "Grantor", "multivalued": True, "inlined_as_list": True}})
+    schema["classes"]["Dataset"]["slots"].extend(["keyed", "mixed"])
+    document = {"description": "Released on 2026-01-01.",
+                "keyed": {"https://example.invalid/key": {"name": "https://example.invalid/keyed-assertion"}},
+                "mixed": ["https://example.invalid/reference", {"name": "https://example.invalid/list-assertion"}]}
+    result = measure(fixture(tmp_path, raw=yaml.safe_dump(schema).encode(), document=document))
+    assert result["checked"] and (result["stated"], result["grounded"]) == (3, 1), result
+    assert {c["value"] for c in result["claims"] if c["kind"] == "url"} == {
+        "https://example.invalid/keyed-assertion", "https://example.invalid/list-assertion"}
+
+
+@pytest.mark.parametrize("fault", ["unknown_slot", "scalar_container", "unknown_range", "union_range",
+                                  "type_designator", "ancestor_rules", "unestablished_keyed_map"])
+def test_unestablished_ownership_cannot_report_a_measurement(tmp_path, fault):
+    schema = yaml.safe_load(schema_bytes())
+    document = {"description": "Released on 2026-01-01.", "grantor": "https://example.invalid/reference"}
+    if fault == "unknown_slot":
+        document["unregistered"] = "https://example.invalid/assertion"
+    elif fault == "scalar_container":
+        document["description"] = {"id": "https://example.invalid/not-an-identifier-owner"}
+    elif fault == "unknown_range":
+        schema["slots"]["grantor"]["range"] = "MissingOwner"
+    elif fault == "union_range":
+        schema["slots"]["grantor"]["any_of"] = [{"range": "Grantor"}, {"range": "string"}]
+    elif fault == "type_designator":
+        schema["slots"]["grantor"]["designates_type"] = True
+    elif fault == "ancestor_rules":
+        schema["classes"]["Parent"] = {"rules": [{"preconditions": {"slot_conditions": {
+            "description": {"value_presence": "PRESENT"}}}, "postconditions": {"slot_conditions": {
+            "grantor": {"range": "string"}}}}]}
+        schema["classes"]["Dataset"]["is_a"] = "Parent"
+    else:
+        schema["slots"]["grantor"].update(multivalued=True, inlined_as_list=True)
+        document["grantor"] = {"arbitrary-key": {"name": "https://example.invalid/assertion"}}
+    result = measure(fixture(tmp_path, raw=yaml.safe_dump(schema).encode(), document=document))
+    assert not result["checked"] and result["stated"] is result["grounded"] is result["rate"] is None
+    assert result["schema_basis"]["status"] == "recorded"
+
+
+def test_low_level_legacy_explicit_global_exclusions_remain_available():
+    document = {"first": {"grantor": "https://example.invalid/reference"},
+                "second": {"grantor": "https://example.invalid/literal"}}
+    assert vf.check_record(document, "", skip_slots={"grantor"}).stated == 0
+    assert vf.check_record(document, "", skip_slots=set()).stated == 2
