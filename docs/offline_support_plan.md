@@ -111,3 +111,70 @@ supplied and unverified; it never retrieves prices or imports an old study budge
 Keep generated plans local until their source contents and publication scope have
 been reviewed. Planning does not complete the empirical acceptance criteria of
 #2929 or #3343.
+
+## Nested version 2
+
+The default remains historical `d4d-support-plan-v1`. Opt in to the draft #3342
+nested target contract with a fresh output directory:
+
+```bash
+d4d evaluate support-plan \
+  --plan-version 2 --artifact-kind full --class-name Dataset \
+  --roster notes/reference_rescore_2026-09-11/manifest.json \
+  --profile bridge2ai \
+  --output /tmp/d4d-nested-support-plan
+```
+
+Version 2 requires an explicit artifact kind (`full`, `core`, or `collection`).
+A core plan must select `--class-name CoreDataset`; the default full Dataset
+class is refused for core. A collection or external root requires its explicitly
+selected `--class-name` and `--schema`. A roster job's optional `artifact_kind`
+must agree, as must the corresponding provenance output path when declared.
+One plan uses one kind/class/schema/profile. Records are not unwrapped and paths
+address their exact pinned bytes.
+
+The required profile selects its existing pinned vocabulary resource, ignoring
+ambient profile selection. `--vocabulary FILE` can explicitly override that
+snapshot for version 2 only. Its YAML must contain a `vocabularies` mapping from
+registry names to nonempty identifier/label mappings. The planner records the
+override basis and hashes the entire file. No registry is fetched. Missing
+`values_from` vocabularies remain named blocked paths; they are not replaced by
+empty authoritative lists. Both nested support and top-level fitness use the
+same captured vocabulary and schema closure. The nested schema view is independent
+of mutable shared LinkML caches, so capture order cannot alter its identity.
+
+The output format is `d4d-support-plan-v2`. It uses `grounding_v3` for the draft
+[nested support contract](nested_support_targets.md) and keeps `fitness` as a
+separate top-level measurement. Counts distinguish support `relationship_edge`,
+support `attribute_value`, and top-level fitness. The request count is an
+accounting total, not a pooled measurement denominator. Every nested target
+records its many-to-one root-field mapping and the corresponding fitness target
+id; a future top-level fitness verdict must not become multiple nested verdicts.
+
+Each record has a complete hashed target inventory, including its deduplicated
+specification catalog, all blocked pointers/codes, and explicit omissions from
+projected context. Every request pins its target/context/specification identities
+and reconstructs from a content-addressed recipe through the same
+`d4d evaluate support-request` command as version 1. The request's SHA-256 uses
+the planner's canonical UTF-8 JSON encoding, not an SDK wire encoding or a cache
+key. Raw record, provenance, original bundle, schema/imports, vocabulary,
+instrument source files and available rubric join outputs are separately pinned.
+Recovery uses the same original-hash checks as version 1 and never rewrites the
+source repository. Unknown top-level fields remain explicit blocked support
+and fitness paths; malformed nested shapes remain blocked support paths while
+their declared top-level field can still receive a separate fitness question.
+
+The three token/cost scenarios are reported both overall and by measurement
+stratum. A warm support scenario credits one source-prefix write per record,
+then reads across both nested support kinds. Fitness has no cached source block.
+Estimates still use a byte-count heuristic, optional local prices and a requested
+output ceiling; they are not measured usage, a transport guarantee, or a spend
+cap. No judgement-cache reuse is credited.
+
+Version 2 completes offline planner integration only. Context-projection review,
+independent scientific controls, #3343 empirical calibration, v3 response and
+execution registration, provider transport and paid authorization remain
+blockers. Actual unresolved target paths and missing rubric join artifacts add
+their own blockers. Schema validation of the record is separate from this
+inventory. No v3 executor, cache loader, model call, or empirical verdict is
+created, and parent #3342/#2929 work remains open.

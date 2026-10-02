@@ -192,7 +192,7 @@ def materialize_request(directory: Path, target_id: str) -> dict:
     """Verify and reconstruct one pinned call's arguments, without a provider."""
     directory = Path(directory)
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("format") != FORMAT:
+    if manifest.get("format") not in (FORMAT, "d4d-support-plan-v2"):
         raise PlanError("unknown plan format")
     targets = [t for t in manifest["targets"] if t["id"] == target_id]
     if len(targets) != 1:
@@ -231,34 +231,16 @@ def _cost(tokens: dict, price: dict | None) -> float | None:
                      for kind, count in tokens.items()), 8)
 
 
-def build_plan(roster: Path, output: Path, *, model: str | None = None,
-               profile: str, class_name: str = "Dataset", schema_path: Path | None = None,
-               max_tokens: int = 8000, prices: Path | None = None,
-               root: Path = ROOT) -> dict:
-    """Freeze a fresh offline plan. Failure never changes existing artifacts.
-
-    ``root`` anchors roster paths and recovery history. Profile selection is
-    explicit, so ambient study/neutral defaults cannot change the instrument.
-    All inputs are validated before creating the exclusive output directory.
-    """
-    root, output = Path(root).resolve(), Path(output)
-    if output.exists() or output.is_symlink():
-        raise PlanError(f"output already exists: {output}")
-    if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or max_tokens < 1:
-        raise PlanError("max_tokens must be a positive integer")
+def plan_model_selection(model: str | None, artifacts: Artifacts) -> dict:
+    """Bind one validated evaluator and the exact config used to select it."""
     try:
         settings = (evaluation_model.model_selection(model) if model is not None
                     else copy.deepcopy(evaluation_model_settings()))
     except ValueError as error:
         raise PlanError(str(error)) from error
-    model = settings["name"]
-    if not isinstance(model, str) or not model.strip():
+    if not isinstance(settings["name"], str) or not settings["name"].strip():
         raise PlanError("model must be a nonempty identifier")
-    selected_profile = profile_named(profile)
-    artifacts = Artifacts()
     if "configuration" in settings:
-        # Bind the exact settings used for selection before doing any planning.
-        # A concurrent edit must not attach new bytes to the old model choice.
         try:
             config_raw = evaluation_model.CONFIG_PATH.read_bytes()
         except OSError as error:
@@ -266,8 +248,11 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         if sha256(config_raw) != settings["configuration"]["sha256"]:
             raise PlanError("evaluation config changed after model selection")
         settings["configuration"]["artifact"] = artifacts.put(config_raw)
-    price = _prices(prices, model, artifacts)
-    roster_raw = Path(roster).read_bytes()
+    return settings
+
+
+def _roster_records(roster_raw: bytes) -> tuple[dict, dict]:
+    """Shared roster identity checks; no artifact selection or mutation."""
     donor = json.loads(roster_raw)
     if not isinstance(donor, dict) or not isinstance(donor.get("jobs"), list):
         raise PlanError("roster must contain a jobs list")
@@ -303,6 +288,84 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
     if not grouped:
         raise PlanError("roster has no primary records")
 
+    return grouped, pins
+
+
+def _record_inputs(root, input_path, identity, jobs, pins, artifacts, recovered_files, *,
+                   artifact_kind="full"):
+    """Shared immutable input/provenance/bundle recovery; never infer schema or kind."""
+    project, label, method, cohort, replicate = identity
+    record_raw, record_pin = _pinned(root, input_path, {"sha256": pins.get(input_path)}, artifacts)
+    record = _mapping(record_raw, input_path)
+    first = jobs[0]
+    provenance_path = first.get("provenance") or (
+        f"data/d4d_concatenated/{method}_core/{label}/{project}_provenance.yaml")
+    if provenance_path in pins:
+        provenance_raw, provenance_pin = _pinned(
+            root, provenance_path, {"sha256": pins[provenance_path]}, artifacts)
+    else:
+        # The historical rubric-only roster did not pin provenance. Bind
+        # exactly the local snapshot used, without claiming roster lineage.
+        provenance_raw = _relative(root, provenance_path).read_bytes()
+        provenance_pin = {"path": provenance_path, "recorded_hashes": {},
+                          "basis": "captured_current_unpinned_by_roster",
+                          "recovery_commit": None, **artifacts.put(provenance_raw)}
+    provenance = _mapping(provenance_raw, provenance_path)
+    run = provenance.get("run", {})
+    if any(run.get(k) != v for k, v in (("project", project), ("label", label), ("method", method))):
+        raise PlanError(f"provenance identity disagrees with roster: {provenance_path}")
+    if "replicate" in run and run["replicate"] != replicate:
+        raise PlanError(f"provenance replicate disagrees with roster: {provenance_path}")
+    declared_full = provenance.get("outputs", {}).get(artifact_kind, {}).get("path")
+    if declared_full is not None and declared_full != input_path:
+        raise PlanError(f"provenance {artifact_kind}-record path disagrees with roster: {provenance_path}")
+    inputs = provenance.get("inputs", {})
+    bundle_path = inputs.get("bundle_path") or inputs.get("bundle")
+    bundle_pins = {k: inputs[f"bundle_{k}"] for k in ("md5", "sha256") if inputs.get(f"bundle_{k}")}
+    bundle_key = (bundle_path, tuple(sorted(bundle_pins.items())))
+    if bundle_key not in recovered_files:
+        recovered_files[bundle_key] = _pinned(root, bundle_path, bundle_pins, artifacts)
+    bundle_raw, bundle_pin = recovered_files[bundle_key]
+    bundle = bundle_raw.decode("utf-8")
+    if not bundle.strip():
+        raise PlanError(f"empty support bundle: {bundle_path}")
+    generator = provenance.get("model", {}).get("model")
+    return record_raw, record_pin, record, provenance_pin, bundle_raw, bundle_pin, bundle, generator
+
+
+def build_plan(roster: Path, output: Path, *, model: str | None = None,
+               profile: str, class_name: str = "Dataset", schema_path: Path | None = None,
+               max_tokens: int = 8000, prices: Path | None = None,
+               root: Path = ROOT, plan_version: int = 1,
+               artifact_kind: str | None = None, vocabulary_path: Path | None = None) -> dict:
+    """Freeze a fresh offline plan. Failure never changes existing artifacts.
+
+    ``root`` anchors roster paths and recovery history. Profile selection is
+    explicit, so ambient study/neutral defaults cannot change the instrument.
+    All inputs are validated before creating the exclusive output directory.
+    """
+    if type(plan_version) is not int or plan_version not in (1, 2):
+        raise PlanError("plan_version must be 1 or 2")
+    if plan_version == 2:
+        from data_sheets_schema.nested_support_plan import build_nested_plan
+        return build_nested_plan(roster, output, model=model, profile=profile,
+            class_name=class_name, schema_path=schema_path, max_tokens=max_tokens,
+            prices=prices, root=root, artifact_kind=artifact_kind, vocabulary_path=vocabulary_path)
+    if artifact_kind is not None or vocabulary_path is not None:
+        raise PlanError("artifact_kind and vocabulary_path require plan_version=2")
+    root, output = Path(root).resolve(), Path(output)
+    if output.exists() or output.is_symlink():
+        raise PlanError(f"output already exists: {output}")
+    if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or max_tokens < 1:
+        raise PlanError("max_tokens must be a positive integer")
+    artifacts = Artifacts()
+    settings = plan_model_selection(model, artifacts)
+    model = settings["name"]
+    selected_profile = profile_named(profile)
+    price = _prices(prices, model, artifacts)
+    roster_raw = Path(roster).read_bytes()
+    grouped, pins = _roster_records(roster_raw)
+
     from data_sheets_schema import schema_digest
     path = schema_digest.resolve_schema(schema_path or schema_digest.CLASS_SCHEMA[class_name])
     before = capture_schema(path, strict=True)
@@ -332,41 +395,8 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
               for name in ("uncached", "cache_miss_every_request", "warm_within_record")}
     for input_path, (identity, jobs) in sorted(grouped.items()):
         project, label, method, cohort, replicate = identity
-        record_raw, record_pin = _pinned(root, input_path, {"sha256": pins.get(input_path)}, artifacts)
-        record = _mapping(record_raw, input_path)
-        first = jobs[0]
-        provenance_path = first.get("provenance") or (
-            f"data/d4d_concatenated/{method}_core/{label}/{project}_provenance.yaml")
-        if provenance_path in pins:
-            provenance_raw, provenance_pin = _pinned(
-                root, provenance_path, {"sha256": pins[provenance_path]}, artifacts)
-        else:
-            # The historical rubric-only roster did not pin provenance. Bind
-            # exactly the local snapshot used, without claiming roster lineage.
-            provenance_raw = _relative(root, provenance_path).read_bytes()
-            provenance_pin = {"path": provenance_path, "recorded_hashes": {},
-                              "basis": "captured_current_unpinned_by_roster",
-                              "recovery_commit": None, **artifacts.put(provenance_raw)}
-        provenance = _mapping(provenance_raw, provenance_path)
-        run = provenance.get("run", {})
-        if any(run.get(k) != v for k, v in (("project", project), ("label", label), ("method", method))):
-            raise PlanError(f"provenance identity disagrees with roster: {provenance_path}")
-        if "replicate" in run and run["replicate"] != replicate:
-            raise PlanError(f"provenance replicate disagrees with roster: {provenance_path}")
-        declared_full = provenance.get("outputs", {}).get("full", {}).get("path")
-        if declared_full is not None and declared_full != input_path:
-            raise PlanError(f"provenance full-record path disagrees with roster: {provenance_path}")
-        inputs = provenance.get("inputs", {})
-        bundle_path = inputs.get("bundle_path") or inputs.get("bundle")
-        bundle_pins = {k: inputs[f"bundle_{k}"] for k in ("md5", "sha256") if inputs.get(f"bundle_{k}")}
-        bundle_key = (bundle_path, tuple(sorted(bundle_pins.items())))
-        if bundle_key not in recovered_files:
-            recovered_files[bundle_key] = _pinned(root, bundle_path, bundle_pins, artifacts)
-        bundle_raw, bundle_pin = recovered_files[bundle_key]
-        bundle = bundle_raw.decode("utf-8")
-        if not bundle.strip():
-            raise PlanError(f"empty support bundle: {bundle_path}")
-        generator = provenance.get("model", {}).get("model")
+        record_raw, record_pin, record, provenance_pin, bundle_raw, bundle_pin, bundle, generator = _record_inputs(
+            root, input_path, identity, jobs, pins, artifacts, recovered_files)
         populated = [slot for slot, value in record.items() if support_judge.populated(value)]
         unknown = sorted(set(populated) - specs.keys())
         if unknown:
