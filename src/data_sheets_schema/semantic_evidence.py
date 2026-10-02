@@ -192,13 +192,18 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     declared = str(result.get("rubric", rubric_name)).removesuffix("-semantic")
     if declared != rubric_name:
         raise ValueError(f"the rating declares {declared}, not {rubric_name}")
-    specification = yaml.safe_load(resource_path(f"data/rubric/{rubric_name}.txt").read_bytes())
+    from data_sheets_schema.semantic_instrument import select_semantic_instrument
+    version = result.get("version")
+    instrument = (select_semantic_instrument(rubric_name, version)
+                  if version in ("2.0", "3.0", "4.0") else None)
+    rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
+    specification = yaml.safe_load(resource_path(rubric_path).read_bytes())
     rules = evaluation_contract(rubric_name, specification, result.get("applicability_context"),
                                 {"id": "evidence-contract"})["items"]
     fields = _declared_fields(rubric_name, specification)
     units = dict(dataset_units(document))
     absence_names = None
-    if result.get("version") == "3.0":
+    if instrument is not None and instrument.evidence_authority_path is not None:
         from data_sheets_schema.semantic_evidence_authority import verify_authority
         absence_names = verify_authority(result.get("metadata") or {})
     findings: list[EvidenceFinding] = []
@@ -628,14 +633,14 @@ def _issue_findings(result: dict, rules: dict, below: dict[str, dict]) -> Iterat
                                   f"issue {index}: item_ids must be a list of item ids and score_effect "
                                   f"one of {', '.join(sorted(SCORE_EFFECTS))}", issue=index)
             continue
-        if result.get("version") == "3.0":
+        if result.get("version") in ("3.0", "4.0"):
             if (not isinstance(issue.get("type"), str) or issue["type"] not in ISSUE_TYPES
                     or not isinstance(issue.get("category"), str) or issue["category"] not in ISSUE_CATEGORIES
                     or effect not in SCORE_EFFECTS or "item_ids" not in issue
                     or len(ids) != len(set(ids)) or (effect == "noted_only" and ids)):
                 yield EvidenceFinding(
                     "error", "malformed_issue", None, None,
-                    f"issue {index}: version 3 requires declared type/category, score_effect, unique item_ids; "
+                    f"issue {index}: version {result['version'][0]} requires declared type/category, score_effect, unique item_ids; "
                     "noted_only has no lowered item_ids", issue=index)
                 continue
         for item_id in ids:

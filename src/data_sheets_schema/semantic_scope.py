@@ -16,17 +16,19 @@ from data_sheets_schema.evaluation_context import (
 )
 from data_sheets_schema.judge_contract import _equal, _number, evaluation_contract
 from data_sheets_schema.resources import resource_path
+from data_sheets_schema.semantic_instrument import select_semantic_instrument
 
 _CLASSIFICATION_ONLY = object()
 
 
 def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
                    expected_context: dict | None | object = _CLASSIFICATION_ONLY):
-    if result.get("version") not in {"2.0", "3.0"}:
+    if result.get("version") not in {"2.0", "3.0", "4.0"}:
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
         raise ValueError("unknown general-context semantic rubric")
+    instrument = select_semantic_instrument(rubric_name, result["version"])
     context = normalize_context(result.get("applicability_context"))
     # Historical structural classification can check internal consistency.
     # New-output acceptance with an input must use independent caller context;
@@ -54,7 +56,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         if units != actual:
             raise ValueError("evaluation scope omits or changes input resource identities")
     metadata = result.get("metadata") or {}
-    if result.get("version") == "3.0":
+    if instrument.evidence_authority_path is not None:
         from data_sheets_schema.semantic_evidence_authority import verify_authority
         verify_authority(metadata)
     if metadata.get("context_sha256") != context_digest(context):
@@ -65,7 +67,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     # Version-2 rules are the source rubric's declared predicate assignments.
     # The instrument boundary records these bytes; future rule revisions need
     # another version instead of reinterpreting previously accepted scores.
-    rubric_path = resource_path(f"data/rubric/{rubric_name}.txt")
+    rubric_path = resource_path(instrument.rubric_path)
     raw = rubric_path.read_bytes()
     specification = yaml.safe_load(raw)
     if metadata.get("rubric_sha256") != hashlib.sha256(raw).hexdigest():
@@ -149,7 +151,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         _equal(overall.get("normalized_percentage"), 100 * total / adjusted, "normalized_percentage", 0.051)
     elif overall.get("normalized_percentage") is not None:
         raise ValueError("zero applicable maximum requires null normalized_percentage")
-    if result.get("version") == "3.0" and document is not None:
+    if instrument.evidence_authority_path is not None and document is not None:
         from data_sheets_schema.semantic_evidence import check_evidence, EvidenceValidationError
         report = check_evidence(result, document, rubric_name)
         if not report.passed:

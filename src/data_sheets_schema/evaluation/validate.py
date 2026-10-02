@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple
 
 from data_sheets_schema.resources import resource_path
+from data_sheets_schema.semantic_instrument import select_semantic_instrument
 
 try:
     import jsonschema
@@ -83,7 +84,8 @@ def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]
 def validate_outputs(paths: List[Path], rubric: str | None = None,
                      schema_dir: Path | None = None, input_path: Path | None = None,
                      definition_path: Path | None = None, context_path: Path | None = None,
-                     project: str | None = None, method: str | None = None) -> int:
+                     project: str | None = None, method: str | None = None,
+                     semantic_version: str = "3.0") -> int:
     """Require each named new output to pass its own agent contract.
 
     Directory names and superseded shapes do not exempt a new output. This
@@ -108,7 +110,13 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 raise ValueError(f"no evaluation contract for rubric {declared!r}")
             if rubric is not None and declared != rubric:
                 raise ValueError(f"expected {rubric}, found {declared}")
-            expected_version = "2.0" if declared in field_rubrics else "3.0"
+            instrument = (None if declared in field_rubrics else
+                          select_semantic_instrument(declared, semantic_version))
+            if semantic_version not in ("3.0", "4.0"):
+                raise ValueError("exact new-output semantic acceptance supports versions 3.0 and 4.0")
+            if declared in field_rubrics and semantic_version != "3.0":
+                raise ValueError("--semantic-version is not a field-agent validation option")
+            expected_version = "2.0" if instrument is None else instrument.version
             if doc.get("version") != expected_version:
                 raise ValueError(f"new-output acceptance requires instrument version {expected_version}; "
                                  "use historical classification for earlier instruments")
@@ -121,16 +129,19 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 continue
             if project is not None or method is not None:
                 raise ValueError("--project and --method are field-agent validation options")
-            valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
+            valid, errors = validate_evaluation(doc, load_schema(schema_dir / Path(instrument.schema_path).name))
             if not valid:
                 raise ValueError("\n".join(errors))
-            if doc.get("version") == "3.0":
+            if instrument.evidence_authority_path is not None:
                 if input_path is None:
-                    raise ValueError("version-3 output validation requires --input to verify every source resource")
+                    raise ValueError(f"version-{expected_version[0]} output validation requires --input to verify every source resource")
                 if definition_path is None:
-                    raise ValueError("version-3 output validation requires --agent-definition to verify its instrument pin")
+                    raise ValueError(f"version-{expected_version[0]} output validation requires --agent-definition to verify its instrument pin")
                 import hashlib
                 definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
+                if instrument.version == "4.0" and definition_sha256 != hashlib.sha256(
+                        resource_path(instrument.definition_path).read_bytes()).hexdigest():
+                    raise ValueError("supplied definition is not the selected semantic version-4 instrument")
                 if doc["metadata"]["instrument_sha256"] != definition_sha256:
                     raise ValueError("evaluation instrument SHA256 does not match the supplied agent definition")
                 from data_sheets_schema.evaluation_context import load_context, load_document
@@ -224,7 +235,17 @@ def main(eval_base: Path | None = None, schema_dir: Path | None = None) -> int:
             no_schema[str(rubric)] = no_schema.get(str(rubric), 0) + 1
             continue
 
-        status, errors = classify(eval_data, schemas[rubric])
+        schema = schemas[rubric]
+        if eval_data.get("version") == "4.0":
+            try:
+                instrument = select_semantic_instrument(rubric, "4.0")
+                schema = load_schema(schema_dir / Path(instrument.schema_path).name)
+            except (OSError, ValueError) as exc:
+                status, errors = "invalid", [str(exc)]
+            else:
+                status, errors = classify(eval_data, schema)
+        else:
+            status, errors = classify(eval_data, schema)
         counts[(where, status)] += 1
         if status == "invalid":
             (kept_invalid if where == "kept" else live_invalid).append((shown, errors))
@@ -268,6 +289,8 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
     parser.add_argument("--context", type=Path, help="trusted caller YAML/JSON applicability declarations; omitted predicates remain unknown")
     parser.add_argument("--project", help="trusted project identity; required for field-agent output acceptance")
     parser.add_argument("--method", help="trusted method identity; required for field-agent output acceptance")
+    parser.add_argument("--semantic-version", choices=("3.0", "4.0"), default=None,
+                        help="explicit semantic instrument for new outputs (default: 3.0)")
     args = parser.parse_args(argv)
     if args.rubric and not args.files:
         parser.error("--rubric requires --file")
@@ -279,10 +302,13 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
         parser.error("--context requires --file")
     if (args.project or args.method) and not args.files:
         parser.error("--project and --method require --file")
+    if args.semantic_version and not args.files:
+        parser.error("--semantic-version requires --file")
     return validate_outputs(args.files, args.rubric, input_path=args.input,
                             definition_path=args.agent_definition, context_path=args.context,
                             schema_dir=schema_dir, project=args.project,
-                            method=args.method) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
+                            method=args.method, semantic_version=args.semantic_version or "3.0"
+                            ) if args.files else main(eval_base=eval_base, schema_dir=schema_dir)
 
 
 if __name__ == "__main__":

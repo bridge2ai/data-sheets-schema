@@ -93,13 +93,13 @@ def report(paths: list[Path], cohort: list[Path] | None = None, *,
     for row in rows:
         text.append("| " + " | ".join(str(cell).replace("|", "\\|").replace("\n", " ")
                                        for cell in row) + " |")
-    if any(doc.get("version") == "3.0" or path.resolve() in inputs for path, doc in documents):
+    if any(doc.get("version") in ("3.0", "4.0") or path.resolve() in inputs for path, doc in documents):
         text.extend(["", "## Evaluator evidence and issue taxonomy", "",
                      "Evidence checks below are recomputed from explicitly supplied inputs and caller contexts; "
                      "a missing context means unknown applicability. They do not certify the evaluator's "
                      "semantic interpretation or replace instrument-provenance acceptance.", ""])
         for path, doc in documents:
-            if doc.get("version") != "3.0" and path.resolve() not in inputs:
+            if doc.get("version") not in ("3.0", "4.0") and path.resolve() not in inputs:
                 continue
             text.extend(_evidence_section(path, doc, inputs.get(path.resolve()), contexts.get(path.resolve())))
     if cohort is None:
@@ -146,23 +146,21 @@ def _evidence_section(path: Path, doc: dict, input_path: Path | None,
     from data_sheets_schema.semantic_scope import validate_scope
 
     lines = [f"### {markdown_cell(path)}", ""]
-    if doc.get("version") == "3.0":
+    if doc.get("version") in ("3.0", "4.0"):
         # Mechanical checks assume the output contract: an unrecognized citation
         # key, for example, must not silently become an absent quotation (#4245).
         from jsonschema import SchemaError, ValidationError, validate
         from data_sheets_schema.resources import resource_path
 
         try:
-            schema_name = {
-                "rubric10-semantic": "rubric10_semantic_schema.json",
-                "rubric20-semantic": "rubric20_semantic_schema.json",
-            }[doc["rubric"]]
-            schema = json.loads(resource_path(f"src/download/prompts/{schema_name}").read_bytes())
+            from data_sheets_schema.semantic_instrument import select_semantic_instrument
+            selected = select_semantic_instrument(doc["rubric"], doc["version"])
+            schema = json.loads(resource_path(selected.schema_path).read_bytes())
             validate(doc, schema)
         except ValidationError as exc:
             location = "/".join(str(part) for part in exc.absolute_path) or "#"
             lines.extend([
-                "Evidence verification: **not established** — invalid v3 output structure at "
+                f"Evidence verification: **not established** — invalid v{doc['version'].split('.')[0]} output structure at "
                 f"{markdown_cell(location)}: {markdown_cell(exc.message)}.", "",
             ])
             return lines
@@ -173,7 +171,7 @@ def _evidence_section(path: Path, doc: dict, input_path: Path | None,
         lines.extend([render_issue_taxonomy(doc).rstrip(), ""])
     except ValueError as exc:
         lines.extend([f"Issue taxonomy: **invalid declaration** — {markdown_cell(exc)}.", ""])
-    if doc.get("version") != "3.0":
+    if doc.get("version") not in ("3.0", "4.0"):
         lines.extend(["Mechanical evidence checks: **not run**; this rating retains its historical contract.", ""])
         return lines
     if input_path is None:
@@ -211,7 +209,7 @@ def main() -> None:
                              "record); default: every evaluation named")
     parser.add_argument("--evidence-input", nargs=2, action="append", type=Path,
                         metavar=("EVALUATION", "INPUT"),
-                        help="recompute v3 mechanical evidence for this named rating and input")
+                        help="recompute structured mechanical evidence for this named rating and input")
     parser.add_argument("--evidence-context", nargs=2, action="append", type=Path,
                         metavar=("EVALUATION", "CONTEXT"),
                         help="independent caller applicability context; omission means unknown")
