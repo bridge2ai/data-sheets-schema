@@ -1,0 +1,410 @@
+"""Offline typed audit packets and independent saved-response checking (#4280).
+
+No provider, execution registration, record repair or semantic certification.
+Every operation derives its authorities from bounded captured bytes. A packet's
+hash is a content identity, not an assertion of its author's trustworthiness.
+"""
+from __future__ import annotations
+
+import argparse
+import base64
+from collections import Counter
+import hashlib
+from pathlib import Path
+
+from . import audit_batches as batches, audit_batch_format as output_format
+from . import audit_grammar, audit_omissions as omissions, audit_protocol
+from . import evidence_assertions as evidence
+from .schema_snapshot import SchemaSnapshot, capture_schema
+
+PACKET = "typed_audit_packet_v1"
+ASSEMBLY = "typed_audit_assembly_v1"
+MAX_PACKET_BYTES = 96_000_000
+MAX_ASSEMBLY_BYTES = 160_000_000
+MAX_SCHEMA_FILES = 256
+LIMITATIONS = [
+    "Scientific support, applicability, novelty and exhaustive recall are unverified.",
+    "Acceptance covers captured identities, declared coverage and literal source-evidence checks only.",
+    "This offline packet does not register or execute a live audit or repair records.",
+    "Input limits include the existing 4000000-byte original and 2097152-byte audit response bounds.",
+]
+_REQUIRED = {"original_full", "bundle", "manifest", "receipt", "context"}
+_OPTIONAL = {"original_core", "source_manifest"}
+
+
+def _sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _json(value):
+    return batches.canonical_bytes(value)
+
+
+def _exact(value, keys, label):
+    if type(value) is not dict or set(value) != set(keys):
+        raise ValueError(f"invalid {label} fields")
+
+
+def _blob(raw, limit=omissions.MAX_INPUT_BYTES):
+    if type(raw) is not bytes or not raw or len(raw) > limit:
+        raise ValueError("captured input must be nonempty bytes within its bound")
+    return {"sha256": _sha(raw), "bytes": len(raw), "base64": base64.b64encode(raw).decode("ascii")}
+
+
+def _unblob(value, limit=omissions.MAX_INPUT_BYTES):
+    _exact(value, {"sha256", "bytes", "base64"}, "captured byte blob")
+    if (type(value["bytes"]) is not int or not 0 < value["bytes"] <= limit
+            or type(value["base64"]) is not str or len(value["base64"]) > (limit + 2) // 3 * 4):
+        raise ValueError("captured byte bound exceeded")
+    try:
+        raw = base64.b64decode(value["base64"], validate=True)
+    except (ValueError, UnicodeError) as exc:
+        raise ValueError("invalid captured base64") from exc
+    if _blob(raw, limit) != value:
+        raise ValueError("captured byte identity mismatch")
+    return raw
+
+
+def _seal(value):
+    return {**value, "sha256": _sha(_json(value))}
+
+
+def _bounded_json(raw, label, limit):
+    return omissions._mapping(raw, label, json_only=True, limit=limit)
+
+
+def _snapshot_rows(snapshot):
+    return [{"name": name, "path": str(path), "content": _blob(raw)}
+            for name, path, raw in snapshot.sources]
+
+
+def _snapshot(rows):
+    if type(rows) is not list or not 0 < len(rows) <= MAX_SCHEMA_FILES:
+        raise ValueError("invalid schema closure roster")
+    sources = []
+    total = 0
+    for row in rows:
+        _exact(row, {"name", "path", "content"}, "schema source")
+        if type(row["path"]) is not str or not row["path"]:
+            raise ValueError("invalid logical schema path")
+        raw = _unblob(row["content"])
+        total += len(raw)
+        if total > omissions.MAX_SCHEMA_BYTES:
+            raise ValueError("schema closure exceeds byte bound")
+        sources.append((row["name"], Path(row["path"]), raw))
+    # captured_view does not use a shared cache. This key identifies exactly
+    # these persisted bytes/paths; the omission API rederives import closure.
+    return SchemaSnapshot(tuple(sources), (str(sources[0][1]), _sha(_json(rows))))
+
+
+def _capture(path):
+    total = 0
+
+    def read(selected):
+        nonlocal total
+        raw = omissions._file(selected, omissions.MAX_INPUT_BYTES)
+        total += len(raw)
+        if total > omissions.MAX_SCHEMA_BYTES:
+            raise ValueError("schema closure exceeds byte bound")
+        omissions._mapping(raw, "schema")
+        return raw
+
+    snapshot = capture_schema(path.absolute(), read_bytes=read, strict=True)
+    if len(snapshot.sources) > MAX_SCHEMA_FILES:
+        raise ValueError("schema file count exceeds bound")
+    return snapshot
+
+
+def _derive(inputs, schema_rows, project, limits):
+    if type(inputs) is not dict or not _REQUIRED <= set(inputs) <= _REQUIRED | _OPTIONAL:
+        raise ValueError("captured input roster differs from protocol")
+    raw = {key: _unblob(value) for key, value in inputs.items()}
+    for key in ("original_full", "original_core"):
+        if key in raw:
+            omissions._mapping(raw[key], key)
+    if ("source_manifest" in raw) != (project is not None):
+        raise ValueError("source manifest and explicit project must be captured together")
+    authority = None
+    if "source_manifest" in raw:
+        from .source_metadata import projection
+        omissions._mapping(raw["source_manifest"], "source manifest")
+        authority = projection(raw["source_manifest"], project)
+    _exact(limits, {"max_paths", "max_inventory_bytes", "max_workers", "max_output_tokens", "max_request_bytes"}, "limits")
+    snapshot = _snapshot(schema_rows)
+    prepared = omissions.prepare(record=raw["original_full"], bundle=raw["bundle"],
+        manifest=raw["manifest"], receipt=raw["receipt"], context=raw["context"],
+        schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+        max_output_tokens=limits["max_output_tokens"], max_request_bytes=limits["max_request_bytes"])
+    plan = batches.make_plan(raw["original_full"].decode("utf-8"), version=2,
+        **{k: limits[k] for k in ("max_paths", "max_inventory_bytes", "max_workers")})
+    contracts = {stage: {"contract": output_format.contract(stage, version=2),
+                         "rendered": output_format.render(stage, version=2)}
+                 for stage in ("worker", "integration")}
+    shared = _json({"protocol": audit_protocol.select(audit_protocol.TYPED),
+        "original_full": raw["original_full"].decode("utf-8"),
+        "original_core": raw.get("original_core", b"").decode("utf-8") or None,
+        "bundle": raw["bundle"].decode("utf-8"), "manifest": raw["manifest"].decode("utf-8"),
+        "receipt": raw["receipt"].decode("utf-8"), "context": prepared.request()["payload"]["context"],
+        "schema": prepared.request()["payload"]["schema"], "registered_provenance": authority}).decode("utf-8")
+    workers = {worker["id"]: _json({"stage": "worker", "shared_context_sha256": _sha(shared.encode()),
+        "plan_sha256": plan["sha256"], "assignment": worker, "inventory": plan["inventory"],
+        "output_contract": contracts["worker"]}).decode("utf-8") for worker in plan["workers"]}
+    for tail in workers.values():
+        if len((shared + tail).encode()) > limits["max_request_bytes"]:
+            raise ValueError("complete worker request exceeds max_request_bytes")
+    return {"plan": plan, "omission_request": prepared.request(), "contracts": contracts,
+            "requests": {"assembly_rule": "shared_context UTF-8 bytes followed by the selected stage UTF-8 bytes",
+                         "shared_context": shared, "workers": workers},
+            "registered_provenance": authority}, raw, prepared
+
+
+def prepare(*, protocol, original_full, bundle, manifest, receipt, context, schema_path,
+            max_output_tokens, original_core=None, source_manifest=None, project=None,
+            max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16):
+    """Capture a new packet; no saved response or self-reported success is trusted."""
+    if audit_protocol.select(protocol)["protocol"] != audit_protocol.TYPED:
+        raise ValueError("this consumer requires explicitly selected typed_audit_protocol_v1")
+    inputs = {key: _blob(value) for key, value in dict(original_full=original_full,
+        bundle=bundle, manifest=manifest, receipt=receipt, context=context,
+        original_core=original_core, source_manifest=source_manifest).items() if value is not None}
+    rows = _snapshot_rows(_capture(Path(schema_path)))
+    limits = dict(max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes,
+                  max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)
+    derived, _, _ = _derive(inputs, rows, project, limits)
+    packet = _seal(dict(kind=PACKET, protocol=audit_protocol.select(protocol), inputs=inputs,
+        schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))
+    _bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)
+    return packet
+
+
+def _open(packet):
+    _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
+        "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
+    if len(_json(packet)) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
+        raise ValueError("packet protocol/size mismatch")
+    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"])
+    expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
+                      **derived, "limitations": list(LIMITATIONS)})
+    if _json(packet) != _json(expected):
+        raise ValueError("packet request/plan/contract/input identity mismatch")
+    return raw, prepared
+
+
+def _omission_findings(findings, candidates=None):
+    for finding in findings:
+        if finding.get("kind") == "omission":
+            refs = finding.get("omission_candidates")
+            if finding["record"] != "full" or not refs:
+                raise ValueError("every omission finding needs full-only captured candidate references")
+            if candidates is not None and not set(refs) <= candidates:
+                raise ValueError("finding references an unknown omission candidate")
+
+
+def check_worker(packet, worker_id, response):
+    """Structural worker check; global omission/source acceptance occurs later."""
+    _open(packet)
+    report = batches.check_worker(response, packet["plan"], worker_id, version=2)
+    if report["passed"]:
+        try:
+            _omission_findings(audit_grammar._load(response)["findings"])
+        except ValueError as exc:
+            report = {**report, "passed": False, "error_count": 1,
+                      "errors": [{"code": "omission_reference_contract", "path": "/findings", "detail": str(exc)}]}
+    return {"packet_sha256": packet["sha256"], "response_sha256": _sha(response),
+            "worker_id": worker_id, "grammar": report, "passed": report["passed"],
+            "acceptance_scope": "worker structure only; source evidence and candidate membership not yet checked"}
+
+
+def _index(packet, workers):
+    index = batches.build_index(packet["plan"], workers, version=2)
+    for response in workers.values():
+        _omission_findings(audit_grammar._load(response)["findings"])
+    return index
+
+
+def index(packet, workers, omission_response):
+    """Bind workers and complete omission response; render the integration tail."""
+    _, prepared = _open(packet)
+    report = prepared.check(omission_response, saved_request=packet["omission_request"])
+    if not report["protocol_complete"]:
+        raise ValueError("omission response does not satisfy complete captured inventory")
+    result = _index(packet, workers)
+    candidates = {row["id"] for row in report["declared_candidates"]}
+    for raw in workers.values():
+        _omission_findings(audit_grammar._load(raw)["findings"], candidates)
+    request = _json({"stage": "integration", "packet_sha256": packet["sha256"],
+        "shared_context_sha256": _sha(packet["requests"]["shared_context"].encode()),
+        "proposal_index": result, "workers": {key: raw.decode("utf-8") for key, raw in workers.items()},
+        "omission_response": omission_response.decode("utf-8"), "omission_check": report,
+        "output_contract": packet["contracts"]["integration"]}).decode("utf-8")
+    if len((packet["requests"]["shared_context"] + request).encode()) > packet["limits"]["max_request_bytes"]:
+        raise ValueError("complete integration request exceeds max_request_bytes")
+    return _seal({"kind": "typed_audit_index_v1", "packet_sha256": packet["sha256"],
+                  "index": result, "omission_check": report, "integration_request": request})
+
+
+def _account(audit, delta, candidates):
+    by_id = {candidate["id"]: candidate for candidate in candidates}
+    decisions = {row["candidate_id"]: row for row in delta["omission_dispositions"]}
+    if set(decisions) != set(by_id):
+        raise ValueError("omission dispositions must cover the exact captured candidate roster")
+    links = {}
+    _omission_findings(audit["findings"], set(by_id))
+    for ordinal, finding in enumerate(audit["findings"]):
+        for identity in finding.get("omission_candidates", []):
+            if identity in links or decisions[identity]["action"] != "retain":
+                raise ValueError("omission candidate linked twice or linked after drop")
+            links[identity] = ordinal
+    if set(links) != {identity for identity, row in decisions.items() if row["action"] == "retain"}:
+        raise ValueError("retained omission candidate has no final finding")
+    return [{"candidate": row, "candidate_sha256": batches.object_sha256(row),
+             "disposition": decisions[row["id"]], "disposition_sha256": batches.object_sha256(decisions[row["id"]]),
+             "final_finding_ordinal": links.get(row["id"])} for row in candidates]
+
+
+def _result(packet, workers, omission_response, integration_response):
+    raw, _ = _open(packet)
+    bound_index = index(packet, workers, omission_response)
+    audit_raw, lineage = batches.assemble(packet["plan"], workers, integration_response, version=2)
+    audit, delta = audit_grammar._load(audit_raw), audit_grammar._load(integration_response)
+    # Check candidates in replaced/dropped proposal entry paths too. The final
+    # exact-once allocation is separate from proposal membership.
+    candidate_rows = bound_index["omission_check"]["declared_candidates"]
+    ids = {row["id"] for row in candidate_rows}
+    for decision in delta["finding_decisions"]:
+        _omission_findings(decision.get("findings", []), ids)
+    _omission_findings(delta["new_findings"], ids)
+    accounting = _account(audit, delta, candidate_rows)
+    artifacts = {key: raw[key].decode("utf-8") for key in ("original_full", "original_core") if key in raw}
+    chunks, _ = evidence.source_chunks_from_bytes(raw["bundle"], raw["manifest"])
+    checked = evidence.check_audit(audit, artifacts=artifacts, chunks=chunks, protocol_version=7,
+        source_manifest_raw=raw.get("source_manifest"), project=packet["project"])
+    decision_problems = evidence.check_assertions(lineage["decision_assertions"], artifacts=artifacts, chunks=chunks)
+    problems = checked["findings"] + decision_problems
+    lineage = {**lineage, "packet_sha256": packet["sha256"], "typed_index_sha256": bound_index["sha256"],
+        "omission_request_sha256": packet["omission_request"]["request_sha256"],
+        "omission_response_sha256": _sha(omission_response), "omission_candidates": accounting,
+        "input_sha256": {key: item["sha256"] for key, item in packet["inputs"].items()},
+        "schema_sources_sha256": _sha(_json(packet["schema_sources"]))}
+    counts = Counter(f.get("kind", "untyped") for f in audit["findings"])
+    report = {"kind": "typed_audit_acceptance_v1", "protocol": packet["protocol"],
+        "packet_sha256": packet["sha256"], "passed": not problems,
+        "acceptance_scope": "captured identity, declaration coverage and literal source-evidence checks",
+        "scientific_support": "unverified", "novelty": "unverified", "exhaustive_recall": "unverified",
+        "finding_counts": {kind: counts[kind] for kind in sorted(audit_protocol.KINDS | {"untyped"})},
+        "omission_counts": {**bound_index["omission_check"]["counts"],
+            "retained": sum(row["disposition"]["action"] == "retain" for row in accounting),
+            "dropped": sum(row["disposition"]["action"] == "drop" for row in accounting)},
+        "source_review": {key: value for key, value in checked["source_review_original"].items() if key != "findings"},
+        "revised_rows": sum(any(claim["verdict"] == "revise" for claim in row.get("claims", []))
+                            for row in audit["source_review"]["values"]),
+        "assertions_checked": checked["assertions_checked"] + len(lineage["decision_assertions"]),
+        "problem_count": len(problems), "problems": problems[:50], "problems_truncated": len(problems) > 50,
+        "limitations": list(LIMITATIONS)}
+    return bound_index, audit_raw, lineage, report
+
+
+def check_integration(packet, workers, omission_response, integration_response):
+    """Run real terminal checks; malformed identity/coverage raises ValueError."""
+    return _result(packet, workers, omission_response, integration_response)[3]
+
+
+def assemble(packet, workers, omission_response, integration_response):
+    """Seal a new self-contained assembly only when mechanical checks pass."""
+    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response)
+    if not report["passed"]:
+        raise ValueError("source-evidence acceptance failed; use check-integration for bounded diagnostics")
+    result = _seal({"kind": ASSEMBLY, "packet": packet,
+        "workers": {key: _blob(raw, audit_grammar.MAX_BYTES) for key, raw in workers.items()},
+        "omission_response": _blob(omission_response, omissions.MAX_RESPONSE_BYTES),
+        "integration_response": _blob(integration_response, audit_grammar.MAX_BYTES),
+        "index": bound_index, "audit": _blob(audit_raw, audit_grammar.MAX_BYTES),
+        "lineage": lineage, "acceptance": report})
+    _bounded_json(_json(result), "assembly", MAX_ASSEMBLY_BYTES)
+    return result
+
+
+def check(assembly):
+    """Rebuild independently from captured original/response bytes, not reports."""
+    _exact(assembly, {"kind", "packet", "workers", "omission_response", "integration_response", "index",
+                      "audit", "lineage", "acceptance", "sha256"}, "assembly")
+    if assembly["kind"] != ASSEMBLY or type(assembly["workers"]) is not dict:
+        raise ValueError("assembly kind or worker roster invalid")
+    if len(_json(assembly)) > MAX_ASSEMBLY_BYTES:
+        raise ValueError("assembly exceeds byte bound")
+    expected = assemble(assembly["packet"], {key: _unblob(value, audit_grammar.MAX_BYTES) for key, value in assembly["workers"].items()},
+        _unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
+        _unblob(assembly["integration_response"], audit_grammar.MAX_BYTES))
+    if _json(assembly) != _json(expected):
+        raise ValueError("saved assembly differs from independent captured-byte reconstruction")
+    return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    commands = parser.add_subparsers(dest="command", required=True)
+    for name in ("prepare", "check-worker", "index", "check-integration", "assemble", "check"):
+        sub = commands.add_parser(name)
+        sub.add_argument("--output", required=True, type=Path, help="New file only; existing paths refused")
+        if name == "prepare":
+            sub.add_argument("--protocol", required=True, choices=[audit_protocol.TYPED])
+            for field in ("original-full", "bundle", "manifest", "receipt", "context", "schema"):
+                sub.add_argument(f"--{field}", required=True, type=Path)
+            for field in ("original-core", "source-manifest"):
+                sub.add_argument(f"--{field}", type=Path)
+            sub.add_argument("--project")
+            sub.add_argument("--max-output-tokens", required=True, type=int)
+            for field, default in (("max-request-bytes", 32_000_000), ("max-paths", 96),
+                                   ("max-inventory-bytes", 16384), ("max-workers", 16)):
+                sub.add_argument(f"--{field}", type=int, default=default)
+        elif name == "check":
+            sub.add_argument("--assembly", required=True, type=Path)
+        else:
+            sub.add_argument("--packet", required=True, type=Path)
+            if name == "check-worker":
+                sub.add_argument("--worker-id", required=True)
+                sub.add_argument("--response", required=True, type=Path)
+            else:
+                sub.add_argument("--worker", required=True, action="append", help="ID=PATH; one per assigned worker")
+                sub.add_argument("--omission-response", required=True, type=Path)
+                if name in {"check-integration", "assemble"}:
+                    sub.add_argument("--integration-response", required=True, type=Path)
+    args = parser.parse_args()
+    try:
+        if args.command == "prepare":
+            supplied = {key: omissions._file(getattr(args, key), omissions.MAX_INPUT_BYTES)
+                        for key in _REQUIRED | _OPTIONAL if getattr(args, key, None) is not None}
+            result = prepare(protocol=args.protocol, schema_path=args.schema, project=args.project,
+                **supplied, **{key: getattr(args, key) for key in ("max_output_tokens", "max_request_bytes",
+                                                          "max_paths", "max_inventory_bytes", "max_workers")})
+        elif args.command == "check":
+            result = check(_bounded_json(omissions._file(args.assembly, MAX_ASSEMBLY_BYTES), "assembly", MAX_ASSEMBLY_BYTES))
+        else:
+            packet = _bounded_json(omissions._file(args.packet, MAX_PACKET_BYTES), "packet", MAX_PACKET_BYTES)
+            if args.command == "check-worker":
+                result = check_worker(packet, args.worker_id, omissions._file(args.response, audit_grammar.MAX_BYTES))
+            else:
+                workers = {}
+                for item in args.worker:
+                    key, separator, path = item.partition("=")
+                    if not key or not separator or not path or key in workers:
+                        raise ValueError("workers must have distinct ID=PATH declarations")
+                    workers[key] = omissions._file(Path(path), audit_grammar.MAX_BYTES)
+                omission_raw = omissions._file(args.omission_response, omissions.MAX_RESPONSE_BYTES)
+                if args.command == "index":
+                    result = index(packet, workers, omission_raw)
+                else:
+                    integration = omissions._file(args.integration_response, audit_grammar.MAX_BYTES)
+                    result = (assemble if args.command == "assemble" else check_integration)(packet, workers, omission_raw, integration)
+        # Exclusive creation refuses existing paths, symlinks (even dangling),
+        # and hardlink aliases. No existing input/output is ever rewritten.
+        with args.output.open("xb") as stream:
+            stream.write(_json(result))
+    except (OSError, ValueError, TypeError, KeyError, RecursionError) as exc:
+        parser.exit(2, f"typed audit refused: {type(exc).__name__}: {exc}\n")
+    if result.get("passed") is False:
+        parser.exit(1)
+
+
+if __name__ == "__main__":
+    main()
