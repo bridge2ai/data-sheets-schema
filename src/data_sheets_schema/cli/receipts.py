@@ -355,16 +355,24 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     the command carrying, anywhere in it, an assignment word (`NAME=`,
     `NAME+=`, `NAME[...]=` or `NAME[...]+=`: `PATH=./bin:$PATH;`, `{
     PATH=./bin:$PATH; };`, `PATH=... 2>/dev/null;`), `printf` with a word
-    starting with `-v`, or one of the words `export`, `declare`, `typeset`,
+    starting with `-v`, one of the words `export`, `declare`, `typeset`,
     `local`, `readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`,
     `source`, `.`, `set`, `shopt`, `alias`, `hash`, `enable`, `for` or
-    `select`; or an assignment word anywhere on the part where any part of
-    the command carries `set` with an option carrying `k` or the word
-    `keyword` (`set -k`, `set -o keyword`). Its cost is a false `unknown`
-    (`echo X=1;`, `ls .;`, `set -e;`). A route those words do not name (a
-    function, `getopts`, `unset`, `(( PATH = 1 ))`, `$X`) or an assignment
-    outside the command is not read, so a derive after `unset PATH;` is
-    placed. Three kinds of part carrying
+    `select`, a `{NAME}` word before a redirection operator (`echo hi
+    {PATH}>/dev/null;`), a parameter expansion that may assign
+    (`${NAME:=...}`, `${NAME=...}`) or a word carrying a `$'...'` or
+    `$"..."` quote; or an assignment word anywhere on the part where any
+    part of the command carries `set` with an option carrying `k` or the
+    word `keyword` (`set -k`, `set -o keyword`). An earlier part's words
+    are read both as the tokenizer splits them and as bash does, a line
+    continuation deleted, and every earlier part counts where the second
+    reading cannot be split or splits the command into other parts. Its
+    cost is a false `unknown` (`echo X=1;`, `ls .;`, `set -e;`). A route
+    those words do not name (such as a function, `getopts`, `unset`,
+    `coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1
+    ))`, or a word built at run time, `$X`) or an assignment outside the
+    command is not read, so a derive after `unset PATH;` is placed. Three
+    kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a

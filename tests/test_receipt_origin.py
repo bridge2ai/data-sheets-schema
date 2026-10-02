@@ -1936,13 +1936,16 @@ class DeriveSpellings(Base):
     FULL = "data/claudecode_direct/L/CHORUS_d4d.yaml"
     OUT = "--out data/claudecode_direct_core/L/CHORUS_d4d_core.yaml"
 
-    def _derived(self, spelling, **result):
-        """Draft, a Phase 1 entry, the call under test, a Phase 3 entry."""
+    def _derived(self, spelling, *, absolute=False, **result):
+        """Draft, a Phase 1 entry, the call under test, a Phase 3 entry. With
+        `absolute`, the call spells the record's `--full` (FULL) as its
+        absolute path, so a directory change the call may make does not
+        leave it unplaced for that reason."""
         r = self.new_run()
         r.write(r.receipt, PRE)
         r.write(r.full, "id: x\n")
         r.write(r.receipt, Boundaries.C003)
-        identity = r.bash(spelling, **result)
+        identity = r.bash(spelling.replace(self.FULL, str(r.full)) if absolute else spelling, **result)
         r.write(r.receipt, Boundaries.C004)
         return identity, r.report()
 
@@ -2011,11 +2014,20 @@ class DeriveSpellings(Base):
         self.assertEqual(block["status"], "checked", block["reasons"])
         self.assertEqual(block["derive_core_attempts"][0]["outcome"], "failed")
 
-    #: Each spelling may put an assignment before the derive's program, which
-    #: may make the part run code other than the CLI (#3781). bash runs
-    #: `./bin/d4d` (or `./x`, or imports from `./hack`) for each of the
-    #: #4123 spellings below, and each was placed until the rule read an
-    #: earlier part's words rather than where they stand.
+    #: Each spelling is one where an assignment may come before the derive's
+    #: program, read by words (#3781, #4123), so none is placed. Most may
+    #: make the part run code other than the CLI. bash runs `./bin/d4d` after
+    #: each #4123 spelling that puts `./bin` first on `PATH`, `.venv/bin/d4d`
+    #: after the `.venv` one where that directory exists, and, on bash 4 and
+    #: later, `./x` after `BASH_CMDS[d4d]=./x`; an append (`PATH+=:./bin`)
+    #: changes which `d4d` runs only where none comes earlier on `PATH`, and
+    #: a `PYTHONPATH` assignment reaches the interpreter only where
+    #: `PYTHONPATH` is already exported. The entries marked as the rule's
+    #: cost change no `d4d` bash runs. At 5168fb2ca, before an earlier part
+    #: was read by its words, each #4123 spelling was placed and its block
+    #: read `checked`, except the two `BASH_CMDS[d4d]=` ones, which this
+    #: relative `--full` left unplaced there for the glob in the word, not
+    #: for the assignment.
     ASSIGNED = ("env PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
                 "PYTHONPATH=src python -m data_sheets_schema.cli {derive}",
                 "PYTHONPATH=./hack python -m data_sheets_schema.cli {derive}",
@@ -2063,24 +2075,62 @@ class DeriveSpellings(Base):
                 "for PATH in ./bin; do :; done; d4d {derive}",
                 "while PATH=./bin:$PATH; do break; done; d4d {derive}",
                 # #4124: an assignment prefix on an earlier program, at its
-                # head or behind `env` or `{`, where a check of the part's
-                # first word alone misses it.
+                # head or behind `env` or `{`. The rule's cost: the prefix
+                # reaches only that program's environment, and bash runs the
+                # same `d4d` after each. `env X=1 cat x;` and `{ X=1 cat x; }`
+                # are what a check of the part's first word alone misses, and
+                # `X=1 cat x;` what 5168fb2ca's all-assignment-words reading
+                # missed.
                 "X=1 cat x; d4d {derive}",
                 "PATH+=:./bin cat x; d4d {derive}",
                 "env X=1 cat x; d4d {derive}",
                 "{{ X=1 cat x; }}; d4d {derive}",
                 # A word that may assign, wherever it stands: the routes
-                # #4116 named within the command.
+                # #4116 named within the command. `declare -x PATH;` only
+                # exports `PATH`, a cost of reading the word `declare`.
                 "export PYTHONPATH=./hack; d4d {derive}",
                 "declare -x PATH; d4d {derive}",
                 "read -r PYTHONPATH < p.txt; python -m data_sheets_schema.cli {derive}",
                 "hash -p ./x d4d; d4d {derive}",
                 "source env.sh; d4d {derive}",
                 "eval \"$SETUP\"; d4d {derive}",
-                # #4124: keyword mode puts the derive's own trailing
-                # assignment words in its environment.
+                # Keyword mode turned on before the derive (#4124): the word
+                # `set` unplaces it, whatever the derive's own words, so these
+                # do not need the keyword clause. It is pinned where it is
+                # the only reason, in the keyword-mode tests below.
                 "set -k; python3 -m data_sheets_schema.cli {derive} PYTHONPATH=./hack",
                 "set -o keyword; d4d {derive} PATH=./bin:$PATH")
+
+    #: #4140: a route in an earlier part that the rule read neither by its
+    #: words nor as bash spells them. Each was placed, and its block read
+    #: `checked`, at 9c0e0d758, as on origin/main. bash 4.1 and later assign
+    #: a `{NAME}` redirection's descriptor to NAME (`echo hi
+    #: {PATH}>/dev/null; d4d` runs `./10/d4d`); `${NAME:=...}` and
+    #: `${NAME=...}` assign NAME where it is unset (`${BASH_CMDS[d4d]:=./x}`:
+    #: bash 5 runs `./x`); `$'-v'` and `$"-v"` are `-v` to bash and `$-v` to
+    #: the tokenizer; and bash deletes a line continuation the tokenizer
+    #: reads as a blank (`printf -\<newline>v` is `printf -v`).
+    ASSIGNED_4140 = ("echo hi {{PATH}}>/dev/null; d4d {derive}",
+                     "exec {{PATH}}>/dev/null; d4d {derive}",
+                     ": {{PYTHONPATH}}</dev/null && python -m data_sheets_schema.cli {derive}",
+                     "true {{BASH_CMDS[d4d]}}>>/dev/null; d4d {derive}",
+                     "echo hi {{PATH}}<>/dev/null; d4d {derive}",
+                     ": ${{BASH_CMDS[d4d]:=./x}}; d4d {derive}",
+                     "echo ${{PYTHONPATH=./hack}} >/dev/null; python -m data_sheets_schema.cli {derive}",
+                     ": ${{!REF:=./bin}}; d4d {derive}",
+                     "printf $'-v' PATH %s ./bin; d4d {derive}",
+                     "printf $\"-v\" PATH %s ./bin; d4d {derive}",
+                     "printf -\\\nv PATH %s ./bin; d4d {derive}",
+                     "echo hi {{PA\\\nTH}}>/dev/null; d4d {derive}")
+    #: The same, where the tokenizer reads the earlier part's first word as a
+    #: bare word not read here, which may change directory (#3782): these
+    #: run with an absolute `--full`, which that does not unplace.
+    ASSIGNED_4140_ABSOLUTE = ("sou\\\nrce env.sh; d4d {derive}",
+                              "rea\\\nd -r PATH < p.txt; d4d {derive}",
+                              "PATH\\\n=./bin:$PATH; d4d {derive}",
+                              "BASH_CMDS[d4d]\\\n=./x; d4d {derive}",
+                              "$'read' -r PATH < p.txt; d4d {derive}",
+                              "$\"source\" env.sh; d4d {derive}")
 
     #: The reason `_boundaries` gives for a derive this rule leaves unplaced.
     ASSIGNED_REASON = ("(assigned_environment: an assignment may come before its program: on the part or given "
@@ -2159,14 +2209,21 @@ class DeriveSpellings(Base):
             with self.subTest(spelling=spelling):
                 self.assertEqual(rows(spelling), [(None, "assigned_environment")])
         # A route the words do not name is not read, as NON_CHECKS says; each
-        # of these runs another `d4d` in bash, and each pin moves if the rule
-        # is widened. (`getopts` and `$X` are bare program words, which may
-        # be functions that change directory (#3782), so the relative
-        # `--full` is given absolute here.)
+        # of these can make bash 5 run another `d4d` (`$X` where `X` holds an
+        # assignment), and each pin moves if the rule is widened (#4135). (A
+        # bare program word this does not read, `getopts`, `$X`, `coproc`,
+        # `trap`, `compgen`, `let`, `[[` or a brace expansion, may be a
+        # function that changes directory (#3782), so the relative `--full`
+        # is given absolute after one.)
         absolute = f"derive core --full /w/{self.FULL} {self.OUT}"
         for spelling in (f"unset PATH; d4d {derive}", f"(( PATH = 1 )); d4d {derive}",
                          f"d4d() {{ ./x; }}; d4d {derive}", f"getopts a PATH; d4d {absolute}",
-                         f"$X; d4d {absolute}"):
+                         f"$X; d4d {absolute}", f"coproc PATH {{ :; }}; d4d {absolute}",
+                         f"trap 'export PATH=./bin' DEBUG; d4d {absolute}",
+                         f"compgen -V PATH -W ./bin; d4d {absolute}", f"let 'PATH = 1'; d4d {absolute}",
+                         f": $(( PATH = 1 )); d4d {derive}", f"echo ${{A[PATH=1]}} >/dev/null; d4d {derive}",
+                         f"[[ 1 -eq 'PATH = 1' ]]; d4d {absolute}", f"printf -${{X}}v PATH %s ./bin; d4d {derive}",
+                         f"{{printf,-v,PATH,%s,./bin}}; d4d {absolute}"):
             with self.subTest(spelling=spelling):
                 self.assertEqual(rows(spelling), [(True, "command")])
         # A part of appends or array elements is read as a program not read
@@ -2174,6 +2231,96 @@ class DeriveSpellings(Base):
         shell = ro._shell("PATH+=:./bin; cat x", "/w", [full])
         self.assertTrue(shell["runs_unread"])
         self.assertFalse(shell["read_only"])
+
+    def test_an_earlier_part_is_read_as_bash_spells_it(self):
+        # #4140, end to end and through `_shell`: each spelling read
+        # `checked`, with the derive as the boundary, at 9c0e0d758.
+        full = ro._Target("full", Path("/w/data/claudecode_direct/L/CHORUS_d4d.yaml"))
+        derive = f"derive core --full {self.FULL} {self.OUT}"
+        for spellings, absolute in ((self.ASSIGNED_4140, False), (self.ASSIGNED_4140_ABSOLUTE, True)):
+            for spelling in spellings:
+                spelling = spelling.format(derive=derive)
+                with self.subTest(spelling=spelling):
+                    identity, block = self._derived(spelling, absolute=absolute)
+                    self.assertIsNone(block["boundaries"]["derive_core"])
+                    self.assertUnknown(block, f"derive core {identity} cannot be placed: the call succeeded but "
+                                              f"its status is not the derive's own {self.ASSIGNED_REASON}")
+                    attempt = block["derive_core_attempts"][0]
+                    self.assertEqual((attempt["targets_full"], attempt["status_basis"], attempt["outcome"]),
+                                     (None, "assigned_environment", "ambiguous"))
+                    command = spelling.replace(self.FULL, f"/w/{self.FULL}") if absolute else spelling
+                    self.assertEqual([(d["targets_full"], d["basis"])
+                                      for d in ro._shell(command, "/w", [full])["derives"]],
+                                     [(None, "assigned_environment")])
+                    # Aimed at another record it places nothing either way.
+                    other = ro._shell(spelling.replace(self.FULL, "/o/full.yaml"), "/w", [full])
+                    self.assertEqual([d["targets_full"] for d in other["derives"]], [False])
+        # The position rule reads only an assignment-only part and `printf
+        # -v` as `printf`'s option (`assigned`, #3689, #3700), not these
+        # words: a reader carrying one does not make a later d4d call, a
+        # derive aimed at another record included, count as one that may not
+        # run what its words name. That pin moves if the position rule is
+        # widened (#4117's class).
+        other = ro._shell(f"echo hi {{PATH}}>/dev/null; d4d derive core --full /o/full.yaml {self.OUT}", "/w",
+                          [full])
+        self.assertEqual([d["targets_full"] for d in other["derives"]], [False])
+        self.assertFalse(other["runs_unread"])
+        # Where the reading as bash spells the words cannot be paired with the
+        # tokenizer's part by part, every earlier part counts: `&\<newline>>`
+        # is `&>` to bash but a `&` and a `>` to the tokenizer, so the two
+        # split the command into different parts. A false `unknown` there:
+        # `echo hi &>/dev/null` assigns nothing.
+        self.assertEqual([(d["targets_full"], d["basis"]) for d in
+                          ro._shell(f"echo hi &\\\n> /dev/null; d4d {derive}", "/w", [full])["derives"]],
+                         [(None, "assigned_environment")])
+        # bash keeps a backslash-newline inside `'...'` or `$'...'`, and after
+        # an escaped backslash, and a `$` inside a quote or ending one opens
+        # none: each of these leaves the derive placed. A word the tokenizer
+        # keeps as `$'x'`, from inside double quotes, carries no `$'...'`
+        # quote either.
+        for spelling in (f"echo 'a\\\nb'; d4d {derive}", f"echo \"a\\\\\n\"; d4d {derive}",
+                         f"grep 'x$' notes.md && d4d {derive}", f"grep \"x$\" notes.md; d4d {derive}",
+                         f"echo \\$'x'; d4d {derive}", f"echo \"$'x'\"; d4d {derive}"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual([d["targets_full"] for d in ro._shell(spelling, "/w", [full])["derives"]], [True])
+        # A word carrying a `$'...'` quote counts whatever it decodes to, the
+        # rule's cost. So does a part the tokenizer's reading counts and
+        # bash's does not (`echo x\<newline>set` is `echo xset` to bash):
+        # the second reading adds to what counts and takes nothing away, so
+        # the change can only add `unknown`.
+        for spelling in (f"echo $'a'; d4d {derive}", f"echo x\\\nset; d4d {derive}"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual([(d["targets_full"], d["basis"]) for d in
+                                  ro._shell(spelling, "/w", [full])["derives"]], [(None, "assigned_environment")])
+
+    def test_bash_spelling(self):
+        single, double = ro._DOLLAR_QUOTE_MARKS["'"], ro._DOLLAR_QUOTE_MARKS['"']
+        cases = {"printf -\\\nv PATH": "printf -v PATH", "sou\\\nrce env.sh": "source env.sh",
+                 "echo \"a\\\nb\"": "echo \"ab\"", "echo 'a\\\nb'": "echo 'a\\\nb'",
+                 "echo a\\\\\nb": "echo a\\\\\nb", "echo \"a\\\\\n\"": "echo \"a\\\\\n\"",
+                 "printf $'-v'": "printf $" + single + "'-v'", "printf $\"-v\"": "printf $" + double + "\"-v\"",
+                 "echo $'a\\\nb'": "echo $" + single + "'a\\\nb'", "echo $\"a\\\nb\"": "echo $" + double + "\"ab\"",
+                 "echo 'x$'": "echo 'x$'", "echo \"x$\"": "echo \"x$\"", "echo \\$'x'": "echo \\$'x'",
+                 "echo \"$'x'\"": "echo \"$'x'\"",
+                 "echo $'it\\'s' $'-v'": "echo $" + single + "'it\\'s' $" + single + "'-v'", "ls x": "ls x"}
+        for command, spelled in cases.items():
+            with self.subTest(command=command):
+                self.assertEqual(ro._bash_spelling(command), spelled)
+        # The parts as bash reads the words: the tokenizer's own where nothing
+        # differs, a word that carried a `$'...'` or `$"..."` quote marked,
+        # and None where the two cannot be paired part by part, or the words
+        # read so cannot be split.
+        segments = ro._layout(ro._tokens("printf -v PATH %s x; ls"))[0]
+        self.assertIs(ro._bash_parts("printf -v PATH %s x; ls", segments), segments)
+        for command, parts in (("printf -\\\nv PATH %s x; ls", [["printf", "-v", "PATH", "%s", "x"], ["ls"]]),
+                               ("printf $'-v' PATH; ls", [["printf", "$" + single + "-v", "PATH"], ["ls"]]),
+                               ("printf $\"-v\" PATH; ls", [["printf", "$" + double + "-v", "PATH"], ["ls"]])):
+            with self.subTest(command=command):
+                self.assertEqual(ro._bash_parts(command, ro._layout(ro._tokens(command))[0]), parts)
+        command = "echo hi &\\\n> /dev/null; ls"
+        self.assertEqual(len(ro._layout(ro._tokens(command))[0]), 3)
+        self.assertIsNone(ro._bash_parts(command, ro._layout(ro._tokens(command))[0]))
+        self.assertIsNone(ro._bash_parts("echo 'a\\\nb", [["echo"]]))
 
     def test_assignment_word(self):
         cases = {"X=1": True, "PATH=./bin:$PATH": True, "PATH+=:./bin": True, "A[0]=x": True,
@@ -2208,12 +2355,33 @@ class DeriveSpellings(Base):
                         ["{", "command", "printf", "-v", "X", "y"], ["printf", "%s", "-v"]):
             with self.subTest(segment=segment):
                 self.assertTrue(ro._may_assign(segment))
+        # #4140: a `{NAME}` word directly before any redirection operator; a
+        # parameter expansion that may assign, anywhere in a word (shlex
+        # splits `${Q:=a b}` at its blank); a word carrying the mark of a
+        # `$'...'` or `$"..."` quote (`_bash_spelling`).
+        single, double = ro._DOLLAR_QUOTE_MARKS["'"], ro._DOLLAR_QUOTE_MARKS['"']
+        for segment in (["echo", "hi", "{PATH}", ">", "/dev/null"], ["exec", "{A[1]}", "<", "f"],
+                        [":", "{X}", ">>", "f"], ["{X}", "<>", "f"], ["true", "{X}", ">&", "2"],
+                        ["cat", "{X}", "<<<", "w"], ["echo", "{X}", "&>", "f"],
+                        [":", "${PATH:=./bin}"], ["echo", "${PATH=./bin}"], ["echo", "${A[1]:=x}"],
+                        ["echo", "${BASH_CMDS[d4d]=./x}"], ["echo", "${!REF:=x}"], ["echo", "a${X:=y}b"],
+                        [":", "${Q:=a", "b}"], ["printf", "$" + single + "-v", "PATH"],
+                        ["$" + double + "source", "env.sh"]):
+            with self.subTest(segment=segment):
+                self.assertTrue(ro._may_assign(segment))
         # Nothing else: `-v` without `printf`, a word that only contains a
-        # listed one, and the routes the words do not name.
+        # listed one, a `{NAME}` with no operator after it or not a whole
+        # word, an expansion that does not assign, a `$'` the tokenizer kept
+        # as text (`echo "$'x'"`), and the routes the words do not name.
         for segment in (["cat", "x"], ["printf", "%s", "x"], ["grep", "-v", "x", "f"], ["cat", "wait.txt"],
                         ["ls", "./x"], ["unset", "PATH"], ["getopts", "a", "PATH"], ["((", "PATH", "=", "1", "))"],
-                        ["d4d", "()", "{", "./x"], ["$X"], ["cd", "sub"], ["--full=F"], ["echo", "${X:=y}"],
-                        ["git", "commit", "-m", "set x"]):
+                        ["d4d", "()", "{", "./x"], ["$X"], ["cd", "sub"], ["--full=F"],
+                        ["git", "commit", "-m", "set x"], ["echo", "{X}"], ["echo", "{X}", "f"],
+                        ["echo", "{X}", "|"], ["echo", "x{X}", ">", "f"], ["echo", "{1X}", ">", "f"],
+                        ["echo", "${X:-y}"], ["echo", "${X:+=}"], ["echo", "${X/=/y}"], ["echo", "${#X}"],
+                        ["echo", "$X=y"], ["echo", "${A[PATH=1]}"], ["echo", "$'x'"], ["echo", "$\"x\""],
+                        ["coproc", "PATH", "{", ":"], ["trap", "export PATH=./bin", "DEBUG"],
+                        ["compgen", "-V", "PATH"], ["let", "PATH = 1"], ["printf", "-${X}v", "PATH"]):
             with self.subTest(segment=segment):
                 self.assertFalse(ro._may_assign(segment))
 
@@ -2246,13 +2414,27 @@ class DeriveSpellings(Base):
                          f"d4d {derive} A[0]=x; builtin set -ek"):
             with self.subTest(spelling=spelling):
                 self.assertEqual(rows(spelling), [(None, "assigned_environment")])
-        # Keyword mode with no assignment word on the derive's part, or an
-        # assignment word there without keyword mode, leaves it placed.
+        # Keyword mode turned on after the derive's part with no assignment
+        # word on that part, or an assignment word there without keyword
+        # mode, leaves it placed.
         for spelling, basis in ((f"d4d {derive} && set -k", "and_chain"), (f"d4d {derive} PYTHONPATH=src", "command"),
                                 (f"d4d {derive} PYTHONPATH=src && set -e", "and_chain"),
                                 (f"d4d {derive} X=1 && sort -k2 f", "and_chain")):
             with self.subTest(spelling=spelling):
                 self.assertEqual(rows(spelling), [(True, basis)])
+        # Turned on before the derive, keyword mode unplaces it whatever the
+        # derive's own words, through the word `set` in an earlier part
+        # (`_may_assign`), not through the keyword clause.
+        for spelling in (f"set -k; d4d {derive}", f"set -o keyword && d4d {derive}"):
+            with self.subTest(spelling=spelling):
+                self.assertEqual(rows(spelling), [(None, "assigned_environment")])
+        # The keyword clause is the only reason where the derive runs after
+        # `set -k` but no earlier part carries `set`: a function defined
+        # first and called after it. bash 3.2 and 5 put the trailing
+        # assignment in the derive's environment there; without the clause
+        # the row is `(True, none)`.
+        self.assertEqual(rows(f"f() ( d4d {derive} PYTHONPATH=./hack ); set -k; f"),
+                         [(None, "assigned_environment")])
         # End to end, keyword mode set after the derive's part.
         identity, block = self._derived(f"d4d {derive} PYTHONPATH=./hack && set -k")
         self.assertIsNone(block["boundaries"]["derive_core"])
@@ -2788,10 +2970,12 @@ class DeriveSpellings(Base):
                       "subcommand of it is read-only (#3693)", flat)
         self.assertNotIn("and an interpreter held in a variable (`$PY -m data_sheets_schema.cli`), are read "
                          "through", flat)
-        # #3781, #4123, #4124: the rule, read by words and not by where they
-        # stand, its cost, and the routes it does not read. The old
+        # #3781, #4123, #4124, #4140: the rule, read by words and not by where
+        # they stand, its cost, and the routes it does not read. The old
         # carve-outs (`export`, `declare`, `read`, a sourced script, `eval`)
-        # are read now, so the texts must no longer name them as unread.
+        # are read now, so the texts must no longer name them as unread, and
+        # since #4140 so are a `{NAME}` redirection, an assigning expansion,
+        # a `$'...'` or `$"..."` quote and a line continuation in a word.
         rule = ("`PYTHONPATH=src` included (#3781). That is read bluntly, by words and not by where they stand "
                 "(#4123): an assignment before the part's program, on the part or given to `env` (`PYTHONPATH=src "
                 "python -m data_sheets_schema.cli derive core`); an earlier part of the command carrying, anywhere "
@@ -2799,37 +2983,62 @@ class DeriveSpellings(Base):
                 "compound keyword, `!`, `time`, a redirection, `builtin`, `command` or any other word: "
                 "`PATH=./bin:$PATH;`, `{ PATH=./bin:$PATH; };`, `if ...; then PATH=...; fi;`, `PATH=... "
                 "2>/dev/null;`, `BASH_CMDS[d4d]=./x;`, `X=1 cat x;`), `printf` with a word starting with `-v` "
-                "(`builtin printf -v PATH ...;`), or one of the words `export`, `declare`, `typeset`, `local`, "
+                "(`builtin printf -v PATH ...;`), one of the words `export`, `declare`, `typeset`, `local`, "
                 "`readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`, `source`, `.`, `set`, `shopt`, "
-                "`alias`, `hash`, `enable`, `for` or `select` (`for PATH in ./bin; do :; done;`); or an assignment "
-                "word anywhere on the part itself where any part of the command, a later one included, carries "
-                "`set` with an option word carrying `k` or the word `keyword` (`set -k`, `set -o keyword`), ")
+                "`alias`, `hash`, `enable`, `for` or `select` (`for PATH in ./bin; do :; done;`), a `{NAME}` word "
+                "before a redirection operator, to which bash 4.1 and later assign the descriptor the redirection "
+                "opens (`echo hi {PATH}>/dev/null;`), a parameter expansion that may assign (`${NAME:=...}` or "
+                "`${NAME=...}`: `: ${BASH_CMDS[d4d]:=./x};`), or a word carrying a `$'...'` or `$\"...\"` quote, "
+                "whose decoded text the tokenizer does not read (`printf $'-v' PATH ...;`, #3830, #4140); or an "
+                "assignment word anywhere on the part itself where any part of the command, a later one included, "
+                "carries `set` with an option word carrying `k` or the word `keyword` (`set -k`, `set -o "
+                "keyword`), ")
+        reading = ("(#4124). An earlier part's words are read both as the tokenizer splits them and as bash does, "
+                   "a line continuation deleted (`printf -\\<newline>v PATH ...;`), and every earlier part counts "
+                   "where the second reading cannot be split or splits the command into other parts (#4140). ")
         self.assertIn("(#3693). Nor can a `derive core` of the full record that an assignment may come before, "
                       "since the assignment may make the part run other code; no assignment is exempt, " + rule +
-                      "since keyword mode puts every assignment word in a command's environment (#4124). The cost "
-                      "is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`). A "
-                      "route those words do not name is not read (a function, defined in the command or outside "
-                      "it, `d4d() { ./x; };`, `getopts`, `unset`, an arithmetic assignment, `(( PATH = 1 ))`, or a "
-                      "program word built at run time, `$X`), nor an assignment, option or definition made outside "
-                      "the command (an earlier call's `export`, the inherited environment), so a derive after "
-                      "`unset PATH;` is placed.", text)
+                      "since keyword mode puts every assignment word in a command's environment " + reading +
+                      "The cost is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, "
+                      "`set -e;`, `echo {X} >f;`). A route those words do not name is not read (such as a "
+                      "function, defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, "
+                      "`coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = "
+                      "1'` or one in an array subscript or a `[[ -eq ]]` operand, or a word built at run time, "
+                      "`$X`, `printf -${X}v` or a brace expansion, #4135), nor an assignment, option or definition "
+                      "made outside the command (an earlier call's `export`, the inherited environment), so a "
+                      "derive after `unset PATH;` is placed.", text)
         self.assertIn("(#3693). Nor can a `derive core` of the full record that an assignment may come before, as "
                       "the assignment may make the part run other code; no assignment is exempt, " + rule +
-                      "as keyword mode puts every assignment word in a command's environment (#4124). Its cost is "
-                      "a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`). A "
-                      "route those words do not name is not read -- a function, defined in the command or outside "
-                      "it (`d4d() { ./x; };`), `getopts`, `unset`, an arithmetic assignment (`(( PATH = 1 ))`), a "
-                      "program word built at run time (`$X`) -- nor is an assignment, option or definition made "
-                      "outside the command (an earlier call's `export`, the inherited environment), so a derive "
-                      "after `unset PATH;` is placed.", flat)
-        for gone in ("An assignment made any other way (by `export`, `declare` or `read`",
-                     "one made any other way -- by `export`, `declare` or `read`",
-                     "so a derive after `export PYTHONPATH=./hack;` is placed",
-                     "The assignment is read as the position rule reads one",
-                     "the cost is a false `unknown`, never a false `checked`"):
+                      "as keyword mode puts every assignment word in a command's environment " + reading +
+                      "Its cost is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, "
+                      "`set -e;`, `echo {X} >f;`). A route those words do not name -- such as a function, defined "
+                      "in the command or outside it (`d4d() { ./x; };`), `getopts`, `unset`, `coproc`, `trap`, "
+                      "`compgen -V`, an arithmetic assignment (`(( PATH = 1 ))`, `let 'PATH = 1'`, or one in an "
+                      "array subscript or a `[[ -eq ]]` operand) or a word built at run time (`$X`, `printf "
+                      "-${X}v`, a brace expansion), #4135 -- is not read, nor is an assignment, option or "
+                      "definition made outside the command (an earlier call's `export`, the inherited "
+                      "environment), so a derive after `unset PATH;` is placed.", flat)
+        # The lists of unread routes that read as complete are gone (#4140).
+        for gone in ("an arithmetic assignment, `(( PATH = 1 ))`, or a program word built at run time",
+                     "an arithmetic assignment (`(( PATH = 1 ))`), a program word built at run time (`$X`) --"):
             with self.subTest(gone=gone):
                 self.assertNotIn(gone, text)
                 self.assertNotIn(gone, flat)
+        for gone in ("An assignment made any other way (by `export`, `declare` or `read`",
+                     "one made any other way -- by `export`, `declare` or `read`",
+                     "so a derive after `export PYTHONPATH=./hack;` is placed",
+                     "The assignment is read as the position rule reads one"):
+            with self.subTest(gone=gone):
+                self.assertNotIn(gone, text)
+                self.assertNotIn(gone, flat)
+        # The `_shell` comment at 092bd8efa and 5168fb2ca called the rule's
+        # cost "a false `unknown`, never a false `checked`", which was false:
+        # a route the words do not name leaves a false `checked`. It stood in
+        # a code comment, which neither text above carries, so the module's
+        # source is read for it, comment markers and line breaks removed.
+        source = " ".join(" ".join(line.strip().lstrip("#").split())
+                          for line in Path(ro.__file__).read_text(encoding="utf-8").splitlines())
+        self.assertNotIn("never a false `checked`", source.lower())
         # Every word the rule reads is named in both texts.
         for word in ro._ASSIGNING_WORDS:
             with self.subTest(word=word):
@@ -4727,17 +4936,24 @@ class Cli(unittest.TestCase):
                       "stand: an assignment on the part or given to `env` (`PYTHONPATH=src python -m "
                       "data_sheets_schema.cli`); an earlier part of the command carrying, anywhere in it, an "
                       "assignment word (`NAME=`, `NAME+=`, `NAME[...]=` or `NAME[...]+=`: `PATH=./bin:$PATH;`, `{ "
-                      "PATH=./bin:$PATH; };`, `PATH=... 2>/dev/null;`), `printf` with a word starting with `-v`, or "
+                      "PATH=./bin:$PATH; };`, `PATH=... 2>/dev/null;`), `printf` with a word starting with `-v`, "
                       "one of the words `export`, `declare`, `typeset`, `local`, `readonly`, `read`, `mapfile`, "
                       "`readarray`, `wait`, `eval`, `source`, `.`, `set`, `shopt`, `alias`, `hash`, `enable`, `for` "
-                      "or `select`; or an assignment word anywhere on the part where any part of the command "
-                      "carries `set` with an option carrying `k` or the word `keyword` (`set -k`, `set -o "
-                      "keyword`). Its cost is a false `unknown` (`echo X=1;`, `ls .;`, `set -e;`). A route those "
-                      "words do not name (a function, `getopts`, `unset`, `(( PATH = 1 ))`, `$X`) or an assignment "
-                      "outside the command is not read, so a derive after `unset PATH;` is placed.",
-                      text)                                                       # #3781, #4123, #4124
+                      "or `select`, a `{NAME}` word before a redirection operator (`echo hi {PATH}>/dev/null;`), a "
+                      "parameter expansion that may assign (`${NAME:=...}`, `${NAME=...}`) or a word carrying a "
+                      "`$'...'` or `$\"...\"` quote; or an assignment word anywhere on the part where any part of "
+                      "the command carries `set` with an option carrying `k` or the word `keyword` (`set -k`, `set "
+                      "-o keyword`). An earlier part's words are read both as the tokenizer splits them and as bash "
+                      "does, a line continuation deleted, and every earlier part counts where the second reading "
+                      "cannot be split or splits the command into other parts. Its cost is a false `unknown` (`echo "
+                      "X=1;`, `ls .;`, `set -e;`). A route those words do not name (such as a function, `getopts`, "
+                      "`unset`, `coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, or a "
+                      "word built at run time, `$X`) or an assignment outside the command is not read, so a derive "
+                      "after `unset PATH;` is placed.",
+                      text)                                                # #3781, #4123, #4124, #4140
         self.assertNotIn("An assignment made any other way (`export`, `declare`, `read`", text)
         self.assertNotIn("so a derive after `export PYTHONPATH=./hack;` is placed", text)
+        self.assertNotIn("(a function, `getopts`, `unset`, `(( PATH = 1 ))`, `$X`)", text)            # #4140
         for word in ro._ASSIGNING_WORDS:
             with self.subTest(word=word):
                 self.assertIn(f"`{word}`", text)
