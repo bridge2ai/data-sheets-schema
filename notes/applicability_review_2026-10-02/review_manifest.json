@@ -6,14 +6,14 @@
     "name": "Codex (AI assistant)",
     "human_reviewer": false
   },
-  "repository_base_commit": "e16a5105ac69aacd85881ca3b2825c1df5fbfa55",
+  "repository_base_commit": "20f694145c19ee54df4c7fb6dda38d9cc0306224",
   "context_contract_version": "d4d-evaluation-context-1",
   "issue": "https://github.com/bridge2ai/data-sheets-schema/issues/2912",
   "evaluation_authorized": false,
   "registration_created": false,
   "paid_execution_performed": false,
   "human_review_status": "pending",
-  "independent_ai_review_status": "pending",
+  "independent_ai_review_status": "R1 clean at 0c636dc; current-main integration review pending",
   "approval_invalidation": "Any changed context, source, scope, predicate interpretation, rubric, or selected instrument requires renewed review. A passing identity check is not approval.",
   "sources": {
     "AI_READI": {
@@ -201,12 +201,12 @@
       "bytes": 21696
     },
     ".claude/agents/d4d-rubric10-semantic.md": {
-      "sha256": "d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f",
-      "bytes": 81456
+      "sha256": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+      "bytes": 93585
     },
     ".claude/agents/d4d-rubric20-semantic.md": {
-      "sha256": "484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9",
-      "bytes": 61609
+      "sha256": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+      "bytes": 68004
     }
   },
   "original_chorus_preservation": {
@@ -327,5 +327,21 @@
       "sha256": "7c359ccc39d25ad5f0ef3bae374da67e111ebc78a429b72a82b92753f10b440d",
       "bytes": 6200
     }
+  },
+  "prior_review_input_history": {
+    "base_commit": "e16a5105ac69aacd85881ca3b2825c1df5fbfa55",
+    "packet_commit": "0c636dc142f3a021d9f48e083704a6081575b390",
+    "manifest_sha256": "c630db4d39bc7a2ab0e0bbb90ad9a73d65cf389f2b15ebf5955213a83c170ba1",
+    "replaced_agent_pins": {
+      ".claude/agents/d4d-rubric10-semantic.md": {
+        "sha256": "d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f",
+        "bytes": 81456
+      },
+      ".claude/agents/d4d-rubric20-semantic.md": {
+        "sha256": "484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9",
+        "bytes": 61609
+      }
+    },
+    "note": "Initial independent review used semantic v2 definitions. After semantic v3 merge, the complete context/applicability instruction block is byte-identical; new structured evidence/version/output changes are reviewed separately. Contexts, citations, rubric bytes and normalizer unchanged."
   }
 }
