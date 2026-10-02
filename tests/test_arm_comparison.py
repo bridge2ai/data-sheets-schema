@@ -504,3 +504,139 @@ class ReleaseInventory(unittest.TestCase):
             f"{arm} `dddddddddddd` (1 records) | – | – | "
             "the records pinned a hash but no source-manifest path |"]))
         self.assertFalse(any("`None`" in r for r in rows))
+
+
+# Live form metrics carry the run's schema and disclose fallbacks (#4216).
+@pytest.fixture
+def form_run(tmp_path, monkeypatch):
+    import hashlib
+    import yaml
+
+    m = _module()
+    m.CONCAT = tmp_path / "concatenated"
+    label, project = "test_run_rep1", "P"
+    monkeypatch.setattr(m, "_method_for", lambda *_args: "claudecode_agent")
+    monkeypatch.setattr(m, "removal_metrics", lambda *_args: {})
+    full = m.CONCAT / "claudecode_agent" / label / f"{project}_d4d.yaml"
+    core = m.CONCAT / "claudecode_agent_core" / label / f"{project}_d4d_core.yaml"
+    prov = core.parent / f"{project}_provenance.yaml"
+    full.parent.mkdir(parents=True)
+    core.parent.mkdir(parents=True)
+    full.write_text(yaml.safe_dump({"id": "foo:1", "publisher": "doi:10.1/a",
+                                   "description": "research centre",
+                                   "variables": [{"unit": "ROR:032db5x82#bench"}]}))
+    core.write_text(yaml.safe_dump({"id": "doi:10.1/core"}))
+    schema = {"id": "https://example.org/run", "name": "run", "default_range": "string",
+              "prefixes": {"foo": "https://foo.example.org/", "linkml": "https://w3id.org/linkml/"},
+              "types": {"string": {"uri": "xsd:string", "base": "str"},
+                        "uriorcurie": {"uri": "xsd:anyURI", "base": "URIorCURIE"}},
+              "classes": {"Dataset": {"attributes": {
+                  "id": {"range": "uriorcurie", "identifier": True},
+                  "publisher": {"range": "uriorcurie"},
+                  "variables": {"range": "VariableMetadata", "multivalued": True}}},
+                  "VariableMetadata": {"attributes": {"unit": {"range": "uriorcurie"}}}}}
+    schema_path = tmp_path / "run_all.yaml"
+    schema_path.write_text(yaml.safe_dump(schema))
+    record = {"schema": {"full_path": str(schema_path),
+                         "full_sha256": hashlib.sha256(schema_path.read_bytes()).hexdigest()},
+              "validation": {"passed": True}, "grounding": {"distinct": {"absent": 7}},
+              "pair_consistency": {"errors": 3}, "report_claims": {"findings": [{}]},
+              "form": {"undeclared_prefix_occurrences": 999}}
+    prov.write_text(yaml.safe_dump(record))
+    return m, label, project, full, core, prov, record
+
+
+def test_live_form_uses_run_schema_for_prefixes_and_identifier_walk(form_run):
+    m, label, project, full, core, prov, record = form_run
+    before = {path: path.read_bytes() for path in (full, core, prov)}
+    today = m.form_facts(full, core)
+    row = m.run_metrics(label, project)
+    assert today["undeclared_prefix_occurrences"] == 1
+    assert today["organisational_fragments"] == 0
+    assert row["undeclared"] == 3 and row["orgfrag"] == 1
+    assert row["british"] == today["british_spellings"]
+    assert row["gc"] == today["gc_label_variant_occurrences"]
+    assert (row["ungrounded"], row["pair"], row["report"]) == (7, 3, 1)
+    assert row["form_schema_basis"] == {"source": "the run's schema, on disk",
+                                         "path": record["schema"]["full_path"],
+                                         "sha256": record["schema"]["full_sha256"]}
+    assert {path: path.read_bytes() for path in before} == before
+
+
+@pytest.mark.parametrize("unavailable", [False, True])
+def test_schema_fallback_uses_todays_values_and_exposes_why(form_run, monkeypatch, unavailable):
+    import yaml
+    m, label, project, full, core, prov, record = form_run
+    if unavailable:
+        record["schema"]["full_sha256"] = "a" * 64
+        monkeypatch.setattr("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for",
+                            lambda *_args, **_kwargs: None)
+        def no_git(*_args, **_kwargs):
+            raise FileNotFoundError("git unavailable")
+        monkeypatch.setattr("data_sheets_schema.provenance.committed_bytes_for", no_git)
+    else:
+        record.pop("schema")
+    prov.write_text(yaml.safe_dump(record))
+    row = m.run_metrics(label, project)
+    assert row["undeclared"] == 1 and row["orgfrag"] == 0
+    assert row["form_schema_basis"]["source"] == "today's schema"
+    expected = "git could not be run" if unavailable else "the record names no merged schema"
+    assert expected in row["form_schema_basis"]["reason"]
+    data = {arm: {p: [] for p in m.PROJECTS} for arm, *_ in m.ARMS}
+    data[m.ARMS[0][0]][m.PROJECTS[0]] = [row]
+    rendered = "\n".join(m.form_schema_section(data))
+    assert "today's schema" in rendered and expected in rendered
+    assert label in rendered
+    assert "do not attest that the requested historical bytes were used" in rendered
+    assert "naming declaration, not the run's schema" in rendered
+    assert "Current prefix instrument:" in rendered and "Current British-spelling instrument:" in rendered
+
+
+def test_missing_or_invalid_runs_do_not_acquire_live_form_measurements(form_run, monkeypatch):
+    import yaml
+    m, label, project, _full, core, prov, record = form_run
+    def unexpected(*_args, **_kwargs):
+        pytest.fail("excluded records must not be measured")
+    monkeypatch.setattr(m, "form_facts", unexpected)
+    record["validation"]["passed"] = False
+    prov.write_text(yaml.safe_dump(record))
+    assert m.run_metrics(label, project) is None
+    assert (label, project) in m.EXCLUDED_INVALID
+    core.unlink()
+    assert m.run_metrics(label, project) is None
+
+
+def test_form_schema_section_escapes_recorded_basis_and_distinguishes_absence():
+    m = _module()
+    data = {arm: {p: [] for p in m.PROJECTS} for arm, *_ in m.ARMS}
+    data[m.ARMS[0][0]][m.PROJECTS[0]] = [
+        {"label": "run|extra\nrow", "form_schema_basis": {"source": "today's schema",
+         "reason": "bad | pin <schema> `name`"}}, {"label": "legacy"}]
+    rendered = "\n".join(m.form_schema_section(data))
+    assert "run&#124;extra<br>row" in rendered
+    assert "bad &#124; pin &lt;schema&gt; &#96;name&#96;" in rendered
+    assert "legacy | unrecorded — no schema basis supplied" in rendered
+
+
+def test_live_reference_worst_is_distinguished_from_stored_canary_thresholds(tmp_path):
+    m = _module()
+    data = {arm: {p: [] for p in m.PROJECTS} for arm, *_ in m.ARMS}
+    # The historical v4 live recompute moves 0/6/0 to 116/56/51 (#4216).
+    m.CONCAT = tmp_path
+    data["v4"]["AI_READI"] = [{"undeclared": n, "label": f"fixture_rep{i}"}
+                               for i, n in enumerate((116, 56, 51), 1)]
+    for row in data["v4"]["AI_READI"]:
+        full = tmp_path / "claudecode_agent" / row["label"] / "AI_READI_d4d.yaml"
+        core = tmp_path / "claudecode_agent_core" / row["label"] / "AI_READI_d4d_core.yaml"
+        full.parent.mkdir(parents=True)
+        core.parent.mkdir(parents=True)
+        full.write_text("id: ex:fixture\n")
+        core.write_text("id: ex:fixture\n")
+        (core.parent / "AI_READI_provenance.yaml").write_text("{}\n")
+    text = m.render_markdown(data, {})
+    assert "74.3 ± 36.2 [116,56,51] worst 116" in text
+    assert "worst on this report's measurement basis" in text
+    assert "Canary gates read stored form blocks" in text
+    assert "this live recompute does not change their thresholds" in text
+    assert "the value the canary gate holds runs against" not in text
+    assert "the canary-gate baseline)" not in text

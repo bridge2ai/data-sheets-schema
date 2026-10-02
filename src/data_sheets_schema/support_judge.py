@@ -271,6 +271,21 @@ def render_request(slot: str, value: Any, spec: str, context: ValueContext) -> s
     return "\n\n".join(parts)
 
 
+def request_arguments(*, model: str, max_tokens: int, bundle: str,
+                      value_text: str) -> dict[str, Any]:
+    """Pure arguments at the shared judge/transport boundary (#3341).
+
+    This does not initialize a client or apply provider-specific transport
+    policy. Offline plans pin these exact arguments, not alleged wire bytes.
+    """
+    return {"model": model, "max_tokens": max_tokens, "temperature": None,
+            "system": SUPPORT_V2_SYSTEM,
+            "messages": [{"role": "user", "content": [
+                {"type": "text", "text": f"# Source documents\n\n{bundle}",
+                 "cache_control": {"type": "ephemeral"}},
+                {"type": "text", "text": value_text}]}]}
+
+
 def parse_verdict(text: str, *, truncated: bool = False) -> tuple[str, str]:
     """`(verdict, reason)` from a complete reply, or `VerdictError`.
 
@@ -467,14 +482,9 @@ class SupportJudgeV2:
 
         from data_sheets_schema.api_runner import _call_with_retry
 
-        parts = [
-            {"type": "text", "text": f"# Source documents\n\n{bundle}",
-             "cache_control": {"type": "ephemeral"}},
-            {"type": "text", "text": render_request(slot, value, spec, vctx)},
-        ]
-        resp = _call_with_retry(client, model=model, max_tokens=self.max_tokens,
-                                temperature=None, system=SUPPORT_V2_SYSTEM,
-                                messages=[{"role": "user", "content": parts}])
+        resp = _call_with_retry(client, **request_arguments(
+            model=model, max_tokens=self.max_tokens, bundle=bundle,
+            value_text=render_request(slot, value, spec, vctx)))
         self.calls += 1
         u = getattr(resp, "usage", None)
         self.usage.append({

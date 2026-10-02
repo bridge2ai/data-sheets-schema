@@ -18,12 +18,12 @@ Bases, stated once and printed into the output:
   same bundle (the record's `recorded_by` says which).
 - **form metrics** (British spellings, undeclared prefixes, organisational
   fragments, GC label variants) are recomputed live from the artifacts with
-  the current instrument (`grounding.form_facts`), so the basis does not
-  depend on when each record was last backfilled. As of this writing the
-  stored `form` blocks agree with the live recompute on every field for all
-  36 records (they were all re-backfilled under instrument v2.1 on
-  2026-08-22); the recompute is what keeps that true after the next
-  instrument change. **GC label variants are anachronistic for the v4 and
+  the current instrument (`grounding.form_facts`) and the merged-schema
+  identifier rules recorded by each run (#4216). Unrecoverable schema pins
+  fall back to today's rules, with the reason disclosed per record. Stored
+  form blocks are not read or rewritten; their measurements may differ.
+  GC label variants still use today's naming manifest rather than a run's
+  schema or a historical manifest. **GC label variants are anachronistic for the v4 and
   22c arms**: the manifest `naming:` declaration they are counted against
   was decided 2026-08-22, after the v4 arm ran and the day the 22c arm did.
 - **rubric scores** come from `data/evaluation_llm/rubric{10,20}_semantic/
@@ -72,6 +72,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import html
 import os
 import statistics
 import sys
@@ -88,7 +89,9 @@ sys.path.insert(0, str(ROOT / "src"))
 from data_sheets_schema.evaluation_model import (  # noqa: E402
     SAME_FAMILY_DISCLAIMER, same_family_label,
 )
-from data_sheets_schema.grounding import form_facts  # noqa: E402
+from data_sheets_schema.grounding import (  # noqa: E402
+    BRITISH_INSTRUMENT, PREFIX_INSTRUMENT, form_facts,
+)
 from data_sheets_schema.semantic_comparison import (  # noqa: E402
     discrimination, evaluator_key, instruments_of, render_discrimination, withheld_projects,
 )
@@ -119,7 +122,7 @@ def _method_for(label: str, project: str) -> str:
 
 # (key, display, label prefix, runtime, role). Every arm is shown as mean ± SD
 # over its replicates; `role == "worst"` additionally prints the per-project
-# worst, the value the canary gate holds runs against.
+# worst on this table's measurement basis. Gates read stored blocks separately.
 ARMS = (
     ("v4", "v4 API (2026-08-13)", "2026-08-13_claude-opus-5-api-generic-v4",
      "Claude API via CBORG", "worst"),
@@ -169,12 +172,14 @@ def arm_labels(prefix) -> list[str]:
 METRICS: dict[str, tuple[str, str, bool, str]] = {
     "ungrounded": ("ungrounded identifiers", "record", True,
                    "grounding.distinct.absent as measured against the bundle the run saw"),
-    "orgfrag": ("organisational fragments", "live", True, ""),
+    "orgfrag": ("organisational fragments", "live", True,
+                "identifier slots from the run's merged schema, or the disclosed fallback"),
     "undeclared": ("undeclared prefixes", "live", True,
-                   "live instrument (grounding.PREFIX_INSTRUMENT): v3 (#982) excludes ark: and "
-                   "mailto:, urn: by registered NID; stored blocks carry prefix_instrument from v3"),
+                   f"current prefix instrument: {PREFIX_INSTRUMENT}; declared prefixes and Person/identifier "
+                   "slots from the run's merged schema, or the disclosed fallback. A familiar prefix "
+                   "can be undeclared in that schema; this is not a verdict that the namespace is invented"),
     "british": ("British spellings", "live", True,
-                "instrument v2.1 (#653). Coupled with pair errors on the API arm: a "
+                f"current instrument: {BRITISH_INSTRUMENT}. Coupled with pair errors on the API arm: a "
                 "full/core spelling split counts once per shared slot in both (#675)"),
     "pair": ("pair errors", "record", True,
              "deterministic artifact check, comparable across arms; the procedures "
@@ -430,8 +435,9 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     rc = rec.get("report_claims") or {}
     g = (rec.get("grounding") or {}).get("distinct") or {}
 
-    # Live form recomputation under the current instrument.
-    form = form_facts(full, core)
+    # Current form instrument, with the run's recorded schema rules (#4216).
+    # Keep the resolver basis: an unavailable pin explicitly falls back.
+    form = form_facts(full, core, record=rec)
 
     def form_get(*keys: str) -> int | None:
         for k in keys:
@@ -445,6 +451,7 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
     leaves = len(populated_leaves(load(full)))
     return {
         "label": label,
+        "form_schema_basis": form.get("schema_basis"),
         "leaves": leaves,
         **receipt_vals,
         **removal_metrics(core_dir / f"{project}_provenance.yaml", rec),
@@ -562,7 +569,9 @@ def stats(reps: list[dict[str, Any]], metric: str) -> tuple[float, float, int] |
 
 def cell(reps: list[dict[str, Any]], metric: str, role: str) -> str:
     """mean ± SD with the replicates in brackets; the baseline arm adds its
-    per-project worst, which is what the canary gate holds runs against."""
+    per-project worst on the table's measurement basis. Canary gates read
+    stored form blocks independently, so this live worst is not a stored
+    threshold (#4217)."""
     raw = ",".join(fmt(r, metric) for r in reps)
     st = stats(reps, metric)
     if st is None:
@@ -1296,6 +1305,37 @@ def _structure_row(arm: str, project: str, v: dict[str, int], names: str) -> str
             f"{v['ge2']} | {v['key']} / {v['pos']} / {v['unaligned']} | {names} |")
 
 
+def form_schema_section(data) -> list[str]:
+    """Expose each live form measurement's schema resolution, including fallback."""
+    def escaped(value):
+        return html.escape(str(value), quote=False).replace("|", "&#124;").replace(
+            "`", "&#96;").replace("\n", "<br>")
+
+    lines = ["## Live form schema bases (#4216)", "",
+             "The current form instrument is separate from its schema and naming inputs. "
+             "Undeclared prefixes and the identifier walk (including organisational fragments) "
+             "use the run's merged schema when recoverable. The resolution below states which "
+             "bytes supplied those rules. Path/hash fields are the run's requested pins: if "
+             "the source is today's schema, those fields do not attest that the requested "
+             "historical bytes were used; the reason explains the fallback.", "",
+             f"Current prefix instrument: {PREFIX_INSTRUMENT}. "
+             f"Current British-spelling instrument: {BRITISH_INSTRUMENT}. "
+             "GC label variants use the current `data/preprocessed/source_manifest.yaml` "
+             "naming declaration, not the run's schema or a recovered historical manifest. "
+             "Stored form blocks and canary gate baselines are not rewritten by this report.", "",
+             "| arm | project | label | schema resolution |",
+             "|---|---|---|---|"]
+    for arm, display, *_rest in ARMS:
+        for project in PROJECTS:
+            for row in data[arm][project]:
+                basis = row.get("form_schema_basis")
+                text = (json.dumps(basis, sort_keys=True, ensure_ascii=False)
+                        if basis is not None else "unrecorded — no schema basis supplied")
+                lines.append("| " + " | ".join(escaped(v) for v in (
+                    display, project, row.get("label", "unrecorded"), text)) + " |")
+    return lines + [""]
+
+
 def render_markdown(data, scores) -> str:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
@@ -1307,10 +1347,11 @@ def render_markdown(data, scores) -> str:
              "(`recorded_by` says whether the run or backfill-checks wrote it).",
              "- British spellings, undeclared prefixes, organisational fragments, GC "
              "label variants: **recomputed live** from the artifacts under the current "
-             "instrument (`grounding.form_facts`), so the basis does not depend on when "
-             "a record was last backfilled. Stored `form` blocks are not read (today "
-             "they agree with the recompute on all 36 records). GC variants are counted "
-             "against a naming declaration decided 2026-08-22 — anachronistic for v4.",
+             "instrument (`grounding.form_facts`), using each run's recorded merged-schema "
+             "identifier rules where recoverable. Per-record schema resolution and any fallback "
+             "to today's rules are disclosed below. Stored `form` blocks are not read or rewritten "
+             "and may differ. GC variants still use the current naming manifest, whose declaration "
+             "was decided 2026-08-22 — anachronistic for v4; it is not recovered from the run's schema.",
              "- rubric scores: `data/evaluation_llm/rubric{10,20}_semantic/label_aware/`. "
              "The v7 production and v8 arms were scored by `claude-opus-5[1m]` on "
              "2026-09-08; their superseded `claude-fable-5` scores are kept under "
@@ -1336,9 +1377,10 @@ def render_markdown(data, scores) -> str:
              "- a record whose own `validation` block says `passed: false` is not an arm "
              "member (#1029): " + (", ".join(f"`{l}` {p}" for l, p in EXCLUDED_INVALID) if EXCLUDED_INVALID else "none excluded this run") + ".", "",
              "Arms: " + "; ".join(f"**{d}** — " + (", ".join(f"`{l}`" for l in pfx) if isinstance(pfx, (list, tuple)) else f"`{pfx}_rep{{1,2,3}}`") + f", {rt}"
-                                   + (" (also shown with its per-project worst — max for reported-only metrics — the canary-gate baseline)" if role == "worst" else "")
+                                   + (" (also shown with its per-project worst on this report's measurement basis — max for reported-only metrics)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
+    lines += form_schema_section(data)
     lines += ["## Deterministic metrics — mean ± SD over replicates", "",
               "| metric | project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
               "|---|---|" + "|".join("---" for _ in ARMS) + "|"]
@@ -1350,7 +1392,8 @@ def render_markdown(data, scores) -> str:
             lines.append(f"| {disp} | {p} | " + " | ".join(cells) + " |")
     lines += ["", "Cells are mean ± sample SD over the *measured* replicates, with every "
               "replicate value in brackets; n is 3 unless stated. The baseline arm adds "
-              "its per-project worst, the value the canary gate holds runs against. Read "
+              "its per-project worst on this report's measurement basis. Canary gates read "
+              "stored form blocks; this live recompute does not change their thresholds (#4217). Read "
               "the SD as a spread, not a confidence interval: with n = 3 and one outlier "
               "(e.g. [3,14,130]) the SD is that outlier, and the bracketed values are the "
               "better summary. ᵘ = unmeasured — the report-claims checker parsed zero "
