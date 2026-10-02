@@ -17,6 +17,7 @@ packages = [
 # relative path.
 include = [
     "README.md",
+    { path = "src/data_sheets_schema/evaluation_config.yaml", format = ["sdist", "wheel"] },
     { path = "src/data_sheets_schema/schema", format = ["sdist", "wheel"] },
     { path = "project", format = ["sdist"] },
     { path = "src/download/prompts/**/*", format = ["sdist", "wheel"] },
