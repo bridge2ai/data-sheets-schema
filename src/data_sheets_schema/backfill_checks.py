@@ -99,26 +99,31 @@ def declared_bundle(record: dict[str, Any], provenance: Path | None = None) -> P
 def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             only: set[str] | None = None,
             ranges: dict[str, dict[str, str | None]] | None = None, *,
-            report_claims_version: int = 8) -> dict[str, Any]:
+            report_claims_version: int = 8, schema_policy: str = "recorded") -> dict[str, Any]:
     """The check blocks for one record, or reasons they cannot be computed.
     `only` restricts the computation to the named blocks (`--blocks`): the
     receipts and grounding checks read the bundle and every chunk, which
     over the corpus is the difference between minutes and hours when the
     revision being backfilled touches only `form`. `report_claims_version=7`
     explicitly replays historical report measurements; current checks use v8.
+    ``schema_policy=legacy_current`` explicitly replays the prior current-schema
+    selection and block shape. It is reserved for historical reproduction.
     This function computes blocks without rewriting stored measurements.
 
     The form and grounding blocks read the identifier rules of the merged
     schema the record names (`schema.full_sha256`, else `full_md5`), not
     today's, and say so under `schema_basis` (#3931): which prefixes were
     declared, and which slots were identifiers or Persons, are facts about
-    the schema the run was given. The pair and report blocks still read
-    today's full and core schemas and pin their hashes."""
+    the schema the run was given. Pair/report rules likewise use the recorded
+    full and core schema bytes, with per-file fallback reasons and hashes (#4062)."""
+    if schema_policy not in {"recorded", "legacy_current"}:
+        raise ValueError("schema_policy must be recorded or legacy_current")
     want = (lambda name: only is None or name in only)
     from data_sheets_schema.grounding import GROUNDING_INSTRUMENT, check_run
-    from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
-                                                _md5, _sha256)
-    from data_sheets_schema.report_claims import check_report, declared_slots
+    from data_sheets_schema.provenance import _md5
+    from data_sheets_schema.report_claims import check_report, declared_slots_of, declared_ranges_of
+    from data_sheets_schema.run_pair_schema import run_schema_views, SCHEMA_SELECTION_INSTRUMENT
+    from contextlib import nullcontext
 
     text = provenance.read_text(encoding="utf-8")
     record = yaml.safe_load(_split_header(text)[1]) or {}
@@ -126,109 +131,130 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     full, core, report = paths["full"], paths["core"], paths["report"]
     out: dict[str, Any] = {}
 
-    # --- pair consistency -------------------------------------------------
-    if not want("pair_consistency"):
-        pass
-    elif not (full.exists() and core.exists()):
-        missing = [str(p) for p in (full, core) if not p.exists()]
-        out["pair_consistency"] = {"checked": False, "ran": False,
-                                   "reason": f"missing: {', '.join(missing)}",
-                                   "recorded_by": RECORDED_BY}
-    else:
-        from data_sheets_schema.d4d_pair_consistency import (
-            load_pair_schema, pair_predates_current_schema, validate_pair_data,
-        )
-        pair = load_pair_schema(FULL_SCHEMA, CORE_SCHEMA)
-        # The whole point of a backfill is that these pairs are old, so this is
-        # exactly where #520 applies and exactly where the first version left
-        # it out (#550). Without it, `related_datasets` — added to core after
-        # most of the corpus was written — reported as a defect in 70 pairs
-        # that could not have carried it.
-        moved = pair_predates_current_schema(core)
-        # The digest this record states it was generated against, not today's.
-        # Where the ledger knows that digest, a slot that demonstrably existed
-        # then stays an error; where it does not, `schema_moved` applies
-        # broadly as before (#580).
-        rep = validate_pair_data(
-            yaml.safe_load(full.read_text(encoding="utf-8")) or {},
-            yaml.safe_load(core.read_text(encoding="utf-8")) or {}, pair,
-            schema_moved=moved,
-            run_digest=(record.get("schema") or {}).get("digest_md5"))
-        out["pair_consistency"] = {
-            "ran": True, "consistent": rep.passed, "errors": len(rep.errors),
-            "warnings": len(rep.warnings),
-            "identity_slots": len(rep.identity_slots),
-            "schema_moved": moved,
-            "findings": [{"code": i.code, "path": i.path,
-                          "message": i.message[:200]} for i in rep.errors[:20]],
-            "findings_truncated": max(0, len(rep.errors) - 20) or None,
-            "artifacts": {"full": {"path": str(full), "md5": _md5(full)},
-                          "core": {"path": str(core), "md5": _md5(core)}},
-            # The schema, not only the records. "The pair is consistent" is a
-            # claim about two files *against a set of identity slots*, and
-            # those come from the schema — #426 is the same lesson for
-            # validation verdicts. Without this, a backfilled verdict cannot
-            # be told apart from one reached against a schema that has since
-            # moved, which is precisely the question a reader asks of a
-            # recomputed result.
-            "schema": {"full_sha256": _schema_sha(FULL_SCHEMA),
-                       "core_sha256": _schema_sha(CORE_SCHEMA)},
-            "recorded_by": RECORDED_BY}
+    schema_context = (run_schema_views(record if schema_policy == "recorded" else None)
+                      if want("pair_consistency") or want("report_claims") else nullcontext(None))
+    with schema_context as selected:
+        # --- pair consistency -------------------------------------------------
+        if not want("pair_consistency"):
+            pass
+        elif not (full.exists() and core.exists()):
+            missing = [str(p) for p in (full, core) if not p.exists()]
+            out["pair_consistency"] = {"checked": False, "ran": False,
+                                       "reason": f"missing: {', '.join(missing)}",
+                                       "recorded_by": RECORDED_BY}
+        else:
+            from data_sheets_schema.d4d_pair_consistency import (
+                pair_schema_from_views, pair_predates_current_schema, validate_pair_data,
+            )
+            pair = pair_schema_from_views(selected.full, selected.core)
+            # The whole point of a backfill is that these pairs are old, so this is
+            # exactly where #520 applies and exactly where the first version left
+            # it out (#550). Without it, `related_datasets` — added to core after
+            # most of the corpus was written — reported as a defect in 70 pairs
+            # that could not have carried it.
+            moved = False if selected.recovered_pair else pair_predates_current_schema(core)
+            # The digest this record states it was generated against, not today's.
+            # Where the ledger knows that digest, a slot that demonstrably existed
+            # then stays an error; where it does not, `schema_moved` applies
+            # broadly as before (#580).
+            rep = validate_pair_data(
+                yaml.safe_load(full.read_text(encoding="utf-8")) or {},
+                yaml.safe_load(core.read_text(encoding="utf-8")) or {}, pair,
+                schema_moved=moved,
+                run_digest=(record.get("schema") or {}).get("digest_md5"))
+            out["pair_consistency"] = {
+                "ran": True, "consistent": rep.passed, "errors": len(rep.errors),
+                "warnings": len(rep.warnings),
+                "identity_slots": len(rep.identity_slots),
+                "schema_moved": moved,
+                "findings": [{"code": i.code, "path": i.path,
+                              "message": i.message[:200]} for i in rep.errors[:20]],
+                "findings_truncated": max(0, len(rep.errors) - 20) or None,
+                "artifacts": {"full": {"path": str(full), "md5": _md5(full)},
+                              "core": {"path": str(core), "md5": _md5(core)}},
+                # The schema, not only the records. "The pair is consistent" is a
+                # claim about two files *against a set of identity slots*, and
+                # those come from the schema — #426 is the same lesson for
+                # validation verdicts. Without this, a backfilled verdict cannot
+                # be told apart from one reached against a schema that has since
+                # moved, which is precisely the question a reader asks of a
+                # recomputed result.
+                "schema": dict(selected.hashes),
+                "schema_basis": selected.basis,
+                "schema_selection_instrument": SCHEMA_SELECTION_INSTRUMENT,
+                "recorded_by": RECORDED_BY}
 
-    # --- report claims ----------------------------------------------------
-    if not want("report_claims"):
-        pass
-    elif not report.exists():
-        out["report_claims"] = {"checked": False,
-                                "reason": "no reconciliation report",
-                                "recorded_by": RECORDED_BY}
-    else:
-        from data_sheets_schema.report_claims import declared_ranges, phase1_snapshot_with_pin_for
-        snapshot, snapshot_pin = phase1_snapshot_with_pin_for(core, record=record)
-        block = check_report(
-            report,
-            yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
-            yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
-            declared if declared is not None else declared_slots(),
-            snapshot=snapshot,
-            instrument_version=report_claims_version,
-            # Both maps describe one core schema and travel together: the
-            # caller builds each once for a whole corpus pass, and rebuilding
-            # one per record would both cost a SchemaView load per record and
-            # leave the two on different footings (#994 round 1, M2).
-            ranges=ranges if ranges is not None else declared_ranges(),
-            dispositions_expected=bool((record.get("inputs") or {}).get("dispositions_expected")
-                                       or (record.get("report_claims") or {}).get("dispositions_expected")))
-        # The report, and the two records it makes claims about, and the
-        # schema those claims are resolved against (#1085). The runner writes
-        # all four; this wrote only the report, so recomputing a block for an
-        # instrument revision silently dropped the pins that make its verdict
-        # checkable — the same argument the pair block states above, and the
-        # same one #426 makes for validation verdicts.
-        # Unconditionally, as the runner does: a `md5: null` says the file was
-        # absent, while omitting the key would be indistinguishable from a
-        # block written before this pinned them at all.
-        block["artifacts"] = {
-            "report": {"path": str(report), "md5": _md5(report)},
-            "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
-            "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
-            "phase1_snapshot": snapshot_pin,
-        }
-        block["schema"] = {"full_sha256": _schema_sha(FULL_SCHEMA),
-                           "core_sha256": _schema_sha(CORE_SCHEMA)}
-        block["recorded_by"] = RECORDED_BY
-        if snapshot_pin and snapshot_pin.get("state") == "unusable":
-            block["checked"] = False
-            block["reason"] = snapshot_pin["reason"]
-        # The expectation is a fact about the run, not about the report:
-        # carried on `inputs` (and on the recorded block) by the runner that
-        # asked for the table, restored here so a rebuild cannot downgrade a
-        # blind row to a tolerated one (#961). Never added to a record that
-        # does not carry it.
-        if (record.get("inputs") or {}).get("dispositions_expected") \
-                or (record.get("report_claims") or {}).get("dispositions_expected"):
-            block["dispositions_expected"] = True
-        out["report_claims"] = block
+        # --- report claims ----------------------------------------------------
+        if not want("report_claims"):
+            pass
+        elif not report.exists():
+            out["report_claims"] = {"checked": False,
+                                    "reason": "no reconciliation report",
+                                    "recorded_by": RECORDED_BY}
+        else:
+            from data_sheets_schema.report_claims import phase1_snapshot_with_pin_for
+            snapshot, snapshot_pin = phase1_snapshot_with_pin_for(core, record=record)
+            block = check_report(
+                report,
+                yaml.safe_load(full.read_text(encoding="utf-8")) if full.exists() else {},
+                yaml.safe_load(core.read_text(encoding="utf-8")) if core.exists() else {},
+                declared if declared is not None else declared_slots_of(selected.full, selected.core),
+                snapshot=snapshot,
+                instrument_version=report_claims_version,
+                # Both maps derive from the same selected views. Optional caller
+                # overrides retain their API, and are separately pinned below.
+                ranges=ranges if ranges is not None else declared_ranges_of(selected.core),
+                dispositions_expected=bool((record.get("inputs") or {}).get("dispositions_expected")
+                                           or (record.get("report_claims") or {}).get("dispositions_expected")))
+            # The report, and the two records it makes claims about, and the
+            # schema those claims are resolved against (#1085). The runner writes
+            # all four; this wrote only the report, so recomputing a block for an
+            # instrument revision silently dropped the pins that make its verdict
+            # checkable — the same argument the pair block states above, and the
+            # same one #426 makes for validation verdicts.
+            # Unconditionally, as the runner does: a `md5: null` says the file was
+            # absent, while omitting the key would be indistinguishable from a
+            # block written before this pinned them at all.
+            block["artifacts"] = {
+                "report": {"path": str(report), "md5": _md5(report)},
+                "full": {"path": str(full), "md5": _md5(full) if full.exists() else None},
+                "core": {"path": str(core), "md5": _md5(core) if core.exists() else None},
+                "phase1_snapshot": snapshot_pin,
+            }
+            block["schema"] = dict(selected.hashes)
+            block["schema_basis"] = selected.basis
+            block["schema_selection_instrument"] = SCHEMA_SELECTION_INSTRUMENT
+            if declared is not None or ranges is not None:
+                import hashlib
+                import json
+                overrides = {}
+                for name, mapping in (("declared_slots", declared), ("declared_ranges", ranges)):
+                    if mapping is not None:
+                        canonical = {key: sorted(value) if isinstance(value, set) else value
+                                     for key, value in mapping.items()}
+                        overrides[name] = hashlib.sha256(json.dumps(
+                            canonical, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
+                block["schema_overrides"] = {"source": "caller-supplied rule maps",
+                                             "sha256": overrides,
+                                             "note": "overridden rules are not derived from the selected schema bytes"}
+            block["recorded_by"] = RECORDED_BY
+            if snapshot_pin and snapshot_pin.get("state") == "unusable":
+                block["checked"] = False
+                block["reason"] = snapshot_pin["reason"]
+            # The expectation is a fact about the run, not about the report:
+            # carried on `inputs` (and on the recorded block) by the runner that
+            # asked for the table, restored here so a rebuild cannot downgrade a
+            # blind row to a tolerated one (#961). Never added to a record that
+            # does not carry it.
+            if (record.get("inputs") or {}).get("dispositions_expected") \
+                    or (record.get("report_claims") or {}).get("dispositions_expected"):
+                block["dispositions_expected"] = True
+            out["report_claims"] = block
+
+    if schema_policy == "legacy_current":
+        for block in out.values():
+            for key in ("schema_basis", "schema_selection_instrument", "schema_overrides"):
+                block.pop(key, None)
 
     # --- form -------------------------------------------------------------
     # Computed from the records alone, so unlike grounding it is available even

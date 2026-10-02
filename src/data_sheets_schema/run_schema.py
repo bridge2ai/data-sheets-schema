@@ -48,20 +48,24 @@ from typing import Any, NamedTuple
 TODAY = "today's schema"
 
 
-def run_schema_bytes(record: dict[str, Any] | None) -> tuple[bytes | None, dict[str, Any]]:
+def run_schema_bytes(record: dict[str, Any] | None, *, kind: str = "full") -> tuple[bytes | None, dict[str, Any]]:
     """(bytes, basis): the merged schema the run recorded, from disk, from a
     recorded reconstruction, or from the committed version that matches, in
     that order; (None, basis) where none of them can be read, the basis
     saying today's schema is read instead and why. Every hash the record
     gives must match, so an md5-only record whose file changed on disk goes
-    on to git (#3803)."""
+    on to git (#3803). ``kind=core`` resolves the recorded core schema by
+    exactly the same rules; the default full-schema contract is unchanged."""
+    if kind not in {"full", "core"}:
+        raise ValueError("schema kind must be full or core")
     schema = (record or {}).get("schema") if isinstance(record, dict) else None
     schema = schema if isinstance(schema, dict) else {}
-    path, sha256, md5 = schema.get("full_path"), schema.get("full_sha256"), schema.get("full_md5")
+    path, sha256, md5 = (schema.get(f"{kind}_{key}") for key in ("path", "sha256", "md5"))
     sha256 = sha256 if isinstance(sha256, str) and sha256 else None
     md5 = md5 if isinstance(md5, str) and md5 else None
     if not isinstance(path, str) or not path or not (sha256 or md5):
-        return None, {"source": TODAY, "reason": "the record names no merged schema by path and hash"}
+        return None, {"source": TODAY, "reason": ("the record names no merged schema by path and hash" if kind == "full"
+                                          else "the record names no merged core schema by path and hash")}
     hashes = {k: v for k, v in (("sha256", sha256), ("md5", md5)) if v}
     from data_sheets_schema.resources import resource_path
     try:
