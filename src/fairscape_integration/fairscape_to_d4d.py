@@ -1128,16 +1128,17 @@ class FairscapeToD4DConverter:
         kept only where permitted, and a scalar is wrapped for a
         multivalued slot. `_coerce` leaves any other date-time text as
         written; the schema rejects it, and `_settle` leaves it out with
-        the validator's message (#4098). This converter departs from
-        `_coerce` in five places:
+        the validator's message (#4098). A one-item list for a
+        single-valued slot is unwrapped before `_coerce` reads it. Until
+        #4109 that was a departure too: `_coerce` read a date before it
+        unwrapped the list, so `["2026-06-30"]` stayed a date the date-time
+        slot does not accept (#4098). `_coerce` now unwraps a one-item list
+        of text before its date rule, and the two agree. This converter
+        departs from `_coerce` in four places:
 
         - A reference or an object is not text, and a slot whose range is
           not a class does not hold it. `_coerce` would keep it as it is, or
           join its Python repr into one text.
-        - A one-item list for a single-valued slot is unwrapped before
-          `_coerce` reads it. `_coerce` reads a date before it unwraps the
-          list, so `["2026-06-30"]` stayed a date the date-time slot does
-          not accept (#4098).
         - A single-valued slot whose range is not text (an identifier, a
           number, a date) keeps the first item of a list, as `id` and an
           enum slot do. `_coerce` would join the items into a text that is
