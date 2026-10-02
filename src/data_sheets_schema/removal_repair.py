@@ -184,7 +184,12 @@ def inspect_run(spec, *, record=None) -> tuple[dict, dict]:
     return out, inputs
 
 
-def completion_check(spec, *, record=None) -> dict:
+def output_pins(spec) -> dict:
+    return {name: {"path": str(path), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+            for name, path in (("full", spec.full_path), ("core", spec.core_path))}
+
+
+def completion_check(spec, *, record=None, expected_outputs=None) -> dict:
     """Recompute final facts; a saved/model-written pass is never authority."""
     from data_sheets_schema.usage_ledger import UsageLedgerError
     out = {"policy": policy_identity(), "checked": False, "findings": []}
@@ -193,7 +198,17 @@ def completion_check(spec, *, record=None) -> dict:
         out.update(checked=True, final=final)
         if final["unfounded"] != 0:
             out["findings"] = [{"kind": "unfounded_removals", "count": final["unfounded"]}]
+        if expected_outputs is not None:
+            actual = output_pins(spec)
+            for name in ("full", "core"):
+                expected = expected_outputs.get(name) if isinstance(expected_outputs, dict) else None
+                if not isinstance(expected, dict) or not re.fullmatch(r"[a-f0-9]{64}", str(expected.get("sha256", ""))):
+                    raise ValueError(f"verified removal repair {name} output pin is missing or invalid")
+                if actual[name] != expected:
+                    out["findings"].append({"kind": "removal_output_changed", "artifact": name,
+                                            "expected": expected, "actual": actual[name]})
     except (OSError, ValueError, UnicodeError, yaml.YAMLError, UsageLedgerError) as exc:
+        out["checked"] = False
         out["findings"] = [{"kind": "removal_inputs_unusable", "detail": str(exc)}]
     return out
 
@@ -223,6 +238,7 @@ def run(spec, client, settings: dict, usage: list) -> dict:
 
     try:
         before, inputs = inspect_run(spec)
+        out["output_pins"] = output_pins(spec)
     except (OSError, ValueError, UnicodeError, yaml.YAMLError, usage_ledger.UsageLedgerError) as exc:
         return reject("removal_inputs_unusable", str(exc))
     out.update(checked=True, before=before, final=before)
@@ -316,7 +332,7 @@ def run(spec, client, settings: dict, usage: list) -> dict:
     api._snapshot(spec, f"{spec.project}_removal_repair_full.yaml", body, usage_id=call_id)
     spec.full_path.write_text(body, encoding="utf-8")
     spec.core_path.write_text(core_body, encoding="utf-8")
-    out.update(changed=True, final=after)
+    out.update(changed=True, final=after, output_pins=output_pins(spec))
     out["final"]["artifacts"] = {**before["artifacts"], "current": {
         "path": str(spec.full_path), "sha256": hashlib.sha256(body.encode()).hexdigest()}}
     api._snapshot(spec, f"{spec.project}_removal_repair_check.json", json.dumps(out, indent=2))

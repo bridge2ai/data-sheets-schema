@@ -372,7 +372,8 @@ def test_final_check_catches_record_drift_during_report_refresh(external, monkey
         api.execute(spec, client=client)
     record = yaml.safe_load(spec.provenance_path.read_text())
     assert record["removals"]["unfounded"] == 1
-    assert record["removal_repair"]["findings"] == [{"kind": "unfounded_removals", "count": 1}]
+    assert {"kind": "unfounded_removals", "count": 1} in record["removal_repair"]["findings"]
+    assert any(f["kind"] == "removal_output_changed" for f in record["removal_repair"]["findings"])
     assert usage_ledger.evidence_refusal(spec)["reading"]["final"]["unfounded"] == 1
 
 
@@ -450,3 +451,67 @@ def test_completed_refresh_recovers_original_outcome_without_new_spend(external,
     assert record["removal_repair"]["response_sha256"] == outcome["response_sha256"]
     with pytest.raises(usage_ledger.UsageLedgerError, match="no second refresh"):
         usage_ledger.begin_call(spec, "report_after_repair", 1, "later")
+    for phase in ("full", "audit", "reconcile_full", "repair_full", "report"):
+        with pytest.raises(usage_ledger.UsageLedgerError, match="cannot restart"):
+            usage_ledger.begin_call(spec, phase, 1, "later")
+
+
+@pytest.mark.parametrize("change", ["rewrite", "novel", "core"])
+def test_post_restore_report_mutation_cannot_pass_on_zero_removals(external, monkeypatch, change):
+    spec = replace(external, condition="generic", removal_repair_version=1)
+    client = FakeClient()
+    client.messages = GeneratingMessages(True)
+    # The retained-value case uses the real validator as an independent
+    # witness that a schema-valid mutation still violates accepted identity.
+    if change != "rewrite":
+        monkeypatch.setattr(api, "_validator_lines", lambda *a: ([], None))
+    regenerate = api._regenerate_report
+    def changed_report(*args, **kwargs):
+        result = regenerate(*args, **kwargs)
+        path = spec.core_path if change == "core" else spec.full_path
+        body = yaml.safe_load(path.read_text())
+        body["description" if change == "rewrite" else "notes"] = "Unreviewed different material"
+        path.write_text(text(body))
+        return result
+    monkeypatch.setattr(api, "_regenerate_report", changed_report)
+    with pytest.raises(RuntimeError, match="removal_output_changed"):
+        api.execute(spec, client=client)
+    record = yaml.safe_load(spec.provenance_path.read_text())
+    assert record["removals"]["unfounded"] == 0
+    findings = record["removal_repair"]["findings"]
+    assert any(f["kind"] == "removal_output_changed" and f["artifact"] ==
+               ("core" if change == "core" else "full") for f in findings)
+    second = FakeClient()
+    with pytest.raises(RuntimeError, match="removal_output_changed"):
+        api.execute(replace(spec), client=second)
+    assert second.messages.calls == []
+
+
+@pytest.mark.parametrize("progress_state", ["missing", "corrupt", "partial"])
+def test_completed_repair_cannot_restart_generation_after_lost_progress(external, monkeypatch, progress_state):
+    spec = replace(external, condition="generic", removal_repair_version=1)
+    client = FakeClient()
+    client.messages = GeneratingMessages(True)
+    monkeypatch.setattr(api, "_validator_lines", lambda *a: ([], None))
+    grounding = api.grounding_block
+    def interrupt(*args, **kwargs):
+        raise KeyboardInterrupt("after repair and refresh, before provenance")
+    monkeypatch.setattr(api, "grounding_block", interrupt)
+    with pytest.raises(KeyboardInterrupt):
+        api.execute(spec, client=client)
+    monkeypatch.setattr(api, "grounding_block", grounding)
+    progress = api._progress_path(spec)
+    if progress_state == "missing":
+        progress.unlink()
+    elif progress_state == "corrupt":
+        progress.write_text("{truncated")
+    else:
+        state = json.loads(progress.read_text())
+        state["completed"].remove("full")
+        progress.write_text(json.dumps(state))
+    originals = spec.full_path.read_bytes(), spec.core_path.read_bytes()
+    second = FakeClient()
+    with pytest.raises(usage_ledger.UsageLedgerError, match="generation phases cannot restart"):
+        api.execute(replace(spec), client=second)
+    assert second.messages.calls == []
+    assert originals == (spec.full_path.read_bytes(), spec.core_path.read_bytes())

@@ -349,6 +349,8 @@ def require_removal_repair_admission(spec, *, phase: str | None = None) -> None:
                        and row.get("usage_id") == admission.get("usage_id") for row in data["rows"])):
         raise UsageLedgerError("removal repair admission is incomplete or invalid; no further calls are allowed")
     refresh = admission.get("report_refresh")
+    if phase is not None and phase not in {"report_after_repair", "report_regate"}:
+        raise UsageLedgerError("generation and shape-repair phases cannot restart after removal repair admission")
     if phase == "report_after_repair" and refresh != "ready":
         raise UsageLedgerError("removal repair report refresh already admitted; no second refresh is allowed")
     if refresh != "complete" and not (refresh == "ready" and phase == "report_after_repair"):

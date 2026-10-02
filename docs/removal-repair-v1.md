@@ -68,6 +68,14 @@ automatic continuation; it cannot skip the refresh or buy a second one
 the refresh and its progress pins are saved, later recovery retains the
 accepted repair's before-count, response identity and derivation without
 repeating either call. The final removal reading is still recomputed.
+The verified full/core SHA256 pins also survive in the accepted outcome.
+Both outputs must still match at resume and immediately before final
+provenance is written; zero remaining removals cannot excuse an unrelated
+rewrite, added fact or changed core (#4255). Missing, unreadable or incomplete
+progress after an accepted repair requires recovery or an explicitly fresh
+generation. The ledger independently refuses original generation and shape
+repair calls after that admission, so loss of progress cannot spend them
+again (#4256).
 
 Parent #2923 remains open. Restoring an original value does not establish
 that it is supported by a source. Evidence-backed audit amendments,

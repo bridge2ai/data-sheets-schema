@@ -6463,6 +6463,14 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
 
     if resume:
         merge_completed_rows(spec, usage)
+        if spec.removal_repair_version:
+            from data_sheets_schema.usage_ledger import removal_repair_attempted, accepted_removal_outcome
+            if removal_repair_attempted(spec):
+                from data_sheets_schema.removal_repair import completion_check
+                accepted = accepted_removal_outcome(spec)
+                checked = completion_check(spec, record=prior_record or None,
+                                           expected_outputs=accepted.get("output_pins", {}))
+                _assert_evidence_clean(checked, "report", spec=spec)
 
     # Resume from an explicit progress file rather than inferring from
     # artifacts. A `full` record on disk may be pre- or post-reconciliation and
@@ -6605,6 +6613,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                 "core": str(spec.core_path),
                                 "report": str(spec.report_path),
                                 "provenance": str(spec.provenance_path)}}
+    if resume and spec.removal_repair_version:
+        from data_sheets_schema.usage_ledger import removal_repair_attempted
+        if removal_repair_attempted(spec) and not set(PHASES).issubset(done):
+            raise UsageLedgerError("accepted removal repair needs complete saved progress or completed provenance; "
+                                   "generation phases cannot restart")
     if generation is None:
         if progress.get("generation_id") is not None or prior_identifier is not None:
             raise UsageLedgerError("identified generation needs recovery but its usage ledger is missing; "
@@ -7061,18 +7074,6 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # report block from the report alone and would drop the flag (#961);
     # `backfill_checks` restores it from here.
     rec.data.setdefault("inputs", {})["dispositions_expected"] = True
-    if removal_check is not None and not removal_check["findings"]:
-        # Report regeneration is another asynchronous call. Recheck the
-        # actual final bytes after it, without discarding any earlier refusal.
-        from data_sheets_schema.removal_repair import completion_check
-        final_removals = completion_check(spec)
-        removal_check.update(checked=final_removals["checked"],
-                             findings=final_removals["findings"],
-                             final=final_removals.get("final"))
-        rec.data["removals"] = removal_check["final"]
-        if removal_check["findings"]:
-            from data_sheets_schema.usage_ledger import record_evidence_refusal
-            record_evidence_refusal(spec, "report", removal_check)
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts
@@ -7096,6 +7097,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # the companions hash, so they describe the bytes the hashes do (#1021).
     provenance.refresh_output_sizes(rec.data)
     rec.data["api_usage"] = _require_surviving_accounting(spec, rec.data.get("api_usage") or [])
+    if removal_check is not None and not removal_check["findings"]:
+        # Report regeneration is another asynchronous call. Recheck the
+        # actual final bytes after it, without discarding any earlier refusal.
+        from data_sheets_schema.removal_repair import completion_check
+        final_removals = completion_check(spec, expected_outputs=removal_check["output_pins"])
+        removal_check.update(checked=final_removals["checked"],
+                             findings=final_removals["findings"],
+                             final=final_removals.get("final"))
+        rec.data["removals"] = removal_check["final"]
+        if removal_check["findings"]:
+            from data_sheets_schema.usage_ledger import record_evidence_refusal
+            record_evidence_refusal(spec, "report", removal_check)
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
