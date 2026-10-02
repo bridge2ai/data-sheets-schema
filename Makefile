@@ -525,8 +525,13 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 # examples under data/ro-crate/, must each convert to a record that
 # validates. The release crates under data/ro-crate_packages/ are not in
 # this list: tests/test_fairscape_integration/test_fairscape_to_d4d.py
-# converts CM4AI's and CHORUS's, and AI_READI's only decoded from
-# windows-1252, since the script cannot read it: it is not UTF-8 (#4089).
+# converts CM4AI's and CHORUS's. AI_READI's is windows-1252, not UTF-8,
+# and the script refuses it with the CrateEncodingError `d4d rocrate map`
+# raises, naming the first byte that does not decode, its offset and how
+# many such bytes the crate holds (#4089). The script takes any path, so
+# its refusal says to transcode the file to UTF-8 where the map command's
+# points to crate_manifest.yaml's `encoding_note` (#4192). The test
+# converts it only decoded from windows-1252.
 # The records go to a temporary directory: a test does not rewrite
 # data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml (#3969).
 # Its path is quoted wherever it is expanded: under a TMPDIR with a space

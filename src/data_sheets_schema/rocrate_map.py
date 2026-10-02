@@ -752,7 +752,21 @@ class CrateEncodingError(ValueError):
     """A crate's JSON is not UTF-8, so it is not JSON under RFC 8259 (#2969)."""
 
 
-def read_crate_json(path: Path) -> Any:
+#: How `read_crate_json`'s refusal ends unless its caller says otherwise:
+#: what to do about a crate the static-map arm reads, one crate_manifest.yaml
+#: declares, where a project's `encoding_note` records how its crate is
+#: written (AI_READI's, #2969).
+ENCODING_NOTE_HINT = ("declare or transcode it deliberately (see the "
+                      "project's `encoding_note` in crate_manifest.yaml)")
+
+#: How it ends for a crate read from whatever path a user gives, as the
+#: FAIRSCAPE converter, `fairscape-cli rocrate-to-d4d` and `fairscape-cli
+#: info` read one. The manifest need not declare that crate, so there is
+#: no note to point to and nowhere to declare its encoding (#4192).
+TRANSCODE_HINT = "transcode it to UTF-8 from the encoding it is written in"
+
+
+def read_crate_json(path: Path, *, hint: str = ENCODING_NOTE_HINT) -> Any:
     """Parse a crate's ``ro-crate-metadata.json``, refusing one that is not UTF-8.
 
     The AI_READI crate is windows-1252 (crate_manifest.yaml `encoding_note`),
@@ -762,6 +776,12 @@ def read_crate_json(path: Path) -> Any:
     under most single-byte encodings, so a fallback would be a silent guess,
     and ``raw/`` is the provenance anchor that is never repaired in place. A
     transcode is a curation decision, to be declared, not inferred here.
+
+    `hint` ends the refusal, after "Not decoded under a guessed encoding;".
+    The default, `ENCODING_NOTE_HINT`, points to the project's
+    `encoding_note`, and `d4d rocrate map` and `normalize` keep it. A caller
+    that reads a crate from any path passes `TRANSCODE_HINT` instead,
+    since the note need not describe that crate (#4192).
     """
     data = path.read_bytes()
     try:
@@ -774,9 +794,8 @@ def read_crate_json(path: Path) -> Any:
         raise CrateEncodingError(
             f"{path} is not UTF-8, as RFC 8259 requires of JSON: byte "
             f"0x{data[e.start]:02x} at offset {e.start}, {bad} undecodable "
-            "byte(s) in all. Not decoded under a guessed encoding; declare or "
-            "transcode it deliberately (see the project's `encoding_note` in "
-            "crate_manifest.yaml)") from e
+            f"byte(s) in all. Not decoded under a guessed encoding; {hint}"
+        ) from e
     return json.loads(text)
 
 
