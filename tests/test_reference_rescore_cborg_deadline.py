@@ -112,7 +112,11 @@ def test_real_local_timeout_retains_candidate_and_waits_for_process(environment,
     assert not (root / job["output"]).exists()
     assert list((root / "temporary").iterdir()) == []
     # Set only once the process is reaped; -SIGKILL is the deadline's kill, not its own exit.
-    assert evaluator.returncode == -signal.SIGKILL, "the timed-out evaluator was not waited for"
+    # The message says which of the two failed (#4200).
+    assert evaluator.returncode == -signal.SIGKILL, (
+        "the timed-out evaluator was not waited for" if evaluator.returncode is None else
+        f"the timed-out evaluator was waited for but not killed by the deadline "
+        f"(returncode {evaluator.returncode}, not -SIGKILL)")
 
 
 def test_changed_frozen_timeout_rejects_before_launch():
