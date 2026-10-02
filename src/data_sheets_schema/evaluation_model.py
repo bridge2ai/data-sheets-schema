@@ -15,13 +15,12 @@ This module is the seam. `evaluation_model_settings()` is what those five
 paths ask when they were given no model, and it answers with a `basis` naming
 where the answer came from. The API rubric judge
 (`evaluation/evaluate_d4d_llm.py`) is not one of them: it never fell back to
-the generation model and keeps its own pinned default (#3326). There is no evaluation config yet — where it lives
-is an owner decision (#2928: `.github/workflows/` ships in the wheel, a YAML
-under `src/data_sheets_schema/` enters future audit closures) — so today the
-answer is the generation model, under the basis `defaults_to_generation_model`.
-That is deliberately *exactly* the old resolution: a judge cache is scoped on
-the model name (`JudgementContext`, #243), and a default that moved would make
-every cached judgement fall out of scope (#351, #462).
+the generation model and deliberately keeps its own pinned default (#3326).
+`evaluation_config.yaml` beside this module ships with `model: null`, preserving
+that generation default. A nonempty model name selects a different evaluator
+without editing generation settings. Selection metadata is disclosure, not part
+of judge cache identity: the model and the existing instrument keys remain the
+cache boundary. No historical cache entry is rewritten.
 
 `model_family()` and `same_family()` let a report state what it cannot yet
 measure: whether the evaluator shares the generator's family. A family is read
@@ -31,10 +30,16 @@ model served on CBORG's `google/` route, not a Google model.
 
 from __future__ import annotations
 
+import hashlib
 import re
+from pathlib import Path
+
 from typing import Any
 
+import yaml
+
 BASIS_GENERATION_DEFAULT = "defaults_to_generation_model"
+CONFIG_PATH = Path(__file__).with_name("evaluation_config.yaml")
 
 # The sentence a report comparing arms on judged scores carries until a
 # cross-family second rating exists (#2928 acceptance criterion 4).
@@ -44,17 +49,44 @@ SAME_FAMILY_DISCLAIMER = (
     "cross-family second rating of these scores exists yet (#2928).")
 
 
-def evaluation_model_settings() -> dict[str, Any]:
-    """The judge model to use when a caller passed none, and why.
+def evaluation_model_settings(*, config_path: Path | None = None) -> dict[str, Any]:
+    """Resolve the packaged configuration at call time, without a provider.
 
-    Returns `name`, `basis` and `generation_model`. Read at call time, never
-    cached here: the generation config can be monkeypatched or edited within a
-    process, and the old fallbacks read it at call time too.
+    The config follows the imported implementation, not the working directory.
+    Missing, malformed or unknown settings fail before a judge call. Explicit
+    caller models use ``model_selection`` and need not read a default config.
     """
     from data_sheets_schema import api_runner
+    from data_sheets_schema.duplicate_keys import find_duplicate_keys
+    path = Path(config_path) if config_path is not None else CONFIG_PATH
+    raw = path.read_bytes()
+    text = raw.decode("utf-8")
+    if find_duplicate_keys(text, strict=True):
+        raise ValueError("evaluation config has duplicate keys")
+    config = yaml.safe_load(text)
+    if (not isinstance(config, dict) or set(config) != {"version", "model"}
+            or type(config["version"]) is not int or config["version"] != 1):
+        raise ValueError("evaluation config requires version: 1 and model")
+    selected = config["model"]
+    if selected is not None and (not isinstance(selected, str) or not selected.strip()
+                                 or selected != selected.strip()):
+        raise ValueError("evaluation model must be null or a nonempty trimmed identifier")
     generation = api_runner._model_settings()["name"]
-    return {"name": generation, "basis": BASIS_GENERATION_DEFAULT,
-            "generation_model": generation}
+    return {"name": generation if selected is None else selected,
+            "basis": BASIS_GENERATION_DEFAULT if selected is None else "evaluation_config",
+            "generation_model": generation,
+            "configuration": {"path": "src/data_sheets_schema/evaluation_config.yaml"
+                              if config_path is None else str(path),
+                              "sha256": hashlib.sha256(raw).hexdigest(), "version": 1}}
+
+
+def model_selection(model: str | None) -> dict[str, Any]:
+    """Bind one selection for a judge, retaining an explicit override's basis."""
+    if model is None:
+        return evaluation_model_settings()
+    if not isinstance(model, str) or not model.strip() or model != model.strip():
+        raise ValueError("explicit evaluation model must be a nonempty trimmed identifier")
+    return {"name": model, "basis": "explicit_override"}
 
 
 def evaluation_model_name() -> str:

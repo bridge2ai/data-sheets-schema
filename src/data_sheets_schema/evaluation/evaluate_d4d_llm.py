@@ -66,7 +66,12 @@ def identity_of(key: str, project_results: dict) -> tuple[str, str]:
 
 @dataclass
 class LLMEvaluationConfig:
-    """Configuration for LLM-based evaluation"""
+    """Configuration for the separately registered API rubric instrument.
+
+    Its dated default predates the shared support/fitness setting. Keep that
+    identity independent (#3326); changing it requires an explicit model in a
+    new evaluation registration, not an incidental support-judge config edit.
+    """
     model: str = "claude-sonnet-4-5-20250929"  # Date-pinned model selection
     temperature: float = 0.0  # Reduces sampling variation; repeatability still needs measurement
     max_tokens: int = 8000
