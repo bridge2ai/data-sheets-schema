@@ -1277,6 +1277,145 @@ def _synthetic_root(d: Path, *, schema: str = "'data_sheets_schema_all.yaml'", p
     return d
 
 
+class TestOptionalFollowupDerivation(unittest.TestCase):
+    """#4263: optional turns come from bound helper calls, never a allowlist."""
+
+    HELPER = "src/data_sheets_schema/optional_turn.py"
+    CALLER = ("\n    if spec.restore_version:\n"
+              "        from data_sheets_schema.optional_turn import run as restore\n"
+              "        restore(spec, None)\n")
+    BODY = ("PHASE = 'restore_full'\n"
+            "def run(spec, client):\n"
+            "    from data_sheets_schema import api_runner as api\n"
+            "    return api._call(spec, PHASE, client)\n")
+
+    def root(self, d):
+        root = _synthetic_root(Path(d).resolve(),
+                               planned="(['restore_full: optional restoration'] if spec.restore_version else [])")
+        text = (root / scan.RUNNER).read_text()
+        text = text.replace("class RunSpec:\n", "class RunSpec:\n    restore_version: int = 0\n")
+        text = text.replace('            raise ValueError("unsupported")',
+                            '            raise ValueError("unsupported")\n'
+                            '        if type(self.restore_version) is not int or self.restore_version not in (0, 1):\n'
+                            '            raise ValueError("version")\n'
+                            '        if self.restore_version and (self.is_agentic or self.render_version != 8):\n'
+                            '            raise ValueError("renderer")')
+        _write(root / scan.RUNNER, text + self.CALLER)
+        _write(root / self.HELPER, self.BODY)
+        return root
+
+    def derive(self, root):
+        consts = scan._module_constants(root / scan.RUNNER)
+        return scan.derive_followups(scan._tree(root / scan.RUNNER), list(consts["PHASES"]), consts, root=root)
+
+    def test_optional_turn_is_not_a_default_monolithic_call(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self.root(d)
+            facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+            meaning = scan.api_meaning(root, facts)
+        self.assertEqual(set(meaning["followup_turns"]), {"restore_full"})
+        for row in meaning["conditions"].values():
+            self.assertEqual(row["shape"], "MONOLITHIC")
+            self.assertEqual(row["followup_turns"], [])
+            self.assertEqual(row["optional_followup_turns"], ["restore_full"])
+        self.assertTrue(any("restore_version" in v and "default 0 disables" in v for v in meaning["verdict"]))
+
+    def test_renamed_axis_module_alias_phase_and_renderer_are_derived(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self.root(d)
+            text = (root / scan.RUNNER).read_text().replace("restore_version", "receipt_version")
+            text = text.replace("restore_full", "receipt_completion").replace("self.render_version != 8", "self.render_version != 7")
+            text = text.replace("from data_sheets_schema.optional_turn import run as restore",
+                                "from data_sheets_schema import optional_turn as helper")
+            text = text.replace("restore(spec, None)", "helper.run(spec, None)")
+            _write(root / scan.RUNNER, text)
+            _write(root / self.HELPER, self.BODY.replace("restore_full", "receipt_completion").replace("api_runner as api", "api_runner as renamed").replace("api._call", "renamed._call"))
+            turns = self.derive(root)
+        self.assertEqual(set(turns), {"receipt_completion"})
+        self.assertEqual(turns["receipt_completion"]["selection"]["field"], "receipt_version")
+        self.assertEqual(turns["receipt_completion"]["selection"]["renderers"], [7])
+
+    def test_direct_imported_wrapper_alias_is_bound(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self.root(d)
+            text = self.BODY.replace("from data_sheets_schema import api_runner as api",
+                                     "from data_sheets_schema.api_runner import _call as send")
+            _write(root / self.HELPER, text.replace("api._call", "send"))
+            self.assertIn("restore_full", self.derive(root))
+
+    def test_plan_gate_mutations_fail_closed(self):
+        mutations = [
+            ("if spec.restore_version else []", "if spec.unknown_version else []"),
+            ("if spec.restore_version else []", "if spec.restore_version and spec.condition == 'generic' else []"),
+            ("if spec.restore_version else []", "if not spec.restore_version else []"),
+            ("if spec.restore_version else []", "if spec.condition in RECEIPT_CONDITIONS or spec.restore_version else []"),
+            ("if spec.restore_version else []", "if spec.restore_version else ['other: alternative']"),
+            ("restore_version: int = 0", "restore_version: int = 1"),
+            ("restore_version: int = 0", "restore_version: bool = False"),
+            ("type(self.restore_version) is not int or ", ""),
+            ("self.restore_version not in (0, 1)", "self.restore_version not in (False, True)"),
+            ("if self.restore_version and (self.is_agentic or self.render_version != 8):", "if False:"),
+            ("self.render_version != 8", "self.render_version != 99"),
+            ("self.render_version != 8", "self.render_version != 20"),
+            ("    def __post_init__(self):", "    def __post_init__(self):\n        return"),
+            ('            raise ValueError("renderer")', '            raise ValueError("renderer")\n        self.restore_version = 1'),
+        ]
+        for before, after in mutations:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                text = (root / scan.RUNNER).read_text()
+                self.assertIn(before, text)
+                _write(root / scan.RUNNER, text.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, "not derived"):
+                    self.derive(root)
+
+    def test_runtime_guard_and_identity_mutations_fail_closed(self):
+        replacements = [
+            self.CALLER.replace("if spec.restore_version:", "if True:"),
+            self.CALLER.replace("if spec.restore_version:", "if spec.restore_version:\n        pass\n    else:"),
+            self.CALLER.replace("if spec.restore_version:", "if not spec.restore_version:"),
+            self.CALLER.replace("if spec.restore_version:", "if spec.restore_version and spec.condition == 'generic':"),
+            self.CALLER + self.CALLER.replace("if spec.restore_version:", "if True:"),
+            self.CALLER.replace("restore(spec, None)", "restore(other_spec, None)"),
+            self.CALLER.replace("restore(spec, None)", "spec = other_spec\n        restore(spec, None)"),
+            self.CALLER.replace("restore(spec, None)", "spec.restore_version = 0\n        restore(spec, None)"),
+            self.CALLER.replace("restore(spec, None)", "restore = other\n        restore(spec, None)"),
+            self.CALLER.replace("restore(spec, None)", "def unused():\n            restore(spec, None)"),
+        ]
+        for replacement in replacements:
+            with self.subTest(replacement=replacement), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                text = (root / scan.RUNNER).read_text()
+                _write(root / scan.RUNNER, text.replace(self.CALLER, replacement))
+                with self.assertRaisesRegex(scan.ConfigError, "not derived"):
+                    self.derive(root)
+
+    def test_missing_changed_unreadable_or_shadowed_helper_cannot_disappear(self):
+        mutations = [
+            None,
+            self.BODY.replace("restore_full", "other_phase"),
+            self.BODY.replace("PHASE = 'restore_full'", "PHASE = choose()"),
+            self.BODY.replace("api._call(spec, PHASE, client)", "None"),
+            self.BODY.replace("api._call(spec, PHASE, client)", "api._call(spec, choose(), client)"),
+            self.BODY.replace("api._call(spec, PHASE, client)", "api._call(other_spec, PHASE, client)"),
+            self.BODY.replace("    return api._call", "    api = other\n    return api._call"),
+            self.BODY.replace("    return api._call", "    def api():\n        pass\n    return api._call"),
+            self.BODY.replace("    return api._call", "    api._call = other\n    return api._call"),
+            self.BODY.replace("    return api._call", "    def unused():\n        return api._call"),
+            self.BODY.replace("from data_sheets_schema import api_runner as api", "from data_sheets_schema import other as api"),
+            "def unrelated():\n    from data_sheets_schema import api_runner as api\n" + self.BODY.replace("    from data_sheets_schema import api_runner as api\n", ""),
+        ]
+        for changed in mutations:
+            with self.subTest(changed=changed), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                if changed is None:
+                    (root / self.HELPER).unlink()
+                else:
+                    _write(root / self.HELPER, changed)
+                with self.assertRaisesRegex(scan.ConfigError, "not derived"):
+                    self.derive(root)
+
+
 class TestApiMeaning(unittest.TestCase):
     """The "api" section agrees with what the runtime does (#4022, #4025,
     #4055, #4057, #4058)."""
@@ -1415,7 +1554,8 @@ class TestApiMeaning(unittest.TestCase):
         builds the full_readdress turn, not a second one (#4058)."""
         from data_sheets_schema import api_runner
         turns = self.meaning["followup_turns"]
-        self.assertEqual(set(turns), {"full_readdress", "report_regate", "repair_{artifact}", "report_after_repair"})
+        self.assertEqual(set(turns), {"full_readdress", "report_regate", "repair_{artifact}", "report_after_repair",
+                                      "removal_repair_full"})
         self.assertEqual(turns["full_readdress"]["conditions"], sorted(api_runner.RECEIPT_CONDITIONS))
         for name in ("report_regate", "repair_{artifact}", "report_after_repair"):
             self.assertIsNone(turns[name]["conditions"])
@@ -1424,6 +1564,30 @@ class TestApiMeaning(unittest.TestCase):
         verdict = self.meaning["verdict"][0]
         self.assertIn("full_readdress runs only under", verdict)
         self.assertNotIn("readdress, ", verdict.replace("full_readdress", ""))
+
+    def test_optional_repair_matches_real_spec_and_plan_without_changing_defaults(self):
+        from data_sheets_schema import api_runner, removal_repair
+        from dataclasses import replace
+        turn = self.meaning["followup_turns"][removal_repair.PHASE]
+        selection = turn["selection"]
+        self.assertEqual(selection["field"], "removal_repair_version")
+        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1], [8]))
+        self.assertEqual(selection["runtime"], "api")
+        self.assertTrue(turn["calls"][0].startswith("src/data_sheets_schema/removal_repair.py:"))
+        self.assertTrue(turn["via"][0]["guards"])
+        base = self._cli_spec()
+        self.assertEqual(getattr(base, selection["field"]), selection["default"])
+        self.assertFalse(any(s.startswith(removal_repair.PHASE + ":") for s in api_runner.plan(base)["conditional_calls"]))
+        enabled = replace(base, removal_repair_version=1)
+        self.assertTrue(any(s.startswith(removal_repair.PHASE + ":") for s in api_runner.plan(enabled)["conditional_calls"]))
+        for changed in ({"removal_repair_version": True}, {"removal_repair_version": 2},
+                        {"removal_repair_version": 1, "render_version": 7}):
+            with self.subTest(changed=changed), self.assertRaises(ValueError):
+                replace(base, **changed)
+        for row in self.meaning["conditions"].values():
+            self.assertNotIn(removal_repair.PHASE, row["followup_turns"])
+            self.assertIn(removal_repair.PHASE, row["optional_followup_turns"])
+        self.assertTrue(any("default 0 disables it" in text for text in self.meaning["verdict"]))
 
     def test_the_tuned_condition_inserts_its_component_and_never_its_prompt(self):
         """resolve_prompt inserts components/{PROJECT}.md into a tuned
@@ -1678,15 +1842,15 @@ class TestDerivationsFailLoudly(unittest.TestCase):
         tree = ast.parse(self.runner_text)
         consts = scan._module_constants(ROOT / scan.RUNNER)
         phases = list(consts["PHASES"])
-        scan.derive_followups(tree, phases, consts)
+        scan.derive_followups(tree, phases, consts, root=ROOT)
         call = '_call_with_usage(spec, "full_readdress", 1, started,'
         self.assertIn(call, self.runner_text)
         unread = ast.parse(self.runner_text.replace(call, "_call_with_usage(spec, pick_phase(), 1, started,"))
         with self.assertRaisesRegex(scan.ConfigError, "not derived: the follow-up turns"):
-            scan.derive_followups(unread, phases, consts)
+            scan.derive_followups(unread, phases, consts, root=ROOT)
         no_plan = ast.parse(self.runner_text.replace('"conditional_calls":', '"other_calls":'))
         with self.assertRaisesRegex(scan.ConfigError, "conditional_calls"):
-            scan.derive_followups(no_plan, phases, consts)
+            scan.derive_followups(no_plan, phases, consts, root=ROOT)
 
     def test_the_tuned_text_the_toolchain_and_the_arms_are_not_derived_when_gone(self):
         env = scan._module_constants(ROOT / scan.RUNNER)

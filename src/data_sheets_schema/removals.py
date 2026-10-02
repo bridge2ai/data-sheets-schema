@@ -1396,9 +1396,10 @@ def _unchecked(reason: str) -> dict[str, Any]:
             "summary": f"not checked: {reason}", "non_checks": list(NON_CHECKS)}
 
 
-def _cap(rows: list[dict[str, Any]], key: str, block: dict[str, Any]) -> None:
-    block[key] = rows[:PATH_LIMIT]
-    block[f"{key}_truncated"] = max(0, len(rows) - PATH_LIMIT) or None
+def _cap(rows: list[dict[str, Any]], key: str, block: dict[str, Any],
+         limit: int | None = PATH_LIMIT) -> None:
+    block[key] = rows[:limit]
+    block[f"{key}_truncated"] = (max(0, len(rows) - limit) or None) if limit is not None else None
 
 
 def _read_back_list(text: str, known: list[Any]) -> list[Any] | None:
@@ -1496,7 +1497,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit_unread: str | None = None, snapshot_sha256: str | None = None,
              amended_paths: frozenset[str] | set[str] = frozenset(),
              enum_aliases: dict[str, dict[str, str]] | None = None,
-             amended_edits: dict[str, list[tuple[str, str] | None]] | None = None) -> dict[str, Any]:
+             amended_edits: dict[str, list[tuple[str, str] | None]] | None = None,
+             path_limit: int | None = PATH_LIMIT) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
     receipt, + the phase outputs in order) -> block.
 
@@ -1513,6 +1515,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     `phase` and `unfounded_phase` are None. `snapshot_sha256` is the hash
     of the snapshot bytes, which an audit's `source_review` must name to
     be read (#3037); without it the review is read as `unhashed`.
+    `path_limit` controls only the returned diagnostic lists (50 by default).
+    None returns every row for a runtime work order; counts and classification
+    are identical under either presentation.
     `amended_paths` are the final-record paths a curator's recorded
     `amend` disposition changed (#903), which mark a rewrite at or under
     them (#3366) — where phases are attributed, only a rewrite of the
@@ -2040,7 +2045,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                                               if judged is not None and sorted_ else None)}),
     }
     for cls in ("flattened", "founded", "unfounded", "unsorted", "rewritten"):
-        _cap(rows[cls], f"{cls}_paths", block)
+        _cap(rows[cls], f"{cls}_paths", block, path_limit)
     if findings is not None:
         unsorted_why = None
     elif audit_unread:

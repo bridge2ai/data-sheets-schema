@@ -461,4 +461,11 @@ files:
       recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing
       retroactively.'
     sha256: 41dd2fd7e970abb0c54419b067d36bd77fdf1360dc17888ccb09f79f0d4f32c0
+  src/download/prompts/removal_repair_v1.md:
+    bytes: 1512
+    pinned_at_commit: 05ffe921385ece56003356be03e1f040c7e7910e
+    pinned_on: '2026-10-02'
+    reason: New opt-in restore-only API removal repair policy v1 (#2923); no historical
+      prompt changes.
+    sha256: cd21a27d1b2ac9ac8893d0d0537811a0bac563811a2a879296d262091b1f0f81
 hash_algorithm: sha256

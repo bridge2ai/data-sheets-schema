@@ -306,6 +306,14 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     data = _read(spec)
     if data.get("evidence_refusal") is not None:
         raise UsageLedgerError("this generation has a terminal evidence refusal; no further calls are allowed")
+    require_removal_repair_admission(spec, phase=phase)
+    if phase == "removal_repair_full":
+        if removal_repair_attempted(spec):
+            raise UsageLedgerError("this generation already admitted its one removal repair")
+        data["removal_repair_attempted"] = True
+        data["removal_repair_admission"] = {"state": "pending"}
+    if phase == "report_after_repair" and data.get("removal_repair_attempted"):
+        data["removal_repair_admission"]["report_refresh"] = "pending"
     if phase == "report_regate":
         if report_regate_attempted(spec):
             raise UsageLedgerError("this generation already attempted its one report regeneration")
@@ -317,6 +325,75 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)
     return identifier
+
+
+def removal_repair_attempted(spec) -> bool:
+    """Admission exhausts the restore-only allowance, including lost responses."""
+    if not ledger_path(spec).exists():
+        return False
+    data = _read(spec)
+    return (bool(data.get("removal_repair_attempted"))
+            or any(row.get("phase") == "removal_repair_full" for row in data["rows"])
+            or (data.get("pending_call") or {}).get("phase") == "removal_repair_full")
+
+
+def require_removal_repair_admission(spec, *, phase: str | None = None) -> None:
+    """Interrupted restoration cannot authorize regeneration of its old phases."""
+    if not removal_repair_attempted(spec):
+        return
+    data = _read(spec)
+    admission = data.get("removal_repair_admission")
+    if (not isinstance(admission, dict) or admission.get("state") != "accepted"
+            or not re.fullmatch(r"[a-f0-9]{64}", str(admission.get("response_sha256", "")))
+            or not any(row.get("phase") == "removal_repair_full"
+                       and row.get("usage_id") == admission.get("usage_id") for row in data["rows"])):
+        raise UsageLedgerError("removal repair admission is incomplete or invalid; no further calls are allowed")
+    refresh = admission.get("report_refresh")
+    if phase is not None and phase not in {"report_after_repair", "report_regate"}:
+        raise UsageLedgerError("generation and shape-repair phases cannot restart after removal repair admission")
+    if phase == "report_after_repair" and refresh != "ready":
+        raise UsageLedgerError("removal repair report refresh already admitted; no second refresh is allowed")
+    if refresh != "complete" and not (refresh == "ready" and phase == "report_after_repair"):
+        raise UsageLedgerError("removal repair report refresh is incomplete; no further calls are allowed")
+
+
+def accept_removal_repair(spec, reading: dict) -> None:
+    """Publish acceptance only after final bytes and their progress pins exist."""
+    data = _read(spec)
+    if (data.get("evidence_refusal") is not None or data.get("pending_call") is not None
+            or data.get("removal_repair_admission") != {"state": "pending"}
+            or not reading.get("checked") or not reading.get("changed") or reading.get("findings")
+            or not re.fullmatch(r"[a-f0-9]{64}", str(reading.get("response_sha256", "")))
+            or not any(row.get("phase") == "removal_repair_full"
+                       and row.get("usage_id") == reading.get("usage_id") for row in data["rows"])):
+        raise UsageLedgerError("cannot accept an unverified removal repair")
+    data["removal_repair_admission"] = {"state": "accepted", "usage_id": reading["usage_id"],
+        "response_sha256": reading["response_sha256"], "report_refresh": "ready", "reading": reading}
+    _write(spec, data)
+
+
+def finish_removal_report(spec) -> None:
+    """A single refresh must finish before accepted restoration can resume."""
+    data = _read(spec)
+    admission = data.get("removal_repair_admission") or {}
+    if (admission.get("state") != "accepted" or admission.get("report_refresh") != "pending"
+            or data.get("pending_call") is not None or data.get("evidence_refusal") is not None
+            or not any(row.get("phase") == "report_after_repair" for row in data["rows"])):
+        raise UsageLedgerError("cannot finish an unverified removal repair report refresh")
+    admission["report_refresh"] = "complete"
+    _write(spec, data)
+
+
+def accepted_removal_outcome(spec) -> dict:
+    """Recover provenance only; callers still recompute the current reading."""
+    require_removal_repair_admission(spec)
+    admission = _read(spec).get("removal_repair_admission") or {}
+    out = admission.get("reading")
+    if (not isinstance(out, dict) or not out.get("checked") or not out.get("changed")
+            or out.get("findings") or out.get("response_sha256") != admission.get("response_sha256")
+            or out.get("usage_id") != admission.get("usage_id")):
+        raise UsageLedgerError("accepted removal repair outcome is missing or invalid")
+    return out
 
 
 def report_regate_attempted(spec) -> bool:
