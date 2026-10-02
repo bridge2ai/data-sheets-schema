@@ -421,6 +421,39 @@ def _repair_note(written: str, doi: str) -> str:
     return f"{said} removed, case kept"
 
 
+def _single_values(value: Any, multivalued: bool) -> tuple[Any, str]:
+    """Leave nulls and nested lists out before shaping a row or the record id.
+
+    Lists are never flattened. The detail accounts for each discarded kind;
+    a list with nothing left is refused with the same reason for every slot.
+    """
+    if not isinstance(value, list) or not value:
+        return value, ""
+    if all(item is None for item in value):
+        return None, f"no value: the list holds only null ({_preview(value)})"
+    notes = []
+    nested = [item for item in value if isinstance(item, list)]
+    if nested:
+        holds = "a list of single values" if multivalued else "one value"
+        rest = [item for item in value if not isinstance(item, list)]
+        if all(item is None for item in rest):
+            return None, (f"a list inside a list, for a slot that holds {holds}: "
+                          f"{_preview(value)}; dropped rather than flattened")
+        notes.append(
+            f"{len(nested)} of {len(value)} list items "
+            f"{'is a list' if len(nested) == 1 else 'are lists'} inside the "
+            f"list, for a slot that holds {holds}: "
+            f"{_preview(', '.join(_preview(item) for item in nested))}; "
+            "dropped rather than flattened")
+        value = rest
+    nulls = sum(item is None for item in value)
+    if nulls:
+        notes.append(f"{nulls} of {len(value)} list items "
+                     f"{'is' if nulls == 1 else 'are'} null; dropped")
+        value = [item for item in value if item is not None]
+    return value, "; ".join(notes)
+
+
 def _coerce(value: Any, slot, sv: SchemaView, project: str,
             counter: dict[str, int]) -> tuple[Any, str]:
     """Shape a crate value to the slot's cardinality and range."""
@@ -434,9 +467,10 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     # the next entity of the type: there the null would change which entity
     # a row reads. Here the entity is the same, and what changes is the row:
     # its reason everywhere, and its status and record wherever the rules
-    # below had made the null a value. A null beside a value is not read
-    # here (#4172). A list inside the list fits no slot, which holds one
-    # value or a list of single values, so it is dropped, never flattened
+    # below had made the null a value. A null beside a value is dropped
+    # before shaping the remaining values (#4172). A list inside the list
+    # fits no slot, which holds one value or a list of single values, so it
+    # is dropped, never flattened
     # one level. The rest of the list is shaped as though the crate held it
     # alone, and the row's detail names each list dropped before what the
     # rest's rules say, as the enum rule's `kept k/n` reports what it left
@@ -470,27 +504,14 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     #   and for `["2022-09-01", ["y"], ["z"]]` nothing. This arm writes
     #   `[{name: '2022-09-01'}]` for each, as for `["2022-09-01"]` alone,
     #   and names each list it dropped.
-    # They do not agree on a null beside a value, which the converter drops
-    # (#4172).
-    if isinstance(value, list) and value:
-        if all(item is None for item in value):
-            return None, f"no value: the list holds only null ({_preview(value)})"
-        nested = [item for item in value if isinstance(item, list)]
-        if nested:
-            holds = "a list of single values" if slot.multivalued else "one value"
-            rest = [item for item in value if not isinstance(item, list)]
-            if all(item is None for item in rest):
-                return None, (f"a list inside a list, for a slot that holds {holds}: "
-                              f"{_preview(value)}; dropped rather than flattened")
-            left_out = (
-                f"{len(nested)} of {len(value)} list items "
-                f"{'is a list' if len(nested) == 1 else 'are lists'} inside the "
-                f"list, for a slot that holds {holds}: "
-                f"{_preview(', '.join(_preview(item) for item in nested))}; "
-                "dropped rather than flattened")
-            # `rest` holds no list, so this goes one call deep.
-            value, note = _coerce(rest, slot, sv, project, counter)
-            return value, "; ".join(part for part in (left_out, note) if part)
+    value, left_out = _single_values(value, bool(slot.multivalued))
+    if left_out:
+        if value is None:
+            return None, left_out
+        # The remaining list holds neither null nor a list, so this goes
+        # one call deep. Keep the filtering note even if a slot rule refuses it.
+        value, note = _coerce(value, slot, sv, project, counter)
+        return value, "; ".join(part for part in (left_out, note) if part)
 
     # Every class's `doi` slot carries the same anchored pattern, so a row
     # that fills a nested class's `doi` is shaped the same way as the
@@ -507,10 +528,15 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     if enum:
         permitted = set(enum.permissible_values)
         candidates = value if isinstance(value, list) else [value]
-        kept = [v for v in candidates if v in permitted]
+        nontext = [v for v in candidates if not isinstance(v, str)]
+        if nontext:
+            notes.append(f"{len(nontext)} non-text enum item(s): "
+                         f"{_preview(nontext)}; dropped")
+        kept = [v for v in candidates if isinstance(v, str) and v in permitted]
         if not kept:
-            return None, (f"no value permitted by {slot.range} "
-                          f"({'|'.join(sorted(permitted))}); dropped")
+            notes.append(f"no value permitted by {slot.range} "
+                         f"({'|'.join(sorted(permitted))}); dropped")
+            return None, "; ".join(notes)
         value = kept if slot.multivalued else kept[0]
         if len(kept) != len(candidates):
             notes.append(f"kept {len(kept)}/{len(candidates)} enum-permitted values")
@@ -683,16 +709,29 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
     # A DOI is written as the `doi:` CURIE, the form #974's write-time
     # normaliser gives the generated arms, so the two compare as one value.
     if "id" not in res.record and root is not None:
-        crate_value = root.get("identifier") or root.get("@id")
-        crate_id = crate_value
-        if isinstance(crate_id, list):
-            crate_id = crate_id[0] if crate_id else None
+        id_notes = []
+        crate_id = None
+        for source in ("identifier", "@id"):
+            crate_value = root.get(source)
+            candidates, note = _single_values(crate_value, False)
+            if note:
+                id_notes.append(f"{source}: {note}")
+            crate_id = candidates
+            if isinstance(candidates, list):
+                crate_id = candidates[0] if candidates else None
+            if crate_id:
+                if source == "@id" and id_notes:
+                    id_notes.append("fell back to @id")
+                break
         if crate_id:
             doi = bare_doi(crate_id)
             res.record["id"] = f"doi:{doi}" if doi else str(crate_id)
             detail = "required by the schema; taken from the crate itself"
-            if isinstance(crate_value, list):
-                detail += f"; the first of {len(crate_value)} list item(s)"
+            if id_notes:
+                detail += "; " + "; ".join(id_notes)
+            if isinstance(candidates, list):
+                remaining = "remaining " if candidates != crate_value else ""
+                detail += f"; the first of {len(candidates)} {remaining}list item(s)"
             if doi:
                 detail += "; a DOI is written as the doi: CURIE (#974)"
             # Wherever the id written is not what the crate holds there — the
@@ -704,6 +743,10 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                 "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
                 "filled", detail, _preview(res.record["id"]), rewritten_from,
                 from_table=False))
+        elif id_notes:
+            res.fields.append(FieldResult(
+                "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
+                "empty", "; ".join(id_notes), from_table=False))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
