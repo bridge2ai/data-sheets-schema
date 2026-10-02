@@ -557,8 +557,10 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        if self.render_version == 24 and self.is_agentic:
+            raise ValueError("renderer 24 is an API-only offline receipt boundary")
         if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1):
             raise ValueError("api_playbook_version must be 0 or 1")
         if self.api_playbook_version and (self.is_agentic or self.render_version != 8):
@@ -1014,6 +1016,11 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0) -
         parts.append({"source_metadata_header": SOURCE_METADATA_HEADER_V16})
     if render_version >= 19:
         parts.append({"audit_schema_semantics_header": SCHEMA_SEMANTICS_HEADER_V19})
+    if render_version >= 24:
+        from data_sheets_schema.rereceipt import HEADER, INSTRUCTION, POLICY
+        from data_sheets_schema.receipts import RERECEIPTS_INSTRUMENT
+        parts.append({"full_rereceipt_header": HEADER, "full_rereceipt_instruction": INSTRUCTION,
+                      "full_rereceipt_policy": POLICY, "receipts_instrument": RERECEIPTS_INSTRUMENT})
     if api_playbook_version:
         if type(api_playbook_version) is not int or api_playbook_version != 1 or render_version != 8:
             raise ValueError("API playbook v1 supports only API renderer 8")
@@ -2092,6 +2099,11 @@ def evidence_phase_contract(phase: str, render_version: int) -> str:
 
 def phase_instruction(phase: str, render_version: int) -> str:
     """Keep historical phase bytes, and complete the v10 terminal contract."""
+    if phase == "full_rereceipt":
+        if render_version != 24:
+            raise ValueError("full_rereceipt requires renderer 24")
+        from data_sheets_schema.rereceipt import INSTRUCTION
+        return INSTRUCTION
     instruction = PHASE_INSTRUCTIONS[phase]
     if render_version < 10:
         return instruction
@@ -2988,6 +3000,33 @@ def build_readdress(req: PhaseRequest, response_text: str,
     ]
     return PhaseRequest(phase="full_readdress", system=req.system,
                         cached_blocks=req.cached_blocks, messages=messages)
+
+
+def build_rereceipt(req: PhaseRequest, response_text: str, inputs, *,
+                    render_version: int) -> PhaseRequest:
+    """Pure preparation only. `inputs.max_output_tokens` is the explicit cap.
+
+    Supply the LAST full/full_readdress request and its complete response; the
+    whole conversation and cache prefix are retained. This accepts no audit or
+    report request, so it cannot reopen a terminal attempt. A later registered
+    executor must bind the preceding run's artifact/usage pins to these inputs.
+    """
+    import copy
+    from data_sheets_schema.rereceipt import HEADER, Inputs
+    if render_version != 24 or not isinstance(inputs, Inputs):
+        raise ValueError("re-receipt preparation requires renderer 24 and pinned Inputs")
+    if req.phase not in ("full", "full_readdress"):
+        raise ValueError("re-receipt preparation must precede audit/report")
+    if not isinstance(response_text, str) or not response_text.strip():
+        raise ValueError("re-receipt preparation requires the preceding assistant response")
+    listing = yaml.safe_dump(inputs.inventory(), sort_keys=False, allow_unicode=True)
+    messages = copy.deepcopy(req.messages) + [
+        {"role": "assistant", "content": response_text},
+        {"role": "user", "content": [
+            {"type": "text", "text": HEADER + listing},
+            {"type": "text", "text": phase_instruction("full_rereceipt", render_version)}]}]
+    return PhaseRequest(phase="full_rereceipt", system=req.system,
+                        cached_blocks=copy.deepcopy(req.cached_blocks), messages=messages)
 
 
 def _extract_readdress(text: str) -> list[dict[str, Any]]:
@@ -4253,6 +4292,9 @@ def sent_text_surfaces() -> dict[str, str]:
     unrecorded; tests/test_american_english_rule.py reads this map and pins
     its size, so a new surface is added here to be guarded."""
     out = {f"phase:{k}": v for k, v in PHASE_INSTRUCTIONS.items()}
+    from data_sheets_schema.rereceipt import HEADER, INSTRUCTION, POLICY
+    out.update({"phase:v24:full_rereceipt": INSTRUCTION, "rereceipt_header": HEADER,
+                "rereceipt_policy": POLICY})
     out.update({f"phase:v10:{phase}": phase_instruction(phase, 10)
                 for phase in (*EVIDENCE_PHASE_CONTRACTS, "report_regate")})
     out.update({f"phase:v12:{phase}": phase_instruction(phase, 12)
@@ -6158,6 +6200,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
+    if spec.render_version in (24,):  # membership is also derived by the execution-policy audit
+        raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
+                         "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
@@ -6262,6 +6307,9 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
+    if spec.render_version in (24,):
+        raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
+                         "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")

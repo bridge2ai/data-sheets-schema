@@ -1387,7 +1387,7 @@ class TestApiMeaning(unittest.TestCase):
         (#4055). Nothing here reaches a provider: the run stops at the lock."""
         from data_sheets_schema import api_runner
         ex = self.meaning["audit_continuations"]["execute_refuses"]
-        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23])
+        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24])
         for n in ex["refused"]:
             with self.subTest(renderer=n), self.assertRaisesRegex(ValueError, "separately registered"):
                 api_runner.execute(self._spec_at(n))
