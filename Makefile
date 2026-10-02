@@ -519,6 +519,8 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 # windows-1252, since the script cannot read it: it is not UTF-8 (#4089).
 # The records go to a temporary directory: a test does not rewrite
 # data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml (#3969).
+# Its path is quoted wherever it is expanded: under a TMPDIR with a space
+# in it, an unquoted `rm -rf` removed two other paths (#4159).
 FAIRSCAPE_CRATES = $(ROCRATE_JSON) \
 	data/ro-crate/examples/CM4AI_roundtrip.json \
 	data/ro-crate/examples/voice_d4d_to_fairscape.json \
@@ -526,12 +528,12 @@ FAIRSCAPE_CRATES = $(ROCRATE_JSON) \
 
 test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (the four data/ro-crate crates)
 	@echo "Testing FAIRSCAPE → D4D conversion..."
-	@out=$$(mktemp -d) && status=0 && \
+	@out="$$(mktemp -d)" || exit 1; status=0; \
 	for crate in $(FAIRSCAPE_CRATES); do \
-		$(RUN) python $(FAIRSCAPE_TO_D4D) --input $$crate \
-			--output $$out/$$(basename $$crate .json).yaml || status=1; \
+		$(RUN) python $(FAIRSCAPE_TO_D4D) --input "$$crate" \
+			--output "$$out/$$(basename "$$crate" .json).yaml" || status=1; \
 	done; \
-	rm -rf $$out; exit $$status
+	rm -rf -- "$$out"; exit "$$status"
 
 fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \
