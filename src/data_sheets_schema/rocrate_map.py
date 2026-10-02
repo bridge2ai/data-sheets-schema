@@ -290,17 +290,18 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
 
     ``12/16/2025`` is unambiguous (16 cannot be a month) so it resolves.
     ``03/04/2026`` is not — the crates are known to mix DD/MM and MM/DD — so it
-    is dropped rather than silently resolved to one reading.
+    is dropped rather than silently resolved to one reading. A slash date is
+    ambiguous only where both orders read a calendar date (#4183).
 
     A value in either form that is not a calendar date is dropped too, with
     a reason that says so; it is never widened (#4168). `datetime.date`
     checks the year, month and day before a date-time is written. That
     covers an ISO date such as ``2026-13-45``, and a slash date that
     neither order reads as a date: ``13/13/2026``, ``31/02/2026``,
-    ``0/0/2026``. Such a slash date had been called ambiguous, as though
-    both components were months, or widened to a date-time the schema
-    rejects. Year ``0000`` is no year to `datetime.date`, and the schema's
-    date-time check rejects it too.
+    ``0/0/2026``, ``01/02/0000``. Such a slash date had been called
+    ambiguous, as though both orders read a date, or widened to a date-time
+    the schema rejects. Year ``0000`` is no year to `datetime.date`, and the
+    schema's date-time check rejects it too.
 
     It reads one text value. Anything else, a list included, comes back
     unchanged with no note, as does text in neither form; `_coerce`
@@ -319,18 +320,24 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     m = SLASH_DATE.match(text)
     if m:
         a, b, year = (int(part) for part in m.groups())
-        if 1 <= a <= 12 and 1 <= b <= 12:
+        # Each order's (month, day), and why it reads no calendar date, or ""
+        # where it reads one. The value is ambiguous only where both orders
+        # read a date: both components are then months, but two months are
+        # not enough, since `01/02/0000` reads no date in either order
+        # (#4183). Where one order reads a date, the value is that date: a
+        # component above 12 is no month, and 0 is neither a day nor a month.
+        orders = {"DD/MM/YYYY": (b, a), "MM/DD/YYYY": (a, b)}
+        why = {form: _not_a_calendar_date(year, month, day)
+               for form, (month, day) in orders.items()}
+        dates = [form for form in orders if not why[form]]
+        if len(dates) == 2:
             return None, (f"ambiguous date {text!r}: both components are <= 12, so "
                           "DD/MM and MM/DD cannot be distinguished; dropped rather "
                           "than guessed")
-        # Not both in 1-12, so at most one order reads a date: a component
-        # above 12 is no month, and 0 is neither a day nor a month.
-        why = {}
-        for form, month, day in (("DD/MM/YYYY", b, a), ("MM/DD/YYYY", a, b)):
-            why[form] = _not_a_calendar_date(year, month, day)
-            if not why[form]:
-                return (f"{year:04d}-{month:02d}-{day:02d}T00:00:00Z",
-                        f"{form} -> date-time")
+        if dates:
+            month, day = orders[dates[0]]
+            return (f"{year:04d}-{month:02d}-{day:02d}T00:00:00Z",
+                    f"{dates[0]} -> date-time")
         return None, (f"not a calendar date {text!r}: as DD/MM/YYYY, "
                       f"{why['DD/MM/YYYY']}, and as MM/DD/YYYY, "
                       f"{why['MM/DD/YYYY']}; dropped")

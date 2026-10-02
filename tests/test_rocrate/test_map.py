@@ -79,6 +79,9 @@ class TestPathResolution(unittest.TestCase):
 
 
 #: #4168: a value in either date form that is no calendar date, and why.
+#: Year 0000 is no year: `datetime.date` starts at 0001, and the schema's
+#: date-time check rejects 0000 too. So `01/02/0000`, whose components are
+#: both months, names no date in either order and is not ambiguous (#4183).
 IMPOSSIBLE_DATES = {
     "13/13/2026": "as DD/MM/YYYY, month 13 is not in 1-12, and as MM/DD/YYYY, "
                   "month 13 is not in 1-12",
@@ -90,7 +93,10 @@ IMPOSSIBLE_DATES = {
                   "MM/DD/YYYY, month 31 is not in 1-12",
     "0/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as MM/DD/YYYY, "
                 "month 0 is not in 1-12",
+    "01/02/0000": "as DD/MM/YYYY, year 0000 is not in 0001-9999, and as "
+                  "MM/DD/YYYY, year 0000 is not in 0001-9999",
     "2026-13-45": "month 13 is not in 1-12",
+    "0000-01-01": "year 0000 is not in 0001-9999",
 }
 
 
@@ -123,17 +129,16 @@ class TestDateNormalization(unittest.TestCase):
         """#4168. `datetime.date` checks a date before it is widened, and
         neither order reads any of these slash dates as one. `13/13/2026`,
         `31/31/2026` and `0/0/2026` had been called ambiguous, "both
-        components are <= 12"; `12/32/2026` and `31/02/2026` had been
-        widened to date-times the schema rejects, as `2026-13-45` had."""
+        components are <= 12", and so, until #4183, had `01/02/0000`;
+        `12/32/2026` and `31/02/2026` had been widened to date-times the
+        schema rejects, as `2026-13-45` and `0000-01-01` had."""
         for text, why in IMPOSSIBLE_DATES.items():
             with self.subTest(text=text):
                 self.assertEqual(_normalize_datetime(text),
                                  (None, f"not a calendar date {text!r}: {why}; dropped"))
 
     def test_the_calendar_decides_not_a_count_of_days(self):
-        """29 February is a date in a leap year only, and year 0000 is no
-        year: `datetime.date` starts at 0001, and the schema's date-time
-        check rejects 0000 too."""
+        """29 February is a date in a leap year only."""
         self.assertEqual(_normalize_datetime("29/02/2024"),
                          ("2024-02-29T00:00:00Z", "DD/MM/YYYY -> date-time"))
         self.assertEqual(_normalize_datetime("2024-02-29"),
@@ -147,23 +152,29 @@ class TestDateNormalization(unittest.TestCase):
             _normalize_datetime("2026-02-29"),
             (None, "not a calendar date '2026-02-29': day 29 is not in 1-28 for "
                    "2026-02; dropped"))
-        self.assertEqual(
-            _normalize_datetime("0000-01-01"),
-            (None, "not a calendar date '0000-01-01': year 0000 is not in "
-                   "0001-9999; dropped"))
 
-    def test_ambiguous_means_both_components_are_months(self):
-        """The ambiguity reason is kept where it is true, for components in
-        1-12, the edges included. A 0 is neither a day nor a month, so a
-        slash date with one is not a calendar date in either order."""
-        for text in ("03/04/2026", "1/12/2026", "12/1/2026"):
+    def test_ambiguous_means_both_orders_read_a_date(self):
+        """The ambiguity reason is kept where it is true: both orders read
+        a calendar date, so both components are months, the edges 1 and 12
+        included. A 0 is neither a day nor a month, in either position, so
+        a slash date with one is not a calendar date in either order. Nor
+        are two months in year 0000 (#4183), which `IMPOSSIBLE_DATES`
+        covers."""
+        for text in ("03/04/2026", "1/12/2026", "12/1/2026", "01/02/0001"):
             with self.subTest(text=text):
                 self.assertEqual(_normalize_datetime(text), _ambiguous(text))
-        self.assertEqual(
-            _normalize_datetime("0/12/2026"),
-            (None, "not a calendar date '0/12/2026': as DD/MM/YYYY, day 0 is not "
-                   "in 1-31 for 2026-12, and as MM/DD/YYYY, month 0 is not in "
-                   "1-12; dropped"))
+        cases = {
+            "0/12/2026": "as DD/MM/YYYY, day 0 is not in 1-31 for 2026-12, and as "
+                         "MM/DD/YYYY, month 0 is not in 1-12",
+            "12/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as "
+                         "MM/DD/YYYY, day 0 is not in 1-31 for 2026-12",
+            "5/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as "
+                        "MM/DD/YYYY, day 0 is not in 1-31 for 2026-05",
+        }
+        for text, why in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(_normalize_datetime(text),
+                                 (None, f"not a calendar date {text!r}: {why}; dropped"))
 
     def test_a_valid_date_resolves_as_before(self):
         """A date with one reading keeps its value and its note: the order
