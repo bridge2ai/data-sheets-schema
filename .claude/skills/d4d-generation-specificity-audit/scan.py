@@ -4563,7 +4563,8 @@ def _optional_condition_scope(tree, init, field: str, validated: set[int]) -> tu
     fail = lambda: _not_derived("which conditions make a follow-up turn",
                                f"unreadable condition restriction for optional gate `spec.{field}`")
     attr = lambda n, name: isinstance(n, ast.Attribute) and ast.unparse(n) == f"self.{name}"
-    if any((isinstance(n, ast.Name) and n.id == "self" and isinstance(n.ctx, (ast.Store, ast.Del)))
+    if any(isinstance(n, (ast.Raise, ast.Assert)) for n in init.body) or any(
+           (isinstance(n, ast.Name) and n.id == "self" and isinstance(n.ctx, (ast.Store, ast.Del)))
            or _rebinding(n, "self", init)
            or (attr(n, "condition") and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(init)):
         raise fail()
@@ -4584,7 +4585,8 @@ def _optional_condition_scope(tree, init, field: str, validated: set[int]) -> tu
         for guard in block.body:
             if not isinstance(guard, ast.If):
                 if _mentions_condition(guard) or any(isinstance(n, (ast.IfExp, ast.While, ast.For,
-                        ast.Try, ast.With, ast.Match, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                        ast.Try, ast.With, ast.Match, ast.Raise, ast.Assert,
+                        ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
                         for n in ast.walk(guard)):
                     raise fail()
                 continue

@@ -425,7 +425,9 @@ None falls back to a constant (#4025).
   values. The JSON retains the condition set and source evidence. Shadowed or
   mutated sets/spec conditions, compound predicates, else-branch restrictions,
   and unknown or nested guards fail closed (#4275). Calls to other validators
-  are not interpreted as condition declarations. This bounded derivation does
+  are not interpreted as condition declarations. An unconditional raise or
+  assertion in the initializer or positive opt-in body is not a proved
+  admissible path and is refused (#4279). This bounded derivation does
   not assume arbitrary compound
   selectors, helper delegation or nested dead functions are equivalent; changed
   shapes stop with “not derived” until explicitly supported and tested (#4263).

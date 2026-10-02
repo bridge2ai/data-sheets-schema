@@ -1446,6 +1446,25 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
                 with self.assertRaisesRegex(scan.ConfigError, "not derived"):
                     self.derive(root)
 
+    def test_unconditional_rejection_before_or_after_condition_guard_fails_closed(self):
+        for statement in ('raise ValueError("unconditional")', 'assert False', 'assert extra'):
+            for where in ("before", "after", "initializer"):
+                with self.subTest(statement=statement, where=where), tempfile.TemporaryDirectory() as d:
+                    root = self.root(d)
+                    block = self.CONDITION_BLOCK
+                    if where == "before":
+                        block = block.replace('            if self.condition',
+                                              f'            {statement}\n            if self.condition')
+                    elif where == "after":
+                        block += f'            {statement}\n'
+                    text = self.restricted(root, block=block)
+                    if where == "initializer":
+                        text = text.replace('    def __post_init__(self):',
+                                            f'    def __post_init__(self):\n        {statement}')
+                    _write(root / scan.RUNNER, text)
+                    with self.assertRaisesRegex(scan.ConfigError, "not derived.*condition restriction"):
+                        self.derive(root)
+
     def test_direct_imported_wrapper_alias_is_bound(self):
         with tempfile.TemporaryDirectory() as d:
             root = self.root(d)
@@ -1701,7 +1720,7 @@ class TestApiMeaning(unittest.TestCase):
         self.assertTrue(any("default 0 disables it" in text for text in self.meaning["verdict"]))
 
     def test_optional_receipt_completion_matches_real_spec_plan_and_registration(self):
-        from data_sheets_schema import api_runner, receipt_completion, receipt_completion_policy
+        from data_sheets_schema import api_runner, chunking, receipt_completion, receipt_completion_policy
         from dataclasses import replace
         turn = self.meaning["followup_turns"][receipt_completion.PHASE]
         selection = turn["selection"]
@@ -1714,6 +1733,10 @@ class TestApiMeaning(unittest.TestCase):
         self.assertTrue(turn["calls"][0].startswith("src/data_sheets_schema/receipt_completion.py:"))
         self.assertTrue(turn["via"][0]["guards"])
         base = self._cli_spec()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        chunk_manifest = _write(Path(tmp.name) / "chunks.yaml",
+                                chunking.dump_manifest(chunking.build_manifest(self.bundle)))
         self.assertFalse(any(s.startswith(receipt_completion.PHASE + ":") for s in api_runner.plan(base)["conditional_calls"]))
         for condition, row in self.meaning["conditions"].items():
             registration = {"format": receipt_completion_policy.FORMAT, "registration_id": "synthetic-scanner-only",
@@ -1726,7 +1749,7 @@ class TestApiMeaning(unittest.TestCase):
             self.assertEqual(receipt_completion.PHASE in row["optional_followup_turns"], condition in allowed)
             if condition in allowed:
                 receipt_completion_policy.parse_registration(encoded.encode())
-                enabled = replace(base, condition=condition, receipt_completion_version=1,
+                enabled = replace(base, condition=condition, chunk_manifest=chunk_manifest, receipt_completion_version=1,
                                   receipt_completion_registration=encoded)
                 self.assertTrue(any(s.startswith(receipt_completion.PHASE + ":") for s in api_runner.plan(enabled)["conditional_calls"]))
             else:
