@@ -22,6 +22,17 @@ reports is derived from the code that decides it:
   non-literal --condition is not derived (#4092); an assistant instruction
   file is a surface only where something loads it, and a controller module
   runs as a script only where something runs it (#4093);
+- an `or` default, a wrapped value, a positional argument, a regex or glob
+  test and a yielded value gate as code; a controller's own `__main__` block
+  that launches a run or runs a command-line interface makes it run; the
+  reason a PreToolUse hook gives a native run's model for a denial, and the
+  classifier reasons that feed it, are model text; run-shaping JSON and a
+  workflow's `contains(fromJSON(...))` are code (#4130);
+- only `--safe-mode` switches the session descriptions off (`--bare` the
+  memory and the hooks), a flag list something can shorten is not shown to
+  carry a flag, a `--system-prompt-file` launch is a launch, the project
+  settings and their hooks are found, and the skill's own description has a
+  recorded reason (#4131);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -36,6 +47,7 @@ from __future__ import annotations
 import ast
 import importlib.util
 import io
+import json
 import re
 import shutil
 import subprocess
@@ -145,10 +157,27 @@ def _discovered_with_a_loading_workflow_and_an_unsafe_launch():
     def launches(*args, **kwargs):
         return real_launches(*args, **kwargs) + [
             {"site": "notes/exp_4092/launch.py:9 --system-prompt", "carries": False,
-             "evidence": ["no element holds --safe-mode or --bare"]}]
+             "evidence": ["no element holds `--safe-mode`"], "memory_off": False,
+             "memory_evidence": ["no element holds `--safe-mode` or `--bare`"]}]
 
     with mock.patch.object(scan, "_named_files", side_effect=named), \
             mock.patch.object(scan, "launch_flags", side_effect=launches):
+        return scan.discover(ROOT)
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_a_bare_launch():
+    """discover() of this checkout with one more registered native launch,
+    which passes `--bare` and not `--safe-mode` (#4131). Computed once."""
+    real_launches = scan.launch_flags
+
+    def launches(*args, **kwargs):
+        return real_launches(*args, **kwargs) + [
+            {"site": "notes/exp_4131/launch.py:9 --system-prompt", "carries": False,
+             "evidence": ["no element holds `--safe-mode`"], "memory_off": True,
+             "memory_evidence": ["notes/exp_4131/launch.py:9 --bare"]}]
+
+    with mock.patch.object(scan, "launch_flags", side_effect=launches):
         return scan.discover(ROOT)
 
 
@@ -339,6 +368,14 @@ class TestTheScannerSees(unittest.TestCase):
                                                     "run_shaping", "live", "test"), tokens)
         self.assertEqual({h["line"] for h in methods if h["match"] == "AI-READI"
                           and h["context"] == "string_literal"}, {60, 63})
+
+    @unittest.skipIf(sys.version_info < (3, 12), "an f-string's parts are tokens from Python 3.12")
+    def test_a_concatenated_f_string_part_is_reported_on_its_own_line(self):
+        """The parts of an f-string concatenated across lines fold into one
+        constant; its line is read from the f-string's own tokens, not the
+        first line (#4130)."""
+        code = "x = (f'{basis}, respelled: {problem}. This refusal '\n     f'the attempt; run CHORUS exactly: {s}')\n"
+        self.assertEqual([(u[0], u[1]) for u in scan._python_units(code) if "CHORUS" in u[2]], [(2, "string_literal")])
 
     def test_a_non_ascii_prefix_does_not_shift_a_literal(self):
         """`ast` columns are UTF-8 bytes and `tokenize` columns are
@@ -535,6 +572,75 @@ class TestProjectKeyedCode(unittest.TestCase):
     def test_a_sentence_naming_a_project_stays_a_string_literal(self):
         units = list(scan._python_units('HELP = "see the CHORUS release notes"\nf(help="the VOICE study")\n'))
         self.assertEqual({u[1] for u in units if "CHORUS" in u[2] or "VOICE" in u[2]}, {"string_literal"})
+
+    #: The forms review round 4 found read as string literals, so a project
+    #: default in them never gated in run-shaping code (#4130): an `or`
+    #: default (assigned and returned), a value wrapped in a call, an
+    #: operator or an f-string, `click.Choice`, a positional argument, regex
+    #: and glob tests, argv `.append`/`.extend`, a yielded value. The last
+    #: two lines are sentences, which stay text.
+    PLANTED_4130 = ('@click.option("--plant-4130", type=click.Choice(["CHORUS", "VOICE"]))\n'     # 1
+                    'def planted_4130(plant_project, p, argv):\n'                                  # 2
+                    '    project = plant_project or "CM4AI"\n'                                     # 3
+                    '    raw = Path("data/raw") / "AI_READI"\n'                                    # 4
+                    '    single = Path("data/raw/CHORUS")\n'                                       # 5
+                    '    peds = f"data/raw/{p}/VOICE_PEDIATRIC"\n'                                 # 6
+                    '    _plant_launch_4130("CHORUS")\n'                                           # 7
+                    '    if re.fullmatch("VOICE", p):\n'                                           # 8
+                    '        pass\n'                                                               # 9
+                    '    if fnmatch.fnmatch(p, "CM4AI*"):\n'                                       # 10
+                    '        pass\n'                                                               # 11
+                    '    argv.append("AI_READI")\n'                                                # 12
+                    '    argv.extend(["CHORUS", "VOICE"])\n'                                       # 13
+                    '    joined = "data/" + "CM4AI"\n'                                             # 14
+                    '    env = os.environ.get("X") or "VOICE"\n'                                   # 15
+                    '    return project or "CHORUS"\n'                                             # 16
+                    'def generate_4130():\n'                                                       # 17
+                    '    yield "CM4AI"\n'                                                          # 18
+                    'TEXT_4130 = plant or "see the VOICE notes"\n'                                 # 19
+                    'print(f"Processing {plant} for CHORUS")\n')                                   # 20
+
+    def test_or_defaults_wrapped_values_arguments_and_tests_gate(self):
+        rel = "src/data_sheets_schema/cli/api.py"
+        surface = _discovered()[0].files[rel]
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        if not text.endswith("\n"):
+            text += "\n"
+        first = len(text.splitlines()) + 2
+        hits = [h for h in _scan_text(rel, text + "\n" + self.PLANTED_4130, surface) if h["line"] >= first]
+        got = {(h["line"] - first + 1, h["match"]): (h["context"], h["violation"]) for h in hits}
+        table, branch = ("code_table", True), ("code_branch", True)
+        self.assertEqual(got, {(1, "CHORUS"): table, (1, "VOICE"): table, (3, "CM4AI"): table,
+                               (4, "AI_READI"): table, (5, "CHORUS"): table, (6, "VOICE_PEDIATRIC"): table,
+                               (7, "CHORUS"): table, (8, "VOICE"): branch, (10, "CM4AI"): branch,
+                               (12, "AI_READI"): table, (13, "CHORUS"): table, (13, "VOICE"): table,
+                               (14, "CM4AI"): table, (15, "VOICE"): table, (16, "CHORUS"): table,
+                               (18, "CM4AI"): table, (19, "VOICE"): ("string_literal", False),
+                               (20, "CHORUS"): ("string_literal", False)})
+
+    def test_an_or_default_is_a_table_like_a_conditional_one(self):
+        """`x if x else "A"` was a table and `x or "A"` a string literal; a
+        lookup default and the same default after `or` differed too (#4130)."""
+        for code in ('x = project if project else "CHORUS"\n', 'x = project or "CHORUS"\n',
+                     'x = os.environ.get("X", "CHORUS")\n', 'x = os.environ.get("X") or "CHORUS"\n',
+                     'def f(project):\n    return project or "CHORUS"\n'):
+            with self.subTest(code=code):
+                self.assertEqual({u[1] for u in scan._python_units(code) if "CHORUS" in u[2]}, {"code_table"})
+
+    def test_the_failed_extraction_table_gates_whole(self):
+        """scripts/fix_failed_extractions.py keys each failed file on a
+        project: its 'column' entries gated, and its `Path(...)` values, which
+        name the same projects and platforms, gate too (#4130)."""
+        rel = "scripts/fix_failed_extractions.py"
+        surface = _discovered()[0].files[rel]
+        self.assertEqual(surface.roles, {"legacy_monolithic": "run_shaping"})
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        wrapped = {i for i, x in enumerate(text.splitlines(), 1) if re.search(r"Path\('\.\./.*(AI_READI|VOICE)", x)}
+        self.assertEqual(len(wrapped), 4)
+        hits = [h for h in _scan_text(rel, text, surface) if h["line"] in wrapped and h["category"] == "gc_project"]
+        self.assertEqual(len(hits), 10)
+        self.assertTrue(all(h["context"] == "code_table" and h["violation"] and h["gates_in"] == ["legacy_monolithic"]
+                            for h in hits), hits)
 
 
 class TestDiscovery(unittest.TestCase):
@@ -743,7 +849,62 @@ class TestDiscovery(unittest.TestCase):
         self.assertTrue(all(x["carries"] is True for x in it["launches"]), it["launches"])
         self.assertEqual(it["launches_without_customizations_off"], [])
         self.assertEqual(self.surfaces.files["CLAUDE.md"].roles, {"interactive_session": "model_facing"})
-        self.assertTrue(set(it["hooks"]) <= set(self.surfaces.files))
+
+    def test_the_project_settings_and_the_hooks_they_run_are_session_surfaces(self):
+        """The settings files and the scripts their hooks run, read here with
+        json, independently of the scanner, are interactive_session
+        surfaces; a project default in a hook script or in the settings' env
+        block gates there (#4131, #4130)."""
+        settings = [rel for rel in (".claude/settings.json", ".claude/settings.local.json") if (ROOT / rel).is_file()]
+        self.assertIn(".claude/settings.json", settings)
+        commands = []
+
+        def walk(x):
+            if isinstance(x, dict):
+                commands.extend(v for k, v in x.items() if k == "command" and isinstance(v, str))
+                for v in x.values():
+                    walk(v)
+            elif isinstance(x, list):
+                for v in x:
+                    walk(v)
+        for rel in settings:
+            walk(json.loads((ROOT / rel).read_text(encoding="utf-8")).get("hooks"))
+        hooks = sorted({m.group(0) for c in commands for m in re.finditer(r"\.claude/hooks/[\w.-]+\.py", c)})
+        self.assertTrue(hooks)
+        it = self.facts["interactive"]
+        self.assertEqual(it["settings"], settings)
+        self.assertEqual(it["hooks"], hooks)
+        for rel in settings + hooks:
+            with self.subTest(rel=rel):
+                self.assertEqual(self.surfaces.files[rel].roles.get("interactive_session"), "run_shaping")
+        for rel in hooks:
+            self.assertIn("interactive_session", self.surfaces.files[rel].runs)
+        planted, _ = _plant(hooks[0], 'DEFAULT_PROJECT_4131 = "CHORUS"')
+        self.assertTrue(planted)
+        self.assertTrue(all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in planted), planted)
+        env, _ = _plant(".claude/settings.json", '  "env": {"D4D_MANIFEST": "data/preprocessed/CHORUS_manifest.yaml"},',
+                        after="{")
+        self.assertTrue(env)
+        self.assertTrue(all(h["context"] == "code_table" and h["violation"] and h["gates_in"] == ["interactive_session"]
+                            for h in env), env)
+
+    def test_an_evaluator_a_generation_closure_reaches_gates(self):
+        """Evaluation is not exempt for being evaluation (#4131): the LLM
+        evaluator `prepare_registration.py` imports from the package is in
+        the native closure and its code tables gate there, a rubric agent's
+        description gates in interactive sessions, and SKILL.md no longer
+        says either never gates."""
+        rel = "src/data_sheets_schema/evaluation/evaluate_d4d_llm.py"
+        self.assertEqual(self.facts["model_clients"][rel]["classified"], "the api/native/deterministic import closure")
+        self.assertEqual(self.surfaces.files[rel].roles, {"native_agentic": "run_shaping"})
+        planted, _ = _plant(rel, "RUBRIC_HINTS_4131 = {'CHORUS': 'hospital EHR'}")
+        self.assertTrue([h for h in planted if h["match"] == "CHORUS" and h["violation"]
+                         and h["gates_in"] == ["native_agentic"]])
+        rubric, _ = _plant(".claude/agents/d4d-rubric10.md", "  Example: score the CHORUS record.", after="description:")
+        self.assertTrue(rubric and all(h["violation"] and h["gates_in"] == ["interactive_session"] for h in rubric))
+        skill = (SKILL / "SKILL.md").read_text(encoding="utf-8")
+        self.assertNotIn("Evaluation is out of scope", skill)
+        self.assertIn("evaluate_d4d_llm.py", skill)
 
     def test_controller_text_found_by_data_flow(self):
         """SYSTEM, returned by render_system, and command_guidance and
@@ -1599,6 +1760,43 @@ class TestRunShapingYamlAndShell(unittest.TestCase):
         quiet, _ = _plant(wf, '          echo "Generating the CHORUS datasheet"', "set -euo pipefail")
         self.assertTrue(quiet and not any(h["violation"] for h in quiet))
 
+    def test_a_membership_test_on_a_fromjson_list_is_a_branch(self):
+        """`contains(fromJSON('[...]'), x)` is GitHub's membership test on a
+        literal list: a branch, like `x == 'A'`; any other fromJSON literal
+        is data the expression reads, a table (#4130)."""
+        test = "contains(fromJSON('[\"CHORUS\", \"VOICE\"]'), steps.resolve.outputs.dataset)"
+        self.assertEqual([c for *_, c in scan._expr_spans(test)], ["code_branch"])
+        self.assertEqual([c for *_, c in scan._expr_spans("fromJSON('{\"CHORUS\": \"a\"}')[inputs.p]")], ["code_table"])
+        wf = ".github/workflows/d4d-agent.yml"
+        planted, _ = _plant(wf, "        if: contains(fromJSON('[\"CHORUS\", \"VOICE\"]'), steps.resolve.outputs.dataset)",
+                            "- name: Validate against the schema")
+        self.assertEqual({h["match"] for h in planted}, {"CHORUS", "VOICE"})
+        self.assertTrue(all(h["context"] == "code_branch" and h["violation"] for h in planted), planted)
+
+    def test_run_shaping_json_is_read_as_code(self):
+        """A JSON file no approach hands to a model (the project settings, the
+        assistant's allow-list) is data that shapes a run: a key and a string
+        value without whitespace are table entries, a hook command is shell,
+        a sentence stays text (#4130)."""
+        text = ('{\n'                                                                                       # 1
+                '  "env": {"D4D_MANIFEST": "data/preprocessed/CHORUS_manifest.yaml", "NOTE": "see the VOICE notes"},\n'
+                '  "CM4AI": ["a", "AI_READI"],\n'                                                            # 3
+                '  "hooks": {"PreToolUse": [{"type": "command", "command": "python3 x.py --project VOICE"}]}\n'  # 4
+                '}\n')
+        got: dict = {}
+        for line, ctx, unit, _ in scan.units_for(Path("s.json"), "s.json", text, code=True):
+            for _, _, _, matched in scan.match_text(unit, list(_tokens())):
+                got.setdefault((line, matched), set()).add(ctx)
+        self.assertEqual(got, {(2, "CHORUS"): {"code_table"}, (2, "VOICE"): {"value"}, (3, "CM4AI"): {"code_table"},
+                               (3, "AI_READI"): {"code_table"}, (4, "VOICE"): {"code_table"}})
+        handed = {c for _, c, _, _ in scan.units_for(Path("s.json"), "s.json", text, code=False)}
+        self.assertEqual(handed, {"value"})
+        surfaces = _discovered()[0]
+        for rel, approach in ((".claude/settings.json", "interactive_session"),
+                              (".github/ai-controllers.json", "github_assistant")):
+            with self.subTest(rel=rel):
+                self.assertEqual(surfaces.files[rel].roles, {approach: "run_shaping"})
+
 
 class TestParseFailures(unittest.TestCase):
     """A Python file the scan cannot parse stops it with exit 2 and is
@@ -1680,7 +1878,7 @@ class TestLaunchFlags(unittest.TestCase):
                                     "    argv.append('--system-prompt')\n    return argv + [p]\n",
              "notes/x/writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n"}
 
-    def _launches(self, files: dict) -> dict:
+    def _rows(self, files: dict) -> dict:
         with tempfile.TemporaryDirectory() as d:
             root = Path(d).resolve()
             for rel, text in files.items():
@@ -1688,16 +1886,111 @@ class TestLaunchFlags(unittest.TestCase):
             parsed = _parsed(root, "notes")
             controllers = {p.relative_to(root).as_posix(): p for p in parsed}
             rows = scan.launch_flags(root, controllers, parsed, scan._notes_index(root, parsed))
-        return {r["site"].split(":")[0].rsplit("/", 1)[-1]: r["carries"] for r in rows}
+        return {r["site"].split(":")[0].rsplit("/", 1)[-1]: r for r in rows}
+
+    def _launches(self, files: dict) -> dict:
+        return {name: row["carries"] for name, row in self._rows(files).items()}
 
     def test_each_launch_is_read_for_the_flag(self):
+        """`carries` is `--safe-mode` itself: `--bare` alone (g_sum) does
+        not switch the command, agent and skill descriptions off (#4131)."""
         self.assertEqual(self._launches(self.FLAGS),
                          {"a_literal.py": True, "b_constant.py": True, "c_imported.py": False, "d_from.py": True,
-                          "e_filtered.py": None, "f_field.py": True, "g_sum.py": True, "h_none.py": False,
+                          "e_filtered.py": None, "f_field.py": True, "g_sum.py": False, "h_none.py": False,
                           "i_append.py": None})
+        self.assertTrue(self._rows(self.FLAGS)["g_sum.py"]["memory_off"])
         # a field one writer fills without the flag is not shown to carry it
         other = {**self.FLAGS, "notes/x/writer2.py": "def make():\n    return {'cli_flags': ['--print']}\n"}
         self.assertIsNone(self._launches(other)["f_field.py"])
+
+    #: Launches whose flag list something can shorten, each beside the same
+    #: launch without the removal (#4131).
+    SHORTENED = {
+        "notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\n",
+        "notes/x/j_module.py": "CLI_FLAGS = ['--print', '--safe-mode']\nCLI_FLAGS.remove('--safe-mode')\n"
+                               "def go(exe, p):\n    return [exe, *CLI_FLAGS, '--system-prompt', p]\n",
+        "notes/x/k_local.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    flags.remove('--safe-mode')\n"
+                              "    return [exe, *flags, '--system-prompt', p]\n",
+        "notes/x/l_argv.py": "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                             "    argv.remove('--safe-mode')\n    return argv\n",
+        "notes/x/m_imported.py": "from flags import SAFE\ndef go(exe, p):\n    return [exe, *SAFE, '--system-prompt', p]\n",
+        "notes/x/n_mutator.py": "import flags\ndef strip():\n    flags.SAFE.pop()\n",
+        "notes/x/o_global.py": "FLAGS = ['--safe-mode']\ndef reset():\n    global FLAGS\n    FLAGS = ['--print']\n"
+                               "def go(exe, p):\n    return [exe, *FLAGS, '--system-prompt', p]\n",
+        "notes/x/p_field.py": "def go(exe, p, rec):\n    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
+        "notes/x/q_writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n",
+        "notes/x/r_field_mutator.py": "def strip(rec):\n    rec['cli_flags'].remove('--safe-mode')\n",
+        "notes/x/s_item.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    flags[1] = '--verbose'\n"
+                             "    return [exe, *flags, '--system-prompt', p]\n",
+        "notes/x/t_del.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n    del flags[1]\n"
+                            "    return [exe, *flags, '--system-prompt', p]\n"}
+    INTACT = {
+        "notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\n",
+        "notes/x/j_module.py": "CLI_FLAGS = ['--print', '--safe-mode']\n"
+                               "def go(exe, p):\n    return [exe, *CLI_FLAGS, '--system-prompt', p]\n",
+        "notes/x/k_local.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
+                              "    return [exe, *flags, '--system-prompt', p]\n",
+        "notes/x/l_argv.py": "def go(exe, p):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n    return argv\n",
+        "notes/x/m_imported.py": "from flags import SAFE\ndef go(exe, p):\n    return [exe, *SAFE, '--system-prompt', p]\n",
+        "notes/x/o_global.py": "FLAGS = ['--safe-mode']\n"
+                               "def go(exe, p):\n    return [exe, *FLAGS, '--system-prompt', p]\n",
+        "notes/x/p_field.py": "def go(exe, p, rec):\n    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
+        "notes/x/q_writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n",
+        "notes/x/s_item.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
+                             "    return [exe, *flags, '--system-prompt', p]\n",
+        "notes/x/t_del.py": "def go(exe, p):\n    flags = ['--print', '--safe-mode']\n"
+                            "    return [exe, *flags, '--system-prompt', p]\n"}
+
+    def test_a_flag_list_something_can_shorten_is_not_shown_to_carry_the_flag(self):
+        """A later `.remove()`, `.pop()`, `del`, item assignment or a
+        reassignment can drop `--safe-mode` from the list a launch reads: in
+        the launch's function, in the constant's module, in a controller that
+        imports the constant, or on the record field (#4131)."""
+        launches = ("j_module.py", "k_local.py", "l_argv.py", "m_imported.py", "o_global.py", "p_field.py",
+                    "s_item.py", "t_del.py")
+        shortened = self._rows(self.SHORTENED)
+        self.assertEqual({n: shortened[n]["carries"] for n in launches}, dict.fromkeys(launches))
+        self.assertTrue(all("can drop" in " ".join(shortened[n]["evidence"]) for n in launches))
+        self.assertEqual(self._launches(self.INTACT), dict.fromkeys(launches, True))
+        # a controller that writes the field by item assignment is a writer
+        assigned = {**self.INTACT, "notes/x/u_assigner.py": "def fill(rec):\n    rec['cli_flags'] = ['--print']\n"}
+        self.assertIsNone(self._launches(assigned)["p_field.py"])
+        text = scan._session_statement({"launches": list(shortened.values())})
+        self.assertNotIn("does not change a registered run's verdict", text)
+
+    def test_a_system_prompt_file_launch_is_a_launch(self):
+        """`--system-prompt-file` and `--append-system-prompt-file` launch a
+        native runtime as surely as `--system-prompt` (#4131), and so does a
+        flag spelled with its value (`--system-prompt=...`)."""
+        rows = self._rows({"notes/x/file_safe.py": "def go(exe, path):\n    return [exe, '--safe-mode', "
+                                                   "'--system-prompt-file', path]\n",
+                           "notes/x/file_plain.py": "def go(exe, path):\n    return [exe, '--print', "
+                                                    "'--append-system-prompt-file', path]\n",
+                           "notes/x/equals.py": "def go(exe, p):\n    return [exe, '--print', f'--system-prompt={p}']\n"})
+        self.assertEqual({n: r["carries"] for n, r in rows.items()},
+                         {"file_safe.py": True, "file_plain.py": False, "equals.py": False})
+        self.assertTrue(rows["file_safe.py"]["site"].endswith("--system-prompt-file"))
+        self.assertTrue(rows["file_plain.py"]["site"].endswith("--append-system-prompt-file"))
+
+    def test_bare_switches_off_the_memory_and_the_hooks_but_not_the_descriptions(self):
+        """`claude --help`: `--bare` skips the hooks and CLAUDE.md, "Skills
+        still resolve via /skill-name" (#4131). A run launched with `--bare`
+        alone loads the command, agent and skill descriptions, so those, and
+        not CLAUDE.md, are its surfaces too."""
+        bare = {"site": "b.py:1 --system-prompt", "carries": False, "evidence": ["no element holds `--safe-mode`"],
+                "memory_off": True, "memory_evidence": ["b.py:1 --bare"]}
+        text = scan._session_statement({"launches": [bare]})
+        self.assertNotIn("does not change a registered run's verdict", text)
+        self.assertIn("it passes `--bare`", text)
+        surfaces, facts = _discovered_with_a_bare_launch()
+        self.assertEqual(facts["interactive"]["launches_without_customizations_off"],
+                         ["notes/exp_4131/launch.py:9 --system-prompt"])
+        self.assertEqual(facts["interactive"]["launches_without_memory_off"], [])
+        self.assertEqual(surfaces.files["CLAUDE.md"].roles, {"interactive_session": "model_facing"})
+        self.assertNotIn("run_controllers", surfaces.files[".claude/settings.json"].roles)
+        review = surfaces.files[".claude/agents/d4d-review-record.md"]
+        self.assertEqual(review.roles.get("run_controllers"), "exposed")
+        self.assertEqual(review.loaded["run_controllers"], review.loaded["interactive_session"])
 
     def test_the_report_says_unaffected_only_when_every_launch_carries_the_flag(self):
         ok = {"site": "a.py:1 --system-prompt", "carries": True, "evidence": ["b.py:2 --safe-mode"]}
@@ -1802,6 +2095,149 @@ class TestControllerRuns(unittest.TestCase):
         loud, _ = _plant(stream, demo)
         self.assertTrue([h for h in loud if h["match"] == "CHORUS" and h["violation"]])
 
+    def test_a_main_block_that_launches_or_runs_a_cli_makes_its_module_run(self):
+        """A module other controllers import runs as a script where its own
+        `__main__` block calls a function that launches a run (in it or in a
+        module function it calls), or a command-line interface nothing else
+        calls (#4130); not where the block does something else, or where
+        another module calls the CLI."""
+        cli = ("import argparse\ndef parse(argv=None):\n    parser = argparse.ArgumentParser()\n"
+               "    return parser.parse_args(argv)\ndef main():\n    return parse()\n"
+               "if __name__ == '__main__':\n    main()\n")
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            base = root / "notes/exp_4130"
+            _write(base / "seed.py", "from data_sheets_schema.api_runner import RunSpec\n"
+                                     "import launcher, prep, prep_called, plain\nspec = RunSpec\n"
+                                     "def again():\n    return prep_called.main()\n")
+            _write(base / "launcher.py", "def build(exe, p):\n    return [exe, '--safe-mode', '--system-prompt', p]\n"
+                                         "def main():\n    return build('claude', 'x')\n"
+                                         "if __name__ == '__main__':\n    raise SystemExit(main())\n")
+            _write(base / "prep.py", cli)
+            _write(base / "prep_called.py", cli)
+            _write(base / "plain.py", "def helper():\n    return 1\nif __name__ == '__main__':\n    print(helper())\n")
+            parsed = _parsed(root, "notes")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            runs = scan.controller_run_evidence(root, parsed, index, controllers)
+        self.assertEqual(set(controllers), {f"notes/exp_4130/{n}.py" for n in
+                                            ("seed", "launcher", "prep", "prep_called", "plain")})
+        self.assertIn("launches a run (notes/exp_4130/launcher.py:2 --system-prompt)", runs["notes/exp_4130/launcher.py"])
+        self.assertIn("command-line interface nothing else calls", runs["notes/exp_4130/prep.py"])
+        self.assertEqual(set(runs), {"notes/exp_4130/seed.py", "notes/exp_4130/launcher.py", "notes/exp_4130/prep.py"})
+
+    def test_the_registered_launchers_run_as_scripts(self):
+        """run_native_canary.py and run_api_canary.py launch from main(),
+        which only their `__main__` blocks call, and prepare_registration.py
+        is an argparse CLI nothing else calls: other controllers import their
+        helpers, and each still runs as a script (#4130). A project default
+        planted in such a block gates."""
+        surfaces, facts = _discovered()
+        base = "notes/matched_cborg_2026-09-13/"
+        for rel, why in ((base + "native_controls/run_native_canary.py", "launches a run"),
+                         (base + "run_api_canary.py", "launches a run (" + base + "run_api_canary.py:"),
+                         (base + "prepare_registration.py", "a command-line interface nothing else calls")):
+            with self.subTest(rel=rel):
+                self.assertIn(why, facts["controller_runs"][rel])
+                self.assertIn("run_controllers", surfaces.files[rel].runs)
+        for rel in (base + "native_controls/run_native_canary.py", base + "prepare_registration.py"):
+            with self.subTest(planted=rel):
+                loud, _ = _plant(rel, 'if __name__ == "__main__":\n    DEFAULT_PROJECT_4130 = "CHORUS"')
+                self.assertTrue([h for h in loud if h["match"] == "CHORUS" and h["violation"]
+                                 and h["gates_in"] == ["run_controllers"]], loud)
+
+
+class TestHookText(unittest.TestCase):
+    """The reason a PreToolUse hook gives for a denial is shown to the model
+    it denies (#4130): a registered native run answers every refused tool
+    call with `hook_output`'s `permissionDecisionReason`, built from the
+    reason a classifier returns."""
+
+    HOOKS = {"function": "def deny(decision, why):\n"
+                         "    return {} if decision == 'allowed' else {'hookSpecificOutput': {\n"
+                         "        'permissionDecisionReason': 'Refused: ' + why}}\n",
+             "method": "class Hook:\n"
+                       "    def deny(self, decision, why):\n"
+                       "        return {} if decision == 'allowed' else {'permissionDecisionReason': 'Refused: ' + why}\n"}
+
+    def test_a_deny_reason_and_the_classifiers_that_feed_it_are_model_text(self):
+        """The hook's own text, and the reason element of every pair whose
+        decision the hook tests ('allowed'), widened by the other decisions
+        those functions return ('refused'); not a function whose decisions
+        are unrelated, nor a message that is not a reason. A method's `self`
+        does not shift the pair."""
+        for kind, hook in self.HOOKS.items():
+            with self.subTest(hook=kind):
+                spans = self._hook_spans(hook)
+                self.assertEqual({a for a, _, _ in spans["notes/exp_4130h/hook.py"]}, {3})
+                self.assertEqual({a for a, _, _ in spans["notes/exp_4130h/policy.py"]}, {3, 4, 6})
+
+    def _hook_spans(self, hook: str) -> dict:
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            base = root / "notes/exp_4130h"
+            _write(base / "launch.py", "from data_sheets_schema.api_runner import RunSpec\nimport hook, policy\n"
+                                       "spec = RunSpec\n")
+            _write(base / "hook.py", hook)
+            _write(base / "policy.py", "def judge(cmd):\n"                                    # 1
+                                       "    if cmd == 'x':\n"                                 # 2
+                                       "        return 'allowed', 'the registered command'\n"  # 3
+                                       "    return 'refused', 'not a registered command'\n"   # 4
+                                       "def judge_more(cmd):\n"                               # 5
+                                       "    return 'refused', 'another refusal'\n"            # 6
+                                       "def unrelated():\n"                                   # 7
+                                       "    return 'other', 'not a reason'\n"                 # 8
+                                       "def fail():\n"                                        # 9
+                                       "    raise ValueError('not a reason either')\n")       # 10
+            parsed = _parsed(root, "notes")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            return scan.model_text_spans(root, parsed, index, controllers)
+
+    def test_a_project_name_in_a_deny_reason_is_a_violation(self):
+        """Planted in the hook's own text, in the file and command
+        classifiers' reasons, and in the second line of a concatenated
+        f-string reason, which is reported on its own line; a message that
+        is not a reason does not gate."""
+        native = "notes/matched_cborg_2026-09-13/native_controls/"
+        for rel, old, new in (
+                (native + "native_control.py", "'Outside the registered tool policy: '", "'Outside the CHORUS tool policy: '"),
+                (native + "native_file_policy.py", "'a path outside the registered inputs and outputs'",
+                 "'a path outside the CHORUS inputs and outputs'"),
+                (native + "native_command_policy.py", "'a program the instruction does not prescribe'",
+                 "'a CHORUS program the instruction does not prescribe'"),
+                (native + "native_command_policy.py", "f'the attempt; run the registered spelling exactly: {spelling}'",
+                 "f'the attempt; run the CHORUS spelling exactly: {spelling}'"),
+                (native + "run_native_canary.py", "'a registered read-only lookup of this job\\'s inputs or outputs'",
+                 "'a registered CHORUS lookup of this job\\'s inputs or outputs'")):
+            with self.subTest(rel=rel, new=new):
+                hits, line = self._planted(rel, old, new)
+                # an f-string part's own line is read from Python 3.12's tokens
+                if not old.startswith("f'") or sys.version_info >= (3, 12):
+                    self.assertEqual([h["line"] for h in hits], [line])
+                self.assertEqual(len(hits), 1, hits)
+                self.assertTrue(all(h["violation"] and h.get("model_text_function") and
+                                    h["gates_in"] == ["run_controllers"] for h in hits), hits)
+        for rel, old, new in ((native + "native_file_policy.py", "'native file target could not be resolved'",
+                               "'native CHORUS target could not be resolved'"),
+                              (native + "native_control.py", "'native callback is malformed or unregistered'",
+                               "'native CHORUS callback is malformed or unregistered'")):
+            with self.subTest(rel=rel, new=new):
+                hits, _ = self._planted(rel, old, new)
+                self.assertTrue(hits and not any(h["violation"] for h in hits), hits)
+
+    def _planted(self, rel: str, old: str, new: str):
+        """The CHORUS hits a copy of a real surface gains when its text `old`
+        becomes `new`, under the role and text spans discovery derived, and
+        the line `old` starts on."""
+        text = (ROOT / rel).read_text(encoding="utf-8")
+        self.assertEqual(text.count(old), 1, (rel, old))
+        surface = _discovered()[0].files[rel]
+        before = {(h["line"], h["context"]) for h in _scan_text(rel, text, surface) if h["match"] == "CHORUS"}
+        hits = [h for h in _scan_text(rel, text.replace(old, new), surface)
+                if h["match"] == "CHORUS" and (h["line"], h["context"]) not in before]
+        return hits, text[:text.index(old)].count("\n") + 1
+
 
 class TestTheWholeAudit(unittest.TestCase):
     """The full scan of this checkout (reads code, prompts, schema and the
@@ -1858,8 +2294,28 @@ class TestTheWholeAudit(unittest.TestCase):
             with self.subTest(want=want):
                 self.assertIn(want, found)
         markdown = scan.render_markdown(result)
-        self.assertIn("Every registered native launch switches these off", markdown)
+        self.assertIn("Every registered native launch passes `--safe-mode`, which switches these off", markdown)
         self.assertIn("`.github/workflows/d4d_assistant_edit.md` (loaded by nothing: not a surface)", markdown)
+
+    def test_the_skills_own_description_has_a_recorded_reason(self):
+        """Every session lists this skill's description, which names the
+        categories it audits: its tracked hits carry the exception that says
+        so, and none is a project name (#4131)."""
+        result = _full_run()
+        rel = ".claude/skills/d4d-generation-specificity-audit/SKILL.md"
+        listed = [h for h in result["hits"] if h["path"] == rel and h.get("loaded_in")]
+        self.assertTrue(listed)
+        self.assertFalse([h for h in listed if h["category"] == "gc_project"])
+        self.assertTrue(all(h["exception"] is not None for h in listed), listed)
+        entry = result["exceptions"][listed[0]["exception"]]
+        self.assertEqual(entry["path"], rel)
+        self.assertTrue(entry["reason"].strip())
+        # read on a tree without the skill (origin/main before this PR), the
+        # entry is unused, and the report says why rather than calling it stale
+        line = scan._unused_exceptions([{**entry, "hits": 0}, {"index": 99, "path": "CLAUDE.md", "hits": 0}],
+                                       ["CLAUDE.md"])
+        self.assertEqual(line, f"Unused exceptions (stale, or the finding was fixed): #{entry['index']} (names no "
+                               "surface of this checkout), #99")
 
 
 if __name__ == "__main__":

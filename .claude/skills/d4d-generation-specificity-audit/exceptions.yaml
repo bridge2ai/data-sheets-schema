@@ -90,3 +90,15 @@ exceptions:
       clinical/biomedical datasets by design (IRB, HIPAA, de-identification,
       consent). Tracked domain scope, not a study fact.
     decision: '#4007 owner: biomedical/clinical is acceptable if tracked'
+
+  # ---- this audit's own description ----------------------------------------------
+  - path: .claude/skills/d4d-generation-specificity-audit/SKILL.md
+    category: [bridge2ai_program, biomedical_clinical]
+    context: frontmatter
+    reason: >-
+      The audit's description, which every interactive session lists so a
+      person can find the audit, names the categories it checks for (a
+      Bridge2AI Grand Challenge project, the Bridge2AI program,
+      biomedical/clinical data). Naming what it audits states no fact about
+      a study; a project name there would still be a violation.
+    decision: '#4131 (review round 4 of #4021)'

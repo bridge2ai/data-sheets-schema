@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.3.0
+  version: 1.4.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -65,12 +65,17 @@ generation surface. The skill's tests check that:
   surface under the role `discover()` gives it, including CLAUDE.md, the
   descriptions a session lists, a YAML comment a playbook's Read returns,
   and the controller text that reaches a model by data flow;
-- project-keyed tables, defaults and keys gate in run-shaping code, also in
-  a workflow, a config and a shell script (an `if:`, a `case`, `[ "$P" =
-  X ]`, `--project X`, `${{ x || 'X' }}`, a per-project key); an exposed
-  file gates only on the lines a session loads from it; a `__main__` block
-  gates only where its module runs as a script, and a controller module
-  runs as one only where something runs it;
+- project-keyed tables, defaults, keys and arguments gate in run-shaping
+  code (an `or` default, a value wrapped in `Path(...)`, an f-string or a
+  `+` join, `click.Choice([...])`, a positional argument, `argv.append`, a
+  regex or glob test, a `yield`), also in a workflow, a config, a JSON file
+  and a shell script (an `if:`, `contains(fromJSON(...))`, a `case`, `[
+  "$P" = X ]`, `--project X`, `${{ x || 'X' }}`, a per-project key, a
+  settings `env` value); an exposed file gates only on the lines a session
+  loads from it; a `__main__` block gates only where its module runs as a
+  script, and a controller module runs as one only where something runs
+  it, its own `__main__` block calling a launch or a command-line interface
+  nothing else calls included;
 - discovery finds every model client, controller and launcher (over `src/`,
   `notes/` and `scripts/`), every file a playbook, agent, loaded assistant
   instruction or controller names, the imports of every script they run,
@@ -78,7 +83,13 @@ generation surface. The skill's tests check that:
   from the code; an assistant instruction file nothing loads is not a
   surface;
 - whether a registered native run loads what an interactive session loads
-  is read from each launch's argv;
+  is read from each launch's argv: `--safe-mode` switches all of it off,
+  `--bare` only the memory and the hooks, a flag list something can shorten
+  (`.remove()`, `del`, a computed list) is not shown to switch anything off,
+  and a `--system-prompt-file` launch is a launch; the project settings and
+  the hook scripts they run are found;
+- the reason a PreToolUse hook gives a native run's model for a denial, and
+  the classifier reasons that feed it, are model text;
 - the "api" section agrees with the runtime: the CLI default condition, the
   condition the GitHub assistant runs (a non-literal `--condition` is "not
   derived"), the default renderers, the audit floor, the renderers
@@ -122,15 +133,15 @@ and the names a file uses. What is left by hand, and why:
 | approach | gates | discovered from |
 |---|---|---|
 | `native_agentic` | yes | `.claude/commands/d4d-*.md`; every playbook or agent that a playbook, a live condition prompt, a run controller or a loaded assistant instruction names, by path, bare name (`d4d-validator`) or slash command (`/d4d-full-core`), followed through the playbooks and agents they name (model-facing); every other file `agentic_runtime.toolchain()` hands a native run (it lists `*.md` in `.claude/commands` and `.claude/agents`, read with ast) is `exposed`; every other file those texts name by path or run (`python x.py`, `python -m mod`), with the namer's status (a named YAML is read raw, so its comments count); what each script they run imports (`src/html/human_readable_renderer.py` reaches `data_sheets_schema.rendering.human_readable_renderer`); the import closure of `agentic_runtime`, of every CLI group they run (`d4d utils status` from `/d4d-agent`; a group only an exposed agent runs is exposed), and of the package modules the run controllers import |
-| `interactive_session` | yes | what Claude Code loads into a person's session in a checkout, where the `/d4d-*` playbooks run interactively: the project memory (`CLAUDE.md`, model-facing), the project settings and the hook scripts they run (and what those import), and the name and description of every command, agent and skill, model-facing on those lines while the body is exposed. The report states, from each registered native launch's argv, whether every one passes `--safe-mode` or `--bare`; where one does not, these surfaces are also `run_controllers` surfaces |
+| `interactive_session` | yes | what Claude Code loads into a person's session in a checkout, where the `/d4d-*` playbooks run interactively: the project memory (`CLAUDE.md`, model-facing), the project settings (run-shaping; read as code, so a project value in their `env` block gates) and the hook scripts they run (and what those import), and the name and description of every command, agent and skill, model-facing on those lines while the body is exposed. The report states, from each registered native launch's argv, whether every one passes `--safe-mode`; where one does not, the surfaces it does not switch off are also `run_controllers` surfaces (`--bare` switches off the memory and the hooks, not the command, agent and skill descriptions) |
 | `api` | yes | the import closure of `cli/api.py` and `api_runner.py`; every condition in `api_runner.CONDITION_PROMPTS` (the newest `generic_vN`, the CLI default and the condition the GitHub assistant runs are **live**, the rest **historical**); the `tuned` components `resolve_prompt` inserts (`d4d_tuned_arm_prompt.md` is only hashed and named in a header, so it is run-shaping); evidence protocols (newest live); every file pinned in `canonical_hashes.yaml` |
 | `github_assistant` | yes | the `@d4dassistant` workflow `d4d-agent.yml`, every file it names or runs (an instruction it hands a model is model-facing, the rest run-shaping: the deterministic config, `.github/ai-controllers.json`, the schema it validates against), the condition its `d4d api run` runs, and an assistant instruction file only where the workflow loads it (today none: the workflow runs `d4d api run` and loads no instruction file). The runner it starts is the `api` approach |
 | `shared_schema` | yes | the import closure of `data_sheets_schema.yaml` and `data_sheets_schema_core.yaml`, the schemas `agentic_runtime.toolchain()` hands a native run, and the hand-kept files above |
 | `deterministic` | yes | the arm commands: every CLI group outside the generation closures that names the bundle of an arm in `cli/api.py` `ARMS` other than the default one (today `cli/healthsheet.py` and `cli/rocrate.py`), and their import closure, followed through `data_sheets_schema`, `src.*` and the directories the code puts on `sys.path` (`setup_repo_imports` adds `.claude/agents/scripts`) |
-| `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface when a registered native launch does not pass `--safe-mode` or `--bare`. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), or no module importing it (an entry point) |
+| `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface a registered native launch does not switch off. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), no module importing it (an entry point), or its own `__main__` block calling a module function that launches a run (an argv with a system prompt or a system-prompt file, the runner's `execute`: `run_native_canary.py`, `run_api_canary.py`) or a command-line interface (argparse, click) that nothing else calls (`prepare_registration.py`) |
 | `legacy_monolithic` | yes | every module under `src/` or `scripts/`, outside the generation closures, that calls a model client and names D4D or a datasheet (not an evaluator); the pre-runner helpers in `src/download` (the name glob); `d4d_concatenated_*.txt`; every prompt set beside the conditions (`src/download/prompts/*/` other than the tuned components) |
 | `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops |
-| `other_model_client` | no | a model client outside generation: under `notes/`, one outside the controller set (diagnostic probes, transports); evaluation modules a controller imports or that import one, and their imports; under `src/` or `scripts/`, an evaluator or a client that names no D4D record |
+| `other_model_client` | no | a model client outside generation and outside every generation closure: under `notes/`, one outside the controller set (diagnostic probes, transports); the `notes/` evaluation modules a controller imports or that import one, and their imports; under `src/` or `scripts/`, an evaluator or a client that names no D4D record. An evaluator a generation closure reaches is that approach's surface and gates there: `evaluation/evaluate_d4d_llm.py`, which the controller `prepare_registration.py` imports from the package, is in the native closure |
 
 A module is a model client when it imports `anthropic`, `openai`,
 `pydantic_ai` or `aurelian`, or calls `*.messages.create|stream`,
@@ -164,19 +175,34 @@ judges a hit by its own role:
 - in run-shaping code, a string literal counts as text when it is model text:
   the body of a run-controller function named for it (`render_*`,
   `*instruction`, `*_system`, `*prompt*`), or code found by data flow. From
-  every argv element after `--system-prompt` or `--append-system-prompt` in
-  a controller, and from those functions' return values, the flow follows
-  local assignments, marks a function whose result becomes part of the text
-  (and follows its returns in turn, across imports) and a module constant the
-  text is built from (`SYSTEM`, which `render_system` returns). Today that
-  finds the `SYSTEM` constants of the audit and finalization preparers,
-  `command_guidance` and `lookup_guidance`;
+  every argv element after `--system-prompt` or `--append-system-prompt` (or
+  the value its `=` spelling carries) in a controller, from every value a
+  controller gives a hook field Claude Code shows the model
+  (`permissionDecisionReason`, the reason a PreToolUse hook gives for a
+  denial, and `additionalContext`), and from those functions' return values,
+  the flow follows local assignments, marks a literal that becomes part of
+  the text, a function whose result does (and follows its returns in turn,
+  across imports) and a module constant the text is built from (`SYSTEM`,
+  which `render_system` returns). A hook field built from its function's
+  parameters (`hook_output(classification, basis)`) is fed through threads
+  and queues no data flow follows, so the classifiers that feed it are found
+  by their decision: every controller function that returns a tuple whose
+  decision element is a literal the hook function compares its decision
+  parameter with (`'prescribed'`), widened by the other decisions such
+  functions return (`'not_prescribed'`); the element in the reason's
+  position is model text. Today that finds the `SYSTEM` constants of the
+  audit and finalization preparers, `command_guidance` and
+  `lookup_guidance`, the deny-reason text in `hook_output` and the reasons
+  of the command, file and audit-validator classifiers;
 - a code branch or table counts unless the role is exposed, in Python and in
-  a YAML, config or shell file that no approach hands to a model (below);
+  a YAML, config, JSON or shell file that no approach hands to a model
+  (below);
 - nothing in a `__main__` block counts for an approach that only imports the
   module (it never runs that block). A run-controller module runs as a script
-  only where an argv, a document or nothing importing it says so; an import
-  by another controller is not a run.
+  only where an argv, a document, nothing importing it, or its own
+  `__main__` block (calling a function that launches a run, or a
+  command-line interface nothing else calls) says so; an import by another
+  controller is not a run.
 
 A hit is a violation when it is gc_project, has no exception, and some gating
 approach counts it (`gates_in` in the JSON).
@@ -189,17 +215,25 @@ for schema text, to the neutrality test) rather than to `scan.py`.
 Every hit is classified by context:
 
 - `.py`: `string_literal` (a model-facing candidate), `code_branch` (a
-  comparison, `match` case or `startswith` test on the value), `code_table`,
-  `docstring`, `comment`. A `code_table` is a bare-token string (no
-  whitespace), or a collection of them, also through `frozenset()`, `set()`,
-  `tuple()`, `list()`, in a table, default or key position: a dict key or
-  value; a value assigned anywhere (a module constant, a function local, an
-  attribute); a loop or comprehension iterable; a keyword argument; a
-  parameter default; a returned value; a subscript key; an argument of
-  `.get`, `.setdefault`, `.pop`, `getenv` or `getattr`. A string with
-  whitespace is text and stays a `string_literal`. Each physical line of a
-  literal is its own unit, read from the tokens that spell it, so the parts
-  of an implicitly concatenated literal are reported on their own lines.
+  comparison, a `match` case, or a test call on the value: `startswith`,
+  `endswith`, `re.match`, `re.fullmatch`, `re.search`, `fnmatch`),
+  `code_table`, `docstring`, `comment`. A `code_table` is a bare-token
+  string (no whitespace) in a table, default, key or argument position: a
+  dict key or value; a value assigned anywhere (a module constant, a
+  function local, an attribute); a loop or comprehension iterable; a keyword
+  or positional argument of any call (`argv.append("X")`, `run("X")`, a
+  decorator's `click.Choice([...])`); a parameter default; a returned or
+  yielded value; a subscript key. The whole value is read, so a bare token
+  anywhere inside it counts: in a collection, in a call's arguments
+  (`frozenset({...})`, `Path("data/X")`), as an `or`/`and` operand
+  (`project or "X"`), an operand of `+`, `/` or `%`, an f-string's literal
+  part, a method's object (`"X/{}".format(p)`) or a comprehension. A string
+  with whitespace is text and stays a `string_literal`. Each physical line
+  of a literal is its own unit, read from the tokens that spell it, so the
+  parts of an implicitly concatenated literal are reported on their own
+  lines; an f-string's parts too, from the tokens Python 3.12 gives them (an
+  f-string with escapes, or under an older tokenizer, is reported from its
+  first line).
 - `.md` and `.txt`: `instruction`, `example`, `prose`, `frontmatter`, or `header`.
   `header` is text above `## Prompt body` in a condition prompt; `prompt_body()`
   never sends it.
@@ -207,27 +241,33 @@ Every hit is classified by context:
   `examples` or `annotations` metaslot), `value`, `comment`. A key directly
   under `attributes:`, `slots:`, `classes:` and the like is an element's
   name, so a slot *named* `examples` is not the metaslot.
-- A YAML, `.config` or shell file that no approach hands to a model and some
-  approach runs on (a workflow, the assistant config, the prompt pins, a
-  `.sh` script) also has code: `code_branch` for a GitHub expression's
-  compared literal (`if: x == 'CM4AI'`, `contains(x, 'VOICE')`), a shell
+- A YAML, `.config`, JSON or shell file that no approach hands to a model
+  and some approach runs on (a workflow, the assistant config, the prompt
+  pins, the project settings, the assistant's allow-list, a `.sh` script)
+  also has code: `code_branch` for a GitHub expression's compared literal
+  (`if: x == 'CM4AI'`, `contains(x, 'VOICE')`, also the JSON a `fromJSON`
+  inside the test parses: `contains(fromJSON('["CHORUS"]'), x)`), a shell
   test's operand (`[ "$P" = "CHORUS" ]`, `[[ ]]`, `test`), an argument of an
   `if`/`while` condition, a `case` pattern, and a github-script string that
   is compared, a `case` label or an argument of `.includes` and the like;
-  `code_table` for an expression default (`${{ x || 'CHORUS' }}`), a shell
-  default (`${P:-CHORUS}`), assignment, long option value (`--project
-  CHORUS`) or `for` list, a github-script string assigned or used as an
-  object value, array item or default, and a bare key (`CM4AI:`) or bare
-  value of the data. A value with whitespace stays text, a key that is a
-  file path (the pin registry's) is a key, not a table, and a prose key keeps
-  its prose. Every `.sh` line is read this way.
+  `code_table` for an expression default (`${{ x || 'CHORUS' }}`), any
+  other `fromJSON` literal, a shell default (`${P:-CHORUS}`), assignment,
+  long option value (`--project CHORUS`) or `for` list, a github-script
+  string assigned or used as an object value, array item or default, a bare
+  key (`CM4AI:`) or bare value of the data, and a JSON key or a JSON string
+  value with no whitespace (`"D4D_MANIFEST": "data/CHORUS_manifest.yaml"`);
+  a JSON hook `command` is read as shell. A value with whitespace stays
+  text, a key that is a file path (the pin registry's) is a key, not a
+  table, and a prose key keeps its prose. Every `.sh` line is read this
+  way.
 
 ## Read the report
 
 1. **Self-test line.** It must say `passed`. The self-test plants one token per
    category in a Markdown file, and in a Python file a branch, a comment, a
    dict key, a `frozenset` constant, a lookup default, a keyword argument, a
-   loop tuple, a string literal, an implicitly concatenated literal and a
+   loop tuple, an `or` default, a value wrapped in `Path(...)`, a regex
+   test, a string literal, an implicitly concatenated literal and a
    triple-quoted block. It checks each is found with its category (Markdown)
    or context (Python) on the line where it was planted.
 2. **Surfaces table and "How the surfaces were found".** Check that the file
@@ -235,9 +275,11 @@ Every hit is classified by context:
    named files and model clients listed are what you expect. A zero means
    discovery broke. The interactive-sessions bullet says that registered runs
    are unaffected only when every registered native launch's argv passes
-   `--safe-mode` or `--bare`; otherwise it names the launch, and the session
-   surfaces count in `run_controllers` too. The controller table says how
-   each controller runs as a script, or that it is imported only.
+   `--safe-mode`; otherwise it names the launch, says whether it passes
+   `--bare` (which switches off only the memory and the hooks), and the
+   session surfaces it does not switch off count in `run_controllers` too.
+   The controller table says how each controller runs as a script, or that
+   it is imported only.
 3. **gc_project violations.** These are the findings that fail the run. A
    violation is a Grand Challenge name, site or identifier in model-facing
    text, or in a code branch or table, that a gating approach counts, with no
@@ -401,14 +443,28 @@ owner's approval before anything is billed.
 
 ## Limits
 
+- Recall of what reaches a model is not complete, and enumeration cannot
+  make it so: each review of this skill found a channel the scan before it
+  did not read (the descriptions a session lists, a YAML comment the Read
+  tool returns, the reason a hook gives for a denial, a project default in
+  a form the code reading did not know). A clean scan means that no listed
+  token was found on a channel the scanner reads, not that no project text
+  reaches a model. Channels known not to be read: what a process prints or
+  writes for a model to read outside the hook fields below (a tool's output,
+  a file a run writes and a later phase reads, a hook's stderr), environment
+  variables a launcher sets in code, files a run reads that no text names,
+  network responses, and the model's own earlier turns.
 - A token list finds what it names. A project fact phrased without any listed
   token, such as a participant count or a site name, is invisible. Add
   tokens when a review finds one.
-- Context classification is heuristic for Markdown, YAML and shell. A shell
-  line is read on its own (with the state a `case` or a multi-line condition
-  needs), so text inside a multi-line quoted string is read as commands; the
-  hook commands in `.claude/settings*.json` are followed to the scripts they
-  run, not classified as shell.
+- Context classification is heuristic for Markdown, YAML, JSON and shell. A
+  shell line is read on its own (with the state a `case` or a multi-line
+  condition needs), so text inside a multi-line quoted string is read as
+  commands. JSON is read line by line: a key and its value on separate lines
+  are not paired, so a hook `command` split that way is read as text, not
+  shell. A Python value is read whole for bare tokens, so a project name
+  passed to `print` or a logger as a bare token gates as code in run-shaping
+  code; one inside a sentence stays text.
 - The CLI package (`cli/__init__.py`) imports every group: a closure that
   reaches it stops there, and a group is followed where a playbook, agent or
   instruction runs it (`d4d <group> ...`). A group a controller's text names
@@ -418,22 +474,50 @@ owner's approval before anything is billed.
   code; its comments and docstrings are not counted even if the model reads
   it.
 - A registered launch is an argv list in a run controller that holds
-  `--system-prompt`; its flags are read through starred lists, constants,
-  imported constants, sums and record fields every writer fills. A flag list
-  that is computed (a comprehension, a call) is not read, so that launch is
-  reported as not shown to switch customizations off, never as switching
-  them off; so is a `--system-prompt` outside an argv list (an argv built by
-  `.append` calls), whose flags cannot be read.
-- A controller module that another module imports and that only a person
-  runs, with no argv, document or docstring that runs it, is judged as
-  imported: its `__main__` block does not count. Every such block today is a
-  one-line `main()` call.
+  `--system-prompt`, `--append-system-prompt` or either's `-file` form, also
+  as `--flag=value`; an argv that hands a native runtime neither (`claude
+  -p` with the prompt on stdin) is not found. Its flags are read through
+  starred lists, constants, imported constants, sums and record fields
+  every writer fills (a dict entry, a keyword, an item assignment). What can
+  drop a flag makes the launch "not shown" to switch customizations off,
+  never "switches them off": a computed list (a comprehension, a call); a
+  removal (`.remove()`, `.pop()`, `.clear()`, `del`, an item assignment,
+  `-=`) on the argv, the name or the field that holds the flags, where it is
+  visible (a local's function; a module constant's module and every
+  controller that imports it; a record field's every controller); another
+  assignment to the argv or the module constant; and a launch flag outside
+  an argv list (an argv built by `.append` calls). The argv is followed in
+  the function that builds it: a callee that changes the list it is passed,
+  a caller that changes a list a function returns, and a removal through an
+  alias (`flags = CLI_FLAGS; flags.remove(...)`) are not read. Only
+  `--safe-mode` is read as switching off the command, agent and skill
+  descriptions; `--bare` switches off the memory and the hooks, since its
+  help says skills still resolve. A launch's `--add-dir`, `--settings`,
+  `--agents` and `--setting-sources`, which can hand a run context
+  explicitly, are not read.
+- A controller module that another module imports runs as a script only
+  where an argv, a document or docstring, or its own `__main__` block says
+  so: a block that calls a module function launching a run (in that
+  function or one it calls), or a command-line interface (argparse, click)
+  nothing outside the block calls (tests are not read). A module whose
+  `__main__` block does something else, with nothing else saying it runs,
+  is judged as imported.
 - Data flow is followed inside a function through assignments and across
   imported functions and constants; a call's arguments are followed for the
-  constants they pass, not for the functions that compute them, and a method
-  on an object (`self.render()`) is not resolved. A model-facing module
-  outside `MODEL_FACING_MODULES` whose text reaches a model only through
-  another module's variable is classed by its role, not traced.
+  constants they pass, not for the functions that compute them or the
+  literals they pass, and a method on an object (`self.render()`) is not
+  resolved. A model-facing module outside `MODEL_FACING_MODULES` whose text
+  reaches a model only through another module's variable is classed by its
+  role, not traced.
+- Hook output is read in run controllers from the two fields Claude Code
+  shows the model, `permissionDecisionReason` and `additionalContext`; a
+  hook's stderr when it exits 2, the `reason` of a `decision: block` and
+  what the session's own hook scripts print are not traced. The classifiers
+  that feed a deny reason are found by their decision literal and by the
+  reason's position in the pair they return; one whose decision is not a
+  literal in a tuple it returns is not found, and every return of a
+  classifier found is read as a reason, including one that never reaches
+  the hook.
 - A native continuation is recognised by `RunSpec.from_render_spec`; a
   controller that rebuilds a parent's spec field by field is recognised only
   through its renderer setter. The runtime of a setter is read from its call
@@ -448,8 +532,14 @@ owner's approval before anything is billed.
   whole repository), so an assistant instruction file only `CLAUDE.md` names
   is not a surface. Templated paths (`{PROJECT}`), `data/` and `tests/` are
   not followed.
-- Evaluation is out of scope: evaluation modules and the rubric agents are
-  listed, never gating.
+- Evaluation is not exempt for being evaluation. An evaluation module is
+  `other_model_client` (listed, never gating) only where no generation
+  closure reaches it: `evaluation/evaluate_d4d_llm.py`, which the controller
+  `prepare_registration.py` imports from the package, is in the native
+  closure and its code tables gate there; and every agent's name and
+  description, the rubric agents' included, gates in `interactive_session`
+  (`d4d-review-record.md`'s does today). An agent's body gates only where a
+  live text names the agent.
 - A nested `CLAUDE.md` is found under `src/`, `notes/` and `scripts/` only.
 - Untracked or gitignored files are scanned when they exist under a
   discovered tree. The scanner does not consult `.gitignore`.
