@@ -1,8 +1,11 @@
 """Tests for the our-mapping crate → D4D arm."""
 
+import contextlib
 import copy
+import io
 import json
 import re
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -711,7 +714,8 @@ class TestNullAndNestedListItems(unittest.TestCase):
     as its only reason, and `[[x]]` wrote the inner list into the slot; a
     multivalued slot kept `[null]` as written; a class-range slot made
     `{name: 'None'}` or `{name: "['x']"}`; and an enum slot raised
-    TypeError, which ended `map_crate`."""
+    TypeError, which ended `map_crate`. #4183: a list that mixes values
+    with lists keeps the values, and the row names each list it drops."""
 
     @classmethod
     def setUpClass(cls):
@@ -746,20 +750,50 @@ class TestNullAndNestedListItems(unittest.TestCase):
                 with self.subTest(value=value, row=path):
                     self.assertEqual(tuple(row), ("empty", why, {}))
 
-    def test_a_list_inside_a_list_is_refused_in_every_row(self):
-        """Refused, not flattened, whatever the slot's range, and whether
-        the inner list is the only item or sits beside a value. The reason
-        says which kind of slot it is: one that holds one value, or one
-        that holds a list of single values."""
-        for value in ([["x"]], [["x", "y"]], ["x", ["y"]]):
+    def holds(self, path):
+        """What the reason says the row's slot holds."""
+        cls, _, slot = path.partition(".")
+        return ("a list of single values"
+                if self.sv.induced_slot(slot, cls).multivalued else "one value")
+
+    def test_a_list_of_lists_is_refused_in_every_row(self):
+        """Refused, not flattened, whatever the slot's range, where every
+        item is a list, or a list or null: nothing is left to shape. The
+        reason says which kind of slot it is: one that holds one value, or
+        one that holds a list of single values."""
+        for value in ([["x"]], [["x", "y"]], [None, ["x"]]):
             for path, *row in self.rows_reading(value):
-                cls, _, slot = path.partition(".")
-                holds = ("a list of single values"
-                         if self.sv.induced_slot(slot, cls).multivalued else "one value")
-                why = (f"a list inside a list, for a slot that holds {holds}: "
-                       f"{json.dumps(value)}; dropped rather than flattened")
+                why = (f"a list inside a list, for a slot that holds "
+                       f"{self.holds(path)}: {json.dumps(value)}; dropped "
+                       "rather than flattened")
                 with self.subTest(value=value, row=path):
                     self.assertEqual(tuple(row), ("empty", why, {}))
+
+    def test_a_list_beside_a_value_is_dropped_and_the_value_kept_in_every_row(self):
+        """#4183. Every row maps a list that mixes values with lists as it
+        maps the values alone, whatever the slot's range or cardinality,
+        and its detail first names each list it dropped. #4164 had refused
+        the whole row, which emptied a `doi` row origin/main filled with a
+        valid DOI. A null beside a value is passed on as it was (#4172)."""
+        cases = (
+            (["x", ["y"]], ["x"], "1 of 2 list items is a list", '["y"]'),
+            ([["y"], "x"], ["x"], "1 of 2 list items is a list", '["y"]'),
+            (["x", ["y"], ["z", "w"]], ["x"],
+             "2 of 3 list items are lists", '["y"], ["z", "w"]'),
+            (["x", "v", ["y"]], ["x", "v"], "1 of 3 list items is a list", '["y"]'),
+            (["x", None, ["y"]], ["x", None], "1 of 3 list items is a list", '["y"]'),
+        )
+        for value, alone, how_many, named in cases:
+            rows_alone = {path: row for path, *row in self.rows_reading(alone)}
+            for path, status, detail, written in self.rows_reading(value):
+                status_alone, detail_alone, written_alone = rows_alone[path]
+                left_out = (f"{how_many} inside the list, for a slot that holds "
+                            f"{self.holds(path)}: {named}; dropped rather than "
+                            "flattened")
+                with self.subTest(value=value, row=path):
+                    self.assertEqual((status, written), (status_alone, written_alone))
+                    self.assertEqual(detail, "; ".join(
+                        part for part in (left_out, detail_alone) if part))
 
     def keywords(self, value):
         """`(keywords, status, detail)` for the shipped table and `GRAPH`
@@ -770,17 +804,20 @@ class TestNullAndNestedListItems(unittest.TestCase):
         field = next(f for f in res.fields if f.d4d_path == "Dataset.keywords")
         return res.record.get("keywords"), field.status, field.detail
 
-    def test_a_multivalued_slot_refuses_a_nested_list_as_a_single_valued_one_does(self):
+    def test_a_multivalued_slot_keeps_its_values_and_drops_a_list_inside(self):
         """The choice #4164 left open: a list inside the list a multivalued
-        slot reads is not one of the single values the slot holds, so the
-        row is refused, not flattened into the slot's list. A list of single
-        values fills it as before."""
-        for value in ([["voice", "health"]], ["voice", ["health"]]):
-            with self.subTest(value=value):
-                self.assertEqual(self.keywords(value), (
-                    None, "empty",
-                    "a list inside a list, for a slot that holds a list of single "
-                    f"values: {json.dumps(value)}; dropped rather than flattened"))
+        slot reads is not one of the single values the slot holds, so it is
+        dropped, not flattened into the slot's list. The values beside it
+        are kept (#4183), and a list of nothing but lists is refused. A list
+        of single values fills the slot as before."""
+        self.assertEqual(self.keywords(["voice", ["health"]]), (
+            ["voice"], "filled",
+            "1 of 2 list items is a list inside the list, for a slot that holds a "
+            'list of single values: ["health"]; dropped rather than flattened'))
+        self.assertEqual(self.keywords([["voice", "health"]]), (
+            None, "empty",
+            "a list inside a list, for a slot that holds a list of single values: "
+            '[["voice", "health"]]; dropped rather than flattened'))
         self.assertEqual(self.keywords(["voice", "health"]),
                          (["voice", "health"], "filled", ""))
 
@@ -792,6 +829,77 @@ class TestNullAndNestedListItems(unittest.TestCase):
         self.assertEqual(status, "filled")
         self.assertIn("voice", kept)
         self.assertNotIn("null", detail)
+
+
+class TestNestedListsAcrossTheArms(unittest.TestCase):
+    """#4175, #4183. `_coerce`'s comment says where this arm and the
+    FAIRSCAPE converter of PR #4042 agree on a list of nulls or lists and on
+    a list that mixes values with lists. Both arms are run here on each
+    shape, for one crate property of each kind that both map to the same
+    `Dataset` slot: text, a list of text, a date-time, the doi, a list of
+    objects and one object."""
+
+    #: crate property -> (the slot both arms fill from it, a value it takes)
+    PAIRS = {
+        "name": ("title", "x"),
+        "keywords": ("keywords", "x"),
+        "datePublished": ("issued", "2026-06-30"),
+        "identifier": ("doi", "https://doi.org/10.5555/x"),
+        "author": ("creators", "x"),
+        "rai:dataReleaseMaintenancePlan": ("updates", "x"),
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        repo_root = str(Path(__file__).resolve().parents[2])
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
+        cls.converter_class = FairscapeToD4DConverter
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = {row["D4D_Full_Path"].strip(): row for row in load_mapping()}
+
+    def this_arm(self, prop, slot, value):
+        """What `map_crate` writes in `slot`, from the table's row for it."""
+        row = self.rows[f"Dataset.{slot}"]
+        source = row["RO_Crate_JSON_Path"].strip()
+        self.assertEqual(source, f"@graph[?@type='Dataset']['{prop}']")
+        res = map_crate(_crate_holding(source, value), [row], self.sv, "TEST")
+        return res.record.get(slot)
+
+    def converter(self, prop, slot, value):
+        """What the converter writes in `slot` for a crate root holding
+        `value` at `prop`."""
+        crate = {"@context": {"@vocab": "https://schema.org/"}, "@graph": [
+            {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+             "about": {"@id": "./"}},
+            {"@id": "./", "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
+             "name": "A test crate", prop: value}]}
+        with contextlib.redirect_stdout(io.StringIO()):
+            return self.converter_class().convert(crate).get(slot)
+
+    def test_neither_arm_writes_a_list_of_nulls_or_lists(self):
+        for prop, (slot, x) in self.PAIRS.items():
+            for value in ([None], [None, None], [[x]], [[x, "y"]], [None, [x]]):
+                with self.subTest(prop=prop, value=value):
+                    self.assertIsNone(self.this_arm(prop, slot, value))
+                    self.assertIsNone(self.converter(prop, slot, value))
+
+    def test_a_mixed_list_is_written_as_its_values_alone_but_in_one_object(self):
+        """Each arm writes for a list mixing a value with a list what it
+        writes for the value alone, and the two agree on the value alone,
+        except in a single-valued slot whose range is a class (`updates`):
+        the converter joins only text into one object, so it writes nothing
+        for the mixed list."""
+        for prop, (slot, x) in self.PAIRS.items():
+            alone = self.this_arm(prop, slot, [x])
+            self.assertIsNotNone(alone)
+            self.assertEqual(self.converter(prop, slot, [x]), alone)
+            for value in ([x, ["y"]], [["y"], x]):
+                with self.subTest(prop=prop, value=value):
+                    self.assertEqual(self.this_arm(prop, slot, value), alone)
+                    self.assertEqual(self.converter(prop, slot, value),
+                                     None if slot == "updates" else alone)
 
 
 class TestDoi(unittest.TestCase):
@@ -974,6 +1082,27 @@ class TestDoi(unittest.TestCase):
                          'ark:59853/other — rewritten from the crate\'s ["ark:59853/other"]: '
                          "required by the schema; taken from the crate itself; "
                          "the first of 1 list item(s)")
+
+    def test_a_list_inside_the_list_is_dropped_and_the_doi_kept(self):
+        """#4183. origin/main took the one DOI among the items, and the
+        record validated; #4164's first version refused the whole row. The
+        list inside the list is dropped and named, the DOI is written as
+        origin/main wrote it, and the report names the crate's whole list."""
+        crate_value = ["https://doi.org/10.5555/x", ["y"]]
+        res = map_crate(_with_identifier(crate_value), self.rows, self.sv, "TEST")
+        field = self.doi_field(res)
+        self.assertEqual((res.record.get("doi"), field.status), ("10.5555/x", "filled"))
+        self.assertEqual(
+            field.detail,
+            '1 of 2 list items is a list inside the list, for a slot that holds '
+            'one value: ["y"]; dropped rather than flattened; the one DOI among '
+            "1 list item(s); resolver or `doi:` prefix removed, case kept")
+        self.assertEqual(field.rewritten_from, json.dumps(crate_value))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(res.record, sort_keys=False,
+                                           allow_unicode=True), encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
 
     def test_a_list_names_the_crate_list_it_gave_its_doi_up_from(self):
         res = map_crate(_with_identifier(["ark:59853/other",

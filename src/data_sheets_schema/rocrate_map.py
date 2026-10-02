@@ -426,29 +426,56 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     """Shape a crate value to the slot's cardinality and range."""
     notes: list[str] = []
 
-    # Two list shapes are refused before any rule reads them, so a row
+    # Two list shapes are settled before any rule reads the value, so a row
     # reports them alike whatever its slot (#4164). A list whose every item
     # is null holds no value: the row is empty, and its reason names the
     # null, as `resolve_path` names an empty root property. That is decided
     # here, not in `resolve_path`, which passes an empty value by and reads
     # the next entity of the type: there the null would change which entity
     # a row reads, not only its reason. A null beside a value is not read
-    # here; that list still holds a value. A list with a list among its
-    # items fits no slot, which holds one value or a list of single values,
-    # so it is refused, not flattened one level: a choice, made so that this
-    # arm and the FAIRSCAPE converter of PR #4042, which refuses it too,
-    # agree. The rules below had read both as values: the enum rule raised
-    # TypeError on a list item, the class step made `{name: 'None'}` of a
-    # null and `{name: "['x']"}` of a list, the cardinality step unwrapped
-    # `[[x]]` into a list in a single-valued slot, and a multivalued slot
-    # kept `[null]` as written.
+    # here (#4172). A list inside the list fits no slot, which holds one
+    # value or a list of single values, so it is dropped, never flattened
+    # one level. The rest of the list is shaped as though the crate held it
+    # alone, and the row's detail names each list dropped before what the
+    # rest's rules say, as the enum rule's `kept k/n` reports what it left
+    # out (#4183). A list holding nothing but lists and nulls leaves nothing
+    # to shape, so it is refused. The rules below had read both shapes as
+    # values: the enum rule raised TypeError on a list item, the class step
+    # made `{name: 'None'}` of a null and `{name: "['x']"}` of a list, the
+    # cardinality step unwrapped `[[x]]` into a list in a single-valued slot
+    # and joined `["x", ["y"]]` into `x; ['y']`, and a multivalued text slot
+    # kept both shapes as written.
+    #
+    # Where this arm and the FAIRSCAPE converter of PR #4042 (`_shape`)
+    # agree, checked by running both on each shape for every crate property
+    # they map to the same `Dataset` slot: neither writes anything for a
+    # list of only nulls, of only lists, or of nulls and lists. On a list
+    # that mixes values with lists, each writes what it writes for those
+    # values alone, so the arms agree wherever they agree on the values,
+    # except in a single-valued slot whose range is a class (`updates`,
+    # `human_subject_research`): there the converter, which joins only text
+    # into one object, refuses the whole list, and this arm keeps the value.
+    # They do not agree on a null beside a value, which the converter drops
+    # (#4172).
     if isinstance(value, list) and value:
         if all(item is None for item in value):
             return None, f"no value: the list holds only null ({_preview(value)})"
-        if any(isinstance(item, list) for item in value):
+        nested = [item for item in value if isinstance(item, list)]
+        if nested:
             holds = "a list of single values" if slot.multivalued else "one value"
-            return None, (f"a list inside a list, for a slot that holds {holds}: "
-                          f"{_preview(value)}; dropped rather than flattened")
+            rest = [item for item in value if not isinstance(item, list)]
+            if all(item is None for item in rest):
+                return None, (f"a list inside a list, for a slot that holds {holds}: "
+                              f"{_preview(value)}; dropped rather than flattened")
+            left_out = (
+                f"{len(nested)} of {len(value)} list items "
+                f"{'is a list' if len(nested) == 1 else 'are lists'} inside the "
+                f"list, for a slot that holds {holds}: "
+                f"{_preview(', '.join(_preview(item) for item in nested))}; "
+                "dropped rather than flattened")
+            # `rest` holds no list, so this goes one call deep.
+            value, note = _coerce(rest, slot, sv, project, counter)
+            return value, "; ".join(part for part in (left_out, note) if part)
 
     # Every class's `doi` slot carries the same anchored pattern, so a row
     # that fills a nested class's `doi` is shaped the same way as the
