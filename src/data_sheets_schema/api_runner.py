@@ -6159,7 +6159,7 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
-    if spec.render_version == 24:
+    if spec.render_version in (24,):  # membership is also derived by the execution-policy audit
         raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
                          "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
@@ -6266,7 +6266,7 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
-    if spec.render_version == 24:
+    if spec.render_version in (24,):
         raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
                          "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
