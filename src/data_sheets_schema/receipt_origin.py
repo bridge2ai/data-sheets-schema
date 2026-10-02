@@ -89,27 +89,42 @@ one of the words `export`, `declare`, `typeset`, `local`, `readonly`,
 `shopt`, `alias`, `hash`, `enable`, `for` or `select` (`for PATH in
 ./bin; do :; done;`), a `{NAME}` word before a redirection operator, to
 which bash 4.1 and later assign the descriptor the redirection opens
-(`echo hi {PATH}>/dev/null;`), a parameter expansion that may assign
-(`${NAME:=...}` or `${NAME=...}`: `: ${BASH_CMDS[d4d]:=./x};`), or a word
-carrying a `$'...'` or `$"..."` quote, whose decoded text the tokenizer
-does not read (`printf $'-v' PATH ...;`, #3830, #4140); or an assignment
+(`echo hi {PATH}>/dev/null;`), or a word carrying a `$'...'` or `$"..."`
+quote, whose decoded text the tokenizer does not read (`printf $'-v'
+PATH ...;`, #3830, #4140); a word, in an earlier part or on the derive's
+own part (bash expands every word of a part before it looks the program
+up), carrying anywhere in it, quoted or not, a parameter expansion that
+may assign (`${NAME:=...}` or `${NAME=...}`: `: ${BASH_CMDS[d4d]:=./x};`,
+`d4d derive core ... ${BASH_CMDS[d4d]:=./x}`, #4140, #4160), a bash 5.3
+substitution that runs its command in this shell (a `${` followed by a
+blank or `|`: `echo "${ PATH=./bin:$PATH; }";`, #4160), a backquote, or
+a `$(` or `${` inside a `[...]` subscript, which the tokenizer cannot
+read whole (``BASH_CMDS[`echo d4d`]=./x;``, #4161); or an assignment
 word anywhere on the part itself where any part of the command, a later
 one included, carries `set` with an option word carrying `k` or the word
 `keyword` (`set -k`, `set -o keyword`), as keyword mode puts every
-assignment word in a command's environment (#4124). An earlier part's
-words are read both as the tokenizer splits them and as bash does, a
-line continuation deleted (`printf -\\<newline>v PATH ...;`), and every
-earlier part counts where the second reading cannot be split or splits
-the command into other parts (#4140). Its cost is a false `unknown` where
-such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X}
->f;`). A route those words do not name -- such as a function, defined in
-the command or outside it (`d4d() { ./x; };`), `getopts`, `unset`,
-`coproc`, `trap`, `compgen -V`, an arithmetic assignment (`(( PATH = 1
-))`, `let 'PATH = 1'`, or one in an array subscript or a `[[ -eq ]]`
-operand) or a word built at run time (`$X`, `printf -${X}v`, a brace
-expansion), #4135 -- is not read, nor is an assignment, option or
-definition made outside the command (an earlier call's `export`, the
-inherited environment), so a derive after `unset PATH;` is placed. Any
+assignment word in a command's environment (#4124). Each clause but the
+first reads a part's words both as the tokenizer splits them and as bash
+does: a line continuation deleted (`printf -\\<newline>v PATH ...;`), a
+`$'...'` or `$"..."` quote marked, one whose `$` a continuation
+separates from its quote included (`$\\<newline>'\\x2dv'`), and a newline
+after an escaped backslash kept as the command separator it is, where
+the tokenizer reads a blank (#3985); where that reading cannot be split,
+or splits the command into other parts (`echo
+x\\\\<newline>PATH=./bin:$PATH;`), no derive in the command is placed
+(#4140, #4161). Its cost is a false `unknown` where such a word assigns
+nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ '
+f;`, ``echo `date`;``), or where the two readings cannot be paired and
+nothing assigns (`echo hi &\\<newline>> /dev/null;`). A route those words
+do not name -- such as a function, defined in the command or outside it
+(`d4d() { ./x; };`), `getopts`, `unset`, `coproc`, `trap`, `compgen -V`,
+an arithmetic assignment (`(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH
+= 1 ))`, among the derive's own words too, or one in an array subscript
+or a `[[ -eq ]]` operand) or a word built at run time (`$X`, `printf
+-${X}v`, a brace expansion), #4135 -- is not read, nor is an assignment,
+option or definition made outside the command (an earlier call's
+`export`, the inherited environment), so a derive after `unset PATH;` is
+placed. Any
 other part that carries the words `derive core` and is neither a d4d call
 of another subcommand nor a program known to read is a derive that cannot
 be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
@@ -513,23 +528,33 @@ NON_CHECKS = (
     "`readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`, `source`, `.`, `set`, `shopt`, "
     "`alias`, `hash`, `enable`, `for` or `select` (`for PATH in ./bin; do :; done;`), a `{NAME}` "
     "word before a redirection operator, to which bash 4.1 and later assign the descriptor the "
-    "redirection opens (`echo hi {PATH}>/dev/null;`), a parameter expansion that may assign "
-    "(`${NAME:=...}` or `${NAME=...}`: `: ${BASH_CMDS[d4d]:=./x};`), or a word carrying a `$'...'` "
-    "or `$\"...\"` quote, whose decoded text the tokenizer does not read (`printf $'-v' PATH ...;`, "
-    "#3830, #4140); or an assignment word anywhere on the part itself where any part of the command, "
-    "a later one included, carries `set` with an option word carrying `k` or the word `keyword` "
-    "(`set -k`, `set -o keyword`), since keyword mode puts every assignment word in a command's "
-    "environment (#4124). An earlier part's words are read both as the tokenizer splits them and as "
-    "bash does, a line continuation deleted (`printf -\\<newline>v PATH ...;`), and every earlier "
-    "part counts where the second reading cannot be split or splits the command into other parts "
-    "(#4140). The cost is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, "
-    "`set -e;`, `echo {X} >f;`). A route those words do not name is not read (such as a function, "
+    "redirection opens (`echo hi {PATH}>/dev/null;`), or a word carrying a `$'...'` or `$\"...\"` "
+    "quote, whose decoded text the tokenizer does not read (`printf $'-v' PATH ...;`, #3830, #4140); "
+    "a word, in an earlier part or on the derive's own part (bash expands every word of a part before "
+    "it looks the program up), carrying anywhere in it, quoted or not, a parameter expansion that may "
+    "assign (`${NAME:=...}` or `${NAME=...}`: `: ${BASH_CMDS[d4d]:=./x};`, `d4d derive core ... "
+    "${BASH_CMDS[d4d]:=./x}`, #4140, #4160), a bash 5.3 substitution that runs its command in this "
+    "shell (a `${` followed by a blank or `|`: `echo \"${ PATH=./bin:$PATH; }\";`, #4160), a "
+    "backquote, or a `$(` or `${` inside a `[...]` subscript, which the tokenizer cannot read whole "
+    "(``BASH_CMDS[`echo d4d`]=./x;``, #4161); or an assignment word anywhere on the part itself where "
+    "any part of the command, a later one included, carries `set` with an option word carrying `k` or "
+    "the word `keyword` (`set -k`, `set -o keyword`), since keyword mode puts every assignment word "
+    "in a command's environment (#4124). Each clause but the first reads a part's words both as the "
+    "tokenizer splits them and as bash does: a line continuation deleted (`printf -\\<newline>v PATH "
+    "...;`), a `$'...'` or `$\"...\"` quote marked, one whose `$` a continuation separates from its "
+    "quote included (`$\\<newline>'\\x2dv'`), and a newline after an escaped backslash kept as the "
+    "command separator it is, where the tokenizer reads a blank (#3985); where that reading cannot "
+    "be split, or splits the command into other parts (`echo x\\\\<newline>PATH=./bin:$PATH;`), no "
+    "derive in the command is placed (#4140, #4161). The cost is a false `unknown` where such a word "
+    "assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo "
+    "`date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
+    "&\\<newline>> /dev/null;`). A route those words do not name is not read (such as a function, "
     "defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, `coproc`, `trap`, "
-    "`compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'` or one in an array "
-    "subscript or a `[[ -eq ]]` operand, or a word built at run time, `$X`, `printf -${X}v` or a "
-    "brace expansion, #4135), nor an assignment, option or definition made outside the command (an "
-    "earlier call's `export`, the inherited environment), so a derive after `unset PATH;` is "
-    "placed. The words are matched "
+    "`compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH = 1 ))`, "
+    "among the derive's own words too, or one in an array subscript or a `[[ -eq ]]` operand, or a "
+    "word built at run time, `$X`, `printf -${X}v` or a brace expansion, #4135), nor an assignment, "
+    "option or definition made outside the command (an earlier call's `export`, the inherited "
+    "environment), so a derive after `unset PATH;` is placed. The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -588,6 +613,18 @@ _DESCRIPTOR_VARIABLE = re.compile(r"\{[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\}")
 #: included (`${BASH_CMDS[d4d]:=./x}`, after which bash 5 runs `./x` for
 #: `d4d`; `${!REF:=x}`), #4140.
 _ASSIGNING_EXPANSION = re.compile(r"\$\{!?[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?:?=")
+#: A bash 5.3 command substitution that runs its command in this shell, not
+#: in a child: `${ command; }` or `${| command; }`, a `${` followed by a
+#: blank or `|` (#4160). It may assign (`echo "${ PATH=./bin:$PATH; }"`
+#: makes bash 5.3 run `./bin/d4d` next) or run any code here. Read anywhere
+#: in a word, inside quotes too, and where a word ends with `${`, as the
+#: tokenizer splits an unquoted one at the blank after it.
+_CURRENT_SHELL_SUBSTITUTION = re.compile(r"\$\{(?:[\s|]|\Z)")
+#: A `$(` or `${` inside a `[...]` subscript, or a `$` ending a word after a
+#: `[`, where the tokenizer split a `$(`'s `(` off as an operator (#4161).
+#: shlex splits such a subscript at a blank inside the substitution, so no
+#: piece of `BASH_CMDS[$(echo d4d)]=./x` is an assignment word.
+_SUBSCRIPT_SUBSTITUTION = re.compile(r"\[[^\]]*\$(?:[({]|\Z)")
 #: The character `_bash_spelling` puts between the `$` and the quote of a
 #: `$'...'` or `$"..."` quote, by the quote: the tokenizer reads such a
 #: quote as a plain one and keeps the `$`, so `$'-v'` comes back as `$-v`
@@ -886,11 +923,14 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     variable or relative-path program, which may be a wrapper, #3693) or
     `assigned_environment` (an assignment that may come before the program,
     on the part, given to `env`, in an earlier part read by its words
-    wherever they stand, or on the part under keyword mode, which may make
-    it run other code, #3781, #4123, #4124). A part whose status the
-    result does not carry is `ambiguous`, unless the call was `denied` --
-    by the native control or, corroborated, by the runtime (#3201) -- and
-    so never ran. `inputs` are the call's, for `_backgrounded`."""
+    wherever they stand, in an expansion among the part's own words or an
+    earlier part's, or on the part under keyword mode, which may make it
+    run other code, or a command whose words cannot be read part by part as
+    bash reads them, #3781, #4123, #4124, #4160, #4161). A part whose
+    status the result does not carry is `ambiguous`, unless the call was
+    `denied` -- by the native control or, corroborated, by the runtime
+    (#3201) -- and so never ran. `inputs` are the call's, for
+    `_backgrounded`."""
     overall = _shell_outcome(result, inputs)
     if overall in ("pending", "ambiguous") or basis == "command":
         return overall
@@ -1185,8 +1225,25 @@ def _tokens(command: str) -> list[str] | None:
     everything after `s/#//g` (#3184). Each unquoted run of operator
     characters is split into bash's operators first (`_spaced_operators`,
     #3825), so a `;`, `&&`, `||` or `|` after an unquoted substitution's
-    `)` is a join and the command after it heads its own part."""
-    text = _spaced_operators(_newlines_as_joins(_strip_comments(command.replace("\\\n", " "))))
+    `)` is a join and the command after it heads its own part. Before all
+    that, every backslash-newline is read as a blank: a line continuation,
+    which bash deletes (`printf -\\<newline>v` is `printf -v` to bash,
+    `_bash_spelling`), one after an escaped backslash, where bash ends the
+    command at the newline (#3985), and one inside `'...'` or `$'...'`,
+    where bash keeps both as text."""
+    return _token_list(command.replace("\\\n", " "))
+
+
+def _token_list(text: str) -> list[str] | None:
+    """`_tokens` without its first step: a backslash-newline in `text` is
+    read as it stands, a newline after an escaped backslash as the command
+    separator it is to bash, and one inside quotes as text. `_bash_parts`
+    reads the text `_bash_spelling` gives this way, as its line
+    continuations are deleted already: a backslash-newline left there is a
+    newline after an escaped backslash (`echo x\\\\<newline>PATH=...`, two
+    commands to bash), which `_tokens`'s blank would join into one word,
+    or one inside `'...'` or `$'...'` (#4161)."""
+    text = _spaced_operators(_newlines_as_joins(_strip_comments(text)))
     lexer = shlex.shlex(text, posix=True, punctuation_chars=True)
     lexer.whitespace_split = True
     lexer.commenters = ""
@@ -1536,7 +1593,9 @@ def _plainly_run(segment: list[str]) -> bool:
     outside the command (exported earlier or inherited) is not read. A
     `derive core` part this rejects is not placed (#3781), nor one after a
     part whose words may assign (`_may_assign`, #4123), nor one carrying an
-    assignment word anywhere where the command may turn on keyword mode
+    expansion that may assign or run code in this shell
+    (`_expansion_may_assign`, #4160, #4161), nor one carrying an assignment
+    word anywhere where the command may turn on keyword mode
     (`_keyword_mode`, #4124)."""
     rest = list(segment)
     while rest:
@@ -1560,8 +1619,9 @@ def _names_its_program(segment: list[str]) -> bool:
     relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) may name a
     wrapper rather than the interpreter or the CLI, so a `derive core` its
     words spell may not have run: the row is not placed. Assignments are
-    `_plainly_run`'s and `_may_assign`'s part of the question, not this
-    one; a derive after one is not placed either (#3781, #4123)."""
+    `_plainly_run`'s, `_may_assign`'s and `_expansion_may_assign`'s part of
+    the question, not this one; a derive after one, or carrying one, is not
+    placed either (#3781, #4123, #4160)."""
     rest = _program(segment)
     while (skip := _wrapper_skip(rest)) is not None and skip < len(rest):
         if not _plain_word(rest[0]):
@@ -1844,36 +1904,61 @@ def _printf_assigns(args: list[str]) -> bool:
 def _may_assign(segment: list[str]) -> bool:
     """Whether a part may assign a variable, set a shell option or change
     what a later part's program name runs, read by its words alone and not
-    by where they stand (#3781, #4123, #4140). It may where any word in it
-    is an assignment word (`_ASSIGNMENT_WORD`: `NAME=`, `NAME+=`,
-    `NAME[...]=`, `NAME[...]+=`), whatever comes before it -- `{`, a
-    compound keyword, `!`, `time`, a redirection, `builtin`, `command`,
+    by where they stand (#3781, #4123, #4140, #4160, #4161). It may where
+    any word in it is an assignment word (`_ASSIGNMENT_WORD`: `NAME=`,
+    `NAME+=`, `NAME[...]=`, `NAME[...]+=`), whatever comes before it -- `{`,
+    a compound keyword, `!`, `time`, a redirection, `builtin`, `command`,
     `env` or any other word -- or is one of `_ASSIGNING_WORDS`; where a word
-    carries a parameter expansion that may assign (`_ASSIGNING_EXPANSION`:
-    `${NAME:=...}`, `${NAME=...}`), or a `$'...'` or `$"..."` quote, whose
-    decoded text the tokenizer does not read (`printf $'-v' PATH`, #3830),
-    as the mark `_bash_spelling` puts in it shows (`_DOLLAR_QUOTED`); where
-    the part carries `printf` and a word starting with `-v` (`builtin
-    printf -v PATH %s ./bin`); and where a `{NAME}` word
+    carries a `$'...'` or `$"..."` quote, whose decoded text the tokenizer
+    does not read (`printf $'-v' PATH`, #3830), as the mark `_bash_spelling`
+    puts in it shows (`_DOLLAR_QUOTED`); where a word carries an expansion
+    `_expansion_may_assign` reads (`${NAME:=...}`, `${NAME=...}`, a bash 5.3
+    `${ ...; }` or `${| ...; }`, a backquote, or a `$(` or `${` inside a
+    `[...]` subscript); where the part carries `printf` and a word starting
+    with `-v` (`builtin printf -v PATH %s ./bin`); and where a `{NAME}` word
     (`_DESCRIPTOR_VARIABLE`) stands directly before a redirection operator
     (`echo hi {PATH}>/dev/null`), whichever operator, and whether or not a
     blank stood between the two, which the tokenizer does not keep. No
     spelling of what stands before a program is followed, which is the
     point: each new one was a miss (#4123). The cost is a false `unknown`
     where such a word assigns nothing (`echo X=1`, `ls .`, `set -e`, `echo
-    {X} >f`, `echo $'a'`). A route the words do not name is not read, such
-    as a function (`d4d() { ./x; }`, or a function or alias defined outside
-    the command), `getopts`, `unset`, `coproc`, `trap`, `compgen -V`, an
-    arithmetic assignment (`(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH =
-    1 ))`, or one in an array subscript or a `[[ -eq ]]` operand) or a word
-    built at run time (`$X`, `printf -${X}v`, a brace expansion), #4135.
-    `_shell` asks this of each part's words as `_tokens` splits them and,
-    where bash reads them otherwise, as bash does (`_bash_parts`)."""
-    return (any(_ASSIGNMENT_WORD.fullmatch(word) or word in _ASSIGNING_WORDS
-                or _ASSIGNING_EXPANSION.search(word) or not _DOLLAR_QUOTED.isdisjoint(word) for word in segment)
+    {X} >f`, `echo $'a'`, `grep -c '${ ' f`, ``echo `date` ``). A route the
+    words do not name is not read, such as a function (`d4d() { ./x; }`, or
+    a function or alias defined outside the command), `getopts`, `unset`,
+    `coproc`, `trap`, `compgen -V`, an arithmetic assignment (`(( PATH = 1
+    ))`, `let 'PATH = 1'`, `$(( PATH = 1 ))`, or one in an array subscript
+    or a `[[ -eq ]]` operand) or a word built at run time (`$X`, `printf
+    -${X}v`, a brace expansion), #4135. `_shell` asks this of each earlier
+    part's words both as `_tokens` splits them and as bash does
+    (`_bash_parts`)."""
+    return (any(_ASSIGNMENT_WORD.fullmatch(word) or word in _ASSIGNING_WORDS or not _DOLLAR_QUOTED.isdisjoint(word)
+                for word in segment)
+            or _expansion_may_assign(segment)
             or ("printf" in segment and any(word.startswith("-v") for word in segment))
             or any(_DESCRIPTOR_VARIABLE.fullmatch(word) and _redirection_operator(after)
                    for word, after in zip(segment, segment[1:])))
+
+
+def _expansion_may_assign(segment: list[str]) -> bool:
+    """Whether a word of a part carries an expansion bash performs before it
+    runs the part's program and that may assign or run code in this shell,
+    or one the tokenizer cannot read whole, anywhere in the word and inside
+    quotes too (#4140, #4160, #4161): a parameter expansion that may assign
+    (`_ASSIGNING_EXPANSION`: `${NAME:=...}`, `${NAME=...}`); a bash 5.3
+    substitution run in this shell (`_CURRENT_SHELL_SUBSTITUTION`: `${ ...;
+    }`, `${| ...; }`); a backquote; or a `$(` or `${` inside a `[...]`
+    subscript (`_SUBSCRIPT_SUBSTITUTION`). shlex knows neither a backquote
+    nor a substitution and splits one at a blank inside it, so
+    ``BASH_CMDS[`echo d4d`]=./x``, after which bash 5.3 runs `./x` for
+    `d4d`, comes back as two words, neither an assignment word. bash expands
+    every word of a simple command before it looks its program up, so
+    `_shell` asks this of the derive's own part as well as of each part
+    before it (`_may_assign`): after `d4d derive core ...
+    ${BASH_CMDS[d4d]:=./x}` bash 5.3 runs `./x`. The cost is a false
+    `unknown` where such a word assigns nothing (`grep -c '${ ' f`, ``echo
+    `date` ``, a backquote among the derive's own words)."""
+    return any(_ASSIGNING_EXPANSION.search(word) or _CURRENT_SHELL_SUBSTITUTION.search(word) or "`" in word
+               or _SUBSCRIPT_SUBSTITUTION.search(word) for word in segment)
 
 
 def _bash_spelling(command: str) -> str:
@@ -1884,9 +1969,14 @@ def _bash_spelling(command: str) -> str:
     (`printf -\\<newline>v PATH` is `printf -v PATH` to bash) -- and a mark
     (`_DOLLAR_QUOTE_MARKS`) put after the `$` that opens a `$'...'` or
     `$"..."` quote outside any other, so the word still shows the quote
-    once tokenised. A `$` inside a quote, or one that ends it (`grep 'x$'
-    f`), opens none and is left as written. Quotes are followed as
-    `_spaced_operators` follows them."""
+    once tokenised. A `$` that line continuations separate from its quote
+    opens one too, as bash deletes them before it reads the quote
+    (`$\\<newline>'\\x2dv'` is the ANSI-C word `-v`, #4161). A `$` inside a
+    quote, or one that ends it (`grep 'x$' f`), opens none and is left as
+    written, and so are a newline after an escaped backslash, which ends
+    the command there to bash, and a backslash-newline inside `'...'` or
+    `$'...'`, which bash keeps. Quotes are followed as `_spaced_operators`
+    follows them."""
     out: list[str] = []
     i, n = 0, len(command)
     quote: str | None = None
@@ -1913,12 +2003,18 @@ def _bash_spelling(command: str) -> str:
                 quote = None
             i += 1
             continue
-        if ch == "$" and command[i + 1:i + 2] in _DOLLAR_QUOTE_MARKS:
-            opened = command[i + 1]
-            out.append("$" + _DOLLAR_QUOTE_MARKS[opened] + opened)
-            quote = "$'" if opened == "'" else '"'
-            i += 2
-            continue
+        if ch == "$":
+            # The quote may stand after line continuations, which bash
+            # deletes first (`$\\<newline>'...'`, #4161).
+            after = i + 1
+            while command.startswith("\\\n", after):
+                after += 2
+            if command[after:after + 1] in _DOLLAR_QUOTE_MARKS:
+                opened = command[after]
+                out.append("$" + _DOLLAR_QUOTE_MARKS[opened] + opened)
+                quote = "$'" if opened == "'" else '"'
+                i = after + 1
+                continue
         if ch in "'\"":
             quote = ch
         out.append(ch)
@@ -1929,16 +2025,21 @@ def _bash_spelling(command: str) -> str:
 def _bash_parts(command: str, segments: list[list[str]]) -> list[list[str]] | None:
     """The command's parts with their words as bash reads them where
     `_tokens` reads them otherwise (`_bash_spelling`), for the assignment
-    rule (`_may_assign`, #4140): a line continuation deleted, and a word
-    that carries a `$'...'` or `$"..."` quote marked, which the tokenizer
-    otherwise loses (`$'-v'` comes back from it as `$-v`, #3830).
-    `segments` where the command carries neither a backslash-newline, a
-    `$'` nor a `$"`; None where the words read so cannot be split, or split
-    into a number of parts other than `segments`'s, so that the two
-    readings cannot be paired part by part."""
+    rule (`_may_assign`, `_expansion_may_assign`, `_keyword_mode`, #4140): a
+    line continuation deleted, and a word that carries a `$'...'` or
+    `$"..."` quote marked, which the tokenizer otherwise loses (`$'-v'`
+    comes back from it as `$-v`, #3830). The text is split by
+    `_token_list`, without the blank `_tokens` reads for every
+    backslash-newline, so a newline after an escaped backslash ends a
+    command here as it does in bash (#4161). `segments` where the command
+    carries neither a backslash-newline, a `$'` nor a `$"`; None where the
+    words read so cannot be split, or split into a number of parts other
+    than `segments`'s, so that the two readings cannot be paired part by
+    part (`echo x\\\\<newline>PATH=./bin:$PATH; d4d`: three parts to bash,
+    two to `_tokens`)."""
     if "\\\n" not in command and "$'" not in command and '$"' not in command:
         return segments
-    tokens = _tokens(_bash_spelling(command))
+    tokens = _token_list(_bash_spelling(command))
     if tokens is None:
         return None
     parts = _layout(tokens)[0]
@@ -2588,17 +2689,29 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     assigned = False
     # The derive rule reads more bluntly (#3781, #4123): per part, whether
     # its words may assign wherever they stand (`_may_assign`), so a derive
-    # after any such part is not placed, and whether the command may turn
-    # on keyword mode, which puts a derive's own trailing assignment words in
-    # its environment (`_keyword_mode`, #4124). A part's words are read as
-    # `_tokens` splits them and as bash does, a line continuation deleted
-    # and a `$'...'` or `$"..."` quote marked (`_bash_parts`, #4140): it
-    # counts where either reading may assign, and every part counts where
-    # the two cannot be paired part by part.
-    spelled = _bash_parts(command, segments)
-    assigning = [spelled is None or _may_assign(segment) or _may_assign(spelled[index])
-                 for index, segment in enumerate(segments)]
-    keyword = _keyword_mode(segments)
+    # after any such part is not placed; whether a word of it carries an
+    # expansion bash performs before it runs the part's program that may
+    # assign or run code in this shell, or one the tokenizer cannot read
+    # whole (`_expansion_may_assign`: `${BASH_CMDS[d4d]:=./x}`, `${ ...; }`,
+    # a backquote, #4160, #4161), which `_may_assign` counts in an earlier
+    # part and which a derive's own part may not carry either, since bash
+    # expands every word of a part before it looks its program up; and
+    # whether the command may turn on keyword mode, which puts a derive's own
+    # trailing assignment words in its environment (`_keyword_mode`, #4124).
+    # Each is read in a part's words as `_tokens` splits them and as bash
+    # does, a line continuation deleted and a `$'...'` or `$"..."` quote
+    # marked (`_bash_parts`, #4140, #4161), and counts where either reading
+    # says so. Where the two readings cannot be paired part by part, every
+    # part counts, the derive's own included, so no derive is placed.
+    as_bash = _bash_parts(command, segments)
+    readings = [segments] if as_bash is None else [segments, as_bash]
+    assigning = [as_bash is None or any(_may_assign(reading[index]) for reading in readings)
+                 for index in range(len(segments))]
+    expanding = [as_bash is None or any(_expansion_may_assign(reading[index]) for reading in readings)
+                 for index in range(len(segments))]
+    keyword = any(_keyword_mode(reading) for reading in readings)
+    keyword_words = [any(_ASSIGNMENT_WORD.fullmatch(word) for reading in readings for word in reading[index])
+                     for index in range(len(segments))]
     # `moved`: whether a directory change has run, in this command or, as
     # the caller says, an earlier call (#3719): `python -c` and `python -m`
     # put the directory they start in first on `sys.path`, so after one the
@@ -2729,16 +2842,21 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 # allow-list, `PYTHONPATH=src` included (#3781, the owner's
                 # decision of 2026-09-30): one on the part or given to `env`
                 # (`_plainly_run`); any earlier part whose words may assign,
-                # wherever they stand (`_may_assign`, #4123); or, where the
-                # command may turn on keyword mode, an assignment word
-                # anywhere on the part (#4124). Its cost is a false
+                # wherever they stand (`_may_assign`, #4123); an expansion
+                # among the part's own words that may assign or run code in
+                # this shell before bash looks the program up, or that the
+                # tokenizer cannot read whole (`_expansion_may_assign`,
+                # #4160, #4161); or, where the command may turn on keyword
+                # mode, an assignment word anywhere on the part (#4124).
+                # Where the two readings of the words cannot be paired, each
+                # counts (`assigning`, `expanding`). Its cost is a false
                 # `unknown`; a route the words do not name is not read.
                 if verdict is False:
                     basis = _status_basis(index, joins, leading, newline)
                 elif not named:
                     verdict, basis = None, "unnamed_program"
-                elif (any(assigning[:index]) or not _plainly_run(segment)
-                      or (keyword and any(_ASSIGNMENT_WORD.fullmatch(word) for word in segment))):
+                elif (any(assigning[:index]) or expanding[index] or not _plainly_run(segment)
+                      or (keyword and keyword_words[index])):
                     verdict, basis = None, "assigned_environment"
                 else:
                     basis = _status_basis(index, joins, leading, newline)
@@ -3203,13 +3321,19 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                                       "data_sheets_schema.cli`, `./d4d`), which may name a wrapper that did "
                                       "not run the derive its words spell (#3693)",
                    "assigned_environment": "an assignment may come before its program: on the part or given "
-                                           "to `env` (`PYTHONPATH=src`), in an earlier part of the command, "
+                                           "to `env` (`PYTHONPATH=src`); in an earlier part of the command, "
                                            "read by its words wherever they stand (an assignment word, "
                                            "`printf -v`, or a word that may assign, such as `export`, `read`, "
-                                           "`eval`, `source`, `set` or `for`: `{ PATH=./bin:$PATH; };`), or on "
-                                           "the part itself where the command may turn on keyword mode "
-                                           "(`set -k`); it may make the part run code other than the derive "
-                                           "its words spell, and no assignment is exempt (#3781)",
+                                           "`eval`, `source`, `set` or `for`: `{ PATH=./bin:$PATH; };`); in "
+                                           "an expansion bash performs before it runs the program, among the "
+                                           "part's own words or an earlier part's, that may assign or run "
+                                           "code in this shell or that the tokenizer cannot read whole "
+                                           "(`${BASH_CMDS[d4d]:=./x}`, a bash 5.3 `${ ...; }`, a backquote); "
+                                           "on the part itself where the command may turn on keyword mode "
+                                           "(`set -k`); or anywhere in a command whose words cannot be read "
+                                           "part by part as bash reads them; it may make the part run code "
+                                           "other than the derive its words spell, and no assignment is "
+                                           "exempt (#3781)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "
