@@ -589,3 +589,50 @@ def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, a
     if output is not None:
         output.write_text(text, encoding="utf-8")
     click.echo(text if as_json else audit_recall.render_text(value), nl=False)
+
+
+@evaluate.command("support-plan")
+@click.option("--roster", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              default="notes/reference_rescore_2026-09-11/manifest.json", show_default=True)
+@click.option("--output", type=click.Path(path_type=Path), required=True,
+              help="Fresh directory; its parent must exist. Existing plans are never overwritten.")
+@click.option("--profile", type=click.Choice(["bridge2ai", "neutral"]), required=True)
+@click.option("--model", default=None, help="Evaluator override; otherwise records the generation-default basis.")
+@click.option("--class-name", default="Dataset", show_default=True)
+@click.option("--schema", "schema_path", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--max-tokens", type=click.IntRange(min=1), default=8000, show_default=True)
+@click.option("--prices", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Optional local USD-per-million-token price JSON. Omitted prices stay unknown.")
+def support_plan_cmd(roster, output, profile, model, class_name, schema_path, max_tokens, prices):
+    """Freeze an OFFLINE typed-support/fitness plan; makes no model calls.
+
+    This plans the current top-level instrument. Nested granularity (#3342),
+    independent empirical calibration (#3343), transport registration and paid
+    authorization remain blockers. Creating this plan does not satisfy them.
+    """
+    from data_sheets_schema.support_plan import build_plan
+    try:
+        manifest = build_plan(roster, output, profile=profile, model=model,
+                              class_name=class_name, schema_path=schema_path,
+                              max_tokens=max_tokens, prices=prices)
+    except (OSError, ValueError, KeyError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(f"Saved {manifest['counts']['records']} records / "
+               f"{manifest['counts']['axis_targets']} axis-targets to {output / 'manifest.json'}")
+    click.echo("BLOCKED for paid use: " + ", ".join(manifest["readiness"]["blockers"]))
+    if prices is None:
+        click.echo("Estimated dollars: unknown (no local prices supplied).")
+
+
+@evaluate.command("support-request")
+@click.option("--plan", type=click.Path(exists=True, file_okay=False, path_type=Path), required=True)
+@click.option("--target", required=True, help="Exact target id from manifest.json.")
+def support_request_cmd(plan, target):
+    """Verify a planned request and print its arguments; makes no model calls."""
+    import json
+    from data_sheets_schema.support_plan import materialize_request
+    try:
+        request = materialize_request(plan, target)
+    except (OSError, ValueError, KeyError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(json.dumps(request, ensure_ascii=False, indent=2))

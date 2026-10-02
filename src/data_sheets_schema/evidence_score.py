@@ -820,6 +820,17 @@ def slot_specification_snapshot(class_name: str = "Dataset", schema_path: Path |
     return schema, inventory, vocabulary, specification
 
 
+def fitness_request_arguments(*, model: str, max_tokens: int, slot: str,
+                              value: Any, specification: str) -> dict[str, Any]:
+    """Pure live-judge request arguments, also used by offline plans (#3341)."""
+    rendered = yaml.safe_dump({slot: value}, sort_keys=False, allow_unicode=True)
+    prompt = (f"{specification}\n\nValue supplied:\n\n```yaml\n{rendered}```\n\n"
+              "Does this value satisfy the field as specified?")
+    return {"model": model, "max_tokens": max_tokens, "temperature": None,
+            "system": FITNESS_SYSTEM,
+            "messages": [{"role": "user", "content": prompt}]}
+
+
 class LLMSlotFitnessScorer:
     """Judge slot values against the schema specification, not the bundle.
 
@@ -983,14 +994,9 @@ class LLMSlotFitnessScorer:
 
         from data_sheets_schema.api_runner import _call_with_retry
 
-        rendered = yaml.safe_dump({slot: value}, sort_keys=False,
-                                  allow_unicode=True)
-        prompt = (f"{self._spec_from_snapshot(slot, *snapshot)}\n\n"
-                  f"Value supplied:\n\n```yaml\n{rendered}```\n\n"
-                  "Does this value satisfy the field as specified?")
-        resp = _call_with_retry(client, model=model, max_tokens=self.max_tokens,
-                                temperature=None, system=FITNESS_SYSTEM,
-                                messages=[{"role": "user", "content": prompt}])
+        resp = _call_with_retry(client, **fitness_request_arguments(
+            model=model, max_tokens=self.max_tokens, slot=slot, value=value,
+            specification=self._spec_from_snapshot(slot, *snapshot)))
         self.calls += 1
         u = getattr(resp, "usage", None)
         self.usage.append({"slot": slot,
