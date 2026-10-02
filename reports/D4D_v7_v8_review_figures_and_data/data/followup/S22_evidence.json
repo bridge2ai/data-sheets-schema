@@ -1,0 +1,283 @@
+{
+  "sample_id": "S22",
+  "record": "CM4AI_v8_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/CM4AI_d4d.yaml",
+  "d4d_sha256": "9fce395dfcba6684dbf183e6c5cf2acc7b6b656c2f76b4ba519974025ca80200",
+  "d4d_fields": {
+    "related_datasets": [
+      {
+        "relationship_type": "is_new_version_of",
+        "target_dataset": "doi:10.18130/V3/K7TGEM",
+        "notes": "CM4AI October 2025 Data Release (Beta), University of Virginia Dataverse, version 2.1. That release contained perturb-seq, SEC-MS and IF image data but no AP-MS data."
+      },
+      {
+        "relationship_type": "is_new_version_of",
+        "target_dataset": "doi:10.18130/V3/F3TD5R",
+        "notes": "CM4AI June 2025 Data Release (Beta), University of Virginia Dataverse, version 2.1, published 2025-07-01. That revision added RGB immunofluorescent images, corrected RO-Crate metadata, and changed naming conventions."
+      },
+      {
+        "relationship_type": "is_new_version_of",
+        "target_dataset": "doi:10.18130/V3/B35XWX",
+        "notes": "CM4AI March 2025 Data Release (Beta), University of Virginia Dataverse, version 1.4, published 2025-03-03. That release included perturb-seq in undifferentiated KOLF2.1J iPSCs, SEC-MS in iPSCs and derivatives, and IF images stated there as covering 563 proteins of interest per condition."
+      },
+      {
+        "relationship_type": "is_new_version_of",
+        "target_dataset": "doi:10.18130/V3/DXWOS5",
+        "notes": "Cell Maps for Artificial Intelligence - Data Release, University of Virginia Dataverse, V1, the May 2024 release cited in the CM4AI preprint."
+      },
+      {
+        "relationship_type": "is_described_by",
+        "target_dataset": "doi:10.1101/2024.05.21.589311",
+        "notes": "Clark T et al., \"Cell Maps for Artificial Intelligence: AI-Ready Maps of Human Cell Architecture from Disease-Relevant Cell Lines\", bioRxiv preprint describing the CM4AI project, its goals, methods, standards, datasets, software tools, status and future directions."
+      },
+      {
+        "relationship_type": "is_referenced_by",
+        "target_dataset": "doi:10.1101/2024.11.03.621734",
+        "notes": "Nourreddine S et al., \"A Perturbation Cell Atlas of Human Induced Pluripotent Stem Cells\", bioRxiv 2024, PMCID PMC11580897, cited as a related publication for the perturb-seq component."
+      },
+      {
+        "relationship_type": "references",
+        "target_dataset": "doi:10.1038/s41586-025-08878-3",
+        "notes": "Schaffer LV, Hu M, Qian G et al., \"Multimodal cell maps as a foundation for structural and functional genomics\", Nature 642:222-231 (2025). Describes a U2OS multimodal cell map produced by integrating AP-MS and immunofluorescence data with the Cell Mapping Toolkit; acknowledges Bridge2AI Program funding OT2 OD032742. Its data are a separate dataset from this release."
+      }
+    ],
+    "version": "2.0",
+    "version_access": {
+      "versions_available": [
+        "Prior CM4AI data releases remain individually published and citable in the University of Virginia Dataverse: May 2024 (doi:10.18130/V3/DXWOS5), March 2025 (doi:10.18130/V3/B35XWX, V1, version 1.4), June 2025 (doi:10.18130/V3/F3TD5R, V2, version 2.1), October 2025 (doi:10.18130/V3/K7TGEM, V2, version 2.1), and June 2026 (doi:10.18130/V3/HIGT4C, V2, version 2.0)."
+      ],
+      "latest_version_doi": "doi:10.18130/V3/HIGT4C"
+    }
+  },
+  "receipt_links": [
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c002",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "source_type": "publication",
+      "slot": "related_datasets[6]",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "Multimodal cell maps as a foundation for structural and functional genomics",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c002",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "source_type": "publication",
+      "slot": "related_datasets[6].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.1038/s41586-025-08878-3",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c006",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "source_type": "publication",
+      "slot": "related_datasets[6].notes",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "We acknowledge funding from Schmidt Futures (T.I., E.L.), the Bridge2AI Program",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c012",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "related_datasets[3].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.18130/V3/DXWOS5",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[2].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.18130/V3/B35XWX",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[2].notes",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "Cell Maps for Artificial Intelligence - March 2025 Data Release (Beta)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[4].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "http://doi.org/10.1101/2024.05.21.589311",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[1].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.18130/V3/F3TD5R",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[1].notes",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "This revision includes adding RGB immunofluorescent images, corrections to ro-crate metadata, and changes to naming conventions",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c021",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[5].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.1101/2024.11.03.621734",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c021",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "source_type": "historical data release",
+      "slot": "related_datasets[5].notes",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "A PERTURBATION CELL ATLAS OF HUMAN INDUCED PLURIPOTENT STEM CELLS",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "source_type": "data resource",
+      "slot": "related_datasets[0].target_dataset",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.18130/V3/K7TGEM",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "source_type": "data resource",
+      "slot": "related_datasets[0].notes",
+      "root": "related_datasets",
+      "section": "Composition",
+      "snippet": "Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep2",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "version",
+      "root": "version",
+      "section": "Metadata",
+      "snippet": "Version 2.0",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "Version 2\\.1",
+    "Version 2\\.0"
+  ],
+  "source_excerpts": [
+    {
+      "query": "Version 2\\.1",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "chunk_sha256": "9bf180d0fbe2d8421519cfa7a8958e9e655a25771c96e2ce8bdfc76d316bb33a",
+      "excerpt": "ocol was scripted using the Python Modeling\nInterface package, a library for modeling macromolecular complexes based on our\nopen-source Integrative Modeling Platform (IMP) package version 2.18\n(https://integrativemodeling.org).\n\n7\n\n\n\n\n\n\nbioRxiv preprint\n\ndoi:\n\nhttps://doi.org/10.1101/2024.05.21.589311\n\n;\n\nthis version posted May 24, 2024.\n\nThe copyright holder for this preprint (which\n\nwas not certified by peer review) is the author/funder, who has granted bioRxiv a license to display t"
+    },
+    {
+      "query": "Version 2\\.1",
+      "chunk": "c020",
+      "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+      "chunk_sha256": "147a4351b49f6975821dd04531dd6b7c69a9c590f658cd96755c5f95d647b5af",
+      "excerpt": "ne\n>\nCell Maps for Artificial Intelligence\n>\nInfo\n\u2013 The \"DRAFT\" version was not found.\u00a0This is version \"2.1\".\nCell Maps for Artificial Intelligence - June 2025 Data Release (Beta)\nVersion 2.1\nClark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacc"
+    },
+    {
+      "query": "Version 2\\.0",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "ataverse\n>\nLibraData: UVa's Scholarly Research\n>\nSchool of Medicine\n>\nCell Maps for Artificial Intelligence\n>\nCell Maps for Artificial Intelligence - June 2026 Data Release (Beta)\nVersion 2.0\nClark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacc"
+    },
+    {
+      "query": "Version 2.1",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "chunk_sha256": "a52130ba08aae4d3be8169404e7bc07695f2b644614ba48a87f406a6f9ef805a",
+      "excerpt": "arly Research > School of Medicine > Cell Maps for Artificial Intelligence > Cell Maps for Artificial Intelligence - October 2025 Data Release (Beta) Version 2.1 Clark, T; Parker, J; Al Manir, S; Axelsson, U; Ballllosero Navarro, F; Chinn, B; Churas, CP; Dailamy, A; Doctor, Y; Fall, J; Forget, A; Gao, J; Hansen, JN; Hu, M; Johannesson, A; Khaliq, H; Lee, YH; Lenkiewicz, J; Levinson, MA; Marquez, C; Metallo, C; Muralidharan, M; Nourreddine, S; Niestroy, J; Obernier, K; Pan, E; Polacco, B; Pratt, D; Qian, G; Schaffer, L; Sigaeva, A; Thaker, S; Zhang, Y; B\u00e9lisle-Pipon, JC; Brandt, C; Chen, JY; Ding, Y; Fode",
+      "whitespace_normalized": true
+    },
+    {
+      "query": "Version 2.0",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "holarly Research > School of Medicine > Cell Maps for Artificial Intelligence > Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta) Version 2.0 Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Marquez C; Metallo C; Muralidharan M; Nourreddine S; Niestroy J; Obernier K; Pan E; Polacco B; Pratt D; Qian G; Schaffer L; Sigaeva A; Thaker S; Zhang Y; B\u00e9lisle-Pipon JC; Brandt C; Chen JY; Ding Y; Fodeh S; Krogan N; Lundberg E; Mali P; Pa",
+      "whitespace_normalized": true
+    }
+  ]
+}

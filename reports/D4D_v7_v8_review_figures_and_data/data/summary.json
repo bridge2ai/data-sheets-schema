@@ -1,0 +1,224 @@
+{
+  "n_records": 24,
+  "primary_ratings": 48,
+  "repeat_ratings": 8,
+  "issue_entries": 562,
+  "issue_types": {
+    "consistency": 194,
+    "completeness": 189,
+    "correctness": 58,
+    "content_accuracy": 65,
+    "semantic_understanding": 56
+  },
+  "severity": {
+    "medium": 230,
+    "low": 276,
+    "high": 56
+  },
+  "missing_fields": {
+    "download_url": 18,
+    "errata": 15,
+    "imputation_protocols": 13,
+    "parent_datasets": 12,
+    "variables": 11,
+    "is_tabular": 10,
+    "data_protection_impacts": 9,
+    "resources": 9,
+    "total_size_bytes": 9,
+    "anomalies": 6,
+    "future_use_impacts": 6,
+    "publisher": 6,
+    "discouraged_uses": 5,
+    "doi": 5,
+    "machine_annotation_tools": 5,
+    "missing_data_documentation": 5
+  },
+  "accuracy_fields": {
+    "source_caveats": 15,
+    "regulatory_restrictions": 12,
+    "is_deidentified": 10,
+    "funders": 9,
+    "creators": 8,
+    "doi": 8,
+    "file_collections": 8,
+    "instances": 8,
+    "participant_privacy": 7,
+    "citation": 6,
+    "data_governance": 6,
+    "ethical_reviews": 6,
+    "external_resources": 6,
+    "issued": 6,
+    "license_and_use_terms": 6,
+    "maintainers": 6
+  },
+  "score_means": {
+    "AI_READI v7": [
+      98.0,
+      94.6969696969697
+    ],
+    "AI_READI v8": [
+      98.0,
+      93.56060606060606
+    ],
+    "CHORUS v7": [
+      64.66666666666667,
+      74.62121212121212
+    ],
+    "CHORUS v8": [
+      68.66666666666667,
+      75.75757575757575
+    ],
+    "CM4AI v7": [
+      90.78014184397162,
+      85.68376068376068
+    ],
+    "CM4AI v8": [
+      85.1063829787234,
+      80.00194250194251
+    ],
+    "VOICE v7": [
+      97.33333333333333,
+      92.04545454545455
+    ],
+    "VOICE v8": [
+      96.66666666666667,
+      89.01515151515152
+    ]
+  },
+  "q20_means": {
+    "Field Completeness": [
+      86.66666666666667,
+      60.0,
+      73.33333333333333,
+      86.66666666666667
+    ],
+    "Entry Length Adequacy": [
+      100.0,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "Keyword Diversity": [
+      83.33333333333333,
+      100.0,
+      100.0,
+      60.0
+    ],
+    "File Enumeration and Type Variety": [
+      100.0,
+      96.66666666666667,
+      50.0,
+      80.0
+    ],
+    "Data File Size Availability": [
+      100.0,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "Dataset Identification Metadata": [
+      100.0,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "Funding and Acknowledgements Completeness": [
+      100.0,
+      96.66666666666667,
+      96.66666666666667,
+      100.0
+    ],
+    "Ethical and Privacy Declarations": [
+      86.66666666666667,
+      60.0,
+      80.0,
+      90.0
+    ],
+    "Access Requirements and Governance Documentation": [
+      100.0,
+      76.66666666666667,
+      90.0,
+      96.66666666666667
+    ],
+    "Interoperability, Standardization, and Cross-Platform Integration": [
+      100.0,
+      90.0,
+      83.33333333333333,
+      90.0
+    ],
+    "Tool and Software Transparency": [
+      80.0,
+      80.0,
+      53.333333333333336,
+      90.0
+    ],
+    "Collection Protocol Clarity": [
+      100.0,
+      80.0,
+      83.33333333333333,
+      86.66666666666667
+    ],
+    "Version History, Maintenance, and Sustainability": [
+      86.66666666666667,
+      40.0,
+      90.0,
+      96.66666666666667
+    ],
+    "Associated Publications": [
+      100.0,
+      60.0,
+      100.0,
+      100.0
+    ],
+    "Human Subject Representation": [
+      100.0,
+      60.0,
+      70.0,
+      80.0
+    ],
+    "Findability (Persistent Links)": [
+      100.0,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "Accessibility (Access Mechanism)": [
+      100.0,
+      76.66666666666667,
+      83.33333333333333,
+      100.0
+    ],
+    "Reusability, Use Guidance, and Social Impact": [
+      90.0,
+      63.333333333333336,
+      90.0,
+      96.66666666666667
+    ],
+    "Data Integrity, Provenance Graph, and Quality": [
+      93.33333333333333,
+      76.66666666666667,
+      83.33333333333333,
+      100.0
+    ],
+    "Bias Documentation and Responsible AI Alignment": [
+      90.0,
+      46.666666666666664,
+      66.66666666666667,
+      80.0
+    ]
+  },
+  "receipt_links": 4289,
+  "unclassified_links": 0,
+  "q19_qualified": [
+    "AI_READI_v8_rep1_r20_rating1",
+    "AI_READI_v8_rep3_r20_rating1",
+    "CHORUS_v7_rep1_r20_rating1",
+    "CHORUS_v8_rep1_r20_rating1",
+    "CHORUS_v8_rep2_r20_rating1",
+    "CM4AI_v7_rep2_r20_rating1",
+    "CM4AI_v8_rep1_r20_rating1",
+    "CM4AI_v8_rep2_r20_rating1",
+    "CM4AI_v8_rep3_r20_rating1"
+  ],
+  "git_commit": "60452ab4e1de922da2bd6581c9f0a34672a2057c"
+}

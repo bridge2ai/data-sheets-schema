@@ -1,0 +1,106 @@
+{
+  "sample_id": "S13",
+  "record": "CHORUS_v8_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/CHORUS_d4d.yaml",
+  "d4d_sha256": "960c3500b4c6b43bd1eb1a17508148529a021c7ee3205c81aa19b021f75aa943",
+  "d4d_fields": {
+    "discouraged_uses": null,
+    "intended_uses": [
+      {
+        "use_category": "Clinical AI/ML model development",
+        "examples": [
+          "Building machine-learning and AI-derived models that characterize acute and critical care illness, predict complications, and measure treatment response, in order to improve the care and outcomes of patients requiring critical care."
+        ]
+      },
+      {
+        "use_category": "External model validation",
+        "examples": [
+          "Validating externally developed models against a sequestered holdout dataset, an activity the project plans in order to aid marketplace adoption of AI-developed models."
+        ]
+      },
+      {
+        "use_category": "Education and workforce development",
+        "examples": [
+          "Hands-on AI/ML training in the CHoRUS ecosystem, including structured EHR datasets, clinical deep learning, ethics of clinical AI, and the OHDSI/OMOP common data model.",
+          "The AIM-AHEAD Bridge2AI for Clinical Care Training Program announced Cohort 2 in a September 2025 informational webinar: up to 30 trainees were to be selected, with notice of award on 10 November 2025 and the program running from 17 November 2025 to 31 July 2026, and would receive hands-on training on the Bridge2AI AI/ML for Clinical Care Network, leveraging the CHoRUS data and tools to create practical use cases and conduct collaborative research on the Bridge2AI Clinical Care Cloud platform."
+        ],
+        "usage_notes": "As of the source webinar (9 September 2025), the Cohort 2 application deadline had not passed and no trainees had been selected; this is an announced program rather than a use in progress."
+      }
+    ],
+    "license_and_use_terms": {
+      "license_terms": "Controlled access to all data types. Participants must sign a licensing agreement, included in the registration form, before gaining access to the dataset; under the training program route a \".edu\" email address is required to gain access to the dataset, and program administrators will assist with this access if needed.",
+      "source_caveats": "The chorus-ai GitHub README states that \"This project is licensed under the MIT License\", which is recorded here as applying to the project's software repositories rather than to the clinical dataset, whose access is governed by the signed licensing agreement described above."
+    },
+    "prohibited_uses": null
+  },
+  "receipt_links": [
+    {
+      "record": "CHORUS_v8_rep2",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c002",
+      "source": "reporter_nih_gov_project-details-10472824_row7.txt",
+      "source_type": "NIH project page",
+      "slot": "intended_uses[0].examples",
+      "root": "intended_uses",
+      "section": "Uses",
+      "snippet": "build machine-learning (ML) and artificial intelligence (AI)-derived models to improve the care and outcomes of patients requiring critical care",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep2",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c003",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "source_type": "tutorial",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "All participants must sign a licensing agreement included in the registration form before gaining",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep2",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c004",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "source_type": "tutorial",
+      "slot": "intended_uses[2].examples",
+      "root": "intended_uses",
+      "section": "Uses",
+      "snippet": "AI/ML for Clinical Care canonical Jupyter Notebooks.",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep2",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "source_type": "tutorial",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "Email Requirement...In order to gain access to...the dataset, you will need...to have a \u201c.edu\u201d email",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "sign a licensing"
+  ],
+  "source_excerpts": [
+    {
+      "query": "sign a licensing",
+      "chunk": "c003",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "chunk_sha256": "7dc281080f359050015dba0a1b8c72ad97340ef64709296d51a0872de86c09c3",
+      "excerpt": "t a registration form with name, email, and institution\n\nOnce access is granted and compute is provisioned, an email will be sent\n\n1\n\n2\n\nLicensing Agreement\n\nAll participants must sign a licensing agreement included in the registration form before gaining\n"
+    }
+  ]
+}

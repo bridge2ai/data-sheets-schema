@@ -1,0 +1,26 @@
+[
+  {
+    "project": "AI_READI",
+    "raw_comments": 124,
+    "strict_signatures": 120,
+    "broad_signatures": 119
+  },
+  {
+    "project": "CHORUS",
+    "raw_comments": 169,
+    "strict_signatures": 155,
+    "broad_signatures": 154
+  },
+  {
+    "project": "CM4AI",
+    "raw_comments": 141,
+    "strict_signatures": 140,
+    "broad_signatures": 140
+  },
+  {
+    "project": "VOICE",
+    "raw_comments": 128,
+    "strict_signatures": 123,
+    "broad_signatures": 123
+  }
+]

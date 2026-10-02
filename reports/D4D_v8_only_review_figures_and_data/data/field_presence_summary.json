@@ -1,0 +1,86 @@
+[
+  {
+    "label": "download_url",
+    "field": "download_url",
+    "Absent, mentioned": 9,
+    "Absent, not mentioned": 3,
+    "Populated": 0
+  },
+  {
+    "label": "errata",
+    "field": "errata",
+    "Absent, mentioned": 8,
+    "Absent, not mentioned": 0,
+    "Populated": 4
+  },
+  {
+    "label": "imputation_protocols",
+    "field": "imputation_protocols",
+    "Absent, mentioned": 7,
+    "Absent, not mentioned": 5,
+    "Populated": 0
+  },
+  {
+    "label": "data_protection_impacts",
+    "field": "data_protection_impacts",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 5,
+    "Populated": 2
+  },
+  {
+    "label": "total_size_bytes",
+    "field": "total_size_bytes",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 3,
+    "Populated": 4
+  },
+  {
+    "label": "is_tabular",
+    "field": "is_tabular",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 2,
+    "Populated": 5
+  },
+  {
+    "label": "variables",
+    "field": "variables",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 1,
+    "Populated": 6
+  },
+  {
+    "label": "parent_datasets",
+    "field": "parent_datasets",
+    "Absent, mentioned": 4,
+    "Absent, not mentioned": 8,
+    "Populated": 0
+  },
+  {
+    "label": "labeling_strategies",
+    "field": "labeling_strategies",
+    "Absent, mentioned": 4,
+    "Absent, not mentioned": 3,
+    "Populated": 5
+  },
+  {
+    "label": "future_use_impacts",
+    "field": "future_use_impacts",
+    "Absent, mentioned": 4,
+    "Absent, not mentioned": 0,
+    "Populated": 8
+  },
+  {
+    "label": "resources",
+    "field": "resources",
+    "Absent, mentioned": 3,
+    "Absent, not mentioned": 9,
+    "Populated": 0
+  },
+  {
+    "label": "machine_annotation_tools",
+    "field": "machine_annotation_tools",
+    "Absent, mentioned": 3,
+    "Absent, not mentioned": 5,
+    "Populated": 4
+  }
+]

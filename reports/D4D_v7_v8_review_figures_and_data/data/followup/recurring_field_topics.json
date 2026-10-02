@@ -1,0 +1,333 @@
+[
+  {
+    "family": "Accuracy/correctness",
+    "roots": [
+      "funders"
+    ],
+    "record_count": 6,
+    "records": [
+      "VOICE_v7_rep1",
+      "VOICE_v7_rep3",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:8",
+      "VOICE_v7_rep1_r20_rating1:6",
+      "VOICE_v7_rep3_r10_rating1:10",
+      "AI_READI_v8_rep2_r20_rating1:12",
+      "AI_READI_v8_rep3_r20_rating1:9",
+      "CM4AI_v8_rep1_r20_rating1:7",
+      "VOICE_v8_rep3_r20_rating1:10"
+    ]
+  },
+  {
+    "family": "Consistency",
+    "roots": [
+      "ethical_reviews",
+      "human_subject_research"
+    ],
+    "record_count": 6,
+    "records": [
+      "CHORUS_v7_rep1",
+      "CHORUS_v7_rep2",
+      "CHORUS_v7_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3"
+    ],
+    "issue_ids": [
+      "CHORUS_v7_rep1_r20_rating1:1",
+      "CHORUS_v7_rep2_r20_rating1:1",
+      "CHORUS_v7_rep3_r20_rating1:4",
+      "CHORUS_v8_rep1_r20_rating1:1",
+      "CHORUS_v8_rep2_r20_rating1:2",
+      "CHORUS_v8_rep3_r20_rating1:1"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "keywords"
+    ],
+    "record_count": 5,
+    "records": [
+      "VOICE_v7_rep1",
+      "VOICE_v7_rep2",
+      "VOICE_v7_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:4",
+      "VOICE_v7_rep2_r10_rating1:1",
+      "VOICE_v7_rep3_r10_rating1:1",
+      "VOICE_v8_rep1_r10_rating1:3",
+      "VOICE_v8_rep3_r10_rating1:1"
+    ]
+  },
+  {
+    "family": "Consistency",
+    "roots": [
+      "data_protection_impacts",
+      "ethical_reviews",
+      "human_subject_research"
+    ],
+    "record_count": 5,
+    "records": [
+      "CHORUS_v7_rep1",
+      "CHORUS_v7_rep2",
+      "CHORUS_v7_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2"
+    ],
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:1",
+      "CHORUS_v7_rep2_r10_rating1:1",
+      "CHORUS_v7_rep3_r10_rating1:1",
+      "CHORUS_v8_rep1_r10_rating1:1",
+      "CHORUS_v8_rep2_r10_rating1:2"
+    ]
+  },
+  {
+    "family": "Semantic understanding",
+    "roots": [
+      "instances"
+    ],
+    "record_count": 5,
+    "records": [
+      "AI_READI_v8_rep3",
+      "CHORUS_v7_rep2",
+      "CHORUS_v8_rep2",
+      "VOICE_v7_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "AI_READI_v8_rep3_r10_rating1:8",
+      "CHORUS_v7_rep2_r10_rating1:11",
+      "CHORUS_v8_rep2_r10_rating1:17",
+      "VOICE_v7_rep1_r10_rating1:10",
+      "VOICE_v8_rep3_r10_rating1:8"
+    ]
+  },
+  {
+    "family": "Accuracy/correctness",
+    "roots": [
+      "maintainers"
+    ],
+    "record_count": 4,
+    "records": [
+      "CHORUS_v7_rep2",
+      "CHORUS_v8_rep3",
+      "CHORUS_v7_rep1",
+      "CHORUS_v8_rep2"
+    ],
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:10",
+      "CHORUS_v7_rep2_r20_rating1:8",
+      "CHORUS_v8_rep3_r10_rating1:11",
+      "CHORUS_v8_rep3_r20_rating1:14",
+      "CHORUS_v7_rep1_r20_rating1:11",
+      "CHORUS_v8_rep2_r20_rating1:13"
+    ]
+  },
+  {
+    "family": "Accuracy/correctness",
+    "roots": [
+      "regulatory_restrictions"
+    ],
+    "record_count": 4,
+    "records": [
+      "AI_READI_v7_rep3",
+      "VOICE_v7_rep1",
+      "AI_READI_v7_rep1",
+      "AI_READI_v8_rep3"
+    ],
+    "issue_ids": [
+      "AI_READI_v7_rep3_r10_rating1:8",
+      "VOICE_v7_rep1_r10_rating1:3",
+      "AI_READI_v7_rep1_r20_rating1:6",
+      "AI_READI_v8_rep3_r20_rating1:2"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "distribution_formats",
+      "file_collections"
+    ],
+    "record_count": 4,
+    "records": [
+      "AI_READI_v7_rep2",
+      "CM4AI_v8_rep2",
+      "VOICE_v7_rep2",
+      "AI_READI_v7_rep1"
+    ],
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:5",
+      "CM4AI_v8_rep2_r10_rating1:4",
+      "VOICE_v7_rep2_r10_rating1:3",
+      "AI_READI_v7_rep1_r20_rating1:7"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "errata",
+      "related_datasets",
+      "updates"
+    ],
+    "record_count": 4,
+    "records": [
+      "CM4AI_v7_rep1",
+      "CM4AI_v7_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3"
+    ],
+    "issue_ids": [
+      "CM4AI_v7_rep1_r10_rating1:7",
+      "CM4AI_v7_rep2_r10_rating1:6",
+      "CM4AI_v8_rep1_r10_rating1:10",
+      "CM4AI_v8_rep3_r10_rating1:6"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "file_collections",
+      "total_size_bytes"
+    ],
+    "record_count": 4,
+    "records": [
+      "CM4AI_v7_rep2",
+      "CM4AI_v7_rep3",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "CM4AI_v7_rep2_r20_rating1:5",
+      "CM4AI_v7_rep3_r20_rating1:8",
+      "CM4AI_v8_rep3_r20_rating1:8",
+      "VOICE_v8_rep3_r20_rating1:6"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "file_collections",
+      "variables"
+    ],
+    "record_count": 4,
+    "records": [
+      "AI_READI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:6",
+      "VOICE_v8_rep1_r10_rating1:10",
+      "VOICE_v8_rep2_r10_rating1:9",
+      "VOICE_v8_rep3_r10_rating1:4"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "future_use_impacts",
+      "known_biases"
+    ],
+    "record_count": 4,
+    "records": [
+      "CM4AI_v7_rep3",
+      "VOICE_v7_rep1",
+      "VOICE_v7_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "issue_ids": [
+      "CM4AI_v7_rep3_r20_rating1:11",
+      "VOICE_v7_rep1_r20_rating1:11",
+      "VOICE_v7_rep3_r20_rating1:10",
+      "VOICE_v8_rep2_r20_rating1:15"
+    ]
+  },
+  {
+    "family": "Completeness",
+    "roots": [
+      "variables"
+    ],
+    "record_count": 4,
+    "records": [
+      "AI_READI_v7_rep3",
+      "CM4AI_v7_rep1",
+      "CM4AI_v8_rep2",
+      "AI_READI_v8_rep1"
+    ],
+    "issue_ids": [
+      "AI_READI_v7_rep3_r10_rating1:3",
+      "CM4AI_v7_rep1_r10_rating1:3",
+      "CM4AI_v8_rep2_r10_rating1:5",
+      "AI_READI_v8_rep1_r20_rating1:11"
+    ]
+  },
+  {
+    "family": "Consistency",
+    "roots": [
+      "is_deidentified",
+      "participant_privacy"
+    ],
+    "record_count": 4,
+    "records": [
+      "CHORUS_v8_rep1",
+      "VOICE_v7_rep3",
+      "VOICE_v8_rep1",
+      "AI_READI_v8_rep3"
+    ],
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:3",
+      "VOICE_v7_rep3_r10_rating1:4",
+      "VOICE_v8_rep1_r10_rating1:5",
+      "AI_READI_v8_rep3_r20_rating1:3"
+    ]
+  },
+  {
+    "family": "Consistency",
+    "roots": [
+      "is_deidentified",
+      "regulatory_restrictions"
+    ],
+    "record_count": 4,
+    "records": [
+      "AI_READI_v7_rep2",
+      "VOICE_v8_rep1",
+      "CHORUS_v7_rep3",
+      "CHORUS_v8_rep3"
+    ],
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:3",
+      "VOICE_v8_rep1_r10_rating1:2",
+      "CHORUS_v7_rep3_r20_rating1:5",
+      "CHORUS_v8_rep3_r20_rating1:6"
+    ]
+  },
+  {
+    "family": "Accuracy/correctness",
+    "roots": [
+      "citation"
+    ],
+    "record_count": 3,
+    "records": [
+      "VOICE_v7_rep1",
+      "VOICE_v7_rep3",
+      "VOICE_v8_rep3"
+    ],
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:7",
+      "VOICE_v7_rep1_r20_rating1:5",
+      "VOICE_v7_rep3_r20_rating1:8",
+      "VOICE_v8_rep3_r20_rating1:9"
+    ]
+  }
+]

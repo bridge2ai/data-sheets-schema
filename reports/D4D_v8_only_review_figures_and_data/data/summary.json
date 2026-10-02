@@ -1,0 +1,37 @@
+{
+  "scope": "v8 only, rating1 only, recomputed from retained evaluation records",
+  "records": 12,
+  "primary_ratings": 24,
+  "datasets": 4,
+  "replicates_per_dataset": 3,
+  "issue_comments": 303,
+  "issues_by_type": {
+    "consistency": 105,
+    "completeness": 100,
+    "semantic_understanding": 33,
+    "content_accuracy": 36,
+    "correctness": 29
+  },
+  "issues_by_severity": {
+    "medium": 131,
+    "low": 140,
+    "high": 32
+  },
+  "q19_qualified_ratings": 7,
+  "receipt_links": 2556,
+  "receipt_links_unpopulated_roots": 38,
+  "structural_fields_selected": 12,
+  "selected_record_field_pairs": 144,
+  "selected_absent_pairs": 106,
+  "selected_absent_mentioned_pairs": 62,
+  "all_records_accuracy_flagged": 12,
+  "qualified_jobs": [
+    "AI_READI_v8_rep1_r20_rating1",
+    "AI_READI_v8_rep3_r20_rating1",
+    "CHORUS_v8_rep1_r20_rating1",
+    "CHORUS_v8_rep2_r20_rating1",
+    "CM4AI_v8_rep1_r20_rating1",
+    "CM4AI_v8_rep2_r20_rating1",
+    "CM4AI_v8_rep3_r20_rating1"
+  ]
+}

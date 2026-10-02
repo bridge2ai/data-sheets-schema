@@ -1,0 +1,863 @@
+[
+  {
+    "section": "Collection",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "type": "content_accuracy",
+    "records": [
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "type": "correctness",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Collection",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "type": "correctness",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Composition",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Data Governance",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 8,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "type": "content_accuracy",
+    "records": [
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Distribution",
+    "type": "semantic_understanding",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Ethics",
+    "type": "semantic_understanding",
+    "records": [
+      "CM4AI_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "FileCollection",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 5,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 7,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "type": "correctness",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Human",
+    "type": "semantic_understanding",
+    "records": [
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep2"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "type": "correctness",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Maintenance",
+    "type": "semantic_understanding",
+    "records": [
+      "CM4AI_v8_rep1",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 12,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 11,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 11,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 11,
+    "denominator": 12
+  },
+  {
+    "section": "Metadata",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "type": "completeness",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep3",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "type": "correctness",
+    "records": [
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Motivation",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep1"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 9,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 6,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "type": "content_accuracy",
+    "records": [
+      "CHORUS_v8_rep2"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "type": "correctness",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Preprocessing",
+    "type": "semantic_understanding",
+    "records": [
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 3,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CHORUS_v8_rep3",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep2"
+    ],
+    "record_count": 8,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "type": "consistency",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep2",
+      "VOICE_v8_rep1"
+    ],
+    "record_count": 4,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "type": "content_accuracy",
+    "records": [
+      "AI_READI_v8_rep1"
+    ],
+    "record_count": 1,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "type": "correctness",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Uses",
+    "type": "semantic_understanding",
+    "records": [
+      "AI_READI_v8_rep3",
+      "CHORUS_v8_rep1"
+    ],
+    "record_count": 2,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "type": "completeness",
+    "records": [
+      "AI_READI_v8_rep1",
+      "AI_READI_v8_rep2",
+      "CHORUS_v8_rep1",
+      "CHORUS_v8_rep2",
+      "CM4AI_v8_rep1",
+      "CM4AI_v8_rep2",
+      "CM4AI_v8_rep3",
+      "VOICE_v8_rep1",
+      "VOICE_v8_rep2",
+      "VOICE_v8_rep3"
+    ],
+    "record_count": 10,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "type": "consistency",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "type": "content_accuracy",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "type": "correctness",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  },
+  {
+    "section": "Variables",
+    "type": "semantic_understanding",
+    "records": [],
+    "record_count": 0,
+    "denominator": 12
+  }
+]

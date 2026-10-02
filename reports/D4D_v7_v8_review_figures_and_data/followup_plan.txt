@@ -1,0 +1,20 @@
+D4D follow-up analysis plan — 2026-09-30
+
+Objective: distinguish evaluator behavior, structural completeness, and evidence-supported defects while preserving the initial analysis.
+
+1. Audit frozen inputs and separate review-mentioned absence from structural absence for the 16 previously reported fields. Export every record-field classification. No applicability inference from presence alone.
+2. Compare native field-flag sets across the two rubrics and across repeated rubric10 ratings. Report Jaccard/positive overlap and raw counts; do not equate overlap with factual agreement.
+3. Build transparent concern groups from native issue families plus implicated field sets. Report strict grouping and a broader sensitivity; do not claim automatically grouped topics are verified unique errors.
+4. Recalculate rubric20 diagnostic scores with Q19 removed uniformly, and with Q13+Q19 removed uniformly. Compare fixed versus adjusted denominators. Retain all original ratings and qualifications.
+5. Select 32 primary comments deterministically (seed 20260930): one per dataset × rubric × family (completeness, consistency, accuracy/correctness, semantic understanding). Review against frozen D4Ds and recovered historical source chunks. Record evidence, outcome, confidence, and unresolved questions. The balanced sample is exploratory, not an estimate of population error prevalence or human gold standard.
+6. Summarize source associations separately by dataset and section, retaining denominator counts and distinguishing support declarations from causation.
+7. Produce a follow-up HTML report, SVG/PNG figures, machine-readable tables, evidence notes, reproduction script, and a downloadable bundle. Validate arithmetic, links, visual layout, and preservation of original outputs.
+
+Priority: measurement correction and robust descriptive inference before additional hypothesis tests. The original exploratory tests remain unchanged; follow-up sensitivity views do not manufacture replacement rubric scores.
+
+Completion record — 2026-09-30
+All seven phases completed. Delivered D4D_review_followup.html, 10 new figures (15–24), 32 evidence-reviewed cases, presence/overlap/sensitivity/source-linkage tables, and reproduction scripts.
+
+Validation: 56 frozen input references rechecked; 81 retained source excerpts verified against historical chunk text and hashes; score arithmetic checked; report links, SVG/JSON, and script syntax checked. All 46 files in the original bundle are unchanged.
+
+Interpretive limits retained: the 32 cases cover 18 records, 17 low- and 15 medium-severity comments, with no high-severity case. No source-availability census, human gold standard, or verified corpus error rate is claimed. Field-topic grouping and text-rule topics are descriptive, not a semantic census of unique errors. Original scores and D4Ds remain untouched.

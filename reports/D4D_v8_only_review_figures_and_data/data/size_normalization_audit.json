@@ -1,0 +1,12 @@
+{
+  "records": 12,
+  "rubric10_total_applicable_points": 591,
+  "rubric10_total_lost_points": 76,
+  "mapped_items": 39,
+  "unmapped_items": 11,
+  "candidate_roots": 98,
+  "review_roots_outside_crosswalk": [],
+  "field_applicability": "Not established; field denominators are sensitivity definitions, not true applicable-field counts.",
+  "field_weighting": "Pooled record-field pairs; mean record rates also exported.",
+  "score_weighting": "Pooled applicable points; mean record rates also exported."
+}

@@ -1,0 +1,302 @@
+[
+  {
+    "item": "1.1",
+    "name": "Persistent Identifier (DOI, RRID, or URI)",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "1.2",
+    "name": "Dataset Title and Description Completeness",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "1.3",
+    "name": "Keywords or Tags for Searchability",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "1.4",
+    "name": "Landing Page and Resources (page, hierarchical resources)",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "1.5",
+    "name": "Hierarchical Structure (parent datasets, relationships)",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "2.1",
+    "name": "Access Policy and IP Restrictions Defined",
+    "section": "Data Governance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "2.2",
+    "name": "Regulatory Compliance and Confidentiality Classification",
+    "section": "Data Governance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "2.3",
+    "name": "Download URL or Platform Link Available",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "2.4",
+    "name": "Distribution Formats and File Types Specified",
+    "section": "Distribution",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "2.5",
+    "name": "Related Datasets and External Resources Linked",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "3.1",
+    "name": "License Terms Allow Reuse",
+    "section": "Data Governance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "3.2",
+    "name": "Data Formats Are Standardized (encoding, format)",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "3.3",
+    "name": "Schema or Ontology Conformance Stated",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "3.4",
+    "name": "Variable Metadata with Identifiers Defined",
+    "section": "Variables",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "3.5",
+    "name": "Use Guidance Provided (intended, prohibited uses)",
+    "section": "Uses",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "4.1",
+    "name": "IRB or Ethics Review and Data Protection Impact",
+    "section": "Ethics",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "4.2",
+    "name": "Deidentification Method Described",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "4.3",
+    "name": "Privacy Protections and Re-identification Risk Assessment",
+    "section": "Human",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "4.4",
+    "name": "Informed Consent Obtained from Participants",
+    "section": "Human",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "4.5",
+    "name": "Vulnerable Populations and Compensation Documented",
+    "section": "Human",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "5.1",
+    "name": "Cohort or Subpopulations Characteristics Described",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "5.2",
+    "name": "Number of Instances or Samples Reported",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "5.3",
+    "name": "Variable-Level Metadata, Tabular Flag, and Data Splits",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "5.4",
+    "name": "Data Topics or Conditions Represented",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "5.5",
+    "name": "Data Quality, Anomalies, and Missing Data Documented",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "6.1",
+    "name": "Dataset Version Number Provided",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "6.2",
+    "name": "Version Access Methods Documented",
+    "section": "Maintenance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "6.3",
+    "name": "Change Descriptions and Errata Provided",
+    "section": "Maintenance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "6.4",
+    "name": "Update Schedule or Frequency Indicated",
+    "section": "Maintenance",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "6.5",
+    "name": "Provenance, Source Derivation, and Raw Data Sources",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "7.1",
+    "name": "Motivation or Purpose for Dataset Creation",
+    "section": "Motivation",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "7.2",
+    "name": "Primary Research Objectives or Tasks",
+    "section": "Motivation",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "7.3",
+    "name": "Funding Sources and Mechanisms Listed",
+    "section": "Motivation",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "7.4",
+    "name": "Grant IDs or Award Numbers Present",
+    "section": "Motivation",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "7.5",
+    "name": "Creators and Acknowledgements Documented",
+    "section": "Motivation",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "8.1",
+    "name": "Collection Mechanisms and Settings Described",
+    "section": "Collection",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "8.2",
+    "name": "Data Acquisition Methods Listed",
+    "section": "Collection",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "8.3",
+    "name": "Preprocessing, Cleaning, Labeling, and Annotation Quality",
+    "section": "Preprocessing",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "8.4",
+    "name": "Software and Tools Documented",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "8.5",
+    "name": "External Standards, Resources, and Imputation Protocols",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "9.1",
+    "name": "Known Limitations Documented",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "9.2",
+    "name": "Biases Categorized Using Standard Taxonomy (RAI-aligned)",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "9.3",
+    "name": "Data Anomalies and Quality Issues Noted",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "9.4",
+    "name": "Sensitive Content and Warnings Provided",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "9.5",
+    "name": "Ethical Review and Social Impact Analysis",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "10.1",
+    "name": "Dataset Published on a Recognized Platform",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "10.2",
+    "name": "Citation and DOI for Cross-referencing",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "10.3",
+    "name": "Community Standards or Schema Conformance",
+    "section": "Metadata",
+    "status": "included: narrow single-section item"
+  },
+  {
+    "item": "10.4",
+    "name": "Outreach Materials and Documentation Links",
+    "section": null,
+    "status": "excluded: broad, multi-section, or ambiguous scope"
+  },
+  {
+    "item": "10.5",
+    "name": "Related Datasets with Typed Relationships",
+    "section": "Composition",
+    "status": "included: narrow single-section item"
+  }
+]

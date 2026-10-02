@@ -1,0 +1,248 @@
+{
+  "sample_id": "S21",
+  "record": "CM4AI_v8_rep3",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/CM4AI_d4d.yaml",
+  "d4d_sha256": "e3311d40121521b83f803ad969395396f63b7446fed36c1f55416379d0f16800",
+  "d4d_fields": {
+    "external_resources": [
+      {
+        "external_resources": [
+          "CM4AI project web portal at https://cm4ai.org/, providing project overview, data releases, tools, product documentation, publications, and learning materials."
+        ]
+      },
+      {
+        "external_resources": [
+          "MassIVE Repository, holding the SEC-MS and AP-MS mass spectrometry data referenced by this release."
+        ]
+      },
+      {
+        "external_resources": [
+          "Figshare, holding the CRISPRi Perturbation Atlas of iPSCs."
+        ]
+      },
+      {
+        "external_resources": [
+          "Network Data Exchange (NDEx), via which CM4AI cell maps are shared and which can be visualized in a web browser or accessed via tools such as Cytoscape, HiView, and the Python ndex2 library."
+        ]
+      },
+      {
+        "external_resources": [
+          "Cell Mapping Toolkit, a series of Python packages implementing the end-to-end cell map construction pipeline, at https://github.com/idekerlab/cellmaps_pipeline with user documentation at https://cellmaps-pipeline.readthedocs.io/."
+        ]
+      },
+      {
+        "external_resources": [
+          "FAIRSCAPE AI-readiness framework, described with a tutorial and installation instructions at https://fairscape.github.io, available under the MIT License."
+        ]
+      },
+      {
+        "external_resources": [
+          "Integrative Modeling Platform (IMP) package, available at http://integrativemodeling.org."
+        ]
+      }
+    ],
+    "raw_data_sources": [
+      {
+        "source_description": "Perturb-seq data in KOLF2.1J iPSCs (undifferentiated)",
+        "source_type": "Single-cell CRISPRi perturbation sequencing",
+        "access_details": "Embargoed"
+      },
+      {
+        "source_description": "Perturb-seq data in MDA-MB-468 breast cancer cells (with and without treatment)",
+        "source_type": "Single-cell CRISPRi perturbation sequencing",
+        "access_details": "Embargoed"
+      },
+      {
+        "source_description": "CRISPRi Perturbation Atlas of iPSCs",
+        "source_type": "Perturbation atlas",
+        "access_details": "Available at Figshare"
+      },
+      {
+        "source_description": "SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte)",
+        "source_type": "Size exclusion chromatography-mass spectrometry",
+        "access_details": "Available at the MassIVE Repository"
+      },
+      {
+        "source_description": "SEC-MS data in MDA-MB-468 breast cancer cells (with and without treatment)",
+        "source_type": "Size exclusion chromatography-mass spectrometry",
+        "access_details": "Available at the MassIVE Repository"
+      },
+      {
+        "source_description": "AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel)",
+        "source_type": "Affinity purification-mass spectrometry",
+        "access_details": "Available at the MassIVE Repository"
+      },
+      {
+        "source_description": "AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat)",
+        "source_type": "Affinity purification-mass spectrometry",
+        "access_details": "Available at the MassIVE Repository"
+      }
+    ],
+    "third_party_sharing": [
+      {
+        "is_shared": true,
+        "notes": "Component data are additionally deposited in external repositories: SEC-MS and AP-MS mass spectrometry data at the MassIVE Repository, and the CRISPRi Perturbation Atlas of iPSCs at Figshare. Perturb-seq data in KOLF2.1J iPSCs and in MDA-MB-468 cells are listed as Embargoed."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "source_type": "publication",
+      "slot": "external_resources[4].external_resources",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "the Cell Mapping Toolkit (\nhttps://github.com/idekerlab/cellmaps_pipeline\n), which implements the end-to-end pipeline described here as a series of Python packages",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c010",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "external_resources[3].external_resources",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "Cell maps are shared via the Network Data Exchange (NDEx)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c011",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "external_resources[6].external_resources",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "open-source Integrative Modeling Platform (IMP) package version 2.18\n(https://integrativemodeling.org)",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c013",
+      "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+      "source_type": "preprint",
+      "slot": "external_resources[5].external_resources",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "The FAIRSCAPE AI-readiness framework is described with a tutorial and instructions\nfor installation at https://fairscape.github.io.",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c023",
+      "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+      "source_type": "data resource",
+      "slot": "raw_data_sources[3].access_details",
+      "root": "raw_data_sources",
+      "section": "Collection",
+      "snippet": "SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte):\nMassIVE Repository",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "raw_data_sources[2].access_details",
+      "root": "raw_data_sources",
+      "section": "Collection",
+      "snippet": "CRISPRi Perturbation Atlas of iPSCs:\nFigshare",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "raw_data_sources[5].source_description",
+      "root": "raw_data_sources",
+      "section": "Collection",
+      "snippet": "AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel):\nMassIVE Repository",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "raw_data_sources[6].source_description",
+      "root": "raw_data_sources",
+      "section": "Collection",
+      "snippet": "AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat):\nMassIVE Repository",
+      "root_present": true
+    },
+    {
+      "record": "CM4AI_v8_rep3",
+      "project": "CM4AI",
+      "version": "v8",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "raw_data_sources[0].access_details",
+      "root": "raw_data_sources",
+      "section": "Collection",
+      "snippet": "Perturb-seq data in KOLF2.1J iPSCs (undifferentiated):\nEmbargoed",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CM4AI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "Available at.*MassIVE",
+    "Available at.*Figshare",
+    "MSV000",
+    "PXD0"
+  ],
+  "source_excerpts": [
+    {
+      "query": "Available at.*MassIVE",
+      "chunk": "c005",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "chunk_sha256": "54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1",
+      "excerpt": "the U2OS protein interaction network will be included as part of the upcoming BioPlex\n105\nv.4.0 database release (E.L.H. et al., manuscript in preparation). AP\u2013MS raw MS files are available at MassIVE under the identifier\nMSV000097168\n. The entire image dataset is included in the Human Protein Atlas v23 release. SEC\u2013MS raw MS files and search results are available at the Proteome Xchange under the identifier\nPXD052362\n. All structural models are available at the ModelArchive Database (\nhttps://m"
+    },
+    {
+      "query": "MSV000",
+      "chunk": "c005",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "chunk_sha256": "54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1",
+      "excerpt": "be included as part of the upcoming BioPlex\n105\nv.4.0 database release (E.L.H. et al., manuscript in preparation). AP\u2013MS raw MS files are available at MassIVE under the identifier\nMSV000097168\n. The entire image dataset is included in the Human Protein Atlas v23 release. SEC\u2013MS raw MS files and search results are available at the Proteome Xchange under the identifier\nPXD052362\n. All structural models are available at the ModelArchive Database (\nhttps://modelarchive.org\n) with the i"
+    },
+    {
+      "query": "PXD0",
+      "chunk": "c005",
+      "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "chunk_sha256": "54b97ebc1ccf405805052c8952ebccc8b0084cc145628130999c13580b1b72a1",
+      "excerpt": "68\n. The entire image dataset is included in the Human Protein Atlas v23 release. SEC\u2013MS raw MS files and search results are available at the Proteome Xchange under the identifier\nPXD052362\n. All structural models are available at the ModelArchive Database (\nhttps://modelarchive.org\n) with the identifiers ma-idk-u2osmap and ma-m5og4. Other public databases and resources used in this study include Gene Ontology (June 2023 release;\nhttps://geneontology.org\n), CORUM (v.4.1 release,\n"
+    },
+    {
+      "query": "CRISPRi Perturbation Atlas",
+      "chunk": "c026",
+      "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "chunk_sha256": "cb24148a28557dfe600c07644aa805f34f7016de9fefd4979169d23cb33c5c73",
+      "excerpt": "taset: Perturb-seq data in KOLF2.1J iPSCs (undifferentiated): Embargoed Perturb-seq data in MDA-MB-468 breast cancer cells (+/- treatment): Embargoed CRISPRi Perturbation Atlas of iPSCs: Figshare SEC-MS data in KOLF2.1J iPSCs (undifferentiated, NPC, neuron, and cardiomyocyte): MassIVE Repository SEC-MS data in MDA-MB-468 breast cancer cells (+/- treatment): MassIVE Repository AP-MS data in MDA-MB-468 breast cancer cells (treated with paclitaxel): MassIVE Repository AP-MS data in MDA-MB-468 breast cancer cells (treated with vorinostat): MassIVE Repository Data Governance & Ethics Human Subjects: No De-identified Samples",
+      "whitespace_normalized": true
+    }
+  ]
+}

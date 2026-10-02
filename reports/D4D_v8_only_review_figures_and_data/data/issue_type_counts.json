@@ -1,0 +1,102 @@
+[
+  {
+    "project": "AI_READI",
+    "type": "completeness",
+    "count": 20
+  },
+  {
+    "project": "CHORUS",
+    "type": "completeness",
+    "count": 25
+  },
+  {
+    "project": "CM4AI",
+    "type": "completeness",
+    "count": 28
+  },
+  {
+    "project": "VOICE",
+    "type": "completeness",
+    "count": 27
+  },
+  {
+    "project": "AI_READI",
+    "type": "consistency",
+    "count": 24
+  },
+  {
+    "project": "CHORUS",
+    "type": "consistency",
+    "count": 34
+  },
+  {
+    "project": "CM4AI",
+    "type": "consistency",
+    "count": 25
+  },
+  {
+    "project": "VOICE",
+    "type": "consistency",
+    "count": 22
+  },
+  {
+    "project": "AI_READI",
+    "type": "content_accuracy",
+    "count": 7
+  },
+  {
+    "project": "CHORUS",
+    "type": "content_accuracy",
+    "count": 11
+  },
+  {
+    "project": "CM4AI",
+    "type": "content_accuracy",
+    "count": 10
+  },
+  {
+    "project": "VOICE",
+    "type": "content_accuracy",
+    "count": 8
+  },
+  {
+    "project": "AI_READI",
+    "type": "correctness",
+    "count": 8
+  },
+  {
+    "project": "CHORUS",
+    "type": "correctness",
+    "count": 13
+  },
+  {
+    "project": "CM4AI",
+    "type": "correctness",
+    "count": 4
+  },
+  {
+    "project": "VOICE",
+    "type": "correctness",
+    "count": 4
+  },
+  {
+    "project": "AI_READI",
+    "type": "semantic_understanding",
+    "count": 7
+  },
+  {
+    "project": "CHORUS",
+    "type": "semantic_understanding",
+    "count": 9
+  },
+  {
+    "project": "CM4AI",
+    "type": "semantic_understanding",
+    "count": 8
+  },
+  {
+    "project": "VOICE",
+    "type": "semantic_understanding",
+    "count": 9
+  }
+]

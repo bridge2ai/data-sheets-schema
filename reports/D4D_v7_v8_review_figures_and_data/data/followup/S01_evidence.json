@@ -1,0 +1,282 @@
+{
+  "sample_id": "S01",
+  "record": "AI_READI_v8_rep1",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep1/AI_READI_d4d.yaml",
+  "d4d_sha256": "4f09d95003ba1f3f5af5b611412126444f14acc1336410f0a962abd9c0f7f85f",
+  "d4d_fields": {
+    "data_governance": {
+      "committee_name": "AI-READI Consortium",
+      "accountable_organization": {
+        "name": "Washington University in St. Louis",
+        "id": "ROR:01yc7t268"
+      },
+      "committee_contact": {
+        "id": "ORCID:0000-0002-7452-1648",
+        "name": "Aaron Lee",
+        "orcid": "0000-0002-7452-1648",
+        "email": "contact@aireadi.org"
+      },
+      "access_review_process": "Accessing the dataset requires logging in through a verified ID system, agreeing to use the data only for type 2 diabetes related research, and agreeing to the license terms, which set certain restrictions and obligations for data usage. FAIRhub records the access type as \"PublicDownloadSelfAttestationRequired\" and publishes the conditions of access at https://fairhub.io/datasets/3/access.",
+      "stewardship_roles": [
+        "The data manager at each data site is responsible for the quality control of all data before uploading to FAIRhub; the AI-READI team supports and maintains the dataset, which is hosted on FAIRhub through Microsoft Azure. The RO-Crate names the AI-READI Consortium as the data governance committee."
+      ],
+      "notes": "The BMJ Open protocol publication states that the requirements for the controlled access dataset were being developed by a Data Access Committee, and that procedures for reviewing and prioritizing written requests for biorepository samples would be developed before the biorepository is complete."
+    },
+    "download_url": null,
+    "external_resources": [
+      {
+        "name": "AI-READI dataset documentation",
+        "description": "Documentation for version 3.0.0 of the dataset at https://docs.aireadi.org, covering citation, preliminary information on access and training prerequisites, per-domain dataset documentation including the Healthsheet, controlled variables, AI-readiness and additional resources. The healthsheet states that the dataset is self-contained but does rely on this documentation for users requiring additional information about the provenance of the dataset.",
+        "restrictions": [
+          "None; the documentation is shared under the CC-BY 4.0 license, so there are no restrictions associated with its use."
+        ]
+      },
+      {
+        "name": "AI-READI project website",
+        "description": "Project website at https://aireadi.org, including the team listing and contact page."
+      },
+      {
+        "name": "FAIRhub dataset access page",
+        "description": "Conditions of access for version 3.0.0 at https://fairhub.io/datasets/3/access."
+      },
+      {
+        "name": "Zenodo community of the AI-READI project",
+        "description": "https://zenodo.org/communities/aireadi"
+      },
+      {
+        "name": "GitHub organization of the AI-READI project",
+        "description": "https://github.com/AI-READI"
+      },
+      {
+        "name": "AI-READI custom data license version 2.0",
+        "description": "License text archived on Zenodo at https://doi.org/10.5281/zenodo.17555036 and included with the release as LICENSE.txt."
+      },
+      {
+        "name": "AI-READI: rethinking AI data collection, preparation and sharing in diabetes research and beyond",
+        "description": "AI-READI Consortium comment in Nature Metabolism (2024), https://doi.org/10.1038/s42255-024-01165-x, introducing the dataset and the project's blueprint for AI-ready data."
+      },
+      {
+        "name": "Cross-sectional design and protocol for Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights (AI-READI)",
+        "description": "Owsley C, Matthies DS, McGwin G, et al. BMJ Open 2025;15:e097449, doi:10.1136/bmjopen-2024-097449, describing the study design and data collection protocol."
+      },
+      {
+        "name": "ClinicalTrials.gov record NCT06002048",
+        "description": "Secondary study identifier for AI Ready and Exploratory Atlas for Diabetes Insights, at https://classic.clinicaltrials.gov/ct2/show/NCT06002048."
+      }
+    ],
+    "page": "https://fairhub.io/datasets/3"
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "data_governance.stewardship_roles",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "site  is  responsible  for  the  quality  control  of  all  data  before",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "external_resources[6].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.1038/s42255-024-01165-x",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "external_resources[3].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "zenodo.org/communities/aireadi; https://github.com/AI-READI;",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.accountable_organization.name",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"name\": \"Washington University in St. Louis\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.accountable_organization.id",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "https://ror.org/01yc7t268",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.access_review_process",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "Accessing the dataset requires several steps, including: Login in through a verified ID system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "external_resources[5].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "https://doi.org/10.5281/zenodo.17555036",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "external_resources[0].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "https://docs.aireadi.org/",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "external_resources[0].restrictions",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "The documentation is shared under the CC-BY 4.0 license, so there are no restrictions associated with its use",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.access_review_process",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "Login in through a verified ID system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "external_resources[8].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "NCT06002048",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.committee_contact.email",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"centralContactEMail\": \"contact@aireadi.org\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "data_governance.committee_name",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"dataGovernanceCommittee\": \"AI-READI Consortium\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "external_resources[6].name",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "Nature metabolism. https://doi.org/10.1038/s42255-024-01165-x",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep1",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "external_resources[2].description",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "\"conditionsOfAccess\": \"https://fairhub.io/datasets/3/access\"",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "PublicDownloadSelfAttestationRequired"
+  ],
+  "source_excerpts": [
+    {
+      "query": "PublicDownloadSelfAttestationRequired",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "e2d6af016157feb5e26209f763a89668859942380866212a358cfa2d97085563",
+      "excerpt": "ationIdentifierValue\": \"https://ror.org/01yc7t268\",\n          \"managingOrganizationScheme\": \"ROR\",\n          \"schemeURI\": \"https://ror.org\"\n        }\n      },\n      \"accessType\": \"PublicDownloadSelfAttestationRequired\",\n      \"accessDetails\": {\n        \"description\": \"Accessing the dataset requires several steps, including: Login in through a verified ID system, Agreeing to use the data only for type 2 diabetes related research, Agreeing to the license terms which set certain restrictions and obligations for dat"
+    }
+  ]
+}

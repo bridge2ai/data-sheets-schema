@@ -1,0 +1,225 @@
+[
+  {
+    "level": "family",
+    "document_type": "Publications",
+    "records": 9,
+    "datasets": 3,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Docs",
+    "records": 12,
+    "datasets": 4,
+    "dataset_names": [
+      "AI_READI",
+      "CHORUS",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Repositories",
+    "records": 9,
+    "datasets": 3,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Structured",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "AI_READI"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Terms",
+    "records": 9,
+    "datasets": 3,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "IRB",
+    "records": 6,
+    "datasets": 2,
+    "dataset_names": [
+      "AI_READI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Awards",
+    "records": 12,
+    "datasets": 4,
+    "dataset_names": [
+      "AI_READI",
+      "CHORUS",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "family",
+    "document_type": "Tutorials",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "CHORUS"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "DUA",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "IRB",
+    "records": 6,
+    "datasets": 2,
+    "dataset_names": [
+      "AI_READI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "NIH project page",
+    "records": 12,
+    "datasets": 4,
+    "dataset_names": [
+      "AI_READI",
+      "CHORUS",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "RO-Crate",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "AI_READI"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "data resource",
+    "records": 9,
+    "datasets": 3,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "documentation",
+    "records": 12,
+    "datasets": 4,
+    "dataset_names": [
+      "AI_READI",
+      "CHORUS",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "historical data release",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "CM4AI"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "historical documentation",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "CHORUS"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "license",
+    "records": 6,
+    "datasets": 2,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "preprint",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "CM4AI"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "publication",
+    "records": 9,
+    "datasets": 3,
+    "dataset_names": [
+      "AI_READI",
+      "CM4AI",
+      "VOICE"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "structured metadata",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "AI_READI"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "tutorial",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "CHORUS"
+    ]
+  },
+  {
+    "level": "native",
+    "document_type": "white paper",
+    "records": 3,
+    "datasets": 1,
+    "dataset_names": [
+      "VOICE"
+    ]
+  }
+]

@@ -1,0 +1,1160 @@
+[
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:1",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:2",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:3",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:6",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r10_rating1:8",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r10_rating1:1",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r10_rating1:2",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r10_rating1:3",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r10_rating1:4",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r10_rating1:9",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r10_rating1:1",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r10_rating1:2",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r10_rating1:3",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r10_rating1:5",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:2",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:3",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:6",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:7",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:8",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:8",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r10_rating1:9",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:1",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:2",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:3",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:6",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:8",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r10_rating1:8",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r10_rating1:3",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r10_rating1:6",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r10_rating1:7",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r10_rating1:9",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:4",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:7",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:8",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:13",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:14",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r10_rating1:15",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r10_rating1:1",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r10_rating1:6",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r10_rating1:8",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r10_rating1:8",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r10_rating1:9",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep3_r10_rating1:5",
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep3_r10_rating1:6",
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r10_rating1:1",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r10_rating1:10",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r10_rating1:11",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r10_rating1:12",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r10_rating1:2",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r10_rating1:5",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r10_rating1:6",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r10_rating1:13",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r10_rating1:18",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:2",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:3",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r10_rating1:9",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:1",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:2",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:3",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:7",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r10_rating1:8",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:3",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:5",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:6",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:7",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:8",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r10_rating1:10",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:2",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:3",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:10",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r10_rating1:10",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:2",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:3",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:6",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:10",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r10_rating1:11",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:2",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:3",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:5",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:10",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:11",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r10_rating1:13",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:2",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:3",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:6",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:8",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r10_rating1:12",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r10_rating1:5",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r10_rating1:6",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r10_rating1:6",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r10_rating1:2",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r10_rating1:4",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r10_rating1:5",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r10_rating1:2",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r10_rating1:5",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r10_rating1:6",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r10_rating1:7",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r10_rating1:4",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r10_rating1:8",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r10_rating1:10",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r10_rating1:1",
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r10_rating1:4",
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r10_rating1:9",
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep3_r10_rating1:2",
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v8_rep3_r10_rating1:4",
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep3_r10_rating1:7",
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r20_rating1:1",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r20_rating1:2",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r20_rating1:9",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep1_r20_rating1:10",
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r20_rating1:1",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r20_rating1:2",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r20_rating1:5",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r20_rating1:6",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep2_r20_rating1:6",
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:2",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:3",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:5",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:8",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v7_rep3_r20_rating1:8",
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:2",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:3",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:4",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:6",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:7",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:7",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:11",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep1_r20_rating1:12",
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:1",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:4",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:5",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep2_r20_rating1:9",
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:3",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "De-identification tension"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:3",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:5",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Institution attribution"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:6",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:6",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:6",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "AI_READI_v8_rep3_r20_rating1:7",
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r20_rating1:3",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r20_rating1:9",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep1_r20_rating1:12",
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r20_rating1:3",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep2_r20_rating1:6",
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v7_rep3_r20_rating1:10",
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r20_rating1:7",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r20_rating1:8",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep1_r20_rating1:12",
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep2_r20_rating1:10",
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:8",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:12",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CHORUS_v8_rep3_r20_rating1:13",
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:1",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:6",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:6",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:8",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep1_r20_rating1:9",
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:1",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:4",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:4",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep2_r20_rating1:11",
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:2",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:4",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Processing-software role"
+  },
+  {
+    "issue_id": "CM4AI_v7_rep3_r20_rating1:7",
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r20_rating1:3",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r20_rating1:4",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep1_r20_rating1:10",
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:1",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:6",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:7",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:13",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep2_r20_rating1:13",
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r20_rating1:1",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r20_rating1:9",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Access URL representation"
+  },
+  {
+    "issue_id": "CM4AI_v8_rep3_r20_rating1:10",
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r20_rating1:3",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r20_rating1:8",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r20_rating1:8",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep1_r20_rating1:11",
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r20_rating1:2",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r20_rating1:3",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r20_rating1:4",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep2_r20_rating1:7",
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r20_rating1:2",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r20_rating1:4",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v7_rep3_r20_rating1:4",
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r20_rating1:3",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r20_rating1:9",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Version / release context"
+  },
+  {
+    "issue_id": "VOICE_v8_rep1_r20_rating1:11",
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r20_rating1:6",
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v8_rep2_r20_rating1:13",
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "theme": "Variable-level documentation"
+  },
+  {
+    "issue_id": "VOICE_v8_rep3_r20_rating1:4",
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "theme": "Impact assessment / social impacts"
+  },
+  {
+    "issue_id": "VOICE_v8_rep3_r20_rating1:7",
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "theme": "Provenance representation"
+  }
+]

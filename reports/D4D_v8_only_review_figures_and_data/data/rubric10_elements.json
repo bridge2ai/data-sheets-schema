@@ -1,0 +1,282 @@
+[
+  {
+    "element": "Dataset Discovery and Identification",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Discovery and Identification",
+    "project": "CHORUS",
+    "points": 9,
+    "applicable_max": 15,
+    "percent": 60.0
+  },
+  {
+    "element": "Dataset Discovery and Identification",
+    "project": "CM4AI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Discovery and Identification",
+    "project": "VOICE",
+    "points": 12,
+    "applicable_max": 15,
+    "percent": 80.0
+  },
+  {
+    "element": "Dataset Access and Retrieval",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Access and Retrieval",
+    "project": "CHORUS",
+    "points": 12,
+    "applicable_max": 15,
+    "percent": 80.0
+  },
+  {
+    "element": "Dataset Access and Retrieval",
+    "project": "CM4AI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Access and Retrieval",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Reuse and Interoperability",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Reuse and Interoperability",
+    "project": "CHORUS",
+    "points": 10,
+    "applicable_max": 15,
+    "percent": 66.66666666666667
+  },
+  {
+    "element": "Data Reuse and Interoperability",
+    "project": "CM4AI",
+    "points": 9,
+    "applicable_max": 15,
+    "percent": 60.0
+  },
+  {
+    "element": "Data Reuse and Interoperability",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Ethical Use and Privacy Safeguards",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Ethical Use and Privacy Safeguards",
+    "project": "CHORUS",
+    "points": 9,
+    "applicable_max": 15,
+    "percent": 60.0
+  },
+  {
+    "element": "Ethical Use and Privacy Safeguards",
+    "project": "CM4AI",
+    "points": 6,
+    "applicable_max": 6,
+    "percent": 100.0
+  },
+  {
+    "element": "Ethical Use and Privacy Safeguards",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Composition and Structure",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Composition and Structure",
+    "project": "CHORUS",
+    "points": 11,
+    "applicable_max": 15,
+    "percent": 73.33333333333333
+  },
+  {
+    "element": "Data Composition and Structure",
+    "project": "CM4AI",
+    "points": 11,
+    "applicable_max": 15,
+    "percent": 73.33333333333333
+  },
+  {
+    "element": "Data Composition and Structure",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Provenance and Version Tracking",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Data Provenance and Version Tracking",
+    "project": "CHORUS",
+    "points": 6,
+    "applicable_max": 15,
+    "percent": 40.0
+  },
+  {
+    "element": "Data Provenance and Version Tracking",
+    "project": "CM4AI",
+    "points": 13,
+    "applicable_max": 15,
+    "percent": 86.66666666666667
+  },
+  {
+    "element": "Data Provenance and Version Tracking",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Scientific Motivation and Funding Transparency",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Scientific Motivation and Funding Transparency",
+    "project": "CHORUS",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Scientific Motivation and Funding Transparency",
+    "project": "CM4AI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Scientific Motivation and Funding Transparency",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Technical Transparency (Data Collection and Processing)",
+    "project": "AI_READI",
+    "points": 12,
+    "applicable_max": 15,
+    "percent": 80.0
+  },
+  {
+    "element": "Technical Transparency (Data Collection and Processing)",
+    "project": "CHORUS",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Technical Transparency (Data Collection and Processing)",
+    "project": "CM4AI",
+    "points": 9,
+    "applicable_max": 15,
+    "percent": 60.0
+  },
+  {
+    "element": "Technical Transparency (Data Collection and Processing)",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Evaluation and Limitations Disclosure",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Dataset Evaluation and Limitations Disclosure",
+    "project": "CHORUS",
+    "points": 10,
+    "applicable_max": 15,
+    "percent": 66.66666666666667
+  },
+  {
+    "element": "Dataset Evaluation and Limitations Disclosure",
+    "project": "CM4AI",
+    "points": 12,
+    "applicable_max": 15,
+    "percent": 80.0
+  },
+  {
+    "element": "Dataset Evaluation and Limitations Disclosure",
+    "project": "VOICE",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Cross-Platform and Community Integration",
+    "project": "AI_READI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Cross-Platform and Community Integration",
+    "project": "CHORUS",
+    "points": 6,
+    "applicable_max": 15,
+    "percent": 40.0
+  },
+  {
+    "element": "Cross-Platform and Community Integration",
+    "project": "CM4AI",
+    "points": 15,
+    "applicable_max": 15,
+    "percent": 100.0
+  },
+  {
+    "element": "Cross-Platform and Community Integration",
+    "project": "VOICE",
+    "points": 13,
+    "applicable_max": 15,
+    "percent": 86.66666666666667
+  }
+]

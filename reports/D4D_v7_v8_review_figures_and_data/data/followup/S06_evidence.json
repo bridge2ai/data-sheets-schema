@@ -1,0 +1,214 @@
+{
+  "sample_id": "S06",
+  "record": "AI_READI_v8_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep2/AI_READI_d4d.yaml",
+  "d4d_sha256": "225e5fd96d9599600b8fa789943bec45e46f5a9b6d2f78c2da809111e27ab2b8",
+  "d4d_fields": {
+    "is_deidentified": {
+      "identifiable_elements_present": false,
+      "method": "No active de-identification was necessary because no identifiers were collected; the team checked that no identifiable data per US HIPAA were present. The public set is stripped of Protected Health Information as defined by the HIPAA Privacy Rule via the \"Safe Harbor\" method.",
+      "identifiers_removed": "Protected Health Information as defined by the HIPAA Privacy Rule (Safe Harbor method); Information related to the sex of participants; Information related to the race and ethnicity of participants; Medications used",
+      "deidentification_details": "The FAIRhub de-identification level is recorded as deIdentType \"NoDeIdentification\" with deIdentDirect true and deIdentHIPAA true, and dates, non-arrayed values and k-anonymity flags false. Sex and race/ethnicity were removed from the public set to prevent stigmatization of findings. The RO-Crate records the release as deidentified.",
+      "notes": "A theoretical risk of future re-identification is acknowledged: AI algorithms can infer individual patient characteristics and could facilitate individual-level identification. To prevent re-identification attempts the project implements a robust data dissemination system, a strict license agreement and data watermarking for both public and controlled sets; the license states that the Data may be statically watermarked to identify the Licensee."
+    },
+    "preprocessing_strategies": [
+      {
+        "preprocessing_details": "After data were sent from each study site to the central project team, all data were mapped to standardized terminologies where possible, notably the Observational Medical Outcomes Partnership Common Data Model for observational clinical data and DICOM for medical imaging data, so that the dataset is stored and shared as \"AI-ready\" and enables immediate AI/ML research without reformatting and preprocessing."
+      },
+      {
+        "preprocessing_details": "Conversion of proprietary device exports into standard formats: Topcon Maestro2 and Triton data exported in .fda file format and converted to DICOM for the dataset; Heidelberg FLIO data exported in .sdt file format and converted to DICOM; Garmin activity data exported in .FIT file format and converted to the Open mHealth standard; ECG data converted to WFDB; environmental sensor and CGM exports handled as delimited text."
+      },
+      {
+        "preprocessing_details": "Removal of protected health information from the public release using the HIPAA Safe Harbor method, together with removal of information related to the sex and race/ethnicity of the participants and of medications used."
+      },
+      {
+        "preprocessing_details": "Organization of the release following the Clinical Dataset Structure v0.1.1, with a manifest.tsv metadata file in each datatype directory and root-level CDS metadata files including dataset_description.json, dataset_structure_description.json, study_description.json, participants.tsv, participants.json, README.md, CHANGELOG.md, healthsheet.md and LICENSE.txt. A dqd_omop.json file supports OMOP CDM data quality analysis with the OMOP CDM Data Quality Dashboard, which runs more than 3,500 data quality checks against an OMOP CDM instance."
+      },
+      {
+        "preprocessing_details": "Processing moved from custom and ad hoc handling for the v1.0.0 pilot data to a combination of automated and custom processing for the later data included in v2.0.0 and v3.0.0."
+      }
+    ]
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c004",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[0].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "called FAIRhub (https://fairhub.io/), a Microsoft Azure",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[1].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": ".fda file format;",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[1].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": ".sdt file format;",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "preprocessing_strategies[1].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": ".FIT file format;",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "is_deidentified.method",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "Health Information (PHI), as defined by the HIPAA (Health Insurance",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "is_deidentified.identifiers_removed[1]",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "method, as well as information related to the sex and race/ethnicity of",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "is_deidentified.identifiers_removed[2]",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "the participants to prevent stigmatization of findings.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "source_type": "publication",
+      "slot": "is_deidentified.notes",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "system, a strict licence agreement and data watermarking for both",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "is_deidentified.method",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "\"deIdentDetails\": \"No identifiers were collected so no active de-identification was necessary",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "preprocessing_strategies[0].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "all data were mapped to standardized terminologies when possible",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "preprocessing_strategies[4].preprocessing_details",
+      "root": "preprocessing_strategies",
+      "section": "Preprocessing",
+      "snippet": "custom / ad hoc",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep2",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "is_deidentified.deidentification_details",
+      "root": "is_deidentified",
+      "section": "Composition",
+      "snippet": "\"deidentified\": true",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "No identifiers were collected",
+    "Safe Harbor"
+  ],
+  "source_excerpts": [
+    {
+      "query": "No identifiers were collected",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "e2d6af016157feb5e26209f763a89668859942380866212a358cfa2d97085563",
+      "excerpt": "      \"deIdentDirect\": true,\n        \"deIdentHIPAA\": true,\n        \"deIdentDates\": false,\n        \"deIdentNonarr\": false,\n        \"deIdentKAnon\": false,\n        \"deIdentDetails\": \"No identifiers were collected so no active de-identification was necessary but we checked that no identifiable data per US HIPAA were present in the data.\"\n      },\n      \"datasetConsent\": {\n        \"consentType\": \"ConsentSpecifiedNotElsewhereCategorised\",\n        \"consentNoncommercial\": false,\n        \"consentGeogRestrict\": fa"
+    },
+    {
+      "query": "Safe Harbor",
+      "chunk": "c007",
+      "source": "s42255-024-01165-x_row3.txt",
+      "chunk_sha256": "04e5b4f7dd3c70f0de0e82fadc9c525dcf56509532f9612226032723203c06e7",
+      "excerpt": "s for access. The public set is stripped of Protected\nHealth Information (PHI), as defined by the HIPAA (Health Insurance\nPortability and Accountability Act) Privacy Rule via the \u201cSafe Harbor\u201d\nmethod, as well as information related to the sex and race/ethnicity of\nthe participants to prevent stigmatization of findings. The first version\nof the public set was recently shared using a new licence developed\nas part of this project that allows reuse for any purpose but includes\nrestrictions "
+    }
+  ]
+}

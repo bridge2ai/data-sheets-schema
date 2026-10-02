@@ -1,0 +1,1250 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 35.13513513513514,
+    "difference_pp": -35.13513513513514
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 27.027027027027028,
+    "difference_pp": -27.027027027027028
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 37.83783783783784,
+    "difference_pp": -37.83783783783784
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 11.764705882352942,
+    "difference_pp": -11.764705882352942
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 8.823529411764707,
+    "difference_pp": -8.823529411764707
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 14.705882352941176,
+    "difference_pp": -14.705882352941176
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.7027027027027026,
+    "difference_pp": -2.7027027027027026
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.405405405405405,
+    "difference_pp": -5.405405405405405
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Collection",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.405405405405405,
+    "difference_pp": -5.405405405405405
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Composition",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Composition",
+    "section_loss_percent": 22.22222222222222,
+    "other_mapped_loss_percent": 26.666666666666668,
+    "difference_pp": -4.444444444444446
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Composition",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 36.666666666666664,
+    "difference_pp": -3.3333333333333286
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Composition",
+    "section_loss_percent": 11.11111111111111,
+    "other_mapped_loss_percent": 11.11111111111111,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Composition",
+    "section_loss_percent": 11.11111111111111,
+    "other_mapped_loss_percent": 7.407407407407407,
+    "difference_pp": 3.7037037037037033
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Composition",
+    "section_loss_percent": 22.22222222222222,
+    "other_mapped_loss_percent": 11.11111111111111,
+    "difference_pp": 11.11111111111111
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 3.3333333333333335,
+    "difference_pp": -3.3333333333333335
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 6.666666666666667,
+    "difference_pp": -6.666666666666667
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Composition",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 6.666666666666667,
+    "difference_pp": -6.666666666666667
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 27.77777777777778,
+    "difference_pp": -27.77777777777778
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Data Governance",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 36.111111111111114,
+    "difference_pp": -2.7777777777777786
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 12.121212121212121,
+    "difference_pp": -12.121212121212121
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 9.090909090909092,
+    "difference_pp": -9.090909090909092
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 15.151515151515152,
+    "difference_pp": -15.151515151515152
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.7777777777777777,
+    "difference_pp": -2.7777777777777777
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Data Governance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 34.21052631578947,
+    "difference_pp": -34.21052631578947
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 26.31578947368421,
+    "difference_pp": -26.31578947368421
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 36.8421052631579,
+    "difference_pp": -36.8421052631579
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 11.428571428571429,
+    "difference_pp": -11.428571428571429
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 8.571428571428571,
+    "difference_pp": -8.571428571428571
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 14.285714285714286,
+    "difference_pp": -14.285714285714286
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.6315789473684212,
+    "difference_pp": -2.6315789473684212
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Distribution",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 31.57894736842105,
+    "difference_pp": 68.42105263157895
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 26.31578947368421,
+    "difference_pp": -26.31578947368421
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Ethics",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 34.21052631578947,
+    "difference_pp": 65.78947368421052
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 11.428571428571429,
+    "difference_pp": -11.428571428571429
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 8.571428571428571,
+    "difference_pp": -8.571428571428571
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 14.285714285714286,
+    "difference_pp": -14.285714285714286
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.6315789473684212,
+    "difference_pp": -2.6315789473684212
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Ethics",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": null
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": null
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": null
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": null
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 25.641025641025642,
+    "difference_pp": null
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 35.8974358974359,
+    "difference_pp": null
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 11.11111111111111,
+    "difference_pp": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 8.333333333333334,
+    "difference_pp": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 13.88888888888889,
+    "difference_pp": null
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 2.5641025641025643,
+    "difference_pp": null
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 5.128205128205129,
+    "difference_pp": null
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "FileCollection",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 5.128205128205129,
+    "difference_pp": null
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Human",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Human",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 25.0,
+    "difference_pp": 8.333333333333336
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Human",
+    "section_loss_percent": 66.66666666666667,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 33.333333333333336
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Human",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 11.11111111111111,
+    "difference_pp": null
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Human",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 8.333333333333334,
+    "difference_pp": null
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Human",
+    "section_loss_percent": null,
+    "other_mapped_loss_percent": 13.88888888888889,
+    "difference_pp": null
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.7777777777777777,
+    "difference_pp": -2.7777777777777777
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Human",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "section_loss_percent": 66.66666666666667,
+    "other_mapped_loss_percent": 30.555555555555557,
+    "difference_pp": 36.111111111111114
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "section_loss_percent": 66.66666666666667,
+    "other_mapped_loss_percent": 22.22222222222222,
+    "difference_pp": 44.44444444444445
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Maintenance",
+    "section_loss_percent": 66.66666666666667,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 33.333333333333336
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 9.090909090909092,
+    "difference_pp": 24.242424242424242
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 9.090909090909092,
+    "difference_pp": -9.090909090909092
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Maintenance",
+    "section_loss_percent": 33.333333333333336,
+    "other_mapped_loss_percent": 12.121212121212121,
+    "difference_pp": 21.212121212121215
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.7777777777777777,
+    "difference_pp": -2.7777777777777777
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Maintenance",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.555555555555555,
+    "difference_pp": -5.555555555555555
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "section_loss_percent": 44.44444444444444,
+    "other_mapped_loss_percent": 30.0,
+    "difference_pp": 14.444444444444443
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "section_loss_percent": 44.44444444444444,
+    "other_mapped_loss_percent": 20.0,
+    "difference_pp": 24.444444444444443
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Metadata",
+    "section_loss_percent": 44.44444444444444,
+    "other_mapped_loss_percent": 33.333333333333336,
+    "difference_pp": 11.111111111111107
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 14.814814814814815,
+    "difference_pp": -14.814814814814815
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 11.11111111111111,
+    "difference_pp": -11.11111111111111
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Metadata",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 18.51851851851852,
+    "difference_pp": -18.51851851851852
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Metadata",
+    "section_loss_percent": 11.11111111111111,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 11.11111111111111
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Metadata",
+    "section_loss_percent": 22.22222222222222,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 22.22222222222222
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Metadata",
+    "section_loss_percent": 22.22222222222222,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 22.22222222222222
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 38.23529411764706,
+    "difference_pp": -38.23529411764706
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 29.41176470588235,
+    "difference_pp": -29.41176470588235
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 41.1764705882353,
+    "difference_pp": -41.1764705882353
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 12.903225806451612,
+    "difference_pp": -12.903225806451612
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 9.67741935483871,
+    "difference_pp": -9.67741935483871
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 16.129032258064516,
+    "difference_pp": -16.129032258064516
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.9411764705882355,
+    "difference_pp": -2.9411764705882355
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.882352941176471,
+    "difference_pp": -5.882352941176471
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Motivation",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.882352941176471,
+    "difference_pp": -5.882352941176471
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 34.21052631578947,
+    "difference_pp": -34.21052631578947
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 26.31578947368421,
+    "difference_pp": -26.31578947368421
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 36.8421052631579,
+    "difference_pp": -36.8421052631579
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 8.571428571428571,
+    "difference_pp": 91.42857142857143
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 5.714285714285714,
+    "difference_pp": 94.28571428571429
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Preprocessing",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 11.428571428571429,
+    "difference_pp": 88.57142857142857
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.6315789473684212,
+    "difference_pp": -2.6315789473684212
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Preprocessing",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 34.21052631578947,
+    "difference_pp": -34.21052631578947
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 26.31578947368421,
+    "difference_pp": -26.31578947368421
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 36.8421052631579,
+    "difference_pp": -36.8421052631579
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 11.428571428571429,
+    "difference_pp": -11.428571428571429
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 8.571428571428571,
+    "difference_pp": -8.571428571428571
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 14.285714285714286,
+    "difference_pp": -14.285714285714286
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.6315789473684212,
+    "difference_pp": -2.6315789473684212
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Uses",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 0.0,
+    "difference_pp": 0.0
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 31.57894736842105,
+    "difference_pp": 68.42105263157895
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 23.68421052631579,
+    "difference_pp": 76.3157894736842
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 34.21052631578947,
+    "difference_pp": 65.78947368421052
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 8.571428571428571,
+    "difference_pp": 91.42857142857143
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 5.714285714285714,
+    "difference_pp": 94.28571428571429
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "section": "Variables",
+    "section_loss_percent": 100.0,
+    "other_mapped_loss_percent": 11.428571428571429,
+    "difference_pp": 88.57142857142857
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 2.6315789473684212,
+    "difference_pp": -2.6315789473684212
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "section": "Variables",
+    "section_loss_percent": 0.0,
+    "other_mapped_loss_percent": 5.2631578947368425,
+    "difference_pp": -5.2631578947368425
+  }
+]

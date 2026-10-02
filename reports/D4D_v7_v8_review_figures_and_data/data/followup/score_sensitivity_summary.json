@@ -1,0 +1,86 @@
+[
+  {
+    "project": "AI_READI",
+    "view": "Original",
+    "v7_mean": 94.6969696969697,
+    "v8_mean": 93.56060606060606,
+    "v8_minus_v7": -1.1363636363636402
+  },
+  {
+    "project": "AI_READI",
+    "view": "Without Q19",
+    "v7_mean": 94.37751004016064,
+    "v8_mean": 93.97590361445783,
+    "v8_minus_v7": -0.40160642570280913
+  },
+  {
+    "project": "AI_READI",
+    "view": "Without Q13 & Q19",
+    "v7_mean": 94.87179487179488,
+    "v8_mean": 94.44444444444444,
+    "v8_minus_v7": -0.42735042735043294
+  },
+  {
+    "project": "CHORUS",
+    "view": "Original",
+    "v7_mean": 74.62121212121212,
+    "v8_mean": 75.75757575757575,
+    "v8_minus_v7": 1.136363636363626
+  },
+  {
+    "project": "CHORUS",
+    "view": "Without Q19",
+    "v7_mean": 74.29718875502009,
+    "v8_mean": 75.90361445783132,
+    "v8_minus_v7": 1.6064257028112365
+  },
+  {
+    "project": "CHORUS",
+    "view": "Without Q13 & Q19",
+    "v7_mean": 76.4957264957265,
+    "v8_mean": 78.2051282051282,
+    "v8_minus_v7": 1.7094017094017033
+  },
+  {
+    "project": "CM4AI",
+    "view": "Original",
+    "v7_mean": 85.68376068376068,
+    "v8_mean": 80.00194250194251,
+    "v8_minus_v7": -5.681818181818173
+  },
+  {
+    "project": "CM4AI",
+    "view": "Without Q19",
+    "v7_mean": 85.63019200088023,
+    "v8_mean": 80.00770204104087,
+    "v8_minus_v7": -5.622489959839356
+  },
+  {
+    "project": "CM4AI",
+    "view": "Without Q13 & Q19",
+    "v7_mean": 85.99798893916541,
+    "v8_mean": 78.6701860231272,
+    "v8_minus_v7": -7.327802916038209
+  },
+  {
+    "project": "VOICE",
+    "view": "Original",
+    "v7_mean": 92.04545454545455,
+    "v8_mean": 89.01515151515152,
+    "v8_minus_v7": -3.030303030303031
+  },
+  {
+    "project": "VOICE",
+    "view": "Without Q19",
+    "v7_mean": 91.56626506024097,
+    "v8_mean": 88.35341365461848,
+    "v8_minus_v7": -3.2128514056224873
+  },
+  {
+    "project": "VOICE",
+    "view": "Without Q13 & Q19",
+    "v7_mean": 91.02564102564102,
+    "v8_mean": 88.03418803418803,
+    "v8_minus_v7": -2.991452991452988
+  }
+]

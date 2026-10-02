@@ -1,0 +1,650 @@
+[
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Original",
+    "points": 82,
+    "applicable_max": 88,
+    "percent": 93.18181818181819
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 77,
+    "applicable_max": 83,
+    "percent": 92.7710843373494
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 73,
+    "applicable_max": 78,
+    "percent": 93.58974358974359
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Original",
+    "points": 83,
+    "applicable_max": 88,
+    "percent": 94.31818181818181
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 78,
+    "applicable_max": 83,
+    "percent": 93.97590361445783
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 74,
+    "applicable_max": 78,
+    "percent": 94.87179487179488
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Original",
+    "points": 85,
+    "applicable_max": 88,
+    "percent": 96.5909090909091
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 80,
+    "applicable_max": 83,
+    "percent": 96.3855421686747
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 75,
+    "applicable_max": 78,
+    "percent": 96.15384615384616
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Original",
+    "points": 82,
+    "applicable_max": 88,
+    "percent": 93.18181818181819
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 78,
+    "applicable_max": 83,
+    "percent": 93.97590361445783
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 74,
+    "applicable_max": 78,
+    "percent": 94.87179487179488
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Original",
+    "points": 82,
+    "applicable_max": 88,
+    "percent": 93.18181818181819
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 77,
+    "applicable_max": 83,
+    "percent": 92.7710843373494
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 73,
+    "applicable_max": 78,
+    "percent": 93.58974358974359
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Original",
+    "points": 83,
+    "applicable_max": 88,
+    "percent": 94.31818181818181
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 79,
+    "applicable_max": 83,
+    "percent": 95.18072289156626
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 74,
+    "applicable_max": 78,
+    "percent": 94.87179487179488
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Original",
+    "points": 66,
+    "applicable_max": 88,
+    "percent": 75.0
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 62,
+    "applicable_max": 83,
+    "percent": 74.6987951807229
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 60,
+    "applicable_max": 78,
+    "percent": 76.92307692307692
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Original",
+    "points": 64,
+    "applicable_max": 88,
+    "percent": 72.72727272727273
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 60,
+    "applicable_max": 83,
+    "percent": 72.28915662650603
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 58,
+    "applicable_max": 78,
+    "percent": 74.35897435897436
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Original",
+    "points": 67,
+    "applicable_max": 88,
+    "percent": 76.13636363636364
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 63,
+    "applicable_max": 83,
+    "percent": 75.90361445783132
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 61,
+    "applicable_max": 78,
+    "percent": 78.2051282051282
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Original",
+    "points": 67,
+    "applicable_max": 88,
+    "percent": 76.13636363636364
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 63,
+    "applicable_max": 83,
+    "percent": 75.90361445783132
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 61,
+    "applicable_max": 78,
+    "percent": 78.2051282051282
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Original",
+    "points": 68,
+    "applicable_max": 88,
+    "percent": 77.27272727272727
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 64,
+    "applicable_max": 83,
+    "percent": 77.10843373493977
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 62,
+    "applicable_max": 78,
+    "percent": 79.48717948717949
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Original",
+    "points": 65,
+    "applicable_max": 88,
+    "percent": 73.86363636363636
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 62,
+    "applicable_max": 83,
+    "percent": 74.6987951807229
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 60,
+    "applicable_max": 78,
+    "percent": 76.92307692307692
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Original",
+    "points": 75,
+    "applicable_max": 88,
+    "percent": 85.22727272727273
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 71,
+    "applicable_max": 83,
+    "percent": 85.5421686746988
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 67,
+    "applicable_max": 78,
+    "percent": 85.8974358974359
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Original",
+    "points": 64,
+    "applicable_max": 78,
+    "percent": 82.05128205128206
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 60,
+    "applicable_max": 73,
+    "percent": 82.1917808219178
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 56,
+    "applicable_max": 68,
+    "percent": 82.3529411764706
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Original",
+    "points": 79,
+    "applicable_max": 88,
+    "percent": 89.77272727272727
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 74,
+    "applicable_max": 83,
+    "percent": 89.1566265060241
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 70,
+    "applicable_max": 78,
+    "percent": 89.74358974358974
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Original",
+    "points": 70,
+    "applicable_max": 88,
+    "percent": 79.54545454545455
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 66,
+    "applicable_max": 83,
+    "percent": 79.51807228915662
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 61,
+    "applicable_max": 78,
+    "percent": 78.2051282051282
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Original",
+    "points": 64,
+    "applicable_max": 78,
+    "percent": 82.05128205128206
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 60,
+    "applicable_max": 73,
+    "percent": 82.1917808219178
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 55,
+    "applicable_max": 68,
+    "percent": 80.88235294117646
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Original",
+    "points": 69,
+    "applicable_max": 88,
+    "percent": 78.4090909090909
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 65,
+    "applicable_max": 83,
+    "percent": 78.3132530120482
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 60,
+    "applicable_max": 78,
+    "percent": 76.92307692307692
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Original",
+    "points": 81,
+    "applicable_max": 88,
+    "percent": 92.04545454545455
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 76,
+    "applicable_max": 83,
+    "percent": 91.56626506024097
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 71,
+    "applicable_max": 78,
+    "percent": 91.02564102564102
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Original",
+    "points": 80,
+    "applicable_max": 88,
+    "percent": 90.9090909090909
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 75,
+    "applicable_max": 83,
+    "percent": 90.36144578313252
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 70,
+    "applicable_max": 78,
+    "percent": 89.74358974358974
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Original",
+    "points": 82,
+    "applicable_max": 88,
+    "percent": 93.18181818181819
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q19",
+    "points": 77,
+    "applicable_max": 83,
+    "percent": 92.7710843373494
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "version": "v7",
+    "view": "Without Q13 & Q19",
+    "points": 72,
+    "applicable_max": 78,
+    "percent": 92.3076923076923
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Original",
+    "points": 78,
+    "applicable_max": 88,
+    "percent": 88.63636363636364
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 73,
+    "applicable_max": 83,
+    "percent": 87.95180722891567
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 69,
+    "applicable_max": 78,
+    "percent": 88.46153846153847
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Original",
+    "points": 77,
+    "applicable_max": 88,
+    "percent": 87.5
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 72,
+    "applicable_max": 83,
+    "percent": 86.74698795180723
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 67,
+    "applicable_max": 78,
+    "percent": 85.8974358974359
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Original",
+    "points": 80,
+    "applicable_max": 88,
+    "percent": 90.9090909090909
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q19",
+    "points": 75,
+    "applicable_max": 83,
+    "percent": 90.36144578313252
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "version": "v8",
+    "view": "Without Q13 & Q19",
+    "points": 70,
+    "applicable_max": 78,
+    "percent": 89.74358974358974
+  }
+]

@@ -1,0 +1,162 @@
+[
+  {
+    "question": 1,
+    "name": "Field Completeness",
+    "Full": 4,
+    "Partial": 20,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 2,
+    "name": "Entry Length Adequacy",
+    "Full": 24,
+    "Partial": 0,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 3,
+    "name": "Keyword Diversity",
+    "Full": 15,
+    "Partial": 9,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 4,
+    "name": "File Enumeration and Type Variety",
+    "Full": 13,
+    "Partial": 11,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 5,
+    "name": "Data File Size Availability",
+    "Full": 24,
+    "Partial": 0,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 6,
+    "name": "Dataset Identification Metadata",
+    "Full": 24,
+    "Partial": 0,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 7,
+    "name": "Funding and Acknowledgements Completeness",
+    "Full": 22,
+    "Partial": 2,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 8,
+    "name": "Ethical and Privacy Declarations",
+    "Full": 5,
+    "Partial": 17,
+    "Zero": 0,
+    "Not applicable": 2
+  },
+  {
+    "question": 9,
+    "name": "Access Requirements and Governance Documentation",
+    "Full": 14,
+    "Partial": 10,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 10,
+    "name": "Interoperability, Standardization, and Cross-Platform Integration",
+    "Full": 13,
+    "Partial": 11,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 11,
+    "name": "Tool and Software Transparency",
+    "Full": 3,
+    "Partial": 21,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 12,
+    "name": "Collection Protocol Clarity",
+    "Full": 9,
+    "Partial": 15,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 13,
+    "name": "Version History, Maintenance, and Sustainability",
+    "Full": 10,
+    "Partial": 14,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 14,
+    "name": "Associated Publications",
+    "Full": 18,
+    "Partial": 6,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 15,
+    "name": "Human Subject Representation",
+    "Full": 6,
+    "Partial": 16,
+    "Zero": 0,
+    "Not applicable": 2
+  },
+  {
+    "question": 16,
+    "name": "Findability (Persistent Links)",
+    "Full": 24,
+    "Partial": 0,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 17,
+    "name": "Accessibility (Access Mechanism)",
+    "Full": 13,
+    "Partial": 11,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 18,
+    "name": "Reusability, Use Guidance, and Social Impact",
+    "Full": 11,
+    "Partial": 13,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 19,
+    "name": "Data Integrity, Provenance Graph, and Quality",
+    "Full": 11,
+    "Partial": 13,
+    "Zero": 0,
+    "Not applicable": 0
+  },
+  {
+    "question": 20,
+    "name": "Bias Documentation and Responsible AI Alignment",
+    "Full": 3,
+    "Partial": 21,
+    "Zero": 0,
+    "Not applicable": 0
+  }
+]

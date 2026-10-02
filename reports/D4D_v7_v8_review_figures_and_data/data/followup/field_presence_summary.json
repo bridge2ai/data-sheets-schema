@@ -1,0 +1,98 @@
+[
+  {
+    "field": "download_url",
+    "Absent, mentioned": 18,
+    "Absent, not mentioned": 6,
+    "Populated": 0
+  },
+  {
+    "field": "errata",
+    "Absent, mentioned": 15,
+    "Absent, not mentioned": 2,
+    "Populated": 7
+  },
+  {
+    "field": "imputation_protocols",
+    "Absent, mentioned": 13,
+    "Absent, not mentioned": 11,
+    "Populated": 0
+  },
+  {
+    "field": "parent_datasets",
+    "Absent, mentioned": 12,
+    "Absent, not mentioned": 12,
+    "Populated": 0
+  },
+  {
+    "field": "variables",
+    "Absent, mentioned": 11,
+    "Absent, not mentioned": 2,
+    "Populated": 11
+  },
+  {
+    "field": "is_tabular",
+    "Absent, mentioned": 10,
+    "Absent, not mentioned": 2,
+    "Populated": 12
+  },
+  {
+    "field": "data_protection_impacts",
+    "Absent, mentioned": 9,
+    "Absent, not mentioned": 10,
+    "Populated": 5
+  },
+  {
+    "field": "resources",
+    "Absent, mentioned": 9,
+    "Absent, not mentioned": 15,
+    "Populated": 0
+  },
+  {
+    "field": "total_size_bytes",
+    "Absent, mentioned": 9,
+    "Absent, not mentioned": 8,
+    "Populated": 7
+  },
+  {
+    "field": "anomalies",
+    "Absent, mentioned": 6,
+    "Absent, not mentioned": 5,
+    "Populated": 13
+  },
+  {
+    "field": "future_use_impacts",
+    "Absent, mentioned": 6,
+    "Absent, not mentioned": 0,
+    "Populated": 18
+  },
+  {
+    "field": "publisher",
+    "Absent, mentioned": 6,
+    "Absent, not mentioned": 3,
+    "Populated": 15
+  },
+  {
+    "field": "discouraged_uses",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 8,
+    "Populated": 11
+  },
+  {
+    "field": "doi",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 1,
+    "Populated": 18
+  },
+  {
+    "field": "machine_annotation_tools",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 8,
+    "Populated": 11
+  },
+  {
+    "field": "missing_data_documentation",
+    "Absent, mentioned": 5,
+    "Absent, not mentioned": 5,
+    "Populated": 14
+  }
+]

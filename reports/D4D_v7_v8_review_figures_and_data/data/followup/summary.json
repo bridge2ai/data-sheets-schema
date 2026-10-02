@@ -1,0 +1,48 @@
+{
+  "field_absence_total": 242,
+  "absence_mentioned": 144,
+  "record_field_pairs": 384,
+  "repeat_summary": {
+    "AI_READI": {
+      "mean_field_jaccard": 0.7332903918411164,
+      "mean_typed_jaccard": 0.4684471489745323,
+      "score_range_pp": 0.0
+    },
+    "CHORUS": {
+      "mean_field_jaccard": 0.6062289562289562,
+      "mean_typed_jaccard": 0.3712797619047619,
+      "score_range_pp": 2.0
+    },
+    "CM4AI": {
+      "mean_field_jaccard": 0.5956205650602934,
+      "mean_typed_jaccard": 0.3720901320901321,
+      "score_range_pp": 0.0
+    },
+    "VOICE": {
+      "mean_field_jaccard": 0.543394777265745,
+      "mean_typed_jaccard": 0.28205128205128205,
+      "score_range_pp": 2.0
+    }
+  },
+  "cross_rubric_summary": {
+    "AI_READI": {
+      "mean_field_jaccard": 0.3531120876515613,
+      "mean_typed_jaccard": 0.19635327635327635
+    },
+    "CHORUS": {
+      "mean_field_jaccard": 0.56604495730312,
+      "mean_typed_jaccard": 0.32845355512798957
+    },
+    "CM4AI": {
+      "mean_field_jaccard": 0.3785012919896641,
+      "mean_typed_jaccard": 0.18926390051994338
+    },
+    "VOICE": {
+      "mean_field_jaccard": 0.32166782166782165,
+      "mean_typed_jaccard": 0.13769191254234972
+    }
+  },
+  "strict_signature_total": 538,
+  "broad_signature_total": 536,
+  "sample_n": 32
+}

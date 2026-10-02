@@ -1,0 +1,3833 @@
+[
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep1_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep1_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep1_r10_rating1:8",
+      "AI_READI_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:7"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:9",
+      "AI_READI_v7_rep2_r20_rating1:5"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep2_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep2",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r10_rating1:3"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:3"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v7_rep3",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v7_rep3_r10_rating1:10"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r10_rating1:8",
+      "AI_READI_v8_rep1_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r10_rating1:7",
+      "AI_READI_v8_rep1_r20_rating1:11"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r10_rating1:8",
+      "AI_READI_v8_rep1_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep1_r20_rating1:14"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:8",
+      "AI_READI_v8_rep2_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:6",
+      "AI_READI_v8_rep2_r20_rating1:9"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep2_r10_rating1:1"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep3_r10_rating1:6",
+      "AI_READI_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep3_r10_rating1:7",
+      "AI_READI_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "AI_READI_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:14"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:15"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:14"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep1_r10_rating1:14"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:8",
+      "CHORUS_v7_rep2_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:5",
+      "CHORUS_v7_rep2_r20_rating1:5"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:5",
+      "CHORUS_v7_rep2_r20_rating1:5"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep2",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep2_r10_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep3_r20_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep3_r20_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep3_r20_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v7_rep3_r20_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v7_rep3",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r20_rating1:15"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:12",
+      "CHORUS_v8_rep1_r20_rating1:12"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep1_r10_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r20_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:12",
+      "CHORUS_v8_rep2_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep2_r10_rating1:7",
+      "CHORUS_v8_rep2_r10_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep3_r10_rating1:9",
+      "CHORUS_v8_rep3_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep3_r20_rating1:12"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "doi",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CHORUS_v8_rep3_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r10_rating1:7",
+      "CM4AI_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r10_rating1:3",
+      "CM4AI_v7_rep1_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep1_r10_rating1:6",
+      "CM4AI_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r10_rating1:5",
+      "CM4AI_v7_rep2_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r10_rating1:5"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r20_rating1:5"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r20_rating1:6"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep2_r10_rating1:3"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep2",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:2",
+      "CM4AI_v7_rep3_r10_rating1:12"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:5"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r20_rating1:11"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v7_rep3",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v7_rep3_r10_rating1:5",
+      "CM4AI_v7_rep3_r10_rating1:12"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep1_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep1_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep1_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep1_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep1_r10_rating1:11"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:7",
+      "CM4AI_v8_rep2_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r20_rating1:7",
+      "CM4AI_v8_rep2_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:5",
+      "CM4AI_v8_rep2_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:11",
+      "CM4AI_v8_rep2_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r20_rating1:6"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:7",
+      "CM4AI_v8_rep2_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep2_r10_rating1:6",
+      "CM4AI_v8_rep2_r20_rating1:4",
+      "CM4AI_v8_rep2_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "errata",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r10_rating1:3"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "is_tabular",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r20_rating1:10"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "anomalies",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "future_use_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r10_rating1:12"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "discouraged_uses",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "machine_annotation_tools",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "field": "missing_data_documentation",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "CM4AI_v8_rep3_r10_rating1:7",
+      "CM4AI_v8_rep3_r20_rating1:13"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:6",
+      "VOICE_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:5",
+      "VOICE_v7_rep1_r20_rating1:8"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:11"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r10_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep1_r20_rating1:9"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r10_rating1:2"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r10_rating1:7"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep2",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep2_r10_rating1:8"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r10_rating1:2",
+      "VOICE_v7_rep3_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v7_rep3_r20_rating1:10"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v7_rep3",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r10_rating1:10"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r10_rating1:8"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep1_r20_rating1:5"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep2_r10_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep2_r10_rating1:9"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep2_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep2_r20_rating1:5"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep2_r20_rating1:15"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "download_url",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "errata",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "imputation_protocols",
+    "populated": false,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Absent, not mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "parent_datasets",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "variables",
+    "populated": true,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r10_rating1:4"
+    ],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "is_tabular",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r10_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "data_protection_impacts",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r20_rating1:4"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "resources",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r20_rating1:7"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "total_size_bytes",
+    "populated": false,
+    "completeness_mentioned": true,
+    "issue_ids": [
+      "VOICE_v8_rep3_r20_rating1:6"
+    ],
+    "state": "Absent, mentioned"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "anomalies",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "future_use_impacts",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "publisher",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "discouraged_uses",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "doi",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "machine_annotation_tools",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "field": "missing_data_documentation",
+    "populated": true,
+    "completeness_mentioned": false,
+    "issue_ids": [],
+    "state": "Populated"
+  }
+]

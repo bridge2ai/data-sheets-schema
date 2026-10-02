@@ -1,0 +1,211 @@
+{
+  "sample_id": "S26",
+  "record": "VOICE_v8_rep2",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep2/VOICE_d4d.yaml",
+  "d4d_sha256": "0766cb45aa40e3557eb0501fd4883cedbaf7462f6c2f59099c05dac4b3d59aea",
+  "d4d_fields": {
+    "distribution_dates": [
+      {
+        "release_dates": [
+          "2025-01-17 (version 1.1)",
+          "2025-04-16 (version 2.0.0)",
+          "2025-08-18 (version 2.0.1)",
+          "2025-12-16 (version 3.0.0)",
+          "2026-05-01 (version 3.1.0)"
+        ],
+        "notes": "Version 1.0 was published earlier on the Health Data Nexus platform rather than on PhysioNet."
+      }
+    ],
+    "updates": {
+      "frequency": "Semi-annual, that is twice a year.",
+      "update_details": "Further versions of the dataset are released as new versions rather than in-place edits, each with its own DOI. Users are notified through news items on the hosting platform and through standard communication channels. Successive releases have added participants, added derived features, reorganized the file layout and corrected errors; the dataset itself is released as static versions rather than being dynamically updated.",
+      "source_caveats": "The semi-annual cadence and notification arrangements are stated in the project documentation against hosting on the Health Data Nexus platform; the current release is hosted on PhysioNet."
+    },
+    "version_access": {
+      "latest_version_doi": "doi:10.13026/37yb-1t42",
+      "versions_available": [
+        "1.0 - first release of the Bridge2AI voice as a biomarker of health dataset, published on Health Data Nexus, providing 12,523 recordings for 306 participants.",
+        "1.1, 17 January 2025 - added Mel-frequency cepstral coefficients.",
+        "2.0.0, 16 April 2025 - added 136 new participants; spectrograms reprocessed; free-speech spectrograms and MFCCs removed.",
+        "2.0.1, 18 August 2025 - corrections to the authorship list.",
+        "3.0.0, 16 December 2025 - added 391 new participants; the single phenotype file separated into individual files; articulatory and phonetic posteriorgram features added; files reorganized.",
+        "3.1.0, 1 May 2026 - no new participants, but additional data released for certain participants; broken Parquet files fixed; audio quality metrics and per-recording metadata added."
+      ],
+      "version_details": "Each version has a unique DOI, and a concept DOI resolves to the latest version. Older versions remain listed on PhysioNet, but the files for version 1.1 are no longer available. The project documentation states that by default older versions continue to be supported, hosted and made available to researchers, and that the dataset publishers reserve the right to remove access to older versions."
+    }
+  },
+  "receipt_links": [
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c008",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "updates.update_details",
+      "root": "updates",
+      "section": "Maintenance",
+      "snippet": "Does the dataset get released as static versions or is it dynamically updated?",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c009",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "updates.frequency",
+      "root": "updates",
+      "section": "Maintenance",
+      "snippet": "further versions of the dataset will be released on a semi-annual (twice a year) basis",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c009",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "source_type": "documentation",
+      "slot": "version_access.version_details",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "By default, older versions of the dataset will continue to be supported, hosted, and made available to researchers.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "source_type": "data resource",
+      "slot": "version_access.version_details",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "The files for this version of the project (1.1) are no longer available.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "This release added Mel-frequency cepstral coefficients (MFCCs).",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "Bridge2AI-Voice v1.0, the initial release, provides 12,523 recordings for 306 participants collected across five sites in North America.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "physionet_b2ai-voice_1.1_row17.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "Bridge2AI-Voice: An ethically-sourced, diverse voice dataset linked to health information (version 1.0). Health Data Nexus.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c016",
+      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "Published: Dec. 16, 2025. Version:",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "A major update with new data for an additional 391 participants.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c017",
+      "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "This release provides data for an additional 136 new participants.",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "version_access.latest_version_doi",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "https://doi.org/10.13026/37yb-1t42",
+      "root_present": true
+    },
+    {
+      "record": "VOICE_v8_rep2",
+      "project": "VOICE",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "version_access.versions_available",
+      "root": "version_access",
+      "section": "Maintenance",
+      "snippet": "Minor update with no new participants, but some additional data released for certain participants.",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/VOICE_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "semi.annual"
+  ],
+  "source_excerpts": [
+    {
+      "query": "semi.annual",
+      "chunk": "c009",
+      "source": "docs_b2ai-voice_org_row10.txt",
+      "chunk_sha256": "7ce385094acb63c7c5a04d241f757c89d862b7728f291726d7a2a1367a12f919",
+      "excerpt": "? If so, please describe how often, by whom, and how updates will be communicated to users (e.g., mailing list, GitHub)?\nYes, further versions of the dataset will be released on a semi-annual (twice a year) basis. These updates will be distributed as new versions of the dataset on the Health Data Nexus platform. Users will be notified through news items on the platform as well as through standard communication channels.\nIf the dataset relates to people, are there applicable limits on th"
+    }
+  ]
+}

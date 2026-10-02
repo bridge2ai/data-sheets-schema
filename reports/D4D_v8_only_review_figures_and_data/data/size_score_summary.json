@@ -1,0 +1,156 @@
+[
+  {
+    "section": "Collection",
+    "mapped_item_count": 2,
+    "scored_records": 12,
+    "applicable_points": 24,
+    "lost_points": 0,
+    "pooled_loss_percent": 0.0,
+    "mean_record_loss_percent": 0.0,
+    "share_all_r10_lost_points_percent": 0.0,
+    "share_all_r10_available_points_percent": 4.060913705583756
+  },
+  {
+    "section": "Composition",
+    "mapped_item_count": 9,
+    "scored_records": 12,
+    "applicable_points": 108,
+    "lost_points": 12,
+    "pooled_loss_percent": 11.11111111111111,
+    "mean_record_loss_percent": 11.11111111111111,
+    "share_all_r10_lost_points_percent": 15.789473684210526,
+    "share_all_r10_available_points_percent": 18.274111675126903
+  },
+  {
+    "section": "Data Governance",
+    "mapped_item_count": 3,
+    "scored_records": 12,
+    "applicable_points": 36,
+    "lost_points": 2,
+    "pooled_loss_percent": 5.555555555555555,
+    "mean_record_loss_percent": 5.555555555555556,
+    "share_all_r10_lost_points_percent": 2.6315789473684212,
+    "share_all_r10_available_points_percent": 6.091370558375634
+  },
+  {
+    "section": "Distribution",
+    "mapped_item_count": 1,
+    "scored_records": 12,
+    "applicable_points": 12,
+    "lost_points": 0,
+    "pooled_loss_percent": 0.0,
+    "mean_record_loss_percent": 0.0,
+    "share_all_r10_lost_points_percent": 0.0,
+    "share_all_r10_available_points_percent": 2.030456852791878
+  },
+  {
+    "section": "Ethics",
+    "mapped_item_count": 1,
+    "scored_records": 12,
+    "applicable_points": 12,
+    "lost_points": 2,
+    "pooled_loss_percent": 16.666666666666668,
+    "mean_record_loss_percent": 16.666666666666668,
+    "share_all_r10_lost_points_percent": 2.6315789473684212,
+    "share_all_r10_available_points_percent": 2.030456852791878
+  },
+  {
+    "section": "FileCollection",
+    "mapped_item_count": 0,
+    "scored_records": 0,
+    "applicable_points": 0,
+    "lost_points": 0,
+    "pooled_loss_percent": null,
+    "mean_record_loss_percent": null,
+    "share_all_r10_lost_points_percent": 0.0,
+    "share_all_r10_available_points_percent": 0.0
+  },
+  {
+    "section": "Human",
+    "mapped_item_count": 3,
+    "scored_records": 9,
+    "applicable_points": 27,
+    "lost_points": 4,
+    "pooled_loss_percent": 14.814814814814815,
+    "mean_record_loss_percent": 14.814814814814817,
+    "share_all_r10_lost_points_percent": 5.2631578947368425,
+    "share_all_r10_available_points_percent": 4.568527918781726
+  },
+  {
+    "section": "Maintenance",
+    "mapped_item_count": 3,
+    "scored_records": 12,
+    "applicable_points": 36,
+    "lost_points": 8,
+    "pooled_loss_percent": 22.22222222222222,
+    "mean_record_loss_percent": 22.222222222222225,
+    "share_all_r10_lost_points_percent": 10.526315789473685,
+    "share_all_r10_available_points_percent": 6.091370558375634
+  },
+  {
+    "section": "Metadata",
+    "mapped_item_count": 9,
+    "scored_records": 12,
+    "applicable_points": 108,
+    "lost_points": 17,
+    "pooled_loss_percent": 15.74074074074074,
+    "mean_record_loss_percent": 15.74074074074074,
+    "share_all_r10_lost_points_percent": 22.36842105263158,
+    "share_all_r10_available_points_percent": 18.274111675126903
+  },
+  {
+    "section": "Motivation",
+    "mapped_item_count": 5,
+    "scored_records": 12,
+    "applicable_points": 60,
+    "lost_points": 0,
+    "pooled_loss_percent": 0.0,
+    "mean_record_loss_percent": 0.0,
+    "share_all_r10_lost_points_percent": 0.0,
+    "share_all_r10_available_points_percent": 10.152284263959391
+  },
+  {
+    "section": "Preprocessing",
+    "mapped_item_count": 1,
+    "scored_records": 12,
+    "applicable_points": 12,
+    "lost_points": 3,
+    "pooled_loss_percent": 25.0,
+    "mean_record_loss_percent": 25.0,
+    "share_all_r10_lost_points_percent": 3.9473684210526314,
+    "share_all_r10_available_points_percent": 2.030456852791878
+  },
+  {
+    "section": "Uses",
+    "mapped_item_count": 1,
+    "scored_records": 12,
+    "applicable_points": 12,
+    "lost_points": 0,
+    "pooled_loss_percent": 0.0,
+    "mean_record_loss_percent": 0.0,
+    "share_all_r10_lost_points_percent": 0.0,
+    "share_all_r10_available_points_percent": 2.030456852791878
+  },
+  {
+    "section": "Variables",
+    "mapped_item_count": 1,
+    "scored_records": 12,
+    "applicable_points": 12,
+    "lost_points": 6,
+    "pooled_loss_percent": 50.0,
+    "mean_record_loss_percent": 50.0,
+    "share_all_r10_lost_points_percent": 7.894736842105263,
+    "share_all_r10_available_points_percent": 2.030456852791878
+  },
+  {
+    "section": "Unmapped items",
+    "mapped_item_count": 11,
+    "scored_records": 12,
+    "applicable_points": 132,
+    "lost_points": 22,
+    "pooled_loss_percent": 16.666666666666668,
+    "mean_record_loss_percent": 16.666666666666668,
+    "share_all_r10_lost_points_percent": 28.94736842105263,
+    "share_all_r10_available_points_percent": 22.33502538071066
+  }
+]

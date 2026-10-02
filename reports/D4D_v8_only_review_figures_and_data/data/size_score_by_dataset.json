@@ -1,0 +1,394 @@
+[
+  {
+    "section": "Collection",
+    "project": "AI_READI",
+    "applicable_points": 6,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Collection",
+    "project": "CHORUS",
+    "applicable_points": 6,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Collection",
+    "project": "CM4AI",
+    "applicable_points": 6,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Collection",
+    "project": "VOICE",
+    "applicable_points": 6,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Composition",
+    "project": "AI_READI",
+    "applicable_points": 27,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Composition",
+    "project": "CHORUS",
+    "applicable_points": 27,
+    "lost_points": 8,
+    "loss_percent": 29.62962962962963
+  },
+  {
+    "section": "Composition",
+    "project": "CM4AI",
+    "applicable_points": 27,
+    "lost_points": 4,
+    "loss_percent": 14.814814814814815
+  },
+  {
+    "section": "Composition",
+    "project": "VOICE",
+    "applicable_points": 27,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Data Governance",
+    "project": "AI_READI",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Data Governance",
+    "project": "CHORUS",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "section": "Data Governance",
+    "project": "CM4AI",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Data Governance",
+    "project": "VOICE",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Distribution",
+    "project": "AI_READI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Distribution",
+    "project": "CHORUS",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Distribution",
+    "project": "CM4AI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Distribution",
+    "project": "VOICE",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Ethics",
+    "project": "AI_READI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Ethics",
+    "project": "CHORUS",
+    "applicable_points": 3,
+    "lost_points": 2,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "section": "Ethics",
+    "project": "CM4AI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Ethics",
+    "project": "VOICE",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "FileCollection",
+    "project": "AI_READI",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "section": "FileCollection",
+    "project": "CHORUS",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "section": "FileCollection",
+    "project": "CM4AI",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "section": "FileCollection",
+    "project": "VOICE",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "section": "Human",
+    "project": "AI_READI",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Human",
+    "project": "CHORUS",
+    "applicable_points": 9,
+    "lost_points": 4,
+    "loss_percent": 44.44444444444444
+  },
+  {
+    "section": "Human",
+    "project": "CM4AI",
+    "applicable_points": 0,
+    "lost_points": 0,
+    "loss_percent": null
+  },
+  {
+    "section": "Human",
+    "project": "VOICE",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Maintenance",
+    "project": "AI_READI",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Maintenance",
+    "project": "CHORUS",
+    "applicable_points": 9,
+    "lost_points": 6,
+    "loss_percent": 66.66666666666667
+  },
+  {
+    "section": "Maintenance",
+    "project": "CM4AI",
+    "applicable_points": 9,
+    "lost_points": 2,
+    "loss_percent": 22.22222222222222
+  },
+  {
+    "section": "Maintenance",
+    "project": "VOICE",
+    "applicable_points": 9,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Metadata",
+    "project": "AI_READI",
+    "applicable_points": 27,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Metadata",
+    "project": "CHORUS",
+    "applicable_points": 27,
+    "lost_points": 12,
+    "loss_percent": 44.44444444444444
+  },
+  {
+    "section": "Metadata",
+    "project": "CM4AI",
+    "applicable_points": 27,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Metadata",
+    "project": "VOICE",
+    "applicable_points": 27,
+    "lost_points": 5,
+    "loss_percent": 18.51851851851852
+  },
+  {
+    "section": "Motivation",
+    "project": "AI_READI",
+    "applicable_points": 15,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Motivation",
+    "project": "CHORUS",
+    "applicable_points": 15,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Motivation",
+    "project": "CM4AI",
+    "applicable_points": 15,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Motivation",
+    "project": "VOICE",
+    "applicable_points": 15,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Preprocessing",
+    "project": "AI_READI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Preprocessing",
+    "project": "CHORUS",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Preprocessing",
+    "project": "CM4AI",
+    "applicable_points": 3,
+    "lost_points": 3,
+    "loss_percent": 100.0
+  },
+  {
+    "section": "Preprocessing",
+    "project": "VOICE",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Uses",
+    "project": "AI_READI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Uses",
+    "project": "CHORUS",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Uses",
+    "project": "CM4AI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Uses",
+    "project": "VOICE",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Variables",
+    "project": "AI_READI",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Variables",
+    "project": "CHORUS",
+    "applicable_points": 3,
+    "lost_points": 3,
+    "loss_percent": 100.0
+  },
+  {
+    "section": "Variables",
+    "project": "CM4AI",
+    "applicable_points": 3,
+    "lost_points": 3,
+    "loss_percent": 100.0
+  },
+  {
+    "section": "Variables",
+    "project": "VOICE",
+    "applicable_points": 3,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  },
+  {
+    "section": "Unmapped items",
+    "project": "AI_READI",
+    "applicable_points": 33,
+    "lost_points": 3,
+    "loss_percent": 9.090909090909092
+  },
+  {
+    "section": "Unmapped items",
+    "project": "CHORUS",
+    "applicable_points": 33,
+    "lost_points": 10,
+    "loss_percent": 30.303030303030305
+  },
+  {
+    "section": "Unmapped items",
+    "project": "CM4AI",
+    "applicable_points": 33,
+    "lost_points": 9,
+    "loss_percent": 27.272727272727273
+  },
+  {
+    "section": "Unmapped items",
+    "project": "VOICE",
+    "applicable_points": 33,
+    "lost_points": 0,
+    "loss_percent": 0.0
+  }
+]

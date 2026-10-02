@@ -1,0 +1,2030 @@
+[
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 25,
+    "b_count": 22,
+    "shared": 20,
+    "union": 27,
+    "jaccard": 0.7407407407407407,
+    "dice": 0.851063829787234,
+    "a_only": [
+      "collection_mechanisms",
+      "known_limitations",
+      "relationships",
+      "third_party_sharing",
+      "variables"
+    ],
+    "b_only": [
+      "description",
+      "splits"
+    ]
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 29,
+    "b_count": 27,
+    "shared": 14,
+    "union": 42,
+    "jaccard": 0.3333333333333333,
+    "dice": 0.5,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "sampling_strategies"
+      ],
+      [
+        "Accuracy/correctness",
+        "third_party_sharing"
+      ],
+      [
+        "Completeness",
+        "collection_mechanisms"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "notes"
+      ],
+      [
+        "Consistency",
+        "collection_timeframes"
+      ],
+      [
+        "Consistency",
+        "creators"
+      ],
+      [
+        "Consistency",
+        "data_governance"
+      ],
+      [
+        "Consistency",
+        "ethical_reviews"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "relationships"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ],
+      [
+        "Semantic understanding",
+        "file_collections"
+      ],
+      [
+        "Semantic understanding",
+        "variables"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "data_governance"
+      ],
+      [
+        "Accuracy/correctness",
+        "data_protection_impacts"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Accuracy/correctness",
+        "notes"
+      ],
+      [
+        "Accuracy/correctness",
+        "participant_privacy"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "splits"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Semantic understanding",
+        "collection_timeframes"
+      ],
+      [
+        "Semantic understanding",
+        "creators"
+      ],
+      [
+        "Semantic understanding",
+        "data_governance"
+      ],
+      [
+        "Semantic understanding",
+        "sampling_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ]
+    ]
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 25,
+    "b_count": 18,
+    "shared": 18,
+    "union": 25,
+    "jaccard": 0.72,
+    "dice": 0.8372093023255814,
+    "a_only": [
+      "collection_mechanisms",
+      "ethical_reviews",
+      "human_subject_research",
+      "known_limitations",
+      "relationships",
+      "sampling_strategies",
+      "variables"
+    ],
+    "b_only": []
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 29,
+    "b_count": 20,
+    "shared": 20,
+    "union": 29,
+    "jaccard": 0.6896551724137931,
+    "dice": 0.8163265306122449,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "sampling_strategies"
+      ],
+      [
+        "Completeness",
+        "collection_mechanisms"
+      ],
+      [
+        "Completeness",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "ethical_reviews"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "relationships"
+      ],
+      [
+        "Semantic understanding",
+        "file_collections"
+      ],
+      [
+        "Semantic understanding",
+        "variables"
+      ]
+    ],
+    "b_only": []
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 22,
+    "b_count": 18,
+    "shared": 17,
+    "union": 23,
+    "jaccard": 0.7391304347826086,
+    "dice": 0.85,
+    "a_only": [
+      "description",
+      "ethical_reviews",
+      "human_subject_research",
+      "sampling_strategies",
+      "splits"
+    ],
+    "b_only": [
+      "third_party_sharing"
+    ]
+  },
+  {
+    "record": "AI_READI_v7_rep1",
+    "project": "AI_READI",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 27,
+    "b_count": 20,
+    "shared": 13,
+    "union": 34,
+    "jaccard": 0.38235294117647056,
+    "dice": 0.5531914893617021,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "data_governance"
+      ],
+      [
+        "Accuracy/correctness",
+        "data_protection_impacts"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Accuracy/correctness",
+        "notes"
+      ],
+      [
+        "Accuracy/correctness",
+        "participant_privacy"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "human_subject_research"
+      ],
+      [
+        "Completeness",
+        "splits"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Semantic understanding",
+        "collection_timeframes"
+      ],
+      [
+        "Semantic understanding",
+        "creators"
+      ],
+      [
+        "Semantic understanding",
+        "data_governance"
+      ],
+      [
+        "Semantic understanding",
+        "sampling_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "third_party_sharing"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "notes"
+      ],
+      [
+        "Consistency",
+        "collection_timeframes"
+      ],
+      [
+        "Consistency",
+        "creators"
+      ],
+      [
+        "Consistency",
+        "data_governance"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ]
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": false,
+    "score_difference_pp": 2.0,
+    "a_count": 40,
+    "b_count": 36,
+    "shared": 28,
+    "union": 48,
+    "jaccard": 0.5833333333333334,
+    "dice": 0.7368421052631579,
+    "a_only": [
+      "confidential_elements",
+      "data_governance",
+      "distribution_formats",
+      "download_url",
+      "errata",
+      "imputation_protocols",
+      "known_limitations",
+      "notes",
+      "parent_datasets",
+      "purposes",
+      "related_datasets",
+      "splits"
+    ],
+    "b_only": [
+      "direct_collection",
+      "discouraged_uses",
+      "intended_uses",
+      "participant_privacy",
+      "preprocessing_strategies",
+      "prohibited_uses",
+      "sampling_strategies",
+      "third_party_sharing"
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": true,
+    "score_difference_pp": 2.0,
+    "a_count": 47,
+    "b_count": 40,
+    "shared": 23,
+    "union": 64,
+    "jaccard": 0.359375,
+    "dice": 0.5287356321839081,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "confidential_elements"
+      ],
+      [
+        "Accuracy/correctness",
+        "license_and_use_terms"
+      ],
+      [
+        "Accuracy/correctness",
+        "notes"
+      ],
+      [
+        "Accuracy/correctness",
+        "purposes"
+      ],
+      [
+        "Completeness",
+        "collection_timeframes"
+      ],
+      [
+        "Completeness",
+        "conforms_to"
+      ],
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "distribution_formats"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "is_deidentified"
+      ],
+      [
+        "Completeness",
+        "parent_datasets"
+      ],
+      [
+        "Completeness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Completeness",
+        "related_datasets"
+      ],
+      [
+        "Completeness",
+        "splits"
+      ],
+      [
+        "Consistency",
+        "anomalies"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "errata"
+      ],
+      [
+        "Consistency",
+        "imputation_protocols"
+      ],
+      [
+        "Consistency",
+        "instances"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "missing_data_documentation"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ],
+      [
+        "Semantic understanding",
+        "distribution_formats"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "collection_timeframes"
+      ],
+      [
+        "Accuracy/correctness",
+        "description"
+      ],
+      [
+        "Accuracy/correctness",
+        "instances"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Completeness",
+        "anomalies"
+      ],
+      [
+        "Completeness",
+        "intended_uses"
+      ],
+      [
+        "Completeness",
+        "missing_data_documentation"
+      ],
+      [
+        "Completeness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Completeness",
+        "sampling_strategies"
+      ],
+      [
+        "Consistency",
+        "direct_collection"
+      ],
+      [
+        "Consistency",
+        "discouraged_uses"
+      ],
+      [
+        "Consistency",
+        "license_and_use_terms"
+      ],
+      [
+        "Consistency",
+        "prohibited_uses"
+      ],
+      [
+        "Consistency",
+        "third_party_sharing"
+      ],
+      [
+        "Semantic understanding",
+        "participant_privacy"
+      ],
+      [
+        "Semantic understanding",
+        "preprocessing_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ]
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 40,
+    "b_count": 34,
+    "shared": 29,
+    "union": 45,
+    "jaccard": 0.6444444444444445,
+    "dice": 0.7837837837837838,
+    "a_only": [
+      "at_risk_populations",
+      "confidential_elements",
+      "conforms_to_standard",
+      "data_governance",
+      "description",
+      "download_url",
+      "license_and_use_terms",
+      "notes",
+      "participant_compensation",
+      "publisher",
+      "purposes"
+    ],
+    "b_only": [
+      "direct_collection",
+      "is_tabular",
+      "participant_privacy",
+      "preprocessing_strategies",
+      "third_party_sharing"
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 47,
+    "b_count": 39,
+    "shared": 22,
+    "union": 64,
+    "jaccard": 0.34375,
+    "dice": 0.5116279069767442,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "citation"
+      ],
+      [
+        "Accuracy/correctness",
+        "confidential_elements"
+      ],
+      [
+        "Accuracy/correctness",
+        "license_and_use_terms"
+      ],
+      [
+        "Accuracy/correctness",
+        "notes"
+      ],
+      [
+        "Accuracy/correctness",
+        "purposes"
+      ],
+      [
+        "Completeness",
+        "citation"
+      ],
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "distribution_formats"
+      ],
+      [
+        "Completeness",
+        "doi"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "is_deidentified"
+      ],
+      [
+        "Completeness",
+        "publisher"
+      ],
+      [
+        "Completeness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Consistency",
+        "anomalies"
+      ],
+      [
+        "Consistency",
+        "at_risk_populations"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "imputation_protocols"
+      ],
+      [
+        "Consistency",
+        "instances"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "missing_data_documentation"
+      ],
+      [
+        "Consistency",
+        "participant_compensation"
+      ],
+      [
+        "Semantic understanding",
+        "conforms_to"
+      ],
+      [
+        "Semantic understanding",
+        "conforms_to_standard"
+      ],
+      [
+        "Semantic understanding",
+        "distribution_formats"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "distribution_formats"
+      ],
+      [
+        "Accuracy/correctness",
+        "instances"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_tabular"
+      ],
+      [
+        "Accuracy/correctness",
+        "known_limitations"
+      ],
+      [
+        "Completeness",
+        "anomalies"
+      ],
+      [
+        "Completeness",
+        "imputation_protocols"
+      ],
+      [
+        "Completeness",
+        "known_limitations"
+      ],
+      [
+        "Completeness",
+        "missing_data_documentation"
+      ],
+      [
+        "Completeness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Consistency",
+        "citation"
+      ],
+      [
+        "Consistency",
+        "direct_collection"
+      ],
+      [
+        "Consistency",
+        "doi"
+      ],
+      [
+        "Consistency",
+        "third_party_sharing"
+      ],
+      [
+        "Semantic understanding",
+        "data_protection_impacts"
+      ],
+      [
+        "Semantic understanding",
+        "participant_privacy"
+      ],
+      [
+        "Semantic understanding",
+        "regulatory_restrictions"
+      ]
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 2.0,
+    "a_count": 36,
+    "b_count": 34,
+    "shared": 26,
+    "union": 44,
+    "jaccard": 0.5909090909090909,
+    "dice": 0.7428571428571429,
+    "a_only": [
+      "at_risk_populations",
+      "conforms_to_standard",
+      "description",
+      "discouraged_uses",
+      "intended_uses",
+      "license_and_use_terms",
+      "participant_compensation",
+      "prohibited_uses",
+      "publisher",
+      "sampling_strategies"
+    ],
+    "b_only": [
+      "distribution_formats",
+      "errata",
+      "imputation_protocols",
+      "is_tabular",
+      "known_limitations",
+      "parent_datasets",
+      "related_datasets",
+      "splits"
+    ]
+  },
+  {
+    "record": "CHORUS_v7_rep1",
+    "project": "CHORUS",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 2.0,
+    "a_count": 40,
+    "b_count": 39,
+    "shared": 23,
+    "union": 56,
+    "jaccard": 0.4107142857142857,
+    "dice": 0.5822784810126582,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "citation"
+      ],
+      [
+        "Accuracy/correctness",
+        "collection_timeframes"
+      ],
+      [
+        "Accuracy/correctness",
+        "description"
+      ],
+      [
+        "Completeness",
+        "citation"
+      ],
+      [
+        "Completeness",
+        "doi"
+      ],
+      [
+        "Completeness",
+        "intended_uses"
+      ],
+      [
+        "Completeness",
+        "publisher"
+      ],
+      [
+        "Completeness",
+        "sampling_strategies"
+      ],
+      [
+        "Consistency",
+        "at_risk_populations"
+      ],
+      [
+        "Consistency",
+        "discouraged_uses"
+      ],
+      [
+        "Consistency",
+        "license_and_use_terms"
+      ],
+      [
+        "Consistency",
+        "participant_compensation"
+      ],
+      [
+        "Consistency",
+        "prohibited_uses"
+      ],
+      [
+        "Semantic understanding",
+        "conforms_to"
+      ],
+      [
+        "Semantic understanding",
+        "conforms_to_standard"
+      ],
+      [
+        "Semantic understanding",
+        "preprocessing_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "distribution_formats"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_tabular"
+      ],
+      [
+        "Accuracy/correctness",
+        "known_limitations"
+      ],
+      [
+        "Completeness",
+        "collection_timeframes"
+      ],
+      [
+        "Completeness",
+        "conforms_to"
+      ],
+      [
+        "Completeness",
+        "imputation_protocols"
+      ],
+      [
+        "Completeness",
+        "known_limitations"
+      ],
+      [
+        "Completeness",
+        "parent_datasets"
+      ],
+      [
+        "Completeness",
+        "related_datasets"
+      ],
+      [
+        "Completeness",
+        "splits"
+      ],
+      [
+        "Consistency",
+        "citation"
+      ],
+      [
+        "Consistency",
+        "doi"
+      ],
+      [
+        "Consistency",
+        "errata"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ],
+      [
+        "Semantic understanding",
+        "data_protection_impacts"
+      ],
+      [
+        "Semantic understanding",
+        "regulatory_restrictions"
+      ]
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 28,
+    "b_count": 35,
+    "shared": 24,
+    "union": 39,
+    "jaccard": 0.6153846153846154,
+    "dice": 0.7619047619047619,
+    "a_only": [
+      "doi",
+      "human_subject_research",
+      "id",
+      "labeling_strategies"
+    ],
+    "b_only": [
+      "creators",
+      "data_governance",
+      "data_protection_impacts",
+      "description",
+      "distribution_dates",
+      "ethical_reviews",
+      "funders",
+      "future_use_impacts",
+      "raw_sources",
+      "regulatory_restrictions",
+      "sensitive_elements"
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 32,
+    "b_count": 40,
+    "shared": 17,
+    "union": 55,
+    "jaccard": 0.3090909090909091,
+    "dice": 0.4722222222222222,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "cleaning_strategies"
+      ],
+      [
+        "Accuracy/correctness",
+        "distribution_formats"
+      ],
+      [
+        "Accuracy/correctness",
+        "download_url"
+      ],
+      [
+        "Accuracy/correctness",
+        "external_resources"
+      ],
+      [
+        "Accuracy/correctness",
+        "file_collections"
+      ],
+      [
+        "Accuracy/correctness",
+        "known_limitations"
+      ],
+      [
+        "Accuracy/correctness",
+        "labeling_strategies"
+      ],
+      [
+        "Accuracy/correctness",
+        "machine_annotation_tools"
+      ],
+      [
+        "Accuracy/correctness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Consistency",
+        "confidential_elements"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "is_deidentified"
+      ],
+      [
+        "Semantic understanding",
+        "direct_collection"
+      ],
+      [
+        "Semantic understanding",
+        "doi"
+      ],
+      [
+        "Semantic understanding",
+        "id"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "direct_collection"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Accuracy/correctness",
+        "raw_sources"
+      ],
+      [
+        "Accuracy/correctness",
+        "sensitive_elements"
+      ],
+      [
+        "Completeness",
+        "confidential_elements"
+      ],
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "external_resources"
+      ],
+      [
+        "Completeness",
+        "future_use_impacts"
+      ],
+      [
+        "Completeness",
+        "machine_annotation_tools"
+      ],
+      [
+        "Completeness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Completeness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Completeness",
+        "version_access"
+      ],
+      [
+        "Consistency",
+        "creators"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "distribution_dates"
+      ],
+      [
+        "Consistency",
+        "external_resources"
+      ],
+      [
+        "Consistency",
+        "funders"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "related_datasets"
+      ],
+      [
+        "Consistency",
+        "updates"
+      ]
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 28,
+    "b_count": 23,
+    "shared": 20,
+    "union": 31,
+    "jaccard": 0.6451612903225806,
+    "dice": 0.7843137254901961,
+    "a_only": [
+      "citation",
+      "confidential_elements",
+      "created_on",
+      "doi",
+      "external_resources",
+      "id",
+      "raw_data_sources",
+      "source_caveats"
+    ],
+    "b_only": [
+      "creators",
+      "distribution_dates",
+      "is_tabular"
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 32,
+    "b_count": 26,
+    "shared": 19,
+    "union": 39,
+    "jaccard": 0.48717948717948717,
+    "dice": 0.6551724137931034,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "cleaning_strategies"
+      ],
+      [
+        "Accuracy/correctness",
+        "distribution_formats"
+      ],
+      [
+        "Accuracy/correctness",
+        "download_url"
+      ],
+      [
+        "Accuracy/correctness",
+        "external_resources"
+      ],
+      [
+        "Completeness",
+        "raw_data_sources"
+      ],
+      [
+        "Consistency",
+        "citation"
+      ],
+      [
+        "Consistency",
+        "confidential_elements"
+      ],
+      [
+        "Consistency",
+        "created_on"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "is_deidentified"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ],
+      [
+        "Semantic understanding",
+        "doi"
+      ],
+      [
+        "Semantic understanding",
+        "id"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "creators"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "is_tabular"
+      ],
+      [
+        "Consistency",
+        "distribution_dates"
+      ],
+      [
+        "Consistency",
+        "related_datasets"
+      ],
+      [
+        "Semantic understanding",
+        "human_subject_research"
+      ],
+      [
+        "Semantic understanding",
+        "is_deidentified"
+      ]
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 35,
+    "b_count": 23,
+    "shared": 20,
+    "union": 38,
+    "jaccard": 0.5263157894736842,
+    "dice": 0.6896551724137931,
+    "a_only": [
+      "citation",
+      "confidential_elements",
+      "created_on",
+      "data_governance",
+      "data_protection_impacts",
+      "description",
+      "ethical_reviews",
+      "external_resources",
+      "funders",
+      "future_use_impacts",
+      "raw_data_sources",
+      "raw_sources",
+      "regulatory_restrictions",
+      "sensitive_elements",
+      "source_caveats"
+    ],
+    "b_only": [
+      "human_subject_research",
+      "is_tabular",
+      "labeling_strategies"
+    ]
+  },
+  {
+    "record": "CM4AI_v7_rep1",
+    "project": "CM4AI",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 40,
+    "b_count": 26,
+    "shared": 16,
+    "union": 50,
+    "jaccard": 0.32,
+    "dice": 0.48484848484848486,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "direct_collection"
+      ],
+      [
+        "Accuracy/correctness",
+        "is_deidentified"
+      ],
+      [
+        "Accuracy/correctness",
+        "raw_sources"
+      ],
+      [
+        "Accuracy/correctness",
+        "sensitive_elements"
+      ],
+      [
+        "Completeness",
+        "confidential_elements"
+      ],
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "external_resources"
+      ],
+      [
+        "Completeness",
+        "future_use_impacts"
+      ],
+      [
+        "Completeness",
+        "machine_annotation_tools"
+      ],
+      [
+        "Completeness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Completeness",
+        "raw_data_sources"
+      ],
+      [
+        "Completeness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Completeness",
+        "version_access"
+      ],
+      [
+        "Consistency",
+        "citation"
+      ],
+      [
+        "Consistency",
+        "created_on"
+      ],
+      [
+        "Consistency",
+        "creators"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "external_resources"
+      ],
+      [
+        "Consistency",
+        "funders"
+      ],
+      [
+        "Consistency",
+        "known_limitations"
+      ],
+      [
+        "Consistency",
+        "source_caveats"
+      ],
+      [
+        "Consistency",
+        "updates"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "creators"
+      ],
+      [
+        "Accuracy/correctness",
+        "file_collections"
+      ],
+      [
+        "Accuracy/correctness",
+        "known_limitations"
+      ],
+      [
+        "Accuracy/correctness",
+        "labeling_strategies"
+      ],
+      [
+        "Accuracy/correctness",
+        "machine_annotation_tools"
+      ],
+      [
+        "Accuracy/correctness",
+        "preprocessing_strategies"
+      ],
+      [
+        "Completeness",
+        "is_tabular"
+      ],
+      [
+        "Semantic understanding",
+        "direct_collection"
+      ],
+      [
+        "Semantic understanding",
+        "human_subject_research"
+      ],
+      [
+        "Semantic understanding",
+        "is_deidentified"
+      ]
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": false,
+    "score_difference_pp": 0.0,
+    "a_count": 20,
+    "b_count": 22,
+    "shared": 14,
+    "union": 28,
+    "jaccard": 0.5,
+    "dice": 0.6666666666666666,
+    "a_only": [
+      "human_subject_research",
+      "imputation_protocols",
+      "instances",
+      "related_datasets",
+      "subpopulations",
+      "was_derived_from"
+    ],
+    "b_only": [
+      "data_governance",
+      "data_protection_impacts",
+      "ethical_reviews",
+      "known_limitations",
+      "maintainers",
+      "page",
+      "participant_privacy",
+      "third_party_sharing"
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      1,
+      2
+    ],
+    "typed": true,
+    "score_difference_pp": 0.0,
+    "a_count": 22,
+    "b_count": 25,
+    "shared": 8,
+    "union": 39,
+    "jaccard": 0.20512820512820512,
+    "dice": 0.3404255319148936,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "citation"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "imputation_protocols"
+      ],
+      [
+        "Completeness",
+        "is_tabular"
+      ],
+      [
+        "Completeness",
+        "was_derived_from"
+      ],
+      [
+        "Consistency",
+        "collection_timeframes"
+      ],
+      [
+        "Consistency",
+        "confidential_elements"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "distribution_dates"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "related_datasets"
+      ],
+      [
+        "Consistency",
+        "subpopulations"
+      ],
+      [
+        "Semantic understanding",
+        "instances"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "collection_timeframes"
+      ],
+      [
+        "Accuracy/correctness",
+        "confidential_elements"
+      ],
+      [
+        "Accuracy/correctness",
+        "distribution_dates"
+      ],
+      [
+        "Completeness",
+        "citation"
+      ],
+      [
+        "Completeness",
+        "maintainers"
+      ],
+      [
+        "Completeness",
+        "page"
+      ],
+      [
+        "Completeness",
+        "third_party_sharing"
+      ],
+      [
+        "Consistency",
+        "data_governance"
+      ],
+      [
+        "Consistency",
+        "data_protection_impacts"
+      ],
+      [
+        "Consistency",
+        "distribution_formats"
+      ],
+      [
+        "Consistency",
+        "download_url"
+      ],
+      [
+        "Consistency",
+        "ethical_reviews"
+      ],
+      [
+        "Consistency",
+        "is_tabular"
+      ],
+      [
+        "Consistency",
+        "participant_privacy"
+      ],
+      [
+        "Consistency",
+        "variables"
+      ],
+      [
+        "Semantic understanding",
+        "description"
+      ],
+      [
+        "Semantic understanding",
+        "known_limitations"
+      ]
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 2.0,
+    "a_count": 20,
+    "b_count": 25,
+    "shared": 14,
+    "union": 31,
+    "jaccard": 0.45161290322580644,
+    "dice": 0.6222222222222222,
+    "a_only": [
+      "distribution_dates",
+      "human_subject_research",
+      "instances",
+      "related_datasets",
+      "subpopulations",
+      "was_derived_from"
+    ],
+    "b_only": [
+      "data_governance",
+      "data_protection_impacts",
+      "doi",
+      "ethical_reviews",
+      "id",
+      "labeling_strategies",
+      "maintainers",
+      "missing_data_documentation",
+      "page",
+      "third_party_sharing",
+      "version_access"
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      1,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 2.0,
+    "a_count": 22,
+    "b_count": 26,
+    "shared": 12,
+    "union": 36,
+    "jaccard": 0.3333333333333333,
+    "dice": 0.5,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "citation"
+      ],
+      [
+        "Accuracy/correctness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Completeness",
+        "was_derived_from"
+      ],
+      [
+        "Consistency",
+        "collection_timeframes"
+      ],
+      [
+        "Consistency",
+        "description"
+      ],
+      [
+        "Consistency",
+        "distribution_dates"
+      ],
+      [
+        "Consistency",
+        "human_subject_research"
+      ],
+      [
+        "Consistency",
+        "related_datasets"
+      ],
+      [
+        "Consistency",
+        "subpopulations"
+      ],
+      [
+        "Semantic understanding",
+        "instances"
+      ]
+    ],
+    "b_only": [
+      [
+        "Accuracy/correctness",
+        "collection_timeframes"
+      ],
+      [
+        "Completeness",
+        "citation"
+      ],
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "description"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "maintainers"
+      ],
+      [
+        "Completeness",
+        "missing_data_documentation"
+      ],
+      [
+        "Completeness",
+        "page"
+      ],
+      [
+        "Completeness",
+        "third_party_sharing"
+      ],
+      [
+        "Consistency",
+        "labeling_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "doi"
+      ],
+      [
+        "Semantic understanding",
+        "id"
+      ],
+      [
+        "Semantic understanding",
+        "version_access"
+      ]
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": false,
+    "score_difference_pp": 2.0,
+    "a_count": 22,
+    "b_count": 25,
+    "shared": 19,
+    "union": 28,
+    "jaccard": 0.6785714285714286,
+    "dice": 0.8085106382978723,
+    "a_only": [
+      "distribution_dates",
+      "known_limitations",
+      "participant_privacy"
+    ],
+    "b_only": [
+      "doi",
+      "id",
+      "imputation_protocols",
+      "labeling_strategies",
+      "missing_data_documentation",
+      "version_access"
+    ]
+  },
+  {
+    "record": "VOICE_v7_rep1",
+    "project": "VOICE",
+    "ratings": [
+      2,
+      3
+    ],
+    "typed": true,
+    "score_difference_pp": 2.0,
+    "a_count": 25,
+    "b_count": 26,
+    "shared": 12,
+    "union": 39,
+    "jaccard": 0.3076923076923077,
+    "dice": 0.47058823529411764,
+    "a_only": [
+      [
+        "Accuracy/correctness",
+        "confidential_elements"
+      ],
+      [
+        "Accuracy/correctness",
+        "distribution_dates"
+      ],
+      [
+        "Accuracy/correctness",
+        "regulatory_restrictions"
+      ],
+      [
+        "Consistency",
+        "data_governance"
+      ],
+      [
+        "Consistency",
+        "data_protection_impacts"
+      ],
+      [
+        "Consistency",
+        "distribution_formats"
+      ],
+      [
+        "Consistency",
+        "download_url"
+      ],
+      [
+        "Consistency",
+        "ethical_reviews"
+      ],
+      [
+        "Consistency",
+        "is_tabular"
+      ],
+      [
+        "Consistency",
+        "participant_privacy"
+      ],
+      [
+        "Consistency",
+        "variables"
+      ],
+      [
+        "Semantic understanding",
+        "description"
+      ],
+      [
+        "Semantic understanding",
+        "known_limitations"
+      ]
+    ],
+    "b_only": [
+      [
+        "Completeness",
+        "data_governance"
+      ],
+      [
+        "Completeness",
+        "data_protection_impacts"
+      ],
+      [
+        "Completeness",
+        "description"
+      ],
+      [
+        "Completeness",
+        "download_url"
+      ],
+      [
+        "Completeness",
+        "ethical_reviews"
+      ],
+      [
+        "Completeness",
+        "imputation_protocols"
+      ],
+      [
+        "Completeness",
+        "is_tabular"
+      ],
+      [
+        "Completeness",
+        "missing_data_documentation"
+      ],
+      [
+        "Consistency",
+        "confidential_elements"
+      ],
+      [
+        "Consistency",
+        "labeling_strategies"
+      ],
+      [
+        "Semantic understanding",
+        "doi"
+      ],
+      [
+        "Semantic understanding",
+        "id"
+      ],
+      [
+        "Semantic understanding",
+        "source_caveats"
+      ],
+      [
+        "Semantic understanding",
+        "version_access"
+      ]
+    ]
+  }
+]

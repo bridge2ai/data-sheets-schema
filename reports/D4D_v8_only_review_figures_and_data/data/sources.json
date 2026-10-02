@@ -1,0 +1,650 @@
+[
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "bmjopen-2024-097449_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "s42255-024-01165-x_row3.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "reporter_nih_gov_project-details-10471118_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-2_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-3_2026-07-24.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_2_row12.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_3_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "fairhub_api_dataset_3_2026-07-27.txt",
+    "source_type": "structured metadata"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+    "source_type": "RO-Crate"
+  },
+  {
+    "record": "AI_READI_v8_rep1",
+    "project": "AI_READI",
+    "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "bmjopen-2024-097449_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "s42255-024-01165-x_row3.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "reporter_nih_gov_project-details-10471118_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-2_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-3_2026-07-24.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_2_row12.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_3_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "fairhub_api_dataset_3_2026-07-27.txt",
+    "source_type": "structured metadata"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+    "source_type": "RO-Crate"
+  },
+  {
+    "record": "AI_READI_v8_rep2",
+    "project": "AI_READI",
+    "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "bmjopen-2024-097449_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "s42255-024-01165-x_row3.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "reporter_nih_gov_project-details-10471118_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-2_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "docs_aireadi_org_docs-3_2026-07-24.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_2_row12.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "fairhub_dataset_3_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "fairhub_api_dataset_3_2026-07-27.txt",
+    "source_type": "structured metadata"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+    "source_type": "RO-Crate"
+  },
+  {
+    "record": "AI_READI_v8_rep3",
+    "project": "AI_READI",
+    "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "source": "reporter_nih_gov_project-details-10472824_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+    "source_type": "tutorial"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "source": "chorus4ai_org_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CHORUS_v8_rep1",
+    "project": "CHORUS",
+    "source": "github_chorus_ai_overview_2025-11-14.txt",
+    "source_type": "historical documentation"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "source": "reporter_nih_gov_project-details-10472824_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+    "source_type": "tutorial"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "source": "chorus4ai_org_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CHORUS_v8_rep2",
+    "project": "CHORUS",
+    "source": "github_chorus_ai_overview_2025-11-14.txt",
+    "source_type": "historical documentation"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source": "reporter_nih_gov_project-details-10472824_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+    "source_type": "tutorial"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source": "chorus4ai_org_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CHORUS_v8_rep3",
+    "project": "CHORUS",
+    "source": "github_chorus_ai_overview_2025-11-14.txt",
+    "source_type": "historical documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+    "source_type": "preprint"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "reporter_nih_gov_project-details-11211616_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "cm4ai_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "cm4ai_org_data-releases_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "creativecommons_org_licenses-by-nc-sa_row15.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "CM4AI_v8_rep1",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+    "source_type": "preprint"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "reporter_nih_gov_project-details-11211616_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "cm4ai_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "cm4ai_org_data-releases_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "creativecommons_org_licenses-by-nc-sa_row15.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "CM4AI_v8_rep2",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "biorxiv_2024.05.21.589311v1_row4.txt",
+    "source_type": "preprint"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "reporter_nih_gov_project-details-11211616_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "cm4ai_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "cm4ai_org_data-releases_row11.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "creativecommons_org_licenses-by-nc-sa_row15.txt",
+    "source_type": "license"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_B35XWX_row16.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_F3TD5R_row19.txt",
+    "source_type": "historical data release"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_K7TGEM_row16.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "CM4AI_v8_rep3",
+    "project": "CM4AI",
+    "source": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt",
+    "source_type": "white paper"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "reporter_nih_gov_project-details-11376382_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "docs_b2ai-voice_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt",
+    "source_type": "DUA"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_1.1_row17.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep1",
+    "project": "VOICE",
+    "source": "github_eipm_bridge2ai-docs_README_row22.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt",
+    "source_type": "white paper"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "reporter_nih_gov_project-details-11376382_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "docs_b2ai-voice_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt",
+    "source_type": "DUA"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_1.1_row17.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep2",
+    "project": "VOICE",
+    "source": "github_eipm_bridge2ai-docs_README_row22.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "pmc_ncbi_nlm_nih_gov_articles-PMC12037532_row2.txt",
+    "source_type": "publication"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "gdrive_1PiK_YlEoFhte1i4LMv7yAPCt2mRA-Si5_row5.txt",
+    "source_type": "white paper"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "reporter_nih_gov_project-details-11376382_row7.txt",
+    "source_type": "NIH project page"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "docs_b2ai-voice_org_row10.txt",
+    "source_type": "documentation"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "gdrive_1gTFzAM-FoYlM_X9qF0s7fXoswmaz8IqN_row13.txt",
+    "source_type": "IRB"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "gdrive_1z4zZ_Z_Jb017IoVZn5btJnSLKdEOHZPA_row14.txt",
+    "source_type": "DUA"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_1.1_row17.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.0.0_row18.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+    "source_type": "data resource"
+  },
+  {
+    "record": "VOICE_v8_rep3",
+    "project": "VOICE",
+    "source": "github_eipm_bridge2ai-docs_README_row22.txt",
+    "source_type": "documentation"
+  }
+]

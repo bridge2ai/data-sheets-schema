@@ -1,0 +1,114 @@
+{
+  "sample_id": "S12",
+  "record": "CHORUS_v8_rep1",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04f_claude-opus-5-api-generic-v8_rep1/CHORUS_d4d.yaml",
+  "d4d_sha256": "f2a4d6229e5b4188a281727cb6723120e8ebbcfefe2883e6b1ada1c434bb0bb7",
+  "d4d_fields": {
+    "external_resources": [
+      {
+        "external_resources": [
+          "https://github.com/chorus-ai \u2014 the CHoRUS for Equitable AI GitHub organization, holding 28 repositories including chorus-extract-upload, Chorus_SOP, data_acq_SOP, chorus_waveform, chorus_waveform_resources, chorus-container-apps, CHoRUSReports, privacy_scan_tool and CTP-deid."
+        ],
+        "notes": "The organization states that the project is licensed under the MIT License, with individual repositories also carrying Apache-2.0 and MIT labels."
+      },
+      {
+        "external_resources": [
+          "https://chorus4ai.org/ \u2014 the CHoRUS project website, with pages on the team, project overview, tools, data acquisition, standards, community engagement, ethics, the dataset, and learning resources.",
+          "www.bridge2ai.org/chorus \u2014 the project website named in the GitHub organization contact section."
+        ]
+      },
+      {
+        "external_resources": [
+          "https://reporter.nih.gov/project-details/10472824 \u2014 the NIH RePORTER record for the award supporting the dataset."
+        ]
+      },
+      {
+        "external_resources": [
+          "https://www.aim-ahead.net/media/jnzdnid3/bridge2ai-for-clinical-care-informational-webinar-cohort-2.pdf \u2014 the AIM-AHEAD Bridge2AI for Clinical Care Training Program cohort-2 informational webinar, which describes the dataset snapshot and the access route for trainees."
+        ]
+      }
+    ],
+    "license_and_use_terms": {
+      "license_terms": "Access to the dataset is controlled and conditioned on a signed licensing agreement: all participants in the AIM-AHEAD Bridge2AI for Clinical Care training program must sign a licensing agreement included in the registration form before gaining access to the dataset, and a \".edu\" email address is required for dataset access. The chorus-ai GitHub organization states that its project code is licensed under the MIT License.",
+      "source_caveats": "The MIT License statement is made about the GitHub software project, not about the data; the source documents do not name a license for the dataset itself, and the access terms described are those of the training program registration route."
+    }
+  },
+  "receipt_links": [
+    {
+      "record": "CHORUS_v8_rep1",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c003",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "source_type": "tutorial",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "All participants must sign a licensing agreement included in the registration form before gaining",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep1",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "source_type": "tutorial",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "In order to gain access to...the dataset, you will need...to have a \u201c.edu\u201d email",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep1",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "github_chorus_ai_overview_2025-11-14.txt",
+      "source_type": "historical documentation",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "This project is licensed under the MIT License.",
+      "root_present": true
+    },
+    {
+      "record": "CHORUS_v8_rep1",
+      "project": "CHORUS",
+      "version": "v8",
+      "chunk": "c007",
+      "source": "github_chorus_ai_overview_2025-11-14.txt",
+      "source_type": "historical documentation",
+      "slot": "external_resources[0].external_resources[0]",
+      "root": "external_resources",
+      "section": "Composition",
+      "snippet": "The CHoRUS GitHub organization houses active repositories",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/CHORUS_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "MIT License",
+    "sign a licensing"
+  ],
+  "source_excerpts": [
+    {
+      "query": "MIT License",
+      "chunk": "c007",
+      "source": "github_chorus_ai_overview_2025-11-14.txt",
+      "chunk_sha256": "53dc2cad4ae923e7fbc47c13b2461a3d598dc5834152a0c967159fddb82f5f1a",
+      "excerpt": "ic-\n\nfacing webpage for more information about the project, its progress, and high-level aims.\n\nThanks for stopping by!\n\nLicense\n\n(back to top)\n\nThis project is licensed under the MIT License. See the LICENSE file for more details.\n\n(back to top)\n\nContact\n\nFor any inquiries or feedback, please feel free to reach out to us:\n\nRequest access: dbold@emory.edu or jared.houghtaling@tuftsmedicine.org\n\nWebsite: www.bridge2ai.org/chorus\n\n(back to top)\n\nPopular repositories\n\nchorus-container-apps"
+    },
+    {
+      "query": "sign a licensing",
+      "chunk": "c003",
+      "source": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "chunk_sha256": "7dc281080f359050015dba0a1b8c72ad97340ef64709296d51a0872de86c09c3",
+      "excerpt": "t a registration form with name, email, and institution\n\nOnce access is granted and compute is provisioned, an email will be sent\n\n1\n\n2\n\nLicensing Agreement\n\nAll participants must sign a licensing agreement included in the registration form before gaining\n"
+    }
+  ]
+}

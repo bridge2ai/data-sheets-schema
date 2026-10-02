@@ -1,0 +1,519 @@
+{
+  "sample_id": "S07",
+  "record": "AI_READI_v8_rep3",
+  "d4d_file": "/Users/obanks/data-sheets-schema/data/d4d_concatenated/claudecode_api/2026-09-04g_claude-opus-5-api-generic-v8_rep3/AI_READI_d4d.yaml",
+  "d4d_sha256": "01e3ef504db5ba6f21691c35fd0aa322661dd48f6d864cb38e053591b9763936",
+  "d4d_fields": {
+    "creators": [
+      {
+        "name": "AI-READI Consortium",
+        "description": "Organizational creator of record for the dataset, registered in the DataCite creator block with nameType Organizational. The consortium comprises the members of the AI-READI project across its participating institutions.",
+        "principal_investigator": {
+          "id": "ORCID:0000-0002-7452-1648",
+          "name": "Aaron Lee",
+          "orcid": "0000-0002-7452-1648",
+          "email": "contact@aireadi.org",
+          "affiliation": [
+            {
+              "id": "ROR:01yc7t268",
+              "name": "Washington University in St. Louis"
+            },
+            {
+              "name": "Department of Ophthalmology, University of Washington"
+            }
+          ],
+          "source_caveats": "Two affiliations are recorded because two equally ranked tier-1 sources disagree: the FAIRhub structured metadata gives Aaron Lee's responsible-party and central contact affiliation as Washington University in St. Louis (ROR 01yc7t268), while the RO-Crate names him as principal investigator in the Department of Ophthalmology at the University of Washington. The email is the study central contact address recorded against his FAIRhub central-contact entry."
+        },
+        "source_caveats": "The FAIRhub creator block records only one creator, \"AI-READI Consortium\", with nameType Organizational; the consortium itself carries no registry identifier in the declared sources, so no id is asserted for it. No affiliations are asserted: the ROR-identified institutions named in the bundle (Washington University in St. Louis, National Institutes of Health, California Medical Innovations Institute, Johns Hopkins University, Oregon Health & Science University, Stanford University, the University of Alabama at Birmingham, the University of California San Diego and the University of Washington) appear there as study sponsors, collaborators and locations rather than as affiliations of the consortium-as-creator."
+      }
+    ],
+    "data_governance": {
+      "committee_name": "AI-READI Consortium",
+      "accountable_organization": {
+        "id": "ROR:01yc7t268",
+        "name": "Washington University in St. Louis"
+      },
+      "committee_contact": {
+        "id": "ORCID:0000-0002-7452-1648",
+        "name": "Aaron Lee",
+        "orcid": "0000-0002-7452-1648",
+        "email": "contact@aireadi.org"
+      },
+      "access_review_process": "Access to the release requires logging in through a verified ID system, agreeing to use the data only for type 2 diabetes related research, and accepting the license terms, which set restrictions and obligations on data usage. The access route is published at https://fairhub.io/datasets/3/access. Access is granted by self-attestation rather than committee review: the FAIRhub access type for this release is PublicDownloadSelfAttestationRequired.",
+      "stewardship_roles": [
+        "The data manager at each of the three collection sites is responsible for quality control of all data before upload to FAIRhub; the central project team performs standardization and dissemination processing; the AI-READI team supports and maintains the released dataset."
+      ],
+      "notes": "The BMJ Open protocol publication states that the requirements for the controlled access data sets were, at the time of writing, being developed by a Data Access Committee; no committee membership or contact for that body is given in the declared sources.",
+      "source_caveats": "Washington University in St. Louis is recorded as accountable organization on the strength of the FAIRhub managing-organization and lead-sponsor fields and the license, which names it as Licensor; the RO-Crate instead names the AI-READI Consortium as the data governance committee and places the principal investigator at the University of Washington."
+    },
+    "human_subject_research": {
+      "involves_human_subjects": true,
+      "irb_approval": [
+        "University of Washington Institutional Review Board protocol STUDY00016228. Initial approval was received on 20 December 2022, with reliance agreements covering the Institutional Review Boards of the University of Alabama at Birmingham and the University of California, San Diego. An annual renewal application reporting the status and progress of the study is required and is due within 90 days of expiration."
+      ],
+      "ethics_review_board": "University of Washington Human Subjects Division; IRB Reliance Team, hsdrely@uw.edu, 4333 Brooklyn Ave NE Box 359470, Seattle, WA 98195-9470, United States.",
+      "regulatory_compliance": [
+        "Human subject review status recorded as submitted and approved. The study is not FDA regulated for either drug or device, has no Data Monitoring Committee, and is not a patient registry. It is registered on ClinicalTrials.gov as NCT06002048."
+      ],
+      "special_populations": [
+        "No protected population was targeted. Eligibility was restricted to adults with a minimum age of 40 years and a maximum age of 85 years; pregnancy, gestational diabetes and type 1 diabetes were exclusion criteria."
+      ],
+      "source_caveats": "The RO-Crate names the reviewing body \"Washington University IRB\" while giving a University of Washington Human Subjects Division postal address and a uw.edu contact, and both publications and the healthsheet attribute the approval to the University of Washington IRB. The healthsheet's eligibility list gives only a lower age bound of 40 years, whereas the FAIRhub study description records a maximum age of 85 years and an exclusion for adults older than 85."
+    },
+    "license_and_use_terms": {
+      "license_terms": "The AI-READI Data License Agreement, Version 2.0, issued by Washington University in St. Louis as Licensor. It grants a non-exclusive, non-transferable license to download, reproduce and use the data and to create derivative works, for research, commercial and non-commercial purposes. A licensee may be an individual or an authorized group within an institution, in which case authorized users are legal members of that group and their rights terminate when their relationship with the group or institution ends. Derivative data - modified, excerpted, encrypted, condensed, encoded, translated or otherwise altered data, including synthetic data generated from it - is treated as data subject to all the same restrictions. Models, algorithms and programs trained or adapted using the data may be distributed provided they do not themselves contain the data and the licensee has taken all reasonable efforts to minimize the likelihood that data can be memorized, derived, reconstructed or reconstituted through them. Licensees must acknowledge the Licensor, the source and any funder in papers reporting use of the data. The agreement terminates automatically on any breach, at which point all copies must be deleted. The data are provided \"as is\" with no warranty; the Licensor's aggregate liability is capped at one US dollar except where applicable law prohibits such limitation.",
+      "data_use_permission": "disease_specific_research",
+      "source_caveats": "The FAIRhub dataset page labels the license \"Health Data License\" while the FAIRhub structured metadata names it \"AI-READI custom license v2.0\" and the license document itself is titled \"AI-READI DATA LICENSE AGREEMENT (Version 2.0)\"; the document's own title is used here. The controlled-vocabulary value disease_specific_research reflects the access condition that the public version can only be used for type 2 diabetes related research; the license grant itself covers research, commercial and non-commercial purposes, and the University of Washington IRB protocol describes the dataset as being made publicly available with a commercial-friendly open-source license."
+    },
+    "source_caveats": "This record describes the publicly downloadable FAIRhub release of version 3.0.0 (DOI 10.60775/fairhub.3). Sources disagree on the expansion of the acronym: the FAIRhub study description and NIH RePORTER give \"Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights\", while the BMJ Open protocol and the Nature Metabolism comment give \"Artificial Intelligence Ready and Equitable Atlas for Diabetes Insights\"; the higher-ranked FAIRhub metadata is followed here. Sources also disagree on the lead institution: the FAIRhub structured metadata names Washington University in St. Louis as managing organization and lead sponsor and the license names it as Licensor, while the RO-Crate places the principal investigator in the Department of Ophthalmology at the University of Washington and NIH RePORTER records the awardee organization as the University of Washington; the two disagreeing tier-1 sources share the same rank, so both are recorded. Publisher is likewise disputed between the two tier-1 sources: the FAIRhub structured metadata gives the publisherName \"FAIRhub\" and the RO-Crate gives \"AI-READI Consortium\"; the FAIRhub position is followed in `publisher`, where the platform URL is recorded in the uriorcurie-ranged slot in place of the bare name the source states, and the RO-Crate value is noted here. Enrollment target is given as 4,000 participants by the FAIRhub study description, the NIH RePORTER abstract and both publications, but as 4,600 by the University of Washington IRB protocol."
+  },
+  "receipt_links": [
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c002",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "human_subject_research.irb_approval",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "AI- READI was approved by the Institutional Review Board",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c005",
+      "source": "bmjopen-2024-097449_row2.txt",
+      "source_type": "publication",
+      "slot": "data_governance.notes",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "access data sets are being currently developed by the Data",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c009",
+      "source": "reporter_nih_gov_project-details-10471118_row7.txt",
+      "source_type": "NIH project page",
+      "slot": "source_caveats",
+      "root": "source_caveats",
+      "section": "Metadata",
+      "snippet": "The Artificial Intelligence Ready and Exploratory Atlas for Diabetes Insights (AI-READI) project",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c011",
+      "source": "docs_aireadi_org_docs-3_2026-07-24.txt",
+      "source_type": "documentation",
+      "slot": "license_and_use_terms.source_caveats",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "The full dataset will be accessible by entering into a data use agreement.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c012",
+      "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+      "source_type": "license",
+      "slot": "data_governance.accountable_organization.name",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "WASHINGTON UNIVERSITY IN ST. LOUIS (\u201cLicensor\u201d)",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c012",
+      "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+      "source_type": "license",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "non-transferable license to download, reproduce and use the Data, and to create derivative works",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c014",
+      "source": "fairhub_dataset_3_2026-07-24.txt",
+      "source_type": "data resource",
+      "slot": "license_and_use_terms.source_caveats",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "Health Data License",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "license_and_use_terms.data_use_permission",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "The public version of the dataset can only be used for type 2 diabetes related research.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.accountable_organization.id",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"managingOrganizationIdentifierValue\": \"https://ror.org/01yc7t268\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.access_review_process",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "Accessing the dataset requires several steps, including: Login in through a verified ID system",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "creators[0].name",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "\"creatorName\": \"AI-READI Consortium\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c018",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "creators[0].description",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "This dataset was created by members of the AI-READI project, hereby referred to as the AI-READI Consortium.",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "license_and_use_terms.license_terms",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "These license terms were specifically tailored to enable reuse of the AI-READI dataset",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "human_subject_research.regulatory_compliance",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"secondaryId\": \"NCT06002048\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "creators[0].affiliations",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "\"collaboratorName\": \"Johns Hopkins University\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.accountable_organization.name",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"leadSponsorName\": \"Washington University in St. Louis\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c019",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "human_subject_research.regulatory_compliance",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"humanSubjectReviewStatus\": \"Submitted, approved\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "human_subject_research.special_populations",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"minimumAge\": \"40 Years\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "human_subject_research.special_populations",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"maximumAge\": \"85 Years\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "data_governance.committee_contact.email",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"centralContactEMail\": \"contact@aireadi.org\"",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c020",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "creators[0].principal_investigator.orcid",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "\"centralContactIdentifierValue\": \"https://orcid.org/0000-0002-7452-1648\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c021",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "source_type": "structured metadata",
+      "slot": "creators[0].affiliations",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "\"locationIdentifierValue\": \"https://ror.org/00cvxb145\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "human_subject_research.irb_approval",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"irbProtocolId\": \"STUDY00016228\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "human_subject_research.involves_human_subjects",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"humanSubjectResearch\": \"Yes\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "human_subject_research.regulatory_compliance",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"fdaRegulated\": false,",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "data_governance.committee_name",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"dataGovernanceCommittee\": \"AI-READI Consortium\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "creators[0].principal_investigator.affiliation",
+      "root": "creators",
+      "section": "Motivation",
+      "snippet": "\"principalInvestigator\": \"Aaron Lee, Department of Ophthalmology, University of Washington\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "human_subject_research.ethics_review_board",
+      "root": "human_subject_research",
+      "section": "Human",
+      "snippet": "\"email\": \"hsdrely@uw.edu\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "data_governance.access_review_process",
+      "root": "data_governance",
+      "section": "Data Governance",
+      "snippet": "\"conditionsOfAccess\": \"https://fairhub.io/datasets/3/access\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "source_type": "RO-Crate",
+      "slot": "source_caveats",
+      "root": "source_caveats",
+      "section": "Metadata",
+      "snippet": "\"publisher\": \"AI-READI Consortium\",",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c025",
+      "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+      "source_type": "IRB",
+      "slot": "source_caveats",
+      "root": "source_caveats",
+      "section": "Metadata",
+      "snippet": "The study will collect a cross-sectional dataset of 4600 people across the US",
+      "root_present": true
+    },
+    {
+      "record": "AI_READI_v8_rep3",
+      "project": "AI_READI",
+      "version": "v8",
+      "chunk": "c028",
+      "source": "gdrive_1rJsa5kySlBRRNhsO_WY7N3bfSKtqDi-Q_row13.txt",
+      "source_type": "IRB",
+      "slot": "license_and_use_terms.source_caveats",
+      "root": "license_and_use_terms",
+      "section": "Data Governance",
+      "snippet": "the data set will be publicly available with a commercial-friendly open-source license",
+      "root_present": true
+    }
+  ],
+  "source_recovery": {
+    "source": "bundle on disk",
+    "path": "/Users/obanks/data-sheets-schema/data/preprocessed/concatenated/AI_READI_preprocessed.txt"
+  },
+  "source_search_queries": [
+    "WASHINGTON UNIVERSITY IN ST. LOUIS",
+    "Department of Ophthalmology"
+  ],
+  "source_excerpts": [
+    {
+      "query": "WASHINGTON UNIVERSITY IN ST. LOUIS",
+      "chunk": "c012",
+      "source": "AI-READI-LICENSE-v2.0_2026-08-12.txt",
+      "chunk_sha256": "4abe14aa7a94a326d5c41a321982e127c13a93e0b101f5a4d235fdb30dd2de92",
+      "excerpt": "READI-LICENSE-v2.0.pdf?download=1\nRaw file: data/raw/AI_READI/AI-READI-LICENSE-v2.0_2026-08-12.pdf\n--------------------------------------------------------------------------------\nWASHINGTON UNIVERSITY IN ST. LOUIS (\u201cLicensor\u201d)\n\nAI-READI DATA LICENSE AGREEMENT (Version 2.0)\n\nBY  INDICATING  ASSENT,  THE  LICENSEE  IDENTIFIED  IN THE DATA REQUEST WORKFLOW\n(\u201cLICENSEE\u201d  OR  \u201cYOU\u201d),  AGREES  TO  THE  TERMS  AND  CONDITIONS  OF  THIS  DATA\nLICENSE  AGREEMENT  WITH  LICENSOR  (\u201cAGREEMENT\u201d)  WITH  RESPECT  TO   THE\n"
+    },
+    {
+      "query": "WASHINGTON UNIVERSITY IN ST. LOUIS",
+      "chunk": "c015",
+      "source": "fairhub_api_dataset_3_2026-07-27.txt",
+      "chunk_sha256": "e2d6af016157feb5e26209f763a89668859942380866212a358cfa2d97085563",
+      "excerpt": "        {\n          \"subjectValue\": \"Retinal imaging\"\n        },\n        {\n          \"subjectValue\": \"Eye exam\"\n        }\n      ],\n      \"managingOrganization\": {\n        \"name\": \"Washington University in St. Louis\",\n        \"managingOrganizationIdentifier\": {\n          \"managingOrganizationIdentifierValue\": \"https://ror.org/01yc7t268\",\n          \"managingOrganizationScheme\": \"ROR\",\n          \"schemeURI\": \"https://ror.org\"\n        }\n      },\n      \"accessType\": \"PublicDownloadSelfAttestationRequired\",\n      \""
+    },
+    {
+      "query": "Department of Ophthalmology",
+      "chunk": "c022",
+      "source": "aireadi_ro_crate_metadata_2026-08-12.txt",
+      "chunk_sha256": "28e1e99f929d583a807b96e68d6cec76a11fdd0611a44450de36c338c71a56cc",
+      "excerpt": "-activity-monitor\"\n        }\n      ],\n      \"author\": [\n        \"AI-READI Consortium\"\n      ],\n      \"publisher\": \"AI-READI Consortium\",\n      \"principalInvestigator\": \"Aaron Lee, Department of Ophthalmology, University of Washington\",\n      \"funder\": \"NIH grant 1OT2OD032644 to the Bridge2AI: Salutogenesis Data Generation Project through the NIH Bridge2AI Common Fund program\",\n      \"citation\": \"https://docs.aireadi.org\",\n      \"associatedPublication\": [\n        \"AI-READI Consortium. (2024). \\\"AI-READI"
+    }
+  ]
+}
