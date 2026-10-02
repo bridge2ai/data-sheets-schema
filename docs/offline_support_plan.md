@@ -25,8 +25,14 @@ is copied into content-addressed `artifacts/`. The manifest records planning-cod
 hashes and commit, explicit profile selection, model-selection basis, same-family
 status, original paths and hashes, and any recovery commits. Historical reference
 records and bundles are recovered from full Git history by their recorded hashes
-when current bytes have drifted. **Originals are never rewritten.** A missing or
-unrecoverable pin fails the build. A shallow clone must first obtain full history;
+when current bytes have drifted. **Originals are never rewritten.** Supplied
+provenance SHA256 pins are honored before reading identity or bundle declarations,
+recovering matching bytes when
+necessary. Historical rosters without that pin explicitly record the basis
+`captured_current_unpinned_by_roster`; a captured snapshot is not a claim that the
+older roster bound its lineage. Git reads ignore inherited repository/worktree/index
+overrides, so code and input commit identities refer to their intended roots.
+A missing or unrecoverable pin fails the build. A shallow clone must first obtain full history;
 a sparse checkout must materialize the roster, provenance, schema, current bundles
 and referenced rubric result paths. Unavailable rubric results are listed as an
 additional blocker rather than silently described as a completed join.
@@ -34,8 +40,11 @@ additional blocker rather than silently described as a completed join.
 The plan retains every populated **top-level field** on both axes. Zero and false
 are populated. Nested list items are still one field request, as in the current
 v2 judge; resolving #3342 may change these counts and requires a new plan. Every
-target belongs to its own record and value, with its own judgement context. No
-historical cache reuse or replicate propagation is credited. Intended result/cache
+target belongs to its own record and value, with its own judgement context.
+Value hashes use `typed-yaml-v1`: recursively tagged scalars, mappings and lists,
+including dates and timezone-bearing datetimes. This distinguishes a native date
+from its quoted string spelling and does not change the live judge's YAML prompt
+or existing cache keys. No historical cache reuse or replicate propagation is credited. Intended result/cache
 paths are reserved in the manifest; the planner does not create verdict files.
 
 Inspect an exact target without any model call:

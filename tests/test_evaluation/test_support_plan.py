@@ -1,5 +1,6 @@
 """Offline planning and request fidelity, never model efficacy/calibration."""
 import hashlib
+from datetime import date, datetime, timedelta, timezone
 import json
 import socket
 import subprocess
@@ -324,3 +325,111 @@ def test_default_model_resolver_has_no_provider_access(fixture, monkeypatch):
     manifest = build(fixture)
     assert manifest["model"]["basis"] == "defaults_to_generation_model"
     assert manifest["model"]["generation_model"] == "claude-opus-5"
+
+
+@pytest.mark.parametrize("value", [
+    pytest.param(date(2026, 1, 2), id="date"),
+    pytest.param(datetime(2026, 1, 2, 3, 4, 5), id="datetime"),
+    pytest.param(datetime(2026, 1, 2, 3, 4, 5, 123456,
+        tzinfo=timezone(timedelta(hours=5, minutes=30))), id="aware-datetime"),
+    pytest.param({"history": [date(2026, 1, 2),
+                             {"created": datetime(2026, 1, 2, tzinfo=timezone.utc)}]}, id="nested"),
+])
+def test_yaml_temporal_values_have_typed_identity_and_unchanged_requests(fixture, value):
+    root, output = fixture
+    schema = yaml.safe_load((root / "schema.yaml").read_text())
+    schema["slots"]["notes"]["range"] = "date"
+    (root / "schema.yaml").write_text(yaml.safe_dump(schema))
+    path = root / "record.yaml"
+    doc = yaml.safe_load(path.read_text()); doc["notes"] = value
+    path.write_text(yaml.safe_dump(doc))
+    rewrite_roster(root, lambda d: d["pinned_files"].update({"record.yaml": support_plan.sha256(path.read_bytes())}))
+    m = build(fixture, model="judge")
+    assert m["value_identity_encoding"] == "typed-yaml-v1"
+    assert m["counts"]["axis_targets"] == 12
+    targets = [t for t in m["targets"] if t["pointer"] == "/notes"]
+    assert {t["value_sha256"] for t in targets} == {support_plan.sha256(support_plan.value_identity(value))}
+    assert support_plan.value_identity(value) != support_plan.value_identity(str(value))
+    from data_sheets_schema.profiles import NEUTRAL
+    spec = support_judge.SupportSpecification.from_schema(schema_path=root / "schema.yaml", profile=NEUTRAL)
+    context = support_judge.build_value_context(doc, "notes", relationship=spec.relationship("notes"))
+    expected = {
+        "grounding_v2": support_judge.request_arguments(model="judge", max_tokens=8000,
+            bundle=(root / "bundle.txt").read_text(),
+            value_text=support_judge.render_request("notes", value, spec.render("notes"), context)),
+        "fitness": evidence_score.fitness_request_arguments(model="judge", max_tokens=8000,
+            slot="notes", value=value, specification=spec.render("notes"))}
+    for target in targets:
+        assert support_plan.materialize_request(output, target["id"]) == expected[target["axis"]]
+
+
+def test_typed_identity_distinguishes_scalar_types_without_tag_collisions():
+    values = [0, False, "0", 0.0, -0.0, None, "None", date(2026, 1, 2), "2026-01-02",
+              ["date", "2026-01-02"], {"type": "date", "value": "2026-01-02"},
+              datetime(2026, 1, 2), datetime(2026, 1, 2, tzinfo=timezone.utc)]
+    assert len({support_plan.value_identity(v) for v in values}) == len(values)
+    assert support_plan.value_identity({"a": date(2026, 1, 2), "b": [False]}) == support_plan.value_identity({"b": [False], "a": date(2026, 1, 2)})
+
+
+@pytest.mark.parametrize("drift", [False, True])
+def test_supplied_provenance_pin_controls_identity_and_bundle(fixture, drift):
+    root, output = fixture
+    path = root / "provenance.yaml"
+    original = path.read_bytes()
+    pin = support_plan.sha256(original)
+    rewrite_roster(root, lambda d: d["pinned_files"].update({"provenance.yaml": pin}))
+    if drift:
+        replacement = b"Unrelated later evidence under the same run label"
+        (root / "replacement.txt").write_bytes(replacement)
+        doc = yaml.safe_load(original)
+        doc["inputs"] = {"bundle_path": "replacement.txt", "bundle_sha256": support_plan.sha256(replacement)}
+        path.write_text(yaml.safe_dump(doc))
+    current = path.read_bytes()
+    manifest = build(fixture, model="judge")
+    row = manifest["records"][0]
+    assert row["provenance"]["sha256"] == pin
+    assert row["provenance"]["basis"] == ("git_recovery" if drift else "current_matches_pin")
+    assert row["provenance"]["recorded_hashes"] == {"sha256": pin}
+    assert row["bundle"]["path"] == "bundle.txt"
+    assert (output / "artifacts" / pin).read_bytes() == original
+    assert path.read_bytes() == current
+
+
+@pytest.mark.parametrize("pin", ["0"*64, "malformed", None])
+def test_unrecoverable_or_malformed_supplied_provenance_pin_refuses(fixture, pin):
+    root, output = fixture
+    rewrite_roster(root, lambda d: d["pinned_files"].update({"provenance.yaml": pin}))
+    with pytest.raises(support_plan.PlanError, match="cannot recover|original hash"):
+        build(fixture, model="judge")
+    assert not output.exists()
+
+
+def test_old_roster_labels_captured_unpinned_provenance(fixture):
+    m = build(fixture, model="judge")
+    assert m["records"][0]["provenance"]["basis"] == "captured_current_unpinned_by_roster"
+    assert m["records"][0]["provenance"]["recorded_hashes"] == {}
+
+
+def test_git_repository_overrides_cannot_change_code_input_or_recovery(fixture, monkeypatch):
+    root, _ = fixture
+    code_commit = git(support_plan.ROOT, "rev-parse", "HEAD")
+    input_commit = git(root, "rev-parse", "HEAD")
+    original_bundle = (root / "bundle.txt").read_bytes()
+    (root / "bundle.txt").write_text("drift requires history from the correct repository")
+    other = root.parent / "unrelated"
+    other.mkdir()
+    git(other, "init", "-q")
+    git(other, "config", "user.email", "test@example.invalid")
+    git(other, "config", "user.name", "Unrelated fixture")
+    (other / "bundle.txt").write_text("Unrelated history")
+    git(other, "add", "."); git(other, "commit", "-qm", "unrelated")
+    monkeypatch.setenv("GIT_DIR", str(other / ".git"))
+    monkeypatch.setenv("GIT_WORK_TREE", str(other))
+    monkeypatch.setenv("GIT_COMMON_DIR", str(other / ".git"))
+    monkeypatch.setenv("GIT_INDEX_FILE", str(other / ".git/index"))
+    m = build(fixture, model="judge")
+    assert m["planning_code"]["commit"] == code_commit
+    assert m["input_repository_commit"] == input_commit
+    bundle = m["records"][0]["bundle"]
+    assert bundle["basis"] == "git_recovery" and bundle["recovery_commit"] == input_commit
+    assert bundle["sha256"] == support_plan.sha256(original_bundle)

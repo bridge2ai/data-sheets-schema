@@ -7,7 +7,9 @@ make historical recovery and exact request inspection independent of originals.
 """
 from __future__ import annotations
 
+import base64
 import copy
+from datetime import date, datetime
 import hashlib
 import importlib.metadata
 import json
@@ -24,6 +26,7 @@ import yaml
 from data_sheets_schema import evidence_score, support_judge
 from data_sheets_schema.evaluation_model import evaluation_model_settings, same_family_label
 from data_sheets_schema.profiles import profile_named
+from data_sheets_schema.resources import git_env
 from data_sheets_schema.schema_snapshot import capture_schema
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -41,6 +44,41 @@ def canonical(value: Any) -> bytes:
     """Versioned plan JSON encoding, not an SDK wire serialization."""
     return json.dumps(value, sort_keys=True, ensure_ascii=False,
                       separators=(",", ":"), allow_nan=False).encode("utf-8")
+
+
+def value_identity(value: Any) -> bytes:
+    """Deterministic typed YAML value identity, separate from request JSON.
+
+    Every node is tagged, so a native date cannot collide with either its
+    quoted spelling or a mapping that happens to resemble an encoding tag.
+    The live judges' YAML rendering and legacy cache keys remain unchanged.
+    """
+    def node(item):
+        if item is None:
+            return ["null"]
+        if isinstance(item, bool):
+            return ["bool", item]
+        if isinstance(item, int):
+            return ["int", str(item)]
+        if isinstance(item, float):
+            return ["float", item.hex()]
+        if isinstance(item, datetime):  # datetime is a subclass of date.
+            return ["datetime", item.isoformat(timespec="microseconds")]
+        if isinstance(item, date):
+            return ["date", item.isoformat()]
+        if isinstance(item, str):
+            return ["str", item]
+        if isinstance(item, bytes):
+            return ["bytes", base64.b64encode(item).decode("ascii")]
+        if isinstance(item, dict):
+            pairs = [[node(k), node(v)] for k, v in item.items()]
+            return ["map", sorted(pairs, key=lambda pair: canonical(pair[0]))]
+        if isinstance(item, list):
+            return ["list", [node(v) for v in item]]
+        if isinstance(item, set):
+            return ["set", sorted((node(v) for v in item), key=canonical)]
+        raise PlanError(f"unsupported YAML value type: {type(item).__name__}")
+    return canonical(node(value))
 
 
 def sha256(data: bytes) -> str:
@@ -61,7 +99,7 @@ class Artifacts:
 
 
 def _git(root: Path, *args: str) -> bytes:
-    result = subprocess.run(["git", "-C", str(root), *args], capture_output=True)
+    result = subprocess.run(["git", "-C", str(root), *args], capture_output=True, env=git_env())
     if result.returncode:
         raise PlanError(f"git {args[0]} failed: {result.stderr.decode('utf-8', 'replace').strip()}")
     return result.stdout
@@ -286,7 +324,16 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         first = jobs[0]
         provenance_path = first.get("provenance") or (
             f"data/d4d_concatenated/{method}_core/{label}/{project}_provenance.yaml")
-        provenance_raw = _relative(root, provenance_path).read_bytes()
+        if provenance_path in pins:
+            provenance_raw, provenance_pin = _pinned(
+                root, provenance_path, {"sha256": pins[provenance_path]}, artifacts)
+        else:
+            # The historical rubric-only roster did not pin provenance. Bind
+            # exactly the local snapshot used, without claiming roster lineage.
+            provenance_raw = _relative(root, provenance_path).read_bytes()
+            provenance_pin = {"path": provenance_path, "recorded_hashes": {},
+                              "basis": "captured_current_unpinned_by_roster",
+                              "recovery_commit": None, **artifacts.put(provenance_raw)}
         provenance = _mapping(provenance_raw, provenance_path)
         run = provenance.get("run", {})
         if any(run.get(k) != v for k, v in (("project", project), ("label", label), ("method", method))):
@@ -326,7 +373,7 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
             join_jobs.append(entry)
         row = {"id": record_id, "project": project, "label": label, "method": method,
                "cohort": cohort, "generation_rep": replicate, "record": record_pin,
-               "provenance": {"path": provenance_path, **artifacts.put(provenance_raw)},
+               "provenance": provenance_pin,
                "bundle": bundle_pin, "generator": generator,
                "same_family": same_family_label(model, generator),
                "populated_top_level_fields": len(populated), "axis_targets": len(populated) * 2,
@@ -363,7 +410,7 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
                 target_id = f"{record_id}:{axis}:{slot}"
                 targets.append({"id": target_id, "record_id": record_id, "axis": axis,
                                 "pointer": "/" + slot.replace("~", "~0").replace("/", "~1"),
-                                "value_sha256": sha256(canonical(value)),
+                                "value_sha256": sha256(value_identity(value)),
                                 "value_context_digest": vctx.digest() if axis == support_judge.AXIS else None,
                                 "judgement_context": context.as_entry(), "propagated": False,
                                 "status": "planned_not_measured", "request_recipe": _recipe(request, artifacts),
@@ -374,9 +421,10 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
 
     code_root = ROOT
     source_files = ["support_plan.py", "support_judge.py", "evidence_score.py", "schema_digest.py",
-                    "schema_snapshot.py", "profiles.py", "evaluation_model.py", "api_runner.py"]
+                    "schema_snapshot.py", "profiles.py", "evaluation_model.py", "api_runner.py", "resources.py"]
     manifest = {
         "format": FORMAT, "mode": "offline_dry_run", "granularity": "top_level_field",
+        "value_identity_encoding": "typed-yaml-v1",
         "readiness": {"ready_for_paid_run": False, "blockers": list(BLOCKERS) + (["missing_rubric_join_artifacts"] if missing_joins else []),
                       "missing_rubric_join_artifacts": sorted(set(missing_joins)),
                       "calibration": "not_performed; software fixtures are not empirical evidence"},
