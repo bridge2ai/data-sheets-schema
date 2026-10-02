@@ -32,7 +32,10 @@ share an `@id`, a `hasPart` reference is compared with the node its file
 collection is made from; a value nested however deep is compared. #4089: a
 crate given as a path is read as the static-map arm reads one, and one that
 is not UTF-8 is refused with its `CrateEncodingError`, by the converter, its
-script and `fairscape-cli`.
+script and `fairscape-cli`. #4192: as those take any path, the refusal says
+to transcode the file instead of pointing to crate_manifest.yaml's
+`encoding_note`, and a file whose JSON is not one object is refused by
+saying what it holds.
 """
 
 import contextlib
@@ -56,7 +59,11 @@ repo_root = Path(__file__).parent.parent.parent
 if str(repo_root) not in sys.path:
     sys.path.insert(0, str(repo_root))
 
-from data_sheets_schema.rocrate_map import CrateEncodingError, read_crate_json
+from data_sheets_schema.rocrate_map import (
+    TRANSCODE_HINT,
+    CrateEncodingError,
+    read_crate_json,
+)
 from src.fairscape_integration import fairscape_to_d4d
 from src.fairscape_integration.fairscape_to_d4d import (
     FairscapeToD4DConverter,
@@ -188,36 +195,58 @@ class TestBundledCratesValidate(unittest.TestCase):
             self.assertNotIn(stamp, first)
 
 
+def cli_runner():
+    """A Click runner that keeps stderr apart from stdout, under Click 8.1
+    and 8.2."""
+    from click.testing import CliRunner
+    try:
+        return CliRunner(mix_stderr=False)
+    except TypeError:
+        return CliRunner()
+
+
 class TestCrateEncoding(unittest.TestCase):
     """#4089: a crate given as a path is read as the static-map arm reads
     one (`rocrate_map.read_crate_json`), and one that is not UTF-8 is
-    refused with the same `CrateEncodingError`. `convert` and
-    `fairscape-cli rocrate-to-d4d` opened it in the platform's default
-    encoding, and the AI-READI release crate, which is windows-1252, ended
-    both with a bare UnicodeDecodeError."""
+    refused with a `CrateEncodingError`. `convert` and `fairscape-cli
+    rocrate-to-d4d` opened it in the platform's default encoding, and the
+    AI-READI release crate, which is windows-1252, ended both with a bare
+    UnicodeDecodeError. #4192: these routes take any path, so their refusal
+    ends by saying to transcode the file. The static-map arm's refusal,
+    which still points to crate_manifest.yaml's `encoding_note`, is
+    unchanged."""
 
-    #: What the refusal says of either tracked AI-READI copy: the numbers
-    #: crate_manifest.yaml's `encoding_note` gives for the crate.
+    #: What either refusal says of either tracked AI-READI copy, up to its
+    #: ending: the numbers crate_manifest.yaml's `encoding_note` gives for
+    #: the crate.
     SAID = ("is not UTF-8, as RFC 8259 requires of JSON: byte 0xa9 at "
-            "offset 5096, 31 undecodable byte(s) in all")
+            "offset 5096, 31 undecodable byte(s) in all. Not decoded under "
+            "a guessed encoding; ")
+    #: How the static-map arm's refusal ends, as it did before #4192.
+    NOTE = ("declare or transcode it deliberately (see the project's "
+            "`encoding_note` in crate_manifest.yaml)")
+    #: How the refusal of a crate given by its path ends (#4192).
+    TRANSCODE = "transcode it to UTF-8 from the encoding it is written in"
 
     def refusal(self, path):
-        """The static-map arm's refusal of `path`, word for word."""
-        with self.assertRaises(CrateEncodingError) as cm:
-            read_crate_json(path)
-        message = str(cm.exception)
-        self.assertIn(f"{path} {self.SAID}", message)
-        self.assertIn("`encoding_note` in crate_manifest.yaml", message)
-        return message
+        """The refusal of `path` given by its path, word for word."""
+        return f"{path} {self.SAID}{self.TRANSCODE}"
 
-    @staticmethod
-    def runner():
-        """Stderr kept apart from stdout, under Click 8.1 and 8.2."""
-        from click.testing import CliRunner
-        try:
-            return CliRunner(mix_stderr=False)
-        except TypeError:
-            return CliRunner()
+    def test_the_static_map_arm_still_points_to_the_encoding_note(self):
+        """`read_crate_json` ends its refusal as it did unless its caller
+        passes a hint, so `d4d rocrate map` and `normalize`, which pass
+        none, still point to the note that describes AI_READI's crate. The
+        refusal of the same file by its path differs only in its ending
+        (#4192)."""
+        for path in (AI_READI, AI_READI_DOWNLOAD):
+            with self.subTest(crate=path.name):
+                with self.assertRaises(CrateEncodingError) as cm:
+                    read_crate_json(path)
+                self.assertEqual(str(cm.exception),
+                                 f"{path} {self.SAID}{self.NOTE}")
+                with self.assertRaises(CrateEncodingError) as cm:
+                    read_crate_json(path, hint=TRANSCODE_HINT)
+                self.assertEqual(str(cm.exception), self.refusal(path))
 
     def test_convert_refuses_a_crate_that_is_not_utf8(self):
         for path in (AI_READI, AI_READI_DOWNLOAD):
@@ -257,7 +286,7 @@ class TestCrateEncoding(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmp:
             output = Path(tmp) / "record.yaml"
-            result = self.runner().invoke(
+            result = cli_runner().invoke(
                 cli, ["rocrate-to-d4d", str(AI_READI), "-o", str(output)])
             self.assertFalse(output.exists())
         self.assertEqual(result.exit_code, 1)
@@ -266,10 +295,11 @@ class TestCrateEncoding(unittest.TestCase):
         self.assertEqual(result.stderr, f"✗ Error: {self.refusal(AI_READI)}\n")
 
     def test_fairscape_cli_info_reports_it_the_same_way(self):
-        """`info` reads a `.json` file as a crate (#4089)."""
+        """`info` reads a `.json` file as a crate (#4089), and takes any
+        path, so it does not point to the manifest's note either (#4192)."""
         from src.fairscape_integration.cli import cli
 
-        result = self.runner().invoke(cli, ["info", str(AI_READI)])
+        result = cli_runner().invoke(cli, ["info", str(AI_READI)])
         self.assertEqual(result.exit_code, 1)
         self.assertIsInstance(result.exception, SystemExit)
         self.assertEqual(result.stdout, "")
@@ -295,6 +325,70 @@ class TestCrateEncoding(unittest.TestCase):
         self.assertIn("à peu près 2 Go is not a byte count",
                       reasons(dropped, "contentSize"))
         self.assertEqual(problems(record), [])
+
+
+class TestCrateIsOneObject(unittest.TestCase):
+    """#4192: an RO-Crate's metadata is one JSON object. Given the path of a
+    file whose JSON is an array, null or a number, `convert` read it as a
+    mapping and raised an AttributeError naming a method the value lacks,
+    and `fairscape-cli rocrate-to-d4d`, which passes it the path since
+    #4089, reported that. Before #4089 the command read the file itself and
+    reported `Unsupported input type`. The file is refused with a
+    ValueError that says what it holds."""
+
+    #: JSON whose top level is not an object, with what JSON calls it
+    NOT_OBJECTS = (('[{"@id": "./"}]', "an array"), ("null", "null"),
+                   ("42", "a number"), ("1.5", "a number"),
+                   ('"./"', "a string"), ("true", "a boolean"))
+
+    @staticmethod
+    def refusal(path, kind):
+        """The refusal of `path`, whose JSON is `kind`, word for word."""
+        return (f"{path} is not an RO-Crate's metadata: its JSON is {kind}, "
+                "not an object. An RO-Crate's metadata is one JSON object, "
+                "whose `@graph` lists the crate's entities")
+
+    def files(self, tmp):
+        """Each of `NOT_OBJECTS` written to a file under `tmp`, as UTF-8,
+        with its path, its text and what JSON calls it."""
+        for number, (text, kind) in enumerate(self.NOT_OBJECTS):
+            path = Path(tmp) / f"metadata-{number}.json"
+            path.write_text(text, encoding="utf-8")
+            yield path, text, kind
+
+    def test_convert_refuses_it_and_says_what_it_holds(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for path, text, kind in self.files(tmp):
+                for given in (path, str(path)):
+                    with self.subTest(json=text, given=type(given).__name__):
+                        converter = FairscapeToD4DConverter()
+                        printed = io.StringIO()
+                        with self.assertRaises(ValueError) as cm, \
+                                contextlib.redirect_stdout(printed):
+                            converter.convert(given)
+                        self.assertEqual(str(cm.exception),
+                                         self.refusal(path, kind))
+                        # Refused before any of it is read as a crate
+                        self.assertEqual(printed.getvalue(), "")
+                        self.assertEqual(converter.dropped, [])
+
+    def test_fairscape_cli_reports_the_refusal_and_exits_1(self):
+        """On stderr, as the command reports any other error: one line, no
+        traceback, and no record written."""
+        from src.fairscape_integration.cli import cli
+
+        with tempfile.TemporaryDirectory() as tmp:
+            for path, text, kind in self.files(tmp):
+                with self.subTest(json=text):
+                    output = Path(tmp) / f"{path.stem}.yaml"
+                    result = cli_runner().invoke(
+                        cli, ["rocrate-to-d4d", str(path), "-o", str(output)])
+                    self.assertFalse(output.exists())
+                    self.assertEqual(result.exit_code, 1)
+                    self.assertIsInstance(result.exception, SystemExit)
+                    self.assertEqual(result.stdout, "")
+                    self.assertEqual(result.stderr,
+                                     f"✗ Error: {self.refusal(path, kind)}\n")
 
 
 class TestDroppedValuesAreRecorded(unittest.TestCase):

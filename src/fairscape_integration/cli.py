@@ -100,9 +100,11 @@ def rocrate_to_d4d(input_file: str, output: Optional[str]):
     try:
         # Convert to D4D. `convert` reads the crate as the static-map arm
         # does (`rocrate_map.read_crate_json`): one that is not UTF-8 is a
-        # CrateEncodingError naming the first byte that does not decode,
-        # reported below like any other error. Until #4089 it was read
-        # here, in the platform's default encoding.
+        # CrateEncodingError naming the first byte that does not decode and
+        # saying to transcode it, and a file whose JSON is not one object
+        # is a ValueError saying what it holds (#4192). Each is reported
+        # below like any other error. Until #4089 the crate was read here,
+        # in the platform's default encoding.
         converter = FairscapeToD4DConverter()
         d4d_data = converter.convert(Path(input_file))
 
@@ -212,8 +214,12 @@ def info(input_file: str, format: str):
             # UTF-8, as RFC 8259 requires, is refused with a
             # CrateEncodingError naming the first byte that does not decode,
             # and is not decoded in the platform's default encoding (#4089).
-            from data_sheets_schema.rocrate_map import read_crate_json
-            data = read_crate_json(file_path)
+            # The refusal says to transcode the file and does not point to
+            # crate_manifest.yaml's `encoding_note`, which describes a
+            # project's crate, not any file given here (#4192).
+            from data_sheets_schema.rocrate_map import (
+                TRANSCODE_HINT, read_crate_json)
+            data = read_crate_json(file_path, hint=TRANSCODE_HINT)
 
             # Check if it's RO-Crate by looking for @graph
             if '@graph' in data:

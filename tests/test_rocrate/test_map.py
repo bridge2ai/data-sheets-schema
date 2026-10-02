@@ -401,11 +401,20 @@ class TestCrateEncoding(unittest.TestCase):
 
     def test_map_project_refuses_before_writing_anything(self):
         with tempfile.TemporaryDirectory() as tmp:
-            _write_cp1252_crate(Path(tmp) / "TEST")
-            with self.assertRaises(CrateEncodingError):
+            path = _write_cp1252_crate(Path(tmp) / "TEST")
+            offset = path.read_bytes().index(b"\xa9")
+            with self.assertRaises(CrateEncodingError) as cm:
                 map_project("TEST", Path(tmp), sv=SchemaView(str(FULL_SCHEMA)),
                             rows=[])
             self.assertFalse((Path(tmp) / "TEST" / "processed").exists())
+        # Word for word as before `read_crate_json` took a hint for the
+        # routes that read a crate from any path: this arm reads a project's
+        # crate, so its refusal points to the project's note (#4192).
+        self.assertEqual(str(cm.exception), (
+            f"{path} is not UTF-8, as RFC 8259 requires of JSON: byte 0xa9 at "
+            f"offset {offset}, 1 undecodable byte(s) in all. Not decoded under "
+            "a guessed encoding; declare or transcode it deliberately (see the "
+            "project's `encoding_note` in crate_manifest.yaml)"))
 
     def test_the_map_command_reports_the_crate_and_maps_the_next(self):
         """The loop caught only FileNotFoundError, so no project after the

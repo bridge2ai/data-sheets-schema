@@ -14,9 +14,12 @@ Features:
   JSON, and in no other encoding. A file that is not UTF-8, such as
   AI-READI's windows-1252 release crate, is refused with a
   `CrateEncodingError` naming the first byte that does not decode, its
-  offset and how many such bytes it holds, and pointing to the crate
-  manifest's `encoding_note`. Until #4089 a path was opened in the
-  platform's default encoding.
+  offset and how many such bytes it holds, and saying to transcode it to
+  UTF-8. Unlike the static-map arm's refusal, it does not point to the
+  crate manifest's `encoding_note`, since a path can name any crate
+  (#4192). A file whose JSON is not one object, as an RO-Crate's metadata
+  is, is refused with a ValueError naming what it holds instead (#4192).
+  Until #4089 a path was opened in the platform's default encoding.
 - Pydantic validation of input RO-Crate
 - Output fitted to the schema's Dataset class: of what this converter
   reads, a key the class does not declare, a value that cannot be shaped
@@ -49,6 +52,7 @@ from data_sheets_schema.rocrate_map import (
     DOI_SLOT,
     FULL_SCHEMA,
     TARGET_CLASS,
+    TRANSCODE_HINT,
     _coerce,
     _normalize_datetime,
     _preview,
@@ -123,6 +127,12 @@ FILE_COLLECTION_SLOTS = {
 #: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
 #: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
 DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
+
+#: What JSON calls each value `json.loads` returns other than an object,
+#: by its Python type, for `convert` to say what a file holds instead of
+#: a crate's metadata (#4192).
+JSON_KINDS = {list: "an array", str: "a string", int: "a number",
+              float: "a number", bool: "a boolean", type(None): "null"}
 
 #: A size stated as a whole number of bytes: `2048`, `2,048`, `2048 B`,
 #: `2048 bytes`, `2,048 BYTES`. The digits may be grouped in threes by
@@ -589,23 +599,30 @@ class FairscapeToD4DConverter:
                 converted. AI-READI's v3.0.0 release crate is windows-1252.
                 A path is read as the static-map arm reads a crate
                 (`rocrate_map.read_crate_json`), and the refusal is its
-                message: the first byte that does not decode, its offset,
-                how many such bytes the file holds, and the crate
-                manifest's `encoding_note`. No other encoding is tried:
-                most single-byte encodings decode any bytes as something,
-                so a fallback would be a silent guess, and transcoding a
-                crate is a curation decision, declared, not made here.
-                Until #4089 a path was opened in the platform's default
-                encoding: where that is UTF-8 the AI-READI crate raised a
-                bare UnicodeDecodeError, and elsewhere a crate could be
-                decoded in an encoding it is not written in.
-            ValueError: the input is not a crate this reads (a type it does
-                not take, or a file Python cannot read as JSON, such as one
+                message: the first byte that does not decode, its offset
+                and how many such bytes the file holds. It ends by saying
+                to transcode the file to UTF-8 from the encoding it is
+                written in (`TRANSCODE_HINT`). It does not point to the
+                crate manifest's `encoding_note`, as the static-map arm's
+                refusal does: that note describes a project's crate, and a
+                path here can name any crate (#4192). No other encoding is
+                tried: most single-byte encodings decode any bytes as
+                something, so a fallback would be a silent guess, and
+                transcoding a crate is a curation decision, declared, not
+                made here. Until #4089 a path was opened in the platform's
+                default encoding: where that is UTF-8 the AI-READI crate
+                raised a bare UnicodeDecodeError, and elsewhere a crate
+                could be decoded in an encoding it is not written in.
+            ValueError: the input is of a type this does not take; the file
+                at the path is not JSON Python can read, such as one
                 holding a number of more digits than Python reads as one
-                integer); the crate has no root data entity; or the record
-                has an error no value left out can fix, such as a missing
-                `id` (`_settle`). A byte count written as text, however
-                long, is recorded in `dropped` instead (#4159).
+                integer; its JSON is not one object, as an RO-Crate's
+                metadata is, but an array, a string, a number, a boolean
+                or null, which the message names (#4192); the crate has no
+                root data entity; or the record has an error no value left
+                out can fix, such as a missing `id` (`_settle`). A byte
+                count written as text, however long, is recorded in
+                `dropped` instead (#4159).
         """
         self.dropped = []
         self._minted = {}
@@ -616,8 +633,22 @@ class FairscapeToD4DConverter:
         if isinstance(rocrate_input, dict):
             rocrate_data = rocrate_input
         elif isinstance(rocrate_input, (str, Path)):
-            # As the static-map arm reads a crate: UTF-8, or refused (#4089)
-            rocrate_data = read_crate_json(Path(rocrate_input))
+            # As the static-map arm reads a crate: UTF-8, or refused (#4089).
+            # The refusal says to transcode the file and does not point to
+            # crate_manifest.yaml's `encoding_note`: a path here can name any
+            # crate, which the manifest need not declare (#4192).
+            path = Path(rocrate_input)
+            rocrate_data = read_crate_json(path, hint=TRANSCODE_HINT)
+            if not isinstance(rocrate_data, dict):
+                # Read as a mapping, an array, a string, a number, a boolean
+                # or null ended in an AttributeError naming a method it
+                # lacks (#4192).
+                kind = JSON_KINDS.get(type(rocrate_data),
+                                      type(rocrate_data).__name__)
+                raise ValueError(
+                    f"{path} is not an RO-Crate's metadata: its JSON is "
+                    f"{kind}, not an object. An RO-Crate's metadata is one "
+                    "JSON object, whose `@graph` lists the crate's entities")
         elif FAIRSCAPE_AVAILABLE and isinstance(rocrate_input, ROCrateV1_2):
             rocrate_data = rocrate_input.model_dump(by_alias=True, exclude_none=True)
         else:

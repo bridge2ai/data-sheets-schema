@@ -229,9 +229,19 @@ class TestUndecodableCrate(unittest.TestCase):
     def test_it_is_refused_by_name_and_leaves_no_processed_dir(self):
         with tempfile.TemporaryDirectory() as tmp:
             _write_crate(Path(tmp) / "TEST", "cp1252")
-            with self.assertRaises(CrateEncodingError):
+            path = Path(tmp) / "TEST" / "raw" / "ro-crate-metadata.json"
+            offset = path.read_bytes().index(b"\xa9")
+            with self.assertRaises(CrateEncodingError) as cm:
                 normalize_project("TEST", Path(tmp), sv=SchemaView(str(FULL_SCHEMA)))
             self.assertFalse((Path(tmp) / "TEST" / "processed").exists())
+        # Word for word as before `read_crate_json` took a hint for the
+        # routes that read a crate from any path: this arm reads a project's
+        # crate, so its refusal points to the project's note (#4192).
+        self.assertEqual(str(cm.exception), (
+            f"{path} is not UTF-8, as RFC 8259 requires of JSON: byte 0xa9 at "
+            f"offset {offset}, 1 undecodable byte(s) in all. Not decoded under "
+            "a guessed encoding; declare or transcode it deliberately (see the "
+            "project's `encoding_note` in crate_manifest.yaml)"))
 
     def test_the_normalize_command_reports_it_and_goes_on(self):
         from click.testing import CliRunner
