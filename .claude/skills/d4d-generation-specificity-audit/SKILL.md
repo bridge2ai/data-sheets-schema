@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.8.0
+  version: 1.8.1
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -418,7 +418,15 @@ None falls back to a constant (#4025).
   validation of its finite integer domain and API-only renderer restriction.
   The JSON records the selection and call-path evidence; Markdown lists the
   option, default, runtime and renderer. Default condition shapes/lists exclude
-  these opt-in turns. This bounded derivation does not assume arbitrary compound
+  these opt-in turns. A direct positive opt-in block in RunSpec may additionally
+  refuse `self.condition not in <declared set>` with an unconditional raise.
+  Its exact nonempty literal module set, bound once and used only for membership,
+  restricts the optional condition rows; renamed sets are derived from their
+  values. The JSON retains the condition set and source evidence. Shadowed or
+  mutated sets/spec conditions, compound predicates, else-branch restrictions,
+  and unknown or nested guards fail closed (#4275). Calls to other validators
+  are not interpreted as condition declarations. This bounded derivation does
+  not assume arbitrary compound
   selectors, helper delegation or nested dead functions are equivalent; changed
   shapes stop with “not derived” until explicitly supported and tested (#4263).
 - The guard in `build_phase` that raises on `render_version >= N` and
