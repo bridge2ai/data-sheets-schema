@@ -1,0 +1,105 @@
+# Offline receipt completion
+
+This is the deterministic prerequisite for [#3314](https://github.com/bridge2ai/data-sheets-schema/issues/3314)
+and [#3315](https://github.com/bridge2ai/data-sheets-schema/issues/3315), under
+[#2926](https://github.com/bridge2ai/data-sheets-schema/issues/2926). It prepares
+requests and checks saved answers. It makes no model calls and changes no input
+files. It does not establish semantic support or empirical improvement.
+
+## Instrument boundary
+
+`receipts.check(..., instrument_version=4)` retains v3 coverage, aggregate
+diagnostics and gates. It adds `snippets.by_origin` for `phase1`, `rereceipt`, and
+`unknown`, each with integer `total`, `no_value_overlap`, `entry_single_leaf`,
+and `unattesting` counts. Only an absent marker uses the historical phase-1
+convention; malformed or unknown explicit markers remain visible. These markers
+are accounting metadata, not independent evidence of authorship or support.
+The default checker and all existing disk readers continue to use v3. Historical
+blocks are not silently rewritten or relabeled.
+
+`apply_rereceipt(..., instrument_version=4)` adds `origin: rereceipt` only to a
+new pair accepted by the existing snippet/path validator. An identical existing
+pair is never relabeled; retrying the same additions does not duplicate pairs.
+Missing or duplicate chunk entries and `duplicate_of` chunks still reject the
+answer. A verified addition to `nothing_relevant` or `redundant_with` changes it
+to `extracted`, retaining the previous status and its reason/references in
+`rereceipt_prior`. The v4 checker counts these recorded reversals separately;
+malformed prior metadata is reported separately. A reversal never adds a new
+reviewed chunk. These counters and anti-padding screens are nonterminal.
+
+Renderer 24 is an **API-only, offline preparation boundary**, not an executable
+or registered generation condition. Its assembly digest binds the new receipt
+instruction, header, policy and v4 instrument. Renderers 1–23 retain their exact
+previous assembly digests. `build_rereceipt` accepts only the last `full` or
+`full_readdress` request plus its entire assistant response; it retains the
+conversation and cached prefix and appends every uncovered leaf. It refuses
+audit/report/reconcile requests. `execute` and `_execute` refuse renderer 24
+before provider access.
+
+## Preparing and checking an offline inventory
+
+Use a phase-1 full snapshot after any re-addressing, its corresponding receipt,
+the exact bundle/chunk manifest, and the selected merged full schema. Do not
+substitute a reconciled final record or a current bundle for recorded bytes.
+For historical inspection, recover/materialize recorded inputs into a separate
+temporary directory using the existing provenance/snapshot recovery facilities;
+retain their commit/hash basis. Never rewrite originals to make hashes match.
+
+`rereceipt.Inputs` holds immutable copies of all five inputs. It refuses duplicate
+YAML keys, a receipt/bundle MD5 disagreement and a manifest that cannot reproduce
+the canonical chunks under its recorded rule. SHA-256 identities cover every
+raw input, the request contract and the explicit output-token cap. It pins the
+supplied schema; **record validation against that schema remains a separate
+required check**. Receipt coverage continues to use the existing populated-leaf
+and exemption logic, rather than a new denominator.
+
+From the repository, using independently materialized paths:
+
+```bash
+python -m data_sheets_schema.rereceipt \
+  --record /tmp/receipt-inputs/full-phase1.yaml \
+  --receipt /tmp/receipt-inputs/coverage_receipt.yaml \
+  --manifest /tmp/receipt-inputs/chunks.yaml \
+  --bundle /tmp/receipt-inputs/bundle.txt \
+  --schema /tmp/receipt-inputs/full-schema.yaml \
+  --max-output-tokens 12000 > /tmp/receipt-inventory.yaml
+```
+
+The illustrative cap is not a registered or measured recommendation. The
+operator must provide it explicitly. No path list is truncated to fit it.
+
+For a saved YAML answer of the form `rereceipt: [...]`, repeat the same command
+with `--answers /tmp/answers.yaml --inventory /tmp/receipt-inventory.yaml` and
+redirect to a **different** temporary report. The saved inventory is required
+when checking answers; any changed input, cap or contract is refused. The CLI
+prints YAML to stdout and writes no input or provenance files. The Python API
+can instead retain the same immutable `Inputs` object; when reloading bytes,
+pass the saved `input_identity` as `complete(..., expected_identity=...)`.
+
+Every requested path receives one receipt action or one typed unsupported
+action with a reason. Duplicate answers are rejected together. The report
+distinguishes rejected **answers** from rejected **paths**, unanswered paths,
+accepted actions, additions, status reversals, and never-receipted leaves before
+and after. Extra or malformed answers prevent `answers_complete`. That state
+means only that every path received one accepted action; all-unsupported can be
+answers-complete with no coverage improvement. Unsupported claims remain in
+the record and in `still_uncovered_paths`, with separate
+`unsupported_audit_candidates`. A verified quotation can still fail semantic
+support; neither the state nor zero deterministic defects certifies it.
+
+## Work that remains open
+
+#2926 still needs a separately registered continuation/condition, phase usage
+and failure telemetry, measured output budgeting/batching, audit carry, a
+registered coverage threshold shared by strict CLI and canary gates, and the
+required CHORUS/AI_READI paid canaries before fanout. A failed follow-up must
+retain the successful full output. Existing v1/v2/v3 instruments, registrations
+and the held audit28 corpus remain unchanged; offline fixture tests or replay
+are not empirical canaries.
+
+[#2923](https://github.com/bridge2ai/data-sheets-schema/issues/2923) still needs
+the record repair route: reuse existing removal classifications, restore an
+unfounded removal or provide independently checked audit evidence for it. A
+report disposition alone cannot clear that obligation. Neither re-receipting
+nor a nonterminal diagnostic may reopen an audit/report attempt already stopped
+by a terminal source/evidence failure.
