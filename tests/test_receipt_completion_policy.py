@@ -236,7 +236,9 @@ def test_disk_rebuild_selects_registration_instrument_and_retains_legacy(disk):
     assert selected["slots"] == legacy["slots"]
     assert selected["coverage_floor"]["registration_sha256"] == declaration()["receipt_completion_registration"]["sha256"]
     rec = {"run": {"project": "P"}, "prompts": {"request": {"spec": declaration()}}}
-    assert receipts.block_for(**disk, snapshot_record=rec) == selected
+    recorded = receipts.block_for(**disk, snapshot_record=rec)
+    assert recorded.pop("identity_rules")["schema_basis"]["source"] == "today's schema"
+    assert recorded == selected
 
 
 def test_real_cli_preprovenance_and_write_prevent_policy_override(disk, tmp_path, monkeypatch):
