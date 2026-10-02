@@ -15,17 +15,16 @@ Output:
 
 import json
 import csv
+import html
 from pathlib import Path
 from typing import List, Dict
 from datetime import datetime
 
-# The denominator lives with the rubric, not as a literal in a report.
-# It was 84 here while the questions defined 88 (#270 thread).
-from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
+# Read each evaluation's recorded denominator and percentage.
 from data_sheets_schema.rubric_pooling import (
-    denominator_label, group_by_denominator, pooling_warning,
-    reported_percentage)
-from data_sheets_schema.semantic_comparison import render_legacy_discrimination
+    denominator_of, pooling_warning, reported_percentage)
+from data_sheets_schema.semantic_comparison import (
+    discrimination, legacy_record, render_discrimination)
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -33,28 +32,87 @@ EVAL_DIR = BASE_DIR / "data" / "evaluation_llm" / "rubric20"
 
 
 def load_evaluation_results() -> List[Dict]:
-    """Load all rubric20 evaluation JSON files."""
+    """Load the legacy cohort, retaining each evaluation's relative source path.
+
+    Individual evaluations are recursive; concatenated evaluations are only
+    the undated directory's direct children. Dated concatenated subdirectories
+    are separate historical cohorts, not additional ratings of this cohort.
+    """
     results = []
+    for kind, pattern in (("individual", "individual/**/*_evaluation.json"),
+                          ("concatenated", "concatenated/*_evaluation.json")):
+        for json_file in sorted(EVAL_DIR.glob(pattern)):
+            with json_file.open(encoding="utf-8") as stream:
+                data = json.load(stream)
+            data['evaluation_type'] = kind
+            data['_evaluation_file'] = json_file.relative_to(EVAL_DIR).as_posix()
+            results.append(data)
+    return sorted(results, key=result_order)
 
-    # Individual evaluations
-    individual_dir = EVAL_DIR / "individual"
-    if individual_dir.exists():
-        for json_file in individual_dir.glob("**/*_evaluation.json"):
-            with open(json_file) as f:
-                data = json.load(f)
-                data['evaluation_type'] = 'individual'
-                results.append(data)
 
-    # Concatenated evaluations
-    concat_dir = EVAL_DIR / "concatenated"
-    if concat_dir.exists():
-        for json_file in concat_dir.glob("*_evaluation.json"):
-            with open(json_file) as f:
-                data = json.load(f)
-                data['evaluation_type'] = 'concatenated'
-                results.append(data)
+def result_order(result: Dict):
+    """Stable even for repeated ratings of one record, independent of glob order."""
+    return tuple(str(result.get(key) or '') for key in (
+        'evaluation_type', 'project', 'method', 'd4d_file',
+        'evaluation_timestamp', '_evaluation_file')) + (
+            json.dumps(result, sort_keys=True, ensure_ascii=False),)
 
-    return results
+
+def cohort_key(result: Dict):
+    """Separate recorded measurement identities; do not infer missing metadata.
+
+    The full model block includes temperature and evaluator type, not just
+    its name. A rubric hash is used verbatim: legacy placeholders are not
+    promoted to verified digests. A record hash and evaluator execution ID
+    identify individual evaluations, not a scoring instrument.
+    """
+    metadata = result.get('metadata') or {}
+    return (str(result.get('evaluation_type') or 'unknown'),
+            str(result.get('rubric') or 'unrecorded'),
+            str(result.get('version') or 'unrecorded'),
+            json.dumps(result.get('model') or {}, sort_keys=True, ensure_ascii=False),
+            str(metadata.get('rubric_hash') or 'unrecorded'),
+            denominator_of(result))
+
+
+def summary_cohorts(results: List[Dict]):
+    groups = {}
+    for result in sorted(results, key=result_order):
+        groups.setdefault(cohort_key(result), []).append(result)
+    return sorted(groups.items())
+
+
+def cell(value) -> str:
+    """Keep recorded labels and paths inside one Markdown table cell."""
+    return html.escape(str(value), quote=False).replace('|', '&#124;').replace(
+        '`', '&#96;').replace('\r\n', '\n').replace('\n', '<br>')
+
+
+def evaluator_name(result: Dict) -> str:
+    return str((result.get('model') or {}).get('name') or 'an unrecorded evaluator')
+
+
+def cohort_description(key, count: int) -> str:
+    kind, rubric, version, settings, rubric_hash, maximum = key
+    who = json.loads(settings).get('name') or 'an unrecorded evaluator'
+    return (f"### Scored out of {maximum:g} — {cell(kind)} evaluations by {cell(who)}\n\n"
+            f"{count} evaluation(s); rubric {cell(rubric)}, version {cell(version)}. "
+            f"Recorded rubric hash: {cell(rubric_hash)}.\n\n"
+            f"Recorded evaluator settings: {cell(settings)}.\n\n")
+
+
+def cohort_note(results: List[Dict]) -> str:
+    return ("Summaries separate record kind, rubric/version, the complete recorded evaluator "
+            "settings, recorded rubric hash and score maximum. Missing metadata stays "
+            "unrecorded; recorded hashes (including legacy placeholders) are not verified "
+            "instrument digests. Generator identity is not inferred from method names.\n\n"
+            "Counts and averages describe evaluations, not distinct files: repeated ratings "
+            "are retained and equally weighted. The discrimination blocks separately exclude "
+            "records rated more than once within their cohort.\n\n"
+            "Cohort selection: recursive `individual/**/*_evaluation.json` and direct "
+            "`concatenated/*_evaluation.json` children. Dated concatenated subdirectories "
+            "are excluded. `all_scores.csv` lists every selected evaluation and its source "
+            "path relative to this directory.\n\n" + pooling_warning(results))
 
 
 def categories_by_name(result: Dict) -> Dict[str, Dict]:
@@ -104,276 +162,172 @@ def questions_of(result: Dict) -> List[Dict]:
 
 
 def create_csv_summary(results: List[Dict]):
-    """Create CSV file with all scores."""
-
+    """One row per evaluation, with enough identity to separate its cohort."""
     csv_path = EVAL_DIR / "all_scores.csv"
-
-    with open(csv_path, 'w', newline='') as f:
-        writer = csv.writer(f)
-
-        # Header
+    with csv_path.open('w', newline='', encoding='utf-8') as stream:
+        writer = csv.writer(stream, lineterminator='\n')
         writer.writerow([
             'project', 'method', 'type', 'file',
             'total_score', 'max_score', 'percentage',
             'cat1_structural', 'cat2_metadata', 'cat3_technical', 'cat4_fairness',
-            'question_scores'
+            'question_scores', 'evaluation_file', 'evaluation_timestamp',
+            'rubric', 'rubric_version', 'evaluator', 'evaluator_settings', 'rubric_hash',
         ])
-
-        # Data rows
-        for result in sorted(results, key=lambda x: (x.get('project', ''), x.get('type', ''), x.get('method', ''))):
-            project = result.get('project', 'unknown')
-            method = result.get('method', 'unknown')
-            eval_type = result.get('evaluation_type', 'unknown')
-            file_path = result.get('d4d_file', '')
-
-            overall = result.get('overall_score', {})
-            total_score = overall.get('total_points', 0)
-            max_score = overall.get('max_points', RUBRIC20_MAX_SCORE)
-            percentage = reported_percentage({'overall_score': overall})
-
-            # Category scores
+        for result in sorted(results, key=result_order):
+            kind, rubric, version, settings, rubric_hash, maximum = cohort_key(result)
+            overall = result.get('overall_score') or {}
             categories = categories_by_name(result)
-            cat1 = categories.get('Structural Completeness', {}).get('category_score', 0)
-            cat2 = categories.get('Metadata Quality & Content', {}).get('category_score', 0)
-            cat3 = categories.get('Technical Documentation', {}).get('category_score', 0)
-            cat4 = categories.get('FAIRness & Accessibility', {}).get('category_score', 0)
-
-            # Question scores string
-            questions = questions_of(result)
-            question_scores_str = ','.join([
+            question_scores = ','.join(
                 f"Q{q['id']}:{q.get('score', 0)}/{q.get('max_score', 5)}"
-                for q in sorted(questions, key=lambda x: x.get('id', 0))[:20]
-            ])
-
+                for q in sorted(questions_of(result), key=lambda q: q.get('id', 0))[:20])
             writer.writerow([
-                project, method, eval_type, file_path,
-                total_score, max_score, percentage,
-                cat1, cat2, cat3, cat4,
-                question_scores_str
+                result.get('project', 'unknown'), result.get('method', 'unknown'),
+                kind, result.get('d4d_file', ''), overall.get('total_points', 0),
+                maximum, reported_percentage(result),
+                *[categories.get(name, {}).get('category_score', 0) for name in CATEGORY_NAMES],
+                question_scores, result.get('_evaluation_file', ''),
+                result.get('evaluation_timestamp', ''), rubric, version,
+                evaluator_name(result), settings, rubric_hash,
             ])
+    print(f"CSV summary created: {csv_path} ({len(results)} evaluations)")
 
-    print(f"✅ CSV summary created: {csv_path}")
-    print(f"   Total evaluations: {len(results)}")
+
+CATEGORY_NAMES = ('Structural Completeness', 'Metadata Quality & Content',
+                  'Technical Documentation', 'FAIRness & Accessibility')
+
+
+def table_row(values) -> str:
+    return '| ' + ' | '.join(cell(value) for value in values) + ' |\n'
 
 
 def create_markdown_table(results: List[Dict]):
-    """Create markdown summary table."""
+    """List every concatenated rating and summarize individuals within cohorts."""
+    md = ("# Rubric20 Evaluation Summary\n\n"
+          f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+          f"**Total Evaluations:** {len(results)}\n\n" + cohort_note(results))
+    for kind in sorted({cohort_key(result)[0] for result in results}):
+        heading = {'concatenated': 'Concatenated D4Ds',
+                   'individual': 'Individual D4Ds Summary'}.get(kind, f'{cell(kind)} D4Ds')
+        md += f"## {heading}\n\n"
+        for key, group in summary_cohorts(results):
+            if key[0] != kind:
+                continue
+            md += cohort_description(key, len(group))
+            if kind == 'individual':
+                md += ("| Project | Method | Avg Score | Evaluations | Avg % | Avg Cat1 | Avg Cat2 | Avg Cat3 | Avg Cat4 |\n"
+                       "|---|---|---|---|---|---|---|---|---|\n")
+                projects_methods = sorted({(str(r.get('project', 'unknown')),
+                                           str(r.get('method', 'unknown'))) for r in group})
+                for project, method in projects_methods:
+                    members = [r for r in group if str(r.get('project', 'unknown')) == project
+                               and str(r.get('method', 'unknown')) == method]
+                    count = len(members)
+                    avg_score = sum(r.get('overall_score', {}).get('total_points', 0)
+                                    for r in members) / count
+                    avg_pct = sum(reported_percentage(r) for r in members) / count
+                    cats = [sum(categories_by_name(r).get(name, {}).get('category_score', 0)
+                                for r in members) / count for name in CATEGORY_NAMES]
+                    md += table_row([project, method, f'{avg_score:.1f}/{key[-1]:g}', count,
+                                     f'{avg_pct:.1f}%', *[f'{value:.1f}' for value in cats]])
+            else:
+                md += ("| Project | Method | Score | Percentage | Cat1 | Cat2 | Cat3 | Cat4 | Top Question | Weakest Question | D4D File | Evaluation File | Evaluation Time |\n"
+                       "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+                for result in group:
+                    overall = result.get('overall_score') or {}
+                    cats = categories_by_name(result)
+                    questions = questions_of(result)
+                    def question_label(question):
+                        return (f"Q{question['id']}: {question['name'][:20]}... "
+                                f"({question['score']}/{question['max_score']})")
+                    if questions:
+                        ratio = lambda q: q.get('score', 0) / max(q.get('max_score', 1), 1)
+                        top = question_label(max(questions, key=ratio))
+                        weak = question_label(min(questions, key=ratio))
+                    else:
+                        top = weak = 'N/A'
+                    md += table_row([
+                        result.get('project', 'unknown'), result.get('method', 'unknown'),
+                        f"{overall.get('total_points', 0)}/{key[-1]:g}",
+                        f'{reported_percentage(result):.1f}%',
+                        *[cats.get(name, {}).get('category_score', 0) for name in CATEGORY_NAMES],
+                        top, weak, result.get('d4d_file', ''), result.get('_evaluation_file', 'unrecorded'),
+                        result.get('evaluation_timestamp', 'unrecorded'),
+                    ])
+            md += '\n'
 
-    # Group by project and type
-    table_data = {}
-    for result in results:
-        project = result.get('project', 'unknown')
-        method = result.get('method', 'unknown')
-        eval_type = result.get('evaluation_type', 'unknown')
-
-        key = (project, eval_type, method)
-        if key not in table_data:
-            table_data[key] = []
-
-        table_data[key].append(result)
-
-    # Create markdown table
-    md = f"""# Rubric20 Evaluation Summary
-
-**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-**Total Evaluations:** {len(results)}
-
-## Concatenated D4Ds
-
-| Project | Method | Score | Percentage | Cat1 | Cat2 | Cat3 | Cat4 | Top Question | Weakest Question |
-|---------|--------|-------|------------|------|------|------|------|--------------|------------------|
-"""
-
-    # Concatenated results
-    for project in ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']:
-        for method in ['curated', 'gpt5', 'claudecode', 'claudecode_agent', 'claudecode_assistant']:
-            key = (project, 'concatenated', method)
-            if key in table_data and table_data[key]:
-                result = table_data[key][0]  # Should only be one per key
-                overall = result.get('overall_score', {})
-                total = overall.get('total_points', 0)
-                max_pts = overall.get('max_points', RUBRIC20_MAX_SCORE)
-                pct = reported_percentage({'overall_score': overall})
-
-                # Category scores
-                categories = categories_by_name(result)
-                cat1 = categories.get('Structural Completeness', {}).get('category_score', 0)
-                cat2 = categories.get('Metadata Quality & Content', {}).get('category_score', 0)
-                cat3 = categories.get('Technical Documentation', {}).get('category_score', 0)
-                cat4 = categories.get('FAIRness & Accessibility', {}).get('category_score', 0)
-
-                # Find top and weakest questions
-                questions = questions_of(result)
-                if questions:
-                    top_q = max(questions, key=lambda x: x.get('score', 0) / max(x.get('max_score', 1), 1))
-                    weak_q = min(questions, key=lambda x: x.get('score', 0) / max(x.get('max_score', 1), 1))
-
-                    top_name = f"Q{top_q['id']}: {top_q['name'][:20]}... ({top_q['score']}/{top_q['max_score']})"
-                    weak_name = f"Q{weak_q['id']}: {weak_q['name'][:20]}... ({weak_q['score']}/{weak_q['max_score']})"
-                else:
-                    top_name = "N/A"
-                    weak_name = "N/A"
-
-                md += f"| {project} | {method} | {total}/{max_pts} | {pct:.1f}% | {cat1} | {cat2} | {cat3} | {cat4} | {top_name} | {weak_name} |\n"
-
-    # Individual results summary
-    md += "\n## Individual D4Ds Summary\n\n"
-    md += "| Project | Method | Avg Score | Files | Avg % | Avg Cat1 | Avg Cat2 | Avg Cat3 | Avg Cat4 |\n"
-    md += "|---------|--------|-----------|-------|-------|----------|----------|----------|----------|\n"
-
-    for project in ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']:
-        for method in ['gpt5', 'claudecode_agent', 'claudecode_assistant']:
-            key = (project, 'individual', method)
-            if key in table_data and table_data[key]:
-                results_list = table_data[key]
-                file_count = len(results_list)
-
-                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in results_list) / file_count
-                avg_pct = sum(reported_percentage(r) for r in results_list) / file_count
-
-                # The records carry their own denominator, and 167 committed
-                # rubric20 evaluations were scored against 84 (#275). Printing a
-                # constant beside an average of those is confidently wrong where
-                # printing the record's own value is merely stale. Pooling
-                # records with different denominators is not meaningful at all,
-                # so say so rather than average across them (#274).
-                denom = denominator_label(results_list)
-
-                avg_cat1 = sum(categories_by_name(r).get('Structural Completeness', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat2 = sum(categories_by_name(r).get('Metadata Quality & Content', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat3 = sum(categories_by_name(r).get('Technical Documentation', {}).get('category_score', 0) for r in results_list) / file_count
-                avg_cat4 = sum(categories_by_name(r).get('FAIRness & Accessibility', {}).get('category_score', 0) for r in results_list) / file_count
-
-                md += f"| {project} | {method} | {avg_score:.1f}/{denom} | {file_count} | {avg_pct:.1f}% | {avg_cat1:.1f} | {avg_cat2:.1f} | {avg_cat3:.1f} | {avg_cat4:.1f} |\n"
-
-    # Top performers
-    md += "\n## Top Performing D4Ds (Score >= 80%)\n"
-
-    # One table per denominator. A >=80% cut and a sort applied across two
-    # maxima rank on the maximum rather than the record: 71/84 is 84.5% and
-    # 71/88 is 80.7%, so identical raw scores separate purely by which
-    # instrument measured them, and the 167 records scored out of 84 win
-    # systematically (#280). A table titled "Top Performing" that is not a
-    # valid ranking is worse than two shorter ones that are.
-    for denom, group in group_by_denominator(results).items():
-        ranked = [r for r in group
-                  if reported_percentage(r) >= 80]
-        ranked.sort(key=lambda x: reported_percentage(x),
-                    reverse=True)
+    md += '## Top Performing D4Ds (Score >= 80%)\n\nUp to 20 evaluations per cohort; ties use the stable evaluation identity order.\n'
+    for key, group in summary_cohorts(results):
+        ranked = sorted((r for r in group if reported_percentage(r) >= 80),
+                        key=lambda r: (-reported_percentage(r), result_order(r)))
         if not ranked:
             continue
-        md += f"\n### Scored out of {denom}\n\n"
-        md += "| Project | Method | Type | Score | File |\n"
-        md += "|---------|--------|------|-------|------|\n"
-        for result in ranked[:20]:  # Top 20 within this denominator
-            project = result.get('project', 'unknown')
-            method = result.get('method', 'unknown')
-            eval_type = result.get('evaluation_type', 'unknown')
-            overall = result.get('overall_score', {})
-            score_str = (f"{overall.get('total_points', 0)}/{denom} "
-                         f"({reported_percentage({'overall_score': overall}):.1f}%)")
-            file_name = Path(result.get('d4d_file', '')).name
-            md += f"| {project} | {method} | {eval_type} | {score_str} | {file_name} |\n"
-
-    # Save markdown
-    md_path = EVAL_DIR / "summary_table.md"
-    with open(md_path, 'w') as f:
-        f.write(md)
-
-    print(f"✅ Markdown table created: {md_path}")
+        md += '\n' + cohort_description(key, len(group))
+        md += '| Project | Method | Type | Score | D4D File | Evaluation File |\n|---|---|---|---|---|---|\n'
+        for result in ranked[:20]:
+            overall = result.get('overall_score') or {}
+            md += table_row([result.get('project', 'unknown'), result.get('method', 'unknown'),
+                             key[0], f"{overall.get('total_points', 0)}/{key[-1]:g} ({reported_percentage(result):.1f}%)",
+                             result.get('d4d_file', ''), result.get('_evaluation_file', 'unrecorded')])
+    md_path = EVAL_DIR / 'summary_table.md'
+    md_path.write_text(md, encoding='utf-8')
+    print(f'Markdown table created: {md_path}')
 
 
 def create_detailed_report(results: List[Dict]):
-    """Create detailed markdown report."""
+    """All aggregates and discrimination use the same recorded cohort identity."""
+    report = ('# Rubric20 Detailed Evaluation Report\n\n'
+              f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+              f'**Total Evaluations:** {len(results)}\n\n' + cohort_note(results))
+    report += '## Executive Summary\n\n'
+    cohorts = summary_cohorts(results)
+    for key, group in cohorts:
+        report += cohort_description(key, len(group))
+        avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
+        percentages = [reported_percentage(r) for r in group]
+        report += (f'- **Average Score:** {avg_score:.1f}/{key[-1]:g} ({sum(percentages) / len(group):.1f}%)\n'
+                   f'- **Best Score:** {max(percentages):.1f}%\n'
+                   f'- **Worst Score:** {min(percentages):.1f}%\n\n')
 
-    report = f"""# Rubric20 Detailed Evaluation Report
+    for field, heading in (('method', 'Method Comparison'), ('project', 'Project Comparison')):
+        report += f'## {heading}\n\n'
+        for key, group in cohorts:
+            report += cohort_description(key, len(group))
+            for name in sorted({str(r.get(field, 'unknown')) for r in group}):
+                members = [r for r in group if str(r.get(field, 'unknown')) == name]
+                count = len(members)
+                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in members) / count
+                avg_pct = sum(reported_percentage(r) for r in members) / count
+                report += (f'#### {cell(name)}\n- Evaluations: {count}\n'
+                           f'- Average score: {avg_score:.1f}/{key[-1]:g} '
+                           f'({avg_pct:.1f}%) over {count} evaluation(s)\n\n')
 
-**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-**Total Evaluations:** {len(results)}
+    report += '## Category Performance\n\n'
+    for key, group in cohorts:
+        report += cohort_description(key, len(group))
+        for name in CATEGORY_NAMES:
+            scores = [categories_by_name(r)[name].get('category_score', 0) for r in group
+                      if name in categories_by_name(r)]
+            if scores:
+                report += (f'#### {name}\n- Average score: {sum(scores) / len(scores):.1f}\n'
+                           f'- Evaluations with this category: {len(scores)}\n\n')
 
-## Executive Summary
+    for key, group in cohorts:
+        kind, _rubric, _version, _settings, _hash, maximum = key
+        who = evaluator_name(group[0])
+        report += cohort_description(key, len(group))
+        others = len(results) - len(group)
+        measured_on = (f'{len(group)} of the {len(results)} evaluations above: the {kind} '
+                       f'evaluations by {who} scored out of {maximum:g}, '
+                       'with the recorded rubric and evaluator settings stated immediately above'
+                       + (f'. The other {others} are in no count in this block' if others else ''))
+        report += '\n'.join(render_discrimination(
+            discrimination(legacy_record(r) for r in group),
+            scope=f', {kind} evaluations by {who} scored out of {maximum:g}',
+            evaluator=who, measured_on=measured_on)) + '\n'
 
-"""
-
-    # One block per denominator, never one number across both (#275). A mean of
-    # 84-scored and 88-scored records lands somewhere plausible and reads as a
-    # result, which is exactly the failure worth refusing.
-    report += pooling_warning(results)
-    for denom, group in group_by_denominator(results).items():
-        if not group:
-            continue
-        total_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group)
-        avg_percentage = sum(reported_percentage(r) for r in group) / len(group)
-        best = max(group, key=lambda x: reported_percentage(x))
-        worst = min(group, key=lambda x: reported_percentage(x))
-        report += f"### Scored out of {denom} ({len(group)} evaluation(s))\n\n"
-        report += f"- **Average Score:** {total_score / len(group):.1f}/{denom} ({avg_percentage:.1f}%)\n"
-        report += f"- **Best Score:** {reported_percentage(best):.1f}%\n"
-        report += f"- **Worst Score:** {reported_percentage(worst):.1f}%\n\n"
-
-    # Method comparison
-    report += "\n## Method Comparison\n\n"
-
-    for method in ['curated', 'gpt5', 'claudecode', 'claudecode_agent', 'claudecode_assistant']:
-        method_results = [r for r in results if r.get('method') == method]
-        if method_results:
-            report += f"### {method}\n"
-            report += f"- Files evaluated: {len(method_results)}\n"
-            # One line per denominator. Averaging a method across two maxima
-            # would rank it against itself measured two different ways (#275).
-            for denom, group in group_by_denominator(method_results).items():
-                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
-                avg_pct = sum(reported_percentage(r) for r in group) / len(group)
-                report += (f"- Average score: {avg_score:.1f}/{denom} "
-                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
-            report += "\n"
-
-    # Project comparison
-    report += "\n## Project Comparison\n\n"
-
-    for project in ['AI_READI', 'CHORUS', 'CM4AI', 'VOICE']:
-        project_results = [r for r in results if r.get('project') == project]
-        if project_results:
-            report += f"### {project}\n"
-            report += f"- Files evaluated: {len(project_results)}\n"
-            # One line per denominator. Averaging a method across two maxima
-            # would rank it against itself measured two different ways (#275).
-            for denom, group in group_by_denominator(project_results).items():
-                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
-                avg_pct = sum(reported_percentage(r) for r in group) / len(group)
-                report += (f"- Average score: {avg_score:.1f}/{denom} "
-                           f"({avg_pct:.1f}%) over {len(group)} evaluation(s)\n")
-            report += "\n"
-
-    # Category analysis
-    report += "\n## Category Performance\n\n"
-
-    categories = ['Structural Completeness', 'Metadata Quality & Content', 'Technical Documentation', 'FAIRness & Accessibility']
-
-    for cat_name in categories:
-        cat_scores = []
-        for r in results:
-            cat_data = categories_by_name(r).get(cat_name, {})
-            if cat_data:
-                cat_scores.append(cat_data.get('category_score', 0))
-
-        if cat_scores:
-            avg_cat_score = sum(cat_scores) / len(cat_scores)
-            report += f"### {cat_name}\n"
-            report += f"- Average score: {avg_cat_score:.1f}\n\n"
-
-    # Item discrimination per cohort (#3281), as the semantic reports have
-    # had since #2927: which items separate no record, and which projects
-    # have too few distinct totals to order their records at all.
-    report += "\n" + "\n".join(render_legacy_discrimination(results))
-
-    # Save report
-    report_path = EVAL_DIR / "summary_report.md"
-    with open(report_path, 'w') as f:
-        f.write(report)
-
-    print(f"✅ Detailed report created: {report_path}")
+    report_path = EVAL_DIR / 'summary_report.md'
+    report_path.write_text(report, encoding='utf-8')
+    print(f'Detailed report created: {report_path}')
 
 
 if __name__ == "__main__":
