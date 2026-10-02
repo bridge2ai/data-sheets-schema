@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/semantic-q19-v4/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Opt-in semantic 4.0: dataset lineage independent of representation - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#opt-in-semantic-40-dataset-lineage-independent-of-representation" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Opt-in semantic 4.0: dataset lineage independent of representation
             
           </span>
         </div>
@@ -316,49 +316,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#trusted-selection-and-preserved-history" class="md-nav__link">
+    Trusted selection and preserved history
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#normative-examples-for-scientific-review" class="md-nav__link">
+    Normative examples for scientific review
   </a>
   
 </li>
@@ -377,95 +343,195 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/semantic-q19-v4.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
+<h1 id="opt-in-semantic-40-dataset-lineage-independent-of-representation">Opt-in semantic 4.0: dataset lineage independent of representation</h1>
+<p>This AI-authored instrument draft implements <a href="https://github.com/bridge2ai/data-sheets-schema/issues/4258">#4258</a>, the offline engineering slice of
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/2911">#2911</a>. Scientific
+review and empirical calibration remain pending. Synthetic contract tests do
+not establish that an evaluator assigns the intended scores. No paid scoring,
+new cohort registration, or human applicability approval is included.</p>
+<p>Semantic rubric20 version 4.0 changes Q19 to <strong>Data Integrity, Provenance, and
+Quality</strong>. It preserves all other nineteen items, their weights, the fixed
+maximum of 88, and the existing applicability and per-resource aggregation
+rules. Q19 always applies, even when data processing is false or unknown.
+Missing lineage receives a score rather than becoming an exclusion.</p>
+<p>The new anchors distinguish no usable provenance (0), meaningful partial
+lineage or version/errata history (3), and identifiable, mutually consistent
+source-to-result lineage at the declared dataset/release scope (5). Partial
+lineage without a change log earns 3. A complete account of original acquisition
+and release can earn 5 without inventing an intervening processing step.
+Equivalent relationships in prose, tables, D4D fields, and PROV receive the
+same score. Formal identifiers, a serialized graph, and populated designated
+provenance slots are not independent prerequisites.</p>
+<p>Missing-data details, split indicators, checksums, and similar information
+support lineage when they identify an input/output or explain an activity.
+Their presence alone does not establish complete lineage; their absence alone
+does not cap it. Complete lineage does not additionally require version history
+or errata. The D4D document's own generation history and a bibliography of
+sources used to write it are not automatically dataset lineage.</p>
+<h2 id="trusted-selection-and-preserved-history">Trusted selection and preserved history</h2>
+<p><code>select_semantic_instrument(rubric_name, version)</code> in
+<code>src/data_sheets_schema/semantic_instrument.py</code> returns immutable, repository-relative
+paths for each supported instrument. It accepts rubric10/rubric20 and their
+<code>-semantic</code> aliases; 2.0 and 3.0 resolve to the released assets, and 4.0 exists
+only for rubric20. Exact new-output acceptance defaults to 3.0. Selecting an
+instrument is a caller decision, never permission inferred solely from model
+output.</p>
+<p>The v4 assets are:</p>
 <ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
+<li><code>data/rubric/rubric20_semantic_v4.txt</code></li>
+<li><code>.claude/agents/d4d-rubric20-semantic-v4.md</code></li>
+<li><code>src/download/prompts/rubric20_semantic_v4_schema.json</code></li>
 </ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
+<p>The old rubric, definitions, output schemas, authority, scores, and registered
+instruments retain their bytes. No old scores are reinterpreted as v4.
+Version 4 explicitly reuses <code>semantic_evidence_authority_v3.json</code>, including
+its frozen hash and its name-only limitation. Current schema evolution does
+not expand that authority. Evidence paths, quotes, counts, deductions, scope,
+context, and input identity receive the same mechanical checks as v3. These
+checks do not decide whether cited prose supports a semantic score, and they
+do not prove every class/range relationship in a path.</p>
+<p>The source rubric retains <code>instrument_version: 2.0-general-context</code> as inherited
+applicability metadata. This is distinct from the selected semantic instrument
+version, <code>4.0</code>; selection and acceptance use that explicit version together with
+the rubric and definition hashes.</p>
+<p>For exact acceptance, supply the original record, the selected definition,
+and any independently supplied applicability context:</p>
+<pre><code class="language-bash">python scripts/validate_evaluation_schema.py \
+  --file NEW_OUTPUT.json --rubric rubric20-semantic --semantic-version 4.0 \
+  --input ORIGINAL_RECORD.yaml \
+  --agent-definition .claude/agents/d4d-rubric20-semantic-v4.md \
+  --context REVIEWED_CONTEXT.yaml
 </code></pre>
-
-</details>
+<p>Omit <code>--context</code> when no independent context exists; predicates then remain
+unknown and conditional items stay in the denominator. Do not manufacture a
+context to exclude missing documentation. Exact acceptance requires version
+4.0, the v4 rubric hash, the selected v4 definition's bytes, and the unchanged
+authority hash. A self-consistent hash of the old definition is insufficient.
+Historical discovery selects the versioned schema for declared v4 outputs;
+that structural classification does not replace exact input-checked acceptance.</p>
+<p>The new agent filename has no same-path predecessor. Its preimage registry
+entry records that fact with null predecessor fields. The offline reference controller requires a v4 instrument registration to name
+<code>predecessor_definition: .claude/agents/d4d-rubric20-semantic.md</code> and
+<code>predecessor_sha256: 35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b</code>,
+with that same file/hash in <code>pinned_files</code>. It uses those actual released bytes
+for the explicit predecessor challenge; copying a preamble or using a stale v3
+echo is not proof. The job agent, selected assets, definition hash and complete
+validator support must also be pinned. Its evaluator and controller validations
+both select <code>--semantic-version 4.0</code>; a v3 command cannot attest a v4 rating. The existing default v3 roster and requests
+remain unchanged. Registration and any scoring launch await the independent
+context/scientific decisions tracked by #2912 and #2911.</p>
+<h2 id="normative-examples-for-scientific-review">Normative examples for scientific review</h2>
+<p>These are authored examples of the intended anchors, <strong>not empirical evaluator
+results, gold labels, or a completed calibration set</strong>. Each row concerns one
+scored dataset resource; evidence must actually occur in that resource.</p>
+<table>
+<thead>
+<tr>
+<th>Documented content at the declared scope</th>
+<th style="text-align: right;">Intended Q19</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A dataset identifier and a bare claim that provenance is complete</td>
+<td style="text-align: right;">0</td>
+<td>No usable origin, derivation, or version information.</td>
+</tr>
+<tr>
+<td>A bibliography for the D4D author, with no dataset-origin relationships</td>
+<td style="text-align: right;">0</td>
+<td>Document research history does not establish dataset lineage.</td>
+</tr>
+<tr>
+<td>Checksums and split indicators, with no usable lineage</td>
+<td style="text-align: right;">0</td>
+<td>Ancillary quality metadata alone is insufficient.</td>
+</tr>
+<tr>
+<td>Version numbers, dated changes, and errata without source-to-result relationships</td>
+<td style="text-align: right;">3</td>
+<td>Meaningful history supports the middle band.</td>
+</tr>
+<tr>
+<td>Original acquisition source and responsible team, but an unexplained route to the released outputs</td>
+<td style="text-align: right;">3</td>
+<td>Partial lineage earns 3 even with no change log.</td>
+</tr>
+<tr>
+<td>One documented modality but an unexplained material modality in the same release</td>
+<td style="text-align: right;">3</td>
+<td>A material derivation branch remains incomplete.</td>
+</tr>
+<tr>
+<td>Meaningful lineage statements that disagree about a material source-to-result relationship</td>
+<td style="text-align: right;">3</td>
+<td>The relationships are not mutually consistent.</td>
+</tr>
+<tr>
+<td>Source, output, acquisition/processing activities, responsible roles, and their relationships in prose</td>
+<td style="text-align: right;">5</td>
+<td>Complete relationships need no graph serialization.</td>
+</tr>
+<tr>
+<td>The same relationships in a table</td>
+<td style="text-align: right;">5</td>
+<td>Changing representation does not change the score.</td>
+</tr>
+<tr>
+<td>The same relationships distributed across D4D fields, with explicit connecting statements</td>
+<td style="text-align: right;">5</td>
+<td>Combining explicit relationships is permitted.</td>
+</tr>
+<tr>
+<td>The same relationships represented in PROV</td>
+<td style="text-align: right;">5</td>
+<td>PROV receives the same credit for the same content.</td>
+</tr>
+<tr>
+<td>Complete prose lineage with empty was_derived_from, parent_datasets, and errata</td>
+<td style="text-align: right;">5</td>
+<td>Empty designated slots do not negate evidence elsewhere.</td>
+</tr>
+<tr>
+<td>Complete lineage without checksums, split indicators, or errata/history</td>
+<td style="text-align: right;">5</td>
+<td>These are not additional prerequisites.</td>
+</tr>
+<tr>
+<td>A first release describing original measurements, acquisition responsibility, and release lineage, explicitly without further processing</td>
+<td style="text-align: right;">5</td>
+<td>Original acquisition is a complete lineage at that scope.</td>
+</tr>
+<tr>
+<td>Names of sources, tools, and people with no relationships between them</td>
+<td style="text-align: right;">0</td>
+<td>A bag of names is not usable lineage; separately documented history would support 3.</td>
+</tr>
+<tr>
+<td>Complete lineage only on a parent collection, while the scored child has only an identifier</td>
+<td style="text-align: right;">0</td>
+<td>Parent metadata is not implicitly inherited.</td>
+</tr>
+<tr>
+<td>Complete lineage only on a sibling resource, while this child has only an identifier</td>
+<td style="text-align: right;">0</td>
+<td>Sibling evidence does not fill this resource's gap.</td>
+</tr>
+</tbody>
+</table>
+<p>For a below-5 assessment, name the unresolved source, output, activity,
+responsibility, or relationship. Do not substitute the absence of one
+representation for a missing relationship. Material contradictions or an
+unexplained branch can justify a deduction; merely scattered documentation
+cannot. Unit tests cover contract boundaries and asset parity, while these
+semantic judgments still need independent review and calibrated evaluator runs.</p>
 
 
 
