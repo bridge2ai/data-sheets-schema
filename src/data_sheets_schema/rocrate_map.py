@@ -432,7 +432,9 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     # null, as `resolve_path` names an empty root property. That is decided
     # here, not in `resolve_path`, which passes an empty value by and reads
     # the next entity of the type: there the null would change which entity
-    # a row reads, not only its reason. A null beside a value is not read
+    # a row reads. Here the entity is the same, and what changes is the row:
+    # its reason everywhere, and its status and record wherever the rules
+    # below had made the null a value. A null beside a value is not read
     # here (#4172). A list inside the list fits no slot, which holds one
     # value or a list of single values, so it is dropped, never flattened
     # one level. The rest of the list is shaped as though the crate held it
@@ -443,18 +445,31 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     # values: the enum rule raised TypeError on a list item, the class step
     # made `{name: 'None'}` of a null and `{name: "['x']"}` of a list, the
     # cardinality step unwrapped `[[x]]` into a list in a single-valued slot
-    # and joined `["x", ["y"]]` into `x; ['y']`, and a multivalued text slot
-    # kept both shapes as written.
+    # and joined `["x", ["y"]]` into `x; ['y']` and `[null, null]` into
+    # `None; None`, and a multivalued text slot kept both shapes as written.
     #
     # Where this arm and the FAIRSCAPE converter of PR #4042 (`_shape`)
-    # agree, checked by running both on each shape for every crate property
-    # they map to the same `Dataset` slot: neither writes anything for a
-    # list of only nulls, of only lists, or of nulls and lists. On a list
-    # that mixes values with lists, each writes what it writes for those
-    # values alone, so the arms agree wherever they agree on the values,
-    # except in a single-valued slot whose range is a class (`updates`,
-    # `human_subject_research`): there the converter, which joins only text
-    # into one object, refuses the whole list, and this arm keeps the value.
+    # agree, checked by running both on each shape, with text, dates,
+    # numbers, a boolean, URLs, references and objects, for every crate
+    # property they map to the same `Dataset` slot: neither writes anything
+    # for a list of only nulls, of only lists, or of nulls and lists. On a
+    # list that mixes values with lists, this arm writes what it writes for
+    # those values alone. So does the converter, except in two places, the
+    # only ones where the arms agree on the values alone and not on the
+    # list (#4194):
+    # - A single-valued slot whose range is a class (`updates`,
+    #   `human_subject_research`). The converter, which joins only text into
+    #   one object, refuses the whole list, and this arm keeps the value.
+    # - `collection_timeframes`, from a `rai:dataCollectionTimeframe` list
+    #   holding an item written as a date (`2022`, `2022-09-01`,
+    #   `9/1/2022`). The converter's `_timeframe` reads that list before
+    #   `_shape` does: two items are a start and an end, a list inside the
+    #   list counting as one of them, and three or more are dropped whole.
+    #   So for `["2022-09-01", ["2026-01-31"]]` the converter writes one
+    #   timeframe from 2022-09-01 to 2026-01-31, with nothing in `dropped`,
+    #   and for `["2022-09-01", ["y"], ["z"]]` nothing. This arm writes
+    #   `[{name: '2022-09-01'}]` for each, as for `["2022-09-01"]` alone,
+    #   and names each list it dropped.
     # They do not agree on a null beside a value, which the converter drops
     # (#4172).
     if isinstance(value, list) and value:

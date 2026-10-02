@@ -141,7 +141,12 @@ class TestDateNormalization(unittest.TestCase):
                                  (None, f"not a calendar date {text!r}: {why}; dropped"))
 
     def test_the_calendar_decides_not_a_count_of_days(self):
-        """29 February is a date in a leap year only."""
+        """29 February is a date in a leap year only, and the leap years
+        are the Gregorian calendar's (#4197): 1900 is not one, though four
+        divides it, and 2000 is, since 400 divides it. A rule that counts
+        every fourth year keeps 1900's, and one that also leaves out every
+        hundredth refuses 2000's; the schema's date-time check does
+        neither."""
         self.assertEqual(_normalize_datetime("29/02/2024"),
                          ("2024-02-29T00:00:00Z", "DD/MM/YYYY -> date-time"))
         self.assertEqual(_normalize_datetime("2024-02-29"),
@@ -155,6 +160,19 @@ class TestDateNormalization(unittest.TestCase):
             _normalize_datetime("2026-02-29"),
             (None, "not a calendar date '2026-02-29': day 29 is not in 1-28 for "
                    "2026-02; dropped"))
+        self.assertEqual(
+            _normalize_datetime("1900-02-29"),
+            (None, "not a calendar date '1900-02-29': day 29 is not in 1-28 for "
+                   "1900-02; dropped"))
+        self.assertEqual(
+            _normalize_datetime("29/02/1900"),
+            (None, "not a calendar date '29/02/1900': as DD/MM/YYYY, day 29 is "
+                   "not in 1-28 for 1900-02, and as MM/DD/YYYY, month 29 is not "
+                   "in 1-12; dropped"))
+        self.assertEqual(_normalize_datetime("2000-02-29"),
+                         ("2000-02-29T00:00:00Z", "date -> date-time"))
+        self.assertEqual(_normalize_datetime("29/02/2000"),
+                         ("2000-02-29T00:00:00Z", "DD/MM/YYYY -> date-time"))
 
     def test_ambiguous_means_both_orders_read_a_date(self):
         """The ambiguity reason is kept where it is true: both orders read
@@ -837,7 +855,8 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
     a list that mixes values with lists. Both arms are run here on each
     shape, for one crate property of each kind that both map to the same
     `Dataset` slot: text, a list of text, a date-time, the doi, a list of
-    objects and one object."""
+    objects and one object. `rai:dataCollectionTimeframe` given dates, the
+    comment's second exception, has a test of its own (#4197)."""
 
     #: crate property -> (the slot both arms fill from it, a value it takes)
     PAIRS = {
@@ -859,24 +878,29 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
         cls.sv = SchemaView(str(FULL_SCHEMA))
         cls.rows = {row["D4D_Full_Path"].strip(): row for row in load_mapping()}
 
-    def this_arm(self, prop, slot, value):
-        """What `map_crate` writes in `slot`, from the table's row for it."""
+    def this_arm(self, prop, slot, value, detail=False):
+        """What `map_crate` writes in `slot`, from the table's row for it,
+        and with `detail`, the row's detail beside it."""
         row = self.rows[f"Dataset.{slot}"]
         source = row["RO_Crate_JSON_Path"].strip()
         self.assertEqual(source, f"@graph[?@type='Dataset']['{prop}']")
         res = map_crate(_crate_holding(source, value), [row], self.sv, "TEST")
-        return res.record.get(slot)
+        written = res.record.get(slot)
+        return (written, res.fields[0].detail) if detail else written
 
-    def converter(self, prop, slot, value):
+    def converter(self, prop, slot, value, dropped=False):
         """What the converter writes in `slot` for a crate root holding
-        `value` at `prop`."""
+        `value` at `prop`, and with `dropped`, what it records as left out
+        beside it."""
         crate = {"@context": {"@vocab": "https://schema.org/"}, "@graph": [
             {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
              "about": {"@id": "./"}},
             {"@id": "./", "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
              "name": "A test crate", prop: value}]}
+        converter = self.converter_class()
         with contextlib.redirect_stdout(io.StringIO()):
-            return self.converter_class().convert(crate).get(slot)
+            written = converter.convert(crate).get(slot)
+        return (written, converter.dropped) if dropped else written
 
     def test_neither_arm_writes_a_list_of_nulls_or_lists(self):
         for prop, (slot, x) in self.PAIRS.items():
@@ -890,7 +914,7 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
         writes for the value alone, and the two agree on the value alone,
         except in a single-valued slot whose range is a class (`updates`):
         the converter joins only text into one object, so it writes nothing
-        for the mixed list."""
+        for the mixed list. The other exception is the next test's."""
         for prop, (slot, x) in self.PAIRS.items():
             alone = self.this_arm(prop, slot, [x])
             self.assertIsNotNone(alone)
@@ -900,6 +924,70 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                     self.assertEqual(self.this_arm(prop, slot, value), alone)
                     self.assertEqual(self.converter(prop, slot, value),
                                      None if slot == "updates" else alone)
+
+    def test_a_timeframe_list_of_dates_is_a_start_and_an_end_to_the_converter(self):
+        """#4197, the second exception in `_coerce`'s comment. Where an item
+        of `rai:dataCollectionTimeframe` is written as a date, the
+        converter's `_timeframe` reads the list before `_shape` does: two
+        items are a start and an end, a list inside the list counting as
+        one of them, and three or more are dropped whole. This arm writes
+        what it writes for the values alone, a timeframe named by the date,
+        and its detail names each list it dropped. The arms agree on the
+        values alone, on lists of nothing but lists and nulls, and wherever
+        no item is written as a date. What the converter writes and records
+        is pinned as it is, not as right: #4194 decides it, and a change
+        there changes this test and the comment."""
+        prop, slot = "rai:dataCollectionTimeframe", "collection_timeframes"
+        for value in (["2022-09-01"], ["2026-06-30"], ["x"],
+                      ["x", ["y"]], [["y"], "x"], ["x", ["2026-01-31"]]):
+            both = [{"name": next(v for v in value if isinstance(v, str))}]
+            with self.subTest(value=value):
+                self.assertEqual(self.this_arm(prop, slot, value), both)
+                self.assertEqual(self.converter(prop, slot, value), both)
+        for value in ([["2022-09-01"]], [["2022-09-01", "2026-01-31"]],
+                      [["2022-09-01"], ["2026-01-31"]], [None, ["2022-09-01"]]):
+            with self.subTest(value=value):
+                self.assertIsNone(self.this_arm(prop, slot, value))
+                self.assertIsNone(self.converter(prop, slot, value))
+        cases = (
+            # the crate's value, its values alone, the lists this arm names
+            # as dropped, and what the converter writes and records
+            (["2022-09-01", ["2026-01-31"]], ["2022-09-01"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["2026-01-31"]',
+             [{"start_date": "2022-09-01", "end_date": "2026-01-31"}], []),
+            (["2022-09-01", ["y"]], ["2022-09-01"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["y"]',
+             [{"start_date": "2022-09-01"}],
+             [("collection_timeframes[0].end_date",
+               "not placed in `end_date`: not a calendar date: y")]),
+            ([["y"], "2026-06-30"], ["2026-06-30"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["y"]',
+             [{"end_date": "2026-06-30"}],
+             [("collection_timeframes[0].start_date",
+               "not placed in `start_date`: not a calendar date: y")]),
+            (["2022-09-01", ["y"], ["z"]], ["2022-09-01"],
+             '2 of 3 list items are lists inside the list, for a slot that '
+             'holds a list of single values: ["y"], ["z"]',
+             None,
+             [("rai:dataCollectionTimeframe",
+               "not placed in `collection_timeframes`: 3 items, where Croissant "
+               "RAI defines this property as the start and end date of the "
+               "collection")]),
+        )
+        for value, alone, left_out, converted, recorded in cases:
+            with self.subTest(value=value):
+                written_alone, detail_alone = self.this_arm(
+                    prop, slot, alone, detail=True)
+                self.assertEqual(written_alone, [{"name": alone[0]}])
+                self.assertEqual(self.converter(prop, slot, alone), written_alone)
+                self.assertEqual(self.this_arm(prop, slot, value, detail=True), (
+                    written_alone,
+                    f"{left_out}; dropped rather than flattened; {detail_alone}"))
+                self.assertEqual(self.converter(prop, slot, value, dropped=True),
+                                 (converted, recorded))
 
 
 class TestDoi(unittest.TestCase):
