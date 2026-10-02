@@ -122,7 +122,7 @@ def _method_for(label: str, project: str) -> str:
 
 # (key, display, label prefix, runtime, role). Every arm is shown as mean ± SD
 # over its replicates; `role == "worst"` additionally prints the per-project
-# worst, the value the canary gate holds runs against.
+# worst on this table's measurement basis. Gates read stored blocks separately.
 ARMS = (
     ("v4", "v4 API (2026-08-13)", "2026-08-13_claude-opus-5-api-generic-v4",
      "Claude API via CBORG", "worst"),
@@ -569,7 +569,9 @@ def stats(reps: list[dict[str, Any]], metric: str) -> tuple[float, float, int] |
 
 def cell(reps: list[dict[str, Any]], metric: str, role: str) -> str:
     """mean ± SD with the replicates in brackets; the baseline arm adds its
-    per-project worst, which is what the canary gate holds runs against."""
+    per-project worst on the table's measurement basis. Canary gates read
+    stored form blocks independently, so this live worst is not a stored
+    threshold (#4217)."""
     raw = ",".join(fmt(r, metric) for r in reps)
     st = stats(reps, metric)
     if st is None:
@@ -1375,7 +1377,7 @@ def render_markdown(data, scores) -> str:
              "- a record whose own `validation` block says `passed: false` is not an arm "
              "member (#1029): " + (", ".join(f"`{l}` {p}" for l, p in EXCLUDED_INVALID) if EXCLUDED_INVALID else "none excluded this run") + ".", "",
              "Arms: " + "; ".join(f"**{d}** — " + (", ".join(f"`{l}`" for l in pfx) if isinstance(pfx, (list, tuple)) else f"`{pfx}_rep{{1,2,3}}`") + f", {rt}"
-                                   + (" (also shown with its per-project worst — max for reported-only metrics — the canary-gate baseline)" if role == "worst" else "")
+                                   + (" (also shown with its per-project worst on this report's measurement basis — max for reported-only metrics)" if role == "worst" else "")
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
     lines += form_schema_section(data)
@@ -1390,7 +1392,8 @@ def render_markdown(data, scores) -> str:
             lines.append(f"| {disp} | {p} | " + " | ".join(cells) + " |")
     lines += ["", "Cells are mean ± sample SD over the *measured* replicates, with every "
               "replicate value in brackets; n is 3 unless stated. The baseline arm adds "
-              "its per-project worst, the value the canary gate holds runs against. Read "
+              "its per-project worst on this report's measurement basis. Canary gates read "
+              "stored form blocks; this live recompute does not change their thresholds (#4217). Read "
               "the SD as a spread, not a confidence interval: with n = 3 and one outlier "
               "(e.g. [3,14,130]) the SD is that outlier, and the bracketed values are the "
               "better summary. ᵘ = unmeasured — the report-claims checker parsed zero "

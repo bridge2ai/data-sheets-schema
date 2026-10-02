@@ -616,3 +616,27 @@ def test_form_schema_section_escapes_recorded_basis_and_distinguishes_absence():
     assert "run&#124;extra<br>row" in rendered
     assert "bad &#124; pin &lt;schema&gt; &#96;name&#96;" in rendered
     assert "legacy | unrecorded — no schema basis supplied" in rendered
+
+
+def test_live_reference_worst_is_distinguished_from_stored_canary_thresholds(tmp_path):
+    m = _module()
+    data = {arm: {p: [] for p in m.PROJECTS} for arm, *_ in m.ARMS}
+    # The historical v4 live recompute moves 0/6/0 to 116/56/51 (#4216).
+    m.CONCAT = tmp_path
+    data["v4"]["AI_READI"] = [{"undeclared": n, "label": f"fixture_rep{i}"}
+                               for i, n in enumerate((116, 56, 51), 1)]
+    for row in data["v4"]["AI_READI"]:
+        full = tmp_path / "claudecode_agent" / row["label"] / "AI_READI_d4d.yaml"
+        core = tmp_path / "claudecode_agent_core" / row["label"] / "AI_READI_d4d_core.yaml"
+        full.parent.mkdir(parents=True)
+        core.parent.mkdir(parents=True)
+        full.write_text("id: ex:fixture\n")
+        core.write_text("id: ex:fixture\n")
+        (core.parent / "AI_READI_provenance.yaml").write_text("{}\n")
+    text = m.render_markdown(data, {})
+    assert "74.3 ± 36.2 [116,56,51] worst 116" in text
+    assert "worst on this report's measurement basis" in text
+    assert "Canary gates read stored form blocks" in text
+    assert "this live recompute does not change their thresholds" in text
+    assert "the value the canary gate holds runs against" not in text
+    assert "the canary-gate baseline)" not in text
