@@ -411,7 +411,8 @@ class TestTheCLI(unittest.TestCase):
         # VOICE_PEDIATRIC.
         from data_sheets_schema.api_runner import CONDITION_PROMPTS
         from data_sheets_schema.api_playbook import POLICY_PATH
-        for real in set(CONDITION_PROMPTS.values()) | {POLICY_PATH}:
+        from data_sheets_schema.removal_repair import POLICY_PATH as REMOVAL_POLICY_PATH
+        for real in set(CONDITION_PROMPTS.values()) | {POLICY_PATH, REMOVAL_POLICY_PATH}:
             here = self.prompt.with_name(real.name)
             if not here.exists():
                 here.write_text(f"# {real.stem}\n\n## Prompt body\nbody\n")

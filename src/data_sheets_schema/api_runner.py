@@ -539,6 +539,8 @@ class RunSpec:
     prompt_text_env: bool = False
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
+    # Separately selected restore-only runtime condition, never inferred from a label.
+    removal_repair_version: int = 0
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
@@ -563,6 +565,10 @@ class RunSpec:
             raise ValueError("api_playbook_version must be 0 or 1")
         if self.api_playbook_version and (self.is_agentic or self.render_version != 8):
             raise ValueError("API playbook v1 supports only API renderer 8")
+        if type(self.removal_repair_version) is not int or self.removal_repair_version not in (0, 1):
+            raise ValueError("removal_repair_version must be 0 or 1")
+        if self.removal_repair_version and (self.is_agentic or self.render_version != 8):
+            raise ValueError("removal repair v1 requires API renderer 8")
         if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
             # Only agentic renderers 9 and later carry the recorder line the
             # key changes; elsewhere it would be recorded and do nothing (#2313).
@@ -676,13 +682,20 @@ class RunSpec:
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
-                   api_playbook_version=recorded.get("api_playbook_version", 0), _replay_only=True)
+                   api_playbook_version=recorded.get("api_playbook_version", 0),
+                   removal_repair_version=recorded.get("removal_repair_version", 0), _replay_only=True)
         if spec.api_playbook_version:
             from data_sheets_schema.api_playbook import POLICY_SHA256
             if recorded.get("api_playbook_sha256") != POLICY_SHA256:
                 raise ValueError("invalid recorded API playbook v1 SHA256")
         elif "api_playbook_sha256" in recorded or "api_playbook_version" in recorded:
             raise ValueError("API playbook metadata is recorded only for opt-in version 1")
+        if spec.removal_repair_version:
+            from data_sheets_schema.removal_repair import POLICY_SHA256
+            if recorded.get("removal_repair_sha256") != POLICY_SHA256:
+                raise ValueError("recorded removal repair policy digest differs")
+        elif "removal_repair_sha256" in recorded or "removal_repair_version" in recorded:
+            raise ValueError("historical specs omit removal repair policy keys")
         if "prompt_text_env" in recorded and recorded["prompt_text_env"] is not True:
             # `render_spec` emits the key only as true; any other spelling
             # would not round-trip and would be refused later as a changed
@@ -738,6 +751,9 @@ class RunSpec:
         if self.api_playbook_version:
             from data_sheets_schema.api_playbook import policy_text
             policy_text()
+        if self.removal_repair_version:
+            from data_sheets_schema.removal_repair import policy_text as removal_policy_text
+            removal_policy_text()
         actual = request_header_values(settings)
         if self._api_header_values is None and not self._replay_only:
             self._api_header_values = actual
@@ -762,6 +778,9 @@ class RunSpec:
         if self.api_playbook_version:
             from data_sheets_schema.api_playbook import policy_text
             policy_text()
+        if self.removal_repair_version:
+            from data_sheets_schema.removal_repair import policy_text as removal_policy_text
+            removal_policy_text()
 
         def entry(path):
             if path is None:
@@ -803,6 +822,9 @@ class RunSpec:
             from data_sheets_schema.api_playbook import POLICY_SHA256
             policy_metadata = {"api_playbook_version": self.api_playbook_version,
                                "api_playbook_sha256": POLICY_SHA256}
+        if self.removal_repair_version:
+            from data_sheets_schema.removal_repair import POLICY_SHA256 as REMOVAL_POLICY_SHA256
+            policy_metadata.update(removal_repair_version=1, removal_repair_sha256=REMOVAL_POLICY_SHA256)
         return {**policy_metadata,
                 **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
@@ -905,6 +927,9 @@ class RunSpec:
             files.append(POLICY_PATH)
         if self.condition == "tuned":
             files += [TUNED_PROMPT, COMPONENTS / f"{self.project}.md"]
+        if self.removal_repair_version:
+            from data_sheets_schema.removal_repair import POLICY_PATH as REMOVAL_POLICY_PATH
+            files.append(REMOVAL_POLICY_PATH)
         return files
 
 
@@ -988,7 +1013,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1020,6 +1045,13 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0) -
         from data_sheets_schema.api_playbook import POLICY_SHA256
         parts.append({"api_playbook_version": 1, "api_playbook_sha256": POLICY_SHA256,
                       "adaptation": "API policy + declarations + full header + selected decision rules + phase return"})
+    if type(removal_repair_version) is not int or removal_repair_version not in (0, 1):
+        raise ValueError("unsupported removal repair assembly version")
+    if removal_repair_version:
+        if render_version != 8:
+            raise ValueError("removal repair v1 requires API renderer 8")
+        from data_sheets_schema.removal_repair import policy_identity
+        parts.append({"removal_repair": policy_identity()})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1275,6 +1307,9 @@ def resolve_prompt(spec: RunSpec) -> str:
         body += f"\n\n## Required phase output contracts (renderer {spec.render_version})\n\n"
         body += "\n\n".join(evidence_phase_contract(phase, spec.render_version)
                               for phase in EVIDENCE_PHASE_CONTRACTS)
+    if spec.removal_repair_version:
+        from data_sheets_schema.removal_repair import policy_text as removal_policy_text
+        body += "\n\n" + removal_policy_text()
     return body
 
 
@@ -2680,6 +2715,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "project": spec.project, "arm": spec.arm, "method": spec.method,
         "label": spec.label, "condition": spec.condition,
         **({"api_playbook_version": spec.api_playbook_version} if spec.api_playbook_version else {}),
+        **({"removal_repair_version": spec.removal_repair_version} if spec.removal_repair_version else {}),
         "bundle": str(spec.bundle), "bundle_bytes": spec.bundle.stat().st_size,
         "model": settings,
         "runtime": RUNTIME,
@@ -2706,6 +2742,11 @@ def plan(spec: RunSpec) -> dict[str, Any]:
                                 "the full-phase exchange, output at most "
                                 f"{READDRESS_MAX_TOKENS} tokens"]
                                if spec.condition in RECEIPT_CONDITIONS else [])
+                              + (["removal_repair_full: at most one restore-only full-record request; original/current records, "
+                                  "fixed audit, receipt and work order; input depends on detected deletions, output at most "
+                                  f"{phase_max_tokens(spec, 'removal_repair_full', DEFAULT_MAX_TOKENS, model=settings['name'])} tokens; "
+                                  "an accepted change re-derives the core and regenerates the report"]
+                                 if spec.removal_repair_version else [])
                               + ["report_regate: one regeneration of the report when its "
                                  "dispositions contradict the records (#929); the report "
                                  "request plus the report and the contradictions, output at "
@@ -4266,6 +4307,8 @@ def sent_text_surfaces() -> dict[str, str]:
     out["draft_grammar_contract_v18"] = DRAFT_GRAMMAR_CONTRACT_V18
     out["schema_semantics_header_v19"] = SCHEMA_SEMANTICS_HEADER_V19
     out["schema_semantics_contract_v19"] = SCHEMA_SEMANTICS_CONTRACT_V19
+    from data_sheets_schema.removal_repair import policy_text as removal_policy_text
+    out["removal_repair_policy_v1"] = removal_policy_text()
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -6318,6 +6361,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if refusal is not None:
             # Before artifact drift can invalidate paid phases (#1820).
             _assert_evidence_clean(refusal["reading"], refusal["stage"])
+        from data_sheets_schema.usage_ledger import require_removal_repair_admission
+        require_removal_repair_admission(spec)
         from data_sheets_schema.usage_ledger import require_source_review_admission
         require_source_review_admission(spec)
     progress = _load_progress(spec) if resume else {}
@@ -6487,6 +6532,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # and a sweep interrupted after a *passing* canary could not resume
             # and fan out under the gate it had already satisfied.
             evidence = saved_evidence_checks(spec, existing) if spec.render_version >= 9 else None
+            removal_check = None
+            if spec.removal_repair_version:
+                from data_sheets_schema.removal_repair import completion_check
+                removal_check = completion_check(spec, record=existing)
+                _assert_evidence_clean(removal_check, "report", spec=spec)
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
@@ -6500,7 +6550,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing),
-                               **({"evidence_assertions": evidence} if evidence is not None else {})},
+                               **({"evidence_assertions": evidence} if evidence is not None else {}),
+                               **({"removal_repair": removal_check} if removal_check is not None else {})},
                     "already_complete": True,
                     "outputs": {"full": str(spec.full_path),
                                 "core": str(spec.core_path),
@@ -6752,7 +6803,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # both: the file for provenance of the source, the resolution for the
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
-    rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version)
+    rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version,
+                                                       removal_repair_version=spec.removal_repair_version)
     rec.data["prompts"]["context_blocks"] = context_blocks(spec)
     ident = provider_identity()
     rec.data["model"] = {
@@ -6770,6 +6822,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                    if not (CORE_DERIVED and (k in DERIVED_PHASES or k == "repair_core"))},
                                 **({"full_readdress": min(READDRESS_MAX_TOKENS, output_limit(settings["name"]))}
                                    if spec.condition in RECEIPT_CONDITIONS else {}),
+                                **({"removal_repair_full": phase_max_tokens(spec, "removal_repair_full", DEFAULT_MAX_TOKENS, model=settings["name"])}
+                                   if spec.removal_repair_version else {}),
                                 "report_regate": phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
@@ -6859,9 +6913,36 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                         "a report describing bytes that no longer exist is the "
                         "artifact a reviewer reads instead of the diff"),
             }
-            _regenerate_report(spec, client, settings, usage, carry)
+            if not spec.removal_repair_version:
+                _regenerate_report(spec, client, settings, usage, carry)
     else:
         rec.data["repair"] = prior_repair or None
+    removal_check = None
+    if spec.removal_repair_version:
+        from data_sheets_schema.removal_repair import run as repair_removals
+        removal_check = repair_removals(spec, client, settings, usage)
+        rec.data["removal_repair"] = removal_check
+        rec.data["removals"] = removal_check.get("final")
+        if removal_check.get("changed"):
+            problems = validate_outputs(spec)
+            rec.data["report_regenerated_after_repair"] = {
+                "changed": ["full", "core"], "why": "accepted restore-only removal repair changed the record pair"}
+        # Freeze accepted internal writes before a later report interruption.
+        _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
+        if removal_check.get("changed") and not removal_check.get("resumed"):
+            from data_sheets_schema.usage_ledger import accept_removal_repair
+            accept_removal_repair(spec, removal_check)
+        if (not removal_check["findings"] and rec.data.get("report_regenerated_after_repair")
+                and not removal_check.get("resumed")):
+            refreshed = _regenerate_report(spec, client, settings, usage, carry)
+            if refreshed and removal_check.get("changed"):
+                from data_sheets_schema.usage_ledger import finish_removal_report
+                _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
+                finish_removal_report(spec)
+            elif not refreshed:
+                from data_sheets_schema.usage_ledger import record_evidence_refusal
+                removal_check["findings"] = [{"kind": "removal_report_refresh_failed"}]
+                record_evidence_refusal(spec, "report", removal_check)
     rec.data["validation"] = validation_block(spec, problems)
     if CORE_DERIVED:
         # After repair, for the same reason validation is: repair rewrites the
@@ -6883,7 +6964,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if on_disk == fresh:
             rec.data["core_derivation"] = {
                 **derivation_facts(spec.full_path),
-                "phase": ("repair_core" if repaired else
+                "phase": ("removal_repair_core" if removal_check and removal_check.get("changed") else
+                          "repair_core" if repaired else
                           (core_derivation or {}).get("phase", "reconcile_core")),
             }
         else:
@@ -6911,7 +6993,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # resolver-URL metric reads the record as written, clean by construction.
     _REWRITE_LOG.reset(_rewrite_token)
     rec.data["normalisation"] = identifier_rewrite_summary(_rewrites)
-    rec.data["report_gate"] = _gate_report(spec, client, settings, usage, carry)
+    rec.data["report_gate"] = (
+        {"checked": False, "regenerated": False, "reason": "terminal removal-repair refusal"}
+        if removal_check is not None and removal_check["findings"] else
+        _gate_report(spec, client, settings, usage, carry))
     final_evidence = require_evidence_checks(spec, carry, stage="report", fail=False)
     if final_evidence is not None:
         rec.data["report_gate"]["evidence_assertions_final"] = final_evidence
@@ -6928,6 +7013,18 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # report block from the report alone and would drop the flag (#961);
     # `backfill_checks` restores it from here.
     rec.data.setdefault("inputs", {})["dispositions_expected"] = True
+    if removal_check is not None and not removal_check["findings"]:
+        # Report regeneration is another asynchronous call. Recheck the
+        # actual final bytes after it, without discarding any earlier refusal.
+        from data_sheets_schema.removal_repair import completion_check
+        final_removals = completion_check(spec)
+        removal_check.update(checked=final_removals["checked"],
+                             findings=final_removals["findings"],
+                             final=final_removals.get("final"))
+        rec.data["removals"] = removal_check["final"]
+        if removal_check["findings"]:
+            from data_sheets_schema.usage_ledger import record_evidence_refusal
+            record_evidence_refusal(spec, "report", removal_check)
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts
@@ -6955,6 +7052,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
     _assert_evidence_clean(final_evidence, "report", spec=spec)
+    _assert_evidence_clean(removal_check, "report", spec=spec)
 
     # Verify what was just written rather than assuming it. The playbook lists a
     # live record as a completion criterion, and a criterion nothing checks is a
@@ -7018,7 +7116,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                        "report": rec.data.get("report_claims"),
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),
-                       "receipts": rec.data.get("receipts")},
+                       "receipts": rec.data.get("receipts"),
+                       **({"removal_repair": removal_check} if removal_check is not None else {})},
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),
                         "provenance": str(spec.provenance_path)}}
