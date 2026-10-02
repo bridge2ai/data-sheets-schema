@@ -347,7 +347,67 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     terminal `result` lists the call, which then never ran. `timeout`,
     `env` and `nice` wrappers are read through. A derive whose program is a
     variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`)
-    cannot be placed, as that program may be a wrapper. Three kinds of part carrying
+    cannot be placed, as that program may be a wrapper. Nor can one that an
+    assignment may come before, as it may make the part run other code: no
+    assignment is exempt, `PYTHONPATH=src` included. That is read by words,
+    not by where they stand: an assignment on the part or given to `env`
+    (`PYTHONPATH=src python -m data_sheets_schema.cli`); an earlier part of
+    the command carrying, anywhere in it, an assignment word (`NAME=`,
+    `NAME+=`, `NAME[...]=` or `NAME[...]+=`: `PATH=./bin:$PATH;`, `{
+    PATH=./bin:$PATH; };`, `PATH=... 2>/dev/null;`), `printf` with a word
+    starting with `-v`, one of the words `export`, `declare`, `typeset`,
+    `local`, `readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`,
+    `source`, `.`, `set`, `shopt`, `alias`, `hash`, `enable`, `for` or
+    `select`, a `{NAME}` word before a redirection operator (`echo hi
+    {PATH}>/dev/null;`) or a word carrying a `$'...'` or `$"..."` quote; a
+    word in an earlier part or on the derive's own part carrying, quoted or
+    not, a parameter expansion that may assign (`${NAME:=...}`,
+    `${NAME=...}`), a bash 5.3 `${ ...; }` or `${| ...; }` substitution,
+    which runs in this shell, a backquote, or a `$(` or `${` inside a
+    `[...]` subscript; or an assignment word anywhere on the part where any
+    part of the command carries `set` with an option carrying `k` or the
+    word `keyword` (`set -k`, `set -o keyword`). All but the first are read
+    in a part's words both as the tokenizer splits them and as bash does,
+    a line continuation deleted and a newline after an escaped backslash
+    kept, and no derive is placed where the second reading cannot be split
+    or splits the command into other parts; where the tokenizer may pair
+    the quotes otherwise than bash (a quote inside a double-quoted `$(...)`
+    or `${...}` or inside a backquote, a `case` word inside the former, a
+    `\\'` inside `$'...'`, or a backquote the comment rule cut short at a
+    `#`); or where an operator character stands quoted or escaped anywhere
+    in the command (`echo hi '&&' d4d derive core ...`), which it may read
+    as a join. Nor is one placed in a command whose text carries, anywhere,
+    quoted or not and in a comment too, a `${`, `$((` or `$[` (bash reads
+    the expansion or arithmetic whole, so `${X:-a&&b}` holds no join, and a
+    `#` in one, or right after the `))` closing a `$((...))`, starts no
+    comment), a backquote (its command runs in a child), or a subscript
+    (`NAME[`, `]=` or `]+=`: at a command's start bash reads `PATH[0
+    ]=./bin` as one assignment word); nor where a `#` stands right after a
+    `)` (bash continues the word after a `$(...)`), or a comment and a
+    backslash-newline meet (bash ends a comment at the newline, and deletes
+    a continuation before it reads a `#`); nor where the two readings give
+    the derive's own words otherwise (`--full F\\<newline>x` is `--full
+    Fx`). In each, a derive read as aimed at another record is not read so
+    either, as a part the tokenizer alone reads, such as a `cd`, may have
+    moved its `--full`. Its cost is a false `unknown` (`echo X=1;`, `ls .;`,
+    `set -e;`, ``echo `date`;``, `echo "$(date)";`, `echo ${HOME};`). A
+    route those words do not name (such as a function, `getopts`, `unset`,
+    `coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1
+    ))`, or a word built at run time, `$X`) or an assignment outside the
+    command is not read, so a derive after `unset PATH;` is placed. A
+    comment the comment rule ends otherwise than bash (at a `#` inside an
+    unquoted `${...}`, right after the `))` or `)` closing a `$((...))` or
+    `$(...)`, or where a comment and a backslash-newline meet) is moot for
+    the derive rule; the other rules still read the command as cut there
+    (#4195). Nor is one placed whose own words carry `--help` or `-h` (a
+    help option may make the CLI return 0 without deriving), or that
+    follows a part carrying, wherever it stands, `exit`, `exec`, `return`,
+    `logout`, `break`, `continue`, `kill` or `suspend`, which may end the
+    shell or leave the rest of the command unrun (`if test -d /; then exit
+    0; fi;` and `exec /usr/bin/true;` return 0 and run no `d4d`). Its cost
+    is a false `unknown` (`echo exit;`); such a word supplied at run time
+    (`$X`) or run by a trap (`trap 'exit 0' DEBUG;`) is not read (#4205).
+    Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
