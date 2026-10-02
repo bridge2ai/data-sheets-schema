@@ -36,6 +36,14 @@ copy and pin both the artifact and its loader.
 tool. Acceptance never rebuilds the authority from whatever schema is current.
 A changed authority needs a separately identified instrument and registration.
 
+Release reproduction uses the hash-verified gzip source snapshots in
+`tests/fixtures/semantic_evidence_authority_v3`, also recoverable from commit
+`b36bb067641467b7e14bea42fa378ac06167d68f`. The builder reads aliases from those
+source bytes as a literal mapping without executing them. Current schema,
+rubric or alias maintenance must not regenerate the released v3 authority;
+even a comment edit changes source hashes while leaving the names unchanged.
+Historical v3 ratings continue to use the released authority digest.
+
 This authority validates token names, not their complete class/range traversal.
 It rejects undeclared names even after a missing parent. JSON-pointer tokens
 are decoded literally: `/version_access.version_details` does not mean the

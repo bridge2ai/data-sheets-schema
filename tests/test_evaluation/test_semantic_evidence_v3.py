@@ -1,5 +1,6 @@
 """The released evidence contract gates exact outputs without revising history."""
 import copy
+import gzip
 import hashlib
 import json
 from pathlib import Path
@@ -183,10 +184,71 @@ def test_authority_includes_declared_rubric_names_without_special_provenance_all
     assert digest == authority_digest()
 
 
-def test_authority_rebuild_matches_the_declared_source_bytes():
-    from build_semantic_evidence_authority import build
+def frozen_authority_sources():
+    artifact = json.loads((ROOT / "data/rubric/semantic_evidence_authority_v3.json").read_text())
+    snapshot = ROOT / "tests/fixtures/semantic_evidence_authority_v3"
+    sources = {}
+    for path, digest in artifact["sources"].items():
+        raw = gzip.decompress((snapshot / (path + ".gz")).read_bytes())
+        assert hashlib.sha256(raw).hexdigest() == digest, path
+        sources[path] = raw
+    return sources
+
+
+def test_authority_rebuild_matches_its_frozen_source_bytes():
+    from build_semantic_evidence_authority import build_from_sources
     artifact = ROOT / "data/rubric/semantic_evidence_authority_v3.json"
-    assert json.dumps(build(), indent=2) + "\n" == artifact.read_text()
+    assert hashlib.sha256(artifact.read_bytes()).hexdigest() == (
+        "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872")
+    assert json.dumps(build_from_sources(frozen_authority_sources()), indent=2) + "\n" == artifact.read_text()
+
+
+@pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
+def test_current_source_evolution_does_not_rotate_released_authority(source, tmp_path, monkeypatch, rubric):
+    from build_semantic_evidence_authority import CONTEXT as CONTEXT_PATH, SCHEMAS, build
+    from data_sheets_schema import semantic_evidence_authority as authority
+    old_rating = current(rubric, source)
+    old_rating["metadata"]["evidence_authority_sha256"] = (
+        "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872")
+    snapshot = frozen_authority_sources()
+    for relative, raw in snapshot.items():
+        path = tmp_path / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(raw)
+    released = (ROOT / authority.AUTHORITY_PATH).read_bytes()
+    (tmp_path / authority.AUTHORITY_PATH).write_bytes(released)
+    schema = tmp_path / SCHEMAS[0]
+    schema.write_bytes(schema.read_bytes() + b"\n# Ordinary maintenance after v3 release.\n")
+    proposed = build(tmp_path)
+    assert proposed["names"] == json.loads(released)["names"]
+    assert proposed["sources"] != json.loads(released)["sources"]
+    assert json.dumps(proposed, indent=2).encode() + b"\n" != released
+
+    # A new field/alias proposal reads the supplied context bytes, not the
+    # ambient imported module. Merely existing today does not grant v3 names.
+    context = tmp_path / CONTEXT_PATH
+    context.write_text(context.read_text().replace(
+        "FIELD_ALIASES = {", 'FIELD_ALIASES = {"future_declared_field": ("future_alias",),'))
+    assert {"future_declared_field", "future_alias"} <= set(build(tmp_path)["names"])
+    monkeypatch.setattr(authority, "resource_path", lambda path: tmp_path / path)
+    assert check_evidence(old_rating, source[0], rubric).passed
+    assert accept(old_rating, tmp_path) == 0
+    assert authority.authority_digest() == old_rating["metadata"]["evidence_authority_sha256"]
+    _row(old_rating, "E1.1" if rubric == "rubric10" else "Q1",
+         absent=[{"path": "future_declared_field"}])
+    assert "unknown_absence_name" in {e.code for e in check_evidence(old_rating, source[0], rubric).errors}
+    assert (tmp_path / authority.AUTHORITY_PATH).read_bytes() == released
+
+
+def test_authority_builder_reads_literal_alias_bytes_without_executing_them():
+    from build_semantic_evidence_authority import CONTEXT as CONTEXT_PATH, build_from_sources
+    sources = frozen_authority_sources()
+    sources[CONTEXT_PATH] += b'\nraise RuntimeError("recorded source must not execute")\n'
+    built = build_from_sources(sources)
+    assert built["names"] == json.loads((ROOT / "data/rubric/semantic_evidence_authority_v3.json").read_text())["names"]
+    sources[CONTEXT_PATH] = b"FIELD_ALIASES = dict(made_up=('new_name',))\n"
+    with pytest.raises(ValueError):
+        build_from_sources(sources)
 
 
 @pytest.mark.parametrize("rubric", ["rubric10", "rubric20"])
