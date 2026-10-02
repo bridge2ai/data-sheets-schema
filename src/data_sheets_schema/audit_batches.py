@@ -33,7 +33,7 @@ import re
 
 import yaml
 
-from . import audit_grammar
+from . import audit_grammar, audit_protocol
 
 PLAN_KIND = "audit_batch_plan_v1"
 INDEX_KIND = "audit_batch_index_v1"
@@ -188,23 +188,25 @@ def _pack(inventory, roots, limits):
 
 
 def make_plan(original_full: str, *, max_paths: int = 96, max_inventory_bytes: int = 16384,
-              max_workers: int = 16) -> dict:
+              max_workers: int = 16, version: int = 1) -> dict:
     """Pack whole top-level fields; an empty record gets one explicit empty worker.
 
     Bytes bound the canonical assigned inventory rows, not the rendered prompt.
     The caller must separately bound complete sources, schema and runtime context.
     """
+    audit_protocol.check_version(version)
     limits = _limits(dict(max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers))
     inventory, roots = _inventory(original_full)
-    return _bound({"schema_version": 1, "kind": PLAN_KIND, "original_full_sha256": inventory["sha256"],
+    return _bound({"schema_version": version, "kind": f"audit_batch_plan_v{version}", "original_full_sha256": inventory["sha256"],
                    "limits": limits, "inventory": inventory, "field_roots": roots,
                    "workers": _pack(inventory, roots, limits)})
 
 
-def validate_plan(plan, original_full) -> None:
+def validate_plan(plan, original_full, *, version: int = 1) -> None:
     """Recompute against frozen original bytes, not merely a self-supplied hash."""
+    audit_protocol.check_version(version)
     try:
-        expected = make_plan(original_full, **_limits(plan["limits"]))
+        expected = make_plan(original_full, **_limits(plan["limits"]), version=version)
         if canonical_bytes(plan) != canonical_bytes(expected):
             raise AuditBatchError("plan_original_mismatch")
     except AuditBatchError:
@@ -213,12 +215,13 @@ def validate_plan(plan, original_full) -> None:
         raise AuditBatchError("plan_invalid") from None
 
 
-def _plan(plan):
+def _plan(plan, *, version=1):
     """Structural self-consistency only; original authority is validate_plan's job."""
+    audit_protocol.check_version(version)
     try:
         if type(plan) is not dict or set(plan) != {"schema_version", "kind", "original_full_sha256", "limits", "inventory", "field_roots", "workers", "sha256"}:
             raise AuditBatchError("plan_shape")
-        if type(plan["schema_version"]) is not int or plan["schema_version"] != 1 or plan["kind"] != PLAN_KIND:
+        if type(plan["schema_version"]) is not int or plan["schema_version"] != version or plan["kind"] != f"audit_batch_plan_v{version}":
             raise AuditBatchError("plan_version")
         if not isinstance(plan["original_full_sha256"], str) or not _DIGEST.fullmatch(plan["original_full_sha256"]):
             raise AuditBatchError("plan_digest")
@@ -248,13 +251,13 @@ def _plan(plan):
         raise AuditBatchError("plan_invalid") from None
 
 
-def _report(errors=()):
-    return {"instrument": INSTRUMENT, "schema_version": 1, "passed": not errors,
+def _report(errors=(), *, version=1):
+    return {"instrument": f"audit_batches grammar v{version}", "schema_version": version, "passed": not errors,
             "error_count": len(errors), "errors": list(errors[:MAX_ERRORS]), "truncated": len(errors) > MAX_ERRORS}
 
 
-def _failure(code, path=""):
-    return _report([{"code": code, "path": path}])
+def _failure(code, path="", *, version=1):
+    return _report([{"code": code, "path": path}], version=version)
 
 
 def _load(raw):
@@ -264,42 +267,44 @@ def _load(raw):
         raise AuditBatchError(str(exc)) from None
 
 
-def check_worker(raw: bytes, plan, worker_id) -> dict:
+def check_worker(raw: bytes, plan, worker_id, *, version: int = 1) -> dict:
     """Candidate-only grammar plus registered structural path/root ownership."""
+    audit_protocol.check_version(version)
     try:
-        _plan(plan)
+        _plan(plan, version=version)
         worker = next((w for w in plan["workers"] if w["id"] == worker_id), None)
         if worker is None:
-            return _failure("worker_id_unknown")
-        result = audit_grammar.check(raw)
+            return _failure("worker_id_unknown", version=version)
+        result = audit_grammar.check(raw, version=version)
         if not result["passed"]:
-            return {**result, "instrument": INSTRUMENT}
+            return {**result, "instrument": f"audit_batches grammar v{version}"}
         audit = _load(raw)
         review = audit["source_review"]
         if review["sha256"] != plan["original_full_sha256"]:
-            return _failure("worker_original_digest", "/source_review/sha256")
+            return _failure("worker_original_digest", "/source_review/sha256", version=version)
         if set(r["path"] for r in review["values"]) != set(worker["paths"]):
-            return _failure("worker_path_roster", "/source_review/values")
+            return _failure("worker_path_roster", "/source_review/values", version=version)
         for i, finding in enumerate(audit["findings"]):
             removal = finding.get("remove_relationship")
             if removal and _pointer(_tokens(removal["path"])[:1]) not in worker["roots"]:
-                return _failure("worker_removal_owner", f"/findings/{i}/remove_relationship/path")
-        return _report()
+                return _failure("worker_removal_owner", f"/findings/{i}/remove_relationship/path", version=version)
+        return _report(version=version)
     except AuditBatchError as exc:
-        return _failure(str(exc))
+        return _failure(str(exc), version=version)
     except (TypeError, KeyError, ValueError, RecursionError):
-        return _failure("worker_structure_invalid")
+        return _failure("worker_structure_invalid", version=version)
 
 
-def build_index(plan, proposals: dict[str, bytes]) -> dict:
+def build_index(plan, proposals: dict[str, bytes], *, version: int = 1) -> dict:
     """Bind every immutable worker, row and finding; validate no source claims."""
-    _plan(plan)
+    audit_protocol.check_version(version)
+    _plan(plan, version=version)
     if type(proposals) is not dict or set(proposals) != {w["id"] for w in plan["workers"]}:
         raise AuditBatchError("proposal_roster")
     workers, by_path, findings = [], {}, []
     for worker in plan["workers"]:
         key, raw = worker["id"], proposals[worker["id"]]
-        if not check_worker(raw, plan, key)["passed"]:
+        if not check_worker(raw, plan, key, version=version)["passed"]:
             raise AuditBatchError("worker_invalid")
         value = _load(raw)
         workers.append({"id": key, "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)})
@@ -307,7 +312,7 @@ def build_index(plan, proposals: dict[str, bytes]) -> dict:
             by_path[row["path"]] = {"path": row["path"], "worker_id": key, "sha256": object_sha256(row)}
         for i, finding in enumerate(value["findings"]):
             findings.append({"id": f"{key}:{i + 1:04d}", "worker_id": key, "ordinal": i, "sha256": object_sha256(finding)})
-    return _bound({"schema_version": 1, "kind": INDEX_KIND, "plan_sha256": plan["sha256"],
+    return _bound({"schema_version": version, "kind": f"audit_batch_index_v{version}", "plan_sha256": plan["sha256"],
                    "original_full_sha256": plan["original_full_sha256"], "workers": workers,
                    "rows": [by_path[r["path"]] for r in plan["inventory"]["values"]], "findings": findings})
 
@@ -323,6 +328,9 @@ def _assertions(grammar, value, path, *, nonempty):
 
 
 def _finding(grammar, value, path):
+    if grammar.version == 2:
+        grammar.finding(value, path)
+        return
     if not grammar.obj(value, {"severity", "record", "slot", "issue", "evidence"}, path,
                        {"review_paths", "remove_relationship"}):
         return
@@ -338,14 +346,16 @@ def _finding(grammar, value, path):
         grammar.removal(value["remove_relationship"], path + "/remove_relationship")
 
 
-def _integration(raw, plan, proposals):
-    index = build_index(plan, proposals)
+def _integration(raw, plan, proposals, *, version=1):
+    index = build_index(plan, proposals, version=version)
     value = _load(raw)
-    g = audit_grammar._Grammar()
+    g = audit_grammar._Grammar(version=version)
     required = {"kind", "proposal_index_sha256", "retain_other_rows_from_index_sha256", "row_replacements", "finding_decisions", "new_findings", "summary"}
+    if version == 2:
+        required.add("omission_dispositions")
     if not g.obj(value, required, ""):
         return value, index, g.result()
-    g.enum(value.get("kind"), {INTEGRATION_KIND}, "/kind")
+    g.enum(value.get("kind"), {f"audit_integration_v{version}"}, "/kind")
     g.text(value.get("summary"), "/summary")
     for key in ("proposal_index_sha256", "retain_other_rows_from_index_sha256"):
         if value.get(key) != index["sha256"]:
@@ -405,10 +415,25 @@ def _integration(raw, plan, proposals):
     if g.array(value.get("new_findings"), "/new_findings"):
         for i, finding in enumerate(value["new_findings"]):
             _finding(g, finding, f"/new_findings/{i}")
+    if version == 2 and g.array(value.get("omission_dispositions"), "/omission_dispositions"):
+        seen = set()
+        for i, item in enumerate(value["omission_dispositions"]):
+            at = f"/omission_dispositions/{i}"
+            if not g.obj(item, {"candidate_id", "action", "reason", "evidence"}, at):
+                continue
+            identity = item.get("candidate_id")
+            if g.text(identity, at + "/candidate_id"):
+                if identity in seen:
+                    g.problem("omission_disposition_duplicate", at + "/candidate_id")
+                seen.add(identity)
+            action = item.get("action")
+            g.enum(action, {"retain", "drop"}, at + "/action")
+            g.text(item.get("reason"), at + "/reason")
+            _assertions(g, item.get("evidence"), at + "/evidence", nonempty=action != "retain")
     return value, index, g.result()
 
 
-def _materialize(plan, proposals, value, index):
+def _materialize(plan, proposals, value, index, *, version=1):
     audits = {key: _load(raw) for key, raw in proposals.items()}
     rows = {r["path"]: r for audit in audits.values() for r in audit["source_review"]["values"]}
     replacements = {r["path"]: (i, r) for i, r in enumerate(value["row_replacements"])}
@@ -444,10 +469,14 @@ def _materialize(plan, proposals, value, index):
     audit = {"findings": findings, "summary": value["summary"], "source_review": {
         "artifact": "original_full", "sha256": plan["original_full_sha256"],
         "values": [rows[r["path"]] for r in plan["inventory"]["values"]]}}
-    lineage = {"schema_version": 1, "kind": "audit_batch_lineage_v1", "plan_sha256": plan["sha256"],
+    lineage = {"schema_version": version, "kind": f"audit_batch_lineage_v{version}", "plan_sha256": plan["sha256"],
                "proposal_index_sha256": index["sha256"], "rows": lineage_rows,
                "findings": lineage_findings, "finding_dispositions": dispositions,
                "decision_assertions": [e for d in value["row_replacements"] + value["finding_decisions"] for e in d["evidence"]]}
+    if version == 2:
+        lineage["omission_dispositions"] = [{**item, "decision_ordinal": i,
+            "decision_sha256": object_sha256(item)} for i, item in enumerate(value["omission_dispositions"])]
+        lineage["decision_assertions"].extend(e for d in value["omission_dispositions"] for e in d["evidence"])
     return audit, lineage
 
 
@@ -467,41 +496,43 @@ def _removal_errors(audit, plan):
     return errors
 
 
-def _checked_integration(raw, plan, proposals):
-    value, index, report = _integration(raw, plan, proposals)
+def _checked_integration(raw, plan, proposals, *, version=1):
+    value, index, report = _integration(raw, plan, proposals, version=version)
     if not report["passed"]:
-        return None, None, {**report, "instrument": INSTRUMENT}
-    audit, lineage = _materialize(plan, proposals, value, index)
+        return None, None, {**report, "instrument": f"audit_batches grammar v{version}"}
+    audit, lineage = _materialize(plan, proposals, value, index, version=version)
     encoded = canonical_bytes(audit)
-    report = audit_grammar.check(encoded)
+    report = audit_grammar.check(encoded, version=version)
     if not report["passed"]:
-        return None, None, {**report, "instrument": INSTRUMENT,
+        return None, None, {**report, "instrument": f"audit_batches grammar v{version}",
                             "errors": [{**e, "path": "/assembled" + e["path"]} for e in report["errors"]]}
     errors = _removal_errors(audit, plan)
     if errors:
-        return None, None, _report(errors)
+        return None, None, _report(errors, version=version)
     lineage.update(integration_sha256=hashlib.sha256(raw).hexdigest(), audit_sha256=hashlib.sha256(encoded).hexdigest())
-    return encoded, lineage, _report()
+    return encoded, lineage, _report(version=version)
 
 
-def check_integration(raw: bytes, plan, proposals) -> dict:
+def check_integration(raw: bytes, plan, proposals, *, version: int = 1) -> dict:
     """Structure and complete explicit integration only; no source entailment."""
+    audit_protocol.check_version(version)
     try:
-        return _checked_integration(raw, plan, proposals)[2]
+        return _checked_integration(raw, plan, proposals, version=version)[2]
     except AuditBatchError as exc:
-        return _failure(str(exc))
+        return _failure(str(exc), version=version)
     except (TypeError, KeyError, ValueError, RecursionError):
-        return _failure("integration_structure_invalid")
+        return _failure("integration_structure_invalid", version=version)
 
 
-def assemble(plan, proposals, integration_raw) -> tuple[bytes, dict]:
+def assemble(plan, proposals, integration_raw, *, version: int = 1) -> tuple[bytes, dict]:
     """Apply only explicit model decisions, producing audit bytes and lineage.
 
     Neither this operation nor grammar establishes scientific acceptance. The
     caller invokes the sole terminal source/evidence check after exact sealing.
     """
+    audit_protocol.check_version(version)
     try:
-        encoded, lineage, report = _checked_integration(integration_raw, plan, proposals)
+        encoded, lineage, report = _checked_integration(integration_raw, plan, proposals, version=version)
         if not report["passed"]:
             raise AuditBatchError("integration_invalid")
         return encoded, lineage
