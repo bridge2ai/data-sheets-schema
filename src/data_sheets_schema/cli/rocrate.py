@@ -254,7 +254,8 @@ def bundle(project, packages_dir):
         for w in withheld:
             click.echo(f"  - {w.split(' — ')[0]} (withheld)")
 
-    if failures:
+    if failures:                                           # the total, not a bare exit (#3638)
+        click.echo(f"\n❌ {failures} of {len(targets)} bundle(s) not written", err=True)
         sys.exit(1)
     click.echo("\n✅ Crate-augmented bundles written")
 
@@ -293,7 +294,8 @@ def emit_arm(version, project, packages_dir):
             click.echo(f"  ❌ {name}: {e}", err=True)
             failures += 1
 
-    if failures:
+    if failures:                                           # the total, not a bare exit (#3638)
+        click.echo(f"\n❌ {failures} of {len(targets)} project(s) not published", err=True)
         sys.exit(1)
     click.echo(f"\n✅ Deterministic arm published under version {version}")
 
@@ -388,6 +390,7 @@ def emit_map_arm(version, project, packages_dir):
         except (FileNotFoundError, FileExistsError) as e:
             click.echo(f"  ❌ {name}: {e}", err=True)
             failures += 1
-    if failures:
+    if failures:                                           # the total, not a bare exit (#3638)
+        click.echo(f"\n❌ {failures} of {len(targets)} project(s) not published", err=True)
         sys.exit(1)
     click.echo(f"\n✅ our-mapping arm published under {version}")
