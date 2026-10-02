@@ -147,8 +147,11 @@ def load_pair_schema(
 ) -> PairSchema:
     """Load schemas and derive strict-identity versus projected shared slots."""
 
-    full_view = shared_view(full_schema)
-    core_view = shared_view(core_schema)
+    return pair_schema_from_views(shared_view(full_schema), shared_view(core_schema))
+
+
+def pair_schema_from_views(full_view: SchemaView, core_view: SchemaView) -> PairSchema:
+    """Derive pair rules from the caller's selected, lifetime-bound views."""
     full_slots = {
         slot.name: slot for slot in full_view.class_induced_slots(FULL_CLASS)
     }
