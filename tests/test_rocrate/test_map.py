@@ -525,16 +525,37 @@ class TestDatesInAOneItemList(unittest.TestCase):
     def test_two_dates_are_not_unwrapped_as_one(self):
         """Only a one-item list is unwrapped before the date rule. What a
         single-valued date slot should do with two dates is a decision this
-        fix does not make, but its first date is never passed off as the
-        list's only item."""
-        _, _, detail = self.issued(["2026-06-30", "2026-07-01"])
-        self.assertNotIn("unwrapped single-item list", detail)
+        fix does not make (#4144): refuse them, or keep the first and report
+        the rest. Under either, `(issued, status, detail)` differs from the
+        first date's alone, so the first date is never passed off as the
+        list's only value, with the unwrap note or silently (#4154)."""
+        two = self.issued(["2026-06-30", "2026-07-01"])
+        self.assertNotIn("unwrapped single-item list", two[2])
+        self.assertNotEqual(two, self.issued("2026-06-30"))
 
-    def test_only_the_date_rule_reads_the_unwrapped_item(self):
-        """The other rules' details for a one-item list did not move: the
-        `doi` rule takes its one DOI from the list itself, and a
-        single-valued slot whose range is a class is shaped before the list
-        is unwrapped, so its unwrap note still comes last."""
+    def test_a_one_item_list_whose_item_is_not_text_is_left_to_the_cardinality_step(self):
+        """The date rule reads text only, so the date branch unwraps a
+        one-item list only when its item is text (#4154). Any other item is
+        unwrapped once by the cardinality step, and the row is the one
+        origin/main (`ba223f894`) wrote: `[null]` keeps its unwrap note
+        rather than giving an empty row with no reason, and a nested list
+        carries the note once rather than being unwrapped twice into a date
+        the rule never read. These rows are pinned as unchanged, not as
+        right: the nested list is still written as a list, which fails
+        validation, and `[null]`'s detail names the unwrap, not the null.
+        Neither is #4109's to change."""
+        self.assertEqual(self.issued([None]),
+                         (None, "empty", "unwrapped single-item list"))
+        self.assertEqual(self.issued([["2026-06-30"]]),
+                         (["2026-06-30"], "filled", "unwrapped single-item list"))
+
+    def test_the_doi_and_class_range_rows_keep_their_one_item_list_details(self):
+        """The unwrap is in the date branch, not hoisted, so a one-item list
+        in the `doi` row and in a single-valued class-range row keeps its
+        detail: the `doi` rule takes its one DOI from the list itself, and a
+        class-range slot is shaped before the list is unwrapped, so its
+        unwrap note still comes last, once. The enum rule's notes are not
+        checked here: #4145 will change them."""
         graph = copy.deepcopy(GRAPH)
         graph[1]["identifier"] = ["https://doi.org/10.5555/Test"]
         graph[1]["rai:dataReleaseMaintenancePlan"] = ["Released annually."]
