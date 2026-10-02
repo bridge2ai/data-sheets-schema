@@ -129,7 +129,12 @@ tokenizer and four to bash, #4182); nor where an operator character
 the command, a double-quoted substitution's own brackets included, as
 shlex returns a quoted `&&` bare and the tokenizer reads it as a join
 (`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d
-derive core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Its cost
+derive core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Wherever
+the readings cannot be paired, a derive the tokenizer reads as aimed at
+another record is not read so either, as a part it reads and bash does
+not, or one it hides, may have moved or spelled its `--full` (`echo hi
+'&&' cd sub && d4d derive core --full <relative> ...` derives the record
+where the call started). Its cost
 is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls
 .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo `date`;``),
 or where the two readings cannot be paired and nothing assigns (`echo hi
@@ -581,7 +586,11 @@ NON_CHECKS = (
     "`&`, `|`, `(`, `)`, `<`, `>`) stands quoted or escaped anywhere in the command, a double-quoted "
     "substitution's own brackets included, since shlex returns a quoted `&&` bare and the tokenizer "
     "reads it as a join (`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d derive "
-    "core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). The cost is a false `unknown` where such "
+    "core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Wherever the readings cannot be paired, a "
+    "derive the tokenizer reads as aimed at another record is not read so either, since a part it reads "
+    "and bash does not, or one it hides, may have moved or spelled its `--full` (`echo hi '&&' cd sub "
+    "&& d4d derive core --full <relative> ...` derives the record where the call started). The cost is "
+    "a false `unknown` where such "
     "a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, "
     "``echo `date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
     "&\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`). A route those words do not "
@@ -2881,11 +2890,12 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # does, a line continuation deleted and a `$'...'` or `$"..."` quote
     # marked (`_bash_parts`, #4140, #4161), and counts where either reading
     # says so. Where the two readings cannot be paired part by part, every
-    # part counts, the derive's own included, so no derive is placed. They
-    # are not paired either where the tokenizer may pair the command's
-    # quotes otherwise than bash (`_pairs_otherwise`), or read a quoted or
-    # escaped operator character as an operator (`_quoted_operator`): both
-    # readings are split by shlex, so neither is then bash's (#4182).
+    # part counts, the derive's own included, so no derive is placed, nor
+    # read as aimed at another record (#4182). They are not paired either
+    # where the tokenizer may pair the command's quotes otherwise than bash
+    # (`_pairs_otherwise`), or read a quoted or escaped operator character
+    # as an operator (`_quoted_operator`): both readings are split by shlex,
+    # so neither is then bash's (#4182).
     as_bash = _bash_parts(command, segments)
     readings = [segments] if as_bash is None else [segments, as_bash]
     assigning = [as_bash is None or any(_may_assign(reading[index]) for reading in readings)
@@ -3032,9 +3042,14 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 # #4160, #4161); or, where the command may turn on keyword
                 # mode, an assignment word anywhere on the part (#4124).
                 # Where the two readings of the words cannot be paired, each
-                # counts (`assigning`, `expanding`). Its cost is a false
+                # counts (`assigning`, `expanding`), and a derive the
+                # tokenizer reads as aimed at another record is not read so
+                # either: a part it reads and bash does not, or one it hides,
+                # may have moved or spelled its `--full` (`echo hi '&&' cd
+                # sub && d4d derive core --full <relative>` derives the
+                # record where the call started, #4182). Its cost is a false
                 # `unknown`; a route the words do not name is not read.
-                if verdict is False:
+                if verdict is False and as_bash is not None:
                     basis = _status_basis(index, joins, leading, newline)
                 elif not named:
                     verdict, basis = None, "unnamed_program"

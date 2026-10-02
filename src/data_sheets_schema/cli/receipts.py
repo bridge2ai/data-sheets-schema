@@ -370,20 +370,23 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     in a part's words both as the tokenizer splits them and as bash does,
     a line continuation deleted and a newline after an escaped backslash
     kept, and no derive is placed where the second reading cannot be split
-    or splits the command into other parts, nor where a quote stands
-    inside a double-quoted `$(...)` or `${...}` or inside a backquote, or a
-    `\\'` inside `$'...'`, which the tokenizer pairs otherwise than bash,
-    nor where an operator character stands quoted or escaped anywhere in
-    the command (`echo hi '&&' d4d derive core ...`), which it may read as
-    a join. Its cost is a false `unknown` (`echo X=1;`, `ls .;`, `set -e;`,
-    ``echo `date`;``, `echo "$(date)";`). A route those words do not name
-    (such as a function, `getopts`, `unset`, `coproc`, `trap`, `compgen
-    -V`, an arithmetic assignment, `(( PATH = 1 ))` or `$(( PATH = 1 ))`,
-    or a word built at run time, `$X`) or an assignment outside the command
-    is not read, so a derive after `unset PATH;` is placed, nor is a comment
-    the comment rule ends otherwise than bash (at a `#` inside an unquoted
-    `${...}`, or past one ending in a backslash-newline). Three kinds of
-    part carrying
+    or splits the command into other parts; where the tokenizer may pair
+    the quotes otherwise than bash (a quote inside a double-quoted `$(...)`
+    or `${...}` or inside a backquote, a `case` word inside the former, a
+    `\\'` inside `$'...'`, or a backquote the comment rule cut short at a
+    `#`); or where an operator character stands quoted or escaped anywhere
+    in the command (`echo hi '&&' d4d derive core ...`), which it may read
+    as a join. In each, a derive read as aimed at another record is not
+    read so either, as a part the tokenizer alone reads, such as a `cd`,
+    may have moved its `--full`. Its cost is a false `unknown` (`echo
+    X=1;`, `ls .;`, `set -e;`, ``echo `date`;``, `echo "$(date)";`). A
+    route those words do not name (such as a function, `getopts`, `unset`,
+    `coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1
+    ))` or `$(( PATH = 1 ))`, or a word built at run time, `$X`) or an
+    assignment outside the command is not read, so a derive after `unset
+    PATH;` is placed, nor is a comment the comment rule ends otherwise than
+    bash (at a `#` inside an unquoted `${...}`, or past one ending in a
+    backslash-newline). Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
