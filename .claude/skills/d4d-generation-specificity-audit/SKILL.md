@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.6.0
+  version: 1.7.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -65,7 +65,9 @@ generation surface. The skill's tests check that:
   surface under the role `discover()` gives it, including CLAUDE.md, the
   descriptions a session lists, a YAML comment a playbook's Read returns,
   and the controller text that reaches a model by data flow, a sentence in
-  a constant that a model-text constant is built from included;
+  a constant that a model-text constant is built from included, and one a
+  method call on such a constant puts in it from a top-level assignment
+  (`D = PARTS.setdefault('d', POLICY)`, an assigned `append`);
 - project-keyed tables, defaults, keys and arguments gate in run-shaping
   code (an `or` default, a value wrapped in `Path(...)`, an f-string or a
   `+` join, `click.Choice([...])`, a positional argument, `argv.append`, a
@@ -91,7 +93,9 @@ generation surface. The skill's tests check that:
   and the hooks; a flag a starred element would bring (a constant, a record
   field), a list built any other way (a concatenation such as `[...] + []`,
   a value wrapped in a call, a comprehension) and a name, attribute or item
-  holding the list that is used any other way than to hand it on are not
+  holding the list that is used any other way than to hand it on, that is a
+  parameter, or whose binding a use may not see (an `if`, loop, `try`,
+  `with` or `match` body the use does not share, a use before it) are not
   shown to switch anything off; a `--system-prompt-file` launch is a
   launch; the project settings and the hook scripts they run are found;
 - the reason a PreToolUse hook gives a native run's model for a denial, and
@@ -194,15 +198,20 @@ judges a hit by its own role:
   part of the text, a function whose result does (and follows its returns in
   turn, across imports) and a module constant the text is built from
   (`SYSTEM`, which `render_system` returns). A constant so marked is
-  followed in turn: every statement at the top of its module that writes it
-  (an assignment, plain, annotated or augmented, an item or attribute
-  assignment on it, a method call on it such as `.append(...)`) is model
-  text, and so is what that statement builds it from, recursively and each
-  constant once: the constants it names, of its module or imported by name
-  (`POLICY` in `SYSTEM = POLICY + '...'`), the functions whose results
-  become part of it, its literals. A hook field built from its function's
-  parameters, directly or through its locals (`hook_output(classification,
-  basis)`), is fed through threads and queues no data flow follows, so the
+  followed in turn: every write of it at the top of its module is model
+  text, and so is what that write puts in it, recursively and each
+  constant once. A write is a top-level assignment to it (plain, annotated
+  or augmented, or to an item or attribute of it), with its value, and any
+  method call whose receiver holds it, wherever a top-level statement makes
+  one on import (alone, in an assignment's value such as `D =
+  PARTS.setdefault('d', POLICY)`, in another call's argument, in a
+  condition or a block's body), with the call's arguments: any method can
+  change the object it is called on. What a write puts in it is followed:
+  the constants it names, of its module or imported by name (`POLICY` in
+  `SYSTEM = POLICY + '...'`), the functions whose results become part of
+  it, its literals. A hook field built from its function's parameters,
+  directly or through its locals (`hook_output(classification, basis)`),
+  is fed through threads and queues no data flow follows, so the
   classifiers that feed it are found by their decision: every controller
   function that returns a tuple whose decision element is a literal the hook
   function compares its decision parameter with (`'prescribed'`), widened by
@@ -508,11 +517,15 @@ owner's approval before anything is billed.
   nothing keeps (a statement of its own, a `with` item); a value returned
   or yielded as it is; or the whole value of a plain or annotated
   assignment, in a function, to one name, or to an attribute or
-  literal-key item of a name (`argv`, `self.argv`, `job['argv']`), that
-  the function, nested functions and classes included, otherwise only
-  hands on whole (a direct argument of a call, a returned or yielded
-  value) or reads (a comparison, an f-string), with the name that holds an
-  attribute or item held to the same rule. Everything else is "not shown",
+  literal-key item of a name (`argv`, `self.argv`, `job['argv']`), where
+  that assignment is the holder's one binding in the function and comes
+  before every other use of it in the same statement list (each use sits
+  in a statement that follows it there, at any depth, so the binding runs
+  on every path to it), a name holder is not a parameter (#4166), and the
+  function, nested functions and classes included, otherwise only hands
+  the holder on whole (a direct argument of a call, a returned or yielded
+  value) or reads it (a comparison, an f-string), with the name that holds
+  an attribute or item held to the same rule. Everything else is "not shown",
   never "switches them off": a flag a starred element would bring (a
   module constant, an imported constant, a record field, a sum, a
   comprehension: `*CLI_FLAGS`, `*overlay['cli_flags']`), which is why none
@@ -522,24 +535,30 @@ owner's approval before anything is billed.
   = list([...])`, and so `proc = Popen([...])` too; a comprehension, a
   conditional, `or`, an augmented assignment, unpacking, `:=`, `yield
   from`); a list bound at module level or in a class body, bound to
-  several targets, or held by something else (`self.cfg.argv`); and a
-  holder used any other way (a method or attribute of it, an item or slice
-  of it, `del`, `+=`, any other binding of the name by any statement,
-  `global` or `nonlocal`, an alias, a star). Not read: what the code the
-  list, or the object holding it, is handed to does with it (a callee that
-  changes the list it is passed, or returns a new list that the function
-  changes and launches in its place, `cmd = list(argv)`; a caller that
-  changes a list a function returns); other code that holds that object
-  meanwhile (another thread, a callback); code that reaches the function's
-  names dynamically (`exec`, `eval`, frame objects); and how the command
-  line parses the list: an element spelled `--safe-mode` is read as the
-  flag even where the option before it takes it as its value (`'--name',
-  '--safe-mode'`) or it follows `--`. "Has no `--safe-mode` element"
-  (`carries` False) means the list is shown and holds neither the literal
-  nor a starred element; a name or a call among its elements is read as
-  some other argument. Only `--safe-mode` is read as switching off the
-  command, agent and skill descriptions; `--bare` switches off the memory
-  and the hooks, since its help says skills still resolve. A launch's
+  several targets, or held by something else (`self.cfg.argv`); a holder
+  that is a parameter of the function, or whose binding a use may not see,
+  because the binding sits in an `if`, loop, `try`, `with` or `match` body
+  the use does not share or comes after the use (`def go(argv, enabled):`
+  that rebinds `argv` only when `enabled`; an existing `self.argv` or
+  `job['argv']` rebound that way, also where the function hands `job` on
+  whole; #4166); and a holder used any other way (a method or attribute of
+  it, an item or slice of it, `del`, `+=`, any other binding of the name
+  by any statement, `global` or `nonlocal`, an alias, a star). Not read:
+  what the code the list, or the object holding it, is handed to does
+  with it (a callee that changes the list it is passed, or returns a new
+  list that the function changes and launches in its place, `cmd =
+  list(argv)`; a caller that changes a list a function returns); other
+  code that holds that object meanwhile (another thread, a callback); code
+  that reaches the function's names dynamically (`exec`, `eval`, frame
+  objects); and how the command line parses the list: an element spelled
+  `--safe-mode` is read as the flag even where the option before it takes
+  it as its value (`'--name', '--safe-mode'`) or it follows `--`. "Has no
+  `--safe-mode` element" (`carries` False) means the list is shown and
+  holds neither the literal nor a starred element; a name or a call among
+  its elements is read as some other argument. Only `--safe-mode` is read
+  as switching off the command, agent and skill descriptions; `--bare`
+  switches off the memory and the hooks, since its help says skills still
+  resolve. A launch's
   `--add-dir`, `--settings`, `--agents` and `--setting-sources`, which can
   hand a run context explicitly, are not read.
 - A controller module that another module imports runs as a script only
@@ -553,14 +572,19 @@ owner's approval before anything is billed.
   imported functions and constants; a call's arguments are followed for the
   constants they pass, not for the functions that compute them or the
   literals they pass, and a method on an object (`self.render()`) is not
-  resolved. A module constant marked as model text is followed through the
-  statements at the top of its module that write it, recursively (#4156); a
-  write inside a block there (`if`, `try`) or in a function (a `global`
-  assignment, a method call on the constant), a constant reached as a module
-  or class attribute (`m.C`, `Cls.C`) or re-exported through another module,
-  and one bound only by unpacking are not followed. A model-facing module
-  outside `MODEL_FACING_MODULES` whose text reaches a model only through
-  another module's variable is classed by its role, not traced.
+  resolved. A module constant marked as model text is followed through its
+  writes at the top of its module, recursively (#4156): its top-level
+  assignments, and every method call whose receiver holds it wherever a
+  top-level statement makes one on import, with the call's arguments
+  (#4166). Not followed: an assignment to it inside a block there (`if`,
+  `try`) or in a function (`global`), a method call on it in the body of a
+  function or lambda, a function it is handed to (`register(C, v)`), a
+  write through another name bound to it or to part of it (`X = C`, then
+  `X.append(v)`), a constant reached as a module or class attribute (`m.C`,
+  `Cls.C`) or re-exported through another module, and one bound only by
+  unpacking. A model-facing module outside `MODEL_FACING_MODULES` whose
+  text reaches a model only through another module's variable is classed
+  by its role, not traced.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and

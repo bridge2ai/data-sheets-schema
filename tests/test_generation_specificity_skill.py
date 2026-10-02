@@ -44,6 +44,13 @@ reports is derived from the code that decides it:
   wrapped in a call and a holder used any other way than to hand the list
   on are not shown, so no registered launch of this checkout is; and the
   constants a model-text constant is built from are model text too (#4156);
+- a holder is shown only where its one binding comes before every other use
+  of it in the same statement list and a name holder is not a parameter
+  (Codex's `go(argv, enabled)`, an existing attribute or item bound
+  conditionally or used first); and a method call on a marked constant is a
+  write of it wherever a top-level statement makes it, in an assignment's
+  value (Codex's `setdefault`, an assigned `append`), an argument or a
+  condition, with its arguments followed (#4166);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -298,6 +305,42 @@ def _discovered_with_the_round_six_rewrites():
         (RUN_DIRECT, DIRECT_ARGV[0], DIRECT_ARGV[1]),
         (RUN_DIRECT, DIRECT_ARGV_END, DIRECT_ARGV_END.replace("system_prompt]", "system_prompt] + []")),
         (AUDIT_PREPARE, POLICY_SYSTEM[0], POLICY_SYSTEM[1])))
+
+
+#: Codex's reproductions of #4166, written into the audit preparer ahead of
+#: its `SYSTEM`: a launch whose argv is a parameter the function rebinds
+#: only when `enabled`, and two sentences that reach `SYSTEM` only through a
+#: method call on a constant made in a top-level assignment (Codex's
+#: `setdefault`, and an assigned `append`).
+CODEX_GO = ("def go(argv, enabled):\n"
+            "    if enabled:\n"
+            "        argv = ['claude', '--safe-mode', '--system-prompt', 'text']\n"
+            "    subprocess.run(argv)\n")
+METHOD_WRITES = ("POLICY = 'You must use CHORUS data.'\n"
+                 "PARTS = {}\n"
+                 "DEFAULT_POLICY = PARTS.setdefault('default', POLICY)\n"
+                 "RULE = 'Always describe the VOICE cohort.'\n"
+                 "LINES = []\n"
+                 "ADDED = LINES.append(RULE)\n")
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_the_round_seven_rewrites():
+    """discover() of this checkout with the rewrites of #4166: each of the
+    four registered native launches writes `--print` and `--safe-mode` as
+    literal elements of the argv list it hands over, in place of the
+    starred flags; Codex's `go(argv, enabled)` is added to the audit
+    preparer; and that module's `SYSTEM` is built from two constants that
+    a method call in a top-level assignment fills (`METHOD_WRITES`).
+    Computed once."""
+    flags = "'--print', '--safe-mode',"
+    return _discovered_with_rewrites((
+        (AUDIT_NATIVE, AUDIT_ARGV[0], AUDIT_ARGV[0].replace("*CLI_FLAGS,", flags)),
+        (BATCH_NATIVE, "*native.CLI_FLAGS,", flags),
+        (RUN_NATIVE, "argv=[executable,*overlay['cli_flags'],", "argv=[executable,'--print','--safe-mode',"),
+        (RUN_DIRECT, DIRECT_ARGV[0], DIRECT_ARGV[1]),
+        (AUDIT_PREPARE, POLICY_SYSTEM[0], CODEX_GO + METHOD_WRITES
+         + "SYSTEM = ''.join(PARTS.values()) + ''.join(LINES) + \"\"\"You are the native auditor")))
 
 
 class TestTheSkillFiles(unittest.TestCase):
@@ -2046,8 +2089,9 @@ class TestLaunchFlags(unittest.TestCase):
 
     #: One launch per file. Shown: a flag literal in the list a function
     #: returns, hands to a call made as a statement or a `with` item, or binds
-    #: to a name it otherwise only hands on whole or reads. Not shown: a flag
-    #: a starred element would bring (a constant, an imported constant, a
+    #: to a name, before every other use of it in its block, that it
+    #: otherwise only hands on whole or reads (#4166). Not shown: a flag a
+    #: starred element would bring (a constant, an imported constant, a
     #: comprehension, a record field, a sum), a list handed to a call whose
     #: value is kept, a launch flag outside a list (#4156).
     FLAGS = {"notes/x/flags.py": "SAFE = ['--print', '--safe-mode']\nPLAIN = ['--print']\n",
@@ -2246,6 +2290,133 @@ class TestLaunchFlags(unittest.TestCase):
         statement = scan._session_statement(it)
         self.assertNotIn("does not change a registered run's verdict", statement)
         self.assertIn(f"`{rows[AUDIT_NATIVE]['site']}` cannot be shown to pass `--safe-mode`", statement)
+
+    #: Holders whose binding a use may not see, each with the start of every
+    #: reason it must give (#4166): Codex's reproduction (a parameter the
+    #: function rebinds only when `enabled`); a parameter rebound first; an
+    #: existing attribute or item rebound conditionally, also used through
+    #: the name that holds it, or used before its binding; a binding in a
+    #: loop, `try`, `with` or `match` body the use does not share; a use
+    #: earlier in the loop body that holds the binding.
+    UNPRECEDED = {
+        "codex": ("import subprocess\n" + CODEX_GO,
+                  ["notes/x/go.py:4 `argv` is a parameter of `go()`",
+                   "notes/x/go.py:5 `argv` is used outside the block that holds the binding at line 4"]),
+        "parameter": ("def go(exe, p, argv):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                      "    return run(argv)\n", ["notes/x/go.py:2 `argv` is a parameter of `go()`"]),
+        "attribute": ("class Launch:\n    def go(self, exe, p, enabled):\n        if enabled:\n"
+                      "            self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                      "        return run(self.argv)\n",
+                      ["notes/x/go.py:5 `self.argv` is used outside the block that holds the binding at line 4"]),
+        "item": ("def go(exe, p, job, enabled):\n    if enabled:\n"
+                 "        job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n    return run(job['argv'])\n",
+                 ["notes/x/go.py:4 `job['argv']` is used outside the block that holds the binding at line 3"]),
+        "item through its holder": ("def go(exe, p, job, enabled):\n    if enabled:\n"
+                                    "        job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                    "    return execute(job)\n",
+                                    ["notes/x/go.py:4 `job`, which holds the argv, is used outside the block that "
+                                     "holds the binding at line 3"]),
+        "attribute used first": ("class Launch:\n    def go(self, exe, p):\n        run(self.argv)\n"
+                                 "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                 "        return run(self.argv)\n",
+                                 ["notes/x/go.py:3 `self.argv` is used before the binding at line 4"]),
+        "loop": ("def go(exe, p, jobs):\n    for job in jobs:\n"
+                 "        argv = [exe, '--safe-mode', '--system-prompt', p]\n    return run(argv)\n",
+                 ["notes/x/go.py:4 `argv` is used outside the block that holds the binding at line 3"]),
+        "earlier in the loop": ("def go(exe, p, jobs):\n    for job in jobs:\n        if job:\n            run(argv)\n"
+                                "        argv = [exe, '--safe-mode', '--system-prompt', p]\n",
+                                ["notes/x/go.py:4 `argv` is used before the binding at line 5"]),
+        "try": ("def go(exe, p):\n    try:\n        argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                "    except ValueError:\n        pass\n    return run(argv)\n",
+                ["notes/x/go.py:6 `argv` is used outside the block that holds the binding at line 3"]),
+        "with": ("def go(exe, p, lock):\n    with lock:\n        argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                 "    return run(argv)\n",
+                 ["notes/x/go.py:4 `argv` is used outside the block that holds the binding at line 3"]),
+        "match": ("def go(exe, p, kind):\n    match kind:\n        case 'audit':\n"
+                  "            argv = [exe, '--safe-mode', '--system-prompt', p]\n    return run(argv)\n",
+                  ["notes/x/go.py:5 `argv` is used outside the block that holds the binding at line 4"]),
+    }
+
+    def test_a_holder_is_not_shown_where_a_use_may_not_see_its_binding(self):
+        """Codex's reproduction of #4166: `go(argv, enabled)` rebinds its
+        parameter to a list holding `--safe-mode` only when `enabled`, then
+        launches `argv`, so `go(['claude', '--system-prompt', 'text'],
+        False)` launches without the flag; it read as carrying it. A holder
+        is now shown only where its one binding comes before every other use
+        of it in the same statement list, and a name holder is not a
+        parameter. Each case here read as carrying the flag before."""
+        for kind, (source, reasons) in self.UNPRECEDED.items():
+            with self.subTest(holder=kind):
+                row = self._rows({"notes/x/go.py": source})["go.py"]
+                self.assertIsNone(row["carries"])
+                self.assertIsNone(row["memory_off"])
+                for words in reasons:
+                    self.assertTrue(any(e.startswith(words) for e in row["evidence"]), (words, row["evidence"]))
+
+    #: The same holders bound before every use in their own block: the use
+    #: in that block, or nested in a later statement of it, the way each
+    #: registered launch hands its argv to a call inside a later `with` or
+    #: `try` (#4166).
+    PRECEDED = {
+        "with": ("def go(exe, p, lock):\n    with lock:\n        argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                 "        return run(argv)\n"),
+        "if": ("def go(exe, p, enabled):\n    if enabled:\n        argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+               "        return run(argv)\n"),
+        "loop": ("def go(exe, p, jobs):\n    for job in jobs:\n        argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                 "        run(argv)\n"),
+        "nested later": ("def go(exe, p, proxy):\n    argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                         "    with proxy.running():\n        try:\n            return run(argv)\n        finally:\n"
+                         "            proxy.close()\n"),
+        "attribute": ("class Launch:\n    def go(self, exe, p, enabled):\n        if enabled:\n"
+                      "            self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                      "            return run(self.argv)\n"),
+        "item": ("def go(exe, p, job):\n    job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                 "    if job is not None:\n        return execute(job)\n"),
+    }
+
+    def test_a_holder_bound_before_every_use_in_its_block_is_shown(self):
+        """Where the binding runs on every path to each use, in its own block
+        or nested in a later statement of it, the holder is shown (#4166):
+        the rule refuses what may not see the binding, not the shape of the
+        registered launches."""
+        for kind, source in self.PRECEDED.items():
+            with self.subTest(holder=kind):
+                row = self._rows({"notes/x/go.py": source})["go.py"]
+                self.assertTrue(row["carries"], row["evidence"])
+                self.assertTrue(row["memory_off"], row["memory_evidence"])
+
+    def test_codex_conditional_argv_keeps_the_session_surfaces_in_run_controllers(self):
+        """Codex's reproduction of #4166 through discovery: with every
+        registered launch shown to pass `--safe-mode` (each writes it as a
+        literal of the argv list it hands over), Codex's `go(argv, enabled)`
+        in a controller read as carrying the flag, so the report said
+        registered runs are unaffected and CLAUDE.md left run_controllers.
+        Now `go` is not shown and CLAUDE.md stays a run_controllers surface,
+        while the four registered launches, whose argv a later `with` or
+        `try` hands on, are still shown."""
+        surfaces, facts, texts = _discovered_with_the_round_seven_rewrites()
+        it = facts["interactive"]
+        rows = {x["site"].split(":")[0]: x for x in it["launches"]}
+        self.assertEqual(set(rows), {AUDIT_NATIVE, BATCH_NATIVE, RUN_NATIVE, RUN_DIRECT, AUDIT_PREPARE})
+        for rel in (AUDIT_NATIVE, BATCH_NATIVE, RUN_NATIVE, RUN_DIRECT):
+            with self.subTest(rel=rel):
+                self.assertTrue(rows[rel]["carries"] and rows[rel]["memory_off"], rows[rel])
+        text = texts[AUDIT_PREPARE]
+        bound = text[:text.index(CODEX_GO)].count("\n") + 3
+        go = rows[AUDIT_PREPARE]
+        self.assertEqual(go["site"], f"{AUDIT_PREPARE}:{bound} --system-prompt")
+        self.assertIsNone(go["carries"])
+        self.assertIsNone(go["memory_off"])
+        self.assertIn(f"{AUDIT_PREPARE}:{bound} `argv` is a parameter of `go()`, which holds the caller's list "
+                      "until the binding runs", go["evidence"])
+        self.assertIn(f"{AUDIT_PREPARE}:{bound + 1} `argv` is used outside the block that holds the binding at "
+                      f"line {bound}, which may not have run there", go["evidence"])
+        self.assertEqual(it["launches_without_customizations_off"], [go["site"]])
+        self.assertEqual(it["launches_without_memory_off"], [go["site"]])
+        self.assertEqual(surfaces.files["CLAUDE.md"].roles, dict.fromkeys(SESSION_GATES, "model_facing"))
+        statement = scan._session_statement(it)
+        self.assertNotIn("does not change a registered run's verdict", statement)
+        self.assertIn(f"`{go['site']}` cannot be shown to pass `--safe-mode`", statement)
 
     #: An argv bound by an annotated assignment, held by an attribute or by an
     #: item, then shortened in the function that builds it, each beside the
@@ -2468,6 +2639,85 @@ class TestConstantText(unittest.TestCase):
                          {(2, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12),
                           (13, 13), (14, 14), (16, 17)})
         self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4156c/base.py"]}, {(1, 1)})
+
+    def _gating_hit(self, match: str, sentence: str) -> dict:
+        """The one hit of `match` on the line of `sentence` in the audit
+        preparer as the #4166 rewrites leave it, scanned under the role
+        discovery gives it."""
+        surfaces, _, texts = _discovered_with_the_round_seven_rewrites()
+        text = texts[AUDIT_PREPARE]
+        line = text[:text.index(sentence)].count("\n") + 1
+        hits = [h for h in _scan_text(AUDIT_PREPARE, text, surfaces.files[AUDIT_PREPARE])
+                if h["match"] == match and h["line"] == line]
+        self.assertEqual(len(hits), 1, hits)
+        return hits[0]
+
+    def test_codex_reproduction_a_constant_a_top_level_setdefault_fills_gates(self):
+        """Codex's reproduction of #4166, through discovery: `PARTS = {}`,
+        `DEFAULT_POLICY = PARTS.setdefault('default', POLICY)` and `SYSTEM`
+        built from `PARTS.values()`. The method call sat in an assignment to
+        another name, so it was not read as a write of `PARTS`, and the
+        CHORUS hit in `POLICY` was neither model-facing nor gating. Now any
+        method call on a marked constant, wherever a top-level statement
+        makes it, is a write, and its arguments are followed."""
+        hit = self._gating_hit("CHORUS", "'You must use CHORUS data.'")
+        self.assertTrue(hit["model_facing"] and hit["violation"], hit)
+        self.assertEqual(hit["gates_in"], ["run_controllers"])
+        self.assertTrue(hit["model_text_function"].startswith("POLICY (part of PARTS, part of SYSTEM"), hit)
+
+    def test_a_constant_an_assigned_append_fills_gates(self):
+        """The assigned `append` Codex also reproduced through discovery
+        (#4166): `ADDED = LINES.append(RULE)` puts `RULE` in `LINES`, which
+        `SYSTEM` joins, so the VOICE hit in `RULE` is model text and gates."""
+        hit = self._gating_hit("VOICE", "'Always describe the VOICE cohort.'")
+        self.assertTrue(hit["model_facing"] and hit["violation"], hit)
+        self.assertEqual(hit["gates_in"], ["run_controllers"])
+        self.assertTrue(hit["model_text_function"].startswith("RULE (part of LINES, part of SYSTEM"), hit)
+
+    #: A controller whose `render_system()` joins a constant that method
+    #: calls fill wherever a top-level statement makes them (#4166), each
+    #: putting in it a constant of its own line, beside a call in a function
+    #: body and a call on another object, which are not writes of it.
+    METHOD_CALLS = ("POLICY = 'Policy text.'\n"                           # 1
+                    "NOTE = 'Argument text.'\n"                           # 2
+                    "RULE = 'Condition text.'\n"                          # 3
+                    "MORE = 'Block text.'\n"                              # 4
+                    "CHAINED = 'Chained text.'\n"                         # 5
+                    "LATE = 'Function text.'\n"                           # 6
+                    "ELSEWHERE = 'Not model text.'\n"                     # 7
+                    "PARTS = {}\n"                                        # 8
+                    "DEFAULT = PARTS.setdefault('default', POLICY)\n"     # 9 an assignment's value
+                    "print(PARTS.update(note=NOTE))\n"                    # 10 another call's argument
+                    "if PARTS.setdefault('rule', RULE):\n"                # 11 a condition
+                    "    PARTS.setdefault('more', MORE)\n"                # 12 a block's body
+                    "PARTS.setdefault('list', []).append(CHAINED)\n"      # 13 a call on its result
+                    "def later():\n"                                      # 14
+                    "    PARTS.setdefault('late', LATE)\n"                # 15 a function body: not read
+                    "OTHER = {}.setdefault('x', ELSEWHERE)\n"             # 16 another object
+                    "def render_system():\n"                              # 17
+                    "    return ''.join(PARTS.values())\n")               # 18
+
+    def test_a_method_call_on_a_constant_is_a_write_wherever_a_top_level_statement_makes_it(self):
+        """A method call whose receiver holds a marked constant is a write of
+        it wherever a top-level statement's code runs on import (#4166): in
+        an assignment's value, another call's argument, a condition, a
+        block's body, or on the result of another call on it; the constants
+        its arguments name are followed in turn. A call in a function body
+        and a call on another object are not writes of it (SKILL.md,
+        Limits)."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            base = root / "notes/exp_4166"
+            _write(base / "launch.py", "from data_sheets_schema.api_runner import RunSpec\nimport prompts\n"
+                                       "spec = RunSpec\n")
+            _write(base / "prompts.py", self.METHOD_CALLS)
+            parsed = _parsed(root, "notes")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            spans = scan.model_text_spans(root, parsed, index, controllers)
+        self.assertEqual({(a, b) for a, b, _ in spans["notes/exp_4166/prompts.py"]},
+                         {(1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (8, 8), (9, 9), (10, 10), (11, 11), (12, 12),
+                          (13, 13), (17, 18)})
 
 
 class TestAssistantInstructions(unittest.TestCase):

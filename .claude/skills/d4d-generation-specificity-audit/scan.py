@@ -2662,8 +2662,10 @@ def _rebinding(n, name: str, fn) -> str | None:
     """How a node binds `name` other than through an `ast.Name` (which
     carries its own context): a parameter of a nested function or lambda,
     `except ... as`, an import, a nested definition, `global` or
-    `nonlocal`, a match capture. The function's own parameters bind before
-    its body runs and are not counted."""
+    `nonlocal`, a match capture. The function's own parameters are not
+    counted here: `_holder_shown` refuses a name holder that is one
+    (#4166), while the name that holds an attribute or item may be one
+    (`self`)."""
     if isinstance(n, ast.arg) and n.arg == name:
         own = fn.args.posonlyargs + fn.args.args + fn.args.kwonlyargs + [fn.args.vararg, fn.args.kwarg]
         return None if any(n is a for a in own) else "a parameter of a nested function"
@@ -2681,17 +2683,40 @@ def _rebinding(n, name: str, fn) -> str | None:
     return None
 
 
+def _block_of(stmt, parents: dict) -> list:
+    """The statement list that holds `stmt`, by identity: its function's
+    body, or an `if`, loop, `try`, `except`, `with` or `match` body or
+    branch."""
+    owner = parents[id(stmt)]
+    return next(v for _, v in ast.iter_fields(owner) if isinstance(v, list) and any(s is stmt for s in v))
+
+
 def _holder_shown(rel: str, parents: dict, assign) -> tuple[bool, list[str]]:
     """Whether the name, attribute or item a plain or annotated assignment
     binds an argv list to holds that list, unchanged, wherever its function
-    hands it on (#4156). Shown only for one target, in a function, that is a
-    name or an attribute or literal-key item of a name (`argv`, `self.argv`,
-    `job['argv']`), where every other occurrence of it in the function
-    (nested functions and classes included) hands it on whole (a direct
-    argument of a call, a returned or yielded value) or only reads it (a
-    comparison, an f-string). For an attribute or item, the name that holds
-    it is held to the same rule. Anything else, a binding, a deletion or a
-    use of any other kind, is a reason it is not shown."""
+    hands it on (#4156, #4166). Shown only for one target, in a function,
+    that is a name or an attribute or literal-key item of a name (`argv`,
+    `self.argv`, `job['argv']`), where:
+
+    - that assignment is the holder's one binding in the function, and
+      every other occurrence of the name (nested functions and classes
+      included) comes after it in the same statement list, inside a
+      statement that follows it there at any depth. An occurrence before
+      it, or outside the block (an `if`, loop, `try`, `with` or `match`
+      body) that holds it, can see what the holder held before the binding
+      ran or on a path where it never runs (#4166);
+    - a name holder is not a parameter of the function, which holds the
+      caller's list until the binding runs (#4166), and neither the name
+      nor the name that holds an attribute or item is declared `global` or
+      `nonlocal`;
+    - every such occurrence hands the holder on whole (a direct argument
+      of a call, a returned or yielded value) or only reads it (a
+      comparison, an f-string). For an attribute or item, the name that
+      holds it is held to the same rule.
+
+    Anything else, a binding, a deletion, an occurrence the binding does
+    not precede in its block, or a use of any other kind, is a reason it is
+    not shown."""
     at = f"{rel}:{assign.lineno}"
     targets = assign.targets if isinstance(assign, ast.Assign) else [assign.target]
     if len(targets) != 1:
@@ -2724,7 +2749,15 @@ def _holder_shown(rel: str, parents: dict, assign) -> tuple[bool, list[str]]:
         return isinstance(x, ast.Subscript) and isinstance(x.slice, ast.Constant) and \
             type(x.slice.value) is type(part[1]) and x.slice.value == part[1]
 
+    # what runs after the binding on every path through its block (#4166)
+    block = _block_of(assign, parents)
+    i = next(k for k, s in enumerate(block) if s is assign)
+    before = {id(x) for s in block[:i + 1] for x in ast.walk(s)}
+    after = {id(x) for s in block[i + 1:] for x in ast.walk(s)}
     problems, uses = [], []
+    if part is None and base in _params(fn):
+        problems.append(f"{at} `{base}` is a parameter of `{fn.name}()`, which holds the caller's list until "
+                        "the binding runs")
     for n in ast.walk(fn):
         how = _rebinding(n, base, fn)
         if how is not None:
@@ -2743,6 +2776,11 @@ def _holder_shown(rel: str, parents: dict, assign) -> tuple[bool, list[str]]:
             problems.append(f"{rel}:{x.lineno} {what} is assigned again")
         elif isinstance(x.ctx, ast.Del):
             problems.append(f"{rel}:{x.lineno} {what} is deleted")
+        elif id(n) in before:
+            problems.append(f"{rel}:{x.lineno} {what} is used before the binding at line {assign.lineno}")
+        elif id(n) not in after:
+            problems.append(f"{rel}:{x.lineno} {what} is used outside the block that holds the binding at line "
+                            f"{assign.lineno}, which may not have run there")
         elif (h := _handed_on(x, parents)) is not None:
             uses.append(f"line {x.lineno}: {what.strip(',')} {h[0]}")
         elif _reads(x, parents):
@@ -2751,8 +2789,9 @@ def _holder_shown(rel: str, parents: dict, assign) -> tuple[bool, list[str]]:
             problems.append(f"{rel}:{x.lineno} {what} is {_use(x, parents)}")
     if problems:
         return False, problems
-    return True, [f"{at} the argv list is bound to `{held}` as it is, which the function otherwise only hands on "
-                  "whole or reads (" + ("; ".join(uses) or "no other use") + ")"]
+    return True, [f"{at} the argv list is bound to `{held}` as it is, before every other use of it in its block, "
+                  "and the function otherwise only hands it on whole or reads it ("
+                  + ("; ".join(uses) or "no other use") + ")"]
 
 
 def _argv_shown(rel: str, parents: dict, lst) -> tuple[bool, list[str]]:
@@ -2760,8 +2799,10 @@ def _argv_shown(rel: str, parents: dict, lst) -> tuple[bool, list[str]]:
     function hands over (#4156): the call's argument itself, in a call
     nothing keeps the value of (`subprocess.run([...])`, `with
     Popen([...]) as p:`); returned or yielded as it is; or the whole value
-    of a plain or annotated assignment to a holder its function never
-    changes (`_holder_shown`). (True, how) or (False, why not)."""
+    of a plain or annotated assignment to a holder that is not a parameter,
+    that the assignment binds before every other use of it in the same
+    statement list, and that its function never changes (`_holder_shown`,
+    #4166). (True, how) or (False, why not)."""
     at = f"{rel}:{lst.lineno}"
     handed = _handed_on(lst, parents)
     if handed is not None:
@@ -2822,11 +2863,14 @@ def launch_flags(controllers: dict[str, Path], parsed: dict) -> list[dict]:
     a starred element, a name, a module constant, an imported constant or a
     record field is "not shown" (`None`), as is a list built any other way
     (a concatenation, a comprehension, a value wrapped in a call) or held
-    by a holder used any other way. What the code the list is handed to
-    does with it (a callee, a caller) is not read. A launch flag outside a
-    list or tuple literal is a launch whose flags cannot be read. Returns
-    one row per launch: its site, `carries` and `memory_off` (True, False
-    or None) and the evidence or the reasons for each."""
+    by a holder used any other way, by a parameter, or bound where it may
+    not have run before a use: in an `if`, loop, `try`, `with` or `match`
+    body the use does not share, or after the use (#4166). What the code
+    the list is handed to does with it (a callee, a caller) is not read. A
+    launch flag outside a list or tuple literal is a launch whose flags
+    cannot be read. Returns one row per launch: its site, `carries` and
+    `memory_off` (True, False or None) and the evidence or the reasons for
+    each."""
     rows = []
     for crel, p in sorted(controllers.items()):
         tree = parsed[p][1]
@@ -2895,25 +2939,49 @@ def _writes_name(target, name: str) -> bool:
     return isinstance(target, ast.Name) and target.id == name
 
 
-def _constant_writes(tree, name: str) -> list[tuple[ast.stmt, list[ast.AST]]]:
-    """Every statement at the top of a module that writes the module
-    constant `name`, with the expressions whose values become part of it
-    (#4156): an assignment to it, plain (also unpacked or chained),
-    annotated or augmented (`NAME += ...`), or to an item or attribute of it
-    (`NAME[k] = v`), and its value; a method call on it made as a statement
-    (`NAME.append(v)`), and its arguments. A write inside a block (`if`,
-    `try`) or a function is not read."""
+def _import_time_nodes(stmt):
+    """Every node of a top-level statement that runs when its module is
+    imported: all of it but the bodies of the functions and lambdas it
+    defines (their decorators, defaults and annotations run)."""
+    todo = [stmt]
+    while todo:
+        n = todo.pop()
+        yield n
+        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            todo += [c for c in ast.iter_child_nodes(n) if not isinstance(c, ast.stmt)]
+        elif isinstance(n, ast.Lambda):
+            todo.append(n.args)
+        else:
+            todo += ast.iter_child_nodes(n)
+
+
+def _constant_writes(tree, name: str) -> list[tuple[ast.AST, list[ast.AST]]]:
+    """Every write of the module constant `name` at the top of its module,
+    with the expressions whose values become part of it (#4156, #4166): a
+    top-level assignment to it, plain (also unpacked or chained),
+    annotated or augmented (`NAME += ...`), or to an item or attribute of
+    it (`NAME[k] = v`), and its value; and every method call whose
+    receiver holds it (`NAME.append(v)`, `NAME['k'].append(v)`,
+    `NAME.setdefault('k', []).append(v)`), wherever it sits in a top-level
+    statement's code that runs on import (alone, in an assignment's value,
+    in another call's argument, in a condition, in a block's body), and the
+    call's arguments. Any method may change the object it is called on, so
+    none is taken for a read: `DEFAULT = NAME.setdefault('d', POLICY)`
+    puts POLICY in NAME (#4166). Not read: an assignment to it inside a
+    block (`if`, `try`) or a function, a method call on it in the body of a
+    function or lambda, a function it is handed to (`register(NAME, v)`),
+    and a write through another name bound to it or to part of it."""
     out = []
     for stmt in tree.body:
         if isinstance(stmt, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and stmt.value is not None:
             targets = stmt.targets if isinstance(stmt, ast.Assign) else [stmt.target]
             if any(_writes_name(t, name) for t in targets):
                 out.append((stmt, [stmt.value]))
-        elif isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call) and \
-                isinstance(stmt.value.func, ast.Attribute) and _writes_name(stmt.value.func.value, name):
-            call = stmt.value
-            out.append((stmt, [a.value if isinstance(a, ast.Starred) else a for a in call.args]
-                        + [k.value for k in call.keywords]))
+        for call in _import_time_nodes(stmt):
+            if isinstance(call, ast.Call) and isinstance(call.func, ast.Attribute) and any(
+                    isinstance(x, ast.Name) and x.id == name for x in ast.walk(call.func.value)):
+                out.append((call, [a.value if isinstance(a, ast.Starred) else a for a in call.args]
+                            + [k.value for k in call.keywords]))
     return out
 
 
@@ -2961,13 +3029,15 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
     function whose result does is model text (and its returns are followed
     in turn, across modules through imports), and a module constant the text
     is built from (`SYSTEM`, returned by `render_system`) is model text,
-    with every statement at the top of its module that writes it, and all
-    that statement's value is built from in turn, recursively and each
-    constant once: the constants it names, of its module or imported by
-    name (`POLICY` in `SYSTEM = POLICY + '...'`, #4156), the functions
-    whose results become part of it, and its literals. A call's arguments
-    are followed for the constants they pass, not for the functions that
-    compute them.
+    with every write of it at the top of its module (`_constant_writes`: a
+    top-level assignment, and a method call on it anywhere in the code a
+    top-level statement runs on import, #4166), and all that write puts in
+    it in turn, recursively and each constant once: the constants it
+    names, of its module or imported by name (`POLICY` in `SYSTEM = POLICY
+    + '...'` or in `D = PARTS.setdefault('d', POLICY)`, #4156, #4166), the
+    functions whose results become part of it, and its literals. A call's
+    arguments are followed for the constants they pass, not for the
+    functions that compute them.
 
     A hook field built from a parameter (`hook_output(classification,
     basis)`), directly or through the function's locals, is fed by
@@ -3011,17 +3081,19 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
 
     def mark_constant(q, name, why):
         """A module constant the text is built from is model text, and so is
-        all it is built from (#4156): each statement at the top of its
-        module that writes it (`_constant_writes`) is marked, and what that
-        statement puts in it is followed as model text in turn: the
-        constants it names (of its module, or imported by name), each marked
-        the same way, recursively; the functions whose results become part
-        of it; its literals. Each constant once, so a cycle ends."""
+        all it is built from (#4156, #4166): each write of it at the top of
+        its module (`_constant_writes`: an assignment statement, or a method
+        call on it wherever a top-level statement runs one on import) is
+        marked, and what that write puts in it is followed as model text in
+        turn: the constants it names (of its module, or imported by name),
+        each marked the same way, recursively; the functions whose results
+        become part of it; its literals. Each constant once, so a cycle
+        ends."""
         if q not in parsed or name not in consts(q) or ("constant", q, name) in marked:
             return
         marked.add(("constant", q, name))
-        for stmt, values in _constant_writes(parsed[q][1], name):
-            spans.setdefault(q, {}).setdefault((stmt.lineno, stmt.end_lineno), f"{name} ({why})")
+        for write, values in _constant_writes(parsed[q][1], name):
+            spans.setdefault(q, {}).setdefault((write.lineno, write.end_lineno), f"{name} ({why})")
             flow(q, None, values, f"part of {name}, {why}")
 
     def callee(q, f):
