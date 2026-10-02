@@ -19,6 +19,28 @@ def review():
     """Review a generated record against its instruction, bundle and receipts."""
 
 
+@review.command("source-attribution-preflight")
+@click.option("--report", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--record", type=click.Path(dir_okay=False, path_type=Path), required=True,
+              help="the final full record the report's source_review must bind")
+@click.option("--bundle", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--chunk-manifest", type=click.Path(dir_okay=False, path_type=Path), required=True)
+@click.option("--protocol-version", type=click.IntRange(3, 7), required=True)
+@click.option("--source-manifest", type=click.Path(dir_okay=False, path_type=Path))
+@click.option("--project", help="with --source-manifest: the explicitly selected project")
+def source_attribution_preflight(**kwargs):
+    """Read-only JSON diagnostics for a final report draft (#2427).
+
+    Exit 0: preflight passes; 1: findings; 2: unusable inputs. Terminal
+    evidence checks and a registered continuation policy remain required.
+    """
+    import json
+    from data_sheets_schema import source_attribution_preflight as preflight
+    result = preflight.file_result(**kwargs)
+    click.echo(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
+    raise click.exceptions.Exit(preflight.exit_status(result))
+
+
 def _provenance(method: str, label: str, project: str) -> Path:
     from data_sheets_schema import provenance as pv
     return pv.record_path_for(project, method, label, pv.CONCAT_DIR)
