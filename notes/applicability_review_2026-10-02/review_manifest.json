@@ -1,0 +1,331 @@
+{
+  "packet_version": "d4d-applicability-review-packet-1",
+  "status": "DRAFT_PENDING_HUMAN_SCIENTIFIC_REVIEW",
+  "created_date": "2026-10-02",
+  "prepared_by": {
+    "name": "Codex (AI assistant)",
+    "human_reviewer": false
+  },
+  "repository_base_commit": "e16a5105ac69aacd85881ca3b2825c1df5fbfa55",
+  "context_contract_version": "d4d-evaluation-context-1",
+  "issue": "https://github.com/bridge2ai/data-sheets-schema/issues/2912",
+  "evaluation_authorized": false,
+  "registration_created": false,
+  "paid_execution_performed": false,
+  "human_review_status": "pending",
+  "independent_ai_review_status": "pending",
+  "approval_invalidation": "Any changed context, source, scope, predicate interpretation, rubric, or selected instrument requires renewed review. A passing identity check is not approval.",
+  "sources": {
+    "AI_READI": {
+      "path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "sha256": "613f5bd62c519179d6927086faca1120f2b72808a59f3c3c37723d36426d6446",
+      "bytes": 542513,
+      "physical_lines": 7446
+    },
+    "CHORUS": {
+      "path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+      "bytes": 35920,
+      "physical_lines": 1698
+    },
+    "CM4AI": {
+      "path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "sha256": "5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4",
+      "bytes": 320799,
+      "physical_lines": 7866
+    },
+    "VOICE": {
+      "path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "sha256": "7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c",
+      "bytes": 376446,
+      "physical_lines": 5742
+    },
+    "VOICE_PEDIATRIC": {
+      "path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "sha256": "eb823708a16342a3b12cc1dabb57529cea4f95fd596abf9cbecd657a17d61e47",
+      "bytes": 206008,
+      "physical_lines": 2866
+    }
+  },
+  "contexts": {
+    "AI_READI": {
+      "path": "notes/applicability_review_2026-10-02/contexts/AI_READI.yaml",
+      "sha256": "b79f9a988a35e39d9f9912ef73c8fc8a5a9004e542409ffcee5fb030832ec17b",
+      "bytes": 3614,
+      "normalized_context_sha256": "0d1f15ad5dc258aaa51ae228d8c24748e2072a5809aa41fb7fd5e1adb1d3ba1b",
+      "values": {
+        "human_subjects": true,
+        "regulated_access": true,
+        "shared_dataset": true,
+        "ml_training_dataset": null,
+        "data_collection": true,
+        "data_processing": true,
+        "processing_software": null
+      },
+      "scope": "Project-level AI_READI with v3 documentation/release metadata. Public and controlled subsets distinguished; not a promise that all historical records cover v3.",
+      "author": {
+        "name": "Codex (AI assistant)",
+        "human_authorship_verified": false
+      },
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "approved_context_sha256": null
+      }
+    },
+    "CHORUS": {
+      "path": "notes/applicability_review_2026-10-02/contexts/CHORUS.yaml",
+      "sha256": "c20d016a74e5850bf8e6eb9a04ac86f6ed086f6de862b6f1c92cdcfcefe9f26e",
+      "bytes": 4310,
+      "normalized_context_sha256": "9dbc7a148f43e37b20867fa933bf82cb36f8976ebc0a7faaef71dd52c766bc43",
+      "values": {
+        "human_subjects": true,
+        "regulated_access": true,
+        "shared_dataset": true,
+        "ml_training_dataset": true,
+        "data_collection": true,
+        "data_processing": true,
+        "processing_software": true
+      },
+      "scope": "Exact September 19 v2 project-level context based on the identical pinned CHORUS bundle; no new evaluation authorization.",
+      "author": {
+        "name": "Unspecified prior author",
+        "human_authorship_verified": false
+      },
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "approved_context_sha256": null
+      }
+    },
+    "CM4AI": {
+      "path": "notes/applicability_review_2026-10-02/contexts/CM4AI.yaml",
+      "sha256": "3d82392715e59f41f7455a5cc02797d8b3b86b026ea798d2e1b668957234ff05",
+      "bytes": 3881,
+      "normalized_context_sha256": "192518fed602676148da1a0dcb2a35f53d75f090d42872bc08436ed148f15c95",
+      "values": {
+        "human_subjects": null,
+        "regulated_access": true,
+        "shared_dataset": true,
+        "ml_training_dataset": true,
+        "data_collection": true,
+        "data_processing": true,
+        "processing_software": true
+      },
+      "scope": "Project-level experimental cell-line data and methods. The June release is distinguished from separate downstream patient-genomics applications and later computed maps.",
+      "author": {
+        "name": "Codex (AI assistant)",
+        "human_authorship_verified": false
+      },
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "approved_context_sha256": null
+      }
+    },
+    "VOICE": {
+      "path": "notes/applicability_review_2026-10-02/contexts/VOICE.yaml",
+      "sha256": "83030d282c31394cbf93bd9d0f16b257f7f4187f92156b6a7010e854a8d1296b",
+      "bytes": 3497,
+      "normalized_context_sha256": "580d6de3e9818409205d2c06c85dbb4214e9b241333eabbb27d984d712bc24fa",
+      "values": {
+        "human_subjects": true,
+        "regulated_access": true,
+        "shared_dataset": true,
+        "ml_training_dataset": null,
+        "data_collection": true,
+        "data_processing": true,
+        "processing_software": true
+      },
+      "scope": "Adult VOICE, using the v3.1 PhysioNet derived-feature release as evidence; pediatric evidence and separately governed raw audio are not merged into that release.",
+      "author": {
+        "name": "Codex (AI assistant)",
+        "human_authorship_verified": false
+      },
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "approved_context_sha256": null
+      }
+    },
+    "VOICE_PEDIATRIC": {
+      "path": "notes/applicability_review_2026-10-02/contexts/VOICE_PEDIATRIC.yaml",
+      "sha256": "8107b47994da92b399714c6063e2bfaf8bab627acc0738881998c30ac4991a81",
+      "bytes": 3606,
+      "normalized_context_sha256": "ae47fa18b4ad483ac0880ad7b08ad5898fbdd8280986e747167c33f06fa4e1c3",
+      "values": {
+        "human_subjects": true,
+        "regulated_access": true,
+        "shared_dataset": true,
+        "ml_training_dataset": null,
+        "data_collection": true,
+        "data_processing": true,
+        "processing_software": true
+      },
+      "scope": "Pediatric v1.1.0 derived-feature release; related adult and general-project documents in its bundle are not substituted for pediatric evidence.",
+      "author": {
+        "name": "Codex (AI assistant)",
+        "human_authorship_verified": false
+      },
+      "human_review": {
+        "status": "pending",
+        "reviewer": null,
+        "reviewed_at": null,
+        "approved_context_sha256": null
+      }
+    }
+  },
+  "reviewed_input_pins": {
+    "src/data_sheets_schema/evaluation_context.py": {
+      "sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+      "bytes": 9204
+    },
+    "src/data_sheets_schema/duplicate_keys.py": {
+      "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2",
+      "bytes": 15690
+    },
+    "data/preprocessed/source_manifest.yaml": {
+      "sha256": "13758a83de3a0d13b367bf21623fbcac611e599c81a9612143bb6987de89abe6",
+      "bytes": 40191
+    },
+    "data/rubric/rubric10.txt": {
+      "sha256": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+      "bytes": 17780
+    },
+    "data/rubric/rubric20.txt": {
+      "sha256": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+      "bytes": 21696
+    },
+    ".claude/agents/d4d-rubric10-semantic.md": {
+      "sha256": "d78cb66cd01f4114cc2f2d3b8bf6af486682573b6529617f9a024de554239c8f",
+      "bytes": 81456
+    },
+    ".claude/agents/d4d-rubric20-semantic.md": {
+      "sha256": "484c28271b42037b9e18030768a3d0213e49c4f2d7ca3513c5196cb493f278f9",
+      "bytes": 61609
+    }
+  },
+  "original_chorus_preservation": {
+    "original_directory": "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19",
+    "files": {
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/CHORUS_applicability_draft.yaml": {
+        "sha256": "0df817a786fc6f7c2914007939d0149fa28c7df3d74faf5c066f0ef003b4e343",
+        "bytes": 4159
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/CHORUS_applicability_draft_v2.yaml": {
+        "sha256": "c20d016a74e5850bf8e6eb9a04ac86f6ed086f6de862b6f1c92cdcfcefe9f26e",
+        "bytes": 4310
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/evidence.md": {
+        "sha256": "0f65048655dbcb154492767e34a4e9ba1b82ac26d867b92cbfff747a43ef0e04",
+        "bytes": 9776
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/evidence_v2.md": {
+        "sha256": "3ec58756cb39166408e52a3f37d2dea3f95f5cfa97a6da2c7bf7932ad48912c8",
+        "bytes": 11897
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/independent_review.json": {
+        "sha256": "a86f5eda5e18ed41dcbb7db9d784de1efdea5adbeb30aaa64013643e6cab258b",
+        "bytes": 15340
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/independent_review.md": {
+        "sha256": "a3574ec8b697bff6a4d29a207402f2123870ede435ee094c7631c0f6c2dee681",
+        "bytes": 3510
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/independent_review_v2.json": {
+        "sha256": "4631a1b9bf20a32b981db698fddb5847d9711da64a77df6234c4d20da5bce719",
+        "bytes": 7091
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/independent_review_v2.md": {
+        "sha256": "869809b422fc5d33cc6ee63c07e18cf903673eef1cb4451493f9cdffbff89418",
+        "bytes": 1713
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/validation.json": {
+        "sha256": "7ae708ce4f98376f42488279cabb51138671cfff5e3d4274112877cfb8b0a8bd",
+        "bytes": 2174
+      },
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/validation_v2.json": {
+        "sha256": "2c205025ed10a63833caa7886b4ddb8314a0fef2a9f1c6aa9d7e4bdd2b863b56",
+        "bytes": 2775
+      }
+    },
+    "copied_context": "contexts/CHORUS.yaml",
+    "copied_context_is_byte_identical": true,
+    "prior_review_verdict": "approved_for_future_applicability_context_use_only",
+    "prior_review_author_identity": "not stated in preserved review; human status unverified",
+    "current_human_approval": false
+  },
+  "search_scope": {
+    "ignored_and_hidden_included": true,
+    "roots": [
+      "primary checkout notes/",
+      "primary checkout data/",
+      "primary checkout docs/"
+    ],
+    "command": "rg --no-ignore --hidden -l --glob '*.yaml' --glob '*.yml' --glob '*.json' --glob '!**/.git/**' --glob '!**/node_modules/**' --glob '!**/.venv/**' 'human_subjects|processing_software' notes data docs",
+    "matching_file_count": 12573,
+    "limits": "Content discovery included nested ignored local worktrees under these roots, but not every sibling execution worktree, /tmp clone, binary, or differently formatted context. Matches were candidate discovery, not a scientific review of all matched files; no global absence claim.",
+    "retained_existing_context_examples": [
+      "notes/matched_cborg_2026-09-13/kids_first/applicability.yaml",
+      "notes/matched_cborg_2026-09-13/external_clinical/applicability.yaml",
+      "notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/evaluation_applicability_preparation_2026-09-19/CHORUS_applicability_draft_v2.yaml"
+    ]
+  },
+  "remaining_dependencies": [
+    "Named human scientific review of every context and explicit instrument/predicate interpretation.",
+    "Semantic version and Q19 instrument decision; old v1/v2 registrations remain frozen.",
+    "New opt-in roster with context pins, original record/source identity checks, and at least two extra rubric20 ratings per project; CM4AI v7 rep2 required.",
+    "Confirm eligible pediatric record inputs; source-bundle availability is not an accepted evaluation record.",
+    "Separate authorized CM4AI canary, then authorized repeat panel; applicability_stable remains null until completion."
+  ],
+  "artifacts": {
+    "notes/applicability_review_2026-10-02/README.md": {
+      "sha256": "8b945dad8928a28474b5aad5723c228324f1f29a9037b205cc740b3eba2f4a63",
+      "bytes": 8069
+    },
+    "notes/applicability_review_2026-10-02/contexts/AI_READI.yaml": {
+      "sha256": "b79f9a988a35e39d9f9912ef73c8fc8a5a9004e542409ffcee5fb030832ec17b",
+      "bytes": 3614
+    },
+    "notes/applicability_review_2026-10-02/contexts/CHORUS.yaml": {
+      "sha256": "c20d016a74e5850bf8e6eb9a04ac86f6ed086f6de862b6f1c92cdcfcefe9f26e",
+      "bytes": 4310
+    },
+    "notes/applicability_review_2026-10-02/contexts/CM4AI.yaml": {
+      "sha256": "3d82392715e59f41f7455a5cc02797d8b3b86b026ea798d2e1b668957234ff05",
+      "bytes": 3881
+    },
+    "notes/applicability_review_2026-10-02/contexts/VOICE.yaml": {
+      "sha256": "83030d282c31394cbf93bd9d0f16b257f7f4187f92156b6a7010e854a8d1296b",
+      "bytes": 3497
+    },
+    "notes/applicability_review_2026-10-02/contexts/VOICE_PEDIATRIC.yaml": {
+      "sha256": "8107b47994da92b399714c6063e2bfaf8bab627acc0738881998c30ac4991a81",
+      "bytes": 3606
+    },
+    "notes/applicability_review_2026-10-02/evidence.json": {
+      "sha256": "9d0a9100abf31fa826d43a01c85bae0a063689ecca2339b2d69b98db7e8ee6ee",
+      "bytes": 63727
+    },
+    "notes/applicability_review_2026-10-02/prior_chorus/evidence_v2.md": {
+      "sha256": "3ec58756cb39166408e52a3f37d2dea3f95f5cfa97a6da2c7bf7932ad48912c8",
+      "bytes": 11897
+    },
+    "notes/applicability_review_2026-10-02/prior_chorus/independent_review_v2.json": {
+      "sha256": "4631a1b9bf20a32b981db698fddb5847d9711da64a77df6234c4d20da5bce719",
+      "bytes": 7091
+    },
+    "notes/applicability_review_2026-10-02/prior_chorus/validation_v2.json": {
+      "sha256": "2c205025ed10a63833caa7886b4ddb8314a0fef2a9f1c6aa9d7e4bdd2b863b56",
+      "bytes": 2775
+    },
+    "notes/applicability_review_2026-10-02/verify_packet.py": {
+      "sha256": "7c359ccc39d25ad5f0ef3bae374da67e111ebc78a429b72a82b92753f10b440d",
+      "bytes": 6200
+    }
+  }
+}

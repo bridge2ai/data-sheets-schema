@@ -1,0 +1,734 @@
+{
+  "status": "DRAFT; human scientific review pending",
+  "citation_convention": "Inclusive physical lines in the exact SHA256-pinned concatenated bundle; not source-document page numbers.",
+  "project_scopes": {
+    "AI_READI": "Project-level AI_READI with v3 documentation/release metadata. Public and controlled subsets distinguished; not a promise that all historical records cover v3.",
+    "CHORUS": "Exact September 19 v2 project-level context based on the identical pinned CHORUS bundle; no new evaluation authorization.",
+    "CM4AI": "Project-level experimental cell-line data and methods. The June release is distinguished from separate downstream patient-genomics applications and later computed maps.",
+    "VOICE": "Adult VOICE, using the v3.1 PhysioNet derived-feature release as evidence; pediatric evidence and separately governed raw audio are not merged into that release.",
+    "VOICE_PEDIATRIC": "Pediatric v1.1.0 derived-feature release; related adult and general-project documents in its bundle are not substituted for pediatric evidence."
+  },
+  "citations": {
+    "AI-scope": {
+      "project": "AI_READI",
+      "bundle_path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "source_filename": "docs_aireadi_org_docs-3_2026-07-24.txt",
+      "file_header_line": 2290,
+      "start_line": 2332,
+      "end_line": 2333,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "905fcacad6b94a34d71f3fcc5c58511a51f137f93bf396d94cb7026cc1baf183",
+      "excerpt": "The AI-READI is a dataset consisting of data collected from individuals with and without Type 2 Diabetes Mellitus (T2DM) and harmonized across 3 data collection sites. The composition of the dataset was designed with future studies using AI/Machine Learning in mind. This included recruitment sampling procedures aimed at achieving approximately equal distribution of participants across diabetes severity, as well as the design of a data acquisition protocol across multiple domains (survey data, physical measurements, clinical data, imaging data, wearable device data, etc.) to enable downstream AI/ML analyses that may not be feasible with existing data sources such as claims or electronic health records data.\nThe goal is to better understand salutogenesis (the pathway from disease to health) in T2DM. Some data that are not considered to be sensitive personal health data will be available to the public for download upon agreement with a license that defines how the data can be used. The full dataset will be accessible by entering into a data use agreement. The public dataset will include survey data, blood and urine lab results, fitness activity levels, clinical measurements (e.g. monofilament and cognitive function testing), retinal images, ECG, blood sugar levels, and environmental variables such as home air quality. The data held under controlled access include 5-digit zip code, sex, race, ethnicity, genetic sequencing data, past health records, medications, and traffic and accident reports. As enrollment is ongoing, the pilot data release and periodic updates to data releases may not have achieved balanced distribution across groups.\n"
+    },
+    "AI-access": {
+      "project": "AI_READI",
+      "bundle_path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "source_filename": "fairhub_api_dataset_3_2026-07-27.txt",
+      "file_header_line": 2814,
+      "start_line": 2983,
+      "end_line": 2985,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "b6911a9ed448669045fa23e369080cf45c814a33853ca189e7bf4d121ada0760",
+      "excerpt": "      \"accessType\": \"PublicDownloadSelfAttestationRequired\",\n      \"accessDetails\": {\n        \"description\": \"Accessing the dataset requires several steps, including: Login in through a verified ID system, Agreeing to use the data only for type 2 diabetes related research, Agreeing to the license terms which set certain restrictions and obligations for data usage (see 'rights' property)\"\n"
+    },
+    "AI-release": {
+      "project": "AI_READI",
+      "bundle_path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "source_filename": "fairhub_api_dataset_3_2026-07-27.txt",
+      "file_header_line": 2814,
+      "start_line": 2901,
+      "end_line": 2905,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "cb4b3feeff418c9b129ef5e0009e614fa4060756560b2be2d3164f91f6b3e78b",
+      "excerpt": "      \"description\": [\n        {\n          \"descriptionValue\": \"This dataset contains data from 2280 participants that was collected between from July 19, 2023 and May 01, 2025. Data from multiple modalities are included. The data in this dataset contain no protected health information (PHI). Information related to the sex and race/ethnicity of the participants as well as medication used has also been removed. A detailed description of the dataset is available in the AI-READI documentation for v3.0.0 of the dataset at https://docs.aireadi.org\",\n          \"descriptionType\": \"Abstract\"\n        }\n"
+    },
+    "AI-processing": {
+      "project": "AI_READI",
+      "bundle_path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "source_filename": "fairhub_api_dataset_3_2026-07-27.txt",
+      "file_header_line": 2814,
+      "start_line": 4367,
+      "end_line": 4368,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "5ad7777e2b6d055308c26cee268968df580d3d7d1ade12d5e91221033269cafe",
+      "excerpt": "          \"question\": \"Was there any pre-processing for cleaning the data? Provide the answer for the preliminary and the current version of the dataset\",\n          \"response\": \"There were several quality control measures used at the time of data entry/acquisition. For example, clinical data outside of expected min/max ranges were flagged in REDCap, which was visible in reports viewed by clinical research coordinators (CRCs) and Data Managers. Using these REDCap reports as guides, Data Managers and CRCs examined participant records and determined if an error was likely. Data were checked for the following and edited if errors were detected:\\n\\n   1. Credibility, based on range checks to determine if all responses fall within a prespecified reasonable range\\n\\n   2. Incorrect flow through prescribed skip patterns\\n\\n   3. Missing data that can be directly filed from other portions of an individual's record\\n\\n   4. The omission and/or duplication of records\\n\\n   Editing was only done under the guidance and approval of the site PI. If corrected data was available from elsewhere in the respondent's answers, the error was corrected. If there was no logical or appropriate way to correct the data, the Data site PI reviewed the values and made decisions about whether those values should be removed from the data.\\n\\n   Once data were sent from each of the study sites to the central project team, additional processing steps were conducted in preparation for dissemination. For example, all data were mapped to standardized terminologies when possible, such as the Observational Medical Outcomes Partnership (OMOP) Common Data Model, a common data model for observational health data, and the Digital Imaging and Communications in Medicine (DICOM), a commonly used standard for medical imaging data. Details about the data processing approaches for each data domain/modality are described in the dataset documentation at https://docs.aireadi.org.\"\n"
+    },
+    "AI-qc-software": {
+      "project": "AI_READI",
+      "bundle_path": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "source_filename": "fairhub_api_dataset_3_2026-07-27.txt",
+      "file_header_line": 2814,
+      "start_line": 3195,
+      "end_line": 3198,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "3ee04fccc08e55a6667c01192c2ee7cfec264fd29935cc96b3ec3a820cee017a",
+      "excerpt": "          \"metadataFileList\": [\n            {\n              \"metadataFileName\": \"dqd_omop.json\",\n              \"metadataFileDescription\": \"The dqd_omop.json file supports OMOP CDM data quality analysis using the OMOP CDM Data Quality Dashboard (DQD). The OMOP CDM DQD tool (https://ohdsi.github.io/DataQualityDashboard/) runs a set of > 3500 data quality checks against an OMOP CDM instance\",\n"
+    },
+    "CM-assays": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7054,
+      "end_line": 7058,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "c37e4916e55d79dd84547d8a3d7a6836b2a05bd55cf81f91fdf2e238bc50a6f8",
+      "excerpt": "This dataset is the June 2026 Data Release of Cell Maps for Artificial Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the NIH Bridge2AI program. CM4AI is generating multi-modal data including protein-protein interaction (PPI), spatial localization, and genetic perturbation data in MDA-MB-468 breast cancer cells (+/- paclitaxel or vorinostat) and iPSCs (+/- differentiation). This Beta release includes:\nPerturb-seq data for MDA-MB-468 breast cancer cells +/- treatment and undifferentiated (parental) KOLF2.1J iPSCs\nSEC-MS data for MDA-MB-468 breast cancer cells +/- treatment, undifferentiated KOLF2.1J iPSCs, and iPSC-derived neuron progenitor cells (NPCs), neurons, and cardiomyocytes\nAP-MS data for MDA-MB-468 breast cancer cells + treatment\nIF images in MDA-MB-468 breast cancer cells +/- treatment\n"
+    },
+    "CM-governance": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7075,
+      "end_line": 7081,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "efcfc2b44c651a59c2ca07c37fda7fdb95844817550354124bf4d298b1a115c7",
+      "excerpt": "Data Governance & Ethics\nHuman Subjects:\nNo\nDe-identified Samples:\nYes\nFDA Regulated:\nNo\n"
+    },
+    "CM-incomplete": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7086,
+      "end_line": 7090,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "eb997add1c412f7ecafe00163bde064baa9d739e8f2da6ee47446b248281cc23",
+      "excerpt": "Completeness\nThese data are not yet in completed final form:\nSome datasets are under temporary pre-publication embargo\nProtein-protein interaction (SEC-MS), protein localization (IF imaging), and CRISPRi perturbSeq data interrogate sets of proteins which incompletely overlap\nComputed cell maps not included in this release\n"
+    },
+    "CM-intent": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7095,
+      "end_line": 7105,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "8f13732905eea7d3ace5937df35a5e2a0610094eddcf27989a57a06c980bf4bf",
+      "excerpt": "Intended Use\nThis dataset is intended for:\nAI-ready datasets to support research in functional genomics\nAI model training\nCellular process analysis\nCell architectural changes and interactions in presence of specific disease processes, treatment conditions, or genetic perturbations\nLimitations\nResearchers should be aware of inherent limitations:\nThis is an interim release\nDoes not contain predicted cell maps, which will be added in future releases\nThe current release is most suitable for bioinformatics analysis of the individual datasets\n"
+    },
+    "CM-cell-lines": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7107,
+      "end_line": 7112,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "1b01c929569342179ffe433087f8cdb510a9f02bde7e51b1217e3ed29816adba",
+      "excerpt": "Prohibited Uses\nThese laboratory data are not to be used in clinical decision-making or in any context involving patient care without appropriate regulatory oversight and approval\nPotential Sources of Bias\nUsers should be aware of potential biases:\nData in this release was derived from commercially available de-identified human cell lines\nDoes not represent all biological variants which may be seen in the population at large\n"
+    },
+    "CM-license": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7120,
+      "end_line": 7121,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "9d62c0aa94a7d851fd74215b7c856a24f3db22e1f688e45966ed157063cb0064",
+      "excerpt": "License/Data Use Agreement\nCC BY-NC-SA 4.0\n"
+    },
+    "CM-public": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "dataverse_10.18130_V3_HIGT4C_2026-07-24.txt",
+      "file_header_line": 7002,
+      "start_line": 7133,
+      "end_line": 7136,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "b079b778f602211110c61e682fa57563ad6c4a7db5b14be9b694a87e73d57829",
+      "excerpt": "Access:\nAll\nAll\nPublic (10)\n"
+    },
+    "CM-downstream-patients": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "file_header_line": 25,
+      "start_line": 1355,
+      "end_line": 1358,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "c826df9e9f760f95e60d1360aac08dfccc2b9b318bb5758ce3a1628c58eb7701",
+      "excerpt": "Pre-processing of paediatric cancer mutational profiles\nData were obtained from a pan-paediatric cancer study\n4\nof 914 individual patients with cancer aged under 25 years (study ID: pediatric_dkfz_2017, downloaded from cBioPortal\n"
+    },
+    "CM-processing": {
+      "project": "CM4AI",
+      "bundle_path": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "source_filename": "www_nature_com_articles-s41586-025-08878-3_row2.txt",
+      "file_header_line": 25,
+      "start_line": 1428,
+      "end_line": 1433,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "ca4093d86d2dd0d5dc3e254b8f3d97a582a56d0c01194afbde4d60b4fe8456dc",
+      "excerpt": "Running the cell mapping toolkit\nThe Cell Mapping Toolkit (\nhttps://github.com/idekerlab/cellmaps_pipeline\n) implements a series of Python packages to execute the end-to-end pipeline described herein. Specific packages include steps for processing the protein imaging and biophysical interaction datasets (cellmaps_imagedownloader, cellmaps_ppidownloader), embedding the input modalities (cellmaps_image_embedding, cellmaps_ppi_embedding), integrating the modalities (cellmaps_coembedding), constructing the hierarchical cell map (cellmaps_generate_hierarchy) and annotating the cell map with known resources such as GO (cellmaps_hierarchyeval). Each package is pip-installable and is linked to complete user documentation hosted at ReadTheDocs (\nhttps://cellmaps-pipeline.readthedocs.io/\n). A step-by-step guide is provided at the GitHub repository.\n"
+    },
+    "V-adult-scope": {
+      "project": "VOICE",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "file_header_line": 4515,
+      "start_line": 4802,
+      "end_line": 4812,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "24c092bfb164be47dc97f21c4dfcf33c9395d3e3355cea0ce7043ae349f7ecaf",
+      "excerpt": "Published: May 1, 2026. Version:\n3.1.0\nRaw Audio Data Access for Bridge2AI Voice Adult Cohort is via Synapse\n(March 9, 2026, 10:11 a.m.)\nThe published Bridge2AI-Voice Adult Dataset contains derived features from the audio waveforms. This PhysioNet project does not contain raw audios.\nAccessing raw audio is a more involved process and requires institutional sign off. Please reach out to the access committee if you are interested in access: DACO@b2ai-voice.org\nData will be made available via Synapse:\nhttps://www.synapse.org/Synapse:syn72370534/\nFor questions regarding the dataset itself, please contact the corresponding author, listed on the sidebar.\nNote that the Bridge2AI-Voice Pediatric Dataset is also available on PhysioNet:\nhttps://physionet.org/content/b2ai-voice-pediatric/\n"
+    },
+    "V-release-intent": {
+      "project": "VOICE",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "file_header_line": 4515,
+      "start_line": 4884,
+      "end_line": 4886,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "79bc07b85a3b14b84c5955ea10ff62f31390d1a1c535d2bd54abc6cd61d3dfba",
+      "excerpt": "Abstract\nThe human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.\nBridge2AI-Voice v3.1 contains data for 833 participants across five sites in North America. Participants were selected based on known conditions which manifest within the voice waveform including voice disorders, neurological disorders, mood disorders, and respiratory disorders. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.\n"
+    },
+    "V-collection-processing": {
+      "project": "VOICE",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "file_header_line": 4515,
+      "start_line": 4912,
+      "end_line": 4919,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "60bd972f3f84c822f8b77d4f4218bd35f0db4221c4e332cb321c8c3884904d00",
+      "excerpt": "Patients presenting at specialty clinics and institutions were considered for enrollment. Patients were selected based on membership to five predetermined groups (Respiratory disorders, Voice disorders, Neurological disorders, Mood disorders, Pediatric). Patients presenting at the given clinic were screened for inclusion and exclusion criteria prior to their visit by the project investigators. If eligible for enrollment, patient consent was sought for the data collection initiative and to share the acquired research data. Once consented, a standardized protocol for data collection was adopted. This protocol involved the collection of demographic information, health questionnaires, targeted questionnaires inquiring about known confounders for voice, disease specific information, and voice recording tasks such as sustained phonation of a vowel sound. Data collection was conducted using a custom application on a tablet with a headset used for data collection when possible. For most participants a single session was sufficient to collect all relevant data. However, a subset of participants required multiple sessions to complete the data collection. As a result, there may be more than one session per participant in the current dataset. Data were exported and converted from RedCap using an open source library developed by our team [2].\nRaw audio was preprocessed by converting to monaural and resampling to 16 kHz with a Butterworth anti-aliasing filter applied. From this standardized audio, we extracted five types of derived data:\nSpectrograms - Time-frequency representations were computed using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT. Spectrograms were further downsampled by a factor of two in the time domain after derivation.\nMel-frequency cepstral coefficients (MFCC) - 60 MFCCs were extracted using the above spectrograms.\nMel Spectrogram - a combination of the above two computed with the same parameters (25ms window size, 10ms hop length, a 400-point FFT, and 60 Mels).\nArticulatory features - using the Speech Articulatory Coding (sparc) package, we generate the kinematic traces of vocal tract articulators and source features as well as measures of loudness, periodicity, and pitch. All features were gathered at 50Hz.\nAcoustic features were extracted using OpenSMILE, capturing temporal dynamics and acoustic characteristics.\nPhonetic and prosodic features were computed using Parselmouth and Praat, providing measures of fundamental frequency, formants, and voice quality.\n"
+    },
+    "V-software": {
+      "project": "VOICE",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "file_header_line": 4515,
+      "start_line": 5057,
+      "end_line": 5059,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "5228eba87260d9526b1dd958712419d63dd3f5bc35a3bfa367348b9df82078d2",
+      "excerpt": "The code used to process the raw audio into the above features and to merge the source data into the phenotype files has been made open source in the\nb2aiprep library\n[8]. This release was generated with b2aiprep v3.0.0.\n"
+    },
+    "V-access": {
+      "project": "VOICE",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice_3.1.0_2026-07-24.txt",
+      "file_header_line": 4515,
+      "start_line": 5123,
+      "end_line": 5131,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "007d15261407d0b172c00ecbbccde3596d894ec78bfddb6237cb0688453edf67",
+      "excerpt": "Access\nAccess Policy:\nOnly credentialed users who sign the DUA can access the files.\nLicense (for files):\nBridge2AI Voice Registered Access License\nData Use Agreement:\nBridge2AI Voice Registered Access Agreement\nRequired training:\nNo training required\n"
+    },
+    "VP-release": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 390,
+      "end_line": 391,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "9a89ee12cc43deb4ef9b57bd0b3cb061d9dfc9e8ba36409b5b8fb5bf00d72cda",
+      "excerpt": "The human voice contains complex acoustic markers which have been linked to important health conditions including dementia, mood disorders, and cancer. When viewed as a biomarker, voice is a promising characteristic to measure as it is simple to collect, cost-effective, and has broad clinical utility. Recent advances in artificial intelligence have provided techniques to extract previously unknown prognostically useful information from dense data elements such as images. The Bridge2AI-Voice project seeks to create an ethically sourced flagship dataset to enable future research in artificial intelligence and support critical insights into the use of voice as a biomarker of health. Here we present Bridge2AI-Voice, a comprehensive collection of data derived from voice recordings with corresponding clinical information.\nBridge2AI-Voice Pediatric Dataset v1.1.0 contains derived audio features for 23,533 recordings collected from 300 participants aged 2-18. The release contains data considered low risk, including derivations such as spectrograms but not the original voice recordings. Detailed demographic, clinical, and validated questionnaire data are also made available.\n"
+    },
+    "VP-intent": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 393,
+      "end_line": 395,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "5fbdb69b199e2b71d9479ed2d616fea9e7d9a4636b5031e39a5d028ce749677e",
+      "excerpt": "Understanding voice and speech development in children is essential for identifying communication or speech disorders early in life, and for supporting timely intervention [1]. Pediatric and adult voice/speech production are fundamentally different because the respiratory system and larynx undergo rapid functional maturation/development throughout childhood [2, 3]. These developmental changes can influence acoustic features such as fundamental frequency (F₀) [2]. As a result, evidence/normative data that we have in adults cannot be generalized to pediatric populations.\nDespite the clinical importance of detecting pediatric communication disorders such as autism spectrum disorder and speech delays, the availability of large-scale pediatric databases/datasets remains/is limited. Data collection in pediatric populations introduces/poses unique challenges such as privacy issues, consent processes, the need for developmentally appropriate tasks. These factors have contributed to the lack of publicly/open access/ available pediatric data sets that enable machine learning for pediatric voice analysis [3].\nEstablishing a robust multi-institutional dataset that integrates pediatric voice data with demographic information would advance the understanding of voice and disease as well as early detection and intervention. Resources such as this project are intended to enable study of developmental norms, create AI-driven tools for early screening, and support clinical insight.\n"
+    },
+    "VP-collection": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 397,
+      "end_line": 400,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "699e28c26929172aaa65097680e2593d9b13ee80180c0a942c436c77676e617e",
+      "excerpt": "Patients/healthy volunteers at the Hospital for Sick Children were considered for enrollment in the study. Patients were considered eligible for the study if they fulfilled the inclusion criteria of 2 to 18 years of age, and English proficiency. Exclusion criteria included participants over 18 years of age, and individuals who were non-verbal. Non-patients, recruited through research postings, were evaluated for eligibility based on the study’s inclusion and exclusion criteria. Following confirmation of eligibility, parental or participant consent was obtained prior to data collection and data sharing. Once consented, patients were assigned a unique study identification number and a standardized age-appropriate protocol for data collection was adopted. The protocol included the collection of demographic information, voice and speech related questionnaires, and questionnaires inquiring about medical history.\nAll data was collected through customized software –\nreproschema-ui –\non tablets. A headset was used to record for most participants, while the remaining recordings utilized the built-in tablet microphone due to low tolerance of wearing headphones or existing complex medical conditions. All participants completed the recording and demographic data collection in one session. For participants without adequate comprehension and familiarity with their past medical history, parents or decision-makers completed the survey during the recording on a separate tablet. The simultaneous completion of the recording and survey improved efficiency and minimized participant burden and fatigue. Data were exported and converted to tab delimited values using an open source library developed by our team [4].\n"
+    },
+    "VP-processing": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 403,
+      "end_line": 413,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "aa8b435e48a47d6d96d79b0df836605fe2403bb6f841c3d0152fc80c0f9addde",
+      "excerpt": "torchaudio_spectrograms.parquet (n=23533) contains spectrograms of dimension 201xT generated using the short-time Fast Fourier Transform (FFT) with a 25ms window size, 10ms hop length, and a 400-point FFT.\ntorchaudio_mel_spectrograms.parquet (n=23533) contains Mel spectrograms of dimension 60xT generated with a 25ms window size, 10ms hop length, a 400-point FFT and 60 Mel bins.\ntorchaudio_mfcc.parquet (n=23533) contains Mel-frequency cepstrum coefficients of dimension 60xT using the same parameters as the mel spectrograms.\ntorchaudio_pitch.parquet (n=23533) contains the detected pitch (fundamental frequency) over time and is of dimension T with a min and max pitch of 80 and 500 respectively.\nsparc_ema.parquet (n=23532) contains the estimated electromagnetic articulography (EMA) using a deep learning model with dimensions Tx12 where the 12 correspond to X/Y positions of six articulators: tongue dorsum (TD), tongue body (TB), tongue tip (TT), lower incisor (LI), upper lip (UL), lower lip (LL), respectively.\nsparc_loudness.parquet (n=23532) contains the estimated loudness based on the average absolute amplitude of the audio waveform of size T, using 20ms windows.\nsparc_periodicity.parquet (n=23532) contains the estimated periodicity (confidence of pitch presence) derived from the audio using 20ms windows of dimension T.\nsparc_pitch.parquet (n=23532) contains the estimated fundamental frequency (F0) of the audio signal using a different algorithm than before with a range of 50-550Hz and dimension T.\nppgs.parquet (n=23533) contains the phonetic posteriorgram probabilities across 40 phoneme categories giving a dimension of 40xT with a frame rate of 100Hz.\nSpectrograms, Mel Spectrograms, MFC coefficients, PPGs, and EMAs for sensitive records and audio checks have been removed from v1.1. Additionally, some files, whether due to length or other issues, could not generate certain features and so are not included in the bundled data.\nIn addition to the parquet files, the features folder contains the following plain-text file, features derived from the open-source Speech and Music Interpretation by Large-space Extraction (openSMILE [5]), Praat [6], parselmouth [7], and torchaudio [8, 9] are provided. Each feature is present in the static_features.tsv file. There is also metrics related to audio quality derived from the recordings present in the audio_quality_metrics.tsv file.\n"
+    },
+    "VP-software": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 415,
+      "end_line": 417,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "b61c6863505a7dc28b5472b4e5c64f78a60d4d6770bbe0ace28bdf3a1ae46516",
+      "excerpt": "The code used to preprocess the raw audio waveforms into the parquet file and to merge the source data into the phenotype files has been made open source in the\nb2aiprep library\n[4].\n"
+    },
+    "VP-access": {
+      "project": "VOICE_PEDIATRIC",
+      "bundle_path": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "source_filename": "physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt",
+      "file_header_line": 21,
+      "start_line": 476,
+      "end_line": 484,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "007d15261407d0b172c00ecbbccde3596d894ec78bfddb6237cb0688453edf67",
+      "excerpt": "Access\nAccess Policy:\nOnly credentialed users who sign the DUA can access the files.\nLicense (for files):\nBridge2AI Voice Registered Access License\nData Use Agreement:\nBridge2AI Voice Registered Access Agreement\nRequired training:\nNo training required\n"
+    },
+    "CH-intent": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "reporter_nih_gov_project-details-10472824_row7.txt",
+      "file_header_line": 19,
+      "start_line": 45,
+      "end_line": 47,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "a81cd007a75a0a11069f4eea6d09716d9dfff5be59baa22043c8b411776408b4",
+      "excerpt": "There is an urgent need for infrastructure to support artificial intelligence and machine learning (AI/ML) in critical care. Developing high-resolution multi-center data sets is a critical first step towards actionable and trustworthy AI. As part of the NIH Common Fund’s Bridge2AI program, the CPatient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Clinical Care AI data generation project will meet the need of generating data for ML/AI applications aimed at characterizing acute and critical care illness, predicting complications, and measuring treatment response among patients with acute or critical illness. Through 3 pillars, the CHoRUS data generation project will addresses multiple challenges relevant for acquiring an AI-ready data set from more than 100,000 critically ill patients: 1) Data (Standards, Tool Development and Optimization, and Data Acquistion) 2) Ethics (Ethical and Trustworthy AI) and 3) People (Team Science and Skill and Workforce Development). The project’s overarching goal is to develop a publicly available, AI-ready critical care dataset, while ensuring the methods promote privacy, accountability, and clinical benefit, while promoting a new generation of AI clinicians and scientists. The dataset will also provision a holdout test set, accessible for model external validation to aid marketplace adoption of AI-developed models for implementation in acute and critical care. Drawing expertise from a comprehensive set of disciplines such as team science, law, ethics, health services, biomedical science, engineering, and scientific journal publications, this project will A) establish a legal framework for collecting data at scale, sampling to ensure comprehensive sets of patient conditions and clinical treatment strategies; B) perform community-facing ethics focus groups to determine what data is appropriate for public sharing; C) ensure that data elements feature appropriate contextual factors such as geographic distance to the nearest hospital; D) develop capabilities across a multi-center network to acquire, standardize, tokenize, store, visualize, and label data such as structured electronic health record data, tokenized unstructured electronic health record data, telemetry and EEG waveforms, imaging, and social determinants of health; E) acquire data, standardize data to the OMOP Common Data Model, transform data using approaches that limit re-identification, and label data for ; and F) cultivate expertise in the lay and scientific community to improve AI literacy nd utilization through multimodal educational approaches. To accomplish this, the project will involve extensive collaboration between centers as well as through the NIH Bridge2AI program, the NIH Bridge2AI Bridge Center, external biomedical and clinical organizations, industry, and regulatory agencies.\n\nThe Patient-Focused Collaborative Hospital Repository Uniting Standards (CHoRUS) for Equitable AI will develop the necessary network, tools, standards, data, and education to build machine-learning (ML) and artificial intelligence (AI)-derived models to improve the care and outcomes of patients requiring critical care.  By performing legal and ethical research, developing tools for data storage, labeling and analysis, acquiring and standardizing a dataset of unprecedented diversity and high resolution, sequestering holdout datasets for external validation, and enriching the community through education, this data generation project will catalyze the biomedical research and expertise necessary to promote the patient-focused deployment of AI in acute and critical care.\n"
+    },
+    "CH-sharing": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 213,
+      "end_line": 221,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "c9372882aec8e63647b12f012d06daf59302eb4ebbe5321a0c1da4145f97eaf2",
+      "excerpt": "Program Purpose\n\nThe  AIM-AHEAD  Bridge2AI  for  Clinical  Care  Training  Program\nexpands access to Bridge2AI CHoRUS data through engagement, AI\ntraining, and mentorship. It equips trainees to apply AI/ML methods\ninnovative  research  at  the\nto  big  data  analysis  and  conduct\nintersection  of  healthcare  challenges  and  AI/ML  using  multi-modal\ndatasets from a broad range of cohort participants.\n"
+    },
+    "CH-dataset": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 236,
+      "end_line": 247,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "8d0bf705ecdc17d369540751861ffaa22239a87ad3ad9242a483622a0e5428ff",
+      "excerpt": "CHoRUS Dataset\n\n• Retrospective data collection\n\n• Controlled access\n\n• As of August 2025, covers 14 different\n\nhospitals with over 45K unique admissions\n• OMOP and telemetry in enclave except:\n\n• Clinical notes – stored locally except tokens\n"
+    },
+    "CH-processing": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 245,
+      "end_line": 254,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "e39927c2daccba43ad96a14e072ce551c2c0a8ef88a75f4acaf1e95d0f7a8ee8",
+      "excerpt": "• OMOP and telemetry in enclave except:\n\n• Clinical notes – stored locally except tokens\n\n•\n\nImaging – currently 1000 images available\nwith de-id in process for larger cohort\n\n• EEG – extraction in process at this point\n"
+    },
+    "CH-use": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 256,
+      "end_line": 258,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "80a6619e488ed24d5de0c9f2be3695c772490ad48adfdf5442e197bd6255abcf",
+      "excerpt": "• Datasets are being used for training\n\nactivities and publications\n"
+    },
+    "CH-software": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 308,
+      "end_line": 310,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "db65ece5994b2436f96b5730841b1cdcfb657cf7d0cff525471dd71b76251ff4",
+      "excerpt": "Clinical notes (extracted\nand tokenized using OHNLP\ntoolkit)\n"
+    },
+    "CH-access": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "bridge2ai-for-clinical-care-informational-webinar-cohort-2_row9.txt",
+      "file_header_line": 55,
+      "start_line": 440,
+      "end_line": 455,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "6d695712571b6065417b801ab972125c04844867d78f75409df76b28bda5e227",
+      "excerpt": "Accessing the Data\n\nRegistration Process\n\nParticipants will ﬁll out a registration form with name, email, and institution\n\nOnce access is granted and compute is provisioned, an email will be sent\n\n1\n\n2\n\nLicensing Agreement\n\nAll participants must sign a licensing agreement included in the registration form before gaining\naccess to the dataset\n"
+    },
+    "CH-project": {
+      "project": "CHORUS",
+      "bundle_path": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "source_filename": "chorus4ai_org_row11.txt",
+      "file_header_line": 1032,
+      "start_line": 1074,
+      "end_line": 1085,
+      "line_numbering": "inclusive physical bundle lines, 1-based",
+      "excerpt_sha256": "73ba6cda26fe09f4f43b4666c3afeffab2e49ad84930f6054d176fd1b94192ce",
+      "excerpt": "Current Released Dataset\n50,000\nPatient admissions from ICU, PICU, and NICU\n1.6 Billion\nRows of EHR OMOP data\n7,642\nAdmissions with Radiology Data\n23 Tb\nWaveform data\nCHoRUS Project Components\nData\nThe CHoRUS project is the collection of multi-modal data across 14 different hospitals. The data utilizes ongoing and new standardization practices. The team creates tools to support the cloud enclave.\n"
+    }
+  },
+  "decisions": {
+    "AI_READI": {
+      "human_subjects": {
+        "value": true,
+        "citation_ids": [
+          "AI-scope",
+          "AI-release"
+        ],
+        "rationale": "Data were collected from people with and without type 2 diabetes; the v3 metadata describes 2,280 participants.",
+        "scope_and_limit": "Human origin and participant/privacy relevance, not a new regulatory determination or assurance of consent compliance.",
+        "human_review_question": null
+      },
+      "regulated_access": {
+        "value": true,
+        "citation_ids": [
+          "AI-scope",
+          "AI-access"
+        ],
+        "rationale": "Public distribution requires attestation and restricted reuse terms; the fuller dataset requires a data use agreement.",
+        "scope_and_limit": "Public and controlled subsets differ. This does not say all released files are credential-controlled or all controlled data are released.",
+        "human_review_question": null
+      },
+      "shared_dataset": {
+        "value": true,
+        "citation_ids": [
+          "AI-release",
+          "AI-access"
+        ],
+        "rationale": "The v3 release has a documented public download and self-attestation access route.",
+        "scope_and_limit": "Sharing under conditions, not unrestricted redistribution; current documentation must not replace a historical record’s original bundle.",
+        "human_review_question": null
+      },
+      "ml_training_dataset": {
+        "value": null,
+        "citation_ids": [
+          "AI-scope"
+        ],
+        "rationale": "The source describes design for future AI/ML studies and downstream analyses; the training-specific interpretation is unresolved.",
+        "scope_and_limit": "Do not equate AI-ready or intended AI research with an established training corpus, trained model, labels, or released train/test split.",
+        "human_review_question": "Does this predicate include intended future model-development use, as proposed in the earlier CHORUS context, or require explicit training use?"
+      },
+      "data_collection": {
+        "value": true,
+        "citation_ids": [
+          "AI-scope",
+          "AI-release"
+        ],
+        "rationale": "Multiple data modalities were acquired from study participants across three sites.",
+        "scope_and_limit": "The documented release and collection process, not completion of target enrollment or balance across all groups.",
+        "human_review_question": null
+      },
+      "data_processing": {
+        "value": true,
+        "citation_ids": [
+          "AI-processing"
+        ],
+        "rationale": "The source describes quality checks, corrections, and mapping to OMOP and DICOM before dissemination.",
+        "scope_and_limit": "Applicability of processing, not proof that every modality had identical processing or complete reproducibility.",
+        "human_review_question": null
+      },
+      "processing_software": {
+        "value": null,
+        "citation_ids": [
+          "AI-processing",
+          "AI-qc-software"
+        ],
+        "rationale": "REDCap reports and the OMOP Data Quality Dashboard support checks; terminology mapping is described. The reviewed passages do not tie an identified software transformation to the release.",
+        "scope_and_limit": "Quality-check software and human-guided corrections do not by themselves establish data-transforming software under the proposed interpretation; null is not evidence that no software exists.",
+        "human_review_question": "Do the documented quality-check/edit workflows qualify, or is a source identifying the transformation software needed?"
+      }
+    },
+    "CM4AI": {
+      "human_subjects": {
+        "value": null,
+        "citation_ids": [
+          "CM-assays",
+          "CM-governance",
+          "CM-cell-lines",
+          "CM-downstream-patients"
+        ],
+        "rationale": "The June release explicitly reports Human Subjects: No and commercially available de-identified human cell lines; a separately bundled paper analyzes 914 cancer patients under 25.",
+        "scope_and_limit": "The cell-line release and the paper’s downstream human-genetics application are distinct. Neither the project name nor that secondary application resolves project-wide applicability.",
+        "human_review_question": "Should the eventual record/context cover only the experimental release or also the downstream analysis? Reconcile the rubric’s human-origin/representation meaning with the release’s regulatory label before declaring false."
+      },
+      "regulated_access": {
+        "value": true,
+        "citation_ids": [
+          "CM-license",
+          "CM-incomplete",
+          "CM-public"
+        ],
+        "rationale": "The release states a CC BY-NC-SA 4.0 reuse condition and temporary embargoes for some datasets.",
+        "scope_and_limit": "True uses the semantic instrument’s governance-constraint meaning. Public files remain public; this does not assert credentialing, a patient-data DUA, or FDA regulation.",
+        "human_review_question": "Confirm that a noncommercial/share-alike condition qualifies as regulated_access under the selected instrument; otherwise revise before approval."
+      },
+      "shared_dataset": {
+        "value": true,
+        "citation_ids": [
+          "CM-public",
+          "CM-license"
+        ],
+        "rationale": "The release lists public files and reuse terms.",
+        "scope_and_limit": "Sharing is not completeness: temporary embargoes and absent computed cell maps are explicitly described.",
+        "human_review_question": null
+      },
+      "ml_training_dataset": {
+        "value": true,
+        "citation_ids": [
+          "CM-intent"
+        ],
+        "rationale": "AI model training is explicitly listed as an intended use.",
+        "scope_and_limit": "Intended use, not a claim that a particular model was trained or a train/test split was released.",
+        "human_review_question": null
+      },
+      "data_collection": {
+        "value": true,
+        "citation_ids": [
+          "CM-assays"
+        ],
+        "rationale": "The release describes Perturb-seq, SEC-MS, AP-MS, and imaging data from experimental cell lines.",
+        "scope_and_limit": "Laboratory data collection; this does not describe direct collection from the downstream pediatric patients.",
+        "human_review_question": null
+      },
+      "data_processing": {
+        "value": true,
+        "citation_ids": [
+          "CM-processing",
+          "CM-incomplete"
+        ],
+        "rationale": "The bundled methods describe processing imaging and biophysical data, embeddings, integration, and hierarchy construction.",
+        "scope_and_limit": "Project-level methods evidence; the June release explicitly does not include computed cell maps. Do not attribute every described transformation to every release.",
+        "human_review_question": null
+      },
+      "processing_software": {
+        "value": true,
+        "citation_ids": [
+          "CM-processing",
+          "CM-incomplete"
+        ],
+        "rationale": "The methods name cellmaps_pipeline and Python packages performing data processing and transformations.",
+        "scope_and_limit": "Explicit project software use, not a claim that this entire pipeline generated the June release or that a release-specific version is pinned.",
+        "human_review_question": null
+      }
+    },
+    "VOICE": {
+      "human_subjects": {
+        "value": true,
+        "citation_ids": [
+          "V-adult-scope",
+          "V-release-intent"
+        ],
+        "rationale": "The adult v3.1 release describes derived voice data and clinical information for 833 participants.",
+        "scope_and_limit": "Adult release scope; the pediatric page embedded elsewhere in this bundle is not evidence of adult cohort membership or pediatric sample counts.",
+        "human_review_question": null
+      },
+      "regulated_access": {
+        "value": true,
+        "citation_ids": [
+          "V-access",
+          "V-adult-scope"
+        ],
+        "rationale": "PhysioNet files require credentialing and a signed DUA; separate raw-audio access has additional institutional requirements.",
+        "scope_and_limit": "Apply the PhysioNet terms to derived features; do not transfer raw-audio access or content to the derived release.",
+        "human_review_question": null
+      },
+      "shared_dataset": {
+        "value": true,
+        "citation_ids": [
+          "V-release-intent",
+          "V-access"
+        ],
+        "rationale": "The documented derived-feature release is available to credentialed users under an agreement.",
+        "scope_and_limit": "Controlled sharing; this PhysioNet release does not contain original raw audio.",
+        "human_review_question": null
+      },
+      "ml_training_dataset": {
+        "value": null,
+        "citation_ids": [
+          "V-release-intent"
+        ],
+        "rationale": "The adult release is intended to enable future AI research, but that statement does not resolve a training-specific predicate.",
+        "scope_and_limit": "Uncertainty about intended-use versus demonstrated/explicit training semantics; no inference from workforce training or use of pretrained feature extractors.",
+        "human_review_question": "Is future AI research sufficient, or must the source explicitly identify model-training use? Review consistently with AI_READI, pediatric VOICE, and the earlier CHORUS intent-based proposal."
+      },
+      "data_collection": {
+        "value": true,
+        "citation_ids": [
+          "V-adult-scope",
+          "V-collection-processing"
+        ],
+        "rationale": "The methods describe consenting participants and collecting clinical information and voice tasks.",
+        "scope_and_limit": "The methods include the wider project’s pediatric group; the adult scope is anchored by the release notice, not by importing the pediatric cohort into adult data.",
+        "human_review_question": null
+      },
+      "data_processing": {
+        "value": true,
+        "citation_ids": [
+          "V-collection-processing",
+          "V-software"
+        ],
+        "rationale": "Audio is converted, resampled, and transformed into acoustic features; phenotype data are merged.",
+        "scope_and_limit": "The described adult release; this does not assert retention of raw audio on PhysioNet or uniform inclusion of every feature.",
+        "human_review_question": null
+      },
+      "processing_software": {
+        "value": true,
+        "citation_ids": [
+          "V-software"
+        ],
+        "rationale": "The release states that b2aiprep v3.0.0 processed audio features and merged phenotype files.",
+        "scope_and_limit": "Release-specific attribution for adult v3.1; the same software version must not be inferred for pediatric data.",
+        "human_review_question": null
+      }
+    },
+    "VOICE_PEDIATRIC": {
+      "human_subjects": {
+        "value": true,
+        "citation_ids": [
+          "VP-release",
+          "VP-collection"
+        ],
+        "rationale": "The pediatric release describes 300 participants aged 2–18 and parental or participant consent before collection and sharing.",
+        "scope_and_limit": "Pediatric v1.1.0 scope; adult counts, release versions, and normative claims do not transfer.",
+        "human_review_question": null
+      },
+      "regulated_access": {
+        "value": true,
+        "citation_ids": [
+          "VP-access"
+        ],
+        "rationale": "The pediatric files require credentialed users to sign the registered-access agreement.",
+        "scope_and_limit": "Access-related No training required refers to user prerequisites, not to whether data support ML training.",
+        "human_review_question": null
+      },
+      "shared_dataset": {
+        "value": true,
+        "citation_ids": [
+          "VP-release",
+          "VP-access"
+        ],
+        "rationale": "Derived audio features and associated clinical information are released under credentialed access.",
+        "scope_and_limit": "Controlled sharing of this pediatric release, which excludes original voice recordings.",
+        "human_review_question": null
+      },
+      "ml_training_dataset": {
+        "value": null,
+        "citation_ids": [
+          "VP-intent"
+        ],
+        "rationale": "The source describes enabling pediatric machine learning and developing AI screening tools; training-specific applicability needs an agreed interpretation.",
+        "scope_and_limit": "Do not infer a trained model or released split, transfer adult evidence, or confuse access training requirements with ML training.",
+        "human_review_question": "Does intended AI tool development qualify as model-training use under the chosen predicate definition? Apply the same decision consistently across the five datasets."
+      },
+      "data_collection": {
+        "value": true,
+        "citation_ids": [
+          "VP-release",
+          "VP-collection"
+        ],
+        "rationale": "Age-appropriate voice and questionnaire data were collected from eligible children and adolescents.",
+        "scope_and_limit": "The 300-participant pediatric release; counts and collection sessions are not inherited from the adult release.",
+        "human_review_question": null
+      },
+      "data_processing": {
+        "value": true,
+        "citation_ids": [
+          "VP-processing",
+          "VP-software"
+        ],
+        "rationale": "The pediatric release describes derived audio features and preprocessing/merging of phenotype data.",
+        "scope_and_limit": "The pediatric workflow; reported processing does not mean every possible feature was retained.",
+        "human_review_question": null
+      },
+      "processing_software": {
+        "value": true,
+        "citation_ids": [
+          "VP-processing",
+          "VP-software"
+        ],
+        "rationale": "The release identifies b2aiprep preprocessing and openSMILE, Praat, parselmouth, and torchaudio feature extraction.",
+        "scope_and_limit": "An identified transformation pipeline; the adult b2aiprep version is not assigned to this pediatric release.",
+        "human_review_question": null
+      }
+    },
+    "CHORUS": {
+      "human_subjects": {
+        "value": true,
+        "citation_ids": [
+          "CH-dataset",
+          "CH-project"
+        ],
+        "rationale": "The existing CHORUS source describes a patient-admission dataset, including EHR, radiology and waveforms from ICU, PICU and NICU admissions (project documentation, c006, lines 1074-1082); the webinar describes retrospective hospital admissions (c003, lines 236-247). This declaration concerns the human origin and participant/privacy relevance of the data; it does not assert a particular regulatory human-subjects determination, consent procedure, or completed ethics approval.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "regulated_access": {
+        "value": true,
+        "citation_ids": [
+          "CH-dataset",
+          "CH-access"
+        ],
+        "rationale": "The 2025-09-09 webinar explicitly labels the CHORUS dataset controlled access (c003, lines 236-240) and requires participants to sign a licensing agreement before dataset access (c003-c004, lines 440-455). A concrete access/governance restriction therefore applies to the documented dataset. This does not identify the exact agreement text, a statutory classification, or an unrestricted public license for the dataset.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "shared_dataset": {
+        "value": true,
+        "citation_ids": [
+          "CH-sharing",
+          "CH-use",
+          "CH-access",
+          "CH-project"
+        ],
+        "rationale": "The webinar describes expanding access to CHORUS data for trainee research (c003, lines 213-221), states that datasets are being used for training activities and publications (c003, lines 256-258), and supplies an access process with an agreement requirement (c003-c004, lines 440-455). The project page also labels a current released dataset (c006, lines 1074-1082). Sharing here includes controlled reuse; unrestricted public download is not asserted.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "ml_training_dataset": {
+        "value": true,
+        "citation_ids": [
+          "CH-intent"
+        ],
+        "rationale": "The NIH project abstract explicitly describes generating data for ML/AI applications and developing ML/AI-derived models, while separately planning a holdout set for external validation (c002, lines 45-47). This declaration identifies intended model-development use of the dataset; it does not assert that any particular model was trained, that a released training/test split is documented, or that workforce training is model training.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "data_collection": {
+        "value": true,
+        "citation_ids": [
+          "CH-dataset",
+          "CH-project"
+        ],
+        "rationale": "The webinar explicitly describes retrospective data collection and hospital admissions (c003, lines 236-247). The project documentation describes collection of multimodal data across contributing hospitals (c006, lines 1083-1085). This establishes a collection process without asserting that all proposed modalities, sites, or planned target counts were completed.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "data_processing": {
+        "value": true,
+        "citation_ids": [
+          "CH-processing",
+          "CH-project"
+        ],
+        "rationale": "The webinar describes OMOP and telemetry in the enclave, clinical notes retained locally except tokens, and imaging de-identification in progress for a larger cohort (c003, lines 245-254). The project page states that the data use ongoing and new standardization practices (c006, lines 1083-1085). Processing therefore applies; these statements do not establish completion of every processing step or processing uniformity across all modalities.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      },
+      "processing_software": {
+        "value": true,
+        "citation_ids": [
+          "CH-software",
+          "CH-dataset"
+        ],
+        "rationale": "The 2025-09-09 CHORUS dataset webinar explicitly describes clinical notes extracted and tokenized using the OHNLP toolkit (c003, lines 308-310), in a dataset snapshot that says clinical notes remain local except tokens (c003, lines 245-247). This supports processing-software applicability for the CHORUS dataset as described. The source does not establish the toolkit version, uniform use across all sites or modalities, or which particular release includes each processed output; those details remain unestablished, without negating the explicit dataset-level software use.",
+        "scope_and_limit": "Exact prior v2 declaration retained; full source filenames supplied by this ledger.",
+        "human_review_question": "Prior review author identity is unspecified. A named human must review these exact bytes and the scope before use."
+      }
+    }
+  }
+}
