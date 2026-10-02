@@ -437,7 +437,15 @@ lint-core: ## Lint the core exchange schema files
 # structural table replace them; the SKOS alignment TTL stays the curated
 # input. Their last bytes are in git history (`git log --diff-filter=D --
 # <path>`).
-gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (comprehensive pair + structural)
+#
+# The structural table is not part of this (#3967). It carries rows its
+# generator cannot produce (KNOWN_UNDERIVABLE in
+# generate_structural_mapping.py, #294), and its rule fires whenever the
+# merged schema, the RO-Crate example or the script is newer, so a schema
+# edit followed by this target rewrote it and silently dropped those rows.
+# Rewriting it is a deliberate act: `make gen-sssom-structural`, then `make
+# check-sssom-structural`, which names every curated row a rewrite dropped.
+gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive ## Regenerate the comprehensive SSSOM pair; leaves the partly curated structural table (see gen-sssom-structural)
 
 gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
 
@@ -476,9 +484,9 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_COMPREHENSIVE)
 
-gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Generate structure-aware D4D ↔ RO-Crate SSSOM mapping
+gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Rewrite the structural D4D ↔ RO-Crate SSSOM and its summary from the generator when its inputs are newer, dropping the KNOWN_UNDERIVABLE rows it cannot produce (not run by gen-sssom-all)
 
-check-sssom-structural: ## Report drift between the committed structural mapping and its generator
+check-sssom-structural: ## Compare the committed structural mapping and summary with their generator, allowing for the KNOWN_UNDERIVABLE rows (writes nothing; generate_structural_mapping.py --help states exactly what it compares)
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT) --check
 
 $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)
@@ -486,8 +494,10 @@ $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT)
 	@echo "✓ Structural mapping: $(SSSOM_STRUCTURAL)"
 
-clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
+# Not the structural table: it is committed and partly curated, and
+# regeneration cannot restore the KNOWN_UNDERIVABLE rows (#3967).
+clean-sssom: ## Remove the generated comprehensive SSSOM pair (gen-sssom-all rebuilds it); leaves the partly curated structural table
+	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
@@ -511,11 +521,35 @@ test-d4d-to-fairscape: ## Test D4D → FAIRSCAPE conversion (VOICE example)
 		json.dump(rocrate.model_dump(exclude_none=True, by_alias=True), \
 		          open('data/ro-crate/examples/voice_d4d_to_fairscape.json', 'w'), indent=2)"
 
-test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (CM4AI example)
+# The four crates #3969 names, the FAIRSCAPE profile crate and the three
+# examples under data/ro-crate/, must each convert to a record that
+# validates. The release crates under data/ro-crate_packages/ are not in
+# this list: tests/test_fairscape_integration/test_fairscape_to_d4d.py
+# converts CM4AI's and CHORUS's. AI_READI's is windows-1252, not UTF-8,
+# and the script refuses it with the CrateEncodingError `d4d rocrate map`
+# raises, naming the first byte that does not decode, its offset and how
+# many such bytes the crate holds (#4089). The script takes any path, so
+# its refusal says to transcode the file to UTF-8 where the map command's
+# points to crate_manifest.yaml's `encoding_note` (#4192). The test
+# converts it only decoded from windows-1252.
+# The records go to a temporary directory: a test does not rewrite
+# data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml (#3969).
+# Its path is quoted wherever it is expanded: under a TMPDIR with a space
+# in it, an unquoted `rm -rf` took the path's two halves as two paths to
+# remove, and left the directory itself (#4159).
+FAIRSCAPE_CRATES = $(ROCRATE_JSON) \
+	data/ro-crate/examples/CM4AI_roundtrip.json \
+	data/ro-crate/examples/voice_d4d_to_fairscape.json \
+	data/ro-crate/examples/voice_fairscape_test.json
+
+test-fairscape-to-d4d: ## Test FAIRSCAPE → D4D conversion (the four data/ro-crate crates)
 	@echo "Testing FAIRSCAPE → D4D conversion..."
-	$(RUN) python $(FAIRSCAPE_TO_D4D) \
-		--input $(ROCRATE_JSON) \
-		--output data/d4d_concatenated/fairscape_reverse/CM4AI_from_fairscape.yaml
+	@out="$$(mktemp -d)" || exit 1; status=0; \
+	for crate in $(FAIRSCAPE_CRATES); do \
+		$(RUN) python $(FAIRSCAPE_TO_D4D) --input "$$crate" \
+			--output "$$out/$$(basename "$$crate" .json).yaml" || status=1; \
+	done; \
+	rm -rf -- "$$out"; exit "$$status"
 
 fairscape-to-d4d: ## Convert FAIRSCAPE RO-Crate to D4D YAML (INPUT=, OUTPUT=)
 	@if [ -z "$(INPUT)" ] || [ -z "$(OUTPUT)" ]; then \

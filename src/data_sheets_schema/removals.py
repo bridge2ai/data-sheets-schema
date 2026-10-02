@@ -978,57 +978,12 @@ def run_enum_aliases(record: dict[str, Any] | None
     reachable version matches, are read before git is asked from their
     committed artefact (`reconstructed_bytes`, #3788, #3953) and accepted
     only by the recorded hashes, so a fresh or shallow clone reads them
-    too; the basis says they were reconstructed and names the artefact."""
-    today = "today's schema"
-    schema = (record or {}).get("schema") if isinstance(record, dict) else None
-    schema = schema if isinstance(schema, dict) else {}
-    path, sha256, md5 = schema.get("full_path"), schema.get("full_sha256"), schema.get("full_md5")
-    sha256 = sha256 if isinstance(sha256, str) and sha256 else None
-    md5 = md5 if isinstance(md5, str) and md5 else None
-    if not isinstance(path, str) or not path or not (sha256 or md5):
-        return None, {"source": today, "reason": "the record names no merged schema by path and hash"}
-    hashes = {k: v for k, v in (("sha256", sha256), ("md5", md5)) if v}
-    from data_sheets_schema.resources import resource_path
-    on_disk = resource_path(path)
-    try:
-        data = on_disk.read_bytes() if on_disk.is_file() else None
-    except OSError:
-        data = None
-    if data is not None and all(getattr(hashlib, k)(data).hexdigest() == v for k, v in hashes.items()):
-        return _tables_of(data), {"source": "the run's schema, on disk", "path": path, **hashes}
-    # Bytes no reachable commit holds, committed as a hash-checked artefact
-    # (#3788): read before git, which a shallow clone cannot answer (#3953).
-    from data_sheets_schema.reconstructed_bytes import reconstructed_bytes_for
-    try:
-        rebuilt = reconstructed_bytes_for(path, md5=md5, sha256=sha256)
-    except OSError as exc:
-        return None, {"source": today, "path": path, **hashes,
-                      "reason": "the run's schema is not on disk and its recorded reconstruction "
-                                f"could not be read ({type(exc).__name__}: {exc})"}
-    if rebuilt is not None:
-        data, entry = rebuilt
-        return _tables_of(data), {"source": "the run's schema, reconstructed", "path": path, **hashes,
-                                  "artefact": entry["artefact"], "base_commit": entry["base_commit"],
-                                  "matched_on": entry["matched_on"], "observed_at": entry["observed_at"],
-                                  "reconstruction": f"reconstructed_bytes.RECONSTRUCTIONS (#{entry['issue']})"}
-    from data_sheets_schema.provenance import GitUnavailable, committed_bytes_for
-    try:
-        found = committed_bytes_for(path, md5=md5, sha256=sha256)
-    except GitUnavailable as exc:
-        return None, {"source": today, "path": path, **hashes,
-                      "reason": f"the run's schema is not on disk and git cannot answer ({exc})"}
-    except OSError as exc:
-        # git could not be started at all (not installed, not on PATH, not
-        # executable): the same degraded fallback, not a failure (#3851).
-        return None, {"source": today, "path": path, **hashes,
-                      "reason": f"the run's schema is not on disk and git could not be run "
-                                f"({type(exc).__name__}: {exc})"}
-    if found is None:
-        return None, {"source": today, "path": path, **hashes,
-                      "reason": "no committed version of the path hashes to what the record recorded"}
-    data, entry = found
-    return _tables_of(data), {"source": "the run's schema, a git blob", "path": path, **hashes,
-                              "commit": entry["commit"], "matched_on": entry["matched_on"]}
+    too; the basis says they were reconstructed and names the artefact.
+    The resolution is `run_schema.run_schema_bytes`, which the form and
+    grounding recomputes read the same way (#3931)."""
+    from data_sheets_schema.run_schema import run_schema_bytes
+    data, basis = run_schema_bytes(record)
+    return (_tables_of(data) if data is not None else None), basis
 
 
 # -------------------------------------------------------------- relocation

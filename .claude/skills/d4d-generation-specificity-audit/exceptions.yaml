@@ -1,0 +1,104 @@
+# Tracked exceptions for the generation-specificity audit (#4007).
+#
+# An entry turns matching hits from "violation" or "no reason recorded" into
+# "tracked with a reason". It never hides a hit: every excepted hit is still
+# listed in the report under its exception number.
+#
+# Keys:
+#   path      glob (or list of globs) on the repository-relative path; fnmatch,
+#             so `*` also crosses `/`
+#   token     optional regex, full-matched case-insensitively against the
+#             matched text (e.g. 'fairhub')
+#   category  optional: gc_project | bridge2ai_program | biomedical_clinical
+#             (or a list). Give `token`, `category`, or both.
+#   context   optional: restrict to contexts (prose, example, instruction,
+#             value, string_literal, code_branch, code_table, comment, ...)
+#   reason    required: why this hit is acceptable where it is
+#   decision  required: the issue, PR or owner decision that settled it
+#
+# A gc_project exception needs a decision that names why the fact cannot live
+# in the manifest or profile. Do not add one to make a run pass.
+
+exceptions:
+  # ---- designed homes of the study's facts -----------------------------------
+  - path: src/data_sheets_schema/profiles.py
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: >-
+      The `bridge2ai` profile is the designated home of the study's
+      vocabulary pin, comparison-arm project lists, healthsheet input and
+      transcript aliases; `neutral` carries none, and a profile is never
+      inferred from a project name.
+    decision: '#628, #1302 (profiles); CLAUDE.md "Profiles"'
+  - path: data/preprocessed/source_manifest.yaml
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: >-
+      The study manifest is the project registry: naming, scope and source
+      ranking are data here and reach the model only for the study's own
+      bundles.
+    decision: '#621, #623, #1299 (manifest is the registry)'
+  - path: src/data_sheets_schema/b2ai_registry_vocabularies.yaml
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: >-
+      Pinned Bridge2AI registry vocabularies, rendered into the digest only
+      under the `bridge2ai` profile.
+    decision: '#1302 (study vocabulary pin, profile-gated)'
+
+  # ---- pinned historical prompt text (cannot be edited without a new condition)
+  - path:
+      - src/download/prompts/components/*.md
+      - src/download/prompts/d4d_tuned_arm_prompt.md
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: >-
+      The `tuned` condition exists to carry project-specific evidence; its
+      files are pinned (#432) and define the 2026-07-27 tuned series. Running
+      `tuned` on a non-study dataset has no component and is refused.
+    decision: '#432 (prompt pins); retirement of `tuned` is a follow-up of #4007'
+  - path: src/download/prompts/d4d_generic_arm_prompt_v*.md
+    context: header
+    reason: >-
+      Text above `## Prompt body` is the condition's changelog; prompt_body()
+      never sends it. Pinned bytes.
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    decision: '#432 (prompt pins); api_runner.prompt_body'
+  - path: src/download/prompts/d4d_generic_arm_prompt.md
+    context: header
+    category: [gc_project, bridge2ai_program, biomedical_clinical]
+    reason: Changelog header of the v1 condition; never sent (prompt_body). Pinned bytes.
+    decision: '#432 (prompt pins); api_runner.prompt_body'
+
+  # ---- analysis-only constants -------------------------------------------------
+  - path: src/data_sheets_schema/constants/projects.py
+    category: [gc_project, bridge2ai_program]
+    reason: >-
+      constants.PROJECTS is the study's corpus for the analysis scripts; the
+      generation path validates --project against the selected manifest
+      (registry.project_choice), not this list.
+    decision: '#623 (registry validation); CLAUDE.md "The manifest is the project registry"'
+
+  # ---- the schema's own namespace ------------------------------------------------
+  - path: src/data_sheets_schema/schema/*.yaml
+    category: bridge2ai_program
+    context: [value, comment]
+    reason: >-
+      Schema namespace URIs (w3id.org/bridge2ai), the B2AI_* prefixes and the
+      repository URL identify the schema itself and stay (CLAUDE.md, #1875).
+    decision: '#1875, #1889 (namespace and prefixes stay; no prose about them)'
+  - path: src/data_sheets_schema/schema/*.yaml
+    category: biomedical_clinical
+    reason: >-
+      The schema's human-subjects, ethics and governance modules model
+      clinical/biomedical datasets by design (IRB, HIPAA, de-identification,
+      consent). Tracked domain scope, not a study fact.
+    decision: '#4007 owner: biomedical/clinical is acceptable if tracked'
+
+  # ---- this audit's own description ----------------------------------------------
+  - path: .claude/skills/d4d-generation-specificity-audit/SKILL.md
+    category: [bridge2ai_program, biomedical_clinical]
+    context: frontmatter
+    reason: >-
+      The audit's description, which every interactive session lists so a
+      person can find the audit, names the categories it checks for (a
+      Bridge2AI Grand Challenge project, the Bridge2AI program,
+      biomedical/clinical data). Naming what it audits states no fact about
+      a study; a project name there would still be a violation.
+    decision: '#4131 (review round 4 of #4021)'
