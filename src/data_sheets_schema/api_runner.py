@@ -537,6 +537,8 @@ class RunSpec:
     # with the pinned binary. False renders the expansion, which keeps every
     # existing render spec byte-identical; True is emitted into the spec.
     prompt_text_env: bool = False
+    # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
+    api_playbook_version: int = 0
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
@@ -559,6 +561,10 @@ class RunSpec:
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
+        if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1):
+            raise ValueError("api_playbook_version must be 0 or 1")
+        if self.api_playbook_version and (self.is_agentic or self.render_version != 8):
+            raise ValueError("API playbook v1 supports only API renderer 8")
         if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
             # Only agentic renderers 9 and later carry the recorder line the
             # key changes; elsewhere it would be recorded and do nothing (#2313).
@@ -671,7 +677,14 @@ class RunSpec:
                    run_date=recorded.get("run_date", ""), runtime=recorded.get("runtime", ""),
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
-                   prompt_text_env=recorded.get("prompt_text_env") is True, _replay_only=True)
+                   prompt_text_env=recorded.get("prompt_text_env") is True,
+                   api_playbook_version=recorded.get("api_playbook_version", 0), _replay_only=True)
+        if spec.api_playbook_version:
+            from data_sheets_schema.api_playbook import POLICY_SHA256
+            if recorded.get("api_playbook_sha256") != POLICY_SHA256:
+                raise ValueError("invalid recorded API playbook v1 SHA256")
+        elif "api_playbook_sha256" in recorded or "api_playbook_version" in recorded:
+            raise ValueError("API playbook metadata is recorded only for opt-in version 1")
         if "prompt_text_env" in recorded and recorded["prompt_text_env"] is not True:
             # `render_spec` emits the key only as true; any other spelling
             # would not round-trip and would be refused later as a changed
@@ -724,6 +737,9 @@ class RunSpec:
         """Before planning or spending, bind the instruction to request settings."""
         if self.render_version < 8 or self.is_agentic:
             return
+        if self.api_playbook_version:
+            from data_sheets_schema.api_playbook import policy_text
+            policy_text()
         actual = request_header_values(settings)
         if self._api_header_values is None and not self._replay_only:
             self._api_header_values = actual
@@ -745,6 +761,9 @@ class RunSpec:
         mixing generations (#1402).
         """
         from data_sheets_schema.chunking import manifest_for
+        if self.api_playbook_version:
+            from data_sheets_schema.api_playbook import policy_text
+            policy_text()
 
         def entry(path):
             if path is None:
@@ -781,7 +800,13 @@ class RunSpec:
         lets `verify_request()` re-render and compare, which is what turns
         "do not intervene" from a rule into something detectable (#420).
         """
-        return {**({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
+        policy_metadata = {}
+        if self.api_playbook_version:
+            from data_sheets_schema.api_playbook import POLICY_SHA256
+            policy_metadata = {"api_playbook_version": self.api_playbook_version,
+                               "api_playbook_sha256": POLICY_SHA256}
+        return {**policy_metadata,
+                **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
                 **({"agentic_toolchain": {"python": self._agentic_toolchain["python"],
                                          "resources": dict(self._agentic_toolchain["resources"])}}
@@ -877,6 +902,9 @@ class RunSpec:
     @property
     def prompt_files(self) -> list[Path]:
         files = [self.base_prompt]
+        if self.api_playbook_version:
+            from data_sheets_schema.api_playbook import POLICY_PATH
+            files.append(POLICY_PATH)
         if self.condition == "tuned":
             files += [TUNED_PROMPT, COMPONENTS / f"{self.project}.md"]
         return files
@@ -962,7 +990,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -993,6 +1021,12 @@ def assembly_digest(render_version: int = 8) -> dict[str, Any]:
         from data_sheets_schema.receipts import RERECEIPTS_INSTRUMENT
         parts.append({"full_rereceipt_header": HEADER, "full_rereceipt_instruction": INSTRUCTION,
                       "full_rereceipt_policy": POLICY, "receipts_instrument": RERECEIPTS_INSTRUMENT})
+    if api_playbook_version:
+        if type(api_playbook_version) is not int or api_playbook_version != 1 or render_version != 8:
+            raise ValueError("API playbook v1 supports only API renderer 8")
+        from data_sheets_schema.api_playbook import POLICY_SHA256
+        parts.append({"api_playbook_version": 1, "api_playbook_sha256": POLICY_SHA256,
+                      "adaptation": "API policy + declarations + full header + selected decision rules + phase return"})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1078,6 +1112,9 @@ def resolve_prompt(spec: RunSpec) -> str:
     in the request is the text that was hashed.
     """
     body = prompt_body(spec.base_prompt)
+    if spec.api_playbook_version:
+        from data_sheets_schema.api_playbook import adapt_template
+        body = adapt_template(body)
     ident = provider_identity()
     api_values = spec.api_header_values if spec.render_version >= 8 and not spec.is_agentic else None
     settings = _model_settings() if api_values is None else None
@@ -1180,6 +1217,9 @@ def resolve_prompt(spec: RunSpec) -> str:
         body = body.replace(
             "# Mode: four-phase project agent, generic prompt",
             "# Mode: four-phase project agent, tuned prompt")
+        if spec.api_playbook_version:
+            body = body.replace("# Mode: API phase controller, generic prompt",
+                                "# Mode: API phase controller, tuned prompt")
         body = body.replace(
             "# Prompt: src/download/prompts/d4d_generic_arm_prompt.md "
             "(identical for all projects)",
@@ -2651,6 +2691,7 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     return {
         "project": spec.project, "arm": spec.arm, "method": spec.method,
         "label": spec.label, "condition": spec.condition,
+        **({"api_playbook_version": spec.api_playbook_version} if spec.api_playbook_version else {}),
         "bundle": str(spec.bundle), "bundle_bytes": spec.bundle.stat().st_size,
         "model": settings,
         "runtime": RUNTIME,
@@ -6759,7 +6800,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # both: the file for provenance of the source, the resolution for the
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
-    rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version)
+    rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version)
     rec.data["prompts"]["context_blocks"] = context_blocks(spec)
     ident = provider_identity()
     rec.data["model"] = {
