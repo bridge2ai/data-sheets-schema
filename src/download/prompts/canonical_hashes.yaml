@@ -10,6 +10,16 @@
 # declaration that it is the new canonical text are two acts, and the second
 # one is small enough to read.
 files:
+  src/download/prompts/api_playbook_v1.md:
+    body_sha256: ce2f644cad14496c2cb4684fc371fca4a2409268f793061c47e00087069038f6
+    bytes: 4558
+    pinned_at_commit: 9a56c05b48001708c35fee1f8a234cfdf0432a60
+    pinned_blob_path: src/download/prompts/api_playbook_v1.md
+    pinned_in_repository: /private/tmp/d4d-loop-4014-20261002
+    pinned_on: '2026-10-02'
+    reason: Freeze explicit API playbook v1 instruction axis (#4014); historical and agentic
+      conditions unchanged.
+    sha256: 6870fd69c6ca377b6f6a349b0161f503ef742176228074db57325b7368db6015
   src/download/prompts/components/AI_READI.md:
     bytes: 1203
     pinned_at_commit: 225f224544aa8f9ca8ac7f61f57aab9813536866

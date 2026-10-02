@@ -410,7 +410,8 @@ class TestTheCLI(unittest.TestCase):
         # Same shape as #467, where a four-project literal silently excluded
         # VOICE_PEDIATRIC.
         from data_sheets_schema.api_runner import CONDITION_PROMPTS
-        for real in set(CONDITION_PROMPTS.values()):
+        from data_sheets_schema.api_playbook import POLICY_PATH
+        for real in set(CONDITION_PROMPTS.values()) | {POLICY_PATH}:
             here = self.prompt.with_name(real.name)
             if not here.exists():
                 here.write_text(f"# {real.stem}\n\n## Prompt body\nbody\n")
