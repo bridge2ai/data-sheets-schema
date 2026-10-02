@@ -72,18 +72,34 @@ program, or a wrapper's, is a variable or a relative path (`$PY -m
 data_sheets_schema.cli`, `./d4d`) is read as one, but a `derive core` of
 the full record it spells cannot be placed, as the program may be a
 wrapper that did not run it, and no subcommand of it is read-only
-(#3693). Nor can a `derive core` of the full record with an assignment
-before its program -- on the part, given to `env`, as an earlier part of
-the command or by `printf -v` (`PYTHONPATH=src python -m
-data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d derive
-core`) -- as the assignment may make the part run other code; no
-assignment is exempt, `PYTHONPATH=src` included (#3781), and an earlier
-part of appends or array elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`)
-counts too. The assignment is read as the position rule reads one (#3689,
-#3700): one made any other way -- by `export`, `declare` or `read`, in a
-sourced script, a function or an `eval`, or outside the command -- is not
-read as one, so a derive after `export PYTHONPATH=./hack;` is placed. Any
-other part that carries the words `derive core` and is neither a d4d call
+(#3693). Nor can a `derive core` of the full record that an assignment
+may come before, as the assignment may make the part run other code; no
+assignment is exempt, `PYTHONPATH=src` included (#3781). That is read
+bluntly, by words and not by where they stand (#4123): an assignment
+before the part's program, on the part or given to `env` (`PYTHONPATH=src
+python -m data_sheets_schema.cli derive core`); an earlier part of the
+command carrying, anywhere in it, an assignment word (`NAME=`, `NAME+=`,
+`NAME[...]=` or `NAME[...]+=`, behind `{`, a compound keyword, `!`,
+`time`, a redirection, `builtin`, `command` or any other word:
+`PATH=./bin:$PATH;`, `{ PATH=./bin:$PATH; };`, `if ...; then PATH=...;
+fi;`, `PATH=... 2>/dev/null;`, `BASH_CMDS[d4d]=./x;`, `X=1 cat x;`),
+`printf` with a word starting with `-v` (`builtin printf -v PATH ...;`),
+or one of the words `export`, `declare`, `typeset`, `local`, `readonly`,
+`read`, `mapfile`, `readarray`, `wait`, `eval`, `source`, `.`, `set`,
+`shopt`, `alias`, `hash`, `enable`, `for` or `select` (`for PATH in
+./bin; do :; done;`); or an assignment word anywhere on the part itself
+where any part of the command, a later one included, carries `set` with
+an option word carrying `k` or the word `keyword` (`set -k`, `set -o
+keyword`), as keyword mode puts every assignment word in a command's
+environment (#4124). Its cost is a false `unknown` where such a word
+assigns nothing (`echo X=1;`, `ls .;`, `set -e;`). A route those words do
+not name is not read -- a function, defined in the command or outside it
+(`d4d() { ./x; };`), `getopts`, `unset`, an arithmetic assignment
+(`(( PATH = 1 ))`), a program word built at run time (`$X`) -- nor is an
+assignment, option or definition made outside the command (an earlier
+call's `export`, the inherited environment), so a derive after
+`unset PATH;` is placed. Any other part that carries the words
+`derive core` and is neither a d4d call
 of another subcommand nor a program known to read is a derive that cannot
 be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
 option this does not read makes a part such a one (#3455). The words are matched after quote and escape
@@ -473,15 +489,27 @@ NON_CHECKS = (
     "or a wrapper's, is a variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) "
     "is read as one, but a `derive core` of the full record it spells cannot be placed, since "
     "the program may be a wrapper that did not run it, and no subcommand of it is read-only "
-    "(#3693). Nor can a `derive core` of the full record with an assignment before its program, "
-    "on the part, given to `env`, as an earlier part of the command or by `printf -v` "
-    "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`, `PATH=./bin:$PATH; d4d "
-    "derive core`), since the assignment may make the part run other code; no assignment is "
-    "exempt, `PYTHONPATH=src` included, and the cost is a false `unknown` (#3781); an earlier part "
-    "of appends or array elements (`PATH+=:./bin;`, `BASH_CMDS[d4d]=./x;`) counts too. An assignment "
-    "made any other way (by `export`, `declare` or `read`, in a sourced script, a function or an "
-    "`eval`, or outside the command) is not read as one, so a derive after `export "
-    "PYTHONPATH=./hack;` is placed. The words are matched "
+    "(#3693). Nor can a `derive core` of the full record that an assignment may come before, "
+    "since the assignment may make the part run other code; no assignment is exempt, "
+    "`PYTHONPATH=src` included (#3781). That is read bluntly, by words and not by where they stand "
+    "(#4123): an assignment before the part's program, on the part or given to `env` "
+    "(`PYTHONPATH=src python -m data_sheets_schema.cli derive core`); an earlier part of the command "
+    "carrying, anywhere in it, an assignment word (`NAME=`, `NAME+=`, `NAME[...]=` or `NAME[...]+=`, "
+    "behind `{`, a compound keyword, `!`, `time`, a redirection, `builtin`, `command` or any other "
+    "word: `PATH=./bin:$PATH;`, `{ PATH=./bin:$PATH; };`, `if ...; then PATH=...; fi;`, `PATH=... "
+    "2>/dev/null;`, `BASH_CMDS[d4d]=./x;`, `X=1 cat x;`), `printf` with a word starting with `-v` "
+    "(`builtin printf -v PATH ...;`), or one of the words `export`, `declare`, `typeset`, `local`, "
+    "`readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`, `source`, `.`, `set`, `shopt`, "
+    "`alias`, `hash`, `enable`, `for` or `select` (`for PATH in ./bin; do :; done;`); or an "
+    "assignment word anywhere on the part itself where any part of the command, a later one "
+    "included, carries `set` with an option word carrying `k` or the word `keyword` (`set -k`, "
+    "`set -o keyword`), since keyword mode puts every assignment word in a command's environment "
+    "(#4124). The cost is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, "
+    "`set -e;`). A route those words do not name is not read (a function, defined in the command or "
+    "outside it, `d4d() { ./x; };`, `getopts`, `unset`, an arithmetic assignment, `(( PATH = 1 ))`, "
+    "or a program word built at run time, `$X`), nor an assignment, option or definition made "
+    "outside the command (an earlier call's `export`, the inherited environment), so a derive after "
+    "`unset PATH;` is placed. The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -514,9 +542,21 @@ _CLEAN_PATH = re.compile(r"[A-Za-z0-9_./+@-]+")
 _ASSIGNMENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*=.*")
 #: Any of bash's assignment words: `NAME=`, an append (`NAME+=`) or an array
 #: element (`NAME[KEY]=`, `NAME[KEY]+=`). `_ASSIGNMENT` reads the first only,
-#: and the rules that use it still read the others as a program; this reads
-#: a part made of them alone as an assignment-only part (#3781).
+#: and the rules that use it still read the others as a program; the derive
+#: rule reads all four, wherever they stand (`_may_assign`, #3781, #4123).
 _ASSIGNMENT_WORD = re.compile(r"[A-Za-z_][A-Za-z0-9_]*(\[[^\]]*\])?\+?=.*")
+#: Words that may assign a variable, set a shell option or change what a
+#: later command's name runs, read wherever they stand in a part
+#: (`_may_assign`, #3781, #4123): the builtins that assign (`export`,
+#: `declare`, `typeset`, `local`, `readonly`, `read`, `mapfile`,
+#: `readarray`, and `wait`, whose `-p` assigns), `eval`, `source` and `.`,
+#: which run text or a file in this shell, `set` and `shopt`, which set its
+#: options (`set -k`), `alias`, `hash` and `enable`, which change what a
+#: name runs, and `for` and `select`, which assign their loop variable (`for
+#: PATH in ./bin; do :; done`).
+_ASSIGNING_WORDS = frozenset({"export", "declare", "typeset", "local", "readonly", "read", "mapfile",
+                              "readarray", "wait", "eval", "source", ".", "set", "shopt", "alias", "hash",
+                              "enable", "for", "select"})
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
 _VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
 _DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
@@ -804,9 +844,10 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     `||`, followed by `;`, or in a multi-line command), `unparsed` (a
     spelling the parser does not read, #3137), `unnamed_program` (a
     variable or relative-path program, which may be a wrapper, #3693) or
-    `assigned_environment` (an assignment before the program, on the part,
-    given to `env`, as an earlier part or by `printf -v`, which may make it
-    run other code, #3781). A part whose status the
+    `assigned_environment` (an assignment that may come before the program,
+    on the part, given to `env`, in an earlier part read by its words
+    wherever they stand, or on the part under keyword mode, which may make
+    it run other code, #3781, #4123, #4124). A part whose status the
     result does not carry is `ambiguous`, unless the call was `denied` --
     by the native control or, corroborated, by the runtime (#3201) -- and
     so never ran. `inputs` are the call's, for `_backgrounded`."""
@@ -1453,8 +1494,10 @@ def _plainly_run(segment: list[str]) -> bool:
     `PATH`, `LD_PRELOAD`, ...) can make it load other code; and the program
     word, and every wrapper's, is a `_plain_word`. An environment set
     outside the command (exported earlier or inherited) is not read. A
-    `derive core` part this rejects, or one after an assignment-only part
-    or `printf -v`, is not placed (#3781)."""
+    `derive core` part this rejects is not placed (#3781), nor one after a
+    part whose words may assign (`_may_assign`, #4123), nor one carrying an
+    assignment word anywhere where the command may turn on keyword mode
+    (`_keyword_mode`, #4124)."""
     rest = list(segment)
     while rest:
         if _ASSIGNMENT.fullmatch(rest[0]):
@@ -1477,8 +1520,8 @@ def _names_its_program(segment: list[str]) -> bool:
     relative path (`$PY -m data_sheets_schema.cli`, `./d4d`) may name a
     wrapper rather than the interpreter or the CLI, so a `derive core` its
     words spell may not have run: the row is not placed. Assignments are
-    `_plainly_run`'s part of the question, not this one; a derive with one
-    is not placed either (#3781)."""
+    `_plainly_run`'s and `_may_assign`'s part of the question, not this
+    one; a derive after one is not placed either (#3781, #4123)."""
     rest = _program(segment)
     while (skip := _wrapper_skip(rest)) is not None and skip < len(rest):
         if not _plain_word(rest[0]):
@@ -1756,6 +1799,39 @@ def _printf_assigns(args: list[str]) -> bool:
         if word.startswith("-v"):
             return True
     return False
+
+
+def _may_assign(segment: list[str]) -> bool:
+    """Whether a part may assign a variable, set a shell option or change
+    what a later part's program name runs, read by its words alone and not
+    by where they stand (#3781, #4123): any word in it is an assignment word
+    (`_ASSIGNMENT_WORD`: `NAME=`, `NAME+=`, `NAME[...]=`, `NAME[...]+=`),
+    whatever comes before it -- `{`, a compound keyword, `!`, `time`, a
+    redirection, `builtin`, `command`, `env` or any other word -- or one of
+    `_ASSIGNING_WORDS`, or the part carries `printf` and a word starting
+    with `-v` (`builtin printf -v PATH %s ./bin`). No spelling of what
+    stands before a program is followed, which is the point: each new one
+    was a miss (#4123). The cost is a false `unknown` where such a word
+    assigns nothing (`echo X=1`, `ls .`, `set -e`). A route the words do
+    not name is not read: a function (`d4d() { ./x; }`, or one defined
+    outside the command), `getopts`, `unset`, an arithmetic assignment
+    (`(( PATH = 1 ))`) or a program word built at run time (`$X`)."""
+    return (any(_ASSIGNMENT_WORD.fullmatch(word) or word in _ASSIGNING_WORDS for word in segment)
+            or ("printf" in segment and any(word.startswith("-v") for word in segment)))
+
+
+def _keyword_mode(segments: list[list[str]]) -> bool:
+    """Whether the command may turn on bash's keyword mode (`set -k`, `set
+    -o keyword`), under which every assignment word in a command, not only
+    those before its program, is put in that command's environment, so
+    `set -k; python -m data_sheets_schema.cli derive core ...
+    PYTHONPATH=./hack` imports from `./hack` (#4124): a part that carries
+    `set` and an option word carrying `k` (`-k`, `-ek`) or the word
+    `keyword`. It is read anywhere in the command, a part after the derive
+    included, the cost of not reading where it stands."""
+    return any("set" in segment and any(word == "keyword" or (word[:1] == "-" and word[1:2] != "-" and "k" in word)
+                                        for word in segment)
+               for segment in segments)
 
 
 def _validator(rest: list[str]) -> bool:
@@ -2381,8 +2457,17 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     may_derive = [False] * len(segments)
     # Whether an assignment-only part has run: it may set `PATH`,
     # `PYTHONPATH` or another variable the environment already exports, so a
-    # later part may not run what its words name (#3689).
+    # later part may not run what its words name (#3689). The position rule
+    # reads this; a part it misses (`{ PATH=./bin; }`) runs a program not
+    # read here, `{`, and so is unread itself.
     assigned = False
+    # The derive rule reads more bluntly (#3781, #4123): per part, whether
+    # its words may assign wherever they stand (`_may_assign`), so a derive
+    # after any such part is not placed, and whether the command may turn
+    # on keyword mode, which puts a derive's own trailing assignment words in
+    # its environment (`_keyword_mode`, #4124).
+    assigning = [_may_assign(segment) for segment in segments]
+    keyword = _keyword_mode(segments)
     # `moved`: whether a directory change has run, in this command or, as
     # the caller says, an earlier call (#3719): `python -c` and `python -m`
     # put the directory they start in first on `sys.path`, so after one the
@@ -2405,11 +2490,9 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
             continue
         # A part of assignments `_ASSIGNMENT` does not read -- an append or an
         # array element, `PATH+=:./bin`, or `BASH_CMDS[d4d]=./x`, after which
-        # bash runs `./x` for `d4d` -- is still read below as a program not
-        # read here, but it assigns as well, so a later part is not plainly
-        # run and a derive after it is not placed (#3781).
-        if all(_ASSIGNMENT_WORD.fullmatch(word) for word in segment):
-            assigned = True
+        # bash runs `./x` for `d4d` -- is read below as a program not read
+        # here, so the call is unread; a derive after it is not placed
+        # (`assigning`, #3781).
         program = os.path.basename(rest[0])
         # Only the builtin moves the directory, and only it leaves the loop
         # here: a path-qualified lookalike (`./cd`, `/usr/bin/cd`) or one run
@@ -2509,19 +2592,22 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 # either way, and the position rule holds it (#3722). Any
                 # other is placed only where the part runs as its words
                 # name it. A variable or relative-path program may be a
-                # wrapper (#3693). An assignment before the program -- on the
-                # part, given to `env`, as an earlier part of the command or
-                # by `printf -v`: `assigned` or `_plainly_run`, as the
-                # position rule reads one (#3689, #3700) -- may make the part
-                # run other code (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`).
-                # There is no allow-list, `PYTHONPATH=src` included (#3781,
-                # the owner's decision of 2026-09-30): the cost is a false
-                # `unknown`, never a false `checked`.
+                # wrapper (#3693). An assignment that may come before the
+                # program may make the part run other code
+                # (`PYTHONPATH=./hack`, `PATH=./bin:$PATH;`), with no
+                # allow-list, `PYTHONPATH=src` included (#3781, the owner's
+                # decision of 2026-09-30): one on the part or given to `env`
+                # (`_plainly_run`); any earlier part whose words may assign,
+                # wherever they stand (`_may_assign`, #4123); or, where the
+                # command may turn on keyword mode, an assignment word
+                # anywhere on the part (#4124). Its cost is a false
+                # `unknown`; a route the words do not name is not read.
                 if verdict is False:
                     basis = _status_basis(index, joins, leading, newline)
                 elif not named:
                     verdict, basis = None, "unnamed_program"
-                elif assigned or not _plainly_run(segment):
+                elif (any(assigning[:index]) or not _plainly_run(segment)
+                      or (keyword and any(_ASSIGNMENT_WORD.fullmatch(word) for word in segment))):
                     verdict, basis = None, "assigned_environment"
                 else:
                     basis = _status_basis(index, joins, leading, newline)
@@ -2985,11 +3071,14 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                    "unnamed_program": "its program is a variable or a relative path (`$PY -m "
                                       "data_sheets_schema.cli`, `./d4d`), which may name a wrapper that did "
                                       "not run the derive its words spell (#3693)",
-                   "assigned_environment": "an assignment comes before its program, on the part, given to "
-                                           "`env`, as an earlier part of the command or by `printf -v` "
-                                           "(`PYTHONPATH=src`, `PATH=./bin:$PATH;`), which may make it run "
-                                           "code other than the derive its words spell; no assignment is "
-                                           "exempt (#3781)",
+                   "assigned_environment": "an assignment may come before its program: on the part or given "
+                                           "to `env` (`PYTHONPATH=src`), in an earlier part of the command, "
+                                           "read by its words wherever they stand (an assignment word, "
+                                           "`printf -v`, or a word that may assign, such as `export`, `read`, "
+                                           "`eval`, `source`, `set` or `for`: `{ PATH=./bin:$PATH; };`), or on "
+                                           "the part itself where the command may turn on keyword mode "
+                                           "(`set -k`); it may make the part run code other than the derive "
+                                           "its words spell, and no assignment is exempt (#3781)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "

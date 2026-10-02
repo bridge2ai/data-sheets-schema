@@ -347,15 +347,24 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     terminal `result` lists the call, which then never ran. `timeout`,
     `env` and `nice` wrappers are read through. A derive whose program is a
     variable or a relative path (`$PY -m data_sheets_schema.cli`, `./d4d`)
-    cannot be placed, as that program may be a wrapper. Nor can one with an
-    assignment before its program, on the part, given to `env`, as an
-    earlier part of the command or by `printf -v` (`PYTHONPATH=src python -m
-    data_sheets_schema.cli`, `PATH=./bin:$PATH; d4d`), as the assignment may
-    make it run other code: no assignment is exempt, and an earlier part of
-    appends or array elements (`PATH+=:./bin;`) counts too. An assignment made any
-    other way (`export`, `declare`, `read`, a sourced script, a function,
-    `eval`, or outside the command) is not read as one, so a derive after
-    `export PYTHONPATH=./hack;` is placed. Three kinds of part carrying
+    cannot be placed, as that program may be a wrapper. Nor can one that an
+    assignment may come before, as it may make the part run other code: no
+    assignment is exempt, `PYTHONPATH=src` included. That is read by words,
+    not by where they stand: an assignment on the part or given to `env`
+    (`PYTHONPATH=src python -m data_sheets_schema.cli`); an earlier part of
+    the command carrying, anywhere in it, an assignment word (`NAME=`,
+    `NAME+=`, `NAME[...]=` or `NAME[...]+=`: `PATH=./bin:$PATH;`, `{
+    PATH=./bin:$PATH; };`, `PATH=... 2>/dev/null;`), `printf` with a word
+    starting with `-v`, or one of the words `export`, `declare`, `typeset`,
+    `local`, `readonly`, `read`, `mapfile`, `readarray`, `wait`, `eval`,
+    `source`, `.`, `set`, `shopt`, `alias`, `hash`, `enable`, `for` or
+    `select`; or an assignment word anywhere on the part where any part of
+    the command carries `set` with an option carrying `k` or the word
+    `keyword` (`set -k`, `set -o keyword`). Its cost is a false `unknown`
+    (`echo X=1;`, `ls .;`, `set -e;`). A route those words do not name (a
+    function, `getopts`, `unset`, `(( PATH = 1 ))`, `$X`) or an assignment
+    outside the command is not read, so a derive after `unset PATH;` is
+    placed. Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a
