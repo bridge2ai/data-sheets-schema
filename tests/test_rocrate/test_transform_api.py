@@ -13,22 +13,15 @@ not decode and says to transcode the file.
 
 import contextlib
 import io
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 repo_root = Path(__file__).resolve().parents[2]
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
 
 from data_sheets_schema.rocrate_map import CrateEncodingError
-from src.transformation.transform_api import (
-    ROCrateParser,
-    SemanticTransformer,
-    TransformationConfig,
-    _parse_rocrate,
-)
 
 #: The AI-READI v3.0.0 release crate and its copy among the raw downloads,
 #: both windows-1252, not UTF-8 (#4089)
@@ -57,12 +50,38 @@ class TestCrateEncoding(unittest.TestCase):
     not UTF-8 by name. With input validation, the default, `rocrate_to_d4d`
     refuses it earlier, when the validation fails, as it did before."""
 
-    @staticmethod
-    def transformer():
+    @classmethod
+    def setUpClass(cls):
+        # The legacy API adds import paths and loads a top-level `validation`
+        # namespace. Keep that state within this class: otherwise collection
+        # shadows evaluation_controls/validation.py in unrelated tests (#4211).
+        before_path = sys.path[:]
+        before_validation = {
+            name: module for name, module in sys.modules.items()
+            if name == "validation" or name.startswith("validation.")
+        }
+
+        def restore_imports():
+            sys.path[:] = before_path
+            for name in list(sys.modules):
+                if name == "validation" or name.startswith("validation."):
+                    del sys.modules[name]
+            sys.modules.update(before_validation)
+
+        cls.addClassCleanup(restore_imports)
+        for name in before_validation:
+            del sys.modules[name]
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+        from src.transformation import transform_api
+        cls.api = transform_api
+
+    @classmethod
+    def transformer(cls):
         """A transformer that validates nothing; the mapping's progress
         lines are kept off the output."""
         with contextlib.redirect_stdout(io.StringIO()):
-            return SemanticTransformer(TransformationConfig(
+            return cls.api.SemanticTransformer(cls.api.TransformationConfig(
                 mapping_file=MAPPING, validate_input=False, validate_output=False))
 
     def test_merge_rocrates_and_rocrate_to_d4d_refuse_it_by_name(self):
@@ -92,8 +111,8 @@ class TestCrateEncoding(unittest.TestCase):
         parser parses it, and a path that is no file is reported by the
         parser, as it was."""
         with contextlib.redirect_stdout(io.StringIO()):
-            read, parsed = _parse_rocrate(VOICE), ROCrateParser(str(VOICE))
-        self.assertIsInstance(read, ROCrateParser)
+            read, parsed = self.api._parse_rocrate(VOICE), self.api.ROCrateParser(str(VOICE))
+        self.assertIsInstance(read, self.api.ROCrateParser)
         for name in ("rocrate_path", "context", "graph", "root_dataset", "all_properties"):
             with self.subTest(attribute=name):
                 self.assertEqual(getattr(read, name), getattr(parsed, name))
@@ -101,8 +120,48 @@ class TestCrateEncoding(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             missing = Path(tmp) / "ro-crate-metadata.json"
             with self.assertRaises(FileNotFoundError) as cm:
-                _parse_rocrate(missing)
+                self.api._parse_rocrate(missing)
         self.assertEqual(str(cm.exception), f"RO-Crate file not found: {missing}")
+
+
+def test_collection_and_class_cleanup_preserve_import_state():
+    """A fresh interpreter catches collection leaks and exact restoration (#4211)."""
+    script = r'''
+import importlib.util
+import sys
+import types
+import unittest
+
+before_path = sys.path[:]
+assert "validation" not in sys.modules
+spec = importlib.util.spec_from_file_location("scoped_transform_test", sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+assert "validation" not in sys.modules, "test collection leaked validation"
+assert sys.path == before_path, "test collection changed sys.path"
+
+# An existing consumer's namespace and submodule must survive the test class.
+previous = types.ModuleType("validation")
+previous.validator_argv = object()
+child = types.ModuleType("validation.existing_child")
+sys.modules["validation"] = previous
+sys.modules["validation.existing_child"] = child
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(module.TestCrateEncoding)
+result = unittest.TestResult()
+suite.run(result)
+assert result.wasSuccessful(), (result.errors, result.failures)
+assert sys.path == before_path
+assert sys.modules["validation"] is previous
+assert sys.modules["validation.existing_child"] is child
+assert {name for name in sys.modules
+        if name == "validation" or name.startswith("validation.")} == {
+    "validation", "validation.existing_child"}
+'''
+    result = subprocess.run(
+        [sys.executable, "-c", script, str(Path(__file__).resolve())],
+        capture_output=True, text=True, timeout=60,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 if __name__ == "__main__":
