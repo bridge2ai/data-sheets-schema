@@ -1946,6 +1946,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/removal-repair-v1/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/repository_details/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>
