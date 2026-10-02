@@ -141,33 +141,11 @@ class TestROCrateCLI(unittest.TestCase):
         self.assertIn("Merged RO-Crate saved", result.output)
 
 
-class TestPerProjectLoopsEndWithACount(unittest.TestCase):
-    """#3638. bundle, emit-arm and emit-map-arm counted the projects they did
-    not finish, then exited 1 without printing the count, so a caller reading
-    only the last line could not tell how many had failed. Each now ends with
-    one stderr line naming what it counts, before the exit. A run with nothing
-    to count ends as it did, as normalize and map do (#3359).
-
-    Both numbers count the loop's entries, and the total is how many it tried.
-    With --project the entries are the names given, and a repeated name counts
-    each time. With none, which is how notes/D4D_GENERATION_ARMS.md runs all
-    three, they are the declared projects that have the input the command
-    looks for.
-
-    In the mixed runs that name all three projects, BETA fails and ALPHA and
-    GAMMA succeed, so the count, the total and the number that succeeded all
-    differ. In the no-project runs (#4155) only ALPHA and BETA have the
-    command's input. GAMMA, declared too, has what another command reads
-    instead (a crate never normalized, or the other emit command's record) and
-    is never tried. ALPHA is done and BETA fails, so the total, 2, is neither
-    the number the manifest declares (3) nor the number of --project values
-    (0). "1 of 2" cannot tell failures from successes; the mixed runs can.
-
-    The library functions run for real. The commands pass them no output
-    directory, so each is patched to add a temporary one, and every run starts
-    in an empty working directory, where a relative default would land if a
-    patch missed: never in the checkout's data/.
-    """
+class _PerProjectLoopFixture(unittest.TestCase):
+    """Three declared projects; temporary crate-package, document-bundle and
+    publication directories; and a runner that starts every run in an empty
+    working directory. The per-project loop tests below share it; it holds no
+    tests of its own."""
 
     PROJECTS = ("ALPHA", "BETA", "GAMMA")
 
@@ -206,6 +184,34 @@ class TestPerProjectLoopsEndWithACount(unittest.TestCase):
         return patch("data_sheets_schema.rocrate_normalize.emit_deterministic_arm",
                      side_effect=lambda name, version, root, **kw: real(
                          name, version, root, concat_dir=self.concat, **kw))
+
+
+class TestPerProjectLoopsEndWithACount(_PerProjectLoopFixture):
+    """#3638. bundle, emit-arm and emit-map-arm counted the projects they did
+    not finish, then exited 1 without printing the count, so a caller reading
+    only the last line could not tell how many had failed. Each now ends with
+    one stderr line naming what it counts, before the exit. A run with nothing
+    to count ends as it did, as normalize and map do (#3359).
+
+    Both numbers count projects, and the total is how many the loop tried.
+    With --project they are the names given, a repeated name once (#4165).
+    With none, which is how notes/D4D_GENERATION_ARMS.md runs all three, they
+    are the declared projects that have the input the command looks for.
+
+    In the mixed runs that name all three projects, BETA fails and ALPHA and
+    GAMMA succeed, so the count, the total and the number that succeeded all
+    differ. In the no-project runs (#4155) only ALPHA and BETA have the
+    command's input. GAMMA, declared too, has what another command reads
+    instead (a crate never normalized, or the other emit command's record) and
+    is never tried. ALPHA is done and BETA fails, so the total, 2, is neither
+    the number the manifest declares (3) nor the number of --project values
+    (0). "1 of 2" cannot tell failures from successes; the mixed runs can.
+
+    The library functions run for real. The commands pass them no output
+    directory, so each is patched to add a temporary one, and every run starts
+    in an empty working directory, where a relative default would land if a
+    patch missed: never in the checkout's data/.
+    """
 
     def test_bundle_counts_the_bundles_it_did_not_write(self):
         from data_sheets_schema import rocrate_normalize
@@ -336,6 +342,213 @@ class TestPerProjectLoopsEndWithACount(unittest.TestCase):
         self.assertEqual(earlier.read_text(encoding="utf-8"), "an earlier run's record\n")
         self.assertEqual(sorted(p.name for p in earlier.parent.iterdir()),
                          ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+
+
+class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
+    """#4165. `project_choice` returns --project as typed, so a name given
+    twice ran its project twice. The emit commands then refused the record the
+    first pass had just published: a run that published every project exited
+    1, its last line saying one was not. Each of the five commands now runs a
+    repeated name once, in the order first given, with one stderr line saying
+    so, and the #3638 count counts projects.
+
+    BETA is given three times around ALPHA, so the order kept (BETA first) is
+    neither alphabetical nor the manifest's, and the line must give the real
+    number of times. normalize and map run with their library function
+    replaced by a recorder, as #4165 was reproduced; the others run for real.
+    """
+
+    NAMES = ("BETA", "ALPHA", "BETA", "BETA")
+    NOTICE = "⚠️  --project BETA was given 3 times; it runs once"
+
+    def _assert_ran_once_each(self, r, library):
+        self.assertEqual([c.args[0] for c in library.call_args_list], ["BETA", "ALPHA"],
+                         r.stdout + r.stderr)
+        self.assertEqual([line for line in r.stderr.splitlines() if "runs once" in line],
+                         [self.NOTICE], r.stderr)
+
+    def test_normalize_runs_a_repeated_project_once(self):
+        from data_sheets_schema.rocrate_normalize import Result
+        with patch("data_sheets_schema.rocrate_normalize.normalize_project",
+                   side_effect=lambda name, root, sv=None: Result(
+                       project=name, validation={f"{name}_crate_d4d.yaml": "PASS"})) as run:
+            r = self._invoke("normalize", projects=self.NAMES)
+
+        self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)
+        self._assert_ran_once_each(r, run)
+        self.assertEqual(r.stdout.splitlines()[-1:], ["✅ Normalization complete"])
+
+    def test_bundle_runs_a_repeated_project_once_and_counts_projects(self):
+        from data_sheets_schema import rocrate_normalize
+        real = rocrate_normalize.build_crate_bundle
+        self.docs.mkdir()                                  # BETA has no document bundle
+        (self.docs / "ALPHA_preprocessed.txt").write_text("ALPHA", encoding="utf-8")
+        (self.packages / "ALPHA" / "processed").mkdir(parents=True)
+        with patch("data_sheets_schema.rocrate_normalize.build_crate_bundle",
+                   side_effect=lambda name, root: real(name, root, docs_dir=self.docs)) as build:
+            r = self._invoke("bundle", projects=self.NAMES)
+
+        self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
+        self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+        self._assert_ran_once_each(r, build)
+        self.assertEqual(r.stderr.count("No document bundle"), 1, r.stderr)
+        self.assertEqual(r.stderr.splitlines()[-1:],
+                         ["❌ 1 of 2 bundle(s) not written"], r.stderr)   # was 3 of 4
+        self.assertEqual([p.name for p in self.docs.glob("*_with_crate.txt")],
+                         ["ALPHA_preprocessed_with_crate.txt"])
+
+    def test_emit_arm_runs_a_repeated_project_once(self):
+        for name in ("ALPHA", "BETA"):
+            self._record(name, "crate_d4d")
+        with self._publishing_into_tmp() as emit:
+            r = self._invoke("emit-arm", "--version", "v1", projects=self.NAMES)
+
+        self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)   # not refused against itself
+        self._assert_ran_once_each(r, emit)
+        self.assertNotIn("❌", r.stderr)
+        self.assertEqual(r.stdout.splitlines()[-1:],
+                         ["✅ Deterministic arm published under version v1"])
+        self.assertEqual(sorted(p.name for p in (self.concat / "rocrate_mapped" / "v1").iterdir()),
+                         ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+
+    def test_map_runs_a_repeated_project_once(self):
+        from data_sheets_schema.rocrate_map import MapResult
+        # load_mapping reads a path relative to the working directory, which is empty
+        with patch("data_sheets_schema.rocrate_map.load_mapping", return_value=[]), \
+             patch("data_sheets_schema.rocrate_map.map_project",
+                   side_effect=lambda name, root, sv=None, rows=None: MapResult(
+                       project=name, validation="PASS")) as run:
+            r = self._invoke("map", projects=self.NAMES)
+
+        self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)
+        self._assert_ran_once_each(r, run)
+        self.assertEqual(r.stdout.splitlines()[-1:], ["✅ Static mapping complete"])
+
+    def test_emit_map_arm_runs_a_repeated_project_once(self):
+        for name in ("ALPHA", "BETA"):
+            self._record(name, "crate_mapped_d4d")
+        with self._publishing_into_tmp() as emit:
+            r = self._invoke("emit-map-arm", "--version", "v1", projects=self.NAMES)
+
+        self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)
+        self._assert_ran_once_each(r, emit)
+        self.assertNotIn("❌", r.stderr)
+        self.assertEqual(r.stdout.splitlines()[-1:], ["✅ our-mapping arm published under v1"])
+        self.assertEqual(
+            sorted(p.name for p in (self.concat / "rocrate_static_map" / "v1").iterdir()),
+            ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+
+
+class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
+    """#4147 and #4148. The emit commands caught only their two refusals, so
+    any other error from a project (a PermissionError writing its record, a
+    UnicodeDecodeError reading it) left the loop there: the projects after it
+    were never tried, no count was printed, and the caller saw a traceback.
+    They now catch any Exception, as bundle does, and go on.
+
+    bundle printed the bare message, so a KeyError read as its quoted key and a
+    message-less error as nothing at all. Each error line now names the type of
+    anything but an expected refusal, whose text is unchanged. KeyboardInterrupt
+    and SystemExit are not Exceptions, and still stop the loop.
+    """
+
+    EMITS = (("emit-arm", "rocrate_mapped", "crate_d4d"),
+             ("emit-map-arm", "rocrate_static_map", "crate_mapped_d4d"))
+
+    def _alpha_raises(self, function, exc, **into_tmp):
+        """The library function, run for real into the temporary directories,
+        except that ALPHA raises `exc` before anything is written."""
+        from data_sheets_schema import rocrate_normalize
+        real = getattr(rocrate_normalize, function)
+
+        def run(name, *args, **kw):
+            if name == "ALPHA":
+                raise exc
+            return real(name, *args, **into_tmp, **kw)
+        return patch(f"data_sheets_schema.rocrate_normalize.{function}", side_effect=run)
+
+    def _check_the_emit_loop_goes_on(self, command, method, variant):
+        for name in ("ALPHA", "BETA"):
+            self._record(name, variant)
+        errors = ((PermissionError(13, "Permission denied", "ALPHA_d4d.yaml"),
+                   "PermissionError: [Errno 13] Permission denied: 'ALPHA_d4d.yaml'"),
+                  (KeyError("x"), "KeyError: 'x'"),
+                  (PermissionError(), "PermissionError"))              # no message
+        for n, (exc, reason) in enumerate(errors):
+            version = f"v{n}"
+            with self.subTest(reason=reason), \
+                 self._alpha_raises("emit_deterministic_arm", exc, concat_dir=self.concat) as emit:
+                r = self._invoke(command, "--version", version, projects=("ALPHA", "BETA"))
+
+                self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)   # not a crash
+                self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+                self.assertEqual([c.args[0] for c in emit.call_args_list], ["ALPHA", "BETA"])
+                self.assertEqual(r.stderr.splitlines(),
+                                 [f"  ❌ ALPHA: {reason}", "",
+                                  "❌ 1 of 2 project(s) not published"], r.stderr)
+                self.assertEqual([p.name for p in (self.concat / method / version).iterdir()],
+                                 ["BETA_d4d.yaml"])
+
+    def test_emit_arm_goes_on_after_an_unexpected_error(self):
+        self._check_the_emit_loop_goes_on("emit-arm", "rocrate_mapped", "crate_d4d")
+
+    def test_emit_map_arm_goes_on_after_an_unexpected_error(self):
+        self._check_the_emit_loop_goes_on("emit-map-arm", "rocrate_static_map",
+                                          "crate_mapped_d4d")
+
+    def test_an_interrupt_or_exit_still_stops_an_emit_loop(self):
+        """Exception, never BaseException: the next project is not tried."""
+        for command, method, variant in self.EMITS:
+            for name in ("ALPHA", "BETA"):
+                self._record(name, variant)
+            for exc, code in ((KeyboardInterrupt(), 1), (SystemExit(3), 3)):
+                with self.subTest(command=command, stop=type(exc).__name__), \
+                     self._alpha_raises("emit_deterministic_arm", exc,
+                                        concat_dir=self.concat) as emit:
+                    r = self._invoke(command, "--version", "v1", projects=("ALPHA", "BETA"))
+
+                    self.assertEqual(r.exit_code, code, r.stdout + r.stderr)
+                    self.assertEqual([c.args[0] for c in emit.call_args_list], ["ALPHA"])
+                    self.assertNotIn("not published", r.stderr)
+                    self.assertFalse((self.concat / method).exists())
+
+    def test_bundle_names_an_unexpected_error_and_never_prints_a_bare_reason(self):
+        from data_sheets_schema.rocrate_normalize import DeNovoPolicyError
+        self.docs.mkdir()                                  # BETA has no document bundle
+        refusal = (f"  ❌ No document bundle at {self.docs / 'BETA_preprocessed.txt'}; "
+                   "run `make concat-preprocessed` first")
+        withheld = "'ALPHA_crate_d4d.yaml' is withheld from the de novo fork: already D4D"
+        for exc, line in ((KeyError("x"), "  ❌ KeyError: 'x'"),
+                          (RuntimeError(), "  ❌ RuntimeError"),          # no message
+                          (DeNovoPolicyError(withheld), f"  ❌ {withheld}")):   # a refusal
+            with self.subTest(line=line), \
+                 self._alpha_raises("build_crate_bundle", exc, docs_dir=self.docs) as build:
+                r = self._invoke("bundle", projects=("ALPHA", "BETA"))
+
+                self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
+                self.assertEqual([c.args[0] for c in build.call_args_list], ["ALPHA", "BETA"])
+                self.assertEqual(r.stderr.splitlines(),
+                                 [line, refusal, "", "❌ 2 of 2 bundle(s) not written"],
+                                 r.stderr)
+
+    def test_the_emit_refusals_read_as_before(self):
+        """The two refusals the emit commands always caught are messages
+        written for the reader, and get no type."""
+        for command, method, variant in self.EMITS:
+            self._record("BETA", variant)                  # GAMMA has no record
+            earlier = self.concat / method / "v1" / "BETA_d4d.yaml"
+            earlier.parent.mkdir(parents=True)
+            earlier.write_text("an earlier run's record\n", encoding="utf-8")
+            missing = self.packages / "GAMMA" / "processed" / f"GAMMA_{variant}.yaml"
+            with self.subTest(command=command), self._publishing_into_tmp():
+                r = self._invoke(command, "--version", "v1", projects=("BETA", "GAMMA"))
+
+                self.assertEqual(r.stderr.splitlines(), [
+                    f"  ❌ BETA: {earlier} already exists; use a new version label "
+                    "rather than overwriting a published run",
+                    f"  ❌ GAMMA: No normalized record at {missing}; "
+                    "run `d4d rocrate normalize` first",
+                    "", "❌ 2 of 2 project(s) not published"], r.stderr)
 
 
 if __name__ == "__main__":
