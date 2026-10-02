@@ -273,6 +273,11 @@ def _normalize_datetime(value: Any) -> tuple[Any, str]:
     ``12/16/2025`` is unambiguous (16 cannot be a month) so it resolves.
     ``03/04/2026`` is not — the crates are known to mix DD/MM and MM/DD — so it
     is dropped rather than silently resolved to one reading.
+
+    It reads one text value. Anything else, a list included, comes back
+    unchanged with no note, as does text in neither form; `_coerce`
+    therefore unwraps a single-valued slot's one-item list whose item is
+    text before calling it (#4109, #4154).
     """
     if not isinstance(value, str):
         return value, ""
@@ -398,6 +403,21 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
             notes.append(f"kept {len(kept)}/{len(candidates)} enum-permitted values")
 
     if slot.range in ("datetime", "date"):
+        # The date rule reads one text value and passes anything else
+        # through, a list included, so a single-valued slot's one-item list
+        # whose item is text is unwrapped here, before it, not by the
+        # cardinality step below: `["2026-06-30"]` stayed a date in a
+        # date-time slot, and `["9/1/2022"]` got past the ambiguity refusal
+        # (#4109). The rule makes text into text or nothing, never a list,
+        # so that step then finds no list: a value the rule keeps carries
+        # the note once, and one it refuses carries the refusal alone, as
+        # its scalar form does. A one-item list whose item is not text
+        # (`[null]`, a nested list) is not the rule's to read; it is left
+        # to that step, which unwraps it once (#4154).
+        if (not slot.multivalued and isinstance(value, list) and len(value) == 1
+                and isinstance(value[0], str)):
+            value = value[0]
+            notes.append("unwrapped single-item list")
         value, note = _normalize_datetime(value)
         if value is None:
             return None, note
