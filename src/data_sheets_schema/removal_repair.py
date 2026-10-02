@@ -213,6 +213,15 @@ def completion_check(spec, *, record=None, expected_outputs=None) -> dict:
     return out
 
 
+def refresh_outcome(spec, outcome: dict, *, record=None) -> dict:
+    """Update actual residuals without ever clearing an earlier refusal."""
+    checked = completion_check(spec, record=record, expected_outputs=outcome.get("output_pins"))
+    findings = list(outcome.get("findings") or [])
+    findings.extend(f for f in checked["findings"] if f not in findings)
+    outcome.update(checked=checked["checked"], final=checked.get("final"), findings=findings)
+    return outcome
+
+
 def run(spec, client, settings: dict, usage: list) -> dict:
     """One admitted restoration, verified before publishing either record.
 
@@ -231,6 +240,7 @@ def run(spec, client, settings: dict, usage: list) -> dict:
 
     def reject(kind, detail):
         out["findings"] = [{"kind": kind, "detail": detail}]
+        refresh_outcome(spec, out)
         # Before snapshots/provenance, whose persistence can itself fail.
         usage_ledger.record_evidence_refusal(spec, "report", out)
         api._snapshot(spec, f"{spec.project}_removal_repair_check.json", json.dumps(out, indent=2))

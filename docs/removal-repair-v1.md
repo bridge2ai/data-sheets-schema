@@ -76,6 +76,10 @@ progress after an accepted repair requires recovery or an explicitly fresh
 generation. The ledger independently refuses original generation and shape
 repair calls after that admission, so loss of progress cannot spend them
 again (#4256).
+Rejected responses and failed report refreshes also reread the actual final
+record before recording residual counts (#4257). A later clean reading never
+clears the original refusal; unavailable evidence produces an unavailable
+final reading, not a reused pre-call count.
 
 Parent #2923 remains open. Restoring an original value does not establish
 that it is supported by a source. Evidence-backed audit amendments,

@@ -7002,7 +7002,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 finish_removal_report(spec)
             elif not refreshed:
                 from data_sheets_schema.usage_ledger import record_evidence_refusal
+                from data_sheets_schema.removal_repair import refresh_outcome
                 removal_check["findings"] = [{"kind": "removal_report_refresh_failed"}]
+                refresh_outcome(spec, removal_check)
                 record_evidence_refusal(spec, "report", removal_check)
     rec.data["validation"] = validation_block(spec, problems)
     if CORE_DERIVED:
@@ -7097,14 +7099,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # the companions hash, so they describe the bytes the hashes do (#1021).
     provenance.refresh_output_sizes(rec.data)
     rec.data["api_usage"] = _require_surviving_accounting(spec, rec.data.get("api_usage") or [])
-    if removal_check is not None and not removal_check["findings"]:
+    if removal_check is not None:
         # Report regeneration is another asynchronous call. Recheck the
         # actual final bytes after it, without discarding any earlier refusal.
-        from data_sheets_schema.removal_repair import completion_check
-        final_removals = completion_check(spec, expected_outputs=removal_check["output_pins"])
-        removal_check.update(checked=final_removals["checked"],
-                             findings=final_removals["findings"],
-                             final=final_removals.get("final"))
+        from data_sheets_schema.removal_repair import refresh_outcome
+        refresh_outcome(spec, removal_check)
         rec.data["removals"] = removal_check["final"]
         if removal_check["findings"]:
             from data_sheets_schema.usage_ledger import record_evidence_refusal

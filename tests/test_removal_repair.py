@@ -238,6 +238,23 @@ def test_lost_response_does_not_refresh_the_allowance(active):
     assert client.messages.calls == []
 
 
+@pytest.mark.parametrize("truncated,remaining", [(False, 2), (True, 2), (True, 0)])
+def test_rejected_response_remeasures_actual_residual_without_clearing_failure(active, monkeypatch, truncated, remaining):
+    client = client_for(text(ORIGINAL) if truncated else "not a complete YAML record", truncated=truncated)
+    create = client.messages.create
+    def during_call(**kwargs):
+        response = create(**kwargs)
+        active.full_path.write_text(text({**ORIGINAL, "keywords": []} if remaining else ORIGINAL))
+        return response
+    monkeypatch.setattr(client.messages, "create", during_call)
+    out = repair.run(active, client, api._model_settings(), [])
+    assert out["before"]["unfounded"] == 1
+    assert out["final"]["unfounded"] == remaining
+    assert out["findings"][0]["kind"] == ("removal_repair_truncated" if truncated else "removal_repair_rejected")
+    refused = usage_ledger.evidence_refusal(active)["reading"]
+    assert refused["final"]["unfounded"] == remaining and refused["findings"]
+
+
 def test_interrupted_delivery_stops_resume_before_generation_phases(active):
     identifier = usage_ledger.begin_call(active, repair.PHASE, 1, "now")
     usage_ledger.cancel_call(active, identifier)
@@ -398,7 +415,8 @@ def test_interruption_after_restoration_cannot_skip_or_buy_a_second_report_refre
     assert second.messages.calls == []
 
 
-def test_truncated_report_after_restoration_remains_terminal_with_its_charge(external, monkeypatch):
+@pytest.mark.parametrize("drift", [False, True])
+def test_truncated_report_after_restoration_remains_terminal_with_its_charge(external, monkeypatch, drift):
     spec = replace(external, condition="generic", removal_repair_version=1)
     client = FakeClient()
     client.messages = GeneratingMessages(True)
@@ -410,6 +428,8 @@ def test_truncated_report_after_restoration_remains_terminal_with_its_charge(ext
         out = create(**kwargs)
         if restored:
             out.stop_reason = "max_tokens"
+            if drift:
+                spec.full_path.write_text(text({**ORIGINAL, "keywords": []}))
         if kwargs["system"] == repair.policy_text():
             restored = True
         return out
@@ -417,7 +437,7 @@ def test_truncated_report_after_restoration_remains_terminal_with_its_charge(ext
     with pytest.raises(RuntimeError, match="removal_report_refresh_failed"):
         api.execute(spec, client=client)
     record = yaml.safe_load(spec.provenance_path.read_text())
-    assert record["removals"]["unfounded"] == 0
+    assert record["removals"]["unfounded"] == (2 if drift else 0)
     assert record["removal_repair"]["before"]["unfounded"] == 1
     assert record["api_usage"][-1]["phase"] == "report_after_repair"
     assert record["api_usage"][-1]["stop_reason"] == "max_tokens"
