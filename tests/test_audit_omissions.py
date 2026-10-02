@@ -345,3 +345,40 @@ def test_actual_cli_prepare_check_and_hardlink_refusal(inputs, tmp_path):
     before = alias.read_bytes()
     result = subprocess.run(args + ["--output", str(alias)], capture_output=True, text=True)
     assert result.returncode != 0 and alias.read_bytes() == before
+
+
+# Independently reproduced scope-boundary regressions (#4267).
+@pytest.mark.parametrize('inheritance', ['direct', 'transitive', 'mixin'])
+@pytest.mark.parametrize('existing', [False, True])
+def test_dataset_subclass_requires_separate_scope(inputs, inheritance, existing):
+    schema = yaml.safe_load(inputs['schema_path'].read_text())
+    classes = schema['classes']
+    classes['Dataset']['attributes']['resources']['range'] = 'ChildDataset'
+    if inheritance == 'direct':
+        classes['ChildDataset'] = {'is_a': 'Dataset'}
+    elif inheritance == 'transitive':
+        classes['MiddleDataset'] = {'is_a': 'Dataset'}
+        classes['ChildDataset'] = {'is_a': 'MiddleDataset'}
+    else:
+        classes['ChildDataset'] = {'mixins': ['Dataset']}
+    inputs['schema_path'].write_text(yaml.safe_dump(schema))
+    if existing:
+        inputs['record'] = b'name: Collection\nresources:\n- name: Member\n'
+    prepared = om.prepare(**inputs)
+    response = answer(prepared)
+    response['chunks'][1]['candidates'][0]['target'] = {'owner': '', 'slot_chain': ['resources', 'description']}
+    assert not prepared.check(raw(response))['protocol_complete']
+
+def test_explicit_child_scope_is_allowed(inputs):
+    schema = yaml.safe_load(inputs['schema_path'].read_text())
+    schema['classes']['Dataset']['attributes']['resources']['range'] = 'ChildDataset'
+    schema['classes']['ChildDataset'] = {'is_a': 'Dataset'}
+    inputs['schema_path'].write_text(yaml.safe_dump(schema))
+    inputs['record'] = b'name: Collection\nresources:\n- name: Member\n'
+    context = json.loads(inputs['context'])
+    context['scopes'].append({'owner':'/resources/0','referent':'Member','release':None,'scope':'Member only.'})
+    inputs['context'] = raw(context)
+    prepared = om.prepare(**inputs)
+    response = answer(prepared)
+    response['chunks'][1]['candidates'][0]['target'] = {'owner': '/resources/0', 'slot_chain': ['description']}
+    assert prepared.check(raw(response))['protocol_complete']

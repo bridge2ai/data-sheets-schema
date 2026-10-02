@@ -193,9 +193,24 @@ def _target(target, payload):
             if not slot["inline"]:
                 raise ValueError("target chain traverses a scalar or non-inline reference")
             name = slot["definition"]["range"]
-            if name == "Dataset":
+            if _dataset_range(payload["schema"], name):
                 raise ValueError("nested Dataset needs its own existing owner and explicit scope")
     return True
+
+
+def _dataset_range(catalog, name):
+    """Dataset scope boundaries include inherited and mixed-in definitions."""
+    pending, seen = [name], set()
+    while pending:
+        current = pending.pop()
+        if current == "Dataset":
+            return True
+        if current in seen:
+            continue
+        seen.add(current)
+        definition = catalog["classes"][current]["definition"]
+        pending.extend(str(p) for p in [definition.get("is_a"), *definition.get("mixins", [])] if p)
+    return False
 
 
 @dataclass(frozen=True)
