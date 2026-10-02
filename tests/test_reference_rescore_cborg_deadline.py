@@ -3,8 +3,10 @@ import copy
 import hashlib
 import json
 from pathlib import Path
+import signal
 import subprocess
 import sys
+import time
 from types import SimpleNamespace
 
 import pytest
@@ -58,18 +60,45 @@ def test_real_local_timeout_retains_candidate_and_waits_for_process(environment,
     executable.write_text(f"#!{sys.executable}\n"
                           "from pathlib import Path\nimport time\n"
                           "Path('output_evaluation.json').write_text('original partial candidate')\n"
+                          "Path('candidate_written').touch()\n"
                           "print('{\"type\":\"assistant\"}',flush=True)\ntime.sleep(60)\n")
     executable.chmod(0o700)
+    evaluators = []
+
+    class CandidateFirstPopen(subprocess.Popen):
+        """Return only once the synthetic evaluator has written its partial candidate.
+
+        `subprocess.run` starts its deadline when Popen returns, before the new
+        interpreter has run a line, so on a loaded machine the 0.5 s could expire
+        before the candidate existed (#4065). Waiting here for the evaluator's own
+        signal starts the real deadline after the candidate however slowly the
+        interpreter starts; the 300 s only bounds an evaluator that never signals.
+        """
+
+        def __init__(self, args, *rest, **kwargs):
+            super().__init__(args, *rest, **kwargs)
+            if args[:1] == [str(executable)]:
+                evaluators.append(self)
+                written, limit = Path(kwargs["cwd"]) / "candidate_written", time.monotonic() + 300
+                while not written.exists() and self.poll() is None and time.monotonic() < limit:
+                    time.sleep(0.01)
+                self.candidate_written = written.exists()
+
+    monkeypatch.setattr(subprocess, "Popen", CandidateFirstPopen)
     monkeypatch.setattr(deadline, "SECONDS", 0.5)
     proxy = deadline.DeadlineSubprocess(runner, subprocess, str(executable), {"synthetic_probe": True})
     monkeypatch.setattr(runner, "subprocess", proxy)
     receipt = runner.run_job(manifest, job, str(executable))
     assert receipt["status"] == "incomplete" and receipt["error"].startswith("TimeoutExpired:")
+    evaluator, = evaluators
+    assert evaluator.candidate_written, "the synthetic evaluator never wrote its partial candidate"
     attempt, = (runner.PLAN / "attempts" / job["id"]).iterdir()
     assert (attempt / "candidate.json").read_text() == "original partial candidate"
     assert json.loads((attempt / "execution_deadline.json").read_bytes())["timed_out"] is True
     assert not (root / job["output"]).exists()
     assert list((root / "temporary").iterdir()) == []
+    # Set only once the process is reaped; -SIGKILL is the deadline's kill, not its own exit.
+    assert evaluator.returncode == -signal.SIGKILL, "the timed-out evaluator was not waited for"
 
 
 def test_changed_frozen_timeout_rejects_before_launch():
