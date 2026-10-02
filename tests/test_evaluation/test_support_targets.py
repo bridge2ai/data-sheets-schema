@@ -321,3 +321,62 @@ def test_first_public_reference_record_fits_default_inventory_limits_without_rew
     target = result.target("/creators/0", kind="relationship_edge")
     assert len(json.dumps(render_request(target, bundle="source", model="test")).encode()) < 30_000
     assert source.read_bytes() == before
+
+
+@pytest.mark.parametrize("inheritance", ["is_a", "mixins"])
+def test_inherited_class_rules_are_blocked_from_captured_schema(schema_path, inheritance):
+    """#4232: the projected ancestor meaning must not erase a rule silently."""
+    source = yaml.safe_load(schema_path.read_text())
+    source["classes"]["Entity"]["rules"] = [{
+        "preconditions": {"slot_conditions": {"claim_status": {"equals_string": "planned"}}},
+        "postconditions": {"slot_conditions": {"name": {"equals_string": "planned specimen"}}},
+    }]
+    if inheritance == "mixins":
+        source["classes"]["Entity"]["mixin"] = True
+        source["classes"]["Dataset"].pop("is_a")
+        source["classes"]["Dataset"]["mixins"] = ["Entity"]
+    schema_path.write_text(yaml.safe_dump(source))
+    captured = NestedSupportSchema.from_schema(schema_path)
+    result = inventory({"name": "observed specimen", "claim_status": "planned"}, captured)
+    assert result.to_dict()["blocked"] == [{"pointer": "", "code": "unsupported_class_constraint"}]
+    assert not result.targets
+
+
+@pytest.mark.parametrize("constraint", ["rules", "any_of", "all_of", "exactly_one_of", "none_of"])
+def test_inherited_constraint_refusal_matches_every_existing_direct_refusal(schema, constraint):
+    payload = schema.to_dict()
+    # Exercise the captured representation: interpretation of the conditional
+    # expression is deliberately unsupported, irrespective of its contents.
+    payload["classes"]["Entity"]["definition"][constraint] = [{"description": "uninterpreted constraint"}]
+    result = inventory({"name": "X"}, NestedSupportSchema(json.dumps(payload)))
+    assert not result.targets
+    assert result.to_dict()["blocked"] == [{"pointer": "", "code": "unsupported_class_constraint"}]
+
+
+@pytest.mark.parametrize("constrained", [False, True])
+def test_constraint_closure_handles_shared_ancestors_and_cycles(schema, constrained):
+    payload = schema.to_dict()
+    classes = payload["classes"]
+    for name in ("Left", "Right"):
+        classes[name] = {"definition": {"name": name, "is_a": "Entity"}, "slots": {}}
+    classes["Dataset"]["definition"]["mixins"] = ["Left", "Right"]
+    # A pre-captured graph can carry a cycle even though capture/schema tooling
+    # normally refuses it first. Neither projection nor refusal should loop.
+    classes["Entity"]["definition"]["mixins"] = ["Dataset"]
+    if constrained:
+        classes["Right"]["definition"]["rules"] = [{"description": "uninterpreted constraint"}]
+    result = inventory({"name": "X"}, NestedSupportSchema(json.dumps(payload)))
+    if constrained:
+        assert not result.targets
+        assert result.to_dict()["blocked"] == [{"pointer": "", "code": "unsupported_class_constraint"}]
+    else:
+        assert result.to_dict()["blocked"] == []
+        assert result.target("/name", kind="attribute_value").to_dict()["value"] == "X"
+
+
+def test_direct_constraint_refusal_is_preserved(schema):
+    payload = schema.to_dict()
+    payload["classes"]["Dataset"]["definition"]["rules"] = [{"description": "uninterpreted constraint"}]
+    result = inventory({"name": "X"}, NestedSupportSchema(json.dumps(payload)))
+    assert not result.targets
+    assert result.to_dict()["blocked"] == [{"pointer": "", "code": "unsupported_class_constraint"}]

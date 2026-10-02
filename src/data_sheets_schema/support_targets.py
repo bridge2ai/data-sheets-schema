@@ -327,6 +327,24 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
                 result.update(declarations(v, pointer + f"/{i}"))
         return result
 
+    def has_class_constraint(name):
+        # A subclass keeps its parent/mixin constraints. The projected class
+        # meaning intentionally does not interpret these rules, so refuse the
+        # same constructs anywhere in its effective ancestry. A visited set
+        # handles shared ancestors and cycles without recursive traversal.
+        pending, seen = [name], set()
+        while pending:
+            current = pending.pop()
+            if not current or current in seen:
+                continue
+            seen.add(current)
+            definition = classes[current]["definition"]
+            if any(definition.get(k) for k in
+                   ("rules", "any_of", "all_of", "exactly_one_of", "none_of")):
+                return True
+            pending.extend([definition.get("is_a"), *definition.get("mixins", [])])
+        return False
+
     def class_meaning(name):
         # Slots are induced separately. Repeating a complete ClassDefinition
         # would inject unrelated attributes and every sibling collection.
@@ -411,7 +429,7 @@ def inventory_targets(record_bytes: bytes, specification: NestedSupportSchema, *
 
     def walk(entity, class_name, pointer, chain, ancestors):
         cls = classes[class_name]
-        if any(cls["definition"].get(k) for k in ("rules", "any_of", "all_of", "exactly_one_of", "none_of")):
+        if has_class_constraint(class_name):
             block(pointer, "unsupported_class_constraint")
             return
         identity = {k: entity[k] for k in IDENTITY if k in entity and

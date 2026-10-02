@@ -72,7 +72,8 @@ Pointers address the exact original document: wrappers are not stripped. RFC
 paths are refused. Zero and false are populated. Unknown schema fields, invalid
 container/cardinality shapes, keyed inline maps, unions/conditional constraints,
 type-discriminator transitions, and missing vocabularies are reported as blocked
-paths. URI references are never followed. Non-inline class references retain
+paths. Unsupported class constraints are refused across the complete `is_a` and
+mixin ancestry, including shared ancestors (#4232). URI references are never followed. Non-inline class references retain
 their relationship assertion as a string-valued edge. Native YAML dates and
 timestamps retain typed identities and faithful `value_yaml` rendering, including
 time zones; their JSON previews are tagged. Every node is tagged for value and
