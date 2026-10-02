@@ -515,6 +515,65 @@ def canonical_cmd(project, config, paths_only, missing, runtime):
         click.echo(f"\nNo canonical record: {', '.join(gap)}", err=True)
 
 
+def _report_grounding_instruments(rows):
+    """Describe stored measurements without recomputing or changing a gate.
+
+    Missing identity means unknown rules, not a proven older implementation.
+    A differing token may also be newer than this checkout's instrument.
+    """
+    from collections import Counter
+
+    import yaml
+
+    from data_sheets_schema.grounding import GROUNDING_INSTRUMENT
+    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.schema_cache import load_yaml
+
+    current = GROUNDING_INSTRUMENT.split()[0]
+    by_instrument = Counter()
+    different = []
+    for row in rows:
+        identity = f"{row['method']}/{row['label']}/{row['project']}"
+        try:
+            rec = load_yaml(record_path_for(row["project"], row["method"], row["label"]))
+        except FileNotFoundError:
+            continue                         # no stored block; reported as unrecorded
+        except (OSError, UnicodeError, yaml.YAMLError) as exc:
+            by_instrument["could not read"] += 1
+            different.append(f"{identity} (could not read: {type(exc).__name__})")
+            continue
+        if not isinstance(rec, dict):
+            by_instrument["malformed provenance"] += 1
+            different.append(f"{identity} (malformed provenance)")
+            continue
+        block = rec.get("grounding")
+        if not isinstance(block, dict) or not block.get("checked"):
+            continue
+        instrument = block.get("instrument")
+        if instrument is None or (isinstance(instrument, str) and not instrument.strip()):
+            name = "none declared"
+        elif not isinstance(instrument, str):
+            name = "invalid instrument"
+        else:
+            name = instrument.split()[0]
+        by_instrument[name] += 1
+        if name != current:
+            different.append(f"{identity} ({name})")
+    if not by_instrument:
+        return
+    click.echo("\nⓘ  grounding blocks by instrument: "
+               + ", ".join(f"{name} {n}" for name, n in by_instrument.most_common())
+               + f" (current {current})")
+    if different:
+        click.echo("   Missing or different instruments cannot establish comparability "
+                   "with the current rules. Stored measurements are unchanged; "
+                   "reported, never fatal.")
+        for line in different[:40]:
+            click.echo(f"     {line}")
+        if len(different) > 40:
+            click.echo(f"     … {len(different) - 40} more")
+
+
 @runs.command("check")
 @click.option("--method", default=None)
 @click.option("--label", default=None)
@@ -862,7 +921,7 @@ def check_cmd(method, label, project, strict):
     if grounds[GROUNDED_GAPS]:
         click.echo(f"\nⓘ  {grounds[GROUNDED_GAPS]} record(s) carry an external "
                    f"identifier that is not in the bundle they read "
-                   f"({grounds[GROUNDED_ALL]} fully grounded, "
+                   f"({grounds[GROUNDED_ALL]} recorded as fully grounded, "
                    f"{grounds[GROUNDED_NOT_RUN]} not checked, "
                    f"{grounds[GROUNDED_UNRECORDED]} predate the check):")
         for proj_, label_, n in sorted(ungrounded)[:8]:       # never the options' names (#3521)
@@ -874,6 +933,7 @@ def check_cmd(method, label, project, strict):
     elif grounds[GROUNDED_UNRECORDED]:
         click.echo(f"\nⓘ  {grounds[GROUNDED_UNRECORDED]} record(s) predate the "
                    "identifier-grounding check (#547).")
+    _report_grounding_instruments(rows)
 
     # Reconciliation reports checked against the record and the schema (#546).
     # The report is what a reviewer reads instead of diffing YAML; nothing

@@ -4160,11 +4160,14 @@ def grounding_block(spec: RunSpec) -> dict[str, Any] | None:
 
     Reported, never fatal, following #520.
     """
+    from data_sheets_schema.grounding import GROUNDING_INSTRUMENT
+
     try:
         from data_sheets_schema.grounding import check_run
         out = check_run(spec.full_path, spec.core_path, spec.bundle)
     except Exception as exc:                                       # noqa: BLE001
-        return {"checked": False, "reason": str(exc)[:200]}
+        return {"checked": False, "instrument": GROUNDING_INSTRUMENT,
+                "reason": str(exc)[:200]}
     if out.get("checked"):
         from data_sheets_schema.provenance import _md5
         out["artifacts"] = {"bundle": {"path": str(spec.bundle),

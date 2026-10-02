@@ -115,7 +115,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     the schema the run was given. The pair and report blocks still read
     today's full and core schemas and pin their hashes."""
     want = (lambda name: only is None or name in only)
-    from data_sheets_schema.grounding import check_run
+    from data_sheets_schema.grounding import GROUNDING_INSTRUMENT, check_run
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
                                                 _md5, _sha256)
     from data_sheets_schema.report_claims import check_report, declared_slots
@@ -274,6 +274,11 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                     block["bundle_hash_basis"] = "the record pinned no hash"
             block["recorded_by"] = RECORDED_BY
             out["grounding"] = block
+    if "grounding" in out:
+        # Includes the refusal branches above, which do not call check_run.
+        # Only this newly computed block is labelled; apply still preserves
+        # existing measurements unless overwrite is explicitly requested.
+        out["grounding"]["instrument"] = GROUNDING_INSTRUMENT
 
     # --- receipts (#708) --------------------------------------------------
     # Whether the run's procedure wrote a coverage receipt is the record's
