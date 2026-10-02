@@ -607,8 +607,8 @@ class FairscapeToD4DConverter:
             d4d['file_collections'] = file_collections
             origin['file_collections'] = 'hasPart'
 
-        # Read in this order. A single-valued slot holds the first of its
-        # values it can hold, in the order `_place` puts them: a dedicated
+        # Read in this order. A single-valued slot holds the first value it
+        # can hold, in the order `_place` puts its values: a dedicated
         # property before an `additionalProperty` entry, whichever is read
         # first, and otherwise the later mapping first (#4139). So
         # `license`, read before the `additionalProperty` entries, still
@@ -627,8 +627,9 @@ class FairscapeToD4DConverter:
                 # which the crate names by reference under `hasPart` and
                 # `isPartOf`. An additionalProperty named "Resources" or
                 # "Parent Datasets" is a name and a value, not one of those
-                # references. An item that was not a mapping crashed the
-                # conversion (#4073). Text became a parent whose `id`
+                # references. In `resources`, an item that was not a
+                # mapping crashed the conversion (#4073). In
+                # `parent_datasets`, text became a parent whose `id`
                 # `_to_object` minted, asserting a dataset the crate does
                 # not identify, with nothing recorded (#4138); `_references`
                 # records `isPartOf` text for the same reason (#4125).
