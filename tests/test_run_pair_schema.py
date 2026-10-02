@@ -96,6 +96,23 @@ def test_missing_identity_is_disclosed_and_uses_actual_current_hash(fixture):
         assert selected.hashes["core_sha256"] == pin(core)["sha256"]
 
 
+@pytest.mark.parametrize("kind", ["full", "core"])
+def test_malformed_nested_historical_class_falls_back_before_checks(fixture, tmp_path, kind):
+    full, core, old_core, record = fixture
+    selected = full if kind == "full" else old_core
+    data = yaml.safe_load(selected.read_bytes())
+    data["classes"]["CoreDistribution"]["is_a"] = "MissingAncestor"
+    historical = tmp_path / (kind + "-malformed.yaml")
+    historical.write_text(yaml.safe_dump(data))
+    rec = record()
+    rec["schema"].update({f"{kind}_{key}": value for key, value in pin(historical).items()})
+    path = layout(tmp_path, rec)
+    block = bc.compute(path, only={"report_claims"})["report_claims"]
+    assert block["schema_basis"][kind]["source"] == run_schema.TODAY
+    assert "MissingAncestor" in block["schema_basis"][kind]["reason"]
+    assert block["schema"][f"{kind}_sha256"] == pin(full if kind == "full" else core)["sha256"]
+
+
 def test_both_historical_views_close_even_when_check_raises(fixture, monkeypatch):
     _full, _core, _old, record = fixture
     real_view = rps.version_view
