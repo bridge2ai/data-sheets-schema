@@ -40,7 +40,10 @@ class TestSSSOMValidation(unittest.TestCase):
                 missing_files.append(f"{name}: {path}")
 
         if missing_files:
-            self.fail(f"Missing SSSOM files (run 'make gen-sssom-all' to generate):\n" +
+            self.fail("Missing SSSOM files (regenerate the comprehensive pair "
+                      "with 'make gen-sssom-all'; restore the structural table "
+                      "from git, since regenerating it drops the rows its "
+                      "generator cannot produce):\n" +
                      "\n".join(missing_files))
 
     def test_sssom_file_format(self):

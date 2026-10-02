@@ -40,7 +40,7 @@ sssom-py-compatible variants and analysis docs.
 |---|---|---|
 | `generate_comprehensive_sssom_uri.py` | `make gen-sssom-uri-comprehensive` | URI variant for all attributes |
 | `generate_comprehensive_sssom.py` | `make gen-sssom-comprehensive` | Label-level variant for all attributes |
-| `generate_structural_mapping.py` | `make gen-sssom-structural` | sssom-py-compatible structural SSSOM |
+| `generate_structural_mapping.py` | `make gen-sssom-structural` | sssom-py-compatible structural SSSOM; not run by `make gen-sssom-all` (see below) |
 | `add_module_column.py`, `add_slot_uris.py`, `implement_uri_mappings.py` | — | One-shot maintenance helpers |
 
 Regenerate the comprehensive pair and check it for drift:
@@ -50,7 +50,7 @@ make gen-sssom-comprehensive gen-sssom-uri-comprehensive
 make check-sssom-comprehensive
 ```
 
-The structural mapping carries rows its generator cannot produce, so it is checked by `tests/test_semantic_exchange/test_structural_mapping_drift.py`, which allows exactly those; `make check-sssom-structural` reports them and exits non-zero, and regenerating it drops them.
+The structural mapping carries rows its generator cannot produce, listed with their reasons as `KNOWN_UNDERIVABLE` in `generate_structural_mapping.py` (#294). Rewriting the table with `make gen-sssom-structural` drops those rows, so `make gen-sssom-all` regenerates only the comprehensive pair and `make clean-sssom` deletes only that pair (#3967). `make check-sssom-structural` checks the table and its summary against what the generator writes, allowing for those rows, and names any of them a rewrite dropped, to restore from git before committing; `python src/semantic_exchange/generate_structural_mapping.py --help` states exactly what it compares (#4076).
 
 ## Validation
 
