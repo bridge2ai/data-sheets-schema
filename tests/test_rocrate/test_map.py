@@ -801,7 +801,7 @@ class TestNullAndNestedListItems(unittest.TestCase):
         maps the values alone, whatever the slot's range or cardinality,
         and its detail first names each list it dropped. #4164 had refused
         the whole row, which emptied a `doi` row origin/main filled with a
-        valid DOI. A null beside a value is passed on as it was (#4172)."""
+        valid DOI. A null beside a value is dropped with its own note (#4172)."""
         cases = (
             (["x", ["y"]], ["x"], "1 of 2 list items is a list", '["y"]'),
             ([["y"], "x"], ["x"], "1 of 2 list items is a list", '["y"]'),
@@ -848,14 +848,105 @@ class TestNullAndNestedListItems(unittest.TestCase):
         self.assertEqual(self.keywords(["voice", "health"]),
                          (["voice", "health"], "filled", ""))
 
-    def test_a_null_beside_a_value_is_not_read_as_a_list_of_null(self):
-        """The rule reads a list whose every item is null. With a value
-        beside the null, the list holds that value, and the row keeps it;
-        what becomes of the null itself is not decided here."""
-        kept, status, detail = self.keywords(["voice", None])
-        self.assertEqual(status, "filled")
-        self.assertIn("voice", kept)
-        self.assertNotIn("null", detail)
+    def test_null_beside_a_value_is_dropped_before_every_rows_rules(self):
+        """#4172: null must not become text, an object or a retained null.
+        Zero and false are values, and a remaining date or DOI still goes
+        through its own rule. A refused value retains the null detail too."""
+        for item in ("voice", "2026-06-30", "9/1/2022",
+                     "https://doi.org/10.5555/x", "bzip2", 0, False):
+            alone = {path: row for path, *row in self.rows_reading([item])}
+            for mixed in ([None, item], [item, None], [None, item, None]):
+                count = len(mixed) - 1
+                note = (f"{count} of {len(mixed)} list items "
+                        f"{'is' if count == 1 else 'are'} null; dropped")
+                for path, status, detail, written in self.rows_reading(mixed):
+                    status_alone, detail_alone, written_alone = alone[path]
+                    with self.subTest(row=path, value=mixed):
+                        self.assertEqual((status, written), (status_alone, written_alone))
+                        self.assertEqual(detail, "; ".join(
+                            part for part in (note, detail_alone) if part))
+        self.assertEqual(self.keywords(["voice", None]), (
+            ["voice"], "filled", "1 of 2 list items is null; dropped"))
+
+
+class TestEnumNonTextItems(unittest.TestCase):
+    """#4173: an enum rejects objects and references without ending a map."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def test_objects_and_references_are_reported_and_permitted_text_survives(self):
+        for rejected in ({"@id": "https://example.org/zip"},
+                         {"@id": "x", "name": "bzip2"}, {}, 1, True):
+            for value, expected in ((rejected, None), ([rejected], None),
+                                    ([None, rejected], None),
+                                    ([rejected, "bzip2"], "bzip2"),
+                                    (["bzip2", rejected], "bzip2")):
+                graph = copy.deepcopy(GRAPH)
+                graph[1]["evi:formats"] = value
+                res = map_crate(graph, self.rows, self.sv, "TEST")
+                field = next(f for f in res.fields if f.d4d_path == "Dataset.compression")
+                with self.subTest(value=value):
+                    self.assertEqual(res.record.get("compression"), expected)
+                    self.assertEqual(field.status, "empty" if expected is None else "filled")
+                    if value == {}:
+                        self.assertIn("empty or absent", field.detail)
+                        continue
+                    self.assertIn("non-text enum item(s)", field.detail)
+                    self.assertIn(json.dumps(rejected), field.detail)
+                    self.assertIn("dropped", field.detail)
+                    # An unrelated row survives too: no map-wide exception.
+                    self.assertEqual(res.record["title"], "Test Crate")
+
+
+class TestRecordIdListItems(unittest.TestCase):
+    """#4174: the required id uses the same null/nested-list refusals."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+
+    def mapped(self, identifier, root_id="ark:59853/thing"):
+        root = {**BARE_ROOT, "@id": root_id, "identifier": identifier}
+        res = map_crate([root], [], self.sv, "TEST")
+        return res, next(f for f in res.fields if f.d4d_path == "Dataset.id")
+
+    def test_null_or_nested_only_identifier_falls_back_to_root_id(self):
+        for value in ([None], [None, None], [["x"]], [None, ["x"]]):
+            with self.subTest(value=value):
+                res, field = self.mapped(value)
+                self.assertEqual(res.record, {"id": "ark:59853/thing"})
+                self.assertEqual(field.status, "filled")
+                self.assertFalse(field.from_table)
+                self.assertIn("identifier:", field.detail)
+                self.assertIn(json.dumps(value), field.detail)
+                self.assertIn("fell back to @id", field.detail)
+
+    def test_mixed_identifier_keeps_first_remaining_item_and_its_original_preview(self):
+        for value in ([None, "https://doi.org/10.5555/x"],
+                      [["bad"], "https://doi.org/10.5555/x", None],
+                      ["https://doi.org/10.5555/x", None, "other"]):
+            with self.subTest(value=value):
+                res, field = self.mapped(value)
+                self.assertEqual(res.record, {"id": "doi:10.5555/x"})
+                self.assertEqual(field.rewritten_from, json.dumps(value))
+                self.assertIn("remaining list item(s)", field.detail)
+                self.assertIn("null; dropped", field.detail)
+                self.assertNotIn("fell back", field.detail)
+
+    def test_root_id_is_filtered_too_and_refusals_are_reported_if_both_are_empty(self):
+        res, field = self.mapped([None], [None, "ark:59853/fallback"])
+        self.assertEqual(res.record, {"id": "ark:59853/fallback"})
+        self.assertIn("@id: 1 of 2 list items is null; dropped", field.detail)
+        for root_id in ([None], [["x"]], None):
+            with self.subTest(root_id=root_id):
+                res, field = self.mapped([["identifier"]], root_id)
+                self.assertEqual(res.record, {})
+                self.assertEqual(field.status, "empty")
+                self.assertFalse(field.from_table)
+                self.assertIn("dropped rather than flattened", field.detail)
 
 
 class TestNestedListsAcrossTheArms(unittest.TestCase):
@@ -885,12 +976,15 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
         from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
         cls.converter_class = FairscapeToD4DConverter
         cls.sv = SchemaView(str(FULL_SCHEMA))
-        cls.rows = {row["D4D_Full_Path"].strip(): row for row in load_mapping()}
+        cls.table = load_mapping()
 
     def this_arm(self, prop, slot, value, detail=False):
         """What `map_crate` writes in `slot`, from the table's row for it,
         and with `detail`, the row's detail beside it."""
-        row = self.rows[f"Dataset.{slot}"]
+        row = next(row for row in self.table
+                   if row["D4D_Full_Path"].strip() == f"Dataset.{slot}"
+                   and row["RO_Crate_JSON_Path"].strip()
+                   == f"@graph[?@type='Dataset']['{prop}']")
         source = row["RO_Crate_JSON_Path"].strip()
         self.assertEqual(source, f"@graph[?@type='Dataset']['{prop}']")
         res = map_crate(_crate_holding(source, value), [row], self.sv, "TEST")
@@ -910,6 +1004,60 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
         with contextlib.redirect_stdout(io.StringIO()):
             written = converter.convert(crate).get(slot)
         return (written, converter.dropped) if dropped else written
+
+    def test_documented_exceptions_across_all_shared_pairs_and_value_kinds(self):
+        """#4201: detect property-specific work before the converter's
+        `_shape`, such as `_timeframe` and `exact_bytes`. Derive the shared
+        pairs from the table and the converter's mappings, including a
+        pair whose slot the schema does not declare (both arms omit it).
+        No committed crate or generated output is read by this sweep."""
+        probe = self.converter_class()
+        probe._described = {}
+        probe._collected = {}
+        mappings = (probe._map_basic_properties, probe._map_complex_properties,
+                    probe._map_evi_properties, probe._map_rai_properties,
+                    probe._map_d4d_properties)
+        shared = set()
+        for row in self.table:
+            path = row["D4D_Full_Path"].strip()
+            match = GRAPH_RE.fullmatch(row.get("RO_Crate_JSON_Path", "").strip())
+            if not (path.startswith("Dataset.") and match
+                    and match["type"] == "Dataset" and not match["name"]):
+                continue
+            prop, slot = match["prop"], path.partition(".")[2]
+            # A number is accepted by exact_bytes, so that mapping is not
+            # lost merely because a text sentinel would be refused.
+            mapped = {(p, s) for mapping in mappings
+                      for p, s, _ in mapping({prop: 1})}
+            if (prop, slot) in mapped:
+                shared.add((prop, slot))
+        self.assertGreaterEqual(len(shared), 37)
+        self.assertLessEqual({(p, s) for p, (s, _) in self.PAIRS.items()}, shared)
+        kinds = {
+            "text": "x", "iso_date": "2022-09-01",
+            "slash_date": "1/31/2026", "ambiguous_date": "9/1/2022",
+            "integer": 42, "digits": "2022", "boolean": True,
+            "url": "https://example.org/x", "doi_url": "https://doi.org/10.5555/x",
+            "reference": {"@id": "https://example.org/x"}, "object": {"name": "x"},
+        }
+        changed = set()
+        for prop, slot in sorted(shared):
+            for kind, item in kinds.items():
+                ours_alone = self.this_arm(prop, slot, [item])
+                theirs_alone = self.converter(prop, slot, [item])
+                for mixed in ([item, ["y"]], [["y"], item], [item, [item]]):
+                    with self.subTest(prop=prop, slot=slot, kind=kind, value=mixed):
+                        self.assertEqual(self.this_arm(prop, slot, mixed), ours_alone)
+                        theirs_mixed = self.converter(prop, slot, mixed)
+                        if theirs_mixed != theirs_alone:
+                            changed.add((slot, kind))
+                            self.assertEqual(ours_alone, theirs_alone)
+        expected = {(slot, kind)
+                    for slot in ("updates", "human_subject_research")
+                    for kind in kinds if kind != "boolean"}
+        expected.update(("collection_timeframes", kind) for kind in (
+            "iso_date", "slash_date", "ambiguous_date", "digits"))
+        self.assertEqual(changed, expected)
 
     def test_neither_arm_writes_a_list_of_nulls_or_lists(self):
         for prop, (slot, x) in self.PAIRS.items():
