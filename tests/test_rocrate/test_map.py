@@ -1,8 +1,11 @@
 """Tests for the our-mapping crate → D4D arm."""
 
+import contextlib
 import copy
+import io
 import json
 import re
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +15,7 @@ from linkml_runtime import SchemaView
 
 from data_sheets_schema.rocrate_map import (
     FULL_SCHEMA,
+    GRAPH_RE,
     CrateEncodingError,
     MapResult,
     _normalize_datetime,
@@ -77,6 +81,34 @@ class TestPathResolution(unittest.TestCase):
         self.assertIn("nope", note)
 
 
+#: #4168: a value in either date form that is no calendar date, and why.
+#: Year 0000 is no year: `datetime.date` starts at 0001, and the schema's
+#: date-time check rejects 0000 too. So `01/02/0000`, whose components are
+#: both months, names no date in either order and is not ambiguous (#4183).
+IMPOSSIBLE_DATES = {
+    "13/13/2026": "as DD/MM/YYYY, month 13 is not in 1-12, and as MM/DD/YYYY, "
+                  "month 13 is not in 1-12",
+    "31/31/2026": "as DD/MM/YYYY, month 31 is not in 1-12, and as MM/DD/YYYY, "
+                  "month 31 is not in 1-12",
+    "12/32/2026": "as DD/MM/YYYY, month 32 is not in 1-12, and as MM/DD/YYYY, "
+                  "day 32 is not in 1-31 for 2026-12",
+    "31/02/2026": "as DD/MM/YYYY, day 31 is not in 1-28 for 2026-02, and as "
+                  "MM/DD/YYYY, month 31 is not in 1-12",
+    "0/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as MM/DD/YYYY, "
+                "month 0 is not in 1-12",
+    "01/02/0000": "as DD/MM/YYYY, year 0000 is not in 0001-9999, and as "
+                  "MM/DD/YYYY, year 0000 is not in 0001-9999",
+    "2026-13-45": "month 13 is not in 1-12",
+    "0000-01-01": "year 0000 is not in 0001-9999",
+}
+
+
+def _ambiguous(text):
+    return (None, f"ambiguous date {text!r}: both components are <= 12, so "
+                  "DD/MM and MM/DD cannot be distinguished; dropped rather than "
+                  "guessed")
+
+
 class TestDateNormalization(unittest.TestCase):
     def test_iso_date_becomes_datetime(self):
         value, note = _normalize_datetime("2026-04-03")
@@ -95,6 +127,92 @@ class TestDateNormalization(unittest.TestCase):
         value, note = _normalize_datetime("03/04/2026")
         self.assertIsNone(value)
         self.assertIn("ambiguous", note)
+
+    def test_an_impossible_date_is_not_a_calendar_date(self):
+        """#4168. `datetime.date` checks a date before it is widened, and
+        neither order reads any of these slash dates as one. `13/13/2026`,
+        `31/31/2026` and `0/0/2026` had been called ambiguous, "both
+        components are <= 12", and so, until #4183, had `01/02/0000`;
+        `12/32/2026` and `31/02/2026` had been widened to date-times the
+        schema rejects, as `2026-13-45` and `0000-01-01` had."""
+        for text, why in IMPOSSIBLE_DATES.items():
+            with self.subTest(text=text):
+                self.assertEqual(_normalize_datetime(text),
+                                 (None, f"not a calendar date {text!r}: {why}; dropped"))
+
+    def test_the_calendar_decides_not_a_count_of_days(self):
+        """29 February is a date in a leap year only, and the leap years
+        are the Gregorian calendar's (#4197): 1900 is not one, though four
+        divides it, and 2000 is, since 400 divides it. A rule that counts
+        every fourth year keeps 1900's, and one that also leaves out every
+        hundredth refuses 2000's; the schema's date-time check does
+        neither."""
+        self.assertEqual(_normalize_datetime("29/02/2024"),
+                         ("2024-02-29T00:00:00Z", "DD/MM/YYYY -> date-time"))
+        self.assertEqual(_normalize_datetime("2024-02-29"),
+                         ("2024-02-29T00:00:00Z", "date -> date-time"))
+        self.assertEqual(
+            _normalize_datetime("02/29/2026"),
+            (None, "not a calendar date '02/29/2026': as DD/MM/YYYY, month 29 is "
+                   "not in 1-12, and as MM/DD/YYYY, day 29 is not in 1-28 for "
+                   "2026-02; dropped"))
+        self.assertEqual(
+            _normalize_datetime("2026-02-29"),
+            (None, "not a calendar date '2026-02-29': day 29 is not in 1-28 for "
+                   "2026-02; dropped"))
+        self.assertEqual(
+            _normalize_datetime("1900-02-29"),
+            (None, "not a calendar date '1900-02-29': day 29 is not in 1-28 for "
+                   "1900-02; dropped"))
+        self.assertEqual(
+            _normalize_datetime("29/02/1900"),
+            (None, "not a calendar date '29/02/1900': as DD/MM/YYYY, day 29 is "
+                   "not in 1-28 for 1900-02, and as MM/DD/YYYY, month 29 is not "
+                   "in 1-12; dropped"))
+        self.assertEqual(_normalize_datetime("2000-02-29"),
+                         ("2000-02-29T00:00:00Z", "date -> date-time"))
+        self.assertEqual(_normalize_datetime("29/02/2000"),
+                         ("2000-02-29T00:00:00Z", "DD/MM/YYYY -> date-time"))
+
+    def test_ambiguous_means_both_orders_read_a_date(self):
+        """The ambiguity reason is kept where it is true: both orders read
+        a calendar date, so both components are months, the edges 1 and 12
+        included. A 0 is neither a day nor a month, in either position, so
+        a slash date with one is not a calendar date in either order. Nor
+        are two months in year 0000 (#4183), which `IMPOSSIBLE_DATES`
+        covers."""
+        for text in ("03/04/2026", "1/12/2026", "12/1/2026", "01/02/0001"):
+            with self.subTest(text=text):
+                self.assertEqual(_normalize_datetime(text), _ambiguous(text))
+        cases = {
+            "0/12/2026": "as DD/MM/YYYY, day 0 is not in 1-31 for 2026-12, and as "
+                         "MM/DD/YYYY, month 0 is not in 1-12",
+            "12/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as "
+                         "MM/DD/YYYY, day 0 is not in 1-31 for 2026-12",
+            "5/0/2026": "as DD/MM/YYYY, month 0 is not in 1-12, and as "
+                        "MM/DD/YYYY, day 0 is not in 1-31 for 2026-05",
+        }
+        for text, why in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(_normalize_datetime(text),
+                                 (None, f"not a calendar date {text!r}: {why}; dropped"))
+
+    def test_a_valid_date_resolves_as_before(self):
+        """A date with one reading keeps its value and its note: the order
+        that reads it is the one whose month is in 1-12."""
+        cases = {
+            "2026-04-03": ("2026-04-03T00:00:00Z", "date -> date-time"),
+            " 2026-04-03 ": ("2026-04-03T00:00:00Z", "date -> date-time"),
+            "12/16/2025": ("2025-12-16T00:00:00Z", "MM/DD/YYYY -> date-time"),
+            "16/12/2025": ("2025-12-16T00:00:00Z", "DD/MM/YYYY -> date-time"),
+            "1/31/2026": ("2026-01-31T00:00:00Z", "MM/DD/YYYY -> date-time"),
+            "31/1/2026": ("2026-01-31T00:00:00Z", "DD/MM/YYYY -> date-time"),
+            "13/12/2026": ("2026-12-13T00:00:00Z", "DD/MM/YYYY -> date-time"),
+            "12/13/2026": ("2026-12-13T00:00:00Z", "MM/DD/YYYY -> date-time"),
+        }
+        for text, expected in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(_normalize_datetime(text), expected)
 
 
 class TestMapping(unittest.TestCase):
@@ -526,6 +644,16 @@ class TestDatesInAOneItemList(unittest.TestCase):
         self.assertEqual(self.issued(["9/1/2022"]), refused)
         self.assertEqual(self.issued("9/1/2022"), refused)
 
+    def test_an_impossible_date_is_refused_alone_and_in_a_one_item_list(self):
+        """#4168. The row is empty, with the reason that the value is not a
+        calendar date, whether the crate writes it alone or as the one item
+        of a list."""
+        for text, why in IMPOSSIBLE_DATES.items():
+            refused = (None, "empty", f"not a calendar date {text!r}: {why}; dropped")
+            with self.subTest(text=text):
+                self.assertEqual(self.issued(text), refused)
+                self.assertEqual(self.issued([text]), refused)
+
     def test_a_scalar_date_is_widened_with_no_unwrap_note(self):
         """The control: the scalar form was already right."""
         self.assertEqual(self.issued("2026-06-30"),
@@ -542,21 +670,23 @@ class TestDatesInAOneItemList(unittest.TestCase):
         self.assertNotIn("unwrapped single-item list", two[2])
         self.assertNotEqual(two, self.issued("2026-06-30"))
 
-    def test_a_one_item_list_whose_item_is_not_text_is_left_to_the_cardinality_step(self):
-        """The date rule reads text only, so the date branch unwraps a
-        one-item list only when its item is text (#4154). Any other item is
-        unwrapped once by the cardinality step, and the row is the one
-        origin/main (`ba223f894`) wrote: `[null]` keeps its unwrap note
-        rather than giving an empty row with no reason, and a nested list
-        carries the note once rather than being unwrapped twice into a date
-        the rule never read. These rows are pinned as unchanged, not as
-        right: the nested list is still written as a list, which fails
-        validation, and `[null]`'s detail names the unwrap, not the null.
-        Neither is #4109's to change."""
+    def test_a_one_item_list_of_null_or_of_a_list_gets_a_row_naming_it(self):
+        """#4164. Neither reaches the date rule. `[null]` is no value, and
+        the reason names the null; its row had named only the unwrap. A
+        list inside a list is refused, not flattened: the cardinality step
+        had unwrapped it once and written `['2026-06-30']` into this
+        single-valued slot, which fails validation. The date rule never
+        read the inner value, so `[["9/1/2022"]]` was never called
+        ambiguous either. #4154 had pinned those rows as unchanged, not as
+        right."""
         self.assertEqual(self.issued([None]),
-                         (None, "empty", "unwrapped single-item list"))
-        self.assertEqual(self.issued([["2026-06-30"]]),
-                         (["2026-06-30"], "filled", "unwrapped single-item list"))
+                         (None, "empty", "no value: the list holds only null ([null])"))
+        for value in ([["2026-06-30"]], [["9/1/2022"]]):
+            with self.subTest(value=value):
+                self.assertEqual(self.issued(value), (
+                    None, "empty",
+                    "a list inside a list, for a slot that holds one value: "
+                    f"{json.dumps(value)}; dropped rather than flattened"))
 
     def test_the_doi_and_class_range_rows_keep_their_one_item_list_details(self):
         """The unwrap is in the date branch, not hoisted, so a one-item list
@@ -576,6 +706,297 @@ class TestDatesInAOneItemList(unittest.TestCase):
         updates = details["Dataset.updates"]
         self.assertTrue(updates.endswith("; unwrapped single-item list"), updates)
         self.assertEqual(updates.count("unwrapped single-item list"), 1, updates)
+
+
+#: A crate root holding nothing a table row reads.
+BARE_ROOT = {"@id": "ark:59853/thing",
+             "@type": ["https://w3id.org/EVI#Dataset", "https://w3id.org/EVI#ROCrate"]}
+
+#: One table row for each kind of slot `_coerce` fills: text, a list of text,
+#: a date-time, the doi, an enum, a list of objects, one object, an integer,
+#: a boolean, a uri, a uriorcurie, and text in a nested class's object.
+ONE_ROW_OF_EACH_KIND = {
+    "Dataset.title", "Dataset.keywords", "Dataset.issued", "Dataset.doi",
+    "Dataset.compression", "Dataset.creators", "Dataset.updates",
+    "Dataset.total_size_bytes", "Dataset.is_tabular", "Dataset.download_url",
+    "Dataset.publisher", "PreprocessingStrategy.description",
+}
+
+
+def _crate_holding(source, value):
+    """A crate whose root holds `value` at the table path `source`, and
+    nothing else a table row reads."""
+    root = copy.deepcopy(BARE_ROOT)
+    m = GRAPH_RE.match(source)
+    if m and m.group("name"):
+        root[m.group("prop")] = [{"name": m.group("name"), m.group("prop2"): value}]
+    else:
+        root[m.group("prop") if m else source] = value
+    return [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork"}, root]
+
+
+class TestNullAndNestedListItems(unittest.TestCase):
+    """#4164. `_coerce` read a list of null and a list inside a list as
+    values. A single-valued slot's `[null]` row was `empty` with the unwrap
+    as its only reason, and `[[x]]` wrote the inner list into the slot; a
+    multivalued slot kept `[null]` as written; a class-range slot made
+    `{name: 'None'}` or `{name: "['x']"}`; and an enum slot raised
+    TypeError, which ended `map_crate`. #4183: a list that mixes values
+    with lists keeps the values, and the row names each list it drops."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def rows_reading(self, value):
+        """`(d4d path, status, detail, written)` for every table row that
+        `_coerce` reads, each mapped alone from a crate holding `value` at
+        its path. A row that cannot be placed, or declares no crate path,
+        never reaches `_coerce` and is left out. `written` is the record
+        without its `id`, which `map_crate` takes from the crate root and no
+        table row supplies."""
+        out = []
+        for row in self.rows:
+            graph = _crate_holding((row.get("RO_Crate_JSON_Path") or "").strip(), value)
+            res = map_crate(graph, [row], self.sv, "TEST")
+            field = res.fields[0]
+            if field.status in ("unplaceable", "unresolvable"):
+                continue
+            out.append((field.d4d_path, field.status, field.detail,
+                        {k: v for k, v in res.record.items() if k != "id"}))
+        self.assertLessEqual(ONE_ROW_OF_EACH_KIND, {path for path, *_ in out})
+        return out
+
+    def test_a_list_of_only_null_is_no_value_in_every_row(self):
+        """The row is `empty`, its reason names the null, and nothing is
+        written, whatever the slot's range or cardinality."""
+        for value in ([None], [None, None]):
+            why = f"no value: the list holds only null ({json.dumps(value)})"
+            for path, *row in self.rows_reading(value):
+                with self.subTest(value=value, row=path):
+                    self.assertEqual(tuple(row), ("empty", why, {}))
+
+    def holds(self, path):
+        """What the reason says the row's slot holds."""
+        cls, _, slot = path.partition(".")
+        return ("a list of single values"
+                if self.sv.induced_slot(slot, cls).multivalued else "one value")
+
+    def test_a_list_of_lists_is_refused_in_every_row(self):
+        """Refused, not flattened, whatever the slot's range, where every
+        item is a list, or a list or null: nothing is left to shape. The
+        reason says which kind of slot it is: one that holds one value, or
+        one that holds a list of single values."""
+        for value in ([["x"]], [["x", "y"]], [None, ["x"]]):
+            for path, *row in self.rows_reading(value):
+                why = (f"a list inside a list, for a slot that holds "
+                       f"{self.holds(path)}: {json.dumps(value)}; dropped "
+                       "rather than flattened")
+                with self.subTest(value=value, row=path):
+                    self.assertEqual(tuple(row), ("empty", why, {}))
+
+    def test_a_list_beside_a_value_is_dropped_and_the_value_kept_in_every_row(self):
+        """#4183. Every row maps a list that mixes values with lists as it
+        maps the values alone, whatever the slot's range or cardinality,
+        and its detail first names each list it dropped. #4164 had refused
+        the whole row, which emptied a `doi` row origin/main filled with a
+        valid DOI. A null beside a value is passed on as it was (#4172)."""
+        cases = (
+            (["x", ["y"]], ["x"], "1 of 2 list items is a list", '["y"]'),
+            ([["y"], "x"], ["x"], "1 of 2 list items is a list", '["y"]'),
+            (["x", ["y"], ["z", "w"]], ["x"],
+             "2 of 3 list items are lists", '["y"], ["z", "w"]'),
+            (["x", "v", ["y"]], ["x", "v"], "1 of 3 list items is a list", '["y"]'),
+            (["x", None, ["y"]], ["x", None], "1 of 3 list items is a list", '["y"]'),
+        )
+        for value, alone, how_many, named in cases:
+            rows_alone = {path: row for path, *row in self.rows_reading(alone)}
+            for path, status, detail, written in self.rows_reading(value):
+                status_alone, detail_alone, written_alone = rows_alone[path]
+                left_out = (f"{how_many} inside the list, for a slot that holds "
+                            f"{self.holds(path)}: {named}; dropped rather than "
+                            "flattened")
+                with self.subTest(value=value, row=path):
+                    self.assertEqual((status, written), (status_alone, written_alone))
+                    self.assertEqual(detail, "; ".join(
+                        part for part in (left_out, detail_alone) if part))
+
+    def keywords(self, value):
+        """`(keywords, status, detail)` for the shipped table and `GRAPH`
+        with `keywords: value`."""
+        graph = copy.deepcopy(GRAPH)
+        graph[1]["keywords"] = value
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        field = next(f for f in res.fields if f.d4d_path == "Dataset.keywords")
+        return res.record.get("keywords"), field.status, field.detail
+
+    def test_a_multivalued_slot_keeps_its_values_and_drops_a_list_inside(self):
+        """The choice #4164 left open: a list inside the list a multivalued
+        slot reads is not one of the single values the slot holds, so it is
+        dropped, not flattened into the slot's list. The values beside it
+        are kept (#4183), and a list of nothing but lists is refused. A list
+        of single values fills the slot as before."""
+        self.assertEqual(self.keywords(["voice", ["health"]]), (
+            ["voice"], "filled",
+            "1 of 2 list items is a list inside the list, for a slot that holds a "
+            'list of single values: ["health"]; dropped rather than flattened'))
+        self.assertEqual(self.keywords([["voice", "health"]]), (
+            None, "empty",
+            "a list inside a list, for a slot that holds a list of single values: "
+            '[["voice", "health"]]; dropped rather than flattened'))
+        self.assertEqual(self.keywords(["voice", "health"]),
+                         (["voice", "health"], "filled", ""))
+
+    def test_a_null_beside_a_value_is_not_read_as_a_list_of_null(self):
+        """The rule reads a list whose every item is null. With a value
+        beside the null, the list holds that value, and the row keeps it;
+        what becomes of the null itself is not decided here."""
+        kept, status, detail = self.keywords(["voice", None])
+        self.assertEqual(status, "filled")
+        self.assertIn("voice", kept)
+        self.assertNotIn("null", detail)
+
+
+class TestNestedListsAcrossTheArms(unittest.TestCase):
+    """#4175, #4183. `_coerce`'s comment says where this arm and the
+    FAIRSCAPE converter of PR #4042 agree on a list of nulls or lists and on
+    a list that mixes values with lists. Both arms are run here on each
+    shape, for one crate property of each kind that both map to the same
+    `Dataset` slot: text, a list of text, a date-time, the doi, a list of
+    objects and one object. `rai:dataCollectionTimeframe` given dates, the
+    comment's second exception, has a test of its own (#4197)."""
+
+    #: crate property -> (the slot both arms fill from it, a value it takes)
+    PAIRS = {
+        "name": ("title", "x"),
+        "keywords": ("keywords", "x"),
+        "datePublished": ("issued", "2026-06-30"),
+        "identifier": ("doi", "https://doi.org/10.5555/x"),
+        "author": ("creators", "x"),
+        "rai:dataReleaseMaintenancePlan": ("updates", "x"),
+    }
+
+    @classmethod
+    def setUpClass(cls):
+        repo_root = str(Path(__file__).resolve().parents[2])
+        if repo_root not in sys.path:
+            sys.path.insert(0, repo_root)
+        from src.fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
+        cls.converter_class = FairscapeToD4DConverter
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = {row["D4D_Full_Path"].strip(): row for row in load_mapping()}
+
+    def this_arm(self, prop, slot, value, detail=False):
+        """What `map_crate` writes in `slot`, from the table's row for it,
+        and with `detail`, the row's detail beside it."""
+        row = self.rows[f"Dataset.{slot}"]
+        source = row["RO_Crate_JSON_Path"].strip()
+        self.assertEqual(source, f"@graph[?@type='Dataset']['{prop}']")
+        res = map_crate(_crate_holding(source, value), [row], self.sv, "TEST")
+        written = res.record.get(slot)
+        return (written, res.fields[0].detail) if detail else written
+
+    def converter(self, prop, slot, value, dropped=False):
+        """What the converter writes in `slot` for a crate root holding
+        `value` at `prop`, and with `dropped`, what it records as left out
+        beside it."""
+        crate = {"@context": {"@vocab": "https://schema.org/"}, "@graph": [
+            {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+             "about": {"@id": "./"}},
+            {"@id": "./", "@type": ["Dataset", "https://w3id.org/EVI#ROCrate"],
+             "name": "A test crate", prop: value}]}
+        converter = self.converter_class()
+        with contextlib.redirect_stdout(io.StringIO()):
+            written = converter.convert(crate).get(slot)
+        return (written, converter.dropped) if dropped else written
+
+    def test_neither_arm_writes_a_list_of_nulls_or_lists(self):
+        for prop, (slot, x) in self.PAIRS.items():
+            for value in ([None], [None, None], [[x]], [[x, "y"]], [None, [x]]):
+                with self.subTest(prop=prop, value=value):
+                    self.assertIsNone(self.this_arm(prop, slot, value))
+                    self.assertIsNone(self.converter(prop, slot, value))
+
+    def test_a_mixed_list_is_written_as_its_values_alone_but_in_one_object(self):
+        """Each arm writes for a list mixing a value with a list what it
+        writes for the value alone, and the two agree on the value alone,
+        except in a single-valued slot whose range is a class (`updates`):
+        the converter joins only text into one object, so it writes nothing
+        for the mixed list. The other exception is the next test's."""
+        for prop, (slot, x) in self.PAIRS.items():
+            alone = self.this_arm(prop, slot, [x])
+            self.assertIsNotNone(alone)
+            self.assertEqual(self.converter(prop, slot, [x]), alone)
+            for value in ([x, ["y"]], [["y"], x]):
+                with self.subTest(prop=prop, value=value):
+                    self.assertEqual(self.this_arm(prop, slot, value), alone)
+                    self.assertEqual(self.converter(prop, slot, value),
+                                     None if slot == "updates" else alone)
+
+    def test_a_timeframe_list_of_dates_is_a_start_and_an_end_to_the_converter(self):
+        """#4197, the second exception in `_coerce`'s comment. Where an item
+        of `rai:dataCollectionTimeframe` is written as a date, the
+        converter's `_timeframe` reads the list before `_shape` does: two
+        items are a start and an end, a list inside the list counting as
+        one of them, and three or more are dropped whole. This arm writes
+        what it writes for the values alone, a timeframe named by the date,
+        and its detail names each list it dropped. The arms agree on the
+        values alone, on lists of nothing but lists and nulls, and wherever
+        no item is written as a date. What the converter writes and records
+        is pinned as it is, not as right: #4194 decides it, and a change
+        there changes this test and the comment."""
+        prop, slot = "rai:dataCollectionTimeframe", "collection_timeframes"
+        for value in (["2022-09-01"], ["2026-06-30"], ["x"],
+                      ["x", ["y"]], [["y"], "x"], ["x", ["2026-01-31"]]):
+            both = [{"name": next(v for v in value if isinstance(v, str))}]
+            with self.subTest(value=value):
+                self.assertEqual(self.this_arm(prop, slot, value), both)
+                self.assertEqual(self.converter(prop, slot, value), both)
+        for value in ([["2022-09-01"]], [["2022-09-01", "2026-01-31"]],
+                      [["2022-09-01"], ["2026-01-31"]], [None, ["2022-09-01"]]):
+            with self.subTest(value=value):
+                self.assertIsNone(self.this_arm(prop, slot, value))
+                self.assertIsNone(self.converter(prop, slot, value))
+        cases = (
+            # the crate's value, its values alone, the lists this arm names
+            # as dropped, and what the converter writes and records
+            (["2022-09-01", ["2026-01-31"]], ["2022-09-01"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["2026-01-31"]',
+             [{"start_date": "2022-09-01", "end_date": "2026-01-31"}], []),
+            (["2022-09-01", ["y"]], ["2022-09-01"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["y"]',
+             [{"start_date": "2022-09-01"}],
+             [("collection_timeframes[0].end_date",
+               "not placed in `end_date`: not a calendar date: y")]),
+            ([["y"], "2026-06-30"], ["2026-06-30"],
+             '1 of 2 list items is a list inside the list, for a slot that '
+             'holds a list of single values: ["y"]',
+             [{"end_date": "2026-06-30"}],
+             [("collection_timeframes[0].start_date",
+               "not placed in `start_date`: not a calendar date: y")]),
+            (["2022-09-01", ["y"], ["z"]], ["2022-09-01"],
+             '2 of 3 list items are lists inside the list, for a slot that '
+             'holds a list of single values: ["y"], ["z"]',
+             None,
+             [("rai:dataCollectionTimeframe",
+               "not placed in `collection_timeframes`: 3 items, where Croissant "
+               "RAI defines this property as the start and end date of the "
+               "collection")]),
+        )
+        for value, alone, left_out, converted, recorded in cases:
+            with self.subTest(value=value):
+                written_alone, detail_alone = self.this_arm(
+                    prop, slot, alone, detail=True)
+                self.assertEqual(written_alone, [{"name": alone[0]}])
+                self.assertEqual(self.converter(prop, slot, alone), written_alone)
+                self.assertEqual(self.this_arm(prop, slot, value, detail=True), (
+                    written_alone,
+                    f"{left_out}; dropped rather than flattened; {detail_alone}"))
+                self.assertEqual(self.converter(prop, slot, value, dropped=True),
+                                 (converted, recorded))
 
 
 class TestDoi(unittest.TestCase):
@@ -758,6 +1179,27 @@ class TestDoi(unittest.TestCase):
                          'ark:59853/other — rewritten from the crate\'s ["ark:59853/other"]: '
                          "required by the schema; taken from the crate itself; "
                          "the first of 1 list item(s)")
+
+    def test_a_list_inside_the_list_is_dropped_and_the_doi_kept(self):
+        """#4183. origin/main took the one DOI among the items, and the
+        record validated; #4164's first version refused the whole row. The
+        list inside the list is dropped and named, the DOI is written as
+        origin/main wrote it, and the report names the crate's whole list."""
+        crate_value = ["https://doi.org/10.5555/x", ["y"]]
+        res = map_crate(_with_identifier(crate_value), self.rows, self.sv, "TEST")
+        field = self.doi_field(res)
+        self.assertEqual((res.record.get("doi"), field.status), ("10.5555/x", "filled"))
+        self.assertEqual(
+            field.detail,
+            '1 of 2 list items is a list inside the list, for a slot that holds '
+            'one value: ["y"]; dropped rather than flattened; the one DOI among '
+            "1 list item(s); resolver or `doi:` prefix removed, case kept")
+        self.assertEqual(field.rewritten_from, json.dumps(crate_value))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(res.record, sort_keys=False,
+                                           allow_unicode=True), encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
 
     def test_a_list_names_the_crate_list_it_gave_its_doi_up_from(self):
         res = map_crate(_with_identifier(["ark:59853/other",

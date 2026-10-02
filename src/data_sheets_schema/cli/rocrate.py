@@ -7,6 +7,7 @@ import click
 
 from data_sheets_schema.registry import project_choice, projects_for
 import sys
+from collections import Counter
 from pathlib import Path
 
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
@@ -17,6 +18,31 @@ def _outcome_line(refused: int, invalid: int) -> str:
     validation: a crate that could not be read was never validated (#3359)."""
     return (f"{refused} crate(s) refused (missing or unreadable), "
             f"{invalid} validation failure(s)")
+
+
+def _once_each(project: tuple[str, ...]) -> list[str]:
+    """The --project names in the order first given, each once (#4165).
+
+    `project_choice` returns the names as typed, so a repeated one ran its
+    project again: an emit command refused the record its first pass had just
+    published, and a run that published every project exited 1. Each repeated
+    name gets one stderr line. With no --project the names come from the
+    manifest's keys, which cannot repeat."""
+    for name, times in Counter(project).items():
+        if times > 1:
+            click.echo(f"⚠️  --project {name} was given {times} times; it runs once",
+                       err=True)
+    return list(dict.fromkeys(project))
+
+
+def _reason(exc: Exception, refusals: tuple[type[Exception], ...]) -> str:
+    """The reason a per-project error line gives (#4148). An expected refusal
+    is its own message. Any other error is named by its type, since a KeyError's
+    message is only the key, and an empty message never leaves the line bare."""
+    text = str(exc)
+    if text and isinstance(exc, refusals):
+        return text
+    return f"{type(exc).__name__}: {text}" if text else type(exc).__name__
 
 
 @click.group()
@@ -189,7 +215,7 @@ def normalize(project, packages_dir):
     )
 
     root = Path(packages_dir)
-    targets = list(project) or [
+    targets = _once_each(project) or [
         p for p in projects_for(click.get_current_context())
         if (root / p / 'raw').is_dir() or (root / p / 'crate').is_dir()
     ]
@@ -238,10 +264,10 @@ def bundle(project, packages_dir):
     from the document bundle plus crate evidence. Artifacts that are already in
     D4D or datasheet form are withheld so this arm extracts rather than copies.
     """
-    from data_sheets_schema.rocrate_normalize import build_crate_bundle
+    from data_sheets_schema.rocrate_normalize import DeNovoPolicyError, build_crate_bundle
 
     root = Path(packages_dir)
-    targets = list(project) or [
+    targets = _once_each(project) or [
         p for p in projects_for(click.get_current_context()) if (root / p / 'processed').is_dir()
     ]
     if not targets:
@@ -255,7 +281,7 @@ def bundle(project, packages_dir):
         try:
             out, included, withheld = build_crate_bundle(name, root)
         except Exception as e:
-            click.echo(f"  ❌ {e}", err=True)
+            click.echo(f"  ❌ {_reason(e, (FileNotFoundError, DeNovoPolicyError))}", err=True)
             failures += 1
             continue
         click.echo(f"  → {out} ({out.stat().st_size:,} bytes)")
@@ -286,7 +312,7 @@ def emit_arm(version, project, packages_dir):
     from data_sheets_schema.rocrate_normalize import emit_deterministic_arm
 
     root = Path(packages_dir)
-    targets = list(project) or [
+    targets = _once_each(project) or [
         p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_d4d.yaml').exists()
     ]
@@ -299,10 +325,12 @@ def emit_arm(version, project, packages_dir):
     for name in targets:
         try:
             out = emit_deterministic_arm(name, version, root)
-            click.echo(f"  ✓ {name} → {out}")
-        except (FileNotFoundError, FileExistsError) as e:
-            click.echo(f"  ❌ {name}: {e}", err=True)
+        except Exception as e:                             # as bundle: count it, go on (#4147)
+            click.echo(f"  ❌ {name}: {_reason(e, (FileNotFoundError, FileExistsError))}",
+                       err=True)
             failures += 1
+            continue
+        click.echo(f"  ✓ {name} → {out}")
 
     if failures:                                           # the total, not a bare exit (#3638)
         click.echo(f"\n❌ {failures} of {len(targets)} project(s) not published", err=True)
@@ -330,7 +358,7 @@ def map_cmd(project, packages_dir):
     )
 
     root = Path(packages_dir)
-    targets = list(project) or [
+    targets = _once_each(project) or [
         p for p in projects_for(click.get_current_context())
         if (root / p / 'raw' / 'ro-crate-metadata.json').exists()
         or (root / p / 'crate' / 'ro-crate-metadata.json').exists()
@@ -382,7 +410,7 @@ def emit_map_arm(version, project, packages_dir):
     from data_sheets_schema.rocrate_normalize import emit_deterministic_arm
 
     root = Path(packages_dir)
-    targets = list(project) or [
+    targets = _once_each(project) or [
         p for p in projects_for(click.get_current_context())
         if (root / p / 'processed' / f'{p}_crate_mapped_d4d.yaml').exists()
     ]
@@ -396,10 +424,12 @@ def emit_map_arm(version, project, packages_dir):
             out = emit_deterministic_arm(name, version, root,
                                          method='rocrate_static_map',
                                          variant='crate_mapped_d4d')
-            click.echo(f"  ✓ {name} → {out}")
-        except (FileNotFoundError, FileExistsError) as e:
-            click.echo(f"  ❌ {name}: {e}", err=True)
+        except Exception as e:                             # as bundle: count it, go on (#4147)
+            click.echo(f"  ❌ {name}: {_reason(e, (FileNotFoundError, FileExistsError))}",
+                       err=True)
             failures += 1
+            continue
+        click.echo(f"  ✓ {name} → {out}")
     if failures:                                           # the total, not a bare exit (#3638)
         click.echo(f"\n❌ {failures} of {len(targets)} project(s) not published", err=True)
         sys.exit(1)
