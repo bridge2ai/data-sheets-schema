@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/semantic-evidence-v3/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Semantic evidence contract v3 - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#semantic-evidence-contract-v3" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Semantic evidence contract v3
             
           </span>
         </div>
@@ -316,56 +316,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#frozen-absence-name-authority" class="md-nav__link">
+    Frozen absence-name authority
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#reporting-and-remaining-figure-integration" class="md-nav__link">
+    Reporting and remaining figure integration
   </a>
   
 </li>
@@ -384,110 +343,75 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/semantic-evidence-v3.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
-</code></pre>
-
-</details>
+<h1 id="semantic-evidence-contract-v3">Semantic evidence contract v3</h1>
+<p>New rubric10-semantic and rubric20-semantic outputs use version <code>3.0</code>.
+Historical semantic versions 1.x and 2.0 retain their classification rules;
+field-agent rubric10 and rubric20 outputs still use version 2.0. No recorded
+scores or frozen registrations are migrated by this change. A future run needs
+a new registration with the v3 definition, validator support files and authority
+artifact pinned before any evaluator call.</p>
+<p>The exact-file validator requires the original input, caller-supplied context
+(omission means unknown), current agent definition and their recorded digests.
+After the existing shape, applicability, scope and arithmetic checks, it checks
+the structured claims against that input. Each resource score has <code>cited</code>,
+<code>absent</code>, <code>counts</code> and <code>considered</code> arrays. A deduction must name a path in at
+least one of them. False counts, unresolved or empty citations, fabricated
+quotes and false absences fail acceptance. Errors carry structured item,
+resource and path findings. Coverage gaps and deductions without a linked issue
+or explicit <code>no_issue_reason</code> are visible warnings; neither rewrites scores.</p>
+<p>Issues record a category, type, score effect and unique item IDs. A <code>lowered</code>
+issue must link to at least one applicable item below its maximum. A
+<code>noted_only</code> issue has no item IDs. These are evaluator declarations, not a
+mechanical adjudication of semantic correctness.</p>
+<h2 id="frozen-absence-name-authority">Frozen absence-name authority</h2>
+<p><code>data/rubric/semantic_evidence_authority_v3.json</code> freezes the union of declared
+slot and class attribute names from the full and core merged schemas, dotted
+field tokens from both rubrics, and names from the existing field-alias table.
+The artifact records the SHA256 of each source. The evaluator records the
+artifact's SHA256 as <code>metadata.evidence_authority_sha256</code>, and acceptance checks
+that digest against the installed artifact. Isolated reference-rescore sessions
+copy and pin both the artifact and its loader.</p>
+<p><code>scripts/build_semantic_evidence_authority.py</code> is an explicit offline release
+tool. Acceptance never rebuilds the authority from whatever schema is current.
+A changed authority needs a separately identified instrument and registration.</p>
+<p>Release reproduction uses the hash-verified gzip source snapshots in
+<code>tests/fixtures/semantic_evidence_authority_v3</code>, also recoverable from commit
+<code>b36bb067641467b7e14bea42fa378ac06167d68f</code>. The builder reads aliases from those
+source bytes as a literal mapping without executing them. Current schema,
+rubric or alias maintenance must not regenerate the released v3 authority;
+even a comment edit changes source hashes while leaving the names unchanged.
+Historical v3 ratings continue to use the released authority digest.</p>
+<p>This authority validates token names, not their complete class/range traversal.
+It rejects undeclared names even after a missing parent. JSON-pointer tokens
+are decoded literally: <code>/version_access.version_details</code> does not mean the
+nested path <code>/version_access/version_details</code>. Numeric tokens are list indices
+on observed lists; after a missing parent, class information is unknown and
+canonical indices remain possible. Combinations of individually declared names
+may still be inappropriate for a class; that remains outside this contract.</p>
+<p>The acceptance fixture for a declared but absent field uses <code>errata</code> in the
+pinned CM4AI v7 rep2 input. <code>was_generated_by</code> is not declared by these authority
+sources and is rejected in v3; no provenance-only allowlist is added. Historical
+v2 behavior is preserved.</p>
+<h2 id="reporting-and-remaining-figure-integration">Reporting and remaining figure integration</h2>
+<p><code>scripts/report_semantic_comparison.py</code> accepts repeated
+<code>--evidence-input EVALUATION INPUT</code> and <code>--evidence-context EVALUATION CONTEXT</code>
+arguments. It recomputes v3 findings from those explicit inputs and displays
+errors and warnings beside the rating and input identity. Missing inputs are
+reported as unchecked. Model-written acceptance flags are never used.</p>
+<p><code>data_sheets_schema.semantic_evidence_reporting</code> exposes structured findings
+and directly recorded v3 taxonomy. Legacy prose remains explicitly unclassified
+unless a caller supplies a legacy classifier. Report generation preserves its
+input files.</p>
+<p>The protected figure worktree is outside this implementation. Its fig11 caller
+still needs to consume the shared direct taxonomy API for v3 and label its
+legacy prose classification separately. That integration remains open under</p>
+<h1 id="2920-it-does-not-block-offline-v3-acceptance-and-reporting-on-main">2920; it does not block offline v3 acceptance and reporting on main.</h1>
 
 
 
