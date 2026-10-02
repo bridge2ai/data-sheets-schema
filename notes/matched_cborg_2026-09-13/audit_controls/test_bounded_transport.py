@@ -195,6 +195,59 @@ def test_progressing_response_cannot_outlive_total_count_deadline(children, monk
     assert progressed >= 2 and len(seen['requests']) == 1, attempts
 
 
+#: How long the late-start test's worker sleeps before it runs: longer than its
+#: count budget plus the deadline-to-kill and reap bounds above, so a count that
+#: ends inside those bounds was ended by the parent's deadline, not by the worker.
+#: The worker is killed at the deadline, so the test never waits this long.
+LATE_START_SECONDS = 30
+
+
+def test_a_worker_that_starts_late_ends_as_a_count_timeout_before_any_request(children, monkeypatch):
+    # The count budget pays for the worker's start-up by design (#2159): one
+    # total deadline is what the SDK-timeout margin is computed against. A
+    # worker that has not started when the budget runs out is therefore killed
+    # at the deadline and reported as the count timeout, the same typed error a
+    # slow provider gives, with no request sent and nothing left running. #2605
+    # kept that attribution rather than adding a start-up signal to the worker
+    # protocol; this pins it at a start-up far past the budget, which no load
+    # measured so far comes near (about 14 s at load 450, #2697).
+    budget, launch, killed_at = 2, bounded.subprocess.Popen, []
+    worker = str(Path(bounded.__file__).resolve())
+    source = (f"import runpy,sys,time;time.sleep({LATE_START_SECONDS});"
+              f"sys.argv=[{worker!r},'--count-worker'];runpy.run_path({worker!r},run_name='__main__')")
+    def late(args, *rest, **kwargs):
+        assert list(args[-2:]) == [worker, '--count-worker'], args
+        child = launch([args[0], '-B', '-c', source], *rest, **kwargs)
+        real_signal = child.send_signal
+        def send_signal(sig):
+            if sig == signal.SIGKILL:
+                killed_at.append(time.monotonic())
+            return real_signal(sig)
+        child.send_signal = send_signal
+        return child
+    monkeypatch.setattr(bounded.subprocess, 'Popen', late)
+    with server() as (url, seen):
+        client = bounded.BoundedCountClient(api_key='fake-key', base_url=url, timeout_seconds=budget)
+        try:
+            started = time.monotonic()
+            with pytest.raises(anthropic.APITimeoutError):
+                client.messages.count_tokens(**FIELDS)
+            elapsed = time.monotonic() - started
+        finally:
+            client.close()
+        assert seen['requests'] == []
+    assert budget + DEADLINE_KILL_SECONDS + REAP_SECONDS < LATE_START_SECONDS
+    # The kill is timed from the count's own deadline, as in the progressing test,
+    # so a start-up allowance of more than DEADLINE_KILL_SECONDS fails here rather
+    # than hiding inside the reap's hang guard (#2941).
+    assert budget - .5 <= elapsed < budget + DEADLINE_KILL_SECONDS + REAP_SECONDS, elapsed
+    assert len(killed_at) == 1 and killed_at[0] - (started + budget) < DEADLINE_KILL_SECONDS, (killed_at, started)
+    # The client reaped it: returncode is set by the client's own poll() or wait()
+    # after the kill, and reading the attribute here reaps nothing, unlike a
+    # poll() from the test would (#2941, #2950).
+    assert len(children) == 1 and children[0].returncode is not None and not client._active
+
+
 def test_close_cancels_and_reaps_active_worker_and_forbids_new_counts(children, monkeypatch):
     # close() must kill the active worker at once, return once it is reaped, and
     # release the count it cancels. Each is timed from in-process instants, so none
