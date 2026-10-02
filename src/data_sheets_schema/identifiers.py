@@ -97,7 +97,13 @@ def declared_prefixes(schema_path: Path = FULL_SCHEMA) -> set[str]:
     """
     from data_sheets_schema.schema_cache import load_schema
     doc = load_schema(schema_path) or {}             # one parse per process (#1203)
-    return set(doc.get("prefixes") or {})
+    return declared_prefixes_of(doc)
+
+
+def declared_prefixes_of(doc: dict[str, Any]) -> set[str]:
+    """`declared_prefixes` on a parsed schema: today's file, or the bytes a
+    run recorded (`run_schema.identifier_rules`, #3931)."""
+    return set((doc or {}).get("prefixes") or {})
 
 
 def classify(value: str, prefixes: set[str]) -> str:
@@ -138,7 +144,12 @@ def person_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     the mappings a `mailto:` id belongs to, and the only ones the
     undeclared-prefix counter excludes it from (#982 v3)."""
     from data_sheets_schema.schema_view import shared_view
-    sv = shared_view(schema_path)
+    return person_slots_of(shared_view(schema_path))
+
+
+def person_slots_of(sv) -> set[str]:
+    """`person_slots` on a view already built: today's file's, or one of the
+    bytes a run recorded (`run_schema.identifier_rules`, #3931)."""
     return {str(sl.name) for c in sv.all_classes()
             for sl in sv.class_induced_slots(c) if str(sl.range) == "Person"}
 
@@ -157,8 +168,12 @@ def uriorcurie_slots(schema_path: Path = FULL_SCHEMA) -> set[str]:
     `uriorcurie` is picked up without anyone remembering to add it here.
     """
     from data_sheets_schema.schema_view import shared_view
+    return uriorcurie_slots_of(shared_view(schema_path))
 
-    sv = shared_view(schema_path)
+
+def uriorcurie_slots_of(sv) -> set[str]:
+    """`uriorcurie_slots` on a view already built: today's file's, or one of
+    the bytes a run recorded (`run_schema.identifier_rules`, #3931)."""
     found: set[str] = set()
     for class_name in sv.all_classes():
         for slot_name in sv.class_slots(class_name, attributes=True):

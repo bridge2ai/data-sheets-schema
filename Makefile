@@ -437,7 +437,15 @@ lint-core: ## Lint the core exchange schema files
 # structural table replace them; the SKOS alignment TTL stays the curated
 # input. Their last bytes are in git history (`git log --diff-filter=D --
 # <path>`).
-gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive gen-sssom-structural ## Generate all SSSOM mappings (comprehensive pair + structural)
+#
+# The structural table is not part of this (#3967). It carries rows its
+# generator cannot produce (KNOWN_UNDERIVABLE in
+# generate_structural_mapping.py, #294), and its rule fires whenever the
+# merged schema, the RO-Crate example or the script is newer, so a schema
+# edit followed by this target rewrote it and silently dropped those rows.
+# Rewriting it is a deliberate act: `make gen-sssom-structural`, then `make
+# check-sssom-structural`, which names every curated row a rewrite dropped.
+gen-sssom-all: gen-sssom-uri-comprehensive gen-sssom-comprehensive ## Regenerate the comprehensive SSSOM pair; leaves the partly curated structural table (see gen-sssom-structural)
 
 gen-sssom-uri-comprehensive: $(SSSOM_URI_COMPREHENSIVE) ## Generate comprehensive URI-level SSSOM for every schema slot
 
@@ -476,9 +484,9 @@ $(SSSOM_COMPREHENSIVE): $(D4D_SCHEMA_ALL) $(SKOS_ALIGNMENT) $(URI_RECOMMENDATION
 		--recommendations $(URI_RECOMMENDATIONS) \
 		--output $(SSSOM_COMPREHENSIVE)
 
-gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Generate structure-aware D4D ↔ RO-Crate SSSOM mapping
+gen-sssom-structural: $(SSSOM_STRUCTURAL) ## Rewrite the structural D4D ↔ RO-Crate SSSOM and its summary from the generator when its inputs are newer, dropping the KNOWN_UNDERIVABLE rows it cannot produce (not run by gen-sssom-all)
 
-check-sssom-structural: ## Report drift between the committed structural mapping and its generator
+check-sssom-structural: ## Compare the committed structural mapping and summary with their generator, allowing for the KNOWN_UNDERIVABLE rows (writes nothing; generate_structural_mapping.py --help states exactly what it compares)
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT) --check
 
 $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT)
@@ -486,8 +494,10 @@ $(SSSOM_STRUCTURAL): $(D4D_SCHEMA_ALL) $(ROCRATE_JSON) $(SSSOM_STRUCTURAL_SCRIPT
 	$(RUN) python $(SSSOM_STRUCTURAL_SCRIPT)
 	@echo "✓ Structural mapping: $(SSSOM_STRUCTURAL)"
 
-clean-sssom: ## Remove generated SSSOM files
-	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE) $(SSSOM_STRUCTURAL)
+# Not the structural table: it is committed and partly curated, and
+# regeneration cannot restore the KNOWN_UNDERIVABLE rows (#3967).
+clean-sssom: ## Remove the generated comprehensive SSSOM pair (gen-sssom-all rebuilds it); leaves the partly curated structural table
+	rm -f $(SSSOM_URI_COMPREHENSIVE) $(SSSOM_COMPREHENSIVE)
 
 ## ------------------------------------------------------------------
 ## FAIRSCAPE ↔ D4D Bidirectional Conversion
