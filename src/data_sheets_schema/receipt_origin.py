@@ -593,7 +593,7 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
     every call under it ambiguous (#2077), a result with no earlier call is
     foreign evidence, and a second result for one call is ambiguous."""
     calls: list[dict] = []
-    by_id: dict[str, dict] = {}
+    by_id: dict[str, dict | None] = {}  # None: a malformed-name call, kept for pairing (#3918)
     results: dict[str, dict] = {}
     duplicated: set[str] = set()
     malformed: list[str] = []
@@ -633,6 +633,16 @@ def _pair(events: list[tuple[int, int, dict]], reasons: list[str]) -> tuple[list
                 identity = block.get("id")
                 if kind != "assistant" or not isinstance(identity, str) or not identity:
                     malformed.append(f"transcript {t} line {n}: tool call without an id or outside an assistant event")
+                    continue
+                # A name that is not a string (a list, a mapping) names no
+                # tool: the call is malformed, never looked up (#3918). Its id
+                # is kept, so its result is paired and not reported again.
+                if not isinstance(block.get("name"), str) or not block["name"]:
+                    malformed.append(f"transcript {t} line {n}: tool call {identity} whose name is not a "
+                                     "non-empty string")
+                    if identity in by_id:
+                        duplicated.add(identity)
+                    by_id[identity] = None
                     continue
                 if identity in by_id:
                     duplicated.add(identity)
