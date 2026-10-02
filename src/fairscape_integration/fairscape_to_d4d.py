@@ -547,9 +547,13 @@ class FairscapeToD4DConverter:
             D4D dictionary, which the schema accepts as a Dataset (#4098)
 
         Raises:
-            ValueError: the crate has no root data entity, or the record
+            ValueError: the input is not a crate this reads (a type it does
+                not take, or a file Python cannot read as JSON, such as one
+                holding a number of more digits than Python reads as one
+                integer); the crate has no root data entity; or the record
                 has an error no value left out can fix, such as a missing
-                `id` (`_settle`)
+                `id` (`_settle`). A byte count written as text, however
+                long, is recorded in `dropped` instead (#4159).
         """
         self.dropped = []
         self._minted = {}
@@ -1509,8 +1513,8 @@ class FairscapeToD4DConverter:
         Until #4159 every key the entity carried with the same value was
         passed over, so a `parent_datasets` or a `license` both stated
         reached neither the record nor `dropped`. Values compare as JSON
-        values (`_same`), and an empty value states nothing and is not
-        recorded, as elsewhere.
+        values (`_same`). An empty value states nothing and is not
+        recorded, as `_place` and `_take` record none.
         """
         if not isinstance(item, dict):
             return
