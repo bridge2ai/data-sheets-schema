@@ -1046,7 +1046,7 @@ class ComprehensiveSSSOMGenerator:
            ``dct:accessRights``, never ``dcterms:``, which the context does
            not declare.
         4. Else the table's own CURIE (``dcat:byteSize``, ``evi:md5``,
-           ``rai:ethicalReview``). The context defines no such key; a crate
+           ``rai:dataUseCases``). The context defines no such key; a crate
            carries it only where its own context declares the prefix, as
            the FAIRSCAPE profile example
            (``data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json``)
