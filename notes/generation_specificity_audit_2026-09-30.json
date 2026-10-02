@@ -1365,7 +1365,7 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "string_literal": 1
+    "code_table": 1
    },
    "hits": 1,
    "model_facing": 0,
@@ -1448,8 +1448,7 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 2,
-    "string_literal": 10
+    "code_table": 12
    },
    "hits": 12,
    "model_facing": 0,
@@ -1889,9 +1888,9 @@
    ],
    "category": "biomedical_clinical",
    "contexts": {
-    "code_table": 15,
+    "code_table": 17,
     "docstring": 5,
-    "string_literal": 15
+    "string_literal": 13
    },
    "hits": 35,
    "model_facing": 0,
@@ -1904,8 +1903,8 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "comment": 1,
-    "string_literal": 22
+    "code_table": 22,
+    "comment": 1
    },
    "hits": 23,
    "model_facing": 0,
@@ -2182,9 +2181,8 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
-    "code_table": 1,
-    "docstring": 4,
-    "string_literal": 1
+    "code_table": 2,
+    "docstring": 4
    },
    "hits": 6,
    "model_facing": 0,
@@ -2200,10 +2198,9 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_table": 21,
+    "code_table": 23,
     "comment": 2,
-    "docstring": 1,
-    "string_literal": 2
+    "docstring": 1
    },
    "hits": 26,
    "model_facing": 0,
@@ -3149,12 +3146,12 @@
    ],
    "category": "bridge2ai_program",
    "contexts": {
+    "code_table": 1,
     "comment": 1,
-    "docstring": 1,
-    "string_literal": 1
+    "docstring": 1
    },
    "hits": 3,
-   "model_facing": 1,
+   "model_facing": 0,
    "path": "src/data_sheets_schema/schema_digest.py",
    "with_reason": 0
   },
@@ -3346,11 +3343,11 @@
    ],
    "category": "gc_project",
    "contexts": {
-    "code_branch": 4,
-    "code_table": 10,
+    "code_branch": 5,
+    "code_table": 18,
     "comment": 1,
     "docstring": 4,
-    "string_literal": 15
+    "string_literal": 6
    },
    "hits": 34,
    "model_facing": 0,
@@ -4017,6 +4014,18 @@
    "index": 8,
    "path": "src/data_sheets_schema/schema/*.yaml",
    "reason": "The schema's human-subjects, ethics and governance modules model clinical/biomedical datasets by design (IRB, HIPAA, de-identification, consent). Tracked domain scope, not a study fact."
+  },
+  {
+   "category": [
+    "bridge2ai_program",
+    "biomedical_clinical"
+   ],
+   "context": "frontmatter",
+   "decision": "#4131 (review round 4 of #4021)",
+   "hits": 0,
+   "index": 9,
+   "path": ".claude/skills/d4d-generation-specificity-audit/SKILL.md",
+   "reason": "The audit's description, which every interactive session lists so a person can find the audit, names the categories it checks for (a Bridge2AI Grand Challenge project, the Bridge2AI program, biomedical/clinical data). Naming what it audits states no fact about a study; a project name there would still be a violation."
   }
  ],
  "exit": 1,
@@ -4219,26 +4228,26 @@
    "tuned_prompt": "src/download/prompts/d4d_tuned_arm_prompt.md"
   },
   "controller_runs": {
-   "notes/claudecode_direct/bind_direct_launch.py": "an entry point: no module imports it; notes/claudecode_direct/README.md runs `notes/claudecode_direct/bind_direct_launch.py`",
-   "notes/claudecode_direct/prepare_direct.py": "notes/claudecode_direct/README.md runs `notes/claudecode_direct/prepare_direct.py`",
-   "notes/claudecode_direct/run_direct_canary.py": "an entry point: no module imports it; notes/claudecode_direct/README.md runs `notes/claudecode_direct/run_direct_canary.py`",
+   "notes/claudecode_direct/bind_direct_launch.py": "an entry point: no module imports it; its `__main__` block calls main(), a command-line interface nothing else calls; notes/claudecode_direct/README.md runs `notes/claudecode_direct/bind_direct_launch.py`",
+   "notes/claudecode_direct/prepare_direct.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/claudecode_direct/README.md runs `notes/claudecode_direct/prepare_direct.py`",
+   "notes/claudecode_direct/run_direct_canary.py": "an entry point: no module imports it; its `__main__` block calls main(), which launches a run (notes/claudecode_direct/run_direct_canary.py:425 --system-prompt); notes/claudecode_direct/README.md runs `notes/claudecode_direct/run_direct_canary.py`",
    "notes/matched_cborg_2026-09-13/audit_controls/__init__.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/batch_history.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py": "",
-   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py": "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py:43 runs `-m audit_controls.batch_output`",
+   "notes/matched_cborg_2026-09-13/audit_controls/batch_output.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/batch_output.py:43 runs `-m audit_controls.batch_output`",
    "notes/matched_cborg_2026-09-13/audit_controls/batch_registration.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py": "notes/matched_cborg_2026-09-13/audit_controls/bounded_stream.py:49 relaunches itself (`__file__`)",
    "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py": "notes/matched_cborg_2026-09-13/audit_controls/bounded_transport.py:113 relaunches itself (`__file__`)",
    "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py": "",
-   "notes/matched_cborg_2026-09-13/audit_controls/contract.py": "notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py:156 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/native.py:62 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/prepare.py:373 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/registration.py:588 runs `-m audit_controls.contract`",
+   "notes/matched_cborg_2026-09-13/audit_controls/contract.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/checkpoint_eligibility.py:156 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/native.py:62 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/prepare.py:373 runs `-m audit_controls.contract`; notes/matched_cborg_2026-09-13/audit_controls/registration.py:588 runs `-m audit_controls.contract`",
    "notes/matched_cborg_2026-09-13/audit_controls/contract_context.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/draft_history.py": "",
-   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py": "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py:24 runs `-m audit_controls.draft_output`",
-   "notes/matched_cborg_2026-09-13/audit_controls/native.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.native`",
-   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.output_parts`; notes/matched_cborg_2026-09-13/audit_controls/output_parts.py:29 runs `-m audit_controls.output_parts`",
-   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.prepare`",
+   "notes/matched_cborg_2026-09-13/audit_controls/draft_output.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/draft_output.py:24 runs `-m audit_controls.draft_output`",
+   "notes/matched_cborg_2026-09-13/audit_controls/native.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.native`",
+   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.output_parts`; notes/matched_cborg_2026-09-13/audit_controls/output_parts.py:29 runs `-m audit_controls.output_parts`",
+   "notes/matched_cborg_2026-09-13/audit_controls/prepare.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.prepare`",
    "notes/matched_cborg_2026-09-13/audit_controls/probe_predecessor.py": "",
-   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py": "notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.reconcile_stopped`; notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py's docstring runs `-m audit_controls.reconcile_stopped`",
+   "notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/audit_controls/README.md runs `-m audit_controls.reconcile_stopped`; notes/matched_cborg_2026-09-13/audit_controls/reconcile_stopped.py's docstring runs `-m audit_controls.reconcile_stopped`",
    "notes/matched_cborg_2026-09-13/audit_controls/registration.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/runtime_closure.py": "",
    "notes/matched_cborg_2026-09-13/audit_controls/transport.py": "",
@@ -4246,9 +4255,9 @@
    "notes/matched_cborg_2026-09-13/budget_amendment.py": "",
    "notes/matched_cborg_2026-09-13/budgeted_cborg.py": "",
    "notes/matched_cborg_2026-09-13/continuation_sequence.py": "",
-   "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": "notes/matched_cborg_2026-09-13/finalization_controls/native.py:34 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/prepare.py:85 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/registration.py:232 runs `-m finalization_controls.contract`",
-   "notes/matched_cborg_2026-09-13/finalization_controls/native.py": "an entry point: no module imports it; notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.native`",
-   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": "notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.prepare`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/finalization_controls/native.py:34 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/prepare.py:85 runs `-m finalization_controls.contract`; notes/matched_cborg_2026-09-13/finalization_controls/registration.py:232 runs `-m finalization_controls.contract`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/native.py": "an entry point: no module imports it; its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.native`",
+   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": "its `__main__` block calls main(), a command-line interface nothing else calls; notes/matched_cborg_2026-09-13/finalization_controls/README.md runs `-m finalization_controls.prepare`",
    "notes/matched_cborg_2026-09-13/finalization_controls/registration.py": "",
    "notes/matched_cborg_2026-09-13/native_context.py": "",
    "notes/matched_cborg_2026-09-13/native_context_control.py": "",
@@ -4260,9 +4269,9 @@
    "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": "",
    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py": "an entry point: no module imports it",
    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": "",
-   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "",
-   "notes/matched_cborg_2026-09-13/prepare_registration.py": "",
-   "notes/matched_cborg_2026-09-13/run_api_canary.py": "",
+   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": "its `__main__` block calls main(), which launches a run (notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt)",
+   "notes/matched_cborg_2026-09-13/prepare_registration.py": "its `__main__` block calls main(), a command-line interface nothing else calls",
+   "notes/matched_cborg_2026-09-13/run_api_canary.py": "its `__main__` block calls main(), which launches a run (notes/matched_cborg_2026-09-13/run_api_canary.py:206 api_runner.execute())",
    "notes/matched_cborg_2026-09-13/sequence_claim.py": ""
   },
   "controller_text": {
@@ -4437,6 +4446,11 @@
       "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
       "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
      ],
+     "memory_evidence": [
+      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
+      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+     ],
+     "memory_off": true,
      "site": "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt"
     },
     {
@@ -4444,6 +4458,10 @@
      "evidence": [
       "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
      ],
+     "memory_evidence": [
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+     ],
+     "memory_off": true,
      "site": "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt"
     },
     {
@@ -4451,6 +4469,10 @@
      "evidence": [
       "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
      ],
+     "memory_evidence": [
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+     ],
+     "memory_off": true,
      "site": "notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt"
     },
     {
@@ -4459,16 +4481,27 @@
       "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
       "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
      ],
+     "memory_evidence": [
+      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
+      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+     ],
+     "memory_off": true,
      "site": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt"
     }
    ],
    "launches_without_customizations_off": [],
+   "launches_without_memory_off": [],
    "memory": [
     "CLAUDE.md"
    ],
    "memory_named_by": [
     ".claude/commands/d4d-add-mapping.md",
     ".github/workflows/d4d_assistant_create.md"
+   ],
+   "memory_off": [
+    "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
+    "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode",
+    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
    ],
    "native_launch_sites": [
     "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt",
@@ -4651,6 +4684,9 @@
     "configuration() (its value reaches instruction())",
     "instruction() (renders model text)"
    ],
+   "notes/matched_cborg_2026-09-13/audit_controls/native.py": [
+    "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+   ],
    "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": [
     "configuration() (its value reaches instruction())",
     "instruction() (renders model text)"
@@ -4662,6 +4698,9 @@
    "notes/matched_cborg_2026-09-13/finalization_controls/contract.py": [
     "_request_text() (its value reaches render_instruction())",
     "render_instruction() (renders model text)"
+   ],
+   "notes/matched_cborg_2026-09-13/finalization_controls/native.py": [
+    "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
    ],
    "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": [
     "SYSTEM (its value reaches render_system())",
@@ -4677,10 +4716,35 @@
     "render_system() (renders model text)"
    ],
    "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": [
-    "command_guidance() (passed to --system-prompt at notes/claudecode_direct/run_direct_canary.py:425)"
+    "_unread_shell() (its value reaches runtime_literal_problem())",
+    "_JS_TRIM (its value reaches runtime_literal_problem())",
+    "_too_complex() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "runtime_literal_problem() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "_registered_spelling() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "command_guidance() (passed to --system-prompt at notes/claudecode_direct/run_direct_canary.py:425)",
+    "_shell_tokens() (its value reaches _simple_command())",
+    "FORBIDDEN_SHELL (its value reaches _simple_command())",
+    "_simple_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "_roster_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "_classify_by_meaning() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+   ],
+   "notes/matched_cborg_2026-09-13/native_controls/native_control.py": [
+    "text in hook_output() (permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+   ],
+   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": [
+    "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+   ],
+   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": [
+    "_helper_arguments() (its value reaches helper_argument_problem())",
+    "helper_argument_problem() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
    ],
    "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": [
     "lookup_guidance() (its value reaches command_guidance())"
+   ],
+   "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": [
+    "text in _classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)",
+    "text in _classify_path() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
    ]
   },
   "named_files": {
@@ -15445,10 +15509,12 @@
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 270,
    "match": "AI_READI",
    "model_facing": false,
@@ -15457,17 +15523,19 @@
    "role": "run_shaping",
    "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 270,
    "match": "fairhub",
    "model_facing": false,
@@ -15476,17 +15544,19 @@
    "role": "run_shaping",
    "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 271,
    "match": "AI_READI",
    "model_facing": false,
@@ -15495,17 +15565,19 @@
    "role": "run_shaping",
    "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 271,
    "match": "fairhub",
    "model_facing": false,
@@ -15514,17 +15586,19 @@
    "role": "run_shaping",
    "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 275,
    "match": "VOICE",
    "model_facing": false,
@@ -15533,17 +15607,19 @@
    "role": "run_shaping",
    "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 275,
    "match": "physionet",
    "model_facing": false,
@@ -15552,17 +15628,19 @@
    "role": "run_shaping",
    "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 275,
    "match": "b2ai-voice",
    "model_facing": false,
@@ -15571,17 +15649,19 @@
    "role": "run_shaping",
    "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 276,
    "match": "VOICE",
    "model_facing": false,
@@ -15590,17 +15670,19 @@
    "role": "run_shaping",
    "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 276,
    "match": "physionet",
    "model_facing": false,
@@ -15609,17 +15691,19 @@
    "role": "run_shaping",
    "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
     "legacy_monolithic"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
-   "gates_in": [],
+   "gates_in": [
+    "legacy_monolithic"
+   ],
    "line": 276,
    "match": "b2ai-voice",
    "model_facing": false,
@@ -15628,7 +15712,7 @@
    "role": "run_shaping",
    "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
    "status": "legacy",
-   "violation": false
+   "violation": true
   },
   {
    "approaches": [
@@ -19799,10 +19883,15 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
-   "gates_in": [],
+   "gates_in": [
+    "api",
+    "deterministic",
+    "native_agentic",
+    "shared_schema"
+   ],
    "line": 124,
    "match": "AI_READI",
    "model_facing": false,
@@ -19821,10 +19910,15 @@
     "shared_schema"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": 0,
-   "gates_in": [],
+   "gates_in": [
+    "api",
+    "deterministic",
+    "native_agentic",
+    "shared_schema"
+   ],
    "line": 124,
    "match": "fairhub",
    "model_facing": false,
@@ -25248,8 +25342,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_branch",
    "exception": null,
    "gates_in": [],
    "line": 837,
@@ -25324,8 +25418,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 949,
@@ -25343,8 +25437,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 963,
@@ -25362,8 +25456,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 967,
@@ -25381,8 +25475,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 792,
@@ -25400,8 +25494,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 849,
@@ -25419,8 +25513,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 926,
@@ -25457,8 +25551,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 806,
@@ -25476,8 +25570,8 @@
     "shared_input"
    ],
    "category": "gc_project",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [],
    "line": 863,
@@ -29549,7 +29643,7 @@
    ],
    "status": "live",
    "text_spans": [],
-   "why": "project memory Claude Code loads into an interactive session (--safe-mode and --bare disable it)"
+   "why": "project memory Claude Code loads into an interactive session (--safe-mode and --bare skip it)"
   },
   "data/preprocessed/source_manifest.yaml": {
    "approaches": [
@@ -29944,7 +30038,33 @@
     "run_controllers"
    ],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     44,
+     44,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     50,
+     50,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     53,
+     53,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     56,
+     56,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     57,
+     57,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/audit_controls/output_parts.py": {
@@ -30411,7 +30531,23 @@
     "run_controllers"
    ],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     25,
+     25,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     29,
+     29,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     30,
+     30,
+     "text in classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: runs a controller (imports __init__.py, native.py, budgeted_cborg.py)"
   },
   "notes/matched_cborg_2026-09-13/finalization_controls/prepare.py": {
@@ -30533,9 +30669,84 @@
    "status": "live",
    "text_spans": [
     [
+     144,
+     181,
+     "_unread_shell() (its value reaches runtime_literal_problem())"
+    ],
+    [
+     220,
+     220,
+     "_JS_TRIM (its value reaches runtime_literal_problem())"
+    ],
+    [
+     311,
+     332,
+     "_too_complex() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     335,
+     358,
+     "runtime_literal_problem() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     361,
+     375,
+     "_registered_spelling() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
      479,
      525,
      "command_guidance() (passed to --system-prompt at notes/claudecode_direct/run_direct_canary.py:425)"
+    ],
+    [
+     544,
+     556,
+     "_shell_tokens() (its value reaches _simple_command())"
+    ],
+    [
+     559,
+     559,
+     "FORBIDDEN_SHELL (its value reaches _simple_command())"
+    ],
+    [
+     562,
+     629,
+     "_simple_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     632,
+     639,
+     "_roster_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     653,
+     654,
+     "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     662,
+     662,
+     "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     663,
+     663,
+     "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     664,
+     664,
+     "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     665,
+     665,
+     "text in classify_program_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     670,
+     711,
+     "_classify_by_meaning() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
     ]
    ],
    "why": "run controller: builds a generation request (playbook_text)"
@@ -30553,7 +30764,13 @@
    },
    "runs_as_script_in": [],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     95,
+     95,
+     "text in hook_output() (permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": {
@@ -30569,7 +30786,58 @@
    },
    "runs_as_script_in": [],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     65,
+     65,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     69,
+     69,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     71,
+     71,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     79,
+     79,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     81,
+     81,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     84,
+     84,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     86,
+     86,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     87,
+     87,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     92,
+     92,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     97,
+     97,
+     "text in classify() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": {
@@ -30585,7 +30853,18 @@
    },
    "runs_as_script_in": [],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     66,
+     135,
+     "_helper_arguments() (its value reaches helper_argument_problem())"
+    ],
+    [
+     158,
+     171,
+     "helper_argument_problem() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": {
@@ -30707,9 +30986,47 @@
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [],
+   "runs_as_script_in": [
+    "run_controllers"
+   ],
    "status": "live",
-   "text_spans": [],
+   "text_spans": [
+    [
+     80,
+     80,
+     "text in _classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     84,
+     87,
+     "text in _classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     88,
+     88,
+     "text in _classify_command() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     94,
+     94,
+     "text in _classify_path() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     101,
+     101,
+     "text in _classify_path() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     103,
+     103,
+     "text in _classify_path() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ],
+    [
+     104,
+     104,
+     "text in _classify_path() (the reason it returns reaches hook_output()'s permissionDecisionReason at notes/matched_cborg_2026-09-13/native_controls/native_control.py:95)"
+    ]
+   ],
    "why": "run controller: imported or staged by a controller"
   },
   "notes/matched_cborg_2026-09-13/native_controls/system.md": {
@@ -30759,7 +31076,9 @@
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [],
+   "runs_as_script_in": [
+    "run_controllers"
+   ],
    "status": "live",
    "text_spans": [],
    "why": "run controller: builds a generation request (RunSpec, build_phase)"
@@ -30775,7 +31094,9 @@
    "roles": {
     "run_controllers": "run_shaping"
    },
-   "runs_as_script_in": [],
+   "runs_as_script_in": [
+    "run_controllers"
+   ],
    "status": "live",
    "text_spans": [],
    "why": "run controller: imported or staged by a controller"
@@ -35067,7 +35388,7 @@
   },
   "bridge2ai_program": {
    "hits": 2467,
-   "model_facing": 2374,
+   "model_facing": 2373,
    "with_reason": 2364
   },
   "gc_project": {
@@ -35075,13 +35396,13 @@
    "model_facing": 390,
    "with_reason": 394
   },
-  "violations": 159,
+  "violations": 169,
   "violations_by_approach": {
    "api": 0,
    "deterministic": 1,
    "github_assistant": 0,
    "interactive_session": 72,
-   "legacy_monolithic": 68,
+   "legacy_monolithic": 78,
    "native_agentic": 9,
    "other_model_client": 0,
    "run_controllers": 9,
@@ -35685,6 +36006,27 @@
    "pattern": "diagnos(?!tic)",
    "role": "run_shaping",
    "snippet": "'governs this new condition. Historical audits and external review diagnoses are not '",
+   "status": "live",
+   "violation": false
+  },
+  {
+   "approaches": [
+    "run_controllers"
+   ],
+   "category": "biomedical_clinical",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "run_controllers"
+   ],
+   "line": 132,
+   "match": "clinical",
+   "model_facing": false,
+   "path": "notes/matched_cborg_2026-09-13/prepare_registration.py",
+   "pattern": "clinical",
+   "role": "run_shaping",
+   "snippet": "external = HERE / \"external_clinical\"",
    "status": "live",
    "violation": false
   },
@@ -36711,8 +37053,8 @@
     "deterministic"
    ],
    "category": "bridge2ai_program",
-   "code": false,
-   "context": "string_literal",
+   "code": true,
+   "context": "code_table",
    "exception": null,
    "gates_in": [
     "api",
@@ -36721,7 +37063,7 @@
    ],
    "line": 152,
    "match": "b2ai",
-   "model_facing": true,
+   "model_facing": false,
    "path": "src/data_sheets_schema/schema_digest.py",
    "pattern": "b2ai",
    "role": "model_facing",
@@ -38991,6 +39333,216 @@
    "pattern": "(?-i:\\bVOICE\\b)",
    "role": "run_shaping",
    "snippet": "'column': 'VOICE'",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 270,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 270,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/AI_READI/fairhub_row13.json'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 271,
+   "match": "AI_READI",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "AI[-_ ]?READI",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 271,
+   "match": "fairhub",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "fairhub",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/AI_READI/fairhub_d4d.yaml'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 275,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 275,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 275,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'input': Path('../downloads_by_column/VOICE/physionet_b2ai-voice_1.1_row14.txt'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 276,
+   "match": "VOICE",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "(?-i:\\bVOICE\\b)",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 276,
+   "match": "physionet",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "physionet",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
+   "status": "legacy",
+   "violation": true
+  },
+  {
+   "approaches": [
+    "legacy_monolithic"
+   ],
+   "category": "gc_project",
+   "code": true,
+   "context": "code_table",
+   "exception": null,
+   "gates_in": [
+    "legacy_monolithic"
+   ],
+   "line": 276,
+   "match": "b2ai-voice",
+   "model_facing": false,
+   "path": "scripts/fix_failed_extractions.py",
+   "pattern": "b2ai-voice",
+   "role": "run_shaping",
+   "snippet": "'output': Path('../data/extracted_by_column/VOICE/physionet_b2ai-voice_1.1_d4d.yaml'),",
    "status": "legacy",
    "violation": true
   },
