@@ -246,8 +246,11 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         raise PlanError(f"output already exists: {output}")
     if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or max_tokens < 1:
         raise PlanError("max_tokens must be a positive integer")
-    settings = ({"name": model, "basis": "explicit_override"} if model is not None
-                else copy.deepcopy(evaluation_model_settings()))
+    try:
+        settings = (evaluation_model.model_selection(model) if model is not None
+                    else copy.deepcopy(evaluation_model_settings()))
+    except ValueError as error:
+        raise PlanError(str(error)) from error
     model = settings["name"]
     if not isinstance(model, str) or not model.strip():
         raise PlanError("model must be a nonempty identifier")

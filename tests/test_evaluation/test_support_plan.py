@@ -174,6 +174,16 @@ def test_explicit_plan_model_does_not_read_default_config(fixture, monkeypatch):
     assert manifest["model"] == {"name": "explicit-judge", "basis": "explicit_override"}
 
 
+@pytest.mark.parametrize("model", [" judge", "judge ", "judge\n", "", " ", 12, False])
+def test_explicit_plan_model_matches_live_selection_validation(fixture, model):
+    from data_sheets_schema import evaluation_model
+    with pytest.raises(ValueError, match="nonempty trimmed identifier"):
+        evaluation_model.model_selection(model)
+    with pytest.raises(support_plan.PlanError, match="nonempty trimmed identifier"):
+        build(fixture, model=model)
+    assert not fixture[1].exists()
+
+
 def test_saved_request_equals_both_live_judge_boundaries(fixture, monkeypatch):
     root, output = fixture
     manifest = build(fixture, model="judge", max_tokens=417)
