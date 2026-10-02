@@ -17,6 +17,9 @@ out and recorded with the validator's message, so every record validates.
 classes, text in `isPartOf` is not a reference, and "holds the value of X
 instead" is said of the record as returned. #4126: the passes have no
 limit, and a `dropped` path numbers an object by its place in the crate.
+#4138: `parent_datasets` takes only `isPartOf` references, as `resources`
+takes only `hasPart` members, whatever other property maps to it. #4139: a
+value waiting for a slot can cost a pass for each level it nests.
 """
 
 import contextlib
@@ -886,6 +889,61 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                               reasons(dropped, "additionalProperty[Resources]"))
                 self.assertEqual(problems(record), [])
 
+    def test_parent_datasets_takes_only_is_part_of_references(self):
+        """An `additionalProperty` named "Parent Datasets" maps to
+        `parent_datasets` by its name, as one named "Resources" maps to
+        `resources`. It is a name and a value, not a reference under
+        `isPartOf`. Its text became a parent whose `id` `_to_object` minted,
+        asserting a dataset the crate does not identify, with nothing in
+        `dropped`, and beside a real `isPartOf` reference it was a second
+        parent (#4138). It is recorded, as text under `isPartOf` is
+        (#4125), and so is a reference in it, or the slot's own name."""
+        text = "Cell Maps for AI project"
+        entry = property_value("Parent Datasets", text)
+
+        def said(source, shown):
+            return (source, (
+                f"not placed in `parent_datasets`: {shown} is not a reference "
+                "under the root's `isPartOf`, which is all `parent_datasets` "
+                "holds"))
+
+        for root, parents in (
+                ({"additionalProperty": [entry]}, None),
+                ({"isPartOf": [{"@id": "ark:59852/p"}],
+                  "additionalProperty": [entry]},
+                 [{"id": "https://n2t.net/ark:59852/p"}])):
+            with self.subTest(is_part_of="isPartOf" in root):
+                record, dropped = converted(crate(root))
+                self.assertEqual(record.get("parent_datasets"), parents)
+                self.assertEqual(
+                    dropped, [said("additionalProperty[Parent Datasets]", text)])
+                self.assertNotIn("urn:d4d", json.dumps(record))
+                self.assertEqual(problems(record), [])
+        record, dropped = converted(crate({"additionalProperty": [
+            property_value("Parent Datasets", {"@id": "ark:59852/q"}),
+            property_value("parent_datasets", "Project Z")]}))
+        self.assertNotIn("parent_datasets", record)
+        self.assertEqual(dropped, [
+            said("additionalProperty[Parent Datasets]", '{"@id": "ark:59852/q"}'),
+            said("additionalProperty[parent_datasets]", "Project Z")])
+        # The tracked full crate, whose root has two `isPartOf` references,
+        # with the entry added: the record is the one the crate gives
+        # without it, and the entry is the one value more in `dropped`
+        def full_crate(*added):
+            crate_json = json.loads(FULL.read_text(encoding="utf-8"))
+            root = next(e for e in crate_json["@graph"]
+                        if "Dataset" in e.get("@type", []))
+            root["additionalProperty"] = [*root["additionalProperty"], *added]
+            return crate_json
+        before, before_dropped = converted(full_crate())
+        after, after_dropped = converted(full_crate(entry))
+        self.assertEqual(len(after["parent_datasets"]), 2)
+        self.assertEqual(after, before)
+        self.assertEqual(
+            [each for each in after_dropped if each not in before_dropped],
+            [said("additionalProperty[Parent Datasets]", text)])
+        self.assertEqual(len(after_dropped), len(before_dropped) + 1)
+
     def test_additional_property_entries_it_cannot_read_are_reported(self):
         _, dropped = converted(crate({"additionalProperty": [
             "a bare string", {"@type": "Thing", "name": "Other", "value": "x"},
@@ -1413,11 +1471,12 @@ class TestTheRecordValidates(unittest.TestCase):
         self.assertEqual(problems(record), [])
 
     def test_any_number_of_rejected_values_for_one_slot_is_left_out(self):
-        """Each value waiting for a single-valued slot is tried once, a pass
-        each; there is no limit on passes, which end because each leaves a
-        value out (#4126). 26 `issued` values ran past the 20-pass limit,
-        and the crate was an error although leaving them out makes it
-        valid."""
+        """Each value waiting for `issued` is tried once, and as a text with
+        nothing nested in it costs one pass; there is no limit on passes,
+        which end because each leaves a value out (#4126). 26 `issued`
+        values ran past the 20-pass limit, and the crate was an error
+        although leaving them out makes it valid. A value with values
+        nested in it can cost more (#4139)."""
         values = [f"Month {n} 2026" for n in range(25)]
         record, dropped = converted(crate({
             "datePublished": "Month X 2026",
@@ -1429,6 +1488,37 @@ class TestTheRecordValidates(unittest.TestCase):
             f"not placed in `issued`: {value} (the schema rejects it: "
             f"'{value}' is not a 'date-time')"
             for value in ["Month X 2026", *values]))
+
+    def test_a_waiting_value_can_cost_a_pass_for_each_level_it_nests(self):
+        """Each of the six values for `human_subject_research`, the one
+        placed and the five waiting, holds a software whose `id` is not
+        text. One pass leaves out the `id`, the next the software that then
+        lacks it, with the objects it leaves empty, and the slot takes the
+        next value. That is two passes for each of the six, and one that
+        finds the record valid: 13 validations. The bound `_settle` stated
+        until #4139 counted each waiting value once: the record's values at
+        the start, nested ones included (`id`, the object, its
+        `used_software` list, the software, its `id` and `name`: 6), the 5
+        waiting and the last pass, 12. It now counts what each waiting
+        value brings into the record, nested values included."""
+        def research(tool):
+            return {"used_software": [{"id": 5, "name": tool}]}
+
+        tools = [f"tool {n}" for n in range(5)]
+        record, dropped, passes = validated(crate({
+            "d4d:humanSubject": research("tool A"),
+            "additionalProperty": [property_value("Human Subject", research(tool))
+                                   for tool in tools]}))
+        self.assertEqual(record, {"id": "./", "title": "A test crate"})
+        self.assertEqual(passes, 13)
+        self.assertEqual(sorted(dropped), sorted(
+            [("human_subject_research.used_software[0].id", (
+                "not placed in `id`: 5 (the schema rejects it: 5 is not of "
+                "type 'string')"))] * 6
+            + [("human_subject_research.used_software", (
+                f'not placed in `used_software`: {{"name": "{tool}"}} (the '
+                "schema rejects it: 'id' is a required property)"))
+               for tool in ["tool A", *tools]]))
 
 
 class TestDroppedPaths(unittest.TestCase):

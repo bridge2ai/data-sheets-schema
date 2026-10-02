@@ -75,6 +75,18 @@ N2T_RESOLVER = "https://n2t.net/"
 #: its resolver URL (#4074).
 IDENTIFIER_RANGES = ("uri", "uriorcurie")
 
+#: The Dataset slots that hold other datasets, each with the one crate
+#: property it takes them from and what of that property it takes: the
+#: root's `hasPart` members the crate types as datasets (`_parts`), and the
+#: references under its `isPartOf` (`_references`). `_build_d4d` records in
+#: `dropped` a value any other property maps to one of these slots, such
+#: as an `additionalProperty` named "Resources" or "Parent Datasets"
+#: (#4073, #4138).
+DATASET_SLOTS = {
+    'resources': ('hasPart', "a hasPart member the crate types as a dataset"),
+    'parent_datasets': ('isPartOf', "a reference under the root's `isPartOf`"),
+}
+
 #: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
 #: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
 DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
@@ -595,8 +607,12 @@ class FairscapeToD4DConverter:
             d4d['file_collections'] = file_collections
             origin['file_collections'] = 'hasPart'
 
-        # In this order a later mapping takes precedence over an earlier one
-        # in a single-valued slot (`_place`).
+        # Read in this order. A single-valued slot holds the first of its
+        # values it can hold, in the order `_place` puts them: a dedicated
+        # property before an `additionalProperty` entry, whichever is read
+        # first, and otherwise the later mapping first (#4139). So
+        # `license`, read before the `additionalProperty` entries, still
+        # comes before an entry named "License".
         for prop, slot, value in (self._map_basic_properties(dataset)
                                   + self._map_complex_properties(dataset)
                                   # EVI properties (computational provenance)
@@ -605,17 +621,21 @@ class FairscapeToD4DConverter:
                                   + self._map_rai_properties(dataset)
                                   # custom D4D properties
                                   + self._map_d4d_properties(dataset)):
-            if slot == 'resources' and prop != 'hasPart':
-                # `resources` holds the root's hasPart members that the
-                # crate types as datasets (`_parts`). An additionalProperty
-                # named "Resources" is a name and a value, and its value is
-                # not one of them; an item that was not a mapping crashed
-                # the conversion (#4073).
+            only = DATASET_SLOTS.get(slot)
+            if only is not None and prop != only[0]:
+                # `resources` and `parent_datasets` hold other datasets,
+                # which the crate names by reference under `hasPart` and
+                # `isPartOf`. An additionalProperty named "Resources" or
+                # "Parent Datasets" is a name and a value, not one of those
+                # references. An item that was not a mapping crashed the
+                # conversion (#4073). Text became a parent whose `id`
+                # `_to_object` minted, asserting a dataset the crate does
+                # not identify, with nothing recorded (#4138); `_references`
+                # records `isPartOf` text for the same reason (#4125).
                 if value not in (None, '', [], {}):
                     self.dropped.append((prop, (
-                        f"not placed in `resources`: {_preview(value)} is not a "
-                        "hasPart member the crate types as a dataset, which is "
-                        "all `resources` holds")))
+                        f"not placed in `{slot}`: {_preview(value)} is not "
+                        f"{only[1]}, which is all `{slot}` holds")))
                 continue
             self._place(d4d, origin, rivals, slot, value, prop)
 
@@ -834,10 +854,18 @@ class FairscapeToD4DConverter:
         The passes end, and need no limit (#4126). Each one finds the
         record valid, or leaves out at least one value, or raises: an error
         that names no value to leave out (an `id` the record lacks) is a
-        ValueError. A value left out does not come back, and each value
-        waiting for a slot is tried once. So there are no more passes than
-        the values the record holds, nested ones included, and the values
-        waiting for its slots, plus the one that finds the record valid.
+        ValueError. A value left out does not come back, and a value
+        waiting for a slot enters the record at most once, when the slot
+        takes it. So there are no more passes than the values that enter
+        the record, plus the one that finds it valid: the values it holds
+        at the start and those each waiting value brings as `_shape` writes
+        it, nested ones included in both (#4139). A waiting value can cost
+        more than one pass. Once placed it is validated like any other
+        value, and a value nested in it can be left out a pass before the
+        object that then lacks it. When `human_subject_research` holds a
+        value with a software whose `id` is not text, and five such values
+        wait for it, there are 13 validations: two for each of the six
+        values for the slot, and the one that finds the record valid.
         Until #4126 the passes stopped at 20. An object slot then lost one
         wrong value a pass, and a slot still tries its waiting values one a
         pass, so 21 of either made an error of a crate that leaving them
@@ -1296,7 +1324,8 @@ class FairscapeToD4DConverter:
         # schema:isPartOf; there is no `is_part_of` slot (#3969). What the
         # crate names there is not checked to be a dataset (#4047). Each
         # reference's keys are fitted to Dataset or recorded (#4098), and
-        # text, which is not a reference, is recorded (#4125).
+        # text, which is not a reference, is recorded (#4125). The slot
+        # takes nothing from any other property (`DATASET_SLOTS`, #4138).
         if 'isPartOf' in dataset:
             found.append(('isPartOf', 'parent_datasets',
                           self._references('isPartOf',
@@ -1425,7 +1454,10 @@ class FairscapeToD4DConverter:
         `is_part_of`, but needs the dataset's identifier or URL as its
         `target_dataset` just as much. That leaves `notes`, and this
         converter moves no value it cannot place into a slot other than
-        its own.
+        its own. For the same reason `parent_datasets` takes only these
+        references: a value another property maps to it, such as an
+        `additionalProperty` named "Parent Datasets", is recorded by
+        `_build_d4d` (`DATASET_SLOTS`, #4138).
 
         The list keeps each reference at its position in the crate's list,
         with None for an entry that is not one, so a `dropped` path counts
@@ -1598,7 +1630,10 @@ class FairscapeToD4DConverter:
         `Completeness` and `Data Governance Committee` name no Dataset slot,
         and `_fit` records them as dropped, as it does any other name that
         is not one (#3969). An entry that is not a PropertyValue, or one
-        with no name to map, is recorded in `dropped` too (#4073).
+        with no name to map, is recorded in `dropped` too (#4073). So is an
+        entry whose name maps to `resources` or `parent_datasets`, which
+        hold only the datasets the root's `hasPart` and `isPartOf` name
+        (`DATASET_SLOTS`, #4073, #4138).
         """
         found = []
 
