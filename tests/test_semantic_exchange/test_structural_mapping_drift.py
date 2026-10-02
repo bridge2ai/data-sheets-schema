@@ -555,7 +555,8 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
     Each case is a copy of the committed mapping and summary changed in one
     way, checked by `run_check` with the set as it stands against one
     generator run (`main` would parse the merged schema once per case).
-    These fail: a row added; a regenerable row's object changed; a
+    These fail: a row added; a regenerable row removed; a regenerable
+    row's object changed; a
     structural value changed on a row both files carry; one
     KNOWN_UNDERIVABLE row removed; the generator's own output, which is the
     table `make gen-sssom-structural` writes and lacks every one of them
@@ -630,6 +631,11 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
             "known row removed": copy(
                 "removed",
                 [line for line in lines if triple(fields(line)) != cls.REMOVED]),
+            # A regenerable row deleted and nothing else changed: only the
+            # rows regeneration produces that the copy lacks can fail it
+            # (#4128).
+            "regenerable row removed": copy(
+                "regenerable-removed", lines[:at] + lines[at + 1:]),
         }
         rewritten = cases["rewritten"] = base / "rewritten"
         rewritten.mkdir()
@@ -673,6 +679,19 @@ class TestTheCheckAcceptsExactlyTheKnownGap(unittest.TestCase):
         self.assertIn("1 row(s) in the committed file that regeneration does "
                       "not produce and KNOWN_UNDERIVABLE does not list:\n"
                       + self._listed([self.added]), out)
+
+    def test_a_row_regeneration_produces_that_the_table_lacks_fails_alone(self):
+        """The one way a triple fails that no other case isolates (#4128): a
+        regenerable row deleted, with no unlisted row beside it, fails on
+        the rows regeneration produces that the table lacks, and on nothing
+        else."""
+        code, out = self.results["regenerable row removed"]
+        self.assertEqual(code, 1, out)
+        self.assertIn("✗ The committed mapping does not regenerate from its "
+                      "inputs.", out)
+        self.assertIn("1 row(s) regeneration produces that the committed file "
+                      "lacks:\n" + self._listed([self.regenerable]), out)
+        self.assertNotIn("does not list", out)
 
     def test_a_changed_row_fails_and_both_halves_are_named(self):
         """The row as changed is one regeneration does not produce, and the
