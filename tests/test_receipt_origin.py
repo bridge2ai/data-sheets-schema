@@ -3552,9 +3552,10 @@ class DeriveSpellings(Base):
                    "derive in the command is placed (#4140, #4161). ")
         cost = ("cost is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, "
                 "`echo {X} >f;`, `grep -c '${ ' f;`, ``echo `date`;``), or where the two readings cannot be "
-                "paired and nothing assigns (`echo hi &\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E "
-                "'a|b' f;`, `echo ${HOME};`, `d4d derive core ... && echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a "
-                "comment ending in a backslash, `--label $'x'` among the derive's own words). ")
+                "paired, or give the derive's own words otherwise, and nothing assigns (`echo hi &\\<newline>> "
+                "/dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`, `echo ${HOME};`, `d4d derive core ... && "
+                "echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a comment ending in a backslash, `--label $'x'` among "
+                "the derive's own words). ")
         # #4182: where the tokenizer reads the command's quoting otherwise
         # than bash.
         pairing = ("No derive is placed either where the tokenizer may pair the command's quotes otherwise than "

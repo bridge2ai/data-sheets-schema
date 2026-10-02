@@ -167,11 +167,11 @@ not, or one it hides, may have moved or spelled its `--full` (`echo hi
 where the call started). Its cost
 is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls
 .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo `date`;``),
-or where the two readings cannot be paired and nothing assigns (`echo hi
-&\\<newline>> /dev/null;`, `echo "$(date)";`, `grep -E 'a|b' f;`, `echo
-${HOME};`, `d4d derive core ... && echo $((1 + 1))`, `grep -c 'a[0-9]'
-f;`, a comment ending in a backslash, `--label $'x'` among the derive's
-own words). A
+or where the two readings cannot be paired, or give the derive's own
+words otherwise, and nothing assigns (`echo hi &\\<newline>> /dev/null;`,
+`echo "$(date)";`, `grep -E 'a|b' f;`, `echo ${HOME};`, `d4d derive core
+... && echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a comment ending in a
+backslash, `--label $'x'` among the derive's own words). A
 route those words do not name -- such as a function, defined in the
 command or outside it (`d4d() { ./x; };`), `getopts`, `unset`, `coproc`,
 `trap`, `compgen -V`, an arithmetic assignment (`(( PATH = 1 ))`, `let
@@ -648,10 +648,11 @@ NON_CHECKS = (
     "it hides, may have moved or spelled its `--full` (`echo hi '&&' cd sub && d4d derive core --full "
     "<relative> ...` derives the record where the call started). The cost is a false `unknown` where "
     "such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, "
-    "``echo `date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
-    "&\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`, `echo ${HOME};`, `d4d derive "
-    "core ... && echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a comment ending in a backslash, `--label "
-    "$'x'` among the derive's own words). A route those words do not name is not read (such as a "
+    "``echo `date`;``), or where the two readings cannot be paired, or give the derive's own words "
+    "otherwise, and nothing assigns (`echo hi &\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E "
+    "'a|b' f;`, `echo ${HOME};`, `d4d derive core ... && echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a "
+    "comment ending in a backslash, `--label $'x'` among the derive's own words). A route those words do "
+    "not name is not read (such as a "
     "function, defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, `coproc`, "
     "`trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'` or one in a "
     "`[[ -eq ]]` operand, or a word built at run time, `$X` or a brace expansion, #4135), nor an "
