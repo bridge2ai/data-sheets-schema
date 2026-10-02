@@ -6,9 +6,25 @@ This module parses RO-Crate JSON-LD structure and provides methods to extract
 properties for transformation to D4D YAML format.
 """
 
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+
+from data_sheets_schema.rocrate_map import TRANSCODE_HINT, read_crate_json
+
+
+def graph_entities(graph: Any) -> Any:
+    """The entities of a crate's `@graph`, as a list where it holds one.
+
+    JSON-LD lets `@graph` be one node object as well as an array of them,
+    and reads the object as an array that holds it. RO-Crate requires the
+    array, but `ROCrateParser` and `fairscape-cli info` read any JSON-LD
+    file they are given, and
+    data/ro-crate_packages/VOICE/raw/ro-crate-prov-graph.json writes the
+    object. Iterated as it stood, the object gave its keys, and both ended
+    with `'str' object has no attribute 'get'` (#4187). Any other value is
+    returned as it is.
+    """
+    return [graph] if isinstance(graph, dict) else graph
 
 
 class ROCrateParser:
@@ -36,15 +52,27 @@ class ROCrateParser:
         self._load_rocrate()
 
     def _load_rocrate(self):
-        """Load and parse the RO-Crate JSON-LD file."""
-        with open(self.rocrate_path, 'r', encoding='utf-8') as f:
-            self.rocrate_data = json.load(f)
+        """Load and parse the RO-Crate JSON-LD file.
+
+        Read as the static-map arm reads a crate (`read_crate_json`): JSON
+        that is not UTF-8, as RFC 8259 requires, is refused with a
+        CrateEncodingError naming the first byte that does not decode, and
+        is not decoded under a guessed encoding. Opened as UTF-8 here,
+        AI_READI's windows-1252 release crate ended `fairscape-cli parse`,
+        `merge`, `rank` and `transform` with a bare UnicodeDecodeError
+        (#4186). The parser takes any path, so the refusal ends by saying
+        to transcode the file, as `fairscape-cli rocrate-to-d4d` and `info`
+        end theirs, not by pointing to crate_manifest.yaml's
+        `encoding_note` (#4192).
+        """
+        self.rocrate_data = read_crate_json(self.rocrate_path, hint=TRANSCODE_HINT)
 
         # Extract @context
         self.context = self.rocrate_data.get('@context', {})
 
-        # Extract @graph (array of entities)
-        self.graph = self.rocrate_data.get('@graph', [])
+        # Extract @graph: an array of entities, or one entity written as a
+        # node object, read as an array that holds it (#4187)
+        self.graph = graph_entities(self.rocrate_data.get('@graph', []))
 
         # Find root Dataset entity
         self.root_dataset = self._find_root_dataset()

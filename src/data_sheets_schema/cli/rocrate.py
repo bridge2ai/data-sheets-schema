@@ -64,8 +64,18 @@ def parse(input_file, output):
     setup_repo_imports()
 
     try:
+        from data_sheets_schema.rocrate_map import TRANSCODE_HINT, read_crate_json
         from rocrate_parser import ROCrateParser
 
+        # The parser setup_repo_imports finds is the copy under
+        # .claude/agents/scripts, which opens the crate as UTF-8 itself, so a
+        # crate that is not UTF-8 ended this command with a bare
+        # UnicodeDecodeError. The crate is read first as `fairscape-cli
+        # parse` reads one (`read_crate_json`): such a crate is refused with
+        # a CrateEncodingError that names the first byte that does not
+        # decode and says to transcode it, reported below like any other
+        # error (#4186).
+        read_crate_json(Path(input_file), hint=TRANSCODE_HINT)
         parser = ROCrateParser(input_file)
         entities = parser.get_all_entities()
 

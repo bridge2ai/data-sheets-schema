@@ -18,7 +18,7 @@ repo_root = Path(__file__).parent.parent.parent
 from fairscape_integration.d4d_to_fairscape import D4DToFairscapeConverter
 from fairscape_integration.fairscape_to_d4d import FairscapeToD4DConverter
 from fairscape_integration.utils.validator import D4DValidator
-from fairscape_integration.utils.rocrate_parser import ROCrateParser
+from fairscape_integration.utils.rocrate_parser import ROCrateParser, graph_entities
 from fairscape_integration.utils.mapping_loader import MappingLoader
 from fairscape_integration.utils.d4d_builder import D4DBuilder
 from fairscape_integration.utils.rocrate_merger import ROCrateMerger
@@ -256,7 +256,9 @@ def info(input_file: str, format: str):
                     click.echo(f"  file_collections: {len(data['file_collections'])} collection(s)")
 
             elif file_type == "RO-Crate JSON-LD":
-                graph = data.get('@graph', [])
+                # An `@graph` written as one node object is that one entity,
+                # as `parse` reads it, not one entity per key (#4187)
+                graph = graph_entities(data.get('@graph', []))
                 click.echo(f"RO-Crate Metadata:")
                 click.echo(f"  @graph entities: {len(graph)}")
 

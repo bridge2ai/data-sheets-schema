@@ -74,6 +74,27 @@ except ImportError:
     VALIDATION_AVAILABLE = False
 
 
+def _parse_rocrate(rocrate_path: Union[Path, str]):
+    """`ROCrateParser` on the crate at `rocrate_path`, read first as
+    `fairscape-cli parse` reads one (#4186).
+
+    The parser imported above is the copy under .claude/agents/scripts,
+    which opens the crate as UTF-8 itself, so a crate that is not UTF-8
+    ended `rocrate_to_d4d` and `merge_rocrates` with a bare
+    UnicodeDecodeError. Read through `rocrate_map.read_crate_json`, such
+    a crate is refused with a CrateEncodingError that names the first byte
+    that does not decode and says to transcode it. With `validate_input`,
+    the default, `rocrate_to_d4d` still refuses it earlier, when the input
+    validation fails, as before. A path that is not a file is left to the
+    parser, which reports it as before.
+    """
+    from data_sheets_schema.rocrate_map import TRANSCODE_HINT, read_crate_json
+
+    if Path(rocrate_path).is_file():
+        read_crate_json(Path(rocrate_path), hint=TRANSCODE_HINT)
+    return ROCrateParser(str(rocrate_path))
+
+
 @dataclass
 class TransformationConfig:
     """Configuration for semantic transformations."""
@@ -223,7 +244,7 @@ class SemanticTransformer:
 
         try:
             # Parse RO-Crate (expects file path string)
-            parser = ROCrateParser(str(rocrate_path))
+            parser = _parse_rocrate(rocrate_path)
 
             # Check mapping loader is available
             if self.mapping_loader is None:
@@ -369,7 +390,7 @@ class SemanticTransformer:
         parsers = []
         source_names = []
         for rocrate_path in rocrate_inputs:
-            parser = ROCrateParser(str(rocrate_path))
+            parser = _parse_rocrate(rocrate_path)
             parsers.append(parser)
             source_names.append(Path(rocrate_path).stem)
 
