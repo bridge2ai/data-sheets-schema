@@ -474,6 +474,80 @@ class TestFilledRowNotes(unittest.TestCase):
         self.assertEqual(cells["Dataset.title"], "Test Crate")
 
 
+class TestDatesInAOneItemList(unittest.TestCase):
+    """#4109. `_coerce` applied its date rule before the cardinality step
+    unwrapped a one-item list, and the rule passes a list through unchanged:
+    `["2026-06-30"]` was written as a date into the date-time slot `issued`,
+    which fails the schema, and `["9/1/2022"]` was written as it stands, past
+    the refusal its scalar form gets."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def map_issued(self, value):
+        graph = copy.deepcopy(GRAPH)
+        graph[1]["datePublished"] = value
+        return map_crate(graph, self.rows, self.sv, "TEST")
+
+    def issued(self, value):
+        """`(issued, status, detail)` for a crate root with `datePublished:
+        value`; `issued` is None where nothing was written."""
+        res = self.map_issued(value)
+        field = next(f for f in res.fields if f.d4d_path == "Dataset.issued")
+        return res.record.get("issued"), field.status, field.detail
+
+    def test_a_date_in_a_one_item_list_is_widened_to_a_date_time(self):
+        self.assertEqual(self.issued(["2026-06-30"]),
+                         ("2026-06-30T00:00:00Z", "filled",
+                          "unwrapped single-item list; date -> date-time"))
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(self.map_issued(["2026-06-30"]).record,
+                                           sort_keys=False, allow_unicode=True),
+                            encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
+
+    def test_an_ambiguous_date_in_a_one_item_list_is_refused_as_the_scalar_is(self):
+        refused = (None, "empty",
+                   "ambiguous date '9/1/2022': both components are <= 12, so "
+                   "DD/MM and MM/DD cannot be distinguished; dropped rather than "
+                   "guessed")
+        self.assertEqual(self.issued(["9/1/2022"]), refused)
+        self.assertEqual(self.issued("9/1/2022"), refused)
+
+    def test_a_scalar_date_is_widened_with_no_unwrap_note(self):
+        """The control: the scalar form was already right."""
+        self.assertEqual(self.issued("2026-06-30"),
+                         ("2026-06-30T00:00:00Z", "filled", "date -> date-time"))
+
+    def test_two_dates_are_not_unwrapped_as_one(self):
+        """Only a one-item list is unwrapped before the date rule. What a
+        single-valued date slot should do with two dates is a decision this
+        fix does not make, but its first date is never passed off as the
+        list's only item."""
+        _, _, detail = self.issued(["2026-06-30", "2026-07-01"])
+        self.assertNotIn("unwrapped single-item list", detail)
+
+    def test_only_the_date_rule_reads_the_unwrapped_item(self):
+        """The other rules' details for a one-item list did not move: the
+        `doi` rule takes its one DOI from the list itself, and a
+        single-valued slot whose range is a class is shaped before the list
+        is unwrapped, so its unwrap note still comes last."""
+        graph = copy.deepcopy(GRAPH)
+        graph[1]["identifier"] = ["https://doi.org/10.5555/Test"]
+        graph[1]["rai:dataReleaseMaintenancePlan"] = ["Released annually."]
+        details = {f.d4d_path: f.detail
+                   for f in map_crate(graph, self.rows, self.sv, "TEST").fields}
+        self.assertEqual(details["Dataset.doi"],
+                         "the one DOI among 1 list item(s); resolver or `doi:` "
+                         "prefix removed, case kept")
+        updates = details["Dataset.updates"]
+        self.assertTrue(updates.endswith("; unwrapped single-item list"), updates)
+        self.assertEqual(updates.count("unwrapped single-item list"), 1, updates)
+
+
 class TestDoi(unittest.TestCase):
     """#2916. The `doi` pattern is anchored to the bare DOI (#646) and crates
     carry the resolver URL; copying it through failed the schema while the
