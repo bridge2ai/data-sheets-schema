@@ -13,8 +13,10 @@ Features:
 - Output fitted to the schema's Dataset class: of what this converter
   reads, a key the class does not declare, a value that cannot be shaped
   to its slot, and any part of a value its slot cannot hold are left out
-  and named in `dropped` (#3969, #4073). A crate property no mapping here
-  reads is not listed (#4046).
+  and named in `dropped` (#3969, #4073). So is an `additionalProperty`
+  entry with no name written as text, whatever it carries; a reference
+  there is not looked up in the `@graph` (#4152). A crate property no
+  mapping here reads is not listed (#4046).
 - The fitted record is then validated in-process with the LinkML check the
   script runs on the file it writes (`record_validator`). Each value the
   validator rejects is left out and named in `dropped` with the
@@ -81,7 +83,8 @@ IDENTIFIER_RANGES = ("uri", "uriorcurie")
 #: references under its `isPartOf` (`_references`). `_build_d4d` records in
 #: `dropped` a value any other property maps to one of these slots, such
 #: as an `additionalProperty` named "Resources" or "Parent Datasets"
-#: (#4073, #4138).
+#: (#4073, #4138), and `_fit` a key of either name inside a reference, or
+#: in any other nested Dataset, which is neither property (#4153).
 DATASET_SLOTS = {
     'resources': ('hasPart', "a hasPart member the crate types as a dataset"),
     'parent_datasets': ('isPartOf', "a reference under the root's `isPartOf`"),
@@ -633,15 +636,23 @@ class FairscapeToD4DConverter:
                 # `_to_object` minted, asserting a dataset the crate does
                 # not identify, with nothing recorded (#4138); `_references`
                 # records `isPartOf` text for the same reason (#4125).
-                if value not in (None, '', [], {}):
-                    self.dropped.append((prop, (
-                        f"not placed in `{slot}`: {_preview(value)} is not "
-                        f"{only[1]}, which is all `{slot}` holds")))
+                self._not_a_dataset_slot_value(prop, slot, value)
                 continue
             self._place(d4d, origin, rivals, slot, value, prop)
 
         fitted = self._fit(d4d, TARGET_CLASS, origin, rivals=rivals)
         return self._settle(fitted, origin, rivals)
+
+    def _not_a_dataset_slot_value(self, source: str, slot: str,
+                                  value: Any) -> None:
+        """Record in `dropped` that `slot`, one of `DATASET_SLOTS`, does not
+        take `value`, which `source` gives it: no `id` is minted for it, as
+        `_to_object` would mint one for text (#4138, #4153). An empty value
+        is not recorded; `_place` and `_take` place none either."""
+        if value not in (None, '', [], {}):
+            self.dropped.append((source, (
+                f"not placed in `{slot}`: {_preview(value)} is not "
+                f"{DATASET_SLOTS[slot][1]}, which is all `{slot}` holds")))
 
     def _record_id(self, dataset: Dict) -> Tuple[Optional[str], Optional[str]]:
         """The record's required `id` and the crate property it came from.
@@ -767,6 +778,15 @@ class FairscapeToD4DConverter:
         values after the one `obj` holds (`_place`): the slot takes the
         first of them it can hold (`_take`), and the rest wait for
         `_settle`.
+
+        In a nested object, a key that names a slot holding datasets
+        (`DATASET_SLOTS`) is recorded too, text and references alike, where
+        the slot ranges over Dataset: in a Dataset, such as an `isPartOf` or
+        `hasPart` reference, and in a DataSubset. Those slots take only the
+        root's `isPartOf` and `hasPart`, and a key inside a nested object is
+        neither. Its text became a dataset whose `id` `_to_object` minted,
+        with nothing recorded (#4153). A FileCollection's `resources` holds
+        Files, and is fitted like any other slot.
         """
         slots = self._class_slots(cls)
         fitted: Dict[str, Any] = {}
@@ -778,6 +798,9 @@ class FairscapeToD4DConverter:
                 for each, _ in [(source, value)] + waiting:
                     self.dropped.append(
                         (each, f"the schema declares no `{key}` slot on {cls}"))
+                continue
+            if where and key in DATASET_SLOTS and slot.range == 'Dataset':
+                self._not_a_dataset_slot_value(source, key, value)
                 continue
             self._take(fitted, origin, key, slot, [(source, value)] + waiting,
                        where, rivals)
@@ -1357,8 +1380,10 @@ class FairscapeToD4DConverter:
         - A member the `@graph` does not describe, whose reference types it
           as a dataset, is a component dataset: it is written to
           `resources`, and `_object` fits the reference's keys to Dataset,
-          recording each it does not declare (#4098). Until #4098 only its
-          `@id` was kept, and its other keys were lost without a word.
+          recording each it does not declare (#4098), and a `resources` or
+          `parent_datasets` key too, since those slots take nothing from a
+          reference (`_fit`, #4153). Until #4098 only its `@id` was kept,
+          and its other keys were lost without a word.
         - Any other member the `@graph` does not describe has no type, or
           one that is not a dataset, so nothing in the crate says it is a
           dataset, and it is recorded in `dropped`.
@@ -1433,8 +1458,10 @@ class FairscapeToD4DConverter:
         A reference keeps its `@id` as the object's `id`, an ARK as its
         resolver URL, and `_object` fits its other keys to Dataset: a key
         the class declares, such as `name` or `description`, is kept, and
-        any other is recorded in `dropped`. Until #4098 only the `@id` was
-        kept, and every other key was lost without a word.
+        any other is recorded in `dropped`, as is a `parent_datasets` or
+        `resources` key, since those slots take nothing from a reference
+        (`_fit`, #4153). Until #4098 only the `@id` was kept, and every other
+        key was lost without a word.
 
         An entry with no `@id` is recorded in `dropped`, and so is text
         (#4125). JSON-LD reads a string under `isPartOf` as text, not as a
@@ -1458,7 +1485,8 @@ class FairscapeToD4DConverter:
         its own. For the same reason `parent_datasets` takes only these
         references: a value another property maps to it, such as an
         `additionalProperty` named "Parent Datasets", is recorded by
-        `_build_d4d` (`DATASET_SLOTS`, #4138).
+        `_build_d4d` (`DATASET_SLOTS`, #4138), and so is a
+        `parent_datasets` key inside a reference, by `_fit` (#4153).
 
         The list keeps each reference at its position in the crate's list,
         with None for an entry that is not one, so a `dropped` path counts
@@ -1630,11 +1658,18 @@ class FairscapeToD4DConverter:
 
         `Completeness` and `Data Governance Committee` name no Dataset slot,
         and `_fit` records them as dropped, as it does any other name that
-        is not one (#3969). An entry that is not a PropertyValue, or one
-        with no name to map, is recorded in `dropped` too (#4073). So is an
-        entry whose name maps to `resources` or `parent_datasets`, which
-        hold only the datasets the root's `hasPart` and `isPartOf` name
-        (`DATASET_SLOTS`, #4073, #4138).
+        is not one (#3969). An entry that is not a PropertyValue is recorded
+        in `dropped` too (#4073), and so is one with no name written as
+        text, whatever else it carries (#4073, #4152), and one whose name
+        maps to `resources` or `parent_datasets`, which hold only the
+        datasets the root's `hasPart` and `isPartOf` name (`DATASET_SLOTS`,
+        #4073, #4138).
+
+        A nameless entry may be a reference (`{"@id": …}`), as in
+        RO-Crate's flattened form, where the entity it names states the
+        name and the value. That entity is not looked up in the `@graph`,
+        so the reference is recorded like any other nameless entry, its
+        `@id` in the reason.
         """
         found = []
 
@@ -1651,10 +1686,15 @@ class FairscapeToD4DConverter:
             value = prop.get('value')
 
             if not isinstance(name, str) or not name.strip():
-                if value not in (None, '', [], {}):
-                    self.dropped.append((f"additionalProperty[{n}]", (
-                        "a PropertyValue with no name, so no slot to read its "
-                        f"value {_preview(value)} into")))
+                # An entry is read by its name. Until #4152 one with none
+                # was recorded only when it held a `value`, so a reference
+                # reached neither the record nor `dropped`.
+                ref = _ref_id(prop)
+                self.dropped.append((f"additionalProperty[{n}]", (
+                    "a PropertyValue with no name written as text, so no slot "
+                    f"to read it into: {_preview(prop)}"
+                    + (f" (a reference to {ref}, which is not looked up in "
+                       "the `@graph`)" if ref else ""))))
                 continue
 
             # Map known additional properties to D4D fields
