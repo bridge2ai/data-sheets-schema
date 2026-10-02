@@ -41,7 +41,7 @@ _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -64,7 +64,7 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     resolved = (Path(bundle) if bundle else
                 reg.bundle(project) if arm == "baseline" else
                 reg.anchored(BUNDLE_DIR) / pattern.format(p=project))
-    kw = {"manifest": selected,
+    kw = {"api_playbook_version": api_playbook_version, "manifest": selected,
           "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
     if runtime:
         kw["runtime"] = runtime
@@ -215,6 +215,8 @@ def api():
 
 
 @api.command("render-prompt")
+@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -238,7 +240,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out):
+                      provider, out, api_playbook_version):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -261,7 +263,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     from data_sheets_schema.api_runner import resolve_prompt
 
     spec = _spec(project, arm, label, condition, bundle,
-                 runtime=runtime, provider=provider,
+                 runtime=runtime, provider=provider, api_playbook_version=api_playbook_version,
                  **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
@@ -293,6 +295,8 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
 
 @api.command("plan")
+@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -311,10 +315,10 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json):
+def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
@@ -324,6 +328,8 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
     click.echo(f"   model    {p['model']['name']}  temp={p['model']['temperature']}  "
                f"max_tokens={p['model']['max_tokens']}")
     click.echo(f"   runtime  {p['runtime']}")
+    if spec.api_playbook_version:
+        click.echo(f"   API playbook version {spec.api_playbook_version} (separate instruction condition)")
     click.echo(f"   bundle   {p['bundle']}  ({p['bundle_bytes']:,} b)")
     click.echo(f"   prompts  {', '.join(Path(x).name for x in p['prompt_files'])}")
     click.echo(f"   digest   md5 {p['schema_digest_md5'][:12]}")
@@ -338,6 +344,8 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
+@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -359,12 +367,12 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -404,6 +412,8 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 
 @api.command("batch")
+@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
 @click.option("--projects", default=None,
               help="comma-separated; default: every project the selected manifest declares "
                    "(#623), or the --project-bundle names")
@@ -439,7 +449,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -470,7 +480,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     for p in names:
         for n in range(1, replicates + 1):
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
-                      bundle=bundles.get(p), manifest=requested)
+                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version)
             # As `plan` and `run` do: a project no selected manifest declares
             # needs an explicit bundle, never the repository's by convention
             # (#1367 round 2, #1386).

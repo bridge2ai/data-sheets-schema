@@ -238,7 +238,8 @@ def prompt_files() -> list[Path]:
                                                TUNED_PROMPT)
 
     from data_sheets_schema.resources import resource_path
-    files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT}
+    from data_sheets_schema.api_playbook import POLICY_PATH
+    files = set(CONDITION_PROMPTS.values()) | {TUNED_PROMPT, POLICY_PATH}
     components = resource_path(COMPONENTS)          # from any directory (#1480)
     if components.is_dir():
         # Keyed by the logical relative spelling, read where they are.
