@@ -1881,6 +1881,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/receipt-completion/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/recommended_mitigation/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>

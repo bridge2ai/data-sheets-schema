@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/issued/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/receipt-completion/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: issued - data-sheets-schema</title>
+        <title>Offline receipt completion - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-issued" class="md-skip">
+        <a href="#offline-receipt-completion" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: issued
+              Offline receipt completion
             
           </span>
         </div>
@@ -316,56 +316,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#instrument-boundary" class="md-nav__link">
+    Instrument boundary
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#preparing-and-checking-an-offline-inventory" class="md-nav__link">
+    Preparing and checking an offline inventory
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#work-that-remains-open" class="md-nav__link">
+    Work that remains open
   </a>
   
 </li>
@@ -384,125 +350,105 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/issued.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/receipt-completion.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-issued">Slot: issued</h1>
-<p><em>Date of formal issuance or publication of the resource. A <code>datetime</code> renders as RFC 3339 <code>date-time</code>, which <strong>requires a UTC offset</strong> — write <code>2024-11-15T00:00:00Z</code>, not <code>2024-11-15T00:00:00</code>. A date alone is also rejected.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/issued">dcterms:issued</a>
-Alias: issued</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../Datetime/">Datetime</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>2022-06-30T00:00:00Z</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcterms:issued</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:issued</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: issued
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: '2022-06-30T00:00:00Z'
-description: Date of formal issuance or publication of the resource. A `datetime`
-  renders as RFC 3339 `date-time`, which **requires a UTC offset** — write `2024-11-15T00:00:00Z`,
-  not `2024-11-15T00:00:00`. A date alone is also rejected.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:issued
-alias: issued
-domain_of:
-- Information
-range: datetime
-
+<h1 id="offline-receipt-completion">Offline receipt completion</h1>
+<p>This is the deterministic prerequisite for <a href="https://github.com/bridge2ai/data-sheets-schema/issues/3314">#3314</a>
+and <a href="https://github.com/bridge2ai/data-sheets-schema/issues/3315">#3315</a>, under
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/2926">#2926</a>. It prepares
+requests and checks saved answers. It makes no model calls and changes no input
+files. It does not establish semantic support or empirical improvement.</p>
+<h2 id="instrument-boundary">Instrument boundary</h2>
+<p><code>receipts.check(..., instrument_version=4)</code> retains v3 coverage, aggregate
+diagnostics and gates. It adds <code>snippets.by_origin</code> for <code>phase1</code>, <code>rereceipt</code>, and
+<code>unknown</code>, each with integer <code>total</code>, <code>no_value_overlap</code>, <code>entry_single_leaf</code>,
+and <code>unattesting</code> counts. Only an absent marker uses the historical phase-1
+convention; malformed or unknown explicit markers remain visible. These markers
+are accounting metadata, not independent evidence of authorship or support.
+The default checker and all existing disk readers continue to use v3. Historical
+blocks are not silently rewritten or relabeled.</p>
+<p><code>apply_rereceipt(..., instrument_version=4)</code> adds <code>origin: rereceipt</code> only to a
+new pair accepted by the existing snippet/path validator. An identical existing
+pair is never relabeled; retrying the same additions does not duplicate pairs.
+Missing or duplicate chunk entries and <code>duplicate_of</code> chunks still reject the
+answer. A verified addition to <code>nothing_relevant</code> or <code>redundant_with</code> changes it
+to <code>extracted</code>, retaining the previous status and its reason/references in
+<code>rereceipt_prior</code>. The v4 checker counts these recorded reversals separately;
+malformed prior metadata is reported separately. A reversal never adds a new
+reviewed chunk. These counters and anti-padding screens are nonterminal.
+The v4 merger rejects a negative-status chunk already carrying an <code>extracted</code>
+or <code>rereceipt_prior</code> key, including empty or malformed values. Correcting that
+contradictory entry would overwrite its evidence; rejection preserves the
+entry exactly and leaves the requested path uncovered. Other valid answers
+in the response can still be merged. Historical v3 merge behavior is unchanged.</p>
+<p>Renderer 24 is an <strong>API-only, offline preparation boundary</strong>, not an executable
+or registered generation condition. Its assembly digest binds the new receipt
+instruction, header, policy and v4 instrument. Renderers 1–23 retain their exact
+previous assembly digests. <code>build_rereceipt</code> accepts only the last <code>full</code> or
+<code>full_readdress</code> request plus its entire assistant response; it retains the
+conversation and cached prefix and appends every uncovered leaf. It refuses
+audit/report/reconcile requests. <code>execute</code> and <code>_execute</code> refuse renderer 24
+before provider access.</p>
+<h2 id="preparing-and-checking-an-offline-inventory">Preparing and checking an offline inventory</h2>
+<p>Use a phase-1 full snapshot after any re-addressing, its corresponding receipt,
+the exact bundle/chunk manifest, and the selected merged full schema. Do not
+substitute a reconciled final record or a current bundle for recorded bytes.
+For historical inspection, recover/materialize recorded inputs into a separate
+temporary directory using the existing provenance/snapshot recovery facilities;
+retain their commit/hash basis. Never rewrite originals to make hashes match.</p>
+<p><code>rereceipt.Inputs</code> holds immutable copies of all five inputs. It refuses duplicate
+YAML keys, a receipt/bundle MD5 disagreement and a manifest that cannot reproduce
+the canonical chunks under its recorded rule. SHA-256 identities cover every
+raw input, the request contract and the explicit output-token cap. It pins the
+supplied schema; <strong>record validation against that schema remains a separate
+required check</strong>. Receipt coverage continues to use the existing populated-leaf
+and exemption logic, rather than a new denominator.</p>
+<p>From the repository, using independently materialized paths:</p>
+<pre><code class="language-bash">python -m data_sheets_schema.rereceipt \
+  --record /tmp/receipt-inputs/full-phase1.yaml \
+  --receipt /tmp/receipt-inputs/coverage_receipt.yaml \
+  --manifest /tmp/receipt-inputs/chunks.yaml \
+  --bundle /tmp/receipt-inputs/bundle.txt \
+  --schema /tmp/receipt-inputs/full-schema.yaml \
+  --max-output-tokens 12000 &gt; /tmp/receipt-inventory.yaml
 </code></pre>
-
-</details>
+<p>The illustrative cap is not a registered or measured recommendation. The
+operator must provide it explicitly. No path list is truncated to fit it.</p>
+<p>For a saved YAML answer of the form <code>rereceipt: [...]</code>, repeat the same command
+with <code>--answers /tmp/answers.yaml --inventory /tmp/receipt-inventory.yaml</code> and
+redirect to a <strong>different</strong> temporary report. The saved inventory is required
+when checking answers; any changed input, cap or contract is refused. The CLI
+prints YAML to stdout and writes no input or provenance files. The Python API
+can instead retain the same immutable <code>Inputs</code> object; when reloading bytes,
+pass the saved <code>input_identity</code> as <code>complete(..., expected_identity=...)</code>.</p>
+<p>Every requested path receives one receipt action or one typed unsupported
+action with a reason. Duplicate answers are rejected together. The report
+distinguishes rejected <strong>answers</strong> from rejected <strong>paths</strong>, unanswered paths,
+accepted actions, additions, status reversals, and never-receipted leaves before
+and after. Extra or malformed answers prevent <code>answers_complete</code>. That state
+means only that every path received one accepted action; all-unsupported can be
+answers-complete with no coverage improvement. Unsupported claims remain in
+the record and in <code>still_uncovered_paths</code>, with separate
+<code>unsupported_audit_candidates</code>. A verified quotation can still fail semantic
+support; neither the state nor zero deterministic defects certifies it.</p>
+<h2 id="work-that-remains-open">Work that remains open</h2>
+<h1 id="2926-still-needs-a-separately-registered-continuationcondition-phase-usage">2926 still needs a separately registered continuation/condition, phase usage</h1>
+<p>and failure telemetry, measured output budgeting/batching, audit carry, a
+registered coverage threshold shared by strict CLI and canary gates, and the
+required CHORUS/AI_READI paid canaries before fanout. A failed follow-up must
+retain the successful full output. Existing v1/v2/v3 instruments, registrations
+and the held audit28 corpus remain unchanged; offline fixture tests or replay
+are not empirical canaries.</p>
+<p><a href="https://github.com/bridge2ai/data-sheets-schema/issues/2923">#2923</a> still needs
+the record repair route: reuse existing removal classifications, restore an
+unfounded removal or provide independently checked audit evidence for it. A
+report disposition alone cannot clear that obligation. Neither re-receipting
+nor a nonterminal diagnostic may reopen an audit/report attempt already stopped
+by a terminal source/evidence failure.</p>
 
 
 
