@@ -4,6 +4,7 @@ CLI tests for d4d schema commands.
 """
 
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -16,6 +17,30 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 from data_sheets_schema.cli import cli
 from tests.test_cli._helpers import build_module_tree
+
+# `d4d schema validate` imports .claude/agents/scripts/validator.py, which
+# gives linkml-validate 30 s; files under .claude/agents/ shape runs and are not
+# edited for a test. Starting poetry and loading the merged schema took longer
+# than that on a heavily loaded machine (#4065), so the tests that reach the
+# real validator give it this bound instead. Its timeout message still says 30s.
+VALIDATE_TIMEOUT_UNDER_LOAD = 300
+
+
+def generous_subprocess_timeouts(widened):
+    """Patch `subprocess.run` so a call that sets a timeout runs under VALIDATE_TIMEOUT_UNDER_LOAD.
+
+    Nothing else changes: the command, its output and its exit status are
+    the validator's own. Each widened command is appended to *widened*.
+    """
+    run = subprocess.run
+
+    def generous(command, *args, **kwargs):
+        if kwargs.get("timeout") is not None:
+            kwargs["timeout"] = VALIDATE_TIMEOUT_UNDER_LOAD
+            widened.append([str(part) for part in command])
+        return run(command, *args, **kwargs)
+
+    return patch("subprocess.run", generous)
 
 
 class TestSchemaCLI(unittest.TestCase):
@@ -135,19 +160,29 @@ class TestSchemaCLI(unittest.TestCase):
         self.assertIn("missing required field", result.output)
         self.assertIn("bad enum value", result.output)
 
+    def invoke_real_validator(self):
+        """Run `d4d schema validate` through the real validator, its timeout widened (#4065)."""
+        widened = []
+        with generous_subprocess_timeouts(widened):
+            result = self.runner.invoke(cli, ["schema", "validate", str(self.d4d_file)])
+        self.assertTrue(any("linkml" in part for command in widened for part in command),
+                        msg=f"no linkml-validate call ran under the widened timeout: {widened}\n"
+                            f"{result.output}")
+        return result
+
     def test_validate_reaches_the_real_validator(self):
         """A fake with the CLI's invented method hid #1024."""
         self.d4d_file.write_text(
             "id: https://example.org/datasets/cli-test\nname: CLI test\n",
             encoding="utf-8",
         )
-        result = self.runner.invoke(cli, ["schema", "validate", str(self.d4d_file)])
+        result = self.invoke_real_validator()
         self.assertEqual(result.exit_code, 0, msg=result.output)
         self.assertIn("is valid", result.output)
 
     def test_real_validation_failure_preserves_the_diagnostic(self):
         self.d4d_file.write_text("name: Missing identifier\n", encoding="utf-8")
-        result = self.runner.invoke(cli, ["schema", "validate", str(self.d4d_file)])
+        result = self.invoke_real_validator()
         self.assertEqual(result.exit_code, 1, msg=result.output)
         self.assertIn("validation errors", result.output)
         self.assertIn("id", result.output)
