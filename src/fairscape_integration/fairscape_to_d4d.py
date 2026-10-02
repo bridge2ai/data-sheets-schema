@@ -201,6 +201,15 @@ def _is_text(value: Any) -> bool:
     return isinstance(value, (str, int, float)) and not isinstance(value, bool)
 
 
+def _not_scalar(items: List[Any]) -> str:
+    """What `items`, none of them text, a number or a boolean, are, as a
+    reason names them. A list among the items of a crate's list is a list
+    inside a list, not a crate reference or object (#4175)."""
+    return ' and '.join(dict.fromkeys(
+        'a list inside a list' if isinstance(item, list)
+        else 'a crate reference or object' for item in items))
+
+
 def _same(a: Any, b: Any) -> bool:
     """Whether `a` and `b` are one JSON value (#4159).
 
@@ -1160,11 +1169,11 @@ class FairscapeToD4DConverter:
         items = [item for item in _as_list(value) if item is not None]
         scalars = [item for item in items if _is_scalar(item)]
         if not scalars:
-            return None, ((f"a crate reference or object, which a "
+            return None, ((f"{_not_scalar(items)}, which a "
                            f"`{slot.range}` slot does not hold: "
                            f"{_preview(value)}") if items else
                           f"no value in {_preview(value)}"), []
-        left += [(item, f"a crate reference or object, which a "
+        left += [(item, f"{_not_scalar([item])}, which a "
                         f"`{slot.range}` slot does not hold")
                  for item in items if not _is_scalar(item)]
         value = scalars if isinstance(value, list) else scalars[0]
@@ -1240,9 +1249,12 @@ class FairscapeToD4DConverter:
         Each item becomes one object (`_object`). A single-valued slot
         given a list of text holds one object made from the text joined
         with `; `. `_coerce` makes each item an object first and then joins
-        the objects. A list holding a reference or an object is not joined,
-        because joining it would write its Python repr, and it is not
-        placed. Each part that is left out is recorded in `dropped` by
+        the objects. A list holding a reference, an object or another list
+        is not joined, because joining it would write its Python repr, and
+        it is not placed. `_coerce` drops a list inside the list and
+        shapes the rest (#4183), so for a single-valued slot given text
+        beside such a list it keeps the text, where this places nothing.
+        Each part that is left out is recorded in `dropped` by
         `_object` or `_fit`. Those name the path inside the object, so
         `left` is always empty here.
 
@@ -1259,7 +1271,7 @@ class FairscapeToD4DConverter:
                 return None, (
                     f"{len(present)} values for a single-valued slot, not all "
                     f"of them text: text is joined into one {cls}, and a "
-                    "reference or an object is not"), []
+                    "reference, an object or a list inside the list is not"), []
             items = ['; '.join(str(item) for item in present)]
         built = []
         for n, item in enumerate(items):

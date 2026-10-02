@@ -29,7 +29,9 @@ key from the entity; a value is a repeat of another only as JSON reads
 them, and a repeat keeps the higher place; a byte count too long for
 Python to read is recorded, not raised. #4167: where two `@graph` nodes
 share an `@id`, a `hasPart` reference is compared with the node its file
-collection is made from; a value nested however deep is compared.
+collection is made from; a value nested however deep is compared. #4175: a
+list among a value's items is named as a list inside a list, not as a crate
+reference or object.
 """
 
 import contextlib
@@ -1003,6 +1005,31 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
                     "crate reference or object, which a `string` slot does "
                     "not hold)"))])
                 self.assertEqual(problems(record), [])
+
+    def test_a_list_inside_the_list_is_named_as_one(self):
+        """#4175. A list among a value's items is neither a crate reference
+        nor an object, and the reason says what it is: beside text, which is
+        placed; beside a reference, each named as what it is; and among what
+        a single-valued class slot does not join into one object."""
+        record, dropped = converted(crate({"keywords": ["a", ["b"]]}))
+        self.assertEqual(record["keywords"], ["a"])
+        self.assertEqual(dropped, [("keywords", (
+            'part of the value not placed in `keywords`: ["b"] (a list inside '
+            "a list, which a `string` slot does not hold)"))])
+        self.assertEqual(problems(record), [])
+        record, dropped = converted(crate({"license": [["MIT"], {"@id": "#l"}]}))
+        self.assertNotIn("license", record)
+        self.assertEqual(dropped, [("license", (
+            "not placed in `license`: a list inside a list and a crate "
+            "reference or object, which a `string` slot does not hold: "
+            '[["MIT"], {"@id": "#l"}]'))])
+        record, dropped = converted(crate(
+            {"rai:dataReleaseMaintenancePlan": ["Annual.", ["b"]]}))
+        self.assertNotIn("updates", record)
+        self.assertEqual(reasons(dropped, "rai:dataReleaseMaintenancePlan"), (
+            "not placed in `updates`: 2 values for a single-valued slot, not "
+            "all of them text: text is joined into one UpdatePlan, and a "
+            "reference, an object or a list inside the list is not"))
 
     def test_an_is_part_of_entry_with_no_id_is_recorded(self):
         record, dropped = converted(crate({"isPartOf": [
