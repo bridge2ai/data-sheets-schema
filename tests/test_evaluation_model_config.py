@@ -131,3 +131,11 @@ def test_form_subtype_cache_precedence_and_new_entries_disclose_basis(config, tm
     assert second.model == "independent-judge"
     second._save("new", "title", "other", "fixture")
     assert json.loads(path.read_text().splitlines()[1])["evaluation_model"]["basis"] == "recorded_cache_model"
+
+
+def test_api_rubric_retains_its_separate_registered_default(config, monkeypatch):
+    from data_sheets_schema.evaluation.evaluate_d4d_llm import LLMEvaluationConfig
+    monkeypatch.setattr(api_runner, "_model_settings", lambda: {"name": "new-generator"})
+    assert em.evaluation_model_name() == "independent-judge"
+    assert LLMEvaluationConfig().model == "claude-sonnet-4-5-20250929"
+    assert LLMEvaluationConfig(model="registered-other").model == "registered-other"

@@ -1390,7 +1390,10 @@ replaying an old cache does not establish the original selection basis. Existing
 cache identities, prompts and historical outputs are unchanged. A deliberate
 model switch requires a newly registered/calibrated measurement; this setting
 alone supplies no evidence of independence or agreement. The separate API rubric
-evaluator retains its pinned default pending #3326.
+evaluator deliberately retains `claude-sonnet-4-5-20250929` (#3326): it is an
+already registered instrument with its own request identity. Changing the shared
+support/fitness setting must not silently change that rubric baseline. A new API
+rubric registration can explicitly supply `LLMEvaluationConfig(model=...)`.
 
 ## D4D LLM-based Evaluation (Quality Assessment)
 

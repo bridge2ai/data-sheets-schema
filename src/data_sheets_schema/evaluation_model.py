@@ -15,7 +15,7 @@ This module is the seam. `evaluation_model_settings()` is what those five
 paths ask when they were given no model, and it answers with a `basis` naming
 where the answer came from. The API rubric judge
 (`evaluation/evaluate_d4d_llm.py`) is not one of them: it never fell back to
-the generation model and keeps its own pinned default (#3326).
+the generation model and deliberately keeps its own pinned default (#3326).
 `evaluation_config.yaml` beside this module ships with `model: null`, preserving
 that generation default. A nonempty model name selects a different evaluator
 without editing generation settings. Selection metadata is disclosure, not part
