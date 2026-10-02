@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/sampling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/run-schema-recomputes/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: sampling_strategies - data-sheets-schema</title>
+        <title>Run-specific schemas in pair and report recomputes - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-sampling_strategies" class="md-skip">
+        <a href="#run-specific-schemas-in-pair-and-report-recomputes" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: sampling_strategies
+              Run-specific schemas in pair and report recomputes
             
           </span>
         </div>
@@ -309,49 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -364,81 +321,42 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/sampling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/run-schema-recomputes.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-sampling_strategies">Slot: sampling_strategies</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/sampling_strategies">data_sheets_schema:sampling_strategies</a>
-Alias: sampling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Instance/">Instance</a></td>
-<td>What do the instances that comprise the dataset represent (e</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../String/">String</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>data_sheets_schema:sampling_strategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:sampling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: sampling_strategies
-alias: sampling_strategies
-domain_of:
-- Dataset
-- Instance
-range: string
-
-</code></pre>
-
-</details>
+<h1 id="run-specific-schemas-in-pair-and-report-recomputes">Run-specific schemas in pair and report recomputes</h1>
+<p><code>backfill_checks.compute</code> selects the full and core merged schema bytes recorded
+by each run. <code>d4d provenance record</code> and the backfill CLI use this computation.
+The full and core selectors require every recorded SHA256/MD5 to agree. They try
+the named file, a registered reconstruction, then matching committed history.
+Schema version labels do not substitute for byte identity.</p>
+<p>Pair identity/projected slots and report declarations/nested ranges are derived
+from those selected views. Each block records <code>schema_selection_instrument:
+run-recorded-full-core-v1 (#4062)</code>, a per-file <code>schema_basis</code>, and the actual
+selected <code>schema.full_sha256</code> / <code>schema.core_sha256</code>. The report's existing v7/v8
+claim contract remains separately identified by <code>instrument</code>.</p>
+<p>A missing, unrecoverable or unusable historical schema retains the established
+current-file fallback, explicitly naming its reason for that file. It does not
+claim a fully recovered historical pair. Recovered schemas that import local
+files are refused: their recorded hash does not cover today's imported files.
+When both schemas are recovered, pair comparison needs no current-schema
+presence exemption. Fallback comparisons retain the existing schema-moved rule.
+Historical views are scoped to the computation and released afterwards.</p>
+<p>The optional Python <code>declared</code>/<code>ranges</code> map arguments remain available. A report
+using them pins their contents under <code>schema_overrides</code>, explicitly distinguishing
+those rules from rules derived from the selected bytes. Normal CLI operation
+passes neither override; it no longer supplies today's maps to every run.</p>
+<p>This changes newly computed diagnostics. It does not rewrite stored provenance,
+canary thresholds, reports or source records. Corpus comparisons should inspect
+both changes in gate counts and schema selection/fallbacks before deciding to
+backfill. The historical rewrite decision remains separate (#4060).</p>
+<p>Historical report v7 reproduction explicitly passes both
+<code>report_claims_version=7</code> and <code>schema_policy="legacy_current"</code>. The latter retains
+the former current-schema rules and block shape; it does not claim to reconstruct
+the run's schema. New calls default to <code>schema_policy="recorded"</code>.</p>
 
 
 

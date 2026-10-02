@@ -2011,6 +2011,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/run-schema-recomputes/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/same_as/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>
