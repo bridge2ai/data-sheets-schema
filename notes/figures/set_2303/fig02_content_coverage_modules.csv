@@ -1,0 +1,469 @@
+project,arm,cohort,rep,module,n_slots,n_populated,fraction
+AI_READI,api,v7,1,Motivation,5,5,1.0
+AI_READI,api,v7,2,Motivation,5,5,1.0
+AI_READI,api,v7,3,Motivation,5,5,1.0
+AI_READI,api,v8,1,Motivation,5,5,1.0
+AI_READI,api,v8,2,Motivation,5,5,1.0
+AI_READI,api,v8,3,Motivation,5,5,1.0
+AI_READI,agentic,v6,1,Motivation,5,5,1.0
+AI_READI,agentic,v6,2,Motivation,5,5,1.0
+AI_READI,agentic,v6,3,Motivation,5,5,1.0
+CHORUS,api,v7,1,Motivation,5,5,1.0
+CHORUS,api,v7,2,Motivation,5,5,1.0
+CHORUS,api,v7,3,Motivation,5,5,1.0
+CHORUS,api,v8,1,Motivation,5,5,1.0
+CHORUS,api,v8,2,Motivation,5,5,1.0
+CHORUS,api,v8,3,Motivation,5,5,1.0
+CHORUS,agentic,v6,1,Motivation,5,5,1.0
+CHORUS,agentic,v6,2,Motivation,5,5,1.0
+CHORUS,agentic,v6,3,Motivation,5,5,1.0
+CM4AI,api,v7,1,Motivation,5,5,1.0
+CM4AI,api,v7,2,Motivation,5,5,1.0
+CM4AI,api,v7,3,Motivation,5,5,1.0
+CM4AI,api,v8,1,Motivation,5,5,1.0
+CM4AI,api,v8,2,Motivation,5,5,1.0
+CM4AI,api,v8,3,Motivation,5,5,1.0
+CM4AI,agentic,v6,1,Motivation,5,5,1.0
+CM4AI,agentic,v6,2,Motivation,5,5,1.0
+CM4AI,agentic,v6,3,Motivation,5,5,1.0
+VOICE,api,v7,1,Motivation,5,5,1.0
+VOICE,api,v7,2,Motivation,5,5,1.0
+VOICE,api,v7,3,Motivation,5,5,1.0
+VOICE,api,v8,1,Motivation,5,5,1.0
+VOICE,api,v8,2,Motivation,5,5,1.0
+VOICE,api,v8,3,Motivation,5,5,1.0
+VOICE,agentic,v6,1,Motivation,5,5,1.0
+VOICE,agentic,v6,2,Motivation,5,5,1.0
+VOICE,agentic,v6,3,Motivation,5,5,1.0
+AI_READI,api,v7,1,Composition,14,14,1.0
+AI_READI,api,v7,2,Composition,14,14,1.0
+AI_READI,api,v7,3,Composition,14,13,0.9286
+AI_READI,api,v8,1,Composition,14,14,1.0
+AI_READI,api,v8,2,Composition,14,14,1.0
+AI_READI,api,v8,3,Composition,14,13,0.9286
+AI_READI,agentic,v6,1,Composition,14,14,1.0
+AI_READI,agentic,v6,2,Composition,14,14,1.0
+AI_READI,agentic,v6,3,Composition,14,14,1.0
+CHORUS,api,v7,1,Composition,14,10,0.7143
+CHORUS,api,v7,2,Composition,14,9,0.6429
+CHORUS,api,v7,3,Composition,14,9,0.6429
+CHORUS,api,v8,1,Composition,14,9,0.6429
+CHORUS,api,v8,2,Composition,14,10,0.7143
+CHORUS,api,v8,3,Composition,14,9,0.6429
+CHORUS,agentic,v6,1,Composition,14,9,0.6429
+CHORUS,agentic,v6,2,Composition,14,8,0.5714
+CHORUS,agentic,v6,3,Composition,14,8,0.5714
+CM4AI,api,v7,1,Composition,14,11,0.7857
+CM4AI,api,v7,2,Composition,14,12,0.8571
+CM4AI,api,v7,3,Composition,14,8,0.5714
+CM4AI,api,v8,1,Composition,14,9,0.6429
+CM4AI,api,v8,2,Composition,14,9,0.6429
+CM4AI,api,v8,3,Composition,14,9,0.6429
+CM4AI,agentic,v6,1,Composition,14,6,0.4286
+CM4AI,agentic,v6,2,Composition,14,7,0.5
+CM4AI,agentic,v6,3,Composition,14,10,0.7143
+VOICE,api,v7,1,Composition,14,14,1.0
+VOICE,api,v7,2,Composition,14,14,1.0
+VOICE,api,v7,3,Composition,14,14,1.0
+VOICE,api,v8,1,Composition,14,14,1.0
+VOICE,api,v8,2,Composition,14,14,1.0
+VOICE,api,v8,3,Composition,14,14,1.0
+VOICE,agentic,v6,1,Composition,14,14,1.0
+VOICE,agentic,v6,2,Composition,14,14,1.0
+VOICE,agentic,v6,3,Composition,14,14,1.0
+AI_READI,api,v7,1,Collection,7,7,1.0
+AI_READI,api,v7,2,Collection,7,7,1.0
+AI_READI,api,v7,3,Collection,7,7,1.0
+AI_READI,api,v8,1,Collection,7,7,1.0
+AI_READI,api,v8,2,Collection,7,7,1.0
+AI_READI,api,v8,3,Collection,7,6,0.8571
+AI_READI,agentic,v6,1,Collection,7,7,1.0
+AI_READI,agentic,v6,2,Collection,7,7,1.0
+AI_READI,agentic,v6,3,Collection,7,7,1.0
+CHORUS,api,v7,1,Collection,7,6,0.8571
+CHORUS,api,v7,2,Collection,7,6,0.8571
+CHORUS,api,v7,3,Collection,7,6,0.8571
+CHORUS,api,v8,1,Collection,7,6,0.8571
+CHORUS,api,v8,2,Collection,7,6,0.8571
+CHORUS,api,v8,3,Collection,7,7,1.0
+CHORUS,agentic,v6,1,Collection,7,7,1.0
+CHORUS,agentic,v6,2,Collection,7,4,0.5714
+CHORUS,agentic,v6,3,Collection,7,5,0.7143
+CM4AI,api,v7,1,Collection,7,5,0.7143
+CM4AI,api,v7,2,Collection,7,6,0.8571
+CM4AI,api,v7,3,Collection,7,7,1.0
+CM4AI,api,v8,1,Collection,7,6,0.8571
+CM4AI,api,v8,2,Collection,7,5,0.7143
+CM4AI,api,v8,3,Collection,7,5,0.7143
+CM4AI,agentic,v6,1,Collection,7,5,0.7143
+CM4AI,agentic,v6,2,Collection,7,6,0.8571
+CM4AI,agentic,v6,3,Collection,7,6,0.8571
+VOICE,api,v7,1,Collection,7,7,1.0
+VOICE,api,v7,2,Collection,7,7,1.0
+VOICE,api,v7,3,Collection,7,7,1.0
+VOICE,api,v8,1,Collection,7,7,1.0
+VOICE,api,v8,2,Collection,7,6,0.8571
+VOICE,api,v8,3,Collection,7,7,1.0
+VOICE,agentic,v6,1,Collection,7,7,1.0
+VOICE,agentic,v6,2,Collection,7,7,1.0
+VOICE,agentic,v6,3,Collection,7,7,1.0
+AI_READI,api,v7,1,Preprocessing,7,3,0.4286
+AI_READI,api,v7,2,Preprocessing,7,3,0.4286
+AI_READI,api,v7,3,Preprocessing,7,3,0.4286
+AI_READI,api,v8,1,Preprocessing,7,2,0.2857
+AI_READI,api,v8,2,Preprocessing,7,3,0.4286
+AI_READI,api,v8,3,Preprocessing,7,3,0.4286
+AI_READI,agentic,v6,1,Preprocessing,7,4,0.5714
+AI_READI,agentic,v6,2,Preprocessing,7,4,0.5714
+AI_READI,agentic,v6,3,Preprocessing,7,4,0.5714
+CHORUS,api,v7,1,Preprocessing,7,3,0.4286
+CHORUS,api,v7,2,Preprocessing,7,4,0.5714
+CHORUS,api,v7,3,Preprocessing,7,4,0.5714
+CHORUS,api,v8,1,Preprocessing,7,3,0.4286
+CHORUS,api,v8,2,Preprocessing,7,2,0.2857
+CHORUS,api,v8,3,Preprocessing,7,4,0.5714
+CHORUS,agentic,v6,1,Preprocessing,7,5,0.7143
+CHORUS,agentic,v6,2,Preprocessing,7,4,0.5714
+CHORUS,agentic,v6,3,Preprocessing,7,4,0.5714
+CM4AI,api,v7,1,Preprocessing,7,5,0.7143
+CM4AI,api,v7,2,Preprocessing,7,3,0.4286
+CM4AI,api,v7,3,Preprocessing,7,3,0.4286
+CM4AI,api,v8,1,Preprocessing,7,2,0.2857
+CM4AI,api,v8,2,Preprocessing,7,0,0.0
+CM4AI,api,v8,3,Preprocessing,7,0,0.0
+CM4AI,agentic,v6,1,Preprocessing,7,4,0.5714
+CM4AI,agentic,v6,2,Preprocessing,7,2,0.2857
+CM4AI,agentic,v6,3,Preprocessing,7,3,0.4286
+VOICE,api,v7,1,Preprocessing,7,4,0.5714
+VOICE,api,v7,2,Preprocessing,7,5,0.7143
+VOICE,api,v7,3,Preprocessing,7,4,0.5714
+VOICE,api,v8,1,Preprocessing,7,4,0.5714
+VOICE,api,v8,2,Preprocessing,7,5,0.7143
+VOICE,api,v8,3,Preprocessing,7,4,0.5714
+VOICE,agentic,v6,1,Preprocessing,7,6,0.8571
+VOICE,agentic,v6,2,Preprocessing,7,5,0.7143
+VOICE,agentic,v6,3,Preprocessing,7,5,0.7143
+AI_READI,api,v7,1,Uses,7,4,0.5714
+AI_READI,api,v7,2,Uses,7,4,0.5714
+AI_READI,api,v7,3,Uses,7,4,0.5714
+AI_READI,api,v8,1,Uses,7,4,0.5714
+AI_READI,api,v8,2,Uses,7,3,0.4286
+AI_READI,api,v8,3,Uses,7,3,0.4286
+AI_READI,agentic,v6,1,Uses,7,4,0.5714
+AI_READI,agentic,v6,2,Uses,7,3,0.4286
+AI_READI,agentic,v6,3,Uses,7,4,0.5714
+CHORUS,api,v7,1,Uses,7,3,0.4286
+CHORUS,api,v7,2,Uses,7,2,0.2857
+CHORUS,api,v7,3,Uses,7,4,0.5714
+CHORUS,api,v8,1,Uses,7,2,0.2857
+CHORUS,api,v8,2,Uses,7,4,0.5714
+CHORUS,api,v8,3,Uses,7,4,0.5714
+CHORUS,agentic,v6,1,Uses,7,2,0.2857
+CHORUS,agentic,v6,2,Uses,7,2,0.2857
+CHORUS,agentic,v6,3,Uses,7,3,0.4286
+CM4AI,api,v7,1,Uses,7,6,0.8571
+CM4AI,api,v7,2,Uses,7,6,0.8571
+CM4AI,api,v7,3,Uses,7,5,0.7143
+CM4AI,api,v8,1,Uses,7,3,0.4286
+CM4AI,api,v8,2,Uses,7,3,0.4286
+CM4AI,api,v8,3,Uses,7,2,0.2857
+CM4AI,agentic,v6,1,Uses,7,4,0.5714
+CM4AI,agentic,v6,2,Uses,7,3,0.4286
+CM4AI,agentic,v6,3,Uses,7,4,0.5714
+VOICE,api,v7,1,Uses,7,5,0.7143
+VOICE,api,v7,2,Uses,7,5,0.7143
+VOICE,api,v7,3,Uses,7,5,0.7143
+VOICE,api,v8,1,Uses,7,6,0.8571
+VOICE,api,v8,2,Uses,7,5,0.7143
+VOICE,api,v8,3,Uses,7,5,0.7143
+VOICE,agentic,v6,1,Uses,7,5,0.7143
+VOICE,agentic,v6,2,Uses,7,5,0.7143
+VOICE,agentic,v6,3,Uses,7,5,0.7143
+AI_READI,api,v7,1,Distribution,3,3,1.0
+AI_READI,api,v7,2,Distribution,3,3,1.0
+AI_READI,api,v7,3,Distribution,3,3,1.0
+AI_READI,api,v8,1,Distribution,3,3,1.0
+AI_READI,api,v8,2,Distribution,3,3,1.0
+AI_READI,api,v8,3,Distribution,3,3,1.0
+AI_READI,agentic,v6,1,Distribution,3,3,1.0
+AI_READI,agentic,v6,2,Distribution,3,3,1.0
+AI_READI,agentic,v6,3,Distribution,3,3,1.0
+CHORUS,api,v7,1,Distribution,3,2,0.6667
+CHORUS,api,v7,2,Distribution,3,2,0.6667
+CHORUS,api,v7,3,Distribution,3,2,0.6667
+CHORUS,api,v8,1,Distribution,3,1,0.3333
+CHORUS,api,v8,2,Distribution,3,3,1.0
+CHORUS,api,v8,3,Distribution,3,2,0.6667
+CHORUS,agentic,v6,1,Distribution,3,2,0.6667
+CHORUS,agentic,v6,2,Distribution,3,2,0.6667
+CHORUS,agentic,v6,3,Distribution,3,2,0.6667
+CM4AI,api,v7,1,Distribution,3,3,1.0
+CM4AI,api,v7,2,Distribution,3,3,1.0
+CM4AI,api,v7,3,Distribution,3,3,1.0
+CM4AI,api,v8,1,Distribution,3,3,1.0
+CM4AI,api,v8,2,Distribution,3,3,1.0
+CM4AI,api,v8,3,Distribution,3,3,1.0
+CM4AI,agentic,v6,1,Distribution,3,3,1.0
+CM4AI,agentic,v6,2,Distribution,3,3,1.0
+CM4AI,agentic,v6,3,Distribution,3,3,1.0
+VOICE,api,v7,1,Distribution,3,3,1.0
+VOICE,api,v7,2,Distribution,3,3,1.0
+VOICE,api,v7,3,Distribution,3,3,1.0
+VOICE,api,v8,1,Distribution,3,3,1.0
+VOICE,api,v8,2,Distribution,3,3,1.0
+VOICE,api,v8,3,Distribution,3,3,1.0
+VOICE,agentic,v6,1,Distribution,3,3,1.0
+VOICE,agentic,v6,2,Distribution,3,3,1.0
+VOICE,agentic,v6,3,Distribution,3,3,1.0
+AI_READI,api,v7,1,Maintenance,6,4,0.6667
+AI_READI,api,v7,2,Maintenance,6,5,0.8333
+AI_READI,api,v7,3,Maintenance,6,4,0.6667
+AI_READI,api,v8,1,Maintenance,6,5,0.8333
+AI_READI,api,v8,2,Maintenance,6,4,0.6667
+AI_READI,api,v8,3,Maintenance,6,5,0.8333
+AI_READI,agentic,v6,1,Maintenance,6,6,1.0
+AI_READI,agentic,v6,2,Maintenance,6,6,1.0
+AI_READI,agentic,v6,3,Maintenance,6,5,0.8333
+CHORUS,api,v7,1,Maintenance,6,3,0.5
+CHORUS,api,v7,2,Maintenance,6,3,0.5
+CHORUS,api,v7,3,Maintenance,6,3,0.5
+CHORUS,api,v8,1,Maintenance,6,3,0.5
+CHORUS,api,v8,2,Maintenance,6,3,0.5
+CHORUS,api,v8,3,Maintenance,6,3,0.5
+CHORUS,agentic,v6,1,Maintenance,6,2,0.3333
+CHORUS,agentic,v6,2,Maintenance,6,3,0.5
+CHORUS,agentic,v6,3,Maintenance,6,3,0.5
+CM4AI,api,v7,1,Maintenance,6,5,0.8333
+CM4AI,api,v7,2,Maintenance,6,5,0.8333
+CM4AI,api,v7,3,Maintenance,6,4,0.6667
+CM4AI,api,v8,1,Maintenance,6,4,0.6667
+CM4AI,api,v8,2,Maintenance,6,5,0.8333
+CM4AI,api,v8,3,Maintenance,6,4,0.6667
+CM4AI,agentic,v6,1,Maintenance,6,4,0.6667
+CM4AI,agentic,v6,2,Maintenance,6,5,0.8333
+CM4AI,agentic,v6,3,Maintenance,6,5,0.8333
+VOICE,api,v7,1,Maintenance,6,6,1.0
+VOICE,api,v7,2,Maintenance,6,6,1.0
+VOICE,api,v7,3,Maintenance,6,6,1.0
+VOICE,api,v8,1,Maintenance,6,6,1.0
+VOICE,api,v8,2,Maintenance,6,6,1.0
+VOICE,api,v8,3,Maintenance,6,6,1.0
+VOICE,agentic,v6,1,Maintenance,6,6,1.0
+VOICE,agentic,v6,2,Maintenance,6,6,1.0
+VOICE,agentic,v6,3,Maintenance,6,6,1.0
+AI_READI,api,v7,1,Ethics,5,4,0.8
+AI_READI,api,v7,2,Ethics,5,5,1.0
+AI_READI,api,v7,3,Ethics,5,4,0.8
+AI_READI,api,v8,1,Ethics,5,4,0.8
+AI_READI,api,v8,2,Ethics,5,4,0.8
+AI_READI,api,v8,3,Ethics,5,5,1.0
+AI_READI,agentic,v6,1,Ethics,5,5,1.0
+AI_READI,agentic,v6,2,Ethics,5,5,1.0
+AI_READI,agentic,v6,3,Ethics,5,5,1.0
+CHORUS,api,v7,1,Ethics,5,1,0.2
+CHORUS,api,v7,2,Ethics,5,1,0.2
+CHORUS,api,v7,3,Ethics,5,1,0.2
+CHORUS,api,v8,1,Ethics,5,1,0.2
+CHORUS,api,v8,2,Ethics,5,1,0.2
+CHORUS,api,v8,3,Ethics,5,1,0.2
+CHORUS,agentic,v6,1,Ethics,5,1,0.2
+CHORUS,agentic,v6,2,Ethics,5,1,0.2
+CHORUS,agentic,v6,3,Ethics,5,1,0.2
+CM4AI,api,v7,1,Ethics,5,1,0.2
+CM4AI,api,v7,2,Ethics,5,1,0.2
+CM4AI,api,v7,3,Ethics,5,1,0.2
+CM4AI,api,v8,1,Ethics,5,1,0.2
+CM4AI,api,v8,2,Ethics,5,1,0.2
+CM4AI,api,v8,3,Ethics,5,1,0.2
+CM4AI,agentic,v6,1,Ethics,5,1,0.2
+CM4AI,agentic,v6,2,Ethics,5,1,0.2
+CM4AI,agentic,v6,3,Ethics,5,1,0.2
+VOICE,api,v7,1,Ethics,5,4,0.8
+VOICE,api,v7,2,Ethics,5,5,1.0
+VOICE,api,v7,3,Ethics,5,5,1.0
+VOICE,api,v8,1,Ethics,5,5,1.0
+VOICE,api,v8,2,Ethics,5,4,0.8
+VOICE,api,v8,3,Ethics,5,4,0.8
+VOICE,agentic,v6,1,Ethics,5,5,1.0
+VOICE,agentic,v6,2,Ethics,5,4,0.8
+VOICE,agentic,v6,3,Ethics,5,4,0.8
+AI_READI,api,v7,1,Human,5,5,1.0
+AI_READI,api,v7,2,Human,5,5,1.0
+AI_READI,api,v7,3,Human,5,5,1.0
+AI_READI,api,v8,1,Human,5,5,1.0
+AI_READI,api,v8,2,Human,5,5,1.0
+AI_READI,api,v8,3,Human,5,5,1.0
+AI_READI,agentic,v6,1,Human,5,5,1.0
+AI_READI,agentic,v6,2,Human,5,5,1.0
+AI_READI,agentic,v6,3,Human,5,5,1.0
+CHORUS,api,v7,1,Human,5,2,0.4
+CHORUS,api,v7,2,Human,5,1,0.2
+CHORUS,api,v7,3,Human,5,1,0.2
+CHORUS,api,v8,1,Human,5,3,0.6
+CHORUS,api,v8,2,Human,5,3,0.6
+CHORUS,api,v8,3,Human,5,3,0.6
+CHORUS,agentic,v6,1,Human,5,2,0.4
+CHORUS,agentic,v6,2,Human,5,1,0.2
+CHORUS,agentic,v6,3,Human,5,2,0.4
+CM4AI,api,v7,1,Human,5,1,0.2
+CM4AI,api,v7,2,Human,5,2,0.4
+CM4AI,api,v7,3,Human,5,1,0.2
+CM4AI,api,v8,1,Human,5,1,0.2
+CM4AI,api,v8,2,Human,5,1,0.2
+CM4AI,api,v8,3,Human,5,1,0.2
+CM4AI,agentic,v6,1,Human,5,1,0.2
+CM4AI,agentic,v6,2,Human,5,1,0.2
+CM4AI,agentic,v6,3,Human,5,1,0.2
+VOICE,api,v7,1,Human,5,5,1.0
+VOICE,api,v7,2,Human,5,5,1.0
+VOICE,api,v7,3,Human,5,5,1.0
+VOICE,api,v8,1,Human,5,5,1.0
+VOICE,api,v8,2,Human,5,4,0.8
+VOICE,api,v8,3,Human,5,5,1.0
+VOICE,agentic,v6,1,Human,5,5,1.0
+VOICE,agentic,v6,2,Human,5,5,1.0
+VOICE,agentic,v6,3,Human,5,5,1.0
+AI_READI,api,v7,1,Data Governance,4,4,1.0
+AI_READI,api,v7,2,Data Governance,4,4,1.0
+AI_READI,api,v7,3,Data Governance,4,4,1.0
+AI_READI,api,v8,1,Data Governance,4,4,1.0
+AI_READI,api,v8,2,Data Governance,4,4,1.0
+AI_READI,api,v8,3,Data Governance,4,4,1.0
+AI_READI,agentic,v6,1,Data Governance,4,4,1.0
+AI_READI,agentic,v6,2,Data Governance,4,4,1.0
+AI_READI,agentic,v6,3,Data Governance,4,4,1.0
+CHORUS,api,v7,1,Data Governance,4,3,0.75
+CHORUS,api,v7,2,Data Governance,4,2,0.5
+CHORUS,api,v7,3,Data Governance,4,3,0.75
+CHORUS,api,v8,1,Data Governance,4,3,0.75
+CHORUS,api,v8,2,Data Governance,4,3,0.75
+CHORUS,api,v8,3,Data Governance,4,3,0.75
+CHORUS,agentic,v6,1,Data Governance,4,2,0.5
+CHORUS,agentic,v6,2,Data Governance,4,2,0.5
+CHORUS,agentic,v6,3,Data Governance,4,3,0.75
+CM4AI,api,v7,1,Data Governance,4,4,1.0
+CM4AI,api,v7,2,Data Governance,4,4,1.0
+CM4AI,api,v7,3,Data Governance,4,4,1.0
+CM4AI,api,v8,1,Data Governance,4,3,0.75
+CM4AI,api,v8,2,Data Governance,4,4,1.0
+CM4AI,api,v8,3,Data Governance,4,4,1.0
+CM4AI,agentic,v6,1,Data Governance,4,4,1.0
+CM4AI,agentic,v6,2,Data Governance,4,4,1.0
+CM4AI,agentic,v6,3,Data Governance,4,4,1.0
+VOICE,api,v7,1,Data Governance,4,4,1.0
+VOICE,api,v7,2,Data Governance,4,4,1.0
+VOICE,api,v7,3,Data Governance,4,4,1.0
+VOICE,api,v8,1,Data Governance,4,4,1.0
+VOICE,api,v8,2,Data Governance,4,3,0.75
+VOICE,api,v8,3,Data Governance,4,4,1.0
+VOICE,agentic,v6,1,Data Governance,4,4,1.0
+VOICE,agentic,v6,2,Data Governance,4,4,1.0
+VOICE,agentic,v6,3,Data Governance,4,4,1.0
+AI_READI,api,v7,1,Variables,1,1,1.0
+AI_READI,api,v7,2,Variables,1,1,1.0
+AI_READI,api,v7,3,Variables,1,1,1.0
+AI_READI,api,v8,1,Variables,1,1,1.0
+AI_READI,api,v8,2,Variables,1,1,1.0
+AI_READI,api,v8,3,Variables,1,1,1.0
+AI_READI,agentic,v6,1,Variables,1,1,1.0
+AI_READI,agentic,v6,2,Variables,1,0,0.0
+AI_READI,agentic,v6,3,Variables,1,1,1.0
+CHORUS,api,v7,1,Variables,1,0,0.0
+CHORUS,api,v7,2,Variables,1,0,0.0
+CHORUS,api,v7,3,Variables,1,0,0.0
+CHORUS,api,v8,1,Variables,1,0,0.0
+CHORUS,api,v8,2,Variables,1,0,0.0
+CHORUS,api,v8,3,Variables,1,0,0.0
+CHORUS,agentic,v6,1,Variables,1,0,0.0
+CHORUS,agentic,v6,2,Variables,1,0,0.0
+CHORUS,agentic,v6,3,Variables,1,1,1.0
+CM4AI,api,v7,1,Variables,1,0,0.0
+CM4AI,api,v7,2,Variables,1,0,0.0
+CM4AI,api,v7,3,Variables,1,0,0.0
+CM4AI,api,v8,1,Variables,1,0,0.0
+CM4AI,api,v8,2,Variables,1,0,0.0
+CM4AI,api,v8,3,Variables,1,0,0.0
+CM4AI,agentic,v6,1,Variables,1,0,0.0
+CM4AI,agentic,v6,2,Variables,1,0,0.0
+CM4AI,agentic,v6,3,Variables,1,0,0.0
+VOICE,api,v7,1,Variables,1,1,1.0
+VOICE,api,v7,2,Variables,1,1,1.0
+VOICE,api,v7,3,Variables,1,0,0.0
+VOICE,api,v8,1,Variables,1,1,1.0
+VOICE,api,v8,2,Variables,1,1,1.0
+VOICE,api,v8,3,Variables,1,1,1.0
+VOICE,agentic,v6,1,Variables,1,1,1.0
+VOICE,agentic,v6,2,Variables,1,0,0.0
+VOICE,agentic,v6,3,Variables,1,1,1.0
+AI_READI,api,v7,1,FileCollection,1,1,1.0
+AI_READI,api,v7,2,FileCollection,1,1,1.0
+AI_READI,api,v7,3,FileCollection,1,1,1.0
+AI_READI,api,v8,1,FileCollection,1,1,1.0
+AI_READI,api,v8,2,FileCollection,1,1,1.0
+AI_READI,api,v8,3,FileCollection,1,1,1.0
+AI_READI,agentic,v6,1,FileCollection,1,1,1.0
+AI_READI,agentic,v6,2,FileCollection,1,1,1.0
+AI_READI,agentic,v6,3,FileCollection,1,1,1.0
+CHORUS,api,v7,1,FileCollection,1,0,0.0
+CHORUS,api,v7,2,FileCollection,1,0,0.0
+CHORUS,api,v7,3,FileCollection,1,0,0.0
+CHORUS,api,v8,1,FileCollection,1,1,1.0
+CHORUS,api,v8,2,FileCollection,1,0,0.0
+CHORUS,api,v8,3,FileCollection,1,0,0.0
+CHORUS,agentic,v6,1,FileCollection,1,0,0.0
+CHORUS,agentic,v6,2,FileCollection,1,0,0.0
+CHORUS,agentic,v6,3,FileCollection,1,0,0.0
+CM4AI,api,v7,1,FileCollection,1,1,1.0
+CM4AI,api,v7,2,FileCollection,1,1,1.0
+CM4AI,api,v7,3,FileCollection,1,1,1.0
+CM4AI,api,v8,1,FileCollection,1,1,1.0
+CM4AI,api,v8,2,FileCollection,1,1,1.0
+CM4AI,api,v8,3,FileCollection,1,1,1.0
+CM4AI,agentic,v6,1,FileCollection,1,0,0.0
+CM4AI,agentic,v6,2,FileCollection,1,1,1.0
+CM4AI,agentic,v6,3,FileCollection,1,0,0.0
+VOICE,api,v7,1,FileCollection,1,0,0.0
+VOICE,api,v7,2,FileCollection,1,0,0.0
+VOICE,api,v7,3,FileCollection,1,1,1.0
+VOICE,api,v8,1,FileCollection,1,1,1.0
+VOICE,api,v8,2,FileCollection,1,1,1.0
+VOICE,api,v8,3,FileCollection,1,1,1.0
+VOICE,agentic,v6,1,FileCollection,1,1,1.0
+VOICE,agentic,v6,2,FileCollection,1,1,1.0
+VOICE,agentic,v6,3,FileCollection,1,1,1.0
+AI_READI,api,v7,1,Base / root,32,23,0.7188
+AI_READI,api,v7,2,Base / root,32,23,0.7188
+AI_READI,api,v7,3,Base / root,32,24,0.75
+AI_READI,api,v8,1,Base / root,32,23,0.7188
+AI_READI,api,v8,2,Base / root,32,25,0.7812
+AI_READI,api,v8,3,Base / root,32,24,0.75
+AI_READI,agentic,v6,1,Base / root,32,22,0.6875
+AI_READI,agentic,v6,2,Base / root,32,21,0.6562
+AI_READI,agentic,v6,3,Base / root,32,21,0.6562
+CHORUS,api,v7,1,Base / root,32,14,0.4375
+CHORUS,api,v7,2,Base / root,32,12,0.375
+CHORUS,api,v7,3,Base / root,32,14,0.4375
+CHORUS,api,v8,1,Base / root,32,14,0.4375
+CHORUS,api,v8,2,Base / root,32,14,0.4375
+CHORUS,api,v8,3,Base / root,32,13,0.4062
+CHORUS,agentic,v6,1,Base / root,32,9,0.2812
+CHORUS,agentic,v6,2,Base / root,32,10,0.3125
+CHORUS,agentic,v6,3,Base / root,32,12,0.375
+CM4AI,api,v7,1,Base / root,32,22,0.6875
+CM4AI,api,v7,2,Base / root,32,24,0.75
+CM4AI,api,v7,3,Base / root,32,19,0.5938
+CM4AI,api,v8,1,Base / root,32,20,0.625
+CM4AI,api,v8,2,Base / root,32,24,0.75
+CM4AI,api,v8,3,Base / root,32,23,0.7188
+CM4AI,agentic,v6,1,Base / root,32,15,0.4688
+CM4AI,agentic,v6,2,Base / root,32,18,0.5625
+CM4AI,agentic,v6,3,Base / root,32,16,0.5
+VOICE,api,v7,1,Base / root,32,18,0.5625
+VOICE,api,v7,2,Base / root,32,21,0.6562
+VOICE,api,v7,3,Base / root,32,21,0.6562
+VOICE,api,v8,1,Base / root,32,18,0.5625
+VOICE,api,v8,2,Base / root,32,20,0.625
+VOICE,api,v8,3,Base / root,32,20,0.625
+VOICE,agentic,v6,1,Base / root,32,15,0.4688
+VOICE,agentic,v6,2,Base / root,32,16,0.5
+VOICE,agentic,v6,3,Base / root,32,18,0.5625
