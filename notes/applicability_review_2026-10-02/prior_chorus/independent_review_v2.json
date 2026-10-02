@@ -1,0 +1,223 @@
+{
+  "reviewed_at_utc": "2026-09-19T07:24:25.989726+00:00",
+  "verdict": "approved_for_future_applicability_context_use_only",
+  "finding_resolved": "APPLICABILITY-1",
+  "repository_commit": "2c342124d099a761c8edd3b330cde4c3c4cf0386",
+  "candidate_hashes": {
+    "CHORUS_applicability_draft_v2.yaml": "c20d016a74e5850bf8e6eb9a04ac86f6ed086f6de862b6f1c92cdcfcefe9f26e",
+    "evidence_v2.md": "3ec58756cb39166408e52a3f37d2dea3f95f5cfa97a6da2c7bf7932ad48912c8",
+    "validation_v2.json": "2c205025ed10a63833caa7886b4ddb8314a0fef2a9f1c6aa9d7e4bdd2b863b56"
+  },
+  "normalized_context_sha256": "9dbc7a148f43e37b20867fa933bf82cb36f8976ebc0a7faaef71dd52c766bc43",
+  "checks": [
+    {
+      "check": "exact candidate identity CHORUS_applicability_draft_v2.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "exact candidate identity evidence_v2.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "exact candidate identity validation_v2.json",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "original CHORUS_applicability_draft.yaml preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "original evidence.md preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "original validation.json preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "APPLICABILITY-1 JSON preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "APPLICABILITY-1 markdown preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "exact seven predicate schema and no duplicates",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "only software declaration differs",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "all seven revised declarations true",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "new normalized identity matches",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "validation metadata describes actual candidate",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "source and instrument identities unchanged",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged CHORUS_preprocessed.txt",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged CHORUS_chunks.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged source_manifest.yaml",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged src/data_sheets_schema/evaluation_context.py",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged notes/matched_cborg_2026-09-13/evaluation_controls/instructions.py",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged notes/matched_cborg_2026-09-13/evaluation_controls/prepare_evaluation.py",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged data/rubric/rubric10.txt",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged data/rubric/rubric20.txt",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged .claude/agents/d4d-rubric10.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged .claude/agents/d4d-rubric10-semantic.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged .claude/agents/d4d-rubric20.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "reviewed source/instrument still unchanged .claude/agents/d4d-rubric20-semantic.md",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "explicit OHNLP attribution included",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "remaining factual uncertainty preserved",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "dataset scope and historical evidence retained",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "correction note avoids invented table status",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "only E8.4 status changes; all70 items retain inclusion",
+      "passed": true,
+      "details": [
+        {
+          "rubric": "rubric10.txt",
+          "item_id": "E8.4",
+          "old_status": "unknown",
+          "new_status": "applicable",
+          "same_inclusion": true,
+          "included": true
+        }
+      ]
+    },
+    {
+      "check": "all proposal files remain outside audit5 exact input/output scope",
+      "passed": true,
+      "details": null
+    },
+    {
+      "check": "no existing candidate or review input changed",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "findings": [],
+  "predicate_values": {
+    "human_subjects": true,
+    "regulated_access": true,
+    "shared_dataset": true,
+    "ml_training_dataset": true,
+    "data_collection": true,
+    "data_processing": true,
+    "processing_software": true
+  },
+  "source_conclusion": "OHNLP extraction/tokenization is explicit documented CHORUS software transformation. Version, uniform application and exact release membership are not established, but are not prerequisites for this dataset-level applicability declaration.",
+  "full_core_scope": "Same reviewed context may be pinned for future independently accepted Dataset/CoreDataset describing the same CHORUS dataset. Different subset or scientific scope requires review, not silent reuse.",
+  "applicability_status_change": [
+    {
+      "rubric": "rubric10.txt",
+      "item_id": "E8.4",
+      "old_status": "unknown",
+      "new_status": "applicable",
+      "same_inclusion": true,
+      "included": true
+    }
+  ],
+  "preserved_v1_hashes": {
+    "CHORUS_applicability_draft.yaml": "0df817a786fc6f7c2914007939d0149fa28c7df3d74faf5c066f0ef003b4e343",
+    "evidence.md": "0f65048655dbcb154492767e34a4e9ba1b82ac26d867b92cbfff747a43ef0e04",
+    "validation.json": "7ae708ce4f98376f42488279cabb51138671cfff5e3d4274112877cfb8b0a8bd",
+    "independent_review.json": "a86f5eda5e18ed41dcbb7db9d784de1efdea5adbeb30aaa64013643e6cab258b",
+    "independent_review.md": "a3574ec8b697bff6a4d29a207402f2123870ede435ee094c7631c0f6c2dee681"
+  },
+  "limits": [
+    "No D4D scored or scientific audit/final pair accepted.",
+    "No evaluation registration or launch created or authorized by this review.",
+    "No model/provider calls, ledger operations or live audit changes.",
+    "Pin exact candidate file and normalized digest only in a later properly accepted evaluation registration; preserve v1 and this review."
+  ]
+}

@@ -3,10 +3,9 @@
 The version-2.0 semantic contract checks that each piece of evidence is a
 non-empty string (`semantic_scope.validate_scope`). It never compares a quote,
 a path or a count with the record that was scored, so a rating that gives a
-record 38 creators when it has 39 is accepted (#1355). This module is the
-check the next contract version will call. Nothing calls it yet and no schema
-or agent emits its fields, so the field names below are a draft. They are kept
-in one place so that the version bump adopts or renames them together.
+record 38 creators when it has 39 is accepted (#1355). Semantic version 3
+calls this checker after scope, context and instrument validation. Historical
+version 1/2 acceptance is not retroactively changed.
 
 Per `unit_scores` row, with paths relative to the resource the row scores:
 
@@ -96,13 +95,14 @@ Limits. These checks are mechanical. They catch fabricated quotes, false
 absences, miscounts and unmentioned declared fields. They do not establish
 that a cited value supports the judgement, so an inference drawn against the
 record, or a misreading of a field the row cites, passes them. #1355's Q13
-deduction cited the `version_access` fields it misread. An absence claim
-cannot tell a missing value from a key spelled wrong. A misspelled key in a
-well-formed path (`version_acess.version_details`), or a pointer token
-naming a key no mapping holds (`/version_access.version_details`, one key
-with a dot in it), reads as missing, because no schema or rubric declares
-every name an absence may be claimed for: #2920 requires `was_generated_by`,
-which neither declares, to pass as absent (#3027). A count is the `len()` of
+deduction cited the `version_access` fields it misread. Version 3 rejects
+absence names absent from its frozen schema/rubric name authority (#3027,
+#3196), including `was_generated_by`: that old acceptance example was not a
+declared field and is replaced by `errata`. A literal pointer token such as
+`/version_access.version_details` is one unknown key, not a nested path.
+The authority checks names, not class/range relationships: a path composed
+entirely of declared names can still describe the wrong relationship. Legacy
+version 2 keeps its original missing-key behavior. A count is the `len()` of
 one list: the path, read as above, must name exactly one location, and it
 must be a list. So an aliased name is counted only where its own spelling
 holds every populated location, as `distribution_formats` does on a full
@@ -125,6 +125,14 @@ from data_sheets_schema.judge_contract import evaluation_contract
 from data_sheets_schema.resources import resource_path
 
 SCORE_EFFECTS = frozenset({"lowered", "noted_only"})
+ISSUE_TYPES = frozenset({"completeness", "consistency", "content_accuracy", "correctness",
+                         "semantic_understanding"})
+ISSUE_CATEGORIES = frozenset({
+    "persistent_identifier", "consent_ethics", "scope_drift", "temporal_version",
+    "source_conflict", "privacy_regulatory", "license_use_terms", "format_access",
+    "variables_metadata", "processing_provenance", "count_size", "attribution",
+    "bias_quality", "other",
+})
 _INDEX = re.compile(r"0|[1-9][0-9]*")
 _NAME = re.compile(r"[a-z_][a-z0-9_]*")
 _BAD_ESCAPE = re.compile(r"~(?![01])")
@@ -160,6 +168,14 @@ class EvidenceReport:
         return not self.errors
 
 
+class EvidenceValidationError(ValueError):
+    """An input-checked rating failed acceptance; retain its structured findings."""
+
+    def __init__(self, report: EvidenceReport):
+        self.report = report
+        super().__init__("\n".join(f"{finding.code}: {finding.message}" for finding in report.errors))
+
+
 def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceReport:
     """Report where a rating's evidence or issue links contradict its input.
 
@@ -176,11 +192,20 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     declared = str(result.get("rubric", rubric_name)).removesuffix("-semantic")
     if declared != rubric_name:
         raise ValueError(f"the rating declares {declared}, not {rubric_name}")
-    specification = yaml.safe_load(resource_path(f"data/rubric/{rubric_name}.txt").read_bytes())
+    from data_sheets_schema.semantic_instrument import select_semantic_instrument
+    version = result.get("version")
+    instrument = (select_semantic_instrument(rubric_name, version)
+                  if version in ("2.0", "3.0", "4.0") else None)
+    rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
+    specification = yaml.safe_load(resource_path(rubric_path).read_bytes())
     rules = evaluation_contract(rubric_name, specification, result.get("applicability_context"),
                                 {"id": "evidence-contract"})["items"]
     fields = _declared_fields(rubric_name, specification)
     units = dict(dataset_units(document))
+    absence_names = None
+    if instrument is not None and instrument.evidence_authority_path is not None:
+        from data_sheets_schema.semantic_evidence_authority import verify_authority
+        absence_names = verify_authority(result.get("metadata") or {})
     findings: list[EvidenceFinding] = []
     below: dict[str, dict] = {}
     for key, item in _items(result, rubric_name):
@@ -200,8 +225,15 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
                     "error", "unknown_unit", key, None,
                     f"{key}: {unit_path!r} is not a resource of the input", unit=str(unit_path)))
                 continue
-            findings.extend(_row_findings(key, unit_path, unit, row))
+            findings.extend(_row_findings(key, unit_path, unit, row, absence_names))
             if applicable and _below(row.get("score"), maximum):
+                if absence_names is not None and not any(
+                        isinstance(row.get(name), list) and row[name]
+                        for name in ("cited", "absent", "counts", "considered")):
+                    findings.append(EvidenceFinding(
+                        "error", "missing_structured_evidence", key, None,
+                        f"{key} {unit_path}: a deduction needs a cited, absent, counted or considered path",
+                        unit=unit_path))
                 findings.extend(_coverage(key, unit_path, unit, row, fields.get(key, ())))
     findings.extend(_issue_findings(result, rules, below))
     return EvidenceReport(tuple(findings))
@@ -432,7 +464,31 @@ def _entry_path(entry: Any) -> str | None:
     return path if isinstance(path, str) and path.strip() else None
 
 
-def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[EvidenceFinding]:
+def _unknown_absence_name(unit: dict, path: str, names: frozenset[str]) -> str | None:
+    """Check even tokens after a missing parent; a typo is not an absence.
+
+    Numeric tokens are indices on lists, not names. After a missing parent we
+    cannot establish its class, so canonical indices remain possible. A known
+    mapping never treats an undeclared numeric key as a list index.
+    """
+    if not path.startswith("/"):
+        return next((part for part in path.split(".") if part not in names), None)
+    unknown = object()
+    node = unit
+    for raw in path[1:].split("/"):
+        token = raw.replace("~1", "/").replace("~0", "~")
+        index = _INDEX.fullmatch(token)
+        if isinstance(node, list) and index:
+            node = node[int(token)] if int(token) < len(node) else unknown
+        else:
+            if token not in names and not (node is unknown and index):
+                return token
+            node = node.get(token, unknown) if isinstance(node, dict) else unknown
+    return None
+
+
+def _row_findings(key: str, unit_path: str, unit: dict, row: dict,
+                  absence_names: frozenset[str] | None = None) -> Iterator[EvidenceFinding]:
     def error(code, path, message):
         return EvidenceFinding("error", code, key, path, f"{key} {unit_path}: {message}", unit=unit_path)
 
@@ -446,7 +502,7 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
 
     lists = {}
     for name in ("cited", "absent", "counts", "considered"):
-        entries = row.get(name, [])
+        entries = row.get(name, [] if absence_names is None else None)
         if isinstance(entries, list):
             lists[name] = entries
         else:
@@ -484,6 +540,12 @@ def _row_findings(key: str, unit_path: str, unit: dict, row: dict) -> Iterator[E
         if (finding := malformed("absent", index, path)) is not None:
             yield finding
             continue
+        if absence_names is not None:
+            unknown = _unknown_absence_name(unit, path, absence_names)
+            if unknown is not None:
+                yield error("unknown_absence_name", path,
+                            f"absent[{index}] path {path!r} names undeclared field {unknown!r}")
+                continue
         populated = [pointer for pointer, value in _locations(unit, path) if _populated(value)]
         if populated:
             yield error("absent_path_populated", path,
@@ -571,6 +633,16 @@ def _issue_findings(result: dict, rules: dict, below: dict[str, dict]) -> Iterat
                                   f"issue {index}: item_ids must be a list of item ids and score_effect "
                                   f"one of {', '.join(sorted(SCORE_EFFECTS))}", issue=index)
             continue
+        if result.get("version") in ("3.0", "4.0"):
+            if (not isinstance(issue.get("type"), str) or issue["type"] not in ISSUE_TYPES
+                    or not isinstance(issue.get("category"), str) or issue["category"] not in ISSUE_CATEGORIES
+                    or effect not in SCORE_EFFECTS or "item_ids" not in issue
+                    or len(ids) != len(set(ids)) or (effect == "noted_only" and ids)):
+                yield EvidenceFinding(
+                    "error", "malformed_issue", None, None,
+                    f"issue {index}: version {result['version'][0]} requires declared type/category, score_effect, unique item_ids; "
+                    "noted_only has no lowered item_ids", issue=index)
+                continue
         for item_id in ids:
             if item_id not in rules:
                 yield EvidenceFinding("error", "unknown_item_id", item_id, None,

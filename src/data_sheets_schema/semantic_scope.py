@@ -1,7 +1,8 @@
 """Validate scope and applicability of general-context semantic assessments.
 
 Older instruments retain their historical contracts. Version 2 adds explicit
-context and per-resource scores without changing semantic score domains.
+context and per-resource scores; version 3 checks structured evaluator evidence
+and issue links against that input, without changing semantic score domains.
 """
 from __future__ import annotations
 
@@ -15,17 +16,19 @@ from data_sheets_schema.evaluation_context import (
 )
 from data_sheets_schema.judge_contract import _equal, _number, evaluation_contract
 from data_sheets_schema.resources import resource_path
+from data_sheets_schema.semantic_instrument import select_semantic_instrument
 
 _CLASSIFICATION_ONLY = object()
 
 
 def validate_scope(result: dict, *, document: dict | None = None, input_sha256: str | None = None,
                    expected_context: dict | None | object = _CLASSIFICATION_ONLY):
-    if result.get("version") != "2.0":
+    if result.get("version") not in {"2.0", "3.0", "4.0"}:
         return
     rubric_name = result.get("rubric", "").removesuffix("-semantic")
     if rubric_name not in {"rubric10", "rubric20"}:
         raise ValueError("unknown general-context semantic rubric")
+    instrument = select_semantic_instrument(rubric_name, result["version"])
     context = normalize_context(result.get("applicability_context"))
     # Historical structural classification can check internal consistency.
     # New-output acceptance with an input must use independent caller context;
@@ -37,7 +40,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         context = trusted
     scope = result.get("evaluation_scope")
     if not isinstance(scope, dict) or scope.get("collection_metadata_inherited") is not False:
-        raise ValueError("version 2 requires an explicit non-inherited evaluation scope")
+        raise ValueError("general-context semantic instruments require an explicit non-inherited evaluation scope")
     units = scope.get("units")
     if not isinstance(units, list) or not units or any(
             not isinstance(unit, dict) or not isinstance(unit.get("path"), str) for unit in units):
@@ -53,6 +56,9 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         if units != actual:
             raise ValueError("evaluation scope omits or changes input resource identities")
     metadata = result.get("metadata") or {}
+    if instrument.evidence_authority_path is not None:
+        from data_sheets_schema.semantic_evidence_authority import verify_authority
+        verify_authority(metadata)
     if metadata.get("context_sha256") != context_digest(context):
         raise ValueError("evaluation context does not match its recorded digest")
     if input_sha256 is not None and metadata.get("input_sha256") != input_sha256:
@@ -61,7 +67,7 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
     # Version-2 rules are the source rubric's declared predicate assignments.
     # The instrument boundary records these bytes; future rule revisions need
     # another version instead of reinterpreting previously accepted scores.
-    rubric_path = resource_path(f"data/rubric/{rubric_name}.txt")
+    rubric_path = resource_path(instrument.rubric_path)
     raw = rubric_path.read_bytes()
     specification = yaml.safe_load(raw)
     if metadata.get("rubric_sha256") != hashlib.sha256(raw).hexdigest():
@@ -145,3 +151,9 @@ def validate_scope(result: dict, *, document: dict | None = None, input_sha256: 
         _equal(overall.get("normalized_percentage"), 100 * total / adjusted, "normalized_percentage", 0.051)
     elif overall.get("normalized_percentage") is not None:
         raise ValueError("zero applicable maximum requires null normalized_percentage")
+    if instrument.evidence_authority_path is not None and document is not None:
+        from data_sheets_schema.semantic_evidence import check_evidence, EvidenceValidationError
+        report = check_evidence(result, document, rubric_name)
+        if not report.passed:
+            raise EvidenceValidationError(report)
+        return report

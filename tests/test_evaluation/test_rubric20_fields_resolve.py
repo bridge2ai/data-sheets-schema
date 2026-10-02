@@ -78,13 +78,47 @@ def resolves(path, start="Dataset"):
     return True
 
 
-def _json_keys(node):
-    """Every key name in a JSON document, at any depth."""
-    if isinstance(node, dict):
-        return set(node) | {k for v in node.values() for k in _json_keys(v)}
-    if isinstance(node, list):
-        return {k for v in node for k in _json_keys(v)}
-    return set()
+def _output_tokens(schema, example):
+    """Declared output paths/names/enums, excluding schema implementation keys."""
+    tokens = set()
+
+    def name(key, prefix):
+        path = f"{prefix}.{key}" if prefix else key
+        tokens.update((key, path))
+        return path
+
+    def walk_schema(node, prefix=""):
+        if not isinstance(node, dict):
+            return
+        for key, child in node.get("properties", {}).items():
+            walk_schema(child, name(key, prefix))
+        tokens.update(value for value in node.get("enum", []) if isinstance(value, str))
+        # Compositions describe the same object, not another output level.
+        for key in ("allOf", "anyOf", "oneOf"):
+            for child in node.get(key, []):
+                walk_schema(child, prefix)
+        for key in ("items", "if", "then", "else"):
+            walk_schema(node.get(key), prefix)
+
+    def walk_example(node, prefix=""):
+        if isinstance(node, dict):
+            for key, child in node.items():
+                walk_example(child, name(key, prefix))
+        elif isinstance(node, list):
+            for child in node:
+                walk_example(child, prefix)
+
+    walk_schema(schema)
+    walk_example(example)
+    return tokens
+
+
+def _prose_field_tokens(text, output_tokens):
+    # Exempt only this explicitly negative occurrence, never the token's other
+    # uses. In particular, mentioning the warning cannot authorize a later
+    # instruction to score the undeclared field (#4242).
+    text = re.sub(r"`[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*` is not declared(?=[;.])", "", text)
+    return set(re.findall(r"`([a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*)`", text)) - output_tokens
 
 
 def _rubric():
@@ -264,24 +298,41 @@ class TestTheAgentsProse(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.output_keys = set()
-        for name in ("rubric20_semantic_schema.json", "rubric20_output_format.json"):
-            path = REPO / "src" / "download" / "prompts" / name
-            if path.exists():
-                cls.output_keys |= _json_keys(json.loads(path.read_text()))
+        prompts = REPO / "src" / "download" / "prompts"
+        cls.output_keys = _output_tokens(
+            json.loads((prompts / "rubric20_semantic_schema.json").read_text()),
+            json.loads((prompts / "rubric20_output_format.json").read_text()))
 
     def test_every_field_named_anywhere_in_an_agent_resolves(self):
         for agent, path in AGENTS.items():
             text = path.read_text(encoding="utf-8")
-            tokens = set(re.findall(
-                r"`([a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*)`", text))
             ignore = self.output_keys | self.ARTIFACTS | self.UNDECLARED_OUTPUT_KEYS
-            for token in sorted(tokens - ignore):
+            for token in sorted(_prose_field_tokens(text, ignore)):
                 with self.subTest(agent=agent, token=token):
                     self.assertTrue(
                         resolves(token),
                         f"`{token}` is named in {agent} but cannot be reached "
                         "from Dataset")
+
+    def test_output_enums_and_qualified_paths_come_from_the_contract(self):
+        self.assertTrue({"lowered", "noted_only", "metadata.evidence_authority_sha256"} <= self.output_keys)
+        self.assertEqual(_prose_field_tokens(
+            "Write `metadata.evidence_authority_sha256`; use `lowered` or `noted_only`.",
+            self.output_keys), set())
+        self.assertEqual(_prose_field_tokens("Write `metadata.evidence_authority_sha25`.", self.output_keys),
+                         {"metadata.evidence_authority_sha25"})
+        self.assertNotIn("properties", self.output_keys)
+
+    def test_negative_example_does_not_exempt_an_actual_dead_field_reference(self):
+        warning = "`was_generated_by` is not declared; use a declared field."
+        self.assertEqual(_prose_field_tokens(warning, self.output_keys), set())
+        self.assertEqual(_prose_field_tokens(warning + " Score `was_generated_by`.", self.output_keys),
+                         {"was_generated_by"})
+        for bad in ("confidentiality_level", "data_characteristics", "version_acess"):
+            with self.subTest(token=bad):
+                self.assertEqual(_prose_field_tokens(f"Compare `{bad}` with `ethical_reviews`.", self.output_keys),
+                                 {bad, "ethical_reviews"})
+                self.assertFalse(resolves(bad))
 
 
 @unittest.skipUnless(HYBRID.exists(), "hybrid scorer not present")

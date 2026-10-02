@@ -127,14 +127,16 @@ def test_explicit_evaluator_basis_and_family(fixture, model, expected):
     assert manifest["records"][0]["same_family"] == expected
 
 
-def test_default_evaluator_config_is_copied_and_requests_survive_its_removal(fixture, monkeypatch):
+@pytest.mark.parametrize("plan_version", [1, 2])
+def test_default_evaluator_config_is_copied_and_requests_survive_its_removal(fixture, monkeypatch, plan_version):
     from data_sheets_schema import evaluation_model
+    version_options = {} if plan_version == 1 else {"plan_version": 2, "artifact_kind": "full"}
     root, output = fixture
     config = root / "judge.yaml"
     raw = b"version: 1\nmodel: independent-judge\n"
     config.write_bytes(raw)
     monkeypatch.setattr(evaluation_model, "CONFIG_PATH", config)
-    manifest = build(fixture)
+    manifest = build(fixture, **version_options)
     selection = manifest["model"]
     assert selection["name"] == "independent-judge"
     assert selection["basis"] == "evaluation_config"
@@ -148,8 +150,10 @@ def test_default_evaluator_config_is_copied_and_requests_survive_its_removal(fix
 
 
 @pytest.mark.parametrize("remove", [False, True])
-def test_default_config_race_fails_before_publishing(fixture, monkeypatch, remove):
+@pytest.mark.parametrize("plan_version", [1, 2])
+def test_default_config_race_fails_before_publishing(fixture, monkeypatch, remove, plan_version):
     from data_sheets_schema import evaluation_model
+    version_options = {} if plan_version == 1 else {"plan_version": 2, "artifact_kind": "full"}
     root, output = fixture
     config = root / "judge.yaml"
     config.write_text("version: 1\nmodel: initial-judge\n")
@@ -163,24 +167,28 @@ def test_default_config_race_fails_before_publishing(fixture, monkeypatch, remov
         return selected
     monkeypatch.setattr(support_plan, "evaluation_model_settings", resolve_then_change)
     with pytest.raises(support_plan.PlanError, match="evaluation config .*after model selection"):
-        build(fixture)
+        build(fixture, **version_options)
     assert not output.exists()
 
 
-def test_explicit_plan_model_does_not_read_default_config(fixture, monkeypatch):
+@pytest.mark.parametrize("plan_version", [1, 2])
+def test_explicit_plan_model_does_not_read_default_config(fixture, monkeypatch, plan_version):
     from data_sheets_schema import evaluation_model
+    version_options = {} if plan_version == 1 else {"plan_version": 2, "artifact_kind": "full"}
     monkeypatch.setattr(evaluation_model, "CONFIG_PATH", fixture[0] / "missing-config.yaml")
-    manifest = build(fixture, model="explicit-judge")
+    manifest = build(fixture, **version_options, model="explicit-judge")
     assert manifest["model"] == {"name": "explicit-judge", "basis": "explicit_override"}
 
 
 @pytest.mark.parametrize("model", [" judge", "judge ", "judge\n", "", " ", 12, False])
-def test_explicit_plan_model_matches_live_selection_validation(fixture, model):
+@pytest.mark.parametrize("plan_version", [1, 2])
+def test_explicit_plan_model_matches_live_selection_validation(fixture, model, plan_version):
     from data_sheets_schema import evaluation_model
+    version_options = {} if plan_version == 1 else {"plan_version": 2, "artifact_kind": "full"}
     with pytest.raises(ValueError, match="nonempty trimmed identifier"):
         evaluation_model.model_selection(model)
     with pytest.raises(support_plan.PlanError, match="nonempty trimmed identifier"):
-        build(fixture, model=model)
+        build(fixture, **version_options, model=model)
     assert not fixture[1].exists()
 
 

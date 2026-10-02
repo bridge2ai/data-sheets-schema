@@ -1,0 +1,49 @@
+# DRAFT authored by Codex (AI assistant), 2026-10-02. Human scientific review pending.
+# Not registered for scoring. Review manifest and evidence ledger accompany these declarations.
+human_subjects:
+  value: true
+  evidence: 'The pediatric release describes 300 participants aged 2–18 and parental or participant consent
+    before collection and sharing. Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 390-391; physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 397-400. Scope/limit: Pediatric v1.1.0 scope; adult counts, release versions, and normative
+    claims do not transfer.'
+regulated_access:
+  value: true
+  evidence: 'The pediatric files require credentialed users to sign the registered-access agreement. Sources:
+    physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt physical lines
+    476-484. Scope/limit: Access-related No training required refers to user prerequisites, not to whether
+    data support ML training.'
+shared_dataset:
+  value: true
+  evidence: 'Derived audio features and associated clinical information are released under credentialed
+    access. Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 390-391; physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 476-484. Scope/limit: Controlled sharing of this pediatric release, which excludes
+    original voice recordings.'
+ml_training_dataset:
+  value: null
+  evidence: 'The source describes enabling pediatric machine learning and developing AI screening tools;
+    training-specific applicability needs an agreed interpretation. Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt,
+    VOICE_PEDIATRIC_preprocessed.txt physical lines 393-395. Scope/limit: Do not infer a trained model
+    or released split, transfer adult evidence, or confuse access training requirements with ML training.'
+data_collection:
+  value: true
+  evidence: 'Age-appropriate voice and questionnaire data were collected from eligible children and adolescents.
+    Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt physical
+    lines 390-391; physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 397-400. Scope/limit: The 300-participant pediatric release; counts and collection
+    sessions are not inherited from the adult release.'
+data_processing:
+  value: true
+  evidence: 'The pediatric release describes derived audio features and preprocessing/merging of phenotype
+    data. Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 403-413; physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 415-417. Scope/limit: The pediatric workflow; reported processing does not mean every
+    possible feature was retained.'
+processing_software:
+  value: true
+  evidence: 'The release identifies b2aiprep preprocessing and openSMILE, Praat, parselmouth, and torchaudio
+    feature extraction. Sources: physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 403-413; physionet_b2ai-voice-pediatric_1.1.0_2026-07-24.txt, VOICE_PEDIATRIC_preprocessed.txt
+    physical lines 415-417. Scope/limit: An identified transformation pipeline; the adult b2aiprep version
+    is not assigned to this pediatric release.'

@@ -40,7 +40,9 @@ def evaluator_column(doc: dict) -> str:
     return shown if shown == key else f"{shown} (evaluator {key})"
 
 
-def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
+def report(paths: list[Path], cohort: list[Path] | None = None, *,
+           evidence_inputs: dict[Path, Path] | None = None,
+           evidence_contexts: dict[Path, Path] | None = None) -> str:
     """`cohort` names the evaluations the discrimination block measures — one
     rating per record, e.g. the primaries of a set that also holds repeats.
     The table still lists every named evaluation, and the block names those
@@ -50,6 +52,13 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     per evaluator, never pooled (#3309)."""
     if not paths:
         raise ValueError("name at least one evaluation")
+    inputs = {Path(k).resolve(): Path(v) for k, v in (evidence_inputs or {}).items()}
+    contexts = {Path(k).resolve(): Path(v) for k, v in (evidence_contexts or {}).items()}
+    named_paths = {path.resolve() for path in paths}
+    if set(inputs) - named_paths:
+        raise ValueError("evidence inputs name evaluations outside the report")
+    if set(contexts) - set(inputs):
+        raise ValueError("each evidence context requires an input for the same evaluation")
     documents, rows = [], []
     for path in paths:
         raw = path.read_bytes()
@@ -84,6 +93,15 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     for row in rows:
         text.append("| " + " | ".join(str(cell).replace("|", "\\|").replace("\n", " ")
                                        for cell in row) + " |")
+    if any(doc.get("version") in ("3.0", "4.0") or path.resolve() in inputs for path, doc in documents):
+        text.extend(["", "## Evaluator evidence and issue taxonomy", "",
+                     "Evidence checks below are recomputed from explicitly supplied inputs and caller contexts; "
+                     "a missing context means unknown applicability. They do not certify the evaluator's "
+                     "semantic interpretation or replace instrument-provenance acceptance.", ""])
+        for path, doc in documents:
+            if doc.get("version") not in ("3.0", "4.0") and path.resolve() not in inputs:
+                continue
+            text.extend(_evidence_section(path, doc, inputs.get(path.resolve()), contexts.get(path.resolve())))
     if cohort is None:
         measured, left_out = [doc for _path, doc in documents], []
     else:
@@ -116,6 +134,72 @@ def report(paths: list[Path], cohort: list[Path] | None = None) -> str:
     return "\n".join(text).rstrip("\n") + "\n"
 
 
+
+def _evidence_section(path: Path, doc: dict, input_path: Path | None,
+                      context_path: Path | None) -> list[str]:
+    import yaml
+    from data_sheets_schema.evaluation_context import load_context, load_document
+    from data_sheets_schema.semantic_evidence import EvidenceValidationError
+    from data_sheets_schema.semantic_evidence_reporting import (
+        markdown_cell, render_evidence_findings, render_issue_taxonomy,
+    )
+    from data_sheets_schema.semantic_scope import validate_scope
+
+    lines = [f"### {markdown_cell(path)}", ""]
+    if doc.get("version") in ("3.0", "4.0"):
+        # Mechanical checks assume the output contract: an unrecognized citation
+        # key, for example, must not silently become an absent quotation (#4245).
+        from jsonschema import SchemaError, ValidationError, validate
+        from data_sheets_schema.resources import resource_path
+
+        try:
+            from data_sheets_schema.semantic_instrument import select_semantic_instrument
+            selected = select_semantic_instrument(doc["rubric"], doc["version"])
+            schema = json.loads(resource_path(selected.schema_path).read_bytes())
+            validate(doc, schema)
+        except ValidationError as exc:
+            location = "/".join(str(part) for part in exc.absolute_path) or "#"
+            lines.extend([
+                f"Evidence verification: **not established** — invalid v{doc['version'].split('.')[0]} output structure at "
+                f"{markdown_cell(location)}: {markdown_cell(exc.message)}.", "",
+            ])
+            return lines
+        except (OSError, ValueError, SchemaError) as exc:
+            lines.extend([f"Evidence verification: **not established** — {markdown_cell(exc)}.", ""])
+            return lines
+    try:
+        lines.extend([render_issue_taxonomy(doc).rstrip(), ""])
+    except ValueError as exc:
+        lines.extend([f"Issue taxonomy: **invalid declaration** — {markdown_cell(exc)}.", ""])
+    if doc.get("version") not in ("3.0", "4.0"):
+        lines.extend(["Mechanical evidence checks: **not run**; this rating retains its historical contract.", ""])
+        return lines
+    if input_path is None:
+        lines.extend([render_evidence_findings(None).rstrip(), ""])
+        return lines
+    try:
+        document, digest = load_document(input_path)
+        context = load_context(context_path)
+        lines.extend([f"Input: {markdown_cell(input_path)}; SHA256: {digest}.", ""])
+        checked = validate_scope(doc, document=document, input_sha256=digest, expected_context=context)
+    except EvidenceValidationError as exc:
+        checked = exc.report
+    except (OSError, ValueError, yaml.YAMLError) as exc:
+        lines.extend([f"Evidence verification: **not established** — {markdown_cell(exc)}.", ""])
+        return lines
+    lines.extend([render_evidence_findings(checked).rstrip(), ""])
+    return lines
+
+
+def _named_pairs(pairs: list[list[Path]] | None, label: str) -> dict[Path, Path]:
+    result = {}
+    for evaluation, value in pairs or []:
+        key = evaluation.resolve()
+        if key in result:
+            raise ValueError(f"duplicate {label} for {evaluation}")
+        result[key] = value
+    return result
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("evaluations", nargs="+", type=Path)
@@ -123,10 +207,25 @@ def main() -> None:
     parser.add_argument("--cohort", nargs="+", type=Path,
                         help="the evaluations the discrimination block measures (one rating per "
                              "record); default: every evaluation named")
+    parser.add_argument("--evidence-input", nargs=2, action="append", type=Path,
+                        metavar=("EVALUATION", "INPUT"),
+                        help="recompute structured mechanical evidence for this named rating and input")
+    parser.add_argument("--evidence-context", nargs=2, action="append", type=Path,
+                        metavar=("EVALUATION", "CONTEXT"),
+                        help="independent caller applicability context; omission means unknown")
     args = parser.parse_args()
     if args.output.resolve() in {p.resolve() for p in args.evaluations}:
         parser.error("output must not replace an evaluation")
-    rendered = report(args.evaluations, args.cohort)
+    try:
+        inputs = _named_pairs(args.evidence_input, "evidence input")
+        contexts = _named_pairs(args.evidence_context, "evidence context")
+        protected = {p.resolve() for p in [*args.evaluations, *inputs.values(), *contexts.values()]}
+        if (args.output.resolve() in protected or args.output.exists()
+                and any(args.output.samefile(p) for p in protected if p.exists())):
+            parser.error("output must not replace an evaluation, evidence input or context")
+        rendered = report(args.evaluations, args.cohort, evidence_inputs=inputs, evidence_contexts=contexts)
+    except ValueError as exc:
+        parser.error(str(exc))
     args.output.write_text(rendered, encoding="utf-8")
 
 

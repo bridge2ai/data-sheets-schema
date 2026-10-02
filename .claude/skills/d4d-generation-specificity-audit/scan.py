@@ -4520,6 +4520,10 @@ def _phase_names(expr, fn, funcs: dict, consts: dict, depth: int = 0) -> set[str
                                 arg = _call_arg(c, fn, expr.id)
                                 if arg is not None:
                                     values |= _phase_names(arg, caller, funcs, consts, depth + 1)
+                elif not found and isinstance(consts.get(expr.id), str):
+                    # Imported helpers can name their phase in a module literal.
+                    values.add(consts[expr.id])
+                    found = True
                 if found:
                     return values
     raise _not_derived("the follow-up turns", f"the phase of a model call (`{ast.unparse(expr)[:40]}` at "
@@ -4548,9 +4552,78 @@ def _guards(fn, target) -> list:
     return out
 
 
-def _plan_scopes(tree: ast.Module, consts: dict) -> dict[str, list[str] | None]:
-    """turn -> the conditions that make it (None: every condition), from the
-    runner's own list of conditional calls in `plan()`."""
+def _optional_turn_selection(tree: ast.Module, test) -> dict:
+    """A narrow, validated opt-in RunSpec axis, never an unknown truthy gate.
+
+    Read the default, finite integer domain and API/renderer restriction from
+    unconditional raising guards in __post_init__. New shapes fail closed.
+    """
+    fail = lambda: _not_derived("which conditions make a follow-up turn",
+                               f"unvalidated optional gate `{ast.unparse(test)[:60]}`")
+    if not (isinstance(test, ast.Attribute) and isinstance(test.value, ast.Name)
+            and test.value.id == "spec"):
+        raise fail()
+    field = test.attr
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "RunSpec"), None)
+    if cls is None:
+        raise fail()
+    declarations = [n for n in cls.body if isinstance(n, ast.AnnAssign)
+                    and isinstance(n.target, ast.Name) and n.target.id == field]
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == "__post_init__"), None)
+    if (len(declarations) != 1 or init is None
+            or not isinstance(declarations[0].annotation, ast.Name) or declarations[0].annotation.id != "int"
+            or not isinstance(declarations[0].value, ast.Constant)
+            or type(declarations[0].value.value) is not int or declarations[0].value.value != 0):
+        raise fail()
+    if any(isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+           and ast.unparse(n) == f"self.{field}" for n in ast.walk(init)):
+        raise fail()
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom)) for n in ast.walk(init)):
+        raise fail()
+    guards = [n for n in init.body if isinstance(n, ast.If) and len(n.body) == 1
+              and isinstance(n.body[0], ast.Raise) and not n.orelse]
+    dump = lambda n: ast.dump(n, include_attributes=False)
+    domain, restrictions = [], []
+    for guard in guards:
+        for node in ast.walk(guard.test):
+            if not (isinstance(node, ast.Compare) and len(node.ops) == 1
+                    and isinstance(node.ops[0], ast.NotIn)
+                    and ast.unparse(node.left) == f"self.{field}"):
+                continue
+            try:
+                values = ast.literal_eval(node.comparators[0])
+            except (ValueError, TypeError):
+                continue
+            if (not isinstance(values, (tuple, list)) or not values or 0 not in values
+                    or any(type(v) is not int or v < 0 for v in values) or not any(values)):
+                continue
+            expected = ast.parse(f"type(self.{field}) is not int or self.{field} not in {values!r}", mode="eval").body
+            if dump(guard.test) == dump(expected):
+                domain.append((sorted(set(values)), guard.lineno))
+        for node in ast.walk(guard.test):
+            if not (isinstance(node, ast.Compare) and len(node.ops) == 1
+                    and isinstance(node.ops[0], ast.NotEq)
+                    and ast.unparse(node.left) == "self.render_version"
+                    and isinstance(node.comparators[0], ast.Constant)
+                    and type(node.comparators[0].value) is int):
+                continue
+            renderer = node.comparators[0].value
+            expected = ast.parse(f"self.{field} and (self.is_agentic or self.render_version != {renderer})", mode="eval").body
+            if dump(guard.test) == dump(expected):
+                restrictions.append((renderer, guard.lineno))
+    if len(domain) != 1 or len(restrictions) != 1:
+        raise fail()
+    admitted = derive_admitted_renderers(tree)
+    if restrictions[0][0] not in admitted or restrictions[0][0] in derive_execute_refusal(tree, admitted)["refused"]:
+        raise fail()
+    return {"field": field, "default": 0, "enabled_values": [v for v in domain[0][0] if v],
+            "runtime": "api", "renderers": [restrictions[0][0]],
+            "evidence": [f"api_runner.py:{n}" for n in
+                         (declarations[0].lineno, domain[0][1], restrictions[0][1])]}
+
+
+def _plan_scopes(tree: ast.Module, consts: dict) -> dict:
+    """Condition and explicit opt-in selection, from plan()'s actual syntax."""
     plan = _function(tree, "plan")
     if plan is None:
         raise _not_derived("which conditions make a follow-up turn", "api_runner.py defines no plan()")
@@ -4558,38 +4631,202 @@ def _plan_scopes(tree: ast.Module, consts: dict) -> dict[str, list[str] | None]:
                   if isinstance(k, ast.Constant) and k.value == "conditional_calls"), None)
     if value is None:
         raise _not_derived("which conditions make a follow-up turn", "plan() lists no conditional_calls")
-    scopes: dict[str, list[str] | None] = {}
+    scopes = {}
 
     def gate_of(test):
-        for left, op, right in _compares(test):
-            if _attr_or_name(left) == "condition":
-                if isinstance(op, ast.In) and isinstance(right, ast.Name) and isinstance(consts.get(right.id), tuple):
-                    return sorted(consts[right.id])
-                if isinstance(op, ast.Eq) and isinstance(right, ast.Constant):
-                    return [right.value]
-        raise _not_derived("which conditions make a follow-up turn",
-                           f"plan() gates a conditional call on `{ast.unparse(test)[:60]}`")
+        if isinstance(test, ast.Compare) and len(test.ops) == 1:
+            left, op, right = test.left, test.ops[0], test.comparators[0]
+            if ast.unparse(left) == "spec.condition":
+                if (isinstance(op, ast.In) and isinstance(right, ast.Name)
+                        and isinstance(consts.get(right.id), tuple)
+                        and all(isinstance(v, str) for v in consts[right.id])):
+                    return {"conditions": sorted(consts[right.id])}
+                if isinstance(op, ast.Eq) and isinstance(right, ast.Constant) and isinstance(right.value, str):
+                    return {"conditions": [right.value]}
+        return {"conditions": None, "selection": _optional_turn_selection(tree, test)}
 
     def visit(node, gate):
         if isinstance(node, ast.IfExp):
+            if gate or not isinstance(node.orelse, (ast.List, ast.Tuple)) or node.orelse.elts:
+                raise _not_derived("which conditions make a follow-up turn", "nested or nonempty alternative gate")
             visit(node.body, gate_of(node.test))
-            visit(node.orelse, gate)
         elif isinstance(node, ast.Constant) and isinstance(node.value, str):
             m = re.match(r"(\w+):", node.value)
             if m:
-                scopes[m.group(1)] = gate
+                if m.group(1) in scopes:
+                    raise _not_derived("which conditions make a follow-up turn", "duplicate planned turn")
+                scopes[m.group(1)] = gate or {"conditions": None}
         elif isinstance(node, ast.JoinedStr):
             if node.values and isinstance(node.values[0], ast.Constant):
                 visit(node.values[0], gate)
-        else:
-            for child in ast.iter_child_nodes(node):
+        elif isinstance(node, (ast.List, ast.Tuple)):
+            for child in node.elts:
                 visit(child, gate)
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+            visit(node.left, gate)
+            visit(node.right, gate)
+        else:
+            raise _not_derived("which conditions make a follow-up turn",
+                               f"unreadable conditional_calls expression `{ast.unparse(node)[:60]}`")
 
     visit(value, None)
     return scopes
 
 
-def derive_followups(tree: ast.Module, phases: list[str], consts: dict) -> dict:
+def _imported_target(call, bindings: dict):
+    if isinstance(call.func, ast.Name):
+        return bindings.get(call.func.id)
+    if isinstance(call.func, ast.Attribute) and isinstance(call.func.value, ast.Name):
+        bound = bindings.get(call.func.value.id)
+        if bound and bound[1] is None:
+            return bound[0], call.func.attr
+    return None
+
+
+def _require_followup_binding(path: str, tree, fn, call) -> None:
+    """An import must be visible, unique and unshadowed at this actual call.
+
+    The broad discovery import map deliberately includes every function. This
+    narrower derivation must not borrow another function's local import.
+    """
+    name = call.func.id if isinstance(call.func, ast.Name) else call.func.value.id
+    fail = lambda: _not_derived("the follow-up turns", f"ambiguous import binding `{name}` at {path}:{call.lineno}")
+    parents = _parents(tree)
+    imports = []
+    for n in ast.walk(tree):
+        if not isinstance(n, (ast.Import, ast.ImportFrom)) or not any(
+                (a.asname or a.name.split(".")[0]) == name for a in n.names):
+            continue
+        owner = parents[id(n)]
+        if owner is tree:
+            imports.append(n)
+        else:
+            cur = owner
+            while cur is not tree and not isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                cur = parents[id(cur)]
+            if cur is fn:
+                block = _block_of(n, parents)
+                after = block[block.index(n) + 1:]
+                if any(call is x for stmt in after for x in ast.walk(stmt)):
+                    imports.append(n)
+                else:
+                    raise fail()
+    if len(imports) != 1 or name in _params(fn):
+        raise fail()
+    if any(isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+           for n in ast.walk(fn)):
+        raise fail()
+    if any(not isinstance(n, ast.alias) and _rebinding(n, name, fn) for n in ast.walk(fn)):
+        raise fail()
+    if any(isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+           and any(isinstance(x, ast.Name) and x.id == name for x in ast.walk(n.value))
+           for n in ast.walk(fn)):
+        raise fail()
+    # Global rebinding after an import is equally ambiguous. Do not confuse a
+    # same-spelled local in some unrelated function with a global assignment.
+    for stmt in tree.body:
+        if isinstance(stmt, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            if stmt.name == name:
+                raise fail()
+        elif not isinstance(stmt, (ast.Import, ast.ImportFrom)) and any(
+                isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                for n in ast.walk(stmt)):
+            raise fail()
+
+
+def _optional_guard_evidence(fn, call, selection: dict, path: str) -> list[str]:
+    """Require a positive exact opt-in guard, retaining branch polarity."""
+    field = selection["field"]
+    parents, cur, evidence = _parents(fn), call, []
+    if "spec" not in _params(fn) or any((isinstance(n, ast.Name) and n.id == "spec" and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or (isinstance(n, ast.Attribute) and ast.unparse(n) == f"spec.{field}"
+               and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(fn)):
+        raise _not_derived("which conditions make a follow-up turn", "the optional spec is reassigned")
+    while id(cur) in parents:
+        par = parents[id(cur)]
+        if isinstance(par, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)) and par is not fn:
+            raise _not_derived("the follow-up turns", "a nested function's call is not a direct helper call")
+        if isinstance(par, (ast.If, ast.IfExp, ast.While)) and cur is not par.test:
+            attributes = [n for n in ast.walk(par.test) if isinstance(n, ast.Attribute)
+                          and isinstance(n.value, ast.Name) and n.value.id == "spec"]
+            if attributes:
+                positive = cur is par.body if isinstance(par, ast.IfExp) else any(cur is s for s in par.body)
+                if not (isinstance(par, ast.If) and positive and ast.unparse(par.test) == f"spec.{field}"):
+                    raise _not_derived("which conditions make a follow-up turn",
+                                       f"unsupported optional call guard at {path}:{par.lineno}")
+                evidence.append(f"{path}:{par.lineno}")
+        cur = par
+    return evidence
+
+
+def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes: dict) -> dict:
+    """Direct imported helper calls, found through the runner's import closure.
+
+    Resolve the wrapper alias to this runner, then read the helper's actual
+    phase. Unsupported indirection fails instead of silently dropping a turn.
+    """
+    runner = _resolved(root / RUNNER)
+    runner_bindings = _bindings(root, runner, tree, {})
+    out = {}
+    for path in _package_closure(root, ["data_sheets_schema.api_runner"]):
+        if _resolved(path) == runner:
+            continue
+        helper_tree = _tree(path)
+        bindings = _bindings(root, path, helper_tree, {})
+        helper_funcs = {n.name: n for n in helper_tree.body
+                        if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
+        for name, fn in helper_funcs.items():
+            for call in ast.walk(fn):
+                if not isinstance(call, ast.Call):
+                    continue
+                target = _imported_target(call, bindings)
+                candidate = _attr_or_name(call.func) in wrappers or (target and target[0] == runner
+                                                                    and target[1] in wrappers)
+                if not candidate:
+                    continue
+                rel = _rel(root, path)
+                if not target or target[0] != runner or target[1] not in wrappers:
+                    raise _not_derived("the follow-up turns", f"unresolved phase wrapper at {rel}:{call.lineno}")
+                _require_followup_binding(rel, helper_tree, fn, call)
+                passed_spec = _call_arg(call, funcs[target[1]], "spec")
+                if not isinstance(passed_spec, ast.Name) or passed_spec.id != "spec":
+                    raise _not_derived("the follow-up turns", "helper wrapper receives another spec")
+                arg = _call_arg(call, funcs[target[1]], "phase")
+                if arg is None:
+                    raise _not_derived("the follow-up turns", f"helper call at {rel}:{call.lineno} names no phase")
+                values = _phase_names(arg, fn, helper_funcs, _module_constants(path))
+                entries = [(caller, c) for caller in funcs.values() for c in ast.walk(caller)
+                           if isinstance(c, ast.Call) and _imported_target(c, runner_bindings) == (_resolved(path), name)]
+                if not entries:
+                    raise _not_derived("the follow-up turns", f"{rel}:{name} has no direct imported runner caller")
+                for phase in values:
+                    selection = scopes.get(phase, {}).get("selection")
+                    if selection is None:
+                        raise _not_derived("which conditions make a follow-up turn",
+                                           f"helper phase `{phase}` has no matching optional conditional_calls entry")
+                    # Inspect the helper's own enclosing guards too; they cannot
+                    # secretly narrow condition/runtime selection from the plan.
+                    _optional_guard_evidence(fn, call, selection, rel)
+                    via = []
+                    for caller, entry in entries:
+                        _require_followup_binding("api_runner.py", tree, caller, entry)
+                        passed_spec = _call_arg(entry, fn, "spec")
+                        if not isinstance(passed_spec, ast.Name) or passed_spec.id != "spec":
+                            raise _not_derived("the follow-up turns", "helper entry receives another spec")
+                        guards = _optional_guard_evidence(caller, entry, selection, "api_runner.py")
+                        if not guards:
+                            raise _not_derived("which conditions make a follow-up turn",
+                                               f"helper phase `{phase}` has an unguarded runner caller")
+                        via.append({"call": f"api_runner.py:{entry.lineno}", "guards": guards})
+                    row = out.setdefault(phase, {"calls": [], "conditions": scopes[phase]["conditions"],
+                                                "selection": selection, "via": [],
+                                                "basis": "per plan() and validated opt-in helper call path"})
+                    row["calls"].append(f"{rel}:{call.lineno}")
+                    row["via"].extend(via)
+    return out
+
+
+def derive_followups(tree: ast.Module, phases: list[str], consts: dict, *, root: Path | None = None) -> dict:
     """The model calls an API run can make besides its phases (#4058), read
     from the code: the runner's model-call wrapper (the function taking a
     `phase` that calls the function that sends the request) and the phase
@@ -4632,7 +4869,9 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict) -> dict:
         if turn == "PHASES" or turn in phases:
             continue
         if turn in scopes:
-            scope, basis = scopes[turn], "per plan()'s conditional_calls"
+            if "selection" in scopes[turn]:
+                raise _not_derived("the follow-up turns", "optional local wrapper calls need a derived call path")
+            scope, basis = scopes[turn]["conditions"], "per plan()'s conditional_calls"
         else:
             guarded = []
             for fname, c in sites:
@@ -4648,6 +4887,11 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict) -> dict:
             scope, basis = None, "since no condition test guards its call path"
         turns[turn] = {"calls": sorted({f"api_runner.py:{c.lineno}" for _, c in sites}), "conditions": scope,
                        "basis": basis}
+    if root is not None:
+        turns.update(_helper_followups(root, tree, funcs, wrappers, scopes))
+    missing = sorted(t for t, scope in scopes.items() if "selection" in scope and t not in turns)
+    if missing:
+        raise _not_derived("the follow-up turns", "planned optional turns have no derived helper call: " + ", ".join(missing))
     return turns
 
 
@@ -4678,11 +4922,12 @@ def api_meaning(root: Path, facts: dict) -> dict:
     whole_schema = schema_form.startswith("schema digest") and any("_all.yaml" in c for c in strings)
     floor = derive_agentic_audit_from(build)
     continuation = audit_continuations(root, floor, sorted(facts["controllers"]), tree, cond["agentic_runtimes"])
-    followups = derive_followups(tree, phases, consts)
+    followups = derive_followups(tree, phases, consts, root=root)
     gh = facts.get("github_assistant_run") or {}
 
-    def turns_for(c):
-        return sorted(t for t, v in followups.items() if v["conditions"] is None or c in v["conditions"])
+    def turns_for(c, *, optional=False):
+        return sorted(t for t, v in followups.items() if bool(v.get("selection")) == optional
+                      and (v["conditions"] is None or c in v["conditions"]))
 
     claude_names = {p.stem: _rel(root, p) for d in (".claude/commands", ".claude/agents")
                     for p in sorted((root / d).glob("*.md")) if p.stem.lower() != "readme"}
@@ -4712,6 +4957,7 @@ def api_meaning(root: Path, facts: dict) -> dict:
             "receipt_condition": name in cond["receipt_conditions"],
             "tuned": name == "tuned",
             "followup_turns": turns_for(name),
+            "optional_followup_turns": turns_for(name, optional=True),
             "shape": shape_of(model_phases, turns_for(name), full_schema),
             "model_calls_minimum": len(model_phases),
             "schema_form": schema_form + (" + merged-schema reference" if whole_schema else ""),
@@ -4786,7 +5032,7 @@ def api_meaning(root: Path, facts: dict) -> dict:
             why.append(f"each run makes one model call ({', '.join(model_phases)}) before any follow-up turn")
         if not full_schema:
             why.append(f"it sends the {schema_form} rather than the LinkML schema")
-        every = sorted(t for t, v in followups.items() if v["conditions"] is None)
+        every = sorted(t for t, v in followups.items() if v["conditions"] is None and not v.get("selection"))
         if every:
             why.append("every condition may add " + ", ".join(every) + " turns")
         for t, v in sorted(followups.items()):
@@ -4795,6 +5041,12 @@ def api_meaning(root: Path, facts: dict) -> dict:
                 why.append(f"{t} runs only under {', '.join(v['conditions'])} ("
                            + (f"of the live ones, {', '.join(live_in)}" if live_in else "no live condition") + ")")
         verdict.append(f"No live API condition ({', '.join(live)}) is monolithic: " + "; ".join(why) + ".")
+    for turn, row in sorted(followups.items()):
+        if row.get("selection"):
+            s = row["selection"]
+            verdict.append(f"Optional {turn} may run only with {s['field']} in {s['enabled_values']}, "
+                           f"runtime {s['runtime']}, renderer {_span(s['renderers'])}; default "
+                           f"{s['default']} disables it. It is not a default-condition follow-up.")
     if mono_legacy:
         verdict.append("The monolithic shape (prompt + full LinkML schema + concatenated documents, one call) "
                        f"survives only in {len(mono_legacy)} scripts outside the runner: "
@@ -5166,7 +5418,13 @@ def render_markdown(result: dict) -> str:
           f"- Schema sent: {m['schema_form']}.",
           "- Follow-up turns (model calls besides the phases, from the runner's model-call wrapper): "
           + "; ".join(f"{k} ({', '.join(v['calls'])}; " + ("every condition" if v["conditions"] is None
-                      else "only " + ", ".join(v["conditions"])) + f", {v['basis']})"
+                      else "only " + ", ".join(v["conditions"]))
+                      + (f"; OPT-IN {v['selection']['field']} in {v['selection']['enabled_values']}, "
+                         f"default {v['selection']['default']}, runtime {v['selection']['runtime']}, "
+                         f"renderer {_span(v['selection']['renderers'])}; "
+                         f"selection evidence {', '.join(v['selection']['evidence'])}; "
+                         f"via {', '.join(x['call'] for x in v['via'])}" if v.get("selection") else "")
+                      + f", {v['basis']})"
                       for k, v in m["followup_turns"].items()) + ".",
           f"- Native audit batch: from renderer {m['agentic_audit_from_renderer']}, `build_phase` refuses the "
           f"audit phase on every spec and the audit is a registered native batch. Default renderer when none is "
@@ -5186,10 +5444,11 @@ def render_markdown(result: dict) -> str:
           "(a record, a registration, a spec or a caller).", ""]
     L += _table([[c, v["status"], v["role"], v["shape"], v["model_calls_minimum"],
                   ", ".join(v["followup_turns"]) or "none",
+                  ", ".join(v["optional_followup_turns"]) or "none",
                   "yes" if v["receipt_condition"] else "", "yes" if v["prompt_hybrid"] else "no",
                   "possible" if v["runtime_hybrid"] else "no", ", ".join(v["prompt_body_references"])]
                  for c, v in m["conditions"].items()],
-                ["condition", "status", "role", "shape", "min model calls", "follow-up turns", "receipt",
+                ["condition", "status", "role", "shape", "min model calls", "default follow-up turns", "opt-in turns", "receipt",
                  "prompt-level hybrid", "runtime hybrid", "playbook files the body names"]) + [""]
     reasons = sorted({r for v in m["conditions"].values() for r in v["hybrid_reasons"]})
     if reasons:

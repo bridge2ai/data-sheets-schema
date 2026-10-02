@@ -12,6 +12,7 @@ from tests.test_evaluation.test_semantic_context_scope import record as semantic
 
 
 ROOT = Path(__file__).resolve().parents[1]
+AUTHORITY = Path("data/rubric/semantic_evidence_authority_v3.json")
 
 
 def _stage_script(repository):
@@ -75,6 +76,7 @@ def test_legacy_batch_schema_cannot_be_replaced_by_the_caller(tmp_path, rubric):
     for name in ("rubric10", "rubric20"):
         (schemas / f"{name}_semantic_schema.json").write_text("{}")
         shutil.copyfile(ROOT / f"data/rubric/{name}.txt", rubrics / f"{name}.txt")
+    shutil.copyfile(ROOT / AUTHORITY, caller / AUTHORITY)
     result = subprocess.run(
         [sys.executable, str(script)], cwd=caller, capture_output=True, text=True, timeout=60,
         env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "PYTHONDONTWRITEBYTECODE": "1"},
@@ -107,6 +109,9 @@ def test_explicit_file_keeps_wrapper_schemas_and_caller_input(tmp_path, rubric, 
         (schemas / f"{name}_semantic_schema.json").write_text(
             json.dumps({"not": {}} if valid else {}))
         shutil.copyfile(ROOT / f"data/rubric/{name}.txt", rubrics / f"{name}.txt")
+    # This caller is an authoritative checkout for rubric resources. Current
+    # v3 fixtures need their pinned absence authority as well as rubric text.
+    shutil.copyfile(ROOT / AUTHORITY, caller / AUTHORITY)
     result = subprocess.run(
         [sys.executable, str(script), "--file",
          str(evaluation if absolute_file else evaluation.relative_to(caller)),
@@ -118,3 +123,13 @@ def test_explicit_file_keeps_wrapper_schemas_and_caller_input(tmp_path, rubric, 
     assert result.returncode == int(not valid), result.stdout + result.stderr
     if not valid:
         assert "model" in result.stdout
+
+
+def test_selected_checkout_missing_v3_authority_does_not_fall_back(tmp_path, monkeypatch):
+    from data_sheets_schema.semantic_evidence_authority import load_authority
+    (tmp_path / "src/data_sheets_schema").mkdir(parents=True)
+    (tmp_path / "pyproject.toml").write_text('name = "data-sheets-schema"\n')
+    (tmp_path / "data/rubric").mkdir(parents=True)
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(FileNotFoundError, match="semantic_evidence_authority_v3.json"):
+        load_authority()

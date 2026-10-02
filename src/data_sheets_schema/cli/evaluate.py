@@ -603,18 +603,26 @@ def audit_recall_cmd(audits, originals, ground_truth, arm, replicates, output, a
 @click.option("--max-tokens", type=click.IntRange(min=1), default=8000, show_default=True)
 @click.option("--prices", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="Optional local USD-per-million-token price JSON. Omitted prices stay unknown.")
-def support_plan_cmd(roster, output, profile, model, class_name, schema_path, max_tokens, prices):
+@click.option("--plan-version", type=click.Choice(["1", "2"]), default="1", show_default=True,
+              help="1: historical top-level support; 2: draft nested support with separate top-level fitness.")
+@click.option("--artifact-kind", type=click.Choice(["full", "core", "collection"]),
+              help="Required for plan version 2; must agree with the selected root class and roster.")
+@click.option("--vocabulary", "vocabulary_path", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="Version 2 only: explicit vocabulary snapshot overriding the selected profile's pin.")
+def support_plan_cmd(roster, output, profile, model, class_name, schema_path, max_tokens, prices,
+                     plan_version, artifact_kind, vocabulary_path):
     """Freeze an OFFLINE typed-support/fitness plan; makes no model calls.
 
-    This plans the current top-level instrument. Nested granularity (#3342),
-    independent empirical calibration (#3343), transport registration and paid
-    authorization remain blockers. Creating this plan does not satisfy them.
+    Version 1 preserves the current top-level instrument; version 2 opts into
+    draft nested support. Independent empirical calibration, context review,
+    transport registration and paid authorization remain separate blockers.
     """
     from data_sheets_schema.support_plan import build_plan
     try:
         manifest = build_plan(roster, output, profile=profile, model=model,
                               class_name=class_name, schema_path=schema_path,
-                              max_tokens=max_tokens, prices=prices)
+                              max_tokens=max_tokens, prices=prices, plan_version=int(plan_version),
+                              artifact_kind=artifact_kind, vocabulary_path=vocabulary_path)
     except (OSError, ValueError, KeyError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(f"Saved {manifest['counts']['records']} records / "

@@ -28,6 +28,13 @@ definition finds different prose there and cannot produce it.
     ...
     verify_echo("d4d-rubric10-semantic", reply)     # raises if stale
 
+For a separately named/versioned definition, callers may supply its real
+predecessor definition as ``predecessor_text`` to all three operations.
+The caller must establish that predecessor's identity (for example, by a
+registered path and SHA256); this API does not authenticate arbitrary text
+or add it to same-path history. Omitting the keyword retains the historical
+Git/installed-preimage lookup and the existing preamble bytes.
+
 **The expected text must come from what changed, and be checked absent from
 the previous version.** Taking the longest line failed the decisive replay of
 the real incident (`8813c8e6` against `119e3171`): it was a shared paragraph
@@ -324,15 +331,25 @@ def challenge_between(body: str, previous: str) -> dict[str, str] | None:
     return None
 
 
-def challenge(name: str) -> dict[str, str] | None:
+def challenge(name: str, *, predecessor_text: str | None = None) -> dict[str, str] | None:
     """A locator to put in the prompt and the answer to keep out of it.
 
     Returns `{"locator": …, "expected": …}`, or None when no text in the
     current definition can be shown absent from the previous one — in which
     case there is no honest challenge to make, and callers must say so rather
     than fall back to something weaker (#1102).
+
+    ``predecessor_text`` selects an explicit caller-supplied predecessor,
+    including any original frontmatter, instead of same-path history. It
+    must be nonblank text from the real predecessor definition; the caller
+    is responsible for pinning its identity. None keeps the default lookup.
     """
-    previous = _previous_text(name)
+    if predecessor_text is not None:
+        if not isinstance(predecessor_text, str) or not predecessor_text.strip():
+            raise ValueError("predecessor_text must be nonblank text from the predecessor definition")
+        previous = predecessor_text
+    else:
+        previous = _previous_text(name)
     if previous is None:
         return None
     return challenge_between(_body(name), previous)
@@ -357,14 +374,17 @@ def _normalise(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip().lower()
 
 
-def spawn_preamble(name: str) -> str:
+def spawn_preamble(name: str, *, predecessor_text: str | None = None) -> str:
     """Text to prepend to a spawn prompt so the reply is evidence.
 
     Raises `NoDiscriminatingChallenge` when the definition carries nothing the
     previous version lacked: there is then no question only the current text
     can answer, and issuing one anyway would produce a `✓` that means nothing.
+
+    An explicit ``predecessor_text`` has the identity requirements of
+    :func:`challenge`; supply the same pinned text to :func:`verify_echo`.
     """
-    ask = challenge(name)
+    ask = challenge(name, predecessor_text=predecessor_text)
     if ask is None:
         raise NoDiscriminatingChallenge(
             f"{name}: nothing in this definition is absent from the previous "
@@ -389,9 +409,14 @@ def spawn_preamble(name: str) -> str:
     )
 
 
-def verify_echo(name: str, reply: str) -> None:
-    """Raise unless the reply quotes text the previous definition lacked."""
-    ask = challenge(name)
+def verify_echo(name: str, reply: str, *, predecessor_text: str | None = None) -> None:
+    """Raise unless the reply quotes text the previous definition lacked.
+
+    When using an explicit predecessor, pass the same caller-pinned
+    ``predecessor_text`` used for :func:`spawn_preamble`. None retains the
+    default same-path Git/installed-preimage lookup.
+    """
+    ask = challenge(name, predecessor_text=predecessor_text)
     if ask is None:
         raise NoDiscriminatingChallenge(
             f"{name}: nothing distinguishes this definition from the previous "
