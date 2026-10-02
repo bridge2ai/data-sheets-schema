@@ -69,6 +69,47 @@ def test_status_reversal_is_preserved_counted_and_does_not_add_reviewed_chunks(s
         result["receipt"], manifest, texts, FULL, manifest["bundle_md5"]))
 
 
+@pytest.mark.parametrize("status, predicate", [
+    ("nothing_relevant", {"reason": "references only"}),
+    ("redundant_with", {"chunks": ["c002"]})])
+@pytest.mark.parametrize("metadata", [
+    {"extracted": [{"slot": "name", "snippet": "Something else entirely", "origin": "old-marker"}]},
+    {"extracted": {"unrecognized": "preserve malformed evidence"}},
+    {"extracted": []},
+    {"rereceipt_prior": {"status": "redundant_with", "chunks": ["c002"], "note": "earlier reversal"}},
+    {"rereceipt_prior": None},
+])
+def test_v4_rejects_status_correction_that_would_overwrite_existing_metadata(status, predicate, metadata):
+    _manifest, texts, receipt, listed = _setup()
+    receipt["chunks"][2] = {"id": "c003", "status": status, **predicate, **metadata}
+    original = copy.deepcopy(receipt)
+    pinned = inputs(receipt=receipt)
+    correction = answer("keywords", "c003", "Something else entirely")
+    out = rr.complete(pinned, [correction, answer()])
+    assert out["counts"]["rejected_answers"] == 1
+    assert out["rejected_paths"] == ["keywords"]
+    assert "would overwrite" in out["rejections"][0]["reason"]
+    assert out["receipt"]["chunks"][2] == original["chunks"][2]
+    assert out["counts"]["status_reversals_added"] == 0
+    assert "keywords" in out["still_uncovered_paths"]
+    # An unrelated accepted answer is retained; the contradictory chunk alone
+    # is rejected, with the original immutable input still recoverable.
+    assert out["counts"]["receipts_added"] == 1
+    assert out["state"] == "answers_incomplete"
+    assert yaml.safe_load(pinned.receipt) == original == receipt
+    assert yaml.safe_load(pinned.record) == FULL
+    counts = out["counts"]
+    assert counts["requested"] == counts["accepted"] + counts["rejected_paths"] + counts["unanswered"]
+    # Historical instruments retain their prior merge result; this safeguard
+    # belongs to the new v4 completion boundary, not a retroactive rewrite.
+    legacy = rc.apply_rereceipt(receipt, FULL, [correction], texts, listed=listed)
+    assert (legacy["added"], legacy["rejected"]) == (1, 0)
+    assert legacy["receipt"]["chunks"][2] == {
+        "id": "c003", "status": "extracted", "rereceipt_prior": {"status": status, **predicate},
+        "extracted": [{"slot": "keywords", "snippet": "Something else entirely"}],
+    }
+
+
 @pytest.mark.parametrize("status", ["missing", "duplicate_entry", "duplicate_of"])
 def test_completion_cannot_manufacture_chunk_review_coverage(status):
     _m, _t, receipt, _l = _setup()

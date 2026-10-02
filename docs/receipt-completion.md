@@ -26,6 +26,11 @@ to `extracted`, retaining the previous status and its reason/references in
 `rereceipt_prior`. The v4 checker counts these recorded reversals separately;
 malformed prior metadata is reported separately. A reversal never adds a new
 reviewed chunk. These counters and anti-padding screens are nonterminal.
+The v4 merger rejects a negative-status chunk already carrying an `extracted`
+or `rereceipt_prior` key, including empty or malformed values. Correcting that
+contradictory entry would overwrite its evidence; rejection preserves the
+entry exactly and leaves the requested path uncovered. Other valid answers
+in the response can still be merged. Historical v3 merge behavior is unchanged.
 
 Renderer 24 is an **API-only, offline preparation boundary**, not an executable
 or registered generation condition. Its assembly digest binds the new receipt

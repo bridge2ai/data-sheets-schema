@@ -1044,7 +1044,9 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
     carry the paths and reasons for the caller to route (the audit input)
     and report. Explicit instrument version 4 marks newly added pairs with
     `origin: rereceipt`; existing pairs retain their exact metadata. The
-    default version 3 keeps the historical output shape."""
+    v4 path rejects negative-status entries carrying extracted or prior
+    metadata rather than overwrite contradictory evidence. The default
+    version 3 keeps the historical output shape and merge behavior."""
     receipt_instrument(instrument_version)
     out = copy.deepcopy(receipt)
     listed_set = {str(p) for p in listed}
@@ -1095,6 +1097,12 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
         status = entry.get("status")
         if status not in RERECEIPT_TARGET_STATUSES:
             reject(n, path, f"chunk {chunk} is {status!r}"); continue
+        if instrument_version == 4 and status != "extracted":
+            conflicts = [key for key in ("extracted", "rereceipt_prior") if key in entry]
+            if conflicts:
+                reject(n, path, f"chunk {chunk} is {status!r} but carries "
+                               f"{', '.join(conflicts)} metadata; correction would overwrite it")
+                continue
         pairs = entry.get("extracted") if status == "extracted" else []
         if pairs is None:
             pairs = []
