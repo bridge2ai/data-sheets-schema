@@ -140,16 +140,23 @@ def declared_bases() -> list[tuple[str, str]]:
     from data_sheets_schema.provenance import FULL_SCHEMA
     from data_sheets_schema.schema_cache import load_schema
     schema = load_schema(FULL_SCHEMA) or {}          # one parse per process (#1203)
+    return declared_bases_of(schema)
+
+
+def declared_bases_of(schema: dict[str, Any]) -> list[tuple[str, str]]:
+    """`declared_bases` on a parsed schema: today's file, or the bytes a run
+    recorded (`run_schema.identifier_rules`, #3931)."""
     out = []
-    for prefix, value in (schema.get("prefixes") or {}).items():
+    for prefix, value in ((schema or {}).get("prefixes") or {}).items():
         base = value.get("prefix_reference") if isinstance(value, dict) else value
         if isinstance(base, str) and base.startswith("http"):
             out.append((base.lower(), str(prefix)))
     return sorted(out, key=lambda pair: -len(pair[0]))
 
 
-def resolver_urls_in_identifier_slots(record: dict[str, Any],
-                                      slots: set[str]) -> list[dict[str, str]]:
+def resolver_urls_in_identifier_slots(record: dict[str, Any], slots: set[str], *,
+                                      bases: tuple[tuple[str, str], ...] | list[tuple[str, str]]
+                                      | None = None) -> list[dict[str, str]]:
     """Identifier slots holding a resolver URL where a prefix is declared (#591).
 
     Distinct from grounding, and invisible to it: `https://doi.org/10.60775/…`
@@ -160,10 +167,15 @@ def resolver_urls_in_identifier_slots(record: dict[str, Any],
     The v5 canary wrote 45 of these and passed a gate that measured pair
     consistency, report claims and grounding. None of the three could see the
     rule v5 exists to enforce.
+
+    `bases` are the declared bases of the schema the run recorded
+    (`run_schema.identifier_rules`, #3931): where that schema declared no
+    `doi`, its resolver URL was the only form the run could write. None
+    reads today's.
     """
     from data_sheets_schema.identifiers import walk_identifiers
 
-    bases = declared_bases()
+    bases = declared_bases() if bases is None else bases
     out, seen = [], set()
     for path, slot, value in walk_identifiers(record, slots):
         value = str(value)
@@ -318,9 +330,18 @@ EXCLUDED_SCHEMES = frozenset({"ark"})
 PREFIX_INSTRUMENT = "v3 (#982): ark excluded, mailto excluded on Person ids only, urn by NID"
 
 
-def undeclared_prefixes(record: dict[str, Any],
-                        slots: set[str]) -> dict[str, int]:
+def undeclared_prefixes(record: dict[str, Any], slots: set[str], *,
+                        prefixes: set[str] | frozenset[str] | None = None,
+                        persons: set[str] | frozenset[str] | None = None) -> dict[str, int]:
     """`{prefix: occurrences}` for CURIE prefixes the schema does not declare.
+
+    Which schema: `prefixes` and `persons` are the declared prefixes and the
+    Person-ranged slots of the schema the run recorded, where a recompute
+    has them (`run_schema.identifier_rules`, #3931); None reads today's. A
+    schema release moves both. On 2026-09-30, 192 of the 283 corpus records
+    read a schema that declared no `ROR`, `ORCID` or `doi`, so a `doi:`
+    CURIE such a run wrote is a prefix its schema did not declare, whatever
+    today's says.
 
     Prediction 4: the invented-prefix population stops growing. `chorus:`,
     `cm4ai:` and friends resolve to nothing, which is why v5's rule three tells
@@ -354,8 +375,8 @@ def undeclared_prefixes(record: dict[str, Any],
     """
     from data_sheets_schema.identifiers import (declared_prefixes, person_slots,
                                                 walk_identifiers)
-    declared = {p.lower() for p in declared_prefixes()}
-    persons = person_slots()
+    declared = {p.lower() for p in (declared_prefixes() if prefixes is None else prefixes)}
+    persons = person_slots() if persons is None else persons
     out: dict[str, int] = {}
     for path, _slot, value in walk_identifiers(record, slots):
         text = str(value)
@@ -447,8 +468,8 @@ def declared_naming(manifest_path: Path | None = None) -> dict[str, Any]:
     return data.get("naming") or {}
 
 
-def form_facts(full: Path, core: Path,
-               slots: set[str] | None = None) -> dict[str, Any]:
+def form_facts(full: Path, core: Path, slots: set[str] | None = None, *,
+               record: dict[str, Any] | None = None) -> dict[str, Any]:
     """Counts that are properties of the records alone (#602).
 
     Separate from `grounding` deliberately. Grounding compares a record to its
@@ -457,11 +478,24 @@ def form_facts(full: Path, core: Path,
     all, and burying them inside a block that can decline would make three
     preregistered predictions unmeasurable for the 59 records whose bundle has
     moved.
+
+    `record` is the run's provenance record. Given one, the prefix count
+    reads the merged schema it recorded, not today's: its declared prefixes,
+    its `uriorcurie` slots (unless `slots` is given) and its Person slots
+    (`run_schema.identifier_rules`, #3931). The block's `schema_basis` says
+    which bytes were read, or that today's were and why. Without one the
+    count reads today's schema, as the runner does when it writes the block
+    while the run's schema is the file on disk.
     """
     import yaml as _yaml
 
     from data_sheets_schema.identifiers import uriorcurie_slots
-    slots = slots if slots is not None else uriorcurie_slots()
+    rules = basis = None
+    if record is not None and (full.exists() or core.exists()):
+        from data_sheets_schema.run_schema import identifier_rules
+        rules, basis = identifier_rules(record)
+    if slots is None:
+        slots = rules.slots if rules is not None else uriorcurie_slots()
     prefixes: dict[str, int] = {}
     british = 0
     fragments: set[str] = set()
@@ -473,7 +507,9 @@ def form_facts(full: Path, core: Path,
         raw = path.read_text(encoding="utf-8", errors="replace")
         british += british_spellings(raw)
         doc = _yaml.safe_load(raw) or {}
-        for prefix, n in undeclared_prefixes(doc, slots).items():
+        for prefix, n in undeclared_prefixes(
+                doc, slots, prefixes=rules.prefixes if rules is not None else None,
+                persons=rules.persons if rules is not None else None).items():
             prefixes[prefix] = prefixes.get(prefix, 0) + n
         from data_sheets_schema.identifiers import walk_identifiers
         for _p, _s, value in walk_identifiers(doc, slots):
@@ -501,15 +537,18 @@ def form_facts(full: Path, core: Path,
                 list(declared.get("variants") or []))
             for k, v in found.items():
                 label_variants[k] = label_variants.get(k, 0) + v
-    return {"checked": True, "records": present,
-            "undeclared_prefixes": prefixes,
-            "undeclared_prefix_occurrences": sum(prefixes.values()),
-            "prefix_instrument": PREFIX_INSTRUMENT,
-            "british_instrument": BRITISH_INSTRUMENT,
-            "british_spellings": british,
-            "organisational_fragments": len(fragments),
-            "gc_label_variants": label_variants,
-            "gc_label_variant_occurrences": sum(label_variants.values())}
+    out = {"checked": True, "records": present,
+           "undeclared_prefixes": prefixes,
+           "undeclared_prefix_occurrences": sum(prefixes.values()),
+           "prefix_instrument": PREFIX_INSTRUMENT,
+           "british_instrument": BRITISH_INSTRUMENT,
+           "british_spellings": british,
+           "organisational_fragments": len(fragments),
+           "gc_label_variants": label_variants,
+           "gc_label_variant_occurrences": sum(label_variants.values())}
+    if basis is not None:
+        out["schema_basis"] = basis
+    return out
 
 
 def check_record(record: dict[str, Any], bundle_text: str,
@@ -563,14 +602,21 @@ def iter_external(record: dict[str, Any], slots: set[str]
 
 
 def check_run(full: Path, core: Path, bundle: Path,
-              slots: set[str] | None = None) -> dict[str, Any]:
-    """Both records of a run, against the bundle it declares."""
+              slots: set[str] | None = None, *,
+              record: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Both records of a run, against the bundle it declares.
+
+    `record` is the run's provenance record. Given one, the identifier slots
+    walked (unless `slots` is given) and the resolver bases the URL finding
+    reads are the merged schema's the run recorded, not today's
+    (`run_schema.identifier_rules`, #3931), and `schema_basis` says which
+    bytes were read, or that today's were and why. Without one both are
+    today's, as when the runner checks a run it has just written."""
     import yaml
 
     from data_sheets_schema.identifiers import uriorcurie_slots
     if not bundle.exists():
         return {"checked": False, "reason": f"bundle absent: {bundle}"}
-    slots = slots if slots is not None else uriorcurie_slots()
     # Both records absent read as `checked: true` with three zeroes, which
     # `runs check` reported as fully grounded (#578). Zero identifiers found in
     # a file that is not there is not a measurement — the same distinction
@@ -579,6 +625,12 @@ def check_run(full: Path, core: Path, bundle: Path,
     if len(missing) == 2:
         return {"checked": False,
                 "reason": f"neither record is on disk: {', '.join(missing)}"}
+    rules = basis = None
+    if record is not None:
+        from data_sheets_schema.run_schema import identifier_rules
+        rules, basis = identifier_rules(record)
+    if slots is None:
+        slots = rules.slots if rules is not None else uriorcurie_slots()
     text = bundle.read_text(encoding="utf-8", errors="replace")
     out: dict[str, Any] = {"checked": True,
                            "counts": {"grounded": 0, "minted_fragment": 0,
@@ -598,7 +650,8 @@ def check_run(full: Path, core: Path, bundle: Path,
             out["counts"][key] += n
         for f in r["findings"]:
             out["findings"].append({**f, "record": which})
-        for f in resolver_urls_in_identifier_slots(doc, slots):
+        for f in resolver_urls_in_identifier_slots(
+                doc, slots, bases=rules.bases if rules is not None else None):
             out["findings"].append({**f, "record": which})
         doc_ids = doc
         from data_sheets_schema.identifiers import walk_identifiers
@@ -607,4 +660,6 @@ def check_run(full: Path, core: Path, bundle: Path,
             if g:
                 pooled[g[2]].add(g[1])
     out["distinct"] = {k: len(v) for k, v in pooled.items()}
+    if basis is not None:
+        out["schema_basis"] = basis
     return out

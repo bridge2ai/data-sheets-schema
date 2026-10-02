@@ -106,10 +106,16 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     over the corpus is the difference between minutes and hours when the
     revision being backfilled touches only `form`. `report_claims_version=7`
     explicitly replays historical report measurements; current checks use v8.
-    This function computes blocks without rewriting stored measurements."""
+    This function computes blocks without rewriting stored measurements.
+
+    The form and grounding blocks read the identifier rules of the merged
+    schema the record names (`schema.full_sha256`, else `full_md5`), not
+    today's, and say so under `schema_basis` (#3931): which prefixes were
+    declared, and which slots were identifiers or Persons, are facts about
+    the schema the run was given. The pair and report blocks still read
+    today's full and core schemas and pin their hashes."""
     want = (lambda name: only is None or name in only)
     from data_sheets_schema.grounding import check_run
-    from data_sheets_schema.identifiers import uriorcurie_slots
     from data_sheets_schema.provenance import (CORE_SCHEMA, FULL_SCHEMA,
                                                 _md5, _sha256)
     from data_sheets_schema.report_claims import check_report, declared_slots
@@ -229,7 +235,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     # where the bundle has drifted (#602).
     if want("form"):
         from data_sheets_schema.grounding import form_facts
-        out["form"] = {**form_facts(full, core), "recorded_by": RECORDED_BY}
+        out["form"] = {**form_facts(full, core, record=record), "recorded_by": RECORDED_BY}
 
     # --- grounding --------------------------------------------------------
     bundle = declared_bundle(record, provenance)
@@ -257,7 +263,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                            "today's bytes would test a file the run never read"),
                 "recorded_by": RECORDED_BY}
         else:
-            block = check_run(full, core, bundle, uriorcurie_slots())
+            block = check_run(full, core, bundle, record=record)
             if block.get("checked"):
                 block["artifacts"] = {"bundle": {"path": str(bundle),
                                                  "md5": _md5(bundle)}}
@@ -411,6 +417,15 @@ def summarise(blocks: dict[str, Any]) -> str:
     fm = blocks.get("form") or {}
     if "form" in blocks and "british_spellings" in fm:
         bits.append(f"british {fm['british_spellings']}")
+    # The run's schema is what a form or grounding recompute reads (#3931);
+    # one that fell back to today's says so on the report line, not only
+    # inside the block.
+    from data_sheets_schema.run_schema import TODAY
+    fell_back = sorted({b["schema_basis"].get("reason") or "" for b in (fm, gr)
+                        if isinstance(b.get("schema_basis"), dict)
+                        and b["schema_basis"].get("source") == TODAY})
+    if fell_back:
+        bits.append(f"{TODAY} read: {'; '.join(fell_back)}")
     rcp = blocks.get("receipts") or {}
     if "receipts" not in blocks:
         pass
