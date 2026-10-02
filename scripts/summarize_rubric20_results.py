@@ -17,14 +17,12 @@ import json
 import csv
 import html
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, NamedTuple
 from datetime import datetime
 
-# Read each evaluation's recorded denominator and percentage.
-from data_sheets_schema.rubric_pooling import (
-    denominator_of, pooling_warning, reported_percentage)
+from data_sheets_schema.constants import RUBRIC20_MAX_SCORE
 from data_sheets_schema.semantic_comparison import (
-    discrimination, legacy_record, render_discrimination)
+    discrimination, excluded_items, legacy_record, render_discrimination, score_bases)
 
 # Base directory
 BASE_DIR = Path(__file__).parent.parent
@@ -58,21 +56,67 @@ def result_order(result: Dict):
             json.dumps(result, sort_keys=True, ensure_ascii=False),)
 
 
-def cohort_key(result: Dict):
-    """Separate recorded measurement identities; do not infer missing metadata.
+class CohortKey(NamedTuple):
+    kind: str
+    rubric: str
+    version: str
+    settings: str
+    rubric_hash: str
+    instrument: str
+    context: str
+    scope: str
+    score_mode: str
+    exclusions: str
+    fixed_max: float
+    adjusted_max: float
 
-    The full model block includes temperature and evaluator type, not just
-    its name. A rubric hash is used verbatim: legacy placeholders are not
-    promoted to verified digests. A record hash and evaluator execution ID
-    identify individual evaluations, not a scoring instrument.
+
+def recorded(mapping, name):
+    """Canonical recorded JSON, keeping absent distinct from explicit null."""
+    return json.dumps(mapping[name], sort_keys=True, ensure_ascii=False) if name in mapping else 'unrecorded'
+
+
+def bases_of(result):
+    return score_bases(result, RUBRIC20_MAX_SCORE)
+
+
+def score_mode(result):
+    overall = result.get('overall_score') or result.get('summary_scores') or {}
+    if any(name in overall for name in ('fixed_max_points', 'adjusted_max_points', 'excluded_max_points')):
+        return 'fixed_and_adjusted'
+    if 'normalized_percentage' in overall or excluded_items(result):
+        return 'adjustment_unrecorded'
+    return 'legacy_fixed_only'
+
+
+def exclusions_of(result):
+    # Normalize API fixed_max_points/max_points for the existing helper's
+    # semantic layout. Never modify the source evaluation (#4214).
+    bases = bases_of(result)
+    overall = result.get('overall_score') or result.get('summary_scores') or {}
+    normalized = {**overall, 'max_points': bases.fixed_max,
+                  'adjusted_max_points': bases.adjusted_max}
+    return excluded_items({**result, 'overall_score': normalized})
+
+
+def cohort_key(result: Dict):
+    """Use recorded instruments, context/scope and score bases (#4213/4214).
+
+    A record hash and execution ID identify individual evaluations rather
+    than scoring instruments. Legacy rubric hashes remain unverified.
+    Unknown adjusted applicability is not evidence of comparability.
     """
     metadata = result.get('metadata') or {}
-    return (str(result.get('evaluation_type') or 'unknown'),
-            str(result.get('rubric') or 'unrecorded'),
-            str(result.get('version') or 'unrecorded'),
-            json.dumps(result.get('model') or {}, sort_keys=True, ensure_ascii=False),
-            str(metadata.get('rubric_hash') or 'unrecorded'),
-            denominator_of(result))
+    bases = bases_of(result)
+    return CohortKey(
+        str(result.get('evaluation_type') or 'unknown'),
+        str(result.get('rubric') or 'unrecorded'),
+        str(result.get('version') or 'unrecorded'),
+        json.dumps(result.get('model') or {}, sort_keys=True, ensure_ascii=False),
+        recorded(metadata, 'rubric_hash'), recorded(metadata, 'instrument_sha256'),
+        recorded(metadata, 'context_sha256'), recorded(result, 'evaluation_scope'),
+        score_mode(result), json.dumps(exclusions_of(result)),
+        bases.fixed_max, bases.adjusted_max)
 
 
 def summary_cohorts(results: List[Dict]):
@@ -93,26 +137,72 @@ def evaluator_name(result: Dict) -> str:
 
 
 def cohort_description(key, count: int) -> str:
-    kind, rubric, version, settings, rubric_hash, maximum = key
-    who = json.loads(settings).get('name') or 'an unrecorded evaluator'
-    return (f"### Scored out of {maximum:g} — {cell(kind)} evaluations by {cell(who)}\n\n"
-            f"{count} evaluation(s); rubric {cell(rubric)}, version {cell(version)}. "
-            f"Recorded rubric hash: {cell(rubric_hash)}.\n\n"
-            f"Recorded evaluator settings: {cell(settings)}.\n\n")
+    who = json.loads(key.settings).get('name') or 'an unrecorded evaluator'
+    exclusions = ('unrecorded' if key.exclusions == 'null' else key.exclusions)
+    adjusted = f'{key.adjusted_max:g}' if key.score_mode == 'fixed_and_adjusted' else 'unrecorded'
+    return (f"### Scored out of {key.fixed_max:g} — {cell(key.kind)} evaluations by {cell(who)}\n\n"
+            f"{count} evaluation(s); rubric {cell(key.rubric)}, version {cell(key.version)}. "
+            f"Recorded rubric hash: {cell(key.rubric_hash)}.\n\n"
+            f"Recorded evaluator settings: {cell(key.settings)}.\n\n"
+            f"Instrument SHA-256: {cell(key.instrument)}; context SHA-256: {cell(key.context)}; "
+            f"evaluation scope: {cell(key.scope)}.\n\n"
+            f"Score mode: {key.score_mode}; fixed maximum: {key.fixed_max:g}; "
+            f"adjusted maximum: {adjusted}; excluded items: {cell(exclusions)}.\n\n")
 
 
 def cohort_note(results: List[Dict]) -> str:
-    return ("Summaries separate record kind, rubric/version, the complete recorded evaluator "
-            "settings, recorded rubric hash and score maximum. Missing metadata stays "
-            "unrecorded; recorded hashes (including legacy placeholders) are not verified "
-            "instrument digests. Generator identity is not inferred from method names.\n\n"
+    maxima = sorted({bases_of(result).fixed_max for result in results})
+    warning = (f"> These results span {len(maxima)} different maxima; "
+               "scores are never pooled across them.\n\n") if len(maxima) > 1 else ''
+    return ("Summaries separate record kind, rubric/version, complete recorded evaluator settings, "
+            "rubric hash, authoritative instrument/context pins, evaluation scope, score mode, "
+            "both maxima and excluded-item identities. Missing metadata stays unrecorded; "
+            "recorded hashes (including legacy placeholders) are not verified here. "
+            "Generator identity is not inferred from method names.\n\n"
+            "Fixed percentages are recomputed from total/fixed maximum. Adjusted percentages use "
+            "the adjusted maximum; zero gives an undefined percentage. Legacy fixed-only records "
+            "are not relabeled as recorded adjusted measurements. Adjusted averages and "
+            "discrimination are withheld when applicability identities or the adjusted basis are "
+            "unrecorded. Top-performing evaluations use the fixed percentage only.\n\n"
+            "CSV compatibility: total_score, max_score and percentage describe the fixed basis, "
+            "identified by score_basis. Added adjusted columns describe the recorded adjusted "
+            "basis; empty adjusted fields mean unrecorded and an empty percentage with maximum "
+            "zero means undefined. reported_* columns preserve each original rate as JSON "
+            "(empty means absent), including any rounding or disagreement.\n\n"
             "Counts and averages describe evaluations, not distinct files: repeated ratings "
             "are retained and equally weighted. The discrimination blocks separately exclude "
             "records rated more than once within their cohort.\n\n"
             "Cohort selection: recursive `individual/**/*_evaluation.json` and direct "
             "`concatenated/*_evaluation.json` children. Dated concatenated subdirectories "
             "are excluded. `all_scores.csv` lists every selected evaluation and its source "
-            "path relative to this directory.\n\n" + pooling_warning(results))
+            "path relative to this directory.\n\n" + warning)
+
+
+def percentage_label(value):
+    return 'undefined' if value is None else f'{value:.1f}%'
+
+
+def adjusted_label(result):
+    if score_mode(result) != 'fixed_and_adjusted':
+        return 'unrecorded'
+    bases = bases_of(result)
+    return f'{bases.total:g}/{bases.adjusted_max:g} ({percentage_label(bases.adjusted_percentage)})'
+
+
+def average_labels(members):
+    """The caller groups first; never derive comparability from an unknown."""
+    key = cohort_key(members[0])
+    bases = [bases_of(result) for result in members]
+    average = sum(b.total for b in bases) / len(bases)
+    fixed = f'{average:.1f}/{key.fixed_max:g} ({100 * average / key.fixed_max:.1f}%)'
+    if key.score_mode == 'legacy_fixed_only':
+        adjusted = 'unrecorded (fixed-only legacy)'
+    elif key.score_mode != 'fixed_and_adjusted' or key.exclusions == 'null':
+        adjusted = 'withheld (adjusted basis or excluded-item identities unrecorded)'
+    else:
+        rate = 100 * average / key.adjusted_max if key.adjusted_max else None
+        adjusted = f'{average:.1f}/{key.adjusted_max:g} ({percentage_label(rate)})'
+    return fixed, adjusted
 
 
 def categories_by_name(result: Dict) -> Dict[str, Dict]:
@@ -162,8 +252,34 @@ def questions_of(result: Dict) -> List[Dict]:
 
 
 def create_csv_summary(results: List[Dict]):
-    """One row per evaluation, with enough identity to separate its cohort."""
+    """Preserve raw rates separately; legacy score columns now name one basis."""
     csv_path = EVAL_DIR / "all_scores.csv"
+    rows = []
+    for result in sorted(results, key=result_order):
+        key = cohort_key(result)
+        bases = bases_of(result)
+        overall = result.get('overall_score') or result.get('summary_scores') or {}
+        categories = categories_by_name(result)
+        question_scores = ','.join(
+            f"Q{q['id']}:{q.get('score', 0)}/{q.get('max_score', 5)}"
+            for q in sorted(questions_of(result), key=lambda q: q.get('id', 0))[:20])
+        adjusted_recorded = key.score_mode == 'fixed_and_adjusted'
+        rows.append([
+            result.get('project', 'unknown'), result.get('method', 'unknown'),
+            key.kind, result.get('d4d_file', ''), bases.total,
+            bases.fixed_max, bases.fixed_percentage,
+            *[categories.get(name, {}).get('category_score', 0) for name in CATEGORY_NAMES],
+            question_scores, result.get('_evaluation_file', ''),
+            result.get('evaluation_timestamp', ''), key.rubric, key.version,
+            evaluator_name(result), key.settings,
+            (result.get('metadata') or {}).get('rubric_hash', 'unrecorded'),
+            'fixed', key.score_mode,
+            bases.adjusted_max if adjusted_recorded else '',
+            bases.adjusted_percentage if adjusted_recorded else '', key.exclusions,
+            *[json.dumps(overall[name], ensure_ascii=False) if name in overall else ''
+              for name in ('percentage', 'normalized_percentage', 'fixed_percentage')],
+            key.instrument, key.context, key.scope,
+        ])
     with csv_path.open('w', newline='', encoding='utf-8') as stream:
         writer = csv.writer(stream, lineterminator='\n')
         writer.writerow([
@@ -172,23 +288,11 @@ def create_csv_summary(results: List[Dict]):
             'cat1_structural', 'cat2_metadata', 'cat3_technical', 'cat4_fairness',
             'question_scores', 'evaluation_file', 'evaluation_timestamp',
             'rubric', 'rubric_version', 'evaluator', 'evaluator_settings', 'rubric_hash',
+            'score_basis', 'score_mode', 'adjusted_max_score', 'adjusted_percentage',
+            'excluded_items', 'reported_percentage', 'reported_normalized_percentage',
+            'reported_fixed_percentage', 'instrument_sha256', 'context_sha256', 'evaluation_scope',
         ])
-        for result in sorted(results, key=result_order):
-            kind, rubric, version, settings, rubric_hash, maximum = cohort_key(result)
-            overall = result.get('overall_score') or {}
-            categories = categories_by_name(result)
-            question_scores = ','.join(
-                f"Q{q['id']}:{q.get('score', 0)}/{q.get('max_score', 5)}"
-                for q in sorted(questions_of(result), key=lambda q: q.get('id', 0))[:20])
-            writer.writerow([
-                result.get('project', 'unknown'), result.get('method', 'unknown'),
-                kind, result.get('d4d_file', ''), overall.get('total_points', 0),
-                maximum, reported_percentage(result),
-                *[categories.get(name, {}).get('category_score', 0) for name in CATEGORY_NAMES],
-                question_scores, result.get('_evaluation_file', ''),
-                result.get('evaluation_timestamp', ''), rubric, version,
-                evaluator_name(result), settings, rubric_hash,
-            ])
+        writer.writerows(rows)
     print(f"CSV summary created: {csv_path} ({len(results)} evaluations)")
 
 
@@ -202,71 +306,74 @@ def table_row(values) -> str:
 
 def create_markdown_table(results: List[Dict]):
     """List every concatenated rating and summarize individuals within cohorts."""
+    cohorts = summary_cohorts(results)
     md = ("# Rubric20 Evaluation Summary\n\n"
           f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
           f"**Total Evaluations:** {len(results)}\n\n" + cohort_note(results))
-    for kind in sorted({cohort_key(result)[0] for result in results}):
+    for kind in sorted({key.kind for key, _group in cohorts}):
         heading = {'concatenated': 'Concatenated D4Ds',
                    'individual': 'Individual D4Ds Summary'}.get(kind, f'{cell(kind)} D4Ds')
         md += f"## {heading}\n\n"
-        for key, group in summary_cohorts(results):
-            if key[0] != kind:
+        for key, group in cohorts:
+            if key.kind != kind:
                 continue
             md += cohort_description(key, len(group))
             if kind == 'individual':
-                md += ("| Project | Method | Avg Score | Evaluations | Avg % | Avg Cat1 | Avg Cat2 | Avg Cat3 | Avg Cat4 |\n"
+                md += ("| Project | Method | Avg Fixed Score (%) | Evaluations | Avg Adjusted Score (%) | Avg Cat1 | Avg Cat2 | Avg Cat3 | Avg Cat4 |\n"
                        "|---|---|---|---|---|---|---|---|---|\n")
                 projects_methods = sorted({(str(r.get('project', 'unknown')),
                                            str(r.get('method', 'unknown'))) for r in group})
                 for project, method in projects_methods:
                     members = [r for r in group if str(r.get('project', 'unknown')) == project
                                and str(r.get('method', 'unknown')) == method]
-                    count = len(members)
-                    avg_score = sum(r.get('overall_score', {}).get('total_points', 0)
-                                    for r in members) / count
-                    avg_pct = sum(reported_percentage(r) for r in members) / count
+                    fixed, adjusted = average_labels(members)
                     cats = [sum(categories_by_name(r).get(name, {}).get('category_score', 0)
-                                for r in members) / count for name in CATEGORY_NAMES]
-                    md += table_row([project, method, f'{avg_score:.1f}/{key[-1]:g}', count,
-                                     f'{avg_pct:.1f}%', *[f'{value:.1f}' for value in cats]])
+                                for r in members) / len(members) for name in CATEGORY_NAMES]
+                    md += table_row([project, method, fixed, len(members), adjusted,
+                                     *[f'{value:.1f}' for value in cats]])
             else:
-                md += ("| Project | Method | Score | Percentage | Cat1 | Cat2 | Cat3 | Cat4 | Top Question | Weakest Question | D4D File | Evaluation File | Evaluation Time |\n"
+                md += ("| Project | Method | Fixed Score (%) | Adjusted Score (%) | Cat1 | Cat2 | Cat3 | Cat4 | Top Question | Weakest Question | D4D File | Evaluation File | Evaluation Time |\n"
                        "|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
                 for result in group:
-                    overall = result.get('overall_score') or {}
+                    bases = bases_of(result)
                     cats = categories_by_name(result)
-                    questions = questions_of(result)
+                    excluded = set(exclusions_of(result) or ())
+                    questions = [q for q in questions_of(result)
+                                 if q.get('score') is not None and q.get('max_score', 0) > 0
+                                 and f"Q{q['id']}" not in excluded]
                     def question_label(question):
                         return (f"Q{question['id']}: {question['name'][:20]}... "
                                 f"({question['score']}/{question['max_score']})")
                     if questions:
-                        ratio = lambda q: q.get('score', 0) / max(q.get('max_score', 1), 1)
+                        ratio = lambda q: q['score'] / q['max_score']
                         top = question_label(max(questions, key=ratio))
                         weak = question_label(min(questions, key=ratio))
                     else:
                         top = weak = 'N/A'
                     md += table_row([
                         result.get('project', 'unknown'), result.get('method', 'unknown'),
-                        f"{overall.get('total_points', 0)}/{key[-1]:g}",
-                        f'{reported_percentage(result):.1f}%',
+                        f'{bases.total:g}/{bases.fixed_max:g} ({bases.fixed_percentage:.1f}%)',
+                        adjusted_label(result),
                         *[cats.get(name, {}).get('category_score', 0) for name in CATEGORY_NAMES],
                         top, weak, result.get('d4d_file', ''), result.get('_evaluation_file', 'unrecorded'),
                         result.get('evaluation_timestamp', 'unrecorded'),
                     ])
             md += '\n'
 
-    md += '## Top Performing D4Ds (Score >= 80%)\n\nUp to 20 evaluations per cohort; ties use the stable evaluation identity order.\n'
-    for key, group in summary_cohorts(results):
-        ranked = sorted((r for r in group if reported_percentage(r) >= 80),
-                        key=lambda r: (-reported_percentage(r), result_order(r)))
+    md += ('## Top Performing D4Ds (Fixed Score >= 80%)\n\n'
+           'Up to 20 evaluations per cohort, ranked by total/fixed maximum; '
+           'ties use the stable evaluation identity order.\n')
+    for key, group in cohorts:
+        ranked = sorted((r for r in group if bases_of(r).fixed_percentage >= 80),
+                        key=lambda r: (-bases_of(r).fixed_percentage, result_order(r)))
         if not ranked:
             continue
         md += '\n' + cohort_description(key, len(group))
-        md += '| Project | Method | Type | Score | D4D File | Evaluation File |\n|---|---|---|---|---|---|\n'
+        md += '| Project | Method | Type | Fixed Score (%) | D4D File | Evaluation File |\n|---|---|---|---|---|---|\n'
         for result in ranked[:20]:
-            overall = result.get('overall_score') or {}
+            bases = bases_of(result)
             md += table_row([result.get('project', 'unknown'), result.get('method', 'unknown'),
-                             key[0], f"{overall.get('total_points', 0)}/{key[-1]:g} ({reported_percentage(result):.1f}%)",
+                             key.kind, f'{bases.total:g}/{bases.fixed_max:g} ({bases.fixed_percentage:.1f}%)',
                              result.get('d4d_file', ''), result.get('_evaluation_file', 'unrecorded')])
     md_path = EVAL_DIR / 'summary_table.md'
     md_path.write_text(md, encoding='utf-8')
@@ -282,11 +389,12 @@ def create_detailed_report(results: List[Dict]):
     cohorts = summary_cohorts(results)
     for key, group in cohorts:
         report += cohort_description(key, len(group))
-        avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in group) / len(group)
-        percentages = [reported_percentage(r) for r in group]
-        report += (f'- **Average Score:** {avg_score:.1f}/{key[-1]:g} ({sum(percentages) / len(group):.1f}%)\n'
-                   f'- **Best Score:** {max(percentages):.1f}%\n'
-                   f'- **Worst Score:** {min(percentages):.1f}%\n\n')
+        fixed, adjusted = average_labels(group)
+        percentages = [bases_of(r).fixed_percentage for r in group]
+        report += (f'- **Average Fixed Score:** {fixed}\n'
+                   f'- **Average Adjusted Score:** {adjusted}\n'
+                   f'- **Best Fixed Score:** {max(percentages):.1f}%\n'
+                   f'- **Worst Fixed Score:** {min(percentages):.1f}%\n\n')
 
     for field, heading in (('method', 'Method Comparison'), ('project', 'Project Comparison')):
         report += f'## {heading}\n\n'
@@ -295,11 +403,10 @@ def create_detailed_report(results: List[Dict]):
             for name in sorted({str(r.get(field, 'unknown')) for r in group}):
                 members = [r for r in group if str(r.get(field, 'unknown')) == name]
                 count = len(members)
-                avg_score = sum(r.get('overall_score', {}).get('total_points', 0) for r in members) / count
-                avg_pct = sum(reported_percentage(r) for r in members) / count
+                fixed, adjusted = average_labels(members)
                 report += (f'#### {cell(name)}\n- Evaluations: {count}\n'
-                           f'- Average score: {avg_score:.1f}/{key[-1]:g} '
-                           f'({avg_pct:.1f}%) over {count} evaluation(s)\n\n')
+                           f'- Average fixed score: {fixed} over {count} evaluation(s)\n'
+                           f'- Average adjusted score: {adjusted}\n\n')
 
     report += '## Category Performance\n\n'
     for key, group in cohorts:
@@ -312,9 +419,18 @@ def create_detailed_report(results: List[Dict]):
                            f'- Evaluations with this category: {len(scores)}\n\n')
 
     for key, group in cohorts:
-        kind, _rubric, _version, _settings, _hash, maximum = key
+        kind, maximum = key.kind, key.fixed_max
         who = evaluator_name(group[0])
         report += cohort_description(key, len(group))
+        if key.score_mode == 'adjustment_unrecorded' or key.exclusions == 'null':
+            report += ('## Item discrimination and within-project orderings\n\n'
+                       'Withheld: adjusted basis or excluded-item identities are unrecorded; '
+                       'equal maxima alone do not establish applicability comparability.\n\n')
+            continue
+        if key.score_mode == 'legacy_fixed_only':
+            report += ('The legacy fixed-only records below have no recorded N/A adjustment. '
+                       'The discrimination helper’s adjusted column equals its fixed column '
+                       'arithmetically; it is not a separately recorded adjusted measurement.\n\n')
         others = len(results) - len(group)
         measured_on = (f'{len(group)} of the {len(results)} evaluations above: the {kind} '
                        f'evaluations by {who} scored out of {maximum:g}, '

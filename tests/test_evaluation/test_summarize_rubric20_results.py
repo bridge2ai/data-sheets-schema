@@ -313,3 +313,183 @@ def test_committed_csv_and_table_cover_the_loader_cohort():
         assert float(row["total_score"]) == result["overall_score"]["total_points"]
         assert float(row["max_score"]) == result["overall_score"]["max_points"]
         assert row["evaluator"] == result["model"]["name"]
+
+
+# Authoritative pins and coherent applicability bases (#4213 / #4214).
+@pytest.mark.parametrize("field", ["instrument_sha256", "context_sha256", "evaluation_scope"])
+@pytest.mark.parametrize("first_present", [False, True])
+def test_authoritative_identity_prevents_cross_instrument_duplicate_drops(out_dir, field, first_present):
+    docs = [_identified(), _identified(score_shift=1, _evaluation_file="concatenated/b_evaluation.json")]
+    values = ["a" * 64, "b" * 64]
+    if field == "evaluation_scope":
+        values = [{"policy": "single_dataset", "units": [name],
+                   "collection_metadata_inherited": False} for name in ("first", "second")]
+    for index, doc in enumerate(docs):
+        if first_present or index == 1:
+            target = doc if field == "evaluation_scope" else doc["metadata"]
+            target[field] = values[index]
+    _run_all(docs)
+    report = (out_dir / "summary_report.md").read_text()
+    assert len(mod.summary_cohorts(docs)) == 2
+    assert "Rated more than once" not in report
+    assert report.count("Measured on 1 of the 2 evaluations above") == 2
+    for section in ("Executive Summary", "Method Comparison", "Project Comparison"):
+        part = report.split("## " + section + "\n", 1)[1].split("\n## ", 1)[0]
+        assert part.count("### Scored out of") == 2
+    rows = _all_csv_rows(out_dir)
+    assert rows[0][field] != rows[1][field]
+
+
+def test_missing_and_explicit_null_pins_remain_distinct_and_scope_order_is_canonical():
+    first, second = _identified(), _identified()
+    second["metadata"]["instrument_sha256"] = None
+    assert len(mod.summary_cohorts([first, second])) == 2
+    first["evaluation_scope"] = {"policy": "single_dataset", "units": ["A"]}
+    second = {**first, "evaluation_scope": {"units": ["A"], "policy": "single_dataset"}}
+    assert len(mod.summary_cohorts([first, second])) == 1
+
+
+def test_execution_and_input_hashes_do_not_create_new_scoring_instruments(out_dir):
+    docs = [_identified(), _identified(_evaluation_file="concatenated/b_evaluation.json")]
+    for index, doc in enumerate(docs):
+        doc["metadata"].update(evaluator_id=str(index), input_sha256=str(index) * 64)
+    _run_all(docs)
+    assert len(mod.summary_cohorts(docs)) == 1
+    assert "Rated more than once" in (out_dir / "summary_report.md").read_text()
+
+
+def _adjusted(excluded, *, api=False, total=40, kind="concatenated", filename="a"):
+    """Numerically coherent 20-question fixture, including real null N/A scores."""
+    doc = _identified(d4d_file=filename + ".yaml", evaluation_type=kind,
+                      _evaluation_file=f"{kind}/{filename}_evaluation.json")
+    remaining = total
+    for category in doc["categories"]:
+        for q in category["questions"]:
+            q["applicable"] = q["id"] not in excluded
+            if not q["applicable"]:
+                q["score"] = None
+            else:
+                q["score"] = min(remaining, q["max_score"])
+                remaining -= q["score"]
+        category["category_score"] = sum(q["score"] or 0 for q in category["questions"])
+    assert remaining == 0
+    questions = mod.questions_of(doc)
+    fixed = sum(q["max_score"] for q in questions)
+    adjusted = sum(q["max_score"] for q in questions if q["applicable"])
+    overall = {"total_points": total, "max_points": fixed,
+               "adjusted_max_points": adjusted, "excluded_max_points": fixed - adjusted,
+               "normalized_percentage": 100 * total / adjusted if adjusted else None}
+    if api:
+        overall["fixed_max_points"] = overall.pop("max_points")
+        overall["max_points"] = overall.pop("adjusted_max_points")
+    doc["overall_score"] = overall
+    return doc
+
+
+@pytest.mark.parametrize("kind", ["concatenated", "individual"])
+def test_adjusted_maxima_split_and_fixed_percentages_never_reuse_reported_rates(out_dir, kind):
+    left = _adjusted({5, 10, 15, 20}, kind=kind, filename="a")  # 40/80 = 50%
+    right = _adjusted({1, 2, 3, 4, 5, 6, 7, 10, 15, 20}, kind=kind, filename="b")  # 40/50 = 80%
+    left["overall_score"]["percentage"] = 99.9  # preserve a conflicting raw rate, never rank on it
+    _run_all([left, right])
+    assert len(mod.summary_cohorts([left, right])) == 2
+    rows = _all_csv_rows(out_dir)
+    assert {row["score_basis"] for row in rows} == {"fixed"}
+    assert all(float(row["percentage"]) == pytest.approx(100 * 40 / 84) for row in rows)
+    assert {float(row["adjusted_percentage"]) for row in rows} == {50, 80}
+    assert {float(row["adjusted_max_score"]) for row in rows} == {50, 80}
+    assert rows[0]["reported_percentage"] == "99.9"
+    assert {row["reported_normalized_percentage"] for row in rows} == {"50.0", "80.0"}
+    for output in ("summary_table.md", "summary_report.md"):
+        text = (out_dir / output).read_text()
+        assert "40.0/84 (65.0%)" not in text
+        assert "40.0/84 (47.6%)" in text or "40/84 (47.6%)" in text
+        assert "/80 (50.0%)" in text and "/50 (80.0%)" in text
+    table = (out_dir / "summary_table.md").read_text()
+    top = table.split("## Top Performing D4Ds (Fixed Score >= 80%)", 1)[1]
+    assert "a.yaml" not in top and "b.yaml" not in top
+    if kind == "concatenated":
+        before = table.split("## Top Performing")[0]
+        assert before.count("| NEW_PROJECT |") == 2
+        assert "Q5:" not in before and "Q10:" not in before  # excluded items aren't extreme scores
+
+
+def test_equal_adjusted_maxima_with_different_exclusions_never_pool(out_dir):
+    docs = [_adjusted({1}, filename="a"), _adjusted({2}, filename="b")]
+    _run_all(docs)
+    assert len(mod.summary_cohorts(docs)) == 2
+    rows = _all_csv_rows(out_dir)
+    assert {float(row["adjusted_max_score"]) for row in rows} == {79}
+    assert {row["excluded_items"] for row in rows} == {'["Q1"]', '["Q2"]'}
+    report = (out_dir / "summary_report.md").read_text()
+    assert report.count("Measured on 1 of the 2 evaluations above") == 2
+
+
+def test_unknown_exclusion_identities_keep_rows_but_withhold_adjusted_pooling(out_dir):
+    docs = [_adjusted({1}, filename="a"), _adjusted({2}, filename="b", total=30)]
+    for doc in docs:
+        # The adjusted maximum survives, but the scorer omitted its item evidence.
+        doc["categories"] = []
+    _run_all(docs)
+    assert len(_all_csv_rows(out_dir)) == 2
+    assert {row["excluded_items"] for row in _all_csv_rows(out_dir)} == {"null"}
+    report = (out_dir / "summary_report.md").read_text()
+    assert "Average Adjusted Score:** withheld" in report
+    assert "35.0/79" not in report
+    assert "Withheld: adjusted basis or excluded-item identities are unrecorded" in report
+    assert "distinct totals (adjusted / fixed)" not in report
+
+
+@pytest.mark.parametrize("api", [False, True])
+def test_fully_excluded_scores_are_undefined_not_zero_and_null_questions_are_retained(out_dir, api):
+    doc = _adjusted(set(range(1, 21)), total=0, api=api)
+    _run_all([doc])
+    row, = _all_csv_rows(out_dir)
+    assert float(row["percentage"]) == 0
+    assert row["adjusted_max_score"] == "0" and row["adjusted_percentage"] == ""
+    assert row["reported_normalized_percentage"] == "null"
+    assert len(row["question_scores"].split(",")) == 20
+    assert "Q1:None/5" in row["question_scores"]
+    table = (out_dir / "summary_table.md").read_text()
+    assert "0/0 (undefined)" in table and "| N/A | N/A |" in table
+    report = (out_dir / "summary_report.md").read_text()
+    assert "Average Adjusted Score:** 0.0/0 (undefined)" in report
+    assert "Average Adjusted Score:** 0.0/0 (0.0%)" not in report
+
+
+def test_api_layout_uses_fixed_max_points_and_keeps_semantic_equivalent_in_same_cohort(out_dir):
+    semantic = _adjusted({1}, filename="semantic")
+    api = _adjusted({1}, filename="api", api=True)
+    _run_all([semantic, api])
+    assert len(mod.summary_cohorts([semantic, api])) == 1
+    for row in _all_csv_rows(out_dir):
+        assert float(row["max_score"]) == 84
+        assert float(row["adjusted_max_score"]) == 79
+        assert float(row["percentage"]) == pytest.approx(100 * 40 / 84)
+        assert float(row["adjusted_percentage"]) == pytest.approx(100 * 40 / 79)
+    # The API helper normalization also detects an omitted exclusion list.
+    api["categories"] = []
+    _run_all([api])
+    assert _all_csv_rows(out_dir)[0]["excluded_items"] == "null"
+
+
+def test_legacy_and_explicit_adjusted_modes_are_separate_even_with_equal_maxima(out_dir):
+    legacy = _identified()
+    explicit = _adjusted(set(), total=legacy["overall_score"]["total_points"])
+    _run_all([legacy, explicit])
+    assert len(mod.summary_cohorts([legacy, explicit])) == 2
+    rows = _all_csv_rows(out_dir)
+    legacy_row = next(row for row in rows if row["score_mode"] == "legacy_fixed_only")
+    assert legacy_row["adjusted_percentage"] == legacy_row["adjusted_max_score"] == ""
+    assert "unrecorded (fixed-only legacy)" in (out_dir / "summary_report.md").read_text()
+
+
+def test_normalized_rate_without_adjusted_basis_stays_unrecorded(out_dir):
+    doc = _identified()
+    doc["overall_score"]["normalized_percentage"] = 90
+    _run_all([doc])
+    row, = _all_csv_rows(out_dir)
+    assert row["reported_normalized_percentage"] == "90"
+    assert row["adjusted_percentage"] == row["adjusted_max_score"] == ""
+    assert row["score_mode"] == "adjustment_unrecorded"
+    assert "Average Adjusted Score:** withheld" in (out_dir / "summary_report.md").read_text()
