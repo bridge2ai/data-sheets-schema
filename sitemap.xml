@@ -791,6 +791,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/api_playbook_context_v1/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/appeal_process/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>

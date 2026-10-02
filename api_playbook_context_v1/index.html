@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/api_playbook_context_v1/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Opt-in API playbook context v1 - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#opt-in-api-playbook-context-v1" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Opt-in API playbook context v1
             
           </span>
         </div>
@@ -309,62 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -377,95 +321,89 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/api_playbook_context_v1.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
+<h1 id="opt-in-api-playbook-context-v1">Opt-in API playbook context v1</h1>
+<p>Issue #4014: historical generic and tuned templates ask the model to open the
+provenance guard and full/core playbook. An API request has no filesystem tools;
+those references did not deliver the factual boundary or phase responsibilities.</p>
+<p><code>api_playbook_version=1</code> is a separate instruction condition, supported only with
+API renderer 8. It supplies <code>src/download/prompts/api_playbook_v1.md</code> directly in
+every phase request. Version 0 (the default, omitted from recorded specs) retains
+historical request text and assembly hashes for renderers 1–23, including agentic
+instructions. No existing prompt pin, registration or saved run is replaced.</p>
+<p>Use an explicit new run label and register this instruction axis before comparing
+outcomes. For an offline inspection with a neutral external bundle:</p>
+<pre><code class="language-sh">d4d api plan --project EXTERNAL --bundle /inputs/source.txt --manifest none \
+  --condition generic_v9 --label new-api-policy-v1 --api-playbook-version 1 --json
+d4d api render-prompt --project EXTERNAL --bundle /inputs/source.txt --manifest none \
+  --condition generic_v9 --label new-api-policy-v1 --api-playbook-version 1 \
+  --runtime 'Claude API (direct)'
 </code></pre>
-
-</details>
+<p><code>api run</code> and <code>api batch</code> accept the same flag. Rendering defaults to the agentic
+runtime, so it requires the explicit API runtime above. Agentic runtimes and any
+other renderer refuse version 1 before execution. This implementation performs no
+live runs and does not authorize spending or modifying held study registrations.</p>
+<p>The adapter selects sections from the registered base template before substituting
+paths/names or inserting tuned evidence. It preserves the full metadata header and
+all selected-condition decision rules. Its runtime adaptations are:</p>
+<table>
+<thead>
+<tr>
+<th>Historical directive</th>
+<th>API v1 behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Open two <code>.claude</code> playbooks</td>
+<td>Inline the frozen factual and phase policy</td>
+</tr>
+<tr>
+<td>Write full/core/report output paths</td>
+<td>Return the final phase's requested artifact; controller writes destinations</td>
+</tr>
+<tr>
+<td>Generate core and its header</td>
+<td>Controller derives core from validated same-run full; no model core generation</td>
+</tr>
+<tr>
+<td>Run shell validation/provenance commands</td>
+<td>Controller runs checks and records provenance; model must not claim unavailable results</td>
+</tr>
+<tr>
+<td>Forbid every generated record, including current work</td>
+<td>Current-run carried artifacts are allowed work products, never independent factual evidence</td>
+</tr>
+<tr>
+<td>Treat schema files as factual inputs</td>
+<td>Supplied digest is structural authority; bundle and manifest context provide facts</td>
+</tr>
+<tr>
+<td>Return counts and completion summary in every phase</td>
+<td>Follow the final phase-specific artifact format</td>
+</tr>
+</tbody>
+</table>
+<p>The controller's phase gates, source context blocks, cache boundaries, deterministic
+core derivation and final phase suffixes are unchanged. Conditions requiring a
+coverage receipt retain their existing receipt suffix; other conditions do not
+acquire one. This policy does not import later generic decision rules into earlier
+conditions or consume the mutable agentic playbooks.</p>
+<p>The policy is pinned in the canonical registry and checked against a frozen SHA256.
+A recorded rendering spec carries both <code>api_playbook_version</code> and
+<code>api_playbook_sha256</code>; replay requires the exact supported version and digest.
+The provenance prompt-file list includes the policy. Agentic playbooks remain
+recorded as not consumed on the API runtime. Resume identity binds the new spec
+and resolved instruction, refusing cross-policy resumes.</p>
+<p>The assembly digest additionally binds this policy version, digest and adaptation.
+<code>condition_delta</code> reports an <code>assembly</code> difference, and <code>runs compare-arms</code> reports
+an <code>assembly digest</code> confound even when both runs use the same generic condition.
+Condition names alone cannot establish equivalence; use recorded procedure facts.</p>
 
 
 
