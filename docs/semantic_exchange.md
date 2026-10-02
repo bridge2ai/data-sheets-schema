@@ -76,8 +76,8 @@ When a D4D class or slot joins the exchange layer, follow the [`/d4d-add-mapping
 |---|---|---|
 | `schema` | `https://schema.org/` | Most title/description/identifier/temporal slots |
 | `dcat` | `http://www.w3.org/ns/dcat#` | Catalog / distribution / byteSize structure |
-| `evi` | `https://w3id.org/EVI#` | FAIRSCAPE Evidence: hashes (md5, sha256), formats, sampling, ROCrate root |
-| `rai` | `http://mlcommons.org/croissant/RAI/` | Responsible AI: dataCollection, biases, limitations, prohibitedUses |
+| `evi` | `https://w3id.org/EVI#` | FAIRSCAPE Evidence: hashes (md5, sha256), formats, ROCrate root |
+| `rai` | `http://mlcommons.org/croissant/RAI/` | Responsible AI (the 20 Croissant RAI 1.0 properties only): dataCollection, biases, limitations, use cases |
 | `d4d` | `https://w3id.org/bridge2ai/data-sheets-schema/` | D4D-specific terms with no external equivalent |
 
 ## Coverage at a glance
