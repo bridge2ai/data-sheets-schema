@@ -1589,9 +1589,16 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     base = {"expected": expected, "non_checks": list(NON_CHECKS)}
     from data_sheets_schema import receipt_completion_policy as selected_receipts
     try:
-        spec_declaration = (snapshot_spec.render_spec() if snapshot_spec is not None
-                            and getattr(snapshot_spec, "receipt_completion_version", 0) else receipt_render_spec)
+        render = getattr(snapshot_spec, "render_spec", None)
+        spec_declaration = render() if callable(render) else None
+        if spec_declaration is None and getattr(snapshot_spec, "receipt_completion_version", 0):
+            raise ValueError("enabled snapshot spec has no authoritative render declaration")
         policy = selected_receipts.select_policy(render_spec=spec_declaration, record=snapshot_record)
+        if receipt_render_spec is not None:
+            explicit_policy = selected_receipts.select_policy(render_spec=receipt_render_spec, record=snapshot_record)
+            if spec_declaration is not None and policy != explicit_policy:
+                raise ValueError("explicit receipt policy differs from the snapshot spec")
+            policy = explicit_policy
     except ValueError as exc:
         return {**base, "expected": True, "checked": False,
                 "reason": f"receipt policy selection refused: {exc}"}

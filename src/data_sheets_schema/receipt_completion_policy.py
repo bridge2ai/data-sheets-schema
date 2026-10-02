@@ -170,21 +170,34 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
     covered = _integer(coverage.get("with_receipt"), "with_receipt")
     if covered > eligible:
         raise ValueError("with_receipt exceeds receiptable")
+    for key, value in coverage.items():
+        if not isinstance(key, str):
+            raise ValueError("coverage keys must be strings")
+        if value is not None and (key.endswith("_count") or key in {"receipt_paths", "exempt_on_carried_identifier"}):
+            _integer(value, key)
     if "populated" in coverage or "exempt" in coverage:
         populated = _integer(coverage.get("populated"), "populated")
         exempt = _integer(coverage.get("exempt"), "exempt")
         if populated != eligible + exempt:
             raise ValueError("coverage populated/exempt/receiptable counters disagree")
+        if coverage.get("exempt_on_carried_identifier") is not None and coverage["exempt_on_carried_identifier"] > exempt:
+            raise ValueError("carried-identifier exemptions exceed all exempt leaves")
     missing = eligible - covered
+    truncated = coverage.get("without_receipt_truncated")
+    if truncated is not None:
+        _integer(truncated, "without_receipt_truncated")
+        if truncated > missing or "without_receipt" not in coverage:
+            raise ValueError("coverage truncation count lacks consistent missing paths")
     if "without_receipt" in coverage:
         paths = coverage["without_receipt"]
-        truncated = coverage.get("without_receipt_truncated")
-        truncated = 0 if truncated is None else _integer(truncated, "without_receipt_truncated")
+        truncated = 0 if truncated is None else truncated
         if not isinstance(paths, list) or any(not isinstance(p, str) for p in paths) or len(set(paths)) != len(paths) or len(paths) + truncated != missing:
             raise ValueError("coverage missing paths/counters disagree")
     for key in ("never_receipted", "added_after_receipt"):
         if coverage.get(key) is not None:
             _integer(coverage[key], key)
+            if coverage[key] > missing:
+                raise ValueError(f"coverage {key} exceeds uncovered leaves")
     if all(coverage.get(k) is not None for k in ("never_receipted", "added_after_receipt")):
         if coverage["never_receipted"] + coverage["added_after_receipt"] != missing:
             raise ValueError("coverage phase-1 missing counters disagree")

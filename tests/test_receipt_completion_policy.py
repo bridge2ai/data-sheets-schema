@@ -143,6 +143,46 @@ def test_record_cannot_downgrade_or_change_policy():
     assert not canary.checks_from_record({"receipts": block(selected)})["receipts"]["checked"]
 
 
+@pytest.mark.parametrize("counter", [
+    {"never_receipted": 1, "added_after_receipt": None},
+    {"never_receipted": None, "added_after_receipt": 1},
+    {"without_receipt_truncated": -1}, {"without_receipt_truncated": True},
+    {"without_receipt_truncated": 0},
+    {"addressing_slips_count": -1}, {"exempt_on_carried_identifier": -1},
+    {"receipt_paths": False}, {"exempt_on_carried_identifier": 1, "populated": 3, "exempt": 0},
+])
+def test_optional_counters_cannot_bypass_registered_gate(counter):
+    b = block(policy(), 3, 3)
+    b["slots"].update(counter)
+    assert strict_failure(b)
+    assert canary.receipt_coverage_floor(b)["state"] == "unmeasurable"
+
+
+@pytest.mark.parametrize("snapshot,explicit", [
+    (declaration(), declaration(registration({"state": "pending", "mode": "diagnostic_pilot"}))),
+    (declaration(), {"condition": "generic"}),
+    ({"condition": "generic"}, declaration()),
+])
+def test_disk_compares_every_supplied_declaration_before_reading(disk, snapshot, explicit):
+    from types import SimpleNamespace
+    spec = SimpleNamespace(receipt_completion_version=snapshot.get("receipt_completion_version", 0),
+                           render_spec=lambda: snapshot)
+    b = receipts.block_for(**disk, snapshot_spec=spec, receipt_render_spec=explicit)
+    assert b["expected"] and not b["checked"]
+    assert "policy" in b["reason"] and "snapshot" in b["reason"]
+
+
+def test_default_snapshot_cannot_silently_select_new_record_policy(disk):
+    from data_sheets_schema.api_runner import RunSpec
+    spec = RunSpec(project="P", arm="A", method="claudecode_api", bundle=disk["bundle"], label="L",
+                   out_dir=disk["full_path"].parent, manifest=None, profile="neutral", provider="test", render_version=8)
+    rec = {"run": {"project": "P", "method": "claudecode_api", "label": "L", "condition": "generic"},
+           "prompts": {"request": {"spec": declaration()}}}
+    b = receipts.block_for(**disk, snapshot_spec=spec, snapshot_record=rec)
+    assert b["expected"] and not b["checked"]
+    assert "policy selection refused" in b["reason"]
+
+
 @pytest.fixture
 def disk(tmp_path):
     from data_sheets_schema.chunking import build_manifest, dump_manifest
