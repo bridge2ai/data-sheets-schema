@@ -3,14 +3,17 @@
 CLI tests for d4d rocrate commands.
 """
 
+import errno
 import shutil
 import sys
 import tempfile
 import types
 import unittest
+from contextlib import nullcontext
 from pathlib import Path
 from unittest.mock import patch
 
+import click
 from click.testing import CliRunner
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
@@ -352,23 +355,29 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
     twice ran its project twice. The emit commands then refused the record the
     first pass had just published: a run that published every project exited
     1, its last line saying one was not. Each of the five commands now runs a
-    repeated name once, in the order first given, with one stderr line saying
-    so, and the #3638 count counts projects.
+    repeated name once, in the order first given, with one stderr line for
+    each repeated name, in the same order, and the #3638 count counts projects.
 
-    BETA is given three times around ALPHA, so the order kept (BETA first) is
-    neither alphabetical nor the manifest's, and the line must give the real
-    number of times. normalize and map run with their library function
-    replaced by a recorder, as #4165 was reproduced; the others run for real.
+    BETA is given first and last, and ALPHA three times between them. The
+    order first given, BETA then ALPHA, is then the reverse of each order a
+    loop might keep instead: alphabetical, the manifest's, by how often a name
+    was given, and by where a name was last given. The input before #4185
+    gave its first name most often, so an order by count matched the order
+    first given and no test could tell them apart. Each line must give its
+    own name's number of times. normalize and map run with their library
+    function replaced by a recorder, as #4165 was reproduced; the others run
+    for real.
     """
 
-    NAMES = ("BETA", "ALPHA", "BETA", "BETA")
-    NOTICE = "⚠️  --project BETA was given 3 times; it runs once"
+    NAMES = ("BETA", "ALPHA", "ALPHA", "ALPHA", "BETA")
+    NOTICES = ["⚠️  --project BETA was given 2 times; it runs once",
+               "⚠️  --project ALPHA was given 3 times; it runs once"]
 
     def _assert_ran_once_each(self, r, library):
         self.assertEqual([c.args[0] for c in library.call_args_list], ["BETA", "ALPHA"],
                          r.stdout + r.stderr)
         self.assertEqual([line for line in r.stderr.splitlines() if "runs once" in line],
-                         [self.NOTICE], r.stderr)
+                         self.NOTICES, r.stderr)
 
     def test_normalize_runs_a_repeated_project_once(self):
         from data_sheets_schema.rocrate_normalize import Result
@@ -396,7 +405,7 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
         self._assert_ran_once_each(r, build)
         self.assertEqual(r.stderr.count("No document bundle"), 1, r.stderr)
         self.assertEqual(r.stderr.splitlines()[-1:],
-                         ["❌ 1 of 2 bundle(s) not written"], r.stderr)   # was 3 of 4
+                         ["❌ 1 of 2 bundle(s) not written"], r.stderr)   # was 2 of 5
         self.assertEqual([p.name for p in self.docs.glob("*_with_crate.txt")],
                          ["ALPHA_preprocessed_with_crate.txt"])
 
@@ -444,18 +453,22 @@ class TestARepeatedProjectRunsOnce(_PerProjectLoopFixture):
     def test_each_repeated_name_gets_its_own_line_in_the_order_first_given(self):
         """Two names repeated, each a different number of times, and one given
         once: a line apiece for the two, in the order first given, none for
-        the third."""
+        the third. GAMMA comes first and last, ALPHA after it and more often,
+        and BETA once. In the order first given the runs are GAMMA, ALPHA,
+        BETA and the lines GAMMA's then ALPHA's; in the order by count, the
+        alphabetical one or the order by where a name was last given, neither
+        would be, and both are asserted (#4185)."""
         from data_sheets_schema.rocrate_normalize import Result
         with patch("data_sheets_schema.rocrate_normalize.normalize_project",
                    side_effect=lambda name, root, sv=None: Result(project=name)) as run:
             r = self._invoke("normalize",
-                             projects=("GAMMA", "ALPHA", "BETA", "GAMMA", "ALPHA", "GAMMA"))
+                             projects=("GAMMA", "ALPHA", "BETA", "ALPHA", "ALPHA", "GAMMA"))
 
         self.assertEqual(r.exit_code, 0, r.stdout + r.stderr)
         self.assertEqual([c.args[0] for c in run.call_args_list], ["GAMMA", "ALPHA", "BETA"])
         self.assertEqual(r.stderr.splitlines(),
-                         ["⚠️  --project GAMMA was given 3 times; it runs once",
-                          "⚠️  --project ALPHA was given 2 times; it runs once"], r.stderr)
+                         ["⚠️  --project GAMMA was given 2 times; it runs once",
+                          "⚠️  --project ALPHA was given 3 times; it runs once"], r.stderr)
 
 
 class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
@@ -463,7 +476,9 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
     any other error from a project (a PermissionError writing its record, a
     UnicodeDecodeError reading it) left the loop there: the projects after it
     were never tried, no count was printed, and the caller saw a traceback.
-    They now catch any Exception, as bundle does, and go on.
+    They now catch any Exception, as bundle does, and go on. Their success
+    line is printed after the `try`, so an error printing it is not caught
+    and counted against a project whose record was written.
 
     bundle printed the bare message, so a KeyError read as its quoted key and a
     message-less error as nothing at all. Each error line now names the type of
@@ -533,13 +548,56 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
                     self.assertNotIn("not published", r.stderr)
                     self.assertFalse((self.concat / method).exists())
 
+    def test_an_error_printing_the_success_line_propagates_and_is_not_counted(self):
+        """The success line is printed after the `try`, not in it (#4185). On
+        a stdout that cannot encode its `✓`, or on a closed pipe, the error
+        comes from the echo after the record is written; inside the `try` the
+        catch-all would count that project as not published and go on to the
+        next. Outside it the error propagates: a UnicodeEncodeError as itself,
+        a broken pipe to click, which ends the run with a quiet exit 1."""
+        real_echo = click.echo
+
+        def closed_pipe(message=None, *args, **kw):        # the reader of stdout is gone
+            if not kw.get("err") and str(message).startswith("  ✓ "):
+                raise BrokenPipeError(errno.EPIPE, "Broken pipe")
+            return real_echo(message, *args, **kw)
+
+        stdouts = (("v1", "latin-1", None, UnicodeEncodeError),   # latin-1 has no ✓
+                   ("v2", "utf-8", closed_pipe, SystemExit))      # click's exit 1 on EPIPE
+        for command, method, variant in self.EMITS:
+            for name in ("ALPHA", "BETA"):
+                self._record(name, variant)
+            for version, charset, echo, raised in stdouts:
+                self.runner = CliRunner(mix_stderr=False, charset=charset)
+                with self.subTest(command=command, raised=raised.__name__), \
+                     patch("click.echo", side_effect=echo) if echo else nullcontext(), \
+                     self._publishing_into_tmp() as emit:
+                    r = self._invoke(command, "--version", version, projects=("ALPHA", "BETA"))
+
+                    self.assertIsInstance(r.exception, raised, r.stdout + r.stderr)
+                    self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+                    self.assertEqual([c.args[0] for c in emit.call_args_list], ["ALPHA"])
+                    self.assertEqual([p.name for p in (self.concat / method / version).iterdir()],
+                                     ["ALPHA_d4d.yaml"])   # written before the echo failed
+                    self.assertEqual(r.stderr, "")       # nothing counted as not published
+
     def test_bundle_names_an_unexpected_error_and_never_prints_a_bare_reason(self):
+        """DeNovoPolicyError is a RuntimeError and FileNotFoundError an
+        OSError, so bundle's refusals could widen to either base. A
+        RuntimeError and a PermissionError that carry a message are what
+        would then print as a bare message, and fail here (#4185); an error
+        with no message reads as its type alone either way."""
         from data_sheets_schema.rocrate_normalize import DeNovoPolicyError
         self.docs.mkdir()                                  # BETA has no document bundle
         refusal = (f"  ❌ No document bundle at {self.docs / 'BETA_preprocessed.txt'}; "
                    "run `make concat-preprocessed` first")
         withheld = "'ALPHA_crate_d4d.yaml' is withheld from the de novo fork: already D4D"
+        denied = "ALPHA_preprocessed_with_crate.txt"
         for exc, line in ((KeyError("x"), "  ❌ KeyError: 'x'"),
+                          # DeNovoPolicyError's base, then an OSError as FileNotFoundError is
+                          (RuntimeError("boom"), "  ❌ RuntimeError: boom"),
+                          (PermissionError(13, "Permission denied", denied),
+                           f"  ❌ PermissionError: [Errno 13] Permission denied: '{denied}'"),
                           (RuntimeError(), "  ❌ RuntimeError"),          # no message
                           (DeNovoPolicyError(withheld), f"  ❌ {withheld}"),   # a refusal
                           (FileNotFoundError(), "  ❌ FileNotFoundError")):   # one with no message
