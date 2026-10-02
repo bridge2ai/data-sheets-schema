@@ -212,7 +212,9 @@ Two more annotations move no class either (#3366, #3367):
   (`run_enum_aliases`: the file on disk where its bytes hash to the
   record's `schema.full_sha256` or `full_md5`, else the committed version
   that does), not today's; where none can be recovered today's are read
-  and `artifacts.enum_alias_tables` says why (#3702). The temporal form
+  and `artifacts.enum_alias_tables` says why (#3702). The mailto form
+  likewise reads the run's Person-ranged slots, with its independently
+  selected basis in `artifacts.person_slot_rules` (#4063). The temporal form
   reads no schema table. Measured over the 87 checked records on 2026-09-30: of
   1,349 rewrites, 459 without a finding and 53 unsorted (one record,
   v4 rep1 VOICE, whose audit could not be read), none has the
@@ -818,7 +820,8 @@ def _temporal_texts(value: Any) -> list[str]:
     return []
 
 
-def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool:
+def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str],
+                 person_slots: frozenset[str] | set[str] | None = None) -> bool:
     """Whether `new` is the id the runner's `normalise_mailto_ids` writes for
     `old` at `path` (#3756): the `id` of a mapping directly under a
     Person-ranged slot (the runner leaves every other `mailto:` id and logs
@@ -828,8 +831,10 @@ def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool
     runner read is the phase output's, not the final record's."""
     toks = _tokens(path)
     owner = next((t for t in reversed(toks[:-1]) if isinstance(t, str)), None)
-    from data_sheets_schema.api_runner import _person_slots
-    if owner not in _person_slots():
+    if person_slots is None:
+        from data_sheets_schema.api_runner import _person_slots
+        person_slots = _person_slots()
+    if owner not in person_slots:
         return False
     m = _MAILTO_ADDR.fullmatch(old.strip())
     if not m or not isinstance(new, str):
@@ -843,7 +848,8 @@ def _mailto_form(path: str, old: str, new: Any, own_ids: frozenset[str]) -> bool
 
 
 def normaliser_form(path: str, old: Any, new: Any, own_ids: frozenset[str] = frozenset(),
-                    enum_aliases: dict[str, dict[str, str]] | None = None) -> str | None:
+                    enum_aliases: dict[str, dict[str, str]] | None = None,
+                    person_slots: frozenset[str] | set[str] | None = None) -> str | None:
     """Which write-time normaliser rewrite turns `old` into `new` at `path`,
     or None (#3366). The enum and temporal forms run the runner's own
     line normalisers (`normalise_enum_aliases`, `normalise_temporal`) on
@@ -857,13 +863,15 @@ def normaliser_form(path: str, old: Any, new: Any, own_ids: frozenset[str] = fro
 
     `enum_aliases` is the slot -> alias table of the schema the run used
     (`run_enum_aliases`, #3702); None reads today's schema's, as the
-    runner does. The temporal form has no schema table: its slot lists
+    runner does. `person_slots` supplies the run's Person-ranged slots;
+    None alone reads today's, while an empty set exempts none (#4063).
+    The temporal form has no schema table: its slot lists
     are the runner's code (`DATETIME_SLOTS`, `DATE_SLOTS`)."""
     leaf = next((t for t in reversed(_tokens(path)) if isinstance(t, str)), None)
     if leaf is None:
         return None
     if isinstance(old, str) and leaf == "id" and old.strip().casefold().startswith("mailto:"):
-        return "mailto_id" if _mailto_form(path, old, new, own_ids) else None
+        return "mailto_id" if _mailto_form(path, old, new, own_ids, person_slots) else None
     import datetime as _dt
     if isinstance(old, (_dt.date, _dt.datetime)):
         texts = _temporal_texts(old)
@@ -1497,6 +1505,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              audit_unread: str | None = None, snapshot_sha256: str | None = None,
              amended_paths: frozenset[str] | set[str] = frozenset(),
              enum_aliases: dict[str, dict[str, str]] | None = None,
+             person_slots: frozenset[str] | set[str] | None = None,
              amended_edits: dict[str, list[tuple[str, str] | None]] | None = None,
              path_limit: int | None = PATH_LIMIT) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
@@ -1527,7 +1536,9 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     empties a value leaves nothing at its path, so without the mark it
     reads as the model's deletion. `enum_aliases` is the run's schema's
     enum-alias table for `normaliser_form` (`run_enum_aliases`, #3702);
-    None reads today's. `amended_edits` is each amended path's recorded
+    None reads today's. `person_slots` similarly supplies the run's
+    Person-ranged slots; None reads today's and an empty set remains empty
+    (#4063). `amended_edits` is each amended path's recorded
     (`replace`, `with`) pairs (`amend_edits`), one per amend in the order
     recorded, None (or a pair without a nonblank `replace`) for an amend
     whose edit is not recorded — still an amend on that path (#3842): #903 records an amend on
@@ -1847,7 +1858,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                 rw: dict[str, Any] = {"path": path, "at": remap_path(path, original, final)["path"]}
                 # Of the write-time normaliser's form (#3366): reported, never subtracted.
                 form = normaliser_form(path, value, _resolve_value(final, rw["at"])[1], own_ids,
-                                       enum_aliases=enum_aliases)
+                                       enum_aliases=enum_aliases, person_slots=person_slots)
                 if form is not None:
                     rw["normaliser"] = form
                 if attributed:
@@ -2292,11 +2303,15 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
         r_state = "usable" if receipt_paths(receipt) is not None else "unusable"
     # The enum-alias tables of the schema the run recorded, not today's (#3702).
     tables, tables_basis = run_enum_aliases(record)
+    # These existing selectors resolve independently. Keep each actual basis,
+    # including a fallback, rather than implying a single shared capture.
+    from data_sheets_schema.run_schema import identifier_rules
+    rules, person_basis = identifier_rules(record)
     block = classify(original, final, audit if a_state == "usable" else None,
                      receipt=receipt, intermediates=None if evidence else stages,
                      audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
                      snapshot_sha256=(pin or {}).get("sha256"), amended_paths=amended_paths(record),
-                     enum_aliases=tables, amended_edits=amend_edits(record))
+                     enum_aliases=tables, person_slots=rules.persons, amended_edits=amend_edits(record))
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,
@@ -2304,6 +2319,7 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
         "receipt": {"state": r_state, "path": str(receipt_file) if r_state != "absent" else None},
         "phases": phases,
         "enum_alias_tables": tables_basis,
+        "person_slot_rules": person_basis,
         **({"phases_reason": "the native/direct evidence protocol snapshots no phase output"} if evidence else {}),
     }
     return block
