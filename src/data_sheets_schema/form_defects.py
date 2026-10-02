@@ -325,6 +325,8 @@ class FormSubtypeClassifier:
         elif schema_snapshot is not None:
             raise ValueError("fitness schema snapshot requires explicit guidance selection")
         self._client, self._model = client, model
+        self.evaluation_model = ({"name": model, "basis": "explicit_override"}
+                                 if model is not None else None)
         self.class_name = class_name
         self.schema_path = schema_path
         # The instrument of the records being classified (#1496); None is
@@ -372,13 +374,16 @@ class FormSubtypeClassifier:
         """
         if self.cache_path and Path(self.cache_path).exists():
             try:
-                return recorded_model(self.cache_path)
+                model = recorded_model(self.cache_path)
+                self.evaluation_model = {"name": model, "basis": "recorded_cache_model"}
+                return model
             except PooledInstruments:
                 raise
             except (ValueError, OSError):
                 pass          # nothing recorded, or unreadable — fall through
-        from data_sheets_schema.evaluation_model import evaluation_model_name
-        return evaluation_model_name()
+        from data_sheets_schema.evaluation_model import model_selection
+        self.evaluation_model = model_selection(None)
+        return self.evaluation_model["name"]
 
     def _load(self) -> None:
         if not self.cache_path or not self.cache_path.exists():
@@ -524,6 +529,7 @@ class FormSubtypeClassifier:
         with self.cache_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps({"rubric": _digest(FORM_SUBTYPE_SYSTEM),
                                  "model": self.model, "chars": VALUE_CHARS,
+                                 "evaluation_model": self.evaluation_model,
                                  "schema": self.schema,
                                  **({"fitness_schema_guidance": self.schema_guidance, "class_name": self.class_name}
                                     if self.schema_guidance else {}),

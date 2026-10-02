@@ -265,6 +265,20 @@ RECEIPTS_INSTRUMENT = ("v3 (#1053): an entry whose identity key the final list n
                        "own-id fragments exempt, unattesting snippets counted apart")
 
 
+RERECEIPTS_INSTRUMENT = (
+    "v4 (#3314, #3315): v3 coverage and gates unchanged; snippet diagnostics "
+    "split by declared phase1/rereceipt/unknown origin, with recorded chunk-status "
+    "reversals counted separately. Origin markers are accounting metadata, not "
+    "proof of authorship or semantic support. " + RECEIPTS_INSTRUMENT)
+
+
+def receipt_instrument(version: int = 3) -> str:
+    """Explicit opt-in: historical/default consumers keep their v3 instrument."""
+    if type(version) is not int or version not in (3, 4):
+        raise ValueError("unsupported receipt instrument version")
+    return RECEIPTS_INSTRUMENT if version == 3 else RERECEIPTS_INSTRUMENT
+
+
 _DOI_RESOLVERS = ("https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/")
 _BARE_DOI = re.compile(r"^10\.\d{4,}/\S+$")
 
@@ -1001,7 +1015,8 @@ def _rereceipt_action(a: Any) -> tuple[str | None, str | None]:
 
 
 def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: list[Any],
-                    chunk_texts: dict[str, str], *, listed: list[str]) -> dict[str, Any]:
+                    chunk_texts: dict[str, str], *, listed: list[str],
+                    instrument_version: int = 3) -> dict[str, Any]:
     """Validate a slot-driven re-receipt's answers and merge the verified ones
     into a copy of `receipt` (#2926). Pure: neither `receipt` nor `record`
     is modified; the merged receipt is returned under `receipt`.
@@ -1027,7 +1042,12 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
     and not added again, so applying the same answers to the result changes
     nothing. The counts are integers; `unsupported_paths` and `rejections`
     carry the paths and reasons for the caller to route (the audit input)
-    and report."""
+    and report. Explicit instrument version 4 marks newly added pairs with
+    `origin: rereceipt`; existing pairs retain their exact metadata. The
+    v4 path rejects negative-status entries carrying extracted or prior
+    metadata rather than overwrite contradictory evidence. The default
+    version 3 keeps the historical output shape and merge behavior."""
+    receipt_instrument(instrument_version)
     out = copy.deepcopy(receipt)
     listed_set = {str(p) for p in listed}
     counts: dict[str, Any] = {"added": 0, "already_present": 0, "unsupported": 0, "rejected": 0}
@@ -1077,6 +1097,12 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
         status = entry.get("status")
         if status not in RERECEIPT_TARGET_STATUSES:
             reject(n, path, f"chunk {chunk} is {status!r}"); continue
+        if instrument_version == 4 and status != "extracted":
+            conflicts = [key for key in ("extracted", "rereceipt_prior") if key in entry]
+            if conflicts:
+                reject(n, path, f"chunk {chunk} is {status!r} but carries "
+                               f"{', '.join(conflicts)} metadata; correction would overwrite it")
+                continue
         pairs = entry.get("extracted") if status == "extracted" else []
         if pairs is None:
             pairs = []
@@ -1086,6 +1112,8 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
         if not ok:
             reject(n, path, f"snippet not verified in {chunk}: {reason}"); continue
         pair = {"slot": path, "snippet": snippet}
+        if instrument_version == 4:
+            pair["origin"] = "rereceipt"
         if any(str(x.get("slot") or "") == path and x.get("snippet") == snippet for x in pairs):
             counts["already_present"] += 1
             continue
@@ -1106,7 +1134,8 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
 
 def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
           full: dict[str, Any], record_bundle_md5: str | None,
-          original: dict[str, Any] | None = None) -> dict[str, Any]:
+          original: dict[str, Any] | None = None, *,
+          instrument_version: int = 3) -> dict[str, Any]:
     """The validator. Pure: receipt + manifest + chunk texts + record → block.
 
     `original` is the record as it stood when the receipt was written (the
@@ -1116,7 +1145,10 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     reported as `reshaped_by_reconcile`, not as a path that never existed
     (#758). The API path has no re-receipt route after reconcile (#742), so
     this is a measured limitation, kept out of the findings and the gate.
+    Explicit version 4 adds origin/status accounting without changing the
+    coverage denominator or any gate; existing callers remain on version 3.
     """
+    instrument = receipt_instrument(instrument_version)
     manifest_ids = _manifest_ids(manifest)
     entries, findings = _receipt_entries(receipt)
 
@@ -1192,6 +1224,9 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                 # findings and a screen must not gate (#839, #840).
                 "no_value_overlap": 0, "no_value_overlap_sample": [],
                 "entry_single_leaf": 0, "entry_single_leaf_sample": []}
+    origins = {origin: {key: 0 for key in
+                       ("total", "no_value_overlap", "entry_single_leaf", "unattesting")}
+               for origin in ("phase1", "rereceipt", "unknown")}
     order = {cid: i for i, cid in enumerate(manifest_ids)}
     unattesting_pairs: set = set()
     hays = {cid: normalise(t) for cid, t in chunk_texts.items()}      # once per chunk (#766)
@@ -1204,6 +1239,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
         text = chunk_texts.get(e.get("id"))
         for pair in e.get("extracted") or []:
             snippets["total"] += 1
+            # Only an absent marker means the historical phase-1 convention.
+            # Null, containers and unrecognized values remain visible, not trusted.
+            origin = ("phase1" if "origin" not in pair else
+                      "rereceipt" if pair["origin"] == "rereceipt" else "unknown")
+            origins[origin]["total"] += 1
             snippet = pair.get("snippet")
             if not isinstance(snippet, str) or not snippet.strip():
                 snippets["mismatched"] += 1
@@ -1253,6 +1293,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                             hit = sum(1 for _k, v in kids if stoks & _value_tokens(v))
                             if hit <= 1:
                                 snippets["entry_single_leaf"] += 1
+                                origins[origin]["entry_single_leaf"] += 1
                                 snippets["entry_single_leaf_sample"].append(
                                     {"chunk": e.get("id"), "slot": spath,
                                      "leaves": len(kids), "overlapping": hit})
@@ -1260,11 +1301,13 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
                         vtoks = _value_tokens(value)
                         if stoks and vtoks and not (stoks & vtoks):
                             snippets["no_value_overlap"] += 1
+                            origins[origin]["no_value_overlap"] += 1
                             snippets["no_value_overlap_sample"].append(
                                 {"chunk": e.get("id"), "slot": spath, "snippet": snippet[:60]})
                 continue
             if why.startswith("too short"):
                 snippets["unattesting"] += 1
+                origins[origin]["unattesting"] += 1
                 snippets["unattesting_sample"].append({"chunk": e.get("id"),
                                                        "slot": pair.get("slot"),
                                                        "snippet": snippet[:40]})
@@ -1442,7 +1485,26 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     reported_kinds = {"snippet_mismatch", "snippet_empty", "snippet_adjacent_chunk",
                       "snippet_elsewhere_chunk", "snippet_spans_boundary"}
     findings_gated = sum(1 for f in findings if f.get("kind") not in reported_kinds)
-    return {"checked": True, "instrument": RECEIPTS_INSTRUMENT,
+    extra = {}
+    if instrument_version == 4:
+        snippets["by_origin"] = origins
+        reversals = []
+        malformed = []
+        for entry in entries:
+            if "rereceipt_prior" not in entry:
+                continue
+            prior = entry["rereceipt_prior"]
+            if (entry.get("status") == "extracted" and isinstance(prior, dict)
+                    and prior.get("status") in ("nothing_relevant", "redundant_with")
+                    and any(p.get("origin") == "rereceipt" for p in entry.get("extracted") or [])):
+                reversals.append({"chunk": entry["id"], "prior": copy.deepcopy(prior)})
+            else:
+                malformed.append(entry["id"])
+        extra["rereceipt"] = {"status_reversal_count": len(reversals),
+                              "status_reversals": reversals,
+                              "unusable_prior_count": len(malformed),
+                              "unusable_prior_chunks": malformed}
+    return {"checked": True, "instrument": instrument, **extra,
             "chunks": chunks, "snippets": snippets, "slots": slots,
             "findings": findings[:100], "findings_truncated": max(0, len(findings) - 100) or None,
             "findings_gated": findings_gated,

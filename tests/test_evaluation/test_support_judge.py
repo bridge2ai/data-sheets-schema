@@ -449,10 +449,12 @@ def test_scorer_system_is_byte_identical():
 
 def test_llm_slot_scorer_and_its_parser_are_byte_identical():
     """v2 is added beside v1, never by editing it. An intended v1 change
-    updates these pins in the same commit, on purpose."""
+    updates these pins in the same commit, on purpose. #3325 adds model-selection
+    disclosure; the prompt, parser, context fingerprint and legacy cache reuse
+    are unchanged and independently tested."""
     pins = {
         evidence_score.LLMSlotScorer:
-            "c6b6781e663d1d0be12c8e5227bfe62a7997acf51b75738badcb71b711461524",
+            "6a93ddf5500fc2012d13232e109f576ebdcdb182e0fa4d84ce83ea23f3774478",
         evidence_score._parse_judgement:
             "fc96fcbd3fd9499e3d098d63bd11d9ac85ccddc35961f617119c603f9d7d9781",
         evidence_score.JudgementContext:

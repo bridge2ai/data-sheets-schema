@@ -23,7 +23,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema import evidence_score, support_judge
+from data_sheets_schema import evaluation_model, evidence_score, support_judge
 from data_sheets_schema.evaluation_model import evaluation_model_settings, same_family_label
 from data_sheets_schema.profiles import profile_named
 from data_sheets_schema.resources import git_env
@@ -246,13 +246,26 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         raise PlanError(f"output already exists: {output}")
     if not isinstance(max_tokens, int) or isinstance(max_tokens, bool) or max_tokens < 1:
         raise PlanError("max_tokens must be a positive integer")
-    settings = ({"name": model, "basis": "explicit_override"} if model is not None
-                else evaluation_model_settings())
+    try:
+        settings = (evaluation_model.model_selection(model) if model is not None
+                    else copy.deepcopy(evaluation_model_settings()))
+    except ValueError as error:
+        raise PlanError(str(error)) from error
     model = settings["name"]
     if not isinstance(model, str) or not model.strip():
         raise PlanError("model must be a nonempty identifier")
     selected_profile = profile_named(profile)
     artifacts = Artifacts()
+    if "configuration" in settings:
+        # Bind the exact settings used for selection before doing any planning.
+        # A concurrent edit must not attach new bytes to the old model choice.
+        try:
+            config_raw = evaluation_model.CONFIG_PATH.read_bytes()
+        except OSError as error:
+            raise PlanError("evaluation config became unavailable after model selection") from error
+        if sha256(config_raw) != settings["configuration"]["sha256"]:
+            raise PlanError("evaluation config changed after model selection")
+        settings["configuration"]["artifact"] = artifacts.put(config_raw)
     price = _prices(prices, model, artifacts)
     roster_raw = Path(roster).read_bytes()
     donor = json.loads(roster_raw)
@@ -421,7 +434,8 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
 
     code_root = ROOT
     source_files = ["support_plan.py", "support_judge.py", "evidence_score.py", "schema_digest.py",
-                    "schema_snapshot.py", "profiles.py", "evaluation_model.py", "api_runner.py", "resources.py"]
+                    "schema_snapshot.py", "profiles.py", "evaluation_model.py", "duplicate_keys.py",
+                    "api_runner.py", "resources.py"]
     manifest = {
         "format": FORMAT, "mode": "offline_dry_run", "granularity": "top_level_field",
         "value_identity_encoding": "typed-yaml-v1",

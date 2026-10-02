@@ -1,4 +1,4 @@
-"""Agent examples carry complete v2 context and match the acceptance contract."""
+"""Agent examples carry context and match their versioned acceptance contract."""
 import hashlib
 import json
 from pathlib import Path
@@ -19,7 +19,7 @@ def test_examples_are_complete_and_do_not_teach_circular_na(rubric, semantic):
     definition = ROOT / f".claude/agents/d4d-{rubric}{'-semantic' if semantic else ''}.md"
     match = re.search(r"```json\n(.*?)\n```", definition.read_text(), re.S)
     result = json.loads(match.group(1))
-    assert result["version"] == "2.0"
+    assert result["version"] == ("3.0" if semantic else "2.0")
     assert result["project"] == "EXAMPLE_NONHUMAN"
     assert result["model"]["temperature"] is None
     groups = result["elements" if rubric == "rubric10" else "categories"]
