@@ -1741,6 +1741,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/offline_support_plan/</loc>
+         <lastmod>2026-10-02</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/ontology_mapping_guide/</loc>
          <lastmod>2026-10-02</lastmod>
          <changefreq>daily</changefreq>
