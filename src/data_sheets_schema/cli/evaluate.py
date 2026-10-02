@@ -22,7 +22,8 @@ def evaluate():
 @click.option("--label", "labels", multiple=True, help="run label(s); default all")
 @click.option("--show", default=0, type=int,
               help="list up to N ungrounded values per record")
-def verifiable_cmd(project, method, labels, show):
+@click.option("--json", "as_json", is_flag=True, help="include captured schema/source identities and unchecked records as JSON")
+def verifiable_cmd(project, method, labels, show, as_json=False):
     """Check the values a record states against the documents it declared.
 
     Answers the half of #165 that survives having no gold standard: a DOI, a
@@ -32,7 +33,10 @@ def verifiable_cmd(project, method, labels, show):
 
     `stated` is printed beside `grounded` on purpose. A record that states
     nothing is trivially correct on everything it states, so the ratio alone
-    would rank an empty record top.
+    would rank an empty record top. Each run uses its recorded schema when
+    recoverable and its exact pinned source bytes. Missing schema identities
+    and unpinned legacy sources are disclosed; unusable pinned inputs are
+    unchecked and make the command fail. No historical files are rewritten.
     """
     from data_sheets_schema.cli.method import resolve_method
     # Each named label is read from its own directory (#973): v7 and v8
@@ -47,13 +51,11 @@ def verifiable_cmd(project, method, labels, show):
         methods = {method}
     else:
         methods = set(by_label.values()) or {"claudecode_agent"}
-    import yaml as _yaml
     from data_sheets_schema.runs import discover, record_path
-    from data_sheets_schema.verifiable import (
-        check_record, declared_bundle, identifier_slots,
-    )
+    from data_sheets_schema.provenance import record_path_for
+    from data_sheets_schema.corpus import anchored
+    from data_sheets_schema.verifiable import check_run
 
-    skip = identifier_slots()
     wanted = set(labels)
     rows = []
     for run in discover():
@@ -69,39 +71,55 @@ def verifiable_cmd(project, method, labels, show):
         for proj in run.projects:
             if project and proj != project:
                 continue
-            # The bundle the run declared, not the baseline one. See
-            # verifiable.declared_bundle: arms read different inputs, and
-            # assuming the baseline reported the whole crate arm as inventing
-            # every value it stated.
-            bundle = declared_bundle(run.method, run.label, proj)
-            if bundle is None:
-                bundle = (Path("data/preprocessed/concatenated")
-                          / f"{proj}_preprocessed.txt")
             rec = record_path(run.method, run.label, proj)
-            if not (bundle.exists() and rec and rec.exists()):
-                continue
-            r = check_record(_yaml.safe_load(rec.read_text(encoding="utf-8")),
-                             bundle.read_text(encoding="utf-8"),
-                             project=proj, label=run.label, skip_slots=skip)
+            if rec is None:
+                # Retain a selected record that disappeared after discovery as
+                # unmeasured; absence cannot turn a partial cohort into success.
+                filename = f"{proj}_d4d_core.yaml" if run.is_core else f"{proj}_d4d.yaml"
+                rec = anchored(Path("data/d4d_concatenated") / run.method / run.label / filename)
+            r = check_run(rec, record_path_for(proj, run.method, run.label),
+                          kind="core" if run.is_core else "full",
+                          fallback_bundle=anchored(Path("data/preprocessed/concatenated") / f"{proj}_preprocessed.txt"),
+                          project=proj, label=run.label)
             rows.append(r)
 
+    rows.sort(key=lambda row: (row["project"], row["label"]))
+    failed = any(not row["checked"] for row in rows)
+    if as_json:
+        import json
+        click.echo(json.dumps({"instrument": "verifiable-recorded-basis-v1", "records": rows}, indent=2))
+        if failed:
+            raise SystemExit(1)
+        return
     if not rows:
         click.echo("No records matched."); return
 
     click.echo(f"{'project':10}{'label':38}{'stated':>7}{'grounded':>9}{'rate':>7}")
-    for r in sorted(rows, key=lambda x: (x.project, x.label)):
-        rate = f"{r.rate:.1%}" if r.rate is not None else "  n/a"
-        click.echo(f"{r.project:10}{r.label:38}{r.stated:>7}{r.grounded:>9}{rate:>7}")
-        for c in r.ungrounded[:show]:
-            click.echo(f"    [{c.kind}] {c.slot}: {c.value[:70]}")
+    for r in rows:
+        if not r["checked"]:
+            click.echo(f"{r['project']:10}{r['label']:38} UNCHECKED: {r['reason']}")
+            continue
+        rate = f"{r['rate']:.1%}" if r["rate"] is not None else "  n/a"
+        click.echo(f"{r['project']:10}{r['label']:38}{r['stated']:>7}{r['grounded']:>9}{rate:>7}")
+        for name in ("schema", "source"):
+            basis = r[f"{name}_basis"]
+            why = f"; {basis['reason']}" if basis.get("reason") else ""
+            kind = f"/{basis['kind']}" if name == "schema" else ""
+            click.echo(f"    {name}{kind}: {basis['status']}; sha256={basis['actual_sha256']}; "
+                       f"{basis['source']}{why}")
+        for c in [c for c in r["claims"] if c["grounded"] is False][:show]:
+            click.echo(f"    [{c['kind']}] {c['slot']}: {c['value'][:70]}")
 
-    total_stated = sum(r.stated for r in rows)
-    total_ok = sum(r.grounded for r in rows)
+    measured = [row for row in rows if row["checked"]]
+    total_stated = sum(r["stated"] for r in measured)
+    total_ok = sum(r["grounded"] for r in measured)
     click.echo(f"\n{total_ok}/{total_stated} values grounded across "
-               f"{len(rows)} record(s)")
-    click.echo("A value is 'ungrounded' when it appears in no declared source "
-               "document. Identifiers the generator mints are excluded — they "
-               "are not claims about the world.")
+               f"{len(measured)} measured record(s); {len(rows) - len(measured)} unchecked.")
+    click.echo("These are token-location counts, not semantic accuracy. Schema and source "
+               "bases are shown per record; totals can combine different bases. "
+               "Unpinned legacy sources do not establish what a historical run read.")
+    if failed:
+        raise SystemExit(1)
 
 
 @evaluate.command()
