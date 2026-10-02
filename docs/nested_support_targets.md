@@ -110,9 +110,9 @@ a later, reviewed integration.
 
 - Independently review this resolver, context and question contract, including
   the choice of edge versus attribute strata and their reporting denominators.
-- Integrate the reviewed contract into a new offline plan version after #3341;
-  regenerate nested target counts, blocked-path coverage, requests and costs.
-  Old top-level manifests and historical caches remain intact.
+- Review the opt-in offline planner version 2 in [offline_support_plan.md](offline_support_plan.md),
+  including nested target counts, blocked-path coverage, requests and costs for
+  the selected roster. Old top-level manifests and historical caches remain intact.
 - Decide and test missing registry/profile coverage, unsupported schema shapes,
   and collection inheritance policies before calling the inventory complete for
   a real roster. The current report always carries unresolved readiness blockers.
