@@ -1,0 +1,11 @@
+{
+  "data/rubric/rubric10.txt": "9a03a8366d1ef2f6e82efe2c7e14c45053739f7e9f7f05c1ca1868d75c986a97",
+  "data/rubric/rubric20.txt": "c8c0d3a96878d895006a4f287af761635b64cb1fc7968b3256eb7d37db360612",
+  "data/rubric/semantic_evidence_authority_v3.json": "0605c742c61f2cc4e13de907f8e09752bde5ebd08d173b31d837c273a4bf3872",
+  ".claude/agents/d4d-rubric10-semantic.md": "c817aa5fefd91552be68016818c8a87ab91b8798ac96666d975bc61af32c7fb3",
+  ".claude/agents/d4d-rubric20-semantic.md": "35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b",
+  ".claude/agents/d4d-rubric10.md": "c7cb23b3693ce9813534214a1da4611dac2f87cb51392204bd826ea26e1562e5",
+  ".claude/agents/d4d-rubric20.md": "6b7aeff1d7c2dc827710162129991d5466e63eb12df218ef47347b228ec87b50",
+  "src/download/prompts/rubric10_semantic_schema.json": "0241a3ef5fd168204db7d33ea3d2f44db3316216a642577924f1830c8bbdb1a1",
+  "src/download/prompts/rubric20_semantic_schema.json": "70b6f5328128440ad3bfb73cfd774844bab54fc46c12bd7204e8b1d351a4d853"
+}
