@@ -3,6 +3,8 @@
 CLI tests for d4d rocrate commands.
 """
 
+import importlib.util
+import json
 import shutil
 import sys
 import tempfile
@@ -17,6 +19,11 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src"))
 
 from data_sheets_schema.cli import cli
 from tests.test_cli._helpers import build_module_tree
+
+#: The parser `d4d rocrate parse` imports: the copy setup_repo_imports puts
+#: on sys.path
+LEGACY_PARSER = (Path(__file__).resolve().parents[2]
+                 / ".claude" / "agents" / "scripts" / "rocrate_parser.py")
 
 
 class TestROCrateCLI(unittest.TestCase):
@@ -139,6 +146,58 @@ class TestROCrateCLI(unittest.TestCase):
             ],
         )
         self.assertIn("Merged RO-Crate saved", result.output)
+
+
+class TestParseRefusesACrateThatIsNotUtf8(unittest.TestCase):
+    """#4186. The parser `d4d rocrate parse` imports, the copy under
+    .claude/agents/scripts, opens a crate as UTF-8 itself, so a crate that
+    is not UTF-8 ended the command with a bare UnicodeDecodeError. The
+    command reads the crate first as `fairscape-cli parse` reads one, and
+    refuses it with a CrateEncodingError naming the first byte that does
+    not decode: one `❌ Error:` line on stderr, exit 1, no output written.
+
+    That parser runs for real, loaded from its path. setup_repo_imports,
+    which would put its directory on sys.path for the rest of the session,
+    is patched out, as above.
+    """
+
+    def setUp(self):
+        self.test_dir = tempfile.mkdtemp()
+        self.crate = Path(self.test_dir) / "ro-crate-metadata.json"
+        text = json.dumps({"@context": "https://w3id.org/ro/crate/1.1/context",
+                           "@graph": [{"@id": "./", "@type": "Dataset",
+                                       "name": "Données © 2025"}]},
+                          ensure_ascii=False)
+        self.crate.write_bytes(text.encode("windows-1252"))
+        # Every character before the é is ASCII, so its index is its offset
+        self.offset = text.index("é")
+
+    def tearDown(self):
+        shutil.rmtree(self.test_dir)
+
+    def test_parse_refuses_it_by_name(self):
+        spec = importlib.util.spec_from_file_location("rocrate_parser", LEGACY_PARSER)
+        parser = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(parser)
+        output = Path(self.test_dir) / "parsed.json"
+
+        with patch("data_sheets_schema.cli.rocrate.require_repo_context"), \
+             patch("data_sheets_schema.cli.rocrate.setup_repo_imports"), \
+             patch.dict(sys.modules, {"rocrate_parser": parser}):
+            result = CliRunner(mix_stderr=False).invoke(
+                cli, ["rocrate", "parse", str(self.crate), "--output", str(output)])
+
+        self.assertEqual(result.exit_code, 1, result.stdout + result.stderr)
+        self.assertIsInstance(result.exception, SystemExit)
+        self.assertEqual(result.stdout, f"📦 Parsing RO-Crate: {self.crate}\n")
+        # é (0xe9) and © (0xa9) are the two bytes that do not decode
+        self.assertEqual(
+            result.stderr,
+            f"❌ Error: {self.crate} is not UTF-8, as RFC 8259 requires of JSON: "
+            f"byte 0xe9 at offset {self.offset}, 2 undecodable byte(s) in all. "
+            "Not decoded under a guessed encoding; transcode it to UTF-8 from "
+            "the encoding it is written in\n")
+        self.assertFalse(output.exists())
 
 
 class TestPerProjectLoopsEndWithACount(unittest.TestCase):
