@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.4.0
+  version: 1.5.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -71,10 +71,11 @@ generation surface. The skill's tests check that:
   regex or glob test, a `yield`), also in a workflow, a config, a JSON file
   and a shell script (an `if:`, `contains(fromJSON(...))`, a `case`, `[
   "$P" = X ]`, `--project X`, `${{ x || 'X' }}`, a per-project key, a
-  settings `env` value); an exposed file gates only on the lines a session
-  loads from it; a `__main__` block gates only where its module runs as a
-  script, and a controller module runs as one only where something runs
-  it, its own `__main__` block calling a launch or a command-line interface
+  settings `env` value, a hook `command` with or without JSON escapes); an
+  exposed file gates only on the lines a session loads from it; a
+  `__main__` block gates only where its module runs as a script, and a
+  controller module runs as one only where something runs it, its own
+  `__main__` block calling a launch or a command-line interface
   nothing else calls included;
 - discovery finds every model client, controller and launcher (over `src/`,
   `notes/` and `scripts/`), every file a playbook, agent, loaded assistant
@@ -86,10 +87,13 @@ generation surface. The skill's tests check that:
   is read from each launch's argv: `--safe-mode` switches all of it off,
   `--bare` only the memory and the hooks, a flag list something can shorten
   (`.remove()`, `del`, a computed list) is not shown to switch anything off,
-  and a `--system-prompt-file` launch is a launch; the project settings and
-  the hook scripts they run are found;
+  also where the argv is bound by an annotated assignment or held by an
+  attribute or an item, and a `--system-prompt-file` launch is a launch; the
+  project settings and the hook scripts they run are found;
 - the reason a PreToolUse hook gives a native run's model for a denial, and
-  the classifier reasons that feed it, are model text;
+  the classifier reasons that feed it, are model text, whether the
+  controller sets the field as a dict entry, by item assignment, `+=`,
+  `.setdefault()` or `.update()`, or from a local;
 - the "api" section agrees with the runtime: the CLI default condition, the
   condition the GitHub assistant runs (a non-literal `--condition` is "not
   derived"), the default renderers, the audit floor, the renderers
@@ -179,14 +183,17 @@ judges a hit by its own role:
   the value its `=` spelling carries) in a controller, from every value a
   controller gives a hook field Claude Code shows the model
   (`permissionDecisionReason`, the reason a PreToolUse hook gives for a
-  denial, and `additionalContext`), and from those functions' return values,
-  the flow follows local assignments, marks a literal that becomes part of
-  the text, a function whose result does (and follows its returns in turn,
-  across imports) and a module constant the text is built from (`SYSTEM`,
-  which `render_system` returns). A hook field built from its function's
-  parameters (`hook_output(classification, basis)`) is fed through threads
-  and queues no data flow follows, so the classifiers that feed it are found
-  by their decision: every controller function that returns a tuple whose
+  denial, and `additionalContext`) under a literal key, as a dict entry, a
+  keyword argument (`dict(...)`, `.update(...)`), an item assignment (plain,
+  annotated or `+=`) or `.setdefault()`, and from those functions' return
+  values, the flow follows local assignments, marks a literal that becomes
+  part of the text, a function whose result does (and follows its returns in
+  turn, across imports) and a module constant the text is built from
+  (`SYSTEM`, which `render_system` returns). A hook field built from its
+  function's parameters, directly or through its locals
+  (`hook_output(classification, basis)`), is fed through threads and queues
+  no data flow follows, so the classifiers that feed it are found by their
+  decision: every controller function that returns a tuple whose
   decision element is a literal the hook function compares its decision
   parameter with (`'prescribed'`), widened by the other decisions such
   functions return (`'not_prescribed'`); the element in the reason's
@@ -256,10 +263,12 @@ Every hit is classified by context:
   string assigned or used as an object value, array item or default, a bare
   key (`CM4AI:`) or bare value of the data, and a JSON key or a JSON string
   value with no whitespace (`"D4D_MANIFEST": "data/CHORUS_manifest.yaml"`);
-  a JSON hook `command` is read as shell. A value with whitespace stays
-  text, a key that is a file path (the pin registry's) is a key, not a
-  table, and a prose key keeps its prose. Every `.sh` line is read this
-  way.
+  a JSON hook `command` is read as shell, as the shell gets it: its JSON
+  escapes (`\"`, `\\`, `\n`) are decoded first, a decoded line break starts
+  a new shell line, and each span is mapped back to the text as written. A
+  value with whitespace stays text, a key that is a file path (the pin
+  registry's) is a key, not a table, and a prose key keeps its prose. Every
+  `.sh` line is read this way.
 
 ## Read the report
 
@@ -462,9 +471,10 @@ owner's approval before anything is billed.
   condition needs), so text inside a multi-line quoted string is read as
   commands. JSON is read line by line: a key and its value on separate lines
   are not paired, so a hook `command` split that way is read as text, not
-  shell. A Python value is read whole for bare tokens, so a project name
-  passed to `print` or a logger as a bare token gates as code in run-shaping
-  code; one inside a sentence stays text.
+  shell. Tokens are matched in the JSON as written, so a token spelled with
+  a `\u` escape is not found. A Python value is read whole for bare tokens,
+  so a project name passed to `print` or a logger as a bare token gates as
+  code in run-shaping code; one inside a sentence stays text.
 - The CLI package (`cli/__init__.py`) imports every group: a closure that
   reaches it stops there, and a group is followed where a playbook, agent or
   instruction runs it (`d4d <group> ...`). A group a controller's text names
@@ -478,19 +488,28 @@ owner's approval before anything is billed.
   as `--flag=value`; an argv that hands a native runtime neither (`claude
   -p` with the prompt on stdin) is not found. Its flags are read through
   starred lists, constants, imported constants, sums and record fields
-  every writer fills (a dict entry, a keyword, an item assignment). What can
-  drop a flag makes the launch "not shown" to switch customizations off,
-  never "switches them off": a computed list (a comprehension, a call); a
-  removal (`.remove()`, `.pop()`, `.clear()`, `del`, an item assignment,
-  `-=`) on the argv, the name or the field that holds the flags, where it is
-  visible (a local's function; a module constant's module and every
-  controller that imports it; a record field's every controller); another
-  assignment to the argv or the module constant; and a launch flag outside
-  an argv list (an argv built by `.append` calls). The argv is followed in
-  the function that builds it: a callee that changes the list it is passed,
-  a caller that changes a list a function returns, and a removal through an
-  alias (`flags = CLI_FLAGS; flags.remove(...)`) are not read. Only
-  `--safe-mode` is read as switching off the command, agent and skill
+  every writer fills (a dict entry, a keyword, an item assignment, plain or
+  annotated, `.setdefault()`; a field written under a key held in a name,
+  through `setattr` or from a list of pairs is not read as a writer). What
+  can drop a flag makes the launch "not shown" to switch customizations
+  off, never "switches them off": a computed list (a comprehension, a
+  call); a removal (`.remove()`, `.pop()`, `.clear()`, `del`, an item
+  assignment, `-=`) on the argv, the name or the field that holds the
+  flags, where it is visible (a local's function; a module constant's
+  module and every controller that imports it; a record field's every
+  controller); another assignment to the argv or the module constant; and a
+  launch flag outside an argv list (an argv built by `.append` calls). The
+  argv is read where a plain or annotated assignment binds it: to a name,
+  read like any local or module constant, or to an attribute or an item
+  (`self.argv = [...]`, `job['argv'] = [...]`), read for a removal or
+  another assignment in the function that builds it (the module, at module
+  level). The argv is followed in the function that builds it: a callee
+  that changes the list it is passed, a caller that changes a list a
+  function returns, a change to an attribute- or item-held argv in another
+  function (another method of its class, code holding the object), an argv
+  bound any other way (unpacking, `:=`, a slice assignment), and a removal
+  through an alias (`flags = CLI_FLAGS; flags.remove(...)`) are not read.
+  Only `--safe-mode` is read as switching off the command, agent and skill
   descriptions; `--bare` switches off the memory and the hooks, since its
   help says skills still resolve. A launch's `--add-dir`, `--settings`,
   `--agents` and `--setting-sources`, which can hand a run context
@@ -512,12 +531,18 @@ owner's approval before anything is billed.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and
-  what the session's own hook scripts print are not traced. The classifiers
-  that feed a deny reason are found by their decision literal and by the
-  reason's position in the pair they return; one whose decision is not a
-  literal in a tuple it returns is not found, and every return of a
-  classifier found is read as a reason, including one that never reaches
-  the hook.
+  what the session's own hook scripts print are not traced. A field is
+  found where a controller writes it under a literal key: a dict entry, a
+  keyword argument, an item assignment (plain, annotated or `+=`) or
+  `.setdefault()`. One written under a key held in a name (`out[REASON] =
+  ...`), through `setattr` or an attribute, or from a list of pairs
+  (`dict(zip(...))`) is not found. The classifiers that feed a deny reason
+  are found by their decision literal and by the reason's position in the
+  pair they return (the reason parameter read in the field's value directly
+  or through the hook function's locals, and the decision parameter where
+  the hook function compares it); one whose decision is not a literal in a
+  tuple it returns is not found, and every return of a classifier found is
+  read as a reason, including one that never reaches the hook.
 - A native continuation is recognised by `RunSpec.from_render_spec`; a
   controller that rebuilds a parent's spec field by field is recognised only
   through its renderer setter. The runtime of a setter is read from its call

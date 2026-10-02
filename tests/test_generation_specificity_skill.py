@@ -33,6 +33,11 @@ reports is derived from the code that decides it:
   carry a flag, a `--system-prompt-file` launch is a launch, the project
   settings and their hooks are found, and the skill's own description has a
   recorded reason (#4131);
+- an argv bound by an annotated assignment, or held by an attribute or an
+  item, is read for what shortens it; a hook field set by item assignment,
+  `+=` or `.setdefault()`, or from a local, is model text with the
+  classifier reasons that feed it; a JSON hook command with escapes is read
+  as shell (#4142);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -179,6 +184,50 @@ def _discovered_with_a_bare_launch():
 
     with mock.patch.object(scan, "launch_flags", side_effect=launches):
         return scan.discover(ROOT)
+
+
+#: The registered native controls two equivalent rewrites edit (#4142).
+NATIVE_CONTROL = "notes/matched_cborg_2026-09-13/native_controls/native_control.py"
+AUDIT_NATIVE = "notes/matched_cborg_2026-09-13/audit_controls/native.py"
+HOOK_OUTPUT_DICT = ("    return {} if classification == 'prescribed' else {'hookSpecificOutput': {\n"
+                    "        'hookEventName': CONTRACT['event'], 'permissionDecision': 'deny',\n"
+                    "        'permissionDecisionReason': 'Outside the registered tool policy: ' + basis}}\n")
+#: The same value, keys in the same order, with the reason set by item
+#: assignment and CHORUS planted in the deny text.
+HOOK_OUTPUT_ITEM = ("    if classification == 'prescribed':\n"
+                    "        return {}\n"
+                    "    output = {'hookEventName': CONTRACT['event'], 'permissionDecision': 'deny'}\n"
+                    "    output['permissionDecisionReason'] = 'Outside the CHORUS tool policy: ' + basis\n"
+                    "    return {'hookSpecificOutput': output}\n")
+AUDIT_ARGV = ("    argv = [str(executable), *CLI_FLAGS,", "    argv: list[str] = [str(executable), *CLI_FLAGS,")
+AUDIT_ARGV_END = "        '--system-prompt', Path(job['system_prompt']).read_text()]\n"
+
+
+@lru_cache(maxsize=None)
+def _discovered_with_the_round_five_rewrites():
+    """discover() of this checkout with two rewrites a reviewer made
+    (#4142): `hook_output` sets the deny reason by item assignment, and the
+    audit continuation binds its argv by an annotated assignment and then
+    removes `--safe-mode` from it. Returns (surfaces, facts, the rewritten
+    texts by path). Computed once; the mock is gone when it returns."""
+    texts = {}
+    text = (ROOT / NATIVE_CONTROL).read_text(encoding="utf-8")
+    assert text.count(HOOK_OUTPUT_DICT) == 1, NATIVE_CONTROL
+    texts[NATIVE_CONTROL] = text.replace(HOOK_OUTPUT_DICT, HOOK_OUTPUT_ITEM)
+    text = (ROOT / AUDIT_NATIVE).read_text(encoding="utf-8")
+    assert text.count(AUDIT_ARGV[0]) == 1 and text.count(AUDIT_ARGV_END) == 1, AUDIT_NATIVE
+    texts[AUDIT_NATIVE] = text.replace(AUDIT_ARGV[0], AUDIT_ARGV[1]).replace(
+        AUDIT_ARGV_END, AUDIT_ARGV_END + "    argv.remove('--safe-mode')\n")
+    rewritten = {(ROOT / rel).resolve(): t for rel, t in texts.items()}
+    real_parse = scan._parse
+
+    def parse(p):
+        t = rewritten.get(Path(p).resolve())
+        return (t, ast.parse(t)) if t is not None else real_parse(p)
+
+    with mock.patch.object(scan, "_parse", side_effect=parse):
+        surfaces, facts = scan.discover(ROOT)
+    return surfaces, facts, texts
 
 
 class TestTheSkillFiles(unittest.TestCase):
@@ -1776,8 +1825,9 @@ class TestRunShapingYamlAndShell(unittest.TestCase):
     def test_run_shaping_json_is_read_as_code(self):
         """A JSON file no approach hands to a model (the project settings, the
         assistant's allow-list) is data that shapes a run: a key and a string
-        value without whitespace are table entries, a hook command is shell,
-        a sentence stays text (#4130)."""
+        value without whitespace are table entries, a hook command is shell
+        (with JSON escapes too: the next test), a sentence stays text
+        (#4130)."""
         text = ('{\n'                                                                                       # 1
                 '  "env": {"D4D_MANIFEST": "data/preprocessed/CHORUS_manifest.yaml", "NOTE": "see the VOICE notes"},\n'
                 '  "CM4AI": ["a", "AI_READI"],\n'                                                            # 3
@@ -1796,6 +1846,45 @@ class TestRunShapingYamlAndShell(unittest.TestCase):
                               (".github/ai-controllers.json", "github_assistant")):
             with self.subTest(rel=rel):
                 self.assertEqual(surfaces.files[rel].roles, {approach: "run_shaping"})
+
+    def test_a_json_hook_command_with_escapes_is_read_as_shell(self):
+        """A hook `command` is read as the shell gets it: its JSON escapes
+        decoded (`\\"`, `\\\\`, `\\n`), and each span mapped back to the line as
+        written, so a unit is the text there (#4142). Any backslash used to
+        turn the shell reading off. A quoted value with whitespace stays text,
+        as it does unescaped."""
+        cases = (('\\"$CLAUDE_PROJECT_DIR\\"/.claude/hooks/x.py --project CHORUS', {("code_table", "CHORUS")}),
+                 ('python3 x.py --note \\"a b\\" --project CHORUS', {("code_table", "CHORUS")}),
+                 ('P=${P:-CHORUS} python3 \\"x.py\\"', {("code_table", "CHORUS")}),
+                 ('python3 \\\\srv\\\\x.py --project \\"CHORUS\\"', {("code_table", '\\"CHORUS\\"')}),
+                 ('cd x\\nif [ \\"$P\\" = \\"CHORUS\\" ]; then y; fi', {("code_branch", '\\"CHORUS\\"')}),
+                 ('\\tpython3 x.py --project=CHORUS', {("code_table", "CHORUS")}))
+        for command, want in cases:
+            line = '{"hooks": {"PreToolUse": [{"type": "command", "command": "' + command + '"}]}}'
+            json.loads(line)
+            got = {(ctx, unit) for _, ctx, unit, _ in scan._json_code_units(line)
+                   for *_, matched in scan.match_text(unit, list(_tokens())) if matched == "CHORUS"}
+            with self.subTest(command=command):
+                self.assertEqual(got, want)
+        line = '{"command": "python3 x.py --project \\"CHORUS data\\""}'
+        self.assertEqual({ctx for _, ctx, unit, _ in scan._json_code_units(line) if "CHORUS" in unit}, {"value"})
+        # the decoding and its map back to the text as written
+        for body in ('a\\"b\\\\c\\/d\\b\\f\\n\\r\\t', '\\u0041\\u00e9x', '\\ud83d\\ude00y', '\\ud83dz', 'plain'):
+            decoded, at = scan._json_decoded(body)
+            with self.subTest(body=body):
+                self.assertEqual(decoded, json.loads(f'"{body}"'))
+                self.assertEqual(len(at), len(decoded) + 1)
+                self.assertEqual([json.loads('"' + body[at[k]:at[k + 1]] + '"') for k in range(len(decoded))],
+                                 list(decoded))
+        # end to end, the reviewer's three forms under the role discovery
+        # gives the project settings
+        for command, _want in cases[:3]:
+            with self.subTest(planted=command):
+                planted, _ = _plant(".claude/settings.json", f'            "command": "{command}"',
+                                    '"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/protect_schema_hook.py"')
+                hits = [h for h in planted if h["match"] == "CHORUS"]
+                self.assertEqual([(h["context"], h["violation"], h["gates_in"]) for h in hits],
+                                 [("code_table", True, ["interactive_session"])])
 
 
 class TestParseFailures(unittest.TestCase):
@@ -1957,6 +2046,83 @@ class TestLaunchFlags(unittest.TestCase):
         self.assertIsNone(self._launches(assigned)["p_field.py"])
         text = scan._session_statement({"launches": list(shortened.values())})
         self.assertNotIn("does not change a registered run's verdict", text)
+
+    #: An argv bound by an annotated assignment, held by an attribute or by an
+    #: item, then shortened in the function that builds it (the module, at
+    #: module level), each beside the same launch left whole (#4142).
+    HELD_SHORTENED = {
+        "notes/x/v_annotated.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                  "    argv.remove('--safe-mode')\n    return argv\n",
+        "notes/x/w_annotated_again.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                        "    argv = argv[2:]\n    return argv\n",
+        "notes/x/x_annotated_module.py": "ARGV: list = ['claude', '--safe-mode', '--system-prompt', 'x']\n"
+                                         "ARGV.remove('--safe-mode')\n",
+        "notes/x/y_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
+                                  "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                  "        self.argv.remove('--safe-mode')\n        return self.argv\n",
+        "notes/x/z_attribute_again.py": "class Launch:\n    def go(self, exe, p):\n"
+                                        "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                        "        self.argv = self.argv[2:]\n        return self.argv\n",
+        "notes/x/za_item.py": "def go(exe, p, job):\n    job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                              "    del job['argv'][1]\n    return job\n",
+        "notes/x/zb_annotated_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
+                                             "        self.argv: list = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                             "        self.argv.pop(1)\n        return self.argv\n"}
+    HELD_INTACT = {
+        "notes/x/v_annotated.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                  "    return argv\n",
+        "notes/x/w_annotated_again.py": "def go(exe, p):\n    argv: list[str] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                        "    return argv\n",
+        "notes/x/x_annotated_module.py": "ARGV: list = ['claude', '--safe-mode', '--system-prompt', 'x']\n",
+        "notes/x/y_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
+                                  "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n        return self.argv\n",
+        "notes/x/z_attribute_again.py": "class Launch:\n    def go(self, exe, p):\n"
+                                        "        self.argv = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                        "        return self.argv\n",
+        "notes/x/za_item.py": "def go(exe, p, job):\n    job['argv'] = [exe, '--safe-mode', '--system-prompt', p]\n"
+                              "    return job\n",
+        "notes/x/zb_annotated_attribute.py": "class Launch:\n    def go(self, exe, p):\n"
+                                             "        self.argv: list = [exe, '--safe-mode', '--system-prompt', p]\n"
+                                             "        return self.argv\n"}
+
+    def test_an_annotated_attribute_or_item_argv_is_read_for_changes(self):
+        """`argv: list[str] = [...]` is read like `argv = [...]`, and an argv
+        held by an attribute or an item (`self.argv`, `job['argv']`) is read
+        for a removal or another assignment in the function that builds it
+        (#4142). A record field written by an annotated item assignment or
+        `.setdefault()` is a writer, like a dict entry."""
+        launches = tuple(n.rsplit("/", 1)[-1] for n in self.HELD_SHORTENED)
+        shortened = self._rows(self.HELD_SHORTENED)
+        self.assertEqual({n: shortened[n]["carries"] for n in shortened}, dict.fromkeys(launches))
+        for n in launches:
+            with self.subTest(launch=n):
+                self.assertTrue(any("can drop" in e for e in shortened[n]["evidence"]), shortened[n]["evidence"])
+        self.assertEqual(self._launches(self.HELD_INTACT), dict.fromkeys(launches, True))
+        field = {"notes/x/f_field.py": "def go(exe, p, rec):\n"
+                                       "    return [exe, *rec['cli_flags'], '--system-prompt', p]\n",
+                 "notes/x/writer.py": "def make():\n    return {'cli_flags': ['--print', '--safe-mode']}\n"}
+        for second in ("def fill(rec):\n    rec['cli_flags']: list = ['--print']\n",
+                       "def fill(rec):\n    rec.setdefault('cli_flags', ['--print'])\n"):
+            with self.subTest(writer=second):
+                self.assertIsNone(self._launches({**field, "notes/x/writer2.py": second})["f_field.py"])
+                carried = second.replace("['--print']", "['--print', '--safe-mode']")
+                self.assertTrue(self._launches({**field, "notes/x/writer2.py": carried})["f_field.py"])
+
+    def test_a_registered_launch_whose_annotated_argv_is_shortened_is_not_shown(self):
+        """The reviewer's rewrite of the audit continuation (#4142): bound by
+        an annotated assignment and then shortened, its argv is not shown to
+        pass `--safe-mode`, so the session surfaces are its too."""
+        surfaces, facts, texts = _discovered_with_the_round_five_rewrites()
+        text = texts[AUDIT_NATIVE]
+        line = text[:text.index(AUDIT_ARGV_END)].count("\n") + 1
+        site = f"{AUDIT_NATIVE}:{line} --system-prompt"
+        self.assertEqual(facts["interactive"]["launches_without_customizations_off"], [site])
+        row = next(x for x in facts["interactive"]["launches"] if x["site"] == site)
+        self.assertIsNone(row["carries"])
+        self.assertTrue(any("`.remove()` on `argv`" in e and "can drop" in e for e in row["evidence"]), row)
+        self.assertEqual(surfaces.files["CLAUDE.md"].roles,
+                         {"interactive_session": "model_facing", "run_controllers": "model_facing"})
+        self.assertNotIn("does not change a registered run's verdict", scan._session_statement(facts["interactive"]))
 
     def test_a_system_prompt_file_launch_is_a_launch(self):
         """`--system-prompt-file` and `--append-system-prompt-file` launch a
@@ -2172,6 +2338,63 @@ class TestHookText(unittest.TestCase):
                 self.assertEqual({a for a, _, _ in spans["notes/exp_4130h/hook.py"]}, {3})
                 self.assertEqual({a for a, _, _ in spans["notes/exp_4130h/policy.py"]}, {3, 4, 6})
 
+    #: The same deny reason set in each of the other ways a field can be
+    #: set, with the lines of the hook text each one gives (#4142).
+    HOOK_FORMS = {
+        "item assignment": ("def deny(decision, why):\n    out = {}\n    if decision != 'allowed':\n"
+                            "        out['permissionDecisionReason'] = 'Refused: ' + why\n    return out\n", {4}),
+        "annotated item assignment": ("def deny(decision, why):\n    out = {}\n    if decision != 'allowed':\n"
+                                      "        out['permissionDecisionReason']: str = 'Refused: ' + why\n"
+                                      "    return out\n", {4}),
+        "appended": ("def deny(decision, why):\n    out = {'permissionDecisionReason': 'Refused'}\n"
+                     "    if decision != 'allowed':\n        out['permissionDecisionReason'] += ': ' + why\n"
+                     "    return out\n", {2, 4}),
+        "setdefault": ("def deny(decision, why):\n    out = {}\n    if decision != 'allowed':\n"
+                       "        out.setdefault('permissionDecisionReason', 'Refused: ' + why)\n    return out\n", {4}),
+        "update": ("def deny(decision, why):\n    out = {}\n    if decision != 'allowed':\n"
+                   "        out.update(permissionDecisionReason='Refused: ' + why)\n    return out\n", {4}),
+        "a local": ("def deny(decision, why):\n    if decision == 'allowed':\n        return {}\n"
+                    "    reason = 'Refused: ' + why\n    return {'permissionDecisionReason': reason}\n", {4})}
+
+    def test_a_hook_field_set_like_any_record_field_is_model_text(self):
+        """An item assignment (plain or annotated), `+=`, `.setdefault()`
+        and `.update()` set a hook field as surely as a dict entry, and a
+        reason that reaches the field through a local is the parameter's
+        (#4142): the hook's text and the classifier reasons are found for
+        each."""
+        for kind, (hook, lines) in self.HOOK_FORMS.items():
+            with self.subTest(form=kind):
+                spans = self._hook_spans(hook)
+                self.assertEqual({a for a, _, _ in spans.get("notes/exp_4130h/hook.py", [])}, lines)
+                self.assertEqual({a for a, _, _ in spans.get("notes/exp_4130h/policy.py", [])}, {3, 4, 6})
+
+    def test_hook_output_rewritten_by_item_assignment_keeps_its_model_text(self):
+        """The reviewer's equivalent rewrite of `hook_output` (#4142), which
+        sets the deny reason by item assignment: its deny text is model text,
+        a project name planted there and in a classifier's reason gates, and
+        in every other file discovery finds the spans it finds for the dict
+        form."""
+        surfaces, _, texts = _discovered_with_the_round_five_rewrites()
+        text = texts[NATIVE_CONTROL]
+        line = text[:text.index("'Outside the CHORUS tool policy: '")].count("\n") + 1
+        hits = [h for h in _scan_text(NATIVE_CONTROL, text, surfaces.files[NATIVE_CONTROL])
+                if h["match"] == "CHORUS" and h["line"] == line]
+        self.assertEqual(len(hits), 1, hits)
+        self.assertTrue(hits[0]["violation"] and hits[0].get("model_text_function")
+                        and hits[0]["gates_in"] == ["run_controllers"], hits)
+        base = _discovered()[0].files
+        common = sorted((set(base) & set(surfaces.files)) - set(texts))
+        self.assertEqual({rel: [tuple(s[:2]) for s in surfaces.files[rel].text_spans] for rel in common},
+                         {rel: [tuple(s[:2]) for s in base[rel].text_spans] for rel in common})
+        hooked = [rel for rel in common
+                  if any("permissionDecisionReason" in s[2] for s in surfaces.files[rel].text_spans)]
+        self.assertIn("notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py", hooked)
+        hits, at = self._planted("notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py",
+                                 "'a path outside the registered inputs and outputs'",
+                                 "'a path outside the CHORUS inputs and outputs'", surfaces=surfaces)
+        self.assertEqual([h["line"] for h in hits], [at])
+        self.assertTrue(all(h["violation"] and h["gates_in"] == ["run_controllers"] for h in hits), hits)
+
     def _hook_spans(self, hook: str) -> dict:
         with tempfile.TemporaryDirectory() as d:
             root = Path(d).resolve()
@@ -2226,13 +2449,13 @@ class TestHookText(unittest.TestCase):
                 hits, _ = self._planted(rel, old, new)
                 self.assertTrue(hits and not any(h["violation"] for h in hits), hits)
 
-    def _planted(self, rel: str, old: str, new: str):
+    def _planted(self, rel: str, old: str, new: str, surfaces=None):
         """The CHORUS hits a copy of a real surface gains when its text `old`
-        becomes `new`, under the role and text spans discovery derived, and
-        the line `old` starts on."""
+        becomes `new`, under the role and text spans discovery derived (or
+        `surfaces` gives), and the line `old` starts on."""
         text = (ROOT / rel).read_text(encoding="utf-8")
         self.assertEqual(text.count(old), 1, (rel, old))
-        surface = _discovered()[0].files[rel]
+        surface = (surfaces or _discovered()[0]).files[rel]
         before = {(h["line"], h["context"]) for h in _scan_text(rel, text, surface) if h["match"] == "CHORUS"}
         hits = [h for h in _scan_text(rel, text.replace(old, new), surface)
                 if h["match"] == "CHORUS" and (h["line"], h["context"]) not in before]

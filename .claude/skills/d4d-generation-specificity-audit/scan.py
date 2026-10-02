@@ -1066,6 +1066,33 @@ def _yaml_code_units(text: str):
 
 
 _JSON_STRING = re.compile(r'"(?:[^"\\]|\\.)*"')
+#: One character of a JSON string as written: an escape (a surrogate pair's
+#: two `\u` escapes together, as they decode to one character) or a plain
+#: character (#4142).
+_JSON_CHAR = re.compile(r"\\u[dD][89abAB][0-9a-fA-F]{2}\\u[dD][c-fC-F][0-9a-fA-F]{2}|\\u[0-9a-fA-F]{4}|\\.|[^\\]",
+                        re.S)
+
+
+def _json_decoded(body: str) -> tuple[str, list[int]]:
+    """A JSON string's body (the text between its quotes, as written)
+    decoded, and where each decoded character starts in `body`, with
+    `len(body)` last: the decoded span `(a, b)` is `body[at[a]:at[b]]` as
+    written (#4142)."""
+    chars, at = [], []
+    for m in _JSON_CHAR.finditer(body):
+        chars.append(json.loads(f'"{m.group(0)}"'))
+        at.append(m.start())
+    return "".join(chars), at + [len(body)]
+
+
+def _command_spans(command: str) -> list:
+    """The shell spans of a command string, its lines read in order with one
+    state, as the shell runs them."""
+    spans_of, out, start = _ShellSpans(), [], 0
+    for part in command.split("\n"):
+        out += [(start + a, start + b, c) for a, b, c in spans_of(part)]
+        start += len(part) + 1
+    return out
 
 
 def _json_code_units(text: str):
@@ -1074,9 +1101,12 @@ def _json_code_units(text: str):
     `env` block reaches every command it runs), an allow-list the workflow
     reads. A key, or a string value with no whitespace, is a table entry
     (`"D4D_MANIFEST": "data/CHORUS_manifest.yaml"`, `"CM4AI": [...]`); a
-    hook's `command` value is read as shell; any other value keeps its text
-    (`value`). Read line by line, so a key and its value on separate lines
-    are not paired."""
+    hook's `command` value is read as shell, as the shell gets it: its JSON
+    escapes (`\\"`, `\\\\`, `\\n`) decoded, each span mapped back to the
+    line as written (#4142); any other value keeps its text (`value`).
+    Tokens are matched in the text as written, so one spelled with a `\\u`
+    escape is not found. Read line by line, so a key and its value on
+    separate lines are not paired."""
     for i, line in enumerate(text.splitlines(), 1):
         spans, key = [], None
         for m in _JSON_STRING.finditer(line):
@@ -1089,9 +1119,9 @@ def _json_code_units(text: str):
                 if re.fullmatch(r"[\w.-]+", value):
                     spans.append((m.start(), m.end(), "code_table"))
                 continue
-            raw = m.group(0)[1:-1]
-            if key == "command" and "\\" not in raw:
-                spans += [(m.start() + 1 + a, m.start() + 1 + b, c) for a, b, c in _ShellSpans()(raw)]
+            if key == "command":
+                decoded, at = _json_decoded(m.group(0)[1:-1])
+                spans += [(m.start() + 1 + at[a], m.start() + 1 + at[b], c) for a, b, c in _command_spans(decoded)]
             elif value and not re.search(r"\s", value):
                 spans.append((m.start(), m.end(), "code_table"))
         for unit, ctx in _split_units(line, spans, "value"):
@@ -2504,6 +2534,37 @@ def _removals(tree) -> list[tuple[ast.AST, int, str]]:
     return out
 
 
+def _literal_key(node) -> str | None:
+    """The key a subscript or a call argument spells as a string literal."""
+    return node.value if isinstance(node, ast.Constant) and isinstance(node.value, str) else None
+
+
+def _field_writes(tree, keys, *, appends: bool = False) -> list[tuple[str, ast.AST]]:
+    """(key, value) for every value a module writes to a record field whose
+    key is a string literal in `keys` (#4130, #4131, #4142): a dict entry
+    (`{'k': v}`), a keyword argument (`dict(k=v)`, `x.update(k=v)`), an item
+    assignment, plain, chained or annotated (`x['k'] = v`, `x['k']: T = v`),
+    and `x.setdefault('k', v)`; with `appends`, also `x['k'] += v`, whose
+    value becomes part of a text field. A key held in a name or built
+    (`x[KEY] = v`, `dict(zip(...))`, a list of pairs), an attribute and
+    `setattr` are not read."""
+    out = []
+    for n in ast.walk(tree):
+        if isinstance(n, ast.Dict):
+            out += [(k.value, v) for k, v in zip(n.keys, n.values) if _literal_key(k) in keys]
+        elif isinstance(n, ast.keyword) and n.arg in keys:
+            out.append((n.arg, n.value))
+        elif (isinstance(n, (ast.Assign, ast.AnnAssign)) and n.value is not None) or (
+                appends and isinstance(n, ast.AugAssign) and isinstance(n.op, ast.Add)):
+            targets = n.targets if isinstance(n, ast.Assign) else [n.target]
+            out += [(t.slice.value, n.value) for t in targets
+                    if isinstance(t, ast.Subscript) and _literal_key(t.slice) in keys]
+        elif isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.func.attr == "setdefault" \
+                and len(n.args) == 2 and _literal_key(n.args[0]) in keys:
+            out.append((n.args[0].value, n.args[1]))
+    return out
+
+
 def _launch_flag(e) -> str | None:
     """The launch flag an argv element spells: `--system-prompt`,
     `--append-system-prompt`, either with `-file` (#4131), or any of them
@@ -2535,15 +2596,21 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
     A flag counts when an element is that literal, or a list that holds it:
     a starred local, module constant or imported constant, a sum of lists,
     or a field of a record (`overlay['cli_flags']`) every controller that
-    writes that field fills with it. What can drop the flag makes the launch
-    `None` ("not shown"), never assumed to carry it: a computed list (a
-    comprehension, a call), a removal (`.remove()`, `.pop()`, `del`, an
-    item assignment, `-=`) on the list, the name or the field that holds it,
-    anywhere it is visible (a local's function; a module constant's module
-    and every controller that imports it; a field's every controller), and
-    another assignment to a module constant. Returns one row per launch: its
-    site, `carries` and `memory_off` (True, False or None) and the evidence
-    or the reason for each."""
+    writes that field fills with it (`_field_writes`: a dict entry, a
+    keyword, an item assignment, plain or annotated, `.setdefault()`). What
+    can drop the flag makes the launch `None` ("not shown"), never assumed
+    to carry it: a computed list (a comprehension, a call), a removal
+    (`.remove()`, `.pop()`, `del`, an item assignment, `-=`) on the list,
+    the name or the field that holds it, anywhere it is visible (a local's
+    function; a module constant's module and every controller that imports
+    it; a field's every controller), and another assignment to a module
+    constant. The argv itself is held by a name bound by a plain or
+    annotated assignment, read like any local or constant, or by an
+    attribute or an item (`self.argv = [...]`, `job['argv'] = [...]`), read
+    for removals and other assignments in the function that builds it, the
+    module at module level (#4142). Returns one row per launch: its site,
+    `carries` and `memory_off` (True, False or None) and the evidence or the
+    reason for each."""
     consts_of, binds_of, removals_of = {}, {}, {}
 
     def rel(q):
@@ -2568,6 +2635,26 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
         """Removals on a local name inside its function."""
         return [f"{rel(q)}:{line} {how} on `{name}`" for t, line, how in removals(q)
                 if isinstance(t, ast.Name) and t.id == name and fn.lineno <= line <= fn.end_lineno]
+
+    def held_changes(q, fn, target, holder):
+        """Removals on the attribute or item that holds an argv (`self.argv`,
+        `job['argv']`), and other assignments to it, in the function that
+        builds it, the module at module level (#4142). The same expression
+        in another function (another method, the object passed on) is not
+        read."""
+        text = ast.unparse(target)
+        lo, hi = (fn.lineno, fn.end_lineno) if fn is not None else (1, sys.maxsize)
+        out = [f"{rel(q)}:{line} {how} on `{text}`" for t, line, how in removals(q)
+               if lo <= line <= hi and ast.unparse(t) == text]
+        for x in ast.walk(fn if fn is not None else parsed[q][1]):
+            if x is holder or not isinstance(x, (ast.Assign, ast.AnnAssign, ast.AugAssign)) or (
+                    isinstance(x, ast.AnnAssign) and x.value is None):
+                continue
+            targets = x.targets if isinstance(x, ast.Assign) else [x.target]
+            if any(isinstance(getattr(e, "ctx", None), ast.Store) and ast.unparse(e) == text
+                   for t in targets for e in ast.walk(t)):
+                out.append(f"{rel(q)}:{x.lineno} `{text}` is assigned again")
+        return out
 
     def constant_changes(q, name):
         """Removals on a module constant in its module (any scope) and in
@@ -2612,17 +2699,9 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
 
     def writers(key):
         """Every value a controller writes to a record field: a dict entry, a
-        keyword argument, an item assignment (`rec['cli_flags'] = [...]`)."""
-        out = []
-        for _, p in sorted(controllers.items()):
-            for n in ast.walk(parsed[p][1]):
-                if isinstance(n, ast.Dict):
-                    out += [(p, v) for k, v in zip(n.keys, n.values) if isinstance(k, ast.Constant) and k.value == key]
-                elif isinstance(n, ast.keyword) and n.arg == key:
-                    out.append((p, n.value))
-                elif isinstance(n, ast.Assign):
-                    out += [(p, n.value) for t in n.targets if isinstance(t, ast.Subscript) and field_of(t) == key]
-        return out
+        keyword argument, an item assignment, plain or annotated
+        (`rec['cli_flags'] = [...]`), `.setdefault()` (`_field_writes`)."""
+        return [(p, v) for _, p in sorted(controllers.items()) for _, v in _field_writes(parsed[p][1], {key})]
 
     def reader(flags):
         """The resolution of one flag set: (True, where the flag is) |
@@ -2718,10 +2797,15 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
     rows = []
     for crel, p in sorted(controllers.items()):
         tree = parsed[p][1]
-        holders: dict[int, list[str]] = {}
+        # what an argv list is bound to: a name, an attribute or an item (not
+        # a slice), by a plain or an annotated assignment (#4142)
+        holders: dict[int, list[tuple[ast.AST, ast.AST]]] = {}
         for n in ast.walk(tree):
-            if isinstance(n, ast.Assign) and isinstance(n.value, (ast.List, ast.Tuple)):
-                holders.setdefault(id(n.value), []).extend(t.id for t in n.targets if isinstance(t, ast.Name))
+            if isinstance(n, (ast.Assign, ast.AnnAssign)) and isinstance(n.value, (ast.List, ast.Tuple)):
+                targets = n.targets if isinstance(n, ast.Assign) else [n.target]
+                holders.setdefault(id(n.value), []).extend(
+                    (t, n) for t in targets if isinstance(t, (ast.Name, ast.Attribute))
+                    or (isinstance(t, ast.Subscript) and not isinstance(t.slice, ast.Slice)))
         read = set()
         for n in ast.walk(tree):
             if not isinstance(n, (ast.List, ast.Tuple)):
@@ -2733,13 +2817,15 @@ def launch_flags(root: Path, controllers: dict[str, Path], parsed: dict, index: 
             fn = _innermost_function(tree, n.lineno)
             # the argv itself, once assigned, can be shortened before it runs
             changes = []
-            for name in holders.get(id(n), []):
-                if fn is not None:
-                    changes += local_changes(p, fn, name)
-                    if len(_local_assignments(fn).get(name, [])) > 1:
-                        changes.append(f"{crel}:{n.lineno} the argv `{name}` is assigned again")
+            for target, holder in holders.get(id(n), []):
+                if not isinstance(target, ast.Name):
+                    changes += held_changes(p, fn, target, holder)
+                elif fn is not None:
+                    changes += local_changes(p, fn, target.id)
+                    if len(_local_assignments(fn).get(target.id, [])) > 1:
+                        changes.append(f"{crel}:{n.lineno} the argv `{target.id}` is assigned again")
                 else:
-                    changes += constant_changes(p, name)
+                    changes += constant_changes(p, target.id)
             row = {"site": f"{crel}:{flag_node.lineno} {_launch_flag(flag_node)}"}
             for key, elements, named in (("carries", safe, safe_named), ("memory_off", memory, memory_named)):
                 ok, ev = elements(p, fn, n.elts, frozenset())
@@ -2818,18 +2904,21 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
     follows `--system-prompt` or `--append-system-prompt` in a controller,
     and every value a controller gives a hook field Claude Code shows the
     model (`permissionDecisionReason`, the PreToolUse deny reason, and
-    `additionalContext`, #4130). From an element or a function's return
-    values, the flow is followed through local assignments: a literal that
-    becomes part of the text is model text, a function whose result does is
-    model text (and its returns are followed in turn, across modules through
-    imports), and a module constant the text is built from (`SYSTEM`,
-    returned by `render_system`) is model text. A call's arguments are
-    followed for the constants they pass, not for the functions that compute
-    them.
+    `additionalContext`, #4130) under a literal key: a dict entry, a keyword
+    argument, an item assignment (plain, annotated or `+=`) or
+    `.setdefault()` (`_field_writes`, #4142). From an element or a
+    function's return values, the flow is followed through local
+    assignments: a literal that becomes part of the text is model text, a
+    function whose result does is model text (and its returns are followed
+    in turn, across modules through imports), and a module constant the text
+    is built from (`SYSTEM`, returned by `render_system`) is model text. A
+    call's arguments are followed for the constants they pass, not for the
+    functions that compute them.
 
     A hook field built from a parameter (`hook_output(classification,
-    basis)`) is fed by classifier pairs that reach it through threads and
-    queues no data flow follows. Those pairs are found by their decision
+    basis)`), directly or through the function's locals, is fed by
+    classifier pairs that reach it through threads and queues no data flow
+    follows. Those pairs are found by their decision
     instead: every controller function that returns a tuple whose decision
     element is a literal the hook function compares its decision parameter
     with (`'prescribed'`), widened to a fixed point by the other decisions
@@ -2941,12 +3030,9 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         for name, fn in defs(p).items():
             if MODEL_TEXT_FUNCTION.match(name):
                 mark_function(p, name, "renders model text")
+        # every way `writers()` reads a record field, and `+=` (#4142)
+        hook_sinks += [(p, k, v) for k, v in _field_writes(tree, HOOK_MODEL_FIELDS, appends=True)]
         for n in ast.walk(tree):
-            if isinstance(n, ast.Dict):
-                hook_sinks += [(p, k.value, v) for k, v in zip(n.keys, n.values)
-                               if isinstance(k, ast.Constant) and k.value in HOOK_MODEL_FIELDS]
-            elif isinstance(n, ast.keyword) and n.arg in HOOK_MODEL_FIELDS:
-                hook_sinks.append((p, n.arg, n.value))
             if not isinstance(n, (ast.List, ast.Tuple)):
                 continue
             for i, e in enumerate(n.elts):
@@ -2975,7 +3061,7 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         # parameters (`hook_output(classification, basis)`), a method's
         # `self` aside
         params = [x for x in _params(fn) if x not in {"self", "cls"}]
-        reasons = {x.id for x in ast.walk(value) if isinstance(x, ast.Name) and x.id in params}
+        reasons = _reaching_params(fn, value, params)
         decisions: dict[str, set] = {}
         for left, op, right in _compares(fn):
             if not isinstance(op, (ast.Eq, ast.NotEq, ast.In, ast.NotIn)):
@@ -3003,6 +3089,23 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                 spans.setdefault(q, {}).setdefault((a, b), label)
     return {_rel(root, q): sorted((a, b, label) for (a, b), label in sp.items())
             for q, sp in spans.items() if _is_inside(q, root)}
+
+
+def _reaching_params(fn, value, params: list[str]) -> set[str]:
+    """The parameters of `fn` that `value` is built from, directly or
+    through the function's local assignments (`reason = '...' + basis`, then
+    the field set to `reason`, #4142)."""
+    local, out, seen, todo = _local_assignments(fn), set(), set(), [value]
+    while todo:
+        for x in ast.walk(todo.pop()):
+            if not isinstance(x, ast.Name):
+                continue
+            if x.id in params:
+                out.add(x.id)
+            elif x.id in local and x.id not in seen:
+                seen.add(x.id)
+                todo += local[x.id]
+    return out
 
 
 def _classifier_pairs(controllers: dict[str, Path], parsed: dict, reason_at: int, decision_at: int,
