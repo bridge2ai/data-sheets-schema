@@ -14,7 +14,7 @@ from data_sheets_schema.cli.receipts import check as command, strict_failure
 
 
 def registration(floor=None):
-    return {"format": cp.FORMAT, "registration_id": "supplied-test-only", "condition": "generic",
+    return {"format": cp.FORMAT, "registration_id": "supplied-test-only", "condition": "generic_v8",
             "runtime_policy_sha256": POLICY_SHA256, "receipt_instrument_version": 4,
             "max_output_tokens": 4096, "max_request_bytes": 1_000_000,
             "context_limit_tokens": 1_000_000, "context_limit_basis": "synthetic test capacity, not a route claim",
@@ -23,7 +23,7 @@ def registration(floor=None):
 
 def declaration(reg=None):
     raw = json.dumps(reg or registration()).encode()
-    return {"condition": "generic", "runtime": RUNTIME, "render_version": 8,
+    return {"condition": "generic_v8", "runtime": RUNTIME, "render_version": 8,
             "receipt_completion_version": 1, "receipt_completion_policy_sha256": POLICY_SHA256,
             "receipt_completion_registration": cp.registration_identity(raw)}
 
@@ -144,6 +144,34 @@ def test_record_cannot_downgrade_or_change_policy():
                         block(policy({"state": "registered", "numerator": 0, "denominator": 1}))):
         assert not canary.checks_from_record({**rec, "receipts": replacement})["receipts"]["checked"]
     assert not canary.checks_from_record({"receipts": block(selected)})["receipts"]["checked"]
+
+
+@pytest.mark.parametrize("condition", ["generic", "domain", "generic_v6", "nonexistent"])
+def test_runtime_ineligible_condition_cannot_certify_a_rehashed_policy(condition):
+    spec = declaration()
+    b = block(cp.select_policy(spec), 3, 3)
+    raw = json.dumps({**registration(), "condition": condition}).encode()
+    identity = {"sha256": hashlib.sha256(raw).hexdigest(), "raw_json": raw.decode()}
+    spec.update(condition=condition, receipt_completion_registration=identity)
+    b[cp.BLOCK_KEY]["registration"] = identity
+    with pytest.raises(ValueError, match="receipt-producing condition"):
+        cp.parse_registration(raw)
+    with pytest.raises(ValueError, match="receipt-producing condition"):
+        cp.select_policy(spec)
+    assert strict_failure(b)
+    assert canary.receipt_coverage_floor(b)["state"] == "unmeasurable"
+    record = {"prompts": {"request": {"spec": spec}}, "receipts": b}
+    assert not canary.checks_from_record(record)["receipts"]["checked"]
+
+
+@pytest.mark.parametrize("condition", ["generic_v7", "generic_v8", "generic_v9"])
+def test_runtime_receipt_conditions_remain_eligible(condition):
+    raw = json.dumps({**registration(), "condition": condition}).encode()
+    spec = {**declaration(), "condition": condition,
+            "receipt_completion_registration": cp.registration_identity(raw)}
+    b = block(cp.select_policy(spec), 3, 3)
+    assert not strict_failure(b)
+    assert canary.receipt_coverage_floor(b)["state"] == "passed"
 
 
 @pytest.mark.parametrize("counter", [

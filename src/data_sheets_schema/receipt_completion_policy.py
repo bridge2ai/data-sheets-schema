@@ -50,6 +50,9 @@ def parse_registration(raw: bytes) -> dict:
     for name in ("registration_id", "condition", "context_limit_basis"):
         if not isinstance(value[name], str) or not value[name].strip():
             raise ValueError(f"registration {name} must be a nonempty string")
+    from data_sheets_schema.api_runner import RECEIPT_CONDITIONS
+    if value["condition"] not in RECEIPT_CONDITIONS:
+        raise ValueError("receipt completion requires a receipt-producing condition")
     if value["runtime_policy_sha256"] != POLICY_SHA256:
         raise ValueError("registration names a different runtime policy")
     if _integer(value["receipt_instrument_version"], "receipt instrument") != 4:
