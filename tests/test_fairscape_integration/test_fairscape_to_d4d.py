@@ -1418,8 +1418,10 @@ class TestDatasetParts(unittest.TestCase):
         when the file collection reads it from the entity
         (`FILE_COLLECTION_SLOTS`), where its value is kept or recorded. On
         the tracked VOICE crate, `parent_datasets` or `license` stated alike
-        in both reached neither the record nor `dropped` (#4159). An empty
-        value states nothing, and is not recorded."""
+        in both reached neither the record nor `dropped` (#4159). Each
+        property that list names reaches the file collection, so
+        `_build_file_collections` reads what it names. An empty value states
+        nothing, and is not recorded."""
         for key, value in (("parent_datasets", "Project Z"), ("license", "MIT")):
             with self.subTest(key=key):
                 crate_json, root = tracked_voice_crate()
@@ -1435,16 +1437,23 @@ class TestDatasetParts(unittest.TestCase):
                     "the `@graph`'s entity for it both state, is not a "
                     "property its file collection is made from"))])
                 self.assertEqual(problems(record), [])
-        # What the file collection reads is kept there or recorded under it,
-        # and the reference stating it too adds nothing
+        # Each property the file collection reads is kept there or recorded
+        # under it (`contentSize` with a unit), and the reference stating
+        # it too adds nothing
+        entity = {"name": "Raw", "description": "Raw files",
+                  "evi:totalContentSizeBytes": 4096, "contentSize": "2 GB",
+                  "contentUrl": "https://example.org/raw", "fileFormat": "gzip",
+                  "d4d:collectionType": "raw_data", "d4d:fileCount": 3}
+        self.assertEqual(set(entity), set(fairscape_to_d4d.FILE_COLLECTION_SLOTS))
         record, dropped = converted(crate(
-            {"hasPart": [{"@id": "#raw", "name": "Raw", "contentSize": "2 GB",
-                          "d4d:fileCount": 3, "description": "",
+            {"hasPart": [{"@id": "#raw", **entity, "keywords": "",
                           "license": None}]},
-            {"@id": "#raw", "@type": "Dataset", "name": "Raw",
-             "contentSize": "2 GB", "d4d:fileCount": 3}))
-        self.assertEqual(record["file_collections"],
-                         [{"id": "#raw", "name": "Raw", "file_count": 3}])
+            {"@id": "#raw", "@type": "Dataset", **entity}))
+        self.assertEqual(record["file_collections"], [{
+            "id": "#raw", "name": "Raw", "description": "Raw files",
+            "total_bytes": 4096, "path": "https://example.org/raw",
+            "compression": "gzip", "collection_type": "raw_data",
+            "file_count": 3}])
         self.assertEqual([source for source, _ in dropped], ["#raw.contentSize"])
 
     def test_an_ark_in_any_identifier_slot_is_its_resolver_url(self):
