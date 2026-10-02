@@ -1,0 +1,48 @@
+# DRAFT authored by Codex (AI assistant), 2026-10-02. Human scientific review pending.
+# Not registered for scoring. Review manifest and evidence ledger accompany these declarations.
+human_subjects:
+  value: true
+  evidence: 'Data were collected from people with and without type 2 diabetes; the v3 metadata describes
+    2,280 participants. Sources: docs_aireadi_org_docs-3_2026-07-24.txt, AI_READI_preprocessed.txt physical
+    lines 2332-2333; fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 2901-2905.
+    Scope/limit: Human origin and participant/privacy relevance, not a new regulatory determination or
+    assurance of consent compliance.'
+regulated_access:
+  value: true
+  evidence: 'Public distribution requires attestation and restricted reuse terms; the fuller dataset requires
+    a data use agreement. Sources: docs_aireadi_org_docs-3_2026-07-24.txt, AI_READI_preprocessed.txt physical
+    lines 2332-2333; fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 2983-2985.
+    Scope/limit: Public and controlled subsets differ. This does not say all released files are credential-controlled
+    or all controlled data are released.'
+shared_dataset:
+  value: true
+  evidence: 'The v3 release has a documented public download and self-attestation access route. Sources:
+    fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 2901-2905; fairhub_api_dataset_3_2026-07-27.txt,
+    AI_READI_preprocessed.txt physical lines 2983-2985. Scope/limit: Sharing under conditions, not unrestricted
+    redistribution; current documentation must not replace a historical record’s original bundle.'
+ml_training_dataset:
+  value: null
+  evidence: 'The source describes design for future AI/ML studies and downstream analyses; the training-specific
+    interpretation is unresolved. Sources: docs_aireadi_org_docs-3_2026-07-24.txt, AI_READI_preprocessed.txt
+    physical lines 2332-2333. Scope/limit: Do not equate AI-ready or intended AI research with an established
+    training corpus, trained model, labels, or released train/test split.'
+data_collection:
+  value: true
+  evidence: 'Multiple data modalities were acquired from study participants across three sites. Sources:
+    docs_aireadi_org_docs-3_2026-07-24.txt, AI_READI_preprocessed.txt physical lines 2332-2333; fairhub_api_dataset_3_2026-07-27.txt,
+    AI_READI_preprocessed.txt physical lines 2901-2905. Scope/limit: The documented release and collection
+    process, not completion of target enrollment or balance across all groups.'
+data_processing:
+  value: true
+  evidence: 'The source describes quality checks, corrections, and mapping to OMOP and DICOM before dissemination.
+    Sources: fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 4367-4368.
+    Scope/limit: Applicability of processing, not proof that every modality had identical processing or
+    complete reproducibility.'
+processing_software:
+  value: null
+  evidence: 'REDCap reports and the OMOP Data Quality Dashboard support checks; terminology mapping is
+    described. The reviewed passages do not tie an identified software transformation to the release.
+    Sources: fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 4367-4368;
+    fairhub_api_dataset_3_2026-07-27.txt, AI_READI_preprocessed.txt physical lines 3195-3198. Scope/limit:
+    Quality-check software and human-guided corrections do not by themselves establish data-transforming
+    software under the proposed interpretation; null is not evidence that no software exists.'

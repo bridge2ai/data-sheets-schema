@@ -1,0 +1,50 @@
+# DRAFT authored by Codex (AI assistant), 2026-10-02. Human scientific review pending.
+# Not registered for scoring. Review manifest and evidence ledger accompany these declarations.
+human_subjects:
+  value: null
+  evidence: 'The June release explicitly reports Human Subjects: No and commercially available de-identified
+    human cell lines; a separately bundled paper analyzes 914 cancer patients under 25. Sources: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,
+    CM4AI_preprocessed.txt physical lines 7054-7058; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt
+    physical lines 7075-7081; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical
+    lines 7107-7112; www_nature_com_articles-s41586-025-08878-3_row2.txt, CM4AI_preprocessed.txt physical
+    lines 1355-1358. Scope/limit: The cell-line release and the paper’s downstream human-genetics application
+    are distinct. Neither the project name nor that secondary application resolves project-wide applicability.'
+regulated_access:
+  value: true
+  evidence: 'The release states a CC BY-NC-SA 4.0 reuse condition and temporary embargoes for some datasets.
+    Sources: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical lines 7120-7121;
+    dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical lines 7086-7090; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,
+    CM4AI_preprocessed.txt physical lines 7133-7136. Scope/limit: True uses the semantic instrument’s
+    governance-constraint meaning. Public files remain public; this does not assert credentialing, a patient-data
+    DUA, or FDA regulation.'
+shared_dataset:
+  value: true
+  evidence: 'The release lists public files and reuse terms. Sources: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,
+    CM4AI_preprocessed.txt physical lines 7133-7136; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt
+    physical lines 7120-7121. Scope/limit: Sharing is not completeness: temporary embargoes and absent
+    computed cell maps are explicitly described.'
+ml_training_dataset:
+  value: true
+  evidence: 'AI model training is explicitly listed as an intended use. Sources: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt,
+    CM4AI_preprocessed.txt physical lines 7095-7105. Scope/limit: Intended use, not a claim that a particular
+    model was trained or a train/test split was released.'
+data_collection:
+  value: true
+  evidence: 'The release describes Perturb-seq, SEC-MS, AP-MS, and imaging data from experimental cell
+    lines. Sources: dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical lines
+    7054-7058. Scope/limit: Laboratory data collection; this does not describe direct collection from
+    the downstream pediatric patients.'
+data_processing:
+  value: true
+  evidence: 'The bundled methods describe processing imaging and biophysical data, embeddings, integration,
+    and hierarchy construction. Sources: www_nature_com_articles-s41586-025-08878-3_row2.txt, CM4AI_preprocessed.txt
+    physical lines 1428-1433; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical
+    lines 7086-7090. Scope/limit: Project-level methods evidence; the June release explicitly does not
+    include computed cell maps. Do not attribute every described transformation to every release.'
+processing_software:
+  value: true
+  evidence: 'The methods name cellmaps_pipeline and Python packages performing data processing and transformations.
+    Sources: www_nature_com_articles-s41586-025-08878-3_row2.txt, CM4AI_preprocessed.txt physical lines
+    1428-1433; dataverse_10.18130_V3_HIGT4C_2026-07-24.txt, CM4AI_preprocessed.txt physical lines 7086-7090.
+    Scope/limit: Explicit project software use, not a claim that this entire pipeline generated the June
+    release or that a release-specific version is pinned.'

@@ -1,0 +1,48 @@
+# DRAFT authored by Codex (AI assistant), 2026-10-02. Human scientific review pending.
+# Not registered for scoring. Review manifest and evidence ledger accompany these declarations.
+human_subjects:
+  value: true
+  evidence: 'The adult v3.1 release describes derived voice data and clinical information for 833 participants.
+    Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 4802-4812;
+    physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 4884-4886. Scope/limit:
+    Adult release scope; the pediatric page embedded elsewhere in this bundle is not evidence of adult
+    cohort membership or pediatric sample counts.'
+regulated_access:
+  value: true
+  evidence: 'PhysioNet files require credentialing and a signed DUA; separate raw-audio access has additional
+    institutional requirements. Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt
+    physical lines 5123-5131; physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical
+    lines 4802-4812. Scope/limit: Apply the PhysioNet terms to derived features; do not transfer raw-audio
+    access or content to the derived release.'
+shared_dataset:
+  value: true
+  evidence: 'The documented derived-feature release is available to credentialed users under an agreement.
+    Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 4884-4886;
+    physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 5123-5131. Scope/limit:
+    Controlled sharing; this PhysioNet release does not contain original raw audio.'
+ml_training_dataset:
+  value: null
+  evidence: 'The adult release is intended to enable future AI research, but that statement does not resolve
+    a training-specific predicate. Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt
+    physical lines 4884-4886. Scope/limit: Uncertainty about intended-use versus demonstrated/explicit
+    training semantics; no inference from workforce training or use of pretrained feature extractors.'
+data_collection:
+  value: true
+  evidence: 'The methods describe consenting participants and collecting clinical information and voice
+    tasks. Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 4802-4812;
+    physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 4912-4919. Scope/limit:
+    The methods include the wider project’s pediatric group; the adult scope is anchored by the release
+    notice, not by importing the pediatric cohort into adult data.'
+data_processing:
+  value: true
+  evidence: 'Audio is converted, resampled, and transformed into acoustic features; phenotype data are
+    merged. Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines
+    4912-4919; physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 5057-5059.
+    Scope/limit: The described adult release; this does not assert retention of raw audio on PhysioNet
+    or uniform inclusion of every feature.'
+processing_software:
+  value: true
+  evidence: 'The release states that b2aiprep v3.0.0 processed audio features and merged phenotype files.
+    Sources: physionet_b2ai-voice_3.1.0_2026-07-24.txt, VOICE_preprocessed.txt physical lines 5057-5059.
+    Scope/limit: Release-specific attribution for adult v3.1; the same software version must not be inferred
+    for pediatric data.'
