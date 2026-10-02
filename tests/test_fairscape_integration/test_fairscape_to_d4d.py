@@ -962,9 +962,10 @@ class TestPartialValuesAreRecorded(unittest.TestCase):
         `isPartOf` or `hasPart`, the only properties those slots take
         (`DATASET_SLOTS`). Its text became a dataset whose `id` `_to_object`
         minted, `urn:d4d:fairscape:parent_datasets:1`, with nothing in
-        `dropped` (#4153). It is recorded, whatever it holds, and the
-        object keeps its other keys. A FileCollection's `resources` holds
-        Files, and keeps them."""
+        `dropped` (#4153). It is recorded, text and references alike, and
+        the object keeps its other keys; an empty value states nothing, and
+        is not. A FileCollection's `resources` holds Files, and keeps
+        them."""
         holds = {"parent_datasets": "a reference under the root's `isPartOf`",
                  "resources": "a hasPart member the crate types as a dataset"}
 
