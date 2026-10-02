@@ -232,6 +232,41 @@ def version_view(path: str | Path, document: dict[str, Any]) -> Iterator[SchemaV
         view.release()
 
 
+@contextmanager
+def captured_view(snapshot: SchemaSnapshot) -> Iterator[SchemaView]:
+    """Independent releasable view of an entire already-captured import closure.
+
+    Unlike a shared view, inferred LinkML metadata from other readers cannot
+    enter this view's definitions. Unlike version_view, local imports are valid
+    because every selected import must resolve to bytes in this exact snapshot.
+    No schema or import file is reopened while consuming the view.
+    """
+    frozen = {path: content for _name, path, content in snapshot.sources}
+
+    def parse(path):
+        try:
+            raw = frozen[path]
+        except KeyError as exc:
+            raise ValueError(f"schema import {path} is outside the captured closure") from exc
+        if isinstance(raw, OSError):
+            raise raw
+        schema = SchemaDefinition(**version_document(raw))
+        schema.source_file = str(path)
+        return schema
+
+    view = _ReleasableView(parse(snapshot.sources[0][1]))
+
+    def load_captured(imp, from_schema=None):
+        source = Path((from_schema or view.schema).source_file)
+        return parse(resolve_import_path(imp, source, view.namespaces))
+
+    view.load_import = load_captured
+    try:
+        yield view
+    finally:
+        view.release()
+
+
 def views_held() -> int:
     """How many views this module currently shares (for tests)."""
     return len(_VIEWS)

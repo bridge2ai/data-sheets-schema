@@ -196,37 +196,37 @@ class NestedSupportSchema:
                     vocabulary: dict | None = None):
         from linkml_runtime.dumpers import json_dumper
         from data_sheets_schema.schema_snapshot import capture_schema
-        from data_sheets_schema.schema_view import shared_view
+        from data_sheets_schema.schema_view import captured_view
         captured = capture_schema(path, strict=True)
-        view = shared_view(path, snapshot=captured)
-        if view.get_class(root_class) is None:
-            raise ValueError(f"unknown root class {root_class!r}")
-        classes, enums, pending = {}, {}, [root_class]
-        while pending:
-            name = pending.pop()
-            if name in classes:
-                continue
-            definition = view.get_class(name)
-            pending.extend(str(parent) for parent in [definition.is_a, *(definition.mixins or [])]
-                           if parent and view.get_class(str(parent)) is not None)
-            slots = {}
-            classes[name] = {"definition": json.loads(json_dumper.dumps(definition)), "slots": slots}
-            for slot in view.class_induced_slots(name):
-                raw = json.loads(json_dumper.dumps(slot))
-                rng = str(slot.range) if slot.range else None
-                target = view.get_class(rng) if rng else None
-                slots[str(slot.name)] = {"definition": raw, "range_class": bool(target),
-                                         "inline": bool(target and view.is_inlined(slot))}
-                if target:
-                    pending.append(rng)
-                enum = view.get_enum(rng) if rng else None
-                if enum:
-                    enums[rng] = json.loads(json_dumper.dumps(enum))
-        sources = sorted((name, hashlib.sha256(data).hexdigest())
-                         for name, _path, data in captured.sources)
-        payload = {"root_class": root_class, "schema_sources": sources,
-                   "classes": classes, "enums": enums, "vocabulary": vocabulary or {}}
-        return cls(_canonical(payload))
+        with captured_view(captured) as view:
+            if view.get_class(root_class) is None:
+                raise ValueError(f"unknown root class {root_class!r}")
+            classes, enums, pending = {}, {}, [root_class]
+            while pending:
+                name = pending.pop()
+                if name in classes:
+                    continue
+                definition = view.get_class(name)
+                pending.extend(str(parent) for parent in [definition.is_a, *(definition.mixins or [])]
+                               if parent and view.get_class(str(parent)) is not None)
+                slots = {}
+                classes[name] = {"definition": json.loads(json_dumper.dumps(definition)), "slots": slots}
+                for slot in view.class_induced_slots(name):
+                    raw = json.loads(json_dumper.dumps(slot))
+                    rng = str(slot.range) if slot.range else None
+                    target = view.get_class(rng) if rng else None
+                    slots[str(slot.name)] = {"definition": raw, "range_class": bool(target),
+                                             "inline": bool(target and view.is_inlined(slot))}
+                    if target:
+                        pending.append(rng)
+                    enum = view.get_enum(rng) if rng else None
+                    if enum:
+                        enums[rng] = json.loads(json_dumper.dumps(enum))
+            sources = sorted((name, hashlib.sha256(data).hexdigest())
+                             for name, _path, data in captured.sources)
+            payload = {"root_class": root_class, "schema_sources": sources,
+                       "classes": classes, "enums": enums, "vocabulary": vocabulary or {}}
+            return cls(_canonical(payload))
 
 
 @dataclass(frozen=True)

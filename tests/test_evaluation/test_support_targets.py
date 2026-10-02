@@ -380,3 +380,42 @@ def test_direct_constraint_refusal_is_preserved(schema):
     result = inventory({"name": "X"}, NestedSupportSchema(json.dumps(payload)))
     assert not result.targets
     assert result.to_dict()["blocked"] == [{"pointer": "", "code": "unsupported_class_constraint"}]
+
+
+def test_schema_and_request_identity_do_not_depend_on_prior_fitness_capture(schema_path):
+    from data_sheets_schema import evidence_score
+    from data_sheets_schema.profiles import NEUTRAL
+    raw = b"creators:\n- name: Dana\n"
+    before_bytes = schema_path.read_bytes()
+    specs = [NestedSupportSchema.from_schema(schema_path)]
+    evidence_score.slot_specification_snapshot("Dataset", schema_path, profile=NEUTRAL)
+    specs += [NestedSupportSchema.from_schema(schema_path), NestedSupportSchema.from_schema(schema_path)]
+    assert schema_path.read_bytes() == before_bytes
+    assert len({s.digest for s in specs}) == 1
+    identities = []
+    for spec in specs:
+        target = inventory_targets(raw, spec, artifact_kind="full").target("/creators/0/name", kind="attribute_value")
+        identities.append(request_identity(target, bundle="Source", model="test"))
+    assert len(set(identities)) == 1
+
+
+def test_independent_view_uses_captured_transitive_import_bytes_without_reopening(tmp_path, monkeypatch):
+    from data_sheets_schema.schema_snapshot import capture_schema, SchemaSnapshot
+    from data_sheets_schema.schema_view import captured_view
+    child = tmp_path / "child.yaml"
+    child.write_text("id: https://example.test/child\nname: child\nclasses:\n  Child:\n    description: Original captured meaning\n")
+    root = tmp_path / "root.yaml"
+    root.write_text("id: https://example.test/root\nname: root\nimports: [child]\nclasses:\n  Dataset:\n    is_a: Child\n")
+    snapshot = capture_schema(root, strict=True)
+    child.write_text("id: https://example.test/child\nname: child\nclasses:\n  Child:\n    description: Changed ambient meaning\n")
+
+    def no_read(*args, **kwargs):
+        raise AssertionError("captured view reopened an ambient file")
+    monkeypatch.setattr(Path, "read_bytes", no_read)
+    monkeypatch.setattr(Path, "read_text", no_read)
+    with captured_view(snapshot) as view:
+        assert view.get_class("Child").description == "Original captured meaning"
+    missing = SchemaSnapshot(sources=tuple(s for s in snapshot.sources if s[1] != child), key=snapshot.key)
+    with captured_view(missing) as view:
+        with pytest.raises(ValueError, match="outside the captured closure"):
+            view.get_class("Child")
