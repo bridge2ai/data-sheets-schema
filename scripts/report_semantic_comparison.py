@@ -93,13 +93,13 @@ def report(paths: list[Path], cohort: list[Path] | None = None, *,
     for row in rows:
         text.append("| " + " | ".join(str(cell).replace("|", "\\|").replace("\n", " ")
                                        for cell in row) + " |")
-    if any(doc.get("version") in {"3.0", "4.0"} or path.resolve() in inputs for path, doc in documents):
+    if any(doc.get("version") in ("3.0", "4.0") or path.resolve() in inputs for path, doc in documents):
         text.extend(["", "## Evaluator evidence and issue taxonomy", "",
                      "Evidence checks below are recomputed from explicitly supplied inputs and caller contexts; "
                      "a missing context means unknown applicability. They do not certify the evaluator's "
                      "semantic interpretation or replace instrument-provenance acceptance.", ""])
         for path, doc in documents:
-            if doc.get("version") not in {"3.0", "4.0"} and path.resolve() not in inputs:
+            if doc.get("version") not in ("3.0", "4.0") and path.resolve() not in inputs:
                 continue
             text.extend(_evidence_section(path, doc, inputs.get(path.resolve()), contexts.get(path.resolve())))
     if cohort is None:
@@ -146,7 +146,7 @@ def _evidence_section(path: Path, doc: dict, input_path: Path | None,
     from data_sheets_schema.semantic_scope import validate_scope
 
     lines = [f"### {markdown_cell(path)}", ""]
-    if doc.get("version") in {"3.0", "4.0"}:
+    if doc.get("version") in ("3.0", "4.0"):
         # Mechanical checks assume the output contract: an unrecognized citation
         # key, for example, must not silently become an absent quotation (#4245).
         from jsonschema import SchemaError, ValidationError, validate
@@ -171,7 +171,7 @@ def _evidence_section(path: Path, doc: dict, input_path: Path | None,
         lines.extend([render_issue_taxonomy(doc).rstrip(), ""])
     except ValueError as exc:
         lines.extend([f"Issue taxonomy: **invalid declaration** — {markdown_cell(exc)}.", ""])
-    if doc.get("version") not in {"3.0", "4.0"}:
+    if doc.get("version") not in ("3.0", "4.0"):
         lines.extend(["Mechanical evidence checks: **not run**; this rating retains its historical contract.", ""])
         return lines
     if input_path is None:

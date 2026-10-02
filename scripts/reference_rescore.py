@@ -194,10 +194,9 @@ def verify_frozen(manifest: dict) -> None:
             required.add(V4_PREDECESSOR)
             if instrument["definition_sha256"] != manifest["pinned_files"].get(instrument["definition"]):
                 raise ValueError("version-4 definition SHA differs from its registered file pin")
-    for job in manifest["jobs"]:
-        instrument = manifest["instruments"][job["rubric"]]
-        if instrument["version"] == "4.0" and job["agent"] != instrument["agent"]:
-            raise ValueError("version-4 job substitutes its registered agent")
+            for job in manifest["jobs"]:
+                if job["rubric"] == rubric and job["agent"] != instrument["agent"]:
+                    raise ValueError("version-4 job substitutes its registered agent")
     if required - manifest["pinned_files"].keys():
         raise ValueError("registration does not pin the complete version-3 validator instrument")
     for section in ("pinned_files", "prior_evaluations"):

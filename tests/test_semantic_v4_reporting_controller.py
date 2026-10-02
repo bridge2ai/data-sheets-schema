@@ -211,3 +211,21 @@ def test_v4_taxonomy_never_uses_legacy_regex():
     doc['rubric'] = 'rubric10-semantic'
     with pytest.raises(ValueError, match='unsupported'):
         issue_taxonomy(doc)
+
+
+@pytest.mark.parametrize('version', [[], {}])
+@pytest.mark.parametrize('with_input', [False, True])
+def test_malformed_version_retains_controlled_report_behavior(tmp_path, version, with_input):
+    from report_semantic_comparison import report
+    path, inp, context = v4_report_fixture(tmp_path)
+    doc = json.loads(path.read_bytes())
+    doc['version'] = version
+    path.write_text(json.dumps(doc))
+    before = path.read_bytes()
+    kwargs = {'evidence_inputs': {path: inp}, 'evidence_contexts': {path: context}} if with_input else {}
+    text = report([path], **kwargs)
+    assert 'No mechanical evidence findings' not in text
+    assert '0 error(s)' not in text
+    if with_input:
+        assert 'invalid declaration' in text and 'not run' in text
+    assert path.read_bytes() == before

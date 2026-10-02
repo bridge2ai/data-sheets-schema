@@ -53,6 +53,11 @@ context, and input identity receive the same mechanical checks as v3. These
 checks do not decide whether cited prose supports a semantic score, and they
 do not prove every class/range relationship in a path.
 
+The source rubric retains `instrument_version: 2.0-general-context` as inherited
+applicability metadata. This is distinct from the selected semantic instrument
+version, `4.0`; selection and acceptance use that explicit version together with
+the rubric and definition hashes.
+
 For exact acceptance, supply the original record, the selected definition,
 and any independently supplied applicability context:
 
