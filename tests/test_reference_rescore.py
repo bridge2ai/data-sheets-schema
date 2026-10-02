@@ -31,7 +31,7 @@ def valid_record(number=10):
 
 
 def current_record(input_path, number=10, context=None):
-    """A complete version-2 fake rating for the actual isolated input."""
+    """A complete version-3 fake rating for the actual isolated input."""
     import yaml
     from data_sheets_schema.evaluation_context import context_digest, load_document
     from data_sheets_schema.judge_contract import evaluation_contract
@@ -39,8 +39,11 @@ def current_record(input_path, number=10, context=None):
     raw = (REAL_ROOT / f"data/rubric/rubric{number}.txt").read_bytes()
     contract = evaluation_contract(f"rubric{number}", yaml.safe_load(raw), context, document)
     doc = valid_record(number)
-    doc.update(version="2.0", applicability_context=contract["context"], evaluation_scope=contract["scope"])
+    doc.update(version="3.0", applicability_context=contract["context"], evaluation_scope=contract["scope"])
     doc["metadata"] = {"context_sha256": context_digest(contract["context"]), "input_sha256": input_sha}
+    from data_sheets_schema.semantic_evidence_authority import authority_digest
+    doc["metadata"]["evidence_authority_sha256"] = authority_digest()
+    doc["semantic_analysis"]["issues_detected"] = []
     total = adjusted = excluded = 0
     for group in doc["elements" if number == 10 else "categories"]:
         points = cap = fixed = 0
@@ -50,7 +53,8 @@ def current_record(input_path, number=10, context=None):
             score = rule["fixed_max_score"] if rule["applicable"] else None
             item.update(name=rule["name"], applicable=rule["applicable"], applicability_status=rule["status"],
                         applicability_evidence=rule["evidence"], score=score,
-                        unit_scores=[{"path": unit["path"], "score": score, "evidence": "Synthetic test evidence"}
+                        unit_scores=[{"path": unit["path"], "score": score, "evidence": "Synthetic test evidence",
+                                      "cited": [], "absent": [], "counts": [], "considered": []}
                                      for unit in contract["scope"]["units"]])
             if number == 10:
                 item["item_id"] = key
@@ -147,7 +151,7 @@ def environment(tmp_path, monkeypatch, request):
         dest = tmp_path / path
         dest.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(REAL_ROOT / path, dest)
-    instrument = {"definition": paths[4], "definition_sha256": runner.digest(tmp_path / paths[4]),
+    instrument = {"version": "3.0", "definition": paths[4], "definition_sha256": runner.digest(tmp_path / paths[4]),
                   "agent": job["agent"], "rubric": paths[5], "schema": paths[6], "preamble": "PREAMBLE"}
     prior = tmp_path / "prior_evaluation.json"
     prior.write_text('{"previous": true}\n')
@@ -1162,7 +1166,7 @@ def test_primary_rubric20_derives_both_percentage_bases(environment, monkeypatch
 
 
 @pytest.mark.parametrize("environment", [10, 20], indirect=True)
-def test_both_v2_rubrics_validate_with_the_complete_isolated_instrument(environment, monkeypatch):
+def test_both_v3_rubrics_validate_with_the_complete_isolated_instrument(environment, monkeypatch):
     root, manifest, job, doc = environment
     poison = root / "ambient"
     (poison / "data_sheets_schema").mkdir(parents=True)
@@ -1176,11 +1180,33 @@ def test_both_v2_rubrics_validate_with_the_complete_isolated_instrument(environm
     assert json.loads((root / job["output"]).read_bytes()) == doc
 
 
+@pytest.mark.parametrize("evidence, code", [
+    ({"absent": [{"path": "id"}]}, "absent_path_populated"),
+    ({"absent": [{"path": "was_generated_by"}]}, "unknown_absence_name"),
+    ({"cited": [{"path": "id", "quote": "invented quote"}]}, "quote_not_found"),
+])
+def test_controller_rechecks_false_evidence_even_after_a_claimed_validator_success(environment, evidence, code):
+    root, manifest, job, doc = environment
+    doc["elements"][0]["sub_elements"][0]["unit_scores"][0].update(evidence)
+    cli = fake_cli(root / "fake-claude", doc, events(doc))
+    prior_bytes = (root / "prior_evaluation.json").read_bytes()
+    receipt = runner.run_job(manifest, job, cli)
+    assert receipt["status"] == "incomplete"
+    assert receipt["error"] == "ValueError: exact-file validator failed"
+    assert not (root / job["output"]).exists()
+    attempt = next(runner.PLAN.glob("attempts/*/*/candidate.json")).parent
+    assert json.loads((attempt / "candidate.json").read_bytes()) == doc
+    assert code in (attempt / "validation.txt").read_text()
+    assert (root / "prior_evaluation.json").read_bytes() == prior_bytes
+    with pytest.raises(ValueError, match="successful receipt"):
+        runner.accept_canary(manifest)
+
+
 @pytest.mark.parametrize("missing", runner.INSTRUMENT_SUPPORT)
 def test_unpinned_validator_support_is_refused_before_spending(environment, missing):
     root, manifest, job, doc = environment
     del manifest["pinned_files"][missing]
-    with pytest.raises(ValueError, match="complete version-2"):
+    with pytest.raises(ValueError, match="complete version-3"):
         runner.run_job(manifest, job, "must-never-run")
     assert not (runner.PLAN / "attempts").exists()
 
@@ -1220,7 +1246,7 @@ def test_evaluator_cannot_replace_the_registered_context(environment):
     cli = fake_cli(root / "fake-claude", doc, events(doc))
     receipt = runner.run_job(manifest, job, cli)
     assert receipt["status"] == "incomplete"
-    assert "registered version-2 applicability context" in receipt["error"]
+    assert "registered version-3 applicability context" in receipt["error"]
     assert not (root / job["output"]).exists()
 
 

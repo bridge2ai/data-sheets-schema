@@ -105,8 +105,9 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 raise ValueError(f"no evaluation contract for rubric {declared!r}")
             if rubric is not None and declared != rubric:
                 raise ValueError(f"expected {rubric}, found {declared}")
-            if doc.get("version") != "2.0":
-                raise ValueError("new-output acceptance requires instrument version 2.0; "
+            expected_version = "2.0" if declared in RUBRICS else "3.0"
+            if doc.get("version") != expected_version:
+                raise ValueError(f"new-output acceptance requires instrument version {expected_version}; "
                                  "use historical classification for earlier instruments")
             if declared in RUBRICS:
                 validate_output(path, rubric=declared, project=project, method=method,
@@ -119,11 +120,11 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
             valid, errors = validate_evaluation(doc, load_schema(schema_dir / names[declared]))
             if not valid:
                 raise ValueError("\n".join(errors))
-            if doc.get("version") == "2.0":
+            if doc.get("version") == "3.0":
                 if input_path is None:
-                    raise ValueError("version-2 output validation requires --input to verify every source resource")
+                    raise ValueError("version-3 output validation requires --input to verify every source resource")
                 if definition_path is None:
-                    raise ValueError("version-2 output validation requires --agent-definition to verify its instrument pin")
+                    raise ValueError("version-3 output validation requires --agent-definition to verify its instrument pin")
                 import hashlib
                 definition_sha256 = hashlib.sha256(definition_path.read_bytes()).hexdigest()
                 if doc["metadata"]["instrument_sha256"] != definition_sha256:
@@ -131,8 +132,10 @@ def validate_outputs(paths: List[Path], rubric: str | None = None,
                 from data_sheets_schema.evaluation_context import load_context, load_document
                 from data_sheets_schema.semantic_scope import validate_scope
                 document, digest = load_document(input_path)
-                validate_scope(doc, document=document, input_sha256=digest,
-                               expected_context=load_context(context_path))
+                evidence = validate_scope(doc, document=document, input_sha256=digest,
+                                          expected_context=load_context(context_path))
+                for finding in evidence.warnings:
+                    print(f"WARNING {path}: {finding.code}: {finding.message}")
         except (OSError, ValueError, jsonschema.SchemaError) as exc:
             print(f"INVALID {path}: {exc}")
             failed = True
@@ -256,8 +259,8 @@ def cli(argv: List[str] | None = None, *, eval_base: Path | None = None,
                         help="validate this exact new output strictly; repeat for multiple files")
     parser.add_argument("--rubric", choices=("rubric10-semantic", "rubric20-semantic", "rubric10", "rubric20"),
                         help="require the named outputs to use this rubric")
-    parser.add_argument("--input", type=Path, help="original D4D input for version-2 resource coverage and byte identity")
-    parser.add_argument("--agent-definition", type=Path, help="exact agent definition used for this version-2 assessment")
+    parser.add_argument("--input", type=Path, help="original D4D input for resource coverage, evidence and byte identity")
+    parser.add_argument("--agent-definition", type=Path, help="exact agent definition used for this assessment")
     parser.add_argument("--context", type=Path, help="trusted caller YAML/JSON applicability declarations; omitted predicates remain unknown")
     parser.add_argument("--project", help="trusted project identity; required for field-agent output acceptance")
     parser.add_argument("--method", help="trusted method identity; required for field-agent output acceptance")
