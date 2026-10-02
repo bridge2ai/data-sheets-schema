@@ -10,12 +10,12 @@ Exit status: **1** — 169 gc_project violation(s).
 | approach | gates exit | files | model-facing | exposed | run-shaping | violations | what |
 |---|---|---|---|---|---|---|---|
 | native_agentic | yes | 151 | 34 | 41 | 76 | 9 | Claude Code / native runtime following the d4d playbooks, the agents they name and the files they name |
-| interactive_session | yes | 26 | 1 | 21 | 4 | 72 | a person's Claude Code session in a checkout, where the /d4d-* playbooks run interactively: the project memory (CLAUDE.md), the settings hooks and the descriptions of every command, agent and skill Claude Code loads into it. A registered native launch that does not pass --safe-mode loads them too (with --bare alone, the descriptions; see run_controllers) |
+| interactive_session | yes | 26 | 1 | 21 | 4 | 72 | a person's Claude Code session in a checkout, where the /d4d-* playbooks run interactively: the project memory (CLAUDE.md), the settings hooks and the descriptions of every command, agent and skill Claude Code loads into it. A registered native launch not shown to pass --safe-mode may load them too (with --bare alone, the descriptions; see run_controllers) |
 | api | yes | 74 | 32 | 0 | 42 | 0 | d4d api run\|batch: api_runner and its condition prompts |
 | github_assistant | yes | 5 | 1 | 0 | 4 | 0 | the @d4dassistant workflow, what it names or runs, the condition its d4d api run runs, and an instruction file only where the workflow loads one |
 | shared_schema | yes | 22 | 20 | 0 | 2 | 0 | the LinkML generation schema, digest inputs, profile and manifest |
 | deterministic | yes | 50 | 13 | 0 | 37 | 1 | the arm commands that build a non-baseline arm's bundle or record (healthsheet, RO-Crate) and their import closure |
-| run_controllers | yes | 61 | 9 | 0 | 52 | 9 | registered-run controllers under notes/ and launchers under scripts/ or src/ that build or launch a generation request, the modules they import and the launchers that run them |
+| run_controllers | yes | 87 | 10 | 21 | 56 | 81 | registered-run controllers under notes/ and launchers under scripts/ or src/ that build or launch a generation request, the modules they import and the launchers that run them |
 | legacy_monolithic | yes | 27 | 13 | 0 | 14 | 78 | generators outside the runner that call a model client to write a D4D record, the pre-runner helper scripts and their prompt sets |
 | shared_input | no | 3 | 0 | 0 | 3 | 0 | the upstream input steps the `d4d download` group imports (download, preprocess, concatenate): upstream of every approach |
 | other_model_client | no | 15 | 0 | 0 | 15 | 0 | reaches a model outside generation: diagnostic probes, evaluators and evaluation controllers, non-D4D extractors. Listed, never gates; a model client a generation closure imports is that approach's surface instead |
@@ -32,7 +32,7 @@ Exit status: **1** — 169 gc_project violation(s).
 - Other files they name (48): `.claude/agents/scripts/check_mapping_coverage.py` (native_agentic, run); `.claude/agents/scripts/d4d_builder.py` (native_agentic, run); `.claude/agents/scripts/mapping_loader.py` (native_agentic, run); `.claude/agents/scripts/rocrate_parser.py` (native_agentic, run); `.claude/agents/scripts/rocrate_to_d4d.py` (native_agentic, run); `.claude/agents/scripts/schema_stats.py` (native_agentic, run); `.claude/agents/scripts/validator.py` (native_agentic, run); `.claude/skills/review-open-issues/SKILL.md` (native_agentic); `.github/ai-controllers.json` (github_assistant); `.github/workflows/d4d_assistant_create.md` (native_agentic); `.github/workflows/d4d_assistant_deterministic.config` (github_assistant, run_controllers); `notes/RUBRIC_AGENT_USAGE.md` (native_agentic); `notes/receipts_pattern_2026-08-27.md` (native_agentic); `scripts/agentic_observed.py` (native_agentic, run); `scripts/check_budget.py` (native_agentic, run); `scripts/description_comprehensive_review.py` (native_agentic, run); `scripts/description_quality_analyzer.py` (native_agentic, run); `scripts/validate_evaluation_schema.py` (native_agentic, run); `src/data_sheets_schema/anonymous_removals.py` (run_controllers); `src/data_sheets_schema/api_runner.py` (native_agentic, run_controllers); `src/data_sheets_schema/audit_batch_format.py` (run_controllers); `src/data_sheets_schema/cli/__init__.py` (native_agentic, run_controllers, run); `src/data_sheets_schema/d4d_pair_consistency.py` (native_agentic, run); `src/data_sheets_schema/datamodel/data_sheets_schema.py` (native_agentic); `src/data_sheets_schema/schema/D4D_Base_import.yaml` (native_agentic); `src/data_sheets_schema/schema/D4D_Composition.yaml` (native_agentic); `src/data_sheets_schema/schema/D4D_Core.yaml` (native_agentic); `src/data_sheets_schema/schema/D4D_Evaluation_Summary.yaml` (native_agentic); `src/data_sheets_schema/schema/D4D_FileCollection.yaml` (native_agentic); `src/data_sheets_schema/schema/data_sheets_schema.yaml` (native_agentic); `src/data_sheets_schema/schema/data_sheets_schema_all.yaml` (github_assistant, native_agentic, run_controllers); `src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml` (native_agentic, run_controllers); `src/data_sheets_schema/schema_semantics.py` (run_controllers); `src/data_sheets_schema/source_metadata.py` (run_controllers); `src/download/prompts/d4d_tuned_arm_prompt.md` (native_agentic); `src/download/prompts/evidence_protocol_v3.md` (run_controllers); `src/download/prompts/evidence_protocol_v4.md` (run_controllers); `src/download/prompts/evidence_protocol_v5.md` (run_controllers); `src/download/prompts/evidence_protocol_v6.md` (run_controllers); `src/download/prompts/evidence_protocol_v7.md` (run_controllers); `src/evaluation/evaluate_d4d.py` (native_agentic); `src/fairscape_integration/d4d_to_fairscape.py` (native_agentic); `src/fairscape_integration/fairscape_to_d4d.py` (native_agentic); `src/github/generate_d4d_metadata.py` (native_agentic, run); `src/github/validate_d4d_completeness.py` (native_agentic, run); `src/github/validate_prerequisites.sh` (native_agentic); `src/html/human_readable_renderer.py` (native_agentic, run); `src/semantic_exchange/generate_comprehensive_sssom.py` (native_agentic).
 - What the scripts they and the hooks run import (`python x.py`, `-m`; a closure stops at the CLI package and at the upstream input): `.claude/agents/scripts/d4d_builder.py`: `.claude/agents/scripts/mapping_loader.py`, `.claude/agents/scripts/rocrate_parser.py`; `.claude/agents/scripts/rocrate_to_d4d.py`: `.claude/agents/scripts/d4d_builder.py`, `.claude/agents/scripts/field_prioritizer.py`, `.claude/agents/scripts/informativeness_scorer.py`, `.claude/agents/scripts/mapping_loader.py`, `.claude/agents/scripts/rocrate_merger.py`, `.claude/agents/scripts/rocrate_parser.py`, `.claude/agents/scripts/validator.py`; `.claude/agents/scripts/schema_stats.py`: `src/data_sheets_schema/constants/__init__.py`, `src/data_sheets_schema/constants/evaluation.py`, `src/data_sheets_schema/constants/methods.py`, `src/data_sheets_schema/constants/projects.py`, `src/data_sheets_schema/constants/schemas.py`; `scripts/agentic_observed.py`: `src/data_sheets_schema/agentic_observed.py`; `scripts/validate_evaluation_schema.py`: `src/data_sheets_schema/duplicate_keys.py`, `src/data_sheets_schema/evaluation/__init__.py`, `src/data_sheets_schema/evaluation/validate.py`, `src/data_sheets_schema/evaluation_context.py`, `src/data_sheets_schema/field_agent_contract.py`, `src/data_sheets_schema/judge_contract.py`, `src/data_sheets_schema/resources.py`, `src/data_sheets_schema/semantic_scope.py`; `src/data_sheets_schema/d4d_pair_consistency.py`: `src/data_sheets_schema/chunking.py`, `src/data_sheets_schema/corpus.py`, `src/data_sheets_schema/profiles.py`, `src/data_sheets_schema/registry.py`, `src/data_sheets_schema/resources.py`, `src/data_sheets_schema/schema_cache.py`, `src/data_sheets_schema/schema_digest.py`, `src/data_sheets_schema/schema_snapshot.py`, `src/data_sheets_schema/schema_sync.py`, `src/data_sheets_schema/schema_view.py`, `src/data_sheets_schema/scope.py`; `src/html/human_readable_renderer.py`: `src/data_sheets_schema/cli/__init__.py`, `src/data_sheets_schema/rendering/__init__.py`, `src/data_sheets_schema/rendering/human_readable_renderer.py`, `src/data_sheets_schema/resources.py`, `src/data_sheets_schema/schema_snapshot.py`, `src/data_sheets_schema/schema_view.py`.
 - CLI groups they run (`d4d <group> ...`), each followed through its imports: native_agentic: `api`, `bundle`, `derive`, `download`, `prompt`, `provenance`, `receipts`, `review` (exposed), `rocrate` (exposed), `runs`, `utils`.
-- Interactive sessions: Claude Code loads the project memory `CLAUDE.md` (named by `.claude/commands/d4d-add-mapping.md`, `.github/workflows/d4d_assistant_create.md`), the settings `.claude/settings.json` and their hooks `.claude/hooks/protect_schema_hook.py`, `.claude/hooks/term_validator_hook.py`, `.claude/hooks/validate_d4d_yaml_hook.py`, and lists the name and description of 21 commands, agents and skills (their bodies load when invoked). Every registered native launch passes `--safe-mode`, which switches these off: `notes/claudecode_direct/run_direct_canary.py:425 --system-prompt` (`notes/claudecode_direct/prepare_direct.py:49 --safe-mode`, `notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode`); `notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt` (`notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode`); `notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt` (`notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode`); `notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt` (`notes/claudecode_direct/prepare_direct.py:49 --safe-mode`, `notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode`). So the interactive_session approach covers interactive sessions only; it does not change a registered run's verdict.
+- Interactive sessions: Claude Code loads the project memory `CLAUDE.md` (named by `.claude/commands/d4d-add-mapping.md`, `.github/workflows/d4d_assistant_create.md`), the settings `.claude/settings.json` and their hooks `.claude/hooks/protect_schema_hook.py`, `.claude/hooks/term_validator_hook.py`, `.claude/hooks/validate_d4d_yaml_hook.py`, and lists the name and description of 21 commands, agents and skills (their bodies load when invoked). NOT every registered native launch is shown to pass `--safe-mode` (a launch is shown to pass it only where the literal is an element of the argv list the launch hands over, unchanged): `notes/claudecode_direct/run_direct_canary.py:425 --system-prompt` cannot be shown to pass `--safe-mode` (notes/claudecode_direct/run_direct_canary.py:423 no element of the argv list is the literal `--safe-mode`; its starred elements (`*runtime['cli_flags']`, `*permission_arguments(command_policy)`) are not followed); nor can it be shown to pass `--bare`; `notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt` cannot be shown to pass `--safe-mode` (notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:429 no element of the argv list is the literal `--safe-mode`; its starred elements (`*native.CLI_FLAGS`, `*[p for d in directories for p in ('--add-dir', d)]`, `*permission_arguments(policy)`) are not followed); nor can it be shown to pass `--bare`; `notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt` cannot be shown to pass `--safe-mode` (notes/matched_cborg_2026-09-13/audit_controls/native.py:785 no element of the argv list is the literal `--safe-mode`; its starred elements (`*CLI_FLAGS`, `*directory_flags`, `*permission_arguments(policy)`) are not followed); nor can it be shown to pass `--bare`; `notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt` cannot be shown to pass `--safe-mode` (notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:665 no element of the argv list is the literal `--safe-mode`; its starred elements (`*overlay['cli_flags']`, `*permission_arguments(command_policy)`) are not followed); nor can it be shown to pass `--bare`. A run so launched may load what an interactive session loads and it is not shown to switch off, so those interactive_session surfaces are also run_controllers surfaces, and their violations count there.
 - Deterministic arm commands (CLI groups that name a non-baseline arm's bundle): `src/data_sheets_schema/cli/healthsheet.py` (names the bundle of the healthsheet arm); `src/data_sheets_schema/cli/rocrate.py` (names the bundle of the de_novo arm). Their import closure: 50 modules, following `data_sheets_schema`, `src.*` and the directories the code puts on sys.path (`.claude/agents/scripts`).
 - Upstream input (the `d4d download` group's `src.download` imports): `src/download/concatenate_documents.py`, `src/download/organized_dataset_extractor.py`, `src/download/preprocess_sources.py`.
 - Legacy prompt sets beside the conditions: `claude`, `claudecode`, `gpt5`, `shared`.
@@ -113,80 +113,80 @@ A Grand Challenge project's name, site or identifier in model-facing text or in 
 
 | where | approach | status | context | token | line |
 |---|---|---|---|---|---|
-| `.claude/agents/d4d-review-record.md:6` | interactive_session | live | frontmatter | `CHORUS` | - "Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1" |
-| `.claude/agents/d4d-review-record.md:7` | interactive_session | live | frontmatter | `AI_READI` | - "Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1" |
+| `.claude/agents/d4d-review-record.md:6` | interactive_session,run_controllers | live | frontmatter | `CHORUS` | - "Review the CHORUS record of label 2026-08-28_claude-opus-5-claudecode-generic-v6_rep1" |
+| `.claude/agents/d4d-review-record.md:7` | interactive_session,run_controllers | live | frontmatter | `AI_READI` | - "Run d4d-review-record on AI_READI 2026-08-28c_claude-opus-5-api-generic-v7_rep1" |
 | `.claude/commands/d4d-input-deep-research.md:65` | native_agentic | live | prose | `FAIRhub` | {DATASET} (DOI, RRID, FAIRhub/PhysioNet/Zenodo entries)." |
 | `.claude/commands/d4d-input-deep-research.md:65` | native_agentic | live | prose | `PhysioNet` | {DATASET} (DOI, RRID, FAIRhub/PhysioNet/Zenodo entries)." |
-| `CLAUDE.md:50` | interactive_session | live | example | `AI_READI` | d4d download sources --project AI_READI       # Download from Google Sheet |
-| `CLAUDE.md:51` | interactive_session | live | example | `AI_READI` | d4d download preprocess --project AI_READI    # Preprocess to text |
-| `CLAUDE.md:53` | interactive_session | live | example | `AI_READI` | d4d download concatenate --project AI_READI   # Concatenate files |
-| `CLAUDE.md:58` | interactive_session | live | example | `AI_READI` | d4d evaluate presence --project AI_READI --method gpt5  # Presence-based |
-| `CLAUDE.md:199` | interactive_session | live | prose | `AI_READI` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
-| `CLAUDE.md:199` | interactive_session | live | prose | `CHORUS` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
-| `CLAUDE.md:199` | interactive_session | live | prose | `CM4AI` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
-| `CLAUDE.md:199` | interactive_session | live | prose | `VOICE` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
-| `CLAUDE.md:223` | interactive_session | live | example | `AI_READI` | make d4d-agent PROJECT=AI_READI  # → data/d4d_concatenated/claudecode_agent/ |
-| `CLAUDE.md:245` | interactive_session | live | prose | `AI-READI` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
-| `CLAUDE.md:245` | interactive_session | live | prose | `VOICE` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
-| `CLAUDE.md:245` | interactive_session | live | prose | `CM4AI` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
-| `CLAUDE.md:245` | interactive_session | live | prose | `B35XWX` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
-| `CLAUDE.md:246` | interactive_session | live | instruction | `CHORUS` | against them penalises correct facts as errors. There is no CHORUS record. |
-| `CLAUDE.md:251` | interactive_session | live | example | `AI_READI` | make d4d-agent PROJECT=AI_READI |
-| `CLAUDE.md:275` | interactive_session | live | example | `AI_READI` | make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5 |
-| `CLAUDE.md:350` | interactive_session | live | example | `VOICE` | d4d download scope --project VOICE        # show the declaration |
-| `CLAUDE.md:369` | interactive_session | live | prose | `AI_READI` | mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the |
-| `CLAUDE.md:369` | interactive_session | live | prose | `CM4AI` | mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the |
-| `CLAUDE.md:370` | interactive_session | live | prose | `AI_READI` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
-| `CLAUDE.md:370` | interactive_session | live | prose | `VOICE` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
-| `CLAUDE.md:370` | interactive_session | live | prose | `VOICE_PEDIATRIC` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
-| `CLAUDE.md:371` | interactive_session | live | prose | `CHORUS` | CHORUS has not changed since #421). The 82 records that predated md5 |
-| `CLAUDE.md:407` | interactive_session | live | prose | `VOICE` | The VOICE run of 2026-08-07 was sent a paragraph naming the project, the |
-| `CLAUDE.md:418` | interactive_session | live | prose | `VOICE` | records place the pediatric release inside VOICE's own `resources`, |
-| `CLAUDE.md:449` | interactive_session | live | prose | `AI_READI` | (~25k-token cap, #700); a line count alone does not, since AI_READI has |
-| `CLAUDE.md:488` | interactive_session | live | instruction | `CHORUS` | the corpus, all CHORUS API v7 records, and every one of them the record's |
-| `CLAUDE.md:489` | interactive_session | live | prose | `chorus` | own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page: |
-| `CLAUDE.md:489` | interactive_session | live | prose | `chorus` | own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page: |
-| `CLAUDE.md:490` | interactive_session | live | instruction | `chorus` | https://chorus4ai.org/`) — so the exemption reaches the record's own |
-| `CLAUDE.md:495` | interactive_session | live | instruction | `AI_READI` | the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted |
-| `CLAUDE.md:517` | interactive_session | live | prose | `AI_READI` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
-| `CLAUDE.md:517` | interactive_session | live | prose | `AI_READI` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
-| `CLAUDE.md:517` | interactive_session | live | prose | `VOICE` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
-| `CLAUDE.md:520` | interactive_session | live | prose | `AI_READI` | predate `findings_gated` gain that key), and AI_READI 2026-09-01 |
-| `CLAUDE.md:585` | interactive_session | live | prose | `CM4AI` | before and after. The v8 CM4AI canary stopped on exactly one such entry. |
-| `CLAUDE.md:602` | interactive_session | live | prose | `CHORUS` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
-| `CLAUDE.md:602` | interactive_session | live | prose | `CM4AI` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
-| `CLAUDE.md:602` | interactive_session | live | prose | `VOICE` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
-| `CLAUDE.md:602` | interactive_session | live | prose | `AI_READI` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
-| `CLAUDE.md:604` | interactive_session | live | prose | `AI_READI` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
-| `CLAUDE.md:604` | interactive_session | live | prose | `CM4AI` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
-| `CLAUDE.md:604` | interactive_session | live | prose | `VOICE` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
-| `CLAUDE.md:604` | interactive_session | live | prose | `CHORUS` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
-| `CLAUDE.md:604` | interactive_session | live | prose | `CHORUS` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
-| `CLAUDE.md:649` | interactive_session | live | prose | `VOICE` | rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary. |
-| `CLAUDE.md:660` | interactive_session | live | prose | `CHORUS` | finding (three of nine v8 reviews had found one: CHORUS 04f rep2 |
-| `CLAUDE.md:661` | interactive_session | live | prose | `AI_READI` | `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE |
-| `CLAUDE.md:661` | interactive_session | live | prose | `VOICE` | `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE |
-| `CLAUDE.md:711` | interactive_session | live | prose | `CM4AI` | byte-for-byte on the CM4AI canary and sits correctly (#873), so the rate |
-| `CLAUDE.md:718` | interactive_session | live | instruction | `AI_READI` | the AI_READI 2026-09-04f record's three top-level `source_caveats` |
-| `CLAUDE.md:745` | interactive_session | live | instruction | `AI_READI` | records a duplicate key, the AI_READI 2026-09-04f rep1 record whose own |
-| `CLAUDE.md:761` | interactive_session | live | instruction | `AI_READI` | AI_READI 2026-09-04f record is the one such record in the corpus: |
-| `CLAUDE.md:799` | interactive_session | live | prose | `CHORUS` | credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium |
-| `CLAUDE.md:799` | interactive_session | live | prose | `Bihorac` | credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium |
-| `CLAUDE.md:801` | interactive_session | live | instruction | `CHORUS` | CHORUS 2026-09-04f rep1 record read two such entries as dropped and lost |
-| `CLAUDE.md:853` | interactive_session | live | prose | `CHORUS` | committed CHORUS 2026-09-01 rep1 pack — underneath the sha256 its own |
-| `CLAUDE.md:910` | interactive_session | live | prose | `AI_READI` | it, and `stated` entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1 |
-| `CLAUDE.md:911` | interactive_session | live | prose | `fairhub` | `file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the |
-| `CLAUDE.md:912` | interactive_session | live | prose | `fairhub` | attested fairhub page plus a label) with the DOIs. Corpus-wide the |
-| `CLAUDE.md:923` | interactive_session | live | instruction | `AI_READI` | drift — 35 of those 57 records, the AI_READI rep1 record among them — |
-| `CLAUDE.md:1237` | interactive_session | live | prose | `CHORUS` | records and CHORUS rep3 carry no `thinking_tokens` at all. So |
-| `CLAUDE.md:1306` | interactive_session | live | prose | `CM4AI` | already states, added when a run broke the rule (#974: the v8 CM4AI |
-| `CLAUDE.md:1330` | interactive_session | live | prose | `VOICE` | counts a skip; `british_occurrences` logs each rewrite once — the VOICE |
-| `CLAUDE.md:1332` | interactive_session | live | prose | `VOICE` | title-case run ("Temerty Centre for …", a real institution the VOICE |
-| `CLAUDE.md:1355` | interactive_session | live | example | `VOICE` | make evaluate-d4d [PROJECT=VOICE] |
-| `CLAUDE.md:1362` | interactive_session | live | example | `VOICE` | make eval-details PROJECT=VOICE METHOD=claudecode |
-| `CLAUDE.md:1505` | interactive_session | live | prose | `AI-READI` | the AI-READI healthsheet input, and the project lists of the comparison |
-| `CLAUDE.md:1573` | interactive_session | live | prose | `VOICE_PEDIATRIC` | its preprocessed files are — the VOICE_PEDIATRIC override, formerly the |
-| `CLAUDE.md:1582` | interactive_session | live | prose | `VOICE` | for that project — `--project VOICE --bundle /elsewhere/x.txt` selects |
+| `CLAUDE.md:50` | interactive_session,run_controllers | live | example | `AI_READI` | d4d download sources --project AI_READI       # Download from Google Sheet |
+| `CLAUDE.md:51` | interactive_session,run_controllers | live | example | `AI_READI` | d4d download preprocess --project AI_READI    # Preprocess to text |
+| `CLAUDE.md:53` | interactive_session,run_controllers | live | example | `AI_READI` | d4d download concatenate --project AI_READI   # Concatenate files |
+| `CLAUDE.md:58` | interactive_session,run_controllers | live | example | `AI_READI` | d4d evaluate presence --project AI_READI --method gpt5  # Presence-based |
+| `CLAUDE.md:199` | interactive_session,run_controllers | live | prose | `AI_READI` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
+| `CLAUDE.md:199` | interactive_session,run_controllers | live | prose | `CHORUS` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
+| `CLAUDE.md:199` | interactive_session,run_controllers | live | prose | `CM4AI` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
+| `CLAUDE.md:199` | interactive_session,run_controllers | live | prose | `VOICE` | **Projects**: AI_READI, CHORUS, CM4AI, VOICE |
+| `CLAUDE.md:223` | interactive_session,run_controllers | live | example | `AI_READI` | make d4d-agent PROJECT=AI_READI  # → data/d4d_concatenated/claudecode_agent/ |
+| `CLAUDE.md:245` | interactive_session,run_controllers | live | prose | `AI-READI` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
+| `CLAUDE.md:245` | interactive_session,run_controllers | live | prose | `VOICE` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
+| `CLAUDE.md:245` | interactive_session,run_controllers | live | prose | `CM4AI` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
+| `CLAUDE.md:245` | interactive_session,run_controllers | live | prose | `B35XWX` | (AI-READI v2.0.0, VOICE v2.0, CM4AI B35XWX v1.4), so scoring current output |
+| `CLAUDE.md:246` | interactive_session,run_controllers | live | instruction | `CHORUS` | against them penalises correct facts as errors. There is no CHORUS record. |
+| `CLAUDE.md:251` | interactive_session,run_controllers | live | example | `AI_READI` | make d4d-agent PROJECT=AI_READI |
+| `CLAUDE.md:275` | interactive_session,run_controllers | live | example | `AI_READI` | make validate-d4d-project PROJECT=AI_READI GENERATOR=gpt5 |
+| `CLAUDE.md:350` | interactive_session,run_controllers | live | example | `VOICE` | d4d download scope --project VOICE        # show the declaration |
+| `CLAUDE.md:369` | interactive_session,run_controllers | live | prose | `AI_READI` | mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the |
+| `CLAUDE.md:369` | interactive_session,run_controllers | live | prose | `CM4AI` | mojibake repair #874 rewrote the AI_READI and CM4AI bundles and the |
+| `CLAUDE.md:370` | interactive_session,run_controllers | live | prose | `AI_READI` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
+| `CLAUDE.md:370` | interactive_session,run_controllers | live | prose | `VOICE` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
+| `CLAUDE.md:370` | interactive_session,run_controllers | live | prose | `VOICE_PEDIATRIC` | docx/accent fixes #921 the AI_READI, VOICE and VOICE_PEDIATRIC ones; |
+| `CLAUDE.md:371` | interactive_session,run_controllers | live | prose | `CHORUS` | CHORUS has not changed since #421). The 82 records that predated md5 |
+| `CLAUDE.md:407` | interactive_session,run_controllers | live | prose | `VOICE` | The VOICE run of 2026-08-07 was sent a paragraph naming the project, the |
+| `CLAUDE.md:418` | interactive_session,run_controllers | live | prose | `VOICE` | records place the pediatric release inside VOICE's own `resources`, |
+| `CLAUDE.md:449` | interactive_session,run_controllers | live | prose | `AI_READI` | (~25k-token cap, #700); a line count alone does not, since AI_READI has |
+| `CLAUDE.md:488` | interactive_session,run_controllers | live | instruction | `CHORUS` | the corpus, all CHORUS API v7 records, and every one of them the record's |
+| `CLAUDE.md:489` | interactive_session,run_controllers | live | prose | `chorus` | own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page: |
+| `CLAUDE.md:489` | interactive_session,run_controllers | live | prose | `chorus` | own top-level `id` (`https://chorus4ai.org/#chorus-dataset` on `page: |
+| `CLAUDE.md:490` | interactive_session,run_controllers | live | instruction | `chorus` | https://chorus4ai.org/`) — so the exemption reaches the record's own |
+| `CLAUDE.md:495` | interactive_session,run_controllers | live | instruction | `AI_READI` | the AI_READI 2026-09-01 rep1 record, whose bundle has drifted. A drifted |
+| `CLAUDE.md:517` | interactive_session,run_controllers | live | prose | `AI_READI` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
+| `CLAUDE.md:517` | interactive_session,run_controllers | live | prose | `AI_READI` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
+| `CLAUDE.md:517` | interactive_session,run_controllers | live | prose | `VOICE` | AI_READI canaries, the 2026-09-01 API v7 AI_READI and VOICE records) |
+| `CLAUDE.md:520` | interactive_session,run_controllers | live | prose | `AI_READI` | predate `findings_gated` gain that key), and AI_READI 2026-09-01 |
+| `CLAUDE.md:585` | interactive_session,run_controllers | live | prose | `CM4AI` | before and after. The v8 CM4AI canary stopped on exactly one such entry. |
+| `CLAUDE.md:602` | interactive_session,run_controllers | live | prose | `CHORUS` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
+| `CLAUDE.md:602` | interactive_session,run_controllers | live | prose | `CM4AI` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
+| `CLAUDE.md:602` | interactive_session,run_controllers | live | prose | `VOICE` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
+| `CLAUDE.md:602` | interactive_session,run_controllers | live | prose | `AI_READI` | CHORUS, CM4AI and VOICE, with AI_READI measuring 0 on rep3 — under v5 a |
+| `CLAUDE.md:604` | interactive_session,run_controllers | live | prose | `AI_READI` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
+| `CLAUDE.md:604` | interactive_session,run_controllers | live | prose | `CM4AI` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
+| `CLAUDE.md:604` | interactive_session,run_controllers | live | prose | `VOICE` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
+| `CLAUDE.md:604` | interactive_session,run_controllers | live | prose | `CHORUS` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
+| `CLAUDE.md:604` | interactive_session,run_controllers | live | prose | `CHORUS` | replicate for AI_READI (3 of 3), CM4AI (2) and VOICE (1), and CHORUS stayed all-vacuous. Under v7, CHORUS rep1 |
+| `CLAUDE.md:649` | interactive_session,run_controllers | live | prose | `VOICE` | rows on slots the core cannot hold are all on the VOICE 2026-09-04d canary. |
+| `CLAUDE.md:660` | interactive_session,run_controllers | live | prose | `CHORUS` | finding (three of nine v8 reviews had found one: CHORUS 04f rep2 |
+| `CLAUDE.md:661` | interactive_session,run_controllers | live | prose | `AI_READI` | `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE |
+| `CLAUDE.md:661` | interactive_session,run_controllers | live | prose | `VOICE` | `regulatory_restrictions`, AI_READI 04g rep3 `content_warnings`, VOICE |
+| `CLAUDE.md:711` | interactive_session,run_controllers | live | prose | `CM4AI` | byte-for-byte on the CM4AI canary and sits correctly (#873), so the rate |
+| `CLAUDE.md:718` | interactive_session,run_controllers | live | instruction | `AI_READI` | the AI_READI 2026-09-04f record's three top-level `source_caveats` |
+| `CLAUDE.md:745` | interactive_session,run_controllers | live | instruction | `AI_READI` | records a duplicate key, the AI_READI 2026-09-04f rep1 record whose own |
+| `CLAUDE.md:761` | interactive_session,run_controllers | live | instruction | `AI_READI` | AI_READI 2026-09-04f record is the one such record in the corpus: |
+| `CLAUDE.md:799` | interactive_session,run_controllers | live | prose | `CHORUS` | credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium |
+| `CLAUDE.md:799` | interactive_session,run_controllers | live | prose | `Bihorac` | credited CHORUS 2026-09-01 rep3's Bihorac receipt to the Consortium |
+| `CLAUDE.md:801` | interactive_session,run_controllers | live | instruction | `CHORUS` | CHORUS 2026-09-04f rep1 record read two such entries as dropped and lost |
+| `CLAUDE.md:853` | interactive_session,run_controllers | live | prose | `CHORUS` | committed CHORUS 2026-09-01 rep1 pack — underneath the sha256 its own |
+| `CLAUDE.md:910` | interactive_session,run_controllers | live | prose | `AI_READI` | it, and `stated` entries are the evidence rules' business. The two-way flag filed the AI_READI 2026-09-01 rep1 |
+| `CLAUDE.md:911` | interactive_session,run_controllers | live | prose | `fairhub` | `file_collections[*].id` (`https://fairhub.io/datasets/3#cardiac_ecg`, the |
+| `CLAUDE.md:912` | interactive_session,run_controllers | live | prose | `fairhub` | attested fairhub page plus a label) with the DOIs. Corpus-wide the |
+| `CLAUDE.md:923` | interactive_session,run_controllers | live | instruction | `AI_READI` | drift — 35 of those 57 records, the AI_READI rep1 record among them — |
+| `CLAUDE.md:1237` | interactive_session,run_controllers | live | prose | `CHORUS` | records and CHORUS rep3 carry no `thinking_tokens` at all. So |
+| `CLAUDE.md:1306` | interactive_session,run_controllers | live | prose | `CM4AI` | already states, added when a run broke the rule (#974: the v8 CM4AI |
+| `CLAUDE.md:1330` | interactive_session,run_controllers | live | prose | `VOICE` | counts a skip; `british_occurrences` logs each rewrite once — the VOICE |
+| `CLAUDE.md:1332` | interactive_session,run_controllers | live | prose | `VOICE` | title-case run ("Temerty Centre for …", a real institution the VOICE |
+| `CLAUDE.md:1355` | interactive_session,run_controllers | live | example | `VOICE` | make evaluate-d4d [PROJECT=VOICE] |
+| `CLAUDE.md:1362` | interactive_session,run_controllers | live | example | `VOICE` | make eval-details PROJECT=VOICE METHOD=claudecode |
+| `CLAUDE.md:1505` | interactive_session,run_controllers | live | prose | `AI-READI` | the AI-READI healthsheet input, and the project lists of the comparison |
+| `CLAUDE.md:1573` | interactive_session,run_controllers | live | prose | `VOICE_PEDIATRIC` | its preprocessed files are — the VOICE_PEDIATRIC override, formerly the |
+| `CLAUDE.md:1582` | interactive_session,run_controllers | live | prose | `VOICE` | for that project — `--project VOICE --bundle /elsewhere/x.txt` selects |
 | `notes/claudecode_direct/prepare_direct.py:343` | run_controllers | live | code_table | `CHORUS` | parser.add_argument("--project", default="CHORUS") |
 | `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = "CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1" |
 | `notes/matched_cborg_2026-09-13/prepare_registration.py:19` | run_controllers | live | code_table | `CHORUS` | DEFAULT_CANARY_ORDER = "CHORUS_api_rep1,CHORUS_agentic_rep1,KIDS_FIRST_api_rep1,KIDS_FIRST_agentic_rep1" |
@@ -295,7 +295,7 @@ Bridge2AI-program and biomedical/clinical hits never fail the run. Each needs a 
 | bridge2ai_program | github_assistant | 1153 | 1151 | 1138 | 15 |
 | bridge2ai_program | shared_schema | 2382 | 2364 | 2358 | 24 |
 | bridge2ai_program | deterministic | 15 | 0 | 6 | 9 |
-| bridge2ai_program | run_controllers | 2115 | 2110 | 2088 | 27 |
+| bridge2ai_program | run_controllers | 2123 | 2114 | 2088 | 35 |
 | bridge2ai_program | legacy_monolithic | 6 | 2 | 0 | 6 |
 | bridge2ai_program | shared_input | 2 | 0 | 0 | 2 |
 | biomedical_clinical | native_agentic | 1503 | 1266 | 1245 | 258 |
@@ -304,7 +304,7 @@ Bridge2AI-program and biomedical/clinical hits never fail the run. Each needs a 
 | biomedical_clinical | github_assistant | 616 | 616 | 616 | 0 |
 | biomedical_clinical | shared_schema | 1339 | 1333 | 1339 | 0 |
 | biomedical_clinical | deterministic | 25 | 4 | 2 | 23 |
-| biomedical_clinical | run_controllers | 1199 | 1198 | 1195 | 4 |
+| biomedical_clinical | run_controllers | 1325 | 1209 | 1195 | 130 |
 | biomedical_clinical | legacy_monolithic | 6 | 2 | 0 | 6 |
 | biomedical_clinical | shared_input | 5 | 0 | 0 | 5 |
 

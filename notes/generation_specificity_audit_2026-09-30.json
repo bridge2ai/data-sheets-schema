@@ -747,7 +747,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -761,7 +762,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -776,7 +778,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -790,7 +793,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -804,7 +808,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -819,7 +824,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -833,7 +839,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -848,7 +855,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -863,7 +871,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -877,7 +886,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -891,7 +901,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -907,7 +918,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -921,7 +933,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -935,7 +948,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -951,7 +965,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -1036,7 +1051,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1050,7 +1066,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1064,7 +1081,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1079,7 +1097,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -1093,7 +1112,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1107,7 +1127,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1174,7 +1195,8 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "contexts": {
@@ -1187,7 +1209,8 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "contexts": {
@@ -1200,7 +1223,8 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "contexts": {
@@ -4406,11 +4430,7 @@
    "manifest": "none passed (neutral for an external bundle)"
   },
   "interactive": {
-   "customizations_off": [
-    "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-    "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode",
-    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
-   ],
+   "customizations_off": [],
    "described": [
     ".claude/agents/d4d-description-reviewer.md",
     ".claude/agents/d4d-mapper.md",
@@ -4441,56 +4461,62 @@
    ],
    "launches": [
     {
-     "carries": true,
+     "carries": null,
      "evidence": [
-      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+      "notes/claudecode_direct/run_direct_canary.py:423 no element of the argv list is the literal `--safe-mode`; its starred elements (`*runtime['cli_flags']`, `*permission_arguments(command_policy)`) are not followed"
      ],
      "memory_evidence": [
-      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+      "notes/claudecode_direct/run_direct_canary.py:423 no element of the argv list is the literal `--safe-mode` or `--bare`; its starred elements (`*runtime['cli_flags']`, `*permission_arguments(command_policy)`) are not followed"
      ],
-     "memory_off": true,
+     "memory_off": null,
      "site": "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt"
     },
     {
-     "carries": true,
+     "carries": null,
      "evidence": [
-      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+      "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:429 no element of the argv list is the literal `--safe-mode`; its starred elements (`*native.CLI_FLAGS`, `*[p for d in directories for p in ('--add-dir', d)]`, `*permission_arguments(policy)`) are not followed"
      ],
      "memory_evidence": [
-      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+      "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:429 no element of the argv list is the literal `--safe-mode` or `--bare`; its starred elements (`*native.CLI_FLAGS`, `*[p for d in directories for p in ('--add-dir', d)]`, `*permission_arguments(policy)`) are not followed"
      ],
-     "memory_off": true,
+     "memory_off": null,
      "site": "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt"
     },
     {
-     "carries": true,
+     "carries": null,
      "evidence": [
-      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:785 no element of the argv list is the literal `--safe-mode`; its starred elements (`*CLI_FLAGS`, `*directory_flags`, `*permission_arguments(policy)`) are not followed"
      ],
      "memory_evidence": [
-      "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode"
+      "notes/matched_cborg_2026-09-13/audit_controls/native.py:785 no element of the argv list is the literal `--safe-mode` or `--bare`; its starred elements (`*CLI_FLAGS`, `*directory_flags`, `*permission_arguments(policy)`) are not followed"
      ],
-     "memory_off": true,
+     "memory_off": null,
      "site": "notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt"
     },
     {
-     "carries": true,
+     "carries": null,
      "evidence": [
-      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+      "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:665 no element of the argv list is the literal `--safe-mode`; its starred elements (`*overlay['cli_flags']`, `*permission_arguments(command_policy)`) are not followed"
      ],
      "memory_evidence": [
-      "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-      "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
+      "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:665 no element of the argv list is the literal `--safe-mode` or `--bare`; its starred elements (`*overlay['cli_flags']`, `*permission_arguments(command_policy)`) are not followed"
      ],
-     "memory_off": true,
+     "memory_off": null,
      "site": "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt"
     }
    ],
-   "launches_without_customizations_off": [],
-   "launches_without_memory_off": [],
+   "launches_without_customizations_off": [
+    "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt",
+    "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt",
+    "notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt",
+    "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt"
+   ],
+   "launches_without_memory_off": [
+    "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt",
+    "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt",
+    "notes/matched_cborg_2026-09-13/audit_controls/native.py:787 --system-prompt",
+    "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py:668 --system-prompt"
+   ],
    "memory": [
     "CLAUDE.md"
    ],
@@ -4498,11 +4524,7 @@
     ".claude/commands/d4d-add-mapping.md",
     ".github/workflows/d4d_assistant_create.md"
    ],
-   "memory_off": [
-    "notes/claudecode_direct/prepare_direct.py:49 --safe-mode",
-    "notes/matched_cborg_2026-09-13/audit_controls/native.py:33 --safe-mode",
-    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay.py:44 --safe-mode"
-   ],
+   "memory_off": [],
    "native_launch_sites": [
     "notes/claudecode_direct/run_direct_canary.py:425 --system-prompt",
     "notes/matched_cborg_2026-09-13/audit_controls/batch_native.py:432 --system-prompt",
@@ -5827,18 +5849,21 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 6,
    "loaded_in": {
-    "interactive_session": "frontmatter description"
+    "interactive_session": "frontmatter description",
+    "run_controllers": "frontmatter description"
    },
    "match": "CHORUS",
    "model_facing": true,
@@ -5852,18 +5877,21 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 7,
    "loaded_in": {
-    "interactive_session": "frontmatter description"
+    "interactive_session": "frontmatter description",
+    "run_controllers": "frontmatter description"
    },
    "match": "AI_READI",
    "model_facing": true,
@@ -5877,7 +5905,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5897,7 +5926,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5917,7 +5947,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5937,7 +5968,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5957,7 +5989,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5977,7 +6010,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -5997,7 +6031,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6017,7 +6052,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6037,7 +6073,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6057,7 +6094,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6077,7 +6115,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6097,7 +6136,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6117,7 +6157,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6137,7 +6178,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6157,7 +6199,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6177,7 +6220,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6197,7 +6241,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6217,7 +6262,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6237,7 +6283,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6257,7 +6304,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6277,7 +6325,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6297,7 +6346,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6317,7 +6367,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6337,7 +6388,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6645,7 +6697,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6667,7 +6720,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -6728,14 +6782,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 50,
    "match": "AI_READI",
@@ -6749,14 +6805,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 51,
    "match": "AI_READI",
@@ -6770,14 +6828,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 53,
    "match": "AI_READI",
@@ -6791,14 +6851,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 58,
    "match": "AI_READI",
@@ -6812,14 +6874,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "AI_READI",
@@ -6833,14 +6897,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "CHORUS",
@@ -6854,14 +6920,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "CM4AI",
@@ -6875,14 +6943,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "VOICE",
@@ -6896,14 +6966,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 223,
    "match": "AI_READI",
@@ -6917,14 +6989,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "AI-READI",
@@ -6938,14 +7012,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "VOICE",
@@ -6959,14 +7035,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "CM4AI",
@@ -6980,14 +7058,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "B35XWX",
@@ -7001,14 +7081,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 246,
    "match": "CHORUS",
@@ -7022,14 +7104,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 251,
    "match": "AI_READI",
@@ -7043,14 +7127,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 275,
    "match": "AI_READI",
@@ -7064,14 +7150,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 350,
    "match": "VOICE",
@@ -7085,14 +7173,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 369,
    "match": "AI_READI",
@@ -7106,14 +7196,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 369,
    "match": "CM4AI",
@@ -7127,14 +7219,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "AI_READI",
@@ -7148,14 +7242,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "VOICE",
@@ -7169,14 +7265,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "VOICE_PEDIATRIC",
@@ -7190,14 +7288,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 371,
    "match": "CHORUS",
@@ -7211,14 +7311,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 407,
    "match": "VOICE",
@@ -7232,14 +7334,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 418,
    "match": "VOICE",
@@ -7253,14 +7357,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 449,
    "match": "AI_READI",
@@ -7274,14 +7380,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 488,
    "match": "CHORUS",
@@ -7295,14 +7403,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 489,
    "match": "chorus",
@@ -7316,14 +7426,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 489,
    "match": "chorus",
@@ -7337,14 +7449,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 490,
    "match": "chorus",
@@ -7358,14 +7472,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 495,
    "match": "AI_READI",
@@ -7379,14 +7495,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "AI_READI",
@@ -7400,14 +7518,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "AI_READI",
@@ -7421,14 +7541,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "VOICE",
@@ -7442,14 +7564,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 520,
    "match": "AI_READI",
@@ -7463,14 +7587,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 585,
    "match": "CM4AI",
@@ -7484,14 +7610,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "CHORUS",
@@ -7505,14 +7633,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "CM4AI",
@@ -7526,14 +7656,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "VOICE",
@@ -7547,14 +7679,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "AI_READI",
@@ -7568,14 +7702,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "AI_READI",
@@ -7589,14 +7725,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CM4AI",
@@ -7610,14 +7748,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "VOICE",
@@ -7631,14 +7771,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CHORUS",
@@ -7652,14 +7794,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CHORUS",
@@ -7673,14 +7817,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 649,
    "match": "VOICE",
@@ -7694,14 +7840,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 660,
    "match": "CHORUS",
@@ -7715,14 +7863,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 661,
    "match": "AI_READI",
@@ -7736,14 +7886,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 661,
    "match": "VOICE",
@@ -7757,14 +7909,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 711,
    "match": "CM4AI",
@@ -7778,14 +7932,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 718,
    "match": "AI_READI",
@@ -7799,14 +7955,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 745,
    "match": "AI_READI",
@@ -7820,14 +7978,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 761,
    "match": "AI_READI",
@@ -7841,14 +8001,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 799,
    "match": "CHORUS",
@@ -7862,14 +8024,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 799,
    "match": "Bihorac",
@@ -7883,14 +8047,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 801,
    "match": "CHORUS",
@@ -7904,14 +8070,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 853,
    "match": "CHORUS",
@@ -7925,14 +8093,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 910,
    "match": "AI_READI",
@@ -7946,14 +8116,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 911,
    "match": "fairhub",
@@ -7967,14 +8139,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 912,
    "match": "fairhub",
@@ -7988,14 +8162,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 923,
    "match": "AI_READI",
@@ -8009,14 +8185,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1237,
    "match": "CHORUS",
@@ -8030,14 +8208,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1306,
    "match": "CM4AI",
@@ -8051,14 +8231,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1330,
    "match": "VOICE",
@@ -8072,14 +8254,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1332,
    "match": "VOICE",
@@ -8093,14 +8277,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1355,
    "match": "VOICE",
@@ -8114,14 +8300,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1362,
    "match": "VOICE",
@@ -8135,14 +8323,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1505,
    "match": "AI-READI",
@@ -8156,14 +8346,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1573,
    "match": "VOICE_PEDIATRIC",
@@ -8177,14 +8369,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1582,
    "match": "VOICE",
@@ -28623,10 +28817,23 @@
   ".claude/agents/d4d-description-reviewer.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      10,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28644,11 +28851,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28657,10 +28866,23 @@
   ".claude/agents/d4d-mapper.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28678,11 +28900,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28691,10 +28915,23 @@
   ".claude/agents/d4d-provenance-guard.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      6,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28712,11 +28949,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28725,10 +28964,23 @@
   ".claude/agents/d4d-review-record.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      8,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28746,11 +28998,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28759,10 +29013,23 @@
   ".claude/agents/d4d-rocrate.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28780,11 +29047,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28793,10 +29062,23 @@
   ".claude/agents/d4d-rubric10-semantic.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28814,11 +29096,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28827,10 +29111,23 @@
   ".claude/agents/d4d-rubric10.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28848,11 +29145,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28861,10 +29160,23 @@
   ".claude/agents/d4d-rubric20-semantic.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28882,11 +29194,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28895,10 +29209,23 @@
   ".claude/agents/d4d-rubric20.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28916,11 +29243,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28929,10 +29258,23 @@
   ".claude/agents/d4d-schema-expert.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28950,11 +29292,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28963,10 +29307,23 @@
   ".claude/agents/d4d-validator.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -28984,11 +29341,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -28997,10 +29356,23 @@
   ".claude/agents/schema-stats.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      9,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -29018,11 +29390,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29221,10 +29595,18 @@
   ".claude/commands/README.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29237,11 +29619,13 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29250,10 +29634,18 @@
   ".claude/commands/d4d-add-mapping.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29266,11 +29658,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29279,10 +29673,18 @@
   ".claude/commands/d4d-agent.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29295,11 +29697,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29308,10 +29712,18 @@
   ".claude/commands/d4d-assistant.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29324,11 +29736,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29337,10 +29751,18 @@
   ".claude/commands/d4d-full-core.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29353,11 +29775,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29366,10 +29790,18 @@
   ".claude/commands/d4d-input-deep-research.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29382,11 +29814,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29395,10 +29829,18 @@
   ".claude/commands/d4d-uniform-rules.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29411,11 +29853,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29424,10 +29868,18 @@
   ".claude/commands/d4d-webfetch.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      1,
+      1,
+      "description (the first line)"
+     ]
+    ],
+    "run_controllers": [
      [
       1,
       1,
@@ -29440,11 +29892,13 @@
    "role": "model_facing",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "model_facing"
+    "native_agentic": "model_facing",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
     "interactive_session",
-    "native_agentic"
+    "native_agentic",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29452,17 +29906,20 @@
   },
   ".claude/hooks/protect_schema_hook.py": {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {},
    "path": ".claude/hooks/protect_schema_hook.py",
    "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "interactive_session": "run_shaping"
+    "interactive_session": "run_shaping",
+    "run_controllers": "run_shaping"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29470,17 +29927,20 @@
   },
   ".claude/hooks/term_validator_hook.py": {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {},
    "path": ".claude/hooks/term_validator_hook.py",
    "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "interactive_session": "run_shaping"
+    "interactive_session": "run_shaping",
+    "run_controllers": "run_shaping"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29488,17 +29948,20 @@
   },
   ".claude/hooks/validate_d4d_yaml_hook.py": {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {},
    "path": ".claude/hooks/validate_d4d_yaml_hook.py",
    "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "interactive_session": "run_shaping"
+    "interactive_session": "run_shaping",
+    "run_controllers": "run_shaping"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29506,17 +29969,20 @@
   },
   ".claude/settings.json": {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {},
    "path": ".claude/settings.json",
    "read_raw_in": [],
    "role": "run_shaping",
    "roles": {
-    "interactive_session": "run_shaping"
+    "interactive_session": "run_shaping",
+    "run_controllers": "run_shaping"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29525,10 +29991,23 @@
   ".claude/skills/review-open-issues/SKILL.md": {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {
     "interactive_session": [
+     [
+      2,
+      2,
+      "frontmatter name"
+     ],
+     [
+      3,
+      3,
+      "frontmatter description"
+     ]
+    ],
+    "run_controllers": [
      [
       2,
       2,
@@ -29546,10 +30025,12 @@
    "role": "exposed",
    "roles": {
     "interactive_session": "exposed",
-    "native_agentic": "exposed"
+    "native_agentic": "exposed",
+    "run_controllers": "exposed"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -29629,17 +30110,20 @@
   },
   "CLAUDE.md": {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "loaded": {},
    "path": "CLAUDE.md",
    "read_raw_in": [],
    "role": "model_facing",
    "roles": {
-    "interactive_session": "model_facing"
+    "interactive_session": "model_facing",
+    "run_controllers": "model_facing"
    },
    "runs_as_script_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "status": "live",
    "text_spans": [],
@@ -31375,6 +31859,11 @@
    "runs_as_script_in": [],
    "status": "live",
    "text_spans": [
+    [
+     107,
+     107,
+     "RECEIPT_MARK (part of PHASE_INSTRUCTIONS, its value reaches phase_instruction())"
+    ],
     [
      1425,
      1469,
@@ -35405,7 +35894,7 @@
    "legacy_monolithic": 78,
    "native_agentic": 9,
    "other_model_client": 0,
-   "run_controllers": 9,
+   "run_controllers": 81,
    "shared_input": 0,
    "shared_schema": 0
   }
@@ -35436,7 +35925,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35458,7 +35948,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35480,7 +35971,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35502,7 +35994,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35524,7 +36017,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35546,7 +36040,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
@@ -35779,14 +36274,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1475,
    "match": "IRB",
@@ -35800,14 +36297,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1481,
    "match": "B2AI",
@@ -35821,14 +36320,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1502,
    "match": "Bridge2AI",
@@ -35842,14 +36343,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1506,
    "match": "bridge2ai",
@@ -35863,14 +36366,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "bridge2ai_program",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1508,
    "match": "bridge2ai",
@@ -35884,14 +36389,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1513,
    "match": "MeSH",
@@ -35905,14 +36412,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1513,
    "match": "NCIT",
@@ -35926,14 +36435,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1516,
    "match": "MeSH",
@@ -35947,14 +36458,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "biomedical_clinical",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1516,
    "match": "NCIT",
@@ -37460,18 +37973,21 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 6,
    "loaded_in": {
-    "interactive_session": "frontmatter description"
+    "interactive_session": "frontmatter description",
+    "run_controllers": "frontmatter description"
    },
    "match": "CHORUS",
    "model_facing": true,
@@ -37485,18 +38001,21 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "frontmatter",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 7,
    "loaded_in": {
-    "interactive_session": "frontmatter description"
+    "interactive_session": "frontmatter description",
+    "run_controllers": "frontmatter description"
    },
    "match": "AI_READI",
    "model_facing": true,
@@ -37510,7 +38029,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -37532,7 +38052,8 @@
   {
    "approaches": [
     "native_agentic",
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
@@ -37553,14 +38074,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 50,
    "match": "AI_READI",
@@ -37574,14 +38097,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 51,
    "match": "AI_READI",
@@ -37595,14 +38120,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 53,
    "match": "AI_READI",
@@ -37616,14 +38143,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 58,
    "match": "AI_READI",
@@ -37637,14 +38166,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "AI_READI",
@@ -37658,14 +38189,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "CHORUS",
@@ -37679,14 +38212,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "CM4AI",
@@ -37700,14 +38235,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 199,
    "match": "VOICE",
@@ -37721,14 +38258,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 223,
    "match": "AI_READI",
@@ -37742,14 +38281,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "AI-READI",
@@ -37763,14 +38304,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "VOICE",
@@ -37784,14 +38327,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "CM4AI",
@@ -37805,14 +38350,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 245,
    "match": "B35XWX",
@@ -37826,14 +38373,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 246,
    "match": "CHORUS",
@@ -37847,14 +38396,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 251,
    "match": "AI_READI",
@@ -37868,14 +38419,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 275,
    "match": "AI_READI",
@@ -37889,14 +38442,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 350,
    "match": "VOICE",
@@ -37910,14 +38465,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 369,
    "match": "AI_READI",
@@ -37931,14 +38488,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 369,
    "match": "CM4AI",
@@ -37952,14 +38511,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "AI_READI",
@@ -37973,14 +38534,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "VOICE",
@@ -37994,14 +38557,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 370,
    "match": "VOICE_PEDIATRIC",
@@ -38015,14 +38580,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 371,
    "match": "CHORUS",
@@ -38036,14 +38603,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 407,
    "match": "VOICE",
@@ -38057,14 +38626,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 418,
    "match": "VOICE",
@@ -38078,14 +38649,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 449,
    "match": "AI_READI",
@@ -38099,14 +38672,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 488,
    "match": "CHORUS",
@@ -38120,14 +38695,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 489,
    "match": "chorus",
@@ -38141,14 +38718,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 489,
    "match": "chorus",
@@ -38162,14 +38741,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 490,
    "match": "chorus",
@@ -38183,14 +38764,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 495,
    "match": "AI_READI",
@@ -38204,14 +38787,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "AI_READI",
@@ -38225,14 +38810,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "AI_READI",
@@ -38246,14 +38833,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 517,
    "match": "VOICE",
@@ -38267,14 +38856,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 520,
    "match": "AI_READI",
@@ -38288,14 +38879,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 585,
    "match": "CM4AI",
@@ -38309,14 +38902,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "CHORUS",
@@ -38330,14 +38925,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "CM4AI",
@@ -38351,14 +38948,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "VOICE",
@@ -38372,14 +38971,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 602,
    "match": "AI_READI",
@@ -38393,14 +38994,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "AI_READI",
@@ -38414,14 +39017,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CM4AI",
@@ -38435,14 +39040,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "VOICE",
@@ -38456,14 +39063,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CHORUS",
@@ -38477,14 +39086,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 604,
    "match": "CHORUS",
@@ -38498,14 +39109,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 649,
    "match": "VOICE",
@@ -38519,14 +39132,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 660,
    "match": "CHORUS",
@@ -38540,14 +39155,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 661,
    "match": "AI_READI",
@@ -38561,14 +39178,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 661,
    "match": "VOICE",
@@ -38582,14 +39201,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 711,
    "match": "CM4AI",
@@ -38603,14 +39224,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 718,
    "match": "AI_READI",
@@ -38624,14 +39247,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 745,
    "match": "AI_READI",
@@ -38645,14 +39270,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 761,
    "match": "AI_READI",
@@ -38666,14 +39293,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 799,
    "match": "CHORUS",
@@ -38687,14 +39316,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 799,
    "match": "Bihorac",
@@ -38708,14 +39339,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 801,
    "match": "CHORUS",
@@ -38729,14 +39362,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 853,
    "match": "CHORUS",
@@ -38750,14 +39385,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 910,
    "match": "AI_READI",
@@ -38771,14 +39408,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 911,
    "match": "fairhub",
@@ -38792,14 +39431,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 912,
    "match": "fairhub",
@@ -38813,14 +39454,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "instruction",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 923,
    "match": "AI_READI",
@@ -38834,14 +39477,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1237,
    "match": "CHORUS",
@@ -38855,14 +39500,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1306,
    "match": "CM4AI",
@@ -38876,14 +39523,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1330,
    "match": "VOICE",
@@ -38897,14 +39546,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1332,
    "match": "VOICE",
@@ -38918,14 +39569,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1355,
    "match": "VOICE",
@@ -38939,14 +39592,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "example",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1362,
    "match": "VOICE",
@@ -38960,14 +39615,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1505,
    "match": "AI-READI",
@@ -38981,14 +39638,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1573,
    "match": "VOICE_PEDIATRIC",
@@ -39002,14 +39661,16 @@
   },
   {
    "approaches": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "category": "gc_project",
    "code": false,
    "context": "prose",
    "exception": null,
    "gates_in": [
-    "interactive_session"
+    "interactive_session",
+    "run_controllers"
    ],
    "line": 1582,
    "match": "VOICE",
