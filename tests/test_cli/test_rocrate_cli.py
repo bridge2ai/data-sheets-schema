@@ -625,18 +625,18 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
         with no message reads as its type alone either way."""
         from data_sheets_schema.rocrate_normalize import DeNovoPolicyError
         self.docs.mkdir()                                  # BETA has no document bundle
-        refusal = (f"  ❌ No document bundle at {self.docs / 'BETA_preprocessed.txt'}; "
+        refusal = (f"  ❌ BETA: No document bundle at {self.docs / 'BETA_preprocessed.txt'}; "
                    "run `make concat-preprocessed` first")
         withheld = "'ALPHA_crate_d4d.yaml' is withheld from the de novo fork: already D4D"
         denied = "ALPHA_preprocessed_with_crate.txt"
-        for exc, line in ((KeyError("x"), "  ❌ KeyError: 'x'"),
+        for exc, line in ((KeyError("x"), "  ❌ ALPHA: KeyError: 'x'"),
                           # DeNovoPolicyError's base, then an OSError as FileNotFoundError is
-                          (RuntimeError("boom"), "  ❌ RuntimeError: boom"),
+                          (RuntimeError("boom"), "  ❌ ALPHA: RuntimeError: boom"),
                           (PermissionError(13, "Permission denied", denied),
-                           f"  ❌ PermissionError: [Errno 13] Permission denied: '{denied}'"),
-                          (RuntimeError(), "  ❌ RuntimeError"),          # no message
-                          (DeNovoPolicyError(withheld), f"  ❌ {withheld}"),   # a refusal
-                          (FileNotFoundError(), "  ❌ FileNotFoundError")):   # one with no message
+                           f"  ❌ ALPHA: PermissionError: [Errno 13] Permission denied: '{denied}'"),
+                          (RuntimeError(), "  ❌ ALPHA: RuntimeError"),          # no message
+                          (DeNovoPolicyError(withheld), f"  ❌ ALPHA: {withheld}"),   # a refusal
+                          (FileNotFoundError(), "  ❌ ALPHA: FileNotFoundError")):   # one with no message
             with self.subTest(line=line), \
                  self._alpha_raises("build_crate_bundle", exc, docs_dir=self.docs) as build:
                 r = self._invoke("bundle", projects=("ALPHA", "BETA"))
@@ -669,3 +669,67 @@ class TestAnUnexpectedErrorIsCountedAndNamed(_PerProjectLoopFixture):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNormalizeAndMapUnexpectedErrors(_PerProjectLoopFixture):
+    """Unexpected library errors are counted separately, with later projects tried."""
+
+    def _library(self, command):
+        if command == "normalize":
+            return "data_sheets_schema.rocrate_normalize.normalize_project"
+        return "data_sheets_schema.rocrate_map.map_project"
+
+    def _result(self, command, name, validation):
+        from data_sheets_schema.rocrate_normalize import Result
+        from data_sheets_schema.rocrate_map import MapResult
+        if command == "normalize":
+            return Result(project=name, validation={f"{name}.yaml": validation})
+        return MapResult(project=name, validation=validation)
+
+    def test_counts_refusals_validation_and_errors_apart_and_continues(self):
+        for command in ("normalize", "map"):
+            for validation in ("PASS", "FAIL\ninvalid id"):
+                def run(name, *args, **kwargs):
+                    if name == "ALPHA":
+                        raise PermissionError("read denied")
+                    if name == "BETA":
+                        raise FileNotFoundError("no crate")
+                    return self._result(command, name, validation)
+
+                with self.subTest(command=command, validation=validation), \
+                     patch("data_sheets_schema.rocrate_map.load_mapping", return_value=[]), \
+                     patch(self._library(command), side_effect=run) as operation:
+                    result = self._invoke(command)
+                self.assertEqual(result.exit_code, 1, result.output)
+                self.assertIsInstance(result.exception, SystemExit)
+                self.assertEqual([c.args[0] for c in operation.call_args_list], list(self.PROJECTS))
+                self.assertIn("ALPHA: PermissionError: read denied", result.stderr)
+                self.assertIn("BETA: no crate", result.stderr)
+                invalid = int(validation.startswith("FAIL"))
+                self.assertEqual(result.stderr.splitlines()[-1],
+                                 "❌ 1 crate(s) refused (missing or unreadable), "
+                                 f"{invalid} validation failure(s), 1 project error(s)")
+                self.assertIn(validation.splitlines()[0], result.stdout)
+                self.assertNotIn("complete", result.stdout)
+
+    def test_empty_unexpected_error_names_its_type(self):
+        for command in ("normalize", "map"):
+            with self.subTest(command=command), \
+                 patch("data_sheets_schema.rocrate_map.load_mapping", return_value=[]), \
+                 patch(self._library(command), side_effect=RuntimeError()):
+                result = self._invoke(command, projects=("ALPHA",))
+            self.assertIn("ALPHA: RuntimeError", result.stderr)
+            self.assertIn("1 project error(s)", result.stderr)
+            self.assertEqual(result.exit_code, 1)
+
+    def test_interrupt_and_explicit_exit_stop_the_loop(self):
+        for command in ("normalize", "map"):
+            for error in (KeyboardInterrupt(), SystemExit(7)):
+                with self.subTest(command=command, error=error), \
+                     patch("data_sheets_schema.rocrate_map.load_mapping", return_value=[]), \
+                     patch(self._library(command), side_effect=error) as operation:
+                    result = self._invoke(command)
+                self.assertNotEqual(result.exit_code, 0)
+                self.assertEqual([c.args[0] for c in operation.call_args_list], ["ALPHA"])
+                self.assertNotIn("project error(s)", result.stderr)
+                self.assertNotIn("complete", result.stdout)

@@ -19,8 +19,11 @@ against other sources -- that is the generation agent's job under
 from __future__ import annotations
 
 import json
+import logging
+import os
 import re
 import subprocess
+import tempfile
 from collections import Counter
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -715,7 +718,8 @@ def emit_deterministic_arm(
 
     Lands at ``{concat_dir}/rocrate_mapped/{version}/{project}_d4d.yaml`` so the
     existing per-method evaluation tooling can compare it against the
-    model-generated arms. Never overwrites a populated version directory.
+    model-generated arms. Publishes each complete record atomically and never
+    overwrites an existing record, including during concurrent publication.
     """
     source = packages_dir / project / "processed" / f"{project}_{variant}.yaml"
     if not source.exists():
@@ -749,7 +753,33 @@ def emit_deterministic_arm(
     body = "\n".join(
         line for line in body.splitlines() if not line.startswith("#")
     ).lstrip("\n")
-    target.write_text(header + body + "\n", encoding="utf-8")
+    staged = None
+    try:
+        # Close (and flush) before linking. A failed write leaves no published
+        # record; link refuses an existing target atomically, unlike replace.
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=out_dir,
+                                         prefix=f".{target.name}.", suffix=".tmp",
+                                         delete=False) as stream:
+            staged = Path(stream.name)
+            stream.write(header + body + "\n")
+        try:
+            os.link(staged, target)
+        except FileExistsError as exc:
+            raise FileExistsError(
+                f"{target} already exists; use a new version label rather than "
+                "overwriting a published run"
+            ) from exc
+    finally:
+        if staged is not None:
+            try:
+                staged.unlink()
+            except OSError:
+                # The record may already be published. A leftover hidden .tmp
+                # must not turn that success into a false 'not published'.
+                logging.getLogger(__name__).warning(
+                    "Could not remove publication temporary file %s", staged,
+                    exc_info=True,
+                )
     return target
 
 

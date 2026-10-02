@@ -13,11 +13,12 @@ from pathlib import Path
 from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
 
 
-def _outcome_line(refused: int, invalid: int) -> str:
+def _outcome_line(refused: int, invalid: int, failed: int = 0) -> str:
     """One summary line counting refused crates apart from records that failed
     validation: a crate that could not be read was never validated (#3359)."""
-    return (f"{refused} crate(s) refused (missing or unreadable), "
+    line = (f"{refused} crate(s) refused (missing or unreadable), "
             f"{invalid} validation failure(s)")
+    return line + (f", {failed} project error(s)" if failed else "")
 
 
 def _once_each(project: tuple[str, ...]) -> list[str]:
@@ -215,14 +216,18 @@ def normalize(project, packages_dir):
 
     from data_sheets_schema.resources import resource_path
     sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
-    refused = invalid = 0                                  # counted apart (#3359)
+    refused = invalid = failed = 0                         # counted apart (#3359, #4177)
     for name in targets:
         click.echo(f"\n📦 {name}")
         try:
             res = normalize_project(name, root, sv=sv)
         except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
-            click.echo(f"  ⚠️  {e}", err=True)
+            click.echo(f"  ⚠️  {name}: {_reason(e, (FileNotFoundError, CrateEncodingError))}", err=True)
             refused += 1
+            continue
+        except Exception as e:
+            click.echo(f"  ❌ {name}: {_reason(e, ())}", err=True)
+            failed += 1
             continue
         for label, path in res.outputs.items():
             click.echo(f"  → {label}: {path}")
@@ -236,8 +241,8 @@ def normalize(project, packages_dir):
                     click.echo(f"      {line}")
         click.echo(f"  {len(res.changes)} change(s) recorded")
 
-    if refused or invalid:
-        click.echo(f"\n❌ {_outcome_line(refused, invalid)}", err=True)
+    if refused or invalid or failed:
+        click.echo(f"\n❌ {_outcome_line(refused, invalid, failed)}", err=True)
         sys.exit(1)
     click.echo("\n✅ Normalization complete")
 
@@ -271,7 +276,7 @@ def bundle(project, packages_dir):
         try:
             out, included, withheld = build_crate_bundle(name, root)
         except Exception as e:
-            click.echo(f"  ❌ {_reason(e, (FileNotFoundError, DeNovoPolicyError))}", err=True)
+            click.echo(f"  ❌ {name}: {_reason(e, (FileNotFoundError, DeNovoPolicyError))}", err=True)
             failures += 1
             continue
         click.echo(f"  → {out} ({out.stat().st_size:,} bytes)")
@@ -361,14 +366,18 @@ def map_cmd(project, packages_dir):
     sv = SchemaView(str(resource_path(FULL_SCHEMA)))       # from any directory (#1485)
     rows = load_mapping()
     click.echo(f"Mapping table: {len(rows)} rows")
-    refused = invalid = 0                                  # counted apart (#3359)
+    refused = invalid = failed = 0                         # counted apart (#3359, #4177)
     for name in targets:
         click.echo(f"\n📦 {name}")
         try:
             res = map_project(name, root, sv=sv, rows=rows)
         except (FileNotFoundError, CrateEncodingError) as e:   # report, go on (#2969)
-            click.echo(f"  ❌ {e}", err=True)
+            click.echo(f"  ❌ {name}: {_reason(e, (FileNotFoundError, CrateEncodingError))}", err=True)
             refused += 1
+            continue
+        except Exception as e:
+            click.echo(f"  ❌ {name}: {_reason(e, ())}", err=True)
+            failed += 1
             continue
         c = res.counts()
         click.echo(f"  filled {c.get('filled',0)} | subsumed {c.get('subsumed',0)} | "
@@ -384,8 +393,8 @@ def map_cmd(project, packages_dir):
             for line in res.validation.splitlines()[1:6]:
                 click.echo(f"      {line}")
 
-    if refused or invalid:
-        click.echo(f"\n❌ {_outcome_line(refused, invalid)}", err=True)
+    if refused or invalid or failed:
+        click.echo(f"\n❌ {_outcome_line(refused, invalid, failed)}", err=True)
         sys.exit(1)
     click.echo("\n✅ Static mapping complete")
 
