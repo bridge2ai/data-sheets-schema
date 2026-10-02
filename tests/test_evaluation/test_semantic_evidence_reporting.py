@@ -71,7 +71,7 @@ def test_legacy_fields_cannot_masquerade_as_v3_and_callback_is_explicit():
 
 def test_unknown_future_contract_and_missing_new_issue_list_are_not_clean():
     with pytest.raises(ValueError, match="unsupported"):
-        issue_taxonomy(rating(version="4.0"))
+        issue_taxonomy(rating(version="5.0"))
     with pytest.raises(ValueError, match="recorded list"):
         issue_taxonomy({"version": "3.0"})
 

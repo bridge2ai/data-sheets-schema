@@ -54,16 +54,19 @@ def render_evidence_findings(report: EvidenceReport | None) -> str:
 
 
 def issue_taxonomy(result: dict, *, legacy_classifier: Callable[[dict], str] | None = None) -> dict:
-    """Count recorded v3 categories/links, or explicitly label legacy coding.
+    """Count recorded structured categories/links, or explicitly label legacy coding.
 
     A legacy classifier receives a private copy of each issue. Without one,
     old issues remain unclassified and their deduction effects are unknown.
-    Malformed v3 declarations raise instead of silently invoking a regex.
+    Malformed structured declarations raise instead of silently invoking a regex.
     This checks declaration shapes, not whether links actually justify scores;
     acceptance must also run the semantic scope and evidence validators.
     """
     version = result.get("version")
-    structured = version == "3.0"
+    structured = version in ("3.0", "4.0")
+    if version == "4.0":
+        from data_sheets_schema.semantic_instrument import select_semantic_instrument
+        select_semantic_instrument(result.get("rubric"), version)
     if not structured and version not in (None, "1.0", "1.1", "1.2", "2.0"):
         raise ValueError(f"unsupported semantic taxonomy version: {version!r}")
     analysis = result.get("semantic_analysis") or {}
@@ -72,8 +75,9 @@ def issue_taxonomy(result: dict, *, legacy_classifier: Callable[[dict], str] | N
     recorded = "issues_detected" in analysis
     issues = analysis.get("issues_detected", [])
     if not isinstance(issues, list) or structured and not recorded:
-        raise ValueError("issues_detected must be a recorded list for v3")
-    basis = ("evaluator_declared_v3" if structured else
+        label = f"a recorded list for v{version.split('.')[0]}" if structured else "a list"
+        raise ValueError(f"issues_detected must be {label}")
+    basis = (f"evaluator_declared_v{version.split('.')[0]}" if structured else
              "legacy_caller_classification" if legacy_classifier else "legacy_unstructured")
     entries = []
     for index, issue in enumerate(issues):
@@ -114,10 +118,11 @@ def issue_taxonomy(result: dict, *, legacy_classifier: Callable[[dict], str] | N
 
 def render_issue_taxonomy(result: dict) -> str:
     taxonomy = issue_taxonomy(result)
-    if taxonomy["basis"] != "evaluator_declared_v3":
+    if not taxonomy["basis"].startswith("evaluator_declared_v"):
         return ("Issue taxonomy: legacy, unstructured; categories and deduction links are "
                 "not inferred from prose.\n")
-    lines = ["Issue taxonomy: **evaluator-declared v3**; categories and deduction links "
+    version = result["version"].split(".")[0]
+    lines = [f"Issue taxonomy: **evaluator-declared v{version}**; categories and deduction links "
              "come directly from the rating. This is not a semantic adjudication.", "",
              f"High-severity issues declared to lower scores: {taxonomy['high_severity_lowered']}.", ""]
     if taxonomy["issues"]:

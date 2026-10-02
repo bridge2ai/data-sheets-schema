@@ -1,6 +1,6 @@
 # Opt-in semantic 4.0: dataset lineage independent of representation
 
-This AI-authored instrument draft implements the offline engineering slice of
+This AI-authored instrument draft implements [#4258](https://github.com/bridge2ai/data-sheets-schema/issues/4258), the offline engineering slice of
 [#2911](https://github.com/bridge2ai/data-sheets-schema/issues/2911). Scientific
 review and empirical calibration remain pending. Synthetic contract tests do
 not establish that an evaluator assigns the intended scores. No paid scoring,
@@ -73,10 +73,14 @@ Historical discovery selects the versioned schema for declared v4 outputs;
 that structural classification does not replace exact input-checked acceptance.
 
 The new agent filename has no same-path predecessor. Its preimage registry
-entry records that fact with null predecessor fields. A future registered
-invocation must explicitly bind the released v3 predecessor and demonstrate
-that its challenge distinguishes the new definition; copying a preamble or
-using a stale v3 echo is not proof. The existing default v3 roster and requests
+entry records that fact with null predecessor fields. The offline reference controller requires a v4 instrument registration to name
+`predecessor_definition: .claude/agents/d4d-rubric20-semantic.md` and
+`predecessor_sha256: 35de3a37264e80f48e6e037fed42b6cc586152058d4da6c08bad93b8096f588b`,
+with that same file/hash in `pinned_files`. It uses those actual released bytes
+for the explicit predecessor challenge; copying a preamble or using a stale v3
+echo is not proof. The job agent, selected assets, definition hash and complete
+validator support must also be pinned. Its evaluator and controller validations
+both select `--semantic-version 4.0`; a v3 command cannot attest a v4 rating. The existing default v3 roster and requests
 remain unchanged. Registration and any scoring launch await the independent
 context/scientific decisions tracked by #2912 and #2911.
 
