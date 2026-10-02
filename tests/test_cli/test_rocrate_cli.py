@@ -148,12 +148,25 @@ class TestPerProjectLoopsEndWithACount(unittest.TestCase):
     one stderr line naming what it counts, before the exit. A run with nothing
     to count ends as it did, as normalize and map do (#3359).
 
-    In the mixed run BETA fails and ALPHA and GAMMA succeed, so the count, the
-    total and the number that succeeded all differ. The library functions run
-    for real. The commands pass them no output directory, so each is patched
-    to add a temporary one, and every run starts in an empty working
-    directory, where a relative default would land if a patch missed: never in
-    the checkout's data/.
+    Both numbers count the loop's entries, and the total is how many it tried.
+    With --project the entries are the names given, and a repeated name counts
+    each time. With none, which is how notes/D4D_GENERATION_ARMS.md runs all
+    three, they are the declared projects that have the input the command
+    looks for.
+
+    In the mixed runs that name all three projects, BETA fails and ALPHA and
+    GAMMA succeed, so the count, the total and the number that succeeded all
+    differ. In the no-project runs (#4155) only ALPHA and BETA have the
+    command's input. GAMMA, declared too, has what another command reads
+    instead (a crate never normalized, or the other emit command's record) and
+    is never tried. ALPHA is done and BETA fails, so the total, 2, is neither
+    the number the manifest declares (3) nor the number of --project values
+    (0). "1 of 2" cannot tell failures from successes; the mixed runs can.
+
+    The library functions run for real. The commands pass them no output
+    directory, so each is patched to add a temporary one, and every run starts
+    in an empty working directory, where a relative default would land if a
+    patch missed: never in the checkout's data/.
     """
 
     PROJECTS = ("ALPHA", "BETA", "GAMMA")
@@ -261,6 +274,68 @@ class TestPerProjectLoopsEndWithACount(unittest.TestCase):
         self.assertEqual(ok.exit_code, 0, ok.stdout + ok.stderr)
         self.assertNotIn("❌", ok.stderr)
         self.assertEqual(ok.stdout.splitlines()[-1:], ["✅ our-mapping arm published under v2"])
+
+    def test_bundle_with_no_project_counts_the_normalized_projects_it_tried(self):
+        from data_sheets_schema import rocrate_normalize
+        real = rocrate_normalize.build_crate_bundle
+        self.docs.mkdir()
+        for name in ("ALPHA", "GAMMA"):                    # BETA has no document bundle
+            (self.docs / f"{name}_preprocessed.txt").write_text(name, encoding="utf-8")
+        for name in ("ALPHA", "BETA"):
+            (self.packages / name / "processed").mkdir(parents=True)
+        (self.packages / "GAMMA" / "raw").mkdir(parents=True)     # a crate never normalized
+        with patch("data_sheets_schema.rocrate_normalize.build_crate_bundle",
+                   side_effect=lambda name, root: real(name, root, docs_dir=self.docs)) as build:
+            r = self._invoke("bundle", projects=())
+
+        self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
+        self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+        self.assertEqual([c.args[0] for c in build.call_args_list], ["ALPHA", "BETA"])
+        self.assertEqual(r.stderr.splitlines()[-1:],
+                         ["❌ 1 of 2 bundle(s) not written"], r.stderr)
+        self.assertIn("No document bundle", r.stderr)
+        self.assertEqual([p.name for p in self.docs.glob("*_with_crate.txt")],
+                         ["ALPHA_preprocessed_with_crate.txt"])
+
+    def test_emit_arm_with_no_project_counts_the_projects_with_a_normalized_record(self):
+        for name in ("ALPHA", "BETA"):
+            self._record(name, "crate_d4d")
+        self._record("GAMMA", "crate_mapped_d4d")          # emit-map-arm's input, not this one's
+        earlier = self.concat / "rocrate_mapped" / "v1" / "BETA_d4d.yaml"
+        earlier.parent.mkdir(parents=True)
+        earlier.write_text("an earlier run's record\n", encoding="utf-8")   # refused, kept
+        with self._publishing_into_tmp() as emit:
+            r = self._invoke("emit-arm", "--version", "v1", projects=())
+
+        self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
+        self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+        self.assertEqual([c.args[0] for c in emit.call_args_list], ["ALPHA", "BETA"])
+        self.assertEqual(r.stderr.splitlines()[-1:],
+                         ["❌ 1 of 2 project(s) not published"], r.stderr)
+        self.assertIn("BETA_d4d.yaml already exists", r.stderr)
+        self.assertEqual(earlier.read_text(encoding="utf-8"), "an earlier run's record\n")
+        self.assertEqual(sorted(p.name for p in earlier.parent.iterdir()),
+                         ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
+
+    def test_emit_map_arm_with_no_project_counts_the_projects_with_a_mapped_record(self):
+        for name in ("ALPHA", "BETA"):
+            self._record(name, "crate_mapped_d4d")
+        self._record("GAMMA", "crate_d4d")                 # emit-arm's input, not this one's
+        earlier = self.concat / "rocrate_static_map" / "v1" / "BETA_d4d.yaml"
+        earlier.parent.mkdir(parents=True)
+        earlier.write_text("an earlier run's record\n", encoding="utf-8")   # refused, kept
+        with self._publishing_into_tmp() as emit:
+            r = self._invoke("emit-map-arm", "--version", "v1", projects=())
+
+        self.assertIsInstance(r.exception, SystemExit, r.stdout + r.stderr)
+        self.assertEqual(r.exit_code, 1, r.stdout + r.stderr)
+        self.assertEqual([c.args[0] for c in emit.call_args_list], ["ALPHA", "BETA"])
+        self.assertEqual(r.stderr.splitlines()[-1:],
+                         ["❌ 1 of 2 project(s) not published"], r.stderr)
+        self.assertIn("BETA_d4d.yaml already exists", r.stderr)
+        self.assertEqual(earlier.read_text(encoding="utf-8"), "an earlier run's record\n")
+        self.assertEqual(sorted(p.name for p in earlier.parent.iterdir()),
+                         ["ALPHA_d4d.yaml", "BETA_d4d.yaml"])
 
 
 if __name__ == "__main__":
