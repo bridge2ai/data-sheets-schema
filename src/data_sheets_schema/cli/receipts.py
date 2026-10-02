@@ -376,17 +376,30 @@ def origin(transcripts, receipt_file, full_file, receipt_at_run, full_at_run, as
     `\\'` inside `$'...'`, or a backquote the comment rule cut short at a
     `#`); or where an operator character stands quoted or escaped anywhere
     in the command (`echo hi '&&' d4d derive core ...`), which it may read
-    as a join. In each, a derive read as aimed at another record is not
-    read so either, as a part the tokenizer alone reads, such as a `cd`,
-    may have moved its `--full`. Its cost is a false `unknown` (`echo
-    X=1;`, `ls .;`, `set -e;`, ``echo `date`;``, `echo "$(date)";`). A
+    as a join. Nor is one placed in a command whose text carries, anywhere,
+    quoted or not and in a comment too, a `${`, `$((` or `$[` (bash reads
+    the expansion or arithmetic whole, so `${X:-a&&b}` holds no join, and a
+    `#` in one, or right after the `))` closing a `$((...))`, starts no
+    comment), a backquote (its command runs in a child), or a subscript
+    (`NAME[`, `]=` or `]+=`: at a command's start bash reads `PATH[0
+    ]=./bin` as one assignment word); nor where a `#` stands right after a
+    `)` (bash continues the word after a `$(...)`), or a comment and a
+    backslash-newline meet (bash ends a comment at the newline, and deletes
+    a continuation before it reads a `#`); nor where the two readings give
+    the derive's own words otherwise (`--full F\\<newline>x` is `--full
+    Fx`). In each, a derive read as aimed at another record is not read so
+    either, as a part the tokenizer alone reads, such as a `cd`, may have
+    moved its `--full`. Its cost is a false `unknown` (`echo X=1;`, `ls .;`,
+    `set -e;`, ``echo `date`;``, `echo "$(date)";`, `echo ${HOME};`). A
     route those words do not name (such as a function, `getopts`, `unset`,
     `coproc`, `trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1
-    ))` or `$(( PATH = 1 ))`, or a word built at run time, `$X`) or an
-    assignment outside the command is not read, so a derive after `unset
-    PATH;` is placed, nor is a comment the comment rule ends otherwise than
-    bash (at a `#` inside an unquoted `${...}`, or past one ending in a
-    backslash-newline). Three kinds of part carrying
+    ))`, or a word built at run time, `$X`) or an assignment outside the
+    command is not read, so a derive after `unset PATH;` is placed. A
+    comment the comment rule ends otherwise than bash (at a `#` inside an
+    unquoted `${...}`, right after the `))` or `)` closing a `$((...))` or
+    `$(...)`, or where a comment and a backslash-newline meet) is moot for
+    the derive rule; the other rules still read the command as cut there
+    (#4195). Three kinds of part carrying
     the words `derive core` cannot be placed: one that is neither a d4d call
     it reads nor a program known only to read, such as a `bash -c` or an
     `xargs` part; a reader part in a command where a later pipe feeds a

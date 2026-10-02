@@ -129,8 +129,38 @@ tokenizer and four to bash, #4182); nor where an operator character
 the command, a double-quoted substitution's own brackets included, as
 shlex returns a quoted `&&` bare and the tokenizer reads it as a join
 (`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d
-derive core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Wherever
-the readings cannot be paired, a derive the tokenizer reads as aimed at
+derive core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Nor, since
+#4199, in a command whose text carries, anywhere, quoted or not and in a
+comment too, as written or with its backslash-newlines deleted, text
+bash reads whole across the blanks, operators and `#` the tokenizer
+splits or the comment rule cuts at: a `${`, `$((` or `$[`, which opens
+an expansion or arithmetic bash reads to its closing bracket, so that
+neither a blank, an operator nor a `#` inside it, nor a `#` right after
+the `))` closing a `$((...))`, is one to bash (the tokenizer puts the
+expansion in `d4d derive core ... ${X:-a&&b} ${BASH_CMDS[d4d]:=./x}`,
+one of the derive's own words to bash, in a later part; `echo
+${X:-hi&& d4d derive core ...}` runs no derive; and in `--out
+O$((0))#x ${BASH_CMDS[d4d]:=./x}`, after which bash 5.3 runs `./x`, the
+comment rule cuts that expansion from both readings); a backquote, whose
+command bash reads to the next backquote and runs in a child (`` echo
+`true&& cd sub&& true `&& d4d derive core --full <relative> ...``
+derives the record where the call started); or a subscript, a `[`
+directly after a letter, digit or underscore or a `]=` or `]+=`, as bash
+reads `NAME[...]` at a command's start to its `]` as one word (`PATH[0
+]=./bin;` makes `PATH` an array, after which bash runs `./d4d`, and
+`BASH_ALIASES[a&& d4d derive core ...]=1` runs no derive and, under bash
+5.3, returns 0). Nor where the comment rule may start or end a comment
+otherwise than bash: where a `#` stands right after a `)`, as bash
+continues the word after the `)` closing a `$(...)`, `<(...)` or `>(...)`
+(`echo $(true)#x; cd sub` runs `cd sub`), or where removing the comments
+before reading the backslash-newlines as blanks gives another text than
+after, as bash ends a comment at a newline whatever stands before it and
+deletes a line continuation before it reads a `#` (`d4d derive core ...
+# x \\<newline>true` runs `true` after the derive, and `--full
+F\\<newline>#x` is `--full F#x`). Nor where the two
+readings give the derive's own words otherwise (`--full F\\<newline>x` is
+`--full Fx` to bash). Wherever the readings cannot be paired, or give the
+derive's own words otherwise, a derive the tokenizer reads as aimed at
 another record is not read so either, as a part it reads and bash does
 not, or one it hides, may have moved or spelled its `--full` (`echo hi
 '&&' cd sub && d4d derive core --full <relative> ...` derives the record
@@ -138,21 +168,26 @@ where the call started). Its cost
 is a false `unknown` where such a word assigns nothing (`echo X=1;`, `ls
 .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, ``echo `date`;``),
 or where the two readings cannot be paired and nothing assigns (`echo hi
-&\\<newline>> /dev/null;`, `echo "$(date)";`, `grep -E 'a|b' f;`). A
+&\\<newline>> /dev/null;`, `echo "$(date)";`, `grep -E 'a|b' f;`, `echo
+${HOME};`, `d4d derive core ... && echo $((1 + 1))`, `grep -c 'a[0-9]'
+f;`, a comment ending in a backslash, `--label $'x'` among the derive's
+own words). A
 route those words do not name -- such as a function, defined in the
 command or outside it (`d4d() { ./x; };`), `getopts`, `unset`, `coproc`,
 `trap`, `compgen -V`, an arithmetic assignment (`(( PATH = 1 ))`, `let
-'PATH = 1'`, `$(( PATH = 1 ))`, among the derive's own words too, or one
-in an array subscript or a `[[ -eq ]]` operand) or a word built at run
-time (`$X`, `printf -${X}v`, a brace expansion), #4135 -- is not read,
-nor is an assignment, option or definition made outside the command (an
-earlier call's `export`, the inherited environment), so a derive after
-`unset PATH;` is placed. Nor is a comment read where the comment rule
-(#3184) ends it otherwise than bash: at a `#` inside an unquoted
-`${...}`, which bash reads as text (`echo ${X:- #x} || true`), or past
-the end of one that ends in a backslash-newline, which bash ends at the
-newline (`# x \\<newline>true`); a part bash runs there, which may make
-the call's status not the derive's, is not read. Any
+'PATH = 1'`, or one in a `[[ -eq ]]` operand) or a word built at run time
+(`$X`, a brace expansion), #4135 -- is not read, nor is an assignment,
+option or definition made outside the command (an earlier call's
+`export`, the inherited environment), so a derive after `unset PATH;` is
+placed. The comment rule (#3184) starts or ends a comment otherwise than
+bash at a `#` inside an unquoted `${...}` or `[...]` subscript, or right
+after the `))` closing a `$((...))` or the `)` closing a `$(...)`,
+`<(...)` or `>(...)`, which bash reads as text, at a `#` right after a
+line continuation, which bash deletes first, and past a comment that
+ends in a backslash-newline, which bash ends at the newline. For the
+derive rule each is moot, as above. The read-only, position and
+directory rules still read such a command as the comment rule cuts it,
+so a part or a word bash runs there may be hidden from them (#4195). Any
 other part that carries the words `derive core` and is neither a d4d call
 of another subcommand nor a program known to read is a derive that cannot
 be placed (#3137): a nested `bash -c`, an `xargs`, or a wrapper option or CLI
@@ -586,25 +621,49 @@ NON_CHECKS = (
     "`&`, `|`, `(`, `)`, `<`, `>`) stands quoted or escaped anywhere in the command, a double-quoted "
     "substitution's own brackets included, since shlex returns a quoted `&&` bare and the tokenizer "
     "reads it as a join (`echo hi '&&' d4d derive core ...`, which runs no derive, and `d4d derive "
-    "core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Wherever the readings cannot be paired, a "
-    "derive the tokenizer reads as aimed at another record is not read so either, since a part it reads "
-    "and bash does not, or one it hides, may have moved or spelled its `--full` (`echo hi '&&' cd sub "
-    "&& d4d derive core --full <relative> ...` derives the record where the call started). The cost is "
-    "a false `unknown` where such "
-    "a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, "
+    "core ... \\&\\& ${BASH_CMDS[d4d]:=./x}`, #3830, #4182). Nor, since #4199, in a command whose text "
+    "carries, anywhere, quoted or not and in a comment too, as written or with its backslash-newlines "
+    "deleted, text bash reads whole across the blanks, operators and `#` the tokenizer splits or the "
+    "comment rule cuts at: a `${`, `$((` or `$[`, which opens an expansion or arithmetic bash reads to "
+    "its closing bracket, so that neither a blank, an operator nor a `#` inside it, nor a `#` right "
+    "after the `))` closing a `$((...))`, is one to bash (the tokenizer puts the expansion in `d4d "
+    "derive core ... ${X:-a&&b} ${BASH_CMDS[d4d]:=./x}`, one of the derive's own words to bash, in a "
+    "later part; `echo ${X:-hi&& d4d derive core ...}` runs no derive; and in `--out O$((0))#x "
+    "${BASH_CMDS[d4d]:=./x}`, after which bash 5.3 runs `./x`, the comment rule cuts that expansion "
+    "from both readings); a backquote, whose command bash reads to the next backquote and runs in a "
+    "child (`` echo `true&& cd sub&& true `&& d4d derive core --full <relative> ...`` derives the record "
+    "where the call started); or a subscript, a `[` directly after a letter, digit or underscore or a "
+    "`]=` or `]+=`, since bash reads `NAME[...]` at a command's start to its `]` as one word (`PATH[0 "
+    "]=./bin;` makes `PATH` an array, after which bash runs `./d4d`, and `BASH_ALIASES[a&& d4d derive "
+    "core ...]=1` runs no derive and, under bash 5.3, returns 0). Nor where the comment rule may start or "
+    "end a comment otherwise than bash: where a `#` stands right after a `)`, since bash continues the "
+    "word after the `)` closing a `$(...)`, `<(...)` or `>(...)` (`echo $(true)#x; cd sub` runs `cd sub`), or where "
+    "removing the comments before reading the backslash-newlines as blanks gives another text than "
+    "after, since bash ends a comment at a newline whatever stands before it and deletes a line "
+    "continuation before it reads a `#` (`d4d derive core ... # x \\<newline>true` runs `true` after "
+    "the derive, and `--full F\\<newline>#x` is `--full F#x`). Nor where the two readings give the "
+    "derive's own words otherwise (`--full F\\<newline>x` is `--full Fx` to bash). Wherever the "
+    "readings cannot be paired, or give the derive's own words otherwise, a derive the tokenizer reads "
+    "as aimed at another record is not read so either, since a part it reads and bash does not, or one "
+    "it hides, may have moved or spelled its `--full` (`echo hi '&&' cd sub && d4d derive core --full "
+    "<relative> ...` derives the record where the call started). The cost is a false `unknown` where "
+    "such a word assigns nothing (`echo X=1;`, `ls .;`, `set -e;`, `echo {X} >f;`, `grep -c '${ ' f;`, "
     "``echo `date`;``), or where the two readings cannot be paired and nothing assigns (`echo hi "
-    "&\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`). A route those words do not "
-    "name is not read (such as a function, "
-    "defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, `coproc`, `trap`, "
-    "`compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'`, `$(( PATH = 1 ))`, "
-    "among the derive's own words too, or one in an array subscript or a `[[ -eq ]]` operand, or a "
-    "word built at run time, `$X`, `printf -${X}v` or a brace expansion, #4135), nor an assignment, "
-    "option or definition made outside the command (an earlier call's `export`, the inherited "
-    "environment), so a derive after `unset PATH;` is placed. Nor is a comment read where the comment "
-    "rule (#3184) ends it otherwise than bash: at a `#` inside an unquoted `${...}`, which bash reads "
-    "as text (`echo ${X:- #x} || true`), or past the end of one that ends in a backslash-newline, "
-    "which bash ends at the newline (`# x \\<newline>true`); a part bash runs there, which may make "
-    "the call's status not the derive's, is not read. The words are matched "
+    "&\\<newline>> /dev/null;`, `echo \"$(date)\";`, `grep -E 'a|b' f;`, `echo ${HOME};`, `d4d derive "
+    "core ... && echo $((1 + 1))`, `grep -c 'a[0-9]' f;`, a comment ending in a backslash, `--label "
+    "$'x'` among the derive's own words). A route those words do not name is not read (such as a "
+    "function, defined in the command or outside it, `d4d() { ./x; };`, `getopts`, `unset`, `coproc`, "
+    "`trap`, `compgen -V`, an arithmetic assignment, `(( PATH = 1 ))`, `let 'PATH = 1'` or one in a "
+    "`[[ -eq ]]` operand, or a word built at run time, `$X` or a brace expansion, #4135), nor an "
+    "assignment, option or definition made outside the command (an earlier call's `export`, the "
+    "inherited environment), so a derive after `unset PATH;` is placed. The comment rule (#3184) starts "
+    "or ends a comment otherwise than bash at a `#` inside an unquoted `${...}` or `[...]` subscript, or "
+    "right after the `))` closing a `$((...))` or the `)` closing a `$(...)`, `<(...)` or `>(...)`, "
+    "which bash reads as text, at a `#` right after a line continuation, which bash deletes first, and "
+    "past a comment that ends in a backslash-newline, which bash ends at the newline. For the derive "
+    "rule each is moot, as above. The read-only, position and directory rules still read such a "
+    "command as the comment rule cuts it, so a part or a word bash runs there may be hidden from them "
+    "(#4195). The words are matched "
     "after quote and escape "
     "characters are removed, and `derive` followed by a word supplied at run time (`derive "
     "$SUB`, `derive $(echo core)`, `xargs ... derive {}`) counts as a derive that cannot be "
@@ -691,6 +750,20 @@ _UNMARKED = dict.fromkeys(map(ord, _DOLLAR_QUOTED))
 #: brackets, a pattern's `)` closes nothing (`"$(case x in x) ...;; esac)"`),
 #: so the brackets no longer say where the substitution ends (#4182).
 _CASE_WORD = re.compile(r"(?<![\w.-])case(?![\w.-])")
+#: What opens an expansion or arithmetic bash reads to its closing bracket
+#: as one word: `${`, `$((` and `$[` (#4199). Neither a blank nor an operator
+#: inside one is one to bash, nor is a `#` inside one, or right after the
+#: `))` that closes a `$((...))`, a comment's start, where the tokenizer
+#: splits at the first two (`${X:-a&&b}`, `$((1&&1))`, `$[1&&1]`) and the
+#: comment rule cuts at the others (`${X:- #x}`, `$((0))#x`).
+_WHOLE_EXPANSION = re.compile(r"\$(?:\{|\(\(|\[)")
+#: A subscript (#4199): a `[` directly after a letter, digit or underscore,
+#: or the `]=` or `]+=` that ends a subscript assignment. At a command's
+#: start bash reads `NAME[...]` to its `]` as one word, across the blanks
+#: and operators the tokenizer splits at: `PATH[0 ]=./bin` assigns `PATH`
+#: (an array then, after which bash runs `./d4d`), and
+#: `BASH_ALIASES[a&& d4d derive core ...]=1` runs no derive and returns 0.
+_SUBSCRIPT = re.compile(r"[A-Za-z0-9_]\[|\]\+?=")
 _PYTHON = re.compile(r"python(\d+(\.\d+)*)?")
 _VARIABLE = re.compile(r"\$([A-Za-z_][A-Za-z0-9_]*|\{[A-Za-z_][A-Za-z0-9_]*\})")
 _DURATION = re.compile(r"\d+(\.\d+)?[smhd]?")
@@ -983,7 +1056,8 @@ def _derive_outcome(result: dict | None, basis: str, denied: bool = False, input
     wherever they stand, in an expansion among the part's own words or an
     earlier part's, or on the part under keyword mode, which may make it
     run other code, or a command whose words cannot be read part by part as
-    bash reads them, #3781, #4123, #4124, #4160, #4161, #4182). A part whose
+    bash reads them, or whose two readings give the part's own words
+    otherwise, #3781, #4123, #4124, #4160, #4161, #4182, #4199). A part whose
     status the result does not carry is `ambiguous`, unless the call was
     `denied` -- by the native control or, corroborated, by the runtime
     (#3201) -- and so never ran. `inputs` are the call's, for
@@ -2201,6 +2275,51 @@ def _quoted_operator(text: str) -> bool:
     return False
 
 
+def _read_whole(command: str) -> bool:
+    """Whether the command's text carries, anywhere, quoted or not and in a
+    comment too, as written or with every backslash-newline deleted (bash
+    deletes a line continuation before it reads the word: `$\\<newline>{`
+    is `${`), text bash reads whole across the blanks, operators and `#`
+    the tokenizer splits or the comment rule cuts at (#4199): an expansion
+    or arithmetic (`_WHOLE_EXPANSION`: `${`, `$((`, `$[`); a backquote,
+    whose command bash reads to the next backquote and runs in a child,
+    where the tokenizer splits it into parts (`` echo `true&& cd sub&&
+    true ` `` holds a `cd sub` part to it, which bash runs in a child); or
+    a subscript (`_SUBSCRIPT`: `NAME[`, `]=`, `]+=`). No spelling of what
+    is inside is read, which is the point: each one read was a miss
+    (#4140, #4160, #4161, #4182, #4199). The cost is a false `unknown` for
+    a derive in such a command (`echo ${HOME}; d4d ...`, `d4d ... && echo
+    $((1 + 1))`, a `python -c` program indexing `x[0]` before it)."""
+    return any(_WHOLE_EXPANSION.search(text) or "`" in text or _SUBSCRIPT.search(text)
+               for text in (command, command.replace("\\\n", "")))
+
+
+def _comments_read_otherwise(command: str) -> bool:
+    """Whether the comment rule (`_strip_comments`, #3184) may start or end
+    a comment in the command otherwise than bash (#4199). It may where a `#`
+    stands right after a `)`, anywhere: the rule starts a comment after
+    every `)`, and bash does after a subshell's, but continues the word
+    after the `)` that closes a `$(...)`, `<(...)` or `>(...)` (`echo
+    $(true)#x; cd sub` runs `cd sub`, which the rule cuts). And it may where
+    removing the comments before the backslash-newlines are read as blanks
+    gives another text than after, as `_tokens` reads them: bash ends a
+    comment at a newline whatever stands before it, so `d4d derive core ...
+    # x \\<newline>true` runs `true` after the derive, which `_tokens` reads
+    inside the comment, and deletes a line continuation before it reads a
+    `#`, so `--full F\\<newline>#x` is `--full F#x`, where `_tokens` reads a
+    blank and a comment (a `)` and a `#` that continuations separate are so
+    too). Where the two orders agree, no `#` that starts a comment and no
+    backslash-newline meet. A `#` inside an unquoted `${...}` or `[...]`
+    subscript, or right after the `))` closing a `$((...))`, is
+    `_read_whole`'s. The cost is a false `unknown` for a derive in such a
+    command, whatever the comment says: after a subshell's `(true)#x`,
+    which bash too reads as a comment, a derive aimed at another record is
+    read as unplaced, and one is not placed where a comment ending in a
+    backslash ends the command."""
+    return ")#" in command or (_strip_comments(command).replace("\\\n", " ")
+                               != _strip_comments(command.replace("\\\n", " ")))
+
+
 def _bash_parts(command: str, segments: list[list[str]]) -> list[list[str]] | None:
     """The command's parts with their words as bash reads them where
     `_tokens` reads them otherwise (`_bash_spelling`), for the assignment
@@ -2221,9 +2340,17 @@ def _bash_parts(command: str, segments: list[list[str]]) -> list[list[str]] | No
     tokenizer may read as an operator (`_quoted_operator`): neither reading
     is then bash's, as both are split by shlex (#4182). Both are asked of
     the command with its comments removed (`_strip_comments`), the first
-    with its line continuations deleted too, as bash deletes them."""
+    with its line continuations deleted too, as bash deletes them. And None,
+    asked of the raw command before anything else (#4199), wherever its text
+    carries anything bash reads whole across what the tokenizer splits or
+    cuts at (`_read_whole`: `${`, `$((`, `$[`, a backquote, a subscript), or
+    the comment rule may start or end a comment in it otherwise than bash
+    (`_comments_read_otherwise`: a `)#`, or a comment and a backslash-newline
+    that meet): an operator, a blank or a comment's `#` may then stand where
+    neither reading is bash's, as no reading here is a shell grammar (#3830)."""
     text = _strip_comments(command)
-    if _pairs_otherwise(_bash_spelling(text).translate(_UNMARKED)) or _quoted_operator(text):
+    if (_read_whole(command) or _comments_read_otherwise(command)
+            or _pairs_otherwise(_bash_spelling(text).translate(_UNMARKED)) or _quoted_operator(text)):
         return None
     if "\\\n" not in command and "$'" not in command and '$"' not in command:
         return segments
@@ -2895,13 +3022,26 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
     # where the tokenizer may pair the command's quotes otherwise than bash
     # (`_pairs_otherwise`), or read a quoted or escaped operator character
     # as an operator (`_quoted_operator`): both readings are split by shlex,
-    # so neither is then bash's (#4182).
+    # so neither is then bash's (#4182). Nor where the command carries,
+    # anywhere, text bash reads whole across what the tokenizer splits or
+    # cuts at (`_read_whole`: a `${`, `$((`, `$[`, a backquote or a
+    # subscript), or comments the comment rule may start or end otherwise
+    # than bash (`_comments_read_otherwise`: a `)#`, or a comment and a
+    # backslash-newline that meet), #4199.
     as_bash = _bash_parts(command, segments)
     readings = [segments] if as_bash is None else [segments, as_bash]
     assigning = [as_bash is None or any(_may_assign(reading[index]) for reading in readings)
                  for index in range(len(segments))]
     expanding = [as_bash is None or any(_expansion_may_assign(reading[index]) for reading in readings)
                  for index in range(len(segments))]
+    # Where the two readings are paired but give a part other words, a
+    # derive there runs with bash's words, not the tokenizer's, which the
+    # `--full` is read from: `--full F\<newline>x` is `--full Fx` to bash
+    # (#4199). Such a derive is not placed, nor read as another record's.
+    # For the derive's own part this subsumes the second reading
+    # `expanding` and `keyword_words` take: where the readings agree on the
+    # part, either gives the same answer.
+    reworded = [as_bash is not None and as_bash[index] != segments[index] for index in range(len(segments))]
     keyword = any(_keyword_mode(reading) for reading in readings)
     keyword_words = [any(_ASSIGNMENT_WORD.fullmatch(word) for reading in readings for word in reading[index])
                      for index in range(len(segments))]
@@ -3047,13 +3187,16 @@ def _shell(command: str, cwd: str | None, targets: list[_Target], *, moved: bool
                 # either: a part it reads and bash does not, or one it hides,
                 # may have moved or spelled its `--full` (`echo hi '&&' cd
                 # sub && d4d derive core --full <relative>` derives the
-                # record where the call started, #4182). Its cost is a false
-                # `unknown`; a route the words do not name is not read.
-                if verdict is False and as_bash is not None:
+                # record where the call started, #4182). So too where they
+                # are paired but give the derive's own part other words
+                # (`reworded`, #4199): its `--full` is then not the one bash
+                # passed. Its cost is a false `unknown`; a route the words do
+                # not name is not read.
+                if verdict is False and as_bash is not None and not reworded[index]:
                     basis = _status_basis(index, joins, leading, newline)
                 elif not named:
                     verdict, basis = None, "unnamed_program"
-                elif (any(assigning[:index]) or expanding[index] or not _plainly_run(segment)
+                elif (any(assigning[:index]) or expanding[index] or reworded[index] or not _plainly_run(segment)
                       or (keyword and keyword_words[index])):
                     verdict, basis = None, "assigned_environment"
                 else:
@@ -3529,11 +3672,14 @@ def _boundaries(h: dict[str, Any], reasons: list[str]) -> tuple[dict | None, dic
                                            "(`${BASH_CMDS[d4d]:=./x}`, a bash 5.3 `${ ...; }`, a backquote); "
                                            "on the part itself where the command may turn on keyword mode "
                                            "(`set -k`); or anywhere in a command whose words cannot be read "
-                                           "part by part as bash reads them, as where a quote stands inside "
-                                           "a double-quoted substitution or a backquote, or an operator "
-                                           "character is quoted or escaped (`'&&'`); it may make the part "
-                                           "run code other than the derive its words spell, and no "
-                                           "assignment is exempt (#3781)",
+                                           "part by part as bash reads them, as where it carries a `${`, "
+                                           "`$((`, `$[`, a backquote or a subscript (`NAME[`, `]=`), a "
+                                           "quote stands inside a double-quoted `$(...)`, an operator "
+                                           "character is quoted or escaped (`'&&'`) or a comment ends "
+                                           "otherwise than bash ends it, or whose two readings give the "
+                                           "derive's own words otherwise; it may make the part run code "
+                                           "other than the derive its words spell, and no assignment is "
+                                           "exempt (#3781)",
                    "unparsed": "a spelling of `derive core` the parser does not follow (a nested shell, "
                                "`xargs`, a substitution, a wrapper or option it does not read, a redirection "
                                "among its words, a command the tokenizer cannot split, or the command-wide "
