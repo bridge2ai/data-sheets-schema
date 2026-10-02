@@ -640,7 +640,7 @@ def _issue_findings(result: dict, rules: dict, below: dict[str, dict]) -> Iterat
                     or len(ids) != len(set(ids)) or (effect == "noted_only" and ids)):
                 yield EvidenceFinding(
                     "error", "malformed_issue", None, None,
-                    f"issue {index}: version {result['version']} requires declared type/category, score_effect, unique item_ids; "
+                    f"issue {index}: version {result['version'][0]} requires declared type/category, score_effect, unique item_ids; "
                     "noted_only has no lowered item_ids", issue=index)
                 continue
         for item_id in ids:
