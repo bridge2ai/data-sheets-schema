@@ -170,7 +170,7 @@ def test_real_complete_api_pipeline_and_completed_recheck(selected):
     assert repeated['already_complete'] and not again.messages.calls
     assert before == files(selected)
     assert_completed_mutations_refuse_without_calls(selected)
-    assert_snapshot_attribution_refuses_without_calls(selected)
+    assert_snapshot_attribution_checks_without_calls(selected)
 # Draft to apply only after immutable pipeline process ends.
 class CandidatesScript(Script):
     def __init__(self, spec, *, drop=False, **kwargs):
@@ -385,7 +385,7 @@ def test_actual_cli_executes_then_refuses_reuse_without_calls(tmp_path, monkeypa
     assert all(p.read_bytes() == raw for p,raw in inputs.items())
 
 
-def assert_snapshot_attribution_refuses_without_calls(spec):
+def assert_snapshot_attribution_checks_without_calls(spec):
     """Actual completed consumers bind their selected snapshot to integration."""
     from data_sheets_schema import snapshot_store
     baseline = files(spec)
@@ -416,8 +416,12 @@ def assert_snapshot_attribution_refuses_without_calls(spec):
         before = files(spec)
         retry = client(spec)
         try:
-            with pytest.raises(ledger.UsageLedgerError):
-                api.execute(replace(spec), client=retry)
+            if change == 'index-only-worker':
+                checked = api.execute(replace(spec), client=retry)
+                assert checked['already_complete'] and checked['validation_problems'] == []
+            else:
+                with pytest.raises(ledger.UsageLedgerError):
+                    api.execute(replace(spec), client=retry)
             assert not retry.messages.calls and not retry.messages.count_calls
             assert files(spec) == before
             if change == 'index-only-worker':
@@ -427,13 +431,17 @@ def assert_snapshot_attribution_refuses_without_calls(spec):
                     runtime.completion_check(spec)
         finally:
             for path, raw in baseline.items(): Path(path).write_bytes(raw)
-    # A genuine missing-index fallback still works without transport. The public
-    # resume may reconstruct the same index from the exact portable history.
+    # A genuine missing-index fallback works without transport or publication:
+    # the existing completed shortcut leaves that optional index absent.
     index_path.unlink()
     absent = files(spec)
-    assert runtime.completion_check(spec) == original_record['shared_generation']
-    assert files(spec) == absent
-    retry = client(spec)
-    restored = api.execute(replace(spec), client=retry)
-    assert restored['already_complete'] and not retry.messages.calls and not retry.messages.count_calls
+    try:
+        assert runtime.completion_check(spec) == original_record['shared_generation']
+        assert files(spec) == absent
+        retry = client(spec)
+        restored = api.execute(replace(spec), client=retry)
+        assert restored['already_complete'] and not retry.messages.calls and not retry.messages.count_calls
+        assert files(spec) == absent
+    finally:
+        for path, raw in baseline.items(): Path(path).write_bytes(raw)
     assert files(spec) == baseline
