@@ -284,6 +284,56 @@ def test_registered_provenance_uses_only_captured_exact_authority(supplied, chan
         assert changed["registered_provenance"]["sha256"] != packet["registered_provenance"]["sha256"]
 
 
+def test_numeric_priority_tiers_are_captured_without_record_key_coercion(supplied):
+    manifest = b"source_priority:\n  1: [article]\nprojects:\n  EXAMPLE:\n    - id: manual\n      processed_file: manual.txt\n      source_type: article\n"
+    supplied.update(source_manifest=manifest, project="EXAMPLE")
+    packet = ta.prepare(**supplied)
+    authority = packet["registered_provenance"]
+    assert authority["sha256"] == ta._sha(manifest)
+    assert authority["sources"][0]["effective_priority"] == 1
+    assert authority["sources"][0]["priority_basis"] == "source_type"
+    assert ta._unblob(packet["inputs"]["source_manifest"]) == manifest
+    assert ta._open(packet)[0]["source_manifest"] == manifest
+    for wrong_tier in (b"'1'", b"1.0", b"true", b"0", b"-1"):
+        with pytest.raises(ValueError):
+            ta._source_authority(manifest.replace(b"  1:", b"  " + wrong_tier + b":"), "EXAMPLE")
+
+
+@pytest.mark.parametrize("prefix", [
+    b"source_priority: {1: [article], 1: [manual]}\n",
+    b"source_priority: {1: [article], true: [manual]}\n",
+    b"defaults: &defaults {note: inherited}\n<<: *defaults\n",
+    b"unused: &cycle [*cycle]\n",
+    b"unused: .nan\n",
+    b"unused: .inf\n",
+    b"unused: [\n",
+])
+def test_manifest_ambiguity_cycle_nonfinite_and_syntax_still_refused(prefix):
+    raw = prefix + b"projects: {EXAMPLE: [{id: manual, processed_file: manual.txt, source_type: article}]}\n"
+    with pytest.raises(ValueError):
+        ta._source_authority(raw, "EXAMPLE")
+
+
+@pytest.mark.parametrize("shape", ["depth", "alias_fanout", "mapping_keys"])
+def test_manifest_resource_bounds_precede_projection(monkeypatch, shape):
+    from data_sheets_schema import source_metadata
+    def must_not_project(*args, **kwargs):
+        pytest.fail("out-of-bound YAML must not enter provenance projection")
+    monkeypatch.setattr(source_metadata, "projection", must_not_project)
+    if shape == "depth":
+        raw = ("unused: " + "[" * 65 + "0" + "]" * 65).encode()
+    elif shape == "alias_fanout":
+        # A tiny graph has more than 200000 expanded alias-node occurrences.
+        rows = ["a0: &a0 [0, 0]"]
+        rows.extend(f"a{i}: &a{i} [*a{i-1}, *a{i-1}]" for i in range(1, 18))
+        raw = ("\n".join(rows) + "\n").encode()
+    else:
+        monkeypatch.setattr(om, "MAX_NODES", 10)
+        raw = b"a: 0\nb: 0\nc: 0\nd: 0\ne: 0\n"  # Root + ten key/value nodes.
+    with pytest.raises(ValueError, match="bound"):
+        ta._source_authority(raw, "EXAMPLE")
+
+
 @pytest.mark.parametrize("protocol", [None, "audit_protocol_v1", "typed_audit_protocol_v2", True, {}, []])
 def test_consumer_requires_explicit_supported_selection(supplied, protocol):
     supplied["protocol"] = protocol

@@ -12,6 +12,8 @@ from collections import Counter
 import hashlib
 from pathlib import Path
 
+import yaml
+
 from . import audit_batches as batches, audit_batch_format as output_format
 from . import audit_grammar, audit_omissions as omissions, audit_protocol
 from . import evidence_assertions as evidence
@@ -116,6 +118,43 @@ def _capture(path):
     return snapshot
 
 
+def _source_authority(raw, project):
+    """Bound YAML representation before the released provenance projection.
+
+    Provenance permits exact integer priority-tier keys. The record-only loader
+    would reject them. Count mapping keys and alias occurrences without expanding
+    aliases into constructed values; projection retains its own duplicate, merge,
+    finite-value and exact-typed authority rules.
+    """
+    from .source_metadata import _Loader, projection
+    try:
+        text = raw.decode("utf-8")
+        if omissions.nesting_exceeds(text, _Loader, omissions.MAX_DEPTH):
+            raise ValueError("source manifest depth bound exceeded")
+        pending = [(yaml.compose(text, Loader=_Loader), 0, frozenset())]
+        count = 0
+        while pending:
+            node, depth, ancestors = pending.pop()
+            count += 1
+            if count > omissions.MAX_NODES or depth > omissions.MAX_DEPTH:
+                raise ValueError("source manifest node/depth bound exceeded")
+            if id(node) in ancestors:
+                raise ValueError("source manifest cannot contain cycles")
+            if isinstance(node, yaml.MappingNode):
+                children = [child for pair in node.value for child in pair]
+            elif isinstance(node, yaml.SequenceNode):
+                children = node.value
+            else:
+                continue
+            if count + len(pending) + len(children) > omissions.MAX_NODES:
+                raise ValueError("source manifest node bound exceeded")
+            ancestors = ancestors | {id(node)}
+            pending.extend((child, depth + 1, ancestors) for child in children)
+        return projection(raw, project)
+    except (yaml.YAMLError, RecursionError) as exc:
+        raise ValueError("source manifest cannot be read safely") from exc
+
+
 def _derive(inputs, schema_rows, project, limits):
     if type(inputs) is not dict or not _REQUIRED <= set(inputs) <= _REQUIRED | _OPTIONAL:
         raise ValueError("captured input roster differs from protocol")
@@ -127,9 +166,7 @@ def _derive(inputs, schema_rows, project, limits):
         raise ValueError("source manifest and explicit project must be captured together")
     authority = None
     if "source_manifest" in raw:
-        from .source_metadata import projection
-        omissions._mapping(raw["source_manifest"], "source manifest")
-        authority = projection(raw["source_manifest"], project)
+        authority = _source_authority(raw["source_manifest"], project)
     _exact(limits, {"max_paths", "max_inventory_bytes", "max_workers", "max_output_tokens", "max_request_bytes"}, "limits")
     snapshot = _snapshot(schema_rows)
     prepared = omissions.prepare(record=raw["original_full"], bundle=raw["bundle"],

@@ -30,6 +30,10 @@ artifact quotations. Optional `--source-manifest sources.yaml --project PROJECT`
 captures both exact registered-provenance bytes and their selected projection.
 Neither input is discovered from the checkout. Evidence referring to unavailable
 authority is refused. Final-record artifact evidence is outside this protocol.
+Source manifests retain their own strict YAML contract, including exact positive
+integer priority-tier keys; the record-only string-key restriction does not apply.
+Representation depth, nodes (including keys and alias occurrences), cycles,
+duplicate/merge keys and nonfinite values are checked before using that authority.
 
 The packet embeds exact original, bundle, chunk-manifest, receipt, context and
 optional authority bytes, with hashes and lengths. It captures the complete local
