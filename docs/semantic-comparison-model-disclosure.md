@@ -63,7 +63,8 @@ does not make a family label a comparability criterion. These are associated
 local declarations, not authenticated provider identities; same-family status
 does not measure self-preference, calibration or evaluator independence.
 
-Hybrid/legacy summary writers and any decision to replace historical summary
-outputs remain separate work under #3327. Cross-family rating design, route,
-budget, paid canaries and empirical calibration remain under #3328. No model
-execution is performed by this report.
+Active hybrid summary integration is tracked under #3327. For saved legacy
+ratings and preserved historical/default reports, follow the
+[legacy summary lifecycle policy](model-disclosure.md#legacy-summary-lifecycle).
+Cross-family rating design, route, budget, paid canaries and empirical
+calibration remain under #3328. No model execution is performed by this report.
