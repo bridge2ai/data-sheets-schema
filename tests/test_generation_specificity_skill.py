@@ -1546,6 +1546,234 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
                     self.derive(root)
 
 
+class TestCorrelatedFollowupDerivation(unittest.TestCase):
+    """New source shapes use neutral renamed axes/phases, never an allowlist."""
+    HELPER = 'src/data_sheets_schema/batch_calls.py'
+    PLAN = 'src/data_sheets_schema/batch_plan.py'
+
+    def root(self, directory):
+        root = TestOptionalFollowupDerivation().root(directory)
+        path = root / scan.RUNNER
+        text = path.read_text()
+        text = text.replace('"generic_v2": "src/download/prompts/g2.md"',
+                            '"generic_v2": "src/download/prompts/g2.md", "generic_v3": "src/download/prompts/g3.md"')
+        text = text.replace('RECEIPT_CONDITIONS = ("generic_v2",)', 'RECEIPT_CONDITIONS = ("generic_v2", "generic_v3")')
+        text = text.replace('PHASES = ("full",)', 'PHASES = ("full", "audit", "report")')
+        text = text.replace('restore_version: int = 0', 'restore_version: int = 0\n    flow_version: int = 0\n    guide_version: int = 0')
+        text = text.replace('(1, 2, 3, 4, 5, 6, 7, 8, 19, 20)', '(1, 2, 3, 4, 5, 6, 7, 8, 9, 19, 20)')
+        text = text.replace('self.restore_version not in (0, 1)', 'self.restore_version not in (0, 1, 2)')
+        text = text.replace('if self.restore_version and (self.is_agentic', 'if self.restore_version == 1 and (self.is_agentic')
+        needle='            raise ValueError("renderer")'
+        guards='''
+        if type(self.flow_version) is not int or self.flow_version not in (0, 1):
+            raise ValueError('flow domain')
+        if type(self.guide_version) is not int or self.guide_version not in (0, 1, 2):
+            raise ValueError('guide domain')
+        if self.condition == 'generic_v3' and self.flow_version != 1:
+            raise ValueError('condition requires flow')
+        if self.render_version == 9 and self.flow_version != 1:
+            raise ValueError('renderer requires flow')
+        if self.flow_version:
+            if self.is_agentic or self.render_version != 9:
+                raise ValueError('flow API renderer')
+            if self.condition != 'generic_v3':
+                raise ValueError('flow condition')
+            if self.guide_version != 2 or self.restore_version != 2:
+                raise ValueError('flow companions')
+        if self.restore_version == 2 and self.flow_version != 1:
+            raise ValueError('restore companion')
+        if self.guide_version == 2 and self.flow_version != 1:
+            raise ValueError('guide companion')
+        if self.guide_version == 1 and (self.is_agentic or self.render_version != 8):
+            raise ValueError('guide API renderer')
+        if self.restore_version:
+            if self.condition not in RECEIPT_CONDITIONS:
+                raise ValueError('receipt condition')
+'''
+        text=text.replace(needle,needle+guards)
+        text=text.replace('def plan(spec):\n', 'def plan(spec):\n    if spec.flow_version:\n        from data_sheets_schema.batch_plan import plan as selected_plan\n        return selected_plan(spec)\n')
+        text=text.replace('    for ph in PHASES:\n        _call(spec, ph, None)', '''    for ph in PHASES:
+        if ph == 'audit':
+            if spec.flow_version:
+                from data_sheets_schema.batch_calls import run as batch
+                batch(spec, None)
+            else:
+                ordinary(spec, ph, None)
+        else:
+            ordinary(spec, ph, None)''')
+        text += '\ndef ordinary(spec, phase, client):\n    return _call(spec, phase, client)\n'
+        _write(path,text)
+        _write(root/'src/download/prompts/g3.md','# header\n## Prompt body\nNeutral selected condition.\n')
+        _write(root/self.HELPER, '''WORKER = 'sample_worker'
+OMISSION = 'sample_omission'
+INTEGRATION = 'sample_integration'
+def run(spec, client):
+    from data_sheets_schema import api_runner as api
+    if stage['phase'] == WORKER:
+        return api._call(spec, WORKER, client)
+    elif stage['phase'] == OMISSION:
+        return api._call(spec, OMISSION, client)
+    elif stage['phase'] == INTEGRATION:
+        return api._call(spec, INTEGRATION, client)
+    else:
+        raise ValueError('unknown stage')
+''')
+        _write(root/self.PLAN, '''def plan(spec):
+    from data_sheets_schema.batch_calls import WORKER, OMISSION, INTEGRATION
+    from data_sheets_schema.optional_turn import PHASE
+    return {'conditional_calls': [f'{PHASE}: completion', f'{WORKER}: each actual worker',
+                                  f'{OMISSION}: one source pass', f'{INTEGRATION}: one integration']}
+''')
+        return root
+
+    def derive(self, root):
+        consts=scan._module_constants(root/scan.RUNNER)
+        return scan.derive_followups(scan._tree(root/scan.RUNNER), list(consts['PHASES']),consts,root=root)
+
+    def test_correlated_cases_and_replacement_match_actual_call_sites(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=self.root(directory); turns=self.derive(root)
+            receipt=turns['restore_full']['selection']
+            actual={(row['values']['restore_version'],row['values']['flow_version'],tuple(row['renderers']),tuple(row['conditions']))
+                    for row in receipt['cases']}
+            self.assertEqual(actual,{(1,0,(8,),('generic_v2',)),(2,1,(9,),('generic_v3',))})
+            for phase in ('sample_worker','sample_omission','sample_integration'):
+                row=turns[phase]
+                self.assertEqual(row['selection']['conditions'],['generic_v3'])
+                self.assertEqual(row['via'][0]['replacement']['phase'],'audit')
+                self.assertTrue(row['calls'][0].startswith(self.HELPER+':'))
+                self.assertTrue(row['delegated_plan']['evidence'][-1].startswith(self.PLAN+':'))
+            meaning=scan.api_meaning(root,{'conditions':scan.condition_table(root),'controllers':{},'legacy_scripts':[]})
+            self.assertEqual(meaning['conditions']['generic']['model_calls_minimum'],3)
+            self.assertIsNone(meaning['conditions']['generic_v3']['model_calls_minimum'])
+            selected=meaning['conditions']['generic_v3']['selected_procedure']
+            self.assertEqual(selected['ordinary_model_phases'],['full','report'])
+            self.assertEqual(set(selected['replaced_model_phases']['audit']),{'sample_worker','sample_omission','sample_integration'})
+            self.assertIn('record-dependent',selected['count_basis'])
+            rendered=scan._selection_text(receipt)
+            self.assertIn(' OR ',rendered)
+            self.assertIn('restore_version=2',rendered)
+
+    def test_correlated_selector_mutations_fail_closed_or_change_actual_cases(self):
+        mutations=[
+            ('self.restore_version == 2 and self.flow_version != 1','self.restore_version == 2 and self.flow_version != 0'),
+            ('if self.is_agentic or self.render_version != 9:', 'if self.render_version != 9:'),
+            ('self.restore_version not in (0, 1, 2)','self.restore_version not in (0, 1, 2, 3)'),
+            ('type(self.flow_version) is not int or ',''),
+            ('flow_version: int = 0','flow_version: int = 1'),
+            ("if self.condition == 'generic_v3' and self.flow_version != 1:", 'if False:'),
+            ("if self.condition == 'generic_v3' and self.flow_version != 1:", "self.render_version = 8\n        if self.condition == 'generic_v3' and self.flow_version != 1:"),
+            ('if self.render_version == 9 and self.flow_version != 1:', 'if False:'),
+            ('self.guide_version != 2 or self.restore_version != 2','self.guide_version != 1 or self.restore_version != 2'),
+            ("if spec.flow_version:\n                from", "if not spec.flow_version:\n                from"),
+            ('batch(spec, None)','batch(other, None)'),
+            ('batch(spec, None)','spec.flow_version = 0\n                batch(spec, None)'),
+            ('batch(spec, None)','spec.restore_version = 1\n                batch(spec, None)'),
+            ('batch(spec, None)',"spec.runtime = 'foreign'\n                batch(spec, None)"),
+        ]
+        for before,after in mutations:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root=self.root(directory);path=root/scan.RUNNER
+                text=path.read_text();self.assertIn(before,text);_write(path,text.replace(before,after))
+                with self.assertRaisesRegex(scan.ConfigError,'not derived'):
+                    self.derive(root)
+
+    def test_early_plan_and_wrapper_mutations_cannot_hide_calls(self):
+        mutations=[
+            (scan.RUNNER,'return selected_plan(spec)','return selected_plan(other)'),
+            (scan.RUNNER,'return selected_plan(spec)','return dict(selected_plan(spec))'),
+            (scan.RUNNER,'return selected_plan(spec)',"selected_plan = other\n        return selected_plan(spec)"),
+            (scan.RUNNER,'if spec.flow_version:\n        from','if True:\n        from'),
+            (self.PLAN,"f'{PHASE}: completion', ",''),
+            (self.PLAN,"f'{WORKER}: each actual worker'","f'{WORKER} each actual worker'"),
+            (self.PLAN,"f'{WORKER}: each actual worker'","f'{WORKER}: each actual worker', f'{WORKER}: duplicate'"),
+            (self.PLAN,"return {'conditional_calls'","if spec.flow_version:\n        return {}\n    return {'conditional_calls'"),
+            (self.PLAN,"return {'conditional_calls'","spec.flow_version = 0\n    return {'conditional_calls'"),
+            (self.PLAN,"return {'conditional_calls'","raise ValueError('dead')\n    return {'conditional_calls'"),
+            (self.HELPER,'api._call(spec, WORKER, client)',"api._call(spec, stage['phase'], client)"),
+            (self.HELPER,'return api._call(spec, OMISSION, client)','return None'),
+            (self.HELPER,'from data_sheets_schema import api_runner as api',"from data_sheets_schema import api_runner as api\n    WORKER = 'foreign'"),
+            (self.HELPER,'return api._call(spec, WORKER, client)','return api._call(other, WORKER, client)'),
+        ]
+        for relative,before,after in mutations:
+            with self.subTest(relative=relative,after=after), tempfile.TemporaryDirectory() as directory:
+                root=self.root(directory);path=root/relative
+                text=path.read_text();self.assertIn(before,text);_write(path,text.replace(before,after))
+                with self.assertRaisesRegex(scan.ConfigError,'not derived'):
+                    self.derive(root)
+
+
+class TestSelectedTemplateDerivation(unittest.TestCase):
+    """Actual adapted base text, not an exception for a renderer's name."""
+    def fixture(self, directory):
+        root = Path(directory)
+        runner = '''def resolve_prompt(spec):
+    body = prompt_body(spec.base_prompt)
+    if spec.guide_version:
+        from data_sheets_schema.api_playbook import adapt_template
+        body = adapt_template(body, version=spec.guide_version)
+    return body
+'''
+        _write(root / scan.RUNNER, runner)
+        for rel in ('src/data_sheets_schema/api_playbook.py', 'src/data_sheets_schema/shared_generation.py'):
+            _write(root / rel, (ROOT / rel).read_text())
+        from data_sheets_schema.shared_generation import API_POLICY
+        _write(root / API_POLICY, (ROOT / API_POLICY).read_text())
+        prompt = scan.condition_table(ROOT)['prompts'][scan.condition_table(ROOT)['current']]
+        body = (ROOT / prompt).read_text().split('## Prompt body', 1)[1]
+        return root, body, {'cases': [{'values': {'guide_version': 2}}]}
+
+    def test_real_adapter_matches_inert_source_derivation(self):
+        from data_sheets_schema.api_playbook import adapt_template
+        with tempfile.TemporaryDirectory() as directory:
+            root, body, selection = self.fixture(directory)
+            result, evidence = scan._selected_template(root, scan._tree(root / scan.RUNNER), selection, body)
+            self.assertEqual(result, adapt_template(body, version=2))
+            self.assertIn('READ FIRST', body)
+            self.assertNotIn('READ FIRST', result)
+            self.assertIn('.claude/agents/', body)
+            self.assertNotIn('.claude/agents/', result)
+            self.assertEqual(evidence['field'], 'guide_version')
+            self.assertTrue(evidence['evidence'][0].startswith(scan.RUNNER + ':'))
+
+    def test_changed_call_binding_or_template_shape_refuses(self):
+        mutations = [
+            (scan.RUNNER, 'body = adapt_template(body, version=spec.guide_version)', 'body = body'),
+            (scan.RUNNER, 'body = adapt_template(body, version=spec.guide_version)',
+             'adapt_template = foreign\n        body = adapt_template(body, version=spec.guide_version)'),
+            (scan.RUNNER, 'version=spec.guide_version', 'version=1'),
+            (scan.RUNNER, 'adapt_template(body,', 'adapt_template(other,'),
+            ('src/data_sheets_schema/api_playbook.py', 'positions[8]:positions[9]', 'positions[0]:positions[9]'),
+            ('src/data_sheets_schema/api_playbook.py', 'return (policy_text(version=version)', 'return (foreign(version=version)'),
+            ('src/data_sheets_schema/api_playbook.py', 'positions.append(body.index(marker))', 'positions.append(0)'),
+            ('src/data_sheets_schema/api_playbook.py', 'def adapt_template(', '@foreign\ndef adapt_template('),
+            ('src/data_sheets_schema/api_playbook.py', 'def policy_identity(', 'class policy_text: pass\n\ndef policy_identity('),
+            ('src/data_sheets_schema/api_playbook.py', 'if positions != sorted(positions):', 'if False:'),
+            ('src/data_sheets_schema/api_playbook.py', 'return captured_assets()[API_POLICY]', 'return foreign()[API_POLICY]'),
+        ]
+        for path, before, after in mutations:
+            with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
+                root, body, selection = self.fixture(directory)
+                target = root / path; text = target.read_text(); self.assertIn(before, text)
+                _write(target, text.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    scan._selected_template(root, scan._tree(root / scan.RUNNER), selection, body)
+
+    def test_changed_source_text_is_derived_not_hidden_by_a_version_exception(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root, body, selection = self.fixture(directory)
+            path = root / 'src/data_sheets_schema/api_playbook.py'
+            # A text-only change does not alter the recognized section-selection
+            # control shape; its actual bytes must be reflected in the result.
+            text = path.read_text().replace('RUN VERSION LABEL:', 'RUN VERSION LABEL: inspect neutral-guide.md')
+            _write(path, text)
+            adapted, _ = scan._selected_template(root, scan._tree(root / scan.RUNNER), selection, body)
+            self.assertIn('inspect neutral-guide.md', adapted)
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan._selected_template(root, scan._tree(root / scan.RUNNER),
+                                        {'cases': [{'values': {'guide_version': 0}}]}, body)
+
+
 class TestApiMeaning(unittest.TestCase):
     """The "api" section agrees with what the runtime does (#4022, #4025,
     #4055, #4057, #4058)."""
@@ -1570,7 +1798,7 @@ class TestApiMeaning(unittest.TestCase):
         from data_sheets_schema import api_runner
         base = self._cli_spec()
         return api_runner.RunSpec(project=base.project, arm=base.arm, method=base.method, bundle=base.bundle,
-                                  label=base.label, condition=self.cond["current"], manifest=None,
+                                  label=base.label, condition=self.cond["default"], manifest=None,
                                   render_version=renderer)
 
     def test_the_cli_default_condition_is_what_the_cli_runs(self):
@@ -1660,11 +1888,22 @@ class TestApiMeaning(unittest.TestCase):
         for n in ex["refused"]:
             with self.subTest(renderer=n), self.assertRaisesRegex(ValueError, "separately registered"):
                 api_runner.execute(self._spec_at(n))
+        selected = {r for procedure in self.meaning.get('selected_procedures', {}).values()
+                    for r in procedure['selection']['renderers']}
         allowed = max(r for r in self.meaning["audit_continuations"]["admitted_renderers"]
-                      if r not in ex["refused"])
+                      if r not in ex["refused"] and r not in selected)
         with mock.patch.object(api_runner, "_exclusive_run", side_effect=RuntimeError("past the refusal")), \
                 self.assertRaisesRegex(RuntimeError, "past the refusal"):
             api_runner.execute(self._spec_at(allowed))
+
+    def test_shared_request_builders_are_discovered_as_model_text(self):
+        for module in ('shared_generation', 'typed_audit_runtime', 'typed_audit', 'audit_omissions', 'audit_batches'):
+            relative = f'src/data_sheets_schema/{module}.py'
+            with self.subTest(module=module):
+                surface = _discovered()[0].files[relative]
+                self.assertEqual(surface.roles['api'], 'model_facing')
+                planted, _ = _plant(relative, "SCANNER_SENT_TEXT = 'Always describe the VOICE cohort.'", surface=surface)
+                self.assertTrue(any(hit['violation'] and 'api' in hit['gates_in'] for hit in planted))
 
     def test_the_shape_follows_the_runner_phase_tables(self):
         from data_sheets_schema import api_runner
@@ -1675,7 +1914,12 @@ class TestApiMeaning(unittest.TestCase):
         for name, row in self.meaning["conditions"].items():
             with self.subTest(condition=name):
                 self.assertEqual(row["shape"], "MULTI-PHASE")
-                self.assertEqual(row["model_calls_minimum"], len(model_phases))
+                if row.get('selected_procedure'):
+                    self.assertIsNone(row['model_calls_minimum'])
+                    self.assertEqual(row['selected_procedure']['ordinary_model_phases'],
+                                     [phase for phase in model_phases if phase != 'audit'])
+                else:
+                    self.assertEqual(row["model_calls_minimum"], len(model_phases))
         self.assertEqual(set(self.meaning["conditions"]), set(api_runner.CONDITION_PROMPTS))
 
     def test_the_follow_up_turns_follow_the_runner(self):
@@ -1685,7 +1929,8 @@ class TestApiMeaning(unittest.TestCase):
         from data_sheets_schema import api_runner
         turns = self.meaning["followup_turns"]
         self.assertEqual(set(turns), {"full_readdress", "report_regate", "repair_{artifact}", "report_after_repair",
-                                      "removal_repair_full", "full_receipt_completion"})
+                                      "removal_repair_full", "full_receipt_completion",
+                                      "typed_audit_worker", "typed_audit_omission", "typed_audit_integration"})
         self.assertEqual(turns["full_readdress"]["conditions"], sorted(api_runner.RECEIPT_CONDITIONS))
         for name in ("report_regate", "repair_{artifact}", "report_after_repair"):
             self.assertIsNone(turns[name]["conditions"])
@@ -1716,7 +1961,10 @@ class TestApiMeaning(unittest.TestCase):
                 replace(base, **changed)
         for row in self.meaning["conditions"].values():
             self.assertNotIn(removal_repair.PHASE, row["followup_turns"])
-            self.assertIn(removal_repair.PHASE, row["optional_followup_turns"])
+            if row.get('selected_procedure'):
+                self.assertNotIn(removal_repair.PHASE, row['optional_followup_turns'])
+            else:
+                self.assertIn(removal_repair.PHASE, row["optional_followup_turns"])
         self.assertTrue(any("default 0 disables it" in text for text in self.meaning["verdict"]))
 
     def test_optional_receipt_completion_matches_real_spec_plan_and_registration(self):
@@ -1728,7 +1976,9 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(turn["conditions"], allowed)
         self.assertEqual(selection["conditions"], allowed)
         self.assertEqual(selection["field"], "receipt_completion_version")
-        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1], [8]))
+        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1, 2], [8, 25]))
+        legacy_allowed = {condition for case in selection['cases']
+                          if case['values']['receipt_completion_version'] == 1 for condition in case['conditions']}
         self.assertEqual(selection["runtime"], "api")
         self.assertTrue(turn["calls"][0].startswith("src/data_sheets_schema/receipt_completion.py:"))
         self.assertTrue(turn["via"][0]["guards"])
@@ -1747,7 +1997,7 @@ class TestApiMeaning(unittest.TestCase):
             encoded = json.dumps(registration)
             self.assertNotIn(receipt_completion.PHASE, row["followup_turns"])
             self.assertEqual(receipt_completion.PHASE in row["optional_followup_turns"], condition in allowed)
-            if condition in allowed:
+            if condition in legacy_allowed:
                 receipt_completion_policy.parse_registration(encoded.encode())
                 enabled = replace(base, condition=condition, chunk_manifest=chunk_manifest, receipt_completion_version=1,
                                   receipt_completion_registration=encoded)
@@ -1755,7 +2005,7 @@ class TestApiMeaning(unittest.TestCase):
             else:
                 with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition"):
                     receipt_completion_policy.parse_registration(encoded.encode())
-                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition"):
+                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition|requires shared generation"):
                     replace(base, condition=condition, receipt_completion_version=1,
                             receipt_completion_registration=encoded)
 
@@ -1849,7 +2099,16 @@ class TestApiMeaning(unittest.TestCase):
         line = next(v for v in self.meaning["verdict"] if v.startswith("No API condition is a runtime hybrid"))
         self.assertIn("prepare_direct.py", line)
         self.assertNotIn("set only by native audit continuations", line)
-        self.assertTrue(self.meaning["conditions"][self.cond["current"]]["prompt_hybrid"])
+        for name, row in self.meaning['conditions'].items():
+            if row.get('selected_procedure'):
+                self.assertFalse(row['prompt_hybrid'])
+                self.assertTrue(row['raw_prompt_body_references'])
+                self.assertFalse(row['prompt_body_references'])
+                self.assertIn('selected text', row['schema_form'])
+                self.assertIn('schema_context', row['schema_form'])
+                self.assertIn('before runtime substitutions', row['selected_template_adaptation']['basis'])
+            else:
+                self.assertEqual(row['prompt_hybrid'], bool(row['prompt_body_references']))
 
     def _continuations(self, files: dict[str, str]) -> dict:
         """audit_continuations over planted controller files, with the real
