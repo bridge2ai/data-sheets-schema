@@ -303,6 +303,42 @@ def test_boolean_counter_and_float_checker_counts_are_not_equal_authority(case):
     assert not offline.verify_history(raw, events)['draft_gate_passed']
 
 
+@pytest.mark.parametrize('alias', ['exitCode', 'exit_code'])
+@pytest.mark.parametrize('value', [False, 0.0, None, '0', 1])
+def test_every_supplied_exit_alias_must_be_the_same_integer(case, alias, value):
+    spec, raw, _ = case
+    events = valid_events(spec)
+    events[-1]['tool_use_result'].update(exitCode=0, exit_code=0)
+    events[-1]['tool_use_result'][alias] = value
+    out = offline.verify_history(raw, events)
+    assert not out['draft_gate_passed']
+    assert not out['observations'][0]['verified_against_current_saved_bytes']
+
+
+@pytest.mark.parametrize('field,value', [('checked', 1), ('checked', 1.0),
+                                        ('claims_examined', True), ('claims_examined', 1.0)])
+def test_stdout_requires_type_preserving_checker_equality(case, field, value):
+    spec, raw, _ = case
+    events = valid_events(spec)
+    stdout = json.loads(events[-1]['tool_use_result']['stdout'])
+    target = stdout['counts'] if field == 'claims_examined' else stdout
+    target[field] = value
+    events[-1]['tool_use_result']['stdout'] = json.dumps(stdout)
+    out = offline.verify_history(raw, events)
+    assert not out['draft_gate_passed']
+    assert not out['observations'][0]['verified_against_current_saved_bytes']
+    assert any('stdout disagree' in p for p in out['problems'])
+
+
+def test_matching_integer_aliases_and_reordered_stdout_remain_valid(case):
+    spec, raw, _ = case
+    events = valid_events(spec)
+    meta = events[-1]['tool_use_result']
+    meta['exit_code'] = 0
+    meta['stdout'] = json.dumps(json.loads(meta['stdout']), sort_keys=True, indent=4)
+    assert offline.verify_history(raw, events)['draft_gate_passed']
+
+
 def test_policy_drift_does_not_change_legacy_and_refuses_new_output(case, tmp_path, monkeypatch):
     legacy = replace(case[0], native_source_attribution_version=0, native_source_attribution_max_checks=None)
     expected = legacy.instruction
@@ -321,15 +357,22 @@ def test_registration_will_not_add_itself_to_the_captured_checker_tree(case):
     assert not target.exists()
 
 
-def test_history_cli_reads_actual_saved_events_without_authorizing_execution(case, tmp_path):
+@pytest.mark.parametrize('typed_stdout_mismatch', [False, True])
+def test_history_cli_reads_actual_saved_events_without_authorizing_execution(case, tmp_path, typed_stdout_mismatch):
     spec, raw, _ = case
     registration = tmp_path / 'registration.json'; registration.write_bytes(raw)
-    events = tmp_path / 'events.json'; events.write_text(json.dumps(valid_events(spec)))
+    history = valid_events(spec)
+    if typed_stdout_mismatch:
+        payload = json.loads(history[-1]['tool_use_result']['stdout'])
+        payload['checked'] = 1
+        history[-1]['tool_use_result']['stdout'] = json.dumps(payload)
+    events = tmp_path / 'events.json'; events.write_text(json.dumps(history))
     before = {registration: raw, events: events.read_bytes(), spec.report_path: spec.report_path.read_bytes()}
     proc = subprocess.run([sys.executable, '-m', 'data_sheets_schema.native_attribution_registration',
         'verify-history', '--registration', str(registration), '--events', str(events)],
         cwd=ROOT, capture_output=True, text=True)
-    assert proc.returncode == 0, (proc.stdout, proc.stderr)
+    assert proc.returncode == int(typed_stdout_mismatch), (proc.stdout, proc.stderr)
     report = json.loads(proc.stdout)
-    assert report['draft_gate_passed'] and report['execution'] == offline.EXECUTION
+    assert report['draft_gate_passed'] is not typed_stdout_mismatch
+    assert report['execution'] == offline.EXECUTION
     assert {p: p.read_bytes() for p in before} == before

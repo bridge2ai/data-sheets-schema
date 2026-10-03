@@ -263,9 +263,10 @@ def verify_history(registration_raw, events):
                 meta = event.get('tool_use_result')
                 meta = meta if isinstance(meta, dict) else {}
                 exit_code = meta.get('exitCode', meta.get('exit_code'))
-                explicit = type(exit_code) is int
-                if 'exitCode' in meta and 'exit_code' in meta and meta['exitCode'] != meta['exit_code']:
-                    explicit = False
+                # Every supplied alias is authority. Python numeric equality
+                # would let False/0.0 impersonate an integer zero (#4305).
+                exits = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
+                explicit = bool(exits) and all(type(code) is int and code == exit_code for code in exits)
                 failed = (not explicit or exit_code != 0 or item.get('is_error') is not False
                           or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')))
                 if kind != 'draft':
@@ -281,7 +282,7 @@ def verify_history(registration_raw, events):
                     payload = _json(item.get('content'))
                     if not isinstance(payload, dict):
                         raise ValueError('draft result is not an object')
-                    if 'stdout' in meta and _json(meta['stdout']) != payload:
+                    if 'stdout' in meta and _encoded(_json(meta['stdout'])) != _encoded(payload):
                         raise ValueError('tool output and stdout disagree')
                     if type(payload.get('checked')) is not bool or type(payload.get('passed')) is not bool:
                         raise ValueError('draft result lacks strict checked/passed states')
