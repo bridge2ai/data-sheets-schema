@@ -338,10 +338,11 @@ def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,mo
     with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
 
 
-@pytest.mark.parametrize('probe_fails,cleanup_write_fails,release_raises',[
-    (False,False,False),(True,False,False),(True,True,False),(False,True,True)])
+@pytest.mark.parametrize('probe_fails,cleanup_write_fails,release_raises,after_link',[
+    (False,False,False,False),(True,False,False,False),(True,True,False,False),
+    (False,True,True,False),(False,True,False,True)])
 def test_observation_persistence_failure_always_releases_acquired_assertions(
-        tmp_path,monkeypatch,probe_fails,cleanup_write_fails,release_raises):
+        tmp_path,monkeypatch,probe_fails,cleanup_write_fails,release_raises,after_link):
     monkeypatch.chdir(authority.ROOT)
     case=make_native_case(tmp_path/'observation-io',awake=True)
     monkeypatch.setattr(execute,'_platform',lambda:'darwin')
@@ -360,8 +361,19 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
     observation_error=LegacyPersistenceError('synthetic observation persistence failure')
     auth_error=RuntimeError('synthetic auth failure')
     real_write=execute.durable_new
+    from data_sheets_schema import native_attempt_supervisor as durable
+    real_sync=durable._sync_directory
+    observation_link_failed=False
+    def sync(path):
+        nonlocal observation_link_failed
+        target=case['root']/'native-attempt/runtime-observation.json'
+        if after_link and target.exists() and not observation_link_failed:
+            observation_link_failed=True
+            events.append(('observation_link_fsync',));raise observation_error
+        return real_sync(path)
+    monkeypatch.setattr(durable,'_sync_directory',sync)
     def interrupted(path,raw):
-        if Path(path).name=='runtime-observation.json':
+        if Path(path).name=='runtime-observation.json' and not after_link:
             events.append(('observation_write',));raise observation_error
         if cleanup_write_fails and Path(path).name=='keep-awake.json':
             events.append(('cleanup_write',));raise OSError('synthetic cleanup persistence failure')
@@ -386,6 +398,9 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
             with pytest.raises(OSError) as caught:
                 execute.launch(case['raw'],**case['kwargs'])
     assert caught.value is observation_error
+    if after_link:
+        assert observation_link_failed
+        assert (case['root']/'native-attempt/runtime-observation.json').is_file()
     if probe_fails:assert caught.value.__context__ is auth_error
     assert [row[1] for row in events if row[0]=='release']==[3,2,1]
     assert guard.active==[] and len(guard.releases)==3
@@ -405,3 +420,49 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         assert receipt['releases']==guard.releases
     with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
     with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
+
+
+@pytest.mark.parametrize('drift',[False,True])
+def test_runtime_observation_capture_and_saved_consistency(case,monkeypatch,drift):
+    (case['root']/'test-mode.txt').write_text('no_correction')
+    monkeypatch.setattr(execute,'_probe_runtime',fake_observation)
+    observation_path=case['root']/'native-attempt/runtime-observation.json'
+    with authority.loaded_dependencies(case['value']['dependencies']) as modules:
+        original=modules['run_native_canary'].execute_child
+        def dispatch(*args,**kwargs):
+            result=original(*args,**kwargs)
+            if drift:
+                changed=draft._json(observation_path.read_bytes());changed['passed']=False
+                observation_path.write_bytes(draft._encoded(changed))
+            return result
+        monkeypatch.setattr(modules['run_native_canary'],'execute_child',dispatch)
+        result=execute.launch(case['raw'],**case['kwargs'])
+    assert result['runtime_gates_passed'] is (not drift)
+    gate=result['gates']['runtime_authority']
+    assert gate['matches_admitted'] is (not drift)
+    assert gate['captured_sha256']==draft._sha(observation_path.read_bytes())
+    assert execute.read_final(case['raw'])==result
+    if drift:
+        assert all(row['checked'] and row['passed'] for name,row in result['gates'].items()
+                   if name!='runtime_authority')
+        return
+    final_path=case['root']/'native-evidence/final.json'
+    marker_path=case['root']/'native-evidence/published.json'
+    marker=draft._json(marker_path.read_bytes())
+    for mutation in ('top_level','gate','rehashed_captured_file'):
+        changed=deepcopy(result)
+        if mutation=='top_level':changed['runtime_observation']['passed']=False
+        elif mutation=='gate':changed['gates']['runtime_authority']['admitted_observation']['passed']=False
+        else:
+            observation=draft._json(observation_path.read_bytes());observation['passed']=False
+            observation_path.write_bytes(draft._encoded(observation))
+            pin=draft._sha(observation_path.read_bytes());path=str(observation_path.resolve())
+            changed['captured_files'][path]['sha256']=pin
+            info=observation_path.stat()
+            changed['captured_metadata'][path].update(size=info.st_size,mtime_ns=info.st_mtime_ns)
+            changed['lifecycle_artifacts']['runtime-observation.json']['sha256']=pin
+        final_raw=draft._encoded(changed)
+        final_path.write_bytes(final_raw)
+        marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(final_raw)}))
+        with pytest.raises(ValueError,match='runtime observation.*disagree'):
+            execute.read_final(case['raw'])

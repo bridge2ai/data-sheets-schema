@@ -144,6 +144,23 @@ def tool_history(prepared):
             'scope': 'Typed settled native results, including usable exit-one draft corrections; no fixed recipe.'}
 
 
+
+RUNTIME_OBSERVATION_BASIS = 'captured_runtime_observation_v1'
+
+
+def runtime_observation_result(raw, admitted):
+    """Bind approval to the exact admitted bytes, including failed drift evidence."""
+    if (type(raw) is not bytes or type(admitted) is not dict
+            or type(admitted.get('checked')) is not bool or type(admitted.get('passed')) is not bool):
+        raise ValueError('runtime observation lacks explicit captured bytes and typed admission')
+    expected_raw = draft._encoded(admitted)
+    matches = raw == expected_raw
+    return {'checked': True, 'passed': admitted['checked'] and admitted['passed'] and matches,
+            'basis': RUNTIME_OBSERVATION_BASIS, 'admitted_observation': deepcopy(admitted),
+            'admitted_sha256': draft._sha(expected_raw), 'captured_sha256': draft._sha(raw),
+            'matches_admitted': matches}
+
+
 def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live,
           first_stop, runtime_authority, keep_awake):
     """Run every safe independent completion gate from the same captured basis."""
@@ -292,6 +309,8 @@ def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live
         and prepared['final_result'].get('findings') == [], 'result': deepcopy(prepared['final_result'])})
     run('observation', observed)
     run('accounting', accounting)
-    run('runtime_authority', lambda: deepcopy(runtime_authority))
+    run('runtime_authority', lambda: runtime_observation_result(
+        snap.read(Path(runtime['attempt_directory']) / 'runtime-observation.json',
+                  'runtime_observation_approval'), runtime_authority))
     run('keep_awake', lambda: deepcopy(keep_awake))
     return results

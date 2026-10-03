@@ -195,7 +195,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
     _sync_directory(evidence.parent)
     for name, body in authorization['raw'].items():
         durable_new(attempt/(name + '.json'), body)
-    status = first_stop = prepared = None
+    status = first_stop = prepared = first_launch_error = None
     signals = []
     observation = {'checked': False, 'passed': False, 'reason': 'native runtime not observed'}
     awake = {'passed': False, 'policy': value['runtime']['keep_awake'], 'state': 'not_acquired'}
@@ -237,6 +237,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     record_stop=stopped, command_policy=adapter.policy, phase_spec=adapter.spec,
                     command_classifier=adapter.classify, event_observer=adapter.observe)
             except BaseException as exc:
+                first_launch_error = exc
                 # Native auth command failures may contain credentials in captured
                 # subprocess attributes. Record only the exception class here.
                 stopped(f'launch or runtime failed: {type(exc).__name__}')
@@ -299,12 +300,15 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     if not (attempt/'keep-awake.json').exists():
                         durable_new(attempt/'keep-awake.json', draft._encoded(awake))
                 except BaseException as cleanup_error:
-                    if pending_error is None:
+                    original = pending_error if pending_error is not None else first_launch_error
+                    if original is None:
                         raise
-                    # The attempt is already spent and cannot complete. Keep
-                    # its original error while recording this second failure.
+                    # A link can exist even when its directory fsync failed;
+                    # that first error remains authoritative after its handler.
                     note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
-                    pending_error.__notes__ = [*getattr(pending_error, '__notes__', []), note]
+                    original.__notes__ = [*getattr(original, '__notes__', []), note]
+                    if pending_error is None:
+                        raise original from cleanup_error
         # Cleanup failure is sticky even if another gate or a previous pass succeeds.
         if first_stop is not None:
             results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
@@ -389,10 +393,19 @@ def read_final(registration_raw):
     if (type(lifecycle) is not dict or not set(lifecycle) <= {'runtime-observation.json', 'keep-awake.json'}
             or completion and set(lifecycle) != {'runtime-observation.json', 'keep-awake.json'}):
         raise ValueError('final result lacks its runtime and cleanup identities')
+    lifecycle_raw = {}
     for name, pin in lifecycle.items():
+        body = _file(attempt/name, 'lifecycle artifact')
         if (type(pin) is not dict or set(pin) != {'path', 'sha256'} or pin['path'] != str(attempt/name)
-                or draft._sha(_file(attempt/name, 'lifecycle artifact')) != pin['sha256']):
+                or draft._sha(body) != pin['sha256']):
             raise ValueError('runtime or cleanup evidence differs from the final identity')
+        lifecycle_raw[name] = body
+    runtime_gate = checks['runtime_authority']
+    if completion or 'basis' in runtime_gate:
+        body = lifecycle_raw.get('runtime-observation.json')
+        recomputed = gates.runtime_observation_result(body, result.get('runtime_observation'))
+        if draft._encoded(runtime_gate) != draft._encoded(recomputed):
+            raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
     additional = result.get('additional_report')
     if additional is None:
         if completion:

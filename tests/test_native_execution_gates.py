@@ -64,3 +64,21 @@ def test_contradictory_native_identity_never_becomes_a_success(change):
     elif change=='tools_missing':events[0]['tools'].remove('Write')
     elif change=='tools_duplicate':events[0]['tools'].append('Read')
     assert verdict(prepared,runtime)['terminal']['passed'] is False
+
+
+@pytest.mark.parametrize('change',['none','passed_false','auth_changed','whitespace','malformed'])
+def test_runtime_gate_binds_exact_captured_observation(change):
+    from data_sheets_schema import native_attribution_registration as draft
+    admitted={'checked':True,'passed':True,'auth':{'loggedIn':True}}
+    captured=deepcopy(admitted)
+    if change=='passed_false':captured['passed']=False
+    elif change=='auth_changed':captured['auth']['loggedIn']=False
+    raw=draft._encoded(captured)
+    if change=='whitespace':raw+=b'\n'
+    elif change=='malformed':raw=b'not a JSON observation'
+    result=gates.runtime_observation_result(raw,admitted)
+    assert result['passed'] is (change=='none')
+    assert result['matches_admitted'] is (change=='none')
+    assert result['admitted_observation']==admitted
+    assert result['captured_sha256']==draft._sha(raw)
+    assert result['admitted_sha256']==draft._sha(draft._encoded(admitted))
