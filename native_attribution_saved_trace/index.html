@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/created_on/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/native_attribution_saved_trace/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: created_on - data-sheets-schema</title>
+        <title>Offline native attribution saved-trace replay - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-created_on" class="md-skip">
+        <a href="#offline-native-attribution-saved-trace-replay" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: created_on
+              Offline native attribution saved-trace replay
             
           </span>
         </div>
@@ -316,56 +316,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#authority-and-captured-evidence" class="md-nav__link">
+    Authority and captured evidence
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#meaning-of-a-passed-result" class="md-nav__link">
+    Meaning of a passed result
   </a>
   
 </li>
@@ -384,124 +343,29 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/created_on.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/native_attribution_saved_trace.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-created_on">Slot: created_on</h1>
-<p><em>The date and time when the resource was created. Requires a UTC offset (<code>…T00:00:00Z</code>); RFC 3339 <code>date-time</code> rejects a naive timestamp.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/created">dcterms:created</a>
-Alias: created_on</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../Datetime/">Datetime</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>2021-03-01T00:00:00Z</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcterms:created</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:created_on</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: created_on
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: '2021-03-01T00:00:00Z'
-description: The date and time when the resource was created. Requires a UTC offset
-  (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:created
-alias: created_on
-domain_of:
-- Information
-range: datetime
-
+<h1 id="offline-native-attribution-saved-trace-replay">Offline native attribution saved-trace replay</h1>
+<p><code>data_sheets_schema.native_attribution_results</code> checks an explicitly selected callback composition and its saved native transcript/control stream. It uses the same composed command policy for executed commands, callback decisions and permission denials. It never starts a child process or calls a provider.</p>
+<pre><code class="language-sh">python -m data_sheets_schema.native_attribution_results \
+  --composition /absolute/path/composition.json \
+  --transcript /absolute/path/attempt/transcript.jsonl \
+  --control /absolute/path/attempt/control.jsonl \
+  --out /separate/new/path/replay.json
 </code></pre>
-
-</details>
+<p>Use <code>--config-root</code> only when the trace contains native persisted tool output. The reader accepts only the exact session/tool-results path grammar; it does not read arbitrary configuration files. The output destination must be new, outside the retained attempt and registered output directories, and must not alias any captured input, including through a hard link or symlink. Omitting <code>--out</code> prints the result without publishing a file. Exit status is 0 for a passed additional gate, 1 for checked failure, and 2 for unusable input or publication failure.</p>
+<h2 id="authority-and-captured-evidence">Authority and captured evidence</h2>
+<p>Version 1 requires current code authority. It reconstructs the supplied composition and registration, checks exact source/policy/interpreter/instruction pins and captures raw transcript/control, selected inputs, prompt/controller sources, metadata, records, report, originals and audit. Raw hashes bind replay inputs; they do not authenticate a provider. An old trace pinned to another source HEAD or package closure refuses, even when its outer hashes are updated. This version does not supply an archived-authority override or silently upgrade a registration.</p>
+<p>The capture stage checks current bytes with the real attribution and evidence-checker primitives. Once sealed, semantic replay uses only captured bytes and metadata. Publication separately rechecks the inputs and aliases for changes. The report records raw file hashes/lengths/roles, the embedded registration identity, composition and authority pins, captured aliases, alias symlink metadata and current file metadata. Metadata describes the capture time and cannot establish historical intermediate file contents.</p>
+<p>Ordered replay preserves pending calls, mutation epochs, report-only correction, finite draft checks, terminal failures and exact final-recorder ordering. A separate lifecycle check requires one successful initialization before tools and rejects cancelled callbacks, extra/error/late initialization responses and unknown control frames. A completed recorder must still be a regular, non-symlink, single-link file according to captured current metadata; no absent historical fingerprint is invented. An earlier draft pass superseded by a report correction remains an unverified historical observation; the final current successful pass is recomputed against captured saved bytes. Failed, stopped, partial or malformed histories cannot become successful merely because current files pass a checker.</p>
+<p>The bounded file/control replay is versioned here so frozen controller helpers retain their old APIs and bytes. Tests compare legacy command, denial and ordered-control outputs, including failures and denials. The shared state only gains overridable path and command resolution hooks; its existing defaults remain unchanged.</p>
+<h2 id="meaning-of-a-passed-result">Meaning of a passed result</h2>
+<p><code>additional_gate_passed</code> covers the selected attribution, command/control, denial and current final-evidence checks. <code>generation_acceptance</code> is always <code>not_assessed</code>. Complete generation history, schema/pair/receipt acceptance, usage accounting, native permission proof, scientific support and launch authorization remain separate requirements. A replay report never resumes an attempt, rewrites a result receipt or grants permission to run a new condition.</p>
+<p>Neutral fixtures and callback traces are engineering checks, not empirical calibration. Parent issues #2427 and #3336 remain open for the registered runtime and scientific work. Historical controllers, registrations, held audit28 artifacts and paid attempts are unchanged.</p>
 
 
 
