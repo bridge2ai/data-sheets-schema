@@ -14,8 +14,10 @@ diagnostics and gates. It adds `snippets.by_origin` for `phase1`, `rereceipt`, a
 and `unattesting` counts. Only an absent marker uses the historical phase-1
 convention; malformed or unknown explicit markers remain visible. These markers
 are accounting metadata, not independent evidence of authorship or support.
-The default checker and all existing disk readers continue to use v3. Historical
-blocks are not silently rewritten or relabeled.
+The default checker and historical disk checks continue to use v3. Disk checks
+for an explicitly registered [receipt-completion runtime condition](receipt-completion-runtime.md)
+select v4 and its registered coverage policy. Historical blocks are not silently
+rewritten or relabeled.
 
 `apply_rereceipt(..., instrument_version=4)` adds `origin: rereceipt` only to a
 new pair accepted by the existing snippet/path validator. An identical existing
@@ -92,19 +94,38 @@ the record and in `still_uncovered_paths`, with separate
 `unsupported_audit_candidates`. A verified quotation can still fail semantic
 support; neither the state nor zero deterministic defects certifies it.
 
-## Work that remains open
+## Runtime integration and remaining work
 
-#2926 still needs a separately registered continuation/condition, phase usage
-and failure telemetry, measured output budgeting/batching, audit carry, a
-registered coverage threshold shared by strict CLI and canary gates, and the
-required CHORUS/AI_READI paid canaries before fanout. A failed follow-up must
-retain the successful full output. Existing v1/v2/v3 instruments, registrations
-and the held audit28 corpus remain unchanged; offline fixture tests or replay
-are not empirical canaries.
+The [registered receipt-completion runtime](receipt-completion-runtime.md)
+implements the continuation, durable phase usage and failure accounting,
+audit carry, and shared strict CLI/canary coverage gate under an explicit
+`receipt_completion_version=1` API renderer-8 condition. It preserves the
+successful full output when the follow-up fails. This runtime is separate
+from renderer 24's offline-only boundary described above; historical/default
+requests and gates remain unchanged.
 
-[#2923](https://github.com/bridge2ai/data-sheets-schema/issues/2923) still needs
-the record repair route: reuse existing removal classifications, restore an
-unfounded removal or provide independently checked audit evidence for it. A
-report disposition alone cannot clear that obligation. Neither re-receipting
-nor a nonterminal diagnostic may reopen an audit/report attempt already stopped
-by a terminal source/evidence failure.
+[#2926](https://github.com/bridge2ai/data-sheets-schema/issues/2926) remains open
+for owner-selected registration inputs and empirical acceptance: explicit
+output/request caps, context capacity and its basis, model, route and spending
+budget; separately authorized CHORUS and AI_READI canaries; and a coverage floor
+calibrated from their post-turn results. Those pilots must report before/after
+never-receipted counts, new-receipt attestation diagnostics, audit findings and
+added cost. A pending diagnostic floor never passes the strict coverage gate
+or authorizes fanout. No values or run authorization are supplied by this
+offline guide.
+
+The [restore-only removal-repair runtime](removal-repair-v1.md) implements the
+record-side restoration alternative for
+[#2923](https://github.com/bridge2ai/data-sheets-schema/issues/2923), selected by
+`removal_repair_version=1` on API renderer 8. It reuses the removal classifier,
+requires restoration of unfounded removals, and cannot be satisfied by report
+dispositions alone. It does not add evidence-backed audit amendments or certify
+the source truth of restored values. Independent source curation, native/direct
+or later-renderer extensions, and empirical acceptance of a fresh condition
+remain separate work. The original #2923 software and replay criteria are
+[complete](https://github.com/bridge2ai/data-sheets-schema/issues/2923#issuecomment-5965432187).
+
+Existing v1/v2/v3 instruments, historical registrations and the held audit28
+corpus remain unchanged. Neither receipt completion nor removal repair reopens
+a generation stopped by terminal source/evidence failure. Offline fixtures and
+replay do not establish empirical calibration or authorize paid execution.
