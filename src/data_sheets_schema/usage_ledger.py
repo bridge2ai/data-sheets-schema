@@ -36,11 +36,9 @@ def exclusive_outputs(paths):
     # Split and flat layouts can share a full/core record while storing their
     # metadata elsewhere. Lock the actual files, including resolved aliases,
     # in one order so partial overlap cannot bypass output ownership (#1298).
-    outputs = {path.resolve() for path in paths}
     held = []
     try:
-        for output in sorted(outputs):
-            path = output.with_name(f".{output.name}_api_run.lock")
+        for output, path in output_locks(paths):
             path.parent.mkdir(parents=True, exist_ok=True)
             lock = FileLock(path, timeout=0)
             try:
@@ -53,6 +51,12 @@ def exclusive_outputs(paths):
     finally:
         for lock in reversed(held):
             lock.release()
+
+
+def output_locks(paths) -> tuple[tuple[Path, Path], ...]:
+    """Exact resolved writer/sidecar pairs, shared by acquisition and preflight."""
+    return tuple((output, output.with_name(f".{output.name}_api_run.lock"))
+                 for output in sorted({Path(path).resolve() for path in paths}))
 
 
 def recovery_files(directory: Path, project: str) -> list[Path]:

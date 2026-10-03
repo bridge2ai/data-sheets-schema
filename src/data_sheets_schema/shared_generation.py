@@ -275,18 +275,21 @@ class Capture:
                 "files": [file_pin(Path(path), raw) for path, raw in self.files]}
 
 
+def _separate_authorities(specs, paths, *, extra_outputs=()):
+    """Protect the captured closure and actual immutable assets from all writers."""
+    from .resources import resource_path
+    from .shared_write_footprint import for_run, require_separate
+    authorities = (*paths, *(resource_path(name) for name in ASSET_HASHES))
+    try:
+        require_separate(authorities, (for_run(spec) for spec in specs),
+                         extra_points=extra_outputs)
+    except RuntimeError as exc:
+        raise ValueError('shared write footprint cannot resolve a filesystem alias') from exc
+
+
 def _separate_inputs(spec, paths):
-    """Caller authority may not live in any run-owned output/evidence directory."""
-    owned = {Path(spec.metadata_dir).resolve(), spec.full_path.parent.resolve(), spec.core_path.parent.resolve()}
-    outputs = (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path)
-    for selected in paths:
-        path = Path(selected)
-        resolved = path.resolve()
-        if any(resolved == parent or parent in resolved.parents for parent in owned):
-            raise ValueError(f"shared authority must be outside run-owned output directories: {path}")
-        for output in outputs:
-            if path.exists() and output.exists() and path.samefile(output):
-                raise ValueError("shared authority aliases a run output")
+    """Caller authority may not alias any run-owned write destination."""
+    _separate_authorities((spec,), paths)
 
 
 def capture(spec) -> Capture:

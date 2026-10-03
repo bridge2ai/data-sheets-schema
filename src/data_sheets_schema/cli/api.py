@@ -177,7 +177,7 @@ def _shared_roster(path, pairs):
         raise click.ClickException(str(exc)) from exc
 
 
-def _shared_current(specs, roster=None):
+def _shared_current(specs, roster=None, *, batch_label_prefix=None):
     from data_sheets_schema import shared_generation as shared
     try:
         captures = [shared.assert_current(spec) for spec in specs if spec.shared_generation_version]
@@ -197,8 +197,10 @@ def _shared_current(specs, roster=None):
                     raise ValueError('shared batch roster aliases selected input authority')
             authority_paths += (path,)
         if authority_paths:
-            for spec in specs:
-                shared._separate_inputs(spec, authority_paths)
+            from data_sheets_schema import run_lock
+            extra = (() if batch_label_prefix is None else
+                     (run_lock._path_for(batch_label_prefix),))
+            shared._separate_authorities(specs, authority_paths, extra_outputs=extra)
     except (ValueError, OSError) as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -766,7 +768,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             specs.append(s)
 
     if roster:
-        _shared_current(specs, roster)
+        _shared_current(specs, roster, batch_label_prefix=label_prefix)
     selected_receipts = any(getattr(s, 'receipt_completion_version', 0) for s in specs)
     receipt_gating = False
     if selected_receipts and not dry_run:
@@ -796,9 +798,6 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     if not yes and not click.confirm(f"Run {len(specs)} billed generations?"):
         click.echo("aborted")
         return
-    if roster:
-        _shared_current(specs, roster)
-
     # Claim the label prefix before spending anything (#513). Two batches
     # writing the same label directories is not a tolerable race: each writes
     # phase snapshots and a progress file under the same names, so the
@@ -814,6 +813,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         raise click.ClickException(run_guard.message(found))
 
     from data_sheets_schema import run_lock
+    if roster:
+        _shared_current(specs, roster, batch_label_prefix=label_prefix)
     try:
         lock_path = run_lock.acquire(label_prefix, names)
     except run_lock.AlreadyRunning as exc:
@@ -844,7 +845,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 break
         try:
             if roster:
-                _shared_current(specs, roster)
+                _shared_current(specs, roster, batch_label_prefix=label_prefix)
             res = execute(s)
             spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
             spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])

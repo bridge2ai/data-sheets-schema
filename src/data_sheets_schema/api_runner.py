@@ -6511,6 +6511,9 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.native_source_attribution_version:
         raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
+    if getattr(spec, 'shared_generation_version', 0):
+        from .shared_generation import assert_current
+        assert_current(spec)  # authority isolation precedes even sidecar lock writes
     with _exclusive_run(spec):
         if resume:
             _restore_resume_date(spec)
