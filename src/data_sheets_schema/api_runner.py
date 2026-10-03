@@ -7087,7 +7087,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # The progress file that carries the findings is deleted on
             # success, so without this the run's richest intermediate
             # survives only as the report's prose summary (#369).
-            call_id = next((row.get("usage_id") for row in reversed(usage) if row.get("phase") == ph), None)
+            snapshot_phase = ph
+            if spec.shared_generation_version:
+                from .typed_audit_runtime import INTEGRATION_PHASE
+                snapshot_phase = INTEGRATION_PHASE
+            call_id = next((row.get("usage_id") for row in reversed(usage) if row.get("phase") == snapshot_phase), None)
+            if spec.shared_generation_version and call_id is None:
+                raise UsageLedgerError("typed audit snapshot lacks its accounted integration call")
             _snapshot(spec, f"{spec.project}_audit.json", body, usage_id=call_id)
         elif artifact:
             target.parent.mkdir(parents=True, exist_ok=True)

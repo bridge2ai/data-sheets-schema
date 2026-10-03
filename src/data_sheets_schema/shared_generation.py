@@ -213,6 +213,13 @@ def parse_registration(raw: bytes) -> dict:
     for key in _AUDIT_LIMITS - {"context_limit_basis"}:
         _integer(limits[key], key)
     _text(limits["context_limit_basis"], "context limit basis")
+    # Even an empty record has one explicit worker, plus omission/integration.
+    # Refuse internally impossible supplied allowances before generation.
+    if limits['max_calls'] < 3 or limits['aggregate_input_tokens'] < 3:
+        raise ValueError('audit allowances cannot cover the three mandatory stages')
+    if limits['aggregate_output_tokens'] < max(limits[f'{stage}_output_tokens']
+            for stage in ('worker', 'omission', 'integration')):
+        raise ValueError('aggregate audit output allowance cannot admit a declared stage cap')
     for stage in ("worker", "omission", "integration"):
         if limits[f"{stage}_output_tokens"] >= limits["context_limit_tokens"]:
             raise ValueError("audit output allowance leaves no input context")

@@ -110,6 +110,15 @@ def test_explicit_exact_positive_limits(external, key, value):
         selected_spec(external, reg)
 
 
+@pytest.mark.parametrize('key,value', [('max_calls', 2), ('aggregate_input_tokens', 2),
+    ('aggregate_output_tokens', 3999)])
+def test_internally_impossible_allowances_refuse_before_generation(external, key, value):
+    reg = registration_for(external)
+    reg['audit_limits'][key] = value
+    with pytest.raises(ValueError, match='allowance'):
+        selected_spec(external, reg)
+
+
 @pytest.mark.parametrize('key', ['bundle', 'context', 'source_manifest'])
 def test_authority_drift_stops_without_recapture(selected, key):
     before = sg.capture(selected)
