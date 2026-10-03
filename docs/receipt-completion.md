@@ -122,7 +122,8 @@ requires restoration of unfounded removals, and cannot be satisfied by report
 dispositions alone. It does not add evidence-backed audit amendments or certify
 the source truth of restored values. Independent source curation, native/direct
 or later-renderer extensions, and empirical acceptance of a fresh condition
-remain separate work under the open parent.
+remain separate work. The original #2923 software and replay criteria are
+[complete](https://github.com/bridge2ai/data-sheets-schema/issues/2923#issuecomment-5965432187).
 
 Existing v1/v2/v3 instruments, historical registrations and the held audit28
 corpus remain unchanged. Neither receipt completion nor removal repair reopens
