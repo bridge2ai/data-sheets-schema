@@ -186,20 +186,7 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
     raised, and so is a quote YAML cannot read, such as an impossible date; the
     rating's item structure is `validate_scope`'s to refuse.
     """
-    rubric_name = rubric_name.removesuffix("-semantic")
-    if rubric_name not in {"rubric10", "rubric20"}:
-        raise ValueError(f"unknown general-context semantic rubric: {rubric_name}")
-    declared = str(result.get("rubric", rubric_name)).removesuffix("-semantic")
-    if declared != rubric_name:
-        raise ValueError(f"the rating declares {declared}, not {rubric_name}")
-    from data_sheets_schema.semantic_instrument import select_semantic_instrument
-    version = result.get("version")
-    instrument = (select_semantic_instrument(rubric_name, version)
-                  if version in ("2.0", "3.0", "4.0") else None)
-    rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
-    specification = yaml.safe_load(resource_path(rubric_path).read_bytes())
-    rules = evaluation_contract(rubric_name, specification, result.get("applicability_context"),
-                                {"id": "evidence-contract"})["items"]
+    rubric_name, instrument, specification, rules = _issue_contract(result, rubric_name)
     fields = _declared_fields(rubric_name, specification)
     units = dict(dataset_units(document))
     absence_names = None
@@ -207,13 +194,10 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
         from data_sheets_schema.semantic_evidence_authority import verify_authority
         absence_names = verify_authority(result.get("metadata") or {})
     findings: list[EvidenceFinding] = []
-    below: dict[str, dict] = {}
     for key, item in _items(result, rubric_name):
         rule = rules.get(key)
         applicable = bool(rule and rule["applicable"])
         maximum = rule["fixed_max_score"] if rule else None
-        if applicable and _below(item.get("score"), maximum):
-            below[key] = item
         rows = item.get("unit_scores")
         for row in rows if isinstance(rows, list) else []:
             if not isinstance(row, dict):
@@ -235,8 +219,45 @@ def check_evidence(result: dict, document: dict, rubric_name: str) -> EvidenceRe
                         f"{key} {unit_path}: a deduction needs a cited, absent, counted or considered path",
                         unit=unit_path))
                 findings.extend(_coverage(key, unit_path, unit, row, fields.get(key, ())))
-    findings.extend(_issue_findings(result, rules, below))
+    findings.extend(_issue_report(result, rubric_name, rules).findings)
     return EvidenceReport(tuple(findings))
+
+
+def _issue_contract(result: dict, rubric_name: str):
+    rubric_name = rubric_name.removesuffix("-semantic")
+    if rubric_name not in {"rubric10", "rubric20"}:
+        raise ValueError(f"unknown general-context semantic rubric: {rubric_name}")
+    declared = str(result.get("rubric", rubric_name)).removesuffix("-semantic")
+    if declared != rubric_name:
+        raise ValueError(f"the rating declares {declared}, not {rubric_name}")
+    from data_sheets_schema.semantic_instrument import select_semantic_instrument
+    version = result.get("version")
+    instrument = (select_semantic_instrument(rubric_name, version)
+                  if version in ("2.0", "3.0", "4.0") else None)
+    rubric_path = instrument.rubric_path if instrument else f"data/rubric/{rubric_name}.txt"
+    specification = yaml.safe_load(resource_path(rubric_path).read_bytes())
+    rules = evaluation_contract(rubric_name, specification, result.get("applicability_context"),
+                                {"id": "evidence-contract"})["items"]
+    return rubric_name, instrument, specification, rules
+
+
+def _issue_report(result: dict, rubric_name: str, rules: dict) -> EvidenceReport:
+    below = {key: item for key, item in _items(result, rubric_name)
+             if rules.get(key, {}).get("applicable")
+             and _below(item.get("score"), rules[key]["fixed_max_score"])}
+    return EvidenceReport(tuple(_issue_findings(result, rules, below)))
+
+
+def check_issue_links(result: dict, rubric_name: str) -> EvidenceReport:
+    """Check issue-to-item links without claiming input evidence was checked.
+
+    Call after schema/scope validation. This uses the same applicability and
+    below-maximum rules, finding content and order as ``check_evidence``.
+    Absence, quotation, count and field-coverage checks require the actual input
+    and remain the responsibility of ``check_evidence``.
+    """
+    rubric_name, _, _, rules = _issue_contract(result, rubric_name)
+    return _issue_report(result, rubric_name, rules)
 
 
 def _declared_fields(rubric_name: str, specification: dict) -> dict[str, tuple[str, ...]]:

@@ -57,7 +57,7 @@ pinned CM4AI v7 rep2 input. `was_generated_by` is not declared by these authorit
 sources and is rejected in v3; no provenance-only allowlist is added. Historical
 v2 behavior is preserved.
 
-## Reporting and remaining figure integration
+## Reporting and structured Figure 11
 
 `scripts/report_semantic_comparison.py` accepts repeated
 `--evidence-input EVALUATION INPUT` and `--evidence-context EVALUATION CONTEXT`
@@ -70,7 +70,17 @@ and directly recorded v3 taxonomy. Legacy prose remains explicitly unclassified
 unless a caller supplies a legacy classifier. Report generation preserves its
 input files.
 
-The protected figure worktree is outside this implementation. Its fig11 caller
-still needs to consume the shared direct taxonomy API for v3 and label its
-legacy prose classification separately. That integration remains open under
-#2920; it does not block offline v3 acceptance and reporting on main.
+`scripts/report_semantic_taxonomy.py` provides the standalone structured
+Figure 11 consumer described in the [selection and publication guide](semantic-taxonomy-figure.md).
+It accepts explicitly selected rubric10-semantic 3.0 and rubric20-semantic
+3.0/4.0 ratings, counts declared categories and item links directly, and reports
+high-severity issues declared to lower scores. Repeated selections and zero-issue
+ratings remain visible; groups separate instruments and evaluators. Plot and
+sidecars distinguish input-bound mechanical checks from declaration-only shape
+and link checks. Neither state establishes semantic correctness.
+
+The protected legacy Figure 11 reproduction, its prose coding, selected ratings
+and historical outputs remain unchanged. The standalone consumer handles new
+structured outputs without reinterpreting those legacy results. The complete
+#2920 acceptance criteria receive a separate review; this guide does not declare
+the parent issue closed or imply scientific adjudication.

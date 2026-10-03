@@ -105,10 +105,16 @@ elsewhere in prose can still be wrongly nominated. Independent review is needed.
 
 The [typed offline audit consumer](typed-audit-offline.md) supplies the explicit
 versioned grammar, saved-response assembly and independent terminal checks.
-Those checks do not deliver omission findings to live generation or
-reconciliation. Follow-up work remains in #2930/#3336/#2921: integrated
-generation delivery, reconciliation routing, main reporting and protected
-figure integration, approved observation/hit rules, registered
+The [checked typed-audit report consumer](typed-audit-reporting.md) exports
+explicitly selected checked assemblies as JSON or CSV, retaining declared
+findings, candidates and their lineage. The standalone
+[typed audit Figure 7](typed-audit-figure.md) plots those checked assemblies by
+declared finding kind, with untyped findings and separate candidate counts.
+The protected historical keyword figure and its outputs remain unchanged.
+These counts do not establish scientific support or recall, and the offline
+consumers do not deliver omission findings to live generation or reconciliation.
+Follow-up work remains in #2930/#3336/#2921: integrated generation delivery,
+reconciliation routing, approved observation/hit rules, registered
 comparator/predictions and independently reviewed empirical canaries.
 
 The separate [registered receipt-completion runtime](receipt-completion-runtime.md)

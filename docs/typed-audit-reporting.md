@@ -6,6 +6,11 @@ in #4328 for #2930/#3336; it does not change the retained fig07 script, register
 generation condition or establish scientific recall. Legacy bare audits and
 prose-derived categories are outside this consumer.
 
+For an actual SVG and joined count tables from the same checked payload, use
+the separate [typed audit Figure 7 consumer](typed-audit-figure.md). It preserves
+this base report API and exports, including its limitations; the historical
+keyword figure remains unchanged.
+
 ```bash
 python -m data_sheets_schema.typed_audit_report \
   --assembly /path/to/first-assembly.json \
