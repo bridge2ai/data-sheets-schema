@@ -309,6 +309,41 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-summary-lifecycle" class="md-nav__link">
+    Legacy summary lifecycle
+  </a>
+  
+    <nav class="md-nav" aria-label="Legacy summary lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#select-saved-ratings-explicitly" class="md-nav__link">
+    Select saved ratings explicitly
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#active-consumers-and-issue-scope" class="md-nav__link">
+    Active consumers and issue scope
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -386,9 +421,66 @@ malformed declarations conservatively keep family comparison unknown, including
 false, empty strings and collection-valued types. Families use the existing declared-model helper,
 so <code>google/claude-...</code> denotes the Claude family regardless of routing vendor.</p>
 <p>This family flag does not measure self-preference, calibration or evaluator
-independence. An unknown model is not evidence of a different family. Historical
-output refresh/consumer integration remains under #3327, and empirical
+independence. An unknown model is not evidence of a different family. Empirical
 cross-family calibration remains separate (#3328).</p>
+<h2 id="legacy-summary-lifecycle">Legacy summary lifecycle</h2>
+<p>The following scripts are retained as legacy compatibility utilities:</p>
+<ul>
+<li><code>scripts/generate_rubric10_semantic_summary.py</code></li>
+<li><code>scripts/generate_rubric10_semantic_summary_simple.py</code></li>
+</ul>
+<p>Both read the fixed, undated
+<code>data/evaluation_llm/rubric10_semantic/concatenated</code> directory and write fixed
+historical summary paths. They also execute when imported. Their code and
+existing outputs are preserved for legacy compatibility; use the standalone
+disclosure CLI for fresh per-rating model information. This policy does not
+assert that external callers have stopped using the legacy utilities.</p>
+<p>Historical summary files, original ratings, default reports and registered
+report implementations remain preserved. The registered
+<code>notes/matched_cborg_2026-09-13/historical_inventory.json</code> includes historical
+summary hashes. The completed CBORG reference condition
+continues to use its verified archived report helper. A fresh disclosure
+report describes the explicitly selected saved bytes; it does not replace a
+historical report or become part of that registered measurement.</p>
+<h3 id="select-saved-ratings-explicitly">Select saved ratings explicitly</h3>
+<p>Run from the repository root. This example selects four saved ratings from
+the undated legacy cohort and writes a new JSON report:</p>
+<pre><code class="language-bash">PYTHONPATH=src poetry run python scripts/report_model_disclosure.py \
+  data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/VOICE_gpt5_evaluation.json \
+  --format json --output /tmp/new-rubric10-legacy-disclosure.json
+</code></pre>
+<p>The output must not exist. Select a different new path for another report.
+Name dated or archived rating files separately when those are the intended
+cohort; the tool does not discover or pool them. Repeating a file argument
+retains a separate rating row. No score is calculated or changed.</p>
+<p>The <code>gpt5</code> text in these filenames is not a generation-model declaration.
+Without an explicit generation binding, generator and same-family status stay
+unknown. Original recorded project/method fields are reported as written;
+this command does not repair historical labels.</p>
+<p>Only when genuine saved generation evidence is available, add the repeatable
+<code>--generation-binding EVALUATION INPUT PROVENANCE</code> option described above.
+It must bind one of the selected ratings and satisfy the shared identity
+checks. Use <code>--root</code> for relative paths recorded inside that evidence; the
+three file arguments still use normal caller paths. Missing provenance is
+not reconstructed from method names or current defaults. Contradictory
+evidence refuses publication rather than manufacturing a generator identity.</p>
+<h3 id="active-consumers-and-issue-scope">Active consumers and issue scope</h3>
+<p>For a fresh semantic score comparison, select the active reporter's
+<a href="../semantic-comparison-model-disclosure/">explicit disclosure mode</a>.
+The active rubric20 and rubric10 summary integrations are tracked by
+<a href="https://github.com/bridge2ai/data-sheets-schema/pull/4316">PR #4316</a> and
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/4317">issue #4317</a>.
+Their defaults and historical outputs remain preserved; disclosure requires
+an explicit selection and fresh output.</p>
+<p><a href="https://github.com/bridge2ai/data-sheets-schema/issues/3327">Issue #3327</a>
+remains open until those active producer integrations and this lifecycle
+policy are merged. Its consumer-disclosure scope does not require replacing
+historical reports or inventing missing generator provenance.
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/3328">Issue #3328</a>
+continues to cover empirical cross-family evaluation and calibration.</p>
 
 
 
