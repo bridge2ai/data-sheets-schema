@@ -14,6 +14,14 @@ from pathlib import Path
 from data_sheets_schema.resources import resource_path
 
 PLAYBOOK = ".claude/commands/d4d-full-core.md"
+# These exact assets belong to an explicitly selected successor, not the
+# released native auto-enumerated toolchain. Never exclude by a version regex.
+SELECTED_SHARED_PLAYBOOKS = frozenset({
+    ".claude/agents/d4d-provenance-guard-v2.md",
+    ".claude/commands/d4d-full-core-v2.md",
+    ".claude/commands/d4d-agent-v2.md",
+    ".claude/commands/d4d-uniform-rules-v2.md",
+})
 SCHEMAS = ("src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
            "src/data_sheets_schema/schema/data_sheets_schema_core_all.yaml")
 UNOBSERVED_TEMPERATURE = "unknown (not observed from the agent runtime)"
@@ -45,6 +53,8 @@ def toolchain() -> dict:
     paths = {name: str(resource_path(name).absolute()) for name in SCHEMAS}
     for directory in (".claude/commands", ".claude/agents"):
         for name in resource_names(directory):
+            if name in SELECTED_SHARED_PLAYBOOKS:
+                continue
             paths[name] = str(resource_path(name).absolute())
     # Do not resolve the interpreter symlink: its path selects the venv.
     return validate_toolchain({"python": str(Path(sys.executable).absolute()), "resources": paths})
