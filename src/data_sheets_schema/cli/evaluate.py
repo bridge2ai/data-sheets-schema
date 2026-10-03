@@ -662,3 +662,8 @@ def support_request_cmd(plan, target):
     except (OSError, ValueError, KeyError) as exc:
         raise click.ClickException(str(exc)) from exc
     click.echo(json.dumps(request, ensure_ascii=False, indent=2))
+
+
+# A separate opt-in saved-response protocol; the existing planners stay unchanged.
+from data_sheets_schema.cli.support_results import support_results
+evaluate.add_command(support_results)
