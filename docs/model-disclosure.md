@@ -66,6 +66,76 @@ false, empty strings and collection-valued types. Families use the existing decl
 so `google/claude-...` denotes the Claude family regardless of routing vendor.
 
 This family flag does not measure self-preference, calibration or evaluator
-independence. An unknown model is not evidence of a different family. Historical
-output refresh/consumer integration remains under #3327, and empirical
+independence. An unknown model is not evidence of a different family. Empirical
 cross-family calibration remains separate (#3328).
+
+## Legacy summary lifecycle
+
+The following scripts are retained as legacy compatibility utilities:
+
+- `scripts/generate_rubric10_semantic_summary.py`
+- `scripts/generate_rubric10_semantic_summary_simple.py`
+
+Both read the fixed, undated
+`data/evaluation_llm/rubric10_semantic/concatenated` directory and write fixed
+historical summary paths. They also execute when imported. Their code and
+existing outputs are preserved for legacy compatibility; use the standalone
+disclosure CLI for fresh per-rating model information. This policy does not
+assert that external callers have stopped using the legacy utilities.
+
+Historical summary files, original ratings, default reports and registered
+report implementations remain preserved. The registered
+`notes/matched_cborg_2026-09-13/historical_inventory.json` includes historical
+summary hashes. The completed CBORG reference condition
+continues to use its verified archived report helper. A fresh disclosure
+report describes the explicitly selected saved bytes; it does not replace a
+historical report or become part of that registered measurement.
+
+### Select saved ratings explicitly
+
+Run from the repository root. This example selects four saved ratings from
+the undated legacy cohort and writes a new JSON report:
+
+```bash
+PYTHONPATH=src poetry run python scripts/report_model_disclosure.py \
+  data/evaluation_llm/rubric10_semantic/concatenated/AI_READI_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/CHORUS_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/CM4AI_gpt5_evaluation.json \
+  data/evaluation_llm/rubric10_semantic/concatenated/VOICE_gpt5_evaluation.json \
+  --format json --output /tmp/new-rubric10-legacy-disclosure.json
+```
+
+The output must not exist. Select a different new path for another report.
+Name dated or archived rating files separately when those are the intended
+cohort; the tool does not discover or pool them. Repeating a file argument
+retains a separate rating row. No score is calculated or changed.
+
+The `gpt5` text in these filenames is not a generation-model declaration.
+Without an explicit generation binding, generator and same-family status stay
+unknown. Original recorded project/method fields are reported as written;
+this command does not repair historical labels.
+
+Only when genuine saved generation evidence is available, add the repeatable
+`--generation-binding EVALUATION INPUT PROVENANCE` option described above.
+It must bind one of the selected ratings and satisfy the shared identity
+checks. Use `--root` for relative paths recorded inside that evidence; the
+three file arguments still use normal caller paths. Missing provenance is
+not reconstructed from method names or current defaults. Contradictory
+evidence refuses publication rather than manufacturing a generator identity.
+
+### Active consumers and issue scope
+
+For a fresh semantic score comparison, select the active reporter's
+[explicit disclosure mode](semantic-comparison-model-disclosure.md).
+The active rubric20 and rubric10 summary integrations are tracked by
+[PR #4316](https://github.com/bridge2ai/data-sheets-schema/pull/4316) and
+[issue #4317](https://github.com/bridge2ai/data-sheets-schema/issues/4317).
+Their defaults and historical outputs remain preserved; disclosure requires
+an explicit selection and fresh output.
+
+[Issue #3327](https://github.com/bridge2ai/data-sheets-schema/issues/3327)
+remains open until those active producer integrations and this lifecycle
+policy are merged. Its consumer-disclosure scope does not require replacing
+historical reports or inventing missing generator provenance.
+[Issue #3328](https://github.com/bridge2ai/data-sheets-schema/issues/3328)
+continues to cover empirical cross-family evaluation and calibration.
