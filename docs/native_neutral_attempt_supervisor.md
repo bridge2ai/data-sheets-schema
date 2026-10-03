@@ -63,8 +63,11 @@ independent checks, and the first controller stop remains alongside later
 errors. Raw transcript, control log, stderr, artifacts, failed staging files,
 captured projections and replay report are retained. `final.json` is not a
 published result without its separately fsynced, hash-bound `published.json`.
-Readback refuses changed captured bytes or aliases and inconsistent gate
-membership. Publication errors do not remove evidence or authorize redispatch.
+Readback refuses changed captured bytes, symlink/inode/link/mtime metadata,
+generated replay-report bytes, aliases and inconsistent gate membership.
+A failed marker-directory fsync or staging unlink retains two links to the
+marker; readback requires a single-link regular marker and refuses that state.
+Publication errors do not remove evidence or authorize redispatch.
 
 The public fixture test provides a complete positive using real receipt,
 derivation, schema, pair and evidence helpers; its four values are exact quotes

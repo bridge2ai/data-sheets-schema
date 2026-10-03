@@ -2,6 +2,7 @@
 from copy import deepcopy
 import hashlib
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -225,6 +226,51 @@ def test_captured_receipts_equal_actual_current_canary(completed):
     assert actual['floors'] == expected['floors']
     for field in ('chunks', 'slots', 'snippets', 'findings', 'findings_gated'):
         assert actual['receipts'][field] == expected['receipts'][field]
+
+
+@pytest.mark.parametrize('change', ['report_bytes', 'report_missing', 'captured_hardlink', 'captured_mtime'])
+def test_readback_binds_generated_report_and_captured_metadata(completed, tmp_path, change):
+    case = completed[0]
+    assert supervisor.read_final(case['raw'])['engineering_completion']
+    report = case['root']/'evidence/attribution-replay.json'
+    full = Path(case['spec']._agentic_artifact_paths['full'])
+    raw, report_stat, full_stat = report.read_bytes(), report.stat(), full.stat()
+    extra = tmp_path/'new-probe-alias'
+    try:
+        if change == 'report_bytes': report.write_bytes(raw+b'\n')
+        elif change == 'report_missing': report.rename(extra)
+        elif change == 'captured_hardlink': os.link(full, extra)
+        else: os.utime(full, ns=(full_stat.st_atime_ns, full_stat.st_mtime_ns+1_000_000))
+        with pytest.raises((OSError, ValueError), match='generated replay|metadata|regular'):
+            supervisor.read_final(case['raw'])
+    finally:
+        if change == 'report_missing': extra.rename(report)
+        if change == 'report_bytes': report.write_bytes(raw)
+        if change == 'captured_hardlink': extra.unlink()
+        os.utime(report, ns=(report_stat.st_atime_ns, report_stat.st_mtime_ns))
+        os.utime(full, ns=(full_stat.st_atime_ns, full_stat.st_mtime_ns))
+    assert supervisor.read_final(case['raw'])['engineering_completion']
+
+
+@pytest.mark.parametrize('boundary', ['directory_fsync', 'staging_unlink'])
+def test_actual_marker_publication_failure_keeps_unusable_two_link_evidence(tmp_path, monkeypatch, boundary):
+    import stat
+    target = tmp_path/'published.json'
+    ordinary_fsync, ordinary_unlink = os.fsync, os.unlink
+    def fsync(fd):
+        if boundary == 'directory_fsync' and target.exists() and stat.S_ISDIR(os.fstat(fd).st_mode):
+            raise OSError('injected marker directory fsync failure')
+        return ordinary_fsync(fd)
+    def unlink(path, *args, **kwargs):
+        if boundary == 'staging_unlink' and Path(path).name.startswith('.published.json.pending-'):
+            raise OSError('injected marker staging unlink failure')
+        return ordinary_unlink(path, *args, **kwargs)
+    monkeypatch.setattr(os, 'fsync', fsync); monkeypatch.setattr(os, 'unlink', unlink)
+    with pytest.raises(OSError, match='marker'):
+        supervisor.durable_new(target, b'{"fixture":true}\n')
+    assert target.stat().st_nlink == 2 and list(tmp_path.glob('.published.json.pending-*'))
+    with pytest.raises(ValueError, match='single-link'):
+        supervisor._file(target, 'publication marker')
 
 
 @pytest.mark.parametrize('mutation,gate', [

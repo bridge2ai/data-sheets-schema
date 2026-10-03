@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import stat
 import sys
 import tempfile
 import threading
@@ -312,6 +313,8 @@ def supervise(registration_raw):
             'shutdown': getattr(proxy, 'control_shutdown', None), 'gates': results,
             'captured_files': prepared['snapshot'].identity() if prepared is not None else {},
             'captured_aliases': dict(prepared['snapshot'].aliases) if prepared is not None else {},
+            'captured_metadata': dict(prepared['snapshot'].metadata) if prepared is not None else {},
+            'captured_alias_metadata': dict(prepared['snapshot'].alias_metadata) if prepared is not None else {},
             'additional_report': {'path': str(additional_path), 'sha256': draft._sha(additional_path.read_bytes())}
                 if additional_path.exists() else None,
             'scope': 'Explicitly synthetic local engineering evidence. No paid generation, native permission, model truth or scientific acceptance.'}
@@ -355,4 +358,30 @@ def read_final(registration_raw):
     for alias, target in result.get('captured_aliases', {}).items():
         if str(Path(alias).resolve()) != target:
             raise ValueError('saved evidence path identity differs from its capture')
+        expected_alias = result.get('captured_alias_metadata', {}).get(alias)
+        if expected_alias != {'symlink': Path(alias).is_symlink()}:
+            raise ValueError('saved evidence alias metadata differs from its capture')
+    metadata = result.get('captured_metadata')
+    if (not isinstance(metadata, dict) or not set(result.get('captured_files', {})) <= set(metadata)
+            or not set(result.get('captured_aliases', {}).values()) <= set(metadata)):
+        raise ValueError('saved evidence lacks captured file metadata')
+    for path, expected_meta in metadata.items():
+        try:
+            info = Path(path).stat()
+            current_meta = {'exists': True, 'regular': stat.S_ISREG(info.st_mode), 'links': info.st_nlink,
+                'device': info.st_dev, 'inode': info.st_ino, 'size': info.st_size, 'mtime_ns': info.st_mtime_ns}
+        except FileNotFoundError:
+            current_meta = {'exists': False, 'regular': False}
+        if current_meta != expected_meta:
+            raise ValueError('saved evidence file metadata differs from its capture')
+    additional = result.get('additional_report')
+    if additional is None:
+        if expected_completion:
+            raise ValueError('completed supervision lacks its generated replay report')
+    else:
+        expected_path = evidence/'attribution-replay.json'
+        if (type(additional) is not dict or set(additional) != {'path', 'sha256'}
+                or additional['path'] != str(expected_path)
+                or draft._sha(_file(expected_path, 'generated replay report')) != additional['sha256']):
+            raise ValueError('generated replay report differs from its exact final identity')
     return result
