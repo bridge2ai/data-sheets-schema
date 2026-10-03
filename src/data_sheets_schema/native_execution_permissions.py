@@ -235,7 +235,22 @@ def _result(event, case, expected, raw):
         _need('d4d_permission_stub' not in text, 'denied case contains helper execution marker')
 
 
-def _settled_text(events, offset, session):
+def _native_scope(event, session, model, role=None):
+    """Optional native metadata may be absent, but may not contradict identity."""
+    _need(event.get('session_id') == session and event.get('parent_tool_use_id') is None,
+          'native frame is outside the initialized parent session')
+    containers = [event]
+    if 'message' in event:
+        _need(type(event['message']) is dict, 'native message is not an object')
+        containers.append(event['message'])
+    for container in containers:
+        if 'model' in container:
+            _need(container['model'] == model, 'native frame model contradicts the selected model')
+        if role is not None and 'role' in container:
+            _need(container['role'] == role, 'native frame role contradicts its event type')
+
+
+def _settled_text(events, offset, session, model):
     """Allow ordinary assistant narration without dropping any executable frame.
 
     Scripted native providers emit a final OFFLINE_COMPLETE assistant message
@@ -251,8 +266,7 @@ def _settled_text(events, offset, session):
                 and set(block) == {'type', 'text'} and block['type'] == 'text'
                 and type(block['text']) is str for block in content)):
             break
-        _need(event.get('session_id') == session and event.get('parent_tool_use_id') is None,
-              'assistant text is outside the initialized parent session')
+        _native_scope(event, session, model, 'assistant')
         offset += 1
     return offset
 
@@ -302,13 +316,16 @@ def _verify(raw_manifest, expected):
     _need(init.get('permissionMode', 'dontAsk') == 'dontAsk', 'native init contradicts permission mode')
     session = init.get('session_id')
     _need(type(session) is str and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}', session), 'invalid session identity')
+    model = expected['runtime']['model']
+    _native_scope(init, session, model)
     offset = 2
     request_ids = set()
     outcomes = []
     for number, case in enumerate(cases):
-        offset = _settled_text(events, offset, session)
+        offset = _settled_text(events, offset, session, model)
         call, callback, result = events[offset:offset+3]; offset += 3
         _need(call.get('type') == 'assistant' and call.get('session_id') == session, 'tool call outside session/order')
+        _native_scope(call, session, model, 'assistant')
         expected_block = {'type':'tool_use', 'id':case['id'], 'name':case['tool'], 'input':case['input']}
         _need(_same(call.get('message', {}).get('content'), [expected_block]), 'tool call differs from exact case')
         request_id = callback.get('request_id')
@@ -329,13 +346,16 @@ def _verify(raw_manifest, expected):
                         'response':native.hook_output(kind,reason)}}}
         _need(_same(clean[number+2], decision), 'parent decision does not match recomputed policy')
         _need(result.get('type') == 'user' and result.get('session_id') == session, 'result outside exact session/order')
+        _native_scope(result, session, model, 'user')
         _result(result, case, expected, raw)
         outcomes.append({'id':case['id'],'admitted':case['allow'],'verified':True})
-    offset = _settled_text(events, offset, session)
+    offset = _settled_text(events, offset, session, model)
     _need(len(events) == offset+1, 'extra, pending, duplicate or post-terminal evidence')
     terminal = events[offset]
+    _native_scope(terminal, session, model)
     _need(terminal.get('type') == 'result' and terminal.get('session_id') == session
           and terminal.get('is_error') is False
+          and terminal.get('subtype', 'success') == 'success'
           and terminal.get('terminal_reason') == 'completed' and terminal.get('stop_reason') == 'end_turn',
           'native terminal is not explicitly successful')
     denied = terminal.get('permission_denials')

@@ -262,3 +262,41 @@ def test_text_frames_cannot_hide_unbound_or_late_lifecycle_events(fixture,change
     else:events.append(deepcopy(events[-1]))
     change_member(value,'transcript.jsonl',jsonlines(events))
     with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('change',['init_parent','call_parent','result_parent','terminal_parent',
+    'call_message_model','call_outer_model','result_model','terminal_model','call_message_role','call_outer_role',
+    'result_role','text_model','text_role','terminal_error_subtype','terminal_unknown_subtype','terminal_null_subtype'])
+def test_explicit_native_metadata_contradictions_refuse(fixture,change):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events'])
+    if change.endswith('_parent'):
+        index={'init_parent':1,'call_parent':2,'result_parent':4,'terminal_parent':-1}[change]
+        events[index]['parent_tool_use_id']='unregistered-child'
+    elif change=='call_message_model':events[2]['message']['model']='foreign'
+    elif change=='call_outer_model':events[2]['model']='foreign'
+    elif change=='result_model':events[4]['message']['model']='foreign'
+    elif change=='terminal_model':events[-1]['model']='foreign'
+    elif change=='call_message_role':events[2]['message']['role']='user'
+    elif change=='call_outer_role':events[2]['role']='user'
+    elif change=='result_role':events[4]['message']['role']='assistant'
+    elif change in ('text_model','text_role'):
+        text=completion_text(fixture);text['message']['model' if change=='text_model' else 'role']='foreign'
+        events.insert(-1,text)
+    elif change=='terminal_error_subtype':events[-1]['subtype']='error_during_execution'
+    elif change=='terminal_unknown_subtype':events[-1]['subtype']='unknown'
+    else:events[-1]['subtype']=None
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])
+
+
+def test_matching_optional_native_metadata_and_completion_remain_valid(fixture):
+    value=deepcopy(fixture['manifest']);events=deepcopy(fixture['events']);model=fixture['expected']['runtime']['model']
+    for event in events:
+        if event['type'] in ('system','assistant','user','result'):
+            event['parent_tool_use_id']=None
+            event['model']=model
+        if event['type'] in ('assistant','user'):
+            event['message'].update(model=model,role=event['type'])
+    events[-1]['subtype']='success';events.insert(-1,completion_text(fixture))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    assert permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])['passed']
