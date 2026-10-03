@@ -291,7 +291,7 @@ def test_actual_consumed_failure_retains_evidence_and_never_repurchases(selected
             result.content[0].text = json.dumps(value)
         return result
     monkeypatch.setattr(c.messages, 'create', broken)
-    with pytest.raises((ValueError, RuntimeError)):
+    with pytest.raises((ValueError, RuntimeError, ledger.UsageLedgerError)):
         api.execute(selected, client=c)
     state = runtime._state(selected)
     assert state['state'] == 'failed'
@@ -300,7 +300,7 @@ def test_actual_consumed_failure_retains_evidence_and_never_repurchases(selected
         assert delivered['text'] and delivered['usage_id']
     before = files(selected)
     retry = client(selected)
-    with pytest.raises((ValueError, RuntimeError)):
+    with pytest.raises((ValueError, RuntimeError, ledger.UsageLedgerError)):
         api.execute(replace(selected), client=retry)
     assert not retry.messages.calls
     assert files(selected) == before
@@ -340,7 +340,7 @@ def assert_completed_mutations_refuse_without_calls(spec):
         before = files(spec)
         retry = client(spec)
         try:
-            with pytest.raises((ValueError, RuntimeError)):
+            with pytest.raises((ValueError, RuntimeError, ledger.UsageLedgerError)):
                 api.execute(replace(spec), client=retry)
             assert not retry.messages.calls
             assert files(spec) == before
