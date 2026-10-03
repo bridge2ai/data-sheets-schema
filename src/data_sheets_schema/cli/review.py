@@ -66,7 +66,7 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
     _require_repo_root_cwd("d4d review pack")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
     method = method or resolve_method(label, project)
-    from data_sheets_schema.review_pack import PackAttested, pack_pins, write_pack
+    from data_sheets_schema.review_pack import IdentifierAuthorityUnavailable, PackAttested, pack_pins, write_pack
     prov = _provenance(method, label, project)
     if not prov.exists():
         raise click.ClickException(f"no provenance record at {prov}")
@@ -78,6 +78,8 @@ def pack(method, label, project, instruction_file, receipted, receiptless, force
                             {"receipted_slots": receipted, "receiptless_slots": receiptless},
                             force=force, force_hint="`--force`")
     except PackAttested as exc:
+        raise click.ClickException(str(exc)) from exc
+    except IdentifierAuthorityUnavailable as exc:
         raise click.ClickException(str(exc)) from exc
     except yaml.YAMLError as exc:
         # `review_pack._load_yaml` names the file that failed — the pack
