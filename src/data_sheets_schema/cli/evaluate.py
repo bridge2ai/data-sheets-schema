@@ -277,7 +277,17 @@ def plan_cmd(config, paths_only, all_replicates, runtime):
 @click.argument("records", nargs=-1, type=click.Path(exists=True))
 @click.option("--project", default=None,
               help="Limit to one project when reading the canonical set.")
-def related_datasets_cmd(records, project, runtime):
+@click.option("--schema-policy", type=click.Choice(["legacy_current", "recorded"]),
+              default="legacy_current", show_default=True,
+              help="Recorded mode binds each artifact to its full/core historical schema.")
+@click.option("--provenance", type=click.Path(), default=None,
+              help="Recorded mode: explicit provenance for one explicit artifact.")
+@click.option("--kind", type=click.Choice(["full", "core"]), default=None,
+              help="Recorded mode: explicit artifact kind, paired with --provenance.")
+@click.option("--json", "as_json", is_flag=True,
+              help="Recorded mode: emit versioned per-artifact results and coverage.")
+def related_datasets_cmd(records, project, runtime, schema_policy="legacy_current",
+                         provenance=None, kind=None, as_json=False):
     """Classify `related_datasets` defects by mode (#292).
 
     All three VOICE replicates fail this slot, each differently, and
@@ -289,6 +299,10 @@ def related_datasets_cmd(records, project, runtime):
 
     With no arguments, reads the canonical set.
     """
+    if schema_policy == "recorded":
+        return _related_recorded_cli(records, project, runtime, provenance, kind, as_json)
+    if provenance is not None or kind is not None or as_json:
+        raise click.UsageError("--provenance, --kind and --json require --schema-policy recorded")
     import yaml
 
     from data_sheets_schema.related_datasets import inspect, summarise
@@ -322,6 +336,74 @@ def related_datasets_cmd(records, project, runtime):
                 click.echo(f"  [{defect.index}] {defect.mode}: {defect.detail}")
     click.echo("")
     click.echo(f"{total} defect(s) across {len(paths)} record(s)")
+    if total:
+        raise SystemExit(1)
+
+
+def _related_recorded_cli(records, project, runtime, provenance, kind, as_json):
+    import json
+    from data_sheets_schema.related_dataset_diagnostics import INSTRUMENT, check_record
+    from data_sheets_schema.evaluation_plan import NothingSelected, VARIANTS
+    from data_sheets_schema.runs import AmbiguousCanonical, canonical_runs
+
+    if records:
+        if len(records) != 1 or provenance is None or kind is None:
+            raise click.UsageError("recorded explicit input requires one artifact and both --provenance and --kind")
+        selected = [(Path(records[0]), Path(provenance), kind)]
+    else:
+        if provenance is not None or kind is not None:
+            raise click.UsageError("--provenance and --kind require an explicit artifact")
+        try:
+            canonical = canonical_runs(runtime=runtime)
+            if not canonical:
+                raise NothingSelected(None)
+        except (NothingSelected, AmbiguousCanonical) as exc:
+            raise click.ClickException(str(exc))
+        selected, seen = [], {}
+        for name, record in canonical.items():
+            if project not in (None, name):
+                continue
+            for variant in VARIANTS:
+                if not record.get(variant):
+                    continue
+                if not record.get('provenance'):
+                    raise click.ClickException(f"canonical artifact lacks provenance association: {record[variant]}")
+                path, prov = Path(record[variant]), Path(record['provenance'])
+                identity, association = path.resolve(), (prov.resolve(), variant)
+                if identity in seen:
+                    if seen[identity] != association:
+                        raise click.ClickException(f"ambiguous canonical artifact association: {path}")
+                    continue
+                seen[identity] = association
+                selected.append((path, prov, variant))
+        if not selected:
+            raise click.ClickException(f"no canonical records matched project {project!r}")
+
+    results = [check_record(path, prov, kind=variant) for path, prov, variant in selected]
+    unavailable = sum(not r['checked'] for r in results)
+    total = sum(len(r['defects']) for r in results if r['checked'])
+    output = {'instrument': INSTRUMENT, 'requested_policy': 'recorded', 'records': results,
+              'coverage': {'selected': len(results), 'checked': len(results) - unavailable,
+                           'unavailable': unavailable, 'defects': total}}
+    if as_json:
+        click.echo(json.dumps(output, sort_keys=True))
+    else:
+        for result in results:
+            click.echo(f"{result['path']} [{result['kind']}] policy=recorded instrument={INSTRUMENT}")
+            if not result['checked']:
+                click.echo(f"  unavailable: {result['reason']}")
+                continue
+            schema = result['selected_schema']
+            click.echo(f"  schema={schema['sha256']} root={schema['root']} owner={schema['owner']} "
+                       f"enum={schema['enum']} basis={result['schema_basis']['source']}")
+            click.echo(f"  output={result['output_association']['historical_output']}: "
+                       f"{result['output_association']['meaning']}")
+            for defect in result['defects']:
+                click.echo(f"  [{defect['index']}] {defect['mode']}: {defect['detail']}")
+        click.echo(f"{total} defect(s) across {len(results) - unavailable} checked record(s); "
+                   f"{unavailable} unavailable of {len(results)} selected")
+    if unavailable:
+        raise SystemExit(2)
     if total:
         raise SystemExit(1)
 
