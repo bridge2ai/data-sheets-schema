@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/conforms_to_schema/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/native_attribution_callback_composition/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: conforms_to_schema - data-sheets-schema</title>
+        <title>Offline native attribution callback composition - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-conforms_to_schema" class="md-skip">
+        <a href="#offline-native-attribution-callback-composition" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: conforms_to_schema
+              Offline native attribution callback composition
             
           </span>
         </div>
@@ -316,56 +316,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#capture-and-verify" class="md-nav__link">
+    Capture and verify
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#offline-evidence-and-remaining-limits" class="md-nav__link">
+    Offline evidence and remaining limits
   </a>
   
 </li>
@@ -384,138 +343,95 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/conforms_to_schema.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/native_attribution_callback_composition.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-conforms_to_schema">Slot: conforms_to_schema</h1>
-<p><em>The metadata schema <strong>this record itself</strong> is written in — normally <code>https://w3id.org/bridge2ai/data-sheets-schema</code>. A statement about the datasheet, not about the data it describes; a standard the <em>data</em> follows belongs in <code>conforms_to</code>.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/conformsToSchema">d4d:conformsToSchema</a>
-Alias: conforms_to_schema</p>
-<!-- no inheritance hierarchy -->
+<h1 id="offline-native-attribution-callback-composition">Offline native attribution callback composition</h1>
+<p>This source-checkout adapter demonstrates pre-tool enforcement of the native
+attribution draft obligation through the existing controller. It provides no
+production launcher and makes no authentication or provider call. Parent #2427
+still requires a fresh execution registration, native-runtime permission checks,
+independent review, CI, explicit launch authorization and empirical evaluation.
+Shared-condition decisions under #3336 are unchanged.</p>
+<p><code>native_attribution_registration.NativeAttributionState</code> provides ordered prefix
+observation and completed-history reporting. The existing <code>verify_history</code> API
+still verifies a supplied completed trace. In callback mode, a passing result is
+recomputed against current saved files before another callback is released.
+Report writes invalidate that pass even if their bytes are later restored.
+Pending tools, malformed results, protected-file corrections, exceeded draft
+limits and prior terminal failures cannot be cleared by a later successful check.
+After the first draft check, inherited mutation-capable shell helpers cannot
+bypass the report-only correction rule. Registered read-only lookups remain
+eligible; unknown shell effects refuse.</p>
+<p>The new <code>native_attribution_controller</code> module builds its policy from the exact
+explicit RunSpec. It adds only the fully bound draft command to the existing
+command grammar. Every concrete command in the selected instruction is checked
+for admission before a composition can be written. An instruction whose quoting
+is rejected by the frozen runtime grammar remains rejected; preparation does not
+silently rewrite it. The old launchers and their registration kinds are unchanged.</p>
+<p>The composition selects the existing version3 <code>HISTORY_CONTRACT</code> explicitly.
+Its observer barrier precedes callback publication; the controller retains its
+bounded queues, timeouts, sticky stop handling and worker-shutdown accounting.
+The adapter is passed through existing <code>execute_child</code> callback parameters in
+neutral local-process tests. Historical phase/receipt checks run first. A passing
+draft gate is not a complete generation acceptance and does not replace final
+evidence, schema, pair, receipt, usage, permission or provenance requirements.</p>
+<p>After an actual current final-evidence pass, one exception permits the exact
+emitted provenance-recorder command. Its existing consumer writes the one new
+registered provenance file (including its inline-check update); the adapter
+does not authorize a module or metadata commands in general. Existing targets,
+symlinks, hard links, failed recorder results and later tool continuation refuse.
+Final input hashes are rechecked through recording, the resulting metadata hash
+is retained, and a completed report rechecks both. This preserves evidence of
+what executed; it does not certify all provenance checks or model usage.</p>
+<h2 id="capture-and-verify">Capture and verify</h2>
+<p>Start with a freshly prepared #4304 offline registration and its exact instruction
+bytes, in the same source checkout and interpreter. These are new files, not a
+copy of a spent paid registration. The Python API can write a new composition:</p>
+<pre><code class="language-python">from pathlib import Path
+from data_sheets_schema.native_attribution_controller import write_composition
 
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../String/">String</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>https://w3id.org/bridge2ai/data-sheets-schema</td>
-</tr>
-<tr>
-<td>d4d:perRecord</td>
-<td>True</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:conformsToSchema</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:conforms_to_schema</td>
-</tr>
-<tr>
-<td>broad</td>
-<td>dcterms:conformsTo</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: conforms_to_schema
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: https://w3id.org/bridge2ai/data-sheets-schema
-  d4d:perRecord:
-    tag: d4d:perRecord
-    value: true
-description: The metadata schema **this record itself** is written in — normally `https://w3id.org/bridge2ai/data-sheets-schema`.
-  A statement about the datasheet, not about the data it describes; a standard the
-  *data* follows belongs in `conforms_to`.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-broad_mappings:
-- dcterms:conformsTo
-rank: 1000
-slot_uri: d4d:conformsToSchema
-alias: conforms_to_schema
-domain_of:
-- Information
-range: string
-
+write_composition(
+    Path(&quot;fresh-offline-registration.json&quot;).read_bytes(),
+    Path(&quot;fresh-instruction.md&quot;),
+    Path(&quot;new-callback-composition.json&quot;),
+)
 </code></pre>
-
-</details>
+<p>The destination must be new and outside captured source/historical-control
+directories. No existing file or attempt is overwritten. <code>verified_composition</code>
+reconstructs the selection before accepting it. <code>CallbackAdapter</code> exposes observer
+and classifier hooks for an independently reviewed caller; it has no method that
+starts a process and is not an execution approval.</p>
+<p>The artifact includes the original registration's exact bytes/hash, instruction
+path/hash, exact command policy/hash, Python identity and the pinned twelve-module
+local controller dependency closure. The source inventory is frozen as
+<code>native_controller_sources_v1.json</code>; source drift, missing dependencies or modules
+loaded from another checkout refuse before use. The original package source-tree
+and canonical prompt pins remain mandatory. These hashes bind local declarations;
+they do not authenticate a provider or certify a live runtime.</p>
+<p>An absent/unused source manifest is excluded from the draft command and its
+source authority. A selected-but-unused manifest can still be needed by the
+unchanged recorder/profile command. The composition pins that file separately as
+metadata-only and retains the recorder's selected manifest permission; it never
+relabels the file as draft evidence.</p>
+<h2 id="offline-evidence-and-remaining-limits">Offline evidence and remaining limits</h2>
+<p>Tests use an ordinary local Python process that speaks the initialize/tool-use/
+callback/result protocol. It executes the actual deterministic preflight and
+final evidence and provenance-recorder commands on neutral temporary files, and writes markers only after
+receiving a real allow reply. Tests preserve originals and failed transcripts,
+exercise report-only correction, pending callbacks, deadlines, inherited stops,
+finite checks, and refusal to reuse an attempt directory. A later queued callback
+receives no permission while recomputation is blocked.</p>
+<p>A direct native controller cannot meter provider spend already incurred in
+producing a tool request. Terminal failure raises into existing close/terminate
+handling instead of inviting a tool retry; there is no automatic restart or
+resume. A fake-runtime success is neither a live permission proof nor a canary
+result. Actual model/effort/context/budget/deadline choices, keep-awake composition,
+owner-approved shared condition and a separately authorized paid canary remain
+outside this delivery. Held audit28 controls and historical attempts are untouched.</p>
 
 
 
