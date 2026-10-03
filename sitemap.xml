@@ -2126,6 +2126,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/semantic-taxonomy-figure/</loc>
+         <lastmod>2026-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/semantic_exchange/</loc>
          <lastmod>2026-10-03</lastmod>
          <changefreq>daily</changefreq>

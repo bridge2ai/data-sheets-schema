@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/semantic-taxonomy-figure/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Structured issue taxonomy Figure 11 - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#structured-issue-taxonomy-figure-11" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Structured issue taxonomy Figure 11
             
           </span>
         </div>
@@ -316,56 +316,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#explicit-ordered-selection" class="md-nav__link">
+    Explicit ordered selection
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#what-is-checked" class="md-nav__link">
+    What is checked
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
+  <a href="#groups-count-units-and-artifacts" class="md-nav__link">
+    Groups, count units and artifacts
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#capture-and-publication-boundary" class="md-nav__link">
+    Capture and publication boundary
   </a>
   
 </li>
@@ -384,110 +357,128 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/semantic-taxonomy-figure.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
+<h1 id="structured-issue-taxonomy-figure-11">Structured issue taxonomy Figure 11</h1>
+<p><code>report_semantic_taxonomy.py</code> renders a new SVG Figure 11 and joined CSV/JSON
+sidecars from explicitly selected structured semantic ratings. It reads the
+shared evaluator-declared category vocabulary and issue-to-item links; it does
+not classify prose, score records, execute an evaluator, or revise historical
+figures. The protected legacy Figure 11 reproduction script and its 56 selected
+ratings remain unchanged.</p>
+<p>Use the repository development environment, which already includes matplotlib:</p>
+<pre><code class="language-sh">PYTHONPATH=src poetry run python scripts/report_semantic_taxonomy.py \
+  --selection /absolute/path/selection.json \
+  --output-dir /absolute/path/new-figure-directory
 </code></pre>
-
-</details>
+<p>The destination must not exist. This command is offline. A missing plotting
+dependency is a refusal; it does not install anything.</p>
+<h2 id="explicit-ordered-selection">Explicit ordered selection</h2>
+<pre><code class="language-json">{
+  &quot;kind&quot;: &quot;semantic_taxonomy_figure_selection&quot;,
+  &quot;version&quot;: 1,
+  &quot;ratings&quot;: [
+    {
+      &quot;rating&quot;: &quot;ratings/example-semantic.json&quot;,
+      &quot;group&quot;: &quot;caller-declared selection&quot;,
+      &quot;input&quot;: &quot;records/example.yaml&quot;,
+      &quot;context&quot;: &quot;contexts/example.yaml&quot;
+    },
+    {
+      &quot;rating&quot;: &quot;ratings/another-semantic.json&quot;,
+      &quot;group&quot;: &quot;caller-declared selection&quot;
+    }
+  ]
+}
+</code></pre>
+<p>Paths resolve relative to the selection file. These are illustrative paths;
+select the actual raw rating files and, when available, their exact input and
+independent caller context. <code>input</code> and <code>context</code> are optional, but context
+without input is refused. With input and no context, applicability predicates
+are unknown, not copied from the evaluator's declarations. The example does
+not imply that any particular recorded rating has a validated input binding.</p>
+<p>Every array occurrence is retained, including repeated files and ratings with
+zero issues. Counts use <strong>selection occurrences</strong>, not independently sampled
+ratings. Group labels are caller declarations; the consumer does not discover
+files or infer cohorts, generators, repetitions or scientific membership.
+Unknown selection keys, duplicate JSON/YAML keys, YAML merges/cycles, nonfinite
+values and malformed paths/documents refuse. Bounds are 256 occurrences, 24
+distinct groups, 512 characters per group/evaluator label, 16 MiB per captured
+file, 256 MiB total, 250,000 parsed nodes and depth 64. Exceeding a bound refuses;
+no rows or text are truncated.</p>
+<h2 id="what-is-checked">What is checked</h2>
+<p>Only rubric10-semantic 3.0 and rubric20-semantic 3.0/4.0 are supported. Legacy
+ratings refuse; use their existing reproduction workflows without rewriting
+them. The trusted instrument selector chooses the exact schema, rubric, agent
+definition and evidence-name authority. The consumer captures each resource and
+checks the recorded definition, rubric and authority SHA256 values against it;
+the captured schema validates the rating. It checks scope, arithmetic and
+applicability, then uses the shared issue-link checker to reject unknown or
+non-applicable item IDs and lowered issues with no below-maximum linked item.
+It never treats a saved <code>passed</code> or acceptance field as proof.</p>
+<p>Two explicitly displayed states remain distinct:</p>
+<ul>
+<li><strong>Declaration shape and links checked:</strong> no authoritative input supplied.
+  Applicability and scope are checked for internal consistency only; quotations,
+  absences, counts, coverage and actual resource identities are not verified.</li>
+<li><strong>Input-bound mechanical checks passed:</strong> exact captured input bytes and
+  independent context match the rating's recorded identities. The existing
+  evidence checker recomputes quotations, absences, counts and coverage. Errors
+  refuse publication; warnings remain in JSON and the per-rating warning count.</li>
+</ul>
+<p>Both states describe evaluator declarations. Neither establishes that cited
+material supports a scientific inference, authenticates evaluator execution,
+or constitutes human approval. A group's SVG label and aggregate CSV rows
+show the number of input-bound and declaration-only occurrences separately.</p>
+<h2 id="groups-count-units-and-artifacts">Groups, count units and artifacts</h2>
+<p>Groups are separated by caller label, rubric, version, all four selected
+resource digests, declared evaluator identity/type and the full model declaration
+digest. The evaluator key uses the existing <code>evaluator_model</code>, <code>model_id</code>, then
+<code>name</code> precedence. A missing identity is explicitly unknown and gets its own
+occurrence group. Different model declarations are never silently pooled.</p>
+<p>The output contains:</p>
+<ul>
+<li><code>fig11_semantic_taxonomy.svg</code>: category counts and high-severity lowered issue
+  counts per group, including groups with zero issues.</li>
+<li><code>ratings.csv</code>: every occurrence and validation state, including zero issues.</li>
+<li><code>issues.csv</code>: one row per issue occurrence, with its declared category/type,
+  severity, effect and JSON-encoded item list.</li>
+<li><code>categories.csv</code>: every vocabulary category per group, including zero counts.</li>
+<li><code>item_links.csv</code>: one row per issue-to-item link; one issue linked to two items
+  contributes one issue and two links.</li>
+<li><code>lowered.csv</code>: high-severity issues declared to lower scores, counted once per
+  issue regardless of link count. High-severity <code>noted_only</code> issues do not count.</li>
+<li><code>report.json</code>: complete payload, captured source/resource paths, raw SHA256 and
+  byte counts, local file identities, warnings, group keys and artifact hashes.</li>
+</ul>
+<p>CSV joins use the selection index, group ID and original issue index. Group IDs
+follow first occurrence, and the report retains the full model declaration and
+ordered selection. The SVG and all sidecars come from the same prepared payload.</p>
+<h2 id="capture-and-publication-boundary">Capture and publication boundary</h2>
+<p><code>prepare(selection_path)</code> captures bytes before parsing and returns an immutable
+<code>PreparedFigure</code>. <code>publish(prepared, output_dir)</code> renders only that captured
+payload. Shared validation still resolves its usual rubric/authority resources;
+the consumer verifies their captured bytes and identities after validation and
+again before publication. Rendering never reparses a selected live rating,
+record or context. All inputs/resources are checked for drift before and after
+rendering and before the final manifest. This is a local consistency check, not
+a lock against arbitrary concurrent external writers.</p>
+<p>Publication reserves a fresh directory, creates artifacts exclusively, verifies
+their written bytes and writes <code>report.json</code> last. A complete report has
+<code>state: complete</code>, a SHA256 for the canonical prepared payload and exact hashes
+for every artifact. A directory without this complete manifest is a partial
+failure and must not be used as a complete figure. Retain such a directory for
+inspection and choose a different fresh destination; the tool does not clean or
+replace it. Existing directories, symlinks, input aliases and overwrite attempts
+refuse. Historical outputs and frozen registrations are never refreshed.</p>
+<p>This implements the structured figure consumer for <a href="https://github.com/bridge2ai/data-sheets-schema/issues/4333">#4333</a>.
+The parent <a href="https://github.com/bridge2ai/data-sheets-schema/issues/2920">#2920</a>
+remains subject to its full acceptance review; this guide does not declare it
+closed or introduce a new scoring instrument.</p>
 
 
 
