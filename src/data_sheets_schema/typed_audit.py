@@ -22,6 +22,7 @@ ASSEMBLY = "typed_audit_assembly_v1"
 MAX_PACKET_BYTES = 96_000_000
 MAX_ASSEMBLY_BYTES = 160_000_000
 MAX_SCHEMA_FILES = 256
+MAX_SAVED_RESPONSE_BYTES = 3_000_000
 LIMITATIONS = [
     "Scientific support, applicability, novelty and exhaustive recall are unverified.",
     "Acceptance covers captured identities, declared coverage and literal source-evidence checks only.",
@@ -138,7 +139,12 @@ def _derive(inputs, schema_rows, project, limits):
     plan = batches.make_plan(raw["original_full"].decode("utf-8"), version=2,
         **{k: limits[k] for k in ("max_paths", "max_inventory_bytes", "max_workers")})
     contracts = {stage: {"contract": output_format.contract(stage, version=2),
-                         "rendered": output_format.render(stage, version=2)}
+                         "rendered": output_format.render(stage, version=2),
+                         "saved_response": {"kind": f"typed_audit_{stage}_response_v1",
+                             "required_fields": ["kind", "packet_sha256", "request_sha256", "response",
+                                                 "worker_id" if stage == "worker" else "typed_index_sha256"],
+                             "response_encoding": "Exact UTF-8 inner JSON bytes as base64, sha256 and bytes.",
+                             "authority": "A declared request/response association, not provider authentication."}}
                  for stage in ("worker", "integration")}
     shared = _json({"protocol": audit_protocol.select(audit_protocol.TYPED),
         "original_full": raw["original_full"].decode("utf-8"),
@@ -174,6 +180,8 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
     packet = _seal(dict(kind=PACKET, protocol=audit_protocol.select(protocol), inputs=inputs,
         schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))
     _bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)
+    for worker in packet["plan"]["workers"]:
+        worker_request(packet, worker["id"])
     return packet
 
 
@@ -200,17 +208,87 @@ def _omission_findings(findings, candidates=None):
                 raise ValueError("finding references an unknown omission candidate")
 
 
+def worker_request(packet, worker_id):
+    """Export a request after packet sealing; identity hashes its exact payload."""
+    _open(packet)
+    if type(worker_id) is not str or worker_id not in packet["requests"]["workers"]:
+        raise ValueError("unknown worker request")
+    payload = {"packet_sha256": packet["sha256"], "worker_id": worker_id,
+        "shared_context": packet["requests"]["shared_context"],
+        "stage": packet["requests"]["workers"][worker_id]}
+    request = {"kind": "typed_audit_worker_request_v1", "payload": payload,
+               "request_sha256": _sha(_json(payload))}
+    if len(_json(request)) > packet["limits"]["max_request_bytes"]:
+        raise ValueError("complete worker request exceeds max_request_bytes")
+    return request
+
+
+def capture_response(request, response):
+    """Declare saved bytes' association with an exported request, without authentication.
+
+    Rewrapping old bytes is a new caller provenance claim. The consumer cannot
+    establish that a provider read a request; it does reject unchanged prior
+    envelopes against different packets or integration inputs.
+    """
+    if type(request) is not dict:
+        raise ValueError("saved response requires an exported request")
+    if request.get("kind") == "typed_audit_worker_request_v1":
+        _exact(request, {"kind", "payload", "request_sha256"}, "worker request")
+        payload = request["payload"]
+        _exact(payload, {"packet_sha256", "worker_id", "shared_context", "stage"}, "worker payload")
+        selected, identity = request, {"worker_id": payload["worker_id"]}
+        stage = "worker"
+    elif request.get("kind") == "typed_audit_index_v1":
+        _exact(request, {"kind", "packet_sha256", "index", "omission_check", "integration_request", "sha256"}, "typed index")
+        if request != _seal({key: value for key, value in request.items() if key != "sha256"}):
+            raise ValueError("typed index identity mismatch")
+        selected = request["integration_request"]
+        _exact(selected, {"kind", "payload", "request_sha256"}, "integration request")
+        if selected["kind"] != "typed_audit_integration_request_v1":
+            raise ValueError("integration request kind mismatch")
+        payload = selected["payload"]
+        _exact(payload, {"stage", "packet_sha256", "shared_context", "proposal_index", "workers",
+                         "omission_response", "omission_check", "output_contract"}, "integration payload")
+        if payload["stage"] != "integration":
+            raise ValueError("integration request stage mismatch")
+        if payload.get("packet_sha256") != request["packet_sha256"]:
+            raise ValueError("integration request packet mismatch")
+        identity, stage = {"typed_index_sha256": request["sha256"]}, "integration"
+    else:
+        raise ValueError("unsupported exported request kind")
+    if selected["request_sha256"] != _sha(_json(payload)):
+        raise ValueError("exported request payload identity mismatch")
+    return _json({"kind": f"typed_audit_{stage}_response_v1", "packet_sha256": payload["packet_sha256"],
+                  "request_sha256": selected["request_sha256"], **identity,
+                  "response": _blob(response, audit_grammar.MAX_BYTES)})
+
+
+def _unwrap(saved, request):
+    value = _bounded_json(saved, "saved response envelope", MAX_SAVED_RESPONSE_BYTES)
+    raw = _unblob(value.get("response"), audit_grammar.MAX_BYTES)
+    if _json(value) != capture_response(request, raw):
+        raise ValueError("saved response envelope does not bind this exact packet/request/index")
+    return raw
+
+
+def _workers(packet, workers):
+    if type(workers) is not dict:
+        raise ValueError("saved workers must have an explicit id roster")
+    return {key: _unwrap(raw, worker_request(packet, key)) for key, raw in workers.items()}
+
+
 def check_worker(packet, worker_id, response):
     """Structural worker check; global omission/source acceptance occurs later."""
-    _open(packet)
-    report = batches.check_worker(response, packet["plan"], worker_id, version=2)
+    raw = _unwrap(response, worker_request(packet, worker_id))
+    report = batches.check_worker(raw, packet["plan"], worker_id, version=2)
     if report["passed"]:
         try:
-            _omission_findings(audit_grammar._load(response)["findings"])
+            _omission_findings(audit_grammar._load(raw)["findings"])
         except ValueError as exc:
             report = {**report, "passed": False, "error_count": 1,
                       "errors": [{"code": "omission_reference_contract", "path": "/findings", "detail": str(exc)}]}
     return {"packet_sha256": packet["sha256"], "response_sha256": _sha(response),
+            "inner_response_sha256": _sha(raw),
             "worker_id": worker_id, "grammar": report, "passed": report["passed"],
             "acceptance_scope": "worker structure only; source evidence and candidate membership not yet checked"}
 
@@ -228,19 +306,23 @@ def index(packet, workers, omission_response):
     report = prepared.check(omission_response, saved_request=packet["omission_request"])
     if not report["protocol_complete"]:
         raise ValueError("omission response does not satisfy complete captured inventory")
-    result = _index(packet, workers)
+    inner_workers = _workers(packet, workers)
+    result = _index(packet, inner_workers)
     candidates = {row["id"] for row in report["declared_candidates"]}
-    for raw in workers.values():
+    for raw in inner_workers.values():
         _omission_findings(audit_grammar._load(raw)["findings"], candidates)
-    request = _json({"stage": "integration", "packet_sha256": packet["sha256"],
-        "shared_context_sha256": _sha(packet["requests"]["shared_context"].encode()),
+    payload = {"stage": "integration", "packet_sha256": packet["sha256"],
+        "shared_context": packet["requests"]["shared_context"],
         "proposal_index": result, "workers": {key: raw.decode("utf-8") for key, raw in workers.items()},
         "omission_response": omission_response.decode("utf-8"), "omission_check": report,
-        "output_contract": packet["contracts"]["integration"]}).decode("utf-8")
-    if len((packet["requests"]["shared_context"] + request).encode()) > packet["limits"]["max_request_bytes"]:
+        "output_contract": packet["contracts"]["integration"]}
+    request = {"kind": "typed_audit_integration_request_v1", "payload": payload,
+               "request_sha256": _sha(_json(payload))}
+    result = _seal({"kind": "typed_audit_index_v1", "packet_sha256": packet["sha256"],
+                   "index": result, "omission_check": report, "integration_request": request})
+    if len(_json(result)) > packet["limits"]["max_request_bytes"]:
         raise ValueError("complete integration request exceeds max_request_bytes")
-    return _seal({"kind": "typed_audit_index_v1", "packet_sha256": packet["sha256"],
-                  "index": result, "omission_check": report, "integration_request": request})
+    return result
 
 
 def _account(audit, delta, candidates):
@@ -265,8 +347,9 @@ def _account(audit, delta, candidates):
 def _result(packet, workers, omission_response, integration_response):
     raw, _ = _open(packet)
     bound_index = index(packet, workers, omission_response)
-    audit_raw, lineage = batches.assemble(packet["plan"], workers, integration_response, version=2)
-    audit, delta = audit_grammar._load(audit_raw), audit_grammar._load(integration_response)
+    inner_integration = _unwrap(integration_response, bound_index)
+    audit_raw, lineage = batches.assemble(packet["plan"], _workers(packet, workers), inner_integration, version=2)
+    audit, delta = audit_grammar._load(audit_raw), audit_grammar._load(inner_integration)
     # Check candidates in replaced/dropped proposal entry paths too. The final
     # exact-once allocation is separate from proposal membership.
     candidate_rows = bound_index["omission_check"]["declared_candidates"]
@@ -284,6 +367,7 @@ def _result(packet, workers, omission_response, integration_response):
     lineage = {**lineage, "packet_sha256": packet["sha256"], "typed_index_sha256": bound_index["sha256"],
         "omission_request_sha256": packet["omission_request"]["request_sha256"],
         "omission_response_sha256": _sha(omission_response), "omission_candidates": accounting,
+        "integration_saved_response_sha256": _sha(integration_response),
         "input_sha256": {key: item["sha256"] for key, item in packet["inputs"].items()},
         "schema_sources_sha256": _sha(_json(packet["schema_sources"]))}
     counts = Counter(f.get("kind", "untyped") for f in audit["findings"])
@@ -315,9 +399,9 @@ def assemble(packet, workers, omission_response, integration_response):
     if not report["passed"]:
         raise ValueError("source-evidence acceptance failed; use check-integration for bounded diagnostics")
     result = _seal({"kind": ASSEMBLY, "packet": packet,
-        "workers": {key: _blob(raw, audit_grammar.MAX_BYTES) for key, raw in workers.items()},
+        "workers": {key: _blob(raw, MAX_SAVED_RESPONSE_BYTES) for key, raw in workers.items()},
         "omission_response": _blob(omission_response, omissions.MAX_RESPONSE_BYTES),
-        "integration_response": _blob(integration_response, audit_grammar.MAX_BYTES),
+        "integration_response": _blob(integration_response, MAX_SAVED_RESPONSE_BYTES),
         "index": bound_index, "audit": _blob(audit_raw, audit_grammar.MAX_BYTES),
         "lineage": lineage, "acceptance": report})
     _bounded_json(_json(result), "assembly", MAX_ASSEMBLY_BYTES)
@@ -332,9 +416,9 @@ def check(assembly):
         raise ValueError("assembly kind or worker roster invalid")
     if len(_json(assembly)) > MAX_ASSEMBLY_BYTES:
         raise ValueError("assembly exceeds byte bound")
-    expected = assemble(assembly["packet"], {key: _unblob(value, audit_grammar.MAX_BYTES) for key, value in assembly["workers"].items()},
+    expected = assemble(assembly["packet"], {key: _unblob(value, MAX_SAVED_RESPONSE_BYTES) for key, value in assembly["workers"].items()},
         _unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
-        _unblob(assembly["integration_response"], audit_grammar.MAX_BYTES))
+        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES))
     if _json(assembly) != _json(expected):
         raise ValueError("saved assembly differs from independent captured-byte reconstruction")
     return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}
@@ -343,7 +427,7 @@ def check(assembly):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
-    for name in ("prepare", "check-worker", "index", "check-integration", "assemble", "check"):
+    for name in ("prepare", "request", "capture-response", "check-worker", "index", "check-integration", "assemble", "check"):
         sub = commands.add_parser(name)
         sub.add_argument("--output", required=True, type=Path, help="New file only; existing paths refused")
         if name == "prepare":
@@ -357,13 +441,17 @@ def main():
             for field, default in (("max-request-bytes", 32_000_000), ("max-paths", 96),
                                    ("max-inventory-bytes", 16384), ("max-workers", 16)):
                 sub.add_argument(f"--{field}", type=int, default=default)
+        elif name == "capture-response":
+            sub.add_argument("--request", required=True, type=Path)
+            sub.add_argument("--response", required=True, type=Path, help="Raw inner JSON; saved envelope captures these exact bytes")
         elif name == "check":
             sub.add_argument("--assembly", required=True, type=Path)
         else:
             sub.add_argument("--packet", required=True, type=Path)
-            if name == "check-worker":
+            if name in {"request", "check-worker"}:
                 sub.add_argument("--worker-id", required=True)
-                sub.add_argument("--response", required=True, type=Path)
+                if name == "check-worker":
+                    sub.add_argument("--response", required=True, type=Path)
             else:
                 sub.add_argument("--worker", required=True, action="append", help="ID=PATH; one per assigned worker")
                 sub.add_argument("--omission-response", required=True, type=Path)
@@ -377,24 +465,30 @@ def main():
             result = prepare(protocol=args.protocol, schema_path=args.schema, project=args.project,
                 **supplied, **{key: getattr(args, key) for key in ("max_output_tokens", "max_request_bytes",
                                                           "max_paths", "max_inventory_bytes", "max_workers")})
+        elif args.command == "capture-response":
+            result = _bounded_json(capture_response(
+                _bounded_json(omissions._file(args.request, MAX_PACKET_BYTES), "exported request", MAX_PACKET_BYTES),
+                omissions._file(args.response, audit_grammar.MAX_BYTES)), "saved response", MAX_SAVED_RESPONSE_BYTES)
         elif args.command == "check":
             result = check(_bounded_json(omissions._file(args.assembly, MAX_ASSEMBLY_BYTES), "assembly", MAX_ASSEMBLY_BYTES))
         else:
             packet = _bounded_json(omissions._file(args.packet, MAX_PACKET_BYTES), "packet", MAX_PACKET_BYTES)
-            if args.command == "check-worker":
-                result = check_worker(packet, args.worker_id, omissions._file(args.response, audit_grammar.MAX_BYTES))
+            if args.command == "request":
+                result = worker_request(packet, args.worker_id)
+            elif args.command == "check-worker":
+                result = check_worker(packet, args.worker_id, omissions._file(args.response, MAX_SAVED_RESPONSE_BYTES))
             else:
                 workers = {}
                 for item in args.worker:
                     key, separator, path = item.partition("=")
                     if not key or not separator or not path or key in workers:
                         raise ValueError("workers must have distinct ID=PATH declarations")
-                    workers[key] = omissions._file(Path(path), audit_grammar.MAX_BYTES)
+                    workers[key] = omissions._file(Path(path), MAX_SAVED_RESPONSE_BYTES)
                 omission_raw = omissions._file(args.omission_response, omissions.MAX_RESPONSE_BYTES)
                 if args.command == "index":
                     result = index(packet, workers, omission_raw)
                 else:
-                    integration = omissions._file(args.integration_response, audit_grammar.MAX_BYTES)
+                    integration = omissions._file(args.integration_response, MAX_SAVED_RESPONSE_BYTES)
                     result = (assemble if args.command == "assemble" else check_integration)(packet, workers, omission_raw, integration)
         # Exclusive creation refuses existing paths, symlinks (even dangling),
         # and hardlink aliases. No existing input/output is ever rewritten.

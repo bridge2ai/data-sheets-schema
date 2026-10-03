@@ -85,8 +85,23 @@ def replies(packet, count=1):
     return workers, omission, delta, quote
 
 
+def saved_workers(packet, workers):
+    return {key: ta.capture_response(ta.worker_request(packet, key), raw) for key, raw in workers.items()}
+
+
+def saved_responses(packet, workers, omission, delta):
+    saved = saved_workers(packet, workers)
+    omission_raw = b.canonical_bytes(omission)
+    request = ta.index(packet, saved, omission_raw)
+    return saved, omission_raw, ta.capture_response(request, b.canonical_bytes(delta))
+
+
 def seal(packet, workers, omission, delta):
-    return ta.assemble(packet, workers, b.canonical_bytes(omission), b.canonical_bytes(delta))
+    return ta.assemble(packet, *saved_responses(packet, workers, omission, delta))
+
+
+def checked_integration(packet, workers, omission, delta):
+    return ta.check_integration(packet, *saved_responses(packet, workers, omission, delta))
 
 
 @pytest.mark.parametrize("count", [0, 1, 2])
@@ -103,8 +118,8 @@ def test_real_roundtrip_and_candidate_merge(packet, count):
     assert checked["finding_counts"]["omission"] == bool(count)
     assert checked["finding_counts"]["untyped"] == checked["revised_rows"] == 0
     for key, raw in workers.items():
-        assert ta.check_worker(packet, key, raw)["passed"]
-    assert ta.index(packet, workers, b.canonical_bytes(omission))["omission_check"]["protocol_complete"]
+        assert ta.check_worker(packet, key, ta.capture_response(ta.worker_request(packet, key), raw))["passed"]
+    assert ta.index(packet, saved_workers(packet, workers), b.canonical_bytes(omission))["omission_check"]["protocol_complete"]
 
 
 def test_explicit_drop_is_retained_with_exact_evidence(packet):
@@ -137,11 +152,11 @@ def test_worker_omission_requires_refs_and_captured_membership_even_if_later_dro
     worker["findings"] = [finding]
     workers[key] = b.canonical_bytes(worker)
     if reference is None:
-        assert not ta.check_worker(packet, key, workers[key])["passed"]
+        assert not ta.check_worker(packet, key, ta.capture_response(ta.worker_request(packet, key), workers[key]))["passed"]
     else:
-        assert ta.check_worker(packet, key, workers[key])["passed"]  # Membership needs omission response.
+        assert ta.check_worker(packet, key, ta.capture_response(ta.worker_request(packet, key), workers[key]))["passed"]  # Membership needs omission response.
     with pytest.raises(ValueError):
-        ta.index(packet, workers, b.canonical_bytes(omission))
+        ta.index(packet, saved_workers(packet, workers), b.canonical_bytes(omission))
 
 
 @pytest.mark.parametrize("mutation", ["loss", "foreign", "double_link", "linked_drop", "retained_unlinked", "missing_refs", "core"])
@@ -221,7 +236,7 @@ def test_real_evidence_checker_refuses_unsupported_evidence(packet, mutation):
         with pytest.raises(ValueError):
             seal(packet, workers, omission, delta)
         return
-    report = ta.check_integration(packet, workers, b.canonical_bytes(omission), b.canonical_bytes(delta))
+    report = checked_integration(packet, workers, omission, delta)
     assert not report["passed"] and report["problem_count"] > 0
     with pytest.raises(ValueError):
         seal(packet, workers, omission, delta)
@@ -260,7 +275,7 @@ def test_registered_provenance_uses_only_captured_exact_authority(supplied, chan
         with pytest.raises(ValueError):
             seal(packet, workers, omission, delta)
     elif change:
-        report = ta.check_integration(packet, workers, b.canonical_bytes(omission), b.canonical_bytes(delta))
+        report = checked_integration(packet, workers, omission, delta)
         assert not report["passed"]
     else:
         assert ta.check(seal(packet, workers, omission, delta))["passed"]
@@ -395,16 +410,25 @@ def test_cli_full_saved_response_roundtrip_and_no_overwrite(supplied, tmp_path):
     args = ["--packet", destination]
     for key, response in workers.items():
         path = tmp_path / f"{key}.json"; path.write_bytes(response)
-        checked = run("check-worker", "--packet", destination, "--worker-id", key, "--response", path,
+        request_path = tmp_path / f"{key}.request.json"
+        requested = run("request", "--packet", destination, "--worker-id", key, "--output", request_path)
+        assert requested.returncode == 0, requested.stderr
+        saved_path = tmp_path / f"{key}.saved.json"
+        captured = run("capture-response", "--request", request_path, "--response", path, "--output", saved_path)
+        assert captured.returncode == 0, captured.stderr
+        checked = run("check-worker", "--packet", destination, "--worker-id", key, "--response", saved_path,
                       "--output", tmp_path / f"{key}.checked.json")
         assert checked.returncode == 0, checked.stderr
-        args.extend(["--worker", f"{key}={path}"])
+        args.extend(["--worker", f"{key}={saved_path}"])
     omission_path = tmp_path / "omission.json"; omission_path.write_bytes(b.canonical_bytes(omission))
     delta_path = tmp_path / "integration.json"; delta_path.write_bytes(b.canonical_bytes(delta))
     args.extend(["--omission-response", omission_path])
     indexed = run("index", *args, "--output", tmp_path / "index.json")
     assert indexed.returncode == 0, indexed.stderr
-    args.extend(["--integration-response", delta_path])
+    saved_delta = tmp_path / "integration.saved.json"
+    captured = run("capture-response", "--request", tmp_path / "index.json", "--response", delta_path, "--output", saved_delta)
+    assert captured.returncode == 0, captured.stderr
+    args.extend(["--integration-response", saved_delta])
     for operation in ("check-integration", "assemble"):
         result = run(operation, *args, "--output", tmp_path / f"{operation}.json")
         assert result.returncode == 0, result.stderr
@@ -422,3 +446,115 @@ def test_cli_full_saved_response_roundtrip_and_no_overwrite(supplied, tmp_path):
         changed = list(command); changed[changed.index("--output") + 1] = alias
         assert run(*changed).returncode == 2
     assert destination.read_bytes() == before
+
+
+def test_bare_worker_and_integration_replies_are_not_request_bound(packet):
+    workers, omission, delta, _ = replies(packet)
+    key = next(iter(workers))
+    with pytest.raises(ValueError):
+        ta.check_worker(packet, key, workers[key])
+    with pytest.raises(ValueError):
+        ta.index(packet, workers, b.canonical_bytes(omission))
+    saved = saved_workers(packet, workers)
+    with pytest.raises(ValueError):
+        ta.assemble(packet, saved, b.canonical_bytes(omission), b.canonical_bytes(delta))
+
+
+def test_old_correctly_wrapped_integration_cannot_dispose_changed_candidate(packet):
+    workers, omission, delta, _ = replies(packet)
+    saved, omission_raw, integration = saved_responses(packet, workers, omission, delta)
+    assert ta.assemble(packet, saved, omission_raw, integration)["acceptance"]["passed"]
+    old_index = ta.index(packet, saved, omission_raw)
+    candidate = omission["chunks"][1]["candidates"][0]
+    candidate["target"]["slot_chain"] = ["issued"]
+    candidate["missing_information"] = "A source-stated date instead."
+    changed = b.canonical_bytes(omission)
+    new_index = ta.index(packet, saved, changed)
+    assert old_index["index"] == new_index["index"]
+    assert old_index["sha256"] != new_index["sha256"]
+    assert old_index["integration_request"]["request_sha256"] != new_index["integration_request"]["request_sha256"]
+    with pytest.raises(ValueError, match="exact packet/request/index"):
+        ta.assemble(packet, saved, changed, integration)
+
+
+def test_old_correctly_wrapped_workers_cannot_replay_under_changed_context(supplied):
+    original = ta.prepare(**supplied)
+    workers, omission, delta, _ = replies(original)
+    saved, omission_raw, integration = saved_responses(original, workers, omission, delta)
+    context = json.loads(supplied["context"])
+    context["scopes"][0]["scope"] = "A different declared release scope."
+    supplied["context"] = b.canonical_bytes(context)
+    changed = ta.prepare(**supplied)
+    assert changed["plan"] == original["plan"]
+    key = next(iter(workers))
+    assert ta.worker_request(changed, key)["request_sha256"] != ta.worker_request(original, key)["request_sha256"]
+    with pytest.raises(ValueError, match="exact packet/request/index"):
+        ta.check_worker(changed, key, saved[key])
+    with pytest.raises(ValueError):
+        ta.assemble(changed, saved, omission_raw, integration)
+    fresh_workers, fresh_omission, fresh_delta, _ = replies(changed)
+    fresh_saved, fresh_omission_raw, _ = saved_responses(changed, fresh_workers, fresh_omission, fresh_delta)
+    with pytest.raises(ValueError, match="exact packet/request/index"):
+        ta.assemble(changed, fresh_saved, fresh_omission_raw, integration)
+
+
+@pytest.mark.parametrize("field", ["kind", "packet_sha256", "request_sha256", "worker_id", "extra", "response"])
+def test_worker_saved_envelope_is_closed_and_exact(packet, field):
+    workers, _, _, _ = replies(packet)
+    key = next(iter(workers))
+    response = json.loads(ta.capture_response(ta.worker_request(packet, key), workers[key]))
+    response[field] = "substitution"
+    with pytest.raises(ValueError):
+        ta.check_worker(packet, key, b.canonical_bytes(response))
+
+
+@pytest.mark.parametrize("field", ["kind", "packet_sha256", "request_sha256", "typed_index_sha256", "extra", "response"])
+def test_integration_saved_envelope_is_closed_and_exact(packet, field):
+    workers, omission, delta, _ = replies(packet)
+    saved, omission_raw, integration = saved_responses(packet, workers, omission, delta)
+    response = json.loads(integration)
+    response[field] = "substitution"
+    with pytest.raises(ValueError):
+        ta.assemble(packet, saved, omission_raw, b.canonical_bytes(response))
+
+
+@pytest.mark.parametrize("payload", [None, [], {}, "untrusted"])
+def test_malformed_exported_integration_payload_refused(packet, payload):
+    workers, omission, delta, _ = replies(packet)
+    request = ta.index(packet, saved_workers(packet, workers), b.canonical_bytes(omission))
+    request["integration_request"]["payload"] = payload
+    request["integration_request"]["request_sha256"] = ta._sha(b.canonical_bytes(payload))
+    request = ta._seal({key: value for key, value in request.items() if key != "sha256"})
+    with pytest.raises(ValueError):
+        ta.capture_response(request, b.canonical_bytes(delta))
+
+
+def test_saved_envelope_overhead_does_not_reduce_inner_response_bound(packet, tmp_path):
+    workers, omission, delta, _ = replies(packet)
+    key = next(iter(workers))
+    inner = workers[key] + b" " * (ta.audit_grammar.MAX_BYTES - len(workers[key]))
+    workers[key] = inner
+    pure_index = b.build_index(packet["plan"], workers, version=2)
+    delta.update(proposal_index_sha256=pure_index["sha256"], retain_other_rows_from_index_sha256=pure_index["sha256"])
+    request = ta.worker_request(packet, key)
+    saved = ta.capture_response(request, inner)
+    assert ta.audit_grammar.MAX_BYTES < len(saved) < ta.MAX_SAVED_RESPONSE_BYTES
+    assert ta.check_worker(packet, key, saved)["passed"]
+    assert ta._unblob(json.loads(saved)["response"], ta.audit_grammar.MAX_BYTES) == inner
+    bound_index = ta.index(packet, {key: saved}, b.canonical_bytes(omission))
+    delta_raw = b.canonical_bytes(delta)
+    delta_raw += b" " * (ta.audit_grammar.MAX_BYTES - len(delta_raw))
+    integration_saved = ta.capture_response(bound_index, delta_raw)
+    assert ta.audit_grammar.MAX_BYTES < len(integration_saved) < ta.MAX_SAVED_RESPONSE_BYTES
+    assembled = ta.assemble(packet, {key: saved}, b.canonical_bytes(omission), integration_saved)
+    assert ta.check(assembled)["passed"]
+    assert ta._unblob(json.loads(integration_saved)["response"], ta.audit_grammar.MAX_BYTES) == delta_raw
+    with pytest.raises(ValueError):
+        ta.capture_response(request, inner + b" ")
+    packet_path, saved_path = tmp_path / "packet.json", tmp_path / "saved.json"
+    packet_path.write_bytes(b.canonical_bytes(packet)); saved_path.write_bytes(saved)
+    result = subprocess.run([sys.executable, "-m", "data_sheets_schema.typed_audit", "check-worker",
+        "--packet", str(packet_path), "--worker-id", key, "--response", str(saved_path),
+        "--output", str(tmp_path / "checked.json")], capture_output=True, text=True,
+        env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"})
+    assert result.returncode == 0, result.stderr

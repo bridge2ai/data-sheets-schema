@@ -49,23 +49,29 @@ that the previous packet passed.
 
 The packet contains the exact omission request in `omission_request`, worker
 assignments in `plan`, and exact version-2 schemas, contracts and examples in
-`contracts`. For a worker, concatenate the UTF-8 bytes of
-`requests.shared_context` and `requests.workers[WORKER_ID]` without adding a
-separator. Both strings already end with a newline. The stage text binds the
-shared-context hash. These are deterministic offline request recipes, not a
-provider envelope or an approved live controller. The invented examples in the
-contracts are syntax demonstrations and cannot support real findings.
+`contracts`. Export the worker request after the packet is sealed. The public
+`worker_request(packet, worker_id)` API is the same operation used by the CLI.
+Its exact payload includes the packet SHA, worker assignment, shared scientific
+context and stage instructions. `request_sha256` hashes that canonical payload,
+excluding its own identity field. The invented examples in the contracts are
+syntax demonstrations and cannot support real findings.
 
-Save actual worker and omission responses as strict JSON, then check and index
-them. Repeat `--worker ID=PATH` for every assigned worker; the roster must match
-exactly.
+Save actual worker and omission responses as strict JSON. Capture the worker
+reply with its exported request, then check and index it. Repeat
+`--worker ID=PATH` for every assigned worker; the roster must match exactly.
 
 ```bash
+python -m data_sheets_schema.typed_audit request \
+  --packet packet.json --worker-id worker_0001 --output worker-1-request.json
+# Supply that request in your separately authorized workflow; save raw reply.
+python -m data_sheets_schema.typed_audit capture-response \
+  --request worker-1-request.json --response worker-1-raw.json \
+  --output worker-1-saved.json
 python -m data_sheets_schema.typed_audit check-worker \
-  --packet packet.json --worker-id worker_0001 --response worker-1.json \
+  --packet packet.json --worker-id worker_0001 --response worker-1-saved.json \
   --output worker-1-check.json
 python -m data_sheets_schema.typed_audit index \
-  --packet packet.json --worker worker_0001=worker-1.json \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
   --omission-response omissions.json --output index.json
 ```
 
@@ -75,18 +81,23 @@ omission checker on the raw response. Every canonical chunk is mandatory,
 including previously negative or redundant chunks. A saved successful omission
 report is never a substitute for that response.
 
-Concatenate the same packet shared-context string with `integration_request`
-from the index to obtain the integration request. Save the integration response
-and run the terminal operations:
+The complete index is the integration request envelope. Its
+`integration_request.payload` contains shared context, exact saved workers and
+omission response, proposal index and output contract. The request payload SHA
+and complete typed-index SHA are separate identities; the latter is supplied
+outside the request payload to avoid a self-referential hash. Capture the raw
+integration reply against the complete index, then run terminal operations:
 
 ```bash
+python -m data_sheets_schema.typed_audit capture-response \
+  --request index.json --response integration-raw.json --output integration-saved.json
 python -m data_sheets_schema.typed_audit check-integration \
-  --packet packet.json --worker worker_0001=worker-1.json \
-  --omission-response omissions.json --integration-response integration.json \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
+  --omission-response omissions.json --integration-response integration-saved.json \
   --output integration-check.json
 python -m data_sheets_schema.typed_audit assemble \
-  --packet packet.json --worker worker_0001=worker-1.json \
-  --omission-response omissions.json --integration-response integration.json \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
+  --omission-response omissions.json --integration-response integration-saved.json \
   --output assembly.json
 python -m data_sheets_schema.typed_audit check \
   --assembly assembly.json --output independent-check.json
@@ -100,6 +111,17 @@ requests, indices and acceptance result from the stored raw inputs. It compares
 the entire reconstructed assembly, including hashes; an edited successful report
 cannot bypass this work. Assembly refuses source-evidence failure. Use
 `check-integration` for its bounded diagnostics.
+
+Saved worker/integration envelopes have closed fields and bind the packet and
+request identities; integration also binds the complete typed index. Inner raw
+UTF-8 response bytes retain their exact encoding/whitespace in a byte blob. Bare
+replies and unchanged envelopes from a different context or omission inventory
+are refused, even when the original full record and pure worker index match.
+The public `capture_response(exported_request, raw_bytes)` API performs the same
+capture as the CLI. It declares a request/response association, not authenticated
+provider provenance. Deliberately rewrapping old bytes under a new request is a
+new caller provenance claim; this offline consumer cannot prove a provider read
+the request. Record honest associations in the separately approved workflow.
 
 ## Findings and omission accounting
 
@@ -134,7 +156,8 @@ novelty or scientific support. Reports keep `scientific_support`, `novelty` and
 ## Bounds and output behavior
 
 Existing shared limits are preserved: 4,000,000 bytes for the original full
-record, 2,097,152 bytes per worker/integration/assembled audit, 8,000,000 bytes per
+record, 2,097,152 bytes per inner worker/integration/assembled audit, 3,000,000 bytes
+per saved worker/integration envelope, 8,000,000 bytes per
 other ordinary input/omission response, and 16,000,000 bytes for the schema
 closure. This consumer also caps the closure at 256 files, the complete packet at
 96,000,000 bytes and assembly at 160,000,000 bytes. The default complete request
