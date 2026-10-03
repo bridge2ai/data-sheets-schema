@@ -2833,10 +2833,11 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
                           if _source_review_estimate else audit_carry(spec))
         parts.append({"type": "text", "text": candidate_text})
     if spec.shared_generation_version:
-        from .shared_generation import schema_context
+        from .shared_generation import schema_context, generation_context
         selected_record = (carry.get("Reconciled full record") if phase == "report"
                            else carry.get("Completed full record") if phase == "reconcile_full" else None)
         parts.append({"type": "text", "text": schema_context(spec, selected_record)})
+        parts.append({"type": "text", "text": generation_context(spec)})
     instruction = phase_instruction(phase, spec.render_version)
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
@@ -5303,6 +5304,13 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 selected_digest = captured_digest(spec, cls)
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
                                errors, profile=spec.profile_obj, _captured_digest=selected_digest)
+            if spec.shared_generation_version:
+                # Selected caller scope is metadata, not permission to change
+                # facts. Keep the source bundle excluded and shape-only
+                # instruction last; released/default repair bytes are intact.
+                from .shared_generation import generation_context
+                req.messages[0]['content'].insert(-1,
+                    {'type': 'text', 'text': generation_context(spec)})
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()

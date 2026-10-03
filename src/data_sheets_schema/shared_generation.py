@@ -365,6 +365,11 @@ def capture(spec) -> Capture:
     context = _mapping(files[selected["context"]["path"]], "generation scope context", json_only=True)
     if omissions._shape(context, json.loads(omissions._asset('context.schema.json'))):
         raise ValueError('generation scope context does not satisfy omission_context_v1')
+    owners = [scope['owner'] for scope in context['scopes']]
+    if owners.count('') != 1 or len(owners) != len(set(owners)):
+        raise ValueError('generation scopes must include root once and name distinct owners')
+    # Whether a non-root owner exists requires the generated record and stays
+    # in the typed omission check. Impossible inventories need no paid output.
     for key in ('bundle', 'chunk_manifest', 'source_manifest', 'context'):
         pin = selected[key]
         if pin is not None and len(files[pin['path']]) > omissions.MAX_INPUT_BYTES:
@@ -424,7 +429,43 @@ def preflight(spec, settings) -> Capture:
         raise ValueError("registered audit context exceeds the named route window")
     return captured
 
+GENERATION_CONTEXT_HEADER = '# Shared generation: captured generation scope and vocabulary\n\n'
 SCHEMA_CONTEXT_HEADER = '# Shared generation: captured schema owners and complete containing values\n\n'
+
+
+def generation_context(spec) -> str:
+    """Complete caller scope authority, distinct from schema-owner context.
+
+    Keep exact input text and its verified identity, including when there is
+    no source manifest. This is omission_context_v1, not scientific approval
+    or the separately reviewed applicability packet.
+    """
+    captured = assert_current(spec)
+    inputs = captured.document()['inputs']
+    context = inputs['context']
+    profile = copy.deepcopy(inputs['profile'])
+    vocabulary = profile['vocabulary']
+    if vocabulary is not None:
+        profile['vocabulary'] = {'identity': vocabulary,
+            'raw_text': captured.raw(vocabulary['path']).decode('utf-8')}
+    return GENERATION_CONTEXT_HEADER + canonical({
+        'context': {'identity': context, 'raw_json': captured.raw(context['path']).decode('utf-8')},
+        'profile': profile, 'source_manifest': inputs['source_manifest'],
+        'scope': 'Caller-declared generation scope, source policy and vocabulary; '
+                 'not a scientific applicability or support verdict.'}).decode('utf-8')
+
+
+def require_generation_context(spec, messages) -> None:
+    """Verify the complete selected block before any request is admitted."""
+    from .usage_ledger import UsageLedgerError
+    expected = generation_context(spec)
+    blocks = [part for message in messages
+              if message.get('role') == 'user' and isinstance(message.get('content'), list)
+              for part in message['content'] if isinstance(part, dict)]
+    selected = [block for block in blocks
+                if isinstance(block.get('text'), str) and block['text'].startswith(GENERATION_CONTEXT_HEADER)]
+    if selected != [{'type': 'text', 'text': expected}]:
+        raise UsageLedgerError('actual shared request omits, changes or duplicates captured generation scope')
 
 
 def schema_context(spec, record: str | None = None) -> str:

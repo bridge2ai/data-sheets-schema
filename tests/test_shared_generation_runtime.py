@@ -238,6 +238,14 @@ def test_real_saved_response_settles_once_then_merged_omissions_and_role_regate(
     assert result['validation_problems'] == []
     assert messages.phases.count(runtime.WORKER_PHASE) == 1
     assert messages.phases[-1] == 'report_regate'
+    # Complete captured scope survives full->receipt transcript, every typed
+    # outer request, reconciliation, report and the actual regate helper.
+    expected_scope = sg.generation_context(selected)
+    for call in messages.calls:
+        sg.require_generation_context(selected, call['messages'])
+        assert sum(part.get('text') == expected_scope for message in call['messages']
+                   if message.get('role') == 'user' and isinstance(message.get('content'), list)
+                   for part in message['content'] if isinstance(part, dict)) == 1
     assert sum(row['usage_id'] == interrupted[0] for row in result['usage']) == 1
     assert runtime._originals(selected) == originals
     assembly = rc._load(runtime._state(selected)['assembly'])

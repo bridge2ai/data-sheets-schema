@@ -133,6 +133,7 @@ def build_request(spec, packet, stage, workers, omission, settings):
              {'type': 'text', 'text': api.shared_evidence_contract()},
              {'type': 'text', 'text': receipts.audit_carry(spec)},
              {'type': 'text', 'text': sg.schema_context(spec, full)},
+             {'type': 'text', 'text': sg.generation_context(spec)},
              {'type': 'text', 'text': '# Registered audit request identity\n\n' + sg.canonical(binding).decode()},
              {'type': 'text', 'text': '# Exact typed stage request\n\n' + sg.canonical(inner).decode()}]
     req = api.PhaseRequest(phase=stage['phase'], system=SYSTEM,
@@ -377,6 +378,7 @@ def require_admission(spec, phase, *, data=None, usage_id=None):
 
 
 def require_request(spec, phase, kwargs):
+    sg.require_generation_context(spec, kwargs['messages'])
     if phase not in PHASES:
         if phase in ('reconcile_full', 'report', 'report_regate', 'report_after_repair'):
             from . import api_runner as api
