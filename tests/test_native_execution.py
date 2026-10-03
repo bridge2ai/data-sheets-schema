@@ -336,3 +336,62 @@ def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,mo
     assert (case['root']/'native-evidence/final.json').exists() is (boundary=='published.json')
     with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
     with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
+
+
+@pytest.mark.parametrize('probe_fails,cleanup_write_fails,release_raises',[
+    (False,False,False),(True,False,False),(True,True,False),(False,True,True)])
+def test_observation_persistence_failure_always_releases_acquired_assertions(
+        tmp_path,monkeypatch,probe_fails,cleanup_write_fails,release_raises):
+    monkeypatch.chdir(authority.ROOT)
+    case=make_native_case(tmp_path/'observation-io',awake=True)
+    monkeypatch.setattr(execute,'_platform',lambda:'darwin')
+    events=[]
+    class FakeIOKit:
+        def create(self,kind):
+            identity=1+sum(row[0]=='acquire' for row in events)
+            events.append(('acquire',identity));return identity
+        def release(self,identity):
+            events.append(('release',identity))
+            if release_raises and identity==3:raise RuntimeError('synthetic release failure')
+            return 0
+    observation_error=OSError('synthetic observation persistence failure')
+    auth_error=RuntimeError('synthetic auth failure')
+    real_write=execute.durable_new
+    def interrupted(path,raw):
+        if Path(path).name=='runtime-observation.json':
+            events.append(('observation_write',));raise observation_error
+        if cleanup_write_fails and Path(path).name=='keep-awake.json':
+            events.append(('cleanup_write',));raise OSError('synthetic cleanup persistence failure')
+        return real_write(path,raw)
+    def observed(value):
+        if probe_fails:raise auth_error
+        return fake_observation(value)
+    def no_dispatch(*args,**kwargs):pytest.fail('dispatch before durable runtime observation')
+    monkeypatch.setattr(execute,'durable_new',interrupted)
+    monkeypatch.setattr(execute,'_probe_runtime',observed)
+    with authority.loaded_dependencies(case['value']['dependencies']) as modules:
+        guard=modules['run_direct_canary_awake'].KeepAwake(api=FakeIOKit())
+        monkeypatch.setattr(modules['run_direct_canary_awake'],'KeepAwake',lambda:guard)
+        monkeypatch.setattr(modules['run_native_canary'],'execute_child',no_dispatch)
+        with pytest.raises(OSError) as caught:
+            execute.launch(case['raw'],**case['kwargs'])
+    assert caught.value is observation_error
+    if probe_fails:assert caught.value.__context__ is auth_error
+    assert [row[1] for row in events if row[0]=='release']==[3,2,1]
+    assert guard.active==[] and len(guard.releases)==3
+    if release_raises:assert guard.releases[0]['error_type']=='RuntimeError'
+    attempt=case['root']/'native-attempt'
+    assert (attempt/'registration.json').read_bytes()==case['raw']
+    assert (attempt/'started.json').is_file()
+    assert not (attempt/'transcript.jsonl').exists()
+    assert not (case['root']/'native-evidence/final.json').exists()
+    assert not (case['root']/'native-evidence/published.json').exists()
+    if cleanup_write_fails:
+        assert caught.value.__notes__==['keep-awake cleanup evidence failed: OSError']
+        assert not (attempt/'keep-awake.json').exists()
+    else:
+        receipt=draft._json((attempt/'keep-awake.json').read_bytes())
+        assert receipt['passed'] is False and receipt['state']=='released_after_failure'
+        assert receipt['releases']==guard.releases
+    with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
+    with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])

@@ -210,89 +210,101 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
         proxy = controls['run_direct_canary'].NoProxy()
         guard = None
         try:
-            for directory in outputs:
-                _mkdir_durable(directory)
-            _mkdir_durable(attempt/'cli_config')
-            _unchanged(value, registration_raw, authorization)
-            if value['runtime']['keep_awake']['policy'] == 'macos_iokit_ims_v1':
-                guard = controls['run_direct_canary_awake'].KeepAwake()
-                guard.__enter__()
-                awake.update(state='acquired', acquisition=guard.snapshot())
-            else:
-                awake.update(state='explicitly_not_applicable', passed=True)
-            observation = _probe_runtime(value)
-            durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
-            def launch_check():
-                _unchanged(value, registration_raw, authorization)
-                if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
-                        or _file(attempt/'started.json', 'started identity') != started_raw
-                        or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
-                        or proxy.closed or proxy.failed.is_set()):
-                    raise ValueError('native admission is closed or consumed identity changed')
-            status = controls['run_native_canary'].execute_child(value['argv'], proxy=proxy,
-                instruction=Path(selected['instruction_path']), attempt=attempt,
-                cwd=value['working_directory'], env=value['environment'],
-                deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
-                record_stop=stopped, command_policy=adapter.policy, phase_spec=adapter.spec,
-                command_classifier=adapter.classify, event_observer=adapter.observe)
-        except BaseException as exc:
-            # Native auth command failures may contain credentials in captured
-            # subprocess attributes. Record only the exception class here.
-            stopped(f'launch or runtime failed: {type(exc).__name__}')
-            if not (attempt/'runtime-observation.json').exists():
-                observation = {'checked': False, 'passed': False, 'reason': first_stop}
-                durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
-        try:
-            if proxy.failed.is_set():
-                stopped(proxy.failure or 'native controller reported failure')
-            if type(proxy.unfinished_handlers) is not int or proxy.unfinished_handlers != 0:
-                stopped('native controller has unresolved handler state')
-            live = adapter.report(complete=True)
-            authority_inputs = {**authorization['inputs'], 'system': value['system_path'],
-                'permission_probe': value['permission_probe']}
-            for name in authorization['inputs']:
-                authority_inputs['consumed_' + name] = str(attempt/(name + '.json'))
             try:
-                prepared = gates.capture(value, controls, authority_inputs=authority_inputs,
-                                         registration_raw=registration_raw)
-            except Exception as exc:
-                problem = f'capture: {type(exc).__name__}: {exc}'
-                stopped(problem)
-                prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem)
-            projections = shared.project(prepared, evidence/'captured')
-            if prepared.get('replay_complete'):
-                replay.write_report(prepared, additional_path)
-            # Keep assertions through both bounded shutdown and evidence capture.
-            if guard is not None:
-                guard.close()
-                awake.update(state='released', releases=guard.releases, released_at=guard.released_at,
-                    passed=bool(awake.get('acquisition')) and len(guard.releases) == 3
-                        and all(type(row.get('return_code')) is int and row['return_code'] == 0 for row in guard.releases))
-            awake['signals_received'] = list(signals)
-            if signals:
-                stopped('launcher interrupted by signal')
-            if not awake['passed']:
-                stopped('keep-awake acquisition or release did not complete')
-            durable_new(attempt/'keep-awake.json', draft._encoded(awake))
-            results = gates.check(prepared, projections, {**value['runtime'], 'attempt_directory': str(attempt)},
-                controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
-                live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake)
-            for path, copy in projections.items():
-                if copy.read_bytes() != prepared['snapshot'].raw[path]:
-                    raise ValueError('captured projection changed during validation')
-            prepared['snapshot'].verify_unchanged()
-            _unchanged(value, registration_raw, authorization)
-        except BaseException as exc:
-            stopped(f'finalization failed: {type(exc).__name__}: {exc}')
+                for directory in outputs:
+                    _mkdir_durable(directory)
+                _mkdir_durable(attempt/'cli_config')
+                _unchanged(value, registration_raw, authorization)
+                if value['runtime']['keep_awake']['policy'] == 'macos_iokit_ims_v1':
+                    guard = controls['run_direct_canary_awake'].KeepAwake()
+                    guard.__enter__()
+                    awake.update(state='acquired', acquisition=guard.snapshot())
+                else:
+                    awake.update(state='explicitly_not_applicable', passed=True)
+                observation = _probe_runtime(value)
+                durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
+                def launch_check():
+                    _unchanged(value, registration_raw, authorization)
+                    if (_file(attempt/'registration.json', 'consumed registration') != registration_raw
+                            or _file(attempt/'started.json', 'started identity') != started_raw
+                            or _file(attempt/'runtime-observation.json', 'runtime observation') != draft._encoded(observation)
+                            or proxy.closed or proxy.failed.is_set()):
+                        raise ValueError('native admission is closed or consumed identity changed')
+                status = controls['run_native_canary'].execute_child(value['argv'], proxy=proxy,
+                    instruction=Path(selected['instruction_path']), attempt=attempt,
+                    cwd=value['working_directory'], env=value['environment'],
+                    deadline_seconds=value['runtime']['deadline_seconds'], verify_launch=launch_check,
+                    record_stop=stopped, command_policy=adapter.policy, phase_spec=adapter.spec,
+                    command_classifier=adapter.classify, event_observer=adapter.observe)
+            except BaseException as exc:
+                # Native auth command failures may contain credentials in captured
+                # subprocess attributes. Record only the exception class here.
+                stopped(f'launch or runtime failed: {type(exc).__name__}')
+                if not (attempt/'runtime-observation.json').exists():
+                    observation = {'checked': False, 'passed': False, 'reason': first_stop}
+                    durable_new(attempt/'runtime-observation.json', draft._encoded(observation))
+            try:
+                if proxy.failed.is_set():
+                    stopped(proxy.failure or 'native controller reported failure')
+                if type(proxy.unfinished_handlers) is not int or proxy.unfinished_handlers != 0:
+                    stopped('native controller has unresolved handler state')
+                live = adapter.report(complete=True)
+                authority_inputs = {**authorization['inputs'], 'system': value['system_path'],
+                    'permission_probe': value['permission_probe']}
+                for name in authorization['inputs']:
+                    authority_inputs['consumed_' + name] = str(attempt/(name + '.json'))
+                try:
+                    prepared = gates.capture(value, controls, authority_inputs=authority_inputs,
+                                             registration_raw=registration_raw)
+                except Exception as exc:
+                    problem = f'capture: {type(exc).__name__}: {exc}'
+                    stopped(problem)
+                    prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem)
+                projections = shared.project(prepared, evidence/'captured')
+                if prepared.get('replay_complete'):
+                    replay.write_report(prepared, additional_path)
+                # Keep assertions through both bounded shutdown and evidence capture.
+                if guard is not None:
+                    guard.close()
+                    awake.update(state='released', releases=guard.releases, released_at=guard.released_at,
+                        passed=bool(awake.get('acquisition')) and len(guard.releases) == 3
+                            and all(type(row.get('return_code')) is int and row['return_code'] == 0 for row in guard.releases))
+                awake['signals_received'] = list(signals)
+                if signals:
+                    stopped('launcher interrupted by signal')
+                if not awake['passed']:
+                    stopped('keep-awake acquisition or release did not complete')
+                durable_new(attempt/'keep-awake.json', draft._encoded(awake))
+                results = gates.check(prepared, projections, {**value['runtime'], 'attempt_directory': str(attempt)},
+                    controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
+                    live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake)
+                for path, copy in projections.items():
+                    if copy.read_bytes() != prepared['snapshot'].raw[path]:
+                        raise ValueError('captured projection changed during validation')
+                prepared['snapshot'].verify_unchanged()
+                _unchanged(value, registration_raw, authorization)
+            except BaseException as exc:
+                stopped(f'finalization failed: {type(exc).__name__}: {exc}')
         finally:
+            # This boundary also covers observation/failure-evidence writes:
+            # persistence errors must never bypass acquired assertion cleanup.
+            pending_error = sys.exception()
             if guard is not None:
                 if guard.active:
                     guard.close()
                     awake.update(state='released_after_failure', passed=False)
                 awake.update(releases=guard.releases, released_at=guard.released_at,
                              signals_received=list(signals))
-                if not (attempt/'keep-awake.json').exists():
-                    durable_new(attempt/'keep-awake.json', draft._encoded(awake))
+                try:
+                    if not (attempt/'keep-awake.json').exists():
+                        durable_new(attempt/'keep-awake.json', draft._encoded(awake))
+                except BaseException as cleanup_error:
+                    if pending_error is None:
+                        raise
+                    # The attempt is already spent and cannot complete. Keep
+                    # its original error while recording this second failure.
+                    pending_error.add_note('keep-awake cleanup evidence failed: '
+                                           + type(cleanup_error).__name__)
         # Cleanup failure is sticky even if another gate or a previous pass succeeds.
         if first_stop is not None:
             results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
