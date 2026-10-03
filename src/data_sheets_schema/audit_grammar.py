@@ -12,6 +12,8 @@ import json
 import math
 import re
 
+from . import audit_protocol
+
 INSTRUMENT = "audit_grammar v1"
 SCHEMA_VERSION = 1
 MAX_BYTES = 64 * 32768
@@ -78,7 +80,8 @@ def _pointer(value):
 
 
 class _Grammar:
-    def __init__(self):
+    def __init__(self, *, version=1):
+        self.version = audit_protocol.check_version(version)
         self.errors = []
         self.count = 0
 
@@ -88,7 +91,7 @@ class _Grammar:
             self.errors.append({"code": code, "path": path})
 
     def result(self):
-        return {"instrument": INSTRUMENT, "schema_version": SCHEMA_VERSION,
+        return {"instrument": f"audit_grammar v{self.version}", "schema_version": self.version,
                 "passed": self.count == 0, "error_count": self.count,
                 "errors": self.errors, "truncated": self.count > MAX_ERRORS}
 
@@ -248,6 +251,60 @@ class _Grammar:
                         revisions[pointer] = where
         return revisions
 
+    def finding(self, finding, path, *, revisions=None, linked=None):
+        """Check one complete finding, optionally linking full-audit revise rows.
+
+        Omission references are structural here; the selected offline consumer
+        owns source/candidate authority and exhaustive disposition accounting.
+        """
+        optional = {"review_paths", "remove_relationship"}
+        if self.version == 2:
+            optional |= {"kind", "omission_candidates"}
+        if not self.obj(finding, {"severity", "record", "slot", "issue", "evidence"}, path,
+                        optional):
+            return
+        self.enum(finding.get("severity"), {"high", "medium", "low"}, path + "/severity")
+        self.enum(finding.get("record"), {"full", "core", "both"}, path + "/record")
+        if self.version == 2:
+            if "kind" in finding:
+                self.enum(finding["kind"], audit_protocol.KINDS, path + "/kind")
+            if "omission_candidates" in finding:
+                if finding.get("kind") != "omission":
+                    self.problem("omission_kind_required", path + "/kind")
+                if finding.get("record") != "full":
+                    self.problem("omission_full_record_required", path + "/record")
+                candidates = finding["omission_candidates"]
+                if self.array(candidates, path + "/omission_candidates", nonempty=True):
+                    seen = set()
+                    for number, candidate in enumerate(candidates):
+                        where = path + f"/omission_candidates/{number}"
+                        if self.text(candidate, where):
+                            if candidate in seen:
+                                self.problem("duplicate_omission_candidate", where)
+                            seen.add(candidate)
+        self.text(finding.get("slot"), path + "/slot")
+        self.text(finding.get("issue"), path + "/issue")
+        evidence = finding.get("evidence")
+        if self.array(evidence, path + "/evidence", nonempty=True):
+            for number, entry in enumerate(evidence):
+                where = path + f"/evidence/{number}"
+                if isinstance(entry, dict) and "source" in entry:
+                    self.document(entry, where)
+                else:
+                    self.artifact(entry, where)
+        if "remove_relationship" in finding:
+            self.removal(finding["remove_relationship"], path + "/remove_relationship")
+        if "review_paths" in finding:
+            pointers = finding["review_paths"]
+            if self.array(pointers, path + "/review_paths", nonempty=True):
+                for number, pointer in enumerate(pointers):
+                    where = path + f"/review_paths/{number}"
+                    if self.pointer(pointer, where):
+                        if revisions is not None and pointer not in revisions:
+                            self.problem("review_path_without_revise", where)
+                        elif linked is not None:
+                            linked.add(pointer)
+
     def audit(self, value):
         if not self.obj(value, {"findings", "summary", "source_review"}, ""):
             return
@@ -258,46 +315,20 @@ class _Grammar:
         if self.array(findings, "/findings"):
             for index, finding in enumerate(findings):
                 path = f"/findings/{index}"
-                if not self.obj(finding, {"severity", "record", "slot", "issue", "evidence"}, path,
-                                {"review_paths", "remove_relationship"}):
-                    continue
-                self.enum(finding.get("severity"), {"high", "medium", "low"}, path + "/severity")
-                self.enum(finding.get("record"), {"full", "core", "both"}, path + "/record")
-                self.text(finding.get("slot"), path + "/slot")
-                self.text(finding.get("issue"), path + "/issue")
-                evidence = finding.get("evidence")
-                if self.array(evidence, path + "/evidence", nonempty=True):
-                    for number, entry in enumerate(evidence):
-                        where = path + f"/evidence/{number}"
-                        if isinstance(entry, dict) and "source" in entry:
-                            self.document(entry, where)
-                        else:
-                            self.artifact(entry, where)
-                if "remove_relationship" in finding:
-                    self.removal(finding["remove_relationship"], path + "/remove_relationship")
-                if "review_paths" in finding:
-                    pointers = finding["review_paths"]
-                    if self.array(pointers, path + "/review_paths", nonempty=True):
-                        for number, pointer in enumerate(pointers):
-                            where = path + f"/review_paths/{number}"
-                            if self.pointer(pointer, where):
-                                if pointer not in revisions:
-                                    self.problem("review_path_without_revise", where)
-                                else:
-                                    linked.add(pointer)
+                self.finding(finding, path, revisions=revisions, linked=linked)
         for pointer, where in revisions.items():
             if pointer not in linked:
                 self.problem("revise_without_finding", where)
 
 
-def check(raw: bytes) -> dict:
+def check(raw: bytes, *, version: int = 1) -> dict:
     """Check one draft, returning bounded diagnostics without any source access.
 
     ``error_count`` counts detected grammar errors; ``errors`` holds the first
     twenty. A parse failure yields one fixed code at the root. JSON Pointers in
     this report locate grammar fields inside the draft, never source paths.
     """
-    grammar = _Grammar()
+    grammar = _Grammar(version=version)
     try:
         value = _load(raw)
     except _JSONProblem as error:

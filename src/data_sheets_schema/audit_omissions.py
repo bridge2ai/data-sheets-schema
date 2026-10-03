@@ -79,10 +79,10 @@ def _shape(value, schema):
     return list(Draft202012Validator(schema).iter_errors(value))
 
 
-def _schema(path: Path) -> dict:
+def _schema(path: Path, *, schema_snapshot=None) -> dict:
     """Capture and validate each file once before constructing a schema view."""
     from linkml_runtime.dumpers import json_dumper
-    from data_sheets_schema.schema_snapshot import capture_schema
+    from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
     from data_sheets_schema.schema_view import captured_view
     total = 0
 
@@ -95,7 +95,40 @@ def _schema(path: Path) -> dict:
         _mapping(raw, "schema")
         return raw
 
-    captured = capture_schema(path.absolute(), read_bytes=read, strict=True)
+    if schema_snapshot is None:
+        captured = capture_schema(path.absolute(), read_bytes=read, strict=True)
+    else:
+        # Replay a complete immutable closure. Neither absent imports nor an
+        # altered source file may cause an ambient filesystem fallback.
+        if type(schema_snapshot) is not SchemaSnapshot or type(schema_snapshot.sources) is not tuple or not schema_snapshot.sources:
+            raise ValueError("schema_snapshot must be a nonempty immutable SchemaSnapshot")
+        frozen = {}
+        for row in schema_snapshot.sources:
+            if type(row) is not tuple or len(row) != 3:
+                raise ValueError("invalid captured schema source")
+            name, selected, raw = row
+            if (not isinstance(name, str) or not name or not isinstance(selected, Path)
+                    or not selected.is_absolute() or ".." in selected.parts
+                    or selected in frozen or type(raw) is not bytes):
+                raise ValueError("invalid or duplicate captured schema identity")
+            total += len(raw)
+            if total > MAX_SCHEMA_BYTES:
+                raise ValueError("schema closure exceeds byte bound")
+            _mapping(raw, "schema")
+            frozen[selected] = raw
+        root = schema_snapshot.sources[0][1]
+        if path.absolute() != root:
+            raise ValueError("schema snapshot root differs from selected schema path")
+
+        def frozen_read(selected):
+            if selected not in frozen:
+                raise ValueError("schema import is outside the captured closure")
+            return frozen[selected]
+
+        replay = capture_schema(root, read_bytes=frozen_read, strict=True)
+        if replay.sources != schema_snapshot.sources:
+            raise ValueError("schema snapshot is not the exact declared import closure")
+        captured = replay
     with captured_view(captured) as view:
         if view.get_class("Dataset") is None:
             raise ValueError("selected schema has no Dataset class")
@@ -286,7 +319,7 @@ class Prepared:
 
 
 def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
-            context: bytes, schema_path: Path, max_output_tokens: int,
+            context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
             max_request_bytes: int = 32_000_000) -> Prepared:
     """Read schema once, capture input bytes, render no transport-specific call."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
@@ -325,7 +358,7 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             raise ValueError("receipt contains an unknown chunk status")
         prior[key] = status
     try:
-        catalog = _schema(Path(schema_path))
+        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot)
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
     owners = _owners(document, catalog, context_doc["vocabulary"])
