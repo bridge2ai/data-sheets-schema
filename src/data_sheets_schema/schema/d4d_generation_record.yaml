@@ -197,6 +197,11 @@ classes:
         inlined: true
         range: AnyBlock
 
+      shared_generation:
+        description: Optional registered shared-generation API execution identity and reconstructed typed-audit declaration; absent on historical/default runs (#4345, #4353).
+        inlined: true
+        range: SharedGenerationExecution
+
       removal_repair:
         description: Opt-in restore-only policy, admitted attempt and mechanically checked final outcome (#2923).
         inlined: true
@@ -650,6 +655,38 @@ classes:
       note:
         description: Why this file matters to a reader of the record.
 
+  SharedGenerationExecution:
+    description: >-
+      Mechanically reconstructed execution metadata. The runtime independently
+      rechecks the captured authority and assembly; schema conformance alone
+      does not certify those checks or the scientific content of declarations.
+    attributes:
+      protocol:
+        range: SharedGenerationProtocol
+        required: true
+      generation_id:
+        pattern: '^[0-9a-f]{32}$'
+        required: true
+      assembly_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      audit_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      acceptance:
+        description: Complete independently reconstructed mechanical typed-audit result, including unverified scientific dimensions; checked by the selected runtime.
+        inlined: true
+        range: AnyBlock
+        required: true
+      authority:
+        description: Exact registered and captured input, schema, context and instrument identities rechecked by the selected runtime.
+        inlined: true
+        range: AnyBlock
+        required: true
+      scientific_support:
+        pattern: '^unverified evaluator declarations$'
+        required: true
+
   AnyBlock:
     description: >-
       A block whose interior varies legitimately across record modes and
@@ -665,6 +702,11 @@ classes:
     class_uri: linkml:Any
 
 enums:
+  SharedGenerationProtocol:
+    description: Explicitly selected shared-generation execution protocol.
+    permissible_values:
+      shared_generation_v1:
+
   RecordType:
     description: >-
       What kind of record this is. Two values across 195 records; enumerated
