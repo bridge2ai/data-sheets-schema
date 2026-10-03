@@ -330,8 +330,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#work-that-remains-open" class="md-nav__link">
-    Work that remains open
+  <a href="#runtime-integration-and-remaining-work" class="md-nav__link">
+    Runtime integration and remaining work
   </a>
   
 </li>
@@ -369,8 +369,10 @@ diagnostics and gates. It adds <code>snippets.by_origin</code> for <code>phase1<
 and <code>unattesting</code> counts. Only an absent marker uses the historical phase-1
 convention; malformed or unknown explicit markers remain visible. These markers
 are accounting metadata, not independent evidence of authorship or support.
-The default checker and all existing disk readers continue to use v3. Historical
-blocks are not silently rewritten or relabeled.</p>
+The default checker and historical disk checks continue to use v3. Disk checks
+for an explicitly registered <a href="../receipt-completion-runtime/">receipt-completion runtime condition</a>
+select v4 and its registered coverage policy. Historical blocks are not silently
+rewritten or relabeled.</p>
 <p><code>apply_rereceipt(..., instrument_version=4)</code> adds <code>origin: rereceipt</code> only to a
 new pair accepted by the existing snippet/path validator. An identical existing
 pair is never relabeled; retrying the same additions does not duplicate pairs.
@@ -435,20 +437,37 @@ answers-complete with no coverage improvement. Unsupported claims remain in
 the record and in <code>still_uncovered_paths</code>, with separate
 <code>unsupported_audit_candidates</code>. A verified quotation can still fail semantic
 support; neither the state nor zero deterministic defects certifies it.</p>
-<h2 id="work-that-remains-open">Work that remains open</h2>
-<h1 id="2926-still-needs-a-separately-registered-continuationcondition-phase-usage">2926 still needs a separately registered continuation/condition, phase usage</h1>
-<p>and failure telemetry, measured output budgeting/batching, audit carry, a
-registered coverage threshold shared by strict CLI and canary gates, and the
-required CHORUS/AI_READI paid canaries before fanout. A failed follow-up must
-retain the successful full output. Existing v1/v2/v3 instruments, registrations
-and the held audit28 corpus remain unchanged; offline fixture tests or replay
-are not empirical canaries.</p>
-<p><a href="https://github.com/bridge2ai/data-sheets-schema/issues/2923">#2923</a> still needs
-the record repair route: reuse existing removal classifications, restore an
-unfounded removal or provide independently checked audit evidence for it. A
-report disposition alone cannot clear that obligation. Neither re-receipting
-nor a nonterminal diagnostic may reopen an audit/report attempt already stopped
-by a terminal source/evidence failure.</p>
+<h2 id="runtime-integration-and-remaining-work">Runtime integration and remaining work</h2>
+<p>The <a href="../receipt-completion-runtime/">registered receipt-completion runtime</a>
+implements the continuation, durable phase usage and failure accounting,
+audit carry, and shared strict CLI/canary coverage gate under an explicit
+<code>receipt_completion_version=1</code> API renderer-8 condition. It preserves the
+successful full output when the follow-up fails. This runtime is separate
+from renderer 24's offline-only boundary described above; historical/default
+requests and gates remain unchanged.</p>
+<p><a href="https://github.com/bridge2ai/data-sheets-schema/issues/2926">#2926</a> remains open
+for owner-selected registration inputs and empirical acceptance: explicit
+output/request caps, context capacity and its basis, model, route and spending
+budget; separately authorized CHORUS and AI_READI canaries; and a coverage floor
+calibrated from their post-turn results. Those pilots must report before/after
+never-receipted counts, new-receipt attestation diagnostics, audit findings and
+added cost. A pending diagnostic floor never passes the strict coverage gate
+or authorizes fanout. No values or run authorization are supplied by this
+offline guide.</p>
+<p>The <a href="../removal-repair-v1/">restore-only removal-repair runtime</a> implements the
+record-side restoration alternative for
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/2923">#2923</a>, selected by
+<code>removal_repair_version=1</code> on API renderer 8. It reuses the removal classifier,
+requires restoration of unfounded removals, and cannot be satisfied by report
+dispositions alone. It does not add evidence-backed audit amendments or certify
+the source truth of restored values. Independent source curation, native/direct
+or later-renderer extensions, and empirical acceptance of a fresh condition
+remain separate work. The original #2923 software and replay criteria are
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/2923#issuecomment-5965432187">complete</a>.</p>
+<p>Existing v1/v2/v3 instruments, historical registrations and the held audit28
+corpus remain unchanged. Neither receipt completion nor removal repair reopens
+a generation stopped by terminal source/evidence failure. Offline fixtures and
+replay do not establish empirical calibration or authorize paid execution.</p>
 
 
 
