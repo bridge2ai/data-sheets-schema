@@ -322,3 +322,48 @@ def test_noncanonical_or_numeric_budget_never_becomes_a_native_argument(fixture,
         permission.probe_argv(expected)
     with pytest.raises(ValueError,match='decimal string'):
         permission.verify_saved_probe(draft._encoded(fixture['manifest']),expected=expected)
+
+
+@pytest.mark.parametrize('error', ['explicit failure', {'message': 'execution failed'},
+    True, False, 0, [], {}, ''])
+def test_terminal_error_cannot_contradict_success(fixture, error):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    events[-1]['error'] = error
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    with pytest.raises(ValueError, match='terminal is not explicitly successful'):
+        permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('case_id', ['arbitrary_python', 'modified_draft', 'source_write'])
+@pytest.mark.parametrize('change', ['wrong_tool', 'null_tool', 'admitted_input',
+    'null_input', 'extra_input', 'wrong_input_type'])
+def test_terminal_denial_details_bind_the_exact_denied_case(fixture, case_id, change):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    case = next(row for row in permission.probe_cases(fixture['expected']) if row['id'] == case_id)
+    row = next(row for row in events[-1]['permission_denials'] if row['tool_use_id'] == case_id)
+    row.update(tool_name=case['tool'], tool_input=deepcopy(case['input']))
+    if change == 'wrong_tool': row['tool_name'] = 'Read'
+    elif change == 'null_tool': row['tool_name'] = None
+    elif change == 'admitted_input': row['tool_input'] = {'command': fixture['expected']['commands']['draft']}
+    elif change == 'null_input': row['tool_input'] = None
+    elif change == 'extra_input': row['tool_input']['unregistered_argument'] = True
+    else: row['tool_input'] = list(row['tool_input'].items())
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    with pytest.raises(ValueError, match='terminal denial .* contradicts its exact case'):
+        permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+
+
+@pytest.mark.parametrize('fields', [(), ('tool_name',), ('tool_input',), ('tool_name', 'tool_input')])
+@pytest.mark.parametrize('null_error', [False, True])
+def test_matching_or_omitted_terminal_details_remain_compatible(fixture, fields, null_error):
+    value = deepcopy(fixture['manifest']); events = deepcopy(fixture['events'])
+    cases = {row['id']: row for row in permission.probe_cases(fixture['expected'])}
+    for row in events[-1]['permission_denials']:
+        case = cases[row['tool_use_id']]
+        details = {'tool_name': case['tool'], 'tool_input': case['input']}
+        row.update({key: deepcopy(details[key]) for key in fields})
+    if null_error: events[-1]['error'] = None
+    change_member(value, 'transcript.jsonl', jsonlines(events))
+    checked = permission.verify_saved_probe(draft._encoded(value), expected=fixture['expected'])
+    assert checked['checked'] is checked['passed'] is True
+    assert 'observation authenticity' in checked['unassessed']

@@ -362,6 +362,7 @@ def _verify(raw_manifest, expected):
     _native_scope(terminal, session, model)
     _need(terminal.get('type') == 'result' and terminal.get('session_id') == session
           and terminal.get('is_error') is False
+          and terminal.get('error') is None
           and terminal.get('subtype', 'success') == 'success'
           and terminal.get('terminal_reason') == 'completed' and terminal.get('stop_reason') == 'end_turn',
           'native terminal is not explicitly successful')
@@ -370,6 +371,14 @@ def _verify(raw_manifest, expected):
           and all(type(row) is dict for row in denied)
           and sorted(row.get('tool_use_id', '') for row in denied) == sorted(c['id'] for c in cases if not c['allow']),
           'terminal denial inventory does not exactly match required restrictions')
+    denied_cases = {case['id']: case for case in cases if not case['allow']}
+    for row in denied:
+        case = denied_cases[row['tool_use_id']]
+        # Native versions may omit these details. Supplied details must agree
+        # with the exact callback/tool result, not just reuse its case ID.
+        for key, wanted in (('tool_name', case['tool']), ('tool_input', case['input'])):
+            if key in row:
+                _need(_same(row[key], wanted), 'terminal denial ' + key + ' contradicts its exact case')
     return {'instrument': KIND, 'version': VERSION, 'checked': True, 'passed': True,
         'basis': 'recomputed exact recorded native permission cases; helper execution was stubbed',
         'scope': 'selected command admission and recorded restrictions only; no universal Write permission claim',
