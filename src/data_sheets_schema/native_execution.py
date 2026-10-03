@@ -282,6 +282,11 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
                     live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake,
                     keep_awake_raw=_file(attempt/'keep-awake.json', 'observed cleanup'))
+                if results['keep_awake'].get('passed') is not True:
+                    # Retain this observed failure, including its raw-byte pins,
+                    # even if the file is restored before final collection.
+                    stopped('cleanup evidence validation failed before publication: '
+                        + draft._encoded(results['keep_awake']).decode().strip())
                 for path, copy in projections.items():
                     if copy.read_bytes() != prepared['snapshot'].raw[path]:
                         raise ValueError('captured projection changed during validation')

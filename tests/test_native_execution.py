@@ -41,7 +41,10 @@ def make_native_case(root, mode='correction', awake=False):
             'subscriptionType':'synthetic-test-subscription','expected_api_key_source':'none'},
         'environment':{'PATH':str(Path(sys.executable).parent)+':/usr/bin:/bin','HOME':str(root),
             'LANG':'en_US.UTF-8','CLAUDE_SECURESTORAGE_CONFIG_DIR':'','CLAUDE_CODE_DISABLE_1M_CONTEXT':'1'},
-        'deadline_seconds':180,'budget_guard_usd':'1.0',
+        # Real offline helpers and captured-source checks can exceed 180s on
+        # a contended CI host. This remains a bounded synthetic test choice;
+        # production registrations still require their own explicit deadline.
+        'deadline_seconds':300,'budget_guard_usd':'1.0',
         'keep_awake':{'policy':'macos_iokit_ims_v1' if awake else 'not_applicable','host_platform':'darwin' if awake else sys.platform,
             'basis':'Ordinary local Python fixture, not a production native or paid generation run'}}
     system=root/'system.txt';system.write_text('Explicitly synthetic software test. No actual native executable or provider.\n')
@@ -495,7 +498,7 @@ def test_runtime_observation_capture_and_saved_consistency(case,monkeypatch,drif
             execute.read_final(case['raw'])
 
 
-@pytest.mark.parametrize('drift',['none','contradiction','whitespace'])
+@pytest.mark.parametrize('drift',['none','contradiction','whitespace','restore_after_gate'])
 def test_cleanup_capture_and_saved_consistency(case,monkeypatch,drift):
     (case['root']/'test-mode.txt').write_text('no_correction')
     monkeypatch.setattr(execute,'_probe_runtime',fake_observation)
@@ -504,21 +507,39 @@ def test_cleanup_capture_and_saved_consistency(case,monkeypatch,drift):
     def write(path,raw):
         real_write(path,raw)
         if Path(path)==cleanup_path:
-            if drift=='contradiction':
+            if drift in ('contradiction','restore_after_gate'):
                 changed=draft._json(raw);changed['passed']=False
                 cleanup_path.write_bytes(draft._encoded(changed))
             elif drift=='whitespace':cleanup_path.write_bytes(raw+b'\n')
     monkeypatch.setattr(execute,'durable_new',write)
+    initial_gates=[]
+    real_check=execute.gates.check
+    def check(*args,**kwargs):
+        result=real_check(*args,**kwargs)
+        initial_gates.append(deepcopy(result['keep_awake']))
+        if drift=='restore_after_gate':
+            assert result['keep_awake']['passed'] is False
+            cleanup_path.write_bytes(draft._encoded(kwargs['keep_awake']))
+        return result
+    monkeypatch.setattr(execute.gates,'check',check)
     result=execute.launch(case['raw'],**case['kwargs'])
     gate=result['gates']['keep_awake']
     assert result['runtime_gates_passed'] is (drift=='none')
-    assert gate['matches_observed'] is (drift=='none')
+    assert gate['matches_observed'] is (drift in ('none','restore_after_gate'))
     assert gate['captured_sha256']==draft._sha(cleanup_path.read_bytes())
     assert result['keep_awake']['state']=='explicitly_not_applicable'
     assert execute.read_final(case['raw'])==result
     if drift!='none':
+        prefix='cleanup evidence validation failed before publication: '
+        assert result['first_stop'].startswith(prefix)
+        observed_failure=draft._json(result['first_stop'][len(prefix):].encode())
+        assert observed_failure==initial_gates[0]
+        assert observed_failure['passed'] is False
+        assert observed_failure['captured_sha256']!=observed_failure['observed_sha256']
+        assert result['gates']['first_stop']['passed'] is False
+        assert gate['passed'] is (drift=='restore_after_gate')
         assert all(row['checked'] and row['passed'] for name,row in result['gates'].items()
-                   if name!='keep_awake')
+                   if name not in ('keep_awake','first_stop'))
         return
     # Rehashing publication wrappers cannot reconcile contradictory raw,
     # top-level or gate records. These changes make no authenticity claim.
