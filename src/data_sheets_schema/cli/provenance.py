@@ -2755,8 +2755,10 @@ def validate_records(strict, label):
               help='with --label: run directory family; defaults to the one the label lives in (#934)')
 @click.option('--record', 'which', type=click.Choice(['phase1', 'full', 'core', 'all']), default=None,
               help="with --label: which of the run's records to check [default: all]")
+@click.option('--schema-policy', type=click.Choice(['recorded', 'legacy_current']), default=None,
+              help='with --label: captured full/core scope [default: recorded], or exact old current-union replay')
 @click.option('--json', 'as_json', is_flag=True, help='emit the result as JSON')
-def name_grounding_cmd(record_file, bundle, label, project, method, which, as_json):
+def name_grounding_cmd(record_file, bundle, label, project, method, which, schema_policy, as_json):
     """Classify person-name tokens against the bundle a record read (#2918).
 
     Every token of two or more letters in a Person- or Creator-ranged name
@@ -2773,7 +2775,11 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
     bundle on disk only where it matches every recorded hash, otherwise the
     committed version that does (`provenance.bundle_bytes_for`). The record
     scope — phase-1 snapshot, final full record, derived core — is printed
-    with each result and each record is reported separately. Read-only:
+    with each result and each record is reported separately. Recorded schema
+    scope selects full for phase1/full and core for core, with an explicit
+    corresponding-current fallback. This remains the established slot-name
+    inventory, not per-owner validation. --schema-policy legacy_current
+    replays the previous current full/core union and output. Read-only:
     nothing is written, and findings never change the exit status.
     """
     import hashlib
@@ -2783,9 +2789,9 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
     if record_file or bundle:
         if not (record_file and bundle):
             raise click.UsageError("--full and --bundle go together")
-        if label or project or method or which:
+        if label or project or method or which or schema_policy:
             raise click.UsageError("--full/--bundle check one file against one bundle; "
-                                   "--label, --project, --method and --record select a run instead")
+                                   "--label, --project, --method, --record and --schema-policy select a run instead")
         raw = bundle.read_bytes()
         text, why = ng.bundle_text(raw)
         if text is None:
@@ -2810,7 +2816,8 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
             if not paths:
                 raise click.ClickException(f"no provenance record under {method} {label}")
         records = ng.RECORDS if which in (None, "all") else (which,)
-        results = [{**ng.check_run(p, records), "method": method} for p in paths]
+        results = [{**ng.check_run(p, records, schema_policy=schema_policy or "recorded"),
+                    "method": method} for p in paths]
     else:
         raise click.UsageError("name a run (--label) or a record and a bundle (--full, --bundle)")
 
@@ -2841,6 +2848,15 @@ def name_grounding_cmd(record_file, bundle, label, project, method, which, as_js
             click.echo(f"  not checked: {res.get('reason')}")
             continue
         for name, rec in res["records"].items():
+            authority = rec.get("schema_basis")
+            if authority:
+                actual = authority.get("actual") or {}
+                digest = f"; sha256 {actual['sha256']}" if actual.get("sha256") else ""
+                click.echo(f"  {name:6} schema scope: {authority['schema_kind']} "
+                           f"{authority['selection']}{digest}")
+                click.echo(f"         {authority['scope_rule']}")
+                if authority.get("reason"):
+                    click.echo(f"         {authority['reason']}")
             if not rec.get("checked"):
                 click.echo(f"  {name:6} {rec.get('path') or '—'}: not checked — {rec.get('reason')}")
                 continue

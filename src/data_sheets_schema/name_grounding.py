@@ -13,12 +13,17 @@ What is read
 A **name leaf** is the `name` of a mapping held by a slot whose induced
 range is `Person` or `Creator`, or the string itself where the record
 writes that slot as a string (`contact_person: Vardit Ravitsky (ORCID:…)`).
-The slots are derived from the full and core schemas, never listed
+The pure default derives slots from today's full and core schemas, never listed
 (`person_name_slots`): `committee_contact`, `committee_members`,
 `contact_person`, `creators`, `governance_committee_contact` and
 `principal_investigator` today. `principal_investigator` is also named
 explicitly, as the issue scopes it, so a later range change cannot drop it.
 The walk recurses, so a creator's own `principal_investigator` is reached.
+Run-aware checks instead capture the recorded full schema for phase1/full
+and the recorded core schema for core, with a disclosed corresponding-current
+fallback. This remains a Person-or-Creator **slot-name inventory**, not
+per-owner semantic validation. `schema_policy='legacy_current'` replays the
+previous current-union run output without adding scope metadata (#4292).
 
 Not read: identifiers (a bare-name person id such as
 `creators[4].id: Uma Axelsson` is an identifier-form defect, not a name
@@ -938,6 +943,88 @@ def person_name_slots() -> frozenset[str]:
             | _ALWAYS)
 
 
+NAME_SCOPE_INSTRUMENT = "name_grounding schema scope v1 (#4292)"
+NAME_SCOPE_RULE = "Person-or-Creator slot-name inventory, not per-owner semantic validation"
+
+
+def person_name_slots_of(view: Any) -> frozenset[str]:
+    """The established slot-name rule in one captured schema, including PI.
+
+    No owner-aware walk is introduced: a name selected by any class applies
+    wherever that key occurs, just as in the pure default checker.
+    """
+    return frozenset(str(slot.name) for owner in view.all_classes()
+                     for slot in view.class_induced_slots(owner)
+                     if str(slot.range) in _PERSON_RANGES) | _ALWAYS
+
+
+def run_name_scope(record: dict[str, Any], *, kind: str
+                   ) -> tuple[frozenset[str] | None, dict[str, Any]]:
+    """Frozen slots and disclosed authority for one requested schema kind.
+
+    Hashes and slots describe the same captured bytes. Historical views are
+    released, local unpinned imports are refused, and no path-keyed slot cache
+    or mutable view survives selection. Current fallback is kind-specific.
+    """
+    import json
+
+    from data_sheets_schema.provenance import CORE_SCHEMA, FULL_SCHEMA
+    from data_sheets_schema.resources import resource_path
+    from data_sheets_schema.run_schema import run_schema_bytes
+    from data_sheets_schema.schema_view import version_document, version_view
+
+    if kind not in {"full", "core"}:
+        raise ValueError("schema kind must be full or core")
+    current = FULL_SCHEMA if kind == "full" else CORE_SCHEMA
+    schema = record.get("schema")
+    schema = schema if isinstance(schema, dict) else {}
+    requested = {key: schema[f"{kind}_{key}"] for key in ("path", "sha256", "md5")
+                 if f"{kind}_{key}" in schema}
+    authority: dict[str, Any] = {
+        "instrument": NAME_SCOPE_INSTRUMENT, "schema_kind": kind,
+        "scope_rule": NAME_SCOPE_RULE, "explicit_slots": sorted(_ALWAYS),
+        "requested": requested,
+    }
+
+    def captured(raw: bytes, path: str) -> tuple[frozenset[str], dict[str, Any]]:
+        with version_view(path, version_document(raw)) as view:
+            slots = person_name_slots_of(view)
+        return slots, {"path": path, "sha256": hashlib.sha256(raw).hexdigest(),
+                       "md5": hashlib.md5(raw).hexdigest()}
+
+    # Broken or unavailable historical authority degrades only this scope.
+    try:
+        raw, basis = run_schema_bytes(record, kind=kind)
+    except Exception as exc:  # noqa: BLE001 — a schema reader failure is disclosed, not a clean zero
+        raw, basis = None, {"reason": f"schema resolution failed ({type(exc).__name__}: {exc})"}
+    authority["resolution"] = basis
+    slots = None
+    if raw is not None:
+        try:
+            slots, actual = captured(raw, str(basis.get("path", current)))
+        except Exception as exc:  # noqa: BLE001 — malformed historical schema uses the stated fallback
+            authority["reason"] = ("the recovered schema cannot supply the name scope "
+                                   f"({type(exc).__name__}: {exc})")
+        else:
+            authority.update(selection="recorded", actual=actual)
+    else:
+        authority["reason"] = basis.get("reason", "the recorded schema bytes are unavailable")
+    if slots is None:
+        try:
+            selected = resource_path(current)
+            slots, actual = captured(selected.read_bytes(), str(selected))
+        except Exception as exc:  # noqa: BLE001 — unchecked, never fabricated zero coverage
+            authority.update(selection="unavailable", reason=(
+                f"{authority.get('reason')}; current {kind} schema cannot supply the name scope "
+                f"({type(exc).__name__}: {exc})"))
+            return None, authority
+        authority.update(selection="current_fallback", actual=actual)
+    names = sorted(slots)
+    authority.update(slots=names, slots_sha256=hashlib.sha256(
+        json.dumps(names, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest())
+    return slots, authority
+
+
 def iter_name_leaves(node: Any, slots: frozenset[str] | set[str],
                      path: str = "") -> Iterator[tuple[str, str]]:
     """(path, name) for every person-name leaf, with indexed paths
@@ -1133,7 +1220,8 @@ def _load(which: str, provenance: Path, record: dict[str, Any]
     return str(path), doc, why
 
 
-def check_run(provenance: Path, records: tuple[str, ...] = RECORDS) -> dict[str, Any]:
+def check_run(provenance: Path, records: tuple[str, ...] = RECORDS, *,
+              schema_policy: str = "recorded") -> dict[str, Any]:
     """Every name leaf of a run's records against the bytes the run read.
 
     `records` is the record scope, named in the result: any of `phase1`
@@ -1141,12 +1229,20 @@ def check_run(provenance: Path, records: tuple[str, ...] = RECORDS) -> dict[str,
     full record) and `core` (the derived core). Each is reported on its
     own; nothing is pooled across them. Where bytes were resolved,
     `bundle.md5` is the md5 of the bytes the records were checked against.
+    ``recorded`` selects each scope's captured schema and discloses fallback;
+    ``legacy_current`` preserves the previous current-union output exactly.
     """
     from data_sheets_schema.schema_cache import load_yaml
+    if schema_policy not in {"recorded", "legacy_current"}:
+        raise ValueError("schema_policy must be recorded or legacy_current")
     out: dict[str, Any] = {"instrument": INSTRUMENT,
                            "project": provenance.name[: -len("_provenance.yaml")],
                            "label": provenance.parent.name, "provenance": str(provenance),
                            "record_scope": list(records)}
+    if schema_policy == "recorded":
+        if any(which not in RECORDS for which in records):
+            raise ValueError("records must name phase1, full or core")
+        out["schema_policy"] = schema_policy
     try:
         record = load_yaml(provenance)
     except (OSError, yaml.YAMLError, UnicodeDecodeError, ValueError) as exc:
@@ -1166,11 +1262,24 @@ def check_run(provenance: Path, records: tuple[str, ...] = RECORDS) -> dict[str,
     if text is None:
         return {**out, "checked": False, "reason": why}
     index = BundleIndex(text)
-    slots = person_name_slots()
+    # Preserve the old default union only for explicit historical replay.
+    slots = person_name_slots() if schema_policy == "legacy_current" else None
+    scopes = ({kind: run_name_scope(record, kind=kind)
+               for kind in dict.fromkeys("core" if r == "core" else "full" for r in records)}
+              if schema_policy == "recorded" else {})
     out["checked"] = True
     out["records"] = {}
     for which in records:
         path, doc, why = _load(which, provenance, record)
+        authority = None
+        if schema_policy == "recorded":
+            slots, authority = scopes["core" if which == "core" else "full"]
+            if slots is None:
+                why = why or authority["reason"]
         out["records"][which] = ({"checked": False, "path": path, "reason": why} if why
                                  else {"path": path, **check_record(doc, index, slots)})
+        if authority is not None:
+            # Sibling results do not share mutable authority metadata.
+            import copy
+            out["records"][which]["schema_basis"] = copy.deepcopy(authority)
     return out
