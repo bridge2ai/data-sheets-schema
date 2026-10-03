@@ -45,6 +45,7 @@ class Capture:
     def __init__(self, root):
         self.root = Path(root)
         self.aliases, self.metadata, self.raw = {}, {}, {}
+        self.alias_metadata = {}
         self.roles = {}
         self.sealed = False
 
@@ -59,6 +60,7 @@ class Capture:
                 raise ValueError('replay requested an uncaptured path')
             target = literal.resolve()
             self.aliases[key] = str(target)
+            self.alias_metadata[key] = {'symlink': literal.is_symlink()}
             if str(target) not in self.metadata:
                 try:
                     info = target.stat()
@@ -68,6 +70,7 @@ class Capture:
                 except FileNotFoundError:
                     self.metadata[str(target)] = {'exists': False, 'regular': False}
             self.aliases.setdefault(str(target), str(target))
+            self.alias_metadata.setdefault(str(target), {'symlink': False})
         return Path(self.aliases[key])
 
     def read(self, value, role):
@@ -105,6 +108,8 @@ class Capture:
         for original, target in self.aliases.items():
             if str(Path(original).resolve()) != target:
                 raise ValueError('captured path identity changed before report publication')
+            if Path(original).is_symlink() != self.alias_metadata[original]['symlink']:
+                raise ValueError('captured path metadata changed before report publication')
         for path, expected in self.metadata.items():
             try:
                 info = Path(path).stat()
@@ -311,6 +316,49 @@ class CapturedFiles:
             return value
         except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
             raise self.BudgetStop('native persisted tool output has invalid provenance') from error
+
+
+def _control_lifecycle(events, records, controls):
+    """Preserve the live controller's initialization and terminal barriers.
+
+    The frozen historical reconciliation alone does not enforce these states.
+    This additional versioned check never changes its legacy output contract.
+    """
+    initialized = terminal = False
+    problems = []
+    init_id = controls['native_control'].INIT_ID
+    if [record.get('kind') for record in records[:2]] != ['initialize_sent', 'initialize_ack']:
+        problems.append('native control journal must begin with initialization then acknowledgement')
+    for line, event in enumerate(events, 1):
+        kind = event.get('type')
+        if kind == 'control_response':
+            response = event.get('response')
+            if (initialized or terminal or not isinstance(response, dict)
+                    or response.get('request_id') != init_id or response.get('subtype') != 'success'):
+                problems.append(f'native control initialization was refused or ambiguous at line {line}')
+            else:
+                initialized = True
+        elif kind == 'control_cancel_request':
+            problems.append(f'native control callback was cancelled or timed out at line {line}')
+        elif kind == 'control_request':
+            if not initialized or terminal or event.get('request_id') == init_id:
+                problems.append(f'native callback is outside the initialized run at line {line}')
+        elif isinstance(kind, str) and kind.startswith('control_'):
+            problems.append(f'unsupported native control frame at line {line}')
+        elif kind == 'result':
+            if not initialized or terminal:
+                problems.append(f'native result is outside the initialized run at line {line}')
+            terminal = True
+        blocks = _blocks(event)
+        if isinstance(blocks, list) and any(isinstance(block, dict) and
+                block.get('type') in ('tool_use', 'tool_result') for block in blocks):
+            if not initialized or terminal:
+                problems.append(f'native tool event is outside the initialized run at line {line}')
+    if not initialized:
+        problems.append('native control lacks successful initialization')
+    if not terminal:
+        problems.append('native control lacks a terminal result')
+    return {'checked': True, 'initialized': initialized, 'terminal': terminal, 'problems': problems}
 
 
 # Versioned adaptation of the frozen ordered control reconciliation.
@@ -705,7 +753,13 @@ def _saved_draft(prepared, classify):
                                 or item.get('is_error') is not False
                                 or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id'))):
                             raise ValueError('registered recorder failed or has unusable result')
-                        state.snapshot.read(policy['post_final_recorder']['destination'], 'provenance')
+                        destination = policy['post_final_recorder']['destination']
+                        recorded_path = state.snapshot.path(destination)
+                        metadata = state.snapshot.metadata[str(recorded_path)]
+                        alias = state.snapshot.alias_metadata[str(Path(destination))]
+                        if (not metadata['regular'] or metadata.get('links') != 1 or alias['symlink']):
+                            raise ValueError('completed recorder metadata must be a regular non-symlink single-link file')
+                        state.snapshot.read(destination, 'provenance')
                         recorder_done = True
             except (ValueError, TypeError, KeyError) as exc:
                 problems.append(str(exc))
@@ -752,6 +806,7 @@ def check_capture(prepared):
     denials = deepcopy(prepared['denials'])
     commands = command_history(events, policy, denials, classify)
     control = _control_history(events, prepared['records'], policy, classify, deepcopy(prepared['files']), controls)
+    lifecycle = _control_lifecycle(events, prepared['records'], controls)
     draft_report, last_final, recorder_done = _saved_draft(prepared, classify)
     actual_final = deepcopy(prepared['final_result'])
     final_problems = []
@@ -762,7 +817,8 @@ def check_capture(prepared):
     if not actual_final.get('checked') or actual_final.get('findings'):
         final_problems.append('actual final evidence checker did not pass on captured bytes')
     denial_problems = controls['run_native_canary'].denial_problems(denials)
-    problems = trace_problems + commands['problems'] + control['problems'] + draft_report['problems'] + final_problems + denial_problems
+    problems = (trace_problems + commands['problems'] + control['problems'] + lifecycle['problems']
+                + draft_report['problems'] + final_problems + denial_problems)
     return {'instrument': INSTRUMENT, 'version': VERSION, 'scope': SCOPE, 'checked': True,
         'additional_gate_passed': not problems and draft_report['draft_gate_passed'],
         'generation_acceptance': 'not_assessed', 'problems': problems,
@@ -775,9 +831,11 @@ def check_capture(prepared):
             'controller_sources_sha256': prepared['composition']['controller_sources_sha256'],
             'policy_sha256': prepared['composition']['policy_sha256']},
         'raw_files': snap.identity(), 'captured_path_aliases': deepcopy(snap.aliases),
+        'captured_path_metadata': deepcopy(snap.alias_metadata),
         'current_file_metadata': deepcopy(snap.metadata),
         'metadata_scope': 'Current capture only; historical intermediate bytes are not reconstructed.',
-        'command_history': commands, 'control_history': control, 'denial_classification': denials,
+        'command_history': commands, 'control_history': control, 'control_lifecycle': lifecycle,
+        'denial_classification': denials,
         'denials_reported_in_terminal': 'permission_denials' in terminal,
         'draft_history': draft_report, 'final_evidence': actual_final,
         'recorder_completed_in_trace': recorder_done,

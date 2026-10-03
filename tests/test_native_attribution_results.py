@@ -91,6 +91,62 @@ def test_bad_saved_trace_does_not_pass_current_files(trace,tmp_path,mutation):
     assert not report['additional_gate_passed'] and report['problems']
 
 
+@pytest.mark.parametrize('mutation',['cancel','duplicate_ack','late_ack','extra_error_response',
+    'failed_ack','missing_ack','callback_before_ack','result_before_ack','ack_after_terminal',
+    'unknown_control','callback_uses_init_id'])
+def test_live_control_lifecycle_is_required_by_public_replay(trace,tmp_path,mutation):
+    def change(events):
+        ack=next(e for e in events if e.get('type')=='control_response')
+        if mutation=='cancel':
+            index=next(n for n,e in enumerate(events) if e.get('type')=='user')
+            events.insert(index,{'type':'control_cancel_request','request_id':'request-0'})
+        elif mutation=='duplicate_ack':events.insert(0,deepcopy(ack))
+        elif mutation=='late_ack':events.remove(ack);events.insert(-1,ack)
+        elif mutation=='extra_error_response':events.insert(1,{'type':'control_response','response':{'subtype':'error','request_id':'extra'}})
+        elif mutation=='failed_ack':ack['response']['subtype']='error'
+        elif mutation=='missing_ack':events.remove(ack)
+        elif mutation=='callback_before_ack':
+            callback=next(e for e in events if e.get('type')=='control_request');events.remove(callback);events.insert(0,callback)
+        elif mutation=='result_before_ack':
+            result=next(e for e in events if e.get('type')=='user');events.remove(result);events.insert(0,result)
+        elif mutation=='ack_after_terminal':events.remove(ack);events.append(ack)
+        elif mutation=='unknown_control':events.insert(1,{'type':'control_future_request','request_id':'new'})
+        else:next(e for e in events if e.get('type')=='control_request')['request_id']=ack['response']['request_id']
+    path=_changed_events(trace,tmp_path,change)
+    report=results.check_files(trace[0]/'composition.json',path,trace[0]/'new-attempt/control.jsonl')
+    assert not report['additional_gate_passed']
+    assert report['control_lifecycle']['checked'] and report['control_lifecycle']['problems']
+
+
+def test_control_journal_initialization_order_is_required(trace,tmp_path):
+    prepared=prepare(trace);records=deepcopy(prepared['records'])
+    records[0],records[1]=records[1],records[0]
+    control=tmp_path/'reordered-control.jsonl'
+    control.write_text(''.join(json.dumps(row)+'\n' for row in records))
+    report=results.check_files(trace[0]/'composition.json',trace[0]/'new-attempt/transcript.jsonl',control)
+    assert not report['additional_gate_passed'] and report['control_lifecycle']['problems']
+
+
+@pytest.mark.parametrize('kind',['regular','hardlink','symlink'])
+def test_actual_completed_recorder_retains_live_file_requirements(tmp_path,kind):
+    source=inputs.__wrapped__();base=case.__wrapped__(tmp_path,source);selection=selected.__wrapped__(base,tmp_path)
+    spec=selection[0]
+    adapter,status,stops=run_fake(selection,tmp_path,[draft_step(spec),final_step(spec,tmp_path/'final'),recorder_step(selection)],deadline_seconds=60)
+    assert status==0 and not stops
+    composition=tmp_path/'composition.json';composition.write_bytes(selection[-1])
+    destination=Path(draft._json(selection[-1])['policy']['post_final_recorder']['destination'])
+    before=destination.read_bytes();alias=tmp_path/'preserved-provenance.yaml'
+    if kind=='hardlink':alias.hardlink_to(destination)
+    elif kind=='symlink':destination.rename(alias);destination.symlink_to(alias)
+    prepared=results.capture(composition,tmp_path/'new-attempt/transcript.jsonl',tmp_path/'new-attempt/control.jsonl')
+    report=results.check_capture(prepared)
+    assert report['additional_gate_passed'] is (kind=='regular')
+    assert report['recorder_completed_in_trace'] is (kind=='regular')
+    if kind!='regular':assert any('regular non-symlink single-link' in p for p in report['problems'])
+    else:assert adapter.report(complete=True)['draft_gate_passed']
+    assert destination.read_bytes()==before
+
+
 
 def test_old_authority_cannot_be_relabelled_with_rehashed_outer_fields(trace,tmp_path):
     root,_=trace
