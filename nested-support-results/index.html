@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/nested-support-results/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Offline nested-support saved responses - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#offline-nested-support-saved-responses" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Offline nested-support saved responses
             
           </span>
         </div>
@@ -316,49 +316,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#invented-fixture-round-trip" class="md-nav__link">
+    Invented fixture round trip
   </a>
   
 </li>
@@ -377,95 +336,147 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/nested-support-results.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
+<h1 id="offline-nested-support-saved-responses">Offline nested-support saved responses</h1>
+<p><code>d4d evaluate support-results</code> checks saved evidence under the explicit
+<code>nested_support_result_v1</code> protocol. It does not call a provider, execute a
+planned request, use a judgement cache, or change an old plan. The v1/v2 planners
+and SupportJudgeV2 remain separate instruments.</p>
+<p>Prepare a descriptor from an existing <code>d4d-support-plan-v2</code> directory with
+<code>--protocol nested_support_result_v1</code> and repeatable <code>--select TARGET_ID
+ATTEMPT_ID</code>. Each selected target has one unique attempt. Fitness targets are
+not eligible. The descriptor copies exact plan bytes and the selected records'
+required artifact closure, reconstructs the schema specification and nested
+inventory, and checks each selected complete request against its recipe. Schema
+imports come only from captured bytes. Original source paths remain metadata;
+they are never recreated or used to load today's schema.</p>
+<p>The saved-response envelope is <code>nested_support_response_v1</code>. It contains exactly
+<code>format</code>, <code>descriptor_sha256</code>, <code>target_id</code>, <code>attempt_id</code>, <code>request_sha256</code>, and
+<code>message_base64</code>. The last field encodes the untouched native-message JSON bytes.
+<code>package_response</code> below is a pure helper for an external capture harness. These
+binding hashes are <strong>caller declarations</strong>: they detect unchanged envelope
+replay into another request/attempt/record. They do not authenticate a provider
+call or prevent a caller from inventing and relabelling evidence. A future
+registered executor must capture this association at the actual call boundary.</p>
+<p>The native-message adapter derives fields from those raw bytes. It requires an
+assistant message, exact requested/reported model equality, <code>end_turn</code>, exactly
+one text block containing a strict JSON object with exactly <code>verdict</code> and a
+nonblank <code>reason</code>, and valid nonnegative integer input/output token counts.
+Markdown fences, trailing prose, duplicate keys, nonfinite numbers, tool/refusal
+blocks, unknown completion states and model aliases are refused. Optional
+thinking/redacted-thinking blocks remain evidence. Missing usage remains
+missing; it never becomes zero. There is no retry, best-of-N selection, model
+alias mapping, or semantic truth certification.</p>
+<p><code>accept</code> preserves rejected raw evidence and exits nonzero for rejection. A
+direct native-message file without an envelope is preserved and rejected with
+an explicit missing-envelope reason. <code>recheck</code> reconstructs the outcome from
+raw artifacts and returns success only when the saved assessment matches; a
+correctly preserved rejection is still a valid artifact, not an accepted score.
+Existing output directories, symlinks and aliases into input evidence are
+refused. No command overwrites an existing destination.</p>
+<p><code>report</code> independently rechecks supplied results, refuses duplicate attempts and
+foreign descriptors, and separates selected missing/rejected/accepted counts by
+relationship edge and attribute value. Full-plan counts are labelled as declared
+by the pinned manifest; unselected record artifacts are not reconstructed.
+Fitness remains unscored. Even complete selected-response accounting leaves all
+original calibration, context, instrument, transport and paid-readiness blockers
+in place. This does not certify full-record schema validation or scientific
+accuracy. Parents #3342/#2929 and calibration #3343 remain open.</p>
+<h2 id="invented-fixture-round-trip">Invented fixture round trip</h2>
+<p>This example creates a new temporary Git fixture and makes no network or model
+calls. The model name, usage, cap and verdict are invented software-test values.
+They are not a quality measurement, calibrated instrument or production budget.
+Run from an environment where this repository's <code>d4d</code> package is installed.</p>
+<pre><code class="language-bash">demo=$(mktemp -d)
+python - &quot;$demo&quot; &lt;&lt;'PY'
+import hashlib, json, subprocess, sys
+from pathlib import Path
+import yaml
+from data_sheets_schema.support_plan import build_plan
+root = Path(sys.argv[1]) / 'source'
+root.mkdir()
+(root / 'schema.yaml').write_text('''id: https://example.invalid/fixture
+name: fixture
+prefixes:
+  linkml: https://w3id.org/linkml/
+  ex: https://example.invalid/
+imports: [linkml:types]
+default_prefix: ex
+classes:
+  Dataset:
+    attributes:
+      title:
+        range: string
+      creators:
+        range: Creator
+        multivalued: true
+        inlined_as_list: true
+  Creator:
+    attributes:
+      name:
+        range: string
+''')
+record = yaml.safe_dump({'title': 'River archive', 'creators': [{'name': 'Alex'}]}).encode()
+bundle = b'FILE: invented.txt\nAlex prepared the River archive.\n'
+(root / 'record.yaml').write_bytes(record)
+(root / 'bundle.txt').write_bytes(bundle)
+(root / 'provenance.yaml').write_text(yaml.safe_dump({
+    'run': {'project': 'River', 'label': 'fixture_rep1', 'method': 'fixture'},
+    'model': {'model': 'invented-generator'},
+    'inputs': {'bundle_path': 'bundle.txt', 'bundle_md5': hashlib.md5(bundle).hexdigest()}}))
+(root / 'roster.json').write_text(json.dumps({'jobs': [{
+    'id': 'river-r20', 'input': 'record.yaml', 'project': 'River',
+    'label': 'fixture_rep1', 'method': 'fixture', 'cohort': 'invented',
+    'generation_rep': 1, 'purpose': 'primary', 'rubric': 'rubric20',
+    'output': 'unmeasured.json', 'provenance': 'provenance.yaml'}],
+    'pinned_files': {'record.yaml': hashlib.sha256(record).hexdigest()}}))
+subprocess.run(['git', 'init', '-q', str(root)], check=True)
+subprocess.run(['git', '-C', str(root), 'add', '.'], check=True)
+subprocess.run(['git', '-C', str(root), '-c', 'user.name=Offline fixture',
+                '-c', 'user.email=offline@example.invalid', 'commit', '-qm', 'Invented inputs'], check=True)
+build_plan(root / 'roster.json', root.parent / 'plan', root=root, profile='neutral',
+           schema_path=root / 'schema.yaml', model='fixture-judge', max_tokens=128,
+           plan_version=2, artifact_kind='full')
+PY
 
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
+target=$(python - &quot;$demo/plan/manifest.json&quot; &lt;&lt;'PY'
+import json, sys
+m = json.load(open(sys.argv[1]))
+print(next(t['id'] for t in m['targets'] if t['axis'] == 'grounding_v3'))
+PY
+)
+d4d evaluate support-results prepare --plan &quot;$demo/plan&quot; \
+  --output &quot;$demo/descriptor&quot; --protocol nested_support_result_v1 \
+  --select &quot;$target&quot; invented-attempt
 
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
+python - &quot;$demo&quot; &lt;&lt;'PY'
+import json, sys
+from pathlib import Path
+from data_sheets_schema.nested_support_results import package_response
+root = Path(sys.argv[1])
+raw = json.dumps({'id': 'invented-message', 'type': 'message', 'role': 'assistant',
+    'model': 'fixture-judge', 'stop_reason': 'end_turn',
+    'usage': {'input_tokens': 10, 'output_tokens': 20},
+    'content': [{'type': 'text', 'text': json.dumps({
+        'verdict': 'supported', 'reason': 'Invented response for a software test.'})}]}).encode()
+with (root / 'response-envelope.json').open('xb') as stream:
+    stream.write(package_response((root / 'descriptor/descriptor.json').read_bytes(),
+                                  attempt_id='invented-attempt', native_message=raw))
+PY
 
+d4d evaluate support-results accept --descriptor &quot;$demo/descriptor&quot; \
+  --response &quot;$demo/response-envelope.json&quot; --attempt invented-attempt --output &quot;$demo/result&quot;
+d4d evaluate support-results recheck --result &quot;$demo/result&quot;
+d4d evaluate support-results report --descriptor &quot;$demo/descriptor&quot; --result &quot;$demo/result&quot;
 </code></pre>
-
-</details>
+<p>The final report shows one selected accepted response, other plan targets
+unselected, fitness unscored, and paid readiness still false. All bytes remain
+available in the temporary directory for inspection.</p>
 
 
 
