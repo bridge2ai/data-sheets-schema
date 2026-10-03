@@ -50,6 +50,7 @@ from __future__ import annotations
 import copy
 import re
 import unicodedata
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -436,12 +437,116 @@ def _covers(receipt_path: str, leaf_path: str) -> bool:
 ENTRY_KEYS = ("id", "name", "title", "label", "variable_name", "url", "download_url",
               "access_url", "path", "grant_id", "grant_number")
 
+IdentifierBases = tuple[tuple[str, str], ...] | list[tuple[str, str]]
+IDENTITY_RULES_INSTRUMENT = "receipt-identity-rules-v1"
 
-def _canonical_identifier(value: str) -> str:
+
+def _validated_identifier_bases(bases: IdentifierBases | None) -> tuple[tuple[str, str], ...] | None:
+    """Freeze an explicit ordered (resolver URL base, CURIE prefix) table.
+
+    None alone selects the legacy ambient rules. Empty is a valid table
+    with no aliases; malformed explicit evidence must never select today.
+    Ordering and duplicate aliases retain the schema's first-match rule.
+    """
+    if bases is None:
+        return None
+    if not isinstance(bases, (tuple, list)):
+        raise ValueError("identifier_bases must be a sequence of (URL base, prefix) pairs")
+    try:
+        # Cache by frozen contents, never the identity of a caller's list.
+        # Every candidate entry in a remap uses this same small table.
+        frozen = tuple(tuple(pair) if isinstance(pair, list) else pair for pair in bases)
+        return _validated_frozen_bases(frozen)
+    except TypeError as exc:
+        raise ValueError("identifier_bases entries must contain URL and prefix strings") from exc
+
+
+@lru_cache(maxsize=64)
+def _validated_frozen_bases(bases: tuple) -> tuple[tuple[str, str], ...]:
+    from urllib.parse import urlsplit
+
+    out = []
+    for pair in bases:
+        if not isinstance(pair, (tuple, list)) or len(pair) != 2:
+            raise ValueError("identifier_bases entries must be (URL base, prefix) pairs")
+        base, prefix = pair
+        if (not isinstance(base, str) or not isinstance(prefix, str) or not prefix
+                or any(c.isspace() or ord(c) < 32 for c in base + prefix)
+                or ":" in prefix):
+            raise ValueError("identifier_bases requires a URL and a nonempty CURIE prefix")
+        try:
+            parsed = urlsplit(base)
+            valid = parsed.scheme in {"http", "https"} and bool(parsed.netloc)
+        except ValueError:
+            valid = False
+        if not valid:
+            raise ValueError("identifier_bases requires an absolute http(s) resolver base")
+        out.append((base, prefix))
+    return tuple(out)
+
+
+@lru_cache(maxsize=64)
+def _resolver_bases(bases: tuple[tuple[str, str], ...]) -> tuple[tuple[str, str], ...]:
+    # The boundary rule used by api_runner._identifier_form_tables (#976).
+    # A schema can declare a namespace without declaring it a resolver base.
+    return tuple((base, prefix) for base, prefix in bases if base.endswith(("/", "#", "_", ":")))
+
+
+def _recorded_identifier_bases(record: dict[str, Any]) -> tuple[tuple[tuple[str, str], ...], dict[str, Any]]:
+    """Select once from this run; disclose the table and actual schema used.
+
+    The resolver's current fallback carries *requested historical* hashes.
+    Keep those separate from the current file's hashes, and verify its base
+    projection against the selected rules before claiming that file as the
+    source. A concurrent edit or inconsistent cache cannot certify a join.
+    Table hashes cover ordered JSON arrays, ASCII encoded, without spaces.
+    """
+    import hashlib
+    import json
+
+    from data_sheets_schema import run_schema
+
+    rules, resolved = run_schema.identifier_rules(record)
+    declared = _validated_identifier_bases(rules.bases)
+    if declared is None:
+        raise ValueError("selected identifier rules did not supply a table")
+    schema_basis = dict(resolved)
+    if resolved.get("source") == run_schema.TODAY:
+        from data_sheets_schema.grounding import declared_bases_of
+        from data_sheets_schema.identifiers import FULL_SCHEMA
+        from data_sheets_schema.resources import resource_path
+        from data_sheets_schema.schema_view import version_document
+
+        raw = resource_path(FULL_SCHEMA).read_bytes()
+        if _validated_identifier_bases(declared_bases_of(version_document(raw))) != declared:
+            raise ValueError("current schema bytes disagree with the selected identifier bases")
+        schema_basis = {"source": run_schema.TODAY, "path": str(FULL_SCHEMA),
+                        "sha256": hashlib.sha256(raw).hexdigest(),
+                        "md5": hashlib.md5(raw).hexdigest(), "reason": resolved["reason"]}
+        requested = {key: resolved[key] for key in ("path", "sha256", "md5") if key in resolved}
+        if requested:
+            schema_basis["requested_schema"] = requested
+    bases = _resolver_bases(declared)
+
+    def digest(table):
+        return hashlib.sha256(json.dumps(table, ensure_ascii=True, separators=(",", ":")).encode("ascii")).hexdigest()
+
+    return bases, {"instrument": IDENTITY_RULES_INSTRUMENT, "schema_basis": schema_basis,
+                   "declared_bases_sha256": digest(declared), "bases_sha256": digest(bases),
+                   "bases": [list(pair) for pair in bases],
+                   "boundary_rule": "delimiter-terminated resolver bases; ordered first match"}
+
+
+def _canonical_identifier(value: str, *, identifier_bases: IdentifierBases | None = None) -> str:
     """The CURIE form when `value` is a resolver URL of a declared prefix,
     else `value` — so an entry whose `id` a phase-1 snapshot wrote as
     `https://doi.org/x#files` and the written record carries as
-    `doi:x#files` (#974's normaliser) is the same entry."""
+    `doi:x#files` (#974's normaliser) is the same entry. Explicit bases use
+    the same delimiter boundary; None retains the legacy ambient lookup."""
+    bases = _validated_identifier_bases(identifier_bases)
+    if bases is not None:
+        from data_sheets_schema.api_runner import curie_form
+        return curie_form(value, _resolver_bases(bases)) or value
     try:
         from data_sheets_schema.api_runner import _identifier_form_tables, curie_form
         _, bases = _identifier_form_tables()
@@ -450,15 +555,16 @@ def _canonical_identifier(value: str) -> str:
         return value
 
 
-def _entry_key(node: Any) -> tuple[str, str] | None:
+def _entry_key(node: Any, *, identifier_bases: IdentifierBases | None = None) -> tuple[str, str] | None:
     """What identifies a list entry: the first `ENTRY_KEYS` string it carries;
     a scalar entry is its own key. None for an entry with no such key — it
     is then located by `_scalar_pairs` overlap."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     if isinstance(node, dict):
         for k in ENTRY_KEYS:
             v = node.get(k)
             if isinstance(v, str) and v.strip():
-                return (k, _canonical_identifier(v.strip()))
+                return (k, _canonical_identifier(v.strip(), identifier_bases=identifier_bases))
         return None
     if isinstance(node, str) and node.strip():
         return ("value", node.strip())
@@ -477,7 +583,8 @@ def _scalar_pairs(node: Any) -> set[tuple[str, str]]:
 
 
 def _locate(entry: Any, i: int, candidates: list[Any],
-            siblings: list[Any] | None = None) -> tuple[int | None, str]:
+            siblings: list[Any] | None = None, *,
+            identifier_bases: IdentifierBases | None = None) -> tuple[int | None, str]:
     """The index in `candidates` of the entry that is `entry`, and how it was
     found: `same` (the key matches at the same index, or a keyless entry
     joined by overlap or by shape at its own index), `by_<key>` (the key
@@ -489,10 +596,12 @@ def _locate(entry: Any, i: int, candidates: list[Any],
     length), or None with the reason — the same index is never assumed
     when identity says otherwise (#899), and a stripped entry in a list
     that shrank is never assumed to be the entry now at its index."""
-    key = _entry_key(entry)
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    key = _entry_key(entry, identifier_bases=identifier_bases)
     stripped = False
     if key is not None:
-        hits = [k for k, e in enumerate(candidates) if _entry_key(e) == key]
+        hits = [k for k, e in enumerate(candidates)
+                if _entry_key(e, identifier_bases=identifier_bases) == key]
         if hits:
             return (i, "same") if i in hits else (hits[0], f"by_{key[0]}")
         if key[0] == "value":
@@ -540,7 +649,8 @@ def _locate(entry: Any, i: int, candidates: list[Any],
     return (j, "by_overlap")
 
 
-def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any]) -> dict[str, Any]:
+def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any], *,
+               identifier_bases: IdentifierBases | None = None) -> dict[str, Any]:
     """Where a receipt path written against `original` (the phase-1 snapshot)
     points in `full` (the final record), following each list entry by its
     identity rather than its index (#899).
@@ -564,7 +674,10 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
     identified entry is not in `full`), `ambiguous` (two final entries tie on
     overlap and neither is at the written index), `leaf_dropped` (the entry
     is there, the leaf is not), `unresolved` (the path does not parse or the
-    structures disagree)."""
+    structures disagree). `identifier_bases` selects explicit resolver aliases:
+    None retains today's legacy lookup; an empty table permits no aliases.
+    """
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     parts = re.findall(r"[\w]+|\[\d+\]", path)
     if not parts or not re.fullmatch(r"\w+(\[\d+\])*(\.\w+(\[\d+\])*)*", path):
         return {"path": None, "basis": "unresolved"}
@@ -581,7 +694,7 @@ def remap_path(path: str, original: dict[str, Any] | None, full: dict[str, Any])
                 return {"path": path if resolve(full, path) else None, "basis": "not_in_snapshot"}
             if not isinstance(cur_f, list):
                 return {"path": None, "basis": "unresolved"}
-            j, how = _locate(cur_o[i], i, cur_f, cur_o)
+            j, how = _locate(cur_o[i], i, cur_f, cur_o, identifier_bases=identifier_bases)
             if j is None:
                 return {"path": None, "basis": how}
             if how != "same":
@@ -760,13 +873,15 @@ def load_receipt(path: Path, *, raw: bytes | None = None) -> dict[str, Any]:
 
 
 def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
-                   original: dict[str, Any] | None = None) -> dict[str, Any]:
+                   original: dict[str, Any] | None = None, *,
+                   identifier_bases: IdentifierBases | None = None) -> dict[str, Any]:
     """The coverage receipt inverted by slot. With the full record, each
     claim also names its derived-core path (or `null` for a full-only slot).
     With the phase-1 snapshot as well, each claim names `resolved_path` —
     where the receipted entry sits in the final record, joined by identity
     (#899) — and `resolution`, the basis of that join; the core path is then
     taken from the resolved path, since that is the entry the core carries."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     pmap = core_path_map(full) if full is not None else None
     slots: dict[str, list[dict[str, Any]]] = {}
     for entry in receipt.get("chunks") or []:
@@ -781,7 +896,7 @@ def claim_receipts(receipt: dict[str, Any], full: dict[str, Any] | None = None,
         item: dict[str, Any] = {"receipts": slots[slot]}
         target = slot
         if full is not None and original is not None:
-            rm = remap_path(slot, original, full)
+            rm = remap_path(slot, original, full, identifier_bases=identifier_bases)
             # A path the snapshot never had resolves nowhere the receipt
             # can vouch for, whatever the final record holds there — the
             # same rule check() applies (#907 review, B).
@@ -870,11 +985,13 @@ def _receipt_paths(entries: list[dict[str, Any]], unattesting_pairs: set) -> tup
 
 
 def _follow_receipt_paths(receipt_paths: list[str], full: dict[str, Any],
-                          original: dict[str, Any] | None) -> dict[str, Any]:
+                          original: dict[str, Any] | None, *,
+                          identifier_bases: IdentifierBases | None = None) -> dict[str, Any]:
     """Each receipt path followed from the phase-1 snapshot to the final
     record (#899, #907, #1053): `effective` (written path → where it now
     resolves), `gone` (path → why it has no credit), and the reported
     classes `check` lists. Empty without a snapshot."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     # #899: with the phase-1 snapshot, every path is followed to the entry it
     # receipted by identity, so a list entry reconciliation moved, split
     # around or inserted ahead of keeps its receipt. A path that remaps is
@@ -909,7 +1026,7 @@ def _follow_receipt_paths(receipt_paths: list[str], full: dict[str, Any],
     not_in_snapshot: list[str] = []
     if original is not None:
         for p in receipt_paths:
-            rm = remap_path(p, original, full)
+            rm = remap_path(p, original, full, identifier_bases=identifier_bases)
             if rm["basis"] == "not_in_snapshot":
                 not_in_snapshot.append(p)
                 gone[p] = rm["basis"]
@@ -958,7 +1075,8 @@ def _attests_nothing(snippet: str) -> bool:
 def uncovered_receiptable_leaves(receipt: dict[str, Any], manifest: dict[str, Any],
                                  chunk_texts: dict[str, str], full: dict[str, Any],
                                  record_bundle_md5: str | None = None,
-                                 original: dict[str, Any] | None = None) -> list[str]:
+                                 original: dict[str, Any] | None = None, *,
+                                 identifier_bases: IdentifierBases | None = None) -> list[str]:
     """Every receiptable populated leaf of `full` that no attesting receipt
     covers, in record order and untruncated (#2926) — the list the block's
     `slots.without_receipt` truncates to 50, computed by the same functions
@@ -970,6 +1088,7 @@ def uncovered_receiptable_leaves(receipt: dict[str, Any], manifest: dict[str, An
     snippet counts as `check` counts it: one below the #720 floors, in a
     chunk the manifest lists and whose text is present, attests nothing;
     any other snippet's path earns coverage whether or not it verified."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     del record_bundle_md5
     manifest_ids = set(_manifest_ids(manifest))
     entries, _findings = _receipt_entries(receipt)
@@ -983,7 +1102,7 @@ def uncovered_receiptable_leaves(receipt: dict[str, Any], manifest: dict[str, An
             if isinstance(snippet, str) and snippet.strip() and _attests_nothing(snippet):
                 unattesting_pairs.add((e.get("id"), str(pair.get("slot") or ""), snippet))
     receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
-    followed = _follow_receipt_paths(receipt_paths, full, original)
+    followed = _follow_receipt_paths(receipt_paths, full, original, identifier_bases=identifier_bases)
     return _slot_coverage(full, attesting, followed["effective"], followed["gone"])["without"]
 
 
@@ -1135,7 +1254,8 @@ def apply_rereceipt(receipt: dict[str, Any], record: dict[str, Any], answers: li
 def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[str, str],
           full: dict[str, Any], record_bundle_md5: str | None,
           original: dict[str, Any] | None = None, *,
-          instrument_version: int = 3) -> dict[str, Any]:
+          instrument_version: int = 3,
+          identifier_bases: IdentifierBases | None = None) -> dict[str, Any]:
     """The validator. Pure: receipt + manifest + chunk texts + record → block.
 
     `original` is the record as it stood when the receipt was written (the
@@ -1147,7 +1267,11 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     this is a measured limitation, kept out of the findings and the gate.
     Explicit version 4 adds origin/status accounting without changing the
     coverage denominator or any gate; existing callers remain on version 3.
+    `identifier_bases` is independent of that version: None preserves the
+    ambient legacy aliases, while an explicit table (including empty) is
+    passed unchanged through identity remapping and coverage accounting.
     """
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     instrument = receipt_instrument(instrument_version)
     manifest_ids = _manifest_ids(manifest)
     entries, findings = _receipt_entries(receipt)
@@ -1347,7 +1471,7 @@ def check(receipt: dict[str, Any], manifest: dict[str, Any], chunk_texts: dict[s
     # off-by-one and addressing checks, so a fabricated path cannot hide
     # behind a tiny snippet.
     receipt_paths, attesting = _receipt_paths(entries, unattesting_pairs)
-    followed = _follow_receipt_paths(receipt_paths, full, original)
+    followed = _follow_receipt_paths(receipt_paths, full, original, identifier_bases=identifier_bases)
     remapped, effective = followed["remapped"], followed["effective"]
     value_changed, gone = followed["value_changed"], followed["gone"]
     located_stripped, index_reused = followed["located_stripped"], followed["index_reused"]
@@ -1580,6 +1704,12 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     or no rule is known — and where a recovery did produce bytes the
     refusal names that outcome first and the disk state as context, so no
     message says the chunks could not be loaded and that they were.
+
+    A supplied `snapshot_record` also selects its recorded identifier rules
+    once, with the resolver's disclosed current fallback where necessary.
+    `identity_rules` reports the actual schema and effective ordered bases,
+    independently of snapshot/source authority and receipt version 3/4.
+    With no record, the existing current-generation output is unchanged.
     """
     import hashlib
 
@@ -1800,7 +1930,15 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": f"the phase-1 snapshot {snap_path} is present but not usable ({snap_why}); "
                           "receipt paths cannot be joined to the record by entry identity, and an index "
                           "join would credit the wrong entries (#899)"}
+    identifier_bases = None
+    if snapshot_record is not None:
+        try:
+            identifier_bases, base["identity_rules"] = _recorded_identifier_bases(snapshot_record)
+        except Exception as exc:  # noqa: BLE001 — unusable rules must not certify an ambient join
+            return {**base, "checked": False,
+                    "reason": f"receipt identity rules unavailable: {type(exc).__name__}: {exc}"}
     block = check(rec, m, texts, full, record_bundle_md5, original,
+                  identifier_bases=identifier_bases,
                   **({"instrument_version": 4} if policy is not None else {}))
     if policy is not None and block.get("checked"):
         try:
