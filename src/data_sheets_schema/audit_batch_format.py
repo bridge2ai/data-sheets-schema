@@ -11,7 +11,7 @@ from __future__ import annotations
 from copy import deepcopy
 import json
 
-from . import audit_batches, audit_grammar
+from . import audit_batches, audit_grammar, audit_protocol
 
 
 FORMAT = "audit_batch_output_format_v1"
@@ -37,7 +37,8 @@ def _object(properties, optional=()):
             "additionalProperties": False}
 
 
-def _definitions():
+def _definitions(*, version=1):
+    audit_protocol.check_version(version)
     definitions = {
         "text": {"type": "string", "pattern": r"\S"},
         "digest": {"type": "string", "pattern": r"^[0-9a-f]{64}(?![\s\S])"},
@@ -101,12 +102,22 @@ def _definitions():
         "evidence": _array(_ref("assertion"), 1),
         "review_paths": _array(_ref("pointer"), 1), "remove_relationship": _ref("removal")},
         optional=("review_paths", "remove_relationship"))
+    if version == 2:
+        finding = definitions["finding"]
+        finding["properties"].update({
+            "kind": {"enum": sorted(audit_protocol.KINDS)},
+            "omission_candidates": {**_array(_ref("text"), 1), "uniqueItems": True}})
+        finding["allOf"] = [{
+            "if": {"required": ["omission_candidates"]},
+            "then": {"required": ["kind"], "properties": {
+                "kind": {"const": "omission"}, "record": {"const": "full"}}}}]
     return definitions
 
 
-def schema(stage: str) -> dict:
+def schema(stage: str, *, version: int = 1) -> dict:
     """Return fresh strict JSON-shape guidance; registered link rules are separate."""
     _stage(stage)
+    audit_protocol.check_version(version)
     if stage == "worker":
         result = _object({
             "findings": _array(_ref("finding")), "summary": _ref("text"),
@@ -124,7 +135,7 @@ def schema(stage: str) -> dict:
              "then": {"properties": {"evidence": {"minItems": 1}}}},
         ]
         result = _object({
-            "kind": {"const": "audit_integration_v1"},
+            "kind": {"const": f"audit_integration_v{version}"},
             "proposal_index_sha256": _ref("digest"),
             "retain_other_rows_from_index_sha256": _ref("digest"),
             "row_replacements": _array(_object({
@@ -133,8 +144,17 @@ def schema(stage: str) -> dict:
                 "evidence": _array(_ref("assertion"), 1)})),
             "finding_decisions": _array(decision),
             "new_findings": _array(_ref("finding")), "summary": _ref("text")})
+        if version == 2:
+            disposition = _object({"candidate_id": _ref("text"),
+                "action": {"enum": ["retain", "drop"]}, "reason": _ref("text"),
+                "evidence": _array(_ref("assertion"))})
+            disposition["allOf"] = [{
+                "if": {"properties": {"action": {"const": "drop"}}},
+                "then": {"properties": {"evidence": {"minItems": 1}}}}]
+            result["properties"]["omission_dispositions"] = _array(disposition)
+            result["required"].append("omission_dispositions")
     return {"$schema": "https://json-schema.org/draft/2020-12/schema", **result,
-            "$defs": _definitions()}
+            "$defs": _definitions(version=version)}
 
 
 COMMON_RULES = (
@@ -164,10 +184,23 @@ INTEGRATION_RULES = (
 )
 
 
-def synthetic_examples() -> dict:
+TYPED_RULES = (
+    "This is explicitly selected grammar/batch/output version 2 with evidence protocol 7. Optional kind uses only role_placement, status_scope, date_scope, absence_or_self_narration, quotation_fidelity, identifier_count, attribution, omission or other. A missing kind remains untyped; do not add null, infer a kind or coerce it to other. This vocabulary is provisional, not scientific calibration.",
+    "omission_candidates is an optional nonempty list of distinct nonblank candidate IDs, permitted only with kind=omission and record=full. The selected typed consumer requires it on every omission finding and checks exact captured candidate authority; grammar alone cannot establish that authority. Do not invent populated review_paths for absent slots or assert core/both from the full-record omission inventory.",
+    "The example candidate and slot are invented shape examples; no omission request, source authority or scientific novelty is established by the example. Every real omission reference must resolve to the separately captured request and checked raw response.",
+)
+TYPED_INTEGRATION_RULES = (
+    "kind is exactly audit_integration_v2. omission_dispositions is a required array with exactly one entry per captured omission candidate, each with candidate_id, action=retain|drop, nonblank reason and evidence. IDs are unique. drop requires nonempty document/artifact evidence; retain may have empty evidence because its candidate evidence is separately pinned.",
+    "Every retained candidate occurs in omission_candidates of exactly one final full-record omission finding; several candidates may share one finding. Dropped, unknown, repeated or unaccounted candidates fail the selected consumer. An empty disposition array is valid only when the checked complete omission response contains no candidates. Pure batch shape validation does not establish complete chunk/candidate coverage, source support, novelty or recall.",
+)
+
+
+def synthetic_examples(*, version: int = 1) -> dict:
     """Fresh, self-contained grammar fixtures; never evidence for a real record."""
     original = "alpha: Example alpha.\nbeta: Example beta.\ngamma: Example gamma.\n"
-    plan = audit_batches.make_plan(original)
+    audit_protocol.check_version(version)
+    options = {"version": 2} if version == 2 else {}
+    plan = audit_batches.make_plan(original, **options)
     evidence = [{"source": "example.txt", "chunk": "c001", "quote": "Illustrative source statement."}]
     rows, findings = [], []
     for key in ("alpha", "beta", "gamma"):
@@ -177,10 +210,14 @@ def synthetic_examples() -> dict:
         findings.append({"severity": "medium", "record": "full", "slot": key,
             "issue": "An illustrative concern about this claim.", "review_paths": ["/" + key],
             "evidence": deepcopy(evidence)})
+    if version == 2:
+        findings[0]["kind"] = "status_scope"
+        findings[1]["kind"] = "attribution"
+        # The third remains untyped; missing kind is not coerced to other.
     worker = {"findings": findings, "summary": "3 illustrative findings: 3 medium.", "source_review": {
         "artifact": "original_full", "sha256": plan["original_full_sha256"], "values": rows}}
     proposals = {plan["workers"][0]["id"]: audit_batches.canonical_bytes(worker)}
-    index = audit_batches.build_index(plan, proposals)
+    index = audit_batches.build_index(plan, proposals, **options)
     replacement_row = deepcopy(rows[2])
     replacement_row["claims"][0].update(verdict="supported", source_status="fact", evidence=deepcopy(evidence),
         reason="The fictional integration review establishes this fictional claim.")
@@ -194,37 +231,53 @@ def synthetic_examples() -> dict:
         if action == "replace":
             decision["findings"] = [replacement_finding]
         decisions.append(decision)
-    integration = {"kind": "audit_integration_v1", "proposal_index_sha256": index["sha256"],
+    integration = {"kind": f"audit_integration_v{version}", "proposal_index_sha256": index["sha256"],
         "retain_other_rows_from_index_sha256": index["sha256"],
         "row_replacements": [{"path": "/gamma", "previous_sha256": index["rows"][2]["sha256"],
             "row": replacement_row, "reason": "A fictional source review justifies this complete row change.",
             "evidence": deepcopy(evidence)}],
         "finding_decisions": decisions, "new_findings": [], "summary": "2 illustrative findings: 2 medium."}
+    if version == 2:
+        integration["new_findings"] = [{"severity": "low", "record": "full",
+            "slot": "example_absent_slot", "issue": "A fictional source-stated omission.",
+            "evidence": deepcopy(evidence), "kind": "omission",
+            "omission_candidates": ["example-candidate-1"]}]
+        integration["omission_dispositions"] = [{"candidate_id": "example-candidate-1",
+            "action": "retain", "reason": "Retained in the fictional omission finding.", "evidence": []}]
+        integration["summary"] = "3 illustrative findings: 2 medium, 1 low."
     return {"original_full": original, "plan": plan, "worker": worker, "index": index,
             "integration": integration}
 
 
-def contract(stage: str) -> dict:
+def contract(stage: str, *, version: int = 1) -> dict:
     """Return deterministic documentation with a fresh schema and synthetic example."""
     _stage(stage)
-    examples = synthetic_examples()
+    audit_protocol.check_version(version)
+    examples = synthetic_examples(version=version)
     example = {"warning": "Invented grammar fixture only. Do not copy any fact, path, source, digest or judgment into your run.",
                "original_full": examples["original_full"], "proposal": examples[stage]}
     if stage == "integration":
         example["worker_proposals"] = [{"id": examples["plan"]["workers"][0]["id"],
                                         "proposal": examples["worker"]}]
         example["worker_index"] = examples["index"]
-    return {"format": FORMAT, "stage": stage,
+    rules = list(COMMON_RULES + (WORKER_RULES if stage == "worker" else INTEGRATION_RULES))
+    if version == 2:
+        rules += list(TYPED_RULES)
+        if stage == "integration":
+            rules[len(COMMON_RULES)] = rules[len(COMMON_RULES)].replace(
+                "new_findings and summary.", "new_findings, summary and omission_dispositions.")
+            rules += list(TYPED_INTEGRATION_RULES)
+    return {"format": f"audit_batch_output_format_v{version}", "stage": stage,
             "authority": "Documentation of existing source-blind grammar, not a new validator or scientific acceptance rule.",
-            "json_schema": schema(stage),
-            "additional_rules": list(COMMON_RULES + (WORKER_RULES if stage == "worker" else INTEGRATION_RULES)),
+            "json_schema": schema(stage, version=version),
+            "additional_rules": rules,
             "synthetic_example": example}
 
 
-def render(stage: str) -> str:
+def render(stage: str, *, version: int = 1) -> str:
     """Render the exact role-specific output contract for explicit opt-in wiring."""
     return ("# Exact registered batch output format\n\n"
             "Use the following closed-key JSON schema together with its identity/link rules. "
             "The schema and invented example describe syntax; the selected scientific protocol "
             "and actual inputs govern judgments. Follow the registered output commands.\n\n"
-            + json.dumps(contract(stage), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
+            + json.dumps(contract(stage, version=version), ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n")
