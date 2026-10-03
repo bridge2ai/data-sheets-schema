@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/external_resources/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/receipt-completion-runtime/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: external_resources - data-sheets-schema</title>
+        <title>Registered API receipt completion - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-external_resources" class="md-skip">
+        <a href="#registered-api-receipt-completion" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: external_resources
+              Registered API receipt completion
             
           </span>
         </div>
@@ -316,49 +316,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#registration-and-gates" class="md-nav__link">
+    Registration and gates
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#durable-continuation" class="md-nav__link">
+    Durable continuation
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#validation-and-limits" class="md-nav__link">
+    Validation and limits
   </a>
   
 </li>
@@ -377,104 +350,107 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/external_resources.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/receipt-completion-runtime.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-external_resources">Slot: external_resources</h1>
-<p><em>Links or identifiers for external resources. Can be used either as a list of ExternalResource objects (in Dataset) or as a list of URL strings (within ExternalResource class).</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/references">dcterms:references</a>
-Alias: external_resources</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>yes</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>yes</td>
-</tr>
-<tr>
-<td><a href="../ExternalResource/">ExternalResource</a></td>
-<td>Is the dataset self-contained or does it rely on external resources (e</td>
-<td>yes</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../String/">String</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcterms:references</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:external_resources</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: external_resources
-description: Links or identifiers for external resources. Can be used either as a
-  list of ExternalResource objects (in Dataset) or as a list of URL strings (within
-  ExternalResource class).
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:references
-alias: external_resources
-domain_of:
-- Dataset
-- ExternalResource
-- FileCollection
-range: string
-multivalued: true
-
-</code></pre>
-
-</details>
+<h1 id="registered-api-receipt-completion">Registered API receipt completion</h1>
+<p>This is the software prerequisite for #2926, tracked in #4266. It is an explicit
+<code>receipt_completion_version=1</code> condition axis for receipt-producing API renderer
+8 conditions. The default omits the axis. Renderer 24 remains an offline-only
+instrument with its historical request identity and execution refusal.</p>
+<p>No production output cap, request limit, model, spending budget, or empirical
+coverage threshold is selected here. Human/empirical calibration and separately
+authorized CHORUS/AI_READI pilots remain open under #2926. The examples in tests
+are synthetic engineering probes, not measurements of receipt quality.</p>
+<h2 id="registration-and-gates">Registration and gates</h2>
+<p>Supply <code>--receipt-completion-version 1 --receipt-completion-registration PATH</code>
+to <code>d4d api plan</code>, <code>render-prompt</code>, <code>run</code>, or <code>batch</code>. The file is strict UTF-8
+JSON. Its exact text and SHA256 are preserved in the render specification under
+<code>prompts.request.spec</code>; the registration binds the frozen runtime policy and is
+not inferred from a run label or a receipt's origin marker.</p>
+<p>Required fields are <code>format: receipt_completion_registration_v1</code>, a nonempty
+<code>registration_id</code>, the selected <code>condition</code>, <code>runtime_policy_sha256</code>,
+<code>receipt_instrument_version: 4</code>, explicit positive integer <code>max_output_tokens</code>
+and <code>max_request_bytes</code>, positive integer <code>context_limit_tokens</code>, nonblank
+<code>context_limit_basis</code>, and <code>coverage_floor</code>. Extra keys, booleans used as
+integers, duplicate keys, and nonfinite numbers are refused.</p>
+<p>The floor is either <code>{state: pending, mode: diagnostic_pilot}</code> or
+<code>{state: registered, numerator: INTEGER, denominator: POSITIVE_INTEGER}</code> within
+[0,1]. A pending diagnostic pilot retains measurements but never passes a strict
+coverage gate. Exact integer cross-multiplication evaluates a registered floor;
+a rounded percentage is not authority. No eligible leaves is explicit N/A, not
+100 percent, and does not authorize fan-out. Existing independent vacuity and
+receipt-defect checks still apply. The new condition cannot use the ordinary
+canary bypass to evade its floor. Changing a pilot to a registered floor creates
+a new identity; it does not retroactively certify the pilot.</p>
+<p><code>receipts check --strict</code> and current canary evaluation share the same policy
+resolver. Before provenance exists, an explicit registration can select the
+checker. With provenance, it must agree with the recorded registration. An old
+record cannot acquire new-condition status via a command-line override or
+<code>--write</code>. Default historical callers keep the existing v3 instrument and five
+receipt defect floors.</p>
+<h2 id="durable-continuation">Durable continuation</h2>
+<p>The full record and any existing re-addressing finish first. The runner saves
+the normalized full, original receipt snapshots, effective receipt, complete
+last full/readdress exchange and usage identity before the completion boundary.
+A separate generation-ledger state prevents a lost progress file from purchasing
+full again. This does not add a phase to the historical global phase sequence.</p>
+<p>The continuation captures the selected schema and transitive imports and validates
+the full against those captured bytes. Every uncovered path enters one complete
+request, together with the original exchange, immutable registration and runtime
+policy. The registered output cap must fit the selected route without clamping;
+the whole request must fit the supplied byte limit. For nonempty inventories,
+the same client's <code>messages.count_tokens</code> endpoint receives the complete logical
+system/messages/model/thinking request (including any effort configuration).
+An unavailable or malformed count refuses generation. The endpoint-reported
+input count plus the output cap must fit the caller-asserted context window.
+Its asserted basis and request-hash-bound count are preserved with the intent;
+neither a byte bound nor the assertion independently establishes actual capacity.
+No path is silently truncated. Empty inventories record explicit no-work without
+a counter or completion call. A saved intent reuses its pinned count.</p>
+<p>One durable admitted completion request uses exactly one controller transport
+attempt and a client configured with SDK retries disabled. The same bounded
+client performs the context count and completion call. A client that cannot
+prove this retry configuration is refused before admission. Other phases keep
+their existing retry behavior. There is no answer retry or restart of full. Raw
+response, finish reason, usage, reasoning and checked result are preserved in
+separate hash-bound snapshots. Unknown usage, source-review/evidence refusals,
+and accepted-restoration restrictions retain their existing terminal semantics.
+The response envelope includes the full captured reasoning entry. Recovery
+appends a missing entry exactly once and refuses contradictory logs, so a crash
+between response publication and reasoning append does not discard disclosure.
+The envelope is durable before usage persistence. Missing, boolean, negative,
+or otherwise invalid input/output counters remain visible alongside all known
+usage, but make the attempt terminal; no zero is fabricated. Recovery also
+revalidates the captured counters against the ledger before accepting a result.</p>
+<p>The existing typed receipt parser, quote checker and validated merge produce
+v4 counts. Verified partial additions may be published, but an incomplete answer
+set stops downstream execution. Unsupported answers can complete answer
+accounting without adding coverage. Every unsupported path/reason, original
+input identity and result artifact digest is carried into the actual audit
+request for independent assessment. They do not instruct deletion.</p>
+<p>Publication checks the pinned original receipt hash and records the exact
+resulting hash. After an interruption, recovery recomputes the result from the
+saved response and inputs, adopts the recorded resulting receipt if already
+published, and refuses unexpected drift. It never reapplies a merge or repeats a
+completion admission. Missing progress after the durable full boundary requires
+restoration of the saved progress or a matching completed provenance record;
+it does not silently reconstruct which later phases ran.</p>
+<p>Keep three facts separate: complete answer accounting, coverage-floor status,
+and scientific support. The fixed phase-1 before/after denominator remains in
+the completion outcome alongside final-record coverage. Later removals cannot
+be presented as receipt-completion improvement. Origin and padding diagnostics
+remain descriptive unless separately registered policy changes their role.</p>
+<h2 id="validation-and-limits">Validation and limits</h2>
+<p>Offline tests use actual local LinkML validation and receipt/snippet checks,
+fake provider responses, deliberate malformed/partial/truncated answers and
+interruption/drift mutations. They exercise the saved request payload and audit
+carry, not only helper return values. Historical renderer captures remain the
+byte-parity oracle. No paid generation, calibration, old-cohort rewrite, held</p>
+<h1 id="26052714-change-or-frozen-controller-edit-is-part-of-this-implementation">2605/#2714 change, or frozen controller edit is part of this implementation.</h1>
 
 
 
