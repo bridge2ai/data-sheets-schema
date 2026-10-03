@@ -354,7 +354,10 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
             events.append(('release',identity))
             if release_raises and identity==3:raise RuntimeError('synthetic release failure')
             return 0
-    observation_error=OSError('synthetic observation persistence failure')
+    class LegacyPersistenceError(OSError):
+        # Python 3.9/3.10 do not supply BaseException.add_note.
+        add_note=None
+    observation_error=LegacyPersistenceError('synthetic observation persistence failure')
     auth_error=RuntimeError('synthetic auth failure')
     real_write=execute.durable_new
     def interrupted(path,raw):
@@ -373,8 +376,10 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         guard=modules['run_direct_canary_awake'].KeepAwake(api=FakeIOKit())
         monkeypatch.setattr(modules['run_direct_canary_awake'],'KeepAwake',lambda:guard)
         monkeypatch.setattr(modules['run_native_canary'],'execute_child',no_dispatch)
-        with pytest.raises(OSError) as caught:
-            execute.launch(case['raw'],**case['kwargs'])
+        with monkeypatch.context() as legacy:
+            legacy.delattr(sys,'exception',raising=False)
+            with pytest.raises(OSError) as caught:
+                execute.launch(case['raw'],**case['kwargs'])
     assert caught.value is observation_error
     if probe_fails:assert caught.value.__context__ is auth_error
     assert [row[1] for row in events if row[0]=='release']==[3,2,1]

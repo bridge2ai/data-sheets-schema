@@ -288,7 +288,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
         finally:
             # This boundary also covers observation/failure-evidence writes:
             # persistence errors must never bypass acquired assertion cleanup.
-            pending_error = sys.exception()
+            pending_error = sys.exc_info()[1]
             if guard is not None:
                 if guard.active:
                     guard.close()
@@ -303,8 +303,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                         raise
                     # The attempt is already spent and cannot complete. Keep
                     # its original error while recording this second failure.
-                    pending_error.add_note('keep-awake cleanup evidence failed: '
-                                           + type(cleanup_error).__name__)
+                    note = 'keep-awake cleanup evidence failed: ' + type(cleanup_error).__name__
+                    pending_error.__notes__ = [*getattr(pending_error, '__notes__', []), note]
         # Cleanup failure is sticky even if another gate or a previous pass succeeds.
         if first_stop is not None:
             results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
