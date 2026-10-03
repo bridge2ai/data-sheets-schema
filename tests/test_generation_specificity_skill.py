@@ -3421,3 +3421,16 @@ class TestTheWholeAudit(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestOfflineDraftSurface(unittest.TestCase):
+    def test_declared_offline_prompt_is_scanned_without_live_delivery_claim(self):
+        surfaces, facts = _discovered()
+        rel = 'src/data_sheets_schema/source_heading_routing.py'
+        surface = surfaces.files[rel]
+        self.assertEqual(surface.roles['offline_draft'], 'model_facing')
+        self.assertIn(rel, facts['offline_draft_surfaces'])
+        self.assertNotIn(rel, facts['api_closure'])
+        self.assertNotIn(rel, facts['native_closure'])
+        hits, _ = _plant(rel, 'POLICY_PROBE = "Always describe CM4AI."')
+        self.assertTrue(any(h['violation'] and 'offline_draft' in h['gates_in'] for h in hits))

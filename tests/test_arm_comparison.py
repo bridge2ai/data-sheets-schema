@@ -516,7 +516,7 @@ def form_run(tmp_path, monkeypatch):
     m.CONCAT = tmp_path / "concatenated"
     label, project = "test_run_rep1", "P"
     monkeypatch.setattr(m, "_method_for", lambda *_args: "claudecode_agent")
-    monkeypatch.setattr(m, "removal_metrics", lambda *_args: {})
+    monkeypatch.setattr(m, "removal_metrics", lambda *_args, include_basis=False: {})
     full = m.CONCAT / "claudecode_agent" / label / f"{project}_d4d.yaml"
     core = m.CONCAT / "claudecode_agent_core" / label / f"{project}_d4d_core.yaml"
     prov = core.parent / f"{project}_provenance.yaml"
