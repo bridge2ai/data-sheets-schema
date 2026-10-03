@@ -2707,18 +2707,35 @@ def test_a_reworded_or_moved_value_is_counted_deleted_though_its_content_survive
 
 
 @pytest.mark.corpus
-def test_the_v4_ai_readi_rep1_identifiers_that_survive_as_curies_are_flattened(monkeypatch):
-    """#3129: the single phase-1 creator's eight affiliation ROR URLs, its
-    own ROR URL and its PI's ORCID, and the two contact objects collapsed to
-    the ORCID CURIE, survive in the final record as CURIEs. v1 counted all
-    twelve deleted and 40 unfounded; v2 counts 29."""
+def test_v4_ai_readi_alias_basis_changes_flattening_with_explicit_legacy_control(monkeypatch):
+    """#4296: the run did not declare ROR/ORCID aliases. The former #3129
+    expectation remains an explicit current-alias counterfactual, not the
+    recorded-schema measurement. Changed counts do not indicate better output.
+    """
     monkeypatch.chdir(CONCAT.parents[1])
-    b = _replay("2026-08-13_claude-opus-5-api-generic-v4_rep1", "AI_READI", method="claudecode_agent")
-    flat = {r["path"] for r in b["flattened_paths"]}
-    assert {f"creators[0].affiliations[{i}].id" for i in range(8)} <= flat
-    assert {"creators[0].id", "creators[0].principal_investigator.id", "data_governance.committee_contact.id",
-            "license_and_use_terms.contact_person.id"} <= flat
-    assert (b["unfounded"], b["flattened"]) == (29, 32)
+    label = "2026-08-13_claude-opus-5-api-generic-v4_rep1"
+    paths = {f"creators[0].affiliations[{i}].id" for i in range(8)} | {
+        "creators[0].id", "creators[0].principal_investigator.id",
+        "data_governance.committee_contact.id", "license_and_use_terms.contact_person.id"}
+    recorded = _replay(label, "AI_READI", method="claudecode_agent")
+    basis = recorded["artifacts"]["identifier_rules"]
+    assert basis["schema_basis"]["sha256"] == "992cbb48d6c8fbcfce68a88f6992de81851c070037baec5db07db8c594514e47"
+    assert not {prefix.lower() for _base, prefix in basis["bases"]} & {"ror", "orcid"}
+    assert not paths & {r["path"] for r in recorded["flattened_paths"]}
+    assert paths - {"creators[0].id"} <= {r["path"] for r in recorded["unfounded_paths"]}
+    assert (recorded["unfounded"], recorded["flattened"]) == (40, 20)
+
+    # Deliberately substitute only the pure checker's legacy ambient alias
+    # contract. This is a named counterfactual; its output is never published
+    # as an actual captured-authority measurement.
+    classify = rm.classify
+    def legacy_aliases(*args, **kwargs):
+        return classify(*args, **{**kwargs, "identifier_bases": None})
+    with monkeypatch.context() as legacy:
+        legacy.setattr(rm, "classify", legacy_aliases)
+        counterfactual = _replay(label, "AI_READI", method="claudecode_agent")
+    assert paths <= {r["path"] for r in counterfactual["flattened_paths"]}
+    assert (counterfactual["unfounded"], counterfactual["flattened"]) == (29, 32)
 
 
 @pytest.mark.corpus

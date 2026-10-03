@@ -501,12 +501,24 @@ def _recorded_identifier_bases(record: dict[str, Any]) -> tuple[tuple[tuple[str,
     source. A concurrent edit or inconsistent cache cannot certify a join.
     Table hashes cover ordered JSON arrays, ASCII encoded, without spaces.
     """
+    from data_sheets_schema import run_schema
+
+    rules, resolved = run_schema.identifier_rules(record)
+    return _identifier_basis_for_rules(rules, resolved)
+
+
+def _identifier_basis_for_rules(rules: Any, resolved: dict[str, Any]
+                                ) -> tuple[tuple[tuple[str, str], ...], dict[str, Any]]:
+    """Disclose an already-selected capture without resolving the run again.
+
+    Shared by receipt and removal joins; Person/enum consumers retain their
+    own basis disclosures. Current fallback must match actual current bytes.
+    """
     import hashlib
     import json
 
     from data_sheets_schema import run_schema
 
-    rules, resolved = run_schema.identifier_rules(record)
     declared = _validated_identifier_bases(rules.bases)
     if declared is None:
         raise ValueError("selected identifier rules did not supply a table")

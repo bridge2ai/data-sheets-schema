@@ -36,12 +36,17 @@ The format is documented in `src/data_sheets_schema/attainability.py`.
   file whose deterministic `not_stated_in_source` entry gains a match when up
   to two consecutive breaks are read as nothing, or when the hyphenated
   breaks are read each on its own over 10 lines; it names the item and the
-  lines and writes nothing. It searches what the measure searches, with the
-  same limits: a match over more than three lines that needs a join is not
-  seen (#3672). A curator entry for the item, which a rewrite
+  lines and writes nothing. The join run now has up to 10 context lines
+  (#3678); outer hyphens use each of the three uniform readings. Three
+  joins, joins outside one two-break run, arbitrary mixed outer-hyphen
+  readings combined with joins, and matches wider than 10 lines remain
+  outside this bounded search. A curator entry for the item, which a rewrite
   keeps in place of the deterministic one, is the way past it. The gate
-  reads no word list. The full measure is still
-  `python scripts/measure_unhyphenated_line_splits.py --compare-window 10 --joins-per-window 2`.
+  reads no word list. The contextual measure is
+  `python scripts/measure_unhyphenated_line_splits.py --compare-window 10 --joins-per-window 2 --join-context-lines 10`.
+  This adds a column; the old columns and default deterministic documents
+  are unchanged. Exact historical identities, results and timings are in
+  `notes/attainability_join_context_2026-10-02.md`; the old table is preserved.
 - **A valid file's deterministic entries are the generator's output**, type
   for type: `hit_count: false` or snippet lines `[45.0, 45]` are refused,
   although Python compares them equal to `0` and `[45, 45]`. Every entry

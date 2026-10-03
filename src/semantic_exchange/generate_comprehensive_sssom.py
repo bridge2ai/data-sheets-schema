@@ -617,6 +617,42 @@ class ComprehensiveSSSOMGenerator:
         self.resolutions = {slot: self._resolve(slot)
                             for slot in sorted(self.d4d_attributes)}
 
+    @classmethod
+    def from_captured(cls, schema_view, skos_text: str,
+                      recommendations_text: Optional[str] = None):
+        """Resolve already captured inputs without opening source files.
+
+        The caller owns the independent view and its lifetime. This additive
+        entry point uses the ordinary constructor's exact resolver; it does
+        not make an independently supplied view or alignment scientifically
+        authoritative. Offline consumers pin those inputs separately.
+        """
+        from linkml_runtime.utils.schemaview import SchemaView
+        if not isinstance(schema_view, SchemaView):
+            raise TypeError('schema_view must be a SchemaView')
+        if not isinstance(skos_text, str):
+            raise TypeError('skos_text must be text')
+        if recommendations_text is not None and not isinstance(recommendations_text, str):
+            raise TypeError('recommendations_text must be text or None')
+        instance = cls.__new__(cls)
+        instance.d4d_schema = None
+        instance.skos_file = None
+        instance.recommendations_file = None
+        instance.sv = schema_view
+        instance.skos_triples = instance._parse_skos(skos_text)
+        instance.namespaces = instance._namespace_map(skos_text)
+        instance.recommendations = {}
+        if recommendations_text is not None:
+            for row in csv.DictReader(io.StringIO(recommendations_text), delimiter='\t'):
+                instance.recommendations[row['attribute']] = {
+                    'suggested_uri': row.get('suggested_uri', ''),
+                    'confidence': row.get('confidence', 'unknown'),
+                }
+        instance.d4d_attributes = instance._load_d4d_attributes()
+        instance.resolutions = {slot: instance._resolve(slot)
+                                for slot in sorted(instance.d4d_attributes)}
+        return instance
+
     # ------------------------------------------------------------ inputs
     def _load_d4d_attributes(self) -> Dict[str, Dict]:
         """Every slot name in the schema, with the classes that own it.

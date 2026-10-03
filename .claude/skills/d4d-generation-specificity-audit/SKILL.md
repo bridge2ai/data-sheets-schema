@@ -651,3 +651,13 @@ owner's approval before anything is billed.
 - A nested `CLAUDE.md` is found under `src/`, `notes/` and `scripts/` only.
 - Untracked or gitignored files are scanned when they exist under a
   discovered tree. The scanner does not consult `.gitignore`.
+
+## Offline prompt drafts (#4293)
+
+`offline_draft` separately scans the explicitly listed source-heading prompt-text
+builder as model-facing instruction text. It gates specificity findings without
+claiming that a live condition calls it or that a provider received its output.
+Its declared source file must exist and parse. Source/evidence payloads supplied
+to a draft remain data, and rendered-supplement tests separately check that their
+project identities and quotations do not enter the neutral instructions. The
+live `api_runner.sent_text_surfaces()` inventory remains unchanged.

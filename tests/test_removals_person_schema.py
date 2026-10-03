@@ -128,7 +128,9 @@ def test_unusable_recovered_person_schema_reports_independent_fallback(tmp_path)
     document = yaml.safe_load(schema_bytes())
     document["classes"]["Governance"]["is_a"] = "MissingAncestor"
     provenance, record = disk_run(tmp_path, yaml.safe_dump(document).encode())
-    current = rs._derive_rules(schema_bytes({"committee_contact"}))
+    # Override only Person slots. #4286 verifies the same capture's resolver
+    # bases against the actual current schema before certifying its hashes.
+    current = rs.todays_identifier_rules()._replace(persons=frozenset({"committee_contact"}))
     with patch.object(rs, "todays_identifier_rules", return_value=current), \
             patch("data_sheets_schema.api_runner._person_slots", side_effect=AssertionError("selected fallback must stay explicit")):
         block = rm.for_record(provenance)
@@ -144,7 +146,7 @@ def test_unrecoverable_person_schema_uses_stated_current_fallback(tmp_path):
     provenance, record = disk_run(tmp_path, schema_bytes())
     Path(record["schema"]["full_path"]).unlink()
     before = tree_bytes(tmp_path)
-    current = rs._derive_rules(schema_bytes({"committee_members"}))
+    current = rs.todays_identifier_rules()._replace(persons=frozenset({"committee_members"}))
     with patch("data_sheets_schema.reconstructed_bytes.reconstructed_bytes_for", return_value=None), \
             patch("data_sheets_schema.provenance.committed_bytes_for", return_value=None), \
             patch.object(rs, "todays_identifier_rules", return_value=current):
@@ -160,7 +162,7 @@ def test_independent_selector_drift_is_not_reported_as_one_shared_capture(tmp_pa
     provenance, record = disk_run(tmp_path, raw)
     enum_basis = {"source": "the run's schema, a git blob", "sha256": record["schema"]["full_sha256"]}
     person_basis = {"source": rs.TODAY, "reason": "historical authority became unavailable"}
-    current = rs._derive_rules(schema_bytes({"committee_contact"}))
+    current = rs.todays_identifier_rules()._replace(persons=frozenset({"committee_contact"}))
     with patch.object(rs, "run_schema_bytes", side_effect=[(raw, enum_basis), (None, person_basis)]) as selected, \
             patch.object(rs, "todays_identifier_rules", return_value=current), \
             patch("data_sheets_schema.api_runner._person_slots", side_effect=AssertionError("explicit rules must stay explicit")):
@@ -168,6 +170,9 @@ def test_independent_selector_drift_is_not_reported_as_one_shared_capture(tmp_pa
     assert selected.call_count == 2
     assert block["artifacts"]["enum_alias_tables"] == enum_basis
     assert block["artifacts"]["person_slot_rules"] == person_basis
+    identity = block["artifacts"]["identifier_rules"]["schema_basis"]
+    assert identity["source"] == rs.TODAY and identity["reason"] == person_basis["reason"]
+    assert identity["sha256"] != enum_basis["sha256"]
     assert block["rewritten_normaliser_by"]["mailto_id"] == 1
     rows = {row["path"]: row.get("normaliser") for row in block["rewritten_paths"]}
     assert rows["data_governance.committee_contact.id"] == "mailto_id"
