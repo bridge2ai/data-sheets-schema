@@ -541,6 +541,8 @@ class RunSpec:
     api_playbook_version: int = 0
     # Separately selected restore-only runtime condition, never inferred from a label.
     removal_repair_version: int = 0
+    receipt_completion_version: int = 0
+    receipt_completion_registration: str | None = None
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
     _agentic_artifact_paths: dict[str, str] | None = field(default=None, init=False, repr=False)
@@ -571,6 +573,17 @@ class RunSpec:
             raise ValueError("removal_repair_version must be 0 or 1")
         if self.removal_repair_version and (self.is_agentic or self.render_version != 8):
             raise ValueError("removal repair v1 requires API renderer 8")
+        if type(self.receipt_completion_version) is not int or self.receipt_completion_version not in (0, 1):
+            raise ValueError("receipt_completion_version must be 0 or 1")
+        if self.receipt_completion_version and (self.is_agentic or self.render_version != 8):
+            raise ValueError("receipt completion v1 requires API renderer 8")
+        if self.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import registration
+            registration(self)
+            if self.condition not in RECEIPT_CONDITIONS:
+                raise ValueError("receipt completion requires a receipt-producing condition")
+        elif self.receipt_completion_registration is not None:
+            raise ValueError("receipt completion registration requires opt-in version 1")
         if self.prompt_text_env and not (self.is_agentic and self.render_version >= 9):
             # Only agentic renderers 9 and later carry the recorder line the
             # key changes; elsewhere it would be recorded and do nothing (#2313).
@@ -671,6 +684,9 @@ class RunSpec:
         this instruction. It may have moved since the run. Execution still
         requires a freshly validated spec; this object is only for replay.
         """
+        if any(k.startswith("receipt_completion_") for k in recorded):
+            from data_sheets_schema.receipt_completion_policy import select_policy
+            select_policy(render_spec=recorded)
         spec = cls(project=project, method=method, label=label,
                    profile=recorded.get("profile") or "neutral",   # never live selection (#1468); the recorded values are restored below
                    profile_basis=recorded.get("profile_basis") or "replay",
@@ -685,7 +701,10 @@ class RunSpec:
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
                    api_playbook_version=recorded.get("api_playbook_version", 0),
-                   removal_repair_version=recorded.get("removal_repair_version", 0), _replay_only=True)
+                   removal_repair_version=recorded.get("removal_repair_version", 0),
+                   receipt_completion_version=recorded.get("receipt_completion_version", 0),
+                   receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
+                   _replay_only=True)
         if spec.api_playbook_version:
             from data_sheets_schema.api_playbook import POLICY_SHA256
             if recorded.get("api_playbook_sha256") != POLICY_SHA256:
@@ -756,6 +775,9 @@ class RunSpec:
         if self.removal_repair_version:
             from data_sheets_schema.removal_repair import policy_text as removal_policy_text
             removal_policy_text()
+        if self.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import preflight
+            preflight(self, settings)
         actual = request_header_values(settings)
         if self._api_header_values is None and not self._replay_only:
             self._api_header_values = actual
@@ -798,7 +820,11 @@ class RunSpec:
         # phases and record only that one.
         digest = (schema_digest.fingerprint(schema_digest.digest_text("Dataset", profile=self.profile_obj))
                   if self.profile else None)
-        return {"bundle": entry(self.bundle),
+        completion = {}
+        if self.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import schema_identity
+            completion["receipt_completion_schema"] = schema_identity()
+        return {**completion, "bundle": entry(self.bundle),
                 "source_manifest": entry(self.manifest) if self.manifest_used else None,
                 "chunks": entry(chunks),
                 "profile": {"name": self.profile, "digest_md5": digest},
@@ -827,6 +853,11 @@ class RunSpec:
         if self.removal_repair_version:
             from data_sheets_schema.removal_repair import POLICY_SHA256 as REMOVAL_POLICY_SHA256
             policy_metadata.update(removal_repair_version=1, removal_repair_sha256=REMOVAL_POLICY_SHA256)
+        if self.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import POLICY_SHA256 as RECEIPT_POLICY_SHA256, registration_identity
+            policy_metadata.update(receipt_completion_version=1,
+                receipt_completion_policy_sha256=RECEIPT_POLICY_SHA256,
+                receipt_completion_registration=registration_identity(self))
         return {**policy_metadata,
                 **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
@@ -932,6 +963,9 @@ class RunSpec:
         if self.removal_repair_version:
             from data_sheets_schema.removal_repair import POLICY_PATH as REMOVAL_POLICY_PATH
             files.append(REMOVAL_POLICY_PATH)
+        if self.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import POLICY_PATH as RECEIPT_POLICY_PATH
+            files.append(RECEIPT_POLICY_PATH)
         return files
 
 
@@ -1015,7 +1049,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1059,6 +1093,13 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
             raise ValueError("removal repair v1 requires API renderer 8")
         from data_sheets_schema.removal_repair import policy_identity
         parts.append({"removal_repair": policy_identity()})
+    if type(receipt_completion_version) is not int or receipt_completion_version not in (0, 1):
+        raise ValueError("unsupported receipt completion assembly version")
+    if receipt_completion_version:
+        if render_version != 8:
+            raise ValueError("receipt completion requires API renderer 8")
+        from data_sheets_schema.receipt_completion import policy_identity
+        parts.append({"receipt_completion": policy_identity()})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1317,6 +1358,9 @@ def resolve_prompt(spec: RunSpec) -> str:
     if spec.removal_repair_version:
         from data_sheets_schema.removal_repair import policy_text as removal_policy_text
         body += "\n\n" + removal_policy_text()
+    if spec.receipt_completion_version:
+        from data_sheets_schema.receipt_completion import policy_text, registration_identity
+        body += "\n\n" + policy_text() + "\nRegistration: " + json.dumps(registration_identity(spec), sort_keys=True)
     return body
 
 
@@ -2641,6 +2685,11 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
         else:
             inventory_text = json.dumps(source_review.inventory(carry[key], artifact), ensure_ascii=False)
         parts.append({"type": "text", "text": source_review.INVENTORY_HEADER + inventory_text})
+    if spec.receipt_completion_version and phase == "audit":
+        from data_sheets_schema.receipt_completion import audit_carry, AUDIT_HEADER
+        candidate_text = (AUDIT_HEADER + "ESTIMATE ONLY; actual complete candidates required before admission"
+                          if _source_review_estimate else audit_carry(spec))
+        parts.append({"type": "text", "text": candidate_text})
     instruction = phase_instruction(phase, spec.render_version)
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
@@ -2728,6 +2777,8 @@ def plan(spec: RunSpec) -> dict[str, Any]:
         "label": spec.label, "condition": spec.condition,
         **({"api_playbook_version": spec.api_playbook_version} if spec.api_playbook_version else {}),
         **({"removal_repair_version": spec.removal_repair_version} if spec.removal_repair_version else {}),
+        **({"receipt_completion_version": 1, "receipt_completion_registration": spec.render_spec()["receipt_completion_registration"]}
+           if spec.receipt_completion_version else {}),
         "bundle": str(spec.bundle), "bundle_bytes": spec.bundle.stat().st_size,
         "model": settings,
         "runtime": RUNTIME,
@@ -2759,6 +2810,9 @@ def plan(spec: RunSpec) -> dict[str, Any]:
                                   f"{phase_max_tokens(spec, 'removal_repair_full', DEFAULT_MAX_TOKENS, model=settings['name'])} tokens; "
                                   "an accepted change re-derives the core and regenerates the report"]
                                  if spec.removal_repair_version else [])
+                              + (["full_receipt_completion: one registered receipt-only follow-up after durable full/readdress; "
+                                  "whole uncovered inventory and prior exchange, explicit registered cap, no regeneration"]
+                                 if spec.receipt_completion_version else [])
                               + ["report_regate: one regeneration of the report when its "
                                  "dispositions contradict the records (#929); the report "
                                  "request plus the report and the contradictions, output at "
@@ -3223,6 +3277,9 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
         _append_usage(spec, usage, entry)
         recorded = True
         text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        if spec.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import remember_exchange
+            remember_exchange(spec, rreq, text, entry["usage_id"])
         cap = reasoning.capture(resp)
         reasoning.append(_reasoning_path(spec),
                          {"phase": "full_readdress", "label": spec.label,
@@ -4351,6 +4408,8 @@ def sent_text_surfaces() -> dict[str, str]:
     out["schema_semantics_contract_v19"] = SCHEMA_SEMANTICS_CONTRACT_V19
     from data_sheets_schema.removal_repair import policy_text as removal_policy_text
     out["removal_repair_policy_v1"] = removal_policy_text()
+    from data_sheets_schema.receipt_completion import policy_text as receipt_policy_text
+    out["receipt_completion_runtime_policy_v1"] = receipt_policy_text()
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -5281,7 +5340,8 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
 
 def _call_with_retry(client, *, model, max_tokens, temperature, system, messages, on_incomplete=None,
                      sleep=time.sleep, wall_clock: float | None = None,
-                     thinking: dict[str, Any] | None = None, effort: str | None = None):
+                     thinking: dict[str, Any] | None = None, effort: str | None = None,
+                     transport_attempts: int | None = None):
     """One API call, retrying transient failures.
 
     Retries rate limits, connection errors and 5xx. Does not retry 4xx other
@@ -5290,6 +5350,9 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
     sees the real problem.
     """
     import anthropic
+    limit = MAX_ATTEMPTS if transport_attempts is None else transport_attempts
+    if type(limit) is not int or limit < 1:
+        raise ValueError("transport_attempts must be a positive integer")
     # Omitted rather than defaulted: claude-opus-5 rejects the parameter with
     # 400 "`temperature` is deprecated for this model", so passing 0.0 fails
     # the request. Sending it only where the model accepts it keeps one code
@@ -5316,7 +5379,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
 
     last: Exception | None = None
     incomplete = 0
-    for attempt in range(1, MAX_ATTEMPTS + 1):
+    for attempt in range(1, limit + 1):
         t_call = time.monotonic()
         trace = StreamTrace(t_call)
         holder: dict[str, Any] = {}
@@ -5466,7 +5529,7 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
             if not transient and "wall clock" in str(exc) and "#664" in str(exc):
                 transient = True
                 print(f"   attempt {attempt} abandoned by the watchdog after the wall clock"
-                      + ("; retrying" if attempt < MAX_ATTEMPTS else "; giving up"))
+                      + ("; retrying" if attempt < limit else "; giving up"))
             if isinstance(exc, IncompleteStreamError):
                 # Bounded below MAX_ATTEMPTS: two clean early closes in one
                 # call are a systemic problem, not noise, and a 15-minute
@@ -5503,8 +5566,8 @@ def _call_with_retry(client, *, model, max_tokens, temperature, system, messages
                 except Exception as rec_exc:               # noqa: BLE001
                     print(f"   could not record the abandoned attempt: {rec_exc}")
                 print(f"   attempt {attempt} {exc}"
-                      + ("; retrying" if transient and attempt < MAX_ATTEMPTS else "; giving up"))
-            if not transient or attempt == MAX_ATTEMPTS:
+                      + ("; retrying" if transient and attempt < limit else "; giving up"))
+            if not transient or attempt == limit:
                 raise
             last = exc
             # A rate limit is not the same shape of transient as a dropped
@@ -6098,6 +6161,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
     return the usable body. Split out of execute() so a derived phase can
     take the artifact path without a call (#694)."""
     req = build_phase(spec, ph, carry=needed)
+    if ph == "audit" and spec.receipt_completion_version:
+        from data_sheets_schema.receipt_completion import require_audit_carry
+        require_audit_carry(spec, req)
 
     # A 200 whose body is unusable is not a permanent failure, and treating
     # it as one is expensive. A live CHORUS run returned the whole of
@@ -6148,6 +6214,9 @@ def _generate_phase(spec: RunSpec, ph: str, needed: dict[str, str], client,
         _admit_source_response(spec, ph, text, getattr(resp, "stop_reason", None), call_usage, needed)
         # Preserve the entire delivered body before split_receipt (#1048).
         response_text = text
+        if ph == "full" and spec.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import remember_exchange
+            remember_exchange(spec, req, response_text, call_id)
         if ph == "full" and spec.condition in RECEIPT_CONDITIONS:
             # Re-addressing can refuse after a billed response was delivered.
             # Keep the complete body, linked to its call and generation, first.
@@ -6414,6 +6483,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         from data_sheets_schema.usage_ledger import require_source_review_admission
         require_source_review_admission(spec)
     progress = _load_progress(spec) if resume else {}
+    if resume and spec.receipt_completion_version:
+        from data_sheets_schema.receipt_completion import resume_guard
+        resume_guard(spec, progress)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -6593,6 +6665,10 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 from data_sheets_schema.removal_repair import completion_check
                 removal_check = completion_check(spec, record=existing)
                 _assert_evidence_clean(removal_check, "report", spec=spec)
+            completion_check_result = None
+            if spec.receipt_completion_version:
+                from data_sheets_schema.receipt_completion import recover
+                completion_check_result = recover(spec)
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
@@ -6606,6 +6682,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing),
+                               **({"receipt_completion": completion_check_result}
+                                  if spec.receipt_completion_version else {}),
                                **({"evidence_assertions": evidence} if evidence is not None else {}),
                                **({"removal_repair": removal_check} if removal_check is not None else {})},
                     "already_complete": True,
@@ -6730,7 +6808,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_source_reviews(spec, carry)
 
     core_derivation: dict[str, Any] | None = None
+    completion_outcome = None
     for ph in PHASES:
+        if spec.receipt_completion_version:
+            if ph == "core" and "full" in done:
+                from data_sheets_schema.receipt_completion import run as complete_receipts
+                completion_outcome = complete_receipts(spec, client, settings, usage)
+                _save_progress(spec, [x for x in PHASES if x in done], carry.get("Audit findings"))
         artifact = PHASE_ARTIFACT.get(ph)
         target = _artifact_path(spec, artifact) if artifact else None
 
@@ -6804,6 +6888,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             elif ph == "core":
                 carry["Original core record"] = body
 
+        if ph == "full" and spec.receipt_completion_version:
+            from data_sheets_schema.receipt_completion import seal_full
+            seal_full(spec)
         done.add(ph)
         _save_progress(spec, [x for x in PHASES if x in done],
                        carry.get("Audit findings"))
@@ -6865,7 +6952,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # request actually sent.
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
     rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version,
-                                                       removal_repair_version=spec.removal_repair_version)
+                                                       removal_repair_version=spec.removal_repair_version,
+                                                       receipt_completion_version=spec.receipt_completion_version)
+    if spec.receipt_completion_version:
+        from data_sheets_schema.receipt_completion import recover
+        rec.data["receipt_completion"] = recover(spec)
     rec.data["prompts"]["context_blocks"] = context_blocks(spec)
     ident = provider_identity()
     rec.data["model"] = {
@@ -6885,6 +6976,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                    if spec.condition in RECEIPT_CONDITIONS else {}),
                                 **({"removal_repair_full": phase_max_tokens(spec, "removal_repair_full", DEFAULT_MAX_TOKENS, model=settings["name"])}
                                    if spec.removal_repair_version else {}),
+                                **({"full_receipt_completion": json.loads(spec.receipt_completion_registration)["max_output_tokens"]}
+                                   if spec.receipt_completion_version else {}),
                                 "report_regate": phase_max_tokens(spec, "report", settings["max_tokens"], model=settings["name"])},
         # What the run sent, and what it was allowed to send. The second is
         # usually unknown, and #568 exists because that could not be told from
@@ -7177,6 +7270,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),
                        "receipts": rec.data.get("receipts"),
+                       **({"receipt_completion": rec.data.get("receipt_completion")}
+                          if spec.receipt_completion_version else {}),
                        **({"removal_repair": removal_check} if removal_check is not None else {})},
             "outputs": {"full": str(spec.full_path), "core": str(spec.core_path),
                         "report": str(spec.report_path),

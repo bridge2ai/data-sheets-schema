@@ -468,4 +468,10 @@ files:
     reason: New opt-in restore-only API removal repair policy v1 (#2923); no historical
       prompt changes.
     sha256: cd21a27d1b2ac9ac8893d0d0537811a0bac563811a2a879296d262091b1f0f81
+  src/download/prompts/receipt_completion_runtime_v1.md:
+    bytes: 3075
+    pinned_at_commit: 0a2313d56f225ebced642598a25a08c8aa36bedf
+    pinned_on: '2026-10-02'
+    reason: New separately registered receipt-only runtime policy v1 (#4266); no empirical floor or historical change.
+    sha256: 9a2b553bb9f14a3a431469a39469f5492a3f8c3d9718dccb3b07b311b2504765
 hash_algorithm: sha256
