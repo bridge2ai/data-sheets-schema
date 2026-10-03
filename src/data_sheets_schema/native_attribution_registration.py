@@ -155,11 +155,11 @@ def _commands(spec):
     return expected
 
 
-def command_kind(command, spec):
+def command_kind(command, spec, *, expected=None):
     """The extra adapter admits only exact bound helper spellings."""
     if not isinstance(command, str):
         raise ValueError('helper command must be text')
-    expected = _commands(spec)
+    expected = _commands(spec) if expected is None else expected
     if command in expected:
         return expected[command]
     try:
@@ -203,6 +203,12 @@ class NativeAttributionState:
         self.protected, self.report_path = protected, report
         self.index = 0
 
+    def _command_kind(self, command):
+        return command_kind(command, self.spec)
+
+    def _target_path(self, path):
+        return Path(path).resolve()
+
     def observe(self, event, *, preserved_shell_commands=()):
         from data_sheets_schema import source_attribution_preflight as preflight
         spec, reg = self.spec, self.reg
@@ -244,7 +250,7 @@ class NativeAttributionState:
                         kind = None
                         if name == 'Bash':
                             try:
-                                kind = command_kind(args.get('command'), spec)
+                                kind = self._command_kind(args.get('command'))
                             except ValueError as exc:
                                 problem(index, str(exc))
                             if kind and args.get('run_in_background') not in (None, False):
@@ -254,9 +260,9 @@ class NativeAttributionState:
                         elif name in ('Write', 'Edit', 'MultiEdit'):
                             epoch += 1; accepted = None
                             target = args.get('file_path')
-                            if checks and (not isinstance(target, str) or Path(target).resolve() != report):
+                            if checks and (not isinstance(target, str) or self._target_path(target) != report):
                                 problem(index, 'draft correction permits only the registered report path')
-                            if checks and isinstance(target, str) and Path(target).resolve() in protected:
+                            if checks and isinstance(target, str) and self._target_path(target) in protected:
                                 problem(index, 'draft correction attempts to change a protected input or record')
                         if kind == 'draft':
                             checks += 1
