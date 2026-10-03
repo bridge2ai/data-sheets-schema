@@ -1741,6 +1741,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/native_neutral_attempt_supervisor/</loc>
+         <lastmod>2026-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/native_source_attribution_offline/</loc>
          <lastmod>2026-10-03</lastmod>
          <changefreq>daily</changefreq>
