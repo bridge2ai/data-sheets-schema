@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/response/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/rubric20-model-disclosure/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: response - data-sheets-schema</title>
+        <title>Optional model disclosure for legacy rubric20 summaries - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-response" class="md-skip">
+        <a href="#optional-model-disclosure-for-legacy-rubric20-summaries" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: response
+              Optional model disclosure for legacy rubric20 summaries
             
           </span>
         </div>
@@ -309,49 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -364,82 +321,69 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/response.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/rubric20-model-disclosure.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-response">Slot: response</h1>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/response">data_sheets_schema:response</a>
-Alias: response</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../AddressingGap/">AddressingGap</a></td>
-<td>Was there a specific gap that needed to be filled by creation of the dataset?</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Task/">Task</a></td>
-<td>Was there a specific task in mind for the dataset's application?</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Purpose/">Purpose</a></td>
-<td>For what purpose was the dataset created?</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../String/">String</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>data_sheets_schema:response</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:response</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: response
-alias: response
-domain_of:
-- Purpose
-- Task
-- AddressingGap
-range: string
-
+<h1 id="optional-model-disclosure-for-legacy-rubric20-summaries">Optional model disclosure for legacy rubric20 summaries</h1>
+<p>The rubric20 summary producer can append declared evaluator and generator
+identities to a <strong>new</strong> set of reports. The existing no-argument command and
+its historical outputs keep their prior behavior:</p>
+<pre><code class="language-bash">PYTHONPATH=src python scripts/summarize_rubric20_results.py
 </code></pre>
-
-</details>
+<p>Select disclosure explicitly and name a directory that does not yet exist:</p>
+<pre><code class="language-bash">PYTHONPATH=src python scripts/summarize_rubric20_results.py \
+  --model-disclosure declared-v1 \
+  --evaluation-root data/evaluation_llm/rubric20 \
+  --output-dir /tmp/rubric20-declared-models
+</code></pre>
+<p>This writes <code>all_scores.csv</code>, <code>summary_table.md</code>, and <code>summary_report.md</code>.
+The CSV retains every existing column and value and appends the disclosure
+policy, rating index, declared evaluator, evaluator family, generator,
+generator family, same-family label, generation-binding status, exact resolved
+evaluation path and SHA256, and limitations. Both Markdown files retain their
+existing score sections, then append every rating's exact cohort membership
+and the complete shared model-disclosure evidence. Disclosure indices join the
+CSV, cohort membership table, and per-rating evidence within this report set.</p>
+<p>Selection remains recursive <code>individual/**/*_evaluation.json</code> and direct
+<code>concatenated/*_evaluation.json</code> children. Dated concatenated subdirectories are
+excluded. Repeated ratings remain separate rows; existing cohort splits,
+fixed and adjusted score bases, undefined percentages, exclusion identities,
+top-performer order, and duplicate handling in discrimination are unchanged.
+No aggregate row acquires a member's generator or same-family label.</p>
+<p>Generator identity remains unknown unless explicitly supplied generation
+evidence binds to a selected rating. Repeat the following option for each
+binding:</p>
+<pre><code class="language-bash">  --generation-binding path/to/rating_evaluation.json \
+      path/to/generated_record.yaml path/to/provenance.yaml
+</code></pre>
+<p><code>--disclosure-root PATH</code> sets the root for relative paths recorded <strong>inside</strong>
+that evidence; command-line file paths keep their usual working-directory
+meaning. The default recorded-path root is the working directory. Binding,
+hash, path, size, and run-identity checks use the shared
+<code>data_sheets_schema.model_disclosure</code> authority (<code>model-disclosure-v1</code>), also
+used by the standalone disclosure report. Duplicate or outside-selection
+bindings and contradictory evidence refuse publication. Missing evidence is
+reported as unknown rather than inferred from methods or filenames.</p>
+<p>The shared authority reads the original evaluation bytes. Summary-only
+<code>evaluation_type</code> record-kind tags are kept separate from the evaluator's
+original type declarations, so they cannot manufacture evaluator-type
+conflicts. Score and disclosure captures must have identical resolved paths
+and SHA256 values. The appendix names those captured bytes; it does not claim
+the files remain unchanged after capture or authenticate the provider.</p>
+<p>All inputs and all three report contents are checked before creating the new
+directory. Existing directories, files, or symlinks are refused, and each file
+is created exclusively. If publication fails after it starts, any partial
+outputs remain as failure evidence; rerun with a different new directory.
+Inputs, provenance, old summaries, and registered archives are never replaced
+by this mode. Options for disclosure require its explicit selector.</p>
+<p>These are declared families associated with supplied local evidence.
+Same-family status does not measure self-preference, calibration, or evaluator
+independence. No scores are recomputed under a new instrument, and no provider
+calls are made. This completes the rubric20 consumer in #4314; the remaining
+consumers in #3327 and the empirical work in #3328 remain separate.</p>
 
 
 
