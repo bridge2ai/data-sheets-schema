@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import hashlib
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
@@ -737,6 +738,53 @@ def synchronize_core_data(
     return synchronized
 
 
+def _pair_history(core_path: Path) -> dict[str, Any]:
+    """Capture one provenance snapshot for both digest comparison and lookup.
+
+    This identifies the existing historical presence exception. It does not
+    recover a historical schema or render a missing historical digest.
+    """
+    from data_sheets_schema import schema_digest
+    from data_sheets_schema.duplicate_keys import find_duplicate_keys
+    from data_sheets_schema.profiles import for_record
+
+    provenance = core_path.parent / f"{core_path.name.split('_d4d')[0]}_provenance.yaml"
+    history = {"instrument": "pair-presence-context-v1", "provenance_path": str(provenance),
+               "provenance_sha256": None, "provenance_status": "unavailable",
+               "run_digest": None, "current_profile": None, "current_digest": None,
+               "schema_moved": False}
+    try:
+        raw = provenance.read_bytes()
+        history["provenance_sha256"] = hashlib.sha256(raw).hexdigest()
+        text = raw.decode("utf-8")
+        if find_duplicate_keys(text, strict=True):
+            raise ValueError("ambiguous duplicate provenance keys")
+        data = yaml.safe_load(text)
+        if not isinstance(data, dict):
+            raise ValueError("provenance must be a mapping")
+        schema = data.get("schema")
+        if schema is None:
+            schema = {}
+        if not isinstance(schema, dict):
+            raise ValueError("provenance schema must be a mapping")
+        recorded = schema.get("digest_md5")
+        if recorded is None or recorded == "":
+            history["provenance_status"] = "no_recorded_digest"
+            return history
+        if not isinstance(recorded, str):
+            raise ValueError("recorded digest must be text")
+    except (OSError, ValueError, TypeError, RecursionError, yaml.YAMLError) as exc:
+        history["reason"] = f"{type(exc).__name__}: {exc}"
+        return history
+
+    profile = for_record(data)
+    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS, profile=profile))
+    history.update(provenance_status="captured", run_digest=recorded,
+                   current_profile=profile.name, current_digest=live,
+                   schema_moved=recorded != live)
+    return history
+
+
 def pair_predates_current_schema(core_path: Path) -> bool:
     """Was this pair generated against a schema that has since moved? (#520)
 
@@ -749,21 +797,7 @@ def pair_predates_current_schema(core_path: Path) -> bool:
     cannot show it predates the schema is held to the current one. Silence is
     not a licence.
     """
-    from data_sheets_schema import schema_digest
-
-    provenance = core_path.parent / f"{core_path.name.split('_d4d')[0]}_provenance.yaml"
-    if not provenance.exists():
-        return False
-    try:
-        data = yaml.safe_load(provenance.read_text(encoding="utf-8")) or {}
-    except Exception:                                          # noqa: BLE001
-        return False
-    recorded = (data.get("schema") or {}).get("digest_md5")
-    if not recorded:
-        return False
-    from data_sheets_schema.profiles import for_record
-    live = schema_digest.fingerprint(schema_digest.digest_text(FULL_CLASS, profile=for_record(data)))
-    return recorded != live
+    return _pair_history(core_path)["schema_moved"]
 
 
 def _load_yaml_mapping(path: Path) -> Dict[str, Any]:
@@ -839,11 +873,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         core_data = synchronize_core_data(full_data, core_data, pair_schema)
         _write_synchronized_core(args.core, core_data)
 
+    history = _pair_history(args.core)
     report = validate_pair_data(
         full_data, core_data, pair_schema,
-        schema_moved=pair_predates_current_schema(args.core))
+        schema_moved=history["schema_moved"], run_digest=history["run_digest"])
+    from data_sheets_schema import schema_digest
+    # A False membership answer still proves a known inventory, including
+    # an empty one; None means the class inventory is not recorded (#580).
+    known = (schema_digest.slot_existed_at(history["run_digest"], CORE_CLASS, "id") is not None
+             if history["run_digest"] else False)
+    history.update(ledger_inventory="known" if known else "unknown",
+                   unknown_inventory_policy="retain broad presence warning when schema_moved",
+                   pair_schema_basis="current comparison using selected schema paths",
+                   full_schema_path=str(args.full_schema), core_schema_path=str(args.core_schema))
     if args.as_json:
-        print(json.dumps(report.to_dict(), indent=2))
+        print(json.dumps({**report.to_dict(), "presence_context": history}, indent=2))
     else:
         status = "PASS" if report.passed else "FAIL"
         print(
@@ -856,6 +900,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             print(f"ERROR [{issue.code}] {issue.path}: {issue.message}")
         for issue in report.warnings:
             print(f"WARNING [{issue.code}] {issue.path}: {issue.message}")
+        print(f"Presence context: {history['provenance_status']}; "
+              f"recorded digest={history['run_digest']}; "
+              f"schema_moved={history['schema_moved']}; ledger inventory={history['ledger_inventory']}")
 
     return 0 if report.passed else 1
 
