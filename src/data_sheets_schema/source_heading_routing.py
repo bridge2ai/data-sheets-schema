@@ -306,7 +306,10 @@ def _tokens(pointer):
     return pointer_tokens(pointer)
 
 
-def _at(value, pointer):
+def _entity_path(value, pointer):
+    """Keep every enclosing object on the exact pointer path, in source order."""
+    path = [('', value)]
+    current = ''
     for token in _tokens(pointer):
         if type(value) is dict:
             if token not in value:
@@ -319,7 +322,9 @@ def _at(value, pointer):
             value = value[index]
         else:
             raise ValueError('pointer cannot traverse this value')
-    return value
+        current = _pointer(current, token)
+        path.append((current, value))
+    return path
 
 
 def _pointer(base, key):
@@ -382,24 +387,42 @@ def _profile(profile, crosswalk):
     return rows
 
 
-def _context_prefixes(source, entity):
-    prefixes, unsupported = {}, False
-    for obj in (source, entity):
+def _context_prefixes(path):
+    """Resolve only simple captured local contexts, never partial JSON-LD.
+
+    A reset, remote context or scoped/unsupported declaration anywhere along
+    this entity's path prevents claiming an inherited compact-key namespace.
+    Sibling objects are not on the path and cannot supply or override it.
+    """
+    prefixes, unsupported = {}, []
+    for pointer, obj in path:
         if type(obj) is not dict or '@context' not in obj:
             continue
         context = obj['@context']
         items = context if type(context) is list else [context]
         for item in items:
             if type(item) is not dict:
-                unsupported = True
-                continue  # remote context identity is captured, never fetched
+                unsupported.append(f'reset, remote or unsupported context at {pointer or "/"}')
+                continue  # capture identity, but do not fetch or ignore its effects
             for key, value in item.items():
                 if key.startswith('@'):
+                    # These two simple settings cannot rebind an absolute
+                    # compact prefix. Import, propagation and other context
+                    # operations are outside this bounded structural resolver.
+                    if key not in ('@base', '@vocab') or type(value) is not str:
+                        unsupported.append(f'unsupported context operation {key} at {pointer or "/"}')
                     continue
+                if ':' in key:
+                    # Exact compact-IRI term definitions can override prefix
+                    # expansion; this subset must not ignore such a binding.
+                    unsupported.append(f'explicit IRI term definition at {pointer or "/"}')
                 if type(value) is dict and set(value) == {'@id', '@prefix'} and value['@prefix'] is True:
                     value = value['@id']
                 if type(value) is not str:
-                    value = None  # an unhandled declaration cannot silently disappear
+                    unsupported.append(f'unsupported or scoped context declaration at {pointer or "/"}')
+                    value = None
+                elif value.startswith('@'):
+                    unsupported.append(f'unsupported context keyword alias at {pointer or "/"}')
                 if key in prefixes and prefixes[key] != value:
                     raise _PrefixConflict('conflicting captured local source prefix declarations')
                 prefixes[key] = value
@@ -431,7 +454,8 @@ def _inventory(source_raw, profile, crosswalk, scope, catalog):
             record['reason'] = 'entity is outside caller-declared exact scope'
         else:
             try:
-                entity = _at(source, binding['entity_pointer'])
+                path = _entity_path(source, binding['entity_pointer'])
+                entity = path[-1][1]
                 if type(entity) is not dict:
                     record.update(match_state='unsupported', reason='entity is not an object')
                 elif binding['entity_id'] != entity.get('@id'):
@@ -440,11 +464,16 @@ def _inventory(source_raw, profile, crosswalk, scope, catalog):
                     record['reason'] = 'both properties must be in the same exact entity object'
                 else:
                     local, external = entity[row['local_property']], entity[row['external_property']]
-                    prefixes, _remote_context = _context_prefixes(source, entity)
                     prefix = row['external_property'].split(':', 1)[0]
                     compact = not row['external_property'].startswith(RAI)
-                    if compact and (prefix not in prefixes or prefixes[prefix] is None):
-                        record.update(match_state='unsupported', reason='compact property lacks a supported captured source-local prefix declaration')
+                    # An explicit URI is bound by its literal source key, not
+                    # by an inferred JSON-LD expansion or profile declaration.
+                    prefixes, unsupported = _context_prefixes(path) if compact else ({}, [])
+                    if compact and (unsupported or prefix not in prefixes or prefixes[prefix] is None):
+                        reason = 'compact property lacks a supported captured source-local prefix declaration'
+                        if unsupported:
+                            reason += ': ' + unsupported[0]
+                        record.update(match_state='unsupported', reason=reason)
                     elif compact and prefixes[prefix] != profile['prefixes'].get(prefix):
                         record.update(match_state='ambiguous', reason='source and profile prefix declarations conflict')
                     elif any(type(value) is not str or not value.strip() for value in (local, external)):

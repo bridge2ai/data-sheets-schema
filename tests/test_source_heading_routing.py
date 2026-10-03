@@ -355,6 +355,94 @@ def test_full_property_uri_needs_no_inferred_source_prefix(inputs):
     assert one['source_prefix_basis'] == 'source property key is the explicit full URI'
 
 
+@pytest.mark.parametrize('case,expected', [
+    ('entity-reset', 'unsupported'), ('ancestor-reset', 'unsupported'),
+    ('ancestor-override', 'ambiguous'), ('remote-after-local', 'unsupported'),
+    ('remote-before-local', 'unsupported'), ('reset-then-local', 'unsupported'),
+    ('scoped-property', 'unsupported'), ('scoped-type', 'unsupported'),
+    ('context-import', 'unsupported'), ('propagation', 'unsupported'),
+    ('unknown-operation', 'unsupported'), ('exact-term-override', 'unsupported'),
+    ('keyword-alias', 'unsupported'), ('ordered-local', 'matched'),
+    ('ancestor-local', 'matched'), ('root-entity', 'matched'),
+    ('sibling-reset-and-override', 'matched'), ('escaped-pointer', 'matched'),
+])
+def test_complete_selected_context_path_governs_compact_namespace(inputs, case, expected):
+    source = json.loads(inputs['source'])
+    entity = source['@graph'][0]
+    pointer = '/@graph/0'
+    local = {'rai': routing.RAI}
+    if case == 'entity-reset':
+        entity['@context'] = None
+    elif case in ('ancestor-reset', 'ancestor-override', 'ancestor-local', 'escaped-pointer'):
+        key = 'enclosing/~scope' if case == 'escaped-pointer' else 'container'
+        context = (None if case == 'ancestor-reset' else
+                   {'rai': 'https://different.example/'} if case == 'ancestor-override' else local)
+        source = {'@context': local, key: {'@context': context, 'children': [entity]}}
+        if case == 'ancestor-local':
+            source.pop('@context')
+        pointer = '/' + key.replace('~', '~0').replace('/', '~1') + '/children/0'
+    elif case in ('remote-after-local', 'remote-before-local', 'reset-then-local'):
+        remote = 'https://unknown.example/context.jsonld'
+        source['@context'] = ([local, remote] if case == 'remote-after-local' else
+                              [remote, local] if case == 'remote-before-local' else [None, local])
+    elif case in ('scoped-property', 'scoped-type'):
+        term = '@graph' if case == 'scoped-property' else 'SelectedType'
+        source['@context'][term] = {'@id': 'https://example.org/term', '@context': {'rai': 'https://different.example/'}}
+        if case == 'scoped-type':
+            entity['@type'] = term
+    elif case in ('context-import', 'propagation', 'unknown-operation'):
+        key, value = {'context-import': ('@import', 'https://unknown.example/context'),
+                      'propagation': ('@propagate', False), 'unknown-operation': ('@future', True)}[case]
+        source['@context'][key] = value
+    elif case == 'exact-term-override':
+        source['@context']['rai:dataCollectionMissingData'] = 'https://different.example/property'
+    elif case == 'keyword-alias':
+        source['@context']['kind'] = '@type'
+    elif case == 'ordered-local':
+        source['@context'] = [local, {'@vocab': 'https://schema.org/'},
+                              {'rai': {'@id': routing.RAI, '@prefix': True}}]
+    elif case == 'root-entity':
+        source = {**entity, '@context': local}
+        pointer = ''
+    else:
+        source['@graph'][1]['@context'] = [None, {'rai': 'https://different.example/'}]
+    raw = encoded(source)
+    profile = json.loads(inputs['profile'])
+    profile['bindings'][0].update(source_sha256=routing._sha(raw), entity_pointer=pointer)
+    args = {**inputs, 'source': raw, 'profile': encoded(profile),
+            'scope': encoded({'source_sha256': routing._sha(raw), 'entity_pointers': [pointer]})}
+    files = routing.prepare(**args)
+    assert routing.check_files(files)['passed']
+    one = evidence(files)['records'][0]
+    assert one['match_state'] == expected, one
+    assert bool(one['candidates']) == (expected == 'matched')
+    assert (b'Dataset.missing_data_documentation' in files['supplement.txt']) == (expected == 'matched')
+    assert routing._unblob(json.loads(files['inputs.json'])['source']) == raw
+    if expected == 'unsupported':
+        assert 'source-local prefix' in one['reason']
+
+
+@pytest.mark.parametrize('context', [None, ['https://unknown.example/context', {'rai': 'https://different.example/'}]])
+def test_explicit_full_uri_is_literal_binding_despite_unsupported_compact_context(inputs, context):
+    source = json.loads(inputs['source'])
+    external = routing.RAI + 'dataCollectionMissingData'
+    entity = source['@graph'][0]
+    entity[external] = entity.pop('rai:dataCollectionMissingData')
+    entity['@context'] = context
+    raw = encoded(source)
+    profile = json.loads(inputs['profile'])
+    profile['prefixes'] = {}
+    profile['bindings'][0]['source_sha256'] = routing._sha(raw)
+    crosswalk = json.loads(inputs['crosswalk'])
+    crosswalk['rows'][0]['external_property'] = external
+    files = routing.prepare(**{**inputs, 'source': raw, 'profile': encoded(profile), 'crosswalk': encoded(crosswalk),
+        'scope': encoded({'source_sha256': routing._sha(raw), 'entity_pointers': ['/@graph/0']})})
+    assert routing.check_files(files)['passed']
+    one = evidence(files)['records'][0]
+    assert one['match_state'] == 'matched'
+    assert one['source_prefix_basis'] == 'source property key is the explicit full URI'
+
+
 def test_authority_newline_handling_matches_existing_compiler_but_preserves_bytes(inputs):
     original = routing.prepare(**inputs)
     changed = {**inputs, **{name: inputs[name].replace(b'\n', b'\r\n') for name in ('ttl','recommendations','comprehensive')}}

@@ -82,6 +82,15 @@ that agrees with the draft profile. Profile prefixes never substitute for an
 absent, remote-only or unsupported source namespace: those rows are unsupported.
 A full URI property key binds directly. Conflicting local declarations are
 ambiguous; remote contexts are never fetched.
+The resolver inspects every enclosing object along the exact selected entity
+pointer, including intermediate objects. A reset, remote context, scoped term
+definition, import, propagation setting or other unsupported context operation
+anywhere on that path prevents a compact-key match, even if another context
+declares the prefix. Ordered simple local declarations are supported only when
+they agree. Contexts on sibling objects do not supply namespace authority.
+Exact IRI term overrides and keyword aliases are also outside this subset.
+This conservative subset does not claim general JSON-LD interpretation; literal
+full-URI property keys remain directly bound without compact-prefix inference.
 An unchanged source copied to another filename retains the same byte identity.
 Changed source bytes require a new declared binding.
 
