@@ -112,6 +112,30 @@ def test_actual_closed_consumer_real_helpers_complete(case,monkeypatch,mode):
     assert result['scientific_acceptance']=='not_assessed'
     with pytest.raises(ValueError,match='new|resume'):
         execute.launch(case['raw'],**case['kwargs'])
+    if mode=='no_correction':
+        # Every validation gate must consume sealed captured bytes or exact
+        # private projections, not silently reread the original input files.
+        with authority.loaded_dependencies(case['value']['dependencies']) as modules:
+            prepared=execute.gates.capture(case['value'],modules,registration_raw=case['raw'],
+                authority_inputs={**{k:str(v) for k,v in case['kwargs'].items()},
+                                  'system':case['value']['system_path'],'permission':case['value']['permission_probe']})
+            projections=execute.shared.project(prepared,case['root']/'sealed-check-projections')
+            original_read=Path.read_bytes
+            def trapped(path):
+                if str(path.resolve()) in prepared['snapshot'].raw:
+                    raise AssertionError('uncaptured original file read during gate validation')
+                return original_read(path)
+            with monkeypatch.context() as local:
+                local.setattr(Path,'read_bytes',trapped)
+                checked=execute.gates.check(prepared,projections,{**case['value']['runtime'],
+                    'attempt_directory':case['value']['attempt_directory']},modules,
+                    exit_code=result['child_exit_code'],shutdown=result['shutdown'],
+                    live=result['gates']['live_attribution']['result'],first_stop=None,
+                    runtime_authority=result['runtime_observation'],keep_awake=result['keep_awake'])
+            assert all(row['checked'] and row['passed'] for row in checked.values()),checked
+        generated=Path(result['additional_report']['path'])
+        generated.write_bytes(generated.read_bytes()+b'\n')
+        with pytest.raises(ValueError,match='replay report'):execute.read_final(case['raw'])
 
 
 @pytest.mark.parametrize('mode',['protected_correction','contradictory_exit','unknown_usage'])
@@ -293,3 +317,22 @@ def test_registration_output_cannot_consume_its_own_future_attempt(case):
             attempt_id=value['attempt_id'],attempt_directory=value['attempt_directory'],
             evidence_directory=value['evidence_directory'],runtime=value['runtime'])
     assert not (case['root']/'native-attempt').exists()
+
+
+@pytest.mark.parametrize('boundary',['final.json','published.json'])
+def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,monkeypatch,boundary):
+    def auth_failure(value):raise RuntimeError('synthetic auth refusal, no native call')
+    monkeypatch.setattr(execute,'_probe_runtime',auth_failure)
+    real=execute.durable_new
+    def interrupted(path,raw):
+        if Path(path).name==boundary:raise OSError('injected publication interruption')
+        return real(path,raw)
+    monkeypatch.setattr(execute,'durable_new',interrupted)
+    with pytest.raises(OSError,match='publication interruption'):
+        execute.launch(case['raw'],**case['kwargs'])
+    assert (case['root']/'native-attempt/started.json').is_file()
+    assert (case['root']/'native-attempt/runtime-observation.json').is_file()
+    assert not (case['root']/'native-evidence/published.json').exists()
+    assert (case['root']/'native-evidence/final.json').exists() is (boundary=='published.json')
+    with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
+    with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
