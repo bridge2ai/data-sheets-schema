@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/pair-presence-context/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Historical presence rules in the pair checker - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#historical-presence-rules-in-the-pair-checker" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Historical presence rules in the pair checker
             
           </span>
         </div>
@@ -309,62 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -377,95 +321,40 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/pair-presence-context.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
-</code></pre>
-
-</details>
+<h1 id="historical-presence-rules-in-the-pair-checker">Historical presence rules in the pair checker</h1>
+<p><code>python -m data_sheets_schema.d4d_pair_consistency --full FULL --core CORE</code>
+compares the pair using the current full/core schemas, or the files explicitly
+selected by <code>--full-schema</code> and <code>--core-schema</code>.</p>
+<p>The CLI captures the adjacent <code>PROJECT_provenance.yaml</code> once. Its recorded
+<code>schema.digest_md5</code> serves two purposes: comparison with today's rendered
+Dataset digest under the record's selected profile, and lookup of the recorded
+CoreDataset slot inventory in the existing digest ledger. An unrelated digest
+change cannot excuse a missing shared slot that this inventory proves existed.
+Content disagreements remain errors under every history case.</p>
+<p>When the digest differs and the ledger proves the slot did not exist, presence
+mismatches remain warnings. An unknown inventory keeps the existing broad
+warning rule, without claiming historical absence was established. A known
+empty inventory is distinct from an unknown one. Missing, unreadable or malformed
+provenance cannot establish a historical exception, so presence remains strict.
+No ledger entries or historical records are changed by this check.</p>
+<p>JSON output adds a versioned <code>presence_context</code> with the captured provenance
+hash, recorded and current digest, selected profile, <code>schema_moved</code>, inventory
+availability and selected comparison-schema paths. Text output includes a short
+context line. The pure <code>validate_pair_data(...).to_dict()</code> format is unchanged.
+Custom schema options continue to select pair structure; the historical digest
+comparison still uses the current profile digest. The schema paths in the
+context are selections, not claims of captured schema hashes or historical
+schema recovery.</p>
+<p>For #4309, a read-only scan of 90 tracked pairs with known digests found seven
+pairs with ten presence errors previously downgraded to warnings by the CLI.
+All seven already failed for other errors. The correction establishes neither
+new scientific scores nor a historical overall pass-to-fail result in that scan.</p>
 
 
 

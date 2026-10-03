@@ -1801,6 +1801,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/pair-presence-context/</loc>
+         <lastmod>2026-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/parent_datasets/</loc>
          <lastmod>2026-10-03</lastmod>
          <changefreq>daily</changefreq>
