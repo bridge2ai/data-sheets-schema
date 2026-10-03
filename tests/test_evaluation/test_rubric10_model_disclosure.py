@@ -88,6 +88,28 @@ def outputs(results):
             'summary_report.md': mod._detailed_report_text(results)}
 
 
+def recorded_discovery(monkeypatch, root, names):
+    """Replay a captured parent order without sorting the production loader.
+
+    Path.glob order differs across filesystems. The legacy stable percentage
+    sort preserves that order for ties, so exact parent bytes require the
+    same input enumeration (#4326).
+    """
+    directory = root / 'concatenated'
+    expected = [directory / name for name in names]
+    assert len(expected) == len(set(expected))
+    original = Path.glob
+
+    def glob(path, pattern):
+        found = list(original(path, pattern))
+        if path == directory and pattern == '*_evaluation.json':
+            assert set(found) == set(expected)
+            return iter(expected)
+        return iter(found)
+
+    monkeypatch.setattr(Path, 'glob', glob)
+
+
 def test_actual_parent_output_bytes_and_all_forty_inputs(tmp_path, monkeypatch):
     monkeypatch.setattr(mod, 'datetime', Clock)
     before = {p: (ROOT / p).read_bytes() for p in BASELINE['input_sha256']}
@@ -95,6 +117,7 @@ def test_actual_parent_output_bytes_and_all_forty_inputs(tmp_path, monkeypatch):
     root = tmp_path / 'rubric10'; (root / 'concatenated').mkdir(parents=True)
     for p, raw in before.items():
         if '/rubric10/' in p: (root / 'concatenated' / Path(p).name).write_bytes(raw)
+    recorded_discovery(monkeypatch, root, BASELINE['rubric10_discovery_order'])
     monkeypatch.setattr(mod, 'EVAL_DIR', root)
     results = mod.load_evaluation_results(); original = deepcopy(results)
     mod.create_csv_summary(results); mod.create_markdown_table(results); mod.create_detailed_report(results)
@@ -112,6 +135,36 @@ def test_actual_parent_output_bytes_and_all_forty_inputs(tmp_path, monkeypatch):
         assert text.startswith(BASELINE['rubric10_outputs'][name]) and text.count('### Rating ') == 20
     assert results == original and not any('_evaluation_file' in r for r in results)
     assert {p: (ROOT / p).read_bytes() for p in before} == before
+
+
+@pytest.mark.parametrize('order', ['name_ascending', 'name_descending', 'ci_observed_ties'])
+def test_alternate_discovery_orders_preserve_actual_parent_bytes(tmp_path, monkeypatch, order):
+    """Hashes were captured by running the pinned parent, not this renderer."""
+    monkeypatch.setattr(mod, 'datetime', Clock)
+    root = tmp_path / 'rubric10'; (root / 'concatenated').mkdir(parents=True)
+    for path, digest in BASELINE['input_sha256'].items():
+        if '/rubric10/' in path:
+            raw = (ROOT / path).read_bytes()
+            assert hashlib.sha256(raw).hexdigest() == digest
+            (root / 'concatenated' / Path(path).name).write_bytes(raw)
+    capture = BASELINE['alternate_discovery_parity'][order]
+    recorded_discovery(monkeypatch, root, capture['order'])
+    monkeypatch.setattr(mod, 'EVAL_DIR', root)
+    results = mod.load_evaluation_results()
+    expected_files = [json.loads((root / 'concatenated' / name).read_bytes())['d4d_file']
+                      for name in capture['order']]
+    assert [row['d4d_file'] for row in results] == expected_files
+    mod.create_csv_summary(results); mod.create_markdown_table(results); mod.create_detailed_report(results)
+    legacy = {name: (root / name).read_bytes() for name in capture['output_sha256']}
+    assert {name: hashlib.sha256(raw).hexdigest() for name, raw in legacy.items()} == capture['output_sha256']
+    disclosed = tmp_path / 'disclosed'
+    assert mod.write_disclosed_summaries(root, disclosed)['ratings'] == len(capture['order'])
+    for name in ('summary_table.md', 'summary_report.md'):
+        assert (disclosed / name).read_bytes().startswith(legacy[name])
+    old = list(csv.DictReader(io.StringIO(legacy['all_scores.csv'].decode(), newline='')))
+    with (disclosed / 'all_scores.csv').open(newline='') as stream:
+        actual = list(csv.DictReader(stream))
+    assert [{key: row[key] for key in old[0]} for row in actual] == old
 
 
 def test_raw_type_declarations_and_occurrence_identity_do_not_enter_scores(sample, monkeypatch):
