@@ -6,8 +6,13 @@ POLICY_PATH = Path("src/download/prompts/api_playbook_v1.md")
 POLICY_SHA256 = "6870fd69c6ca377b6f6a349b0161f503ef742176228074db57325b7368db6015"
 
 
-def policy_text() -> str:
+def policy_text(*, version: int = 1) -> str:
     """Fail closed on changed policy bytes, including during historical replay."""
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError("unsupported API playbook version")
+    if version == 2:
+        from .shared_generation import captured_assets, API_POLICY
+        return captured_assets()[API_POLICY].decode("utf-8").split("## Prompt body", 1)[1].strip()
     from data_sheets_schema.resources import resource_path
     raw = resource_path(POLICY_PATH).read_bytes()
     if hashlib.sha256(raw).hexdigest() != POLICY_SHA256:
@@ -15,7 +20,7 @@ def policy_text() -> str:
     return raw.decode("utf-8").split("## Prompt body", 1)[1].strip()
 
 
-def adapt_template(body: str) -> str:
+def adapt_template(body: str, *, version: int = 1) -> str:
     """Adapt the registered base only, before substitutions or tuned evidence.
 
     Select explicit sections, never scrub user/bundle text. Refuse a changed
@@ -47,6 +52,14 @@ def adapt_template(body: str) -> str:
     if ending != ("RETURN: full slot count, core slot count, whether both validated, and the\n"
                    "reconciliation outcome. Return data, not prose."):
         raise ValueError("API playbook v1 cannot adapt changed completion instruction")
-    return (policy_text() + "\n\n" + declarations + "\n\n" + header
+    return (policy_text(version=version) + "\n\n" + declarations + "\n\n" + header
             + "\n\n" + rules + "\n\nRETURN: follow only the final phase instruction's "
             "artifact format; the controller manages files and checks.\n")
+
+
+def policy_identity(*, version: int = 1) -> dict:
+    policy_text(version=version)
+    if version == 1:
+        return {"path": str(POLICY_PATH), "sha256": POLICY_SHA256}
+    from .shared_generation import API_POLICY, ASSET_HASHES
+    return {"path": API_POLICY, "sha256": ASSET_HASHES[API_POLICY]}

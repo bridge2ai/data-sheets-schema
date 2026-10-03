@@ -1,6 +1,7 @@
 """Generation-bound phase evidence, with historical files kept intact (#1409)."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -313,12 +314,19 @@ def _portable_entry(record: dict, project: str, name: str) -> dict | None:
 
 
 def read_latest(directory: Path, project: str, name: str, *, spec=None,
-                record: dict | None = None) -> tuple[bool, tuple[Path, bytes] | None]:
+                record: dict | None = None, include_attestation: bool = False
+                ) -> tuple[bool, tuple[Path, bytes] | tuple[Path, bytes, dict] | None]:
     """Read once under an expected live identity or portable byte attestation.
 
     The boolean distinguishes identified evidence from older unregistered
     helpers. A modern record without an index never falls back to filenames.
+    Opting into metadata adds a fresh copy of the selected, byte-verified entry
+    to the inner tuple; the default return and authority precedence are unchanged.
     """
+    def selected(entry):
+        observed = _read_verified(entry)
+        return (*observed, copy.deepcopy(entry)) if include_attestation else observed
+
     generation = ledger.generation_id(spec) if spec is not None else None
     if generation is not None:
         expected_inputs = ledger.recorded_inputs(spec)
@@ -333,7 +341,7 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
         entry = _portable_entry(portable, project, name)
         if entry is None and portable["run"].get("generation_id"):
             raise ledger.UsageLedgerError("identified run has no attested phase snapshot; restore its evidence")
-        return True, _read_verified(entry) if entry is not None else None
+        return True, selected(entry) if entry is not None else None
     if generation is not None:
         data = _load(directory, project)
         if (data is not None and not data.get("superseded")
@@ -341,7 +349,7 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
                 and data["run_identity"] == ledger.run_identity(spec)
                 and not ledger._identity_differs(data["input_identity"], spec.input_identity())):
             entry = next((e for e in reversed(data["snapshots"]) if e["name"] == name), None)
-            return True, _read_verified(entry) if entry is not None else None
+            return True, selected(entry) if entry is not None else None
         # Portable evidence may recover a missing/stale index, but cannot
         # replace a new active generation with a previous completed one.
         portable = _portable(directory, project, record, spec)
@@ -353,7 +361,7 @@ def read_latest(directory: Path, project: str, name: str, *, spec=None,
         entry = _portable_entry(portable, project, name)
         if entry is None and portable["run"].get("generation_id"):
             raise ledger.UsageLedgerError("identified run has no attested phase snapshot; restore its evidence")
-        return True, _read_verified(entry) if entry is not None else None
+        return True, selected(entry) if entry is not None else None
     if index_path(directory, project).exists() or any(
             index_path(directory, project).parent.glob(f"{project}_snapshot_index.previous-*.json")):
         raise ledger.UsageLedgerError("generation snapshots require a matching run record or active identity")

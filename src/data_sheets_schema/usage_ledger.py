@@ -328,6 +328,9 @@ def begin_call(spec, phase: str, attempt: int, started_at: str) -> str:
     identifier = uuid.uuid4().hex
     if getattr(spec, "receipt_completion_version", 0) and phase == RECEIPT_PHASE:
         data["receipt_completion"]["usage_id"] = identifier
+    if getattr(spec, "shared_generation_version", 0):
+        from .typed_audit_runtime import require_admission
+        require_admission(spec, phase, data=data, usage_id=identifier)
     data["pending_call"] = {"usage_id": identifier, "phase": phase,
                             "attempt": attempt, "started_at": started_at}
     _write(spec, data)

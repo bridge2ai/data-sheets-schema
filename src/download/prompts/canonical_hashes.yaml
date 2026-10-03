@@ -484,4 +484,71 @@ files:
     reason: Freeze native-only source-attribution draft preflight v1 for offline registration
       (#4304); preserve historical renderer requests.
     sha256: e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761
+  .claude/agents/d4d-provenance-guard-v2.md:
+    bytes: 6912
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/agents/d4d-provenance-guard-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: 10dc4689e1855096ef3507de01b129abfd5795690fbcfbd3458407741fe30085
+  .claude/commands/d4d-agent-v2.md:
+    bytes: 12698
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/commands/d4d-agent-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: dcb33659014a68596a248ed768c196dd0b1e396a0fe41579918dff95ac559299
+  .claude/commands/d4d-full-core-v2.md:
+    bytes: 58267
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/commands/d4d-full-core-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: 2f52d3e70d7a6f3098b7acfcc80b9e9d0f318c9ca1517f711eae9fb789410124
+  .claude/commands/d4d-uniform-rules-v2.md:
+    bytes: 26356
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: .claude/commands/d4d-uniform-rules-v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: 7b511b1ef15d6fb56d47dc58b367196ed9c7269a61406ed19127481f719c885a
+  src/download/prompts/api_playbook_v2.md:
+    body_sha256: 0a559d17c802f68a3e349185399e1d6255d14cb10303f1ed6e58f03a010813b3
+    bytes: 4492
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: src/download/prompts/api_playbook_v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: 5fa3385ae994231cf68f8432d0dba35a86d8c4e37120e80d0aecda199f5ad719
+  src/download/prompts/d4d_generic_arm_prompt_v10.md:
+    body_sha256: b19350c15903696d1c11781ff7257751985ce401947f3c9588b8ce19da208d13
+    bytes: 29014
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: src/download/prompts/d4d_generic_arm_prompt_v10.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: a3a2004cef2147b3351613cb38a67abde1d58c91c19ee0c72c66ff476d0722ec
+  src/download/prompts/receipt_completion_runtime_v2.md:
+    bytes: 3158
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: src/download/prompts/receipt_completion_runtime_v2.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: c5f6b3818fabb9256bdb6d035eb1760b92cfe03ad0d8a60ab80becb51bf30d5c
+  src/download/prompts/shared_generation_v1.md:
+    body_sha256: 2e407d1cebb92c8c5d4568d82b9f658b2e369c70d864be21034d06430e8ddac0
+    bytes: 3569
+    pinned_at_commit: bbac63fa517bfa761224e41827b2551f299f6748
+    pinned_blob_path: src/download/prompts/shared_generation_v1.md
+    pinned_on: '2026-10-03'
+    reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
+      released condition.
+    sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
 hash_algorithm: sha256

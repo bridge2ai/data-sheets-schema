@@ -1,0 +1,1013 @@
+{
+  "assemblies": {
+    "1": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "10": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "efd42e290b8fa347d663fd7953d896d45a12827bca0049df64d9b74dd48c4eba"
+    },
+    "11": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "b7e2f4dcd2db81121c03204f1ce1171682f5e1894b7164f9e37a4d2e6810578d"
+    },
+    "12": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "1e3b4d5df240f67f9aae814e4494017b79804ecce06a16504eb0b084f5082a4a"
+    },
+    "13": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "adc8d2982d744dced2505134e18fde58a1b97ea079b40df7cd7e146ffeb549b5"
+    },
+    "14": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "d5f55d9ff58bbcbf94e70a4528e13bd0b2815a9a87e1d8fd0e6ab7a912bdf924"
+    },
+    "15": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "79d0d4a45d908a0f699bf15af53c24854b16c00bce4a94596a5687a584d01097"
+    },
+    "16": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "ea4117e600ebeb3a0bbd940c2c7d9047e5925f68faac2d876a48f6a8e87127d1"
+    },
+    "17": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "083b90de0c82ea464686e6f9d46e6cefb09cce7c98bb55aab2d6054037a4045a"
+    },
+    "18": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "8994bb0d648a354c9d14fc81761a2264f74922ededa9ec4b51fb99072f2f3002"
+    },
+    "19": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "4bd4a55c1e5c8473ec0ffae423a6708fe8bff75da17980935e3e5752e06072e1"
+    },
+    "2": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "20": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "d6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14"
+    },
+    "21": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "d6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14"
+    },
+    "22": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "d6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14"
+    },
+    "23": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "d6005d48d13dc099d3d30179d88948e4b6284541ba5e414d1e310fc5bed59e14"
+    },
+    "24": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998); hash-bound source-review inventory before audit/report instruction: # Required source-review inventory\n\n",
+      "sha256": "12e03e3911ff1cb16d2d69817fa55b121e36ff22bc20e64e1f468d052a5d89dc"
+    },
+    "3": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "4": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "5": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "6": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "7": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "8": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    },
+    "9": {
+      "layout": "schema digest, input bundle, source ranking, declared naming, declared scope (#932), arm prompt, carried artifacts, computed audit counts and core inventory for reports, phase instruction; audit counts come from the structured entries, never their prose summary (#1802); core derived from the full record, not generated (#694); audit and reconcile_full address the full record only, the core being its projection (#705); under a receipt condition the bundle carries [cNNN] chunk markers and the full phase instruction asks for the coverage receipt after the record (#710); a receipt entry whose slot is not a path in the record just written gets one follow-up turn \u2014 the full-phase exchange replayed as an assistant turn, then the unresolved entries with their chunk and ordinal and the re-addressing instruction \u2014 whose answer moves the entry only to a resolving path or drops it (#952); the report phase ends with a dispositions table, checked against the records before the run completes, and a report with contradictory claims, unrecorded changes or a missing dispositions table is regenerated once with the discrepancies named (#929, #1181); the report phase carries the core class's top-level slot inventory before its instruction, so the model can see which slots the core declares \u2014 the gate still judges presence in the two records, and the inventory decides only whether a finding carries the 'core class declares no such slot' cause (#998)",
+      "sha256": "39fadef4fcbd7d25c9e494abd8671d319897ba72ed89d7fa87617e47654285c3"
+    }
+  },
+  "instructions": {
+    "metadata/api": {
+      "1": {
+        "instruction_sha256": "418999f4a52c4b622bf7d1476ee3b9c6e92f2749fe769bfe97ed221943addd43",
+        "spec_sha256": "89d59493a9acd1169ca94ec7aa8f9e734bd2851b07fa6b91d85529b4833c3fdc"
+      },
+      "10": {
+        "instruction_sha256": "10039199add57ee447ddf181e9a82a8dd573dcd4f85242bb324ab3135a4f9830",
+        "spec_sha256": "422c4631b2cc639dcbdca8be82ecdd2035ddaab37d94794b99a3ba0a706270ed"
+      },
+      "11": {
+        "instruction_sha256": "e088adfff7955fa101e6ba2f81e25dc0c5c2baebb1000e2afe30c44d823086b2",
+        "spec_sha256": "09f8ed0c37ef120f10efe2749caab5f2f762dc6ca988e2a0ff5c7a40f8fcaf8e"
+      },
+      "12": {
+        "instruction_sha256": "410477442deb68b50ad3dc476fa049d576f33f1bfab2cca1ed2966e3a766ecf0",
+        "spec_sha256": "0b9bbcb4bad61bbe7a4bb680d6378bc8044f39daaf838718afd5d23e52d15240"
+      },
+      "13": {
+        "instruction_sha256": "24e796bca5933f7dc72b7d39c0c2224a2cc2a3e859e449e95ae9848b57085145",
+        "spec_sha256": "e6e06c6443c01a939932a8e0fe979f8cdbfc34ddb48b20e7bb93a914e2ea5c0b"
+      },
+      "14": {
+        "instruction_sha256": "700e675127a73235a4130c51567f9588f2d85e07c17849f47b43611e4b3901e7",
+        "spec_sha256": "3f68732f8797bc7107442354ecd50da90ea5291f99e700635bf199d3ffe4f37c"
+      },
+      "15": {
+        "instruction_sha256": "455858fcf07d911b3b93300b520579d0ce80340263a0a4873c0f5ac5343f1848",
+        "spec_sha256": "694a0064465b494b891c7aa135b3c14ac9eca383d5f43923d38a1f103d948ca9"
+      },
+      "16": {
+        "instruction_sha256": "70f5dee8c370da7b877fa597c658f449289cb905c69692ac3fc788994031e9f5",
+        "spec_sha256": "ead3be885d4357b3cbe057b6e3dc7dcaa771b8b22d856f4181c82715037a22d4"
+      },
+      "17": {
+        "instruction_sha256": "19e5caaa511da5520fc011f408eb21b59ecf4f1dd32f62c8fc797aaab4c10959",
+        "spec_sha256": "e8c9e01020b1086f3274b2cc68b066acb7b8bba68f1e78c39d9f8b9c3c7973fd"
+      },
+      "18": {
+        "instruction_sha256": "8eaa32bcaaa0f019f878a37c0f7386bf94a7415752fa3e7e5353ff19df7c5f6f",
+        "spec_sha256": "49cea8d149110471ba4ad83813def4a14b1659ff5c2f9339432f4d0d4faeddca"
+      },
+      "19": {
+        "instruction_sha256": "147499288553ecc540823fde0b8b44115bd1d9cbe7d69b83a2574e4c40c03c75",
+        "spec_sha256": "fe936be21431e4c5179211e22b21c7b92dfba53665605567121fa68aead770ad"
+      },
+      "2": {
+        "instruction_sha256": "bd7475b06d591d59a470a40e6f94bb5b72548aca8884e69653aa76542352b0ba",
+        "spec_sha256": "da9850a30b4cbdf25425005bf026ce063e3c540753a1b1ba5dc825c1b4f31cd5"
+      },
+      "20": {
+        "instruction_sha256": "1fb58169ccc5b9c914f22701ce4cdf89caf92b4fbee3a67858b8e4ad7dcb4c98",
+        "spec_sha256": "5a18691b983d620e6473bf3fe967aef8a977bdf9c04415fbca04aa3d685a7100"
+      },
+      "21": {
+        "instruction_sha256": "39bf91ab64efa38345dbb2fdd33ca74c70e20d9fa49a5a45c7bf2449726497a6",
+        "spec_sha256": "ecf3dc975ad72cb794eeb299010fa37e0d42ea699dddbb3fbb03102e97790335"
+      },
+      "22": {
+        "instruction_sha256": "2926ce13d740e4cac847bd2917659e7638061a46c158a82ab4aeafabba74c8b8",
+        "spec_sha256": "1ab2e18c6f789a7ab9c13616213a192194f9bc6aa61fec97cc3b2c0b4c08e51c"
+      },
+      "23": {
+        "instruction_sha256": "443cd7915ca08dabfbcb69a5ac81c3f7690ed3e647b3e34ba125639d6144e038",
+        "spec_sha256": "fb63614e9421655cb9fd6429cd0a8cf91dbbc8bce4dc103e96f1822f9361b3c6"
+      },
+      "24": {
+        "instruction_sha256": "0ff1299824005d46d2669552816b26f2232412446bf86eb9e11bcaed6df7e28b",
+        "spec_sha256": "090439a680f712ebfd7d801eda2ba5060cadbe88dd342a6401a363f4cf4d680c"
+      },
+      "3": {
+        "instruction_sha256": "b6006f2bd4529eb4206321c4de7f7e4328661fc1d3e3586bb5d2b6cca7bdd6ef",
+        "spec_sha256": "63a4c347fa62675b8ee8b7386ca5c47a1068ebfc821258eb212a5e52131e004f"
+      },
+      "4": {
+        "instruction_sha256": "f0f54fa04690142d6d29270b244ca305b3f4cfd226a3349be2e0d4e2cf73403b",
+        "spec_sha256": "41c680afb6fd2e1332799e19d1cc8772c9cd211a4dbd9a420fb1a737f78fcb4f"
+      },
+      "5": {
+        "instruction_sha256": "805c9b6b0f6224d8bb29a0e33ab4de2e7eec00c1713cc2477691e91d54b2c90b",
+        "spec_sha256": "146d7246268b153b175c6d29884b4c1e0ae30d7d4ac6f2f85d7f2266ef896250"
+      },
+      "6": {
+        "instruction_sha256": "7f0c6476b0ab1896624cd621dba0f827b883245d349b477d9992a4c684d4c584",
+        "spec_sha256": "6834915cbc8c2f14677bb9465caea5f83c3d07d1769cbc4ef23d12e0955b6268"
+      },
+      "7": {
+        "instruction_sha256": "5b64feba261beb4748fc40ae95c6a971ee9b664c329b98b9b26eccebdc2918ba",
+        "spec_sha256": "645ccb7b56bbd5df41456d32c6cdb7a796022cb4b42a149260146bd62b4d7f30"
+      },
+      "8": {
+        "instruction_sha256": "9d072c8e4332af948f7ce2262f4d8fdc7ebb11fec0644c0af3141cd06c073f17",
+        "spec_sha256": "1c9fca022901271feb350058dd129e9f0d907d713fcf96e67a835e2871c29ba3"
+      },
+      "9": {
+        "instruction_sha256": "2972beef31b6fe5b7364ab1409dfa0a98edc72b80972e18af6ced5d0428190b2",
+        "spec_sha256": "69208e085a12a6c3880096c907449e8b558890620dfead0e8598956d2a2c5979"
+      }
+    },
+    "metadata/native": {
+      "1": {
+        "instruction_sha256": "593c85ba96c9ce317657247df18ac5d89b20c5aa5bd31ed84dfa7239c72decad",
+        "spec_sha256": "4b3fd2335a7963745832a6769283a11e85c5c50daa40fb55226faf953a5951b6"
+      },
+      "10": {
+        "instruction_sha256": "a9caee2070246fb65a2471512ef86f1f1f3955a8024c89526e44c694746f2e9d",
+        "spec_sha256": "b1ea01371a2d8cc5c9d35136f15e59f41673d2aa672328b6ef86d4ee7f3eb05b"
+      },
+      "11": {
+        "instruction_sha256": "ce93e0b1aca39a2f447a0d4243776781ef42b64c767decabaf7e52c7d737e1d8",
+        "spec_sha256": "c6f21ffcf5bebe26b5921333da5cec1d17664c457187dd33c9324d74674e7f16"
+      },
+      "12": {
+        "instruction_sha256": "a1ac7f57d18e6d4bf76fe05f2ad8ba2b57138fb23fd0d4ebcc038f0cd5d21f26",
+        "spec_sha256": "6544373fbb1c550eaf25a3a66b065d016ea59539ad330cfa37bb7f115e704353"
+      },
+      "13": {
+        "instruction_sha256": "38f7dce9be74d5c0250d6e28770fe67297e640db96083bd39dcc18d142e81dea",
+        "spec_sha256": "846cb97841c9fabffe95714185c70c665078100029532fa1da4b8bf6bb078d83"
+      },
+      "14": {
+        "instruction_sha256": "d901583dbccc89119fccc91c3c96874c753e6b7b812d3d50b5630bd6c873f7da",
+        "spec_sha256": "3b4dd05d95a9a9d610a59650ded44cefbdff873910dcd17567d6851c61dc2afd"
+      },
+      "15": {
+        "instruction_sha256": "6340928bcde909d82a796891235d3f4097aca43a2141f54414a1f3a132bf0d5c",
+        "spec_sha256": "db62ce3d3c5b4e36c0e3bda996ab11f417a99eb95b2c7cf154fed2e80d31117c"
+      },
+      "16": {
+        "instruction_sha256": "6341e3b1b076cb2baf2497e15fd7cfb23abc0434f4cc6d90e6f4b9ee1652c3a9",
+        "spec_sha256": "e5961ac7915b1c68799afce7a6a969155422abc416e31bf97305ad86e55658c2"
+      },
+      "17": {
+        "instruction_sha256": "57d7ca4ec55217be38de469f8a808f131556e676ad71b753be2b2e15a88a322d",
+        "spec_sha256": "9a9f14cbb55c1d40e5e1c3e35198b16711a5b4b0d9b6ee22c69aaa7ef62835fd"
+      },
+      "18": {
+        "instruction_sha256": "090771de67502c73262b504cf06fead6b4ae955ce1f31eab9f9cca718c948309",
+        "spec_sha256": "e85591c7cf92dfc3b2829a2a02dfe541cda74df725bab3e2a6a687a79b004601"
+      },
+      "19": {
+        "instruction_sha256": "7448202195b75713c751a1f63e74df62cc3bba579a067ba95cd15ffb2dcd7b0a",
+        "spec_sha256": "114ec63d3aa231a3e977f7f9b1f473fdba0aeefbf838226c4cb7898b91bdbee0"
+      },
+      "2": {
+        "instruction_sha256": "dbe6fc4dcf460ac2e053847e7f407c1586a40c153b29f67c432f9acc610db2d9",
+        "spec_sha256": "97a294945f5e74ff981e1106a1ce396bd1a40945d068182597f77f6ca4e623ed"
+      },
+      "20": {
+        "instruction_sha256": "a9e8c36b12c50e6831c5c785d2b2508dea9fabe361067add75a13acad4c7c763",
+        "spec_sha256": "e0d5aaf70b4957029f3040f27f9d27c691a9024b1e2420ad780adb75f79f1a5a"
+      },
+      "21": {
+        "instruction_sha256": "3281fd92618038b99cac044224dca143459bc96a78efaaded0010e98386490a3",
+        "spec_sha256": "0fd818dfa7ddf18a02497b0990e319069a1ee4d7a29cffdfa15863a979f024cf"
+      },
+      "22": {
+        "instruction_sha256": "aeb0f6c455ed093199e51d090778c14b03949ec1b28ae680cd7c1bb92a996e17",
+        "spec_sha256": "5fa0aa9ed4d9e604dbba1dae29ad96c7820cc2658738e8aca5c02ae919f56fe1"
+      },
+      "23": {
+        "instruction_sha256": "b2d11b4ff8aea94bbdc3175aa2c1e8db0a977b22fafca1846d5b869080ce4d43",
+        "spec_sha256": "eb90587373ad64ae4012f9295e7a808f15742edb85d38e16475a0b120fa6cf99"
+      },
+      "3": {
+        "instruction_sha256": "106c746c374cf84d42e4f65be81f2b6809eba813a6bc8ff9b13b1d48fc6d5ca8",
+        "spec_sha256": "9770a48b5b0e4ed247b9663b7d1ed2ec9f4819595207ee77ed2b321f72767955"
+      },
+      "4": {
+        "instruction_sha256": "7783423813364cec16bc6777ddbda61b896155dfdcf94ba71fe42104a83d0770",
+        "spec_sha256": "e8b5edaadf367419d06c07a13d477cc42fbc7813292f0307044b3c50543b0fec"
+      },
+      "5": {
+        "instruction_sha256": "1a747a2188520a5ee4e082f6edcf85583e5cd4235e17b138081ceccdab511877",
+        "spec_sha256": "36353a7c77758b5b78a255bc133dad6ceb81a2c9e3c14769fd3cac65f2cf56ba"
+      },
+      "6": {
+        "instruction_sha256": "a7c3f2e287b75a4676d600903d9371b32f20cad0e60568263a561b4f50ab86a6",
+        "spec_sha256": "fbc44179902dd4c612d89dba61e6dfb8f9145fefbe505899f8b632d8246e7bee"
+      },
+      "7": {
+        "instruction_sha256": "3e94c3eea6bc0e370a8712a03b0c88f4b176b562acbbd855dce14999d8272370",
+        "spec_sha256": "bae63af87f3adba2c0c6c30ac5b04fac03bcd06d78818570165206ea43ef4802"
+      },
+      "8": {
+        "instruction_sha256": "70b97a6a99755428cc9de19654f8a767545285c0ef36e1922634c388a0f715ef",
+        "spec_sha256": "481ed7802652de0f5354d24c312e1ecece1680d9468fd982f0a74a5c1090be3d"
+      },
+      "9": {
+        "instruction_sha256": "2609a63242cdf2037cd5e8c5527f35594c2aaaa28d9641afaad7fc2dca93bf8b",
+        "spec_sha256": "ce4f036481039ea7f3ad00147d30262b203329ec1cf8e9fee95a9ea182ec389c"
+      }
+    },
+    "specification/api": {
+      "1": {
+        "instruction_sha256": "04e07d87726604ce93981097b94d9286dfe8e04d589da6915fef79fe51a41994",
+        "spec_sha256": "e894ada5ad2f7e123362bad71d16c8380e70114d4187a7028df2b1b88ad85618"
+      },
+      "10": {
+        "instruction_sha256": "2c2702acbf03ec84c9b94b73ed9865cff6913f9bc37fc26c0d80c8cd676e877c",
+        "spec_sha256": "946dd8909ea462240bf7a9c75a0c07531a891b86663ebfac1388d64458d5b876"
+      },
+      "11": {
+        "instruction_sha256": "8a25368e7f6ba0c2fabd811a56a745a040341b015680006b9d38c97cee39c2ef",
+        "spec_sha256": "ccdf75e75a0b3ea4306b8293fbf1a1a4042735bca921ddc6f3feddeffb1840ab"
+      },
+      "12": {
+        "instruction_sha256": "c0cecb598fdd99aa08b6e061fe1172fc41fbb0948c7a198cdd4d1a9a21ac786b",
+        "spec_sha256": "c7559300a0447b452603ab9e8aa62972058ab0a0f5cb576a745cc8d6931d2f73"
+      },
+      "13": {
+        "instruction_sha256": "6e95eddb01eee3e3bdb51dec02afc3216398d07cedf16e52b9d4bd9172ce0524",
+        "spec_sha256": "8ffdd983501d0f85fd174df948f5456237c108c15abea2352776bf9608e8426a"
+      },
+      "14": {
+        "instruction_sha256": "527cfa5ba482ba5a055aba6b0c18b6f338706ced16200417cfc786d692cfd405",
+        "spec_sha256": "2e90deeec0f5a9c50d191baa8378f4844408b16abb35cf265dd4d3d3657b93d1"
+      },
+      "15": {
+        "instruction_sha256": "e4e79e630c822bf3d2b1ace35931f533256aa8d3ea18ef363c74f74ef4086c47",
+        "spec_sha256": "e16892ee4866d5c70c75faec27fe8e9198e84c6deb921ffac5f68be3bcb99d0d"
+      },
+      "16": {
+        "instruction_sha256": "aac3a966e80d3242b55320f82b68eae71ac1b1487aad82b5eff5f54082570b2d",
+        "spec_sha256": "f647138e4f9bbc44a8013af7ea2767a6d981c9692b361f414d9f2760e2d88f8b"
+      },
+      "17": {
+        "instruction_sha256": "c5e7224616040285bc3b2d60f466647cde02db2fcfbb8801de78e6954204d7f6",
+        "spec_sha256": "9bfdd3d3dd1d488a02ef0a5a2fe7cb7041f3e1b8f3bc6610f290490c716ba955"
+      },
+      "18": {
+        "instruction_sha256": "9c4ca96eeab9d7d57c21960cf2abb69965ef1c409db0ff0b5e0941d19f15a070",
+        "spec_sha256": "d917887c8550dd6f556b2ae71ffd60b5d3cf43194796d7b6b9412ffce5bbd755"
+      },
+      "19": {
+        "instruction_sha256": "89ec7c84d5a06c945ba435080ba66cce42e3f891ef44d259094ef91f5f169719",
+        "spec_sha256": "2a329a3fcfdaf2f1e4624843796096e43887e1a2acb151e3d3bb7512ef1b313c"
+      },
+      "2": {
+        "instruction_sha256": "14e833fe5333cd60e24d35fe94321be7f9f8bc23008b4b7ed00b6415bf59b121",
+        "spec_sha256": "77498902e83eea6206e74b7b113549dadabe5c61e61b981c52d320f384bbcbe1"
+      },
+      "20": {
+        "instruction_sha256": "8440b83ac0010126da03c0fdc0b68d3d5c3088b3efaec3d19305c6d860432fdf",
+        "spec_sha256": "d80cb68e06562c7fef716c0ff8f2c1922164fc8844660d23c9aafacaf50d2f4b"
+      },
+      "21": {
+        "instruction_sha256": "448ffe6c821e77483bc750a32b0a4d7f0ef664ea77858cb8fbd9c003694aa520",
+        "spec_sha256": "506915457409f29ea59a117211a7fe5e9055bc465b6537f77b50015a9165b467"
+      },
+      "22": {
+        "instruction_sha256": "52d4e036793af39a51de4e689bc10622065e633f7889c50f8dd09f53198a93e8",
+        "spec_sha256": "77b34624ee8b7dd42c075d2fc1eebdd494878146398b60ba3864dae9fe08d9f1"
+      },
+      "23": {
+        "instruction_sha256": "d756c3ebed781690efa6b2fcf5b342fdee11d819d1203208a7b871b36fe2eca9",
+        "spec_sha256": "cd0b633925ff6a880fe7af6a73bc06248560ea5291767910d36749fdb988be0e"
+      },
+      "24": {
+        "instruction_sha256": "bdb3954c865294ff6e0d2cc248b9b769c002de03fb80735acefca78faecae27d",
+        "spec_sha256": "a9710aec6cba675ceec5f4b5549afa7a6bcfa7ccea92d5360a19cee6c64ff4f5"
+      },
+      "3": {
+        "instruction_sha256": "726e4da53cb1b3991a9f1ddd6189c9ecccba4bd7b55a9004b4fd6fd88b76d3ba",
+        "spec_sha256": "597790526f4f617988566755a8f26aecd3c1097780c186458cc1fd17670a88d2"
+      },
+      "4": {
+        "instruction_sha256": "582a9fd8332b7e417a69313aed6ef6a29d663e8da25f9dbe7fa80b9515af9357",
+        "spec_sha256": "40f39a5e2bc7c50fc350ec3564332a55da16f629eaf68994f0597b26669913ee"
+      },
+      "5": {
+        "instruction_sha256": "bcb320f4086989199abc65c7b27e65c9f2a7aa56c53e0cccca9100ac9b0189e1",
+        "spec_sha256": "943dff9e33b3911a9ece384f3a6511a852303857d6ef2f7b2e8a08830e199b73"
+      },
+      "6": {
+        "instruction_sha256": "b7dcd9fd857b6ddc236c939e0bb263cd9bf2d1c33f29d6d4a719bad7db65fb5f",
+        "spec_sha256": "584da6b434a742797e0120bb026f395b07c5af852a2ceb4ff6e3fa07eba57fff"
+      },
+      "7": {
+        "instruction_sha256": "e873be773ab8ca9138fadb4e4df7e1b00a49039e9fa61ec59bc07b2de4b0b80f",
+        "spec_sha256": "6a14f0ca1f7492766ab9e0f6bd87f0c818795f6dea4378efdebf6983d1ca3500"
+      },
+      "8": {
+        "instruction_sha256": "e0be713d9f71abf0e25d35428f09a227630e43dd5d990ca4cde25acf0ca88480",
+        "spec_sha256": "33f2739b186d73f38bbccffdfb7158ad8dd8506d9c6acbe4db39674c0a7b8c5d"
+      },
+      "9": {
+        "instruction_sha256": "00bb953be103240730a5ffdc0f3aa23c49397215cb6eb24e1be2c70c0fd6311f",
+        "spec_sha256": "c3e99d1ea930b8e924eb2fc034b9297ea3a39d075e7ea7e2471f9d185f497ade"
+      }
+    },
+    "specification/native": {
+      "1": {
+        "instruction_sha256": "a2bbdb5b277cae7311e4219a52472a9a3edfddde42dbdd79d0479babf78ffdaf",
+        "spec_sha256": "491f15066b8b917b6677a66f44294aaadad4eac0ce2a192f886c980b49d34405"
+      },
+      "10": {
+        "instruction_sha256": "33a4078bac15c23482cb80e93fe67f69f07ebf09c85d176602cd1b7b34c1d20f",
+        "spec_sha256": "e7e1084327a2b7146e3ce6414ebaec552b2471a46ac21237b3df475b31bf9677"
+      },
+      "11": {
+        "instruction_sha256": "e0dd26a8537541932a6a7e7a521b8ec7d1fa475385ddf0abc746ba6bd356efa9",
+        "spec_sha256": "41c61437ca62f7305587d1ae30a910ebad800f4d1ebd1f51c1b0188dd6ae4aa8"
+      },
+      "12": {
+        "instruction_sha256": "7f727bf846bc2572f06aeff241b1e9da01e58caf3cc22e01d826c4aebd211a70",
+        "spec_sha256": "9fa5ae5bf6e31b374da64e7d59dbfd8307462e413114e32a070bdf4a270fa809"
+      },
+      "13": {
+        "instruction_sha256": "6ecf7a38f5109d77b2952dfaaaac39223be6340d2950b58c161121510cf33169",
+        "spec_sha256": "08c39958adcd5e8b9486618a5b5926d1333997db5c189e31c8e086dafce6f9a1"
+      },
+      "14": {
+        "instruction_sha256": "4ab5ace400f2fa3d249e2353e7efc0904c42ca92317221fddfc9b9baeea81ee3",
+        "spec_sha256": "e1ec38d475d62ab394a55cb34aa2e6c9a240b29ff469c839ea6d4a39bf3a37e6"
+      },
+      "15": {
+        "instruction_sha256": "c3612c510abd37099497b9d5478a09765924d50e926aaeb9643567b9fbf8d996",
+        "spec_sha256": "8b10eed60d351acd7eee76a58c892e54e155a7da64413405ad533a8cddea6bd1"
+      },
+      "16": {
+        "instruction_sha256": "e780fe74d5f7821301efe6c0365f854fae1ed4b2b0f01ef9137bc83cdd8b971b",
+        "spec_sha256": "bb4de7ee1e922605f68c4e8d5cca0b3a5c6e8dd23f56b80c821617dcd1a74876"
+      },
+      "17": {
+        "instruction_sha256": "9786ec4d7c7507e7c3a3f2e6335333340917bd91fca924d216106d71c75ac6be",
+        "spec_sha256": "531f387cc3c49d7167abd74d34ca7f664b6c97cd02f98b5576ab4cd546dd1cb3"
+      },
+      "18": {
+        "instruction_sha256": "6910ff963f07474e6cd7e1bca86916dfd47f5b0b95b1d97953d891b1de70e842",
+        "spec_sha256": "4245dc6fe3d7c961a48f3091d3c08bba99dc22251008027a5529d856a3366837"
+      },
+      "19": {
+        "instruction_sha256": "f2ac5c4aa6cb51e174f514e77218897e4601c51d823980b9be2b8c5da81e2d12",
+        "spec_sha256": "651b42804dbad87c46dcb355e3413d2396f65cc84bdf44898e493a72631c9671"
+      },
+      "2": {
+        "instruction_sha256": "2e5af9e04f14f156d0a28fb783dbea192d3f88eb52569ff262557751b73a48fe",
+        "spec_sha256": "4eca8a05225e903a7e06a93ec600c322397e6ccfd1a7c6c3c48a8c2b4cdac7b0"
+      },
+      "20": {
+        "instruction_sha256": "5e334f7f4b00c2312113df28b49c4c0d474c25201e6b2298a189ef33d2ba101a",
+        "spec_sha256": "8b3eb668a91c91ca3f4458e156689c44be9bbf2a50633a252a7f263bf854fc49"
+      },
+      "21": {
+        "instruction_sha256": "c249175ba29ac8a379fd132ca7c0a910d6baf0c2c3b7194079cb46f95c206c5c",
+        "spec_sha256": "e2624aaa41ff0f065047a2cea4d437f7a611dceb1d265bf01401a753076a2bca"
+      },
+      "22": {
+        "instruction_sha256": "dac07e0bf79a248fdb7ed69332f41f995011a7d2b2be353a586066d4abc673bb",
+        "spec_sha256": "c1f5ca49b00d2faca717a452d53b84311ce17e004376b72b88fba4537744b8c9"
+      },
+      "23": {
+        "instruction_sha256": "7cb5b9bb15918d46e3282e36bb84aa2d18f92fae9475ac156f35e1183c873fac",
+        "spec_sha256": "f6dfa24ef2104efe43e32276cbf72e8713d3a687f453758804d99a7977b0f61c"
+      },
+      "3": {
+        "instruction_sha256": "4e3110818b57cac132734d4b1c3490d58bdb12046a0b84a47904cabe5adef5ab",
+        "spec_sha256": "6b215bdfa586905334671170ce6d9da135c72ca82fd0052ee3b04dcf7bba743a"
+      },
+      "4": {
+        "instruction_sha256": "87d9708d196af685c289ca223d40c38a702db242e6bd67d56fe21b8fd2a2ded5",
+        "spec_sha256": "6e13085349c72cbb1753d10075ef55e0a2a0cf60f2c99e689ec9df1655c7293f"
+      },
+      "5": {
+        "instruction_sha256": "e6f4b533966733977aa6efab464b691504f07615dcd235e7a701e13f3f78101c",
+        "spec_sha256": "68687ce4a6d56e65ef317b4b895a3802716f57f1f95a2701292a77345d31e766"
+      },
+      "6": {
+        "instruction_sha256": "ae00f5839c039fe73a477a968b83df3a97e288c50475081041547c44b664d8b7",
+        "spec_sha256": "32c0f4e3667260967e7706bed13f5f7452fd950a2fc807f828ba51a47464152d"
+      },
+      "7": {
+        "instruction_sha256": "c5a199074348894dc0c53b4e58784eb961a183c3e65486e8473a82fa4ee43431",
+        "spec_sha256": "bd82be9776613840e124320c44b28a2623e507382f47c71c60e5a00018abd5e9"
+      },
+      "8": {
+        "instruction_sha256": "a1141c10ce3f562cbc9411a772d9e1926737045cc820bc1f03813f844be0a9c6",
+        "spec_sha256": "d00a8917fcc91200bba7a77fdc82ff22fa1a9ab721c38ba5067926370b20ac9b"
+      },
+      "9": {
+        "instruction_sha256": "886daf0b6d49ccc75259a794320887d4b6b284c70cd9d2903acfe09594a894d2",
+        "spec_sha256": "895af47e4a8888ff2ea8c05549981b01cfac6b66cda04d3a481c4ada0c5d1c46"
+      }
+    }
+  },
+  "parent": "cf331cdc5a57dee1813d1167678ea286e4a28a65",
+  "registry_entries": {
+    "files": {
+      "src/download/prompts/api_playbook_v1.md": {
+        "body_sha256": "ce2f644cad14496c2cb4684fc371fca4a2409268f793061c47e00087069038f6",
+        "bytes": 4558,
+        "pinned_at_commit": "9a56c05b48001708c35fee1f8a234cfdf0432a60",
+        "pinned_blob_path": "src/download/prompts/api_playbook_v1.md",
+        "pinned_in_repository": "/private/tmp/d4d-loop-4014-20261002",
+        "pinned_on": "2026-10-02",
+        "reason": "Freeze explicit API playbook v1 instruction axis (#4014); historical and agentic conditions unchanged.",
+        "sha256": "6870fd69c6ca377b6f6a349b0161f503ef742176228074db57325b7368db6015"
+      },
+      "src/download/prompts/components/AI_READI.md": {
+        "bytes": 1203,
+        "pinned_at_commit": "225f224544aa8f9ca8ac7f61f57aab9813536866",
+        "pinned_on": "2026-08-10",
+        "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+        "sha256": "553f8d5b6a713d5e919fa33677c4d2bfeb209cd486a75db91851728f49c7b030"
+      },
+      "src/download/prompts/components/CHORUS.md": {
+        "bytes": 1233,
+        "pinned_at_commit": "225f224544aa8f9ca8ac7f61f57aab9813536866",
+        "pinned_on": "2026-08-10",
+        "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+        "sha256": "f697cd7d78c2de0e88519e5d80894a35a6f3388042500ed60c567fd4b6fe61a2"
+      },
+      "src/download/prompts/components/CM4AI.md": {
+        "bytes": 1165,
+        "pinned_at_commit": "225f224544aa8f9ca8ac7f61f57aab9813536866",
+        "pinned_on": "2026-08-10",
+        "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+        "sha256": "849d68be5654ead54d5be8fad3646bbd809616f6d4abef0b2be78eae08ddcb79"
+      },
+      "src/download/prompts/components/VOICE.md": {
+        "bytes": 1294,
+        "pinned_at_commit": "225f224544aa8f9ca8ac7f61f57aab9813536866",
+        "pinned_on": "2026-08-10",
+        "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+        "sha256": "07b59ca750a1d24ef7c7eb42d310fbfa064ddf300b4cd118383aaaebb9074186"
+      },
+      "src/download/prompts/components/VOICE_PEDIATRIC.md": {
+        "bytes": 1887,
+        "pinned_at_commit": "5f1ab65796518f355eec7b5bb1afc8822a79640e",
+        "pinned_on": "2026-08-11",
+        "reason": "First canonical text for the pediatric tuned condition (#478). States the adult figures present in the pediatric bundle \u2014 833 instances against this dataset's 300 participants \u2014 so each is attributed to the cohort its source names. Mirrors the VOICE cohort fact, which is the study's largest measured single effect. The referent is left to the manifest scope declaration rather than restated here (#422).",
+        "sha256": "b7db067c2852b57287cb68bd1fd4f3bfc229496cc2a4bd33065bb9558a35b215"
+      },
+      "src/download/prompts/d4d_generic_arm_prompt.md": {
+        "body_sha256": "0e16a8a8dc35d6fe242bdb55972918ad6dc39875df069caed4be998369a99436",
+        "bytes": 6737,
+        "pinned_at_commit": "7141fdc63e43f5049bf98289a142c85bd63107ed",
+        "pinned_on": "2026-08-13",
+        "reason": "#515: the core header block is stated in full instead of implied by 'the core file uses phase 2 and the core schema path'. That one line contradicted the playbook's requirement for '# Sources:' and '# Phase 4 reconciliation: completed', and fifteen runs of the 2026-08-11 arm resolved it four different ways.",
+        "sha256": "f5873222343632a97e0d9200e283924751cddfc70e1c879bbeb9f6416cf95d86",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-10",
+            "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+            "retired_on": "2026-08-13",
+            "sha256": "0fbc626bc3a51d74a8ba3d8e2813752f3bc5ce9366ee5f19c99089afdfd9e8dc"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v2.md": {
+        "body_sha256": "6b639abb906c44af91a5b3a7f6391da3fc6dd8f039de9e7d6544858e1fb17410",
+        "bytes": 10099,
+        "pinned_at_commit": "7141fdc63e43f5049bf98289a142c85bd63107ed",
+        "pinned_on": "2026-08-13",
+        "reason": "#515: the core header block is stated in full instead of implied by 'the core file uses phase 2 and the core schema path'. That one line contradicted the playbook's requirement for '# Sources:' and '# Phase 4 reconciliation: completed', and fifteen runs of the 2026-08-11 arm resolved it four different ways.",
+        "sha256": "7bb7a2b854e11ad49361eccbd6b84f00ff0eb0808f16b67a148bbb49be76bf67",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-10",
+            "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+            "retired_on": "2026-08-13",
+            "sha256": "4780613475ef2a629f98b69a934228b58eccd5fe93915fcd259a62cff6583de6"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v3.md": {
+        "body_sha256": "5a4d7ab16e04caa124f3c9d6ceccc84384bd7cd6d8657a2f23a4a565fa9bb847",
+        "bytes": 8193,
+        "pinned_at_commit": "7141fdc63e43f5049bf98289a142c85bd63107ed",
+        "pinned_on": "2026-08-13",
+        "reason": "#515: the core header block is stated in full instead of implied by 'the core file uses phase 2 and the core schema path'. That one line contradicted the playbook's requirement for '# Sources:' and '# Phase 4 reconciliation: completed', and fifteen runs of the 2026-08-11 arm resolved it four different ways.",
+        "sha256": "71c808bca3529140b4b82802ca8cf5c68ee972ec664a2b4e06137cd5df06a714",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-10",
+            "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+            "retired_on": "2026-08-13",
+            "sha256": "2126da06d0834c2501c55fe9838720fe3ee33ab38c4775f2af329bc4759da45a"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v4.md": {
+        "body_sha256": "3d31f5a15fab7b62091d119f9401ac981eed8e9ffaded5637521105115df799b",
+        "bytes": 8659,
+        "pinned_at_commit": "7141fdc63e43f5049bf98289a142c85bd63107ed",
+        "pinned_on": "2026-08-13",
+        "reason": "#515: the core header block is stated in full instead of implied by 'the core file uses phase 2 and the core schema path'. That one line contradicted the playbook's requirement for '# Sources:' and '# Phase 4 reconciliation: completed', and fifteen runs of the 2026-08-11 arm resolved it four different ways.",
+        "sha256": "3845b66c33ba25e585741496755a8e0c9bbec172f6a26a1b90e6fe4fcb0a0cb9",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-10",
+            "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+            "retired_on": "2026-08-13",
+            "sha256": "a47e61b52c05a0aa81c2a8629be551942ab2e6e24a39d11dc75ba96ef5b3482a"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v5.md": {
+        "body_sha256": "bdc18672ba485dbc15a4b1f1321e61dbda0e292fde502b8b2cc568053dafef98",
+        "bytes": 13934,
+        "pinned_at_commit": "e94cfde09488987e5a2593dd0aeb2ff14b2f6bf5",
+        "pinned_on": "2026-09-09",
+        "reason": "Rationale-only rotation (#647): the real ROR cited as the example of an identifier supplied from memory is replaced by the institution's name. The prompt body is byte-identical to the previous pin; only rationale prose, which prompt_body does not send, changed (#560).",
+        "sha256": "21d625c6277972ff015281f49ae1f8a6312ff9e43f55c7962162c7655821942a",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-14",
+            "reason": "initial pin for the generic-v5 condition (#547, #531, #545): v4 plus one marked block of four rules \u2014 CURIE form and American English brought over from the playbook to close the #545 divergence, plus identifier-must-come-from-the-evidence (#547) and fragment-on-an-attested-identifier rather than an invented prefix (#531). The block states no quantity, names no project and contains no dataset identifier; tests/test_download/test_generic_v5_prompt.py asserts that. Predictions are registered in notes/generic_v5_analysis_plan.md, not in the prompt.",
+            "retired_on": "2026-08-14",
+            "sha256": "e4d0570921f84f2024a8166bbd6284557d1c7f65471d8356a18edd957bf42e52"
+          },
+          {
+            "pinned_on": "2026-08-14",
+            "reason": "rotation before any v5 run: corrects an attribution in the rationale (#531 established 1,094 VOICE values, not the corpus-wide ~12,000). The prompt body is byte-identical to the previous pin; only rationale prose, which prompt_body does not send, changed. Free to rotate because no record names generic_v5 yet.",
+            "retired_on": "2026-08-15",
+            "sha256": "606e7382cd4ee5214d7a910fc5b89f8e9faa053cb193dbaeff02ac65b672904d"
+          },
+          {
+            "pinned_on": "2026-08-15",
+            "reason": "reconcile the CURIE rule with the playbook before any v5 run (#573). The first version said an identifier is \"never as a URL\" with no scope, contradicting the playbook \u2014 which says a URL is correct where no prefix is declared, that URL-ranged slots take URLs, and that prose is exempt. `download_url` and `access_urls` are declared `uri`, so the unscoped rule told the API arm to put a CURIE where the schema requires a URL. Both texts now state one rule: CURIE where a prefix is declared, URL-ranged slots and prose untouched, never an invented prefix, fragment on an attested identifier where none fits. Free to rotate because no record names generic_v5.",
+            "retired_on": "2026-08-17",
+            "sha256": "bc239c3ab991b18e67cac19c25c4a374b5fec867d707c781e78c902606d5815a"
+          },
+          {
+            "pinned_on": "2026-08-17",
+            "reason": "restore the rule force #573 softened (#591). The v5 canary put 45 resolver URLs in uriorcurie id slots for doi/ROR \u2014 prefixes the schema declares \u2014 against 12 in the v4 baseline. #573 correctly removed an unscoped \"never as a URL\" because download_url and access_urls are uri-ranged, but replaced it with \"rather than\", alongside two exemptions, and the ban lost its force. The ban is now scoped rather than softened: in an identifier slot, never a resolver URL where a prefix is declared; URL-ranged slots and prose exempt entirely. Only the canary record names generic_v5, and it is being superseded.",
+            "retired_on": "2026-08-17",
+            "sha256": "45c6f86f4d409dd548d070b35e854db4a78d69e536103cb819de86329c10cbb6"
+          },
+          {
+            "pinned_on": "2026-08-17",
+            "reason": "add source priority as the fifth v5 rule (Harry, 2026-08-17), on top of the restored CURIE force from #591. The uniform rules said to represent a disagreement rather than select a side, and a v4 CHORUS record named the gap: \"no instance count is asserted because the two sources give different figures and the bundle offers no basis for preferring one\". source_priority in the manifest is that basis, declared there rather than in a prompt per #422. The rule went into the v5 block rather than editing the inherited disagreement rule, which is v2s and carried by every version.",
+            "retired_on": "2026-08-18",
+            "sha256": "3446689e35fcabd4e873d30f4bd08e80a2c3fd6cd63b3e73343cfd8cceaee893"
+          },
+          {
+            "pinned_on": "2026-08-18",
+            "reason": "resolve the identifier contradiction and correct the rule count (#603). The provenance rule said \"take it from the evidence or omit it\" and the minting rule said to hang a new identifier off an attested one \u2014 a minted fragment is not in the evidence, so the first forbade what the second required, on the case a model meets for every identifier it writes. The line is now external referent versus internal label: an identifier naming something outside this dataset is a claim about the world and comes from the evidence; one naming a part of this record is a label no evidence can supply, and the test is whether the thing named has a referent outside the record. Also corrects the rationale from four rules to five.",
+            "retired_on": "2026-08-19",
+            "sha256": "389f7bfe6a202f3e7207e28296b87dad44de19f956c503532e2d6530768613ec"
+          },
+          {
+            "pinned_on": "2026-08-19",
+            "reason": "Rationale said \"Four rules\"; the block holds five (#638). Rationale only \u2014 above `## Prompt body`, never sent to the model, so the body hash is unchanged and the condition is not re-baselined.",
+            "retired_on": "2026-08-19",
+            "sha256": "97ccf288e22b52c7baca4fb163c60218f821b365c846e9eaa9a81b292c4b0513"
+          },
+          {
+            "pinned_on": "2026-08-19",
+            "reason": "Rule 1 exemption said \"declared range is a URL\", which uriorcurie satisfies on a plain reading \u2014 the model expanded every id to a resolver URL (29/29) where v4 with no rule wrote 62/68 CURIEs (#644). The governed range is now named literally, matching the playbook wording that never had the hole.",
+            "retired_on": "2026-08-19",
+            "sha256": "4d83f0dd032270d1f8f4a6c481a8edbb58dca3dcfe1e70febc28df0e5a0fa0a9"
+          },
+          {
+            "pinned_on": "2026-08-19",
+            "reason": "The #644 fix examples leaked AI-READI DOI prefix 10.60775 into the generic prompt; examples now show CURIE form without any project quantity.",
+            "retired_on": "2026-08-19",
+            "sha256": "c7fcc2283d1d8d84c11a156b26205c93e507134ec90cccc3adb2199d29b3ada5"
+          },
+          {
+            "pinned_on": "2026-08-19",
+            "reason": "Round-2 review of #645: examples are form-only (a real UC Berkeley ROR id had entered the text), and string-ranged identifier slots get one sentence of guidance (doi takes the bare DOI). The uri-not-uriorcurie exemption is unchanged from the #644 fix.",
+            "retired_on": "2026-08-20",
+            "sha256": "d22c9084436458e67600ea0e54cd936b8705105a554d50479655123b9708fbe5"
+          },
+          {
+            "pinned_on": "2026-08-20",
+            "reason": "Round-3 fix: the exemption paragraph said \"Two things\" while listing three, a stale literal count in the paragraph #644 proved is read literally.",
+            "retired_on": "2026-09-09",
+            "sha256": "c4bbcc41eb4f0b83704228a0bf040294dedd6edf5afbf06035c2fd9d7587ebbb"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v6.md": {
+        "body_sha256": "44f97c64723c778640f3e2afc10287937626c7112e48fedfb932ac95d1a3bf45",
+        "bytes": 13827,
+        "pinned_at_commit": "880e7aac7ddcaaf6f7dc7718be78b278611080be",
+        "pinned_on": "2026-08-27",
+        "reason": "generic_v6 rotated before any run: the density norm reworded to be decidable (another value must point at the part) and spelled per the American-English rule (#706 review F6/F8)",
+        "sha256": "57ac203090ee6bab7ad89f4e1cecfe78dcf3fe6d29c44687d843c5e0215e9160",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-27",
+            "reason": "generic_v6: v5 plus the minting density norm (#685) and the derived-core header lines (#694); registered as the v6 condition text before any run",
+            "retired_on": "2026-08-27",
+            "sha256": "5613df5aa699e5c1007f09ed658c5a6debe15c641c31fb949234ab17d3b5170a"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v7.md": {
+        "body_sha256": "d8e8e86df24182d14b9ece6cf27e262a4f45b92ad23457297eb5ef968ef9e1be",
+        "bytes": 13203,
+        "pinned_at_commit": "f09e620238fb085e9214eab704cbcbcc6f2fb910",
+        "pinned_on": "2026-08-27",
+        "reason": "generic_v7 rotated before any run: the receipt rule names each status's key and drops the uniqueness claim and backticked slot paths (#737 review)",
+        "sha256": "08a26ae430cc7d145a6906c3457d5deaeac499d3d3be3edf965718f674d43fbf",
+        "superseded": [
+          {
+            "pinned_on": "2026-08-27",
+            "reason": "generic_v7: v6 plus the coverage-receipt rule (#710); registered as the v7 condition text before any run",
+            "retired_on": "2026-08-27",
+            "sha256": "2291399646298845e0ee4c406bc2b2b5c1ccddbc00eceb7abf9a6cbe2db9d37e"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v8.md": {
+        "body_sha256": "82db865066a41919c8817189d2c31fbc138b45913e4797cb4455ad0de6c28a5c",
+        "bytes": 16611,
+        "pinned_at_commit": "5080d91f918f3fa7cc5b0caeb2731e06a3730a61",
+        "pinned_on": "2026-09-04",
+        "reason": "R5 (#981/#984): a Person's id is the ORCID the evidence states, else a fragment minted on the record's own id, never a mailto address; the block carries five rules",
+        "sha256": "506af01bc9ab37ad8ba54cbb5d866bd4c0dc6c6a8aed6441117581a9406043fe",
+        "superseded": [
+          {
+            "pinned_on": "2026-09-03",
+            "reason": "generic_v8: v7 plus the ADDED IN v8 block (R1-R4 of notes/generic_v8_analysis_plan.md), registered as one configuration with the depth-two digest (#916) and the inlined Person slots (#805); pinned before any run names it",
+            "retired_on": "2026-09-03",
+            "sha256": "00f15ae82d91c9845c3c6e19cabae79d450d6e45d20eb831204b1ef30a4b7018"
+          },
+          {
+            "pinned_on": "2026-09-03",
+            "reason": "generic_v8 after the #928 review: R1 names the id and the affiliation object list; R2 routes by the passage's subject and says what receipts a related-dataset value; R3 says a derived figure is receipted by its inputs; the rule-order reference corrected",
+            "retired_on": "2026-09-04",
+            "sha256": "06666c4d10786d4689170acdfd68350d451f84d2f94d4b5a22be6e569d3824f1"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_generic_arm_prompt_v9.md": {
+        "body_sha256": "bc817ed3aab001da54d1a7040a4511f457ef0fdef87ddcff4b01fbd3fda836f7",
+        "bytes": 30060,
+        "pinned_at_commit": "c64df6d0964e53b8eac1c703bf21502da23d6261",
+        "pinned_on": "2026-09-11",
+        "reason": "#1197: R8 states the existing receipt cost of scheme-added page and fallback URL bases; mirrored in the agentic playbook and registered before the first v9 run. PR #1231, review #1234.",
+        "sha256": "a14c871598880ad490130be9ada71d67190488d3323b39d829441cbe7a67d051",
+        "superseded": [
+          {
+            "pinned_on": "2026-09-08",
+            "reason": "generic_v9: v8 plus R6 (a value in the referent own slots is supported by a passage about the referent, binding reconcile \u2014 #913) and R7 (a list entry names exactly one entity, with the merged-entry signature \u2014 #911). Pairs with the scope declaration the runner sends (#932).",
+            "retired_on": "2026-09-08",
+            "sha256": "6a4957605105333eeb0e68b23c64604374fa46b05c1ce06a9e3d8a7a592e6e80"
+          },
+          {
+            "pinned_on": "2026-09-08",
+            "reason": "Rotated after the #1072 review: R6 promises only the fields a declaration actually carries and states that an empty related list assures nothing; R7 uses generic examples rather than strings lifted from the records it will be scored against, and carves out an entity whose own registered name contains a conjunction.",
+            "retired_on": "2026-09-08",
+            "sha256": "bc4914fc782d0ecdf19db8f1bdc02c70756c023135c3cd61dfa46cd86867ead1"
+          },
+          {
+            "pinned_on": "2026-09-08",
+            "reason": "R8\u2013R14 added before the first v9 run (#803, #901, #830): the fragment rule's carve-out for schema-forced ids with the projector sentence and the referent test for every other mint; one rule each for enumeration slots, raw_data_format, principal_investigator, consequence and keyword lines, list membership, and absence-is-not-an-entry. No v9 record exists, so the condition keeps one boundary.",
+            "retired_on": "2026-09-09",
+            "sha256": "cde27e6303eeff3e194767ca4cfae272536c3935540724286d359748c8237b32"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8\u2013R14 corrected after the #1109 review (#1120): R9 exempts a required enum and the file enums read from a file's name; R12 carves out keywords; R8 names Software, defers to the ORCID-first person rule, treats creator/maintainer entries as roles, and states how it refines the v5 minting base. No v9 record exists; the condition keeps one boundary.",
+            "retired_on": "2026-09-09",
+            "sha256": "84e86dc364f1f054dd2c75734345a23d9f7e24bdb2675c046241803337ac74cc"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8/R9 corrected after round 2 of the #1109 review (#1120): R8 names a component dataset under resources, restates each rule it refers to, prefers the record's own id and states the receipt cost of a landing-page label; R9's file-enum carve-out adds file_type and a collection's compression. No v9 record exists.",
+            "retired_on": "2026-09-09",
+            "sha256": "96ff7f47e933d62d6883cc2772383c742c51a7f251d0d7bcfbf869bfff77d424"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "American spellings in the body (#1134): organisation -> organization, recognise -> recognize, in the inherited v5 block and R7; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "df3e6e7946467ce35f672e389b8ee18284b0afc36e6ab4a6c081aaffae41b5a2"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "American spellings (#1134, round 2): \"neighbouring\" -> \"neighboring\" in the inherited v2 block of the body, after organisation/recognise in the v5 block, R7 and the rationale (the rationale is not sent); one byte shorter (the dropped u); no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "6ef7c881faea87008fdc2eba74e9d4ce54b283a2a28faab470ce5f41f5e71484"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147): the own-id preference argued from traceability, the \"needs a receipt like any other value\" clause dropped \u2014 receipts instrument v2 (#1123) exempts a fragment on any identifier the record carries for the dataset; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "898f428b221322dae767a4ebc18ee0f174fd49b48d9af0408226d3823b4552d2"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 2): the own-id preference argued from the join every consumer already holds (the core projector and the resources match), replacing a contrast clause that contradicted the landing-page licence; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "0c49ccae8ccdbd5ba53058db80577a0a9128e8d19eeadbfd1b4c9f2571a71c0c"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 3): the own-id preference argued from uniqueness \u2014 the id names this dataset and nothing else, a landing page is often a root shared with sibling releases \u2014 replacing a join clause that did not discriminate between bases; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "f4ace36675a56462ae542a5f386cd9e3b92bce56f4187e6451d8e05dd5ac086a"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 4): \"labelled\" -> \"labeled\" in the round-3 sentence, caught by the #1134 file sweep; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "57722cdbdd1bc11b533a4a94327be98533063fc181132b32b950657dd197b8c2"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 5): a record whose own id is itself a shared root, or a fragment on one, still prefers it \u2014 the premise inverted on 35 CHORUS records; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "96a75e5e32385b9145ccf80bf1154e83aae2fa81cf4f6f2e068dd4860e80e9e7"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 6): an id that is already a fragment on a shared root labels its parts on the root itself, never with a second #; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "d755a69ba4ac435c9ab5f510b2d743a6355b18eeea87d2de39a1662daf651c40"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 7): the fragment-marker clause written without a backticked token (the block test admits backticks for digest vocabulary only); no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "33d1d867f0eef5d71f706ab46bb041ae0e5f9bb3310dc8303545c7fb93915ddf"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 8, answering the Codex CLI review): a forced id takes the identifier the evidence states and is minted only where none is stated; a DOI or page base must be an identifier form (declared CURIE, resolver URL, absolute URL); a part of a fragment-on-root id keeps the record fragment, hyphen, own label; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "aae4b3598fe1d3c1bc5d603328e54a0b70fdbd1fd78eba99ad50f7bdd70eedc4"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 9, answering the reviewer after the Codex CLI review): the own id is the base to prefer only where it is itself an identifier form, a stated forced id must be a declared CURIE, a resolver URL or an absolute URL, and a person fragment on a fragment-bearing id keeps the record fragment; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "bdcf05beaa0238857933d31922ca2a11a736492291e63ba39d892d3d1ff72763"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 10, answering the round-9 review): an identifier form is a declared CURIE, an absolute URL, or a URI under a registered scheme such as ark or urn, for a stated forced id and for every base; the premise admits a token own id; the person case is literal in the carve-out; a token own id with neither DOI nor page uses the fragment rule resolvable-URL fallback; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "bb905941ee111674fda6a78822222d26af978734eb0fc1ebb42d3330e535b298"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 11, answering the round-9 review): the admitted identifier forms are named \u2014 a declared CURIE, a resolver URL, an absolute URL, an ARK or a URN \u2014 rather than any registered scheme, which admitted mailto and file; the fragment carve-out covers any id that already carries one; the neither-DOI-nor-page fallback cites the fragment rule that licenses it; the premise names the identity slot; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-09",
+            "sha256": "b42fde28cae671e8d19e7522d35e5db05532e285d35a747c522da5d652efa962"
+          },
+          {
+            "pinned_on": "2026-09-09",
+            "reason": "R8 (#1147, round 12, answering the round-10 review): the fragment carve-out is scoped to the base the rule sends the record to \u2014 the own id where it is an identifier form, else the DOI or page \u2014 so it cannot label a part on a base the same bullet disqualified; no v9 record exists, so no record is superseded",
+            "retired_on": "2026-09-10",
+            "sha256": "780a01411fb186e299e424e378a0870a19d4b8e1519cf900771d9e0c311753a7"
+          },
+          {
+            "pinned_on": "2026-09-10",
+            "reason": "R8 admits four identifier forms and no resolver URL as a form to write: every id it governs is uriorcurie and doi is a declared prefix, so the v8 rule in the same prompt calls a resolver URL there a defect, and R8 admitting it contradicted that rule (#1166 round 10, MF1). A stated resolver URL is that identifier, written as the CURIE. The fragment carve-out follows the base this rule sends the record to, whichever of the three it is, so it reaches the fallback resolvable URL (SF4); and the person clause carries R8s own exception for a bare-token own id (SF6).",
+            "retired_on": "2026-09-10",
+            "sha256": "79cfeaf309df0c0a10a985c252de03f0199e5be813630afb9e6f60101e8f8804"
+          },
+          {
+            "pinned_on": "2026-09-10",
+            "reason": "The v9 block carries no backticked token the digest vocabulary does not name: uriorcurie in backticks failed test_backticks_name_digest_vocabulary_only, and the twentieth pin was taken without the suite being run (#1166 round 11, MF1). R8 also counted three bases where it names four, having deleted the enumeration the numeral referred to (MF2), and the fallback base now takes the same identifier-form test as the others, an absolute URL with its scheme.",
+            "retired_on": "2026-09-10",
+            "sha256": "4b35cd0bc91c94eb1ae949a5bcd8aa3dff0ce20529bad06aab1707819c215e82"
+          },
+          {
+            "pinned_on": "2026-09-10",
+            "reason": "The fallback bases appositive sits next to the noun it describes: round 11 inserted the form constraint between them, so the fragment rules own license read as describing an absolute URL rather than the resolvable URL it qualifies (#1166 round 12, SF1). Content unchanged; the constraint is now a trailing clause.",
+            "retired_on": "2026-09-11",
+            "sha256": "f527b1243b8339abd63e47028fde5af4f696d2938970a522e58cfdcada102d4a"
+          }
+        ]
+      },
+      "src/download/prompts/d4d_tuned_arm_prompt.md": {
+        "bytes": 2877,
+        "pinned_at_commit": "225f224544aa8f9ca8ac7f61f57aab9813536866",
+        "pinned_on": "2026-08-10",
+        "reason": "initial pin (#432): the file as it stood when the registry was created. All 77 recorded prompt hashes in the corpus match these bytes, so pinning here fails nothing retroactively.",
+        "sha256": "41dd2fd7e970abb0c54419b067d36bd77fdf1360dc17888ccb09f79f0d4f32c0"
+      },
+      "src/download/prompts/native_source_attribution_v1.md": {
+        "body_sha256": "88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a",
+        "bytes": 2047,
+        "pinned_at_commit": "7d6d0b6ff66e52a8e93af13062f31439d4457b88",
+        "pinned_blob_path": "src/download/prompts/native_source_attribution_v1.md",
+        "pinned_in_repository": "/private/tmp/d4d-loop-2427-native-20261002",
+        "pinned_on": "2026-10-02",
+        "reason": "Freeze native-only source-attribution draft preflight v1 for offline registration (#4304); preserve historical renderer requests.",
+        "sha256": "e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761"
+      },
+      "src/download/prompts/receipt_completion_runtime_v1.md": {
+        "bytes": 3075,
+        "pinned_at_commit": "0a2313d56f225ebced642598a25a08c8aa36bedf",
+        "pinned_on": "2026-10-02",
+        "reason": "New separately registered receipt-only runtime policy v1 (#4266); no empirical floor or historical change.",
+        "sha256": "9a2b553bb9f14a3a431469a39469f5492a3f8c3d9718dccb3b07b311b2504765"
+      },
+      "src/download/prompts/removal_repair_v1.md": {
+        "bytes": 1512,
+        "pinned_at_commit": "05ffe921385ece56003356be03e1f040c7e7910e",
+        "pinned_on": "2026-10-02",
+        "reason": "New opt-in restore-only API removal repair policy v1 (#2923); no historical prompt changes.",
+        "sha256": "cd21a27d1b2ac9ac8893d0d0537811a0bac563811a2a879296d262091b1f0f81"
+      }
+    },
+    "hash_algorithm": "sha256"
+  },
+  "suffixes": {
+    "audit": {
+      "1": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "10": "a8be7aa70644ba14aad2cd0d921eb39c3f8f97bcbc33918a74a5d2185e755023",
+      "11": "cdb4084434233b5af6c8ac4f441cbcb52e4f75d4f140f2f1e75d6a1a305e80c4",
+      "12": "9577d1fbe2ce90ec60ee0983fb46685160a5e0f57c7ea0b66918b10294b98177",
+      "13": "9577d1fbe2ce90ec60ee0983fb46685160a5e0f57c7ea0b66918b10294b98177",
+      "14": "fa90fe026fb3439b84a30ce92c58472c337ca78513ae2baf634da9e08e3d6bc3",
+      "15": "dc71062186358dc66f0b05c5a6959275cbbebe9f47931860f09977c1b3170962",
+      "16": "993e7751575b99f90875e0749cb94fc1faf95140c4cbef96af5ccd8e9e2065ce",
+      "17": "0cbb1f23f62babd4c8e38f1ff4006fde899a3195bff0711d3ab8e6ecad510e62",
+      "18": "0829f97bb7a47a8b15c9e16c0e2f1ff49f01ad9ab882a78e9ea59c6e80c3acbd",
+      "19": "78b7c10a39ab489a99ca50336097e1852a2347c27121a7eaf79a93c6a3ade04b",
+      "2": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "20": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+      "21": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+      "22": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+      "23": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+      "24": "2cd29fb6ee202aa12283e0368054bc56042c5facbb7132862df59ef3028a5111",
+      "3": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "4": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "5": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "6": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "7": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "8": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee",
+      "9": "91296b20b628a7e9b202320c93d551f22cdd17e8382bad685e9d3d4033b239ee"
+    },
+    "full_rereceipt": {
+      "24": "763f956b36d641de85c7869aa0652dd99d50781d83865b3b0f5e426622a1d401"
+    },
+    "reconcile_full": {
+      "1": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "10": "0f9634381c0253fd68f8a1d35facb44d0a696b3ee782dc1edcd8f23e4630b5ba",
+      "11": "d21d4bed0449758b763f401632656558fddaebfca0f55dffeb86377f582d4dab",
+      "12": "944e150b7d30b60d7eff3ec9b72e68a2bf655fdc1713f579390262e020cc20ef",
+      "13": "944e150b7d30b60d7eff3ec9b72e68a2bf655fdc1713f579390262e020cc20ef",
+      "14": "944e150b7d30b60d7eff3ec9b72e68a2bf655fdc1713f579390262e020cc20ef",
+      "15": "712964976c01d9967a6562d4674b19b2757f2c94950f075be2dfca8ade449b41",
+      "16": "83345e6c6ffc74ab472d8faf77858b2446b82e1053b2825b6a2d9d4f6919e32d",
+      "17": "fca2676c269212a162a5f28383e70bd11335a51f9432584eb687e3f6918399fb",
+      "18": "6ba9688d0e6ad180e6e7b972d9adbbddc36267f2396e5f394b2d7ffdbfd18c36",
+      "19": "6ba9688d0e6ad180e6e7b972d9adbbddc36267f2396e5f394b2d7ffdbfd18c36",
+      "2": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "20": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+      "21": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+      "22": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+      "23": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+      "24": "d9519b419be5cea42b59e335c1efc68a4dc022fd664d651b036ee55c5a6e9958",
+      "3": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "4": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "5": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "6": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "7": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "8": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf",
+      "9": "c858f9cd91bdafdb54c0e45d0130e07b62af0a48ba19fee7b7231e45c6e7bdbf"
+    },
+    "report": {
+      "1": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "10": "d986dca9286b4d4cbe9865cf869d623df5d017a252ec3d45c0069520a7488646",
+      "11": "64317897ce2c0b07ba5ca146314bdc42f9704a32fa843a9a04186b8bfb420feb",
+      "12": "ab64a5883c2b40d207aae6761aa25b4b5dc3172e6813d9fa958aefde8aea805c",
+      "13": "ab64a5883c2b40d207aae6761aa25b4b5dc3172e6813d9fa958aefde8aea805c",
+      "14": "ab64a5883c2b40d207aae6761aa25b4b5dc3172e6813d9fa958aefde8aea805c",
+      "15": "07733043b41ca1d17cd8b084d1b7d28e49277e8343182b36b922b272072c3718",
+      "16": "05dc5512df6ccdf384b6dfb423f57abe7d9d462f92a1763e0b4945e7b1a3d053",
+      "17": "59501ff4eaa6624f0d4c3af50de2dd6cb8b440462eac0e0a59b2f4e76a30b027",
+      "18": "a28efc00eb1fe68bdf1361eabb51b4390c0cebe1c72ed6dbf15696e042e58094",
+      "19": "a28efc00eb1fe68bdf1361eabb51b4390c0cebe1c72ed6dbf15696e042e58094",
+      "2": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "20": "96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a",
+      "21": "96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a",
+      "22": "96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a",
+      "23": "96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a",
+      "24": "96aa6c6f0940ffba049460ed34451014f4c34829b5e551efb0494fb100400a2a",
+      "3": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "4": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "5": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "6": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "7": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "8": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b",
+      "9": "eb68d15ccad8f8e6fed610140fc899293501f61068cbccf3eb4fac3e3e5a796b"
+    },
+    "report_regate": {
+      "1": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "10": "ad1bffa84d865a2f2654cb41642a5c5a0f8a0189822cc64f3841512657736289",
+      "11": "5a807924d6e362cb4bb2801dc4fdb2889d4361df76e437e8ae767d6f1479e985",
+      "12": "a26caa64b89aedab395acfff48671239e4e5c25ace8f3229a927a3f551c1e41a",
+      "13": "a26caa64b89aedab395acfff48671239e4e5c25ace8f3229a927a3f551c1e41a",
+      "14": "a26caa64b89aedab395acfff48671239e4e5c25ace8f3229a927a3f551c1e41a",
+      "15": "f7624c6125ac69b6c4f4475e6f158f8088bce24cac35cf54f20ab70d14168878",
+      "16": "83fa1fdeb1010c32bfa18c1288cde2d055f52a213a3119d097623b2b8b32976c",
+      "17": "23ea8896656eb902a8b5a60ee98092ed48d329434efdf7f95bd6d91203c7d079",
+      "18": "b840b8b37eb0d3722b77e1f1f70936d3222241ad296b2ea7344feb7349b073fe",
+      "19": "b840b8b37eb0d3722b77e1f1f70936d3222241ad296b2ea7344feb7349b073fe",
+      "2": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "20": "ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff",
+      "21": "ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff",
+      "22": "ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff",
+      "23": "ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff",
+      "24": "ffe24d4306fab15c0c6e766c9bea84591f44896fc8ef34a9184d46bb7db91cff",
+      "3": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "4": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "5": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "6": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "7": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "8": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f",
+      "9": "24bc01cf98c075d80f20569c610918e97c124201f17734d49e485d77efa2bb6f"
+    }
+  }
+}

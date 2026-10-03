@@ -23,6 +23,23 @@ HISTORICAL_ASSEMBLY = {
 }
 
 
+@pytest.mark.parametrize('explicit_default', [False, True])
+@pytest.mark.parametrize('manifest_used', [False, True])
+def test_legacy_metadata_helper_keeps_omitted_shared_selection_disabled(
+        tmp_path, explicit_default, manifest_used):
+    manifest = tmp_path / 'source-metadata.yaml'
+    raw = b'projects:\n  EXTERNAL:\n    description: captured metadata\n'
+    manifest.write_bytes(raw)
+    fields = dict(render_version=16, manifest=manifest, manifest_used=manifest_used,
+                  project='EXTERNAL')
+    if explicit_default:
+        fields['shared_generation_version'] = 0
+    assert api.source_metadata_authority(SimpleNamespace(**fields)) == {
+        'source_manifest_raw': raw if manifest_used else None,
+        'project': 'EXTERNAL' if manifest_used else None,
+    }
+
+
 def test_historical_assembly_bytes_and_protocol_selection_are_preserved():
     assert {v: api.assembly_digest(v)['sha256'] for v in HISTORICAL_ASSEMBLY} == HISTORICAL_ASSEMBLY
     assert api.assembly_digest(15)['sha256'] not in HISTORICAL_ASSEMBLY.values()
