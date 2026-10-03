@@ -16,6 +16,7 @@ helper correctness, authentication, provider billing or generation acceptance.
 from __future__ import annotations
 
 from copy import deepcopy
+from decimal import Decimal
 from pathlib import PurePosixPath
 import re
 import shlex
@@ -60,6 +61,13 @@ def _hash(value):
     _need(type(value) is str and re.fullmatch(r'[0-9a-f]{64}', value) is not None, 'invalid SHA256')
 
 
+def _budget(value):
+    _need(isinstance(value, str) and len(value) <= 32
+          and re.fullmatch(r'[0-9]+(?:\.[0-9]+)?', value) is not None and Decimal(value) > 0,
+          'budget guard must be an exact finite positive decimal string')
+    return value
+
+
 def stub_files():
     """The complete neutral helper package. These modules never open artifacts."""
     out = {'data_sheets_schema/__init__.py': ''}
@@ -95,7 +103,7 @@ def probe_argv(expected):
     return [runtime['executable']['path'], '--print', '--safe-mode', '--restricted',
         '--strict-mcp-config', '--no-session-persistence', '--model', runtime['model'],
         '--effort', runtime['effort'], '--disable-slash-commands', '--max-budget-usd',
-        str(runtime['budget_guard_usd']), '--prompt-suggestions', 'false', '--output-format',
+        _budget(runtime['budget_guard_usd']), '--prompt-suggestions', 'false', '--output-format',
         'stream-json', '--verbose', '--permission-mode', 'dontAsk', '--tools', 'Read,Write,Bash',
         *controls['native_command_policy'].permission_arguments(expected['policy']), '--system-prompt', SYSTEM]
 
@@ -114,8 +122,7 @@ def _authority(expected, controls):
     _path(exe['path']); _hash(exe['sha256'])
     for value in (exe['version'], exe['init_version'], runtime.get('model'), runtime.get('effort')):
         _need(type(value) is str and bool(value.strip()) and '\0' not in value, 'missing runtime identity')
-    budget = runtime.get('budget_guard_usd')
-    _need(type(budget) in (int, float) and 0 < budget < float('inf'), 'invalid explicit probe budget guard')
+    _budget(runtime.get('budget_guard_usd'))
     _need(_same(policy.get('pretool_control'), controls['native_control'].HISTORY_CONTRACT), 'only exact control v3 is supported')
     _path(policy['python']); _path(policy['readonly_lookups']['repository'])
     source = expected['source']['path']

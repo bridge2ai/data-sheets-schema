@@ -39,7 +39,7 @@ def fixture(tmp_path_factory):
     commands = draft._commands(case['spec'])
     runtime = {'route':'claude_code_direct_stream_json_v1',
         'executable':{'path':'/fictional/claude','sha256':'a'*64,'version':'fictional test version', 'init_version':'test-only'},
-        'model':'synthetic-test-model','effort':'synthetic-test-effort','budget_guard_usd':1}
+        'model':'synthetic-test-model','effort':'synthetic-test-effort','budget_guard_usd':'1.0'}
     expected = {'runtime':runtime, 'policy':selected['policy'],
         'commands':{'draft':next(c for c,k in commands.items() if k=='draft'),
                     'final_evidence':next(c for c,k in commands.items() if k=='final_evidence'),
@@ -300,3 +300,25 @@ def test_matching_optional_native_metadata_and_completion_remain_valid(fixture):
     events[-1]['subtype']='success';events.insert(-1,completion_text(fixture))
     change_member(value,'transcript.jsonl',jsonlines(events))
     assert permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])['passed']
+
+
+@pytest.mark.parametrize('budget',['1.0','01.50','0.0001','1','9'*32,'0.'+'0'*29+'1'])
+def test_exact_positive_decimal_budget_is_preserved_in_probe_argv(fixture,tmp_path,budget):
+    expected=deepcopy(fixture['expected']); expected['runtime']['budget_guard_usd']=budget
+    built=fabricated_manifest(expected,tmp_path/'decimal-probe',
+        fixture['manifest']['members']['source.before']['text'].encode())
+    argv=built['launch']['argv']
+    assert argv[argv.index('--max-budget-usd')+1] == budget
+    assert type(argv[argv.index('--max-budget-usd')+1]) is str
+    assert permission.verify_saved_probe(draft._encoded(built['manifest']),expected=expected)['passed']
+
+
+@pytest.mark.parametrize('budget',[None,True,False,1,1.0,0,0.0,float('nan'),float('inf'),
+    '', '0','00','0.0','00.000','-1','+1','1e2','1E2','NaN','nan','Inf','Infinity',
+    '.5','1.',' 1','1 ','1\n','9'*33,'0.'+'0'*30+'1'])
+def test_noncanonical_or_numeric_budget_never_becomes_a_native_argument(fixture,budget):
+    expected=deepcopy(fixture['expected']);expected['runtime']['budget_guard_usd']=budget
+    with pytest.raises(ValueError,match='decimal string'):
+        permission.probe_argv(expected)
+    with pytest.raises(ValueError,match='decimal string'):
+        permission.verify_saved_probe(draft._encoded(fixture['manifest']),expected=expected)
