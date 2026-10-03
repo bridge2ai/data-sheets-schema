@@ -282,11 +282,12 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
                     live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake,
                     keep_awake_raw=_file(attempt/'keep-awake.json', 'observed cleanup'))
-                if results['keep_awake'].get('passed') is not True:
-                    # Retain this observed failure, including its raw-byte pins,
-                    # even if the file is restored before final collection.
-                    stopped('cleanup evidence validation failed before publication: '
-                        + draft._encoded(results['keep_awake']).decode().strip())
+                for name, label in (('runtime_authority', 'runtime observation'), ('keep_awake', 'cleanup evidence')):
+                    if results[name].get('passed') is not True:
+                        # Retain this failure and its byte pins even if the file
+                        # is restored before final lifecycle collection.
+                        stopped(label + ' validation failed before publication: '
+                            + draft._encoded(results[name]).decode().strip())
                 for path, copy in projections.items():
                     if copy.read_bytes() != prepared['snapshot'].raw[path]:
                         raise ValueError('captured projection changed during validation')
@@ -325,6 +326,11 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                 results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
             lifecycle_raw = {name: _file(attempt/name, 'lifecycle artifact')
                 for name in ('runtime-observation.json', 'keep-awake.json') if (attempt/name).exists()}
+            if 'runtime-observation.json' in lifecycle_raw:
+                results['runtime_authority'] = gates.runtime_observation_result(
+                    lifecycle_raw['runtime-observation.json'], observation)
+            else:
+                results['runtime_authority'] = {'checked': False, 'passed': False, 'reason': 'runtime observation unavailable'}
             if 'keep-awake.json' in lifecycle_raw:
                 results['keep_awake'] = gates.cleanup_result(
                     lifecycle_raw['keep-awake.json'], awake, value['runtime']['keep_awake'])
@@ -423,17 +429,23 @@ def read_final(registration_raw):
             raise ValueError('runtime or cleanup evidence differs from the final identity')
         lifecycle_raw[name] = body
     runtime_gate = checks['runtime_authority']
-    if completion or 'basis' in runtime_gate:
+    if 'runtime-observation.json' in lifecycle_raw:
         body = lifecycle_raw.get('runtime-observation.json')
         recomputed = gates.runtime_observation_result(body, result.get('runtime_observation'))
         if draft._encoded(runtime_gate) != draft._encoded(recomputed):
             raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
+    elif (runtime_gate['checked'] is not False or runtime_gate['passed'] is not False or 'basis' in runtime_gate
+            or (attempt/'runtime-observation.json').exists() or (attempt/'runtime-observation.json').is_symlink()):
+        raise ValueError('runtime observation fallback requires an unchecked failed gate and no artifact')
     cleanup_gate = checks['keep_awake']
-    if completion or 'basis' in cleanup_gate:
+    if 'keep-awake.json' in lifecycle_raw:
         recomputed = gates.cleanup_result(lifecycle_raw.get('keep-awake.json'),
             result.get('keep_awake'), value['runtime']['keep_awake'])
         if draft._encoded(cleanup_gate) != draft._encoded(recomputed):
             raise ValueError('cleanup evidence, observed release outcome and gate disagree')
+    elif (cleanup_gate['checked'] is not False or cleanup_gate['passed'] is not False or 'basis' in cleanup_gate
+            or (attempt/'keep-awake.json').exists() or (attempt/'keep-awake.json').is_symlink()):
+        raise ValueError('cleanup fallback requires an unchecked failed gate and no artifact')
     additional = result.get('additional_report')
     if additional is None:
         if completion:

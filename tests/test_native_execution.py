@@ -473,8 +473,10 @@ def test_runtime_observation_capture_and_saved_consistency(case,monkeypatch,drif
     assert gate['captured_sha256']==draft._sha(observation_path.read_bytes())
     assert execute.read_final(case['raw'])==result
     if drift:
+        assert result['first_stop'].startswith('runtime observation validation failed before publication: ')
+        assert result['gates']['first_stop']['passed'] is False
         assert all(row['checked'] and row['passed'] for name,row in result['gates'].items()
-                   if name!='runtime_authority')
+                   if name not in ('runtime_authority','first_stop'))
         return
     final_path=case['root']/'native-evidence/final.json'
     marker_path=case['root']/'native-evidence/published.json'
@@ -565,3 +567,50 @@ def test_cleanup_capture_and_saved_consistency(case,monkeypatch,drift):
         marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(raw)}))
         with pytest.raises(ValueError,match='cleanup.*disagree'):
             execute.read_final(case['raw'])
+
+
+def test_failed_publication_lifecycle_gates_cannot_skip_canonical_readback(case,monkeypatch):
+    def refused(value):raise OSError('synthetic auth failure; no native or provider call')
+    monkeypatch.setattr(execute,'_probe_runtime',refused)
+    result=execute.launch(case['raw'],**case['kwargs'])
+    assert result['state']=='failed' and result['runtime_gates_passed'] is False
+    assert execute.read_final(case['raw'])==result
+    final_path=case['root']/'native-evidence/final.json'
+    marker_path=case['root']/'native-evidence/published.json'
+    marker=draft._json(marker_path.read_bytes())
+    for gate_name,filename in [('runtime_authority','runtime-observation.json'),('keep_awake','keep-awake.json')]:
+        assert result['gates'][gate_name]['basis']
+        for mutation in ('no_basis','unchecked','omit_artifact'):
+            changed=deepcopy(result)
+            if mutation=='no_basis':del changed['gates'][gate_name]['basis']
+            else:changed['gates'][gate_name]={'checked':False,'passed':False,'reason':'claimed unavailable'}
+            if mutation=='omit_artifact':del changed['lifecycle_artifacts'][filename]
+            raw=draft._encoded(changed)
+            final_path.write_bytes(raw)
+            marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(raw)}))
+            with pytest.raises(ValueError,match='runtime observation|cleanup'):
+                execute.read_final(case['raw'])
+        artifact=case['root']/'native-attempt'/filename
+        assert str(artifact) not in result['captured_files']  # stopped before the complete native capture
+        retained=case['root']/('retained-'+filename)
+        artifact.rename(retained)
+        try:
+            changed=deepcopy(result)
+            del changed['lifecycle_artifacts'][filename]
+            changed['gates'][gate_name]={'checked':False,'passed':False,'reason':'artifact unavailable'}
+            for invalid in (None,'checked','passed','basis'):
+                current=deepcopy(changed)
+                if invalid=='basis':current['gates'][gate_name]['basis']='claimed captured evidence'
+                elif invalid:current['gates'][gate_name][invalid]=True
+                raw=draft._encoded(current)
+                final_path.write_bytes(raw)
+                marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(raw)}))
+                if invalid is None:assert execute.read_final(case['raw'])==current
+                else:
+                    with pytest.raises(ValueError,match='runtime observation|cleanup'):
+                        execute.read_final(case['raw'])
+        finally:
+            retained.rename(artifact)
+    final_path.write_bytes(draft._encoded(result))
+    marker_path.write_bytes(draft._encoded(marker))
+    assert execute.read_final(case['raw'])==result

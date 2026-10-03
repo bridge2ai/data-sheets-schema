@@ -147,6 +147,8 @@ def tool_history(prepared):
 
 RUNTIME_OBSERVATION_BASIS = 'captured_runtime_observation_v1'
 CLEANUP_BASIS = 'captured_native_cleanup_v1'
+# The v1 policy uses this exact set/order from its pinned KeepAwake producer.
+IOKIT_ASSERTIONS = ('PreventUserIdleSystemSleep', 'PreventDiskIdle', 'PreventSystemSleep')
 
 
 def runtime_observation_result(raw, admitted):
@@ -163,6 +165,31 @@ def runtime_observation_result(raw, admitted):
 
 
 
+def _released_assertions(observed, registered_policy):
+    acquisition, releases = observed.get('acquisition'), observed.get('releases')
+    if (type(acquisition) is not dict or acquisition.get('policy') != registered_policy['policy']
+            or set(acquisition) != {'policy', 'pid', 'acquired_at', 'status', 'assertions', 'limitations', 'cleanup_receipt'}
+            or acquisition.get('status') != 'acquired'
+            or type(acquisition.get('pid')) is not int or acquisition['pid'] <= 0
+            or type(acquisition.get('acquired_at')) is not str or not acquisition['acquired_at'].strip()
+            or type(observed.get('released_at')) is not str or not observed['released_at'].strip()):
+        return False
+    assertions = acquisition.get('assertions')
+    if (type(assertions) is not list or len(assertions) != len(IOKIT_ASSERTIONS)
+            or any(type(row) is not dict or set(row) != {'type', 'id'}
+                or type(row['id']) is not int or not 0 < row['id'] < 2**32 for row in assertions)
+            or tuple(row['type'] for row in assertions) != IOKIT_ASSERTIONS
+            or len({row['id'] for row in assertions}) != len(assertions)):
+        return False
+    if (type(releases) is not list or len(releases) != len(assertions)
+            or any(type(row) is not dict or set(row) != {'type', 'id', 'return_code'}
+                or type(row['id']) is not int or type(row['return_code']) is not int
+                or row['return_code'] != 0 for row in releases)):
+        return False
+    return [(row['type'], row['id']) for row in releases] == [
+        (row['type'], row['id']) for row in reversed(assertions)]
+
+
 def cleanup_result(raw, observed, registered_policy):
     """Bind actual cleanup bytes, release outcome and the selected policy."""
     if (type(raw) is not bytes or type(observed) is not dict
@@ -173,13 +200,11 @@ def cleanup_result(raw, observed, registered_policy):
     policy_matches = draft._encoded(observed.get('policy')) == draft._encoded(registered_policy)
     releases = observed.get('releases', [])
     if registered_policy.get('policy') == 'not_applicable':
-        outcome_matches = observed.get('state') == 'explicitly_not_applicable' and releases == []
+        outcome_matches = (observed.get('state') == 'explicitly_not_applicable' and releases == []
+            and 'acquisition' not in observed and 'released_at' not in observed)
     else:
         outcome_matches = (registered_policy.get('policy') == 'macos_iokit_ims_v1'
-            and observed.get('state') == 'released' and bool(observed.get('acquisition'))
-            and type(releases) is list and len(releases) == 3
-            and all(type(row) is dict and type(row.get('return_code')) is int
-                    and row['return_code'] == 0 for row in releases))
+            and observed.get('state') == 'released' and _released_assertions(observed, registered_policy))
     return {'checked': True, 'passed': observed['passed'] and matches and policy_matches and outcome_matches,
             'basis': CLEANUP_BASIS, 'observed_cleanup': deepcopy(observed),
             'registered_policy': deepcopy(registered_policy), 'policy_matches': policy_matches,
