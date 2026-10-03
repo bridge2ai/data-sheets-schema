@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/typed-audit-offline/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Typed audit offline packets - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#typed-audit-offline-packets" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Typed audit offline packets
             
           </span>
         </div>
@@ -316,49 +316,29 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#capturing-a-packet" class="md-nav__link">
+    Capturing a packet
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#request-recipes-and-saved-responses" class="md-nav__link">
+    Request recipes and saved responses
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
+  <a href="#findings-and-omission-accounting" class="md-nav__link">
+    Findings and omission accounting
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#bounds-and-output-behavior" class="md-nav__link">
+    Bounds and output behavior
   </a>
   
 </li>
@@ -377,95 +357,163 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/typed-audit-offline.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
+<h1 id="typed-audit-offline-packets">Typed audit offline packets</h1>
+<p><code>python -m data_sheets_schema.typed_audit</code> implements the explicitly selected
+<code>typed_audit_protocol_v1</code>: audit grammar, batching and output format 2, existing
+evidence protocol 7, and <code>omission_inventory_v1</code>. Existing calls to the shared
+grammar/batching/formatter still default to version 1. A version-2 plan does not
+automatically select version 2.</p>
+<p>This is an offline saved-response consumer. It does not call a provider, register
+an execution, change records or receipts, resume audit28, or measure audit recall.
+The taxonomy, omission novelty and scientific support still need independent
+review. Issues #2921, #2930 and #3336 retain their scientific/live-execution work.</p>
+<h2 id="capturing-a-packet">Capturing a packet</h2>
+<p>All paths below are explicit caller inputs. Use a new output path at every step.
+The context follows the existing <code>omission_context_v1</code> schema; it declares the
+release/referent scope and source policy rather than deriving them from a name.</p>
+<pre><code class="language-bash">python -m data_sheets_schema.typed_audit prepare \
+  --protocol typed_audit_protocol_v1 \
+  --original-full original.yaml --bundle bundle.txt --manifest chunks.json \
+  --receipt receipt.yaml --context omission-context.json --schema schema.yaml \
+  --max-output-tokens 4000 --output packet.json
 </code></pre>
-
-</details>
+<p>Optional <code>--original-core core.yaml</code> captures authority for <code>original_core</code>
+artifact quotations. Optional <code>--source-manifest sources.yaml --project PROJECT</code>
+captures both exact registered-provenance bytes and their selected projection.
+Neither input is discovered from the checkout. Evidence referring to unavailable
+authority is refused. Final-record artifact evidence is outside this protocol.
+Source manifests retain their own strict YAML contract, including exact positive
+integer priority-tier keys; the record-only string-key restriction does not apply.
+Representation depth, nodes (including keys and alias occurrences), cycles,
+duplicate/merge keys and nonfinite values are checked before using that authority.</p>
+<p>The packet embeds exact original, bundle, chunk-manifest, receipt, context and
+optional authority bytes, with hashes and lengths. It captures the complete local
+schema/import closure. Replay derives that closure from its stored bytes and
+logical import paths and refuses missing, extra or inconsistent entries; it never
+falls back to current schema files. An additive <code>schema_snapshot</code> argument on
+<code>audit_omissions.prepare</code> supplies this replay without changing the default
+omission request or any frozen omission policy/schema asset.</p>
+<p>Packet hashes identify content; they do not authenticate the author or establish
+scientific authority. Keep the packet and its hash with the registration or other
+external record appropriate to your later reviewed use. Changing all input bytes
+and honestly rebuilding a new packet creates a different experiment, not proof
+that the previous packet passed.</p>
+<h2 id="request-recipes-and-saved-responses">Request recipes and saved responses</h2>
+<p>The packet contains the exact omission request in <code>omission_request</code>, worker
+assignments in <code>plan</code>, and exact version-2 schemas, contracts and examples in
+<code>contracts</code>. Export the worker request after the packet is sealed. The public
+<code>worker_request(packet, worker_id)</code> API is the same operation used by the CLI.
+Its exact payload includes the packet SHA, worker assignment, shared scientific
+context and stage instructions. <code>request_sha256</code> hashes that canonical payload,
+excluding its own identity field. The invented examples in the contracts are
+syntax demonstrations and cannot support real findings.</p>
+<p>Save actual worker and omission responses as strict JSON. Capture the worker
+reply with its exported request, then check and index it. Repeat
+<code>--worker ID=PATH</code> for every assigned worker; the roster must match exactly.</p>
+<pre><code class="language-bash">python -m data_sheets_schema.typed_audit request \
+  --packet packet.json --worker-id worker_0001 --output worker-1-request.json
+# Supply that request in your separately authorized workflow; save raw reply.
+python -m data_sheets_schema.typed_audit capture-response \
+  --request worker-1-request.json --response worker-1-raw.json \
+  --output worker-1-saved.json
+python -m data_sheets_schema.typed_audit check-worker \
+  --packet packet.json --worker-id worker_0001 --response worker-1-saved.json \
+  --output worker-1-check.json
+python -m data_sheets_schema.typed_audit index \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
+  --omission-response omissions.json --output index.json
+</code></pre>
+<p>Worker checking reports structural acceptance only. Indexing reconstructs the
+original-bound plan, rebuilds complete finding hashes, and invokes the real
+omission checker on the raw response. Every canonical chunk is mandatory,
+including previously negative or redundant chunks. A saved successful omission
+report is never a substitute for that response.</p>
+<p>The complete index is the integration request envelope. Its
+<code>integration_request.payload</code> contains shared context, exact saved workers and
+omission response, proposal index and output contract. The request payload SHA
+and complete typed-index SHA are separate identities; the latter is supplied
+outside the request payload to avoid a self-referential hash. Capture the raw
+integration reply against the complete index, then run terminal operations:</p>
+<pre><code class="language-bash">python -m data_sheets_schema.typed_audit capture-response \
+  --request index.json --response integration-raw.json --output integration-saved.json
+python -m data_sheets_schema.typed_audit check-integration \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
+  --omission-response omissions.json --integration-response integration-saved.json \
+  --output integration-check.json
+python -m data_sheets_schema.typed_audit assemble \
+  --packet packet.json --worker worker_0001=worker-1-saved.json \
+  --omission-response omissions.json --integration-response integration-saved.json \
+  --output assembly.json
+python -m data_sheets_schema.typed_audit check \
+  --assembly assembly.json --output independent-check.json
+</code></pre>
+<p>Assembly stores the packet and raw responses, exact audit bytes, index, lineage
+and acceptance report in one self-contained file. Captured bytes use an object
+with <code>base64</code>, <code>sha256</code> and <code>bytes</code>; for example, decode <code>assembly.audit.base64</code>
+to inspect the final audit. <code>check</code> independently derives the audit, lineage,
+requests, indices and acceptance result from the stored raw inputs. It compares
+the entire reconstructed assembly, including hashes; an edited successful report
+cannot bypass this work. Assembly refuses source-evidence failure. Use
+<code>check-integration</code> for its bounded diagnostics.</p>
+<p>Saved worker/integration envelopes have closed fields and bind the packet and
+request identities; integration also binds the complete typed index. Inner raw
+UTF-8 response bytes retain their exact encoding/whitespace in a byte blob. Bare
+replies and unchanged envelopes from a different context or omission inventory
+are refused, even when the original full record and pure worker index match.
+The public <code>capture_response(exported_request, raw_bytes)</code> API performs the same
+capture as the CLI. It declares a request/response association, not authenticated
+provider provenance. Deliberately rewrapping old bytes under a new request is a
+new caller provenance claim; this offline consumer cannot prove a provider read
+the request. Record honest associations in the separately approved workflow.</p>
+<h2 id="findings-and-omission-accounting">Findings and omission accounting</h2>
+<p>The optional closed <code>kind</code> vocabulary is <code>role_placement</code>, <code>status_scope</code>,
+<code>date_scope</code>, <code>absence_or_self_narration</code>, <code>quotation_fidelity</code>, <code>identifier_count</code>,
+<code>attribution</code>, <code>omission</code>, and <code>other</code>. Missing kind stays untyped. Complete
+finding hashes preserve the kind and omission references through worker,
+retain/replace/drop/new integration and final lineage.</p>
+<p>Every omission finding in this consumer needs <code>record: full</code> and a nonempty
+<code>omission_candidates</code> list naming captured candidates. The full-only inventory
+cannot support core/both omission claims. A missing slot is represented by the
+candidate's schema owner and slot chain, not an invented populated JSON Pointer.
+Exact targets, quotes, source identities and candidate hashes remain in lineage;
+the finding's free-text <code>slot</code> is not target authority.</p>
+<p>Integration must contain <code>omission_dispositions</code>, including an empty array for a
+complete all-negative response. Each captured candidate occurs once, with
+<code>candidate_id</code>, <code>action</code> (<code>retain</code> or <code>drop</code>), nonblank <code>reason</code>, and <code>evidence</code>.
+Drops require literal document/artifact evidence. A retained candidate must link
+to exactly one final omission finding. Several candidates may merge into one
+finding. Unknown IDs, silent loss, duplicate allocation and linking after drop
+are refused. Structural batching alone cannot check this captured candidate
+roster; the packet consumer does so.</p>
+<p>Final acceptance invokes the existing evidence-v7 checker and checks all
+integration decision evidence against captured sources/artifacts. A matching
+quote, complete declared coverage or valid schema target does not prove omission,
+novelty or scientific support. Reports keep <code>scientific_support</code>, <code>novelty</code> and
+<code>exhaustive_recall</code> explicitly <code>unverified</code>, including a clean all-negative audit.</p>
+<h2 id="bounds-and-output-behavior">Bounds and output behavior</h2>
+<p>Existing shared limits are preserved: 4,000,000 bytes for the original full
+record, 2,097,152 bytes per inner worker/integration/assembled audit, 3,000,000 bytes
+per saved worker/integration envelope, 8,000,000 bytes per
+other ordinary input/omission response, and 16,000,000 bytes for the schema
+closure. This consumer also caps the closure at 256 files, the complete packet at
+96,000,000 bytes and assembly at 160,000,000 bytes. The default complete request
+bound is 32,000,000 bytes; preparation and indexing enforce it. Unsupported large
+records are refused, never truncated. A larger-corpus protocol needs separately
+reviewed bounds.</p>
+<p>Every output uses exclusive file creation. Existing outputs, symlinks including
+dangling links, and hardlink aliases are refused. Inputs and historical artifacts
+are never overwritten. Exit 0 means the requested bounded operation succeeded;
+exit 1 means a written check report failed; exit 2 means malformed inputs,
+identity/coverage refusal or an output error. Worker exit 0 alone is not terminal
+source-evidence acceptance.</p>
+<p>The test fixtures and CLI round trips are invented engineering probes. They are
+not empirical calibration, curated audit observations or evidence of recall.</p>
 
 
 
