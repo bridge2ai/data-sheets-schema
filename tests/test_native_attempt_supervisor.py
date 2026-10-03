@@ -359,3 +359,77 @@ def test_failed_final_publication_cannot_resume_or_claim_published(case, monkeyp
         supervisor.read_final(case['raw'])
     with pytest.raises(ValueError, match='new|resume'):
         supervisor.supervise(case['raw'])
+
+
+@pytest.mark.parametrize('change', ['drop_call', 'reorder_call', 'wrong_argument', 'duplicate_call',
+    'drop_result', 'duplicate_result', 'bool_exit', 'float_exit', 'missing_exit', 'false_alias',
+    'error_flag', 'stdout_mismatch', 'source_read_mismatch', 'early_terminal', 'late_init'])
+def test_closed_neutral_recipe_requires_exact_settled_history(completed, change):
+    prepared = {**completed[2], 'events': deepcopy(completed[2]['events'])}
+    events = prepared['events']
+    calls = [i for i, e in enumerate(events) if e.get('type') == 'assistant']
+    results = [i for i, e in enumerate(events) if e.get('type') == 'user' and 'tool_use_result' in e]
+    assert gates.recipe_history(prepared)['passed']
+    call = events[calls[0]]['message']['content'][0]
+    result = events[results[0]]
+    if change == 'drop_call': del events[calls[0]]
+    elif change == 'reorder_call': events[calls[0]], events[calls[1]] = events[calls[1]], events[calls[0]]
+    elif change == 'wrong_argument': call['input']['file_path'] += '.different'
+    elif change == 'duplicate_call': events.insert(calls[0]+1, deepcopy(events[calls[0]]))
+    elif change == 'drop_result': del events[results[0]]
+    elif change == 'duplicate_result': events.insert(results[0]+1, deepcopy(result))
+    elif change == 'bool_exit': result['tool_use_result']['exitCode'] = False
+    elif change == 'float_exit': result['tool_use_result']['exitCode'] = 0.0
+    elif change == 'missing_exit': result['tool_use_result'].pop('exitCode')
+    elif change == 'false_alias': result['tool_use_result']['exit_code'] = False
+    elif change == 'error_flag': result['message']['content'][0]['is_error'] = True
+    elif change == 'stdout_mismatch': result['tool_use_result']['stdout'] = 'different'
+    elif change == 'source_read_mismatch':
+        result['tool_use_result']['stdout'] = result['message']['content'][0]['content'] = 'different'
+    elif change == 'early_terminal':
+        terminal = next(e for e in events if e.get('type') == 'result')
+        events.remove(terminal); events.insert(calls[0], terminal)
+    else:
+        init = next(e for e in events if e.get('type') == 'system' and e.get('subtype') == 'init')
+        events.remove(init); events.insert(results[-1], init)
+    with pytest.raises(ValueError):
+        gates.recipe_history(prepared)
+
+
+@pytest.mark.parametrize('state', ['failure', 'pending'])
+def test_dispatch_state_cannot_hide_behind_success_return(case, monkeypatch, state):
+    with authority.loaded_dependencies(case['value']['dependencies']) as controls:
+        def stopped_child(argv, **kwargs):
+            if state == 'failure':
+                kwargs['proxy'].failed.set()
+                kwargs['proxy'].failure = 'independent recorded controller failure'
+            else:
+                kwargs['proxy'].unfinished_handlers = 1
+            return 0
+        monkeypatch.setattr(controls['run_native_canary'], 'execute_child', stopped_child)
+        result = supervisor.supervise(case['raw'])
+    assert not result['engineering_completion']
+    assert not result['gates']['first_stop']['passed']
+    assert ('controller failure' if state == 'failure' else 'unresolved handler') in result['first_stop']
+
+
+@pytest.mark.parametrize('binding', ['path', 'bytes'])
+def test_capture_from_another_consumed_attempt_cannot_complete(case, completed, monkeypatch, binding):
+    def foreign_capture(*args, **kwargs):
+        prepared = {**completed[2], 'snapshot': deepcopy(completed[2]['snapshot'])}
+        if binding == 'bytes':
+            snapshot = prepared['snapshot']
+            snapshot.sealed = False
+            path = Path(case['value']['attempt_directory'])/'registration.json'
+            snapshot.read(path, 'supervisor_registration')
+            snapshot.raw[str(snapshot.path(path))] = completed[0]['raw']
+            snapshot.sealed = True
+        return prepared
+    with authority.loaded_dependencies(case['value']['dependencies']) as controls:
+        monkeypatch.setattr(controls['run_native_canary'], 'execute_child', lambda *a, **k: 0)
+        monkeypatch.setattr(gates, 'capture', foreign_capture)
+        result = supervisor.supervise(case['raw'])
+    assert not result['engineering_completion']
+    expected = 'uncaptured path' if binding == 'path' else 'different consumed registration'
+    assert expected in result['first_stop']
+    assert result['gates']['first_stop']['passed'] is False

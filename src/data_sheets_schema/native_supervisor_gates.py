@@ -122,6 +122,16 @@ def capture(composition_path, attempt, controls):
     snap, spec = prepared['snapshot'], prepared['state'].spec
     snap.sealed = False
     snap.read(Path(attempt)/'stderr.txt', 'stderr')
+    from data_sheets_schema import native_attempt_supervisor as supervisor
+    selected = draft._json(snap.read(Path(attempt)/'registration.json', 'supervisor_registration'))
+    fixture_raw = snap.read(selected['fixture'], 'neutral_recipe_fixture')
+    if (selected['composition_sha256'] != draft._sha(snap.read(composition_path, 'composition'))
+            or selected['fixture_sha256'] != draft._sha(fixture_raw)):
+        raise ValueError('neutral recipe input binding differs from captured bytes')
+    steps = supervisor.recipe_steps(spec, prepared['policy'], supervisor._fixture(fixture_raw))
+    if selected['steps_sha256'] != draft._sha(draft._encoded(steps)):
+        raise ValueError('neutral recipe steps differ from consumed registration')
+    prepared['recipe_steps'] = steps
     paths = spec._agentic_artifact_paths
     snap.read(paths['receipt'], 'coverage_receipt')
     record_path = prepared['policy']['post_final_recorder']['destination']
@@ -206,6 +216,70 @@ def project(prepared, directory):
         target.chmod(0o400)
         out[path] = target
     return out
+
+
+
+def recipe_history(prepared):
+    """Check the closed neutral recipe, separate from released generic phase rules."""
+    steps = prepared.get('recipe_steps')
+    if not isinstance(steps, list) or not steps:
+        raise ValueError('captured neutral recipe unavailable')
+    position, pending, seen = 0, None, set()
+    initialized, terminated = False, False
+    for event in prepared['events']:
+        if event.get('type') == 'system' and event.get('subtype') == 'init':
+            if initialized or terminated or position or pending is not None:
+                raise ValueError('neutral initialization is out of order')
+            initialized = True
+        if event.get('type') == 'result':
+            if not initialized or terminated or pending is not None or position != len(steps):
+                raise ValueError('neutral terminal precedes settled complete recipe')
+            terminated = True
+        content = event.get('message', {}).get('content', [])
+        if not isinstance(content, list):
+            continue
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            kind = block.get('type')
+            if kind not in ('tool_use', 'tool_result'):
+                continue
+            if not initialized or terminated:
+                raise ValueError('neutral tool history lies outside initialization and terminal')
+            if kind == 'tool_use':
+                identity = block.get('id')
+                if (event.get('type') != 'assistant' or pending is not None
+                        or not isinstance(identity, str) or not identity or identity in seen
+                        or position >= len(steps)):
+                    raise ValueError('neutral recipe has duplicate, pending or extra tool calls')
+                expected = steps[position]
+                if draft._encoded({'tool': block.get('name'), 'input': block.get('input')}) != draft._encoded(expected):
+                    raise ValueError('neutral tool call differs from exact ordered recipe')
+                pending = identity
+                seen.add(identity)
+            else:
+                if event.get('type') != 'user' or pending is None or block.get('tool_use_id') != pending:
+                    raise ValueError('neutral result has no matching unique pending call')
+                metadata = event.get('tool_use_result')
+                if not isinstance(metadata, dict):
+                    raise ValueError('neutral tool result lacks explicit exit metadata')
+                codes = [metadata[k] for k in ('exitCode', 'exit_code') if k in metadata]
+                if not codes or any(type(code) is not int or code != 0 for code in codes):
+                    raise ValueError('neutral helper did not explicitly exit integer zero')
+                text = block.get('content')
+                if (block.get('is_error') is not False or not isinstance(text, str)
+                        or type(metadata.get('stdout')) is not str or metadata['stdout'] != text):
+                    raise ValueError('neutral result content or error metadata is inconsistent')
+                expected = steps[position]
+                if expected['tool'] == 'Read':
+                    raw = prepared['snapshot'].read(expected['input']['file_path'], 'neutral_source_read')
+                    if text != raw.decode('utf-8'):
+                        raise ValueError('neutral source read differs from captured bytes')
+                position += 1
+                pending = None
+    if not initialized or not terminated or pending is not None or position != len(steps):
+        raise ValueError('neutral recipe lacks complete settled history')
+    return {'passed': True, 'steps_completed': position, 'steps_sha256': draft._sha(draft._encoded(steps))}
 
 
 def check(prepared, projections, declaration, controls, *, exit_code, shutdown, live, first_stop):
@@ -319,6 +393,7 @@ def check(prepared, projections, declaration, controls, *, exit_code, shutdown, 
         and live.get('recorder_completed') is True and live.get('controller_stop') is None, 'result': live})
     run('saved_attribution', saved)
     run('phase_history', phase)
+    run('recipe_history', lambda: recipe_history(prepared))
     run('schema', schemas)
     run('pair', paired)
     run('receipts', lambda: receipt_gate(prepared, prepared['record'], prepared['schema_paths'], prepared['phase1_original'], controls))

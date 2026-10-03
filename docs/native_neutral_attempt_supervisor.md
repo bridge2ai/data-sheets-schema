@@ -31,6 +31,10 @@ and audit evidence, completes the final derivation, runs final inventory, writes
 the reconciliation report, runs the draft and final evidence checkers, and runs
 the one exact recorder. Helper commands come from the verified composition.
 Callers cannot inject a shell command or replace the recipe's executable.
+The final recipe gate requires the exact ordered calls and inputs, one settled
+result per call, explicit integer-zero exits and matching result text, and
+source-read content equal to the captured bytes. No pending handler state or
+controller failure can be hidden by a zero child return code.
 
 An attempt directory's exclusive reservation consumes that canonical attempt
 identity. A failed or partial start is retained, and the same identity never
@@ -52,7 +56,8 @@ existing strict floors. No historical recovery or current-schema fallback can
 stand in for this new attempt's registered bytes. No original file is repaired.
 
 The additive dependency identity covers the old twelve-module closure plus the
-two direct helper modules, exact package/schema bytes, source HEAD and Python
+two direct helper modules at their explicitly pinned released hashes, exact
+package/schema bytes, source HEAD and Python
 identity. Imported module origins are checked as well as bytes; loader path and
 bare-module state are restored. The old controller manifest, launchers, defaults
 and registrations are unchanged. No old launcher `main` or auth helper is used.

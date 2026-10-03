@@ -29,7 +29,7 @@ RECIPE = 'source_receipt_derive_audit_reconcile_attribution_record_v1'
 DRIVER = Path('src/data_sheets_schema/native_neutral_runtime_v1.py')
 MAX_BYTES = 8 * 1024 * 1024
 GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution',
-         'phase_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting')
+         'phase_history', 'recipe_history', 'schema', 'pair', 'receipts', 'evidence', 'observation', 'accounting')
 UNASSESSED = dict(generation_acceptance='not_assessed', native_permission_proof='not_assessed',
                   provider_metering='not_assessed', launch_authorization='not_assessed')
 
@@ -278,6 +278,10 @@ def supervise(registration_raw):
                 phase_spec=adapter.spec, command_classifier=adapter.classify, event_observer=adapter.observe)
         except BaseException as exc:
             stopped(f'{type(exc).__name__}: {exc}')
+        if proxy.failed.is_set():
+            stopped(proxy.failure or 'neutral controller reported failure')
+        if type(proxy.unfinished_handlers) is not int or proxy.unfinished_handlers != 0:
+            stopped('neutral controller has unresolved handler state')
         live = adapter.report(complete=True)
         results = {name: {'checked': False, 'passed': False, 'reason': 'capture unavailable'} for name in GATES}
         additional_path = evidence/'attribution-replay.json'
@@ -288,6 +292,9 @@ def supervise(registration_raw):
                 problem = f'capture: {type(exc).__name__}: {exc}'
                 stopped(problem)
                 prepared = gates.incomplete_capture(value['composition'], attempt, adapter, problem)
+            if (prepared.get('replay_complete') and prepared['snapshot'].read(
+                    attempt/'registration.json', 'supervisor_registration') != registration_raw):
+                raise ValueError('captured recipe belongs to a different consumed registration')
             projections = gates.project(prepared, evidence/'captured')
             if prepared.get('replay_complete'):
                 replay.write_report(prepared, additional_path)

@@ -14,8 +14,10 @@ from data_sheets_schema.resources import git_env
 
 ROOT = composition.ROOT
 ADDITIONAL = {
-    'prepare_direct': 'notes/claudecode_direct/prepare_direct.py',
-    'run_direct_canary': 'notes/claudecode_direct/run_direct_canary.py',
+    'prepare_direct': {'path': 'notes/claudecode_direct/prepare_direct.py',
+        'sha256': '034c8851f747e0a767a01da8dddb5b6fe3316a6bb7b807fd9cedcbf02218244d'},
+    'run_direct_canary': {'path': 'notes/claudecode_direct/run_direct_canary.py',
+        'sha256': '0f2e031f30e267b0ecfe2404cc5bf50dd540b4423c3bc66c1b5b77b38f6a1251'},
 }
 
 
@@ -27,9 +29,10 @@ def head():
 def dependency_identity():
     """Add to, never replace or rewrite, the released controller closure."""
     manifest = composition.controller_sources()
-    modules = {**manifest['modules'], **{
-        name: {'path': path, 'sha256': draft._sha((ROOT/path).read_bytes())}
-        for name, path in ADDITIONAL.items()}}
+    for name, pin in ADDITIONAL.items():
+        if draft._sha((ROOT/pin['path']).read_bytes()) != pin['sha256']:
+            raise ValueError(f'additive supervisor dependency differs from released bytes: {name}')
+    modules = {**manifest['modules'], **ADDITIONAL}
     for name, pin in modules.items():
         loaded = sys.modules.get(name)
         if loaded is not None and Path(getattr(loaded, '__file__', '')).resolve() != (ROOT/pin['path']).resolve():
