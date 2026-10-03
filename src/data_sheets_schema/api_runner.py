@@ -886,7 +886,7 @@ class RunSpec:
         completion = {}
         if self.receipt_completion_version:
             from data_sheets_schema.receipt_completion import schema_identity
-            completion["receipt_completion_schema"] = schema_identity(self)
+            completion["receipt_completion_schema"] = schema_identity(self) if self.shared_generation_version else schema_identity()
         if self.shared_generation_version:
             from .shared_generation import assert_current
             completion["shared_generation"] = assert_current(self).identity()
