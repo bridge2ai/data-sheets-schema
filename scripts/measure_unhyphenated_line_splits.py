@@ -53,6 +53,15 @@ are certified:
   two window counts at N lines — the cost of the wider window, which is
   not the cost at `MIXED_WINDOW_LINES` (#3439).
 
+With `--join-context-lines W` and `--joins-per-window K`, an additional
+`moved_with_join_context` column uses the certification gate's bounded
+context search (#3678). JOIN is confined to one K-break run inside W
+lines; outer ordinary breaks are spaces and outer hyphens use each of the
+three uniform readings. Arbitrary mixed outer-hyphen readings combined
+with joins are not searched. All older columns retain their definitions.
+Contextual reports include exact bundle identities; an unrecoverable
+version is reported as unmeasured and makes this command fail.
+
 "A word" is a line-interior token of the same bundle (the first and last
 token of a line are left out: they are the halves being judged) or an
 entry of the word list `--words` names (default `/usr/share/dict/words`).
@@ -198,13 +207,14 @@ def window_moves(lines: dict[int, tuple[str, str]], window: int,
     return {name: [len(hits[name]), len(wider[name])] for name in hits if wider[name] != hits[name]}
 
 
-def joined_moves(lines: dict[int, tuple[str, str]], joins: int, hits: dict[str, set[int]]) -> dict[str, str]:
+def joined_moves(lines: dict[int, tuple[str, str]], joins: int, hits: dict[str, set[int]], *,
+                 context_lines: int | None = None) -> dict[str, str]:
     """Check name -> `status` or `lines`, as `moved_checks` says them, for a
     match across a break read as nothing in some run of up to `joins`
     consecutive breaks (`attainability.join_matching_lines`, #3481)."""
     out = {}
     for check in at.CHECKS:
-        joined = at.join_matching_lines(check.pattern, lines, joins)
+        joined = at.join_matching_lines(check.pattern, lines, joins, context_lines=context_lines)
         if joined and not hits[check.name]:
             out[check.name] = "status"
         elif joined - hits[check.name]:
@@ -213,7 +223,7 @@ def joined_moves(lines: dict[int, tuple[str, str]], joins: int, hits: dict[str, 
 
 
 def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int | None = None,
-            joins_per_window: int | None = None) -> dict[str, Any]:
+            joins_per_window: int | None = None, *, join_context_lines: int | None = None) -> dict[str, Any]:
     """The counts the module docstring names, for one bundle's text."""
     raw_lines = text.split("\n")
     words = set(dictionary) | interior_words(raw_lines)
@@ -240,6 +250,11 @@ def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int |
                  "compare_mixed_windows": wider_mixed, "compare_most_in_one_window": wider_most}
     if joins_per_window:
         wider["moved_if_up_to_k_breaks_join"] = joined_moves(lines, joins_per_window, hits)
+    if join_context_lines is not None:
+        if type(joins_per_window) is not int or joins_per_window < 1:
+            raise ValueError("join_context_lines requires a positive joins_per_window")
+        wider["moved_with_join_context"] = joined_moves(lines, joins_per_window, hits,
+                                                       context_lines=join_context_lines)
     return {"lines": len(raw_lines), "letter_breaks": len(breaks), "joinable_breaks": len(joinable),
             "split_words": splits, "wraps_that_join": joins, "moved": moved,
             "moved_if_every_break_joins": moved_all, **wider,
@@ -256,7 +271,7 @@ def load_words(path: Path | None) -> tuple[set[str], dict[str, Any]]:
 
 
 def report(corpus: Path, words_path: Path | None, compare_window: int | None = None,
-           joins_per_window: int | None = None) -> dict[str, Any]:
+           joins_per_window: int | None = None, *, join_context_lines: int | None = None) -> dict[str, Any]:
     from data_sheets_schema.corpus import anchored
     dictionary, identity = load_words(words_path)
     versions, unreadable = bundle_versions(anchored(corpus))
@@ -269,24 +284,32 @@ def report(corpus: Path, words_path: Path | None, compare_window: int | None = N
             rows.append({"bundle": path, "md5": md5, "records": records, "error": str(exc)})
             continue
         rows.append({"bundle": path, "md5": md5, "records": records, "source": basis["source"],
-                     **measure(text, dictionary, compare_window, joins_per_window)})
+                     **({"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw), "bundle_basis": basis}
+                        if join_context_lines is not None else {}),
+                     **measure(text, dictionary, compare_window, joins_per_window,
+                               join_context_lines=join_context_lines)})
     return {"words": identity, "mixed_window_lines": at.MIXED_WINDOW_LINES, "compare_window": compare_window,
             "joins_per_window": joins_per_window,
+            **({"join_context_lines": join_context_lines,
+                "join_context_outer_hyphens": list(at.HYPHEN_READINGS)} if join_context_lines is not None else {}),
             "unreadable_records": unreadable, "rows": rows}
 
 
 def markdown(result: dict[str, Any]) -> str:
-    words, k = result["words"], result.get("joins_per_window")
+    words, k, context = result["words"], result.get("joins_per_window"), result.get("join_context_lines")
     out = [f"Word list: `{words['path']}` (sha256 `{words['sha256']}`, {words['entries']} entries), "
            "plus each bundle's own line-interior tokens.", "",
            "| Bundle | md5 | Records | Letter/letter breaks | Split words | Wraps that join | Checks moved | "
            "Breaks joined | Moved if every break joins | Hyphenated breaks | Mixed windows | Most in one |"
-           + (f" Moved if up to {k} breaks join |" if k else ""),
-           "|---|---|---:|---:|---|---:|---|---:|---|---:|---:|---:|" + ("---|" if k else "")]
+           + (f" Moved if up to {k} breaks join |" if k else "")
+           + (f" Moved with {context}-line join context |" if context else ""),
+           "|---|---|---:|---:|---|---:|---|---:|---|---:|---:|---:|" + ("---|" if k else "")
+           + ("---|" if context else "")]
     for r in result["rows"]:
         if "error" in r:
             out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | "
-                       f"not measured: {r['error']} | | | | | | | | |" + (" |" if k else ""))
+                       f"not measured: {r['error']} | | | | | | | | |" + (" |" if k else "")
+                       + (" |" if context else ""))
             continue
         splits = ", ".join(f"{s['tail']}/{s['head']} (line {s['line']})" for s in r["split_words"]) or "0"
         moved, moved_all, moved_k = (", ".join(f"{name} ({v})" for name, v in sorted(m.items())) or "none"
@@ -295,7 +318,13 @@ def markdown(result: dict[str, Any]) -> str:
         out.append(f"| `{Path(r['bundle']).name}` | `{r['md5'][:8]}` | {r['records']} | {r['letter_breaks']} | "
                    f"{splits} | {r['wraps_that_join']} | {moved} | {r['joinable_breaks']} | {moved_all} | "
                    f"{r['hyphenated_breaks']} | "
-                   f"{r['mixed_windows']} | {r['most_in_one_window']} |" + (f" {moved_k} |" if k else ""))
+                   f"{r['mixed_windows']} | {r['most_in_one_window']} |" + (f" {moved_k} |" if k else "")
+                   + ((" " + (", ".join(f"{name} ({v})" for name, v in sorted(r["moved_with_join_context"].items()))
+                              or "none") + " |") if context else ""))
+    if context:
+        out += ["", f"Join context: at most {context} lines, joins in one run of {k} consecutive breaks; "
+                    "outer hyphens read uniformly as space, drop or keep. Arbitrary mixed outer-hyphen "
+                    "readings combined with joins are not searched. Older columns are unchanged."]
     if result["compare_window"]:
         moved = [f"`{Path(r['bundle']).name}` `{r['md5'][:8]}`: "
                  + ", ".join(f"{k} {a} -> {b} lines" for k, (a, b) in sorted(r["window_moves"].items()))
@@ -330,6 +359,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--joins-per-window", type=int, metavar="K",
                         help="also report the checks a match moves when up to K consecutive breaks are read "
                              "as nothing at once, every combination (#3481)")
+    parser.add_argument("--join-context-lines", type=int, metavar="W",
+                        help="add the gate's contextual join column; requires --joins-per-window K and W >= K+1")
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     words = None if args.no_word_list else args.words
@@ -342,11 +373,17 @@ def main(argv: list[str] | None = None) -> int:
     if args.joins_per_window is not None and args.joins_per_window < 1:
         print("--joins-per-window must be at least 1 break", file=sys.stderr)
         return 2
-    result = report(args.corpus, words, args.compare_window, args.joins_per_window)
+    if args.join_context_lines is not None and (args.joins_per_window is None or
+                                               args.join_context_lines < args.joins_per_window + 1):
+        print("--join-context-lines requires --joins-per-window K and at least K+1 lines", file=sys.stderr)
+        return 2
+    result = report(args.corpus, words, args.compare_window, args.joins_per_window,
+                    **({"join_context_lines": args.join_context_lines} if args.join_context_lines is not None else {}))
     sys.stdout.write(json.dumps(result, indent=2) + "\n" if args.json else markdown(result))
     # The table is printed either way, but a corpus with a record that could
     # not be read is incomplete, and that is not a success (#3579).
-    return 1 if result["unreadable_records"] else 0
+    return 1 if result["unreadable_records"] or (args.join_context_lines is not None and
+                                                any("error" in row for row in result["rows"])) else 0
 
 
 if __name__ == "__main__":
