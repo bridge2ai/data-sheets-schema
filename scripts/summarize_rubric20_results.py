@@ -16,6 +16,9 @@ Output:
 import json
 import csv
 import html
+import argparse
+import hashlib
+import io
 from pathlib import Path
 from typing import List, Dict, NamedTuple
 from datetime import datetime
@@ -251,9 +254,16 @@ def questions_of(result: Dict) -> List[Dict]:
             for q in category.get('questions') or []]
 
 
-def create_csv_summary(results: List[Dict]):
+DISCLOSURE_COLUMNS = (
+    'model_disclosure_policy', 'disclosure_rating', 'declared_evaluator',
+    'evaluator_family', 'generator', 'generator_family', 'same_family',
+    'generation_binding', 'evaluation_resolved_path', 'evaluation_sha256',
+    'model_disclosure_limitations',
+)
+
+
+def _csv_summary_text(results: List[Dict], *, disclosure_rows=None):
     """Preserve raw rates separately; legacy score columns now name one basis."""
-    csv_path = EVAL_DIR / "all_scores.csv"
     rows = []
     for result in sorted(results, key=result_order):
         key = cohort_key(result)
@@ -280,9 +290,18 @@ def create_csv_summary(results: List[Dict]):
               for name in ('percentage', 'normalized_percentage', 'fixed_percentage')],
             key.instrument, key.context, key.scope,
         ])
-    with csv_path.open('w', newline='', encoding='utf-8') as stream:
+        if disclosure_rows is not None:
+            from data_sheets_schema.model_disclosure import DISCLAIMER, VERSION
+            declared = disclosure_rows[result['_evaluation_file']]
+            values = [VERSION, declared['rating'],
+                      *[declared[k] for k in ('evaluator', 'evaluator_family', 'generator',
+                                              'generator_family', 'same_family', 'association_status',
+                                              'evaluation_resolved_path', 'evaluation_sha256')],
+                      DISCLAIMER]
+            rows[-1].extend('unknown' if value is None else value for value in values)
+    with io.StringIO(newline='') as stream:
         writer = csv.writer(stream, lineterminator='\n')
-        writer.writerow([
+        columns = [
             'project', 'method', 'type', 'file',
             'total_score', 'max_score', 'percentage',
             'cat1_structural', 'cat2_metadata', 'cat3_technical', 'cat4_fairness',
@@ -291,8 +310,18 @@ def create_csv_summary(results: List[Dict]):
             'score_basis', 'score_mode', 'adjusted_max_score', 'adjusted_percentage',
             'excluded_items', 'reported_percentage', 'reported_normalized_percentage',
             'reported_fixed_percentage', 'instrument_sha256', 'context_sha256', 'evaluation_scope',
-        ])
+        ]
+        writer.writerow(columns + (list(DISCLOSURE_COLUMNS) if disclosure_rows is not None else []))
         writer.writerows(rows)
+        return stream.getvalue()
+
+
+def create_csv_summary(results: List[Dict]):
+    """Write the unchanged default CSV to the historical destination."""
+    csv_path = EVAL_DIR / "all_scores.csv"
+    text = _csv_summary_text(results)
+    with csv_path.open('w', newline='', encoding='utf-8') as stream:
+        stream.write(text)
     print(f"CSV summary created: {csv_path} ({len(results)} evaluations)")
 
 
@@ -304,7 +333,7 @@ def table_row(values) -> str:
     return '| ' + ' | '.join(cell(value) for value in values) + ' |\n'
 
 
-def create_markdown_table(results: List[Dict]):
+def _markdown_table_text(results: List[Dict]):
     """List every concatenated rating and summarize individuals within cohorts."""
     cohorts = summary_cohorts(results)
     md = ("# Rubric20 Evaluation Summary\n\n"
@@ -375,12 +404,16 @@ def create_markdown_table(results: List[Dict]):
             md += table_row([result.get('project', 'unknown'), result.get('method', 'unknown'),
                              key.kind, f'{bases.total:g}/{bases.fixed_max:g} ({bases.fixed_percentage:.1f}%)',
                              result.get('d4d_file', ''), result.get('_evaluation_file', 'unrecorded')])
+    return md
+
+
+def create_markdown_table(results: List[Dict]):
     md_path = EVAL_DIR / 'summary_table.md'
-    md_path.write_text(md, encoding='utf-8')
+    md_path.write_text(_markdown_table_text(results), encoding='utf-8')
     print(f'Markdown table created: {md_path}')
 
 
-def create_detailed_report(results: List[Dict]):
+def _detailed_report_text(results: List[Dict]):
     """All aggregates and discrimination use the same recorded cohort identity."""
     report = ('# Rubric20 Detailed Evaluation Report\n\n'
               f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
@@ -441,12 +474,94 @@ def create_detailed_report(results: List[Dict]):
             scope=f', {kind} evaluations by {who} scored out of {maximum:g}',
             evaluator=who, measured_on=measured_on)) + '\n'
 
+    return report
+
+
+def create_detailed_report(results: List[Dict]):
     report_path = EVAL_DIR / 'summary_report.md'
-    report_path.write_text(report, encoding='utf-8')
+    report_path.write_text(_detailed_report_text(results), encoding='utf-8')
     print(f'Detailed report created: {report_path}')
 
 
-if __name__ == "__main__":
+def _disclosed_inputs(evaluation_root, bindings, disclosure_root):
+    """Keep raw-byte identities separate from loader-only record-kind tags."""
+    from data_sheets_schema.model_disclosure import build_report
+
+    captured = []
+    for kind, pattern in (("individual", "individual/**/*_evaluation.json"),
+                          ("concatenated", "concatenated/*_evaluation.json")):
+        for path in sorted(evaluation_root.glob(pattern)):
+            resolved = path.resolve()
+            raw = path.read_bytes()
+            original = json.loads(raw)
+            if not isinstance(original, dict):
+                raise ValueError(f'{path}: expected an evaluation object')
+            # These two keys belong to the summary, never the evaluator's
+            # original type declarations or the disclosure authority (#4314).
+            result = {**original, 'evaluation_type': kind,
+                      '_evaluation_file': path.relative_to(evaluation_root).as_posix()}
+            captured.append((result, path, str(resolved), hashlib.sha256(raw).hexdigest()))
+    if not captured:
+        raise ValueError('no evaluation results found')
+    captured.sort(key=lambda row: result_order(row[0]))
+    disclosure = build_report([row[1] for row in captured], bindings=bindings,
+                              root=disclosure_root)
+    results, by_file = [], {}
+    for (result, path, resolved, digest), declared in zip(captured, disclosure['rows'], strict=True):
+        if (declared['evaluation_resolved_path'] != resolved or
+                declared['evaluation_sha256'] != digest):
+            raise ValueError(f'{path}: evaluation changed between score and disclosure capture')
+        results.append(result)
+        by_file[result['_evaluation_file']] = declared
+    return results, disclosure, by_file
+
+
+def _disclosure_appendix(results, disclosure):
+    from data_sheets_schema.model_disclosure import render
+
+    text = ['\n## Model disclosure cohort membership\n\n',
+            'Each rating below belongs to the exact existing summary cohort stated here. '
+            'Family labels do not change scores, grouping, membership or ordering. '
+            'An aggregate has no single member’s generator or same-family claim.\n\n',
+            '| Disclosure rating | Evaluation file | Resolved evaluation | Evaluation SHA256 | Summary cohort |\n',
+            '|---|---|---|---|---|\n']
+    for result, declared in zip(results, disclosure['rows'], strict=True):
+        text.append(table_row([declared['rating'], result['_evaluation_file'],
+                               declared['evaluation_resolved_path'], declared['evaluation_sha256'],
+                               json.dumps(cohort_key(result)._asdict(), sort_keys=True, ensure_ascii=False)]))
+    text.append('\n')
+    text.append('\n'.join('#' + line if line.startswith('#') else line
+                          for line in render(disclosure).rstrip('\n').splitlines()) + '\n')
+    return ''.join(text)
+
+
+def write_disclosed_summaries(evaluation_root: Path, output_dir: Path, *,
+                              generation_bindings=(), disclosure_root: Path | None = None):
+    """Publish a declared-v1 summary set exclusively, retaining partial failures.
+
+    All source captures and report contents are validated before directory
+    creation. A publication race leaves any new partial outputs as evidence;
+    neither existing files nor another writer's files are removed or replaced.
+    """
+    evaluation_root, output_dir = Path(evaluation_root), Path(output_dir)
+    if output_dir.exists() or output_dir.is_symlink():
+        raise ValueError('model disclosure output directory must be new')
+    results, disclosure, by_file = _disclosed_inputs(
+        evaluation_root, generation_bindings, disclosure_root)
+    appendix = _disclosure_appendix(results, disclosure)
+    texts = {'all_scores.csv': _csv_summary_text(results, disclosure_rows=by_file),
+             'summary_table.md': _markdown_table_text(results) + appendix,
+             'summary_report.md': _detailed_report_text(results) + appendix}
+    # mkdir without exist_ok also refuses late symlinks or existing directories.
+    output_dir.mkdir()
+    for name, text in texts.items():
+        with (output_dir / name).open('x', encoding='utf-8', newline='') as stream:
+            stream.write(text)
+    return {'policy': 'declared-v1', 'ratings': len(results),
+            'outputs': {name: str(output_dir / name) for name in texts}}
+
+
+def _legacy_main():
     print("=" * 60)
     print("Rubric20 Results Summary Generator")
     print("=" * 60)
@@ -479,3 +594,35 @@ if __name__ == "__main__":
     print("  cat data/evaluation_llm/rubric20/summary_report.md")
     print("  open data/evaluation_llm/rubric20/all_scores.csv")
     print()
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--model-disclosure', choices=('declared-v1',))
+    parser.add_argument('--evaluation-root', type=Path,
+                        help='rubric20 evaluation directory; same legacy membership rules')
+    parser.add_argument('--output-dir', type=Path, help='new directory for the opt-in summaries')
+    parser.add_argument('--generation-binding', nargs=3, action='append', type=Path,
+                        metavar=('EVALUATION', 'INPUT', 'PROVENANCE'))
+    parser.add_argument('--disclosure-root', type=Path,
+                        help='explicit root for paths recorded inside generation evidence')
+    args = parser.parse_args(argv)
+    if args.model_disclosure is None:
+        if any(value is not None for value in (args.evaluation_root, args.output_dir,
+                                               args.generation_binding, args.disclosure_root)):
+            parser.error('disclosure options require --model-disclosure declared-v1')
+        return _legacy_main()
+    if args.output_dir is None:
+        parser.error('model disclosure requires --output-dir naming a new directory')
+    from data_sheets_schema.model_disclosure import GenerationBinding
+    try:
+        result = write_disclosed_summaries(args.evaluation_root or EVAL_DIR, args.output_dir,
+            generation_bindings=[GenerationBinding(*triple) for triple in args.generation_binding or ()],
+            disclosure_root=args.disclosure_root)
+    except (ValueError, OSError) as exc:
+        parser.error(str(exc))
+    print(json.dumps(result, sort_keys=True))
+
+
+if __name__ == '__main__':
+    main()
