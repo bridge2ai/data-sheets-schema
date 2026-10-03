@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/model-disclosure/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Declared model-family disclosure - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#declared-model-family-disclosure" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Declared model-family disclosure
             
           </span>
         </div>
@@ -309,69 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -384,110 +321,74 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/model-disclosure.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
+<h1 id="declared-model-family-disclosure">Declared model-family disclosure</h1>
+<p><code>report_model_disclosure.py</code> is an additive offline report for explicitly named
+rating JSON files. It accepts semantic and legacy hybrid ratings, keeps repeated
+ratings as separate rows, and never computes or changes scores. Its
+<code>model-disclosure-v1</code> output is separate from the registered semantic comparison
+report and its archived implementations. Existing summary scripts and reports
+retain their behavior.</p>
+<pre><code class="language-bash">PYTHONPATH=src poetry run python scripts/report_model_disclosure.py \
+  rating.json older-hybrid-rating.json \
+  --generation-binding rating.json generated.yaml provenance.yaml \
+  --root /path/to/the/recorded/tree --format json --output new-disclosure.json
 </code></pre>
-
-</details>
+<p>Omit <code>--output</code> to print to stdout. Markdown is the default; <code>--format csv</code> and
+<code>--format json</code> expose the same per-rating fields. Output files must be new;
+existing files, including symlinks and hardlinks, are refused. Input arguments
+use the caller's normal filesystem paths. <code>--root</code> anchors relative paths
+<em>recorded inside</em> the evaluation and provenance; it defaults to the current
+working directory. It does not select an ambient study or discover records.</p>
+<p>Each repeatable <code>--generation-binding EVALUATION INPUT PROVENANCE</code> names one
+explicit association. It must name an evaluation included in the report and
+cannot be repeated for that file. A repeated evaluation argument still produces
+another rating row with the same supplied binding. Named files are captured
+once; parsing and reported hashes use those captured bytes. Every row includes
+its evaluation identity/hash, declared evaluator and evaluation type, supplied
+input/provenance identities and hashes, generator association checks, model
+families and <code>yes</code>, <code>no</code> or <code>unknown</code> same-family status.</p>
+<p>An association requires a recorded input path or verified evaluation-input hash,
+a matching provenance <code>outputs.full.path</code> or <code>outputs.core.path</code>, agreement with
+every evaluation-declared project/method/label, and a recorded generation model.
+Missing evidence produces an explicit unknown row. A supplied contradictory
+binding refuses the report before writing an output. Bare filename-only
+<code>d4d_file</code> values require a matching input hash; they cannot establish association
+on their own. Missing historical provenance output hashes are permitted and
+shown as absent checks. Any supplied output SHA256/MD5 or byte count must match.
+These checks associate supplied local declarations; they do not authenticate
+provider responses, establish an original registration, or prove absence of
+manual edits to historical files.</p>
+<p>The v1 input-hash contract checks <code>metadata.input_sha256</code>,
+<code>metadata.d4d_file_hash</code> and top-level <code>input_sha256</code> as SHA256. The legacy rubric
+schemas and the hybrid/API writers define <code>d4d_file_hash</code> as SHA256; its historical
+<code>sha256:</code> prefix is accepted. All declared hashes must match, not just one. A
+bare 32-character value is not guessed to be MD5. Provenance output <code>sha256</code> and
+<code>md5</code> fields explicitly select their own algorithms. The supported recorded
+input paths are <code>d4d_file</code>, <code>input_file</code> and <code>input_path</code> at the top level or in
+<code>metadata</code>; unrelated context/rubric/bundle hashes are not input hashes.</p>
+<p>Evaluator identity uses the shared precedence <code>model.evaluator_model</code>,
+<code>model.model_id</code>, then <code>model.name</code>. Generator identity comes only from the
+associated provenance's <code>model.model</code>, then <code>model.name</code>. A method such as
+<code>gpt5</code>, a filename, evaluation <code>metadata.generator</code>, current configuration or
+default model never supplies a generator identity. Missing or malformed model
+values remain unknown. Known LLM evaluation types (<code>semantic_llm_judge</code>,
+<code>llm_as_judge</code>, <code>llm_judge</code>, <code>llm</code>) and legacy absent types permit family lookup;
+other declared types remain visible with unknown evaluator family, even if their
+display name resembles an LLM. <code>model.evaluation_type</code> takes display precedence
+over the top-level field; both declarations are retained. Conflicting or
+malformed declarations conservatively keep family comparison unknown, including
+false, empty strings and collection-valued types. Families use the existing declared-model helper,
+so <code>google/claude-...</code> denotes the Claude family regardless of routing vendor.</p>
+<p>This family flag does not measure self-preference, calibration or evaluator
+independence. An unknown model is not evidence of a different family. Historical
+output refresh/consumer integration remains under #3327, and empirical
+cross-family calibration remains separate (#3328).</p>
 
 
 
