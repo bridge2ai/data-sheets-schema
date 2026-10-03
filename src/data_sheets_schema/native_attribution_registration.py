@@ -172,160 +172,200 @@ def command_kind(command, spec):
     return None  # other commands are outside this adapter's permission scope
 
 
-def verify_history(registration_raw, events):
-    """Check supplied ordered native events against current saved draft bytes.
+class NativeAttributionState:
+    """One ordered draft state machine for offline replay and callback observation.
 
-    This is an offline verifier, not an authenticated event recorder. It never
-    treats model prose as tool evidence. A future controller must preserve the
-    actual event stream and enforce the same boundaries before dispatch.
+    ``live=True`` checks saved bytes at each passing-result boundary and again
+    before later callback observation. It grants no execution permission alone.
     """
-    from data_sheets_schema import source_attribution_preflight as preflight
-    spec, reg = verified(registration_raw)
-    if not isinstance(events, list):
-        raise ValueError('native events must be an ordered list')
-    problems, observations = [], []
-    pending, seen = {}, set()
-    epoch, checks = 0, 0
-    accepted = None
-    terminal = False
-    paths = spec._agentic_artifact_paths
-    protected = {Path(p).resolve() for p in (paths['full'], paths['core'], spec.bundle, spec.chunk_manifest,
-                 Path(paths['core']).parent / 'evidence/original_full.yaml',
-                 Path(paths['core']).parent / 'evidence/original_core.yaml',
-                 Path(paths['core']).parent / 'evidence/audit.json')}
-    if spec.manifest_used:
-        protected.add(Path(spec.manifest).resolve())
-    report = Path(paths['report']).resolve()
 
-    def problem(index, text):
-        problems.append(f'event {index}: {text}')
+    def __init__(self, registration_raw, *, live=False):
+        spec, reg = verified(registration_raw)
+        problems, observations = [], []
+        pending, seen = {}, set()
+        epoch, checks = 0, 0
+        accepted = None
+        terminal = False
+        paths = spec._agentic_artifact_paths
+        protected = {Path(p).resolve() for p in (paths['full'], paths['core'], spec.bundle, spec.chunk_manifest,
+                     Path(paths['core']).parent / 'evidence/original_full.yaml',
+                     Path(paths['core']).parent / 'evidence/original_core.yaml',
+                     Path(paths['core']).parent / 'evidence/audit.json')}
+        if spec.manifest_used:
+            protected.add(Path(spec.manifest).resolve())
+        report = Path(paths['report']).resolve()
 
-    for index, event in enumerate(events):
-        if not isinstance(event, dict):
-            problem(index, 'event is not a mapping'); continue
-        message = event.get('message')
-        if message is None:
-            continue  # init/status events have no tool obligations
-        content = message.get('content') if isinstance(message, dict) else None
-        if not isinstance(content, list):
-            problem(index, 'message content is not an array'); continue
-        for item in content:
-            if not isinstance(item, dict):
-                problem(index, 'message block is not a mapping'); continue
-            if item.get('type') == 'tool_use':
-                if event.get('type') != 'assistant':
-                    problem(index, 'tool call is not an assistant event'); continue
-                identity, name, args = item.get('id'), item.get('name'), item.get('input')
-                if not isinstance(identity, str) or not identity or identity in seen or not isinstance(args, dict):
-                    problem(index, 'missing/duplicate tool identity or malformed inputs'); continue
-                seen.add(identity)
-                if name not in ('Read', 'Write', 'Bash'):
-                    problem(index, 'tool is outside the native Read/Write/Bash contract')
-                    epoch += 1; accepted = None
-                if terminal:
-                    problem(index, 'tool continuation after a terminal or unusable check')
-                kind = None
-                if name == 'Bash':
-                    try:
-                        kind = command_kind(args.get('command'), spec)
-                    except ValueError as exc:
-                        problem(index, str(exc))
-                    if kind and args.get('run_in_background') not in (None, False):
-                        problem(index, 'selected helper cannot run in background')
-                    if kind is None:
-                        epoch += 1; accepted = None  # unknown shell effects cannot preserve a draft pass
-                elif name in ('Write', 'Edit', 'MultiEdit'):
-                    epoch += 1; accepted = None
-                    target = args.get('file_path')
-                    if checks and (not isinstance(target, str) or Path(target).resolve() != report):
-                        problem(index, 'draft correction permits only the registered report path')
-                    if checks and isinstance(target, str) and Path(target).resolve() in protected:
-                        problem(index, 'draft correction attempts to change a protected input or record')
-                if kind == 'draft':
-                    checks += 1
-                    accepted = None
-                    if checks > reg['max_draft_checks']:
-                        problem(index, 'registered draft-check limit exceeded')
-                    if pending:
-                        problem(index, 'draft check overlaps an unresolved tool call')
-                if kind == 'final_evidence' and (accepted is None or accepted['epoch'] != epoch or pending):
-                    problem(index, 'final evidence check precedes a current settled draft pass')
-                pending[identity] = {'kind': kind, 'epoch': epoch, 'call_event': index}
-            elif item.get('type') == 'tool_result':
-                if event.get('type') != 'user':
-                    problem(index, 'tool result is not a user event'); continue
-                row = pending.pop(item.get('tool_use_id'), None)
-                if row is None:
-                    problem(index, 'result has no unique pending call'); continue
-                kind = row['kind']
-                if kind is None:
-                    continue
-                meta = event.get('tool_use_result')
-                meta = meta if isinstance(meta, dict) else {}
-                exit_code = meta.get('exitCode', meta.get('exit_code'))
-                # Every supplied alias is authority. Python numeric equality
-                # would let False/0.0 impersonate an integer zero (#4305).
-                exits = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
-                explicit = bool(exits) and all(type(code) is int and code == exit_code for code in exits)
-                failed = (not explicit or exit_code != 0 or item.get('is_error') is not False
-                          or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')))
-                if kind != 'draft':
-                    if failed:
-                        terminal = True; accepted = None
-                        problem(index, 'terminal evidence/source-inventory check failed or has unusable result')
-                    continue
-                observation = {'tool_use_id': item['tool_use_id'], **row, 'result_event': index,
-                               'exit_code': exit_code, 'reported_passed': False,
-                               'verified_against_current_saved_bytes': False}
-                observations.append(observation)
-                try:
-                    payload = _json(item.get('content'))
-                    if not isinstance(payload, dict):
-                        raise ValueError('draft result is not an object')
-                    if 'stdout' in meta and _encoded(_json(meta['stdout'])) != _encoded(payload):
-                        raise ValueError('tool output and stdout disagree')
-                    if type(payload.get('checked')) is not bool or type(payload.get('passed')) is not bool:
-                        raise ValueError('draft result lacks strict checked/passed states')
-                    if not explicit or exit_code not in (0, 1) or payload['checked'] is not True:
-                        raise ValueError('unusable draft result')
-                    if exit_code != preflight.exit_status(payload) or item.get('is_error') is not bool(exit_code):
-                        raise ValueError('draft tool status contradicts its checker result')
-                    if any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')):
-                        raise ValueError('draft result is interrupted or pending')
-                    if exit_code == 0:
-                        hashes = payload.get('input_sha256')
-                        required = {'report', 'final_full'} | set(reg['inputs'])
-                        if (not isinstance(hashes, dict) or set(hashes) != required
-                                or any(not isinstance(h, str) or len(h) != 64
-                                       or any(c not in '0123456789abcdef' for c in h) for h in hashes.values())
-                                or any(hashes[k] != v['sha256'] for k, v in reg['inputs'].items())):
-                            raise ValueError('draft pass has invalid selected input identities')
-                        if pending or row['epoch'] != epoch or terminal:
-                            raise ValueError('draft pass is stale, overlapping or after a terminal failure')
-                        accepted = {'epoch': epoch, 'payload': payload, 'observation': observation}
-                        observation['reported_passed'] = True
-                        observation['input_sha256'] = hashes
-                except (TypeError, ValueError, KeyError, OSError, RecursionError, yaml.YAMLError) as exc:
-                    terminal = True; accepted = None
-                    problem(index, str(exc))
-    if pending:
-        problems.append('history has unresolved tool calls')
-    if accepted is not None:
+        self.spec, self.reg, self.registration_raw = spec, reg, registration_raw
+        self.live = live
+        self.problems, self.observations = problems, observations
+        self.pending, self.seen = pending, seen
+        self.epoch, self.checks, self.accepted, self.terminal = epoch, checks, accepted, terminal
+        self.protected, self.report_path = protected, report
+        self.index = 0
+
+    def observe(self, event, *, preserved_shell_commands=()):
+        from data_sheets_schema import source_attribution_preflight as preflight
+        spec, reg = self.spec, self.reg
+        problems, observations = self.problems, self.observations
+        pending, seen = self.pending, self.seen
+        epoch, checks, accepted, terminal = self.epoch, self.checks, self.accepted, self.terminal
+        protected, report = self.protected, self.report_path
+        index = self.index
+        self.index += 1
+
+        def problem(index, text):
+            problems.append(f'event {index}: {text}')
+
         try:
-            current = preflight.check_files(**_arguments(spec))
-            if not current['passed'] or _encoded(current) != _encoded(accepted['payload']):
+            for event in (event,):
+                if not isinstance(event, dict):
+                    problem(index, 'event is not a mapping'); continue
+                message = event.get('message')
+                if message is None:
+                    continue  # init/status events have no tool obligations
+                content = message.get('content') if isinstance(message, dict) else None
+                if not isinstance(content, list):
+                    problem(index, 'message content is not an array'); continue
+                for item in content:
+                    if not isinstance(item, dict):
+                        problem(index, 'message block is not a mapping'); continue
+                    if item.get('type') == 'tool_use':
+                        if event.get('type') != 'assistant':
+                            problem(index, 'tool call is not an assistant event'); continue
+                        identity, name, args = item.get('id'), item.get('name'), item.get('input')
+                        if not isinstance(identity, str) or not identity or identity in seen or not isinstance(args, dict):
+                            problem(index, 'missing/duplicate tool identity or malformed inputs'); continue
+                        seen.add(identity)
+                        if name not in ('Read', 'Write', 'Bash'):
+                            problem(index, 'tool is outside the native Read/Write/Bash contract')
+                            epoch += 1; accepted = None
+                        if terminal:
+                            problem(index, 'tool continuation after a terminal or unusable check')
+                        kind = None
+                        if name == 'Bash':
+                            try:
+                                kind = command_kind(args.get('command'), spec)
+                            except ValueError as exc:
+                                problem(index, str(exc))
+                            if kind and args.get('run_in_background') not in (None, False):
+                                problem(index, 'selected helper cannot run in background')
+                            if kind is None and not (self.live and args.get('command') in preserved_shell_commands):
+                                epoch += 1; accepted = None  # unknown shell effects cannot preserve a draft pass
+                        elif name in ('Write', 'Edit', 'MultiEdit'):
+                            epoch += 1; accepted = None
+                            target = args.get('file_path')
+                            if checks and (not isinstance(target, str) or Path(target).resolve() != report):
+                                problem(index, 'draft correction permits only the registered report path')
+                            if checks and isinstance(target, str) and Path(target).resolve() in protected:
+                                problem(index, 'draft correction attempts to change a protected input or record')
+                        if kind == 'draft':
+                            checks += 1
+                            accepted = None
+                            if checks > reg['max_draft_checks']:
+                                problem(index, 'registered draft-check limit exceeded')
+                            if pending:
+                                problem(index, 'draft check overlaps an unresolved tool call')
+                        if kind == 'final_evidence' and (accepted is None or accepted['epoch'] != epoch or pending):
+                            problem(index, 'final evidence check precedes a current settled draft pass')
+                        pending[identity] = {'kind': kind, 'epoch': epoch, 'call_event': index}
+                    elif item.get('type') == 'tool_result':
+                        if event.get('type') != 'user':
+                            problem(index, 'tool result is not a user event'); continue
+                        row = pending.pop(item.get('tool_use_id'), None)
+                        if row is None:
+                            problem(index, 'result has no unique pending call'); continue
+                        kind = row['kind']
+                        if kind is None:
+                            continue
+                        meta = event.get('tool_use_result')
+                        meta = meta if isinstance(meta, dict) else {}
+                        exit_code = meta.get('exitCode', meta.get('exit_code'))
+                        # Every supplied alias is authority. Python numeric equality
+                        # would let False/0.0 impersonate an integer zero (#4305).
+                        exits = [meta[k] for k in ('exitCode', 'exit_code') if k in meta]
+                        explicit = bool(exits) and all(type(code) is int and code == exit_code for code in exits)
+                        failed = (not explicit or exit_code != 0 or item.get('is_error') is not False
+                                  or any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')))
+                        if kind != 'draft':
+                            if failed:
+                                terminal = True; accepted = None
+                                problem(index, 'terminal evidence/source-inventory check failed or has unusable result')
+                            continue
+                        observation = {'tool_use_id': item['tool_use_id'], **row, 'result_event': index,
+                                       'exit_code': exit_code, 'reported_passed': False,
+                                       'verified_against_current_saved_bytes': False}
+                        observations.append(observation)
+                        try:
+                            payload = _json(item.get('content'))
+                            if not isinstance(payload, dict):
+                                raise ValueError('draft result is not an object')
+                            if 'stdout' in meta and _encoded(_json(meta['stdout'])) != _encoded(payload):
+                                raise ValueError('tool output and stdout disagree')
+                            if type(payload.get('checked')) is not bool or type(payload.get('passed')) is not bool:
+                                raise ValueError('draft result lacks strict checked/passed states')
+                            if not explicit or exit_code not in (0, 1) or payload['checked'] is not True:
+                                raise ValueError('unusable draft result')
+                            if exit_code != preflight.exit_status(payload) or item.get('is_error') is not bool(exit_code):
+                                raise ValueError('draft tool status contradicts its checker result')
+                            if any(meta.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id')):
+                                raise ValueError('draft result is interrupted or pending')
+                            if exit_code == 0:
+                                hashes = payload.get('input_sha256')
+                                required = {'report', 'final_full'} | set(reg['inputs'])
+                                if (not isinstance(hashes, dict) or set(hashes) != required
+                                        or any(not isinstance(h, str) or len(h) != 64
+                                               or any(c not in '0123456789abcdef' for c in h) for h in hashes.values())
+                                        or any(hashes[k] != v['sha256'] for k, v in reg['inputs'].items())):
+                                    raise ValueError('draft pass has invalid selected input identities')
+                                if pending or row['epoch'] != epoch or terminal:
+                                    raise ValueError('draft pass is stale, overlapping or after a terminal failure')
+                                accepted = {'epoch': epoch, 'payload': payload, 'observation': observation}
+                                observation['reported_passed'] = True
+                                observation['input_sha256'] = hashes
+                        except (TypeError, ValueError, KeyError, OSError, RecursionError, yaml.YAMLError) as exc:
+                            terminal = True; accepted = None
+                            problem(index, str(exc))
+        finally:
+            self.epoch, self.checks, self.accepted, self.terminal = epoch, checks, accepted, terminal
+        if self.live and self.accepted is not None:
+            self._check_current(self.problems)
+
+    def _check_current(self, problems):
+        from data_sheets_schema import source_attribution_preflight as preflight
+        try:
+            current = preflight.check_files(**_arguments(self.spec))
+            if not current['passed'] or _encoded(current) != _encoded(self.accepted['payload']):
                 problems.append('draft pass differs from actual checker on current saved bytes')
             else:
-                accepted['observation']['verified_against_current_saved_bytes'] = True
+                self.accepted['observation']['verified_against_current_saved_bytes'] = True
         except (TypeError, ValueError, KeyError, OSError, RecursionError, yaml.YAMLError) as exc:
             problems.append(f'current draft cannot be verified: {exc}')
-    else:
-        problems.append('no current passing draft check')
-    return {'instrument': 'native source attribution offline history v1', 'execution': EXECUTION,
-            'scope': SCOPE, 'registration_sha256': _sha(registration_raw), 'checks': checks,
-            'max_draft_checks': reg['max_draft_checks'], 'observations': observations,
-            'draft_gate_passed': accepted is not None and not problems,
-            'terminal_failure_observed': terminal, 'problems': problems}
+
+    def report(self, *, complete=False):
+        from copy import deepcopy
+        problems = list(self.problems)
+        if complete:
+            if self.pending:
+                problems.append('history has unresolved tool calls')
+            if self.accepted is not None:
+                self._check_current(problems)
+            else:
+                problems.append('no current passing draft check')
+        return {'instrument': 'native source attribution offline history v1', 'execution': EXECUTION,
+                'scope': SCOPE, 'registration_sha256': _sha(self.registration_raw), 'checks': self.checks,
+                'max_draft_checks': self.reg['max_draft_checks'], 'observations': deepcopy(self.observations),
+                'draft_gate_passed': self.accepted is not None and not problems and not self.pending,
+                'terminal_failure_observed': self.terminal, 'problems': problems}
+
+
+def verify_history(registration_raw, events):
+    """Review a completed supplied trace; earlier superseded passes stay historical."""
+    if not isinstance(events, list):
+        raise ValueError('native events must be an ordered list')
+    state = NativeAttributionState(registration_raw)
+    for event in events:
+        state.observe(event)
+    return state.report(complete=True)
 
 
 def main(argv=None):
