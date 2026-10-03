@@ -100,7 +100,7 @@ def fabricated_manifest(expected, neutral, source_raw):
         records.append({'kind':'decision','request':callback,'classification':kind,'basis':reason,
             'response':{'type':'control_response','response':{'subtype':'success','request_id':'callback-'+identity,
                         'response':native.hook_output(kind,reason)}}})
-    events.append({'type':'result','is_error':False,'terminal_reason':'completed','stop_reason':'end_turn',
+    events.append({'type':'result','session_id':session,'is_error':False,'terminal_reason':'completed','stop_reason':'end_turn',
                    'permission_denials':[{'tool_use_id':r['id']} for r in cases if not r['allow']]})
     files = {'policy.json':json.dumps(expected['policy']), 'cases.json':json.dumps(cases), 'launch.json':json.dumps(launch),
         'config.json':'{}','source.before':source,'source.after':source,'version.txt':runtime['executable']['version']+'\n',
@@ -219,3 +219,46 @@ def test_path_rewrite_and_nonmodule_helpers_are_explicitly_unsupported(fixture):
 def test_duplicate_json_keys_and_nonfinite_numbers_are_rejected(fixture):
     for raw in (b'{"kind":1,"kind":2}',b'{"value":NaN}',b'{"value":Infinity}'):
         with pytest.raises(ValueError):permission.verify_saved_probe(raw,expected=fixture['expected'])
+
+
+def completion_text(fixture):
+    # Actual committed native frame shape, with this fixture's session only.
+    # See e0a8:notes/matched_cborg_2026-09-13/native_controls/
+    # offline_fake_provider/transcript.jsonl, line 8. This is not a native call.
+    return {'type':'assistant','message':{'id':'offline_4','type':'message','role':'assistant',
+        'model':fixture['expected']['runtime']['model'],'content':[{'type':'text','text':'OFFLINE_COMPLETE'}],
+        'stop_reason':None,'stop_sequence':None,'usage':{'input_tokens':100,'output_tokens':0},
+        'context_management':None},'parent_tool_use_id':None,
+        'session_id':fixture['events'][1]['session_id'],
+        'uuid':'34b5fc8c-1cc6-456f-8e9d-352e37e8c0b5','timestamp':'2026-09-14T04:14:35.782Z'}
+
+
+def test_native_completion_text_and_settled_narration_are_usable(fixture):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events'])
+    events.insert(-1,completion_text(fixture))
+    events.insert(5,completion_text(fixture))
+    events.insert(2,completion_text(fixture))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    assert permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])['passed']
+
+
+@pytest.mark.parametrize('change',['terminal_missing_session','terminal_foreign_session','terminal_bool_session',
+    'text_foreign_session','text_missing_session','text_child_session','text_contains_tool','text_after_terminal',
+    'tool_after_terminal','text_before_init','text_while_case_pending','duplicate_terminal'])
+def test_text_frames_cannot_hide_unbound_or_late_lifecycle_events(fixture,change):
+    value=deepcopy(fixture['manifest']); events=deepcopy(fixture['events']); text=completion_text(fixture)
+    if change=='terminal_missing_session':del events[-1]['session_id']
+    elif change=='terminal_foreign_session':events[-1]['session_id']='00000000-0000-0000-0000-000000000000'
+    elif change=='terminal_bool_session':events[-1]['session_id']=True
+    elif change=='text_foreign_session':text['session_id']='foreign';events.insert(-1,text)
+    elif change=='text_missing_session':del text['session_id'];events.insert(-1,text)
+    elif change=='text_child_session':text['parent_tool_use_id']='child';events.insert(-1,text)
+    elif change=='text_contains_tool':
+        text['message']['content'].append(deepcopy(events[2]['message']['content'][0]));events.insert(-1,text)
+    elif change=='text_after_terminal':events.append(text)
+    elif change=='tool_after_terminal':events.append(deepcopy(events[2]))
+    elif change=='text_before_init':events.insert(0,text)
+    elif change=='text_while_case_pending':events.insert(4,text)
+    else:events.append(deepcopy(events[-1]))
+    change_member(value,'transcript.jsonl',jsonlines(events))
+    with pytest.raises(ValueError):permission.verify_saved_probe(draft._encoded(value),expected=fixture['expected'])

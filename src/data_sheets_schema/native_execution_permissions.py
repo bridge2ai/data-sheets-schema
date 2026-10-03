@@ -235,6 +235,28 @@ def _result(event, case, expected, raw):
         _need('d4d_permission_stub' not in text, 'denied case contains helper execution marker')
 
 
+def _settled_text(events, offset, session):
+    """Allow ordinary assistant narration without dropping any executable frame.
+
+    Scripted native providers emit a final OFFLINE_COMPLETE assistant message
+    before the result. Text can also occur between settled cases. The caller
+    invokes this only at those boundaries, never after the terminal result.
+    """
+    while offset < len(events):
+        event = events[offset]
+        if event.get('type') != 'assistant':
+            break
+        content = (event.get('message') or {}).get('content')
+        if not (type(content) is list and content and all(type(block) is dict
+                and set(block) == {'type', 'text'} and block['type'] == 'text'
+                and type(block['text']) is str for block in content)):
+            break
+        _need(event.get('session_id') == session and event.get('parent_tool_use_id') is None,
+              'assistant text is outside the initialized parent session')
+        offset += 1
+    return offset
+
+
 def verify_saved_probe(raw_manifest: bytes, *, expected: dict) -> dict:
     """Verify captured records only. Never run a native CLI or accept a summary.
 
@@ -284,6 +306,7 @@ def _verify(raw_manifest, expected):
     request_ids = set()
     outcomes = []
     for number, case in enumerate(cases):
+        offset = _settled_text(events, offset, session)
         call, callback, result = events[offset:offset+3]; offset += 3
         _need(call.get('type') == 'assistant' and call.get('session_id') == session, 'tool call outside session/order')
         expected_block = {'type':'tool_use', 'id':case['id'], 'name':case['tool'], 'input':case['input']}
@@ -308,9 +331,11 @@ def _verify(raw_manifest, expected):
         _need(result.get('type') == 'user' and result.get('session_id') == session, 'result outside exact session/order')
         _result(result, case, expected, raw)
         outcomes.append({'id':case['id'],'admitted':case['allow'],'verified':True})
+    offset = _settled_text(events, offset, session)
     _need(len(events) == offset+1, 'extra, pending, duplicate or post-terminal evidence')
     terminal = events[offset]
-    _need(terminal.get('type') == 'result' and terminal.get('is_error') is False
+    _need(terminal.get('type') == 'result' and terminal.get('session_id') == session
+          and terminal.get('is_error') is False
           and terminal.get('terminal_reason') == 'completed' and terminal.get('stop_reason') == 'end_turn',
           'native terminal is not explicitly successful')
     denied = terminal.get('permission_denials')
