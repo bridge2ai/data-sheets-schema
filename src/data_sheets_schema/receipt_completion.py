@@ -308,7 +308,7 @@ def _usage_problems(row) -> list[str]:
     return problems
 
 
-def _reasoning_entry(spec, row, resp, model):
+def _reasoning_entry(spec, row, resp, model, *, phase=PHASE):
     from data_sheets_schema import api_runner as api, reasoning
     captured = reasoning.capture(resp)
     observed = captured.output_tokens
@@ -318,7 +318,7 @@ def _reasoning_entry(spec, row, resp, model):
                                and captured.thinking_tokens >= 0 else None)
     value = captured.to_dict()
     value['output_tokens'] = _counter_evidence(observed)
-    return {'phase': PHASE, 'label': spec.label, 'project': spec.project,
+    return {'phase': phase, 'label': spec.label, 'project': spec.project,
             'model': model, 'attempt': 1, **api._reasoning_usage(spec, row), **value}
 
 
@@ -343,10 +343,10 @@ def _count_context(client, payload, reg) -> dict:
     return value
 
 
-def _recover_reasoning(spec, response, row, payload) -> None:
+def _recover_reasoning(spec, response, row, payload, *, phase=PHASE) -> None:
     from data_sheets_schema import api_runner as api, reasoning, usage_ledger as ledger
     entry = response.get('reasoning_entry')
-    identity = {'phase': PHASE, 'label': spec.label, 'project': spec.project,
+    identity = {'phase': phase, 'label': spec.label, 'project': spec.project,
                 'model': payload['model'], 'attempt': 1, **api._reasoning_usage(spec, row)}
     if not isinstance(entry, dict) or any(entry.get(k) != v for k, v in identity.items()):
         raise ledger.UsageLedgerError('receipt completion reasoning is not bound to its accounted response')
@@ -646,3 +646,34 @@ def require_audit_carry(spec, req) -> None:
               for p in m['content'] if isinstance(p, dict)]
     if blocks.count(expected) != 1:
         raise UsageLedgerError('audit request omits or changes receipt completion candidate carry')
+
+
+def recover_delivered(spec) -> None:
+    """V2 only: a complete saved response may settle its still-pending usage.
+
+    Released v1 retains its existing recovery boundary. No incomplete response,
+    unknown count or merely asserted result can purchase or authorize a retry.
+    """
+    if spec.receipt_completion_version != 2:
+        return
+    from . import usage_ledger as ledger
+    state = _state(spec)
+    if not state or state.get('state') != 'admitted' or not state.get('response'):
+        return
+    response = _load(state['response'])
+    row = response.get('usage')
+    if (_usage_problems(row) or response.get('usage_id') != state.get('usage_id')
+            or row.get('usage_id') != state.get('usage_id') or row.get('phase') != PHASE):
+        raise ledger.UsageLedgerError('delivered receipt response has no complete bound usage')
+    data = ledger._read(spec)
+    existing = [r for r in data['rows'] if r.get('usage_id') == row['usage_id']]
+    if existing:
+        if existing != [row]:
+            raise ledger.UsageLedgerError('delivered receipt accounting conflicts with its journal')
+    elif (data.get('pending_call') or {}).get('usage_id') == row['usage_id']:
+        ledger.persist_usage(spec, copy.deepcopy(row))
+    else:
+        raise ledger.UsageLedgerError('delivered receipt has lost its accounting admission')
+    state['state'] = 'response'
+    _set_state(spec, state)
+    recover(spec)

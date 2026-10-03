@@ -451,3 +451,41 @@ def schema_context(spec, record: str | None = None) -> str:
     return SCHEMA_CONTEXT_HEADER + canonical({'schema': schema_pin(captured.full_schema),
         'classes': classes, 'owners': owners,
         'scope': 'Actual schema structure and complete values; relationship support is an evaluator declaration.'}).decode('utf-8')
+
+
+def require_client(spec, client):
+    """Bind the actual adapter's declared endpoint, without reading a secret."""
+    reg = capture(spec).document()
+    endpoint = getattr(client, 'base_url', None)
+    if endpoint is None or str(endpoint).rstrip('/') != reg['runtime']['base_url'].rstrip('/'):
+        raise ValueError('actual client endpoint differs from registered route')
+
+
+def plan(spec, settings):
+    """No client or historical-output discovery; dynamic sizes remain unknown."""
+    from . import api_runner as api
+    captured = preflight(spec, settings)
+    reg = captured.document()
+    request = api.build_phase(spec, 'full', carry={})
+    return {'project': spec.project, 'arm': spec.arm, 'method': spec.method, 'label': spec.label,
+        'condition': spec.condition, 'runtime': spec.runtime, 'model': copy.deepcopy(settings),
+        'bundle': str(spec.bundle), 'bundle_bytes': len(captured.raw(reg['inputs']['bundle']['path'])),
+        'profile': spec.profile, 'profile_basis': spec.profile_basis,
+        'api_playbook_version': 2, 'receipt_completion_version': 2, 'shared_generation_version': 1,
+        'shared_generation_registration': captured.identity()['registration'],
+        'prompt_files': [str(path) for path in spec.prompt_files],
+        'schema_digest_md5': None,
+        'phases': [{'phase': 'full', 'approx_input_tokens': request.approx_tokens(), 'carried': {},
+                    'cached_blocks': len(request.cached_blocks)},
+                   {'phase': 'typed_audit', 'approx_input_tokens': None, 'carried': 'actual originals and effective receipt',
+                    'cached_blocks': 0}],
+        'approx_total_input_tokens': None, 'full_request_approx_input_tokens': request.approx_tokens(),
+        'registered_audit_allowances': copy.deepcopy(reg['audit_limits']),
+        'estimate_basis': 'Only the actual full request has an approximate byte-derived count. Future record-dependent requests/roster are unknown; declared audit allowances are bounds, not measured tokens or prices.',
+        'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)},
+        'conditional_calls': ['receipt completion2 before core; exact explicit receipt cap and coverage floor',
+                              'every typed worker, one complete omission inventory and one integration; no answer retries',
+                              'existing full readdress, schema repair and report regate behavior remains separately accounted'],
+        'readiness': {'software_protocol': NAME, 'native_direct': 'unsupported; separate adapter required',
+                      'scientific_approval': 'unverified', 'campaign_launch': 'not authorized by a plan',
+                      'coverage_floor': copy.deepcopy(reg['receipt']['coverage_floor'])}}

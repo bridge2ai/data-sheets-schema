@@ -2870,6 +2870,9 @@ def plan(spec: RunSpec) -> dict[str, Any]:
     """
     settings = _model_settings()
     spec.bind_api_header_values(settings)
+    if spec.shared_generation_version:
+        from .shared_generation import plan as shared_plan
+        return shared_plan(spec, settings)
     sizes, basis = _carry_sizes(spec)
     phases = []
     for ph in PHASES:
@@ -5443,6 +5446,9 @@ def _attach_output_tokens_details(msg, details: dict[str, Any]) -> None:
 
 def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, client, **kwargs):
     _require_surviving_accounting(spec)
+    if spec.shared_generation_version:
+        from .typed_audit_runtime import require_request
+        require_request(spec, phase, kwargs)
     identifier = _begin_usage_call(spec, phase, attempt, started_at)
     try:
         response = _call_with_retry(client, **kwargs)
@@ -6596,11 +6602,24 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
 
     settings = _model_settings()
     spec.bind_api_header_values(settings)
+    if spec.shared_generation_version and not resume:
+        from . import usage_ledger as ledger
+        if ledger.ledger_path(spec).exists() or any(path.exists() for path in
+                (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path)):
+            raise UsageLedgerError("shared generation cannot reuse spent outputs with no-resume; register a fresh run")
     client = client or _client()
+    if spec.shared_generation_version:
+        from .shared_generation import require_client
+        require_client(spec, client)
     usage: list[dict[str, Any]] = []
     fresh_generation = not resume
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
     if resume:
+        if spec.shared_generation_version:
+            from .receipt_completion import recover_delivered as recover_receipt_delivery
+            from .typed_audit_runtime import recover_delivered as recover_audit_delivery
+            recover_receipt_delivery(spec)
+            recover_audit_delivery(spec)
         _require_resolved_usage(spec)
         from data_sheets_schema.usage_ledger import evidence_refusal
         refusal = evidence_refusal(spec)
@@ -6615,6 +6634,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if resume and spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import resume_guard
         resume_guard(spec, progress)
+    if resume and spec.shared_generation_version:
+        from .typed_audit_runtime import resume_guard as shared_resume_guard
+        shared_resume_guard(spec, progress)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -6794,6 +6816,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                 from data_sheets_schema.removal_repair import completion_check
                 removal_check = completion_check(spec, record=existing)
                 _assert_evidence_clean(removal_check, "report", spec=spec)
+            shared_check = None
+            if spec.shared_generation_version:
+                from .typed_audit_runtime import completion_check
+                shared_check = completion_check(spec)
+                if existing.get("shared_generation") != shared_check:
+                    raise UsageLedgerError("completed provenance differs from reconstructed typed audit authority")
             completion_check_result = None
             if spec.receipt_completion_version:
                 from data_sheets_schema.receipt_completion import recover
@@ -6811,6 +6839,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                "grounding": grounding_block(spec),
                                "form": _form_block(spec),
                                "receipts": _receipts_block(spec, existing),
+                               **({"shared_generation": shared_check} if shared_check is not None else {}),
                                **({"receipt_completion": completion_check_result}
                                   if spec.receipt_completion_version else {}),
                                **({"evidence_assertions": evidence} if evidence is not None else {}),
@@ -6930,6 +6959,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     # A produced but rejected phase is still paid evidence. Recheck it on
     # resume instead of generating it again or using it for another call.
     if "audit" in done:
+        if spec.shared_generation_version:
+            from .typed_audit_runtime import completion_check
+            completion_check(spec, carry)
         require_evidence_checks(spec, carry, stage="audit", preserve=False)
     if "reconcile_full" in done:
         require_evidence_checks(spec, carry, stage="reconcile", preserve=False)
@@ -6976,7 +7008,14 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             body, facts = core_text(spec.full_path,
                                     phase4_complete=(ph == "reconcile_core"))
             core_derivation = {**facts, "phase": ph}
+        elif spec.shared_generation_version and ph == "audit":
+            from .typed_audit_runtime import run as run_typed_audit
+            outcome = run_typed_audit(spec, carry=carry, client=client, settings=settings, usage=usage)
+            body = outcome.audit
         else:
+            if spec.shared_generation_version and ph in {"reconcile_full", "report"}:
+                from .typed_audit_runtime import completion_check
+                completion_check(spec, carry)
             body = _generate_phase(spec, ph, needed, client, settings, usage)
         if ph == "audit":
             carry["Audit findings"] = body
@@ -7082,7 +7121,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     rec.data["prompts"]["resolved"] = resolved_prompt_digest(spec)
     rec.data["prompts"]["assembly"] = assembly_digest(spec.render_version, api_playbook_version=spec.api_playbook_version,
                                                        removal_repair_version=spec.removal_repair_version,
-                                                       receipt_completion_version=spec.receipt_completion_version)
+                                                       receipt_completion_version=spec.receipt_completion_version,
+                                                       shared_generation_version=spec.shared_generation_version)
     if spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import recover
         rec.data["receipt_completion"] = recover(spec)
@@ -7330,6 +7370,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         if removal_check["findings"]:
             from data_sheets_schema.usage_ledger import record_evidence_refusal
             record_evidence_refusal(spec, "report", removal_check)
+    if spec.shared_generation_version:
+        from .typed_audit_runtime import completion_check
+        rec.data["shared_generation"] = completion_check(spec, carry)
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
@@ -7399,6 +7442,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                        "grounding": rec.data.get("grounding"),
                        "form": rec.data.get("form"),
                        "receipts": rec.data.get("receipts"),
+                       **({"shared_generation": rec.data.get("shared_generation")}
+                          if spec.shared_generation_version else {}),
                        **({"receipt_completion": rec.data.get("receipt_completion")}
                           if spec.receipt_completion_version else {}),
                        **({"removal_repair": removal_check} if removal_check is not None else {})},
