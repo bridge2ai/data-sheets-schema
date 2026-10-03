@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/labeling_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/native-execution-v1/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: labeling_strategies - data-sheets-schema</title>
+        <title>Explicit direct native execution v1 - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-labeling_strategies" class="md-skip">
+        <a href="#explicit-direct-native-execution-v1" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: labeling_strategies
+              Explicit direct native execution v1
             
           </span>
         </div>
@@ -316,49 +316,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#preparation-and-supplied-authority" class="md-nav__link">
+    Preparation and supplied authority
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#separate-single-attempt-launch" class="md-nav__link">
+    Separate single-attempt launch
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#captured-validation-and-publication" class="md-nav__link">
+    Captured validation and publication
   </a>
   
 </li>
@@ -377,95 +350,125 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/labeling_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/native-execution-v1.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-labeling_strategies">Slot: labeling_strategies</h1>
-<p><em>Labeling or annotation methodologies applied to the data. List of LabelingStrategy objects from the Preprocessing module describing annotation procedures, annotator qualifications, and quality controls.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/labelingStrategies">d4d:labelingStrategies</a>
-Alias: labeling_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
+<h1 id="explicit-direct-native-execution-v1">Explicit direct native execution v1</h1>
+<p>This additive consumer addresses the software portion of #4334/#2427. It does
+not choose a live condition, model, runtime binary, limits, budget, auth identity,
+cohort, or launch. The shared condition decision in #3336 and an authorized
+empirical canary remain separate. All examples in its tests are fabricated
+software evidence; they cannot be reused as real permission or launch authority.</p>
+<p>The old offline attribution registration, callback composition, API refusal,
+neutral fixed-recipe supervisor, and historical direct launchers keep their
+original behavior and bytes. New execution uses a distinct registration kind,
+<code>d4d_native_attribution_execution_registration</code> version 1, and the separate
+<code>data_sheets_schema.native_execution</code> module. There is no arbitrary argv option,
+public mock switch, implicit runtime discovery, retry, or resume.</p>
+<h2 id="preparation-and-supplied-authority">Preparation and supplied authority</h2>
+<p><code>native_execution_registration.registration(composition_path, system_path,
+permission_probe_path=..., attempt_id=..., attempt_directory=...,
+evidence_directory=..., runtime=...)</code> captures an offline proposal. The
+composition must have the explicit attribution axis/check cap, a direct
+Claude Code spec, manifest-rooted corpus layout, profile, effort and provider.
+Actual local helper/toolchain, prompt, schema, instruction, controller and package
+identities are reconstructed. Source HEAD and every consumed package/frozen
+helper blob must match the reviewed commit at admission; old registrations are
+not updated to new code by relabeling their hashes.</p>
+<p>The closed runtime mapping requires every field below; none has a live default:</p>
 <ul>
-<li>
-<p>Range: <a href="../LabelingStrategy/">LabelingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
+<li><code>route</code>: explicitly select <code>claude_code_direct_stream_json_v1</code>.</li>
+<li><code>executable</code>: absolute resolved <code>path</code>, actual <code>sha256</code>, expected <code>version</code>
+  output, and expected stream initialization <code>init_version</code>.</li>
+<li><code>model</code>, distinct <code>auxiliary_models</code>, <code>effort</code>, <code>provider</code>.</li>
+<li><code>limits</code>: positive integer <code>contextWindow</code> and <code>maxOutputTokens</code>, plus an
+  explicit <code>limits_basis</code>. These are supplied assertions checked against the
+  eventual native usage metadata, not independently measured context capacity.</li>
+<li><code>auth</code>: exact <code>loggedIn: true</code>, <code>authMethod: claude.ai</code>,
+  <code>apiProvider: firstParty</code>, caller-selected <code>subscriptionType</code>, and
+  <code>expected_api_key_source: none</code>. This version supports this explicitly
+  selected direct subscription route only; it does not support API keys/proxies.</li>
+<li><code>environment</code>: explicit allowed base names. Required: absolute <code>PATH</code> entries,
+  absolute <code>HOME</code>, <code>CLAUDE_SECURESTORAGE_CONFIG_DIR</code> (empty or absolute), and
+  <code>CLAUDE_CODE_DISABLE_1M_CONTEXT</code> (<code>0</code> or <code>1</code>). Optional base names are USER,
+  SHELL, TMPDIR, LANG, LC_ALL and TERM. Secret/provider redirect/override keys
+  are refused. The consumer derives exact config isolation, safe transport,
+  helper interpreter, manifest/profile/instruction and package environment.</li>
+<li>Positive integer <code>deadline_seconds</code> (software maximum one day), explicit
+  positive decimal string <code>budget_guard_usd</code>.</li>
+<li><code>keep_awake</code>: <code>policy</code> (<code>macos_iokit_ims_v1</code> or explicitly
+  <code>not_applicable</code>), actual <code>host_platform</code>, and nonblank decision <code>basis</code>.</li>
 </ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:labelingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:labeling_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: labeling_strategies
-description: Labeling or annotation methodologies applied to the data. List of LabelingStrategy
-  objects from the Preprocessing module describing annotation procedures, annotator
-  qualifications, and quality controls.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:labelingStrategies
-alias: labeling_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: LabelingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
-</code></pre>
-
-</details>
+<p>The saved permission manifest is independently rechecked from raw embedded
+members by <code>native_execution_permissions.verify_saved_probe</code>. It must match
+this exact binary/version, policy, command spellings, instruction/system,
+controller closure and derived environment. It needs the complete admitted
+command/read and denied restriction cases with actual initialization, callbacks,
+results and settled shutdown; a passed summary is insufficient. V1 accepts no
+command/path remapping. Its separately pinned neutral config/stub/local-provider
+environment demonstrates recorded native admission only. Stub execution cannot
+prove production helper behavior, future permissions, authentication or billing.
+No probe is executed by preparation. Saved evidence is checked for consistency,
+not cryptographic authenticity; an independent reviewer must assess its origin.</p>
+<p>CLI preparation requires explicit <code>--composition</code>, <code>--system</code>,
+<code>--permission-probe</code>, <code>--runtime</code> JSON, <code>--attempt-id</code>, <code>--attempt-directory</code>,
+<code>--evidence-directory</code>, and fresh <code>--output</code>. It does not call a native binary.</p>
+<h2 id="separate-single-attempt-launch">Separate single-attempt launch</h2>
+<p><code>native_execution.launch(registration_raw, review_path=..., ci_path=...,
+launch_word_path=...)</code> can invoke the selected native binary. It is a separate
+explicit action, never a consequence of preparing a file. Every external
+artifact binds raw registration SHA256, attempt id, source commit and dependency
+SHA256. The independent review needs a distinct reviewer/author, literal
+independent approval, timestamp and evidence reference. CI needs all six shards,
+offline audit/finalization, offline evaluation, aggregate test and large-files
+successful at the exact source, each with its recorded repository check URL.
+The owner artifact requires <code>AUTHORIZE_ONE_NATIVE_ATTEMPT</code>, owner/time and exact
+review, CI and permission-manifest hashes. These saved statements are not
+signatures or an authenticated GitHub query.</p>
+<p>All output/attempt/evidence paths must be fresh, canonical, disjoint and outside
+source/historical controls and input authority. Reservation plus parent fsync
+consumes the identity before later work. Start and selected authority bytes are
+saved before dispatch. The authorized launch performs a fresh binary version
+and filtered auth observation in the exact selected environment; it never saves
+raw credential output. Failure retains the spent attempt and safely capturable
+evidence. Keep-awake acquisition, if required, precedes dispatch and persists
+through bounded child cleanup and evidence capture. Failed release prevents
+completion. One dispatch means one native CLI process, not one provider request.
+Native internal retries/costs are not claimed to be proxy-ledger metering.</p>
+<p>The unchanged <code>execute_child</code> receives both actual composed callbacks and exact
+phase spec. A usable draft exit 1 with <code>is_error: true</code> may be corrected by a
+report-only write and fresh check. Old passes cannot clear newer failures,
+pending/mutated artifacts, terminal evidence failure, invalid controls or a stop.
+This consumer does not reuse the neutral supervisor's fixed recipe or synthetic
+accounting. Actual terminal identity, usage counters, primary/auxiliary models,
+limits, effort, cost estimate and shutdown are checked independently.</p>
+<h2 id="captured-validation-and-publication">Captured validation and publication</h2>
+<p>After shutdown one captured raw-byte/metadata basis feeds saved attribution,
+phase/control chronology, schema, pair, receipts, final evidence and source-read
+observation checks. The receipt gate is the existing strict implementation,
+including registered bundle/chunk/schema identities, phase-1 snapshot selection,
+identifier authority, strict floors and refusal of conflicting or unsupported
+receipt-policy declarations. The existing API-only receipt-completion axis is
+not enabled for native execution. Full/core
+schema and original/final data authority cannot silently fall back to unrelated
+paths. Captured projections must remain byte-identical and originals unchanged.</p>
+<p>The full required conjunction retains all 13 neutral obligations, replacing
+only fixed recipe history with generic typed settled tool history and synthetic
+accounting with actual native metadata. Runtime authority and keep-awake are
+additional gates. Passing yields <code>completed_pending_independent_review</code>, not
+scientific acceptance. Known partial transcript/usage and the first failure are
+retained when any gate fails. The generated replay report is itself hash-bound.
+Durable final and publication-marker writes are exclusive; incomplete
+publication cannot be read as complete. <code>read-final --registration ...</code> verifies
+saved identities without running native/auth/provider processes or resuming.</p>
+<p>Development tests use only an ordinary Python fake CLI, fabricated review/CI/
+permission/owner records, and an explicit private observation seam. Genuine
+receipt, derive, inventory, audit, attribution, evidence and recorder helpers
+operate over synthetic text. Their success is software evidence only. No real
+runtime permission, authentication or scientific result was established.</p>
 
 
 
