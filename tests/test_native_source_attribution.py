@@ -211,6 +211,34 @@ def test_registration_drift_duplicate_keys_no_overwrite_and_execution_refusal(ca
     with pytest.raises(ValueError): offline.verified(raw)
 
 
+@pytest.mark.parametrize('version', range(19, 25))
+@pytest.mark.parametrize('private', [False, True])
+def test_historical_execution_refusal_precedes_new_axis_access(version, private, monkeypatch):
+    class HistoricalRefusedSpec:
+        render_version = version
+        _replay_only = False
+
+        @property
+        def native_source_attribution_version(self):
+            pytest.fail('historical renderer refusal inspected a new opt-in field')
+
+    monkeypatch.setattr(api, '_exclusive_run', lambda *a, **k: pytest.fail('output lock reached'))
+    monkeypatch.setattr(api, '_client', lambda *a, **k: pytest.fail('provider client reached'))
+    expected = 'offline only' if version == 24 else 'separately registered audit continuation'
+    with pytest.raises(ValueError, match=expected):
+        (api._execute if private else api.execute)(HistoricalRefusedSpec(), resume=False, client=None)
+
+
+@pytest.mark.parametrize('version', range(16, 19))
+@pytest.mark.parametrize('private', [False, True])
+def test_new_axis_still_refuses_before_any_execution_side_effect(case, version, private, monkeypatch):
+    spec = replace(case[0], render_version=version)
+    monkeypatch.setattr(api, '_exclusive_run', lambda *a, **k: pytest.fail('output lock reached'))
+    monkeypatch.setattr(api, '_client', lambda *a, **k: pytest.fail('provider client reached'))
+    with pytest.raises(ValueError, match='native source attribution is offline-only'):
+        (api._execute if private else api.execute)(spec, resume=False, client=None)
+
+
 def test_actual_prepare_cli_is_offline_and_preserves_existing_file(case, tmp_path):
     spec = case[0]; dest = tmp_path / 'prepared.json'
     args = [sys.executable, '-m', 'data_sheets_schema.native_attribution_registration', 'prepare',

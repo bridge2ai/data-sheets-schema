@@ -1,0 +1,250 @@
+{
+  "captured_at_head": "df8bd4f85cdcc18f9a3596a89af9e108ecc15794",
+  "cases": [
+    {
+      "name": "single",
+      "files": {
+        "a.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric10-semantic",
+          "version": "2.0",
+          "d4d_file": "record.yaml",
+          "model": {
+            "name": "claude-opus-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 30,
+            "max_points": 50,
+            "adjusted_max_points": 45,
+            "excluded_max_points": 5
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "paths": [
+        "a.json"
+      ],
+      "cohort": null,
+      "expected": "# Semantic comparison: both score bases\n\nFixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.\n\n| Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |\n|---|---|---|---|---|---|---|---|---|\n| a.json | EXAMPLE | rubric10-semantic | Fixed: 30/50 (60.0%) | N/A-adjusted: 30/45 (66.7%) | E1: Scoped criterion | claude-opus-5 | unreported | a24e66c46d835dd9e372fce10800c175ba5316808d407cd6b68bef76ebd5c0ef |\n\n## Item discrimination and within-project orderings (#2927)\n\nMeasured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 1 rubric in the cohort; the cross-rubric comparison needs exactly two.\n"
+    },
+    {
+      "name": "mixed_and_repeats",
+      "files": {
+        "a.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric10-semantic",
+          "version": "2.0",
+          "d4d_file": "record.yaml",
+          "model": {
+            "name": "claude-opus-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 30,
+            "max_points": 50,
+            "adjusted_max_points": 45,
+            "excluded_max_points": 5
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        },
+        "b.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric10-semantic",
+          "version": "2.0",
+          "d4d_file": "other.yaml",
+          "model": {
+            "name": "gpt-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 35,
+            "max_points": 50,
+            "adjusted_max_points": 45,
+            "excluded_max_points": 5
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "paths": [
+        "a.json",
+        "b.json",
+        "a.json"
+      ],
+      "cohort": [
+        "a.json",
+        "b.json"
+      ],
+      "expected": "# Semantic comparison: both score bases\n\nFixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.\n\n- EXAMPLE / rubric10-semantic: mixed evaluator, instrument, context or collection scope; compare within matching conditions before interpreting score differences.\n\n| Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |\n|---|---|---|---|---|---|---|---|---|\n| a.json | EXAMPLE | rubric10-semantic | Fixed: 30/50 (60.0%) | N/A-adjusted: 30/45 (66.7%) | E1: Scoped criterion | claude-opus-5 | unreported | a24e66c46d835dd9e372fce10800c175ba5316808d407cd6b68bef76ebd5c0ef |\n| b.json | EXAMPLE | rubric10-semantic | Fixed: 35/50 (70.0%) | N/A-adjusted: 35/45 (77.8%) | E1: Scoped criterion | gpt-5 | unreported | 164164344a57473cdd3b4171cf5727d6203000e030beae95e1b63ddc2cef6c36 |\n| a.json | EXAMPLE | rubric10-semantic | Fixed: 30/50 (60.0%) | N/A-adjusted: 30/45 (66.7%) | E1: Scoped criterion | claude-opus-5 | unreported | a24e66c46d835dd9e372fce10800c175ba5316808d407cd6b68bef76ebd5c0ef |\n\n## Item discrimination and within-project orderings, claude-opus-5 evaluations (#2927)\n\nMeasured on the claude-opus-5 evaluations above, one rating per record. Evaluations by any other evaluator are in no count in this block: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 1 rubric in the cohort; the cross-rubric comparison needs exactly two.\n\n## Item discrimination and within-project orderings, gpt-5 evaluations (#2927)\n\nMeasured on the gpt-5 evaluations above, one rating per record. Evaluations by any other evaluator are in no count in this block: an evaluator is an instrument (#1058), and pooling two would count their offset as distinct totals. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 1 rubric in the cohort; the cross-rubric comparison needs exactly two.\n"
+    },
+    {
+      "name": "legacy_zero",
+      "files": {
+        "old.json": {
+          "project": "OLD",
+          "rubric": "rubric10-semantic",
+          "version": "1.0",
+          "summary_scores": {
+            "total_score": 0,
+            "total_max_score": 50
+          }
+        }
+      },
+      "paths": [
+        "old.json"
+      ],
+      "cohort": null,
+      "expected": "# Semantic comparison: both score bases\n\nFixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.\n\n| Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |\n|---|---|---|---|---|---|---|---|---|\n| old.json | OLD | rubric10-semantic | Fixed: 0/50 (0.0%) | N/A-adjusted: 0/50 (0.0%) | none | unreported | unreported | ef6eb3c72b2be3fdcdacee51bb1c41b3320ad6e495a27de46a0bb33ff2d188f8 |\n\n## Item discrimination and within-project orderings (#2927)\n\nMeasured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 0 items. At ceiling: 0/0 (none). At floor: 0/0 (none).\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| OLD | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 1 rubric in the cohort; the cross-rubric comparison needs exactly two.\n"
+    },
+    {
+      "name": "zero_applicable",
+      "files": {
+        "zero.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric10-semantic",
+          "version": "2.0",
+          "d4d_file": "record.yaml",
+          "model": {
+            "name": "claude-opus-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 0,
+            "max_points": 50,
+            "adjusted_max_points": 0,
+            "excluded_max_points": 50
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "paths": [
+        "zero.json"
+      ],
+      "cohort": null,
+      "expected": "# Semantic comparison: both score bases\n\nFixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.\n\n| Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |\n|---|---|---|---|---|---|---|---|---|\n| zero.json | EXAMPLE | rubric10-semantic | Fixed: 0/50 (0.0%) | N/A-adjusted: 0/0 (undefined) | E1: Scoped criterion | claude-opus-5 | unreported | 87e0c6a2a818b9be87aaaaf5d5a38445fc153a6dfd48ab15db8d9dd44c0fb032 |\n\n## Item discrimination and within-project orderings (#2927)\n\nMeasured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 0 / 1 | 0/0 / 0/0 | 0: none | **withheld (adjusted)**: 0 distinct totals; at most 2 cannot rank records within the project, so no order or better/worse verdict is given; **withheld (fixed)**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 1 rubric in the cohort; the cross-rubric comparison needs exactly two.\n"
+    },
+    {
+      "name": "structured_versions_invalid_without_input",
+      "files": {
+        "v3.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric10-semantic",
+          "version": "3.0",
+          "d4d_file": "record.yaml",
+          "model": {
+            "name": "claude-opus-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 30,
+            "max_points": 50,
+            "adjusted_max_points": 45,
+            "excluded_max_points": 5
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        },
+        "v4.json": {
+          "project": "EXAMPLE",
+          "method": "method_label",
+          "rubric": "rubric20-semantic",
+          "version": "4.0",
+          "d4d_file": "record.yaml",
+          "model": {
+            "name": "claude-opus-5",
+            "evaluation_type": "semantic_llm_judge"
+          },
+          "overall_score": {
+            "total_points": 30,
+            "max_points": 50,
+            "adjusted_max_points": 45,
+            "excluded_max_points": 5
+          },
+          "elements": [
+            {
+              "id": 1,
+              "sub_elements": [
+                {
+                  "id": "1.1",
+                  "name": "Scoped criterion",
+                  "applicable": false,
+                  "score": null
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "paths": [
+        "v3.json",
+        "v4.json"
+      ],
+      "cohort": null,
+      "expected": "# Semantic comparison: both score bases\n\nFixed percentages use the full rubric maximum. N/A-adjusted percentages use the applicable maximum. Neither alone establishes comparable applicability or evaluator reliability. These are individual measurements; this report does not rank runs or average different instruments.\n\n| Evaluation | Project | Rubric | Fixed base | N/A-adjusted base | Excluded items | Evaluator | Instrument SHA256 | Evaluation SHA256 |\n|---|---|---|---|---|---|---|---|---|\n| v3.json | EXAMPLE | rubric10-semantic | Fixed: 30/50 (60.0%) | N/A-adjusted: 30/45 (66.7%) | E1: Scoped criterion | claude-opus-5 | unreported | f9bf4d035eb8ad66704b3d743097cd18f3f35e79ab3ddc9daed8d13dc766d0c5 |\n| v4.json | EXAMPLE | rubric20-semantic | Fixed: 30/50 (60.0%) | N/A-adjusted: 30/45 (66.7%) | E1: Scoped criterion | claude-opus-5 | unreported | 5d3d45c1c1dd176ecfb3bf4ebc5e0a482cbf9465311486147d7823af639f829b |\n\n## Evaluator evidence and issue taxonomy\n\nEvidence checks below are recomputed from explicitly supplied inputs and caller contexts; a missing context means unknown applicability. They do not certify the evaluator's semantic interpretation or replace instrument-provenance acceptance.\n\n### v3.json\n\nEvidence verification: **not established** \u2014 invalid v3 output structure at #: 'applicability\\_context' is a required property.\n\n### v4.json\n\nEvidence verification: **not established** \u2014 invalid v4 output structure at #: 'applicability\\_context' is a required property.\n\n\n## Item discrimination and within-project orderings (#2927)\n\nMeasured on the evaluations above, one rating per record. An item at ceiling (or floor) scored its maximum (or 0) on every record where it was scored, so it separates none of them. A project with at most 2 distinct totals on a basis gets no within-project order or better/worse verdict on that basis. Totals are compared exactly, as points over the basis's denominator. This is descriptive of these ratings; it is not an evaluator-reliability estimate.\n\n**rubric10-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\n**rubric20-semantic** \u2014 1 records, 1 items. At ceiling: 0/1 (none). At floor: 0/1 (none). Never scored: E1.1.\n\n| project | records | distinct totals (adjusted / fixed) | tied pairs (adjusted / fixed) | items that vary | within-project order |\n|---|---|---|---|---|---|\n| EXAMPLE | 1 | 1 / 1 | 0/0 / 0/0 | 0: none | **withheld on both bases**: 1 distinct total; at most 2 cannot rank records within the project, so no order or better/worse verdict is given |\n\nCross-rubric agreement: not computed \u2014 no record is rated under both rubric10-semantic and rubric20-semantic.\n\nNot joined (no rating of the same (project, label) under the other rubric): EXAMPLE `unlabelled` (rubric10-semantic), EXAMPLE `unlabelled` (rubric20-semantic).\n"
+    }
+  ]
+}

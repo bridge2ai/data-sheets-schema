@@ -6352,14 +6352,14 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:
         return plan(spec)
-    if spec.native_source_attribution_version:
-        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
     if spec.render_version in (24,):  # membership is also derived by the execution-policy audit
         raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
                          "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
+    if spec.native_source_attribution_version:
+        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
     with _exclusive_run(spec):
         if resume:
@@ -6461,14 +6461,14 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
 
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
-    if spec.native_source_attribution_version:
-        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
     if spec.render_version in (24,):
         raise ValueError("renderer 24 is offline only; receipt execution requires a separately "
                          "registered condition, coverage policy and measured canaries")
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
+    if spec.native_source_attribution_version:
+        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
