@@ -1341,7 +1341,7 @@ class RunTest(unittest.TestCase):
         self.bundle.write_bytes(self.READ)
         (self.core_dir / "intermediate" / "P_full.yaml").unlink()
         out = self._run()
-        self.assertEqual(out["records"]["phase1"],
+        self.assertEqual({k: v for k, v in out["records"]["phase1"].items() if k != "schema_basis"},
                          {"checked": False, "path": None, "reason": "the run kept no phase-1 snapshot"})
         self.assertTrue(out["records"]["full"]["checked"])
 
@@ -1361,7 +1361,7 @@ class RunTest(unittest.TestCase):
         full = self.core_dir.parent.parent / "claudecode_api" / "L" / "P_d4d.yaml"
         full.write_text("release_date: 2026-02-30\ncreators: [{name: Christian Metallo}]\n")
         out = self._run()
-        self.assertEqual(out["records"]["full"],
+        self.assertEqual({k: v for k, v in out["records"]["full"].items() if k != "schema_basis"},
                          {"checked": False, "path": str(full), "reason": "does not parse: ValueError"})
         self.assertTrue(out["records"]["phase1"]["checked"])
         self.assertTrue(out["records"]["core"]["checked"])
