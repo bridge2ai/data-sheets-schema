@@ -181,6 +181,9 @@ def _shared_current(specs, roster=None):
     from data_sheets_schema import shared_generation as shared
     try:
         captures = [shared.assert_current(spec) for spec in specs if spec.shared_generation_version]
+        # Reuse the complete closure for every run; one run must not overwrite
+        # another run's authority before a later drift check can refuse it.
+        authority_paths = tuple(path for capture in captures for path, _ in capture.files)
         if roster is not None:
             path = roster['path']
             if _bounded_registration_bytes(path) != roster['raw']:
@@ -192,6 +195,10 @@ def _shared_current(specs, roster=None):
             for capture in captures:
                 if any(path.resolve() == Path(name).resolve() or path.samefile(name) for name, _ in capture.files):
                     raise ValueError('shared batch roster aliases selected input authority')
+            authority_paths += (path,)
+        if authority_paths:
+            for spec in specs:
+                shared._separate_inputs(spec, authority_paths)
     except (ValueError, OSError) as exc:
         raise click.ClickException(str(exc)) from exc
 
