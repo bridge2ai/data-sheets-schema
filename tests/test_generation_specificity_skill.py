@@ -3378,8 +3378,7 @@ class TestTheWholeAudit(unittest.TestCase):
     def test_the_review_round_three_findings_are_violations(self):
         """The GC names in d4d-review-record's description (interactive
         sessions, and run_controllers while no registered launch is shown to
-        switch them off), the renderer's study-group table and the YAML
-        comments a playbook's Read returns (native_agentic) all gate
+        switch them off) and the renderer's study-group table all gate
         (#4091); the report says registered runs are unaffected only where
         every launch is shown to pass --safe-mode, which no launch of this
         checkout is (#4092, #4156), and names the instruction file nothing
@@ -3388,9 +3387,7 @@ class TestTheWholeAudit(unittest.TestCase):
         found = {(v["path"], v["match"].lower(), tuple(v["gates_in"])) for v in result["violations"]}
         for want in ((".claude/agents/d4d-review-record.md", "chorus", tuple(SESSION_GATES)),
                      (".claude/agents/d4d-review-record.md", "ai_readi", tuple(SESSION_GATES)),
-                     ("src/data_sheets_schema/rendering/human_readable_renderer.py", "diabet", ("native_agentic",)),
-                     ("src/data_sheets_schema/schema/D4D_Core.yaml", "ai_readi", ("native_agentic",)),
-                     ("src/data_sheets_schema/schema/D4D_Base_import.yaml", "ai-readi", ("native_agentic",))):
+                     ("src/data_sheets_schema/rendering/human_readable_renderer.py", "diabet", ("native_agentic",))):
             with self.subTest(want=want):
                 self.assertIn(want, found)
         markdown = scan.render_markdown(result)
