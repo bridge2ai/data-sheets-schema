@@ -25,6 +25,7 @@ Most subcommands assume they can import repo-local modules from `src/` and `.cla
 | `d4d rocrate` | Parse, merge, and transform RO-Crate metadata |
 | `d4d schema` | Generate schema metrics and validate YAML against the schema |
 | `d4d utils` | Inspect pipeline status and validate preprocessing results |
+| `d4d validate` | Validate and lint data-sheet instances (CI-friendly) |
 
 ## `d4d download`
 
@@ -315,6 +316,79 @@ Options:
 | `--raw-dir PATH` | Raw data directory. Default: `data/raw` |
 | `--preprocessed-dir PATH` | Preprocessed data directory. Default: `data/preprocessed/individual` |
 | `--project` | Optional. Restrict validation to one project |
+
+## `d4d validate`
+
+Validate and lint one or more data-sheet instance files (YAML or JSON)
+against the D4D LinkML schema. Unlike `d4d schema validate`, this command
+runs the validator in-process (no `poetry run` subprocess), works from an
+installed wheel in any directory, and adds linter checks that go beyond
+schema validity:
+
+- **unknown fields** (with did-you-mean hints for typos),
+- **scalar type mismatches** (`count: not-a-number` on an integer slot —
+  missed by `linkml-validate` itself),
+- **placeholder prose** (`TBD`, `N/A`, `?`) and **empty values**,
+- **missing identifier prose** (`title`, `name`, `description`),
+- **British spellings** in prose (the datasheet convention is American English),
+- **per-section completeness** against the Gebru et al. datasheet sections,
+  with a 0–100 completeness score.
+
+```bash
+poetry run d4d validate datasheet.yaml
+poetry run d4d validate --schema core datasheet.yaml --format json --output report.json
+poetry run d4d validate --fail-on-warning datasheets/*.yaml
+```
+
+Options:
+
+| Option | Description |
+| --- | --- |
+| `FILES...` | One or more data-sheet YAML/JSON files to check |
+| `--schema` | `full` (target class `Dataset`) or `core` (target class `CoreDataset`). Default: `full` |
+| `--schema-file PATH` | Validate against this schema file instead of `--schema` |
+| `--target-class NAME` | Target class in the schema (default: `Dataset` for full, `CoreDataset` for core) |
+| `--format` | `human` (summary + findings) or `json` (machine-readable report). Default: `human` |
+| `--output PATH` | Write the report to this file instead of stdout |
+| `--fail-on-warning` | Exit 1 on lint warnings, not just on schema errors |
+| `--quiet`, `-q` | Human format: print only the per-file summary lines |
+
+Exit codes: `0` = all files valid (warnings allowed unless
+`--fail-on-warning`); `1` = at least one file invalid, or warnings with
+`--fail-on-warning`; `2` = usage error (missing file, unknown target class,
+unreadable schema).
+
+Issue codes emitted in reports:
+
+| Code | Severity | Meaning |
+| --- | --- | --- |
+| `schema-violation` | error | Failed LinkML schema validation, with JSON path |
+| `unknown-field` | error | Field not in the schema (typo candidate), with hint |
+| `type-mismatch` | error | Scalar value that cannot be coerced to the slot range |
+| `unparseable` | error | File could not be parsed as YAML/JSON |
+| `not-a-mapping` | error | Instance is not a mapping for the target class |
+| `placeholder-value` | warning | `TBD`/`N/A`/`?` instead of an answer |
+| `empty-value` | warning | Empty string value |
+| `missing-identifier` | warning | `title`/`name`/`description` missing or empty |
+| `british-spelling` | warning | British spelling in prose |
+| `empty-section` | warning | An always-applicable section (identification, motivation, composition, uses, distribution) with no answered questions |
+
+### CI recipe
+
+Gate pull requests on datasheet validity with a job like this (no
+repository checkout of `data-sheets-schema` needed beyond the schema
+itself — point `--schema-file` at a pinned copy, or install the package):
+
+```yaml
+- name: Validate datasheets
+  run: |
+    pip install "linkml==1.9.3" "linkml-runtime==1.9.4" click pyyaml
+    python -m data_sheets_schema.cli validate \
+      --schema core --format json --output d4d-report.json \
+      datasheets/*.yaml
+    # or, with the d4d entrypoint installed:
+    # d4d validate --schema core --fail-on-warning datasheets/*.yaml
+```
 
 ## Recommended Starting Points
 
