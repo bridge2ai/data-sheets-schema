@@ -175,7 +175,9 @@ def parse_registration(raw: bytes) -> dict:
     _exact(inputs, {"project", "bundle", "chunk_manifest", "source_manifest", "context",
                     "profile", "full_schema", "core_schema"}, "registered inputs")
     _text(inputs["project"], "project")
-    _exact(inputs["profile"], {"name", "basis"}, "registered profile")
+    _exact(inputs["profile"], {"name", "basis", "vocabulary"}, "registered profile")
+    if inputs["profile"]["vocabulary"] is not None:
+        _validate_pin(inputs["profile"]["vocabulary"], "profile vocabulary")
     for key in ("name", "basis"):
         _text(inputs["profile"][key], f"profile {key}")
     for key in ("bundle", "chunk_manifest", "context", "source_manifest"):
@@ -287,7 +289,14 @@ def capture(spec) -> Capture:
     if reg["run"] != {key: getattr(spec, key) for key in ("project", "arm", "method", "label")}:
         raise ValueError("shared registration belongs to another explicit run")
     selected = reg["inputs"]
-    if (selected["project"] != spec.project or selected["profile"] != {"name": spec.profile, "basis": spec.profile_basis}
+    vocabulary_path = spec.profile_obj.pin_path
+    vocabulary = selected["profile"]["vocabulary"]
+    if spec.chunk_manifest is None:
+        raise ValueError("shared generation requires an explicit captured chunk manifest")
+    if ((None if vocabulary_path is None else str(vocabulary_path.absolute())) !=
+            (None if vocabulary is None else vocabulary["path"])):
+        raise ValueError("registered profile vocabulary differs from selected profile")
+    if (selected["project"] != spec.project or {k: selected["profile"][k] for k in ("name", "basis")} != {"name": spec.profile, "basis": spec.profile_basis}
             or selected["bundle"]["path"] != str(Path(spec.bundle).absolute())
             or selected["chunk_manifest"]["path"] != str(Path(spec.chunk_manifest).absolute())
             or (None if spec.manifest is None else str(Path(spec.manifest).absolute())) !=
@@ -307,6 +316,8 @@ def capture(spec) -> Capture:
     pins = [selected[k] for k in ("bundle", "chunk_manifest", "source_manifest", "context") if selected[k] is not None]
     if reg["runtime"]["config"] is not None:
         pins.append(reg["runtime"]["config"])
+    if vocabulary is not None:
+        pins.append(vocabulary)
     for key in ("full_schema", "core_schema"):
         pins.extend(selected[key]["sources"])
     _separate_inputs(spec, [reg["registration_path"], *(pin["path"] for pin in pins)])
@@ -407,10 +418,16 @@ def schema_context(spec, record: str | None = None) -> str:
     of role names. The instruction asks for scientific relationship review.
     Software's induced keys are included for generation before values exist.
     """
+    captured = assert_current(spec)
+    return memo(spec, 'schema_context', [canonical(schema_pin(captured.full_schema)),
+        *[raw for _name, _path, raw in captured.full_schema.sources],
+        canonical(record)], lambda: _schema_context(captured, record))
+
+
+def _schema_context(captured, record):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
-    captured = assert_current(spec)
     owners, classes = [], {}
     value = _mapping(record.encode("utf-8"), "whole record for role review") if record is not None else None
     with captured_view(captured.full_schema) as view:
@@ -440,14 +457,11 @@ def schema_context(spec, record: str | None = None) -> str:
                 if isinstance(child, list):
                     pending.extend((v, target, child_pointer + '/' + str(i)) for i, v in enumerate(child))
                 elif isinstance(child, dict):
-                    # LinkML keyed inline collections contain objects below
-                    # their keys; a singleton instead has declared slot keys.
-                    target_slots = describe(target)
-                    if any(key in target_slots for key in child):
-                        pending.append((child, target, child_pointer))
-                    else:
+                    if slot.get('multivalued') and not slot.get('inlined_as_list'):
                         pending.extend((v, target, child_pointer + '/' + str(k).replace('~', '~0').replace('/', '~1'))
                                        for k, v in child.items())
+                    else:
+                        pending.append((child, target, child_pointer))
     return SCHEMA_CONTEXT_HEADER + canonical({'schema': schema_pin(captured.full_schema),
         'classes': classes, 'owners': owners,
         'scope': 'Actual schema structure and complete values; relationship support is an evaluator declaration.'}).decode('utf-8')
@@ -494,3 +508,108 @@ def plan(spec, settings):
         'readiness': {'software_protocol': NAME, 'native_direct': 'unsupported; separate adapter required',
                       'scientific_approval': 'unverified', 'campaign_launch': 'not authorized by a plan',
                       'coverage_floor': copy.deepcopy(reg['receipt']['coverage_floor'])}}
+
+
+# Per-RunSpec pure derivations only. No admission, terminal or accounting state
+# is stored here. Callers revalidate their live authority/pins before reuse.
+MAX_MEMO_BYTES = 128_000_000
+MAX_MEMO_ENTRIES = 32
+
+
+def memo(spec, namespace, raw_parts, build):
+    if any(type(raw) is not bytes for raw in raw_parts):
+        raise TypeError('pure derivation keys require exact bytes')
+    key = (namespace, tuple((len(raw), sha(raw)) for raw in raw_parts))
+    cache = getattr(spec, '_shared_generation_derivations', None)
+    if cache is None:
+        cache = spec._shared_generation_derivations = {}
+    if key in cache:
+        return json.loads(cache[key])
+    result = build()
+    encoded = canonical(result)
+    if len(encoded) <= MAX_MEMO_BYTES:
+        while cache and (len(cache) >= MAX_MEMO_ENTRIES or sum(map(len, cache.values())) + len(encoded) > MAX_MEMO_BYTES):
+            del cache[next(iter(cache))]
+        cache[key] = encoded
+    return json.loads(encoded)
+
+
+def source_raw(spec):
+    captured = assert_current(spec)
+    pin = captured.document()['inputs']['source_manifest']
+    return captured.raw(pin['path']) if pin else None
+
+
+def source_registry(spec):
+    from .registry import Registry
+    from .typed_audit import _source_authority
+    from .source_metadata import _Loader
+    import yaml
+    raw = source_raw(spec)
+    if raw is None:
+        return Registry(None, {})
+    _source_authority(raw, spec.project)  # Bound aliases/nodes before construction.
+    data = yaml.load(raw.decode('utf-8'), Loader=_Loader)
+    if type(data) is not dict:
+        raise ValueError('captured source manifest must be a mapping')
+    return Registry(Path(spec.manifest), data)
+
+
+def digest_text(spec, cls):
+    from . import schema_digest
+    captured = assert_current(spec)
+    snapshot = captured.core_schema if cls == 'CoreDataset' else captured.full_schema
+    pin = captured.document()['inputs']['profile']['vocabulary']
+    vocabulary = captured.raw(pin['path']) if pin else b''
+    return memo(spec, 'digest:' + cls,
+        [canonical(schema_pin(snapshot)), *[raw for _name, _path, raw in snapshot.sources], vocabulary],
+        lambda: schema_digest.render(schema_digest._build_cached(cls, snapshot.sources[0][1], snapshot),
+            vocabulary=schema_digest.vocabularies(content=vocabulary, profile=spec.profile_obj)))
+
+
+def marked_bundle(spec):
+    from .audit_omissions import _mapping
+    from .chunking import canonical_name, validate_manifest_mapping
+    captured = assert_current(spec)
+    inputs = captured.document()['inputs']
+    raw = captured.raw(inputs['bundle']['path'])
+    manifest = _mapping(captured.raw(inputs['chunk_manifest']['path']), 'captured chunk manifest')
+    validate_manifest_mapping(manifest, raw, canonical_name(spec.bundle, source_manifest=spec.manifest))
+    starts = {chunk['lines'][0]: chunk['id'] for chunk in manifest['chunks']}
+    out = []
+    for number, line in enumerate(raw.decode('utf-8', errors='ignore').split('\n'), 1):
+        if number in starts:
+            out.append(f'[{starts[number]}]')
+        out.append(line)
+    return '\n'.join(out), manifest['bundle_md5']
+
+
+def core_inventory(spec):
+    from .schema_view import captured_view
+    captured = assert_current(spec)
+    def build():
+        with captured_view(captured.core_schema) as view:
+            return [str(slot.name) for slot in view.class_induced_slots('CoreDataset')]
+    return memo(spec, 'core_inventory', [canonical(schema_pin(captured.core_schema)),
+        *[raw for _name, _path, raw in captured.core_schema.sources]], build)
+
+
+def core_text(spec, *, phase4_complete=False):
+    from . import derive_core as derive
+    from .d4d_pair_consistency import pair_schema_from_views
+    from .schema_view import captured_view
+    from .audit_omissions import _mapping
+    import yaml
+    captured = assert_current(spec)
+    raw = spec.full_path.read_bytes()
+    full = _mapping(raw, 'full record to derive core')
+    with captured_view(captured.full_schema) as full_view, captured_view(captured.core_schema) as core_view:
+        pair = pair_schema_from_views(full_view, core_view)
+        core = derive.derive_core(full, pair)
+        facts = {'derived': True, 'rule': derive.RULE,
+            'from': {'path': str(spec.full_path), 'md5': hashlib.md5(raw).hexdigest()},
+            'identity_slots': len(pair.identity_slots), 'projected_slots': list(pair.projected_slots),
+            'distribution_slots': derive._distribution_slots(pair), 'conditional': dict(derive.CONDITIONAL)}
+    body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
+    header = '\n'.join(derive.core_header(raw.decode('utf-8'), spec.full_path, phase4_complete))
+    return (header + '\n\n' if header else '') + body, facts

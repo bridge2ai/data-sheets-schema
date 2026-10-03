@@ -405,13 +405,13 @@ def api():
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
 @click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -492,6 +492,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
         click.echo(f"✓ {out}", err=True)
     if spec.shared_generation_version:
         condition, runtime = spec.condition, spec.runtime
+        arm = next(key for key, row in ARMS.items() if row[:2] == (spec.arm, spec.method))
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
@@ -507,13 +508,13 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
 @click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -574,13 +575,13 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
 @click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -660,13 +661,13 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
               help="single-run registration, or exact per-run registration roster for batch")
 @click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--projects", default=None,
               help="comma-separated; default: every project the selected manifest declares "
                    "(#623), or the --project-bundle names")

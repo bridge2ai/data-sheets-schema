@@ -578,6 +578,10 @@ class RunSpec:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
         if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1):
             raise ValueError("shared_generation_version must be 0 or 1")
+        if self.condition == "generic_v10" and self.shared_generation_version != 1:
+            raise ValueError("generic_v10 requires shared generation 1")
+        if self.render_version == 25 and self.shared_generation_version != 1:
+            raise ValueError("renderer 25 requires shared generation 1")
         if self.shared_generation_version:
             if self.is_agentic or self.render_version != 25:
                 raise ValueError("shared generation requires API renderer 25")
@@ -2378,7 +2382,8 @@ PHASE_NEEDS = {
 
 def naming_block(project: str,
                  manifest_line: str | None = None,
-                 manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
+                 manifest: Path | None = DEFAULT_MANIFEST, *,
+                 _captured_registry=None) -> str | None:
     """The declared canonical GC label for one project, as sent to the model.
 
     Rendered from the manifest's `naming:` block (#668) so an edit there
@@ -2392,7 +2397,9 @@ def naming_block(project: str,
     if manifest is None:
         return None
     from data_sheets_schema.grounding import declared_naming
-    declared = (declared_naming(Path(manifest)) or {}).get(project) or {}
+    naming = (declared_naming(Path(manifest)) if _captured_registry is None
+              else _captured_registry.data.get("naming"))
+    declared = (naming or {}).get(project) or {}
     label = declared.get("canonical_label")
     if not label:
         return None
@@ -2415,7 +2422,8 @@ def naming_block(project: str,
 
 def scope_block(project: str,
                 manifest_line: str | None = None,
-                manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
+                manifest: Path | None = DEFAULT_MANIFEST, *,
+                 _captured_registry=None) -> str | None:
     """The declared scope for one project, as sent to the model (#932).
 
     v8's R2 tells the model that a passage whose subject is another dataset
@@ -2439,7 +2447,8 @@ def scope_block(project: str,
         return None
     try:
         from data_sheets_schema.scope import scope_of
-        declared = scope_of(project, Path(manifest)) or {}
+        declared = (scope_of(project, Path(manifest)) if _captured_registry is None
+                    else (_captured_registry.data.get("scope") or {}).get(project)) or {}
     except Exception:                                          # noqa: BLE001
         return None
     referent = str(declared.get("referent") or "").strip()
@@ -2502,7 +2511,8 @@ def scope_block(project: str,
 
 def source_ranking_block(project: str,
                          manifest_line: str | None = None,
-                         manifest: Path | None = DEFAULT_MANIFEST) -> str | None:
+                         manifest: Path | None = DEFAULT_MANIFEST, *,
+                 _captured_registry=None) -> str | None:
     """The declared source ranking for one project, as sent to the model.
 
     Rendered from the manifest rather than restated, so a tier edited there
@@ -2520,7 +2530,7 @@ def source_ranking_block(project: str,
         return None
     from data_sheets_schema.source_priority import ranked
     from data_sheets_schema.registry import load_registry, validate_context
-    registry = load_registry(Path(manifest))
+    registry = load_registry(Path(manifest)) if _captured_registry is None else _captured_registry
     validate_context(registry, project)
     rows = ranked(project, registry.data)
     if not rows:
@@ -2632,7 +2642,7 @@ def _receipts_block(spec: RunSpec, record: dict[str, Any]) -> dict[str, Any]:
                      snapshot_spec=spec, snapshot_record=record)
 
 
-def core_inventory_block() -> str:
+def core_inventory_block(*, _captured_names=None) -> str:
     """The core class's top-level slot names, for the report phase (#998).
 
     The report phase is assembled with the `Dataset` digest, and its
@@ -2649,7 +2659,7 @@ def core_inventory_block() -> str:
     `retention_not_shown` on `both` rows over full-only slots, on one
     record — so the most this can remove is those five; nothing else moves.
     """
-    names = schema_digest.slot_names("CoreDataset")
+    names = schema_digest.slot_names("CoreDataset") if _captured_names is None else _captured_names
     return ("# Core schema inventory\n\n"
             "`CoreDataset` declares exactly these top-level slots. The test is on "
             "the *root* of a dispositions row's slot path — `funders[0].grant_id` "
@@ -2700,10 +2710,17 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     # `third_party_sharing`) that CoreDataset does not accept — the first live
     # run produced a core record that failed validation for exactly that.
     cls = "CoreDataset" if PHASE_ARTIFACT.get(phase) == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
+    if spec.shared_generation_version:
+        from . import shared_generation as shared
+        digest = shared.digest_text(spec, cls)
+        captured_registry = shared.source_registry(spec)
+    else:
+        digest = schema_digest.digest_text(cls, profile=spec.profile_obj)
+        captured_registry = None
     receipted = spec.condition in RECEIPT_CONDITIONS
     if receipted:
-        bundle_text, bundle_md5 = chunk_marked_bundle(spec.bundle, spec.chunk_manifest, source_manifest=spec.manifest)
+        bundle_text, bundle_md5 = (shared.marked_bundle(spec) if spec.shared_generation_version else
+            chunk_marked_bundle(spec.bundle, spec.chunk_manifest, source_manifest=spec.manifest))
         bundle_head = (BUNDLE_HEAD.format(bundle=spec.bundle)
                        + BUNDLE_MD5_LINE.format(md5=bundle_md5)
                        + CHUNK_MARKER_NOTE)
@@ -2734,20 +2751,23 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     # A breakpoint caches the whole prefix up to it, so one at the end of the
     # group caches all three together — fewer breakpoints, longer prefix,
     # identical content.
-    ranking = source_ranking_block(spec.project, spec.manifest_line, manifest=spec.manifest)
+    ranking = source_ranking_block(spec.project, spec.manifest_line, manifest=spec.manifest,
+                           _captured_registry=captured_registry)
     if ranking:
         cached.append({"type": "text", "text": ranking})
     # The declared naming, for the same reason and with the same manifest-not-
     # used exemption (#668): the label standard lives in the manifest, and a
     # rule the API path never received would be one condition with two
     # behaviours.
-    naming = naming_block(spec.project, spec.manifest_line, manifest=spec.manifest)
+    naming = naming_block(spec.project, spec.manifest_line, manifest=spec.manifest,
+                           _captured_registry=captured_registry)
     if naming:
         cached.append({"type": "text", "text": naming})
     # The declared scope, same source and same exemption (#932): the rules
     # already tell the model what to do with a passage about another dataset,
     # and until now nothing told it which datasets those are.
-    scope = scope_block(spec.project, spec.manifest_line, manifest=spec.manifest)
+    scope = scope_block(spec.project, spec.manifest_line, manifest=spec.manifest,
+                           _captured_registry=captured_registry)
     if scope:
         cached.append({"type": "text", "text": scope})
     # The group's single breakpoint. `cached[-1]` is the bundle when none of
@@ -2794,7 +2814,8 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
                           + json.dumps(counts, sort_keys=True)})
         # The core inventory the instruction's `both` rule refers to (#998);
         # before the instruction so the instruction stays last (#346).
-        parts.append({"type": "text", "text": core_inventory_block()})
+        parts.append({"type": "text", "text": core_inventory_block(
+            _captured_names=shared.core_inventory(spec) if spec.shared_generation_version else None)})
     if spec.render_version >= 12 and phase in {"audit", "report"}:
         from data_sheets_schema import source_review
         artifact = "original_full" if phase == "audit" else "final_full"
@@ -4266,6 +4287,10 @@ def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
     """Only the selected v5 instrument receives actual manifest-byte authority."""
     if spec.render_version < 16:
         return {}
+    if spec.shared_generation_version:
+        from .shared_generation import source_raw
+        raw = source_raw(spec)
+        return {"source_manifest_raw": raw, "project": spec.project if raw is not None else None}
     return {"source_manifest_raw": spec.manifest.read_bytes() if spec.manifest_used else None,
             "project": spec.project if spec.manifest_used else None}
 
@@ -5114,7 +5139,7 @@ def normalise_multivalued(text: str) -> str:
 
 
 def build_repair(artifact: str, body: str, errors: list[str], *,
-                 profile=None) -> PhaseRequest:
+                 profile=None, _captured_digest: str | None = None) -> PhaseRequest:
     """A shape-repair request: digest, failing record, validator findings.
 
     Deliberately excludes the input bundle. The validator names shapes, not
@@ -5123,7 +5148,7 @@ def build_repair(artifact: str, body: str, errors: list[str], *,
     it also makes a repair call an order of magnitude cheaper than a phase.
     """
     cls = "CoreDataset" if artifact == "core" else "Dataset"
-    digest = schema_digest.digest_text(cls, profile=profile)
+    digest = schema_digest.digest_text(cls, profile=profile) if _captured_digest is None else _captured_digest
     cached = [{"type": "text", "text": digest,
                "cache_control": {"type": "ephemeral"}}]
     parts: list[dict[str, Any]] = list(cached)
@@ -5220,7 +5245,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
             # re-projected rather than the core being repaired on its own,
             # which would let the pair diverge again (#694).
             from data_sheets_schema.derive_core import core_text
-            text = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0], phase="repair_core")
+            if spec.shared_generation_version:
+                from .shared_generation import core_text as captured_core_text
+                derived_text = captured_core_text(spec, phase4_complete=True)[0]
+            else:
+                derived_text = core_text(spec.full_path, phase4_complete=True)[0]
+            text = normalise_record_text(derived_text, phase="repair_core")
             text = stamp_provenance_header(text, settings)      # the same sequence as the phase write (#1027 review)
             spec.core_path.write_text(text, encoding="utf-8")
             errors, failure = _validator_lines(path, schema, cls)
@@ -5259,8 +5289,12 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                             "outcome": (f"not converging: {applied_from} -> "
                                         f"{len(errors)} findings; stopped")})
                 break
+            selected_digest = None
+            if spec.shared_generation_version:
+                from .shared_generation import digest_text as captured_digest
+                selected_digest = captured_digest(spec, cls)
             req = build_repair(artifact, path.read_text(encoding="utf-8"),
-                               errors, profile=spec.profile_obj)
+                               errors, profile=spec.profile_obj, _captured_digest=selected_digest)
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()
@@ -6613,8 +6647,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     spec.bind_api_header_values(settings)
     if spec.shared_generation_version and not resume:
         from . import usage_ledger as ledger
+        from .snapshot_store import index_path
         if ledger.ledger_path(spec).exists() or any(path.exists() for path in
-                (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path)):
+                (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path,
+                 _receipt_path(spec), _progress_path(spec), _reasoning_path(spec),
+                 index_path(spec.provenance_path.parent, spec.project))) or any(
+                     _intermediate_dir(spec).glob(f"{spec.project}_*")):
             raise UsageLedgerError("shared generation cannot reuse spent outputs with no-resume; register a fresh run")
     client = client or _client()
     if spec.shared_generation_version:
@@ -7014,8 +7052,12 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             # generated core would — written, snapshotted, carried — so
             # resume, audit and report see the artifact they always did.
             from data_sheets_schema.derive_core import core_text
-            body, facts = core_text(spec.full_path,
-                                    phase4_complete=(ph == "reconcile_core"))
+            if spec.shared_generation_version:
+                from .shared_generation import core_text as captured_core_text
+                body, facts = captured_core_text(spec, phase4_complete=(ph == "reconcile_core"))
+            else:
+                body, facts = core_text(spec.full_path,
+                                        phase4_complete=(ph == "reconcile_core"))
             core_derivation = {**facts, "phase": ph}
         elif ph == "audit":
             if spec.shared_generation_version:
@@ -7293,14 +7335,19 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         from data_sheets_schema.derive_core import core_text, derivation_facts
         token = _REWRITE_LOG.set(None)                       # a comparison, not a write
         try:
-            fresh = normalise_record_text(core_text(spec.full_path, phase4_complete=True)[0])
+            if spec.shared_generation_version:
+                from .shared_generation import core_text as captured_core_text
+                derived_text, selected_derivation = captured_core_text(spec, phase4_complete=True)
+            else:
+                derived_text = core_text(spec.full_path, phase4_complete=True)[0]
+            fresh = normalise_record_text(derived_text)
         finally:
             _REWRITE_LOG.reset(token)
         on_disk = spec.core_path.read_text(encoding="utf-8") if spec.core_path.exists() else None
         repaired = any(r.get("phase") == "repair_core" for r in (rec.data.get("repair") or []))
         if on_disk == fresh:
             rec.data["core_derivation"] = {
-                **derivation_facts(spec.full_path),
+                **(selected_derivation if spec.shared_generation_version else derivation_facts(spec.full_path)),
                 "phase": ("removal_repair_core" if removal_check and removal_check.get("changed") else
                           "repair_core" if repaired else
                           (core_derivation or {}).get("phase", "reconcile_core")),

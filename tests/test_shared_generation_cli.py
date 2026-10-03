@@ -310,3 +310,21 @@ def test_two_projects_two_replicates_keep_distinct_registered_contexts(registere
     assert [s.bundle for s in seen]==[first.bundle,first.bundle,other.bundle,other.bundle]
     contexts=[json.loads(s.shared_generation_registration)['inputs']['context']['path'] for s in seen]
     assert contexts[0]==contexts[1] and contexts[2]==contexts[3] and contexts[0]!=contexts[2]
+
+
+def test_render_status_names_registered_arm_with_omitted_cli_arm(registered):
+    _base, reg = registered
+    reg['run']['arm'], reg['run']['method'] = module.ARMS['de_novo'][:2]
+    Path(reg['registration_path']).write_bytes(sg.canonical(reg))
+    result = single(reg, 'render-prompt')
+    assert result.exit_code == 0, result.output
+    assert ' / de_novo / runtime=Claude API (direct)' in result.output
+    assert ' / baseline / runtime=' not in result.output
+
+
+@pytest.mark.parametrize('command', ['plan', 'render-prompt', 'run', 'batch'])
+def test_help_discloses_selected_v2_boundaries(command):
+    result = CliRunner().invoke(cli, ['api', command, '--help'])
+    assert result.exit_code == 0
+    text = ' '.join(result.output.split())
+    assert '2 requires shared generation 1 / API renderer 25' in text
