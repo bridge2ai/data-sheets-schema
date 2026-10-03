@@ -376,8 +376,13 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         guard=modules['run_direct_canary_awake'].KeepAwake(api=FakeIOKit())
         monkeypatch.setattr(modules['run_direct_canary_awake'],'KeepAwake',lambda:guard)
         monkeypatch.setattr(modules['run_native_canary'],'execute_child',no_dispatch)
+        class LegacySys:
+            def __getattr__(self,name):
+                if name=='exception':raise AttributeError(name)
+                return getattr(sys,name)
         with monkeypatch.context() as legacy:
-            legacy.delattr(sys,'exception',raising=False)
+            # Restrict this module's API surface, not Python 3.13 stdlib sys.
+            legacy.setattr(execute,'sys',LegacySys())
             with pytest.raises(OSError) as caught:
                 execute.launch(case['raw'],**case['kwargs'])
     assert caught.value is observation_error
