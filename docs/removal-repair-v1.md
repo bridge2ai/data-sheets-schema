@@ -81,9 +81,11 @@ record before recording residual counts (#4257). A later clean reading never
 clears the original refusal; unavailable evidence produces an unavailable
 final reading, not a reused pre-call count.
 
-Parent #2923 remains open. Restoring an original value does not establish
-that it is supported by a source. Evidence-backed audit amendments,
-independent curation, native/direct integration and empirical acceptance of
-a freshly registered condition still require separate work. The independent
+The original #2923 software and replay criteria are
+[complete](https://github.com/bridge2ai/data-sheets-schema/issues/2923#issuecomment-5965432187).
+Restoring an original value does not establish that it is supported by a
+source. Evidence-backed audit amendments, independent curation, native/direct
+integration and empirical acceptance of a freshly registered condition remain
+separate extensions and scientific decisions. The independent
 self-disclaimer (#2913) and name-grounding (#2918) instruments retain their
 own runtime/canary scope. No historical record or block is backfilled here.
