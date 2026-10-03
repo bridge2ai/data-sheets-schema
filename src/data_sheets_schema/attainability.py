@@ -88,18 +88,18 @@ other invalid file, not raised past them (#3180, #3217).
 `not_stated_in_source` entry when the reading the entries leave out gives
 its check a match on those bytes: a break with no hyphen read as nothing,
 up to `GATE_JOINS_PER_WINDOW` (two) consecutive breaks at once
-(`join_matching_lines`, #3481), or the hyphenated breaks read each on its
-own over `GATE_COMPARE_WINDOW` (ten) lines. The join search reads only the
-three lines around each run of two breaks, so it does not see a match that
-needs three joins, nor one that needs a single join but runs over four or
-more lines ('a data' / 'protection' / 'im' / 'pact assessment', #3672): an
-absence like that is certified without the gate seeing it. No file is
-written; a curator
+(`join_matching_lines`, #3481), with up to `GATE_COMPARE_WINDOW` (ten)
+context lines (#3678), or the hyphenated breaks read each on its own over
+ten lines. Outer hyphens in the join search use three uniform readings;
+arbitrary mixed outer-hyphen readings combined with joins, three joins,
+and matches wider than ten lines remain outside this bounded search.
+When a candidate is found, no file is written; a curator
 entry for the item, kept in place of the deterministic one, is the way
 past it once someone has read the lines. The gate reads no word list, so
 it runs wherever `derive` does. On the 22 versions the decisions in
-notes/attainability_line_splits_2026-09-29.md rest on it refuses nothing:
-the only absences are on the two CHORUS document versions, and they hold. The
+notes/attainability_line_splits_2026-09-29.md rest on, the historical gate
+refused nothing. The contextual measurement is recorded separately in
+notes/attainability_join_context_2026-10-02.md. The
 validator does not run it: a valid file's deterministic entries are what
 their check writes, which the gate does not change.
 
@@ -466,9 +466,9 @@ JOIN = "join"
 #: hyphenated breaks read each on its own within this many lines — the
 #: widths the measured versions were checked at
 #: (notes/attainability_line_splits_2026-09-29.md, #3246, #3481). The join
-#: search reads only the `GATE_JOINS_PER_WINDOW` + 1 lines around a run, so
-#: a match wider than that is not searched, even one needing a single join
-#: (#3672).
+#: search adds `GATE_COMPARE_WINDOW` context lines (#3678): outer
+#: hyphens use the three uniform readings, not arbitrary mixed readings.
+#: Pure join helpers without explicit context retain their historical scope.
 GATE_JOINS_PER_WINDOW = 2
 GATE_COMPARE_WINDOW = 10
 
@@ -511,14 +511,63 @@ def _join_readings(lines: dict[int, tuple[str, str]], joins: int
             yield text, spans, [stop for n, _, stop in spans if reading.get(n) == JOIN]
 
 
-def join_matching_lines(pattern: str, lines: dict[int, tuple[str, str]], joins: int = 1) -> set[int]:
+def _context_join_readings(lines: dict[int, tuple[str, str]], joins: int, context_lines: int
+                           ) -> Iterable[tuple[str, list[tuple[int, int, int]], list[int]]]:
+    """K-break alternatives within W-line context (#3678).
+
+    Only one run of at most K consecutive breaks can introduce JOIN.
+    Outside it, ordinary breaks are spaces and hyphens use one of the
+    three uniform HYPHEN_READINGS. This does not enumerate arbitrary
+    mixed outer-hyphen readings. Stream windows and deduplicate readings
+    within one window only; no document-wide combinations are retained.
+    """
+    if type(joins) is not int or joins < 1:
+        raise ValueError("joins must be a positive integer")
+    if type(context_lines) is not int or context_lines < joins + 1:
+        raise ValueError("context_lines must be an integer at least joins + 1")
+    numbers = sorted(lines)
+    joinable, hyphenated = joinable_breaks(lines), _hyphenated(lines)
+    width = min(context_lines, len(numbers))
+    for left in range(max(0, len(numbers) - width + 1)):
+        window = numbers[left:left + width]
+        if len(window) < 2 or not joinable.intersection(window[:-1]):
+            continue
+        seen = set()
+        for start in range(len(window) - 1):
+            breaks = window[start:min(start + joins, len(window) - 1)]
+            if not joinable.intersection(breaks):
+                continue
+            outer_hyphens = hyphenated.intersection(window[:-1]).difference(breaks)
+            options = [("space", JOIN) if n in joinable else HYPHEN_READINGS if n in hyphenated else ("space",)
+                       for n in breaks]
+            for combo in itertools.product(*options):
+                if JOIN not in combo:
+                    continue
+                for outer in HYPHEN_READINGS if outer_hyphens else ("space",):
+                    reading = {n: outer for n in outer_hyphens if outer != "space"}
+                    reading.update((n, r) for n, r in zip(breaks, combo) if r != "space")
+                    key = tuple(sorted(reading.items()))
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    text, spans = _read(lines, window, reading)
+                    yield text, spans, [stop for n, _, stop in spans if reading.get(n) == JOIN]
+
+
+def join_matching_lines(pattern: str, lines: dict[int, tuple[str, str]], joins: int = 1, *,
+                        context_lines: int | None = None) -> set[int]:
     """Every line a match of `pattern` takes a character from, where the
     match crosses a joined break — takes a character from each side of it —
     under one of `_join_readings`. A match that only touches the break
     ('consent' / 'from') is a match on one line as it stands and crosses
-    nothing (#3471). Each start position is searched, as in `matching_lines`."""
+    nothing (#3471). Each start position is searched, as in `matching_lines`.
+    Omitted context preserves the historical K+1-line search. Explicit
+    context uses the bounded outer-hyphen contract in `_context_join_readings`.
+    """
     rx, out = re.compile(pattern), set()
-    for text, spans, cuts in _join_readings(lines, joins):
+    readings = (_join_readings(lines, joins) if context_lines is None else
+                _context_join_readings(lines, joins, context_lines))
+    for text, spans, cuts in readings:
         pos = 0
         while (m := rx.search(text, pos)) is not None:
             begin, end = m.span()
@@ -534,9 +583,10 @@ def line_split_gate(lines: dict[int, tuple[str, str]], checks: Iterable[AbsenceC
     """Check name → what gives it a match the entry's reading does not, for
     each of `checks`: a match across up to `joins` consecutive breaks read
     as nothing (`join_matching_lines`), or one with the hyphenated breaks
-    read each on its own within `window_lines` lines. The first reads only
-    the `joins` + 1 lines around each run, so a match that spans more lines
-    than that is not reported, even one needing a single join (#3672).
+    read each on its own within `window_lines` lines. The join search also
+    reads up to `window_lines` of context; outer hyphens use each uniform
+    reading. Arbitrary mixed outer-hyphen readings combined with joins,
+    joins outside one K-break run, and wider matches are not searched (#3678).
     Meant for checks with
     no matching line, where either is a status the entry would not have
     (#3408). Reads no word list, so it runs wherever the validator does, and
@@ -544,9 +594,10 @@ def line_split_gate(lines: dict[int, tuple[str, str]], checks: Iterable[AbsenceC
     out: dict[str, list[str]] = {}
     for check in checks:
         found = []
-        joined = sorted(join_matching_lines(check.pattern, lines, joins))
+        joined = sorted(join_matching_lines(check.pattern, lines, joins, context_lines=window_lines))
         if joined:
-            found.append(f"a match across up to {joins} line break(s) read as nothing, on line(s) "
+            found.append(f"a match across up to {joins} line break(s) read as nothing within {window_lines} "
+                         "context lines (outer hyphens read uniformly), on line(s) "
                          f"{_some(joined)}")
         wider = matching_lines(check.pattern, lines, window_lines)
         if wider:

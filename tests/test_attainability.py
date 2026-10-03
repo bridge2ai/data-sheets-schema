@@ -1134,16 +1134,15 @@ def test_the_gate_reads_the_breaks_the_entries_do_not():
                  "Participants gave con-\nsen\nt to take part."):
         assert at.matching_lines(consent.pattern, _lines(text)) == [], text
         [reason] = at.line_split_gate(_lines(text), [consent])["consent_text"]
-        assert reason.startswith("a match across up to 2 line break(s) read as nothing, on line(s) 1, 2"), reason
+        assert reason.startswith("a match across up to 2 line break(s) read as nothing within 10 context lines (outer hyphens read uniformly), on line(s) 1, 2"), reason
     assert at.line_split_gate(_lines("Participants gave co\nns\nen\nt to take part."), [consent]) == {}  # 3 joins
-    # #3672: one join, but over four lines, is outside the gate's three-line
-    # runs; the same statement over three lines is seen. The README, the note
-    # and the docstrings state this limit, and this pins it.
+    # #3678: K still limits the join run, not the match's context width.
     four, three = "a data\nprotection\nim\npact assessment was done", "a data\nprotection im\npact assessment was done"
     assert at.matching_lines(ethics.pattern, _lines(four)) == []
-    assert at.line_split_gate(_lines(four), [ethics]) == {}
+    assert at.line_split_gate(_lines(four), [ethics]) == {"ethics_review": [
+        "a match across up to 2 line break(s) read as nothing within 10 context lines (outer hyphens read uniformly), on line(s) 1, 2, 3, 4"]}
     assert at.line_split_gate(_lines(three), [ethics]) == {"ethics_review": [
-        "a match across up to 2 line break(s) read as nothing, on line(s) 1, 2, 3"]}
+        "a match across up to 2 line break(s) read as nothing within 10 context lines (outer hyphens read uniformly), on line(s) 1, 2, 3"]}
     wide = "a data-\n-\n-\n-\n-\n-\nprotec-\ntion impact assessment"
     assert at.matching_lines(ethics.pattern, _lines(wide)) == []
     assert at.line_split_gate(_lines(wide), [ethics]) == {"ethics_review": [
@@ -1192,7 +1191,7 @@ def test_write_document_refuses_an_absence_the_gate_moves_and_writes_nothing(tmp
         at.write_document(doc, att)
     [problem] = refused.value.problems
     assert problem.startswith("E4.4 would be certified not_stated_in_source by deterministic:consent_text, but "
-                              "a match across up to 2 line break(s) read as nothing, on line(s) 1, 2; "), problem
+                              "a match across up to 2 line break(s) read as nothing within 10 context lines (outer hyphens read uniformly), on line(s) 1, 2; "), problem
     assert not att.exists()
 
     curated = {**doc, "entries": [e for e in doc["entries"] if e["item_id"] != "E4.4"] + [{
