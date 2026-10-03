@@ -263,13 +263,15 @@ import hashlib
 import json
 import re
 from collections import Counter
-from functools import lru_cache
+from functools import lru_cache, partial
 from pathlib import Path
 from typing import Any
 
 import yaml
 
-from data_sheets_schema.receipts import (ENTRY_KEYS, _canonical_identifier, _populated, _resolve_value,
+from data_sheets_schema.receipts import (ENTRY_KEYS, IdentifierBases, _canonical_identifier,
+                                         _identifier_basis_for_rules, _populated, _resolve_value,
+                                         _validated_identifier_bases,
                                          dataset_identifier_forms, exempt, normalise, remap_path)
 
 INSTRUMENT = ("removals v3 (#3037, #3038, #3130, #3223; annotations #3366, #3367, #3702): phase-1 "
@@ -465,25 +467,38 @@ def _ws(value: Any) -> str:
     return " ".join(str(value).split())
 
 
-def _member_raw(value: str) -> str:
+def _member_raw(value: str, *, identifier_bases: IdentifierBases | None = None) -> str:
     """What `_member` normalises: the value as the CURIE a resolver URL
     names, case folded and in American spelling."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     from data_sheets_schema.american_spelling import americanise
-    return americanise(_canonical_identifier(value.strip()).casefold())[0]
+    return americanise(_canonical_identifier(value.strip(), identifier_bases=identifier_bases).casefold())[0]
 
 
-@lru_cache(maxsize=1 << 16, typed=True)
-def _member(value: Any) -> str:
+def _member(value: Any, *, identifier_bases: IdentifierBases | None = None) -> str:
     """A list member's identity: its text, a resolver URL read as the CURIE
     it names (#974's normaliser rewrites one to the other at write time)
     and a British spelling as the American form (#1002's normaliser, the
     form instrument's rules; #3038). Identifier-shaped tokens are left as
     written, as the normaliser leaves them; the text is folded to lower
     case first, so a Capitalised word its proper-noun rule would skip is
-    folded too — this is an identity, not a rewrite."""
+    folded too — this is an identity, not a rewrite. The frozen table is
+    part of the cache key: successive runs cannot borrow each other's
+    aliases, and an explicit empty table is distinct from legacy None."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    return _member_cached(value, identifier_bases)
+
+
+@lru_cache(maxsize=1 << 16, typed=True)
+def _member_cached(value: Any, identifier_bases: tuple[tuple[str, str], ...] | None) -> str:
     if not isinstance(value, str):
         return _text(value)
-    return _text(_member_raw(value))
+    return _text(_member_raw(value, identifier_bases=identifier_bases))
+
+
+# Retain the cache inspection/reset interface used by diagnostic callers.
+_member.cache_clear = _member_cached.cache_clear
+_member.cache_info = _member_cached.cache_info
 
 
 def _scalars(node: Any):
@@ -521,13 +536,15 @@ class _Presence:
     removal. A list of one scalar and that scalar are the same value — the
     runner's multivalued coercion (`receipts._rewritten`)."""
 
-    def __init__(self, original: dict[str, Any], target: dict[str, Any]):
+    def __init__(self, original: dict[str, Any], target: dict[str, Any], *,
+                 identifier_bases: IdentifierBases | None = None):
+        self.identifier_bases = _validated_identifier_bases(identifier_bases)
         self.original, self.target = original, target
         self._members: dict[str, set[int]] = {}
 
     def carried(self, path: str, list_path: str | None) -> bool:
         if list_path is None:
-            rm = remap_path(path, self.original, self.target)
+            rm = remap_path(path, self.original, self.target, identifier_bases=self.identifier_bases)
             if rm["path"] is None:
                 return False
             ok, value = _resolve_value(self.target, rm["path"])
@@ -539,26 +556,27 @@ class _Presence:
         path holds now still contains its text (#3243). A member of a list
         of scalars is identified by its text, so it has no rewrite. A value
         with no text once normalised (a path of "/") is kept only as written."""
-        rm = remap_path(path, self.original, self.target)
+        rm = remap_path(path, self.original, self.target, identifier_bases=self.identifier_bases)
         ok, node = _resolve_value(self.target, rm["path"]) if rm["path"] is not None else (False, None)
-        return ok and (node == value or _survives(value, node))
+        return ok and (node == value or _survives(value, node, identifier_bases=self.identifier_bases))
 
     def _kept(self, list_path: str) -> set[int]:
         if list_path not in self._members:
             kept: set[int] = set()
             ok_o, before = _resolve_value(self.original, list_path)
-            rm = remap_path(list_path, self.original, self.target)
+            rm = remap_path(list_path, self.original, self.target, identifier_bases=self.identifier_bases)
             after: Any = None
             if rm["path"] is not None:
                 _ok, after = _resolve_value(self.target, rm["path"])
             if isinstance(after, (str, int, float, bool)):
                 after = [after]
             if ok_o and isinstance(before, list) and isinstance(after, list):
-                pool = [_member(x) for x in after if not isinstance(x, (dict, list)) and _populated(x)]
+                pool = [_member(x, identifier_bases=self.identifier_bases) for x in after
+                        if not isinstance(x, (dict, list)) and _populated(x)]
                 for i, x in enumerate(before):
                     if isinstance(x, (dict, list)) or not _populated(x):
                         continue
-                    t = _member(x)
+                    t = _member(x, identifier_bases=self.identifier_bases)
                     if t in pool:
                         pool.remove(t)
                         kept.add(i)
@@ -576,15 +594,16 @@ def _hay(node: Any, form=_text) -> str:
     return " ".join(form(s) for s in _scalars(node))
 
 
-def _survives(value: Any, node: Any) -> bool:
+def _survives(value: Any, node: Any, *, identifier_bases: IdentifierBases | None = None) -> bool:
     """Does `node` carry `value`'s text? Containment on token boundaries,
     with a resolver URL and the CURIE it names one text on either side
     (#3129): the needle and each scalar of the hay are read as written and
     as `_member` reads them, so a ROR URL the final record carries as
     `ROR:…` survives, and a URL quoted inside prose still matches as
     written."""
-    needles = {_text(value), _member(value)} - {""}
-    hays = (_hay(node), _hay(node, _member))
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    needles = {_text(value), _member(value, identifier_bases=identifier_bases)} - {""}
+    hays = (_hay(node), _hay(node, partial(_member, identifier_bases=identifier_bases)))
     return any(_carries(h, n) for n in needles for h in hays)
 
 
@@ -604,34 +623,37 @@ def _flattenable(value: Any) -> bool:
     return not (_numeric(value) and sum(map(len, _text(value).split())) < MIN_NUMERIC_DIGITS)
 
 
-def _kept_in(value: Any, node: Any) -> bool:
+def _kept_in(value: Any, node: Any, *, identifier_bases: IdentifierBases | None = None) -> bool:
     """The flattening test: `_survives`, except that a value of numbers only
     is carried only by a scalar equal to it, normalised (#3130) — a count or
     a date inside prose is a number quoted, not the value kept."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     if not _numeric(value):
-        return _survives(value, node)
-    want = {_text(value), _member(value)}
-    return any(_text(s) in want or _member(s) in want for s in _scalars(node))
+        return _survives(value, node, identifier_bases=identifier_bases)
+    want = {_text(value), _member(value, identifier_bases=identifier_bases)}
+    return any(_text(s) in want or _member(s, identifier_bases=identifier_bases) in want for s in _scalars(node))
 
 
-def _into_source_caveats(value: Any, node: Any, path: str) -> bool:
+def _into_source_caveats(value: Any, node: Any, path: str, *, identifier_bases: IdentifierBases | None = None) -> bool:
     """Whether every scalar of `node` (at `path`) that carries the value's
     text is a `source_caveats` — the run's commentary, not a claim (#3223)."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     wrapped = {"_": node}
-    carriers = [p for p, s, _lp in values(wrapped) if _kept_in(value, s)]
+    carriers = [p for p, s, _lp in values(wrapped) if _kept_in(value, s, identifier_bases=identifier_bases)]
     return bool(carriers) and all(_CAVEAT_PATH.search(path + p[1:]) for p in carriers)
 
 
-def _identity(entry: dict[str, Any]) -> list[str]:
+def _identity(entry: dict[str, Any], *, identifier_bases: IdentifierBases | None = None) -> list[str]:
     """The identifying texts of a list entry: every `receipts.ENTRY_KEYS`
     string on the entry and on the objects nested in it by key — not on the
     entries of a list inside it, which are other things (an affiliation is
     not the creator). An identifier is read as the CURIE it names."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     out: list[str] = []
     stack: list[Any] = [entry]
     while stack:
         node = stack.pop()
-        out += [_member(node[k]) for k in ENTRY_KEYS if isinstance(node.get(k), str)]
+        out += [_member(node[k], identifier_bases=identifier_bases) for k in ENTRY_KEYS if isinstance(node.get(k), str)]
         stack += [v for v in node.values() if isinstance(v, dict)]
     return [t for t in out if t]
 
@@ -641,7 +663,8 @@ def _join(base: str, rel: str) -> str:
 
 
 def _fold_target(entry_path: str, entry: dict[str, Any], survivors: list[Any],
-                 record_id: str | None, carried: frozenset[str]) -> int | None:
+                 record_id: str | None, carried: frozenset[str], *,
+                 identifier_bases: IdentifierBases | None = None) -> int | None:
     """The index of the one surviving entry recognisably the dropped
     entry's continuation, or None: the entry carrying the most of its
     identifying texts (`_identity`), no other as many — the CM4AI v4 rep3
@@ -650,16 +673,18 @@ def _fold_target(entry_path: str, entry: dict[str, Any], survivors: list[Any],
     the one entry carrying every value it had that is inside the
     classification: the CHORUS 2026-08-11 leadership team folded into one
     entry's notes, name and affiliation each."""
-    needles = _identity(entry)
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    needles = _identity(entry, identifier_bases=identifier_bases)
     need_all = not needles
     if need_all:
-        needles = [t for t in (_member(v) for p, v, lp in values(entry)
+        needles = [t for t in (_member(v, identifier_bases=identifier_bases) for p, v, lp in values(entry)
                                if not isinstance(v, bool)
                                and not exempt_value(_join(entry_path, lp if lp is not None else p), v,
                                                     record_id, carried)) if t]
     if not needles:
         return None
-    scores = [sum(_carries(h, t) for t in needles) for h in (_hay(e, _member) for e in survivors)]
+    form = partial(_member, identifier_bases=identifier_bases)
+    scores = [sum(_carries(h, t) for t in needles) for h in (_hay(e, form) for e in survivors)]
     best = max(scores, default=0)
     if best == 0 or (need_all and best < len(needles)) or scores.count(best) > 1:
         return None
@@ -668,7 +693,7 @@ def _fold_target(entry_path: str, entry: dict[str, Any], survivors: list[Any],
 
 def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_list: list[Any],
                  final_path: str, survivors: list[Any], record_id: str | None,
-                 carried: frozenset[str]) -> str | None:
+                 carried: frozenset[str], *, identifier_bases: IdentifierBases | None = None) -> str | None:
     """Where a value of a dropped list entry — an object `receipts.remap_path`
     no longer finds in a list that is still a list — survives, or None
     (#3076). The whole list is not the surviving ancestor: it is a set of
@@ -696,24 +721,28 @@ def _folded_into(value: Any, entry_path: str, entry: dict[str, Any], snapshot_li
     where v1 did not count it, and a v1 surplus can vanish (#3383). A value
     of numbers only counts only where a scalar equals it (`_kept_in`,
     #3130)."""
-    j = _fold_target(entry_path, entry, survivors, record_id, carried)
-    if j is not None and _kept_in(value, survivors[j]):
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    j = _fold_target(entry_path, entry, survivors, record_id, carried, identifier_bases=identifier_bases)
+    if j is not None and _kept_in(value, survivors[j], identifier_bases=identifier_bases):
         return f"{final_path}[{j}]"
     k = int(entry_path[entry_path.rindex("[") + 1:-1])
-    after = sum(_kept_in(value, e) for e in survivors)
-    before = sum(_kept_in(value, e) for i, e in enumerate(snapshot_list) if i != k)
+    after = sum(_kept_in(value, e, identifier_bases=identifier_bases) for e in survivors)
+    before = sum(_kept_in(value, e, identifier_bases=identifier_bases) for i, e in enumerate(snapshot_list) if i != k)
     return final_path if after > before else None
 
 
 def _flattened_into(path: str, value: Any, original: dict[str, Any], final: dict[str, Any], *,
-                    record_id: str | None = None, carried: frozenset[str] = frozenset()) -> str | None:
+                    record_id: str | None = None, carried: frozenset[str] = frozenset(),
+                    identifier_bases: IdentifierBases | None = None) -> str | None:
     """`_flattening`'s path alone."""
-    return _flattening(path, value, original, final, record_id=record_id, carried=carried)[0]
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    return _flattening(path, value, original, final, record_id=record_id, carried=carried,
+                       identifier_bases=identifier_bases)[0]
 
 
 def _flattening(path: str, value: Any, original: dict[str, Any], final: dict[str, Any], *,
-                record_id: str | None = None, carried: frozenset[str] = frozenset()
-                ) -> tuple[str | None, str | None]:
+                record_id: str | None = None, carried: frozenset[str] = frozenset(),
+                identifier_bases: IdentifierBases | None = None) -> tuple[str | None, str | None]:
     """(path, route): the final-record path of the nearest surviving ancestor whose text
     carries the value's, normalised and on token boundaries; None when the
     nearest surviving ancestor does not carry it, or none survives short of
@@ -733,11 +762,12 @@ def _flattening(path: str, value: Any, original: dict[str, Any], final: dict[str
     it), `continuation` (a dropped entry's recognised continuation does) or
     `surplus` (more of the list's final entries carry it than its other
     phase-1 entries did); None with the path."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     if not _flattenable(value):
         return None, None
     below = path
     for anc in _ancestors(path):
-        rm = remap_path(anc, original, final)
+        rm = remap_path(anc, original, final, identifier_bases=identifier_bases)
         if rm["path"] is None:
             below = anc
             continue
@@ -749,9 +779,10 @@ def _flattening(path: str, value: Any, original: dict[str, Any], final: dict[str
             _ok, entry = _resolve_value(original, below)
             _ok, snapshot_list = _resolve_value(original, anc)
             if isinstance(entry, dict) and isinstance(snapshot_list, list):
-                into = _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried)
+                into = _folded_into(value, below, entry, snapshot_list, rm["path"], node, record_id, carried,
+                                    identifier_bases=identifier_bases)
                 return into, (None if into is None else "surplus" if into == rm["path"] else "continuation")
-        return (rm["path"], "ancestor") if _kept_in(value, node) else (None, None)
+        return (rm["path"], "ancestor") if _kept_in(value, node, identifier_bases=identifier_bases) else (None, None)
     return None, None
 
 
@@ -995,12 +1026,21 @@ def run_enum_aliases(record: dict[str, Any] | None
 
 
 # -------------------------------------------------------------- relocation
-@lru_cache(maxsize=1 << 16, typed=True)
-def _words(value: Any) -> frozenset[str]:
+def _words(value: Any, *, identifier_bases: IdentifierBases | None = None) -> frozenset[str]:
     """A value's content words: `_member`'s tokens longer than two
     characters, less `redundancy.STOPWORDS` (#3223)."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
+    return _words_cached(value, identifier_bases)
+
+
+@lru_cache(maxsize=1 << 16, typed=True)
+def _words_cached(value: Any, identifier_bases: tuple[tuple[str, str], ...] | None) -> frozenset[str]:
     from data_sheets_schema.redundancy import STOPWORDS
-    return frozenset(w for w in _member(value).split() if len(w) > 2 and w not in STOPWORDS)
+    return frozenset(w for w in _member(value, identifier_bases=identifier_bases).split() if len(w) > 2 and w not in STOPWORDS)
+
+
+_words.cache_clear = _words_cached.cache_clear
+_words.cache_info = _words_cached.cache_info
 
 
 #: What may follow an identifier where it ends (#3603): an optional
@@ -1044,7 +1084,8 @@ class _Relocation:
     each populated scalar, and each list of scalars taken whole — a member
     split in three is in the list, not in any one member."""
 
-    def __init__(self, final: dict[str, Any]):
+    def __init__(self, final: dict[str, Any], *, identifier_bases: IdentifierBases | None = None):
+        self.identifier_bases = _validated_identifier_bases(identifier_bases)
         scalars = values(final)
         lists: dict[str, list[Any]] = {}
         for _p, v, lp in scalars:
@@ -1055,10 +1096,11 @@ class _Relocation:
         # form there, while `_member` rewrites a URL scalar to its CURIE.
         # Kept before the punctuation step, so an identifier's end can be
         # read (#3603).
-        self.members = [(p, (_folded(t), _folded(_member_raw(t))))
+        self.members = [(p, (_folded(t), _folded(_member_raw(t, identifier_bases=self.identifier_bases))))
                         for p, v, _lp in scalars for t in [v if isinstance(v, str) else str(v)]]
-        self.words = ([(p, _words(v)) for p, v, _lp in scalars]
-                      + [(lp, frozenset().union(*map(_words, vs))) for lp, vs in lists.items()])
+        words = partial(_words, identifier_bases=self.identifier_bases)
+        self.words = ([(p, words(v)) for p, v, _lp in scalars]
+                      + [(lp, frozenset().union(*map(words, vs))) for lp, vs in lists.items()])
 
     def candidate(self, value: Any) -> tuple[bool, dict[str, Any] | None]:
         """(assessed, candidate or None). An identifier-shaped value is
@@ -1075,12 +1117,12 @@ class _Relocation:
         path in record order wins a tie, a scalar before a list."""
         if isinstance(value, str) and _IDENTIFIER_SHAPED.fullmatch(value.strip()):
             bare = re.sub(r"^mailto:", "", value.strip(), flags=re.I)
-            needles = {_text(bare), _member(bare)} - {""}
+            needles = {_text(bare), _member(bare, identifier_bases=self.identifier_bases)} - {""}
             patterns = [_identifier_pattern(n) for n in needles]
             hit = next((p for p, forms in self.members
                         if any(pat.search(h) for pat in patterns for h in forms)), None)
             return True, (self._row(hit, 1.0) if hit is not None else None)
-        want = _words(value)
+        want = _words(value, identifier_bases=self.identifier_bases)
         if isinstance(value, bool) or len(want) < RELOCATED_MIN_WORDS:
             return False, None
         best, at = 0.0, None
@@ -1506,6 +1548,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
              amended_paths: frozenset[str] | set[str] = frozenset(),
              enum_aliases: dict[str, dict[str, str]] | None = None,
              person_slots: frozenset[str] | set[str] | None = None,
+             identifier_bases: IdentifierBases | None = None,
              amended_edits: dict[str, list[tuple[str, str] | None]] | None = None,
              path_limit: int | None = PATH_LIMIT) -> dict[str, Any]:
     """The block for one run. Pure: snapshot + final record + audit (+ the
@@ -1538,7 +1581,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     enum-alias table for `normaliser_form` (`run_enum_aliases`, #3702);
     None reads today's. `person_slots` similarly supplies the run's
     Person-ranged slots; None reads today's and an empty set remains empty
-    (#4063). `amended_edits` is each amended path's recorded
+    (#4063). `identifier_bases` supplies the ordered resolver aliases for
+    every identity join, scalar membership, containment, relocation and
+    phase/amendment comparison; None preserves the legacy ambient lookup,
+    an explicit empty table supplies no aliases (#4286). `amended_edits`
+    is each amended path's recorded
     (`replace`, `with`) pairs (`amend_edits`), one per amend in the order
     recorded, None (or a pair without a nonblank `replace`) for an amend
     whose edit is not recorded — still an amend on that path (#3842): #903 records an amend on
@@ -1548,6 +1595,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     (#3802) —
     where phases are attributed, only one the `write` phase deleted, and
     a member a model phase removed is no rival fit (#3818)."""
+    identifier_bases = _validated_identifier_bases(identifier_bases)
     if not isinstance(original, dict):
         return _unchecked("no phase-1 snapshot: the removals cannot be read against what phase 1 wrote (#899)")
     final = final if isinstance(final, dict) else {}
@@ -1576,9 +1624,10 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
     # removed.
     attributed = intermediates is not None and all(isinstance(doc, dict) for _n, doc in intermediates)
     review_state, judged = source_review_judgments(audit, snapshot_sha256)
-    relocation = _Relocation(final)
-    at_final = _Presence(original, final)
-    at_stage = [(name, _Presence(original, doc)) for name, doc in (intermediates or [])] if attributed else []
+    relocation = _Relocation(final, identifier_bases=identifier_bases)
+    at_final = _Presence(original, final, identifier_bases=identifier_bases)
+    at_stage = ([(name, _Presence(original, doc, identifier_bases=identifier_bases))
+                 for name, doc in (intermediates or [])] if attributed else [])
 
     def stage_after_last(keeps) -> str:
         # The stage after the last one that still kept the value; the
@@ -1636,7 +1685,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
                 records = [r for rec in records for t in texts if (r := _with_leaf(rec, a, t)) is not None]
                 if not records:
                     break
-            rebuilt.append([(r, _Presence(original, r)) for r in records] if records else None)
+            rebuilt.append([(r, _Presence(original, r, identifier_bases=identifier_bases))
+                            for r in records] if records else None)
         return rebuilt[0]
 
     def amended_at(at: str | None) -> bool:
@@ -1743,7 +1793,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # rebuild cannot place the entry either, the amends are read below.
         readings: set[bool] = set()
         for record, presence in pre_amend() or []:
-            if remap_path(target, original, record)["path"] is None:
+            if remap_path(target, original, record, identifier_bases=identifier_bases)["path"] is None:
                 readings = set()
                 break
             # Kept as written: a value the model had already rewritten (the
@@ -1796,7 +1846,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         # (#3818).
         if not amended:
             return None
-        at = remap_path(list_path or path, original, final)["path"]
+        at = remap_path(list_path or path, original, final, identifier_bases=identifier_bases)["path"]
         if at is None:
             return amend_at_lost_address(path, value, list_path)
         if list_path is None:
@@ -1822,7 +1872,7 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if attributed and at_stage:
             # The last phase output's list: what the write phase was given.
             last = intermediates[-1][1]
-            moved = remap_path(list_path, original, last)["path"]
+            moved = remap_path(list_path, original, last, identifier_bases=identifier_bases)["path"]
             ok, held = _resolve_value(last, moved) if moved is not None else (False, None)
             if ok and isinstance(held, list):
                 co_removable |= {_ws(m) for m in held if _ws(m) not in populated}
@@ -1855,7 +1905,8 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
             # Carried, but its path may hold other text now (#3243): reported
             # as its own class, never a removal.
             if list_path is None and not at_final.retains(path, value):
-                rw: dict[str, Any] = {"path": path, "at": remap_path(path, original, final)["path"]}
+                rw: dict[str, Any] = {"path": path,
+                    "at": remap_path(path, original, final, identifier_bases=identifier_bases)["path"]}
                 # Of the write-time normaliser's form (#3366): reported, never subtracted.
                 form = normaliser_form(path, value, _resolve_value(final, rw["at"])[1], own_ids,
                                        enum_aliases=enum_aliases, person_slots=person_slots)
@@ -1891,10 +1942,11 @@ def classify(original: dict[str, Any] | None, final: dict[str, Any],
         if paths_receipted is not None:
             row["receipted"] = _receipted(path, list_path, paths_receipted)
             receipted["removed"] += row["receipted"]
-        into, route = _flattening(path, value, original, final, record_id=record_id, carried=carried)
+        into, route = _flattening(path, value, original, final, record_id=record_id, carried=carried,
+                                   identifier_bases=identifier_bases)
         if into is not None:
             flat = {**row, "into": into}
-            if _into_source_caveats(value, _resolve_value(final, into)[1], into):
+            if _into_source_caveats(value, _resolve_value(final, into)[1], into, identifier_bases=identifier_bases):
                 flat["into_source_caveats"] = True
             # Reported only (#3367): a flattening coincidence could make, and
             # whether a finding would found it were it a deletion — so the
@@ -2250,7 +2302,13 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
 
     The phase-1 snapshot is the API runner's `intermediate/{P}_full.yaml`;
     where a run has none, the native/direct `evidence/original_full.yaml`,
-    read with `evidence/audit.json` and no phase outputs (#3037)."""
+    read with `evidence/audit.json` and no phase outputs (#3037).
+
+    Identity joins use the recorded schema's resolver bases (#4286), or
+    the disclosed current fallback selected by `run_schema`. The artifact
+    records the effective table and actual schema hashes separately from
+    the independent enum capture and Person-rule basis. An inconsistent
+    or malformed selected table leaves the block unchecked, never zero."""
     from data_sheets_schema.backfill_checks import record_paths
     from data_sheets_schema.report_claims import phase1_snapshot_with_pin_for
     paths = record_paths(provenance)
@@ -2305,13 +2363,26 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
     tables, tables_basis = run_enum_aliases(record)
     # These existing selectors resolve independently. Keep each actual basis,
     # including a fallback, rather than implying a single shared capture.
+    # Identifier aliases reuse the Person rule capture, with their effective
+    # table and actual fallback bytes disclosed separately (#4286).
     from data_sheets_schema.run_schema import identifier_rules
-    rules, person_basis = identifier_rules(record)
-    block = classify(original, final, audit if a_state == "usable" else None,
-                     receipt=receipt, intermediates=None if evidence else stages,
-                     audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
-                     snapshot_sha256=(pin or {}).get("sha256"), amended_paths=amended_paths(record),
-                     enum_aliases=tables, person_slots=rules.persons, amended_edits=amend_edits(record))
+    person_basis: dict[str, Any] = {}
+    try:
+        rules, person_basis = identifier_rules(record)
+        identifier_bases, identity_basis = _identifier_basis_for_rules(rules, person_basis)
+    except Exception as exc:  # noqa: BLE001 — unusable authority is never checked counts
+        reason = f"identifier rules could not be established ({type(exc).__name__}: {exc})"
+        block = _unchecked(reason)
+        identity_basis = {"state": "unusable", "reason": reason}
+        if not person_basis:
+            person_basis = {"source": "unusable", "reason": reason}
+    else:
+        block = classify(original, final, audit if a_state == "usable" else None,
+                         receipt=receipt, intermediates=None if evidence else stages,
+                         audit_unread=(a_why or "unreadable") if a_state == "unusable" else None,
+                         snapshot_sha256=(pin or {}).get("sha256"), amended_paths=amended_paths(record),
+                         enum_aliases=tables, person_slots=rules.persons, identifier_bases=identifier_bases,
+                         amended_edits=amend_edits(record))
     block["artifacts"] = {
         "phase1_snapshot": pin, "final": str(paths["full"]),
         "audit": {"state": a_state, "path": str(a_path) if a_path else None,
@@ -2320,6 +2391,7 @@ def for_record(provenance: Path, *, record: dict[str, Any] | None = None) -> dic
         "phases": phases,
         "enum_alias_tables": tables_basis,
         "person_slot_rules": person_basis,
+        "identifier_rules": identity_basis,
         **({"phases_reason": "the native/direct evidence protocol snapshots no phase output"} if evidence else {}),
     }
     return block

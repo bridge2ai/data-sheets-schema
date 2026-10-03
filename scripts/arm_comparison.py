@@ -45,7 +45,8 @@ Bases, stated once and printed into the output:
   them `reconcile_full` removed (#3150), receipted values deleted and values
   rewritten in place without a finding (#3243), with the low-confidence
   flattenings (#3367) and the rewrites not the model's (#3366), are
-  recomputed live and read-only (`removals.for_record`); the
+  recomputed live and read-only (`removals.for_record`), with recorded-schema
+  identifier aliases and per-record fallback/Person/enum basis disclosures; the
   unrecorded-removal count is the record's `report_claims` block.
 - **omission candidates** (#3335): an intermittent slot a filling replicate
   receipts with a snippet verified in its own chunk, the record's bundle
@@ -394,7 +395,7 @@ def receipt_metrics(rcp: dict[str, Any]) -> dict[str, Any]:
             "addedafter": int(added) if added is not None else None}
 
 
-def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
+def removal_metrics(prov: Path, rec: dict[str, Any], *, include_basis: bool = False) -> dict[str, Any]:
     """The removal rows for one record (#2923): recomputed live from the
     phase-1 snapshot, the final record, the audit and the receipt
     (`removals.for_record`, read-only), and the report block's own
@@ -405,7 +406,7 @@ def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
     rc = rec.get("report_claims") or {}
     unrecorded = rc.get("removals_unrecorded_count") if rc.get("snapshot_checked") else None
     by_phase = block.get("unfounded_phase")
-    return {"unfoundedremovals": block["unfounded"],
+    result = {"unfoundedremovals": block["unfounded"],
             "unfoundedreconcile": by_phase.get("reconcile_full", 0) if by_phase is not None else None,
             "unfoundedrelocated": block.get("relocated_candidate_unfounded"),
             "receipteddeleted": (block["receipted"] or {}).get("deleted"),
@@ -413,6 +414,15 @@ def removal_metrics(prov: Path, rec: dict[str, Any]) -> dict[str, Any]:
             "unfoundedrewrites": block.get("rewritten_unfounded"),
             "unfoundedrewritesnotmodel": block.get("rewritten_unfounded_not_model"),
             "unrecordedremovals": int(unrecorded) if unrecorded is not None else None}
+    if include_basis:
+        artifacts = block.get("artifacts") or {}
+        result["removal_schema_basis"] = {
+            "checked": block.get("checked"), "reason": block.get("reason"),
+            "identifier_rules": artifacts.get("identifier_rules"),
+            "person_slot_rules": artifacts.get("person_slot_rules"),
+            "enum_alias_tables": artifacts.get("enum_alias_tables"),
+        }
+    return result
 
 
 def run_metrics(label: str, project: str) -> dict[str, Any] | None:
@@ -454,7 +464,7 @@ def run_metrics(label: str, project: str) -> dict[str, Any] | None:
         "form_schema_basis": form.get("schema_basis"),
         "leaves": leaves,
         **receipt_vals,
-        **removal_metrics(core_dir / f"{project}_provenance.yaml", rec),
+        **removal_metrics(core_dir / f"{project}_provenance.yaml", rec, include_basis=True),
         "ungrounded": g.get("absent"),
         "minted": g.get("minted_fragment"),
         "pair": pc.get("errors"),
@@ -1336,6 +1346,39 @@ def form_schema_section(data) -> list[str]:
     return lines + [""]
 
 
+def removal_schema_section(data) -> list[str]:
+    """Keep the actual per-run removal inputs visible beside recomputed counts."""
+    def escaped(value):
+        return html.escape(str(value), quote=False).replace("|", "&#124;").replace(
+            "`", "&#96;").replace("\n", "<br>")
+
+    lines = ["## Live removal schema bases (#4286, #4296)", "",
+             "Removal identity joins and resolver aliases use the run's recorded merged-schema "
+             "rules when recoverable. The identifier basis distinguishes any requested historical "
+             "pins from the actual current fallback and hashes the effective ordered alias table. "
+             "Person-slot and enum-alias selectors retain their separately disclosed resolutions; "
+             "the table does not assert that independently selected rules came from one capture. "
+             "No stored record or canary gate baseline is rewritten. Different counts on this "
+             "basis are not evidence of a generation improvement.", "",
+             "The table omits the alias list itself but retains its digest, boundary rule and "
+             "schema resolution. Unavailable authority or evidence stays unmeasured, not zero.", "",
+             "| arm | project | label | removal measurement basis |", "|---|---|---|---|"]
+    for arm, display, *_rest in ARMS:
+        for project in PROJECTS:
+            for row in data[arm][project]:
+                basis = row.get("removal_schema_basis")
+                if basis is not None:
+                    basis = dict(basis)
+                    identity = basis.get("identifier_rules")
+                    if isinstance(identity, dict):
+                        basis["identifier_rules"] = {k: v for k, v in identity.items() if k != "bases"}
+                text = (json.dumps(basis, sort_keys=True, ensure_ascii=False)
+                        if basis is not None else "unrecorded — no removal basis supplied")
+                lines.append("| " + " | ".join(escaped(v) for v in (
+                    display, project, row.get("label", "unrecorded"), text)) + " |")
+    return lines + [""]
+
+
 def render_markdown(data, scores) -> str:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
@@ -1370,7 +1413,9 @@ def render_markdown(data, scores) -> str:
              "from the phase-1 snapshot, the phase outputs, the final full record, the audit "
              "and the receipt, with the record's amend dispositions (#903) "
              "(`removals.for_record`, #2923), read-only; no record carries a "
-             "removals block. Removals unrecorded in the report: the record's `report_claims` "
+             "removals block. Identifier aliases use the recorded schema where recoverable, "
+             "with the actual per-record rule bases and fallback disclosed below (#4286). "
+             "Removals unrecorded in the report: the record's `report_claims` "
              "block.",
              "- spend: absent by design — `api_usage` and `run_observed` are different "
              "quantities (#400).",
@@ -1381,6 +1426,7 @@ def render_markdown(data, scores) -> str:
                                    for _k, d, pfx, rt, role in ARMS), ""]
 
     lines += form_schema_section(data)
+    lines += removal_schema_section(data)
     lines += ["## Deterministic metrics — mean ± SD over replicates", "",
               "| metric | project | " + " | ".join(d for _k, d, *_ in ARMS) + " |",
               "|---|---|" + "|".join("---" for _ in ARMS) + "|"]
