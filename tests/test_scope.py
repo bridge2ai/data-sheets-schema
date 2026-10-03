@@ -618,7 +618,10 @@ class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
 
     def test_no_rendered_instruction_names_another_project(self):
         from data_sheets_schema.api_runner import CONDITION_PROMPTS
-        for condition in sorted(CONDITION_PROMPTS):
+        # The registered API-only v10 instruction is exercised in full in
+        # test_shared_generation_condition_compatibility; it has no legacy
+        # unregistered/native specification.
+        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"}):
             for project in ALL_PROJECTS:
                 text = self._rendered(project, condition)
                 for other in ALL_PROJECTS:
@@ -647,7 +650,7 @@ class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
         """
         from data_sheets_schema.api_runner import CONDITION_PROMPTS
         pattern = re.compile(r"data/preprocessed/concatenated/[\w.-]+")
-        for condition in sorted(CONDITION_PROMPTS):
+        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"}):
             for project in ALL_PROJECTS:
                 text = self._rendered(project, condition)
                 named = set(pattern.findall(text))
