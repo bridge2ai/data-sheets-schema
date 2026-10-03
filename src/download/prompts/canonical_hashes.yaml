@@ -474,4 +474,14 @@ files:
     pinned_on: '2026-10-02'
     reason: New separately registered receipt-only runtime policy v1 (#4266); no empirical floor or historical change.
     sha256: 9a2b553bb9f14a3a431469a39469f5492a3f8c3d9718dccb3b07b311b2504765
+  src/download/prompts/native_source_attribution_v1.md:
+    body_sha256: 88bd24829813e0970b1a95ee85f9e86495b8898ff4c7efc39042abf21e63932a
+    bytes: 2047
+    pinned_at_commit: 7d6d0b6ff66e52a8e93af13062f31439d4457b88
+    pinned_blob_path: src/download/prompts/native_source_attribution_v1.md
+    pinned_in_repository: /private/tmp/d4d-loop-2427-native-20261002
+    pinned_on: '2026-10-02'
+    reason: Freeze native-only source-attribution draft preflight v1 for offline registration
+      (#4304); preserve historical renderer requests.
+    sha256: e13f0bd8de8e4e28cd1c1216799defb7005f7e041698698a4478d824e8acc761
 hash_algorithm: sha256

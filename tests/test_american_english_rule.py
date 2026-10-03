@@ -73,8 +73,8 @@ class TestTheRunnerSendsWhatItAsksFor(unittest.TestCase):
         # eleven authored surfaces, plus the versioned evidence contracts and
         # the two renderer-19 schema-semantics surfaces, three renderer-24
         # receipt completion surfaces, and the opt-in removal repair and
-        # runtime receipt-completion policies.
-        self.assertEqual(len(surfaces), 42, sorted(surfaces))
+        # runtime receipt-completion and native attribution draft policies.
+        self.assertEqual(len(surfaces), 43, sorted(surfaces))
         for name, text in surfaces.items():
             with self.subTest(surface=name):
                 found = british_forms(text, exempt_quotes=False)

@@ -539,6 +539,8 @@ class RunSpec:
     prompt_text_env: bool = False
     # Independent opt-in instruction axis; absent/zero preserves every historical renderer.
     api_playbook_version: int = 0
+    native_source_attribution_version: int = 0
+    native_source_attribution_max_checks: int | None = None
     # Separately selected restore-only runtime condition, never inferred from a label.
     removal_repair_version: int = 0
     receipt_completion_version: int = 0
@@ -563,6 +565,9 @@ class RunSpec:
             self.render_version = 7 if self.is_agentic else 8
         if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
+        validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
+                                    renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
         if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1):
@@ -700,11 +705,24 @@ class RunSpec:
                    provider=recorded.get("provider"),
                    reasoning_effort=recorded.get("reasoning_effort"),
                    prompt_text_env=recorded.get("prompt_text_env") is True,
+                   native_source_attribution_version=recorded.get("native_source_attribution_version", 0),
+                   native_source_attribution_max_checks=recorded.get("native_source_attribution_max_checks"),
                    api_playbook_version=recorded.get("api_playbook_version", 0),
                    removal_repair_version=recorded.get("removal_repair_version", 0),
                    receipt_completion_version=recorded.get("receipt_completion_version", 0),
                    receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
                    _replay_only=True)
+        if spec.native_source_attribution_version:
+            if {k for k in recorded if k.startswith("native_source_attribution_")} != {
+                    "native_source_attribution_version", "native_source_attribution_max_checks",
+                    "native_source_attribution_sha256"}:
+                raise ValueError("invalid native source attribution render metadata")
+            from data_sheets_schema.native_source_attribution import POLICY_SHA256, policy_text
+            policy_text()
+            if recorded.get("native_source_attribution_sha256") != POLICY_SHA256:
+                raise ValueError("invalid recorded native source attribution policy SHA256")
+        elif any(k.startswith("native_source_attribution_") for k in recorded):
+            raise ValueError("historical specs omit native source attribution metadata")
         if spec.api_playbook_version:
             from data_sheets_schema.api_playbook import POLICY_SHA256
             if recorded.get("api_playbook_sha256") != POLICY_SHA256:
@@ -846,10 +864,15 @@ class RunSpec:
         "do not intervene" from a rule into something detectable (#420).
         """
         policy_metadata = {}
+        if self.native_source_attribution_version:
+            from data_sheets_schema.native_source_attribution import policy_identity
+            policy_metadata.update(native_source_attribution_version=1,
+                native_source_attribution_max_checks=self.native_source_attribution_max_checks,
+                native_source_attribution_sha256=policy_identity()["sha256"])
         if self.api_playbook_version:
             from data_sheets_schema.api_playbook import POLICY_SHA256
-            policy_metadata = {"api_playbook_version": self.api_playbook_version,
-                               "api_playbook_sha256": POLICY_SHA256}
+            policy_metadata.update(api_playbook_version=self.api_playbook_version,
+                                   api_playbook_sha256=POLICY_SHA256)
         if self.removal_repair_version:
             from data_sheets_schema.removal_repair import POLICY_SHA256 as REMOVAL_POLICY_SHA256
             policy_metadata.update(removal_repair_version=1, removal_repair_sha256=REMOVAL_POLICY_SHA256)
@@ -955,6 +978,9 @@ class RunSpec:
     @property
     def prompt_files(self) -> list[Path]:
         files = [self.base_prompt]
+        if self.native_source_attribution_version:
+            from data_sheets_schema.native_source_attribution import POLICY_PATH
+            files.append(POLICY_PATH)
         if self.api_playbook_version:
             from data_sheets_schema.api_playbook import POLICY_PATH
             files.append(POLICY_PATH)
@@ -1049,7 +1075,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1100,6 +1126,14 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
             raise ValueError("receipt completion requires API renderer 8")
         from data_sheets_schema.receipt_completion import policy_identity
         parts.append({"receipt_completion": policy_identity()})
+    if type(native_source_attribution_version) is not int or native_source_attribution_version not in (0, 1):
+        raise ValueError("unsupported native source attribution assembly version")
+    if native_source_attribution_version:
+        if type(render_version) is not int or render_version not in range(16, 24):
+            raise ValueError("native source attribution assembly requires renderer 16 through 23")
+        from data_sheets_schema.native_source_attribution import policy_identity
+        parts.append({"native_source_attribution": policy_identity(),
+                      "ordering": "saved report draft preflight before unchanged terminal evidence check"})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -1448,6 +1482,10 @@ def native_evidence_instructions(spec: RunSpec) -> str:
             + shlex.join([spec._agentic_toolchain["python"], "-m", "data_sheets_schema.source_review",
                           "--record", paths["full"], "--artifact", "final_full"])
             + "\n\nCover every listed value and copy the exact artifact hash into source_review.\n")
+    draft = ""
+    if spec.native_source_attribution_version:
+        from data_sheets_schema.native_source_attribution import instructions
+        draft = instructions(spec)
     return (
         "\n\n## Native evidence execution (renderer v9)\n\n"
         "Immediately after Phase 2, before auditing or changing either record, "
@@ -1455,8 +1493,8 @@ def native_evidence_instructions(spec: RunSpec) -> str:
         + command + "\n\n" + source_inventory
         + f"Write the Phase 3 audit JSON, including its evidence arrays, to {audit}. "
         "Check it before applying any recommendation:\n\n"
-        + shlex.join(args) + "\n\n"
-        "After reconciliation, core derivation and reporting, check all evidence and "
+        + shlex.join(args) + "\n\n" + draft
+        + "After reconciliation, core derivation and reporting, check all evidence and "
         "declared relationship removals with:\n\n"
         + shlex.join(args + ["--final-full", paths["full"], "--final-core", paths["core"],
                              "--report", paths["report"]]) + "\n\n"
@@ -4410,6 +4448,8 @@ def sent_text_surfaces() -> dict[str, str]:
     out["removal_repair_policy_v1"] = removal_policy_text()
     from data_sheets_schema.receipt_completion import policy_text as receipt_policy_text
     out["receipt_completion_runtime_policy_v1"] = receipt_policy_text()
+    from data_sheets_schema.native_source_attribution import policy_text as native_attribution_policy
+    out["native_source_attribution_policy_v1"] = native_attribution_policy()
     out.update({"assembly_layout": str(ASSEMBLY_LAYOUT), "system": PHASE_SYSTEM,
                 "repair_system": REPAIR_SYSTEM, "repair_instruction": REPAIR_INSTRUCTION,
                 "core_inventory_block": core_inventory_block(),
@@ -6318,6 +6358,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
+    if spec.native_source_attribution_version:
+        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
     with _exclusive_run(spec):
         if resume:
@@ -6425,6 +6467,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     if spec.render_version in (19, 20, 21, 22, 23):
         raise ValueError(f"renderer {spec.render_version} requires a separately registered audit continuation; "
                          "generation execution is not supported")
+    if spec.native_source_attribution_version:
+        raise ValueError("native source attribution is offline-only; execution requires reviewed controller integration")
 
     # Before a token is spent. The digest this run is about to send, the schema
     # it validates against and the identity slots its pair check uses all come
