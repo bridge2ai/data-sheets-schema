@@ -2316,6 +2316,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/typed-audit-reporting/</loc>
+         <lastmod>2026-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/unit/</loc>
          <lastmod>2026-10-03</lastmod>
          <changefreq>daily</changefreq>

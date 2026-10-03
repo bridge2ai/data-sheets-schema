@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/preprocessing_strategies/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/typed-audit-reporting/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: preprocessing_strategies - data-sheets-schema</title>
+        <title>Reporting checked typed audits - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-preprocessing_strategies" class="md-skip">
+        <a href="#reporting-checked-typed-audits" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: preprocessing_strategies
+              Reporting checked typed audits
             
           </span>
         </div>
@@ -309,62 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -377,95 +321,69 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/preprocessing_strategies.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/typed-audit-reporting.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-preprocessing_strategies">Slot: preprocessing_strategies</h1>
-<p><em>Preprocessing steps applied to the raw data. List of PreprocessingStrategy objects from the Preprocessing module describing normalization, transformation, and other preparation steps.</em></p>
-<p>URI: <a href="https://w3id.org/bridge2ai/data-sheets-schema/preprocessingStrategies">d4d:preprocessingStrategies</a>
-Alias: preprocessing_strategies</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>
-<p>Range: <a href="../PreprocessingStrategy/">PreprocessingStrategy</a></p>
-</li>
-<li>
-<p>Multivalued: True</p>
-</li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>d4d:preprocessingStrategies</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:preprocessing_strategies</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: preprocessing_strategies
-description: Preprocessing steps applied to the raw data. List of PreprocessingStrategy
-  objects from the Preprocessing module describing normalization, transformation,
-  and other preparation steps.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: d4d:preprocessingStrategies
-alias: preprocessing_strategies
-owner: Dataset
-domain_of:
-- Dataset
-range: PreprocessingStrategy
-multivalued: true
-inlined: true
-inlined_as_list: true
-
+<h1 id="reporting-checked-typed-audits">Reporting checked typed audits</h1>
+<p><code>python -m data_sheets_schema.typed_audit_report</code> exports caller-selected
+<code>typed_audit_assembly_v1</code> files as JSON or CSV. This is the reporting prerequisite
+in #4328 for #2930/#3336; it does not change the retained fig07 script, register a
+generation condition or establish scientific recall. Legacy bare audits and
+prose-derived categories are outside this consumer.</p>
+<pre><code class="language-bash">python -m data_sheets_schema.typed_audit_report \
+  --assembly /path/to/first-assembly.json \
+  --assembly /path/to/second-assembly.json \
+  --format json --output /new/path/typed-audits.json
 </code></pre>
-
-</details>
+<p>Use <code>--format csv</code> and a different fresh destination for CSV. Inputs are selected
+explicitly and retain caller order. There is no directory scan, inferred method,
+project or cohort, or cross-assembly quality aggregate. Repeating one canonical
+assembly is refused even if a different filename or JSON whitespace was used.
+Distinct assemblies may still repeat facts; selection does not imply independent
+observations. Up to 64 assemblies and 320,000,000 total raw bytes are accepted,
+subject also to the existing per-assembly byte, node and depth bounds.</p>
+<p>Each input is read once and parsed with the existing strict bounded loader.
+<code>typed_audit.check</code> reconstructs the packet, exact requests, responses, audit,
+candidate dispositions, source checks and complete assembly from captured bytes.
+Only after successful exact comparison are rows extracted from that same parsed
+object. Saved <code>passed</code>, counts and lineage are not independently trusted. Invalid
+inputs refuse the whole report; there is no silently omitted failed row. Captured
+schema/source authorities are not reopened from current filesystem paths.</p>
+<p>JSON contains an ordered <code>assemblies</code> list. Every entry records its exact source
+file spelling, raw SHA256 and byte count, canonical assembly and packet hashes,
+all captured input and schema identities, omission-policy/schema pins, exact raw
+audit and saved/inner response identities, request hashes and complete lineage.
+Raw payload bytes remain in the selected assembly, not duplicated in the report.
+Hashes identify content and declared associations, not provider authentication.</p>
+<p>Per-assembly counts keep findings, candidates, retained candidates and dropped
+candidates separate. Several candidates can be retained in one finding. Finding
+rows retain zero-based final ordinal, original finding/evidence, exact lineage,
+and <code>classification_basis: audit_declared_kind</code> when a kind is present. Otherwise
+the basis is <code>untyped</code> and <code>declared_kind</code> is null, regardless of prose. The kind
+vocabulary is the existing typed protocol's vocabulary; there is no mapping to
+legacy figure categories.</p>
+<p>CSV is long form. Each assembly has an <code>assembly</code> row, including all-negative or
+dropped-only audits, followed by <code>finding</code> and <code>candidate</code> detail rows. Join on
+<code>selection_index</code> and <code>assembly_sha256</code>. Counts and full identity/lineage JSON
+cells appear only on assembly rows, so summing a count column does not multiply
+it by the number of detail rows. Candidate rows preserve disposition evidence,
+source quote/chunk and schema target, candidate/disposition hashes, and linked
+finding ordinal (empty for a dropped candidate). Finding rows retain their exact
+finding JSON and finding lineage. Nested cells are compact JSON, not Python repr.</p>
+<p>Scientific support, applicability, novelty and exhaustive recall remain
+unverified. A mechanically accepted declared omission is not an established
+omission or evidence of improved recall. The synthetic tests are engineering
+checks, not empirical observations or human-adjudicated ground truth.</p>
+<p>All outputs require fresh paths. Existing files, hardlinks and symlinks
+(including dangling links) are refused. Named captured schema authority paths
+are protected even when the old files are absent. The complete serialized report
+is staged, flushed and published with exclusive creation; a competing existing
+destination wins without being overwritten. Exit 0 means publication succeeded;
+exit 2 means invalid input, failed reconstruction, duplicate selection or an I/O
+refusal. Historical report APIs/defaults, stored outputs and figures are unchanged.</p>
 
 
 
