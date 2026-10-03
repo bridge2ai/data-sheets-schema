@@ -41,7 +41,7 @@ _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -64,8 +64,15 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     resolved = (Path(bundle) if bundle else
                 reg.bundle(project) if arm == "baseline" else
                 reg.anchored(BUNDLE_DIR) / pattern.format(p=project))
+    try:
+        registration_text = (Path(receipt_completion_registration).read_bytes().decode('utf-8')
+                             if receipt_completion_registration else None)
+    except (OSError, UnicodeError) as exc:
+        raise click.ClickException(f'receipt completion registration is unreadable: {exc}') from exc
     kw = {"api_playbook_version": api_playbook_version, "removal_repair_version": removal_repair_version, "manifest": selected,
-          "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None}
+          "chunk_manifest": Path(chunk_manifest) if chunk_manifest else None,
+          "receipt_completion_version": receipt_completion_version,
+          "receipt_completion_registration": registration_text}
     if runtime:
         kw["runtime"] = runtime
     if provider:
@@ -162,6 +169,9 @@ def _canary_never_ran(spec, baseline, what_happened: str) -> str:
     metric that moved. Here there is no measurement, and "no measurement" is
     the one thing this corpus insists must not read as "fine".
     """
+    if getattr(spec, "receipt_completion_version", 0):
+        return (f"registered receipt gate did not pass for {spec.project} {spec.label}: "
+                f"{what_happened}. Remaining runs were stopped; fix the failure before resuming.")
     return (f"canary did not pass: the first run ({spec.project} "
             f"{spec.label}) never produced a verdict against the {baseline} "
             f"baseline because {what_happened}. Fanning out would spend the "
@@ -172,7 +182,7 @@ def _canary_never_ran(spec, baseline, what_happened: str) -> str:
 
 
 
-def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> None:
+def _write_verdict(res: dict, v: dict, canary_baseline: str | None, rbasis: dict) -> None:
     """Put the gate's verdict on the run's own record (#1020)."""
     import yaml as _yaml
 
@@ -196,6 +206,9 @@ def _write_verdict(res: dict, v: dict, canary_baseline: str, rbasis: dict) -> No
               if res.get("already_complete") else "this record's own check blocks")
     rec.data["canary"] = _canary.verdict_block(v, label_prefix=canary_baseline, report_basis_counts=rbasis,
                                                recorded_by="d4d api batch", prior=prior, checks_source=source)
+    if canary_baseline is None:
+        rec.data["canary"]["basis"] = (f"verdict from {source} against the selected absolute floors; "
+                                       "no historical baseline requested")
     rec.write(path)
 
 
@@ -215,6 +228,10 @@ def api():
 
 
 @api.command("render-prompt")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -242,7 +259,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -265,7 +282,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     from data_sheets_schema.api_runner import resolve_prompt
 
     spec = _spec(project, arm, label, condition, bundle,
-                 runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version,
+                 runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
                  **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
@@ -297,6 +314,10 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
 
 @api.command("plan")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -319,10 +340,10 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version):
+def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
@@ -350,6 +371,10 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -375,12 +400,12 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -420,6 +445,10 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 
 @api.command("batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
+              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
+              help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
 @click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
@@ -459,7 +488,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -490,7 +519,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     for p in names:
         for n in range(1, replicates + 1):
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
-                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version)
+                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration)
             # As `plan` and `run` do: a project no selected manifest declares
             # needs an explicit bundle, never the repository's by convention
             # (#1367 round 2, #1386).
@@ -499,6 +528,14 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             _refuse_condition_mismatch(s, allow_condition_mismatch)   # before any spend (#1094)
             specs.append(s)
 
+    receipt_gating = False
+    if receipt_completion_version and not dry_run:
+        from data_sheets_schema.receipt_completion import registration
+        if no_canary_gate:
+            raise click.ClickException("registered receipt completion cannot bypass its canary/coverage gate")
+        if len(specs) > 1 and any(registration(s)["coverage_floor"]["state"] == "pending" for s in specs):
+            raise click.ClickException("diagnostic receipt completion floor is pending; fan-out is blocked")
+        receipt_gating = registration(specs[0])["coverage_floor"]["state"] == "registered"
     plans = [_plan_or_refuse(s) for s in specs]
     total = sum(x["approx_total_input_tokens"] for x in plans)
     click.echo(f"📦 {len(specs)} runs — {len(names)} projects x {replicates} "
@@ -538,7 +575,12 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
     #: Whether the fan-out is gated on the first run at all. Read in three
     #: places, so it is computed once rather than restated (#619).
     gating = bool(canary_baseline) and not no_canary_gate
+    if receipt_gating:
+        gating = True
     for i, s in enumerate(specs, 1):
+        # A selected registered floor binds every result, including later
+        # runs; a historical baseline remains opt-in for legacy batches.
+        gate_this_run = receipt_gating or (i == 1 and gating)
         click.echo(f"\n[{i}/{len(specs)}] {s.project} {s.label}")
         # Again, per run (#799): the checkout that empties the working tree
         # can happen while this batch is live, and the one-shot check above
@@ -568,7 +610,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                                err=True)
                 failed.append((s.project, s.label,
                                f"{len(vp)} validation failure(s)"))
-                if gating and i == 1:
+                if gate_this_run:
                     canary_stop = _canary_never_ran(
                         s, canary_baseline,
                         f"it produced {len(vp)} validation failure(s)")
@@ -584,24 +626,39 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # sweep cannot look clean while they fail (#579) — and, on the
             # first run, gating the fan-out.
             from data_sheets_schema import canary as _canary
-            counts = _canary.counts_from(res.get("checks") or {})
+            checks = res.get("checks") or {}
+            if receipt_completion_version:
+                from data_sheets_schema import receipt_completion_policy as cp
+                try:
+                    selected_policy = cp.select_policy(s.render_spec())
+                    receipt = checks.get("receipts")
+                    if selected_policy is None or not isinstance(receipt, dict):
+                        raise ValueError("selected receipt policy has no checked receipt block")
+                    cp.policy_from_block(receipt, policy=selected_policy)
+                except ValueError as exc:
+                    checks = {**checks, "receipts": {"expected": True, "checked": False,
+                                                      "reason": str(exc)}}
+            counts = _canary.counts_from(checks)
             # Reported-only metrics too (#669 review): the commit that added
             # the GC-label metric said "report ... in the canary output" while
             # nothing output it — minted fragments had the same gap since
             # #602. Displayed after the gated ones, never gated.
-            counts.update(_canary.counts_from(res.get("checks") or {},
+            counts.update(_canary.counts_from(checks,
                                               _canary.REPORTED_ONLY))
-            if _canary.report_vacuous((res.get("checks") or {}).get("report")):
+            if receipt_completion_version:
+                floor = _canary.receipt_coverage_floor(checks.get("receipts") or {})
+                counts["registered receipt coverage"] = (floor or {}).get("state", "unmeasurable")
+            if _canary.report_vacuous(checks.get("report")):
                 counts["report findings"] = "unmeasured"      # not a held 0 (#684)
             click.echo("     " + "  ".join(
                 f"{name}={'—' if v is None else v}"
                 for name, v in counts.items()))
 
-            if i == 1 and gating:
-                bar = _canary.baseline_for(s.project, canary_baseline)
-                rbasis = _canary.report_basis(s.project, canary_baseline)
-                v = _canary.verdict(res.get("checks") or {}, bar,
-                                    baseline_requested=True,
+            if gate_this_run:
+                bar = _canary.baseline_for(s.project, canary_baseline) if canary_baseline else {}
+                rbasis = _canary.report_basis(s.project, canary_baseline) if canary_baseline else {}
+                v = _canary.verdict(checks, bar,
+                                    baseline_requested=bool(canary_baseline),
                                     report_basis=rbasis)
                 # Written on the record at the gate (#1020): a verdict the
                 # batch acts on is a measurement of the record, pass or fail.
@@ -628,13 +685,17 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                     # out anyway, which is the one thing this gate exists to
                     # prevent. Raised after the loop, once the lock is released.
                     canary_stop = (
+                        f"registered receipt gate {v['status']} for {s.project} {s.label}: "
+                        "coverage or required checks did not pass. Remaining runs were stopped."
+                        if receipt_completion_version else
                         f"canary {v['status']}: the first run is worse than "
                         f"the {canary_baseline} baseline for {s.project}, or a "
                         "check could not run. Fanning out would spend the rest "
                         "of the sweep on a known regression. Re-run with "
                         "--no-canary-gate to proceed anyway.")
                 else:
-                    click.echo("     canary ok — fanning out")
+                    click.echo("     registered receipt gate passed" if receipt_gating
+                               else "     canary ok — fanning out")
             ok.append(s.label)
         except Exception as exc:                       # noqa: BLE001
             click.echo(f"   ❌ {type(exc).__name__}: {exc}", err=True)
@@ -650,7 +711,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # This is the gate's whole purpose stated the other way round: it
             # must fan out only on a canary that demonstrably passed, never
             # merely on one that failed to say it did not.
-            if gating and i == 1:
+            if gate_this_run:
                 canary_stop = _canary_never_ran(
                     s, canary_baseline, f"it raised {type(exc).__name__}")
             if not continue_on_error:

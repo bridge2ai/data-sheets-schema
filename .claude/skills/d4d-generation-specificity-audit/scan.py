@@ -4552,6 +4552,93 @@ def _guards(fn, target) -> list:
     return out
 
 
+def _optional_condition_scope(tree, init, field: str, validated: set[int]) -> tuple:
+    """Read only a direct positive opt-in's raising condition-set refusal.
+
+    A named set must be one literal module binding, used only for membership.
+    Aliases, mutation, shadowing and control flow we cannot prove fail closed.
+    Other calls in the opt-in block (e.g. registration validation) are not
+    interpreted as condition declarations.
+    """
+    fail = lambda: _not_derived("which conditions make a follow-up turn",
+                               f"unreadable condition restriction for optional gate `spec.{field}`")
+    attr = lambda n, name: isinstance(n, ast.Attribute) and ast.unparse(n) == f"self.{name}"
+    if any(isinstance(n, (ast.Raise, ast.Assert)) for n in init.body) or any(
+           (isinstance(n, ast.Name) and n.id == "self" and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, "self", init)
+           or (attr(n, "condition") and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(init)):
+        raise fail()
+    scopes, evidence = [], []
+    parents = _parents(tree)
+    for block in ast.walk(init):
+        if not isinstance(block, (ast.If, ast.IfExp, ast.While, ast.Match)):
+            continue
+        test = block.subject if isinstance(block, ast.Match) else block.test
+        if id(block) in validated or not any(attr(n, field) for n in ast.walk(test)):
+            continue
+        if not (isinstance(block, ast.If) and block in init.body and attr(block.test, field)):
+            raise fail()
+        # The disabled branch may validate companion options, but cannot carry
+        # the enabled option's condition restriction.
+        if any(_mentions_condition(n) for n in block.orelse):
+            raise fail()
+        for guard in block.body:
+            if not isinstance(guard, ast.If):
+                if _mentions_condition(guard) or any(isinstance(n, (ast.IfExp, ast.While, ast.For,
+                        ast.Try, ast.With, ast.Match, ast.Raise, ast.Assert,
+                        ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                        for n in ast.walk(guard)):
+                    raise fail()
+                continue
+            test = guard.test
+            if not (isinstance(test, ast.Compare) and len(test.ops) == 1
+                    and isinstance(test.ops[0], ast.NotIn) and attr(test.left, "condition")
+                    and isinstance(test.comparators[0], ast.Name) and not guard.orelse
+                    and len(guard.body) == 1 and isinstance(guard.body[0], ast.Raise)):
+                raise fail()
+            name = test.comparators[0].id
+            declarations = [n for n in tree.body if
+                (isinstance(n, ast.Assign) and len(n.targets) == 1
+                 and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name)
+                or (isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.target.id == name)]
+            if len(declarations) != 1:
+                raise fail()
+            declaration = declarations[0]
+            value = declaration.value
+            if isinstance(value, ast.Call):
+                if not (isinstance(value.func, ast.Name) and value.func.id in {"frozenset", "set", "tuple"}
+                        and len(value.args) == 1 and not value.keywords):
+                    raise fail()
+                if any((isinstance(n, ast.Name) and n.id == value.func.id
+                        and isinstance(n.ctx, (ast.Store, ast.Del))) or _rebinding(n, value.func.id, init)
+                       for n in ast.walk(tree)):
+                    raise fail()
+                value = value.args[0]
+            if not isinstance(value, (ast.Tuple, ast.List, ast.Set)) or not value.elts or any(
+                    not isinstance(n, ast.Constant) or type(n.value) is not str or not n.value.strip() for n in value.elts):
+                raise fail()
+            target = declaration.targets[0] if isinstance(declaration, ast.Assign) else declaration.target
+            for node in ast.walk(tree):
+                if _rebinding(node, name, init) or (isinstance(node, ast.arg) and node.arg == name):
+                    raise fail()
+                if not isinstance(node, ast.Name) or node.id != name or node is target:
+                    continue
+                parent = parents.get(id(node))
+                if not (isinstance(node.ctx, ast.Load) and isinstance(parent, ast.Compare)
+                        and len(parent.ops) == 1 and isinstance(parent.ops[0], (ast.In, ast.NotIn))
+                        and node is parent.comparators[0]):
+                    raise fail()
+            scopes.append({n.value for n in value.elts})
+            evidence.extend((declaration.lineno, block.lineno, guard.lineno))
+    if not scopes:
+        return None, []
+    # Several direct refusals constrain the option by their intersection.
+    scope = set.intersection(*scopes)
+    if not scope:
+        raise fail()
+    return sorted(scope), sorted(set(evidence))
+
+
 def _optional_turn_selection(tree: ast.Module, test) -> dict:
     """A narrow, validated opt-in RunSpec axis, never an unknown truthy gate.
 
@@ -4616,10 +4703,13 @@ def _optional_turn_selection(tree: ast.Module, test) -> dict:
     admitted = derive_admitted_renderers(tree)
     if restrictions[0][0] not in admitted or restrictions[0][0] in derive_execute_refusal(tree, admitted)["refused"]:
         raise fail()
+    conditions, condition_evidence = _optional_condition_scope(tree, init, field,
+        {id(n) for n in guards if n.lineno in (domain[0][1], restrictions[0][1])})
     return {"field": field, "default": 0, "enabled_values": [v for v in domain[0][0] if v],
             "runtime": "api", "renderers": [restrictions[0][0]],
+            **({"conditions": conditions} if conditions is not None else {}),
             "evidence": [f"api_runner.py:{n}" for n in
-                         (declarations[0].lineno, domain[0][1], restrictions[0][1])]}
+                         (declarations[0].lineno, domain[0][1], restrictions[0][1], *condition_evidence)]}
 
 
 def _plan_scopes(tree: ast.Module, consts: dict) -> dict:
@@ -4643,7 +4733,8 @@ def _plan_scopes(tree: ast.Module, consts: dict) -> dict:
                     return {"conditions": sorted(consts[right.id])}
                 if isinstance(op, ast.Eq) and isinstance(right, ast.Constant) and isinstance(right.value, str):
                     return {"conditions": [right.value]}
-        return {"conditions": None, "selection": _optional_turn_selection(tree, test)}
+        selection = _optional_turn_selection(tree, test)
+        return {"conditions": selection.get("conditions"), "selection": selection}
 
     def visit(node, gate):
         if isinstance(node, ast.IfExp):
@@ -4737,9 +4828,12 @@ def _require_followup_binding(path: str, tree, fn, call) -> None:
 def _optional_guard_evidence(fn, call, selection: dict, path: str) -> list[str]:
     """Require a positive exact opt-in guard, retaining branch polarity."""
     field = selection["field"]
+    protected = {f"spec.{field}"}
+    if selection.get("conditions") is not None:
+        protected.add("spec.condition")
     parents, cur, evidence = _parents(fn), call, []
     if "spec" not in _params(fn) or any((isinstance(n, ast.Name) and n.id == "spec" and isinstance(n.ctx, (ast.Store, ast.Del)))
-           or (isinstance(n, ast.Attribute) and ast.unparse(n) == f"spec.{field}"
+            or (isinstance(n, ast.Attribute) and ast.unparse(n) in protected
                and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(fn)):
         raise _not_derived("which conditions make a follow-up turn", "the optional spec is reassigned")
     while id(cur) in parents:

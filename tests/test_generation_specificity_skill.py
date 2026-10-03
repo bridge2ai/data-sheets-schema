@@ -1335,6 +1335,136 @@ class TestOptionalFollowupDerivation(unittest.TestCase):
         self.assertEqual(turns["receipt_completion"]["selection"]["field"], "receipt_version")
         self.assertEqual(turns["receipt_completion"]["selection"]["renderers"], [7])
 
+    CONDITION_BLOCK = ('        if self.restore_version:\n'
+                       '            if self.condition not in ALLOWED_TURNS:\n'
+                       '                raise ValueError("condition")\n')
+
+    def restricted(self, root, *, value="frozenset({'generic_v2'})", block=None):
+        text = (root / scan.RUNNER).read_text()
+        text = f"ALLOWED_TURNS = {value}\n" + text
+        text = text.replace('            raise ValueError("renderer")\n',
+                            '            raise ValueError("renderer")\n' + (block or self.CONDITION_BLOCK))
+        _write(root / scan.RUNNER, text)
+        return text
+
+    def test_optional_condition_scope_is_derived_and_does_not_change_default_shape(self):
+        for value in ("frozenset({'generic_v2'})", "{'generic_v2'}", "('generic_v2',)",
+                      "['generic_v2']", "set(('generic_v2',))", "tuple(['generic_v2'])"):
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                self.restricted(root, value=value)
+                facts = {"conditions": scan.condition_table(root), "controllers": {}, "legacy_scripts": []}
+                meaning = scan.api_meaning(root, facts)
+                turn = meaning["followup_turns"]["restore_full"]
+                self.assertEqual(turn["conditions"], ["generic_v2"])
+                self.assertEqual(turn["selection"]["conditions"], ["generic_v2"])
+                self.assertIn("api_runner.py:1", turn["selection"]["evidence"])
+                self.assertEqual(meaning["conditions"]["generic"]["optional_followup_turns"], [])
+                self.assertEqual(meaning["conditions"]["generic_v2"]["optional_followup_turns"], ["restore_full"])
+                for row in meaning["conditions"].values():
+                    self.assertEqual(row["followup_turns"], [])
+                    self.assertEqual(row["shape"], "MONOLITHIC")
+
+    def test_renamed_set_and_changed_members_are_read_from_the_guard(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self.root(d)
+            text = self.restricted(root, value="('generic',)").replace("ALLOWED_TURNS", "MY_SCOPE")
+            _write(root / scan.RUNNER, text)
+            self.assertEqual(self.derive(root)["restore_full"]["conditions"], ["generic"])
+
+    def test_multiple_direct_condition_refusals_intersect(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = self.root(d)
+            block = self.CONDITION_BLOCK + self.CONDITION_BLOCK.replace("ALLOWED_TURNS", "OTHER_SCOPE")
+            text = self.restricted(root, value="('generic', 'generic_v2')", block=block)
+            _write(root / scan.RUNNER, "OTHER_SCOPE = ('generic',)\n" + text)
+            self.assertEqual(self.derive(root)["restore_full"]["conditions"], ["generic"])
+
+    def test_unknown_or_wrong_polarity_condition_restrictions_fail_closed(self):
+        blocks = [
+            self.CONDITION_BLOCK.replace("if self.restore_version:", "if not self.restore_version:"),
+            self.CONDITION_BLOCK.replace("if self.restore_version:", "if self.restore_version and extra:"),
+            self.CONDITION_BLOCK.replace("if self.restore_version:", "if self.restore_version:\n            pass\n        else:"),
+            self.CONDITION_BLOCK.replace("self.condition not in ALLOWED_TURNS", "self.condition in ALLOWED_TURNS"),
+            self.CONDITION_BLOCK.replace("self.condition not in ALLOWED_TURNS", "self.condition != 'generic_v2'"),
+            self.CONDITION_BLOCK.replace("self.condition not in ALLOWED_TURNS", "self.condition not in ALLOWED_TURNS and extra"),
+            self.CONDITION_BLOCK.replace("self.condition not in ALLOWED_TURNS", "check(self.condition)"),
+            self.CONDITION_BLOCK.replace("self.condition not in ALLOWED_TURNS", "getattr(self, 'condition') not in ALLOWED_TURNS"),
+            self.CONDITION_BLOCK.replace('raise ValueError("condition")', 'check(self)'),
+            self.CONDITION_BLOCK.replace('                raise ValueError("condition")',
+                                        '                if extra:\n                    raise ValueError("condition")'),
+            '        if extra:\n' + ''.join('    ' + line + '\n' for line in self.CONDITION_BLOCK.splitlines()),
+            '        if self.condition not in ALLOWED_TURNS:\n'
+            '            if self.restore_version:\n                raise ValueError("condition")\n',
+        ]
+        for block in blocks:
+            with self.subTest(block=block), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                self.restricted(root, block=block)
+                with self.assertRaisesRegex(scan.ConfigError, "not derived.*condition restriction"):
+                    self.derive(root)
+
+    def test_ambiguous_condition_constants_and_values_fail_closed(self):
+        values = ["()", "(1,)", "('generic_v2', 1)", "choose()", "OTHER_SCOPE",
+                  "frozenset({'generic_v2'}, unexpected=True)", "[c for c in ['generic_v2']]", "(' ',)"]
+        for value in values:
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                self.restricted(root, value=value)
+                with self.assertRaisesRegex(scan.ConfigError, "not derived.*condition restriction"):
+                    self.derive(root)
+
+    def test_shadowed_mutated_or_aliased_condition_sets_fail_closed(self):
+        mutations = [
+            lambda t: t + "\nALLOWED_TURNS = ('generic',)\n",
+            lambda t: t + "\nif extra:\n    ALLOWED_TURNS = ('generic',)\n",
+            lambda t: t + "\nALLOWED_TURNS.add('generic')\n",
+            lambda t: t + "\nALIAS = ALLOWED_TURNS\nALIAS.add('generic')\n",
+            lambda t: t + "\ndef change():\n    global ALLOWED_TURNS\n    ALLOWED_TURNS = ('generic',)\n",
+            lambda t: t + "\ndef frozenset(value):\n    return ('generic',)\n",
+            lambda t: t.replace("def __post_init__(self):", "def __post_init__(self, ALLOWED_TURNS=('generic',)):"),
+            lambda t: t.replace("def __post_init__(self):", "def __post_init__(self):\n        ALLOWED_TURNS = ('generic',)"),
+            lambda t: t.replace("def __post_init__(self):", "def __post_init__(self):\n        from other import ALLOWED_TURNS"),
+        ]
+        for mutation in mutations:
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                _write(root / scan.RUNNER, mutation(self.restricted(root)))
+                with self.assertRaisesRegex(scan.ConfigError, "not derived.*condition restriction"):
+                    self.derive(root)
+
+    def test_mutated_or_shadowed_spec_condition_cannot_reuse_scope(self):
+        mutations = [
+            lambda t: t.replace("def __post_init__(self):", "def __post_init__(self):\n        self = other"),
+            lambda t: t.replace("def __post_init__(self):", "def __post_init__(self):\n        self.condition = 'generic_v2'"),
+            lambda t: t.replace("restore(spec, None)", "spec.condition = 'generic'\n        restore(spec, None)"),
+        ]
+        for mutation in mutations:
+            with self.subTest(mutation=mutation), tempfile.TemporaryDirectory() as d:
+                root = self.root(d)
+                _write(root / scan.RUNNER, mutation(self.restricted(root)))
+                with self.assertRaisesRegex(scan.ConfigError, "not derived"):
+                    self.derive(root)
+
+    def test_unconditional_rejection_before_or_after_condition_guard_fails_closed(self):
+        for statement in ('raise ValueError("unconditional")', 'assert False', 'assert extra'):
+            for where in ("before", "after", "initializer"):
+                with self.subTest(statement=statement, where=where), tempfile.TemporaryDirectory() as d:
+                    root = self.root(d)
+                    block = self.CONDITION_BLOCK
+                    if where == "before":
+                        block = block.replace('            if self.condition',
+                                              f'            {statement}\n            if self.condition')
+                    elif where == "after":
+                        block += f'            {statement}\n'
+                    text = self.restricted(root, block=block)
+                    if where == "initializer":
+                        text = text.replace('    def __post_init__(self):',
+                                            f'    def __post_init__(self):\n        {statement}')
+                    _write(root / scan.RUNNER, text)
+                    with self.assertRaisesRegex(scan.ConfigError, "not derived.*condition restriction"):
+                        self.derive(root)
+
     def test_direct_imported_wrapper_alias_is_bound(self):
         with tempfile.TemporaryDirectory() as d:
             root = self.root(d)
@@ -1555,7 +1685,7 @@ class TestApiMeaning(unittest.TestCase):
         from data_sheets_schema import api_runner
         turns = self.meaning["followup_turns"]
         self.assertEqual(set(turns), {"full_readdress", "report_regate", "repair_{artifact}", "report_after_repair",
-                                      "removal_repair_full"})
+                                      "removal_repair_full", "full_receipt_completion"})
         self.assertEqual(turns["full_readdress"]["conditions"], sorted(api_runner.RECEIPT_CONDITIONS))
         for name in ("report_regate", "repair_{artifact}", "report_after_repair"):
             self.assertIsNone(turns[name]["conditions"])
@@ -1588,6 +1718,46 @@ class TestApiMeaning(unittest.TestCase):
             self.assertNotIn(removal_repair.PHASE, row["followup_turns"])
             self.assertIn(removal_repair.PHASE, row["optional_followup_turns"])
         self.assertTrue(any("default 0 disables it" in text for text in self.meaning["verdict"]))
+
+    def test_optional_receipt_completion_matches_real_spec_plan_and_registration(self):
+        from data_sheets_schema import api_runner, chunking, receipt_completion, receipt_completion_policy
+        from dataclasses import replace
+        turn = self.meaning["followup_turns"][receipt_completion.PHASE]
+        selection = turn["selection"]
+        allowed = sorted(api_runner.RECEIPT_CONDITIONS)
+        self.assertEqual(turn["conditions"], allowed)
+        self.assertEqual(selection["conditions"], allowed)
+        self.assertEqual(selection["field"], "receipt_completion_version")
+        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1], [8]))
+        self.assertEqual(selection["runtime"], "api")
+        self.assertTrue(turn["calls"][0].startswith("src/data_sheets_schema/receipt_completion.py:"))
+        self.assertTrue(turn["via"][0]["guards"])
+        base = self._cli_spec()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        chunk_manifest = _write(Path(tmp.name) / "chunks.yaml",
+                                chunking.dump_manifest(chunking.build_manifest(self.bundle)))
+        self.assertFalse(any(s.startswith(receipt_completion.PHASE + ":") for s in api_runner.plan(base)["conditional_calls"]))
+        for condition, row in self.meaning["conditions"].items():
+            registration = {"format": receipt_completion_policy.FORMAT, "registration_id": "synthetic-scanner-only",
+                            "condition": condition, "runtime_policy_sha256": receipt_completion.POLICY_SHA256,
+                            "receipt_instrument_version": 4, "max_output_tokens": 1024, "max_request_bytes": 1000000,
+                            "context_limit_tokens": 1000000, "context_limit_basis": "synthetic scanner test",
+                            "coverage_floor": {"state": "pending", "mode": "diagnostic_pilot"}}
+            encoded = json.dumps(registration)
+            self.assertNotIn(receipt_completion.PHASE, row["followup_turns"])
+            self.assertEqual(receipt_completion.PHASE in row["optional_followup_turns"], condition in allowed)
+            if condition in allowed:
+                receipt_completion_policy.parse_registration(encoded.encode())
+                enabled = replace(base, condition=condition, chunk_manifest=chunk_manifest, receipt_completion_version=1,
+                                  receipt_completion_registration=encoded)
+                self.assertTrue(any(s.startswith(receipt_completion.PHASE + ":") for s in api_runner.plan(enabled)["conditional_calls"]))
+            else:
+                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition"):
+                    receipt_completion_policy.parse_registration(encoded.encode())
+                with self.subTest(condition=condition), self.assertRaisesRegex(ValueError, "receipt-producing condition"):
+                    replace(base, condition=condition, receipt_completion_version=1,
+                            receipt_completion_registration=encoded)
 
     def test_the_tuned_condition_inserts_its_component_and_never_its_prompt(self):
         """resolve_prompt inserts components/{PROJECT}.md into a tuned

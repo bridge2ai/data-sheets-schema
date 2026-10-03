@@ -192,6 +192,11 @@ classes:
         inlined: true
         range: AnyBlock
 
+      receipt_completion:
+        description: Registered receipt-only continuation with immutable input/request/response/result pins, v4 accounting and independent coverage policy (#4266).
+        inlined: true
+        range: AnyBlock
+
       removal_repair:
         description: Opt-in restore-only policy, admitted attempt and mechanically checked final outcome (#2923).
         inlined: true

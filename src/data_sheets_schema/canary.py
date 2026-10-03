@@ -140,9 +140,22 @@ PREDICTION_METRICS = {
 def checks_from_record(record: dict[str, Any]) -> dict[str, Any]:
     """The `checks` mapping the batch gate reads, taken from a record's own
     blocks — the same keys the runner passes at run end."""
+    receipt = record.get("receipts")
+    from data_sheets_schema import receipt_completion_policy as cp
+    try:
+        policy = cp.select_policy(record=record)
+        if policy is not None:
+            if not isinstance(receipt, dict):
+                raise ValueError("selected receipt condition has no checked receipt block")
+            cp.policy_from_block(receipt, policy=policy)
+            receipt = {**receipt, "expected": True}
+        elif isinstance(receipt, dict) and cp.BLOCK_KEY in receipt:
+            raise ValueError("receipt block has no authoritative run policy")
+    except ValueError as exc:
+        receipt = {"expected": True, "checked": False, "reason": f"receipt policy refused: {exc}"}
     return {"pair": record.get("pair_consistency"), "validation": record.get("validation"),
             "report": record.get("report_claims"), "grounding": record.get("grounding"),
-            "form": record.get("form"), "receipts": record.get("receipts")}
+            "form": record.get("form"), "receipts": receipt}
 
 
 def offline_verdict(record: dict[str, Any], project: str, label_prefix: str,
@@ -248,7 +261,7 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
     """Defect counts read from a checked receipts block; each must be 0."""
     ch, sn = block.get("chunks") or {}, block.get("snippets") or {}
     total, reviewed = int(ch.get("total") or 0), int(ch.get("reviewed") or 0)
-    return {
+    floors = {
         "chunks unreviewed": max(0, total - reviewed),
         "snippets unverified": int(sn.get("mismatched") or 0) + int(sn.get("unchecked") or 0),
         # #891, registered in the v7 plan: addressing-shaped unresolved paths
@@ -278,6 +291,24 @@ def receipt_floors(block: dict[str, Any]) -> dict[str, int]:
                                                                 "snippet_adjacent_chunk", "snippet_elsewhere_chunk",
                                                                 "snippet_spans_boundary")])),
     }
+    coverage = receipt_coverage_floor(block)
+    if coverage is not None:
+        floors["registered receipt coverage"] = int(not coverage["passed"])
+    return floors
+
+
+def receipt_coverage_floor(block: dict) -> dict | None:
+    """Recompute from registered integers; never trust a stored pass marker."""
+    from data_sheets_schema import receipt_completion_policy as cp
+    if cp.BLOCK_KEY not in block:
+        return None
+    try:
+        policy = cp.policy_from_block(block)
+        if not block.get("checked"):
+            raise ValueError("receipt instrument did not run")
+        return cp.evaluate_floor(block.get("slots"), policy)
+    except ValueError as exc:
+        return {"state": "unmeasurable", "passed": False, "reason": str(exc)}
 
 
 def report_vacuous(block: Any) -> bool:
@@ -453,13 +484,20 @@ def verdict(checks: dict[str, Any], baseline: dict[str, int | None],
     # was expected and none could be checked → blind (UNMEASURABLE, #613); it
     # was checked → floors.
     rb = (checks or {}).get("receipts")
-    if isinstance(rb, dict) and rb.get("expected"):
+    if isinstance(rb, dict) and (rb.get("expected") or "receipt_completion_policy" in rb):
         if not rb.get("checked"):
             blind.append("receipts")
             rows.append({"metric": "receipts", "run": None, "baseline_worst": None})
         else:
             for name, value in receipt_floors(rb).items():
                 row = {"metric": name, "run": value, "baseline_worst": 0}
+                if name == "registered receipt coverage":
+                    coverage = receipt_coverage_floor(rb)
+                    row["coverage"] = coverage
+                    if coverage["state"] not in ("passed", "failed"):
+                        blind.append(name)
+                        rows.append({**row, "run": None, "note": coverage.get("reason")})
+                        continue
                 if value > 0:
                     row["regressed"] = True
                     regressions.append(f"{name}: {value} against a floor of 0")
