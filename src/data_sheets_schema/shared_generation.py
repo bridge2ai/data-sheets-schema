@@ -467,6 +467,8 @@ def plan(spec, settings):
     captured = preflight(spec, settings)
     reg = captured.document()
     request = api.build_phase(spec, 'full', carry={})
+    from .receipt_completion import PHASE as RECEIPT_PHASE
+    from .typed_audit_runtime import WORKER_PHASE, OMISSION_PHASE, INTEGRATION_PHASE
     return {'project': spec.project, 'arm': spec.arm, 'method': spec.method, 'label': spec.label,
         'condition': spec.condition, 'runtime': spec.runtime, 'model': copy.deepcopy(settings),
         'bundle': str(spec.bundle), 'bundle_bytes': len(captured.raw(reg['inputs']['bundle']['path'])),
@@ -483,9 +485,12 @@ def plan(spec, settings):
         'registered_audit_allowances': copy.deepcopy(reg['audit_limits']),
         'estimate_basis': 'Only the actual full request has an approximate byte-derived count. Future record-dependent requests/roster are unknown; declared audit allowances are bounds, not measured tokens or prices.',
         'outputs': {'full': str(spec.full_path), 'core': str(spec.core_path), 'report': str(spec.report_path)},
-        'conditional_calls': ['receipt completion2 before core; exact explicit receipt cap and coverage floor',
-                              'every typed worker, one complete omission inventory and one integration; no answer retries',
-                              'existing full readdress, schema repair and report regate behavior remains separately accounted'],
+        'conditional_calls': [f'{RECEIPT_PHASE}: receipt completion2 before core; exact explicit receipt cap and coverage floor',
+                              f'{WORKER_PHASE}: every partition worker; count depends on the complete captured originals, no answer retries',
+                              f'{OMISSION_PHASE}: one complete source-chunk omission pass; no answer retries',
+                              f'{INTEGRATION_PHASE}: one integration of every worker and omission candidate; no answer retries',
+                              'full_readdress: existing one-time full receipt-path correction',
+                              'report_regate: existing one-time report disposition correction'],
         'readiness': {'software_protocol': NAME, 'native_direct': 'unsupported; separate adapter required',
                       'scientific_approval': 'unverified', 'campaign_launch': 'not authorized by a plan',
                       'coverage_floor': copy.deepcopy(reg['receipt']['coverage_floor'])}}

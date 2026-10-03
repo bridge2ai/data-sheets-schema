@@ -576,6 +576,15 @@ class RunSpec:
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
+        if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1):
+            raise ValueError("shared_generation_version must be 0 or 1")
+        if self.shared_generation_version:
+            if self.is_agentic or self.render_version != 25:
+                raise ValueError("shared generation requires API renderer 25")
+            if self.condition != "generic_v10":
+                raise ValueError("shared generation requires generic_v10")
+            if self.api_playbook_version != 2 or self.receipt_completion_version != 2:
+                raise ValueError("shared generation requires playbook2 and receipt2")
         if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1, 2):
             raise ValueError("api_playbook_version must be 0, 1 or 2")
         if self.api_playbook_version == 2 and self.shared_generation_version != 1:
@@ -7008,10 +7017,13 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             body, facts = core_text(spec.full_path,
                                     phase4_complete=(ph == "reconcile_core"))
             core_derivation = {**facts, "phase": ph}
-        elif spec.shared_generation_version and ph == "audit":
-            from .typed_audit_runtime import run as run_typed_audit
-            outcome = run_typed_audit(spec, carry=carry, client=client, settings=settings, usage=usage)
-            body = outcome.audit
+        elif ph == "audit":
+            if spec.shared_generation_version:
+                from .typed_audit_runtime import run as run_typed_audit
+                outcome = run_typed_audit(spec, carry=carry, client=client, settings=settings, usage=usage)
+                body = outcome.audit
+            else:
+                body = _generate_phase(spec, ph, needed, client, settings, usage)
         else:
             if spec.shared_generation_version and ph in {"reconcile_full", "report"}:
                 from .typed_audit_runtime import completion_check

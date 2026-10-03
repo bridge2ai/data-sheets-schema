@@ -415,12 +415,19 @@ def run(spec, *, carry, client, settings, usage):
             _store(spec, state)
         started, start = datetime.now(timezone.utc).isoformat(timespec='seconds'), time.monotonic()
         try:
-            response, call_id = api._call_with_usage(spec, stage['phase'], 1, started, bounded,
-                transport_attempts=1, model=settings['name'], max_tokens=payload['max_tokens'],
+            wire = dict(transport_attempts=1, model=settings['name'], max_tokens=payload['max_tokens'],
                 temperature=settings['temperature'], thinking=settings.get('thinking'), effort=settings.get('effort'),
                 system=req.system, messages=req.messages,
                 on_incomplete=lambda info: api._record_incomplete_stream(spec, stage['phase'], 1, started,
                     info, usage, max_tokens=payload['max_tokens']))
+            if stage['phase'] == WORKER_PHASE:
+                response, call_id = api._call_with_usage(spec, WORKER_PHASE, 1, started, bounded, **wire)
+            elif stage['phase'] == OMISSION_PHASE:
+                response, call_id = api._call_with_usage(spec, OMISSION_PHASE, 1, started, bounded, **wire)
+            elif stage['phase'] == INTEGRATION_PHASE:
+                response, call_id = api._call_with_usage(spec, INTEGRATION_PHASE, 1, started, bounded, **wire)
+            else:
+                raise ledger.UsageLedgerError('unknown registered typed audit stage')
         except BaseException as exc:
             state = _state(spec)
             if state['stages'][-1]['state'] == 'admitted':
