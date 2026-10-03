@@ -103,10 +103,18 @@ For example, an exactly quoted companion-study version can pass quotation and
 target checks while still being scientifically ineligible. A fact represented
 elsewhere in prose can still be wrongly nominated. Independent review is needed.
 
-Follow-up work remains in #2930/#3336/#2921: integrated generation delivery,
-versioned typed audit grammar/assembly/terminal checks, reconciliation routing,
-main reporting and protected figure integration, approved observation/hit rules,
-registered comparator/predictions and independently reviewed empirical canaries.
-#2926 separately needs registered receipt-completion execution and coverage
-policy. #2605/#2714 and all historical pins remain held/unchanged. This offline
-tool neither authorizes paid runs nor closes those parent issues.
+The [typed offline audit consumer](typed-audit-offline.md) supplies the explicit
+versioned grammar, saved-response assembly and independent terminal checks.
+Those checks do not deliver omission findings to live generation or
+reconciliation. Follow-up work remains in #2930/#3336/#2921: integrated
+generation delivery, reconciliation routing, main reporting and protected
+figure integration, approved observation/hit rules, registered
+comparator/predictions and independently reviewed empirical canaries.
+
+The separate [registered receipt-completion runtime](receipt-completion-runtime.md)
+implements execution and shared coverage-policy gates for explicitly selected
+API renderer-8 conditions. It fills receipts for existing populated values;
+it is not source-first omission generation. #2926 retains owner-selected
+registration inputs, calibrated thresholds and separately authorized pilots.
+#2605/#2714 and all historical pins remain held/unchanged. These offline tools
+neither authorize paid runs nor close those parent issues.
