@@ -268,7 +268,7 @@ def recover_delivered(spec):
     _rebuild(spec, state, settle=True)
 
 
-def recover(spec, *, carry=None, terminal=False, independent=False):
+def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
     state = _state(spec)
     if state is None:
         if terminal:
@@ -285,22 +285,33 @@ def recover(spec, *, carry=None, terminal=False, independent=False):
         return None
     if state['state'] not in ('assembled', 'accepted') or _load(state.get('assembly')) != assembly:
         raise ledger.UsageLedgerError('typed audit accepted identity differs from rebuilt assembly')
-    checked = (typed.check(assembly, derivations=typed.DerivationCache()) if independent else
-        {**assembly['acceptance'], 'assembly_sha256': assembly['sha256'], 'independently_reconstructed': False})
     body = typed._unblob(assembly['audit'], typed.audit_grammar.MAX_BYTES).decode('utf-8')
     if carry is not None and carry.get('Audit findings') != body:
         raise ledger.UsageLedgerError('downstream audit carry is not the checked exact typed assembly')
     if terminal:
         from . import snapshot_store
         _, snapshot = snapshot_store.read_latest(spec.provenance_path.parent, spec.project,
-            f'{spec.project}_audit.json', spec=spec)
+            f'{spec.project}_audit.json', spec=spec, record=record, include_attestation=True)
         if snapshot is None or snapshot[1] != body.encode('utf-8'):
             raise ledger.UsageLedgerError('terminal audit snapshot differs from the checked typed assembly')
+        integration = [row for row in state['stages']
+                       if row['selection']['phase'] == INTEGRATION_PHASE]
+        if len(integration) != 1 or integration[0]['state'] != 'checked':
+            raise ledger.UsageLedgerError('terminal audit lacks its unique checked integration stage')
+        integration_id = integration[0].get('usage_id')
+        settled = [row for row in ledger._read(spec)['rows']
+                   if row.get('usage_id') == integration_id]
+        if (not integration_id or len(settled) != 1
+                or settled[0].get('phase') != INTEGRATION_PHASE
+                or snapshot[2].get('usage_id') != integration_id):
+            raise ledger.UsageLedgerError('terminal audit snapshot is not attributed to its checked integration usage')
+    checked = (typed.check(assembly, derivations=typed.DerivationCache()) if independent else
+        {**assembly['acceptance'], 'assembly_sha256': assembly['sha256'], 'independently_reconstructed': False})
     return Outcome(body, assembly['sha256'], checked)
 
 
-def completion_check(spec, carry=None):
-    outcome = recover(spec, carry=carry, terminal=True, independent=True)
+def completion_check(spec, carry=None, *, record=None):
+    outcome = recover(spec, carry=carry, terminal=True, independent=True, record=record)
     return {'protocol': sg.NAME, 'generation_id': ledger.generation_id(spec),
             'assembly_sha256': outcome.assembly_sha256, 'audit_sha256': sg.sha(outcome.audit.encode()),
             'acceptance': outcome.acceptance, 'authority': sg.identity(spec),
@@ -325,7 +336,7 @@ def resume_guard(spec, progress):
     try:
         from .audit_omissions import _mapping
         prior = _mapping(spec.provenance_path.read_bytes(), 'completed provenance')
-        if prior.get('shared_generation') == completion_check(spec):
+        if prior.get('shared_generation') == completion_check(spec, record=prior):
             return
     except (OSError, ValueError):
         pass

@@ -170,6 +170,7 @@ def test_real_complete_api_pipeline_and_completed_recheck(selected):
     assert repeated['already_complete'] and not again.messages.calls
     assert before == files(selected)
     assert_completed_mutations_refuse_without_calls(selected)
+    assert_snapshot_attribution_refuses_without_calls(selected)
 # Draft to apply only after immutable pipeline process ends.
 class CandidatesScript(Script):
     def __init__(self, spec, *, drop=False, **kwargs):
@@ -382,3 +383,57 @@ def test_actual_cli_executes_then_refuses_reuse_without_calls(tmp_path, monkeypa
     assert not fresh.messages.calls
     assert files(selected) == before
     assert all(p.read_bytes() == raw for p,raw in inputs.items())
+
+
+def assert_snapshot_attribution_refuses_without_calls(spec):
+    """Actual completed consumers bind their selected snapshot to integration."""
+    from data_sheets_schema import snapshot_store
+    baseline = files(spec)
+    index_path = snapshot_store.index_path(spec.metadata_dir, spec.project)
+    original_index = json.loads(index_path.read_bytes())
+    original_record = yaml.safe_load(spec.provenance_path.read_bytes())
+    name = f'{spec.project}_audit.json'
+    rows = ledger._read(spec)['rows']
+    worker = next(row['usage_id'] for row in rows if row['phase'] == runtime.WORKER_PHASE)
+    omission = next(row['usage_id'] for row in rows if row['phase'] == runtime.OMISSION_PHASE)
+    mutations = [('both-worker', worker), ('record-only-worker', worker),
+                 ('index-only-worker', worker), ('both-omission', omission),
+                 ('both-missing', None), ('both-stale', '0' * 32),
+                 ('portable-worker', worker)]
+    for change, identity in mutations:
+        index, record = deepcopy(original_index), deepcopy(original_record)
+        if change != 'record-only-worker':
+            entry = next(row for row in index['snapshots'] if row['name'] == name)
+            if identity is None: entry.pop('usage_id')
+            else: entry['usage_id'] = identity
+            index_path.write_bytes(sg.canonical(index))
+        if change != 'index-only-worker':
+            entry = next(row for row in record['intermediates'] if row['phase'] == name)
+            if identity is None: entry.pop('usage_id')
+            else: entry['usage_id'] = identity
+            spec.provenance_path.write_text(yaml.safe_dump(record))
+        if change == 'portable-worker': index_path.unlink()
+        before = files(spec)
+        retry = client(spec)
+        try:
+            with pytest.raises(ledger.UsageLedgerError):
+                api.execute(replace(spec), client=retry)
+            assert not retry.messages.calls and not retry.messages.count_calls
+            assert files(spec) == before
+            if change == 'index-only-worker':
+                # Explicit-record precedence remains the existing selector rule.
+                assert runtime.completion_check(spec, record=original_record) == original_record['shared_generation']
+                with pytest.raises(ledger.UsageLedgerError, match='integration usage'):
+                    runtime.completion_check(spec)
+        finally:
+            for path, raw in baseline.items(): Path(path).write_bytes(raw)
+    # A genuine missing-index fallback still works without transport. The public
+    # resume may reconstruct the same index from the exact portable history.
+    index_path.unlink()
+    absent = files(spec)
+    assert runtime.completion_check(spec) == original_record['shared_generation']
+    assert files(spec) == absent
+    retry = client(spec)
+    restored = api.execute(replace(spec), client=retry)
+    assert restored['already_complete'] and not retry.messages.calls and not retry.messages.count_calls
+    assert files(spec) == baseline

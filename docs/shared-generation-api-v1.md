@@ -128,7 +128,9 @@ grammar is preserved; the model still declares its relationship judgment.
 Final publication and completed resume reconstruct the assembly from captured
 requests and replies. They recheck source/schema/context/registration identity,
 original full/core, effective receipt, accounting, exact downstream audit carry
-and the saved audit snapshot. The provenance `shared_generation` block names
+and the saved audit snapshot. Its selected index or portable attestation must
+name the unique checked and settled integration call, not merely another paid
+stage. Completed-record checks use that exact record's attestation. The provenance `shared_generation` block names
 the resulting assembly and audit hashes and labels scientific support
 unverified. Saved success flags alone are not authority.
 

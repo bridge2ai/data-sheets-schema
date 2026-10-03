@@ -6877,7 +6877,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             shared_check = None
             if spec.shared_generation_version:
                 from .typed_audit_runtime import completion_check
-                shared_check = completion_check(spec)
+                shared_check = completion_check(spec, record=existing)
                 if existing.get("shared_generation") != shared_check:
                     raise UsageLedgerError("completed provenance differs from reconstructed typed audit authority")
             completion_check_result = None
@@ -7448,7 +7448,7 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             record_evidence_refusal(spec, "report", removal_check)
     if spec.shared_generation_version:
         from .typed_audit_runtime import completion_check
-        rec.data["shared_generation"] = completion_check(spec, carry)
+        rec.data["shared_generation"] = completion_check(spec, carry, record=rec.data)
     rec.write(spec.provenance_path)
     # Persist the one-time report regeneration and its usage before refusing
     # completion; otherwise resume could admit that same call again (#1818).
