@@ -1,0 +1,1075 @@
+{
+  "head": "fb85996981bd5e454a695627fe8e17a8c7ccc0b5",
+  "cases": [
+    {
+      "record": {},
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": null
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Cites",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Cites' is a declared alias of 'cites'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Collects",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Collects' is a declared alias of 'collects'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Compiles",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Compiles' is a declared alias of 'compiles'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Continues",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Continues' is a declared alias of 'continues'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Describes",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Describes' is a declared alias of 'describes'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Documents",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Documents' is a declared alias of 'documents'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "HasMetadata",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'HasMetadata' is a declared alias of 'has_metadata'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "HasPart",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'HasPart' is a declared alias of 'has_part'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "HasVersion",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'HasVersion' is a declared alias of 'has_version'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsCitedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsCitedBy' is a declared alias of 'is_cited_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsCollectedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsCollectedBy' is a declared alias of 'is_collected_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsCompiledBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsCompiledBy' is a declared alias of 'is_compiled_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsContinuedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsContinuedBy' is a declared alias of 'is_continued_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsDerivedFrom",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsDerivedFrom' is a declared alias of 'derives_from'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsDescribedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsDescribedBy' is a declared alias of 'is_described_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsDocumentedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsDocumentedBy' is a declared alias of 'is_documented_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsIdenticalTo",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsIdenticalTo' is a declared alias of 'is_identical_to'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsMetadataFor",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsMetadataFor' is a declared alias of 'is_metadata_for'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsNewVersionOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsNewVersionOf' is a declared alias of 'is_new_version_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsObsoletedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsObsoletedBy' is a declared alias of 'is_replaced_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsOriginalFormOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsOriginalFormOf' is a declared alias of 'is_original_form_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsPartOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsPartOf' is a declared alias of 'is_part_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsPreviousVersionOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsPreviousVersionOf' is a declared alias of 'is_previous_version_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsPublishedIn",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsPublishedIn' is a declared alias of 'is_published_in'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsReferencedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsReferencedBy' is a declared alias of 'is_referenced_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsRequiredBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsRequiredBy' is a declared alias of 'is_required_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsReviewedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsReviewedBy' is a declared alias of 'is_reviewed_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsSourceOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsSourceOf' is a declared alias of 'is_source_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsSupplementTo",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsSupplementTo' is a declared alias of 'supplements'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsSupplementedBy",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsSupplementedBy' is a declared alias of 'is_supplemented_by'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsVariantFormOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsVariantFormOf' is a declared alias of 'is_variant_form_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "IsVersionOf",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsVersionOf' is a declared alias of 'is_version_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Obsoletes",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Obsoletes' is a declared alias of 'replaces'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "References",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'References' is a declared alias of 'references'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Requires",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Requires' is a declared alias of 'requires'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "Reviews",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'Reviews' is a declared alias of 'reviews'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "cites",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "collects",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "compiles",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "continues",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "derives_from",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "describes",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "documents",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "has_metadata",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "has_part",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "has_version",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "invented",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "unknown_type",
+          "detail": "'invented' is not a permissible value and not a declared alias"
+        }
+      ]
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_cited_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_collected_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_compiled_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_continued_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_described_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_documented_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_identical_to",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_metadata_for",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_new_version_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_original_form_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_part_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_previous_version_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_published_in",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_referenced_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_replaced_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_required_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_reviewed_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_source_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_supplemented_by",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_variant_form_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "is_version_of",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "references",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "replaces",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "requires",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "reviews",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": [
+          {
+            "relationship_type": "supplements",
+            "target_dataset": "x"
+          }
+        ]
+      },
+      "defects": []
+    },
+    {
+      "record": {
+        "related_datasets": {
+          "relationship_type": "IsNewVersionOf",
+          "target_dataset": {
+            "id": "x"
+          }
+        }
+      },
+      "defects": [
+        {
+          "index": 0,
+          "mode": "inline_target",
+          "detail": "target_dataset holds an object where the schema declares a string"
+        },
+        {
+          "index": 0,
+          "mode": "aliased_type",
+          "detail": "'IsNewVersionOf' is a declared alias of 'is_new_version_of'; the write-path normaliser should have rewritten it"
+        }
+      ]
+    }
+  ],
+  "cli": {
+    "argv": [
+      "related-datasets",
+      "/tmp/d4d-4301-legacy-record.yaml"
+    ],
+    "exit_code": 1,
+    "output": "/tmp/d4d-4301-legacy-record.yaml\n  [0] aliased_type: 'IsNewVersionOf' is a declared alias of 'is_new_version_of'; the write-path normaliser should have rewritten it\n  [1] inline_target: target_dataset holds an object where the schema declares a string\n  [1] unknown_type: 'invented' is not a permissible value and not a declared alias\n\n3 defect(s) across 1 record(s)\n"
+  },
+  "source_sha256": {
+    "src/data_sheets_schema/related_datasets.py": "94b07cd7607071012a6be71a5d3ef605bc7b658c5e9de9a8dd5359198d1a3507",
+    "src/data_sheets_schema/cli/evaluate.py": "0cf0e13b7b1c313358ac627867d70b84230456d2b91b3e735b22d4f2ad015419"
+  },
+  "cli_input": "id: example:one\nrelated_datasets:\n- relationship_type: IsNewVersionOf\n  target_dataset: x\n- relationship_type: invented\n  target_dataset: {id: x}\n"
+}
