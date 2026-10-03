@@ -348,3 +348,37 @@ def assert_completed_mutations_refuse_without_calls(spec):
             for path, raw in input_bytes.items(): path.write_bytes(raw)
             for path, raw in baseline.items(): Path(path).write_bytes(raw)
     assert files(spec) == baseline
+
+
+def test_actual_cli_executes_then_refuses_reuse_without_calls(tmp_path, monkeypatch):
+    import importlib
+    from click.testing import CliRunner
+    from data_sheets_schema.cli import cli
+    module = importlib.import_module('data_sheets_schema.cli.api')
+    base = replace(specification(tmp_path), arm=module.ARMS['baseline'][0],
+                   method=module.ARMS['baseline'][1], label='shared-cli-synthetic_rep1')
+    reg = registration_for(base)
+    selected = selected_spec(base, reg)
+    peer = client(selected)
+    monkeypatch.setattr(api, '_client', lambda: peer)
+    args = ['api', 'run', '--project', selected.project, '--label', selected.label,
+            '--out-dir', str(selected.out_dir), '--shared-generation-version', '1',
+            '--shared-generation-registration', reg['registration_path'], '--yes']
+    inputs = {p: p.read_bytes() for p in (selected.bundle, selected.chunk_manifest,
+               Path(reg['inputs']['context']['path']), Path(reg['registration_path']))}
+    result = CliRunner().invoke(cli, args)
+    (tmp_path/'cli-first-output.txt').write_text(result.output)
+    assert result.exit_code == 0, (result.output, result.exception)
+    assert peer.messages.phases == ['full','full_receipt_completion','typed_audit_worker',
+        'typed_audit_omission','typed_audit_integration','reconcile_full','report']
+    assert selected.provenance_path.exists()
+    before = files(selected)
+    fresh = client(selected)
+    monkeypatch.setattr(api, '_client', lambda: fresh)
+    repeat = CliRunner().invoke(cli, args)
+    (tmp_path/'cli-repeat-output.txt').write_text(repeat.output)
+    assert repeat.exit_code == 1, repeat.output
+    assert 'a run label is never reused' in repeat.output
+    assert not fresh.messages.calls
+    assert files(selected) == before
+    assert all(p.read_bytes() == raw for p,raw in inputs.items())
