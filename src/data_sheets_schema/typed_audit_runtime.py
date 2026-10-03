@@ -61,6 +61,15 @@ def _originals(spec):
     return result
 
 
+def _derivations(spec):
+    cache = getattr(spec, '_typed_audit_derivations', None)
+    if cache is None:
+        cache = spec._typed_audit_derivations = typed.DerivationCache()
+    if type(cache) is not typed.DerivationCache:
+        raise ledger.UsageLedgerError('invalid per-run pure derivation cache')
+    return cache
+
+
 def prepare_packet(spec):
     """Use the single captured registration closure and exact saved originals."""
     from . import api_runner as api
@@ -78,6 +87,7 @@ def prepare_packet(spec):
         source_manifest=(captured.raw(inputs['source_manifest']['path']) if inputs['source_manifest'] else None),
         project=spec.project if inputs['source_manifest'] else None,
         schema_path=captured.full_schema.sources[0][1], schema_snapshot=captured.full_schema,
+        derivations=_derivations(spec),
         max_output_tokens=limits['omission_output_tokens'],
         **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers', 'max_request_bytes')}))
     if len(packet['plan']['workers']) + 2 > limits['max_calls']:
@@ -93,16 +103,16 @@ def roster(packet):
 def _inner(spec, packet, stage, workers, omission):
     key = [sg.canonical(packet), sg.canonical(stage),
         sg.canonical({name: typed._blob(raw) for name, raw in workers.items()}), omission or b'']
-    return sg.memo(spec, 'typed_inner', key, lambda: _derive_inner(packet, stage, workers, omission))
+    return sg.memo(spec, 'typed_inner', key, lambda: _derive_inner(spec, packet, stage, workers, omission))
 
 
-def _derive_inner(packet, stage, workers, omission):
+def _derive_inner(spec, packet, stage, workers, omission):
     if stage['phase'] == WORKER_PHASE:
-        return typed.worker_request(packet, stage['worker_id'])
+        return typed.worker_request(packet, stage['worker_id'], derivations=_derivations(spec))
     if stage['phase'] == OMISSION_PHASE:
         return packet['omission_request']
     if stage['phase'] == INTEGRATION_PHASE:
-        return typed.index(packet, workers, omission)
+        return typed.index(packet, workers, omission, derivations=_derivations(spec))
     raise ledger.UsageLedgerError('unknown registered typed audit stage')
 
 
@@ -135,38 +145,22 @@ def build_request(spec, packet, stage, workers, omission, settings):
 
 
 def _check_response(spec, packet, stage, inner, response, workers, omission):
-    # Captured-byte derivation, not a saved verdict. Every journal/request pin,
-    # usage row and authority is freshly checked by _rebuild before this call.
-    key = [sg.canonical(packet), sg.canonical(stage), sg.canonical(inner), sg.canonical(response),
-        sg.canonical({name: typed._blob(raw) for name, raw in workers.items()}), omission or b'']
-    def build():
-        out_workers, out_omission, assembly = _derive_response(packet, stage, inner, response,
-            copy.deepcopy(workers), omission)
-        return {'workers': {name: typed._blob(raw) for name, raw in out_workers.items()},
-            'omission': typed._blob(out_omission) if out_omission is not None else None, 'assembly': assembly}
-    value = sg.memo(spec, 'typed_response_derivation', key, build)
-    return ({name: typed._unblob(blob, typed.MAX_SAVED_RESPONSE_BYTES) for name, blob in value['workers'].items()},
-        typed._unblob(value['omission'], typed.omissions.MAX_RESPONSE_BYTES) if value['omission'] else None,
-        value['assembly'])
-
-
-def _derive_response(packet, stage, inner, response, workers, omission):
     raw = response['text'].encode('utf-8')
     if response['stop_reason'] != 'end_turn':
         raise ledger.UsageLedgerError('typed response did not finish normally; allowance remains consumed')
     if stage['phase'] == WORKER_PHASE:
         saved = typed.capture_response(inner, raw)
-        if not typed.check_worker(packet, stage['worker_id'], saved)['passed']:
+        if not typed.check_worker(packet, stage['worker_id'], saved, derivations=_derivations(spec))['passed']:
             raise ledger.UsageLedgerError('typed worker response failed structural coverage checks')
         workers[stage['worker_id']] = saved
     elif stage['phase'] == OMISSION_PHASE:
         # This checks every chunk, even a prior negative/redundant status.
         # Its schema/source scope is the exact captured packet, never current files.
-        typed.index(packet, workers, raw)
+        typed.index(packet, workers, raw, derivations=_derivations(spec))
         omission = raw
     else:
         saved = typed.capture_response(inner, raw)
-        assembly = typed.assemble(packet, workers, omission, saved)
+        assembly = typed.assemble(packet, workers, omission, saved, derivations=_derivations(spec))
         return workers, omission, assembly
     return workers, omission, None
 
@@ -291,7 +285,7 @@ def recover(spec, *, carry=None, terminal=False, independent=False):
         return None
     if state['state'] not in ('assembled', 'accepted') or _load(state.get('assembly')) != assembly:
         raise ledger.UsageLedgerError('typed audit accepted identity differs from rebuilt assembly')
-    checked = (typed.check(assembly) if independent else
+    checked = (typed.check(assembly, derivations=typed.DerivationCache()) if independent else
         {**assembly['acceptance'], 'assembly_sha256': assembly['sha256'], 'independently_reconstructed': False})
     body = typed._unblob(assembly['audit'], typed.audit_grammar.MAX_BYTES).decode('utf-8')
     if carry is not None and carry.get('Audit findings') != body:

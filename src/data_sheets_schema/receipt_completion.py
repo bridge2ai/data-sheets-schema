@@ -185,10 +185,19 @@ def _inputs(spec) -> dict:
         raise ValueError('completion transcript has no matching accounted usage')
     reg = registration(spec)
     schema = schema_capture(spec)
+    if getattr(spec, 'shared_generation_version', 0):
+        from .shared_generation import assert_current
+        captured = assert_current(spec)
+        selected = captured.document()['inputs']
+        manifest_raw = captured.raw(selected['chunk_manifest']['path'])
+        bundle_raw = captured.raw(selected['bundle']['path'])
+    else:
+        manifest_raw = Path(spec.chunk_manifest or chunking.manifest_for(spec.bundle, source_manifest=spec.manifest)).read_bytes()
+        bundle_raw = spec.bundle.read_bytes()
     result = {'record': spec.full_path.read_bytes().decode('utf-8'),
               'receipt': api._receipt_path(spec).read_bytes().decode('utf-8'),
-              'manifest': Path(spec.chunk_manifest or chunking.manifest_for(spec.bundle, source_manifest=spec.manifest)).read_bytes().decode('utf-8'),
-              'bundle': spec.bundle.read_bytes().decode('utf-8'), 'schema': schema,
+              'manifest': manifest_raw.decode('utf-8'),
+              'bundle': bundle_raw.decode('utf-8'), 'schema': schema,
               'transcript': transcript, 'transcript_pin': transcript_pin,
               'registration': registration_identity(spec), 'policy': policy_identity(version=spec.receipt_completion_version),
               'input_identity': spec.input_identity(), 'max_output_tokens': reg['max_output_tokens']}

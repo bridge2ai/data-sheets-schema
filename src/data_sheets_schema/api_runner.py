@@ -4311,7 +4311,11 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
     protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
         metadata_authority = source_metadata_authority(spec)
-        chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        if spec.shared_generation_version:
+            from .shared_generation import source_chunks as captured_chunks
+            chunks, pins = captured_chunks(spec)
+        else:
+            chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
         if metadata_authority.get("source_manifest_raw") is not None:
             pins["source_manifest"] = hashlib.sha256(metadata_authority["source_manifest_raw"]).hexdigest()
         audit = evidence.load_json(carry["Audit findings"])
@@ -4423,7 +4427,11 @@ def _admit_source_response(spec: RunSpec, phase: str, text: str, stop_reason,
         if stop_reason == "max_tokens":
             raise ValueError("source-review output truncated at max_tokens")
         body = _extract(text, "json" if phase == "audit" else "md")
-        chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
+        if spec.shared_generation_version:
+            from .shared_generation import source_chunks as captured_chunks
+            chunks, pins = captured_chunks(spec)
+        else:
+            chunks, pins = evidence.source_chunks(spec.bundle, spec.chunk_manifest)
         if metadata_authority.get("source_manifest_raw") is not None:
             pins["source_manifest"] = hashlib.sha256(metadata_authority["source_manifest_raw"]).hexdigest()
         if phase == "audit":
@@ -6645,6 +6653,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
 
     settings = _model_settings()
     spec.bind_api_header_values(settings)
+    if spec.shared_generation_version:
+        from .shared_generation import preflight as shared_preflight
+        shared_preflight(spec, settings)
     if spec.shared_generation_version and not resume:
         from . import usage_ledger as ledger
         from .snapshot_store import index_path

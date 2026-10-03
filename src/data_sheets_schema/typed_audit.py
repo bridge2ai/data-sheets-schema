@@ -10,6 +10,7 @@ import argparse
 import base64
 from collections import Counter
 import hashlib
+import json
 from pathlib import Path
 
 import yaml
@@ -77,7 +78,9 @@ def _bounded_json(raw, label, limit):
 
 
 def _snapshot_rows(snapshot):
-    return [{"name": name, "path": str(path), "content": _blob(raw)}
+    # LinkML import names may be URIorCURIE subclasses. Their captured JSON
+    # representation is a string; normalize before optional strict cache keys.
+    return [{"name": str(name), "path": str(path), "content": _blob(raw)}
             for name, path, raw in snapshot.sources]
 
 
@@ -155,7 +158,61 @@ def _source_authority(raw, project):
         raise ValueError("source manifest cannot be read safely") from exc
 
 
-def _derive(inputs, schema_rows, project, limits):
+
+class DerivationCache:
+    """Bounded, caller-owned pure packet derivations; never response verdicts.
+
+    Each hit returns decoded private objects, including a NEW frozen Prepared.
+    Final independent checks should receive a fresh instance, so their first
+    derivation is independent of any earlier preparation or runtime cache.
+    """
+    def __init__(self, *, max_entries=8, max_bytes=64_000_000):
+        if (type(max_entries) is not int or not 0 < max_entries <= 32
+                or type(max_bytes) is not int or not 0 < max_bytes <= 128_000_000):
+            raise ValueError('derivation cache requires bounded positive integer limits')
+        self.max_entries, self.max_bytes = max_entries, max_bytes
+        self._rows, self._bytes = {}, 0
+
+    def _derive(self, inputs, schema_rows, project, limits):
+        def exact_json(value):
+            if type(value) is dict:
+                if any(type(key) is not str for key in value):
+                    raise ValueError('derivation cache keys require exact string mapping keys')
+                for item in value.values():
+                    exact_json(item)
+            elif type(value) is list:
+                for item in value:
+                    exact_json(item)
+            elif type(value) not in (str, int, float, bool, type(None)):
+                raise ValueError('derivation cache keys require exact JSON types')
+        selected = [inputs, schema_rows, project, limits]
+        exact_json(selected)
+        # These bytes are checked on every lookup, not merely when cached.
+        assets = {name: _sha(omissions._asset(name)) for name in omissions.ASSET_SHA256}
+        identity = _json([selected, assets])
+        key = (len(identity), _sha(identity))
+        encoded = self._rows.get(key)
+        if encoded is None:
+            derived, raw, prepared = _derive(inputs, schema_rows, project, limits)
+            encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
+                             'prepared_payload_json': prepared.payload_json})
+            if len(encoded) <= self.max_bytes:
+                while self._rows and (len(self._rows) >= self.max_entries or self._bytes + len(encoded) > self.max_bytes):
+                    self._bytes -= len(self._rows.pop(next(iter(self._rows))))
+                self._rows[key] = encoded
+                self._bytes += len(encoded)
+        value = json.loads(encoded)
+        return value['derived'], {name: _unblob(blob) for name, blob in value['raw'].items()}, omissions.Prepared(value['prepared_payload_json'])
+
+
+def _derive(inputs, schema_rows, project, limits, *, derivations=None):
+    if derivations is not None:
+        if type(derivations) is not DerivationCache:
+            raise ValueError('derivations must be an explicit DerivationCache')
+        return derivations._derive(inputs, schema_rows, project, limits)
+    return _derive_uncached(inputs, schema_rows, project, limits)
+
+def _derive_uncached(inputs, schema_rows, project, limits):
     if type(inputs) is not dict or not _REQUIRED <= set(inputs) <= _REQUIRED | _OPTIONAL:
         raise ValueError("captured input roster differs from protocol")
     raw = {key: _unblob(value) for key, value in inputs.items()}
@@ -204,7 +261,7 @@ def _derive(inputs, schema_rows, project, limits):
 def prepare(*, protocol, original_full, bundle, manifest, receipt, context, schema_path,
             max_output_tokens, original_core=None, source_manifest=None, project=None,
             max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16,
-            schema_snapshot=None):
+            schema_snapshot=None, derivations=None):
     """Capture a new packet; no saved response or self-reported success is trusted."""
     if audit_protocol.select(protocol)["protocol"] != audit_protocol.TYPED:
         raise ValueError("this consumer requires explicitly selected typed_audit_protocol_v1")
@@ -220,21 +277,21 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
         rows = _snapshot_rows(_capture(Path(schema_path)))
     limits = dict(max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes,
                   max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)
-    derived, _, _ = _derive(inputs, rows, project, limits)
+    derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations)
     packet = _seal(dict(kind=PACKET, protocol=audit_protocol.select(protocol), inputs=inputs,
         schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))
     _bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)
     for worker in packet["plan"]["workers"]:
-        worker_request(packet, worker["id"])
+        worker_request(packet, worker["id"], derivations=derivations)
     return packet
 
 
-def _open(packet):
+def _open(packet, *, derivations=None):
     _exact(packet, {"kind", "protocol", "inputs", "schema_sources", "project", "limits", "plan",
         "omission_request", "contracts", "requests", "registered_provenance", "limitations", "sha256"}, "packet")
     if len(_json(packet)) > MAX_PACKET_BYTES or packet["kind"] != PACKET or _json(packet["protocol"]) != _json(audit_protocol.select(audit_protocol.TYPED)):
         raise ValueError("packet protocol/size mismatch")
-    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"])
+    derived, raw, prepared = _derive(packet["inputs"], packet["schema_sources"], packet["project"], packet["limits"], derivations=derivations)
     expected = _seal({**{key: packet[key] for key in ("kind", "protocol", "inputs", "schema_sources", "project", "limits")},
                       **derived, "limitations": list(LIMITATIONS)})
     if _json(packet) != _json(expected):
@@ -252,9 +309,9 @@ def _omission_findings(findings, candidates=None):
                 raise ValueError("finding references an unknown omission candidate")
 
 
-def worker_request(packet, worker_id):
+def worker_request(packet, worker_id, *, derivations=None):
     """Export a request after packet sealing; identity hashes its exact payload."""
-    _open(packet)
+    _open(packet, derivations=derivations)
     if type(worker_id) is not str or worker_id not in packet["requests"]["workers"]:
         raise ValueError("unknown worker request")
     payload = {"packet_sha256": packet["sha256"], "worker_id": worker_id,
@@ -315,15 +372,15 @@ def _unwrap(saved, request):
     return raw
 
 
-def _workers(packet, workers):
+def _workers(packet, workers, *, derivations=None):
     if type(workers) is not dict:
         raise ValueError("saved workers must have an explicit id roster")
-    return {key: _unwrap(raw, worker_request(packet, key)) for key, raw in workers.items()}
+    return {key: _unwrap(raw, worker_request(packet, key, derivations=derivations)) for key, raw in workers.items()}
 
 
-def check_worker(packet, worker_id, response):
+def check_worker(packet, worker_id, response, *, derivations=None):
     """Structural worker check; global omission/source acceptance occurs later."""
-    raw = _unwrap(response, worker_request(packet, worker_id))
+    raw = _unwrap(response, worker_request(packet, worker_id, derivations=derivations))
     report = batches.check_worker(raw, packet["plan"], worker_id, version=2)
     if report["passed"]:
         try:
@@ -344,13 +401,13 @@ def _index(packet, workers):
     return index
 
 
-def index(packet, workers, omission_response):
+def index(packet, workers, omission_response, *, derivations=None):
     """Bind workers and complete omission response; render the integration tail."""
-    _, prepared = _open(packet)
+    _, prepared = _open(packet, derivations=derivations)
     report = prepared.check(omission_response, saved_request=packet["omission_request"])
     if not report["protocol_complete"]:
         raise ValueError("omission response does not satisfy complete captured inventory")
-    inner_workers = _workers(packet, workers)
+    inner_workers = _workers(packet, workers, derivations=derivations)
     result = _index(packet, inner_workers)
     candidates = {row["id"] for row in report["declared_candidates"]}
     for raw in inner_workers.values():
@@ -388,11 +445,11 @@ def _account(audit, delta, candidates):
              "final_finding_ordinal": links.get(row["id"])} for row in candidates]
 
 
-def _result(packet, workers, omission_response, integration_response):
-    raw, _ = _open(packet)
-    bound_index = index(packet, workers, omission_response)
+def _result(packet, workers, omission_response, integration_response, *, derivations=None):
+    raw, _ = _open(packet, derivations=derivations)
+    bound_index = index(packet, workers, omission_response, derivations=derivations)
     inner_integration = _unwrap(integration_response, bound_index)
-    audit_raw, lineage = batches.assemble(packet["plan"], _workers(packet, workers), inner_integration, version=2)
+    audit_raw, lineage = batches.assemble(packet["plan"], _workers(packet, workers, derivations=derivations), inner_integration, version=2)
     audit, delta = audit_grammar._load(audit_raw), audit_grammar._load(inner_integration)
     # Check candidates in replaced/dropped proposal entry paths too. The final
     # exact-once allocation is separate from proposal membership.
@@ -432,14 +489,14 @@ def _result(packet, workers, omission_response, integration_response):
     return bound_index, audit_raw, lineage, report
 
 
-def check_integration(packet, workers, omission_response, integration_response):
+def check_integration(packet, workers, omission_response, integration_response, *, derivations=None):
     """Run real terminal checks; malformed identity/coverage raises ValueError."""
-    return _result(packet, workers, omission_response, integration_response)[3]
+    return _result(packet, workers, omission_response, integration_response, derivations=derivations)[3]
 
 
-def assemble(packet, workers, omission_response, integration_response):
+def assemble(packet, workers, omission_response, integration_response, *, derivations=None):
     """Seal a new self-contained assembly only when mechanical checks pass."""
-    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response)
+    bound_index, audit_raw, lineage, report = _result(packet, workers, omission_response, integration_response, derivations=derivations)
     if not report["passed"]:
         raise ValueError("source-evidence acceptance failed; use check-integration for bounded diagnostics")
     result = _seal({"kind": ASSEMBLY, "packet": packet,
@@ -452,7 +509,7 @@ def assemble(packet, workers, omission_response, integration_response):
     return result
 
 
-def check(assembly):
+def check(assembly, *, derivations=None):
     """Rebuild independently from captured original/response bytes, not reports."""
     _exact(assembly, {"kind", "packet", "workers", "omission_response", "integration_response", "index",
                       "audit", "lineage", "acceptance", "sha256"}, "assembly")
@@ -462,7 +519,7 @@ def check(assembly):
         raise ValueError("assembly exceeds byte bound")
     expected = assemble(assembly["packet"], {key: _unblob(value, MAX_SAVED_RESPONSE_BYTES) for key, value in assembly["workers"].items()},
         _unblob(assembly["omission_response"], omissions.MAX_RESPONSE_BYTES),
-        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES))
+        _unblob(assembly["integration_response"], MAX_SAVED_RESPONSE_BYTES), derivations=derivations)
     if _json(assembly) != _json(expected):
         raise ValueError("saved assembly differs from independent captured-byte reconstruction")
     return {**expected["acceptance"], "assembly_sha256": expected["sha256"], "independently_reconstructed": True}

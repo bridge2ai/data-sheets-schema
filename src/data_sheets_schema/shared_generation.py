@@ -354,7 +354,16 @@ def capture(spec) -> Capture:
                 raise ValueError(f"captured schema has no {cls}")
         snapshots.append(snapshot)
     from .audit_omissions import _mapping
-    _mapping(files[selected["context"]["path"]], "generation scope context")
+    from . import audit_omissions as omissions
+    context = _mapping(files[selected["context"]["path"]], "generation scope context", json_only=True)
+    if omissions._shape(context, json.loads(omissions._asset('context.schema.json'))):
+        raise ValueError('generation scope context does not satisfy omission_context_v1')
+    for key in ('bundle', 'chunk_manifest', 'source_manifest', 'context'):
+        pin = selected[key]
+        if pin is not None and len(files[pin['path']]) > omissions.MAX_INPUT_BYTES:
+            raise ValueError('selected input exceeds typed audit input bound')
+    if any(sum(len(raw) for _name, _path, raw in snapshot.sources) > omissions.MAX_SCHEMA_BYTES for snapshot in snapshots):
+        raise ValueError('selected schema exceeds typed audit schema bound')
     result = Capture(raw, tuple(sorted(files.items())), *snapshots)
     spec._shared_generation_capture = result
     return result
@@ -428,6 +437,8 @@ def _schema_context(captured, record):
     from .schema_view import captured_view
     from .audit_omissions import _mapping
     from linkml_runtime.dumpers import json_dumper
+    from .support_targets import _typed
+    import yaml
     owners, classes = [], {}
     value = _mapping(record.encode("utf-8"), "whole record for role review") if record is not None else None
     with captured_view(captured.full_schema) as view:
@@ -447,7 +458,9 @@ def _schema_context(captured, record):
             if not isinstance(item, dict):
                 continue
             slots = describe(cls)
-            owners.append({'path': pointer, 'class': cls, 'whole_value': item})
+            owners.append({'path': pointer, 'class': cls,
+                'whole_value_yaml': yaml.safe_dump(item, sort_keys=False, allow_unicode=True),
+                'whole_value_identity': _typed(item)})
             for name, child in item.items():
                 slot = slots.get(name)
                 if slot is None or view.get_class(slot.get('range')) is None:
@@ -613,3 +626,11 @@ def core_text(spec, *, phase4_complete=False):
     body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
     header = '\n'.join(derive.core_header(raw.decode('utf-8'), spec.full_path, phase4_complete))
     return (header + '\n\n' if header else '') + body, facts
+
+
+def source_chunks(spec):
+    from .evidence_assertions import source_chunks_from_bytes
+    captured = assert_current(spec)
+    inputs = captured.document()['inputs']
+    return source_chunks_from_bytes(captured.raw(inputs['bundle']['path']),
+                                   captured.raw(inputs['chunk_manifest']['path']))

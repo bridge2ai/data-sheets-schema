@@ -75,7 +75,7 @@ class Script(FakeMessages):
             phase = rc.PHASE
         else:
             last = blocks[-1]
-            phase = next((p for p in api.PHASES if last.startswith(api.PHASE_INSTRUCTIONS[p].split('\n')[0])), None)
+            phase = next((p for p in api.PHASES if last.startswith(api.phase_instruction(p, self.spec.render_version).split('\n')[0])), None)
             if last.startswith('Report re-check.'):
                 phase = 'report_regate'
             if phase is None:
@@ -148,7 +148,7 @@ def test_real_complete_api_pipeline_and_completed_recheck(selected):
     state = runtime._state(selected)
     assert state['state'] == 'accepted'
     assembly = rc._load(state['assembly'])
-    checked = typed.check(assembly)
+    checked = typed.check(assembly, derivations=typed.DerivationCache())
     assert checked['passed'] and checked['independently_reconstructed']
     audit = typed._unblob(assembly['audit']).decode()
     reconcile = c.messages.calls[phases.index('reconcile_full')]
