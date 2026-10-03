@@ -37,9 +37,12 @@ source-read content equal to the captured bytes. No pending handler state or
 controller failure can be hidden by a zero child return code.
 
 An attempt directory's exclusive reservation consumes that canonical attempt
-identity. A failed or partial start is retained, and the same identity never
-automatically retries or resumes. The fsynced started record precedes the sole
-controller dispatch. Both callbacks and `phase_spec` are supplied to the frozen
+identity. Its containing directory is synced immediately after reservation,
+before registration/started writes. The new evidence directory's parent is
+also synced before dispatch. A failed barrier prevents dispatch and retains
+the reservation and any partial evidence; it is never treated as successful
+durable consumption. A failed or partial start never automatically retries or
+resumes. The fsynced started record precedes the sole controller dispatch. Both callbacks and `phase_spec` are supplied to the frozen
 controller, preserving phase order, terminal stops and bounded shutdown. The
 environment is explicitly constructed without inherited provider credentials.
 

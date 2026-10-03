@@ -433,3 +433,75 @@ def test_capture_from_another_consumed_attempt_cannot_complete(case, completed, 
     expected = 'uncaptured path' if binding == 'path' else 'different consumed registration'
     assert expected in result['first_stop']
     assert result['gates']['first_stop']['passed'] is False
+
+
+def test_reservation_parent_barriers_precede_started_and_dispatch(case, monkeypatch):
+    import stat
+    attempt = Path(case['value']['attempt_directory'])
+    evidence = Path(case['value']['evidence_directory'])
+    parent = case['root'].stat()
+    trace = []
+    ordinary_mkdir, ordinary_fsync, ordinary_write = Path.mkdir, os.fsync, supervisor.durable_new
+    def mkdir(path, *args, **kwargs):
+        result = ordinary_mkdir(path, *args, **kwargs)
+        if path in (attempt, evidence): trace.append(('mkdir', str(path)))
+        return result
+    def fsync(fd):
+        info = os.fstat(fd)
+        ordinary_fsync(fd)
+        if stat.S_ISDIR(info.st_mode) and (info.st_dev, info.st_ino) == (parent.st_dev, parent.st_ino):
+            trace.append(('parent_fsync_complete', str(case['root'])))
+    def write(path, raw):
+        trace.append(('write', Path(path).name))
+        return ordinary_write(path, raw)
+    def child(*args, **kwargs):
+        trace.append(('dispatch', 1))
+        raise RuntimeError('offline dispatch boundary')
+    with authority.loaded_dependencies(case['value']['dependencies']) as controls:
+        monkeypatch.setattr(Path, 'mkdir', mkdir)
+        monkeypatch.setattr(os, 'fsync', fsync)
+        monkeypatch.setattr(supervisor, 'durable_new', write)
+        monkeypatch.setattr(controls['run_native_canary'], 'execute_child', child)
+        result = supervisor.supervise(case['raw'])
+    prefix = trace[:trace.index(('dispatch', 1))]
+    assert prefix == [('mkdir', str(attempt)), ('parent_fsync_complete', str(case['root'])),
+        ('write', 'registration.json'), ('write', 'started.json'), ('mkdir', str(evidence)),
+        ('parent_fsync_complete', str(case['root']))]
+    assert result['engineering_completion'] is False
+    assert 'offline dispatch boundary' in result['first_stop']
+
+
+@pytest.mark.parametrize('boundary', ['attempt_parent', 'evidence_parent', 'registration_file'])
+def test_actual_pre_dispatch_sync_failure_retains_identity(case, monkeypatch, boundary):
+    import stat
+    attempt = Path(case['value']['attempt_directory'])
+    evidence = Path(case['value']['evidence_directory'])
+    parent = case['root'].stat()
+    ordinary_fsync = os.fsync
+    parent_syncs = []
+    dispatches = []
+    def fsync(fd):
+        info = os.fstat(fd)
+        is_parent = stat.S_ISDIR(info.st_mode) and (info.st_dev, info.st_ino) == (parent.st_dev, parent.st_ino)
+        current = ('evidence_parent' if evidence.exists() else 'attempt_parent') if is_parent else 'registration_file'
+        if current == boundary and (is_parent or stat.S_ISREG(info.st_mode)):
+            raise OSError('injected actual fsync failure: '+boundary)
+        ordinary_fsync(fd)
+        if is_parent: parent_syncs.append(current)
+    def child(*args, **kwargs):
+        dispatches.append(1)
+        pytest.fail('dispatch occurred after a required sync failure')
+    with authority.loaded_dependencies(case['value']['dependencies']) as controls:
+        monkeypatch.setattr(os, 'fsync', fsync)
+        monkeypatch.setattr(controls['run_native_canary'], 'execute_child', child)
+        with pytest.raises(OSError, match='injected actual fsync failure'):
+            supervisor.supervise(case['raw'])
+        assert not dispatches
+        assert attempt.is_dir()
+        assert (attempt/'started.json').exists() is (boundary == 'evidence_parent')
+        assert evidence.exists() is (boundary == 'evidence_parent')
+        assert not (evidence/'published.json').exists()
+        assert parent_syncs == ([] if boundary == 'attempt_parent' else ['attempt_parent'])
+        with pytest.raises(ValueError, match='new|resume'):
+            supervisor.supervise(case['raw'])
+        assert not dispatches

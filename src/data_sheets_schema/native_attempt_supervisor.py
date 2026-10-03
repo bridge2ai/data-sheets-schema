@@ -211,12 +211,17 @@ def durable_new(path, raw):
         stream.flush()
         os.fsync(stream.fileno())
     os.link(temporary, path)
-    handle = os.open(path.parent, os.O_RDONLY)
+    _sync_directory(path.parent)
+    os.unlink(temporary)
+
+
+def _sync_directory(path):
+    """Persist directory entries; failure never grants dispatch or publication."""
+    handle = os.open(path, os.O_RDONLY)
     try:
         os.fsync(handle)
     finally:
         os.close(handle)
-    os.unlink(temporary)
 
 
 class NeutralState:
@@ -241,6 +246,7 @@ def supervise(registration_raw):
     reserved = _paths(value, selected, fresh=True)
     attempt, evidence, *outputs = reserved
     attempt.mkdir(mode=0o700)  # The first reservation consumes the identity.
+    _sync_directory(attempt.parent)  # Persist that new entry before any later failure.
     durable_new(attempt/'registration.json', registration_raw)
     started = {'kind': KIND, 'version': VERSION, 'state': 'started', 'attempt_id': value['attempt_id'],
         'registration_sha256': draft._sha(registration_raw), 'composition_sha256': draft._sha(raw),
@@ -248,6 +254,7 @@ def supervise(registration_raw):
     started_raw = draft._encoded(started)
     durable_new(attempt/'started.json', started_raw)
     evidence.mkdir(mode=0o700)
+    _sync_directory(evidence.parent)  # A result directory must survive before dispatch.
     for directory in outputs:
         directory.mkdir(parents=True, mode=0o700)
     adapter = composition.CallbackAdapter(raw)
