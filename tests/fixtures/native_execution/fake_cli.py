@@ -37,9 +37,9 @@ def main():
         if bad == fixture['report']:
             raise AssertionError('test correction mutation did not alter the selected source')
         steps[position-1]['input']['content'] = bad
-        repair = {'tool':'Write','input':{'file_path':str(spec.report_path),'content':fixture['report']}}
+        repair = {'tool':'Write','input':{'file_path':str(spec._agentic_artifact_paths['report']),'content':fixture['report']}}
         if mode == 'protected_correction':
-            repair['input']['file_path'] = str(spec.full_path)
+            repair['input']['file_path'] = str(spec._agentic_artifact_paths['full'])
         steps[position+1:position+1] = [repair,steps[position].copy()]
     runtime=value['runtime'];session='43340000-0000-4000-8000-000000000001'
     def send(event):

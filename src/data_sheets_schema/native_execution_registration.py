@@ -33,7 +33,7 @@ POLICY_ENV = {'DISABLE_NON_ESSENTIAL_MODEL_CALLS': '1',
               'PYTHONDONTWRITEBYTECODE': '1', 'PYTHONUNBUFFERED': '1'}
 FLAGS = ['--print', '--safe-mode', '--restricted', '--strict-mcp-config',
          '--disable-slash-commands', '--no-session-persistence', '--prompt-suggestions', 'false',
-         '--input-format', 'stream-json', '--output-format', 'stream-json', '--verbose',
+         '--output-format', 'stream-json', '--verbose',
          '--permission-mode', 'dontAsk', '--tools', 'Read,Write,Bash']
 
 

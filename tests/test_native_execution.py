@@ -52,6 +52,7 @@ def make_native_case(root, mode='correction', awake=False):
     probe=root/'fabricated-permission.json';probe.write_bytes(draft._encoded(fabricated['manifest']))
     value=registration.registration(composition_path,system,permission_probe_path=probe,
         attempt_id='native-attempt',attempt_directory=root/'native-attempt',evidence_directory=root/'native-evidence',runtime=runtime)
+    assert value['argv'].count('--input-format') == 1  # supplied by the frozen permission helper
     raw=draft._encoded(value)
     binding={'registration_sha256':draft._sha(raw),'attempt_id':value['attempt_id'],
         'source_commit':value['dependencies']['base']['source_commit'],
