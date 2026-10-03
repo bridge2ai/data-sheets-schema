@@ -123,6 +123,19 @@ def _probe_runtime(value):
             'scope': 'Fresh version and filtered auth observation; no credential bytes or provider request.'}
 
 
+def expected_runtime_observation(value):
+    """Derive selected identity without observing native auth or invoking a runtime."""
+    runtime = value['runtime']
+    declared = runtime['executable']
+    binary = registration.executable_identity(declared['path'])
+    if (binary['path'] != declared['path'] or binary['sha256'] != declared['sha256']
+            or type(binary['bytes']) is not int or not 0 <= binary['bytes'] <= 1024**3):
+        raise ValueError('runtime executable identity changed from its selected declaration')
+    return {'binary': binary, 'version': declared['version'],
+        'auth': {key: runtime['auth'][key] for key in ('loggedIn', 'authMethod', 'apiProvider', 'subscriptionType')},
+        'environment_sha256': draft._sha(draft._encoded(value['environment']))}
+
+
 @contextmanager
 def _signals(observed):
     if threading.current_thread() is not threading.main_thread():
@@ -177,6 +190,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
     authorization = authorizations(registration_raw, value, review_path=review_path,
                                   ci_path=ci_path, launch_word_path=launch_word_path)
     _unchanged(value, registration_raw, authorization)
+    runtime_identity = expected_runtime_observation(value)
     selected = composition.verified_composition(value['composition_raw_json'].encode())
     attempt, evidence, *outputs = registration._paths(value, selected, fresh=True,
         extra_protected=list(authorization['inputs'].values()))
@@ -281,6 +295,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                 results = gates.check(prepared, projections, {**value['runtime'], 'attempt_directory': str(attempt)},
                     controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
                     live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake,
+                    runtime_authority_expected=runtime_identity,
                     keep_awake_raw=_file(attempt/'keep-awake.json', 'observed cleanup'))
                 for name, label in (('runtime_authority', 'runtime observation'), ('keep_awake', 'cleanup evidence')):
                     if results[name].get('passed') is not True:
@@ -328,7 +343,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                 for name in ('runtime-observation.json', 'keep-awake.json') if (attempt/name).exists()}
             if 'runtime-observation.json' in lifecycle_raw:
                 results['runtime_authority'] = gates.runtime_observation_result(
-                    lifecycle_raw['runtime-observation.json'], observation)
+                    lifecycle_raw['runtime-observation.json'], observation, runtime_identity)
             else:
                 results['runtime_authority'] = {'checked': False, 'passed': False, 'reason': 'runtime observation unavailable'}
             if 'keep-awake.json' in lifecycle_raw:
@@ -431,7 +446,8 @@ def read_final(registration_raw):
     runtime_gate = checks['runtime_authority']
     if 'runtime-observation.json' in lifecycle_raw:
         body = lifecycle_raw.get('runtime-observation.json')
-        recomputed = gates.runtime_observation_result(body, result.get('runtime_observation'))
+        recomputed = gates.runtime_observation_result(body, result.get('runtime_observation'),
+                                                     expected_runtime_observation(value))
         if draft._encoded(runtime_gate) != draft._encoded(recomputed):
             raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
     elif (runtime_gate['checked'] is not False or runtime_gate['passed'] is not False or 'basis' in runtime_gate

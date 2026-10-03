@@ -136,6 +136,7 @@ def test_actual_closed_consumer_real_helpers_complete(case,monkeypatch,mode):
                     exit_code=result['child_exit_code'],shutdown=result['shutdown'],
                     live=result['gates']['live_attribution']['result'],first_stop=None,
                     runtime_authority=result['runtime_observation'],keep_awake=result['keep_awake'],
+                    runtime_authority_expected=execute.expected_runtime_observation(case['value']),
                     keep_awake_raw=cleanup_raw)
             assert all(row['checked'] and row['passed'] for row in checked.values()),checked
         generated=Path(result['additional_report']['path'])
@@ -611,6 +612,32 @@ def test_failed_publication_lifecycle_gates_cannot_skip_canonical_readback(case,
                         execute.read_final(case['raw'])
         finally:
             retained.rename(artifact)
+    runtime_path=case['root']/'native-attempt/runtime-observation.json'
+    original_runtime_raw=runtime_path.read_bytes()
+    selected=execute.expected_runtime_observation(case['value'])
+    try:
+        for mutation in ('binary_sha','version','auth_method','environment'):
+            changed=deepcopy(result)
+            observed=fake_observation(case['value'])
+            if mutation=='binary_sha':observed['binary']['sha256']='0'*64
+            elif mutation=='version':observed['version']='foreign-version'
+            elif mutation=='auth_method':observed['auth']['authMethod']='foreign-auth'
+            else:observed['environment_sha256']='0'*64
+            body=draft._encoded(observed)
+            runtime_path.write_bytes(body)
+            gate=execute.gates.runtime_observation_result(body,observed,selected)
+            assert gate['matches_admitted'] is True and gate['passed'] is False
+            gate.update(passed=True,matches_selected_identity=True)
+            changed['runtime_observation']=observed
+            changed['gates']['runtime_authority']=gate
+            changed['lifecycle_artifacts']['runtime-observation.json']['sha256']=draft._sha(body)
+            raw=draft._encoded(changed)
+            final_path.write_bytes(raw)
+            marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(raw)}))
+            with pytest.raises(ValueError,match='runtime observation.*disagree'):
+                execute.read_final(case['raw'])
+    finally:
+        runtime_path.write_bytes(original_runtime_raw)
     final_path.write_bytes(draft._encoded(result))
     marker_path.write_bytes(draft._encoded(marker))
     assert execute.read_final(case['raw'])==result

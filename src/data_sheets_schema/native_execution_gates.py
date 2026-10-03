@@ -151,17 +151,21 @@ CLEANUP_BASIS = 'captured_native_cleanup_v1'
 IOKIT_ASSERTIONS = ('PreventUserIdleSystemSleep', 'PreventDiskIdle', 'PreventSystemSleep')
 
 
-def runtime_observation_result(raw, admitted):
+def runtime_observation_result(raw, admitted, selected_identity):
     """Bind approval to the exact admitted bytes, including failed drift evidence."""
     if (type(raw) is not bytes or type(admitted) is not dict
-            or type(admitted.get('checked')) is not bool or type(admitted.get('passed')) is not bool):
+            or type(admitted.get('checked')) is not bool or type(admitted.get('passed')) is not bool
+            or type(selected_identity) is not dict
+            or set(selected_identity) != {'binary', 'version', 'auth', 'environment_sha256'}):
         raise ValueError('runtime observation lacks explicit captured bytes and typed admission')
     expected_raw = draft._encoded(admitted)
     matches = raw == expected_raw
-    return {'checked': True, 'passed': admitted['checked'] and admitted['passed'] and matches,
+    identity_matches = draft._encoded({key: admitted.get(key) for key in selected_identity}) == draft._encoded(selected_identity)
+    return {'checked': True, 'passed': admitted['checked'] and admitted['passed'] and matches and identity_matches,
             'basis': RUNTIME_OBSERVATION_BASIS, 'admitted_observation': deepcopy(admitted),
             'admitted_sha256': draft._sha(expected_raw), 'captured_sha256': draft._sha(raw),
-            'matches_admitted': matches}
+            'matches_admitted': matches, 'selected_runtime_identity': deepcopy(selected_identity),
+            'matches_selected_identity': identity_matches}
 
 
 
@@ -213,7 +217,7 @@ def cleanup_result(raw, observed, registered_policy):
 
 
 def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live,
-          first_stop, runtime_authority, keep_awake, keep_awake_raw=None):
+          first_stop, runtime_authority, keep_awake, keep_awake_raw=None, runtime_authority_expected=None):
     """Run every safe independent completion gate from the same captured basis."""
     from data_sheets_schema import api_runner as api, agentic_observed, d4d_pair_consistency as pair
     from data_sheets_schema.duplicate_keys import duplicate_keys_in, describe
@@ -362,6 +366,6 @@ def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live
     run('accounting', accounting)
     run('runtime_authority', lambda: runtime_observation_result(
         snap.read(Path(runtime['attempt_directory']) / 'runtime-observation.json',
-                  'runtime_observation_approval'), runtime_authority))
+                  'runtime_observation_approval'), runtime_authority, runtime_authority_expected))
     run('keep_awake', lambda: cleanup_result(keep_awake_raw, keep_awake, runtime['keep_awake']))
     return results

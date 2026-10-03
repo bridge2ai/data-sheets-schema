@@ -69,19 +69,53 @@ def test_contradictory_native_identity_never_becomes_a_success(change):
 @pytest.mark.parametrize('change',['none','passed_false','auth_changed','whitespace','malformed'])
 def test_runtime_gate_binds_exact_captured_observation(change):
     from data_sheets_schema import native_attribution_registration as draft
-    admitted={'checked':True,'passed':True,'auth':{'loggedIn':True}}
+    identity={'binary':{'path':'/synthetic','sha256':'a'*64,'bytes':12},'version':'synthetic-v1',
+        'auth':{'loggedIn':True,'authMethod':'synthetic','apiProvider':'firstParty','subscriptionType':'synthetic'},
+        'environment_sha256':'b'*64}
+    admitted={'checked':True,'passed':True,**deepcopy(identity)}
     captured=deepcopy(admitted)
     if change=='passed_false':captured['passed']=False
     elif change=='auth_changed':captured['auth']['loggedIn']=False
     raw=draft._encoded(captured)
     if change=='whitespace':raw+=b'\n'
     elif change=='malformed':raw=b'not a JSON observation'
-    result=gates.runtime_observation_result(raw,admitted)
+    result=gates.runtime_observation_result(raw,admitted,identity)
     assert result['passed'] is (change=='none')
     assert result['matches_admitted'] is (change=='none')
     assert result['admitted_observation']==admitted
     assert result['captured_sha256']==draft._sha(raw)
     assert result['admitted_sha256']==draft._sha(draft._encoded(admitted))
+
+
+@pytest.mark.parametrize('change',['none','binary_path','binary_sha','binary_bytes','binary_bool','binary_float',
+    'version','auth_method','auth_provider','auth_subscription','logged_out','logged_in_alias','auth_extra',
+    'environment','missing_identity','failed_observation'])
+def test_runtime_gate_rejects_selected_identity_contradictions_even_when_bytes_agree(change):
+    from data_sheets_schema import native_attribution_registration as draft
+    identity={'binary':{'path':'/synthetic','sha256':'a'*64,'bytes':12},'version':'synthetic-v1',
+        'auth':{'loggedIn':True,'authMethod':'synthetic','apiProvider':'firstParty','subscriptionType':'synthetic'},
+        'environment_sha256':'b'*64}
+    observed={'checked':True,'passed':True,**deepcopy(identity)}
+    if change=='binary_path':observed['binary']['path']='/foreign'
+    elif change=='binary_sha':observed['binary']['sha256']='c'*64
+    elif change=='binary_bytes':observed['binary']['bytes']=13
+    elif change=='binary_bool':observed['binary']['bytes']=True
+    elif change=='binary_float':observed['binary']['bytes']=12.0
+    elif change=='version':observed['version']='foreign-v1'
+    elif change=='auth_method':observed['auth']['authMethod']='foreign'
+    elif change=='auth_provider':observed['auth']['apiProvider']='foreign'
+    elif change=='auth_subscription':observed['auth']['subscriptionType']='foreign'
+    elif change=='logged_out':observed['auth']['loggedIn']=False
+    elif change=='logged_in_alias':observed['auth']['loggedIn']=1
+    elif change=='auth_extra':observed['auth']['unexpected']=True
+    elif change=='environment':observed['environment_sha256']='c'*64
+    elif change=='missing_identity':del observed['auth']
+    elif change=='failed_observation':observed={'checked':False,'passed':False,'reason':'synthetic auth failure'}
+    result=gates.runtime_observation_result(draft._encoded(observed),observed,identity)
+    assert result['matches_admitted'] is True
+    assert result['matches_selected_identity'] is (change=='none')
+    assert result['passed'] is (change=='none')
+    assert result['selected_runtime_identity']==identity
 
 
 @pytest.mark.parametrize('change',['none','failed','whitespace','wrong_policy','wrong_state',
