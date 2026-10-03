@@ -146,6 +146,7 @@ def tool_history(prepared):
 
 
 RUNTIME_OBSERVATION_BASIS = 'captured_runtime_observation_v1'
+CLEANUP_BASIS = 'captured_native_cleanup_v1'
 
 
 def runtime_observation_result(raw, admitted):
@@ -161,8 +162,33 @@ def runtime_observation_result(raw, admitted):
             'matches_admitted': matches}
 
 
+
+def cleanup_result(raw, observed, registered_policy):
+    """Bind actual cleanup bytes, release outcome and the selected policy."""
+    if (type(raw) is not bytes or type(observed) is not dict
+            or type(observed.get('passed')) is not bool or type(registered_policy) is not dict):
+        raise ValueError('cleanup lacks captured bytes, a typed outcome or selected policy')
+    expected_raw = draft._encoded(observed)
+    matches = raw == expected_raw
+    policy_matches = draft._encoded(observed.get('policy')) == draft._encoded(registered_policy)
+    releases = observed.get('releases', [])
+    if registered_policy.get('policy') == 'not_applicable':
+        outcome_matches = observed.get('state') == 'explicitly_not_applicable' and releases == []
+    else:
+        outcome_matches = (registered_policy.get('policy') == 'macos_iokit_ims_v1'
+            and observed.get('state') == 'released' and bool(observed.get('acquisition'))
+            and type(releases) is list and len(releases) == 3
+            and all(type(row) is dict and type(row.get('return_code')) is int
+                    and row['return_code'] == 0 for row in releases))
+    return {'checked': True, 'passed': observed['passed'] and matches and policy_matches and outcome_matches,
+            'basis': CLEANUP_BASIS, 'observed_cleanup': deepcopy(observed),
+            'registered_policy': deepcopy(registered_policy), 'policy_matches': policy_matches,
+            'outcome_matches': outcome_matches, 'matches_observed': matches,
+            'observed_sha256': draft._sha(expected_raw), 'captured_sha256': draft._sha(raw)}
+
+
 def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live,
-          first_stop, runtime_authority, keep_awake):
+          first_stop, runtime_authority, keep_awake, keep_awake_raw=None):
     """Run every safe independent completion gate from the same captured basis."""
     from data_sheets_schema import api_runner as api, agentic_observed, d4d_pair_consistency as pair
     from data_sheets_schema.duplicate_keys import duplicate_keys_in, describe
@@ -312,5 +338,5 @@ def check(prepared, projections, runtime, controls, *, exit_code, shutdown, live
     run('runtime_authority', lambda: runtime_observation_result(
         snap.read(Path(runtime['attempt_directory']) / 'runtime-observation.json',
                   'runtime_observation_approval'), runtime_authority))
-    run('keep_awake', lambda: deepcopy(keep_awake))
+    run('keep_awake', lambda: cleanup_result(keep_awake_raw, keep_awake, runtime['keep_awake']))
     return results

@@ -82,3 +82,31 @@ def test_runtime_gate_binds_exact_captured_observation(change):
     assert result['admitted_observation']==admitted
     assert result['captured_sha256']==draft._sha(raw)
     assert result['admitted_sha256']==draft._sha(draft._encoded(admitted))
+
+
+@pytest.mark.parametrize('change',['none','failed','whitespace','wrong_policy','wrong_state',
+    'missing_acquisition','missing_release','bool_release','failed_release','not_applicable','na_release'])
+def test_cleanup_gate_binds_exact_outcome_and_registered_policy(change):
+    from data_sheets_schema import native_attribution_registration as draft
+    policy={'policy':'macos_iokit_ims_v1','host_platform':'darwin','basis':'synthetic'}
+    observed={'passed':True,'policy':deepcopy(policy),'state':'released',
+        'acquisition':{'assertions':[1,2,3]},'releases':[{'return_code':0} for _ in range(3)]}
+    if change=='failed':observed['passed']=False
+    elif change=='wrong_policy':observed['policy']['basis']='different'
+    elif change=='wrong_state':observed['state']='acquired'
+    elif change=='missing_acquisition':observed['acquisition']={}
+    elif change=='missing_release':observed['releases'].pop()
+    elif change=='bool_release':observed['releases'][0]['return_code']=False
+    elif change=='failed_release':observed['releases'][0]['return_code']=1
+    elif change in ('not_applicable','na_release'):
+        policy={**policy,'policy':'not_applicable'}
+        observed={'passed':True,'policy':deepcopy(policy),'state':'explicitly_not_applicable'}
+        if change=='na_release':observed['releases']=[{'return_code':0}]
+    raw=draft._encoded(observed)
+    if change=='whitespace':raw+=b'\n'
+    result=gates.cleanup_result(raw,observed,policy)
+    assert result['passed'] is (change in ('none','not_applicable'))
+    assert result['observed_cleanup']==observed
+    assert result['registered_policy']==policy
+    assert result['captured_sha256']==draft._sha(raw)
+    assert result['observed_sha256']==draft._sha(draft._encoded(observed))

@@ -195,7 +195,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
     _sync_directory(evidence.parent)
     for name, body in authorization['raw'].items():
         durable_new(attempt/(name + '.json'), body)
-    status = first_stop = prepared = first_launch_error = None
+    status = first_stop = prepared = first_error = None
     signals = []
     observation = {'checked': False, 'passed': False, 'reason': 'native runtime not observed'}
     awake = {'passed': False, 'policy': value['runtime']['keep_awake'], 'state': 'not_acquired'}
@@ -237,7 +237,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     record_stop=stopped, command_policy=adapter.policy, phase_spec=adapter.spec,
                     command_classifier=adapter.classify, event_observer=adapter.observe)
             except BaseException as exc:
-                first_launch_error = exc
+                first_error = exc
                 # Native auth command failures may contain credentials in captured
                 # subprocess attributes. Record only the exception class here.
                 stopped(f'launch or runtime failed: {type(exc).__name__}')
@@ -258,6 +258,8 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     prepared = gates.capture(value, controls, authority_inputs=authority_inputs,
                                              registration_raw=registration_raw)
                 except Exception as exc:
+                    if first_error is None:
+                        first_error = exc
                     problem = f'capture: {type(exc).__name__}: {exc}'
                     stopped(problem)
                     prepared = shared.incomplete_capture(value['composition'], attempt, adapter, problem)
@@ -278,13 +280,16 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                 durable_new(attempt/'keep-awake.json', draft._encoded(awake))
                 results = gates.check(prepared, projections, {**value['runtime'], 'attempt_directory': str(attempt)},
                     controls, exit_code=status, shutdown=getattr(proxy, 'control_shutdown', None),
-                    live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake)
+                    live=live, first_stop=first_stop, runtime_authority=observation, keep_awake=awake,
+                    keep_awake_raw=_file(attempt/'keep-awake.json', 'observed cleanup'))
                 for path, copy in projections.items():
                     if copy.read_bytes() != prepared['snapshot'].raw[path]:
                         raise ValueError('captured projection changed during validation')
                 prepared['snapshot'].verify_unchanged()
                 _unchanged(value, registration_raw, authorization)
             except BaseException as exc:
+                if first_error is None:
+                    first_error = exc
                 stopped(f'finalization failed: {type(exc).__name__}: {exc}')
         finally:
             # This boundary also covers observation/failure-evidence writes:
@@ -300,7 +305,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     if not (attempt/'keep-awake.json').exists():
                         durable_new(attempt/'keep-awake.json', draft._encoded(awake))
                 except BaseException as cleanup_error:
-                    original = pending_error if pending_error is not None else first_launch_error
+                    original = pending_error if pending_error is not None else first_error
                     if original is None:
                         raise
                     # A link can exist even when its directory fsync failed;
@@ -309,35 +314,47 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     original.__notes__ = [*getattr(original, '__notes__', []), note]
                     if pending_error is None:
                         raise original from cleanup_error
-        # Cleanup failure is sticky even if another gate or a previous pass succeeds.
-        if first_stop is not None:
-            results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
-        if not awake['passed']:
-            results['keep_awake'] = {'checked': True, **awake}
-        completed = (set(results) == set(gates.GATES)
-            and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
-        final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
-            'state': 'completed_pending_independent_review' if completed else 'failed',
-            'runtime_gates_passed': completed, **UNASSESSED, 'first_stop': first_stop,
-            'registration_sha256': draft._sha(registration_raw), 'started_sha256': draft._sha(started_raw),
-            'composition_sha256': value['composition_sha256'], 'authority': authorization['identity'],
-            'child_exit_code': status, 'shutdown': getattr(proxy, 'control_shutdown', None),
-            'runtime_observation': observation, 'keep_awake': awake, 'gates': results,
-            'lifecycle_artifacts': {name: {'path': str(attempt/name),
-                'sha256': draft._sha(_file(attempt/name, 'lifecycle artifact'))}
-                for name in ('runtime-observation.json', 'keep-awake.json') if (attempt/name).exists()},
-            'captured_files': prepared['snapshot'].identity() if prepared is not None else {},
-            'captured_aliases': dict(prepared['snapshot'].aliases) if prepared is not None else {},
-            'captured_metadata': dict(prepared['snapshot'].metadata) if prepared is not None else {},
-            'captured_alias_metadata': dict(prepared['snapshot'].alias_metadata) if prepared is not None else {},
-            'additional_report': {'path': str(additional_path), 'sha256': draft._sha(_file(additional_path, 'replay report'))}
-                if additional_path.exists() else None,
-            'scope': 'Controller/runtime completion only. Saved authority is not authenticated; native permission observations do not prove production helpers, future permissions, billing or scientific support.'}
-        final_raw = draft._encoded(final)
-        durable_new(evidence/'final.json', final_raw)
-        durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
-            'started_sha256': draft._sha(started_raw), 'registration_sha256': draft._sha(registration_raw)}))
-        return final
+        try:
+            # Cleanup failure is sticky even if another gate or a previous pass succeeds.
+            if first_stop is not None:
+                results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
+            lifecycle_raw = {name: _file(attempt/name, 'lifecycle artifact')
+                for name in ('runtime-observation.json', 'keep-awake.json') if (attempt/name).exists()}
+            if 'keep-awake.json' in lifecycle_raw:
+                results['keep_awake'] = gates.cleanup_result(
+                    lifecycle_raw['keep-awake.json'], awake, value['runtime']['keep_awake'])
+            else:
+                results['keep_awake'] = {'checked': False, 'passed': False, 'reason': 'cleanup evidence unavailable'}
+            completed = (set(results) == set(gates.GATES)
+                and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
+            final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
+                'state': 'completed_pending_independent_review' if completed else 'failed',
+                'runtime_gates_passed': completed, **UNASSESSED, 'first_stop': first_stop,
+                'registration_sha256': draft._sha(registration_raw), 'started_sha256': draft._sha(started_raw),
+                'composition_sha256': value['composition_sha256'], 'authority': authorization['identity'],
+                'child_exit_code': status, 'shutdown': getattr(proxy, 'control_shutdown', None),
+                'runtime_observation': observation, 'keep_awake': awake, 'gates': results,
+                'lifecycle_artifacts': {name: {'path': str(attempt/name),
+                    'sha256': draft._sha(body)} for name, body in lifecycle_raw.items()},
+                'captured_files': prepared['snapshot'].identity() if prepared is not None else {},
+                'captured_aliases': dict(prepared['snapshot'].aliases) if prepared is not None else {},
+                'captured_metadata': dict(prepared['snapshot'].metadata) if prepared is not None else {},
+                'captured_alias_metadata': dict(prepared['snapshot'].alias_metadata) if prepared is not None else {},
+                'additional_report': {'path': str(additional_path), 'sha256': draft._sha(_file(additional_path, 'replay report'))}
+                    if additional_path.exists() else None,
+                'scope': 'Controller/runtime completion only. Saved authority is not authenticated; native permission observations do not prove production helpers, future permissions, billing or scientific support.'}
+            final_raw = draft._encoded(final)
+            durable_new(evidence/'final.json', final_raw)
+            durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
+                'started_sha256': draft._sha(started_raw), 'registration_sha256': draft._sha(registration_raw)}))
+            return final
+        except BaseException as publication_error:
+            if first_error is not None and publication_error is not first_error:
+                note = 'native lifecycle or publication failed after the original error: ' + type(publication_error).__name__
+                first_error.__notes__ = [*getattr(first_error, '__notes__', []), note]
+                raise first_error from publication_error
+            raise
+
 
 
 def read_final(registration_raw):
@@ -406,6 +423,12 @@ def read_final(registration_raw):
         recomputed = gates.runtime_observation_result(body, result.get('runtime_observation'))
         if draft._encoded(runtime_gate) != draft._encoded(recomputed):
             raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
+    cleanup_gate = checks['keep_awake']
+    if completion or 'basis' in cleanup_gate:
+        recomputed = gates.cleanup_result(lifecycle_raw.get('keep-awake.json'),
+            result.get('keep_awake'), value['runtime']['keep_awake'])
+        if draft._encoded(cleanup_gate) != draft._encoded(recomputed):
+            raise ValueError('cleanup evidence, observed release outcome and gate disagree')
     additional = result.get('additional_report')
     if additional is None:
         if completion:

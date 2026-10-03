@@ -120,6 +120,7 @@ def test_actual_closed_consumer_real_helpers_complete(case,monkeypatch,mode):
                 authority_inputs={**{k:str(v) for k,v in case['kwargs'].items()},
                                   'system':case['value']['system_path'],'permission':case['value']['permission_probe']})
             projections=execute.shared.project(prepared,case['root']/'sealed-check-projections')
+            cleanup_raw=Path(result['lifecycle_artifacts']['keep-awake.json']['path']).read_bytes()
             original_read=Path.read_bytes
             def trapped(path):
                 if str(path.resolve()) in prepared['snapshot'].raw:
@@ -131,7 +132,8 @@ def test_actual_closed_consumer_real_helpers_complete(case,monkeypatch,mode):
                     'attempt_directory':case['value']['attempt_directory']},modules,
                     exit_code=result['child_exit_code'],shutdown=result['shutdown'],
                     live=result['gates']['live_attribution']['result'],first_stop=None,
-                    runtime_authority=result['runtime_observation'],keep_awake=result['keep_awake'])
+                    runtime_authority=result['runtime_observation'],keep_awake=result['keep_awake'],
+                    keep_awake_raw=cleanup_raw)
             assert all(row['checked'] and row['passed'] for row in checked.values()),checked
         generated=Path(result['additional_report']['path'])
         generated.write_bytes(generated.read_bytes()+b'\n')
@@ -320,16 +322,37 @@ def test_registration_output_cannot_consume_its_own_future_attempt(case):
 
 
 @pytest.mark.parametrize('boundary',['final.json','published.json'])
-def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,monkeypatch,boundary):
-    def auth_failure(value):raise RuntimeError('synthetic auth refusal, no native call')
-    monkeypatch.setattr(execute,'_probe_runtime',auth_failure)
+@pytest.mark.parametrize('origin',['auth','runtime','observation'])
+def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,monkeypatch,boundary,origin):
+    original_error=OSError('synthetic initial '+origin+' failure, no native call')
+    secondary_error=OSError('injected publication interruption')
+    dispatched=[]
+    def observed(value):
+        if origin=='auth':raise original_error
+        return fake_observation(value)
+    def dispatch(*args,**kwargs):
+        dispatched.append(True)
+        assert origin=='runtime'
+        raise original_error
+    monkeypatch.setattr(execute,'_probe_runtime',observed)
     real=execute.durable_new
+    observation_failed=False
     def interrupted(path,raw):
-        if Path(path).name==boundary:raise OSError('injected publication interruption')
+        nonlocal observation_failed
+        if origin=='observation' and Path(path).name=='runtime-observation.json' and not observation_failed:
+            observation_failed=True
+            raise original_error
+        if Path(path).name==boundary:raise secondary_error
         return real(path,raw)
     monkeypatch.setattr(execute,'durable_new',interrupted)
-    with pytest.raises(OSError,match='publication interruption'):
-        execute.launch(case['raw'],**case['kwargs'])
+    with authority.loaded_dependencies(case['value']['dependencies']) as modules:
+        monkeypatch.setattr(modules['run_native_canary'],'execute_child',dispatch)
+        with pytest.raises(OSError) as caught:
+            execute.launch(case['raw'],**case['kwargs'])
+    assert caught.value is original_error
+    assert caught.value.__cause__ is secondary_error
+    assert caught.value.__notes__==['native lifecycle or publication failed after the original error: OSError']
+    assert dispatched==([True] if origin=='runtime' else [])
     assert (case['root']/'native-attempt/started.json').is_file()
     assert (case['root']/'native-attempt/runtime-observation.json').is_file()
     assert not (case['root']/'native-evidence/published.json').exists()
@@ -340,7 +363,7 @@ def test_interrupted_publication_never_certifies_or_reuses_spent_attempt(case,mo
 
 @pytest.mark.parametrize('probe_fails,cleanup_write_fails,release_raises,after_link',[
     (False,False,False,False),(True,False,False,False),(True,True,False,False),
-    (False,True,True,False),(False,True,False,True)])
+    (False,True,True,False),(False,True,False,True),(False,False,False,True)])
 def test_observation_persistence_failure_always_releases_acquired_assertions(
         tmp_path,monkeypatch,probe_fails,cleanup_write_fails,release_raises,after_link):
     monkeypatch.chdir(authority.ROOT)
@@ -416,7 +439,11 @@ def test_observation_persistence_failure_always_releases_acquired_assertions(
         assert not (attempt/'keep-awake.json').exists()
     else:
         receipt=draft._json((attempt/'keep-awake.json').read_bytes())
-        assert receipt['passed'] is False and receipt['state']=='released_after_failure'
+        if after_link:
+            assert receipt['passed'] is True and receipt['state']=='released'
+            assert caught.value.__notes__==['native lifecycle or publication failed after the original error: ValueError']
+        else:
+            assert receipt['passed'] is False and receipt['state']=='released_after_failure'
         assert receipt['releases']==guard.releases
     with pytest.raises((ValueError,OSError)):execute.read_final(case['raw'])
     with pytest.raises(ValueError,match='new|resume'):execute.launch(case['raw'],**case['kwargs'])
@@ -465,4 +492,55 @@ def test_runtime_observation_capture_and_saved_consistency(case,monkeypatch,drif
         final_path.write_bytes(final_raw)
         marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(final_raw)}))
         with pytest.raises(ValueError,match='runtime observation.*disagree'):
+            execute.read_final(case['raw'])
+
+
+@pytest.mark.parametrize('drift',['none','contradiction','whitespace'])
+def test_cleanup_capture_and_saved_consistency(case,monkeypatch,drift):
+    (case['root']/'test-mode.txt').write_text('no_correction')
+    monkeypatch.setattr(execute,'_probe_runtime',fake_observation)
+    cleanup_path=case['root']/'native-attempt/keep-awake.json'
+    real_write=execute.durable_new
+    def write(path,raw):
+        real_write(path,raw)
+        if Path(path)==cleanup_path:
+            if drift=='contradiction':
+                changed=draft._json(raw);changed['passed']=False
+                cleanup_path.write_bytes(draft._encoded(changed))
+            elif drift=='whitespace':cleanup_path.write_bytes(raw+b'\n')
+    monkeypatch.setattr(execute,'durable_new',write)
+    result=execute.launch(case['raw'],**case['kwargs'])
+    gate=result['gates']['keep_awake']
+    assert result['runtime_gates_passed'] is (drift=='none')
+    assert gate['matches_observed'] is (drift=='none')
+    assert gate['captured_sha256']==draft._sha(cleanup_path.read_bytes())
+    assert result['keep_awake']['state']=='explicitly_not_applicable'
+    assert execute.read_final(case['raw'])==result
+    if drift!='none':
+        assert all(row['checked'] and row['passed'] for name,row in result['gates'].items()
+                   if name!='keep_awake')
+        return
+    # Rehashing publication wrappers cannot reconcile contradictory raw,
+    # top-level or gate records. These changes make no authenticity claim.
+    original_raw=cleanup_path.read_bytes()
+    final_path=case['root']/'native-evidence/final.json'
+    marker_path=case['root']/'native-evidence/published.json'
+    marker=draft._json(marker_path.read_bytes())
+    for mutation in ('raw_false','raw_whitespace','top_level','gate_extra','gate_observed','policy'):
+        cleanup_path.write_bytes(original_raw)
+        changed=deepcopy(result)
+        if mutation=='raw_false':
+            cleanup=draft._json(original_raw);cleanup['passed']=False
+            cleanup['releases']=[{'error_type':'RuntimeError','return_code':None}]
+            cleanup_path.write_bytes(draft._encoded(cleanup))
+        elif mutation=='raw_whitespace':cleanup_path.write_bytes(original_raw+b'\n')
+        elif mutation=='top_level':changed['keep_awake']['passed']=False
+        elif mutation=='gate_extra':changed['gates']['keep_awake']['unbound_claim']=True
+        elif mutation=='gate_observed':changed['gates']['keep_awake']['observed_cleanup']['passed']=False
+        else:changed['gates']['keep_awake']['registered_policy']['basis']='foreign policy'
+        changed['lifecycle_artifacts']['keep-awake.json']['sha256']=draft._sha(cleanup_path.read_bytes())
+        raw=draft._encoded(changed)
+        final_path.write_bytes(raw)
+        marker_path.write_bytes(draft._encoded({**marker,'final_sha256':draft._sha(raw)}))
+        with pytest.raises(ValueError,match='cleanup.*disagree'):
             execute.read_final(case['raw'])
