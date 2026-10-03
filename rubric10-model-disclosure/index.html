@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/rubric10-model-disclosure/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Optional model disclosure for legacy rubric10 summaries - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#optional-model-disclosure-for-legacy-rubric10-summaries" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Optional model disclosure for legacy rubric10 summaries
             
           </span>
         </div>
@@ -309,69 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -384,110 +321,87 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/rubric10-model-disclosure.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
+<h1 id="optional-model-disclosure-for-legacy-rubric10-summaries">Optional model disclosure for legacy rubric10 summaries</h1>
+<p>The rubric10 summary command can produce a separate report set with declared
+model identities. Its existing no-argument command and writer APIs preserve
+their historical output and aggregation:</p>
+<pre><code class="language-bash">PYTHONPATH=src python scripts/summarize_rubric10_results.py
 </code></pre>
-
-</details>
+<p>Select disclosure explicitly and name a directory that does not exist:</p>
+<pre><code class="language-bash">PYTHONPATH=src python scripts/summarize_rubric10_results.py \
+  --model-disclosure declared-v1 \
+  --evaluation-root data/evaluation_llm/rubric10 \
+  --output-dir /tmp/rubric10-declared-models
+</code></pre>
+<p>The new directory contains <code>all_scores.csv</code>, <code>summary_table.md</code> and
+<code>summary_report.md</code>. The CSV retains its nine existing columns and all their
+values and ordering. Added columns identify each evaluation file, resolved
+path, SHA256 and disclosure index, plus declared evaluator, evaluator family,
+generator, generator family, same-family status, binding status, policy and
+limitations. The raw evaluation's identity is kept outside the dictionaries
+used for scoring, grouping and stable tie ordering.</p>
+<p>Both Markdown files retain the existing score sections and append complete
+per-rating evidence. The paired membership table explicitly distinguishes:</p>
+<ul>
+<li>The first rating selected for each legacy concatenated table row, repeated
+  ratings unshown there, and unlisted projects or methods.</li>
+<li>Ratings included in an individual project/method average and unlisted ones.</li>
+<li>Ratings selected in the existing top20, qualifying ratings beyond that
+  limit, and ratings below its threshold.</li>
+<li>Inclusion in the existing executive, method and project summaries.</li>
+</ul>
+<p>The appendix lists every selected input, even if a legacy table omits it.
+<code>csv_row</code> counts data rows after the header. The disclosure index follows the
+original loader enumeration order and joins the CSV, membership and evidence
+sections; it is not a ranking. The independent discrimination helper retains
+its existing cohort and duplicate policy. No aggregate gets one member's
+same-family label.</p>
+<p><strong>This mode preserves legacy aggregation; it does not certify comparability.</strong>
+The existing tables use fixed project/method lists, choose the first
+concatenated rating per group, pool individual scores, and rank on the reported
+percentage. Project/method groups are not thereby comparable scoring
+instruments. Changing those measurements or replacing historical published
+reports requires separate review. Family disclosure does not make the old
+aggregates an independence or calibration measurement.</p>
+<p>The input boundary also stays unchanged: recursive
+<code>individual/**/*_evaluation.json</code> and direct undated
+<code>concatenated/*_evaluation.json</code> children, in the old loader order. Dated
+concatenated subdirectories are excluded. Exact repeated content at different
+paths remains distinct occurrences. Symlink bindings follow the shared
+authority's resolved-path identity; sharing a hardlink inode does not transfer
+a generation binding to a different declared evaluation path.</p>
+<p>Without supplied generation evidence the generator and same-family status
+remain unknown. Repeat this option for each selected rating to bind evidence:</p>
+<pre><code class="language-bash">  --generation-binding path/to/rating_evaluation.json \
+      path/to/generated_record.yaml path/to/provenance.yaml
+</code></pre>
+<p><code>--disclosure-root PATH</code> sets the root for relative paths recorded inside the
+evidence, defaulting to the working directory; command-line paths retain
+ordinary working-directory semantics. The unchanged shared
+<code>data_sheets_schema.model_disclosure</code> authority (<code>model-disclosure-v1</code>)
+checks supplied hashes, paths, sizes and run identities. It reads original
+evaluation bytes before the loader adds a record-kind <code>evaluation_type</code>, so
+that presentation tag cannot manufacture an evaluator-type conflict.
+Score and disclosure captures must agree on resolved path and SHA256.
+The report identifies captured bytes, without claiming later immutability or
+provider authentication. Missing evidence remains unknown; generator identity
+is never guessed from a method or filename.</p>
+<p>All three report contents are prepared before exclusive directory and file
+creation. Existing destinations, including input aliases, are refused.
+Contradictory or malformed evidence refuses publication. A failure during
+publication retains partial outputs as evidence; rerun into a different new
+directory. The opt-in mode never replaces an input, provenance file, old
+summary or registered archive. Disclosure options require the selector.</p>
+<p>No model calls are made. Declared same-family status does not measure
+self-preference, calibration or evaluator independence. This is the rubric10
+consumer in #4317; #3327's remaining consumer/output decisions and #3328's
+empirical requirements remain separate.</p>
 
 
 
