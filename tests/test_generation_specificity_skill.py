@@ -2072,8 +2072,8 @@ class TestApiMeaning(unittest.TestCase):
     def test_no_api_condition_is_a_runtime_hybrid(self):
         """Every native continuation of a parent run, at any renderer, sits in
         a package whose gate refuses a parent that is not agentic generic_v9
-        at renderer 14; renderer >= 20 is otherwise set only by the direct
-        arm, whose runtime is agentic (#4022, #4055)."""
+        at renderer 14. The registered API-only procedure can now select a
+        renderer above that floor without admitting native work."""
         from data_sheets_schema import api_runner
         ac = self.meaning["audit_continuations"]
         self.assertFalse(ac["runtime_hybrid_possible"])
@@ -2092,7 +2092,19 @@ class TestApiMeaning(unittest.TestCase):
             self.assertIn(x["runtime"], api_runner.AGENTIC_RUNTIMES)
         registered = [x for x in ac["setters"] if x["path"].endswith("prepare_registration.py")]
         self.assertTrue(registered and all(not x["reaches_floor"] for x in registered))
-        self.assertFalse(ac["api_reaches_floor"])
+        self.assertTrue(ac["api_reaches_floor"])
+        self.assertTrue(ac["api_cli_renderer_inputs"])
+        self.assertEqual(ac["default_renderer"]["api"], self._cli_spec().render_version)
+        self.assertLess(ac["default_renderer"]["api"], ac["floor"])
+        selected = self.meaning['selected_procedures']['shared_generation_version']
+        self.assertEqual(selected['selection']['renderers'], [25])
+        self.assertEqual(selected['selection']['conditions'], ['generic_v10'])
+        self.assertEqual(set(selected['replaced_model_phases']['audit']),
+                         {'typed_audit_worker', 'typed_audit_omission', 'typed_audit_integration'})
+        self.assertEqual(selected['native_runtime'], 'not admitted by this API-only selector')
+        self.assertIn('ordinary audit request', ac['api_path'])
+        self.assertIn('source-derived selected audit replacement', ac['api_path'])
+        self.assertNotIn('would stop at audit', ac['api_path'])
         for name, row in self.meaning["conditions"].items():
             with self.subTest(condition=name):
                 self.assertFalse(row["runtime_hybrid"])
@@ -2191,6 +2203,17 @@ class TestApiMeaning(unittest.TestCase):
             got = scan.audit_continuations(root, 20, [], runner, self.cond["agentic_runtimes"])
         self.assertTrue(got["api_reaches_floor"])
         self.assertFalse(got["runtime_hybrid_possible"])
+
+    def test_legacy_cli_without_renderer_selection_remains_below_the_floor(self):
+        runner = scan._tree(ROOT / scan.RUNNER)
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root / scan.CLI_API, 'def legacy():\n    return RunSpec()\n')
+            got = scan.audit_continuations(root, 20, [], runner, self.cond['agentic_runtimes'])
+        self.assertFalse(got['api_reaches_floor'])
+        self.assertFalse(got['runtime_hybrid_possible'])
+        self.assertEqual(got['api_cli_renderer_inputs'], [])
+        self.assertNotIn('selected audit replacement', got['api_path'])
 
     def test_renderer_values_are_read_in_any_spelling(self):
         """Literal, conditional, local, constant, option with or without

@@ -4368,7 +4368,8 @@ def audit_continuations(root: Path, floor: int, controllers: list[str], runner_t
       setter that can reach the floor with neither, or whose value cannot be
       resolved, makes a runtime hybrid possible: never a false "no".
     - An API run that itself reaches the floor is not a hybrid: `build_phase`
-      refuses its audit, and `api_runner.execute` refuses what it lists."""
+      refuses its ordinary audit request, and `api_runner.execute` refuses
+      what it lists. Selected helper replacements are derived separately."""
     setters, propagating, packages, gates_by_dir = [], 0, {}, {}
     for rel in controllers:
         p = root / rel
@@ -4455,8 +4456,8 @@ def audit_continuations(root: Path, floor: int, controllers: list[str], runner_t
     if refusal["refused"]:
         api_path += (f"; api_runner.execute refuses renderers {_span(refusal['refused'])} before it runs "
                      f"(api_runner.py:{refusal['line']})")
-    api_path += (f"; and `build_phase` refuses the audit phase at renderer >= {floor} on any spec, so an API run "
-                 "that reached it would stop at audit, not become a hybrid")
+    api_path += (f"; `build_phase` refuses its ordinary audit request at renderer >= {floor}; "
+                 "that builder call stops rather than dispatching a native agent")
     return {"floor": floor, "setters": setters, "propagating_setters": propagating,
             "continuations": continuations, "gates": [{"at": k, **g} for k, g in sorted(used.items())],
             "ungated_continuations": [c["package"] for c in ungated],
@@ -5719,6 +5720,13 @@ def api_meaning(root: Path, facts: dict) -> dict:
                        and all(case['values'].get(k) == v for k, v in selected_case['values'].items())
                        for case in followups[turn].get('selection', {}).get('cases', [])
                        for selected_case in procedure['selection'].get('cases', []))]
+
+    for procedure in selected_procedures.values():
+        replacement = procedure['replaced_model_phases'].get('audit')
+        if replacement:
+            continuation['api_path'] += ('; source-derived selected audit replacement under '
+                + _selection_text(procedure['selection']) + ' uses ' + ', '.join(replacement)
+                + ' instead of that ordinary builder; it does not admit native execution')
 
     arms_table = _module_constants(root / CLI_API).get("ARMS")
     if not isinstance(arms_table, dict) or not arms_table:

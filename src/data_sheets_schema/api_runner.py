@@ -4287,7 +4287,7 @@ def source_metadata_authority(spec: RunSpec) -> dict[str, Any]:
     """Only the selected v5 instrument receives actual manifest-byte authority."""
     if spec.render_version < 16:
         return {}
-    if spec.shared_generation_version:
+    if getattr(spec, "shared_generation_version", 0):
         from .shared_generation import source_raw
         raw = source_raw(spec)
         return {"source_manifest_raw": raw, "project": spec.project if raw is not None else None}
@@ -4311,7 +4311,7 @@ def evidence_checks_block(spec: RunSpec, carry: dict[str, str], *, report: bool 
     protocol = evidence.protocol_for_renderer(spec.render_version)
     try:
         metadata_authority = source_metadata_authority(spec)
-        if spec.shared_generation_version:
+        if getattr(spec, "shared_generation_version", 0):
             from .shared_generation import source_chunks as captured_chunks
             chunks, pins = captured_chunks(spec)
         else:
