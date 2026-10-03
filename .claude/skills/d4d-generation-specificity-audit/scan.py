@@ -77,6 +77,8 @@ APPROACHES = {
                                   "registered native launch not shown to pass --safe-mode may load them too (with "
                                   "--bare alone, the descriptions; see run_controllers)"),
     "api": (True, "d4d api run|batch: api_runner and its condition prompts"),
+    "offline_draft": (True, "explicit offline prompt-draft builders; inspected instruction text only, "
+                            "not a registered live condition or evidence of model delivery"),
     "github_assistant": (True, "the @d4dassistant workflow, what it names or runs, the condition its d4d api run "
                                "runs, and an instruction file only where the workflow loads one"),
     "shared_schema": (True, "the LinkML generation schema, digest inputs, profile and manifest"),
@@ -105,6 +107,10 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
 })
+
+# Explicitly reviewed builders outside every live generation call path. Keep
+# this separate from MODEL_FACING_MODULES: the latter asserts live reachability.
+OFFLINE_DRAFT_MODULES = ("src/data_sheets_schema/source_heading_routing.py",)
 
 #: How strongly an approach reaches a file. Per approach the strongest wins:
 #: a file one route names for the model is model-facing in that approach
@@ -3300,6 +3306,13 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     if unparsed:
         raise _unparsed(unparsed)
     index = _notes_index(root, parsed)
+
+    facts["offline_draft_surfaces"] = list(OFFLINE_DRAFT_MODULES)
+    for rel in OFFLINE_DRAFT_MODULES:
+        if root / rel not in parsed:
+            raise ConfigError(f"declared offline draft surface is missing or unreadable: {rel}")
+        s.add(rel, "offline_draft", "model_facing", "offline draft",
+              "explicit source-heading prompt-text builder; no provider or live condition", runs=True)
 
     # ---- api: runner closure, conditions, evidence protocols
     api_closure = _package_closure(root, ["data_sheets_schema.cli.api", "data_sheets_schema.api_runner"])
