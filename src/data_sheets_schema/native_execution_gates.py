@@ -123,7 +123,7 @@ def tool_history(prepared):
                     or any(metadata.get(k) for k in ('interrupted', 'backgroundTaskId', 'background_task_id'))):
                 raise ValueError('native Bash result is contradictory, interrupted or pending')
             command = call.get('input', {}).get('command')
-            kind = draft.command_kind(command, spec)
+            kind = draft.command_kind(command, spec, expected=prepared['state'].commands)
             if kind == 'draft' and codes[0] not in (0, 1):
                 raise ValueError('draft checker returned an unusable result')
             if kind in ('evidence', 'final_evidence', 'source_inventory') and codes[0] != 0:
