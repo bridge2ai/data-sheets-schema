@@ -203,14 +203,21 @@ def _derive(inputs, schema_rows, project, limits):
 
 def prepare(*, protocol, original_full, bundle, manifest, receipt, context, schema_path,
             max_output_tokens, original_core=None, source_manifest=None, project=None,
-            max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16):
+            max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16,
+            schema_snapshot=None):
     """Capture a new packet; no saved response or self-reported success is trusted."""
     if audit_protocol.select(protocol)["protocol"] != audit_protocol.TYPED:
         raise ValueError("this consumer requires explicitly selected typed_audit_protocol_v1")
     inputs = {key: _blob(value) for key, value in dict(original_full=original_full,
         bundle=bundle, manifest=manifest, receipt=receipt, context=context,
         original_core=original_core, source_manifest=source_manifest).items() if value is not None}
-    rows = _snapshot_rows(_capture(Path(schema_path)))
+    if schema_snapshot is not None:
+        # The omission constructor independently verifies exact transitive
+        # closure/root identity from these bytes, with no ambient import reads.
+        omissions._schema(Path(schema_path), schema_snapshot=schema_snapshot)
+        rows = _snapshot_rows(schema_snapshot)
+    else:
+        rows = _snapshot_rows(_capture(Path(schema_path)))
     limits = dict(max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes,
                   max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)
     derived, _, _ = _derive(inputs, rows, project, limits)

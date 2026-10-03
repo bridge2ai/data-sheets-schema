@@ -27,7 +27,12 @@ def canonical(value) -> bytes:
                       separators=(',', ':')).encode('utf-8')
 
 
-def policy_text() -> str:
+def policy_text(*, version: int = 1) -> str:
+    if type(version) is not int or version not in (1, 2):
+        raise ValueError('unsupported receipt completion runtime policy')
+    if version == 2:
+        from .shared_generation import captured_assets, RECEIPT_POLICY
+        return captured_assets()[RECEIPT_POLICY].decode('utf-8')
     from data_sheets_schema.resources import resource_path
     raw = resource_path(POLICY_PATH).read_bytes()
     if sha(raw) != POLICY_SHA256:
@@ -35,10 +40,12 @@ def policy_text() -> str:
     return raw.decode('utf-8')
 
 
-def policy_identity() -> dict:
-    policy_text()
+def policy_identity(*, version: int = 1) -> dict:
+    policy_text(version=version)
     from data_sheets_schema.receipts import RERECEIPTS_INSTRUMENT
-    return {'version': 1, 'path': str(POLICY_PATH), 'sha256': POLICY_SHA256,
+    from .shared_generation import RECEIPT_POLICY, ASSET_HASHES
+    return {'version': version, 'path': str(POLICY_PATH) if version == 1 else RECEIPT_POLICY,
+            'sha256': POLICY_SHA256 if version == 1 else ASSET_HASHES[RECEIPT_POLICY],
             'receipt_instrument_version': 4, 'receipt_instrument': copy.deepcopy(RERECEIPTS_INSTRUMENT),
             'transport_attempts': 1, 'sdk_max_retries': 0,
             'phase': PHASE, 'audit_header': AUDIT_HEADER}
@@ -48,7 +55,8 @@ def registration(spec) -> dict:
     from data_sheets_schema.receipt_completion_policy import parse_registration
     if not isinstance(spec.receipt_completion_registration, str):
         raise ValueError('receipt completion requires immutable registration JSON')
-    value = parse_registration(spec.receipt_completion_registration.encode('utf-8'))
+    value = parse_registration(spec.receipt_completion_registration.encode('utf-8'),
+                               version=spec.receipt_completion_version)
     if value['condition'] != spec.condition:
         raise ValueError('receipt completion registration condition differs from RunSpec')
     return value
@@ -57,20 +65,24 @@ def registration(spec) -> dict:
 def registration_identity(spec) -> dict:
     from data_sheets_schema.receipt_completion_policy import registration_identity as identify
     registration(spec)
-    return identify(spec.receipt_completion_registration.encode('utf-8'))
+    return identify(spec.receipt_completion_registration.encode('utf-8'), version=spec.receipt_completion_version)
 
 
-def schema_capture() -> dict:
+def schema_capture(spec=None) -> dict:
     from data_sheets_schema import api_runner as api
     from data_sheets_schema.schema_snapshot import capture_schema
-    captured = capture_schema(api.FULL_SCHEMA_PATH, strict=True)
+    if spec is not None and getattr(spec, 'shared_generation_version', 0):
+        from .shared_generation import assert_current
+        captured = assert_current(spec).full_schema
+    else:
+        captured = capture_schema(api.FULL_SCHEMA_PATH, strict=True)
     return {'sources': [{'name': name, 'path': str(path), 'sha256': sha(raw),
                          'text': raw.decode('utf-8')} for name, path, raw in captured.sources]}
 
 
-def schema_identity() -> dict:
+def schema_identity(spec=None) -> dict:
     return {'sources': [{k: v for k, v in row.items() if k != 'text'}
-                        for row in schema_capture()['sources']]}
+                        for row in schema_capture(spec)['sources']]}
 
 
 def preflight(spec, settings: dict) -> dict:
@@ -83,7 +95,7 @@ def preflight(spec, settings: dict) -> dict:
     named_limit = api.context_facts(settings['name'], [])['limit_tokens']
     if named_limit is not None and reg['context_limit_tokens'] > named_limit:
         raise ValueError('registered receipt completion context exceeds the explicitly named route window')
-    policy_text()
+    policy_text(version=spec.receipt_completion_version)
     return reg
 
 
@@ -172,13 +184,13 @@ def _inputs(spec) -> dict:
                for r in data['rows']):
         raise ValueError('completion transcript has no matching accounted usage')
     reg = registration(spec)
-    schema = schema_capture()
+    schema = schema_capture(spec)
     result = {'record': spec.full_path.read_bytes().decode('utf-8'),
               'receipt': api._receipt_path(spec).read_bytes().decode('utf-8'),
               'manifest': Path(spec.chunk_manifest or chunking.manifest_for(spec.bundle, source_manifest=spec.manifest)).read_bytes().decode('utf-8'),
               'bundle': spec.bundle.read_bytes().decode('utf-8'), 'schema': schema,
               'transcript': transcript, 'transcript_pin': transcript_pin,
-              'registration': registration_identity(spec), 'policy': policy_identity(),
+              'registration': registration_identity(spec), 'policy': policy_identity(version=spec.receipt_completion_version),
               'input_identity': spec.input_identity(), 'max_output_tokens': reg['max_output_tokens']}
     expected_schema = {'sources': [{k: v for k, v in row.items() if k != 'text'}
                                   for row in schema['sources']]}
@@ -215,6 +227,9 @@ def _prepared(inputs):
 
 def build_request(inputs):
     from data_sheets_schema import api_runner as api
+    selected = policy_identity(version=inputs['policy']['version'])
+    if inputs['policy'] != selected:
+        raise ValueError('captured receipt policy differs from selected immutable version')
     prepared = _prepared(inputs)
     prior = inputs['transcript']
     # Explicit runtime identity: do not label this request as renderer 24.
@@ -228,7 +243,7 @@ def build_request(inputs):
         messages=copy.deepcopy(prior['messages']) + [
             {'role': 'assistant', 'content': prior['response']},
             {'role': 'user', 'content': [{'type': 'text', 'text': canonical(inventory).decode()},
-                                        {'type': 'text', 'text': policy_text()}]}])
+                                        {'type': 'text', 'text': policy_text(version=selected['version'])}]}])
     return req, inventory
 
 
