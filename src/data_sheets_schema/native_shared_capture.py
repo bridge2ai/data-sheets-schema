@@ -686,18 +686,18 @@ def _load(selection_path, *, transcript_bytes=None, control_bytes=None):
     return _loaded(base, streams, prefixes)
 
 
-def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None):
-    """Fixed live route; a new authority/catalog transaction at every call."""
+def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None, _catalogs=None):
+    """Fresh live authority, optionally with owner-reused pure catalog storage."""
     base = _base(selection_path)
     anchors = _declared_stream_files(base[0], base[1])
     if stream_files is not None and live_streams.identities(stream_files) != anchors:
         raise ValueError('observed stream identities differ from initialized authority')
     streams, prefixes = _live_streams(base[2], stream_files=anchors,
         transcript_bytes=transcript_bytes, control_bytes=control_bytes)
-    return _loaded(base, streams, prefixes)
+    return _loaded(base, streams, prefixes, _catalogs=_catalogs)
 
 
-def _loaded(base, streams, prefixes):
+def _loaded(base, streams, prefixes, *, _catalogs=None):
     selection, reader, value, composition, spec = base
     transcript, control = prefixes
     for path in _observation_paths(selection):
@@ -712,6 +712,8 @@ def _loaded(base, streams, prefixes):
     phase1 = _phase1(selection, binding, history, reader)
     run = _CapturedRun(selection, value, composition, spec, reader, _pool(reader, streams),
                        transcript, control, binding, history, observations, phase1)
+    if _catalogs is not None:
+        run._catalogs = receipt_api._catalog_context(_catalogs)
     _checked_observations(run)
     return run
 

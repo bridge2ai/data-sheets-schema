@@ -106,6 +106,7 @@ class CallbackAdapter:
         from .api_runner import RunSpec
         from .native_shared_phase import PhaseState
         from . import native_shared_attribution as attribution
+        from .native_shared_receipts import _ReceiptCatalogContext
         self.raw = composition_raw
         self.value = verified_composition(composition_raw)
         if (c.canonical(execution) != c.canonical(c.strict_json(registration_raw, 'execution', c.HARD_LIMITS['request_bytes']))
@@ -131,6 +132,7 @@ class CallbackAdapter:
         self._activated = self._initialized = False
         self._stream_prefixes = {}
         self._stream_files = {}
+        self._receipt_catalogs = _ReceiptCatalogContext()
 
     def require_phase_authority(self):
         if (not self.policy or self.policy != self.value['policy'] or self.spec.render_version != 26
@@ -180,7 +182,8 @@ class CallbackAdapter:
         if endpoints is None:
             return capture._load(self.selection.registration.pin.path)
         run = capture._load_live(self.selection.registration.pin.path,
-            transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files)
+            transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
+            _catalogs=self._receipt_catalogs)
         if self._stream_prefixes != {'transcript': run.transcript, 'control': run.control}:
             raise ValueError('recaptured streams differ from exact parent-observed prefixes')
         return run

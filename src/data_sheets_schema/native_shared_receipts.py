@@ -79,7 +79,7 @@ def _catalog_key(selection, snapshot):
 
 
 class _ReceiptCatalogContext:
-    """One bounded immutable derivation, owned by one captured transaction."""
+    """One bounded immutable derivation, owned by one capture or live attempt."""
     def __init__(self):
         self._entry = None
         self._bytes = 0
