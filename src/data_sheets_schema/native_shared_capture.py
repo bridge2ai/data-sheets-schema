@@ -80,6 +80,8 @@ class _Reader:
         limit = c.HARD_LIMITS[_LIMITS[role]]
         if role == 'request': limit = min(limit, self.selection.bounds()['max_request_bytes'])
         if role == 'response': limit = min(limit, self.selection.bounds()['max_response_bytes'])
+        if role in ('phase1_full', 'phase1_core', 'phase1_receipt'):
+            limit = min(limit, self.selection.bounds()['max_input_bytes'])
         return limit
 
     def read(self, role, path, expected=None):
@@ -525,6 +527,13 @@ def _decision_at(run, digest):
     return stage.prepare_next(run.selection, run.binding, phase1, history)
 
 
+def _require_completed_read_before_write(request, read):
+    """Both native Write announcements must follow the actual delivered Read."""
+    if (request.call.line <= read.result_event.line
+            or request.callback.line <= read.result_event.line):
+        raise ValueError('response Write precedes its complete current request Read')
+
+
 def _checked_observations(run):
     """Validate raw joins and current-request chronology, not saved success flags."""
     previous = {'transcript': 0, 'control': 0}
@@ -602,8 +611,8 @@ def _checked_observations(run):
                     or type(inputs['content']) is not str or not inputs['content']
                     or len(inputs['content'].encode('utf-8')) > current.response.max_bytes):
                 raise ValueError('Write intent exceeds the exact response contract')
-            if request.call.line <= _call(c.strict_json(reads[0][0].raw)['payload']['call']).call.line:
-                raise ValueError('response Write precedes its complete current request Read')
+            read_call = _call(c.strict_json(reads[0][0].raw)['payload']['call'])
+            _require_completed_read_before_write(request, trace.settled(read_call.tool_use_id))
             seen_intents[artifact.pin.sha256] = (artifact, payload)
         elif kind == 'advance_admitted':
             call = _call(payload['call'])
@@ -656,6 +665,9 @@ def capture_stage(selection_registration_path):
     run = _load(str(selection_registration_path))
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
+    phase, _ = phase_replay(run)
+    if not phase['passed']:
+        raise ValueError('advance current phase history did not pass')
     trace = run.trace()
     pending = trace.pending()
     if len(pending) != 1:
@@ -701,3 +713,421 @@ def publish_stage(invocation, proposal):
         raise ValueError('selected capture changed before stage publication')
     result, _ = publish_derived(fresh, proposal)
     return result
+
+
+def _chronology(run):
+    catalog = {}
+    advance_before, advance_after = {}, {}
+    visible = {run.history.records[0].pin.sha256: 0}
+    seal_observations = {}
+    for item in run.observations:
+        doc, transcript, _ = observation(item, run.selection, run.binding, run.pool)
+        catalog[item.pin.sha256] = (doc, transcript.lines)
+        payload = doc['payload']; kind = doc['observation_type']
+        if kind == 'advance_admitted':
+            advance_before[payload['call']['tool_use_id']] = payload['before_history_sha256']
+        elif kind == 'advance_settled':
+            identity = payload['call']['tool_use_id']
+            advance_after[identity] = payload['advance_result']['after_history_sha256']
+            for pin in payload['advance_result']['publications']:
+                if pin['role'] == 'record':
+                    if pin['sha256'] in visible:
+                        raise ValueError('stage record has duplicate publication observations')
+                    visible[pin['sha256']] = transcript.lines
+        elif kind in ('phase1_sealed', 'core_sealed'):
+            seal_observations[transcript.lines] = (kind, payload)
+    for item in run.history.records:
+        row = _document(item.raw, 'stage chronology'); payload = row['payload']
+        role = {'session_bound': 'init_observation', 'phase1_sealed': 'observation',
+                'core_sealed': 'observation', 'response_consumed': 'response_observation'}.get(row['record_type'])
+        if role is not None:
+            pin = payload[role]
+            if pin['sha256'] not in catalog:
+                raise ValueError('stage record lacks its actual observation visibility')
+            visible[item.pin.sha256] = catalog[pin['sha256']][1]
+    return catalog, advance_before, advance_after, visible, seal_observations
+
+
+def phase_replay(run, *, complete=False):
+    """Freshly run the actual phase machine over observed journal visibility."""
+    from .native_shared_phase import PhaseState
+    from .native_shared_render import commands
+    paths = run.spec._agentic_artifact_paths
+    phase = PhaseState(commands(run.spec), full_path=paths['full'], core_path=paths['core'],
+        report_path=paths['report'], receipt_path=paths['receipt'], working_directory=run.binding.working_directory)
+    catalog, advance_before, advance_after, visible, seal_observations = _chronology(run)
+    actions = {}
+    for line, _, frame in observed.rows(run.transcript):
+        count = 0
+        for item in run.history.records:
+            if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
+                break
+            count += 1
+        decision = None
+        if count >= 3:
+            raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
+                execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
+                records=tuple(item.pin for item in run.history.records[:count]))
+            decision = _decision_at(run, c.sha(raw))
+        blocks = frame.get('message', {}).get('content', [])
+        for block in blocks if type(blocks) is list else ():
+            if type(block) is not dict:
+                continue
+            identity = block.get('id') if block.get('type') == 'tool_use' else block.get('tool_use_id')
+            if block.get('type') == 'tool_use' and identity in advance_before:
+                decision = _decision_at(run, advance_before[identity])
+            if block.get('type') == 'tool_result' and identity in advance_after:
+                decision = _decision_at(run, advance_after[identity])
+        emitted = phase.observe(frame, stage_decision=decision)
+        if emitted:
+            actions[line] = (emitted, phase.report())
+        if line in seal_observations:
+            kind, payload = seal_observations[line]
+            needed = 'seal_phase1' if kind == 'phase1_sealed' else 'seal_core'
+            if needed not in emitted:
+                raise ValueError('sealed originals lack the actual settled phase boundary')
+            expected = [row['tool_use_id'] for row in phase.report()['checks']
+                        if row['helper'] in ({'chunk_check', 'source_scope', 'full_schema', 'full_terms', 'phase1_receipts'}
+                                            if needed == 'seal_phase1' else {'derive_core', 'core_schema', 'pair'})]
+            if payload['helper_calls'] != expected:
+                raise ValueError('seal helper identities differ from actual phase observations')
+    if complete and set(visible) != {item.pin.sha256 for item in run.history.records}:
+        raise ValueError('completed history has unpublished or unobserved stage records')
+    return phase.report(complete=complete), actions
+
+
+def seal_originals(run, kind):
+    """Parent-only observation effect after genuine settled helper results."""
+    if kind not in ('seal_phase1', 'seal_core'):
+        raise ValueError('unknown native seal action')
+    report, actions = phase_replay(run)
+    if kind not in actions.get(run.transcript.lines, ((), None))[0]:
+        raise ValueError('seal does not follow this exact observed helper boundary')
+    paths = run.spec._agentic_artifact_paths
+    if kind == 'seal_phase1':
+        if run.phase1 is not None:
+            raise ValueError('original full/receipt seal is spent')
+        inputs = [('full', 'phase1_full'), ('receipt', 'phase1_receipt')]
+        helpers = {'chunk_check', 'source_scope', 'full_schema', 'full_terms', 'phase1_receipts'}
+    else:
+        if run.phase1 is None or run.phase1.core is not None:
+            raise ValueError('original core seal is absent, premature or spent')
+        decision = run.decision()
+        if decision.state != 'await_core':
+            raise ValueError('genuine original core is not at the current receipt boundary')
+        inputs = [('core', 'phase1_core')]
+        helpers = {'derive_core', 'core_schema', 'pair'}
+    captured = {source: evidence.read_regular(paths[source], role,
+        max_bytes=min(c.HARD_LIMITS['original_full_bytes'], run.selection.bounds()['max_input_bytes'])).captured for source, role in inputs}
+    for source, role in inputs:
+        _create(run.selection, role, captured[source].raw)
+    sealed = {source: _captured(role, run.selection.role(role), captured[source].raw) for source, role in inputs}
+    calls = [row['tool_use_id'] for row in report['checks'] if row['helper'] in helpers]
+    if kind == 'seal_phase1':
+        payload = {'full': c.pin_dict(sealed['full'].pin), 'original_receipt': c.pin_dict(sealed['receipt'].pin), 'helper_calls': calls}
+        obs = _persist_observation(run, 'phase1_sealed', payload)
+        body = {'kind': 'd4d_native_shared_phase1_seal', 'version': 1,
+            'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
+            'session_id': run.binding.session_id, 'full': payload['full'], 'original_receipt': payload['original_receipt'],
+            'observation': c.pin_dict(obs.pin)}
+        seal = _create(run.selection, 'phase1_seal', c.canonical(body))
+        record_payload = {'seal': c.pin_dict(seal.pin), 'full': payload['full'],
+            'original_receipt': payload['original_receipt'], 'observation': c.pin_dict(obs.pin)}
+        _append(run.selection, run.binding, run.history, 'phase1_sealed', record_payload)
+    else:
+        payload = {'core': c.pin_dict(sealed['core'].pin), 'helper_calls': calls}
+        obs = _persist_observation(run, 'core_sealed', payload)
+        body = {'kind': 'd4d_native_shared_core_seal', 'version': 1,
+            'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
+            'session_id': run.binding.session_id, 'phase1_seal_sha256': run.phase1.seal.pin.sha256,
+            'core': payload['core'], 'observation': c.pin_dict(obs.pin)}
+        seal = _create(run.selection, 'core_seal', c.canonical(body))
+        _append(run.selection, run.binding, run.history, 'core_sealed',
+            {'seal': c.pin_dict(seal.pin), 'core': payload['core'], 'observation': c.pin_dict(obs.pin)})
+    # A mutating host cannot make a result certify different bytes between
+    # actual helper settlement and the original-copy publication.
+    for source, role in inputs:
+        if evidence.read_regular(paths[source], role, max_bytes=c.HARD_LIMITS['original_full_bytes']).captured != captured[source]:
+            raise ValueError('original output changed during its exact observed seal')
+
+
+def current_effect_view(run, *, correction_window=False, exclude_pending=None):
+    """Derive the restrictive overlay solely from captured state and events."""
+    decision = run.decision()
+    state = decision.state if decision is not None else 'request_ready'
+    request = decision.request if decision is not None else None
+    response = decision.response if decision is not None else None
+    read = intent = None
+    if decision is not None and state == 'awaiting_response':
+        for item in run.observations:
+            doc = _document(item.raw, 'stage observation'); payload = doc['payload']
+            if payload.get('history_sha256') != run.history.journal.pin.sha256:
+                continue
+            if doc['observation_type'] == 'request_read' and payload['request'] == c.pin_dict(request.pin):
+                read = item.pin.sha256
+            elif doc['observation_type'] == 'response_intent' and payload['request'] == c.pin_dict(request.pin):
+                intent = item.pin.sha256
+        # A consumed response remains spent even after journal advancement.
+        for row in stage._history(run.selection, run.binding, run.history)[0]:
+            if row['record_type'] == 'response_consumed' and row['payload']['request_sha256'] == request.pin.sha256:
+                pin = row['payload']['response_observation']
+                intent = pin['sha256']
+    protected = list(run.selection.roles)
+    protected += [c.RolePath('authority_' + str(index), path) for index, path in enumerate(
+        run.composition['policy']['readonly_lookups']['inputs']) if path not in {role.path for role in protected}]
+    if run.phase1 is not None:
+        protected.append(c.RolePath('sealed_original_receipt_output', run.spec._agentic_artifact_paths['receipt']))
+    pending = [identity for identity in run.trace().pending() if identity != exclude_pending
+               and run.trace().calls[identity][2].get('input', {}).get('command') == run.composition['policy']['native_shared_helpers']['advance']]
+    if len(pending) > 1:
+        raise ValueError('overlapping selected advance effects')
+    return c.NativeEffectView(correction_window=correction_window, cursor=None if decision is None else decision.cursor,
+        execution_binding_sha256=run.binding.binding_artifact.pin.sha256, history_sha256=run.history.journal.pin.sha256,
+        pending_advance_tool_use_id=pending[0] if pending else None, protected_roles=tuple(protected),
+        protocol=c.NAME, request=None if request is None else request.pin,
+        request_read_observation_sha256=read, response=response, response_intent_observation_sha256=intent,
+        sealed=() if decision is None else decision.sealed, selection_sha256=run.selection.registration.pin.sha256,
+        stage_command=run.composition['policy']['native_shared_helpers']['advance'], stage_root=run.selection.role('stage_root'),
+        state=state, static_policy_sha256=run.composition['policy_sha256'], working_directory=run.binding.working_directory)
+
+
+def observe_request_read(run, identity):
+    current = run.decision()
+    if current is None or current.state != 'awaiting_response' or current.request is None:
+        raise ValueError('request delivery has no current admitted outer request')
+    trace = run.trace(); actual = trace.settled(identity)
+    observed.complete_request_read(trace, actual, current.request)
+    # An additional correct Read grants no new response identity. Retain the
+    # first complete current Read rather than inventing independent deliveries.
+    for item in run.observations:
+        prior = _document(item.raw, 'current read observation')
+        if (prior['observation_type'] == 'request_read'
+                and prior['payload']['history_sha256'] == run.history.journal.pin.sha256
+                and prior['payload']['request'] == c.pin_dict(current.request.pin)):
+            return
+    _persist_observation(run, 'request_read', {'call': call_document(actual.call),
+        'result': asdict(actual.result), 'result_event': asdict(actual.result_event),
+        'request': c.pin_dict(current.request.pin), 'history_sha256': run.history.journal.pin.sha256})
+
+
+def observe_response_intent(run, identity):
+    from .native_shared_effects import classify_effect
+    trace = run.trace(); request = trace.request(identity)
+    inputs = _document(request.input_json, 'response Write')
+    view = current_effect_view(run, exclude_pending=identity)
+    if classify_effect(view, tool_name=request.tool_name, tool_input=inputs)[0] != 'prescribed':
+        raise ValueError('current response Write is not permitted by actual captured effects')
+    path = Path(view.response.path)
+    if path.exists() or path.is_symlink():
+        raise ValueError('first response destination already exists; no overwrite or retry')
+    matches = [item for item in run.observations if item.pin.sha256 == view.request_read_observation_sha256]
+    if len(matches) != 1:
+        raise ValueError('response Write lacks one durable whole request observation')
+    read_call = _call(_document(matches[0].raw, 'request Read observation')['payload']['call'])
+    _require_completed_read_before_write(request, trace.settled(read_call.tool_use_id))
+    _persist_observation(run, 'response_intent', {'request': c.pin_dict(view.request), 'response': asdict(view.response),
+        'call': asdict(request.call), 'callback': asdict(request.callback), 'tool_use_id': identity,
+        'input_json': request.input_json.decode('utf-8'), 'history_sha256': run.history.journal.pin.sha256,
+        'read_observation': c.pin_dict(matches[0].pin)})
+
+
+def observe_response_written(run, identity):
+    current = run.decision(); trace = run.trace(); actual = trace.settled(identity)
+    if current is None or current.state != 'awaiting_response' or current.response is None:
+        raise ValueError('response settlement has no current selected destination')
+    matches = [(item, _document(item.raw, 'response intent')['payload']) for item in run.observations
+        if _document(item.raw, 'response intent')['observation_type'] == 'response_intent'
+        and _document(item.raw, 'response intent')['payload']['tool_use_id'] == identity]
+    if len(matches) != 1:
+        raise ValueError('response settlement lacks one preceding exact pre-grant intent')
+    intent, payload = matches[0]
+    response = run.reader.read('response', current.response.path)
+    observed.first_response_write(trace, actual, response, intent_input_json=payload['input_json'].encode('utf-8'))
+    obs = _persist_observation(run, 'response_written', {'call': call_document(actual.call),
+        'result': asdict(actual.result), 'result_event': asdict(actual.result_event), 'response': c.pin_dict(response.pin),
+        'intent_observation': c.pin_dict(intent.pin), 'history_sha256': run.history.journal.pin.sha256})
+    _append(run.selection, run.binding, run.history, 'response_consumed', {'cursor': asdict(current.cursor),
+        'request_sha256': current.request.pin.sha256, 'response': c.pin_dict(response.pin),
+        'read_observation': payload['read_observation'], 'response_observation': c.pin_dict(obs.pin)})
+
+
+def observe_advance_settled(run, identity):
+    trace = run.trace(); actual = trace.settled(identity)
+    frame = evidence.event(run.transcript, actual.result_event)
+    result = _document(frame.get('tool_use_result', {}).get('stdout', '').encode('utf-8'), 'advance stdout')
+    observed.helper_result(trace, actual, result)
+    c.exact(result, {'kind', 'version', 'selection_sha256', 'execution_sha256', 'attempt_id', 'session_id',
+        'advance_tool_use_id', 'before_history_sha256', 'after_history_sha256', 'state', 'publications'}, 'advance acknowledgement')
+    expected = {'kind': c.KINDS['advance_result'], 'version': 1,
+        'selection_sha256': run.selection.registration.pin.sha256, 'execution_sha256': run.binding.execution.pin.sha256,
+        'attempt_id': run.binding.attempt_id, 'session_id': run.binding.session_id, 'advance_tool_use_id': identity,
+        'after_history_sha256': run.history.journal.pin.sha256, 'state': run.decision().state}
+    if any(type(result[key]) is not type(value) or result[key] != value for key, value in expected.items()):
+        raise ValueError('advance result differs from actual current selected publication')
+    before = _history_prefix(run, result['before_history_sha256'])
+    phase1 = _phase1(run.selection, run.binding, before, run.reader)
+    replay = stage._Replay(run.selection, run.binding, phase1, before).run()
+    if replay.pending is not None and replay.pending[-1] is not None:
+        response, _ = replay.pending[-1]
+        proposal = stage.check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw, response.raw)
+        publications = (*proposal.publications, *(c.HelperPublication('create_once', item, None) for item in proposal.records_to_append),
+            c.HelperPublication('replace_journal_from_exact_predecessor', proposal.predicted_journal, before.journal.pin.sha256))
+    else:
+        publications = stage.prepare_next(run.selection, run.binding, phase1, before).publications
+    if result['publications'] != [c.pin_dict(item.artifact.pin) for item in publications]:
+        raise ValueError('advance result does not describe every freshly derived actual effect')
+    for item in publications:
+        actual_file = run.reader.read(item.artifact.pin.role, item.artifact.pin.path, item.artifact.pin)
+        if actual_file.raw != item.artifact.raw:
+            raise ValueError('advance published bytes differ from fresh pure reconstruction')
+    _persist_observation(run, 'advance_settled', {'call': call_document(actual.call),
+        'result': asdict(actual.result), 'result_event': asdict(actual.result_event), 'advance_result': result})
+
+
+def selected_receipt_paths(selection_registration_path):
+    """Explicit live S reaches only the paths captured in its already active E."""
+    _, _, _, composition, spec = _base(str(selection_registration_path))
+    paths = spec._agentic_artifact_paths
+    return {'full': Path(paths['full']), 'receipt': Path(paths['receipt']),
+            'provenance': Path(composition['policy']['post_final_recorder']['destination']),
+            'core_dir': Path(paths['core']).parent}
+
+
+from .native_shared_current import current_artifact
+
+
+def _receipt_assessment(run, *, full_path, receipt_path):
+    from . import native_shared_receipts as receipts
+    paths = run.spec._agentic_artifact_paths
+    if (str(full_path) != paths['full'] or str(receipt_path) != paths['receipt']):
+        raise ValueError('receipt caller paths differ from the exact execution-selected outputs')
+    full = current_artifact(run, 'final_full', paths['full'])
+    original = current_artifact(run, 'original_receipt_output', paths['receipt'])
+    if run.phase1 is None:
+        block = receipts.check_initial(run.selection, full_raw=full.raw, receipt_raw=original.raw)
+        return block, full, original
+    if original.raw != run.phase1.original_receipt.raw:
+        raise ValueError('selected ordinary receipt changed from the exact sealed original')
+    decision = run.decision()
+    if decision.state != 'assembly_complete' or decision.completion is None:
+        raise ValueError('final native receipts require the freshly checked complete stage history')
+    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history,
+                                     decision.completion.assembly.raw)
+    assessed = completion.effective_receipt
+    block = receipts.check_final(run.selection, run.binding, run.phase1, completion,
+                                final_full=full.raw, final_receipt=assessed.raw)
+    block['native_receipt_inputs'] = {'selected_original': c.pin_dict(original.pin),
+        'sealed_original': c.pin_dict(run.phase1.original_receipt.pin), 'assessed_effective': c.pin_dict(assessed.pin),
+        'final_full': c.pin_dict(full.pin), 'basis': 'Original caller-selected receipt preserved; reconstructed effective receipt assessed.'}
+    return block, full, assessed
+
+
+def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
+    run = _load(str(selection_registration_path))
+    phase_replay(run)
+    return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+
+
+def _provenance_block(run):
+    decision = run.decision()
+    if decision is None or decision.state != 'assembly_complete' or decision.completion is None:
+        raise ValueError('native provenance requires complete freshly reconstructed selected stages')
+    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history, decision.completion.assembly.raw)
+    artifact = run.reader.read('completion', run.selection.role('completion'))
+    return {'protocol': c.NAME, 'selection_sha256': run.selection.registration.pin.sha256,
+        'execution_sha256': run.binding.execution.pin.sha256, 'attempt_id': run.binding.attempt_id,
+        'session_id': run.binding.session_id, 'assembly_sha256': completion.assembly.pin.sha256,
+        'audit_sha256': completion.audit.pin.sha256, 'receipt_result_sha256': completion.receipt_result.pin.sha256,
+        'stage_completion_sha256': artifact.pin.sha256, 'scientific_support': 'unverified evaluator declarations',
+        'runtime_acceptance': 'pending independent saved readback'}
+
+
+def live_provenance_block(selection_registration_path):
+    run = _load(str(selection_registration_path))
+    phase, _ = phase_replay(run)
+    required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
+                'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}
+    if not required <= set(phase['current_checks']) or not phase['passed']:
+        raise ValueError('recorder precedes actual current final helper obligations')
+    from .native_shared_gates import current_evidence
+    checked = current_evidence(run)
+    if checked.get('checked') is not True or checked.get('findings') != []:
+        raise ValueError('recorder current captured evidence did not pass')
+    paths = run.spec._agentic_artifact_paths
+    block, _, _ = _receipt_assessment(run, full_path=paths['full'], receipt_path=paths['receipt'])
+    from .canary import receipt_floors
+    if any(receipt_floors(block).values()):
+        raise ValueError('recorder current selected receipt floors did not pass')
+    return _provenance_block(run)
+
+
+def _recorded_run(spec, record):
+    from .native_shared_render import validate_metadata
+    if type(record) is not dict:
+        raise ValueError('native recorded reader requires one explicit provenance mapping')
+    try:
+        render_spec = record['prompts']['request']['spec']
+        document = validate_metadata(render_spec)
+    except (KeyError, TypeError) as exc:
+        raise ValueError('native record lacks its complete selected render authority') from exc
+    run = _load(document['registration_path'])
+    if c.canonical(render_spec) != c.canonical(run.composition['render_spec']):
+        raise ValueError('native record rendering differs from its observed execution composition')
+    if spec is not None and c.canonical(spec.render_spec()) != c.canonical(render_spec):
+        raise ValueError('caller spec differs from the explicit native record')
+    if c.canonical(record.get('native_shared_generation')) != c.canonical(_provenance_block(run)):
+        raise ValueError('native record stage/session identity differs from actual reconstructed evidence')
+    phase, _ = phase_replay(run)
+    if not phase['passed']:
+        raise ValueError('native recorded stage chronology did not pass')
+    return run
+
+
+def recorded_receipt_block(spec, *, record, full_path, receipt_path):
+    run = _recorded_run(spec, record)
+    return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
+
+
+def recorded_receipt_claims(spec, *, record, full_path, receipt_path, expected_block):
+    """Claim sidecar from the same captured effective bytes as the checked block."""
+    from . import native_shared_receipts as receipts
+    from . import receipts as rc
+    from .audit_omissions import _mapping
+    run = _recorded_run(spec, record)
+    block, full, effective = _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)
+    if (block.get('native_receipt_stage') != 'final' or block.get('final_stage_complete') is not True
+            or c.canonical(expected_block) != c.canonical(block)):
+        raise ValueError('claim sidecar expected block differs from the same freshly captured final receipt assessment')
+    _, _, _, _, _, bases, _, _ = receipts._inputs(run.selection, run.phase1)
+    return rc.claim_receipts(_mapping(effective.raw, 'native effective receipt'),
+        _mapping(full.raw, 'native final full'), _mapping(run.phase1.full.raw, 'native original full'),
+        identifier_bases=bases)
+
+
+def at_callback(run, line):
+    """Pure current authority at one real callback; no future observation credit."""
+    _, _, _, visible, _ = _chronology(run)
+    count = 0
+    for item in run.history.records:
+        if item.pin.sha256 not in visible or visible[item.pin.sha256] >= line:
+            break
+        count += 1
+    if count < 2:
+        raise ValueError('callback precedes actual session publication')
+    raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
+        execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
+        records=tuple(item.pin for item in run.history.records[:count]))
+    history = _history_prefix(run, c.sha(raw))
+    observations = tuple(item for item in run.observations
+        if observation(item, run.selection, run.binding, run.pool)[1].lines < line)
+    history = replace(history, observations=observations)
+    transcript = _through(run.transcript, line)
+    frames = {c.canonical(frame) for _, _, frame in observed.rows(transcript)}
+    control_lines = 0
+    for number, _, row in observed.rows(run.control):
+        if row.get('kind') == 'decision' and c.canonical(row.get('request')) not in frames:
+            break
+        control_lines = number
+    control = _through(run.control, control_lines)
+    return replace(run, history=history, observations=observations, transcript=transcript, control=control,
+        phase1=_phase1(run.selection, run.binding, history, run.reader))

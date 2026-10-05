@@ -415,9 +415,12 @@ def read_final(registration_raw, *, contract: ExecutionContract,
     files, aliases, metadata = result.get('captured_files'), result.get('captured_aliases'), result.get('captured_metadata')
     if not all(type(v) is dict for v in (files, aliases, metadata)) or not set(files) <= set(metadata) or not set(aliases.values()) <= set(metadata):
         raise ValueError('final evidence lacks complete captured metadata')
-    for path, pin in files.items():
-        if draft._sha(Path(path).read_bytes()) != pin['sha256']:
-            raise ValueError('saved evidence differs from the captured basis')
+    if KIND == 'd4d_native_shared_attempt':
+        replay.validate_file_basis(value, result)
+    else:
+        for path, pin in files.items():
+            if draft._sha(Path(path).read_bytes()) != pin['sha256']:
+                raise ValueError('saved evidence differs from the captured basis')
     for alias, target in aliases.items():
         if (str(Path(alias).resolve()) != target
                 or result.get('captured_alias_metadata', {}).get(alias) != {'symlink': Path(alias).is_symlink()}):
@@ -472,4 +475,3 @@ def read_final(registration_raw, *, contract: ExecutionContract,
             raise ValueError('generated replay report differs from its final identity')
     contract.check_additional_readback(value, result)
     return result
-
