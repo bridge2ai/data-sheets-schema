@@ -1689,7 +1689,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
               record_chunks: dict[str, Any] | None = None, *,
               snapshot_spec=None, snapshot_record: dict | None = None,
               allow_manifest_discovery: bool = True,
-              receipt_render_spec: dict | None = None) -> dict[str, Any]:
+              receipt_render_spec: dict | None = None,
+              native_selection_path: Path | None = None) -> dict[str, Any]:
     """The provenance block for one run, or why it could not be computed.
 
     `expected` is whether this run's procedure was to write a receipt. It is
@@ -1733,7 +1734,8 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
     try:
         render = getattr(snapshot_spec, "render_spec", None)
         spec_declaration = render() if callable(render) else None
-        if spec_declaration is None and getattr(snapshot_spec, "receipt_completion_version", 0):
+        if spec_declaration is None and (getattr(snapshot_spec, "receipt_completion_version", 0)
+                or getattr(snapshot_spec, "native_shared_generation_version", 0)):
             raise ValueError("enabled snapshot spec has no authoritative render declaration")
         policy = selected_receipts.select_policy(render_spec=spec_declaration, record=snapshot_record)
         if receipt_render_spec is not None:
@@ -1746,6 +1748,28 @@ def block_for(full_path: Path, receipt: Path, bundle: Path | None, record_bundle
                 "reason": f"receipt policy selection refused: {exc}"}
     if policy is not None:
         base.update(expected=True, **{selected_receipts.BLOCK_KEY: selected_receipts.block_identity(policy)})
+    is_native = policy is not None and policy['registration'].get('kind') == 'd4d_native_shared_receipt_policy'
+    if native_selection_path is not None and not is_native:
+        return {**base, 'expected': True, 'checked': False,
+                'reason': 'native receipt reader requires its explicit authoritative selection'}
+    if is_native:
+        # Native evidence is captured by its own observer. API snapshot-store
+        # fallback would join different originals and must remain unreachable.
+        try:
+            from . import native_shared_capture as native_capture
+            if snapshot_record is not None:
+                checked = native_capture.recorded_receipt_block(snapshot_spec, record=snapshot_record,
+                    full_path=full_path, receipt_path=receipt)
+            elif native_selection_path is not None:
+                checked = native_capture.live_receipt_block(native_selection_path,
+                    full_path=full_path, receipt_path=receipt)
+            else:
+                raise ValueError('native receipt read requires an explicit record or live selection path')
+            result = {**base, **checked}
+            selected_receipts.policy_from_block(result, policy=policy)
+            return result
+        except (ValueError, OSError) as exc:
+            return {**base, 'checked': False, 'reason': f'native receipt reconstruction refused: {exc}'}
     if not receipt.exists():
         return {**base, "checked": False, "reason": f"no coverage receipt at {receipt}"}
     try:

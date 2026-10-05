@@ -11,6 +11,9 @@ FORMAT = "receipt_completion_registration_v1"
 SPEC_KEYS = {"receipt_completion_version", "receipt_completion_policy_sha256",
              "receipt_completion_registration"}
 BLOCK_KEY = "receipt_completion_policy"
+NATIVE_SPEC_KEYS = {"native_shared_generation_version", "native_shared_generation_descriptor",
+                    "native_shared_generation_registration", "native_shared_generation_context",
+                    "native_shared_receipt_policy"}
 
 
 def _integer(value, name, minimum=0):
@@ -91,20 +94,114 @@ def _identity(value):
     if not isinstance(value, dict) or set(value) != {"sha256", "raw_json"} or not isinstance(value["raw_json"], str):
         raise ValueError("receipt completion registration identity is missing or malformed")
     raw = value["raw_json"].encode("utf-8")
+    if len(raw) > 2_000_000:
+        raise ValueError('receipt registration identity exceeds its byte bound')
     try:
-        format_name = json.loads(raw, object_pairs_hook=_pairs, parse_constant=_invalid_constant).get("format")
+        parsed = json.loads(raw, object_pairs_hook=_pairs, parse_constant=_invalid_constant)
+        format_name = parsed.get("format")
     except (ValueError, AttributeError, RecursionError) as exc:
         raise ValueError("receipt completion registration is unreadable") from exc
+    if parsed.get("kind") == "d4d_native_shared_receipt_policy":
+        from .native_shared_contract import parse_receipt_policy
+        from .native_shared_selection import RECEIPT_POLICY_SHA256
+        if hashlib.sha256(raw).hexdigest() != value["sha256"]:
+            raise ValueError("native receipt policy bytes differ from their SHA256")
+        return parse_receipt_policy(raw, RECEIPT_POLICY_SHA256)
     version = 2 if format_name == "receipt_completion_registration_v2" else 1
     if registration_identity(raw, version=version) != value:
         raise ValueError("receipt completion registration bytes differ from their SHA256")
     return parse_registration(raw, version=version)
 
 
+def _native_selection(spec):
+    """Select recorded native authority without reading current input paths."""
+    from . import native_shared_contract as c, native_shared_selection as native
+    if (not NATIVE_SPEC_KEYS <= set(spec)
+            or type(spec['native_shared_generation_version']) is not int
+            or spec['native_shared_generation_version'] != 1):
+        raise ValueError('native receipt selection fields are missing or contradictory')
+    if (spec.get('runtime') != c.RUNTIME or spec.get('condition') != c.CONDITION
+            or type(spec.get('render_version')) is not int or spec['render_version'] != c.RENDERER
+            or spec['native_shared_generation_descriptor'] != native.descriptor()):
+        raise ValueError('native receipt selection requires its exact descriptor and renderer')
+    for axis in ('native_source_attribution_version', 'shared_generation_version', 'api_playbook_version',
+                 'receipt_completion_version', 'removal_repair_version'):
+        if type(spec.get(axis, 0)) is not int or spec.get(axis, 0) != 0:
+            raise ValueError('native receipt selection conflicts with another execution axis')
+    if {'receipt_completion_policy_sha256', 'receipt_completion_registration'}.intersection(spec):
+        raise ValueError('native receipt selection cannot carry an API receipt registration')
+    registered = spec['native_shared_generation_registration']
+    c.exact(registered, {'sha256', 'raw_json'}, 'native selection identity')
+    if type(registered['raw_json']) is not str:
+        raise ValueError('native selection must retain raw UTF-8 JSON')
+    raw = registered['raw_json'].encode('utf-8')
+    doc = c.parse_selection(raw)
+    if c.sha(raw) != registered['sha256'] or doc['selection']['descriptor_sha256'] != native.descriptor_capture().sha256:
+        raise ValueError('native receipt selection identity differs from its recorded bytes')
+    assets = doc['selection']['assets']
+    if set(assets) != set(native.ASSET_HASHES) or any(assets[name]['sha256'] != digest for name, digest in native.ASSET_HASHES.items()):
+        raise ValueError('native receipt selection assets differ from the fixed descriptor')
+    declared = spec['native_shared_receipt_policy']
+    c.exact(declared, {'path', 'sha256', 'raw_json'}, 'native receipt declaration')
+    identity = {key: declared[key] for key in ('sha256', 'raw_json')}
+    registration = _identity(identity)
+    policy_raw = declared['raw_json'].encode('utf-8')
+    if ({'path': declared['path'], 'sha256': declared['sha256'], 'bytes': len(policy_raw)} != doc['receipt_policy']
+            or registration.get('kind') != c.KINDS['receipt_policy']):
+        raise ValueError('native receipt policy does not match its selection file pin')
+    context = spec['native_shared_generation_context']
+    c.exact(context, {'context', 'profile', 'source_manifest', 'scope'}, 'native generation context')
+    expected_scope = ('Caller-declared generation scope, source policy and vocabulary; '
+                      'not a scientific applicability or support verdict.')
+    if context['scope'] != expected_scope or context['source_manifest'] != doc['inputs']['source_manifest']:
+        raise ValueError('native receipt source authority differs from selected scope')
+    def captured_text(value, pin, key):
+        c.exact(value, {'identity', key}, 'native captured context member')
+        if type(value[key]) is not str:
+            raise ValueError('native context member must retain text')
+        body = value[key].encode('utf-8')
+        if value['identity'] != pin or len(body) != pin['bytes'] or c.sha(body) != pin['sha256']:
+            raise ValueError('native captured context bytes differ from selection')
+    captured_text(context['context'], doc['inputs']['context'], 'raw_json')
+    profile = context['profile']
+    c.exact(profile, {'name', 'basis', 'vocabulary'}, 'native profile context')
+    expected = doc['inputs']['profile']
+    if profile['name'] != expected['name'] or profile['basis'] != expected['basis']:
+        raise ValueError('native profile differs from selected authority')
+    if expected['vocabulary'] is None:
+        if profile['vocabulary'] is not None:
+            raise ValueError('native profile has an unselected vocabulary')
+    else:
+        captured_text(profile['vocabulary'], expected['vocabulary'], 'raw_text')
+    return {'registration': registration, 'identity': identity,
+            'runtime_policy_sha256': native.RECEIPT_POLICY_SHA256}
+
+
+def native_render_declaration(capture):
+    """Receipt CLI's explicit native declaration, using one immutable capture."""
+    from . import native_shared_contract as c, native_shared_selection as native
+    if type(capture) is not c.NativeSelectionCapture:
+        raise ValueError('native receipt declaration requires a selection capture')
+    return {'condition': c.CONDITION, 'runtime': c.RUNTIME, 'render_version': c.RENDERER,
+        'native_shared_generation_version': 1,
+        'native_shared_generation_descriptor': native.descriptor(),
+        'native_shared_generation_registration': {'sha256': capture.registration.pin.sha256,
+            'raw_json': capture.registration.raw.decode('utf-8')},
+        'native_shared_generation_context': capture.generation_context(),
+        'native_shared_receipt_policy': {'path': capture.receipt_policy.pin.path,
+            'sha256': capture.receipt_policy.pin.sha256,
+            'raw_json': capture.receipt_policy.raw.decode('utf-8')}}
+
+
 def _selection(spec):
     from data_sheets_schema.receipt_completion import policy_identity
     if not isinstance(spec, dict):
         raise ValueError("recorded render spec must be a mapping")
+    if 'native_shared_generation_version' in spec and type(spec['native_shared_generation_version']) is not int:
+        raise ValueError('native receipt axis must be an integer')
+    if (spec.get('native_shared_generation_version', 0) != 0
+            or (NATIVE_SPEC_KEYS - {'native_shared_generation_version'}).intersection(spec)):
+        return _native_selection(spec)
     if not SPEC_KEYS.intersection(spec):
         return None
     if not SPEC_KEYS <= set(spec) or type(spec["receipt_completion_version"]) is not int or spec["receipt_completion_version"] not in (1, 2):
@@ -157,6 +254,10 @@ def select_policy(render_spec: dict | None = None, record: dict | None = None) -
             recorded = _selection(recorded_spec)
             if render_spec is not None and selected != recorded:
                 raise ValueError("supplied receipt policy differs from the record declaration")
+            if render_spec is not None and any(key in recorded_spec or key in render_spec
+                    for key in NATIVE_SPEC_KEYS - {'native_shared_generation_version'}):
+                if any(render_spec.get(key) != recorded_spec.get(key) for key in NATIVE_SPEC_KEYS):
+                    raise ValueError('supplied native receipt selection differs from the record declaration')
             selected = recorded
         runtime = record.get("receipt_completion")
         if runtime is not None:

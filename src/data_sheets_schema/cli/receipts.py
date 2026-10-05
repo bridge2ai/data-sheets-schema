@@ -38,7 +38,10 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
               help="selected chunk manifest, including before provenance exists; recorded hashes still apply")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="pinned completion registration before provenance exists; must match an existing run declaration")
-def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration):
+@click.option("--native-shared-selection", type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="explicit native shared selection; reconstructs initial or final receipt evidence from its observed history")
+def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
+          native_shared_selection=None):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -53,6 +56,22 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     from data_sheets_schema.cli.method import resolve_method
     if not project.strip() or "/" in project or "\\" in project or project in {".", ".."}:
         raise click.BadParameter("must be a nonempty dataset basename", param_hint="--project")
+    native_capture = None
+    if native_shared_selection is not None:
+        if receipt_completion_registration is not None:
+            raise click.BadParameter('native and API receipt registrations are mutually exclusive')
+        from data_sheets_schema import native_shared_selection as native
+        try:
+            native_capture = native.capture(native_shared_selection)
+            chosen = native_capture.document()
+            method = method or chosen['run']['method']
+            if (project, label, method) != tuple(chosen['run'][key] for key in ('project', 'label', 'method')):
+                raise ValueError('native selection belongs to another project, label or method')
+            for supplied, key in ((bundle_opt, 'bundle'), (chunk_manifest, 'chunk_manifest')):
+                if supplied is not None and str(Path(supplied).resolve()) != chosen['inputs'][key]['path']:
+                    raise ValueError('native selected source paths cannot be overridden')
+        except (OSError, ValueError) as exc:
+            raise click.ClickException(f'native receipt selection refused: {exc}') from exc
     method = method or resolve_method(label, project)
     import yaml
 
@@ -76,13 +95,19 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             raise click.ClickException(f"no provenance record at {p['provenance']} to write into; "
                                        "run without --write until the record step")
         from data_sheets_schema.provenance import _md5, parse_header
-        header = parse_header(p["full"])
-        declared = bundle_opt or header.get("Source bundle") or header.get("Source")
-        if not declared:
-            raise click.ClickException(f"no provenance record yet and {p['full']} names no "
-                                       "`# Source bundle:`; pass --bundle")
-        bundle = Path(declared)
-        md5 = _md5(bundle) if bundle.exists() else None
+        if native_capture is not None:
+            import hashlib
+            pin = native_capture.document()['inputs']['bundle']
+            bundle = Path(pin['path'])
+            md5 = hashlib.md5(native_capture.raw(pin['path'])).hexdigest()
+        else:
+            header = parse_header(p["full"])
+            declared = bundle_opt or header.get("Source bundle") or header.get("Source")
+            if not declared:
+                raise click.ClickException(f"no provenance record yet and {p['full']} names no "
+                                           "`# Source bundle:`; pass --bundle")
+            bundle = Path(declared)
+            md5 = _md5(bundle) if bundle.exists() else None
         expected = True
         recovery = {}
         click.echo(f"   · no provenance record yet; checking against {bundle} as on disk")
@@ -95,6 +120,17 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         recovery["allow_manifest_discovery"] = False
     if chunk_manifest is not None:
         recovery["manifest"] = chunk_manifest
+    if native_capture is not None:
+        from data_sheets_schema import receipt_completion_policy as cp
+        declaration = cp.native_render_declaration(native_capture)
+        try:
+            if record is not None and cp.select_policy(record=record) is None:
+                raise ValueError('an existing historical run cannot acquire a native receipt policy')
+            cp.select_policy(render_spec=declaration, record=record)
+        except ValueError as exc:
+            raise click.ClickException(f'native receipt declaration refused: {exc}') from exc
+        recovery['receipt_render_spec'] = declaration
+        recovery['native_selection_path'] = native_shared_selection
     if receipt_completion_registration is not None:
         from data_sheets_schema import receipt_completion_policy as cp
         from data_sheets_schema.api_runner import RUNTIME
@@ -134,7 +170,11 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             receipt = rc.load_receipt(rc.receipt_path(p["core_dir"], project))
             full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
             out = rc.claims_path(p["core_dir"], project)
-            out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full), sort_keys=False,
+            identity_options = {}
+            if block.get('native_receipt_stage') in {'phase1_initial', 'final'}:
+                identity_options['identifier_bases'] = tuple(tuple(pair) for pair in
+                    block['identity_rules']['identifier_bases'])
+            out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full, **identity_options), sort_keys=False,
                                           allow_unicode=True), encoding="utf-8")
             click.echo(f"   ✓ claim receipts written to {out}")
     # A run whose procedure wrote no receipt is not failed by --strict: the
@@ -142,6 +182,14 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     if strict and block.get("expected") and not block.get("checked"):
         sys.exit(1)
     if strict and block.get("checked") and strict_failure(block):
+        # The mandatory initial helper precedes receipt completion. Its
+        # observed phase marker cannot certify a final floor or typed audit.
+        initial = (block.get('native_receipt_stage') == 'phase1_initial'
+                   and block.get('final_stage_complete') is False and block.get('passed') is True)
+        if not initial:
+            sys.exit(1)
+    if strict and block.get('native_receipt_stage') == 'phase1_initial' and (
+            block.get('final_stage_complete') is not False or block.get('passed') is not True):
         sys.exit(1)
 
 

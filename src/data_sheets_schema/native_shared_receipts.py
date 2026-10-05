@@ -229,8 +229,14 @@ def check_final(selection, execution, phase1, completion, *, final_full, final_r
     receipt = omissions._mapping(final_receipt, 'native effective receipt')
     block = receipts.check(receipt, manifest, texts, full, md5, original,
                            instrument_version=4, identifier_bases=bases)
+    selected_policy = policy(selection)
     return {**block, 'expected': True, 'checked': True,
+            'native_receipt_stage': 'final', 'final_stage_complete': True,
             'coverage_floor': floor(block['slots'], selection),
+            'receipt_completion_policy': {
+                'registration': {'sha256': selection.receipt_policy.pin.sha256,
+                    'raw_json': selection.receipt_policy.raw.decode('utf-8')},
+                'runtime_policy_sha256': selected_policy['runtime_policy_sha256']},
             'native_shared_receipt_policy': {'sha256': selection.receipt_policy.pin.sha256,
                 'raw_json': selection.receipt_policy.raw.decode('utf-8')},
             'identity_rules': {'basis': 'captured native full schema', 'identifier_bases': [list(p) for p in bases]},
