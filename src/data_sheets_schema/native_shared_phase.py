@@ -114,11 +114,13 @@ class PhaseState:
         _require(type(inputs) is dict, 'native tool inputs must be an object')
         if name == 'Bash':
             command = inputs.get('command')
-            _require(type(command) is str and command in self.commands,
-                     'Bash is not an exact registered phase helper')
+            _require(type(command) is str and command, 'Bash command must retain explicit text')
             _require(inputs.get('run_in_background') is None or inputs['run_in_background'] is False,
                      'phase helper cannot run in background')
-            return self.commands[command]
+            # Ordinary read-only shell lookups retain their actual command
+            # policy's admission. Phase observation never grants a command:
+            # only these exact spellings can earn a helper milestone.
+            return self.commands.get(command)
         _require(name in ('Read', 'Write', 'Edit', 'MultiEdit'), 'unsupported phase tool')
         return None
 

@@ -269,12 +269,40 @@ def test_foreign_session_duplicate_result_and_premature_terminal_refuse():
         assert not trace.state.report(complete=True)['passed']
 
 
-def test_wrong_command_and_background_requests_never_count():
+def test_unrecognized_bash_never_earns_helper_credit_and_background_refuses():
     trace = Trace()
-    for inputs in ({'command': shlex.join(trace.commands['chunk_check']) + ' --foreign'},
-                   {'command': shlex.join(trace.commands['chunk_check']), 'run_in_background': True}):
-        with pytest.raises(ValueError): trace.state.before('Bash', inputs)
+    identity = trace.call('Bash', {'command': shlex.join(trace.commands['chunk_check']) + ' --foreign'})
+    trace.result(identity, text='not phase evidence')
+    with pytest.raises(ValueError):
+        trace.state.before('Bash', {'command': shlex.join(trace.commands['chunk_check']), 'run_in_background': True})
     assert trace.state.report()['current_checks'] == []
+    assert trace.state.report()['checks'][-1]['helper'] is None
+
+
+@pytest.mark.parametrize('code', [0, 1])
+def test_ordinary_readonly_bash_is_observed_but_not_a_phase_helper(code):
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/full'})
+    trace.result(identity, code=code, text='neutral lookup or refusal')
+    report = trace.state.report()
+    assert report['passed'] and report['pending_tool_ids'] == []
+    assert report['current_checks'] == []
+    assert report['checks'][-1]['helper'] is None
+    assert report['checks'][-1]['exit_code'] == code
+    with pytest.raises(ValueError, match='generation precedes'):
+        trace.write('full')
+
+
+def test_ordinary_bash_cannot_hide_missing_exit_or_overlap():
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/full'})
+    with pytest.raises(ValueError, match='exit aliases'):
+        trace.result(identity, text='neutral', mutation=lambda event: event['tool_use_result'].pop('exitCode'))
+    assert not trace.state.report()['passed']
+    other = Trace(); other.call('Bash', {'command': 'cat /neutral/full'})
+    with pytest.raises(ValueError, match='overlaps an unsettled'):
+        other.state.observe({'type': 'assistant', 'message': {'content': [
+            {'type': 'tool_use', 'id': 'next', 'name': 'Bash', 'input': {'command': 'cat /neutral/full'}}]}})
 
 
 def test_callback_before_or_after_tool_frame_accepts_only_the_current_report_write():
