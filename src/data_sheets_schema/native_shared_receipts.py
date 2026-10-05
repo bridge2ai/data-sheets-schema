@@ -95,13 +95,19 @@ def floor(coverage, selection):
 
 
 def _inputs(selection, phase1):
+    return _raw_inputs(selection, phase1.full.raw, phase1.original_receipt.raw)
+
+
+def _raw_inputs(selection, full_raw, receipt_raw):
     chosen = selection.document()['inputs']
     bounds = selection.bounds()
-    for item in (phase1.full, phase1.original_receipt):
-        if len(item.raw) > min(bounds['max_input_bytes'], contract.HARD_LIMITS['original_full_bytes']):
+    for raw in (full_raw, receipt_raw):
+        if type(raw) is not bytes:
+            raise ValueError('native initial inputs require captured bytes')
+        if len(raw) > min(bounds['max_input_bytes'], contract.HARD_LIMITS['original_full_bytes']):
             raise ValueError('phase-1 input exceeds the supplied native byte bound')
-    full = omissions._mapping(phase1.full.raw, 'sealed native full')
-    receipt = omissions._mapping(phase1.original_receipt.raw, 'sealed native receipt')
+    full = omissions._mapping(full_raw, 'sealed native full')
+    receipt = omissions._mapping(receipt_raw, 'sealed native receipt')
     bundle = selection.raw(chosen['bundle']['path'])
     manifest = omissions._mapping(selection.raw(chosen['chunk_manifest']['path']), 'captured chunks')
     validate_manifest_mapping(manifest, bundle, manifest.get('bundle'))
@@ -127,6 +133,39 @@ def _inputs(selection, phase1):
     if scopes.count('') != 1 or len(set(scopes)) != len(scopes) or any(p not in owners for p in scopes):
         raise ValueError('native scope must name distinct existing full-record owners and root once')
     return full, receipt, manifest, texts, md5, bases, catalog, owners
+
+
+def check_initial(selection, *, full_raw, receipt_raw):
+    """Check actual initial bytes without inventing future seals or completion.
+
+    The caller owns initialized execution/call/path authority. ``passed`` is
+    only the released initial receipt checks; a final registered coverage floor
+    cannot be certified before receipt completion and final reconstruction.
+    """
+    from .canary import receipt_floors
+
+    full, receipt, manifest, texts, md5, bases, _, _ = _raw_inputs(selection, full_raw, receipt_raw)
+    block = receipts.check(receipt, manifest, texts, full, md5, full,
+                           instrument_version=4, identifier_bases=bases)
+    # Compute ordinary structural/source-text gates before adding the selected
+    # final-floor registration. Missing quotes/chunks and vacuity still refuse.
+    structural = receipt_floors(block)
+    selected_policy = policy(selection)
+    pending = {**floor(block['slots'], selection), 'state': 'pending', 'passed': False,
+        'reason': 'initial receipt check precedes completion and final stage reconstruction'}
+    return {**block, 'expected': True, 'checked': True,
+        'passed': not any(structural.values()), 'structural_receipt_floors': structural,
+        'native_receipt_stage': 'phase1_initial', 'final_stage_complete': False,
+        'coverage_floor': pending,
+        'receipt_completion_policy': {
+            'registration': {'sha256': selection.receipt_policy.pin.sha256,
+                'raw_json': selection.receipt_policy.raw.decode('utf-8')},
+            'runtime_policy_sha256': selected_policy['runtime_policy_sha256']},
+        'native_shared_receipt_policy': {'sha256': selection.receipt_policy.pin.sha256,
+            'raw_json': selection.receipt_policy.raw.decode('utf-8')},
+        'identity_rules': {'basis': 'captured native full schema', 'identifier_bases': [list(p) for p in bases]},
+        'native_initial_inputs': {'selection_sha256': selection.registration.pin.sha256,
+            'full_sha256': contract.sha(full_raw), 'receipt_sha256': contract.sha(receipt_raw)}}
 
 
 def prepare(selection, execution, phase1):
