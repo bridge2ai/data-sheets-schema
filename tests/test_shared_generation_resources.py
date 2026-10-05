@@ -90,6 +90,16 @@ def copy_resource(kind, tmp_path, monkeypatch):
     name = names[kind]
     if kind == 'record-import':
         copied, authority = schema_files(tmp_path / 'private-record-schema')
+    elif kind in ('full-version', 'core-version'):
+        # These version roots also feed the real schema-sync reader. Preserve
+        # their actual private sibling/import closure, not an incomplete root.
+        source = original(name)
+        private = tmp_path / 'private-raw-schema'
+        for path in source.parent.rglob('*.yaml'):
+            target = private / path.relative_to(source.parent)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(path.read_bytes())
+        copied = authority = private / source.name
     else:
         copied = tmp_path / ('copied-' + Path(name).name)
         copied.write_bytes(original(name).read_bytes())
