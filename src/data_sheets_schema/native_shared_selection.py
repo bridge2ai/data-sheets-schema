@@ -5,10 +5,12 @@ falls back to live files, and none of these operations launches a runtime.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
 import os
 from pathlib import Path
 import re
 import stat
+from threading import Lock
 from types import MappingProxyType
 
 from . import native_shared_contract as contract
@@ -42,6 +44,56 @@ ASSET_HASHES = MappingProxyType({
     'src/download/prompts/shared_generation_v1.md': '34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450',
 })
 _PLAYBOOK_REF = re.compile(r'\.claude/(?:commands|agents)/[\w.-]+\.md')
+_SCHEMA_CACHE_ENTRIES = 2
+_SCHEMA_CACHE_BYTES = 40_000_000
+
+
+class _SchemaDerivationCache:
+    """Bound only immutable schema payloads, never views or admission results."""
+    def __init__(self):
+        self._entries = OrderedDict()
+        self._bytes = 0
+        self._lock = Lock()
+
+    @staticmethod
+    def _key(key):
+        if (type(key) is not tuple or len(key) != 2 or type(key[0]) is not bytes
+                or type(key[1]) is not tuple or any(type(raw) is not bytes for raw in key[1])):
+            raise ValueError('schema cache requires immutable complete byte keys')
+
+    def get(self, key):
+        self._key(key)
+        with self._lock:
+            entry = self._entries.get(key)
+            if entry is None:
+                return None
+            self._entries.move_to_end(key)
+            return entry[0]
+
+    def put(self, key, value):
+        self._key(key)
+        if type(value) is not bytes:
+            raise ValueError('schema cache retains only immutable derivation metadata bytes')
+        # Count every ordered raw occurrence, even if immutable objects repeat.
+        size = len(key[0]) + sum(len(raw) for raw in key[1]) + len(value)
+        if size > _SCHEMA_CACHE_BYTES:
+            return
+        with self._lock:
+            prior = self._entries.get(key)
+            if prior is not None:
+                if prior[0] != value:
+                    raise ValueError('one schema input produced different derivation metadata')
+                self._entries.move_to_end(key)
+                return
+            while self._entries and (len(self._entries) >= _SCHEMA_CACHE_ENTRIES
+                                     or self._bytes + size > _SCHEMA_CACHE_BYTES):
+                _, (_, old_size) = self._entries.popitem(last=False)
+                self._bytes -= old_size
+            self._entries[key] = (value, size)
+            self._bytes += size
+
+
+_SCHEMA_DERIVATIONS = _SchemaDerivationCache()
 
 
 def descriptor() -> dict:
@@ -196,11 +248,52 @@ def _schemas(doc, artifacts):
     return tuple(result)
 
 
+def _schema_cache_key(doc, artifacts):
+    declarations, raw = [], []
+    for kind, cls in (('full', 'Dataset'), ('core', 'CoreDataset')):
+        declaration = doc['inputs'][kind + '_schema']
+        sources = tuple(artifacts[f'{kind}_schema:{i}'] for i in range(len(declaration['sources'])))
+        declarations.append({'kind': kind, 'root_class': cls, 'declaration': declaration,
+                             'artifacts': [contract.pin_dict(a.pin) for a in sources]})
+        raw.extend(a.raw for a in sources)
+    metadata = {'domain': 'native_shared_schema_derivation_v1',
+                'strict': True, 'logical_paths': True, 'namespace_orders': None,
+                'limits': dict(contract.HARD_LIMITS), 'schemas': declarations}
+    return contract.canonical(metadata), tuple(raw)
+
+
+def _schema_metadata(schemas):
+    return contract.canonical([{
+        'kind': schema.kind, 'root_class': schema.root_class, 'root_name': schema.root_name,
+        'import_roles': schema.import_roles, 'closure_sha256': schema.closure_sha256,
+        'sources': [contract.pin_dict(a.pin) for a in schema.sources],
+    } for schema in schemas])
+
+
+def _cached_schemas(doc, artifacts):
+    key = _schema_cache_key(doc, artifacts)
+    metadata = _SCHEMA_DERIVATIONS.get(key)
+    if metadata is None:
+        # Derive outside the lock. Concurrent misses may safely repeat work.
+        metadata = _schema_metadata(_schemas(doc, artifacts))
+    result = _declared_schemas(doc, artifacts)
+    if _schema_metadata(result) != metadata:
+        raise ValueError('schema derivation metadata differs from the current captured carriers')
+    _SCHEMA_DERIVATIONS.put(key, metadata)
+    return result
+
+
 def rebuild(registration: contract.CapturedArtifact,
             authority: tuple[contract.CapturedArtifact, ...],
             schemas: tuple[contract.SchemaClosureCapture, ...],
             receipt_policy: contract.CapturedArtifact) -> contract.NativeSelectionCapture:
     """Independently reconstruct S from complete bytes; no live fallback."""
+    return _rebuild(registration, authority, schemas, receipt_policy, use_schema_cache=False)
+
+
+def _rebuild(registration, authority, schemas, receipt_policy, *, use_schema_cache):
+    if type(use_schema_cache) is not bool:
+        raise ValueError('schema derivation route must be explicit')
     if (type(registration) is not contract.CapturedArtifact
             or type(receipt_policy) is not contract.CapturedArtifact
             or type(authority) is not tuple or type(schemas) is not tuple
@@ -242,7 +335,7 @@ def rebuild(registration: contract.CapturedArtifact,
     if owners.count('') != 1 or len(owners) != len(set(owners)):
         raise ValueError('native generation context requires exactly one root and unique owners')
     contract.parse_receipt_policy(receipt_policy.raw, RECEIPT_POLICY_SHA256)
-    reconstructed = _schemas(doc, by_role)
+    reconstructed = (_cached_schemas(doc, by_role) if use_schema_cache else _schemas(doc, by_role))
     if schemas != reconstructed:
         raise ValueError('saved native schema carriers differ from complete reconstruction')
     return contract.NativeSelectionCapture(
@@ -368,7 +461,8 @@ def capture(selection_path: str | Path) -> contract.NativeSelectionCapture:
     schemas = _declared_schemas(doc, artifacts)
     authority = tuple(a for role, a in artifacts.items()
                       if role != 'receipt_policy' and not role.startswith(('full_schema:', 'core_schema:')))
-    result = rebuild(_artifact('selection', path, raw), authority, schemas, artifacts['receipt_policy'])
+    result = _rebuild(_artifact('selection', path, raw), authority, schemas,
+                      artifacts['receipt_policy'], use_schema_cache=True)
     reader.stable()
     if _canonical_file(stage_root) != stage_root:
         raise ValueError('native stage root changed during capture')

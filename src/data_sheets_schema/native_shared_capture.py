@@ -998,6 +998,7 @@ from .native_shared_current import current_artifact
 
 def _receipt_assessment(run, *, full_path, receipt_path):
     from . import native_shared_receipts as receipts
+    from . import native_shared_selection as selection_api
     paths = run.spec._agentic_artifact_paths
     if (str(full_path) != paths['full'] or str(receipt_path) != paths['receipt']):
         raise ValueError('receipt caller paths differ from the exact execution-selected outputs')
@@ -1008,13 +1009,17 @@ def _receipt_assessment(run, *, full_path, receipt_path):
         return block, full, original
     if original.raw != run.phase1.original_receipt.raw:
         raise ValueError('selected ordinary receipt changed from the exact sealed original')
+    fresh_selection = selection_api.rebuild(run.selection.registration, run.selection.authority,
+                                           run.selection.schemas, run.selection.receipt_policy)
+    if fresh_selection != run.selection:
+        raise ValueError('final receipt selection differs from independent reconstruction')
     decision = run.decision()
     if decision.state != 'assembly_complete' or decision.completion is None:
         raise ValueError('final native receipts require the freshly checked complete stage history')
-    completion = stage.check_assembly(run.selection, run.binding, run.phase1, run.history,
+    completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,
                                      decision.completion.assembly.raw)
     assessed = completion.effective_receipt
-    block = receipts.check_final(run.selection, run.binding, run.phase1, completion,
+    block = receipts.check_final(fresh_selection, run.binding, run.phase1, completion,
                                 final_full=full.raw, final_receipt=assessed.raw)
     block['native_receipt_inputs'] = {'selected_original': c.pin_dict(original.pin),
         'sealed_original': c.pin_dict(run.phase1.original_receipt.pin), 'assessed_effective': c.pin_dict(assessed.pin),
