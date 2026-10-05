@@ -26,8 +26,10 @@ on:
 jobs:
   check-mention:
     # Most issue/PR edits are bookkeeping. Avoid allocating a runner when
-    # the relevant body has no mention; the existing script still authorizes
-    # the actor and parses the request. Manual dispatch still searches comments.
+    # the relevant body has no mention. This is only a cheap first gate: a
+    # handle quoted in prose or code passes it too. The steps below authorize
+    # the author, and "Read the request" decides whether the text holds a
+    # request (#4108). Manual dispatch still searches comments.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' && contains(github.event.issue.body, '@d4dassistant')) ||
@@ -35,8 +37,9 @@ jobs:
       ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') && contains(github.event.comment.body, '@d4dassistant'))
     runs-on: ubuntu-latest
     outputs:
-      qualified-mention: ${{ steps.detect.outputs.qualified-mention }}
-      prompt: ${{ steps.detect.outputs.prompt }}
+      # 'true' only when "Read the request" ran (an allowed author) and found one
+      qualified-mention: ${{ steps.request.outputs.request }}
+      dataset: ${{ steps.request.outputs.dataset }}
       user: ${{ steps.detect.outputs.user }}
       item-type: ${{ steps.detect.outputs.item-type }}
       item-number: ${{ steps.detect.outputs.item-number }}
@@ -146,32 +149,43 @@ jobs:
               itemNumber = context.payload.pull_request.number;
             }
 
-            // Check if user is allowed and mention exists
+            // Check if user is allowed. Whether the text holds a request is
+            // decided by the next step, which reads it from this file (#4108).
             const isAllowed = allowedUsers.includes(userLogin);
-            const mentionRegex = new RegExp('@d4dassistant\\s+(.*)', 'i');
-            const mentionMatch = content.match(mentionRegex);
+            fs.writeFileSync(`${process.env.RUNNER_TEMP}/assistant-request-text.md`, content);
 
-            const qualifiedMention = isAllowed && mentionMatch !== null;
-            const prompt = qualifiedMention ? mentionMatch[1].trim() : '';
-
-            console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Has mention: ${mentionMatch !== null}, Content: "${content}"`);
+            console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Content: "${content}"`);
 
             // Set outputs
-            core.setOutput('qualified-mention', qualifiedMention);
-            core.setOutput('prompt', prompt);
+            core.setOutput('allowed', isAllowed);
             core.setOutput('user', userLogin);
             core.setOutput('item-type', itemType);
             core.setOutput('item-number', itemNumber);
             core.setOutput('controllers', allowedUsers.map(u => '@' + u).join(', '));
 
             return {
-              qualifiedMention,
+              allowed: isAllowed,
               itemType,
               itemNumber,
-              prompt,
               user: userLogin,
               controllers: allowedUsers.map(u => '@' + u).join(', ')
             };
+
+      # The authoritative decision (#4108). A request is one line that starts
+      # a paragraph with the assistant's handle at the very start of the line,
+      # followed by the name of one directory under
+      # data/sheets_d4dassistant/inputs/ and nothing else, outside code spans,
+      # fenced code, quotes and HTML comments. Anything else (a handle quoted
+      # in prose or code, an unknown dataset, extra words) logs "no request"
+      # and runs nothing. The rules are in the script's docstring.
+      - name: Read the request
+        id: request
+        if: steps.detect.outputs.allowed == 'true'
+        run: >-
+          python3 src/github/assistant_request.py
+          --inputs data/sheets_d4dassistant/inputs
+          --body "$RUNNER_TEMP/assistant-request-text.md"
+          --github-output "$GITHUB_OUTPUT"
 
   respond-to-mention:
     needs: check-mention
@@ -208,22 +222,15 @@ jobs:
       - name: Resolve dataset from the request
         id: resolve
         env:
-          PROMPT: ${{ needs.check-mention.outputs.prompt }}
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
         run: |
           set -euo pipefail
-          # The dataset is whichever inputs/ directory the request names. Matching
-          # against what exists avoids inventing a name from free text.
-          DATASET=""
-          for d in data/sheets_d4dassistant/inputs/*/; do
-            name=$(basename "$d")
-            if printf '%s' "$PROMPT" | grep -qiE "(^|[^A-Za-z0-9_])${name}([^A-Za-z0-9_]|$)"; then
-              DATASET="$name"; break
-            fi
-          done
-          if [ -z "$DATASET" ]; then
-            echo "no-dataset=true" >> "$GITHUB_OUTPUT"
-            echo "available=$(ls data/sheets_d4dassistant/inputs/ | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
-            exit 0
+          # The dataset is the inputs/ directory the request line names exactly,
+          # as "Read the request" in check-mention found it (#4108); never a
+          # name matched in free text. Re-checked against this checkout.
+          if [ -z "$DATASET" ] || [ ! -d "data/sheets_d4dassistant/inputs/$DATASET" ]; then
+            echo "::error::the request names no input directory in this checkout: '$DATASET'"
+            exit 1
           fi
           BUNDLE=$(find "data/sheets_d4dassistant/inputs/$DATASET" -type f \
                      \( -name '*.txt' -o -name '*.md' \) | sort | head -1)
@@ -237,15 +244,11 @@ jobs:
           echo "label=$(date -u +%Y-%m-%d)_claude-opus-5-assistant" >> "$GITHUB_OUTPUT"
 
       - name: Report unresolvable request
-        if: steps.resolve.outputs.no-dataset == 'true' || steps.resolve.outputs.no-bundle == 'true'
+        if: steps.resolve.outputs.no-bundle == 'true'
         env:
           GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
         run: |
-          if [ "${{ steps.resolve.outputs.no-dataset }}" = "true" ]; then
-            MSG="I could not tell which dataset to generate. Name one of these input directories in your request: ${{ steps.resolve.outputs.available }}"
-          else
-            MSG="Found the input directory for **${{ steps.resolve.outputs.dataset }}** but no .txt or .md file inside it, so there is nothing to read."
-          fi
+          MSG="Found the input directory for **${{ steps.resolve.outputs.dataset }}** but no .txt or .md file inside it, so there is nothing to read."
           gh issue comment "${{ needs.check-mention.outputs.item-number }}" --body "$MSG"
           exit 1
 

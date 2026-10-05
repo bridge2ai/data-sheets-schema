@@ -6,13 +6,15 @@ This repository has an AI assistant (`@d4dassistant`) that can automatically gen
 
 ### Request D4D Generation
 
-Authorized users (listed in `.github/ai-controllers.json`) can mention `@d4dassistant` in GitHub issues to request D4D generation:
+Authorized users (listed in `.github/ai-controllers.json`) request a datasheet with one line in an issue, a pull request description or a comment. That line must:
 
-```markdown
-@d4dassistant Please create a D4D for this dataset: https://example.com/dataset-page
+- start with the assistant's handle (shown above), at the very start of the line;
+- continue with a space and the name of one directory under `data/sheets_d4dassistant/inputs/`, spelled exactly as the directory is, and nothing else;
+- start a paragraph: be the first line, or follow a blank line.
 
-Additional context: This dataset contains medical imaging data for cancer research...
-```
+The workflow generates the datasheet for that directory from the documents in it; the rest of the text is not read. Put a new dataset's documents under `data/sheets_d4dassistant/inputs/<name>/` first.
+
+Nothing else is a request (#4108): not the handle in a sentence, in a code span or code block, in a quote (`>`) or an HTML comment, and not the handle followed by anything but one input directory name. For those the workflow logs "no request" and does nothing.
 
 ### What the Assistant Does
 
@@ -22,33 +24,6 @@ Additional context: This dataset contains medical imaging data for cancer resear
 4. **Validates** the YAML against the schema
 5. **Creates** a pull request with the D4D file in `html-demos/user_d4ds/`
 6. **Comments** on your issue with a link to the PR
-
-### Example Requests
-
-**With URL:**
-```markdown
-@d4dassistant Create a D4D for the Bridge2AI VOICE dataset
-
-URL: https://physionet.org/content/b2ai-voice/
-This is a voice biomarker dataset for health research.
-```
-
-**With description only:**
-```markdown
-@d4dassistant Generate a D4D for my diabetes study dataset
-
-Dataset name: T2D Longitudinal Study
-Description: 5-year longitudinal study of 1000 Type 2 diabetes patients
-Format: CSV files with clinical measurements and lab results
-License: CC-BY-4.0
-```
-
-**With GitHub repository:**
-```markdown
-@d4dassistant Create D4D from this repo: https://github.com/org/dataset-repo
-
-The README has all the dataset details.
-```
 
 ## What Information to Provide
 
@@ -115,6 +90,7 @@ Only authorized users can trigger the assistant by mentioning `@d4dassistant`.
 **Assistant didn't respond:**
 - Check that you're in the authorized users list
 - Ensure you mentioned `@d4dassistant` (not `@d4d-assistant` or similar)
+- Check that the request line has exactly the form described above; the "Read the request" step of the workflow run logs why a text holds no request
 - Check GitHub Actions logs for errors
 
 **Generated D4D is incomplete:**
