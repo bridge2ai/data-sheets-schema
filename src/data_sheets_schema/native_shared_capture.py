@@ -6,7 +6,7 @@ Live callers and the saved replay use the same closed observation joins.
 """
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path, PurePosixPath
 import re
 import os
@@ -16,6 +16,7 @@ from . import native_shared_contract as c
 from . import native_shared_evidence as evidence
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
+from . import native_shared_receipts as receipt_api
 
 _DYNAMIC = {'record': ('journal_records_root', 'json', 'history_records', 0),
             'request': ('requests_root', 'json', 'submissions', 1),
@@ -354,6 +355,8 @@ class _CapturedRun:
     history: c.RawHistory
     observations: tuple
     phase1: object
+    _catalogs: object = field(default_factory=receipt_api._ReceiptCatalogContext,
+                              init=False, compare=False, repr=False)
 
     def trace(self, transcript=None, control=None):
         return observed.Trace(transcript or self.transcript, control or self.control,
@@ -362,7 +365,7 @@ class _CapturedRun:
     def decision(self):
         if self.phase1 is None:
             return None
-        return stage.prepare_next(self.selection, self.binding, self.phase1, self.history)
+        return stage._prepare_next(self.selection, self.binding, self.phase1, self.history, self._catalogs)
 
 
 def _binding_document(selection, value, composition, execution, started, observation_item, session):
@@ -524,7 +527,7 @@ def _decision_at(run, digest):
     phase1 = _phase1(run.selection, run.binding, history, run.reader)
     if phase1 is None:
         raise ValueError('stage observation precedes actual phase1 seal')
-    return stage.prepare_next(run.selection, run.binding, phase1, history)
+    return stage._prepare_next(run.selection, run.binding, phase1, history, run._catalogs)
 
 
 def _require_completed_read_before_write(request, read):
@@ -966,14 +969,14 @@ def observe_advance_settled(run, identity):
         raise ValueError('advance result differs from actual current selected publication')
     before = _history_prefix(run, result['before_history_sha256'])
     phase1 = _phase1(run.selection, run.binding, before, run.reader)
-    replay = stage._Replay(run.selection, run.binding, phase1, before).run()
+    replay = stage._Replay(run.selection, run.binding, phase1, before, _catalogs=run._catalogs).run()
     if replay.pending is not None and replay.pending[-1] is not None:
         response, _ = replay.pending[-1]
-        proposal = stage.check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw, response.raw)
+        proposal = stage._check_response(run.selection, run.binding, phase1, before, replay.pending[2].raw, response.raw, run._catalogs)
         publications = (*proposal.publications, *(c.HelperPublication('create_once', item, None) for item in proposal.records_to_append),
             c.HelperPublication('replace_journal_from_exact_predecessor', proposal.predicted_journal, before.journal.pin.sha256))
     else:
-        publications = stage.prepare_next(run.selection, run.binding, phase1, before).publications
+        publications = stage._prepare_next(run.selection, run.binding, phase1, before, run._catalogs).publications
     if result['publications'] != [c.pin_dict(item.artifact.pin) for item in publications]:
         raise ValueError('advance result does not describe every freshly derived actual effect')
     for item in publications:
@@ -1013,7 +1016,8 @@ def _receipt_assessment(run, *, full_path, receipt_path):
                                            run.selection.schemas, run.selection.receipt_policy)
     if fresh_selection != run.selection:
         raise ValueError('final receipt selection differs from independent reconstruction')
-    decision = run.decision()
+    # Final reconstruction must not reuse the live run's catalog context.
+    decision = stage.prepare_next(fresh_selection, run.binding, run.phase1, run.history)
     if decision.state != 'assembly_complete' or decision.completion is None:
         raise ValueError('final native receipts require the freshly checked complete stage history')
     completion = stage.check_assembly(fresh_selection, run.binding, run.phase1, run.history,

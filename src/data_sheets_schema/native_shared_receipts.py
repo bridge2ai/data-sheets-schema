@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 from pathlib import Path
+from threading import Lock
 
 import yaml
 
@@ -37,6 +38,75 @@ def schema_snapshot(selection, kind='full'):
     names = {role: name for name, role in schema.import_roles}
     sources = tuple((names[item.pin.role], Path(item.pin.path), item.raw) for item in schema.sources)
     return SchemaSnapshot(sources, (str(sources[0][1]), schema.closure_sha256))
+
+
+
+_CATALOG_PAYLOAD_BYTES = 40_000_000
+_CATALOG_DOMAIN = 'native_shared_receipt_catalog_v1'
+
+
+def _catalog_key(selection, snapshot):
+    """Validate immutable carrier identity before considering a pure hit."""
+    rows = [item for item in selection.schemas if item.kind == 'full']
+    if len(rows) != 1 or type(rows[0]) is not contract.SchemaClosureCapture:
+        raise ValueError('receipt catalog requires one captured full schema')
+    schema = rows[0]
+    # Recheck pin integrity even if a caller has bypassed frozen dataclasses.
+    sources = tuple(contract.CapturedArtifact(
+        contract.ArtifactPin(item.pin.role, item.pin.path, item.pin.bytes, item.pin.sha256), item.raw)
+        for item in schema.sources)
+    checked = contract.SchemaClosureCapture(schema.closure_sha256, schema.import_roles,
+        schema.kind, schema.root_class, schema.root_name, sources)
+    names = {role: name for name, role in checked.import_roles}
+    expected = tuple((names[item.pin.role], Path(item.pin.path), item.raw) for item in sources)
+    if snapshot.sources != expected:
+        raise ValueError('receipt catalog snapshot differs from its captured schema')
+    if sum(len(item.raw) for item in sources) > omissions.MAX_SCHEMA_BYTES:
+        raise ValueError('schema closure exceeds byte bound')
+    metadata = contract.canonical({'domain': _CATALOG_DOMAIN, 'kind': checked.kind,
+        'root_class': checked.root_class, 'root_name': checked.root_name,
+        'root_path': sources[0].pin.path, 'closure_sha256': checked.closure_sha256,
+        'import_roles': [list(row) for row in checked.import_roles],
+        'sources': [{'name': names[item.pin.role], 'pin': contract.pin_dict(item.pin)} for item in sources],
+        'declaration': selection.document()['inputs']['full_schema'],
+        'mode': {'logical_paths': True, 'strict': True, 'namespace_orders': None},
+        'limits': {'max_input_bytes': omissions.MAX_INPUT_BYTES,
+            'max_schema_bytes': omissions.MAX_SCHEMA_BYTES, 'max_nodes': omissions.MAX_NODES,
+            'max_depth': omissions.MAX_DEPTH, 'native': dict(contract.HARD_LIMITS),
+            'supplied': selection.bounds()}})
+    return metadata, tuple(item.raw for item in sources)
+
+
+class _ReceiptCatalogContext:
+    """One bounded byte-only derivation, owned by one captured transaction."""
+    def __init__(self):
+        self._entry = None
+        self._bytes = 0
+        self._lock = Lock()
+
+    def catalog(self, selection, snapshot):
+        key = _catalog_key(selection, snapshot)
+        with self._lock:
+            raw = self._entry[1] if self._entry is not None and self._entry[0] == key else None
+        if raw is None:
+            catalog = omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True)
+            # LinkML URIorCURIE names have the same released JSON meaning.
+            raw = omissions._json(catalog).encode('utf-8')
+            result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+            size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw)
+            if size <= _CATALOG_PAYLOAD_BYTES:
+                with self._lock:
+                    self._entry, self._bytes = (key, raw), size
+            return result
+        return contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+
+
+def _catalog_context(value=None):
+    if value is None:
+        return _ReceiptCatalogContext()
+    if type(value) is not _ReceiptCatalogContext:
+        raise ValueError('receipt catalog context must be private derivation storage')
+    return value
 
 
 def omission_assets(selection):
@@ -94,11 +164,11 @@ def floor(coverage, selection):
     return {**result, 'state': 'passed' if passed else 'failed', 'passed': passed}
 
 
-def _inputs(selection, phase1):
-    return _raw_inputs(selection, phase1.full.raw, phase1.original_receipt.raw)
+def _inputs(selection, phase1, *, _catalogs=None):
+    return _raw_inputs(selection, phase1.full.raw, phase1.original_receipt.raw, _catalogs=_catalogs)
 
 
-def _raw_inputs(selection, full_raw, receipt_raw):
+def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
     chosen = selection.document()['inputs']
     bounds = selection.bounds()
     for raw in (full_raw, receipt_raw):
@@ -122,11 +192,7 @@ def _raw_inputs(selection, full_raw, receipt_raw):
     # The released rule uses the selected root's declared prefixes. Explicit
     # empty bases are meaningful; never fall back to the current installation.
     bases = tuple(declared_bases_of(omissions._mapping(snapshot.sources[0][2], 'captured schema')))
-    catalog = omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True)
-    # LinkML's URIorCURIE import names are string subclasses. The released
-    # omission wire serializes them as strings; retain that exact JSON meaning.
-    catalog = contract.strict_json(omissions._json(catalog).encode('utf-8'),
-                                   'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+    catalog = _catalog_context(_catalogs).catalog(selection, snapshot)
     context = omissions._mapping(selection.raw(chosen['context']['path']), 'scope context', json_only=True)
     owners = omissions._owners(full, catalog, context['vocabulary'])
     scopes = [row['owner'] for row in context['scopes']]
@@ -169,7 +235,11 @@ def check_initial(selection, *, full_raw, receipt_raw):
 
 
 def prepare(selection, execution, phase1):
-    full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1)
+    return _prepare(selection, execution, phase1, _ReceiptCatalogContext())
+
+
+def _prepare(selection, execution, phase1, catalogs):
+    full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1, _catalogs=catalogs)
     chosen = selection.document()['inputs']
     paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5,
                                                   original=full, identifier_bases=bases)
@@ -190,8 +260,12 @@ def prepare(selection, execution, phase1):
 
 
 def complete(selection, execution, phase1, response_raw):
-    request = prepare(selection, execution, phase1)
-    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1)
+    return _complete(selection, execution, phase1, response_raw, _ReceiptCatalogContext())
+
+
+def _complete(selection, execution, phase1, response_raw, catalogs):
+    request = _prepare(selection, execution, phase1, catalogs)
+    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1, _catalogs=catalogs)
     listed = request['requested_paths']
     if response_raw is None:
         if listed:

@@ -201,7 +201,8 @@ def _envelope(raw):
 
 
 class _Replay:
-    def __init__(self, selection, execution, phase1, history):
+    def __init__(self, selection, execution, phase1, history, *, _catalogs=None):
+        self.catalogs = nr._catalog_context(_catalogs)
         self.s, self.e, self.p, self.h = selection, execution, phase1, history
         self.rows, self.artifacts = _history(selection, execution, history)
         self.at = 0
@@ -280,7 +281,7 @@ class _Replay:
 
     def _inner(self, cursor):
         if cursor.kind == 'receipt':
-            return nr.prepare(self.s, self.e, self.p)
+            return nr._prepare(self.s, self.e, self.p, self.catalogs)
         if cursor.kind == 'worker':
             return typed.worker_request(self.packet, cursor.target_id, **self.options)
         if cursor.kind == 'omission':
@@ -328,7 +329,7 @@ class _Replay:
     def _derive_response(self, cursor, inner, raw):
         envelope, outputs = None, ()
         if cursor.kind == 'receipt':
-            value = nr.complete(self.s, self.e, self.p, raw)
+            value = nr._complete(self.s, self.e, self.p, raw, self.catalogs)
             outputs = self._receipt_outputs(value)
             if c.strict_json(value.result_json)['state'] != 'answers_complete':
                 raise _IncompleteReceipt(outputs)
@@ -421,14 +422,14 @@ class _Replay:
         return True
 
     def run(self):
-        requested = nr.prepare(self.s, self.e, self.p)['requested_paths']
+        requested = nr._prepare(self.s, self.e, self.p, self.catalogs)['requested_paths']
         ordinal = 1
         if requested:
             if not self._stage(c.StageCursor(ordinal=ordinal, kind='receipt', target_id='receipt')):
                 return self
             ordinal += 1
         else:
-            self.receipt = nr.complete(self.s, self.e, self.p, None)
+            self.receipt = nr._complete(self.s, self.e, self.p, None, self.catalogs)
             outputs = self._receipt_outputs(self.receipt)
             if self.at == len(self.rows):
                 self.pending = ('receipt_zero_work', None, None, None, None, outputs, None)
@@ -499,7 +500,11 @@ def _sealed(replay):
 
 def prepare_next(selection, execution, phase1, history):
     """Rebuild history and derive the only next request or no-response state."""
-    replay = _Replay(selection, execution, phase1, history).run()
+    return _prepare_next(selection, execution, phase1, history, nr._ReceiptCatalogContext())
+
+
+def _prepare_next(selection, execution, phase1, history, catalogs):
+    replay = _Replay(selection, execution, phase1, history, _catalogs=catalogs).run()
     state, cursor, request, destination, publications, predecessor = 'assembly_complete', None, None, None, (), None
     failure = None
     completion = None
@@ -539,7 +544,11 @@ def prepare_next(selection, execution, phase1, history):
 
 def check_response(selection, execution, phase1, history, request_raw, response_raw):
     """First bytes must already be consumed; parsing can never buy another answer."""
-    replay = _Replay(selection, execution, phase1, history).run()
+    return _check_response(selection, execution, phase1, history, request_raw, response_raw, nr._ReceiptCatalogContext())
+
+
+def _check_response(selection, execution, phase1, history, request_raw, response_raw, catalogs):
+    replay = _Replay(selection, execution, phase1, history, _catalogs=catalogs).run()
     if replay.pending is None or replay.pending[0] != 'awaiting_response' or replay.pending[-1] is None:
         raise ValueError('native response has no unique durable first consumption')
     _, cursor, request, destination, inner, _, consumed = replay.pending

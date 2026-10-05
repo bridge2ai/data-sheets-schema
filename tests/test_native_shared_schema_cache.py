@@ -306,14 +306,15 @@ def test_final_receipt_routes_fresh_rebuild_before_assessment(
     assembly = artifact('typed_assembly', str(tmp_path / 'assembly.json'), b'{}')
     seen, selections = [], []
 
-    def decision():
+    def decision(selection, *_args):
+        assert selection == saved and selection is not saved
         assert len(views) == 4
         seen.append('decision')
         return SimpleNamespace(state='assembly_complete', completion=SimpleNamespace(assembly=assembly))
 
     run = SimpleNamespace(selection=saved, spec=SimpleNamespace(_agentic_artifact_paths={
         'full': full_path, 'receipt': receipt_path}), phase1=SimpleNamespace(original_receipt=original),
-        binding=object(), history=object(), decision=decision)
+        binding=object(), history=object(), decision=lambda: pytest.fail('final reused live decision'))
     completion = SimpleNamespace(effective_receipt=effective)
 
     def check_assembly(selection, *args):
@@ -333,6 +334,7 @@ def test_final_receipt_routes_fresh_rebuild_before_assessment(
     monkeypatch.setattr(capture, '_load', lambda _path: run)
     monkeypatch.setattr(capture, '_recorded_run', lambda _spec, _record: run)
     monkeypatch.setattr(capture, 'phase_replay', lambda _run: ({'passed': True}, None))
+    monkeypatch.setattr(capture.stage, 'prepare_next', decision)
     monkeypatch.setattr(capture.stage, 'check_assembly', check_assembly)
     monkeypatch.setattr(receipts, 'check_final', check_final)
     with monkeypatch.context() as trapped:
