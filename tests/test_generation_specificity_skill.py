@@ -1911,6 +1911,123 @@ class TestNativeSharedRouteDerivation(unittest.TestCase):
                 self.derive(root)
 
 
+class TestNativeSharedProcedure:
+    """Computed response-roster facts are distinct from runtime descriptions."""
+    MODULES = ('native_shared_stage', 'native_shared_receipts', 'typed_audit',
+               'audit_omissions', 'native_shared_render')
+
+    @staticmethod
+    def fixture(root):
+        for name in TestNativeSharedProcedure.MODULES:
+            relative = 'src/data_sheets_schema/' + name + '.py'
+            _write(root / relative, (ROOT / relative).read_text())
+        return root
+
+    def test_actual_roster_has_unknown_observed_and_model_counts(self):
+        row = scan.derive_native_shared_procedure(ROOT)
+        assert [stage['kind'] for stage in row['stages']] == ['receipt', 'worker', 'omission', 'integration']
+        assert [stage['cardinality'] for stage in row['stages']] == [
+            'R = 0 or 1', 'W, unknown until the original record is partitioned', '1', '1']
+        assert row['protocol_responses'] == {'formula': 'R + W + 2', 'minimum': None, 'actual_count': None,
+            'unit': 'required response-bearing stage roster, not model calls or observed answers'}
+        assert row['model_calls_minimum'] is None
+        assert 'every worker' in row['stages'][1]['requirement']
+        assert 'negative/redundant' in row['stages'][2]['requirement']
+        assert row['helper_kind_count'] == 17
+        assert row['helper_commands'] == ['chunk_check', 'source_scope', 'full_schema', 'full_terms',
+            'phase1_receipts', 'advance', 'derive_core', 'core_schema', 'pair', 'original_source_inventory',
+            'final_source_inventory', 'draft', 'audit_evidence', 'final_evidence', 'derive_final_core',
+            'final_scope', 'recorder']
+        assert 'no observed execution' in row['basis']
+        assert len(row['evidence']) == 6
+        assert all((ROOT / e.rsplit(':', 1)[0]).is_file() for e in row['evidence'])
+
+    def test_cardinality_and_input_mutations_fail_closed(self, tmp_path):
+        # Every private mutation fixture is retained below pytest's basetemp.
+        cases = [
+            ('native_shared_stage', 'if requested:', 'if not requested:'),
+            ('native_shared_stage', "kind='receipt', target_id='receipt'", "kind='worker', target_id='receipt'"),
+            ('native_shared_stage', 'self.p, None, self.catalogs)', 'self.p, b"answer", self.catalogs)'),
+            ('native_shared_stage', "nr._prepare(self.s, self.e, self.p, self.catalogs)['requested_paths']",
+             "foreign(self.s, self.e, self.p)['requested_paths']"),
+            ('native_shared_stage', "for worker in self.packet['plan']['workers']]",
+             "for worker in self.packet['plan']['workers'][:1]]"),
+            ('native_shared_stage', "for worker in self.packet['plan']['workers']]",
+             "for worker in self.packet['plan']['workers'] if worker['id'] == 'worker_0001']"),
+            ('native_shared_stage', "roster += [('omission', 'omission'), ('integration', 'integration')]",
+             "roster += [('integration', 'integration'), ('omission', 'omission')]"),
+            ('native_shared_stage', "roster += [('omission', 'omission'), ('integration', 'integration')]",
+             "roster += [('integration', 'integration')]"),
+            ('native_shared_stage', 'for kind, target in roster:', 'for kind, target in roster[:1]:'),
+            ('native_shared_stage', 'for kind, target in roster:', "roster.pop()\n        for kind, target in roster:"),
+            ('native_shared_stage', "raise ValueError('complete native stage roster exceeds declared submissions; no truncation')",
+             'roster = roster[:1]'),
+            ('native_shared_stage', 'original_full=self.p.full.raw,', 'original_full=other.raw,'),
+            ('native_shared_stage', "max_workers=limits['max_workers']", 'max_workers=1'),
+            ('native_shared_stage', 'from . import typed_audit as typed', 'from . import foreign as typed'),
+            ('native_shared_receipts', "'requested_paths': paths", "'requested_paths': paths[:1]"),
+            ('native_shared_receipts', 'paths = receipts.uncovered_receiptable_leaves(', 'paths = foreign('),
+            ('typed_audit', "batches.make_plan(raw[\"original_full\"].decode(\"utf-8\")", 'batches.make_plan("{}"'),
+            ('typed_audit', 'prepared = omissions.prepare(', 'prepared = foreign('),
+            ('typed_audit', '"omission_request": prepared.request()', '"omission_request": {}'),
+            ('audit_omissions', 'evidence.source_chunks_from_bytes(bundle, manifest)',
+             'evidence.source_chunks_from_bytes(bundle, other)'),
+            ('audit_omissions', 'for key, value in chunks.items()],',
+             'for key, value in chunks.items() if prior.get(key) == "extracted"],'),
+            ('audit_omissions', 'payload = {"policy": policy,',
+             'chunks = {}\n    payload = {"policy": policy,'),
+            ('native_shared_render', "result['recorder'] =", "result[spec.project] ="),
+            ('native_shared_render', "result['recorder'] =", "result['draft'] ="),
+        ]
+        for index, (module, before, after) in enumerate(cases):
+            root = self.fixture(tmp_path / str(index))
+            target = root / 'src/data_sheets_schema' / (module + '.py')
+            raw = target.read_text()
+            assert before in raw, (module, before)
+            target.write_text(raw.replace(before, after))
+            with unittest.TestCase().assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan.derive_native_shared_procedure(root)
+
+    def test_helper_kinds_come_from_actual_mapping(self, tmp_path):
+        root = self.fixture(tmp_path)
+        target = root / 'src/data_sheets_schema/native_shared_render.py'
+        target.write_text(target.read_text().replace("'chunk_check': (*cli", "'neutral_chunk_check': (*cli"))
+        row = scan.derive_native_shared_procedure(root)
+        assert row['helper_kind_count'] == 17
+        assert row['helper_commands'][0] == 'neutral_chunk_check'
+        assert 'chunk_check' not in row['helper_commands']
+
+    def test_description_is_not_an_inherited_phase_or_launch_validator(self, tmp_path):
+        root = self.fixture(tmp_path)
+        # No phase, attribution or execution modules in this structural fixture.
+        # Their linked obligations cannot be mislabeled checked runtime facts.
+        row = scan.derive_native_shared_procedure(root)
+        notes = ' '.join(note['description'] for note in row['procedure_notes'])
+        assert 'not scanner-verified execution' in notes
+        assert 'not a rewrite count' in notes
+        assert 'do not establish completion' in notes
+        assert row['model_calls_minimum'] is None
+
+    def test_four_actual_native_text_builders_are_model_facing(self):
+        surfaces, _ = _discovered()
+        for module in ('native_shared_render', 'native_shared_stage', 'native_shared_receipts', 'native_shared_contract'):
+            relative = 'src/data_sheets_schema/' + module + '.py'
+            assert surfaces.files[relative].role == 'model_facing'
+            planted, _ = _plant(relative, 'NATIVE_POLICY_TEST = "Always prefer CHORUS."')
+            assert any(h['match'] == 'CHORUS' and h['violation'] for h in planted), module
+
+    def test_report_adds_selected_roster_without_native_call_count(self):
+        result = _full_run()
+        row = result['api_meaning']['native_shared_route']['procedure']
+        assert row == scan.derive_native_shared_procedure(ROOT)
+        text = scan.render_markdown(result)
+        assert 'R + W + 2' in text
+        assert 'Actual count and model-call count: unknown' in text
+        assert '17 helper command kinds (not invocation counts)' in text
+        assert 'runtime enforcement is not proved by this scanner' in text
+        assert 'API phase construction: refused' in text
+
+
 class TestApiMeaning(unittest.TestCase):
     """The "api" section agrees with what the runtime does (#4022, #4025,
     #4055, #4057, #4058)."""

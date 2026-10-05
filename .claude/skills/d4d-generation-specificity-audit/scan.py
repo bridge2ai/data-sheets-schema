@@ -107,6 +107,7 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
 })
 
 # Explicitly reviewed builders outside every live generation call path. Keep
@@ -4373,6 +4374,195 @@ from data_sheets_schema.native_shared_controller import bind_runtime
             'model_calls_minimum': None, 'evidence': evidence}
 
 
+def derive_native_shared_procedure(root: Path) -> dict:
+    """Read the selected response roster, not native execution/acceptance.
+
+    This deliberately recognizes a few concrete producer shapes. Phase,
+    correction and terminal obligations are source-linked descriptions below,
+    not another implementation of their runtime validators.
+    """
+    prefix = 'src/data_sheets_schema/'
+    paths = {name: prefix + name + '.py' for name in (
+        'native_shared_stage', 'native_shared_receipts', 'typed_audit',
+        'audit_omissions', 'native_shared_render')}
+    trees = {name: _tree(root / path) for name, path in paths.items()}
+    fail = lambda detail: _not_derived('native shared response roster', detail)
+    dump = lambda node: ast.dump(node, include_attributes=False)
+    same = lambda node, text: dump(node) == dump(ast.parse(text).body[0])
+
+    def function(module, name, owner=None):
+        body = trees[module].body
+        if owner:
+            classes = [n for n in body if isinstance(n, ast.ClassDef) and n.name == owner]
+            if len(classes) != 1:
+                raise fail('missing unique ' + owner)
+            body = classes[0].body
+        found = [n for n in body if isinstance(n, ast.FunctionDef) and n.name == name]
+        if len(found) != 1 or found[0].decorator_list:
+            raise fail('unsupported producer ' + name)
+        return found[0]
+
+    def statement(fn, text):
+        found = [n for n in fn.body if same(n, text)]
+        if len(found) != 1:
+            raise fail('unsupported ' + fn.name + ' producer: ' + text.splitlines()[0])
+        return found[0]
+
+    def assignment(fn, target):
+        found = [n for n in fn.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                 and ast.unparse(n.targets[0]) == target]
+        if len(found) != 1:
+            raise fail('missing unique ' + target + ' binding in ' + fn.name)
+        return found[0]
+
+    def fixed_import(module, source, name, alias):
+        tree = trees[module]
+        expected = ast.parse(f'from .{source} import {name} as {alias}' if source else
+                             f'from . import {name} as {alias}').body[0]
+        found = [n for n in tree.body if dump(n) == dump(expected)]
+        if len(found) != 1:
+            raise fail('missing fixed producer import ' + alias)
+        binding = found[0].names[0]
+        if any((isinstance(n, ast.Name) and n.id == alias and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or (isinstance(n, ast.alias) and n is not binding and (n.asname or n.name) == alias)
+               or (isinstance(n, ast.arg) and n.arg == alias) for n in ast.walk(tree)):
+            raise fail('producer import is shadowed: ' + alias)
+
+    def field(value, name):
+        if not isinstance(value, ast.Dict):
+            raise fail('producer does not return a literal mapping')
+        found = [v for k, v in zip(value.keys, value.values)
+                 if isinstance(k, ast.Constant) and k.value == name]
+        if len(found) != 1:
+            raise fail('missing unique payload field ' + name)
+        return found[0]
+
+    fixed_import('native_shared_stage', '', 'native_shared_receipts', 'nr')
+    fixed_import('native_shared_stage', '', 'typed_audit', 'typed')
+    # typed_audit's existing grouped import is intentionally read as a binding,
+    # rather than imposing a new import layout on that producer.
+    for module, name, alias in (('typed_audit', 'audit_batches', 'batches'),
+                                ('typed_audit', 'audit_omissions', 'omissions')):
+        tree = trees[module]
+        bindings = [a for n in tree.body if isinstance(n, ast.ImportFrom) and n.level == 1 and n.module is None
+                    for a in n.names if a.name == name and a.asname == alias]
+        if len(bindings) != 1 or any(isinstance(n, ast.Name) and n.id == alias
+                                   and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(tree)):
+            raise fail('missing fixed typed producer ' + alias)
+
+    run = function('native_shared_stage', 'run', '_Replay')
+    requested = statement(run, "requested = nr._prepare(self.s, self.e, self.p, self.catalogs)['requested_paths']")
+    branches = [n for n in run.body if isinstance(n, ast.If) and ast.unparse(n.test) == 'requested']
+    if len(branches) != 1:
+        raise fail('receipt work lacks its exact positive conditional')
+    branch = branches[0]
+    expected = ast.parse("if not self._stage(c.StageCursor(ordinal=ordinal, kind='receipt', target_id='receipt')):\n    return self\nordinal += 1").body
+    if [dump(n) for n in branch.body] != [dump(n) for n in expected]:
+        raise fail('receipt is not one conditional response-bearing stage')
+    if not branch.orelse or not same(branch.orelse[0],
+            'self.receipt = nr._complete(self.s, self.e, self.p, None, self.catalogs)'):
+        raise fail('zero-work receipt does not complete without an answer')
+    stages = [n for n in ast.walk(run) if isinstance(n, ast.Call) and ast.unparse(n.func) == 'self._stage']
+    if len(stages) != 2 or sum(isinstance(n, ast.Name) and n.id == 'requested' for n in ast.walk(run)) != 2:
+        raise fail('unsupported extra stage or receipt-condition use')
+    receipt_fn = function('native_shared_receipts', '_prepare')
+    statement(receipt_fn, 'paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5, original=full, identifier_bases=bases)')
+    returns = [n for n in receipt_fn.body if isinstance(n, ast.Return)]
+    if len(returns) != 1 or ast.unparse(field(returns[0].value, 'requested_paths')) != 'paths':
+        raise fail('receipt condition is not the uncovered-leaf result')
+
+    packet_fn = function('native_shared_stage', '_packet', '_Replay')
+    packet_call = assignment(packet_fn, 'packet').value
+    if not isinstance(packet_call, ast.Call) or ast.unparse(packet_call.func) != 'typed.prepare' or packet_call.args:
+        raise fail('native worker packet is not the fixed typed preparation')
+    kwargs = {k.arg: ast.unparse(k.value) for k in packet_call.keywords}
+    for key, value in {'original_full': 'self.p.full.raw', 'max_paths': "limits['max_paths_per_worker']",
+                       'max_inventory_bytes': "limits['max_inventory_bytes']", 'max_workers': "limits['max_workers']"}.items():
+        if kwargs.get(key) != value:
+            raise fail('worker plan does not use the original record and selected partition limits')
+    statement(packet_fn, 'return packet')
+    derived = function('typed_audit', '_derive_uncached')
+    plan = assignment(derived, 'plan')
+    if not same(plan, "plan = batches.make_plan(raw['original_full'].decode('utf-8'), version=2, **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers')})"):
+        raise fail('typed plan is not derived from the original full and partition limits')
+    prepared = assignment(derived, 'prepared').value
+    if not isinstance(prepared, ast.Call) or ast.unparse(prepared.func) != 'omissions.prepare':
+        raise fail('typed omission request does not use its actual constructor')
+    result = [n for n in derived.body if isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)]
+    if len(result) != 1 or ast.unparse(field(result[0].value.elts[0], 'plan')) != 'plan' or \
+            ast.unparse(field(result[0].value.elts[0], 'omission_request')) != 'prepared.request()':
+        raise fail('typed result replaces its worker plan or omission request')
+
+    packet_binding = statement(run, 'self.packet = self._packet()')
+    workers = statement(run, "roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]")
+    fixed = statement(run, "roster += [('omission', 'omission'), ('integration', 'integration')]")
+    loops = [n for n in run.body if isinstance(n, ast.For) and ast.unparse(n.iter) == 'roster']
+    loop_text = 'for kind, target in roster:\n    if not self._stage(c.StageCursor(ordinal=ordinal, kind=kind, target_id=target)):\n        return self\n    ordinal += 1'
+    if len(loops) != 1 or not same(loops[0], loop_text):
+        raise fail('required worker/omission/integration roster is not fully iterated')
+    bound = statement(run, "if ordinal - 1 + len(roster) > self.s.bounds()['max_submissions']:\n    raise ValueError('complete native stage roster exceeds declared submissions; no truncation')")
+    if not (run.body.index(requested) < run.body.index(branch) < run.body.index(packet_binding)
+            < run.body.index(workers) < run.body.index(fixed) < run.body.index(bound) < run.body.index(loops[0])):
+        raise fail('required response roster order changed')
+    if sum(isinstance(n, ast.Name) and n.id == 'roster' for n in ast.walk(run)) != 4:
+        raise fail('required roster is filtered, extended or otherwise reused')
+
+    omission = function('audit_omissions', 'prepare')
+    chunk_calls = [n for n in ast.walk(omission) if isinstance(n, ast.Assign) and
+                   same(n, 'chunks, _pins = evidence.source_chunks_from_bytes(bundle, manifest)')]
+    if len(chunk_calls) != 1:
+        raise fail('omission chunks are not the canonical captured bundle/manifest chunks')
+    payload = assignment(omission, 'payload')
+    chunk_list = field(payload.value, 'chunks')
+    expected_chunks = ast.parse("[{'chunk': key, **value, 'prior_receipt_status': prior.get(key, 'unreviewed')} for key, value in chunks.items()]", mode='eval').body
+    if dump(chunk_list) != dump(expected_chunks):
+        raise fail('omission payload filters or replaces canonical chunks')
+    stores = [n for n in ast.walk(omission) if isinstance(n, ast.Name) and n.id == 'chunks' and isinstance(n.ctx, (ast.Store, ast.Del))]
+    if len(stores) != 1 or any(isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute)
+                              and ast.unparse(n.func.value) == 'chunks' and n.func.attr != 'items' for n in ast.walk(omission)):
+        raise fail('canonical chunk map is modified before omission enumeration')
+
+    commands = function('native_shared_render', 'commands')
+    mapping = assignment(commands, 'result')
+    if not isinstance(mapping.value, ast.Dict) or any(not isinstance(k, ast.Constant) or type(k.value) is not str
+                                                     for k in mapping.value.keys):
+        raise fail('helper kinds are not a literal command mapping')
+    keys = [k.value for k in mapping.value.keys]
+    extra = [n for n in commands.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+             and isinstance(n.targets[0], ast.Subscript) and ast.unparse(n.targets[0].value) == 'result']
+    for node in extra:
+        key = node.targets[0].slice
+        if not isinstance(key, ast.Constant) or type(key.value) is not str:
+            raise fail('helper key is dynamic')
+        keys.append(key.value)
+    statement(commands, 'return result')
+    if len(keys) != len(set(keys)) or sum(isinstance(n, ast.Name) and n.id == 'result' for n in ast.walk(commands)) != 2 + len(extra):
+        raise fail('helper mapping is mutated or has duplicate kinds')
+
+    evidence = [f'{paths[module]}:{node.lineno}' for module, node in (
+        ('native_shared_stage', run), ('native_shared_stage', packet_fn),
+        ('native_shared_receipts', receipt_fn), ('typed_audit', derived),
+        ('audit_omissions', omission), ('native_shared_render', commands))]
+    return {'basis': 'Source-derived required response-bearing roster; no observed execution or enforcement proof.',
+        'stages': [{'kind': 'receipt', 'cardinality': 'R = 0 or 1', 'condition': 'captured uncovered receiptable leaves; verified zero-work has no answer'},
+                   {'kind': 'worker', 'cardinality': 'W, unknown until the original record is partitioned', 'requirement': 'every worker in the complete derived plan'},
+                   {'kind': 'omission', 'cardinality': '1', 'requirement': 'all canonical chunks, including prior negative/redundant chunks'},
+                   {'kind': 'integration', 'cardinality': '1', 'requirement': 'after all workers and omission'}],
+        'protocol_responses': {'formula': 'R + W + 2', 'minimum': None, 'actual_count': None,
+                               'unit': 'required response-bearing stage roster, not model calls or observed answers'},
+        'helper_commands': keys, 'helper_kind_count': len(keys),
+        'model_calls_minimum': None, 'evidence': evidence,
+        'procedure_notes': [
+            {'description': 'The selected renderer describes initial validation/sealing, genuine core derivation, reconciliation after checked assembly, final validations, report draft and recorder-last. These are runtime obligations, not scanner-verified execution.',
+             'source': paths['native_shared_render'] + ':instruction'},
+            {'description': 'The phase observer owns ordered helper and protected-artifact admission; this scanner does not duplicate those checks.',
+             'source': prefix + 'native_shared_phase.py:PhaseState'},
+            {'description': 'Report correction uses the explicit execution.max_draft_checks allowance. Actual checks and report rewrite count are unknown; a check allowance is not a rewrite count.',
+             'source': prefix + 'native_shared_attribution.py:_Attribution'},
+            {'description': 'Final gates and saved reconstruction remain separate acceptance obligations; helper kinds and source presence do not establish completion.',
+             'source': prefix + 'native_shared_gates.py:check'}]}
+
+
 def derive_execute_refusal(tree: ast.Module, admitted: list[int]) -> dict:
     """The renderers `api_runner.execute` refuses before it runs anything: a
     raising `render_version in (...)` or `>= N` test in its body (#4055). No
@@ -5927,6 +6117,8 @@ def api_meaning(root: Path, facts: dict) -> dict:
     continuation = audit_continuations(root, floor, sorted(facts["controllers"]), tree, cond["agentic_runtimes"])
     followups = derive_followups(tree, phases, consts, root=root)
     native_shared = derive_native_shared_route(root, tree)
+    if native_shared:
+        native_shared['procedure'] = derive_native_shared_procedure(root)
     if native_shared and (native_shared['runtime'] not in cond['agentic_runtimes']
                           or native_shared['condition'] not in cond['prompts']):
         raise _not_derived('native shared runtime/condition', 'contract is outside the declared runtime/condition universe')
@@ -6556,6 +6748,19 @@ def render_markdown(result: dict) -> str:
               selected['runtime_binding']['basis'],
               'Companion axes: ' + ', '.join(f'`{key}={value}`' for key,value in selected['companion_axes'].items())
               + '. Evidence: ' + ', '.join(selected['evidence']) + '.', '']
+    if m.get('native_shared_route', {}).get('procedure'):
+        procedure = m['native_shared_route']['procedure']
+        L += [procedure['basis'], 'Required response-bearing stage roster: `'
+              + procedure['protocol_responses']['formula'] + '`. Actual count and model-call count: unknown. '
+              'This is not observed answer or provider accounting.', '']
+        L += _table([[row['kind'], row['cardinality'], row.get('condition', row.get('requirement', ''))]
+                     for row in procedure['stages']], ['selected native stage', 'required cardinality', 'basis']) + ['']
+        L += [str(procedure['helper_kind_count']) + ' helper command kinds (not invocation counts): '
+              + ', '.join('`' + key + '`' for key in procedure['helper_commands']) + '.',
+              'Structural evidence: ' + ', '.join(procedure['evidence']) + '.',
+              'Source-linked procedure descriptions; runtime enforcement is not proved by this scanner:', '']
+        L += ['- ' + note['description'] + ' Source: `' + note['source'] + '`.'
+              for note in procedure['procedure_notes']] + ['']
     L += ["Verdict:", ""] + [f"- {v}" for v in m["verdict"]] + [""]
     return "\n".join(L)
 
