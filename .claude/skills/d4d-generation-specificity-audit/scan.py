@@ -96,17 +96,26 @@ APPROACHES = {
                                   "a generation closure imports is that approach's surface instead"),
 }
 
-#: Modules whose text reaches a model (prompt assembly, bundle text, digest).
-#: A hand-kept list: which modules belong to each closure is derived from
-#: imports; whether a module *writes model-facing text* is not derivable
-#: from an import graph. tests/test_generation_specificity_skill.py fails
-#: when a name here is in none of the api, native or deterministic closures.
+#: Modules whose text reaches a model (prompt assembly, bundle text, digest),
+#: kept by hand as a cross-check of the derivation (#4085): whether a
+#: top-level `data_sheets_schema` module writes model-facing text is derived
+#: by data flow (`derive_model_facing`), and the report lists every module
+#: the derivation finds that this list lacks, and every one it names that
+#: the derivation does not reach. A module either names is model-facing, so
+#: a gap in the derivation never stops a module here from gating in
+#: silence. tests/test_generation_specificity_skill.py fails when a name here
+#: is in none of the api, native or deterministic closures, and when this
+#: checkout's derivation and this list disagree.
 MODEL_FACING_MODULES = frozenset({
     "api_runner", "schema_digest", "schema_semantics", "source_review", "grounding",
     "scope", "source_priority", "source_metadata", "chunking", "evidence_assertions",
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    # found by the derivation (#4085): the opt-in renderer-24 receipt turn,
+    # the API playbook adaptation, the native attribution instructions, the
+    # receipt-completion and removal-repair requests and what they carry
+    "rereceipt", "api_playbook", "native_source_attribution", "receipt_completion", "receipts", "removals",
 })
 
 # Explicitly reviewed builders outside every live generation call path. Keep
@@ -183,6 +192,28 @@ HOOK_MODEL_FIELDS = frozenset({"permissionDecisionReason", "additionalContext"})
 #: String methods whose arguments become part of their result (text flows
 #: through them: "".join(parts), text.replace(a, b)).
 STR_TEXT_METHODS = frozenset({"join", "replace", "format", "format_map", "strip", "rstrip", "lstrip"})
+#: Calls the scan cannot resolve to a function whose result carries their
+#: positional arguments' text: a copy, a conversion or a serialization
+#: (`list(cached)`, `str(x)`, `json.dumps(inventory)`,
+#: `yaml.safe_dump(manifest)`), read by the callee's last name (#4085).
+TEXT_CARRYING_CALLS = frozenset({"str", "repr", "list", "tuple", "sorted", "reversed", "copy", "deepcopy",
+                                 "dumps", "dump", "safe_dump", "dedent", "indent", "fill"})
+#: Methods whose result is what a file holds, not the path they are called
+#: on (#4085): `resource_path(name).read_bytes()` sends the file's bytes, so
+#: the path expression is followed as data, never as text.
+FILE_READ_METHODS = frozenset({"read_text", "read_bytes", "read", "readline", "readlines", "open"})
+#: The fields of the runner's request that carry text to the model: the
+#: system prompt and the messages, whose head is the cached prefix
+#: (`cached_blocks`). A request's `phase` names the call for accounting and
+#: is not sent (#4085).
+REQUEST_TEXT_FIELDS = ("system", "cached_blocks", "messages")
+#: The tree a run reads its inputs from (the bundles, their chunk mappings,
+#: the manifest); a run's records go under data/d4d_concatenated/ (#4085).
+INPUT_TREE = "data/preprocessed/"
+#: A templated input a playbook names under the input tree, and the file
+#: name after the project: `data/preprocessed/chunks/{PROJECT}_chunks.yaml`
+#: -> `_chunks.yaml` (#4085).
+TEMPLATED_INPUT = re.compile(re.escape(INPUT_TREE) + r"[\w./-]*\{PROJECT\}([\w.-]*\.\w+)")
 
 #: Packages whose import makes a module a model client (#4023).
 MODEL_CLIENT_PACKAGES = ("anthropic", "openai", "pydantic_ai", "aurelian")
@@ -368,6 +399,20 @@ def _bare_token(node) -> bool:
     not a sentence."""
     return (isinstance(node, ast.Constant) and isinstance(node.value, str)
             and bool(node.value) and not re.search(r"\s", node.value))
+
+
+def _prose(node) -> bool:
+    """A string literal or f-string whose literal text has whitespace and a
+    letter or digit: a sentence a module writes, not a bare token (a key, an
+    identifier, a file name), which gates as code in any role, nor a
+    separator or a rule line (#4085)."""
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        text = node.value
+    elif isinstance(node, ast.JoinedStr):
+        text = "".join(str(v.value) for v in node.values if isinstance(v, ast.Constant))
+    else:
+        return False
+    return bool(re.search(r"\s", text) and re.search(r"[^\W_]", text))
 
 
 #: Calls that test a value: every constant argument is a branch
@@ -1337,12 +1382,14 @@ def _module_constants(path: Path) -> dict[str, object]:
     return env
 
 
-def _module_role(p: Path) -> str:
-    """model_facing for a module MODEL_FACING_MODULES names: a top-level
-    module of the `data_sheets_schema` package, matched by its place in the
+def _module_role(p: Path, derived=frozenset()) -> str:
+    """model_facing for a top-level module of the `data_sheets_schema`
+    package whose text the data flow found reaching a model (`derived`,
+    #4085) or that MODEL_FACING_MODULES names, matched by its place in the
     package and not its stem alone (`cli/healthsheet.py` is not
     `healthsheet.py`)."""
-    return "model_facing" if _package_module_name(p) in MODEL_FACING_MODULES else "run_shaping"
+    name = _package_module_name(p)
+    return "model_facing" if name in MODEL_FACING_MODULES or name in derived else "run_shaping"
 
 
 def _package_module_name(p: Path) -> str | None:
@@ -2912,11 +2959,20 @@ def launch_flags(controllers: dict[str, Path], parsed: dict) -> list[dict]:
 # ---- text a model receives, by data flow (#4054)
 
 
+_DEFS: dict[int, tuple] = {}
+
+
 def _function_defs(tree) -> dict[str, ast.AST]:
+    """name -> the first function so named in a module, at any depth; cached
+    per tree (the entry holds the tree, so its id is not reused)."""
+    entry = _DEFS.get(id(tree))
+    if entry is not None and entry[0] is tree:
+        return entry[1]
     out = {}
     for n in ast.walk(tree):
         if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)):
             out.setdefault(n.name, n)
+    _DEFS[id(tree)] = (tree, out)
     return out
 
 
@@ -3011,6 +3067,92 @@ def _local_assignments(fn) -> dict[str, list[ast.AST]]:
     return out
 
 
+def _holder(target) -> str | None:
+    """The name whose object an expression writes into: `parts` for
+    `parts`, `d['k']`, `req.messages[0]['content']`."""
+    while isinstance(target, (ast.Subscript, ast.Attribute)):
+        target = target.value
+    return target.id if isinstance(target, ast.Name) else None
+
+
+_WRITES: dict[int, tuple] = {}
+
+
+def _local_values(fn) -> dict[str, list[ast.AST]]:
+    """What each local of a function is bound to: the value of every
+    assignment to it (plain, unpacked, annotated or augmented), and the
+    iterable of a `for` loop that binds it (#4085). A fresh dict."""
+    out = {k: list(v) for k, v in _local_assignments(fn).items()}
+    for n in ast.walk(fn):
+        if isinstance(n, (ast.For, ast.AsyncFor)):
+            for x in ast.walk(n.target):
+                if isinstance(x, ast.Name) and isinstance(x.ctx, ast.Store):
+                    out.setdefault(x.id, []).append(n.iter)
+    return out
+
+
+def _local_writes(fn) -> dict[str, list[ast.AST]]:
+    """What becomes part of each local of a function, for the data flow
+    (#4085): the value of every assignment to it (plain, unpacked, annotated
+    or augmented), the iterable of a `for` loop that binds it, and, for a
+    name the function binds that is not a parameter, the arguments of every
+    method call on it and every value assigned to an item or attribute of
+    it (`parts.append(x)`, `d['k'] = v`, `req.messages[0]['content']
+    .extend(...)`): any method may change the object it is called on, as
+    for a module constant (#4166). Cached per function node."""
+    entry = _WRITES.get(id(fn))
+    if entry is not None and entry[0] is fn:
+        return entry[1]
+    out = _local_values(fn)
+    bound = set(out) - set(_params(fn))
+    for n in ast.walk(fn):
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and _holder(n.func.value) in bound:
+            out[_holder(n.func.value)] += ([a.value if isinstance(a, ast.Starred) else a for a in n.args]
+                                           + [k.value for k in n.keywords])
+        elif isinstance(n, (ast.Assign, ast.AnnAssign, ast.AugAssign)) and n.value is not None:
+            for t in n.targets if isinstance(n, ast.Assign) else [n.target]:
+                if isinstance(t, (ast.Subscript, ast.Attribute)) and _holder(t) in bound:
+                    out[_holder(t)].append(n.value)
+    _WRITES[id(fn)] = (fn, out)
+    return out
+
+
+def _results(fn) -> list[ast.AST]:
+    """What a function's result is built from: its returned values, and the
+    values a generator yields."""
+    return [r.value for r in ast.walk(fn) if isinstance(r, (ast.Return, ast.Yield)) and r.value is not None]
+
+
+def _carried_params(fn) -> tuple[set[int], set[str], int | None, bool]:
+    """The parameters a function's result is built from, directly or
+    through its locals (#4085): a caller's argument for one of them is part
+    of the result (`dump_manifest(manifest)` returns
+    `yaml.safe_dump(manifest)`). Returns (the positional indexes, the names,
+    the index from which a `*args` the result is built from collects the
+    positional arguments, whether a `**kwargs` it is built from collects the
+    other keywords); a leading `self` or `cls` is not a caller's argument."""
+    params = set(_params(fn))
+    local = _local_writes(fn)
+    reached, seen, todo = set(), set(), list(_results(fn))
+    while todo:
+        for x in ast.walk(todo.pop()):
+            if not isinstance(x, ast.Name):
+                continue
+            if x.id in params:
+                reached.add(x.id)
+            elif x.id in local and x.id not in seen:
+                seen.add(x.id)
+                todo += local[x.id]
+    positional = [x.arg for x in fn.args.posonlyargs + fn.args.args]
+    if positional and positional[0] in {"self", "cls"}:
+        positional = positional[1:]
+    indexes = {i for i, name in enumerate(positional) if name in reached}
+    names = {name for name in reached if name in positional + [x.arg for x in fn.args.kwonlyargs]}
+    star_from = len(positional) if fn.args.vararg is not None and fn.args.vararg.arg in reached else None
+    any_kw = fn.args.kwarg is not None and fn.args.kwarg.arg in reached
+    return indexes, names, star_from, any_kw
+
+
 def _innermost_function(tree, line: int):
     best = None
     for n in ast.walk(tree):
@@ -3020,31 +3162,51 @@ def _innermost_function(tree, line: int):
     return best
 
 
-def model_text_spans(root: Path, parsed: dict, index: dict,
-                     controllers: dict[str, Path]) -> dict[str, list[tuple[int, int, str]]]:
-    """Code whose text a run controller hands a model, found by data flow as
-    well as by name (#4054). Seeds: the controller functions a name says
-    render model text (`MODEL_TEXT_FUNCTION`), every argv element that
-    follows `--system-prompt` or `--append-system-prompt` in a controller,
-    and every value a controller gives a hook field Claude Code shows the
-    model (`permissionDecisionReason`, the PreToolUse deny reason, and
+def model_text_spans(root: Path, parsed: dict, index: dict, controllers: dict[str, Path],
+                     sinks=()) -> dict[str, list[tuple[int, int, str]]]:
+    """Code whose text reaches a model, found by data flow as well as by
+    name (#4054): `text_flow`'s spans, path -> (first, last, label)."""
+    return text_flow(root, parsed, index, controllers, sinks)[0]
+
+
+def text_flow(root: Path, parsed: dict, index: dict, controllers: dict[str, Path],
+              sinks=()) -> tuple[dict[str, list[tuple[int, int, str]]], dict[str, list[str]]]:
+    """Code whose text reaches a model, found by data flow as well as by
+    name (#4054, #4085). Seeds: the controller functions a name says render
+    model text (`MODEL_TEXT_FUNCTION`), every argv element that follows
+    `--system-prompt` or `--append-system-prompt` in a controller, every
+    value a controller gives a hook field Claude Code shows the model
+    (`permissionDecisionReason`, the PreToolUse deny reason, and
     `additionalContext`, #4130) under a literal key: a dict entry, a keyword
     argument, an item assignment (plain, annotated or `+=`) or
-    `.setdefault()` (`_field_writes`, #4142). From an element or a
-    function's return values, the flow is followed through local
-    assignments: a literal that becomes part of the text is model text, a
-    function whose result does is model text (and its returns are followed
-    in turn, across modules through imports), and a module constant the text
-    is built from (`SYSTEM`, returned by `render_system`) is model text,
-    with every write of it at the top of its module (`_constant_writes`: a
-    top-level assignment, and a method call on it anywhere in the code a
-    top-level statement runs on import, #4166), and all that write puts in
-    it in turn, recursively and each constant once: the constants it
-    names, of its module or imported by name (`POLICY` in `SYSTEM = POLICY
-    + '...'` or in `D = PARTS.setdefault('d', POLICY)`, #4156, #4166), the
-    functions whose results become part of it, and its literals. A call's
-    arguments are followed for the constants they pass, not for the
-    functions that compute them.
+    `.setdefault()` (`_field_writes`, #4142), and `sinks`, (module,
+    function, expressions, why) of text that reaches a model some other way
+    (`model_input_sinks`: what the runner's requests carry and what the
+    model-input writers write, #4085). From an element or a function's
+    results (returned or yielded), the flow is followed through the
+    function's locals (`_local_writes`: every assignment, the iterable of a
+    `for` that binds one, the arguments of a method call on one and a value
+    assigned to an item or attribute of one, #4085): a literal that becomes
+    part of the text is model text, a function whose result does is model
+    text (and its results are followed in turn, across modules through
+    imports), and a module constant the text is built from (`SYSTEM`,
+    returned by `render_system`; `source_review.INVENTORY_HEADER`, read
+    through its module, #4085) is model text, with every write of it at the
+    top of its module (`_constant_writes`: a top-level assignment, and a
+    method call on it anywhere in the code a top-level statement runs on
+    import, #4166), and all that write puts in it in turn, recursively and
+    each constant once: the constants it names, of its module or imported by
+    name (`POLICY` in `SYSTEM = POLICY + '...'` or in `D =
+    PARTS.setdefault('d', POLICY)`, #4156, #4166), the functions whose
+    results become part of it, and its literals. A call's arguments are
+    followed for the constants they pass and, where they become part of its
+    result, as text: the arguments of a string method that joins or
+    rewrites them (`STR_TEXT_METHODS`), of a copy, conversion or
+    serialization the scan cannot resolve (`TEXT_CARRYING_CALLS`), and of a
+    function whose result is built from the parameter they fill
+    (`_carried_params`, #4085). What a file read returns is the file's, so
+    the path a read is called on is followed as data (`FILE_READ_METHODS`,
+    #4085).
 
     A hook field built from a parameter (`hook_output(classification,
     basis)`), directly or through the function's locals, is fed by
@@ -3054,9 +3216,10 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
     element is a literal the hook function compares its decision parameter
     with (`'prescribed'`), widened to a fixed point by the other decisions
     such functions return (`'not_prescribed'`); the element in the position
-    of the reason parameter is model text. Returns path -> (first, last,
-    label)."""
-    defs_of, consts_of, binds_of = {}, {}, {}
+    of the reason parameter is model text. Returns (path -> (first, last,
+    label), path -> the labels of the string literals with a letter or a
+    digit it carried into model text: the module wrote that text, #4085)."""
+    defs_of, consts_of, binds_of, carried_of = {}, {}, {}, {}
 
     def defs(q):
         if q not in defs_of:
@@ -3075,6 +3238,7 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
 
     spans: dict[Path, dict[tuple[int, int], str]] = {}
     literals: dict[Path, dict[tuple[int, int], str]] = {}
+    wrote: dict[Path, dict[str, None]] = {}
     marked: set[tuple] = set()
     todo: list[tuple] = []
 
@@ -3116,8 +3280,13 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                 return target, f.attr
         return None
 
+    def carried(hit):
+        if hit not in carried_of:
+            carried_of[hit] = _carried_params(defs(hit[0])[hit[1]])
+        return carried_of[hit]
+
     def flow(q, fn, exprs, why):
-        local = _local_assignments(fn) if fn is not None else {}
+        local = _local_writes(fn) if fn is not None else {}
         params = set(_params(fn)) if fn is not None else set()
         seen: set[tuple] = set()
         where = f"text in {fn.name}()" if fn is not None else "module text"
@@ -3129,7 +3298,10 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
             if mode == "text" and (isinstance(e, ast.JoinedStr) or (
                     isinstance(e, ast.Constant) and isinstance(e.value, str))):
                 # a literal that becomes part of the text (#4130)
-                literals.setdefault(q, {}).setdefault((e.lineno, e.end_lineno), f"{where} ({why})")
+                label = f"{where} ({why})"
+                literals.setdefault(q, {}).setdefault((e.lineno, e.end_lineno), label)
+                if _prose(e):
+                    wrote.setdefault(q, {})[label] = None
             if isinstance(e, ast.Name):
                 if e.id in local:
                     for v in local[e.id]:
@@ -3142,24 +3314,48 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                         if target is not None and attr:
                             mark_constant(target, attr, why)
                 return
+            if isinstance(e, ast.Attribute) and isinstance(e.value, ast.Name) and e.value.id not in local \
+                    and e.value.id not in params:
+                target, attr = binds(q).get(e.value.id, (None, None))
+                if target is not None and attr is None:
+                    # a module's constant read through the module (#4085)
+                    mark_constant(target, e.attr, why)
+                    return
             if isinstance(e, ast.Call):
-                text_args = isinstance(e.func, ast.Attribute) and e.func.attr in STR_TEXT_METHODS
-                if mode == "text":
-                    hit = callee(q, e.func)
-                    if hit is not None:
-                        mark_function(hit[0], hit[1], why)
-                if isinstance(e.func, ast.Attribute):
-                    walk(e.func.value, mode)
-                for a in e.args:
-                    walk(a.value if isinstance(a, ast.Starred) else a, mode if text_args else "data")
+                hit = callee(q, e.func)
+                method = isinstance(e.func, ast.Attribute)
+                text_args = (method and e.func.attr in STR_TEXT_METHODS) or (
+                    hit is None and _attr_or_name(e.func) in TEXT_CARRYING_CALLS)
+                indexes, names, star_from, any_kw = set(), set(), None, False
+                if mode == "text" and hit is not None:
+                    mark_function(hit[0], hit[1], why)
+                    indexes, names, star_from, any_kw = carried(hit)
+                if method:
+                    walk(e.func.value, "data" if e.func.attr in FILE_READ_METHODS else mode)
+                for i, a in enumerate(e.args):
+                    starred = isinstance(a, ast.Starred)
+                    carries = text_args or i in indexes or (star_from is not None and i >= star_from) or (
+                        starred and (any(j >= i for j in indexes) or star_from is not None))
+                    walk(a.value if starred else a, mode if carries else "data")
                 for k in e.keywords:
-                    walk(k.value, "data")
+                    carries = k.arg in names or (any_kw and k.arg not in names) or (k.arg is None and bool(names))
+                    walk(k.value, mode if carries else "data")
                 return
             if isinstance(e, ast.IfExp):
                 walk(e.body, mode)
                 walk(e.orelse, mode)
                 return
             if isinstance(e, (ast.Compare, ast.Lambda)):
+                return
+            # a key selects or labels a value; the value is the text (#4085)
+            if isinstance(e, ast.Subscript):
+                walk(e.value, mode)
+                walk(e.slice, "data")
+                return
+            if isinstance(e, ast.Dict):
+                for k, v in zip(e.keys, e.values):
+                    walk(k, "data")
+                    walk(v, mode)
                 return
             for child in ast.iter_child_nodes(e):
                 walk(child, mode)
@@ -3173,6 +3369,13 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
         for name, fn in defs(p).items():
             if MODEL_TEXT_FUNCTION.match(name):
                 mark_function(p, name, "renders model text")
+        # a function of another module the controller calls, named for the
+        # text it renders (`audit_batch_context.render_worker_context`, whose
+        # result a controller writes for its native child to read, #4085)
+        for c in ast.walk(tree):
+            hit = callee(p, c.func) if isinstance(c, ast.Call) else None
+            if hit is not None and hit[0] != p and MODEL_TEXT_FUNCTION.match(hit[1]):
+                mark_function(hit[0], hit[1], f"renders model text for the controller call at {rel}:{c.lineno}")
         # every way `writers()` reads a record field, and `+=` (#4142)
         hook_sinks += [(p, k, v) for k, v in _field_writes(tree, HOOK_MODEL_FIELDS, appends=True)]
         for n in ast.walk(tree):
@@ -3220,18 +3423,22 @@ def model_text_spans(root: Path, parsed: dict, index: dict,
                 label = f"the reason it returns reaches {fn.name}()'s {why}"
                 for q, cfn, exprs in found:
                     flow(q, cfn, exprs, label)
+    # the runner's requests and the model-input writes (#4085)
+    for q, fn, exprs, why in sinks:
+        if q in parsed:
+            flow(q, fn, exprs, why)
     while todo:
         q, name = todo.pop()
         fn = defs(q)[name]
-        returns = [r.value for r in ast.walk(fn) if isinstance(r, ast.Return) and r.value is not None]
-        flow(q, fn, returns, f"its value reaches {name}()")
+        flow(q, fn, _results(fn), f"its value reaches {name}()")
     # a literal inside a span already found adds nothing
     for q, sp in literals.items():
         for (a, b), label in sp.items():
             if not any(lo <= a and b <= hi for lo, hi in spans.get(q, {})):
                 spans.setdefault(q, {}).setdefault((a, b), label)
-    return {_rel(root, q): sorted((a, b, label) for (a, b), label in sp.items())
-            for q, sp in spans.items() if _is_inside(q, root)}
+    return ({_rel(root, q): sorted((a, b, label) for (a, b), label in sp.items())
+             for q, sp in spans.items() if _is_inside(q, root)},
+            {_rel(root, q): list(w) for q, w in wrote.items() if _is_inside(q, root)})
 
 
 def _reaching_params(fn, value, params: list[str]) -> set[str]:
@@ -3284,6 +3491,261 @@ def _classifier_pairs(controllers: dict[str, Path], parsed: dict, reason_at: int
     return sorted(found.values(), key=lambda x: (str(x[0]), x[1].lineno))
 
 
+# --------------------------------------------------------------------------
+# which modules write model-facing text, derived (#4085)
+
+
+def derive_request_type(root: Path) -> dict:
+    """The request the runner sends (#4085): the class `build_phase` returns
+    a construction of, directly or through a local (`req = PhaseRequest(...)`,
+    `return req`), with its fields in order. Not found, two classes, or a
+    request type without every field `REQUEST_TEXT_FIELDS` names, is not
+    derived."""
+    tree = _tree(root / RUNNER)
+    build = _function(tree, "build_phase")
+    if build is None:
+        raise _not_derived("the request the runner sends", "api_runner.py defines no build_phase()")
+    classes = {n.name: n for n in tree.body if isinstance(n, ast.ClassDef)}
+    local = _local_values(build)
+    returned = [r.value for r in ast.walk(build) if isinstance(r, ast.Return) and r.value is not None]
+    returned += [v for r in returned if isinstance(r, ast.Name) for v in local.get(r.id, [])]
+    found = sorted({r.func.id for r in returned if isinstance(r, ast.Call) and isinstance(r.func, ast.Name)
+                    and r.func.id in classes})
+    if len(found) != 1:
+        raise _not_derived("the request the runner sends",
+                           f"build_phase returns a construction of {found or 'no class api_runner.py defines'}")
+    fields = [s.target.id for s in classes[found[0]].body
+              if isinstance(s, ast.AnnAssign) and isinstance(s.target, ast.Name)]
+    missing = [f for f in REQUEST_TEXT_FIELDS if f not in fields]
+    if missing:
+        raise _not_derived("the request the runner sends", f"{found[0]} has no field {', '.join(missing)}")
+    return {"class": found[0], "fields": fields, "text_fields": list(REQUEST_TEXT_FIELDS)}
+
+
+def model_input_files(root: Path, playbooks) -> dict[str, list[str]]:
+    """The files a run reads as model input, by the file name that follows
+    the project (#4085): every arm's bundle in `cli/api.py` ARMS
+    (`{p}_healthsheet_only.txt` -> `_healthsheet_only.txt`) and every
+    templated file under the input tree that a playbook names
+    (`data/preprocessed/chunks/{PROJECT}_chunks.yaml` -> `_chunks.yaml`):
+    suffix -> what names it. An arm without a bundle pattern is not
+    derived."""
+    arms = _module_constants(root / CLI_API).get("ARMS")
+    if not isinstance(arms, dict) or not arms:
+        raise _not_derived("the model input files", "cli/api.py ARMS is not a module-level dict literal")
+    out: dict[str, set] = {}
+    for arm, row in arms.items():
+        bundle = row[2] if isinstance(row, tuple) and len(row) > 2 else None
+        if not isinstance(bundle, str) or "{p}" not in bundle:
+            raise _not_derived("the model input files", f"ARMS[{arm!r}] has no `{{p}}...` bundle pattern")
+        out.setdefault(bundle.split("{p}", 1)[1], set()).add(f"the {arm} arm's bundle")
+    for p in playbooks:
+        for m in TEMPLATED_INPUT.finditer(p.read_text(encoding="utf-8")):
+            out.setdefault(m.group(1), set()).add(_rel(root, p))
+    return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+def _own_nodes(fn):
+    """Every node of a function's body outside the functions, classes and
+    lambdas it defines: what runs when the function itself runs."""
+    todo = list(fn.body)
+    while todo:
+        n = todo.pop()
+        yield n
+        if not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef, ast.Lambda)):
+            todo += ast.iter_child_nodes(n)
+
+
+def _file_writes(fn) -> list[tuple[ast.AST, ast.AST, ast.Call]]:
+    """(target, value, call) for every file a function itself writes
+    (#4085): `target.write_text(value)`, and `handle.write(value)`,
+    `json.dump(value, handle)` or `yaml.safe_dump(value, handle)` where a
+    `with` binds `handle` to `open(target, ...)` or `target.open(...)`. A
+    nested function's writes are its own."""
+    handles = {}
+    nodes = list(_own_nodes(fn))
+    for n in nodes:
+        if isinstance(n, (ast.With, ast.AsyncWith)):
+            for item in n.items:
+                c = item.context_expr
+                if not (isinstance(item.optional_vars, ast.Name) and isinstance(c, ast.Call)):
+                    continue
+                if isinstance(c.func, ast.Name) and c.func.id == "open" and c.args:
+                    handles[item.optional_vars.id] = c.args[0]
+                elif isinstance(c.func, ast.Attribute) and c.func.attr == "open":
+                    handles[item.optional_vars.id] = c.func.value
+    out = []
+    for n in nodes:
+        if not (isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and n.args):
+            continue
+        f = n.func
+        if f.attr == "write_text":
+            out.append((f.value, n.args[0], n))
+        elif f.attr == "write" and isinstance(f.value, ast.Name) and f.value.id in handles:
+            out.append((handles[f.value.id], n.args[0], n))
+        elif f.attr in {"dump", "safe_dump"} and len(n.args) > 1 and isinstance(n.args[1], ast.Name) \
+                and n.args[1].id in handles:
+            out.append((handles[n.args[1].id], n.args[0], n))
+    return out
+
+
+def _resolve_call(root: Path, parsed: dict, index: dict, q: Path, func):
+    """(module, function node) a call in module `q` names: a function of
+    the module, one imported by name, or one read through an imported
+    module; None otherwise."""
+    tree = parsed[q][1]
+    defs = _function_defs(tree)
+    if isinstance(func, ast.Name):
+        if func.id in defs:
+            return q, defs[func.id]
+        target, attr = _bindings(root, q, tree, index).get(func.id, (None, None))
+        if target is not None and attr and target in parsed:
+            fn = _function_defs(parsed[target][1]).get(attr)
+            return (target, fn) if fn is not None else None
+    if isinstance(func, ast.Attribute) and isinstance(func.value, ast.Name):
+        target, attr = _bindings(root, q, tree, index).get(func.value.id, (None, None))
+        if target is not None and attr is None and target in parsed:
+            fn = _function_defs(parsed[target][1]).get(func.attr)
+            return (target, fn) if fn is not None else None
+    return None
+
+
+#: Path calls whose result ends in their last argument's name
+#: (`Path(name)`, `os.path.join(d, name)`, `x.with_name(name)`), or in their
+#: argument's suffix (`x.with_suffix('.tmp')`).
+_PATH_TAIL_CALLS = frozenset({"Path", "PurePath", "PurePosixPath", "str", "join", "with_name", "with_suffix"})
+
+
+def _file_names(root: Path, parsed: dict, index: dict, q: Path, fn, expr) -> set[str]:
+    """The literal text a write's target path can end with (#4085): the last
+    part of the path expression (`d / name`, `Path(name)`, `x.with_name(name)`,
+    `os.path.join(d, name)`), each alternative of an `or` or a conditional,
+    through the function's locals, the constants it names (of its module, or
+    imported by name) and the results of the functions it calls, each once;
+    an f-string ends with its last part (`f"{project}_chunks.yaml"` ->
+    `_chunks.yaml`, `f"{project}{BUNDLE_SUFFIX}"` -> the constant's value).
+    A path read off an object (`spec.full_path`) or a parameter ends in
+    nothing the scan can see."""
+    out: set[str] = set()
+    seen: set[int] = set()
+    todo = [(q, fn, expr)]
+    while todo:
+        q, fn, e = todo.pop()
+        if e is None or id(e) in seen:
+            continue
+        seen.add(id(e))
+        tree = parsed[q][1]
+        if isinstance(e, ast.Constant) and isinstance(e.value, str):
+            out.add(e.value)
+        elif isinstance(e, ast.JoinedStr) and e.values:
+            last = e.values[-1]
+            todo.append((q, fn, last.value if isinstance(last, ast.FormattedValue) else last))
+        elif isinstance(e, ast.BinOp) and isinstance(e.op, (ast.Div, ast.Add)):
+            todo.append((q, fn, e.right))
+        elif isinstance(e, ast.BoolOp):
+            todo += [(q, fn, v) for v in e.values]
+        elif isinstance(e, ast.IfExp):
+            todo += [(q, fn, e.body), (q, fn, e.orelse)]
+        elif isinstance(e, ast.Name):
+            local = _local_values(fn) if fn is not None else {}
+            consts = _module_assignments(tree)
+            if e.id in local:
+                todo += [(q, fn, v) for v in local[e.id]]
+            elif e.id in consts:
+                todo.append((q, None, consts[e.id].value))
+            else:
+                target, attr = _bindings(root, q, tree, index).get(e.id, (None, None))
+                if target is not None and attr and target in parsed:
+                    there = _module_assignments(parsed[target][1])
+                    if attr in there:
+                        todo.append((target, None, there[attr].value))
+        elif isinstance(e, ast.Call):
+            name = _attr_or_name(e.func)
+            if name in _PATH_TAIL_CALLS and e.args:
+                todo.append((q, fn, e.args[-1]))
+            else:
+                hit = _resolve_call(root, parsed, index, q, e.func)
+                if hit is not None:
+                    todo += [(hit[0], hit[1], r) for r in _results(hit[1])]
+    return out
+
+
+def model_input_sinks(root: Path, parsed: dict, index: dict, playbooks, upstream) -> tuple[list, dict]:
+    """The text that reaches a model other than through a controller (#4085),
+    as data-flow sinks (module, function, expressions, why) for `text_flow`:
+
+    - what every request the runner sends carries: each construction, in
+      any module, of the request type `build_phase` returns
+      (`derive_request_type`), with the values it is given for
+      `REQUEST_TEXT_FIELDS` (its system prompt, cached blocks and messages);
+    - what a package function writes to a model-input file
+      (`model_input_files`: an arm's bundle, a file a playbook has the model
+      read from the input tree), recognised by the text the write's target
+      path ends with (`_file_names`: `chunking.write_manifest_for` writes to
+      `manifest_for(...)`, which ends in `f"{stem}_chunks.yaml"`);
+    - what an upstream input step (`upstream`, the modules the `d4d
+      download` group imports) writes: it writes the input tree, the
+      documents a bundle is concatenated from.
+
+    Returns (sinks, facts)."""
+    request = derive_request_type(root)
+    inputs = model_input_files(root, playbooks)
+    runner = _resolved(root / RUNNER)
+    cls, fields = request["class"], request["fields"]
+    sinks, requests, writers = [], [], []
+    for q, (text, tree) in sorted(parsed.items()):
+        rel = _rel(root, q)
+        writes = rel.startswith("src/data_sheets_schema/") or rel in upstream
+        if cls in text:
+            binds = _bindings(root, q, tree, index)
+            for call in ast.walk(tree):
+                if not isinstance(call, ast.Call):
+                    continue
+                f = call.func
+                if not ((isinstance(f, ast.Name) and (binds.get(f.id) == (runner, cls) or (
+                        q == runner and f.id == cls and f.id not in binds)))
+                        or (isinstance(f, ast.Attribute) and f.attr == cls and isinstance(f.value, ast.Name)
+                            and binds.get(f.value.id) == (runner, None))):
+                    continue
+                values = [a.value if isinstance(a, ast.Starred) else a for i, a in enumerate(call.args)
+                          if isinstance(a, ast.Starred) or (i < len(fields) and fields[i] in REQUEST_TEXT_FIELDS)]
+                values += [k.value for k in call.keywords if k.arg is None or k.arg in REQUEST_TEXT_FIELDS]
+                requests.append(f"{rel}:{call.lineno}")
+                sinks.append((q, _innermost_function(tree, call.lineno), values,
+                              f"sent in a {cls} at {rel}:{call.lineno}"))
+        if not writes:
+            continue
+        for fn in ast.walk(tree):
+            if not isinstance(fn, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                continue
+            for target, value, call in _file_writes(fn):
+                where = f"{rel}:{call.lineno}"
+                if rel in upstream:
+                    writers.append(where)
+                    sinks.append((q, fn, [value], f"written by the upstream input step at {where}"))
+                    continue
+                ends = _file_names(root, parsed, index, q, fn, target)
+                hit = sorted(s for s in inputs if any(name.endswith(s) for name in ends))
+                if hit:
+                    writers.append(where)
+                    sinks.append((q, fn, [value], f"written to a `*{hit[0]}` model input at {where}"))
+    return sinks, {"request": request, "model_input_files": inputs, "requests": requests, "writers": writers}
+
+
+def derive_model_facing(wrote: dict[str, list[str]]) -> dict[str, list[str]]:
+    """The top-level `data_sheets_schema` modules whose text reaches a model
+    (#4085): each module the data flow (`text_flow`) carried one of its own
+    string literals from into model text, with what carried it. A module
+    that only passes on what it is given, or whose literals are punctuation
+    and whitespace (a separator, a rule line), writes none."""
+    out: dict[str, list[str]] = {}
+    for rel, labels in sorted(wrote.items()):
+        name = _package_module_name(Path(rel))
+        if name is not None and rel.startswith("src/data_sheets_schema/"):
+            out.setdefault(name, []).extend(labels)
+    return out
+
+
 def discover(root: Path) -> tuple[Surfaces, dict]:
     s = Surfaces()
     facts: dict = {"python": f"{platform.python_implementation()} {platform.python_version()}"}
@@ -3315,11 +3777,10 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         s.add(rel, "offline_draft", "model_facing", "offline draft",
               "explicit source-heading prompt-text builder; no provider or live condition", runs=True)
 
-    # ---- api: runner closure, conditions, evidence protocols
+    # ---- api: runner closure, conditions, evidence protocols (the closure's
+    # roles wait for the derivation of which modules write model text)
     api_closure = _package_closure(root, ["data_sheets_schema.cli.api", "data_sheets_schema.api_runner"])
     facts["api_closure"] = [_rel(root, p) for p in api_closure]
-    for p in api_closure:
-        s.add(_rel(root, p), "api", _module_role(p), "live", "import closure of cli/api.py + api_runner", runs=False)
     cond = condition_table(root)
     gh = github_assistant_run(root, cond)
     if gh:
@@ -3352,7 +3813,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     pinned = yaml.safe_load((prompts_dir / "canonical_hashes.yaml").read_text(encoding="utf-8"))
     facts["pinned_prompts"] = sorted((pinned or {}).get("files", {}))
     for rel in facts["pinned_prompts"]:
-        if (root / rel).exists() and rel not in s.files:
+        if (root / rel).exists() and rel not in s.files and rel not in facts["api_closure"]:
             s.add(rel, "api", "model_facing", "historical", "pinned prompt file")
     s.add("src/download/prompts/canonical_hashes.yaml", "api", "run_shaping", "live", "prompt pin registry")
     for p in sorted(prompts_dir.glob("determinism_settings.yaml")):
@@ -3400,6 +3861,18 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     facts["controller_text"] = controller_text
     for rel, by in sorted(controller_text.items()):
         s.add(rel, "run_controllers", "model_facing", "live", f"text a controller hands to the model ({by})")
+
+    # ---- text a model receives, by data flow (#4054, #4085): from the
+    # controllers' sinks, the runner's requests and the model-input writes.
+    # A top-level package module whose own text it carries there is
+    # model-facing (`derive_model_facing`), before any closure is given roles.
+    playbook_files = sorted(p for p in (root / ".claude/commands").glob("d4d-*.md") if p.is_file())
+    sinks, facts["model_input"] = model_input_sinks(root, parsed, index, playbook_files, set(shared))
+    spans, wrote = text_flow(root, parsed, index, controllers, sinks)
+    derived = derive_model_facing(wrote)
+    for p in api_closure:
+        s.add(_rel(root, p), "api", _module_role(p, derived), "live", "import closure of cli/api.py + api_runner",
+              runs=False)
 
     # ---- every playbook, agent and file that a playbook, an agent, a live
     # prompt, a controller, the assistant workflow or an instruction it loads
@@ -3542,7 +4015,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     native_closure = _package_closure(root, sorted(set(starts)))
     facts["native_closure"] = [_rel(root, p) for p in native_closure]
     for p in native_closure:
-        s.add(_rel(root, p), "native_agentic", _module_role(p), "live",
+        s.add(_rel(root, p), "native_agentic", _module_role(p, derived), "live",
               "closure of agentic_runtime, the CLI groups the playbooks run and the controllers' imports", runs=False)
     # a CLI group run only by an exposed text, or by a controller (#4091)
     for approach, gs in sorted(cli_groups.items()):
@@ -3551,7 +4024,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                 continue
             role = "run_shaping" if "run_shaping" in by.values() else "exposed"
             for p in _package_closure(root, [f"data_sheets_schema.cli.{g}"]):
-                s.add(_rel(root, p), approach, role if role == "exposed" else _module_role(p), "live",
+                s.add(_rel(root, p), approach, role if role == "exposed" else _module_role(p, derived), "live",
                       f"closure of the CLI group `d4d {g}` that {', '.join(sorted(by))} run", runs=False)
 
     # ---- deterministic arms: the commands that build a non-baseline arm's
@@ -3560,7 +4033,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
         rel = _rel(root, p)
         why = (f"deterministic arm command ({arm_commands[rel]})" if rel in arm_commands
                else "import closure of the deterministic arm commands")
-        s.add(rel, "deterministic", _module_role(p), "live", why, runs=False)
+        s.add(rel, "deterministic", _module_role(p, derived), "live", why, runs=False)
 
     # ---- interactive sessions: what Claude Code loads into a person's session
     # in a checkout, and that registered native runs switch off (#4054, #4091)
@@ -3620,7 +4093,7 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                 continue
             script_imports.setdefault(rel, []).append(qrel)
             for approach, role in sorted(by.items()):
-                s.add(qrel, approach, role if role == "exposed" else _module_role(q), "live",
+                s.add(qrel, approach, role if role == "exposed" else _module_role(q, derived), "live",
                       f"imported by {rel}, which is run in {approach}", runs=False)
     facts["run_script_imports"] = {k: sorted(v) for k, v in sorted(script_imports.items())}
 
@@ -3729,12 +4202,13 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
                     s.add(_rel(root, p), "legacy_monolithic", "model_facing", "legacy",
                           f"legacy prompt set ({d.name})")
 
-    # ---- upstream input (listed, never gates)
+    # ---- upstream input (listed, never gates); the text the data flow
+    # carries into what a step writes is model text there, span by span
+    # (#4085)
     for rel, why in shared.items():
         s.add(rel, "shared_input", "run_shaping", "live", "input acquisition / bundle shaping: " + why)
 
-    # ---- text a model receives, by data flow (#4054)
-    spans = model_text_spans(root, parsed, index, controllers)
+    # ---- text a model receives, by data flow (#4054, #4085), found above
     for rel, sp in spans.items():
         if rel in s.files:
             s.files[rel].text_spans = sp
@@ -3742,6 +4216,16 @@ def discover(root: Path) -> tuple[Surfaces, dict]:
     # treats as model-facing as a whole
     facts["model_text"] = {rel: list(dict.fromkeys(label for *_, label in sp)) for rel, sp in sorted(spans.items())
                            if rel in s.files and "model_facing" not in s.files[rel].roles.values()}
+    # the derivation of which package modules write model text, cross-checked
+    # against the hand-kept list (#4085): a live module is one a generation
+    # closure reaches
+    live = {_package_module_name(p) for p in api_closure + native_closure + det_closure} - {None}
+    facts["model_facing_modules"] = {
+        "derived": {name: list(dict.fromkeys(labels))[:3] for name, labels in derived.items() if name in live},
+        "derived_outside_closures": sorted(name for name in derived if name not in live),
+        "listed": sorted(MODEL_FACING_MODULES),
+        "derived_not_listed": sorted(name for name in derived if name in live and name not in MODEL_FACING_MODULES),
+        "listed_not_derived": sorted(name for name in MODEL_FACING_MODULES if name not in derived)}
     return s, facts
 
 
@@ -6000,6 +6484,37 @@ def _session_statement(it: dict) -> str:
             "those interactive_session surfaces are also run_controllers surfaces, and their violations count there.")
 
 
+def _model_facing_statement(f: dict) -> str:
+    """The report line on which package modules write model-facing text:
+    the derivation's sinks, what it found, and the cross-check with
+    MODEL_FACING_MODULES in both directions (#4085)."""
+    mi, mf = f["model_input"], f["model_facing_modules"]
+    upstream = set(f["shared_input"])
+    by_file: dict[str, int] = {}
+    for w in mi["writers"]:
+        rel = w.rsplit(":", 1)[0]
+        if rel in upstream:
+            by_file[rel] = by_file.get(rel, 0) + 1
+    package = [w for w in mi["writers"] if w.rsplit(":", 1)[0] not in upstream]
+
+    def names(xs):
+        return ", ".join(f"`{x}`" for x in xs) or "none"
+    return ("- Which top-level `data_sheets_schema` modules write model-facing text, derived by that data flow "
+            f"(#4085) from what every `{mi['request']['class']}` the runner builds carries (the class `build_phase` "
+            f"returns; its {', '.join(f'`{x}`' for x in mi['request']['text_fields'])}: "
+            f"{len(mi['requests'])} constructions, {names(mi['requests'])}), from what is written to a model input "
+            "(each arm's bundle, and what a playbook has the model read from `" + INPUT_TREE + "`: "
+            + names(mi["model_input_files"]) + f"; {len(package)} writes, {names(package)}; and the upstream input "
+            "steps' writes, " + (", ".join(f"`{k}` ({v})" for k, v in sorted(by_file.items())) or "none")
+            + ") and from the controllers' sinks. A module is model-facing where the flow carries one of its own "
+            "sentences there: " + names(sorted(mf["derived"])) + ". Cross-checked with the hand-kept "
+            "`MODEL_FACING_MODULES`: derived and not listed: " + names(mf["derived_not_listed"])
+            + "; listed and not derived (model-facing by the list alone, through a channel the flow does not read): "
+            + names(mf["listed_not_derived"]) + "."
+            + (" Derived outside every generation closure (no surface): " + names(mf["derived_outside_closures"]) + "."
+               if mf["derived_outside_closures"] else ""))
+
+
 def _unused_exceptions(exceptions: list[dict], surfaces) -> str | None:
     """The report line for exceptions no hit used: stale, or the finding was
     fixed, unless the entry names no surface of the scanned checkout (an
@@ -6065,9 +6580,11 @@ def render_markdown(result: dict) -> str:
           "- Text a controller hands to the model: "
           + (", ".join(f"`{k}`" for k in f["controller_text"]) or "none") + ".",
           "- Code whose text reaches a model, found by data flow from `--system-prompt`, from the hook fields "
-          "Claude Code shows the model (a PreToolUse deny reason, and the classifier reasons that feed it) and "
-          "from the functions that render model text: "
+          "Claude Code shows the model (a PreToolUse deny reason, and the classifier reasons that feed it), "
+          "from the functions that render model text, from the runner's requests and from the model-input "
+          "writes (below), where the module is not model-facing as a whole: "
           + ("; ".join(f"`{k}`: " + ", ".join(v) for k, v in f["model_text"].items()) or "none") + ".",
+          _model_facing_statement(f),
           "- Playbooks and agents a playbook, a live prompt, a controller or an assistant instruction names "
           "(path, bare name or slash command): " + ", ".join(f"`{r}`" for r in f["native_referenced"]) + ".",
           "- Assistant instruction files, a surface only where the `@d4dassistant` workflow, a playbook or a "

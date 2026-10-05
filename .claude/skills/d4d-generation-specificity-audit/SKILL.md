@@ -5,7 +5,7 @@ metadata:
   category: audit
   requires_database: false
   requires_internet: false
-  version: 1.8.1
+  version: 1.9.0
 ---
 
 # D4D generation-specificity audit (#4007)
@@ -102,6 +102,16 @@ generation surface. The skill's tests check that:
   the classifier reasons that feed it, are model text, whether the
   controller sets the field as a dict entry, by item assignment, `+=`,
   `.setdefault()` or `.update()`, or from a local;
+- which top-level `data_sheets_schema` modules write model-facing text is
+  derived by data flow from the runner's requests, the model-input writes
+  and the controllers' sinks (`rereceipt`, whose instruction the renderer-24
+  turn sends, among them), and the hand-kept `MODEL_FACING_MODULES` is
+  checked against it in both directions; a sentence in a new module whose
+  constant `build_phase` sends, or in one the healthsheet bundle is built
+  from, gates, and stops gating when the derivation is off; a file's path,
+  a key, an identifier and a report for a person are not model-facing
+  text; the request type is read directly or through a local, or not
+  derived (#4085);
 - the "api" section agrees with the runtime: the CLI default condition, the
   condition the GitHub assistant runs (a non-literal `--condition` is "not
   derived"), the default renderers, the audit floor, the renderers
@@ -124,10 +134,25 @@ None of them walks the record corpus, so none is marked `corpus`.
 Surfaces are derived from the code: imports, calls, the files a text names,
 and the names a file uses. What is left by hand, and why:
 
-- `MODEL_FACING_MODULES` in `scan.py`: which top-level `data_sheets_schema`
-  modules write text a model reads. An import graph does not say that. A
-  test fails when a name on it is in none of the api, native or
-  deterministic closures.
+- `MODEL_FACING_MODULES` in `scan.py`, a cross-check (#4085). Which
+  top-level `data_sheets_schema` modules write text a model reads is
+  derived by data flow (Roles, below): a module is model-facing where the
+  flow carries one of its own sentences into a request, a model input or a
+  controller's model text. The report lists every module the derivation
+  finds that the list lacks, and every one the list names that the
+  derivation does not reach. A module either names is model-facing, so a
+  module whose text reaches a model through a channel the flow does not
+  read (Limits) still gates while the list names it. A test fails when a
+  name on the list is in none of the api, native or deterministic closures,
+  and when this checkout's derivation and the list disagree.
+- What the derivation rests on: `REQUEST_TEXT_FIELDS`, the fields of the
+  runner's request that are sent (`system`, `messages`, and the
+  `cached_blocks` at their head); `INPUT_TREE` (`data/preprocessed/`), the
+  tree a run reads its bundle, chunk mapping and manifest from;
+  `TEXT_CARRYING_CALLS`, the copies, conversions and serializations whose
+  result carries their arguments' text (`list`, `str`, `json.dumps`,
+  `yaml.safe_dump`); `FILE_READ_METHODS`, whose result is a file's content
+  rather than the path they are called on.
 - The `shared_schema` files `profiles.py`, `registry.py`, the vocabulary pin
   and the study manifest, each with the reason it reaches a model.
 - The pre-runner helpers in `src/download` that write prompts without calling
@@ -157,7 +182,7 @@ and the names a file uses. What is left by hand, and why:
 | `deterministic` | yes | the arm commands: every CLI group outside the generation closures that names the bundle of an arm in `cli/api.py` `ARMS` other than the default one (today `cli/healthsheet.py` and `cli/rocrate.py`), and their import closure, followed through `data_sheets_schema`, `src.*` and the directories the code puts on `sys.path` (`setup_repo_imports` adds `.claude/agents/scripts`) |
 | `run_controllers` | yes | under `notes/`: every module (not a probe, not on an evaluation path) that uses a generation builder as code (`RunSpec`, `build_phase`, `phase_instruction`, `prompt_body`, `resolve_prompt`, `playbook_text`, `digest_text`, `assembly_digest`); under `scripts/` or `src/`, outside the generation closures: a module that uses one and launches a run (calls the runner's `execute`, or hands a native runtime `--system-prompt`); every `notes/` or `scripts/` module they import or pin by file name; every module that runs one, to a fixed point; the Markdown a controller names beside itself (`system.md`, model-facing); every file a controller names in its literals; and every interactive_session surface a registered native launch is not shown to switch off. A controller module runs as a script (its `__main__` block counts) only where something runs it: an argv (`[python, '-m', 'audit_controls.contract']`, a worker relaunching itself through `__file__`), a document beside it or a module docstring (`python -m audit_controls.native`), no module importing it (an entry point), or its own `__main__` block calling a module function that launches a run (an argv with a system prompt or a system-prompt file, the runner's `execute`: `run_native_canary.py`, `run_api_canary.py`) or a command-line interface (argparse, click) that nothing else calls (`prepare_registration.py`) |
 | `legacy_monolithic` | yes | every module under `src/` or `scripts/`, outside the generation closures, that calls a model client and names D4D or a datasheet (not an evaluator); the pre-runner helpers in `src/download` (the name glob); `d4d_concatenated_*.txt`; every prompt set beside the conditions (`src/download/prompts/*/` other than the tuned components) |
-| `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops |
+| `shared_input` | no | the `src.download` modules the `d4d download` group imports (download, preprocess, concatenate) and the `src/download` modules they import: upstream of every approach, and where a closure stops. What a step writes is model input, so the text the data flow carries into it (the concatenation's headers, preprocessing's source-metadata block) is model text here (#4085) |
 | `other_model_client` | no | a model client outside generation and outside every generation closure: under `notes/`, one outside the controller set (diagnostic probes, transports); the `notes/` evaluation modules a controller imports or that import one, and their imports; under `src/` or `scripts/`, an evaluator or a client that names no D4D record. An evaluator a generation closure reaches is that approach's surface and gates there: `evaluation/evaluate_d4d_llm.py`, which the controller `prepare_registration.py` imports from the package, is in the native closure |
 
 A module is a model client when it imports `anthropic`, `openai`,
@@ -198,14 +223,40 @@ judges a hit by its own role:
   (`permissionDecisionReason`, the reason a PreToolUse hook gives for a
   denial, and `additionalContext`) under a literal key, as a dict entry, a
   keyword argument (`dict(...)`, `.update(...)`), an item assignment (plain,
-  annotated or `+=`) or `.setdefault()`, and from those functions' return
-  values, the flow follows local assignments, marks a literal that becomes
-  part of the text, a function whose result does (and follows its returns in
-  turn, across imports) and a module constant the text is built from
-  (`SYSTEM`, which `render_system` returns). A constant so marked is
-  followed in turn: every write of it at the top of its module is model
-  text, and so is what that write puts in it, recursively and each
-  constant once. A write is a top-level assignment to it (plain, annotated
+  annotated or `+=`) or `.setdefault()`, from a function of another module
+  a controller calls whose name says it renders model text
+  (`audit_batch_context.render_worker_context`, whose result the batch
+  controller writes for its native child), from what every request the
+  runner builds carries (each construction, in any module, of the class
+  `build_phase` returns, directly or through a local; not found is "not
+  derived", exit 2; with the values each construction is given for `system`,
+  `cached_blocks` and `messages`: `build_phase`'s cached blocks and parts,
+  the re-address, re-receipt and repair requests, the receipt-completion,
+  removal-repair and typed-audit requests), from what a package function
+  writes to a model input (an arm's bundle in `cli/api.py` ARMS, or a
+  templated file a playbook has the model read from `data/preprocessed/`,
+  `{PROJECT}_chunks.yaml`; recognised by the text the write's target path
+  ends with, through locals, constants and the results of the functions
+  that build it: `chunking.write_manifest_for` writes to `manifest_for(...)`)
+  and from what the upstream input steps write (the documents a bundle is
+  concatenated from, and the concatenation), and from those functions'
+  results (returned or yielded), the flow follows a function's locals
+  (every assignment, a `for` loop's iterable, the arguments of a method call
+  on a local and a value assigned to an item or attribute of one:
+  `parts.append(x)`), marks a literal that becomes part of the text, a
+  function whose result does (and follows its results in turn, across
+  imports) and a module constant the text is built from (`SYSTEM`, which
+  `render_system` returns; `source_review.INVENTORY_HEADER`, read through
+  its module). A call's arguments are text where its result carries them:
+  the positional arguments of a string method that joins or rewrites them
+  and of a copy, conversion or serialization the scan cannot resolve
+  (`list(cached)`, `json.dumps(inventory)`), and the arguments for the
+  parameters a function's result is built from (`dump_manifest(manifest)`);
+  a key that selects or labels a value, and the path a file read is called
+  on, are not text (#4085). A constant so marked is followed in turn:
+  every write of it at the top of its module is model text, and so is what
+  that write puts in it, recursively and each constant once. A write is a
+  top-level assignment to it (plain, annotated
   or augmented, or to an item or attribute of it), with its value, and any
   method call whose receiver holds it, wherever a top-level statement makes
   one on import (alone, in an assignment's value such as `D =
@@ -226,6 +277,14 @@ judges a hit by its own role:
   `command_guidance` and `lookup_guidance`, the deny-reason text in
   `hook_output` and the reasons of the command, file and audit-validator
   classifiers;
+- a top-level `data_sheets_schema` module is model-facing as a whole, in
+  every approach whose closure reaches it, where that data flow carries
+  one of its own sentences (a literal with whitespace and a letter or a
+  digit) into model text, or where `MODEL_FACING_MODULES` names it (#4085).
+  A module that only passes on what it is given, or whose literals in the
+  text are keys, identifiers or separators, is not derived: a bare token
+  gates as code in any role. Elsewhere (a controller, an upstream input
+  step) the text the flow finds counts span by span, as above;
 - a code branch or table counts unless the role is exposed, in Python and in
   a YAML, config, JSON or shell file that no approach hands to a model
   (below);
@@ -314,7 +373,13 @@ Every hit is classified by context:
    memory and the hooks), and the session surfaces it is not shown to switch
    off count in `run_controllers` too.
    The controller table says how each controller runs as a script, or that
-   it is imported only.
+   it is imported only. The line on which package modules write
+   model-facing text names the requests, the model-input writes and the
+   modules the derivation found, and the cross-check with
+   `MODEL_FACING_MODULES`: a module derived and not listed belongs on the
+   list (it gates already); one listed and not derived reaches a model, if
+   at all, through a channel the flow does not read, and the list is all
+   that keeps it gating.
 3. **gc_project violations.** These are the findings that fail the run. A
    violation is a Grand Challenge name, site or identifier in model-facing
    text, or in a code branch or table, that a gating approach counts, with no
@@ -506,10 +571,11 @@ owner's approval before anything is billed.
   a form the code reading did not know). A clean scan means that no listed
   token was found on a channel the scanner reads, not that no project text
   reaches a model. Channels known not to be read: what a process prints or
-  writes for a model to read outside the hook fields below (a tool's output,
-  a file a run writes and a later phase reads, a hook's stderr), environment
-  variables a launcher sets in code, files a run reads that no text names,
-  network responses, and the model's own earlier turns.
+  writes for a model to read outside the hook fields and the model inputs
+  below (a tool's output, a file a run writes and a later phase reads, a
+  hook's stderr), environment variables a launcher sets in code, files a
+  run reads that no text names, network responses, and the model's own
+  earlier turns.
 - A token list finds what it names. A project fact phrased without any listed
   token, such as a participant count or a site name, is invisible. Add
   tokens when a review finds one.
@@ -594,23 +660,49 @@ owner's approval before anything is billed.
   nothing outside the block calls (tests are not read). A module whose
   `__main__` block does something else, with nothing else saying it runs,
   is judged as imported.
-- Data flow is followed inside a function through assignments and across
-  imported functions and constants; a call's arguments are followed for the
-  constants they pass, not for the functions that compute them or the
-  literals they pass, and a method on an object (`self.render()`) is not
-  resolved. A module constant marked as model text is followed through its
-  writes at the top of its module, recursively (#4156): its top-level
-  assignments, and every method call whose receiver holds it wherever a
-  top-level statement makes one on import, with the call's arguments
-  (#4166). Not followed: an assignment to it inside a block there (`if`,
-  `try`) or in a function (`global`), a method call on it in the body of a
-  function or lambda, a function it is handed to (`register(C, v)`), a
-  write through another name bound to it or to part of it (`X = C`, then
-  `X.append(v)`), a constant reached as a module or class attribute (`m.C`,
-  `Cls.C`) or re-exported through another module, and one bound only by
-  unpacking. A model-facing module outside `MODEL_FACING_MODULES` whose
-  text reaches a model only through another module's variable is classed
-  by its role, not traced.
+- Data flow is followed inside a function through its locals (assignments,
+  `for` loops, method calls on a local and item writes to it) and across
+  imported functions and constants, a module's constant read through the
+  module included (#4085); a call's arguments are followed as text only
+  where its result carries them (a string method that joins or rewrites
+  them, a copy, conversion or serialization, a function whose result is
+  built from the parameter they fill), otherwise for the constants they
+  pass, and a method on an object (`self.render()`) is not resolved. The
+  flow does not tell the fields of a value apart: where a request
+  serializes part of a function's result
+  (`outcome['unsupported_audit_candidates']`), all of it is followed, which
+  is how `receipts` and `removals` are derived, through the
+  receipt-completion outcome and the removal classification those requests
+  are built from. A module constant marked as model text is followed
+  through its writes at the top of its module, recursively (#4156): its
+  top-level assignments, and every method call whose receiver holds it
+  wherever a top-level statement makes one on import, with the call's
+  arguments (#4166). Not followed: an assignment to it inside a block there
+  (`if`, `try`) or in a function (`global`), a method call on it in the
+  body of a function or lambda, a function it is handed to (`register(C,
+  v)`), a write through another name bound to it or to part of it (`X = C`,
+  then `X.append(v)`), a write reaching it as a module or class attribute
+  (`m.C.append(v)` in another module, `Cls.C`) or through a re-export, and
+  one bound only by unpacking.
+- The derivation of the model-facing modules (#4085) reads the requests
+  where the runner builds them, the model-input writes and the controllers'
+  sinks. It does not read: text added to a request after it is built,
+  through the object holding it (the report regate's
+  `req.messages[0]['content'].extend(...)` after `build_phase`); a request
+  of another type than the one `build_phase` returns (an evaluator's judge
+  request); what a tool prints for a native model to read (`d4d download
+  scope --project`, which the native playbook runs, the findings a check
+  prints); a file a controller writes for its native child other than
+  through a function named for model text, and a file a run writes that a
+  later phase reads (the derived core record, a batch plan or index); a
+  write whose target path is read off an object or passed in
+  (`spec.full_path`, a parameter), outside the upstream input steps, and a
+  write other than `write_text` or a `with`-bound handle's `write` or
+  `dump` (an `open()` held in a name, `shutil.copy`); and model input a
+  module supplies only as data, with no sentence of its own (manifest
+  values, JSON keys). The modules `MODEL_FACING_MODULES` names that the
+  derivation does not reach are listed in the report, and stay
+  model-facing because the list names them.
 - Hook output is read in run controllers from the two fields Claude Code
   shows the model, `permissionDecisionReason` and `additionalContext`; a
   hook's stderr when it exits 2, the `reason` of a `decision: block` and

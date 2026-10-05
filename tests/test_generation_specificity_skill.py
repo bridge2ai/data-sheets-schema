@@ -51,6 +51,12 @@ reports is derived from the code that decides it:
   write of it wherever a top-level statement makes it, in an assignment's
   value (Codex's `setdefault`, an assigned `append`), an argument or a
   condition, with its arguments followed (#4166);
+- which top-level package modules write model-facing text is derived by
+  data flow from the runner's requests, the model-input writes and the
+  controllers' sinks, and the hand-kept MODEL_FACING_MODULES is checked
+  against it in both directions: a project name in a new module whose
+  constant `build_phase` sends, or in one the healthsheet bundle is built
+  from, gates, and does not when the derivation is off (#4085);
 - the "api" section's derivations agree with what the runtime does, read
   their code in any spelling, and fail loudly rather than fall back (#4022,
   #4025, #4055, #4057, #4058);
@@ -1213,6 +1219,281 @@ class TestDiscovery(unittest.TestCase):
         self.assertEqual(missing, set())
 
 
+#: A runner small enough to read (#4085): the request type, and a
+#: `build_phase` that sends what a module the runner imports holds: a
+#: constant read through the module, one a helper returns from a
+#: function-level import, a function's result a helper's result is built
+#: from, and one a serialization carries.
+DERIVATION_RUNNER = '''from dataclasses import dataclass, field
+
+from data_sheets_schema import phase_notes_4085
+
+
+@dataclass
+class PhaseRequest:
+    phase: str
+    system: str
+    cached_blocks: list = field(default_factory=list)
+    messages: list = field(default_factory=list)
+
+
+def phase_instruction(phase):
+    from data_sheets_schema.phase_notes_4085 import INSTRUCTION
+    return INSTRUCTION
+
+
+def framed(text):
+    return "## " + text
+
+
+def build_phase(spec, phase, *, carry):
+    cached = [{"type": "text", "text": spec.bundle.read_text(), "cache_control": {"type": "ephemeral"}}]
+    parts = list(cached)
+    parts.append({"type": "text", "text": phase_notes_4085.NOTE})
+    parts.append({"type": "text", "text": phase_instruction(phase)})
+    parts.append({"type": "text", "text": framed(phase_notes_4085.role())})
+    parts.append({"type": "text", "text": "".join(sorted(phase_notes_4085.details()))})
+    return PhaseRequest(phase=phase, system=spec.system, cached_blocks=cached,
+                        messages=[{"role": "user", "content": parts}])
+'''
+#: The new module: four sentences the runner sends and one it never does,
+#: which gates only because the module as a whole is model-facing.
+PHASE_NOTES = ('NOTE = "Describe the CHORUS cohort as its sites report it."\n'      # 1
+               'INSTRUCTION = "Return the record of the VOICE release."\n'          # 2
+               'ASIDE = "A CM4AI sentence this module never sends."\n'              # 3
+               '\n\n'
+               'def role():\n'                                                       # 6
+               '    return "You describe the AI-READI release."\n'                  # 7
+               '\n\n'
+               'def details():\n'                                                    # 10
+               '    return ["Cite the fairhub page."]\n')                           # 11
+#: What reaches a request as something other than a module's own sentence
+#: (#4085): a file's content (not the path a read is called on), a value
+#: picked by a key (not the key), an identifier (a bare token, which gates
+#: as code in any role), and a report written for a person (not a model
+#: input). `prompts_4085` is the control: its sentence is sent.
+PRECISION_RUNNER = '''from dataclasses import dataclass, field
+from pathlib import Path
+
+from data_sheets_schema import data_4085, ids_4085, paths_4085, prompts_4085, reports_4085
+
+
+@dataclass
+class PhaseRequest:
+    phase: str
+    system: str
+    cached_blocks: list = field(default_factory=list)
+    messages: list = field(default_factory=list)
+
+
+def build_phase(spec, phase, *, carry):
+    guide = paths_4085.locate(spec).read_text(encoding="utf-8")
+    value = data_4085.rows(spec)["cohort"]
+    reports_4085.write(spec.output)
+    return PhaseRequest(phase=phase, system=prompts_4085.SYSTEM,
+                        messages=[{"role": "user", "content": [guide, value, ids_4085.label(spec)]}])
+'''
+PRECISION_MODULES = {
+    "paths_4085": 'from pathlib import Path\n\n\ndef locate(spec):\n    return Path("data") / "CHORUS guide.md"\n',
+    "data_4085": 'def rows(spec):\n    return {"CHORUS cohort": spec.value, "cohort": spec.other}\n',
+    "ids_4085": 'def label(spec):\n    return "dataset-" + spec.key\n',
+    "reports_4085": ('from pathlib import Path\n\nREPORT = "A CHORUS report written for a person."\n\n\n'
+                     'def write(directory):\n    (Path(directory) / "report_4085.md").write_text(REPORT)\n'),
+    "prompts_4085": 'SYSTEM = "You write records for one VOICE dataset."\n',
+}
+#: Listed in MODEL_FACING_MODULES, not reached by the derivation (#4085):
+#: what they hand a model goes through a channel the data flow does not
+#: read (SKILL.md, Limits) — a tool's output (`d4d download scope`), a file
+#: a controller or a run writes for a later reader (a batch plan or index),
+#: or data with no sentence of the module's own (manifest values, JSON
+#: keys). The list is what keeps them model-facing; a change here is a
+#: change to the cross-check, made on purpose.
+LISTED_NOT_DERIVED = ["audit_batches", "audit_grammar", "audit_omissions", "evidence_assertions", "grounding",
+                      "scope", "source_metadata", "typed_audit"]
+
+
+class TestModelFacingDerivation(unittest.TestCase):
+    """Which top-level `data_sheets_schema` modules write model-facing text
+    is derived by data flow from the requests the runner builds, the
+    model-input writes and the controllers' sinks; MODEL_FACING_MODULES is
+    a cross-check (#4085)."""
+
+    @staticmethod
+    def _root(d: str, runner: str, modules: dict[str, str]) -> Path:
+        root = Path(d).resolve()
+        _write(root / scan.CLI_API, (ROOT / scan.CLI_API).read_text(encoding="utf-8"))
+        _write(root / "src/data_sheets_schema/__init__.py", "")
+        _write(root / scan.RUNNER, runner)
+        for name, text in modules.items():
+            _write(root / f"src/data_sheets_schema/{name}.py", text)
+        return root
+
+    @staticmethod
+    def _derive(root: Path, *, sinks: bool = True):
+        """The derivation over a scratch root, with its sinks or (`sinks`
+        False) none: (derived modules, spans, the sinks' facts)."""
+        parsed = _parsed(root, "src")
+        index = scan._notes_index(root, parsed)
+        found, facts = scan.model_input_sinks(root, parsed, index, [], set())
+        spans, wrote = scan.text_flow(root, parsed, index, {}, found if sinks else [])
+        return scan.derive_model_facing(wrote), spans, facts
+
+    @staticmethod
+    def _violations(root: Path, rel: str, derived, spans) -> set:
+        """(token, line) of every violation in `rel` under the role and the
+        spans the derivation gives it."""
+        surface = scan.Surface(rel, ["api"], scan._module_role(root / rel, derived), "live", "t",
+                               text_spans=list(spans.get(rel, [])))
+        hits = scan.scan_file(root, surface, list(_tokens()))
+        for h in hits:
+            h["exception"] = None
+        return {(h["match"], h["line"]) for h in hits if scan.is_violation(h)}
+
+    def test_a_project_name_in_a_new_module_build_phase_sends_gates(self):
+        """The planted case: NOTE reaches the request through `parts.append`,
+        INSTRUCTION through a helper's function-level import, `role()`
+        through the parameter `framed()`'s result is built from, and
+        `details()` through `sorted`. The module is model-facing, so even
+        the sentence it never sends gates; with the derivation off nothing
+        in it does."""
+        rel = "src/data_sheets_schema/phase_notes_4085.py"
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, DERIVATION_RUNNER, {"phase_notes_4085": PHASE_NOTES})
+            derived, spans, facts = self._derive(root)
+            self.assertEqual(facts["request"]["class"], "PhaseRequest")
+            line = DERIVATION_RUNNER.splitlines().index("    return PhaseRequest(phase=phase, system=spec.system, "
+                                                        "cached_blocks=cached,") + 1
+            self.assertEqual(facts["requests"], [f"{scan.RUNNER}:{line}"])
+            self.assertIn("phase_notes_4085", derived)
+            # each sent sentence is found on its own route, ASIDE on none
+            self.assertEqual({label.split(" ")[0] for *_, label in spans[rel]},
+                             {"NOTE", "INSTRUCTION", "role()", "details()"})
+            self.assertEqual(self._violations(root, rel, derived, spans),
+                             {("CHORUS", 1), ("VOICE", 2), ("CM4AI", 3), ("AI-READI", 7), ("fairhub", 11)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("phase_notes_4085", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_text_moved_out_of_the_healthsheet_bundle_builder_still_gates(self):
+        """The #4054 review scenario: healthsheet.py's Origin line moved into
+        a new module it imports. The bundle it writes ends in the healthsheet
+        arm's `_healthsheet_only.txt`, so what it writes is model input, and
+        the new module is model-facing: the FAIRhub name there gates."""
+        origin = '"Origin: FAIRhub API record, metadata.healthsheet",'
+        text = (ROOT / "src/data_sheets_schema/healthsheet.py").read_text(encoding="utf-8")
+        self.assertEqual(text.count(origin), 1)
+        moved = text.replace(origin, "ORIGIN,").replace(
+            "from __future__ import annotations\n",
+            "from __future__ import annotations\n\nfrom data_sheets_schema.healthsheet_text import ORIGIN\n", 1)
+        rel = "src/data_sheets_schema/healthsheet_text.py"
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, DERIVATION_RUNNER, {
+                "healthsheet": moved, "healthsheet_text": f"ORIGIN = {origin.rstrip(',')}\n"})
+            derived, spans, facts = self._derive(root)
+            self.assertEqual([w.rsplit(":", 1)[0] for w in facts["writers"]], ["src/data_sheets_schema/healthsheet.py"])
+            self.assertIn("healthsheet_text", derived)
+            self.assertIn("healthsheet", derived)
+            self.assertEqual(self._violations(root, rel, derived, spans), {("FAIRhub", 1)})
+            off, off_spans, _ = self._derive(root, sinks=False)
+            self.assertNotIn("healthsheet_text", off)
+            self.assertEqual(self._violations(root, rel, off, off_spans), set())
+
+    def test_what_reaches_a_model_as_data_is_not_derived(self):
+        """A file's content is not the path read to get it, a key picks a
+        value without being one, an identifier is a bare token, and a report
+        written for a person is not model input: none of those modules
+        writes model-facing text. The module whose sentence is the system
+        prompt does."""
+        with tempfile.TemporaryDirectory() as d:
+            root = self._root(d, PRECISION_RUNNER, PRECISION_MODULES)
+            derived, spans, facts = self._derive(root)
+        self.assertEqual(facts["writers"], [])
+        self.assertIn("prompts_4085", derived)
+        self.assertIn("src/data_sheets_schema/ids_4085.py", spans)      # reached, with no sentence of its own
+        self.assertEqual({"paths_4085", "data_4085", "ids_4085", "reports_4085"} & set(derived), set())
+
+    def test_a_rendering_function_a_controller_calls_writes_model_text(self):
+        """The native audit batch writes each child's instruction from
+        `audit_batch_context.render_worker_context` into a file its launch
+        hands the child: a function of another module that a controller
+        calls, named for the text it renders, is model text, and its module
+        is model-facing. A function named otherwise is not followed."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d).resolve()
+            _write(root / "notes/exp_4085/launch.py",
+                   "from data_sheets_schema.api_runner import RunSpec\n"
+                   "from data_sheets_schema import batch_text_4085\n\n\n"
+                   "def prepare(path):\n"
+                   "    path.write_text(batch_text_4085.render_child_context(RunSpec))\n"
+                   "    path.with_suffix('.json').write_text(batch_text_4085.summary())\n")
+            _write(root / "src/data_sheets_schema/batch_text_4085.py",
+                   'DUTIES = "Audit every CHORUS path you are assigned."\n\n\n'
+                   'def render_child_context(spec):\n    return DUTIES\n\n\n'
+                   'def summary():\n    return "A VOICE summary for a person."\n')
+            parsed = _parsed(root, "notes", "src")
+            index = scan._notes_index(root, parsed)
+            controllers, _, _ = scan.run_controllers(root, parsed, index)
+            spans, wrote = scan.text_flow(root, parsed, index, controllers)
+        self.assertEqual(set(controllers), {"notes/exp_4085/launch.py"})
+        self.assertEqual(list(scan.derive_model_facing(wrote)), ["batch_text_4085"])
+        self.assertEqual({label.split(" ")[0] for *_, label in spans["src/data_sheets_schema/batch_text_4085.py"]},
+                         {"DUTIES", "render_child_context()"})
+
+    def test_this_checkouts_derivation_and_the_hand_kept_list_agree(self):
+        """Every module the derivation finds is on the list, and the list
+        names no module the derivation misses beyond LISTED_NOT_DERIVED; every
+        derived module is in a generation closure."""
+        mf = _discovered()[1]["model_facing_modules"]
+        self.assertEqual(mf["listed"], sorted(scan.MODEL_FACING_MODULES))
+        self.assertEqual(mf["derived_not_listed"], [])
+        self.assertEqual(mf["derived_outside_closures"], [])
+        self.assertEqual(mf["listed_not_derived"], LISTED_NOT_DERIVED)
+        self.assertEqual(set(mf["derived"]) | set(LISTED_NOT_DERIVED), scan.MODEL_FACING_MODULES)
+
+    def test_the_requests_and_the_model_input_writes_are_derived(self):
+        """The request type is what `build_phase` returns, and every
+        construction of it is a sink; the bundle and chunk-manifest writers
+        and the upstream input steps' writes are sinks; the runner's own
+        writes (records, receipts) are not model input."""
+        mi = _discovered()[1]["model_input"]
+        self.assertEqual(mi["request"], {"class": "PhaseRequest", "fields": ["phase", "system", "cached_blocks",
+                                                                             "messages"],
+                                         "text_fields": list(scan.REQUEST_TEXT_FIELDS)})
+        self.assertLessEqual({scan.RUNNER, "src/data_sheets_schema/receipt_completion.py",
+                              "src/data_sheets_schema/removal_repair.py",
+                              "src/data_sheets_schema/typed_audit_runtime.py"},
+                             {r.rsplit(":", 1)[0] for r in mi["requests"]})
+        self.assertLessEqual({"_chunks.yaml", "_crate_only.txt", "_healthsheet_only.txt", "_preprocessed.txt",
+                              "_preprocessed_with_crate.txt"}, set(mi["model_input_files"]))
+        writers = {w.rsplit(":", 1)[0] for w in mi["writers"]}
+        self.assertLessEqual({"src/data_sheets_schema/chunking.py", "src/data_sheets_schema/healthsheet.py",
+                              "src/data_sheets_schema/rocrate_normalize.py", "src/download/concatenate_documents.py",
+                              "src/download/preprocess_sources.py"}, writers)
+        self.assertNotIn(scan.RUNNER, writers)
+
+    def test_rereceipt_gates_by_the_derivation_alone(self):
+        """The live case the hand list missed: the renderer-24 receipt turn
+        sends rereceipt's INSTRUCTION, HEADER and POLICY. Derived, it is
+        model-facing whether or not the list names it, so a project name in
+        any of its sentences gates; with neither, a sentence outside the
+        text the flow follows does not."""
+        surfaces, facts = _discovered()
+        derived = facts["model_facing_modules"]["derived"]
+        rel = "src/data_sheets_schema/rereceipt.py"
+        self.assertIn("rereceipt", derived)
+        self.assertEqual(surfaces.files[rel].roles["api"], "model_facing")
+        unlisted = scan.MODEL_FACING_MODULES - {"rereceipt"}
+        line = 'NOTE_4085 = "Describe the CHORUS cohort."'
+        with mock.patch.object(scan, "MODEL_FACING_MODULES", unlisted):
+            role = scan._module_role(ROOT / rel, derived)
+            off = scan._module_role(ROOT / rel, {})
+        self.assertEqual((role, off), ("model_facing", "run_shaping"))
+        planted, _ = _plant(rel, line, surface=scan.Surface(rel, ["api"], role, "live", "t"))
+        self.assertTrue(planted and all(h["violation"] and h["gates_in"] == ["api"] for h in planted), planted)
+        quiet, _ = _plant(rel, line, surface=scan.Surface(rel, ["api"], off, "live", "t"))
+        self.assertTrue(quiet and not any(h["violation"] for h in quiet), quiet)
+
+
 #: A runner small enough to make monolithic: one phase, a model-call
 #: wrapper, a plan, the guards the derivations read (#4057, #4058).
 SYNTHETIC_RUNNER = '''
@@ -2319,6 +2600,41 @@ class TestDerivationsFailLoudly(unittest.TestCase):
             _write(root / scan.CLI_API, self.cli_text.replace("_healthsheet_only.txt", "_hs.txt"))
             with self.assertRaisesRegex(scan.ConfigError, "deterministic arm commands"):
                 scan.deterministic_arm_commands(root)
+
+    def test_the_request_and_the_model_inputs_are_read_in_either_form_or_not_at_all(self):
+        """The request type is what `build_phase` returns, directly or
+        through a local; a `build_phase` that returns no construction of a
+        runner class, a request type without a text field, and an arm with
+        no bundle pattern are not derived (#4085)."""
+        ret = "    return PhaseRequest(\n        phase=phase,"
+        self.assertEqual(self.runner_text.count(ret), 1)
+        cases = {"through a local": self.runner_text.replace(ret, "    req = PhaseRequest(\n        phase=phase,"
+                                                              ).replace("        messages=[{\"role\": \"user\", "
+                                                                        "\"content\": parts}],\n    )\n",
+                                                                        "        messages=[{\"role\": \"user\", "
+                                                                        "\"content\": parts}],\n    )\n"
+                                                                        "    return req\n", 1)}
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root / scan.RUNNER, self.runner_text)
+            live = scan.derive_request_type(root)
+            self.assertEqual(live["class"], "PhaseRequest")
+            for why, text in cases.items():
+                self.assertIn("    return req\n", text)
+                _write(root / scan.RUNNER, text)
+                with self.subTest(why=why):
+                    self.assertEqual(scan.derive_request_type(root), live)
+            for broken, why in ((self.runner_text.replace(ret, "    return dict(\n        phase=phase,"),
+                                 "returns a construction of"),
+                                (self.runner_text.replace("    messages: list[dict[str, Any]] = field(",
+                                                          "    turns: list[dict[str, Any]] = field("),
+                                 "has no field messages")):
+                _write(root / scan.RUNNER, broken)
+                with self.subTest(why=why), self.assertRaisesRegex(scan.ConfigError, why):
+                    scan.derive_request_type(root)
+            _write(root / scan.CLI_API, self.cli_text.replace('"{p}_healthsheet_only.txt"', '"healthsheet.txt"'))
+            with self.assertRaisesRegex(scan.ConfigError, "not derived: the model input files"):
+                scan.model_input_files(root, [])
 
     def test_a_runner_that_branches_on_the_arm_is_not_derived(self):
         with tempfile.TemporaryDirectory() as d:
@@ -3642,6 +3958,11 @@ class TestTheWholeAudit(unittest.TestCase):
         for spread in ("`*CLI_FLAGS`", "`*native.CLI_FLAGS`", "`*overlay['cli_flags']`", "`*runtime['cli_flags']`"):
             self.assertIn(spread, markdown)
         self.assertNotIn("does not change a registered run's verdict", markdown)
+        # the derivation of the model-facing modules and its cross-check (#4085)
+        self.assertIn("Cross-checked with the hand-kept `MODEL_FACING_MODULES`: derived and not listed: none; "
+                      "listed and not derived (model-facing by the list alone, through a channel the flow does not "
+                      "read): " + ", ".join(f"`{m}`" for m in LISTED_NOT_DERIVED) + ".", markdown)
+        self.assertIn("`rereceipt`", markdown.split("A module is model-facing where the flow carries")[1][:2000])
 
     def test_claude_md_and_the_agent_script_demo_are_judged_as_they_run(self):
         """CLAUDE.md's GC names are interactive-session violations, and
