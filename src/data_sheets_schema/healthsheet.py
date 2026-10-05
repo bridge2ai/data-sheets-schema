@@ -188,11 +188,13 @@ def build_bundle(record_path: Path | None = None,
     output_dir.mkdir(parents=True, exist_ok=True)
     target = output_dir / (name or (bundle_name() if own_name else None) or f"{project}_healthsheet_only.txt")
     from data_sheets_schema.profiles import PROFILES
-    reserved = {p.healthsheet_bundle for p in PROFILES.values() if p.healthsheet_bundle}
+    reserved = {p.healthsheet_bundle: p.name for p in PROFILES.values() if p.healthsheet_bundle}
     if not own_name and name is None and target.name in reserved:
         # A record that is not the profile's may not take a profile's
         # tracked bundle name by claiming its project — under any active
-        # profile (#1543, #1565).
-        raise ValueError(f"{target.name} is the active profile's bundle name; pass --name for {record_path}")
+        # profile (#1543, #1565), so the refusal names the profile the name
+        # belongs to, which need not be the active one (#4420).
+        raise ValueError(f"{target.name} is the {reserved[target.name]} profile's bundle name; "
+                         f"pass --name for {record_path}")
     target.write_text(text, encoding="utf-8")
     return target, stats

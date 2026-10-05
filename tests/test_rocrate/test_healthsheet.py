@@ -207,7 +207,9 @@ class TestOrigin(unittest.TestCase):
 class TestDefaultName(unittest.TestCase):
     """Every place that states the default file name states the one the
     code writes: a record that is not the profile's is named after the
-    project it is filed under, not after the record's file (#1493, #4420)."""
+    project it is filed under, not after the record's file (#1493), and a
+    default that is a profile's bundle name is refused with that profile
+    named (#1565). Both #4420."""
 
     @staticmethod
     def _stated_names(text, project):
@@ -236,6 +238,23 @@ class TestDefaultName(unittest.TestCase):
                 self.assertEqual(written, ["CLINIC_healthsheet_only.txt"])
                 for where, text in stated.items():
                     self.assertEqual(self._stated_names(text, "CLINIC"), set(written), where)
+
+    def test_a_reserved_default_is_refused_naming_the_profile_it_belongs_to(self):
+        """The name is reserved under every active profile, so the refusal
+        names its owner, not the active profile, which under `neutral` has
+        no bundle name at all."""
+        from data_sheets_schema.profiles import BRIDGE2AI
+        for profile in ("bridge2ai", "neutral"):
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as d, \
+                    mock.patch.dict(os.environ, {"D4D_PROFILE": profile}):
+                record = Path(d) / "clinic_record.json"
+                record.write_text(json.dumps(FOREIGN), encoding="utf-8")
+                out = Path(d) / "out"
+                with self.assertRaises(ValueError) as caught:
+                    build_bundle(record, out, project=BRIDGE2AI.healthsheet_project)
+                self.assertIn(f"{BRIDGE2AI.healthsheet_bundle} is the {BRIDGE2AI.name} profile's bundle name; "
+                              "pass --name", str(caught.exception))
+                self.assertFalse((out / BRIDGE2AI.healthsheet_bundle).exists())
 
 
 class TestArmRegistration(unittest.TestCase):
