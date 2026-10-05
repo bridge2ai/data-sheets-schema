@@ -241,7 +241,8 @@ def _leaves_html_open(text: str) -> bool:
     what the page shows after it: anything OPAQUE matches, or an HTML
     tokenizer that, reading `text` from its data state, stops in a comment,
     a tag or a quoted attribute value, or in a bogus comment or DOCTYPE
-    short of its ">"."""
+    short of its ">". OPAQUE already refuses "<?" and "--!>"; the tokenizer
+    below still reads them by its own rules, so it stays right on its own."""
     if OPAQUE.search(text):
         return True
     i = text.find("<")
