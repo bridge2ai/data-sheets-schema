@@ -78,7 +78,16 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     from data_sheets_schema import backfill_checks as bc
     from data_sheets_schema import receipts as rc
 
-    p = _run_paths(method, label, project)
+    if native_capture is not None:
+        from data_sheets_schema import native_shared_capture
+        try:
+            p = native_shared_capture.selected_receipt_paths(native_shared_selection)
+        except (OSError, ValueError) as exc:
+            raise click.ClickException(f'native receipt paths refused: {exc}') from exc
+        receipt_file = p['receipt']
+    else:
+        p = _run_paths(method, label, project)
+        receipt_file = rc.receipt_path(p['core_dir'], project)
     record = None
     if p["provenance"].exists():
         record = yaml.safe_load(bc._split_header(p["provenance"].read_text(encoding="utf-8"))[1]) or {}
@@ -147,7 +156,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         except (OSError, ValueError) as exc:
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
-    block = rc.block_for(p["full"], rc.receipt_path(p["core_dir"], project), bundle, md5, expected, **recovery)
+    block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
@@ -171,7 +180,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             from data_sheets_schema import native_shared_capture
             try:
                 claims = native_shared_capture.recorded_receipt_claims(None, record=record,
-                    full_path=p["full"], receipt_path=rc.receipt_path(p["core_dir"], project),
+                    full_path=p["full"], receipt_path=receipt_file,
                     expected_block=block)
                 native_claims_text = yaml.safe_dump(claims, sort_keys=False, allow_unicode=True)
             except (OSError, ValueError, yaml.YAMLError) as exc:
@@ -184,7 +193,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             if native_claims_text is not None:
                 out.write_text(native_claims_text, encoding="utf-8")
             else:
-                receipt = rc.load_receipt(rc.receipt_path(p["core_dir"], project))
+                receipt = rc.load_receipt(receipt_file)
                 full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
                 out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full), sort_keys=False,
                                               allow_unicode=True), encoding="utf-8")

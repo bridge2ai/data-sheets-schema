@@ -126,7 +126,8 @@ def routed(declaration, tmp_path, monkeypatch):
         calls.append(('recorded', specification, kwargs))
         return copy.deepcopy(result)
     monkeypatch.setattr(data_sheets_schema, 'native_shared_capture',
-        types.SimpleNamespace(live_receipt_block=live, recorded_receipt_block=recorded), raising=False)
+        types.SimpleNamespace(live_receipt_block=live, recorded_receipt_block=recorded,
+            selected_receipt_paths=lambda path: {**paths, 'receipt': receipt}), raising=False)
     monkeypatch.setattr(receipts, 'phase1_snapshot_state', lambda *a, **k: pytest.fail('native reader used API snapshots'))
     return cap, spec, cli, paths, receipt, calls, result
 
@@ -144,6 +145,39 @@ def test_native_cli_initial_and_final_use_observed_reader_and_explicit_paths(rou
     final = CliRunner().invoke(cli.check, args)
     assert final.exit_code == 1  # The declared pending floor is not final success.
     assert {p: p.read_bytes() for p in originals} == originals
+
+
+def test_native_cli_uses_selected_paths_and_receipt_basename_without_legacy_discovery(routed, monkeypatch):
+    cap, _, cli, paths, _, calls, _ = routed
+    chosen = {**paths, 'full': paths['core_dir'] / 'chosen-full.yaml',
+              'receipt': paths['core_dir'] / 'sealed-input.custom.yaml',
+              'provenance': paths['core_dir'] / 'chosen-provenance.yaml'}
+    chosen['full'].write_bytes(b'name: Selected actual full\n')
+    chosen['receipt'].write_bytes(b'fixture: selected original\n')
+    monkeypatch.setattr(cli, '_run_paths', lambda *a: pytest.fail('native route discovered legacy corpus paths'))
+    def selected_paths(path):
+        assert str(path) == cap.registration.pin.path
+        return chosen
+    monkeypatch.setattr(data_sheets_schema.native_shared_capture, 'selected_receipt_paths', selected_paths)
+    outcome = CliRunner().invoke(cli.check, ['--native-shared-selection', cap.registration.pin.path,
+        '--label', 'offline-test', '--project', 'SYNTHETIC', '--strict'])
+    assert outcome.exit_code == 0, (outcome.output, outcome.exception)
+    assert calls == [('live', cap.registration.pin.path,
+                      {'full_path': chosen['full'], 'receipt_path': chosen['receipt']})]
+
+
+def test_native_cli_path_reconstruction_refusal_cannot_fall_back(routed, monkeypatch):
+    cap, _, cli, paths, receipt, calls, _ = routed
+    before = {p: p.read_bytes() for p in (paths['full'], receipt)}
+    def refused(path):
+        raise ValueError('selected E/C paths cannot be reconstructed')
+    monkeypatch.setattr(data_sheets_schema.native_shared_capture, 'selected_receipt_paths', refused)
+    monkeypatch.setattr(cli, '_run_paths', lambda *a: pytest.fail('native path refusal fell back'))
+    outcome = CliRunner().invoke(cli.check, ['--native-shared-selection', cap.registration.pin.path,
+        '--label', 'offline-test', '--project', 'SYNTHETIC', '--write'])
+    assert outcome.exit_code == 1 and 'native receipt paths refused' in outcome.output
+    assert calls == []
+    assert {p: p.read_bytes() for p in before} == before
 
 
 @pytest.mark.parametrize('value', [False, 1, None])
