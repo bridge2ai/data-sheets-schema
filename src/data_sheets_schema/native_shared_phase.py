@@ -141,6 +141,8 @@ class PhaseState:
             target = self._path(tool_input.get('file_path'))
             role = next((r for r, path in self.paths.items() if path == target), None)
             if role in ('full', 'receipt'):
+                _require(role != 'receipt' or not self._phase1_sealed,
+                         'sealed original receipt remains unchanged; the helper owns the effective receipt')
                 _require(self._all('chunk_check', 'source_scope'), 'generation precedes chunk/source checks')
                 _require(not self._phase1_sealed or self._assembly_complete,
                          'sealed original cannot be mutated before checked assembly completion')

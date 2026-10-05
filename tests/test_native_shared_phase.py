@@ -130,6 +130,20 @@ def test_complete_ordered_chain_and_detached_replay():
     assert trace.state.report()['checks']
 
 
+@pytest.mark.parametrize('through_callback', [True, False])
+def test_original_receipt_cannot_be_rewritten_after_checked_assembly(through_callback):
+    trace = Trace()
+    trace.assembly()
+    inputs = {'file_path': '/neutral/receipt', 'content': 'replacement effective receipt'}
+    with pytest.raises(ValueError, match='sealed original receipt'):
+        if through_callback:
+            trace.state.before('Write', inputs, stage_decision=trace.current)
+        else:
+            trace.state.observe({'type': 'assistant', 'session_id': 'session', 'message': {'content': [
+                {'type': 'tool_use', 'id': 'receipt-overwrite', 'name': 'Write', 'input': inputs}]}},
+                stage_decision=trace.current)
+
+
 def test_initial_correction_and_failed_draft_can_be_repaired():
     trace = Trace()
     trace.helper('chunk_check'); trace.helper('source_scope')
