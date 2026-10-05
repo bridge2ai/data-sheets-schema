@@ -930,8 +930,9 @@ def current_effect_view(run, *, correction_window=False, exclude_pending=None):
             elif doc['observation_type'] == 'response_intent' and payload['request'] == c.pin_dict(request.pin):
                 intent = item.pin.sha256
         # A consumed response remains spent even after journal advancement.
+        request_hash = c.strict_json(request.raw, max_bytes=run.selection.bounds()['max_request_bytes'])['request_sha256']
         for row in stage._history(run.selection, run.binding, run.history)[0]:
-            if row['record_type'] == 'response_consumed' and row['payload']['request_sha256'] == request.pin.sha256:
+            if row['record_type'] == 'response_consumed' and row['payload']['request_sha256'] == request_hash:
                 pin = row['payload']['response_observation']
                 intent = pin['sha256']
     protected = list(run.selection.roles)
@@ -1008,8 +1009,9 @@ def observe_response_written(run, identity):
     obs = _persist_observation(run, 'response_written', {'call': call_document(actual.call),
         'result': asdict(actual.result), 'result_event': asdict(actual.result_event), 'response': c.pin_dict(response.pin),
         'intent_observation': c.pin_dict(intent.pin), 'history_sha256': run.history.journal.pin.sha256})
+    request_hash = c.strict_json(current.request.raw, max_bytes=run.selection.bounds()['max_request_bytes'])['request_sha256']
     _append(run.selection, run.binding, run.history, 'response_consumed', {'cursor': asdict(current.cursor),
-        'request_sha256': current.request.pin.sha256, 'response': c.pin_dict(response.pin),
+        'request_sha256': request_hash, 'response': c.pin_dict(response.pin),
         'read_observation': payload['read_observation'], 'response_observation': c.pin_dict(obs.pin)})
 
 
