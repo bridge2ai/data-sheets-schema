@@ -156,7 +156,7 @@ def counters(monkeypatch):
     calls = []
     targets = ((capture, '_base'), (capture, '_live_streams'), (capture, '_binding'),
                (capture._Reader, 'history'), (capture, '_checked_observations'),
-               (receipts.omissions, '_schema'))
+               (receipts.omissions, '_schema_with_root_bases'))
     for owner, name in targets:
         actual = getattr(owner, name)
         def counted(*args, _actual=actual, _name=name, **kwargs):
@@ -183,7 +183,7 @@ def test_two_real_live_captures_share_only_pure_catalog(live, monkeypatch, tmp_p
     (tmp_path / 'capture-counts.json').write_bytes(c.canonical({'calls': calls,
         'request_sha256': live.request.pin.sha256, 'journal_sha256': second.history.journal.pin.sha256}))
     # BEFORE regression: both actual validators derived the same catalog.
-    assert calls.count('_schema') == 1
+    assert calls.count('_schema_with_root_bases') == 1
     assert first._catalogs is second._catalogs is live.adapter._receipt_catalogs
 
 
@@ -191,28 +191,28 @@ def test_strict_default_replaced_public_and_other_adapter_stay_fresh(live, monke
     calls = counters(monkeypatch)
     warm = live.adapter._run(live.endpoints)
     expected = warm.decision()
-    assert calls.count('_schema') == 1
+    assert calls.count('_schema_with_root_bases') == 1
     bases, private = warm._catalogs.schema_data(warm.selection, receipts.schema_snapshot(warm.selection))
     private['classes'].clear()
     assert type(bases) is tuple
     assert live.adapter._run(live.endpoints).decision() == expected
-    assert calls.count('_schema') == 1
+    assert calls.count('_schema_with_root_bases') == 1
     other = live.new_adapter()
     assert other._receipt_catalogs is not warm._catalogs
     assert other._receipt_catalogs._entry is None
     assert other._run(live.endpoints).decision() == expected
-    assert calls.count('_schema') == 2
+    assert calls.count('_schema_with_root_bases') == 2
     strict = live.adapter._run()
     assert strict._catalogs is not warm._catalogs and strict.decision() == expected
-    assert calls.count('_schema') == 3
+    assert calls.count('_schema_with_root_bases') == 3
     default = capture._load_live(live.path)
     assert default._catalogs is not warm._catalogs and default.decision() == expected
-    assert calls.count('_schema') == 4
+    assert calls.count('_schema_with_root_bases') == 4
     copied = replace(warm)
     assert copied._catalogs is not warm._catalogs and copied.decision() == expected
-    assert calls.count('_schema') == 5
+    assert calls.count('_schema_with_root_bases') == 5
     public = stage.prepare_next(warm.selection, warm.binding, warm.phase1, warm.history)
-    assert public == expected and calls.count('_schema') == 6
+    assert public == expected and calls.count('_schema_with_root_bases') == 6
     # A callback failure stays latched; warmed storage supplies no retry path.
     with pytest.raises(live.adapter.controls['budgeted_cborg'].BudgetStop):
         live.adapter.observe({})  # This fixture never activated a live transport.
@@ -262,4 +262,4 @@ def test_live_context_rejects_nonexact_storage_before_observation_validation(liv
         with pytest.raises(ValueError, match='private derivation storage'):
             capture._load_live(live.path, _catalogs=foreign)
     assert calls.count('_base') == calls.count('_binding') == calls.count('history') == 2
-    assert '_checked_observations' not in calls and '_schema' not in calls
+    assert '_checked_observations' not in calls and '_schema_with_root_bases' not in calls

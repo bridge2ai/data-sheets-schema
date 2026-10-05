@@ -19,14 +19,14 @@ from tests.test_typed_audit import supplied
 
 @pytest.fixture
 def derivations(monkeypatch):
-    actual = nr.omissions._schema
+    actual = nr.omissions._schema_with_root_bases
     seen = []
 
     def counted(*args, **kwargs):
         seen.append(kwargs['schema_snapshot'].sources)
         return actual(*args, **kwargs)
 
-    monkeypatch.setattr(nr.omissions, '_schema', counted)
+    monkeypatch.setattr(nr.omissions, '_schema_with_root_bases', counted)
     return seen
 
 
@@ -249,13 +249,13 @@ def test_payload_accounting_eviction_oversize_and_copy_isolation(case, monkeypat
 
 def test_concurrent_misses_compute_outside_lock_and_return_independent_data(case, monkeypatch):
     s = case[0]; context = nr._ReceiptCatalogContext(); gate = Barrier(2)
-    actual = nr.omissions._schema
+    actual = nr.omissions._schema_with_root_bases
 
     def together(*args, **kwargs):
         gate.wait(timeout=10)
         return actual(*args, **kwargs)
 
-    monkeypatch.setattr(nr.omissions, '_schema', together)
+    monkeypatch.setattr(nr.omissions, '_schema_with_root_bases', together)
     with ThreadPoolExecutor(max_workers=2) as pool:
         values = list(pool.map(lambda _: context.catalog(s, nr.schema_snapshot(s)), range(2)))
     assert values[0] == values[1] and values[0] is not values[1]
@@ -325,7 +325,16 @@ def test_changed_root_and_import_rederive_one_matched_pair(case, derivations, ro
     assert len(derivations) == len(root_derivations) == 3
 
 
-def test_failed_root_derivation_never_replaces_valid_pair(case, derivations, root_derivations):
+def test_failed_root_derivation_never_replaces_valid_pair(case, derivations, root_derivations, monkeypatch):
+    from data_sheets_schema import schema_view
+    actual_view = schema_view.captured_view
+    catalog_views = []
+
+    def counted_view(*args, **kwargs):
+        catalog_views.append(args[0])
+        return actual_view(*args, **kwargs)
+
+    monkeypatch.setattr(schema_view, 'captured_view', counted_view)
     s = case[0]; context = nr._ReceiptCatalogContext()
     original = context.schema_data(s, nr.schema_snapshot(s))
     entry, size = context._entry, context._bytes
@@ -335,7 +344,10 @@ def test_failed_root_derivation_never_replaces_valid_pair(case, derivations, roo
             context.schema_data(bad, nr.schema_snapshot(bad))
     assert context._entry is entry and context._bytes == size
     assert context.schema_data(s, nr.schema_snapshot(s)) == original
-    assert len(root_derivations) == 3 and len(derivations) == 1
+    # The joint helper is entered before parsing, including both failed roots;
+    # only the valid root may reach actual catalog construction.
+    assert len(root_derivations) == len(derivations) == 3
+    assert len(catalog_views) == 1
 
 
 def test_bases_storage_counts_without_an_extra_catalog_envelope_limit(case, monkeypatch, derivations):
@@ -372,14 +384,14 @@ def test_concurrent_distinct_keys_never_mix_catalog_and_root_bases(case, monkeyp
                   for side in ('left', 'right')]
     expected = [nr._ReceiptCatalogContext().schema_data(item, nr.schema_snapshot(item)) for item in selections]
     context = nr._ReceiptCatalogContext(); gate = Barrier(2)
-    actual = nr.omissions._schema
+    actual = nr.omissions._schema_with_root_bases
 
     def together(*args, **kwargs):
         gate.wait(timeout=10)
         return actual(*args, **kwargs)
 
     with monkeypatch.context() as concurrent:
-        concurrent.setattr(nr.omissions, '_schema', together)
+        concurrent.setattr(nr.omissions, '_schema_with_root_bases', together)
         with ThreadPoolExecutor(max_workers=2) as pool:
             values = list(pool.map(lambda item: context.schema_data(item, nr.schema_snapshot(item)), selections))
     assert values == expected and values[0] != values[1]

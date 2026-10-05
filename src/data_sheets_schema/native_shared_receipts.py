@@ -16,7 +16,6 @@ import yaml
 from . import audit_omissions as omissions, receipts
 from . import native_shared_contract as contract
 from .chunking import chunk_texts, validate_manifest_mapping
-from .grounding import declared_bases_of
 from .receipt_completion_policy import coverage_counts
 from .schema_snapshot import SchemaSnapshot
 
@@ -95,8 +94,7 @@ class _ReceiptCatalogContext:
         if entry is None:
             # Root-only prefixes are intentional: an explicit empty tuple must
             # never inherit imported or current-installation identifier bases.
-            bases = tuple(declared_bases_of(omissions._mapping(snapshot.sources[0][2], 'captured schema')))
-            catalog = omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True)
+            bases, catalog = omissions._schema_with_root_bases(snapshot.sources[0][1], schema_snapshot=snapshot)
             # LinkML URIorCURIE names have the same released JSON meaning.
             raw = omissions._json(catalog).encode('utf-8')
             result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)

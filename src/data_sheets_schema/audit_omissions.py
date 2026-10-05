@@ -104,6 +104,24 @@ def _shape(value, schema):
 
 def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
     """Capture and validate each file once before constructing a schema view."""
+    return _schema_product(path, schema_snapshot=schema_snapshot,
+                           logical_paths=logical_paths, with_root_bases=False)[0]
+
+
+def _schema_with_root_bases(path: Path, *, schema_snapshot):
+    """Derive native root-only bases and the catalog from the same strict parse."""
+    catalog, bases = _schema_product(path, schema_snapshot=schema_snapshot,
+                                    logical_paths=True, with_root_bases=True)
+    return bases, catalog
+
+
+def _schema_product(path, *, schema_snapshot, logical_paths, with_root_bases):
+    bases = None
+    if with_root_bases:
+        from .grounding import declared_bases_of
+        # Preserve native root parsing/projection before closure validation.
+        # No caller supplies a parsed mapping or a prior validation verdict.
+        bases = tuple(declared_bases_of(_mapping(schema_snapshot.sources[0][2], 'captured schema')))
     from linkml_runtime.dumpers import json_dumper
     from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
     from data_sheets_schema.schema_view import captured_view
@@ -128,7 +146,7 @@ def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
         if type(schema_snapshot) is not SchemaSnapshot or type(schema_snapshot.sources) is not tuple or not schema_snapshot.sources:
             raise ValueError("schema_snapshot must be a nonempty immutable SchemaSnapshot")
         frozen = {}
-        for row in schema_snapshot.sources:
+        for ordinal, row in enumerate(schema_snapshot.sources):
             if type(row) is not tuple or len(row) != 3:
                 raise ValueError("invalid captured schema source")
             name, selected, raw = row
@@ -139,7 +157,10 @@ def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
             total += len(raw)
             if total > MAX_SCHEMA_BYTES:
                 raise ValueError("schema closure exceeds byte bound")
-            _mapping(raw, "schema")
+            # Only native ordinal zero has already passed this strict reader
+            # in this call. Imports retain their independent validation.
+            if not with_root_bases or ordinal != 0:
+                _mapping(raw, "schema")
             frozen[selected] = raw
         root = schema_snapshot.sources[0][1]
         if path.absolute() != root:
@@ -179,7 +200,7 @@ def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
                 if enum:
                     enums[str(slot.range)] = json.loads(json_dumper.dumps(enum))
     return {"root_class": "Dataset", "classes": classes, "enums": enums,
-            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}
+            "sources": [{"name": name, "sha256": _sha(raw)} for name, _path, raw in captured.sources]}, bases
 
 
 def _class(catalog, name):
