@@ -117,7 +117,20 @@ REPORTED_ONLY = (
     ("snippets not in the chunk cited", "receipts",
      lambda b: int((b.get("snippets") or {}).get("adjacent") or 0) + int((b.get("snippets") or {}).get("elsewhere") or 0)
      + int((b.get("snippets") or {}).get("spans_boundary") or 0)),
+    # Receipt origin (#2933): of the receipt's snippets, those in it when the
+    # full record was first written and those a Phase 1 correction or Phase 3
+    # back-port added after. Read from the run's transcript; — where no
+    # transcript was read for this receipt. Never gated: post-draft snippets
+    # stay unaccepted for semantic support until independent review (#2067).
+    ("snippets contemporaneous", "receipts", lambda b: (receipt_origin_split(b) or {}).get("contemporaneous")),
+    ("snippets post-draft", "receipts", lambda b: (receipt_origin_split(b) or {}).get("post_draft")),
 )
+
+
+def receipt_origin_split(block: dict[str, Any]) -> dict[str, int] | None:
+    """The receipts block's origin counts (`receipt_origin_record.split`)."""
+    from data_sheets_schema.receipt_origin_record import split
+    return split(block)
 
 
 #: Which metric answers each numbered prediction in

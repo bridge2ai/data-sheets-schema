@@ -109,7 +109,22 @@ def _known_phases() -> frozenset[str]:
                                 "report_regate"} | AGENTIC_PHASES
 
 
-def _inline_checks(path: Path) -> None:
+def _recorded_receipt_origin(path: Path):
+    """The `receipts.origin` a record on disk carries, or None (#2933): read
+    before a re-record rewrites the file, because no recorder can read the
+    transcript it was measured from again."""
+    import yaml as _yaml
+
+    from data_sheets_schema.backfill_checks import _split_header
+    try:
+        data = _yaml.safe_load(_split_header(path.read_text(encoding="utf-8"))[1]) if path.exists() else None
+    except (OSError, UnicodeDecodeError, _yaml.YAMLError):
+        return None
+    receipts = data.get("receipts") if isinstance(data, dict) else None
+    return receipts.get("origin") if isinstance(receipts, dict) else None
+
+
+def _inline_checks(path: Path, origin_prior=None) -> None:
     """Write the four deterministic check blocks into a just-written record.
 
     The API runner computes pair consistency, report claims, grounding and
@@ -123,13 +138,14 @@ def _inline_checks(path: Path) -> None:
     run without a record is not. Downstream, the canary gate reads
     report_claims and refuses a record that lacks it, so the gap cannot pass
     silently into a fan-out. The one exception is an artifact that does not
-    parse, which is re-raised.
+    parse, which is re-raised. `origin_prior` is the receipt origin the
+    record carried before a re-record rewrote it (#2933).
     """
     import yaml as _yaml
 
     from data_sheets_schema import backfill_checks as bc
     try:
-        blocks = bc.compute(path)
+        blocks = bc.compute(path, origin_prior=origin_prior)
     except _yaml.YAMLError:
         # An artifact that does not parse is a run failure, not a checks
         # failure; hiding it behind a ⚠️ would let a launcher ship it.
@@ -631,12 +647,13 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # ambient owner; the record itself keeps portable paths at its own root.
     destination = (Path(registered._agentic_artifact_paths["core"]).resolve().parent / f"{project}_provenance.yaml"
                    if registered is not None else record_path_for(project, method, label, concat_dir=concat_dir.absolute()))
+    origin_prior = _recorded_receipt_origin(destination)        # a re-record keeps it (#2933)
     out = rec.write(destination)
     click.echo(f"✓ {out}")
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
     inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
-    _inline_checks(inline_address)
+    _inline_checks(inline_address, origin_prior)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs
