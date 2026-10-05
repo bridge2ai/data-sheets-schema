@@ -177,13 +177,19 @@ def _shared_roster(path, pairs):
         raise click.ClickException(str(exc)) from exc
 
 
-def _shared_current(specs, roster=None, *, batch_label_prefix=None):
+def _shared_current(specs, roster=None, *, batch_label_prefix=None, canary_baseline=None):
     from data_sheets_schema import shared_generation as shared
     try:
         captures = [shared.assert_current(spec) for spec in specs if spec.shared_generation_version]
         # Reuse the complete closure for every run; one run must not overwrite
         # another run's authority before a later drift check can refuse it.
         authority_paths = tuple(path for capture in captures for path, _ in capture.files)
+        if canary_baseline:
+            from data_sheets_schema import canary, provenance
+            # Match baseline_for/report_basis exactly: their default method
+            # spans agent-family arms, not only the current run's method.
+            authority_paths += tuple(path for spec in specs for path in
+                canary._baseline_records(provenance.CONCAT_DIR, None, canary_baseline, spec.project))
         if roster is not None:
             path = roster['path']
             if _bounded_registration_bytes(path) != roster['raw']:
@@ -203,7 +209,7 @@ def _shared_current(specs, roster=None, *, batch_label_prefix=None):
             shared._separate_authorities(specs, authority_paths, extra_outputs=extra)
             from data_sheets_schema.output_ownership import require_disjoint_selected_outputs
             require_disjoint_selected_outputs(specs, control_paths=extra)
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError, LookupError) as exc:
         raise click.ClickException(str(exc)) from exc
 
 
@@ -770,7 +776,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             specs.append(s)
 
     if roster:
-        _shared_current(specs, roster, batch_label_prefix=label_prefix)
+        _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
     selected_receipts = any(getattr(s, 'receipt_completion_version', 0) for s in specs)
     receipt_gating = False
     if selected_receipts and not dry_run:
@@ -816,7 +822,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
 
     from data_sheets_schema import run_lock
     if roster:
-        _shared_current(specs, roster, batch_label_prefix=label_prefix)
+        _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
     try:
         lock_path = run_lock.acquire(label_prefix, names)
     except run_lock.AlreadyRunning as exc:
@@ -847,7 +853,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 break
         try:
             if roster:
-                _shared_current(specs, roster, batch_label_prefix=label_prefix)
+                _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
             spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
             spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])

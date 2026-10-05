@@ -277,9 +277,10 @@ class Capture:
 
 def _separate_authorities(specs, paths, *, extra_outputs=()):
     """Protect the captured closure and actual immutable assets from all writers."""
-    from .resources import resource_path
+    from .shared_generation_resources import resource_paths
     from .shared_write_footprint import for_run, require_separate
-    authorities = (*paths, *(resource_path(name) for name in ASSET_HASHES))
+    specs = tuple(specs)
+    authorities = (*paths, *resource_paths(specs))
     try:
         require_separate(authorities, (for_run(spec) for spec in specs),
                          extra_points=extra_outputs)
