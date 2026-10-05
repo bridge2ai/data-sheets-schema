@@ -15,6 +15,12 @@ from data_sheets_schema import native_shared_selection as selected
 from data_sheets_schema import source_review
 
 
+def _write_file(path, content):
+    """Emulate the granted Write's parent creation, without prepopulating data."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+
+
 def main():
     attempt = Path(os.environ['CLAUDE_CONFIG_DIR']).parent
     value = c.strict_json((attempt / 'registration.json').read_bytes(), max_bytes=c.HARD_LIMITS['request_bytes'])
@@ -81,7 +87,7 @@ def main():
         elif name == 'Write':
             path = Path(inputs['file_path']); existed = path.exists()
             old = path.read_text() if existed else None
-            path.write_text(inputs['content'])
+            _write_file(path, inputs['content'])
             metadata = {'type': 'update' if existed else 'create', 'filePath': str(path),
                 'content': inputs['content'], 'originalFile': old, 'userModified': False, 'structuredPatch': []}
             code, text = 0, ('The file ' + str(path) + ' has been updated successfully.' if existed
