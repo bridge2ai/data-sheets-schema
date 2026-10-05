@@ -4441,6 +4441,11 @@ def derive_native_shared_procedure(root: Path) -> dict:
     def field(value, name):
         if not isinstance(value, ast.Dict):
             raise fail('producer does not return a literal mapping')
+        if any(not isinstance(key, ast.Constant) or type(key.value) is not str for key in value.keys):
+            raise fail('counted authority mapping has unpacked or dynamic keys')
+        keys = [key.value for key in value.keys]
+        if len(keys) != len(set(keys)):
+            raise fail('counted authority mapping has duplicate keys')
         found = [v for k, v in zip(value.keys, value.values)
                  if isinstance(k, ast.Constant) and k.value == name]
         if len(found) != 1:

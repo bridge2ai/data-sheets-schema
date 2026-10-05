@@ -2020,6 +2020,23 @@ class TestNativeSharedProcedure:
             'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)',
             'derived, _, _ = foreign(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)')
 
+    def test_return_unpack_cannot_override_counted_receipt_field(self, tmp_path):
+        # Exact independent #4403 witness, preserving the original literal
+        # field and its otherwise unchanged local producer/use pair.
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, **{'requested_paths': []},")
+
+    def test_return_dynamic_key_cannot_override_counted_receipt_field(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, 'requested_' + 'paths': [],")
+
+    def test_return_duplicate_literal_key_is_not_counted_authority(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,",
+            "'schema': catalog, 'owner_classes': owners, 'requested_paths': paths, 'requested_paths': [],")
+
     def test_counted_values_and_fixed_producer_delegates_cannot_escape(self, tmp_path):
         # Source-only witnesses for the finite local-use/return joins. No
         # mutated producer or runtime is imported or executed.
