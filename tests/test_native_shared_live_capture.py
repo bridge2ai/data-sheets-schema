@@ -51,6 +51,13 @@ def native_init(cap, value, selected):
     return transcript, control
 
 
+def stream_capture(value):
+    from data_sheets_schema.native_shared_streams import stream_files as identities
+    members, prefixes = capture._streams(value)
+    return {'stream_files': identities(members),
+            'observed_prefixes': dict(zip(('transcript', 'control'), prefixes))}
+
+
 def test_actual_reserved_genesis_then_observed_init_and_no_premature_stage(started):
     cap, value, selected, raw, start = started
     genesis = c.strict_json(Path(cap.role('journal')).read_bytes())
@@ -59,7 +66,7 @@ def test_actual_reserved_genesis_then_observed_init_and_no_premature_stage(start
     with pytest.raises(ValueError, match='spent'):
         capture.activate(cap, raw, start)
     transcript, control = native_init(cap, value, selected)
-    capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control))
+    capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     actual = capture._load(cap.registration.pin.path)
     assert actual.phase1 is None
     assert len(actual.history.records) == 2 and len(actual.observations) == 1
@@ -67,7 +74,7 @@ def test_actual_reserved_genesis_then_observed_init_and_no_premature_stage(start
     assert actual.binding.session_id == '00000000-0000-4000-8000-000000000010'
     assert actual.trace().pending() == ()
     with pytest.raises(ValueError, match='spent'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control))
+        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     with pytest.raises(ValueError, match='sealed originals'):
         capture.capture_stage(cap.registration.pin.path)
 
@@ -79,12 +86,12 @@ def test_binding_cannot_use_foreign_init_or_changed_actual_attempt(started):
     changed = transcript.replace(value['runtime']['model'].encode(), b'foreign-model')
     (attempt / 'transcript.jsonl').write_bytes(changed)
     with pytest.raises(ValueError, match='runtime'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(changed), control_bytes=len(control))
+        capture.initialize(cap.registration.pin.path, transcript_bytes=len(changed), control_bytes=len(control), **stream_capture(value))
     assert not Path(cap.role('session_binding')).exists()
     (attempt / 'transcript.jsonl').write_bytes(transcript)
     (attempt / 'started.json').write_bytes(start + b' ')
     with pytest.raises(ValueError, match='actual one-use'):
-        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control))
+        capture.initialize(cap.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     assert not Path(cap.role('session_binding')).exists()
 
 

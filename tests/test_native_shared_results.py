@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from tests.test_native_shared_live_capture import started, native_init
+from tests.test_native_shared_live_capture import started, native_init, stream_capture
 from tests.test_native_shared_registration import execution, bound, native_spec, declaration
 from data_sheets_schema import native_shared_capture as cap
 from data_sheets_schema import native_shared_results as results
@@ -15,7 +15,7 @@ from data_sheets_schema import native_shared_contract as c
 def initial(started):
     selection, value, composition, raw, start = started
     transcript, control = native_init(selection, value, composition)
-    cap.initialize(selection.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control))
+    cap.initialize(selection.registration.pin.path, transcript_bytes=len(transcript), control_bytes=len(control), **stream_capture(value))
     live = cap._load(selection.registration.pin.path)
     members = {member.member_id: member for member in live.pool.members}
     for artifact in (selection.registration, selection.receipt_policy, *selection.authority,

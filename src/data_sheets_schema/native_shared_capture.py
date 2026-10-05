@@ -14,6 +14,7 @@ import shlex
 
 from . import native_shared_contract as c
 from . import native_shared_evidence as evidence
+from . import native_shared_streams as live_streams
 from . import native_shared_observations as observed
 from . import native_shared_stage as stage
 from . import native_shared_receipts as receipt_api
@@ -34,7 +35,7 @@ _LIMITS = {'execution_capture': 'request_bytes', 'started_capture': 'metadata_re
 _OBSERVATION_KEYS = {'kind', 'version', 'observation_type', 'selection_sha256', 'execution_sha256',
     'attempt_id', 'session_id', 'transcript_prefix', 'control_prefix', 'payload'}
 _OBSERVATION_PAYLOADS = {
-    'initialized': {'initialize_sent', 'initialize_ack', 'native_init'},
+    'initialized': {'initialize_sent', 'initialize_ack', 'native_init', 'stream_files'},
     'advance_admitted': {'call', 'before_history_sha256'},
     'request_read': {'call', 'result', 'result_event', 'request', 'history_sha256'},
     'response_intent': {'request', 'response', 'call', 'callback', 'tool_use_id', 'input_json', 'history_sha256', 'read_observation'},
@@ -169,6 +170,8 @@ def observation_bytes(kind, selection, execution_sha256, attempt_id, session_id,
     if kind not in _OBSERVATION_PAYLOADS:
         raise ValueError('unknown native shared observation type')
     c.exact(payload, _OBSERVATION_PAYLOADS[kind], 'observation payload')
+    if kind == 'initialized':
+        live_streams.identities(payload['stream_files'])
     raw = c.canonical({'kind': c.KINDS['observation'], 'version': 1, 'observation_type': kind,
         'selection_sha256': selection.registration.pin.sha256, 'execution_sha256': execution_sha256,
         'attempt_id': attempt_id, 'session_id': session_id,
@@ -194,6 +197,13 @@ def observation(artifact, selection, execution, pool):
             or doc['attempt_id'] != execution.attempt_id or doc['session_id'] != execution.session_id):
         raise ValueError('native observation belongs to another exact execution/session')
     c.exact(doc['payload'], _OBSERVATION_PAYLOADS[kind], 'native observation payload')
+    if kind == 'initialized':
+        anchors = live_streams.identities(doc['payload']['stream_files'])
+        members = tuple(pool.member(dict(pool.stream_bindings)[
+            evidence.stream_id(execution.execution.pin.sha256, role, doc[role + '_prefix']['path'])])
+            for role in live_streams.ROLES)
+        if anchors != live_streams.stream_files(members):
+            raise ValueError('initialized stream files differ from captured physical identities')
     transcript = pool.prefix(doc['transcript_prefix'], execution_sha256=execution.execution.pin.sha256)
     control = pool.prefix(doc['control_prefix'], execution_sha256=execution.execution.pin.sha256)
     execution_value = c.strict_json(execution.execution.raw, 'captured execution', c.HARD_LIMITS['request_bytes'])
@@ -398,7 +408,9 @@ def _binding(selection, value, composition, reader, pool):
     session, sent, ack, initialized = observed.initialization(transcript, control,
         policy=composition['policy'], runtime=value['runtime'])
     if (session != result.session_id or observation_doc['observation_type'] != 'initialized'
-            or observation_doc['payload'] != {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(initialized)}):
+            or observation_doc['payload'] != {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(initialized),
+                'stream_files': live_streams.stream_files(tuple(pool.member(member_id)
+                    for _, member_id in pool.stream_bindings))}):
         raise ValueError('session binding lacks exact actual initialization observations')
     return result
 
@@ -448,6 +460,32 @@ def _streams(value, *, transcript_bytes=None, control_bytes=None):
     return tuple(members), tuple(prefixes)
 
 
+def _live_streams(value, *, stream_files, transcript_bytes=None, control_bytes=None):
+    anchors = live_streams.identities(stream_files)
+    members, prefixes = [], []
+    for role, endpoint in (('transcript', transcript_bytes), ('control', control_bytes)):
+        member = live_streams.read_live_stream(
+            str(Path(value['attempt_directory']) / (role + '.jsonl')), role,
+            max_bytes=c.HARD_LIMITS['stream_bytes'], identity=anchors[role])
+        members.append(member)
+        prefixes.append(live_streams.prefix(member, endpoint))
+    return tuple(members), tuple(prefixes)
+
+
+def _declared_stream_files(selection, reader):
+    # This early declaration can only restrict an opened identity. _binding
+    # subsequently verifies every E/S/init/prefix join before any effect.
+    binding = _document(reader.read('session_binding', selection.role('session_binding')).raw,
+                        'actual session binding')
+    init = reader.pinned(binding['init_observation'])
+    doc = c.strict_json(init.raw, 'initialized observation', c.HARD_LIMITS['metadata_record_bytes'])
+    c.exact(doc, _OBSERVATION_KEYS, 'initialized observation')
+    if doc['observation_type'] != 'initialized':
+        raise ValueError('stream identity must come from the initialized observation')
+    c.exact(doc['payload'], _OBSERVATION_PAYLOADS['initialized'], 'initialized payload')
+    return live_streams.identities(doc['payload']['stream_files'])
+
+
 def _base(selection_path):
     from . import native_shared_selection as selected
     from . import native_shared_registration as registration
@@ -483,10 +521,13 @@ def _pool(reader, streams):
         member.member_id) for member in streams))
 
 
-def initialize(selection_path, *, transcript_bytes, control_bytes):
+def initialize(selection_path, *, transcript_bytes, control_bytes, stream_files, observed_prefixes):
     """Bind the actual parent-observed initialization, never owner summary flags."""
     selection, reader, value, composition, _ = _base(selection_path)
-    streams, (transcript, control) = _streams(value, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    streams, (transcript, control) = _live_streams(value, stream_files=stream_files, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    c.exact(observed_prefixes, {'transcript', 'control'}, 'parent observed prefixes')
+    if observed_prefixes != {'transcript': transcript, 'control': control}:
+        raise ValueError('initialization differs from the exact parent-observed prefixes')
     session, sent, ack, init = observed.initialization(transcript, control,
         policy=composition['policy'], runtime=value['runtime'])
     if Path(selection.role('session_binding')).exists() or _observation_paths(selection):
@@ -495,7 +536,7 @@ def initialize(selection_path, *, transcript_bytes, control_bytes):
     started = reader.read('started_capture', selection.role('started_capture'))
     item = _create(selection, 'observation', observation_bytes('initialized', selection, execution.pin.sha256,
         value['attempt_id'], session, transcript, control,
-        {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(init)}))
+        {'initialize_sent': asdict(sent), 'initialize_ack': asdict(ack), 'native_init': asdict(init), 'stream_files': live_streams.stream_files(streams)}))
     _create(selection, 'session_binding', c.canonical(_binding_document(selection, value, composition,
         execution, started, item, session)))
     reader = _Reader(selection)
@@ -639,8 +680,26 @@ def _checked_observations(run):
 
 
 def _load(selection_path, *, transcript_bytes=None, control_bytes=None):
-    selection, reader, value, composition, spec = _base(selection_path)
-    streams, (transcript, control) = _streams(value, transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    """Strict complete-file route for final and recorded consumers."""
+    base = _base(selection_path)
+    streams, prefixes = _streams(base[2], transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    return _loaded(base, streams, prefixes)
+
+
+def _load_live(selection_path, *, transcript_bytes=None, control_bytes=None, stream_files=None):
+    """Fixed live route; a new authority/catalog transaction at every call."""
+    base = _base(selection_path)
+    anchors = _declared_stream_files(base[0], base[1])
+    if stream_files is not None and live_streams.identities(stream_files) != anchors:
+        raise ValueError('observed stream identities differ from initialized authority')
+    streams, prefixes = _live_streams(base[2], stream_files=anchors,
+        transcript_bytes=transcript_bytes, control_bytes=control_bytes)
+    return _loaded(base, streams, prefixes)
+
+
+def _loaded(base, streams, prefixes):
+    selection, reader, value, composition, spec = base
+    transcript, control = prefixes
     for path in _observation_paths(selection):
         reader.read('observation', path)
     pool = _pool(reader, streams)
@@ -665,7 +724,7 @@ def _persist_observation(run, kind, payload):
 
 def capture_stage(selection_registration_path):
     """Capture the sole pending, actually admitted fixed advance invocation."""
-    run = _load(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path))
     if run.phase1 is None:
         raise ValueError('advance precedes actual sealed originals')
     phase, _ = phase_replay(run)
@@ -1032,7 +1091,7 @@ def _receipt_assessment(run, *, full_path, receipt_path):
 
 
 def live_receipt_block(selection_registration_path, *, full_path, receipt_path):
-    run = _load(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path))
     phase_replay(run)
     return _receipt_assessment(run, full_path=full_path, receipt_path=receipt_path)[0]
 
@@ -1052,7 +1111,7 @@ def _provenance_block(run):
 
 
 def live_provenance_block(selection_registration_path):
-    run = _load(str(selection_registration_path))
+    run = _load_live(str(selection_registration_path))
     phase, _ = phase_replay(run)
     required = {'draft', 'final_evidence', 'final_source_inventory', 'phase1_receipts', 'final_scope',
                 'derive_final_core', 'core_schema', 'pair', 'full_schema', 'full_terms', 'audit_evidence'}

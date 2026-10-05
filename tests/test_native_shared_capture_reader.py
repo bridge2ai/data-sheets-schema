@@ -84,7 +84,8 @@ def test_observation_has_flat_prefix_not_future_stream_contents(private_case):
     raw = b'{"synthetic":"explicit prefix only"}\n'
     def prefix(role):
         return c.EvidencePrefix(role, '/synthetic/'+role, raw, len(raw), c.sha(raw), 1)
-    payload = {'initialize_sent': {}, 'initialize_ack': {}, 'native_init': {}}
+    payload = {'initialize_sent': {}, 'initialize_ack': {}, 'native_init': {},
+               'stream_files': {role: {'device': 0, 'inode': 0} for role in ('transcript', 'control')}}
     result = capture.observation_bytes('initialized', selection, execution.execution.pin.sha256,
         execution.attempt_id, execution.session_id, prefix('transcript'), prefix('control'), payload)
     doc = c.strict_json(result)

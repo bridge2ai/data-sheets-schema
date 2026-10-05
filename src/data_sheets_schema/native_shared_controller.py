@@ -18,6 +18,7 @@ from . import native_shared_policy as policy
 from . import native_attribution_controller as inherited
 from . import native_execution_registration as runtime_registration
 from .native_shared_evidence import read_regular
+from . import native_shared_streams as live_streams
 
 KIND = 'd4d_native_shared_callback_composition'
 VERSION = 1
@@ -128,8 +129,8 @@ class CallbackAdapter:
         self.recorder_call = None
         self.recorder_done = False
         self._activated = self._initialized = False
-        self._through_bytes = 0
-        self._prefix_sha256 = c.sha(b'')
+        self._stream_prefixes = {}
+        self._stream_files = {}
 
     def require_phase_authority(self):
         if (not self.policy or self.policy != self.value['policy'] or self.spec.render_version != 26
@@ -150,28 +151,39 @@ class CallbackAdapter:
         raise self.controls['budgeted_cborg'].BudgetStop(self.failure)
 
     def _observed_endpoint(self, event):
-        path = str(Path(self.execution['attempt_directory']) / 'transcript.jsonl')
-        item = read_regular(path, 'transcript', max_bytes=c.HARD_LIMITS['stream_bytes']).captured
-        if c.sha(item.raw[:self._through_bytes]) != self._prefix_sha256:
-            raise ValueError('previously observed native stream prefix changed')
-        end = item.raw.find(b'\n', self._through_bytes)
-        if end < 0:
-            raise ValueError('observer has no complete corresponding native physical frame')
-        actual = c.strict_json(item.raw[self._through_bytes:end + 1], 'observed native frame', 16 * 1024 * 1024)
-        if c.canonical(actual) != c.canonical(event):
-            raise ValueError('observer event differs from its next exact raw native frame')
-        self._through_bytes = end + 1
-        self._prefix_sha256 = c.sha(item.raw[:end + 1])
-        control = read_regular(str(Path(self.execution['attempt_directory']) / 'control.jsonl'),
-            'control', max_bytes=c.HARD_LIMITS['stream_bytes']).captured
-        return self._through_bytes, len(control.raw)
+        members, prefixes = [], {}
+        for role in live_streams.ROLES:
+            path = str(Path(self.execution['attempt_directory']) / (role + '.jsonl'))
+            previous = self._stream_prefixes.get(role)
+            member = live_streams.read_live_stream(path, role,
+                max_bytes=c.HARD_LIMITS['stream_bytes'], previous=previous,
+                identity=self._stream_files.get(role))
+            members.append(member)
+            if role == 'transcript':
+                start = previous.bytes if previous is not None else 0
+                end = member.captured.raw.find(b'\n', start)
+                if end < 0:
+                    raise ValueError('observer has no complete corresponding native physical frame')
+                actual = c.strict_json(member.captured.raw[start:end + 1], 'observed native frame', 16 * 1024 * 1024)
+                if c.canonical(actual) != c.canonical(event):
+                    raise ValueError('observer event differs from its next exact raw native frame')
+                prefixes[role] = live_streams.prefix(member, end + 1)
+            else:
+                prefixes[role] = live_streams.prefix(member)
+        # Neither cursor advances if either acquisition or the event fails.
+        anchors = live_streams.stream_files(tuple(members))
+        self._stream_prefixes, self._stream_files = prefixes, anchors
+        return prefixes['transcript'].bytes, prefixes['control'].bytes
 
     def _run(self, endpoints=None):
         from . import native_shared_capture as capture
         if endpoints is None:
             return capture._load(self.selection.registration.pin.path)
-        return capture._load(self.selection.registration.pin.path,
-            transcript_bytes=endpoints[0], control_bytes=endpoints[1])
+        run = capture._load_live(self.selection.registration.pin.path,
+            transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files)
+        if self._stream_prefixes != {'transcript': run.transcript, 'control': run.control}:
+            raise ValueError('recaptured streams differ from exact parent-observed prefixes')
+        return run
 
     def _current_final(self, run):
         from .native_shared_gates import current_evidence
@@ -222,7 +234,8 @@ class CallbackAdapter:
                 if self._initialized:
                     raise ValueError('native initialization repeated')
                 capture.initialize(self.selection.registration.pin.path,
-                    transcript_bytes=endpoints[0], control_bytes=endpoints[1])
+                    transcript_bytes=endpoints[0], control_bytes=endpoints[1], stream_files=self._stream_files,
+                    observed_prefixes=self._stream_prefixes)
                 self._initialized = True
             if not self._initialized:
                 if event.get('type') != 'control_response':
