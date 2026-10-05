@@ -78,6 +78,11 @@ class Profile:
     #: How that dataset is written in prose — the tracked study bundle says
     #: "AI-READI baseline" where the key is `AI_READI` (#1542).
     healthsheet_display: str | None = None
+    #: What the bundle's `Origin:` line says that record is: where it was
+    #: served from and which member of it the bundle renders. A fact about
+    #: the record, so the profile's; a record that is not the profile's gets
+    #: no `Origin:` line (#4009).
+    healthsheet_origin: str | None = None
     #: Optional historical aliases used to discover a study's transcripts.
     transcript_name_keys: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
@@ -125,6 +130,7 @@ BRIDGE2AI = Profile(
     healthsheet_bundle="AI_READI_healthsheet_only.txt",
     healthsheet_project="AI_READI",
     healthsheet_display="AI-READI",
+    healthsheet_origin="FAIRhub API record, metadata.healthsheet",   # the tracked bundle's bytes (#4009)
     transcript_name_keys={
         "AI_READI": ("aireadi",), "CHORUS": ("chorus",), "CM4AI": ("cm4ai",),
         "VOICE": ("voice",), "VOICE_PEDIATRIC": ("voicepediatric", "voicepeds"),
