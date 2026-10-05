@@ -1,6 +1,7 @@
 """Pure catalog reuse with real tiny schemas; no observed native run claimed."""
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import fields, replace
+import json
 from pathlib import Path
 from threading import Barrier
 from types import SimpleNamespace
@@ -26,6 +27,20 @@ def derivations(monkeypatch):
         return actual(*args, **kwargs)
 
     monkeypatch.setattr(nr.omissions, '_schema', counted)
+    return seen
+
+
+@pytest.fixture
+def root_derivations(monkeypatch):
+    actual = nr.omissions._mapping
+    seen = []
+
+    def counted(raw, label, **kwargs):
+        if label == 'captured schema':
+            seen.append(raw)
+        return actual(raw, label, **kwargs)
+
+    monkeypatch.setattr(nr.omissions, '_mapping', counted)
     return seen
 
 
@@ -72,7 +87,7 @@ def test_real_catalog_counts_and_complete_request_result_byte_parity(case, monke
         assert current.pending[0] == 'awaiting_response'
 
 
-def test_private_run_reuses_catalog_but_new_public_and_replaced_runs_are_fresh(case, derivations, monkeypatch):
+def test_private_run_reuses_catalog_but_new_public_and_replaced_runs_are_fresh(case, derivations, root_derivations, monkeypatch):
     run = fake_run(case)
     first = run.decision()
     assert run.decision() == first and len(derivations) == 1
@@ -91,9 +106,10 @@ def test_private_run_reuses_catalog_but_new_public_and_replaced_runs_are_fresh(c
     field = next(row for row in fields(run) if row.name == '_catalogs')
     assert not field.init and not field.compare and not field.repr
     assert '_catalogs' not in repr(run)
+    assert len(root_derivations) == len(derivations) == 4
 
 
-def test_public_receipt_and_claim_inputs_stay_fresh_and_returns_are_private(case, derivations):
+def test_public_receipt_and_claim_inputs_stay_fresh_and_returns_are_private(case, derivations, root_derivations):
     s, e, p, _ = case
     first = nr.prepare(s, e, p)
     assert len(derivations) == 1
@@ -101,15 +117,17 @@ def test_public_receipt_and_claim_inputs_stay_fresh_and_returns_are_private(case
     assert nr.prepare(s, e, p)['schema']['classes'] and len(derivations) == 2
     raw = receipt_answer(case)
     derivations.clear()
+    root_derivations.clear()
     completed = nr.complete(s, e, p, raw)
     assert len(derivations) == 1
     assert nr.complete(s, e, p, raw) == completed and len(derivations) == 2
     nr._inputs(s, p)  # Exact existing recorded_receipt_claims signature.
     nr._raw_inputs(s, p.full.raw, p.original_receipt.raw)
     assert len(derivations) == 4
+    assert len(root_derivations) == 4
 
 
-def test_initial_and_final_public_receipts_do_not_inherit_a_warm_context(case, derivations):
+def test_initial_and_final_public_receipts_do_not_inherit_a_warm_context(case, derivations, root_derivations):
     s, e, p, _ = case
     context = nr._ReceiptCatalogContext()
     nr._prepare(s, e, p, context)
@@ -122,6 +140,7 @@ def test_initial_and_final_public_receipts_do_not_inherit_a_warm_context(case, d
     # Real final receipt check; completion is an explicit lineage fixture only.
     nr.check_final(s, e, p, completion, final_full=p.full.raw, final_receipt=p.original_receipt.raw)
     assert len(derivations) == 3
+    assert len(root_derivations) == 3
 
 
 @pytest.mark.parametrize('mutation', ['raw', 'role', 'path', 'name', 'order', 'bounds', 'limit', 'domain'])
@@ -203,10 +222,12 @@ def test_current_noncatalog_inputs_are_rechecked_on_warm_context(case, derivatio
 def test_payload_accounting_eviction_oversize_and_copy_isolation(case, monkeypatch, derivations):
     s = case[0]; context = nr._ReceiptCatalogContext()
     value = context.catalog(s, nr.schema_snapshot(s))
-    key, raw = context._entry
+    key, raw, bases = context._entry
     assert type(key[0]) is bytes and type(key[1]) is tuple and type(raw) is bytes
     assert all(type(item) is bytes for item in key[1])
-    size = len(key[0]) + sum(map(len, key[1])) + len(raw)
+    assert type(bases) is tuple and all(type(pair) is tuple for pair in bases)
+    size = len(key[0]) + sum(map(len, key[1])) + len(raw) + len(
+        json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii'))
     assert context._bytes == size and nr._CATALOG_PAYLOAD_BYTES == 40_000_000
     value['classes'].clear()
     assert context.catalog(s, nr.schema_snapshot(s))['classes'] and len(derivations) == 1
@@ -243,7 +264,7 @@ def test_concurrent_misses_compute_outside_lock_and_return_independent_data(case
     assert context._bytes <= nr._CATALOG_PAYLOAD_BYTES
 
 
-def test_public_response_and_assembly_checks_cannot_inherit_run_context(case, derivations):
+def test_public_response_and_assembly_checks_cannot_inherit_run_context(case, derivations, root_derivations):
     run = fake_run(case)
     ready = run.decision()
     assert len(derivations) == 1
@@ -255,3 +276,116 @@ def test_public_response_and_assembly_checks_cannot_inherit_run_context(case, de
     with pytest.raises(ValueError, match='before every mandatory'):
         stage.check_assembly(*observed_case, b'{}')
     assert len(derivations) == 3
+    assert len(root_derivations) == 3
+
+
+def test_root_only_bases_are_immutable_and_explicit_empty_stays_empty(case, monkeypatch, derivations, root_derivations):
+    from data_sheets_schema import grounding
+
+    def no_default():
+        raise AssertionError('captured roots must not consult installed identifier bases')
+
+    monkeypatch.setattr(grounding, 'declared_bases', no_default)
+    s = case[0]; context = nr._ReceiptCatalogContext()
+    assert b'prefixes:' not in s.schemas[0].sources[0].raw
+    assert any(b'prefixes:' in item.raw for item in s.schemas[0].sources[1:])
+    empty, catalog = context.schema_data(s, nr.schema_snapshot(s))
+    assert empty == () and catalog['classes']
+    assert nr._raw_inputs(s, case[2].full.raw, case[2].original_receipt.raw, _catalogs=context)[5] == ()
+    assert len(derivations) == len(root_derivations) == 1
+    root = s.schemas[0].sources[0].raw
+    s = changed_schema(s, root + b"prefixes: {short: 'https://x/', First: 'https://EXAMPLE.test/a/', Second: 'https://example.test/b/'}\n")
+    bases, value = context.schema_data(s, nr.schema_snapshot(s))
+    assert bases == (('https://example.test/a/', 'First'), ('https://example.test/b/', 'Second'), ('https://x/', 'short'))
+    with pytest.raises(TypeError):
+        bases[0][0] = 'mutated'
+    value['classes'].clear()
+    warm_bases, warm = context.schema_data(s, nr.schema_snapshot(s))
+    assert warm_bases == bases and warm['classes']
+    assert context.catalog(s, nr.schema_snapshot(s)) == warm
+    assert len(derivations) == len(root_derivations) == 2
+
+
+def test_changed_root_and_import_rederive_one_matched_pair(case, derivations, root_derivations):
+    s = case[0]; context = nr._ReceiptCatalogContext()
+    root = s.schemas[0].sources[0].raw
+    first = changed_schema(s, root + b"prefixes: {left: 'https://left.test/'}\n")
+    second = changed_schema(s, root + b"prefixes: {right: 'https://right.test/'}\n")
+    left = context.schema_data(first, nr.schema_snapshot(first))
+    right = context.schema_data(second, nr.schema_snapshot(second))
+    assert left[0] == (('https://left.test/', 'left'),)
+    assert right[0] == (('https://right.test/', 'right'),) and left[1] != right[1]
+    full = second.schemas[0]; old = full.sources[1]
+    updated = artifact(old.pin.role, old.pin.path, old.raw + b'\n# changed actual imported bytes\n')
+    sources = (full.sources[0], updated, *full.sources[2:])
+    full = replace(full, sources=sources, closure_sha256=c.schema_closure_sha(sources, full.import_roles))
+    imported = replace(second, schemas=(full, second.schemas[1]))
+    changed = context.schema_data(imported, nr.schema_snapshot(imported))
+    assert changed[0] == right[0] and changed[1] != right[1]
+    assert len(derivations) == len(root_derivations) == 3
+
+
+def test_failed_root_derivation_never_replaces_valid_pair(case, derivations, root_derivations):
+    s = case[0]; context = nr._ReceiptCatalogContext()
+    original = context.schema_data(s, nr.schema_snapshot(s))
+    entry, size = context._entry, context._bytes
+    bad = changed_schema(s, b'id: [unterminated\n')
+    for _ in range(2):
+        with pytest.raises(ValueError):
+            context.schema_data(bad, nr.schema_snapshot(bad))
+    assert context._entry is entry and context._bytes == size
+    assert context.schema_data(s, nr.schema_snapshot(s)) == original
+    assert len(root_derivations) == 3 and len(derivations) == 1
+
+
+def test_bases_storage_counts_without_an_extra_catalog_envelope_limit(case, monkeypatch, derivations):
+    s = case[0]
+    # Valid YAML scalar aliases expand into more bases bytes than root bytes.
+    prefixes = "prefixes:\n  p000: &base 'https://example.test/" + 'a' * 500 + "/'\n"
+    prefixes += ''.join(f'  p{i:03d}: *base\n' for i in range(1, 100))
+    raw = s.schemas[0].sources[0].raw + prefixes.encode()
+    s = changed_schema(s, raw); snapshot = nr.schema_snapshot(s)
+    context = nr._ReceiptCatalogContext()
+    expected = context.schema_data(s, snapshot)
+    key, catalog_raw, bases = context._entry
+    base_size = len(json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii'))
+    catalog_bound = max(sum(map(len, key[1])), len(catalog_raw))
+    assert len(catalog_raw) + base_size > catalog_bound
+    monkeypatch.setattr(nr.omissions, 'MAX_SCHEMA_BYTES', catalog_bound)
+    exact = nr._ReceiptCatalogContext()
+    assert exact.schema_data(s, snapshot) == expected
+    size = exact._bytes
+    assert size == len(exact._entry[0][0]) + sum(map(len, key[1])) + len(catalog_raw) + base_size
+    monkeypatch.setattr(nr, '_CATALOG_PAYLOAD_BYTES', size)
+    retained = nr._ReceiptCatalogContext()
+    assert retained.schema_data(s, snapshot) == expected and retained._bytes == size
+    monkeypatch.setattr(nr, '_CATALOG_PAYLOAD_BYTES', size - 1)
+    skipped = nr._ReceiptCatalogContext(); before = len(derivations)
+    assert skipped.schema_data(s, snapshot) == skipped.schema_data(s, snapshot) == expected
+    assert skipped._entry is None and skipped._bytes == 0
+    assert len(derivations) == before + 2
+
+
+def test_concurrent_distinct_keys_never_mix_catalog_and_root_bases(case, monkeypatch):
+    s = case[0]; root = s.schemas[0].sources[0].raw
+    selections = [changed_schema(s, root + f"prefixes: {{{side}: 'https://{side}.test/'}}\n".encode())
+                  for side in ('left', 'right')]
+    expected = [nr._ReceiptCatalogContext().schema_data(item, nr.schema_snapshot(item)) for item in selections]
+    context = nr._ReceiptCatalogContext(); gate = Barrier(2)
+    actual = nr.omissions._schema
+
+    def together(*args, **kwargs):
+        gate.wait(timeout=10)
+        return actual(*args, **kwargs)
+
+    with monkeypatch.context() as concurrent:
+        concurrent.setattr(nr.omissions, '_schema', together)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            values = list(pool.map(lambda item: context.schema_data(item, nr.schema_snapshot(item)), selections))
+    assert values == expected and values[0] != values[1]
+    key, raw, bases = context._entry
+    assert (bases, c.strict_json(raw)) in expected
+    assert key in [nr._catalog_key(item, nr.schema_snapshot(item)) for item in selections]
+    for item, wanted in zip(selections, expected):
+        assert context.schema_data(item, nr.schema_snapshot(item)) == wanted
+    assert context._bytes <= nr._CATALOG_PAYLOAD_BYTES

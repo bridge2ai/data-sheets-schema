@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import hashlib
+import json
 from pathlib import Path
 from threading import Lock
 
@@ -78,27 +79,34 @@ def _catalog_key(selection, snapshot):
 
 
 class _ReceiptCatalogContext:
-    """One bounded byte-only derivation, owned by one captured transaction."""
+    """One bounded immutable derivation, owned by one captured transaction."""
     def __init__(self):
         self._entry = None
         self._bytes = 0
         self._lock = Lock()
 
     def catalog(self, selection, snapshot):
+        return self.schema_data(selection, snapshot)[1]
+
+    def schema_data(self, selection, snapshot):
         key = _catalog_key(selection, snapshot)
         with self._lock:
-            raw = self._entry[1] if self._entry is not None and self._entry[0] == key else None
-        if raw is None:
+            entry = self._entry if self._entry is not None and self._entry[0] == key else None
+        if entry is None:
+            # Root-only prefixes are intentional: an explicit empty tuple must
+            # never inherit imported or current-installation identifier bases.
+            bases = tuple(declared_bases_of(omissions._mapping(snapshot.sources[0][2], 'captured schema')))
             catalog = omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True)
             # LinkML URIorCURIE names have the same released JSON meaning.
             raw = omissions._json(catalog).encode('utf-8')
             result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
-            size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw)
+            bases_bytes = json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii')
+            size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw) + len(bases_bytes)
             if size <= _CATALOG_PAYLOAD_BYTES:
                 with self._lock:
-                    self._entry, self._bytes = (key, raw), size
-            return result
-        return contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+                    self._entry, self._bytes = (key, raw, bases), size
+            return bases, result
+        return entry[2], contract.strict_json(entry[1], 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
 
 
 def _catalog_context(value=None):
@@ -189,10 +197,7 @@ def _raw_inputs(selection, full_raw, receipt_raw, *, _catalogs=None):
     if len(receipts.populated_leaves(full)) > bounds['max_populated_paths']:
         raise ValueError('complete native populated inventory exceeds the global bound')
     snapshot = schema_snapshot(selection)
-    # The released rule uses the selected root's declared prefixes. Explicit
-    # empty bases are meaningful; never fall back to the current installation.
-    bases = tuple(declared_bases_of(omissions._mapping(snapshot.sources[0][2], 'captured schema')))
-    catalog = _catalog_context(_catalogs).catalog(selection, snapshot)
+    bases, catalog = _catalog_context(_catalogs).schema_data(selection, snapshot)
     context = omissions._mapping(selection.raw(chosen['context']['path']), 'scope context', json_only=True)
     owners = omissions._owners(full, catalog, context['vocabulary'])
     scopes = [row['owner'] for row in context['scopes']]
