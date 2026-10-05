@@ -6617,6 +6617,51 @@ def _require_recorded_inputs(spec: RunSpec, record: dict[str, Any]) -> None:
                                "and instruction or use --no-resume for an explicit new generation")
 
 
+@dataclass(frozen=True)
+class _ResumeRecordContext:
+    raw: bytes | None = None
+    parsed: Any = None
+    prior_matches: bool = False
+    prior_identifier: Any = None
+    foreign_prior: bool = False
+    foreign_identifier: Any = None
+
+
+def _read_resume_record(spec: RunSpec, *, generation, progress) -> _ResumeRecordContext:
+    """Recognize prior inputs; this does not establish completed acceptance."""
+    if not spec.provenance_path.exists():
+        return _ResumeRecordContext()
+    raw = spec.provenance_path.read_bytes()
+    prior_matches = foreign_prior = False
+    identifier = None
+    try:
+        prior = yaml.safe_load(raw.decode('utf-8')) or {}
+        identity = prior.get("run") if isinstance(prior, dict) else None
+        foreign_prior = _foreign_usage_identity(spec, identity, recorded=True)
+        identifier = identity.get("generation_id") if isinstance(identity, dict) else None
+        prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
+        if (prior_matches and generation is not None and identifier is None
+                and prior.get("record_mode") == "reconstructed"):
+            # Generic backfill cannot supersede observed generation-bound inputs.
+            from data_sheets_schema.usage_ledger import recorded_inputs
+            if _generation_bound_inputs_observed(
+                    spec, progress, generation, recorded_inputs(spec), spec.input_identity()):
+                prior_matches = False
+        if prior_matches:
+            _require_recorded_inputs(spec, prior)
+    except yaml.YAMLError:
+        # Preserve the old flags but not an unverified record or its usage seed.
+        prior = None
+    return _ResumeRecordContext(raw, prior, prior_matches,
+        None if foreign_prior else identifier, foreign_prior,
+        identifier if foreign_prior else None)
+
+
+def _require_same_resume_record(spec: RunSpec, context: _ResumeRecordContext) -> None:
+    if spec.provenance_path.read_bytes() != context.raw:
+        raise UsageLedgerError("completed provenance changed after resume authority was captured")
+
+
 def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     """Execute while holding exclusive access to this run's output files."""
     if spec.render_version in (24,):
@@ -6688,12 +6733,25 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     usage: list[dict[str, Any]] = []
     fresh_generation = not resume
     generation = _usage_generation(spec) if resume else _prepare_usage(spec, resume=False)
+    progress = None
+    completed_context = None
+    completed_record = None
+    if resume and spec.shared_generation_version:
+        progress = _load_progress(spec)
+        if (isinstance(progress, dict) and ('completed' not in progress
+                or type(progress['completed']) is list and not progress['completed'])):
+            candidate = _read_resume_record(spec, generation=generation, progress=progress)
+            if (candidate.prior_matches and candidate.parsed is not None
+                    and type(generation) is str and generation
+                    and candidate.prior_identifier == generation):
+                completed_context = candidate
+                completed_record = candidate.parsed
     if resume:
         if spec.shared_generation_version:
             from .receipt_completion import recover_delivered as recover_receipt_delivery
             from .typed_audit_runtime import recover_delivered as recover_audit_delivery
             recover_receipt_delivery(spec)
-            recover_audit_delivery(spec)
+            recover_audit_delivery(spec, record=completed_record)
         _require_resolved_usage(spec)
         from data_sheets_schema.usage_ledger import evidence_refusal
         refusal = evidence_refusal(spec)
@@ -6704,13 +6762,14 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
         require_removal_repair_admission(spec)
         from data_sheets_schema.usage_ledger import require_source_review_admission
         require_source_review_admission(spec)
-    progress = _load_progress(spec) if resume else {}
+    if progress is None:
+        progress = _load_progress(spec) if resume else {}
     if resume and spec.receipt_completion_version:
         from data_sheets_schema.receipt_completion import resume_guard
         resume_guard(spec, progress)
     if resume and spec.shared_generation_version:
         from .typed_audit_runtime import resume_guard as shared_resume_guard
-        shared_resume_guard(spec, progress)
+        shared_resume_guard(spec, progress, record=completed_record)
     skipped: list[str] = []
     carry: dict[str, str] = {}
 
@@ -6727,36 +6786,20 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     prior_record: dict[str, Any] = {}
     foreign_prior = False
     foreign_identifier = None
-    if resume and spec.provenance_path.exists():
-        try:
-            prior = yaml.safe_load(
-                spec.provenance_path.read_text(encoding="utf-8")) or {}
-            identity = prior.get("run") if isinstance(prior, dict) else None
-            foreign_prior = _foreign_usage_identity(spec, identity, recorded=True)
-            identifier = identity.get("generation_id") if isinstance(identity, dict) else None
-            if foreign_prior:
-                foreign_identifier = identifier
-            else:
-                prior_identifier = identifier
-            prior_matches = _usage_record_matches(spec, identity) and _same_usage_generation(spec, identifier)
-            if (prior_matches and generation is not None and identifier is None
-                    and prior.get("record_mode") == "reconstructed"):
-                # Generic backfill cannot supersede observed generation-bound
-                # inputs. Older backfill could publish during an interruption.
-                from data_sheets_schema.usage_ledger import recorded_inputs
-                if _generation_bound_inputs_observed(
-                        spec, progress, generation, recorded_inputs(spec), spec.input_identity()):
-                    prior_matches = False
-            if prior_matches:
-                _require_recorded_inputs(spec, prior)
-                prior_record = prior
-            if prior_matches and _progress_path(spec).exists():
-                usage.extend(prior.get("api_usage") or [])
-                # Only this generation's repair history belongs here (#366,
-                # #1291); a fresh run may still have its predecessor's file.
-                prior_repair = list(prior.get("repair") or [])
-        except yaml.YAMLError:
-            pass
+    if resume:
+        if completed_context is not None:
+            _require_same_resume_record(spec, completed_context)
+        context = completed_context or _read_resume_record(spec, generation=generation, progress=progress)
+        prior_matches = context.prior_matches
+        prior_identifier = context.prior_identifier
+        foreign_prior = context.foreign_prior
+        foreign_identifier = context.foreign_identifier
+        if prior_matches and context.parsed is not None:
+            prior_record = context.parsed
+        if prior_matches and context.parsed is not None and _progress_path(spec).exists():
+            usage.extend(prior_record.get("api_usage") or [])
+            # Only this generation's repair history belongs here (#366, #1291).
+            prior_repair = list(prior_record.get("repair") or [])
 
     if resume:
         merge_completed_rows(spec, usage)
@@ -6834,11 +6877,15 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             and all(_artifact_path(spec, a).exists()
                     for a in ("full", "core", "report"))):
         from data_sheets_schema.runs import check_provenance
+        if completed_context is not None:
+            _require_same_resume_record(spec, completed_context)
         prior = check_provenance(spec.method, spec.label, spec.project,
                                  record=spec.provenance_path)
+        if completed_context is not None:
+            _require_same_resume_record(spec, completed_context)
         if prior["ok"]:
-            existing = yaml.safe_load(
-                spec.provenance_path.read_text(encoding="utf-8")) or {}
+            existing = (completed_record if completed_context is not None else yaml.safe_load(
+                spec.provenance_path.read_text(encoding="utf-8")) or {})
             snapshot_store.require_completed_accounted(spec, existing)
             if _unrecorded_abandoned(spec, existing):
                 raise UsageLedgerError("surviving abandoned charges are absent from completed accounting; "
@@ -6900,6 +6947,8 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
             if spec.receipt_completion_version:
                 from data_sheets_schema.receipt_completion import recover
                 completion_check_result = recover(spec)
+            if completed_context is not None:
+                _require_same_resume_record(spec, completed_context)
             return {"label": spec.label, "project": spec.project,
                     "usage": existing.get("api_usage") or [],
                     "skipped": list(PHASES), "validation_problems": problems,
@@ -6923,6 +6972,9 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
                                 "core": str(spec.core_path),
                                 "report": str(spec.report_path),
                                 "provenance": str(spec.provenance_path)}}
+    if completed_context is not None:
+        raise UsageLedgerError("completed shared-generation authority failed final verification; "
+                               "restore its evidence rather than restart generation")
     if resume and spec.removal_repair_version:
         from data_sheets_schema.usage_ledger import removal_repair_attempted
         if removal_repair_attempted(spec) and not set(PHASES).issubset(done):

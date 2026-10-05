@@ -49,12 +49,15 @@ def _load(pin):
     return receipts._load(pin)
 
 
-def _originals(spec):
+def _originals(spec, *, record=None):
     from . import snapshot_store
+    if record is not None and (not isinstance(record, dict)
+            or not isinstance(record.get('intermediates'), list)):
+        raise ledger.UsageLedgerError('completed typed audit requires explicit original snapshot attestations')
     result = {}
     for phase in ('full', 'core'):
         _, saved = snapshot_store.read_latest(spec.provenance_path.parent, spec.project,
-            f'{spec.project}_{phase}.yaml', spec=spec)
+            f'{spec.project}_{phase}.yaml', spec=spec, record=record)
         if saved is None:
             raise ledger.UsageLedgerError('typed audit requires both immutable phase-1 originals')
         result['original_' + phase] = saved[1]
@@ -70,13 +73,13 @@ def _derivations(spec):
     return cache
 
 
-def prepare_packet(spec):
+def prepare_packet(spec, *, record=None):
     """Use the single captured registration closure and exact saved originals."""
     from . import api_runner as api
     captured = sg.assert_current(spec)
     reg = captured.document()
     inputs, limits = reg['inputs'], reg['audit_limits']
-    originals = _originals(spec)
+    originals = _originals(spec, record=record)
     receipts.recover(spec)  # Effective receipt must be the accepted one-use result.
     receipt_raw = api._receipt_path(spec).read_bytes()
     key = [captured.registration, *[raw for _path, raw in captured.files], *originals.values(), receipt_raw]
@@ -166,14 +169,14 @@ def _check_response(spec, packet, stage, inner, response, workers, omission):
     return workers, omission, None
 
 
-def _validate_base(spec, state):
+def _validate_base(spec, state, *, record=None):
     if type(state) is not dict or state.get('format') != STATE or state.get('state') not in ('prepared', 'running', 'assembled', 'accepted', 'failed'):
         raise ledger.UsageLedgerError('invalid typed audit journal')
     if (state.get('generation_id') != ledger.generation_id(spec)
             or state.get('authority') != sg.identity(spec)):
         raise ledger.UsageLedgerError('typed audit belongs to another generation or authority')
     packet = _load(state['packet'])
-    expected = prepare_packet(spec)
+    expected = prepare_packet(spec, record=record)
     if sg.canonical(packet) != sg.canonical(expected) or state.get('roster') != roster(packet):
         raise ledger.UsageLedgerError('typed audit packet/originals/effective receipt/roster changed')
     stages = state.get('stages')
@@ -210,8 +213,8 @@ def _settle(spec, row, response, payload):
     receipts._recover_reasoning(spec, response, usage, payload, phase=row['selection']['phase'])
 
 
-def _rebuild(spec, state, *, settle=False):
-    packet = _validate_base(spec, state)
+def _rebuild(spec, state, *, settle=False, record=None):
+    packet = _validate_base(spec, state, record=record)
     settings = state['settings']
     sg.preflight(spec, settings)
     workers, omission, assembly = {}, None, None
@@ -259,14 +262,14 @@ def _rebuild(spec, state, *, settle=False):
     return packet, workers, omission, assembly, reserved_input, reserved_output
 
 
-def recover_delivered(spec):
+def recover_delivered(spec, *, record=None):
     """Before generic pending-call refusal, recover only complete bound evidence."""
     state = _state(spec)
     if state is None:
         return
     if state.get('state') == 'failed':
         raise ledger.UsageLedgerError('typed audit failed terminally; generation cannot buy another response')
-    _rebuild(spec, state, settle=True)
+    _rebuild(spec, state, settle=True, record=record)
 
 
 def recover(spec, *, carry=None, terminal=False, independent=False, record=None):
@@ -277,7 +280,7 @@ def recover(spec, *, carry=None, terminal=False, independent=False, record=None)
         return None
     if state.get('state') == 'failed':
         raise ledger.UsageLedgerError('typed audit failed terminally')
-    _, _, _, assembly, _, _ = _rebuild(spec, state)
+    _, _, _, assembly, _, _ = _rebuild(spec, state, record=record)
     if assembly is None:
         if terminal:
             raise ledger.UsageLedgerError('shared-generation terminal lacks a complete checked typed assembly')
@@ -319,9 +322,17 @@ def completion_check(spec, carry=None, *, record=None):
             'scientific_support': 'unverified evaluator declarations'}
 
 
-def resume_guard(spec, progress):
+def resume_guard(spec, progress, *, record=None):
     state = _state(spec)
     if state is None:
+        return
+    if record is not None:
+        if not isinstance(progress, dict) or not (
+                'completed' not in progress or type(progress['completed']) is list and not progress['completed']):
+            raise ledger.UsageLedgerError('completed typed authority cannot override active or malformed progress')
+        _validate_base(spec, state, record=record)
+        if record.get('shared_generation') != completion_check(spec, record=record):
+            raise ledger.UsageLedgerError('completed provenance differs from reconstructed typed audit authority')
         return
     _validate_base(spec, state)
     completed = progress.get('completed') if type(progress) is dict else None

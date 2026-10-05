@@ -171,6 +171,8 @@ def test_real_complete_api_pipeline_and_completed_recheck(selected):
     assert before == files(selected)
     assert_completed_mutations_refuse_without_calls(selected)
     assert_snapshot_attribution_checks_without_calls(selected)
+    from tests.test_shared_generation_completed_replay import assert_completed_replay_authority
+    assert_completed_replay_authority(selected)
 # Draft to apply only after immutable pipeline process ends.
 class CandidatesScript(Script):
     def __init__(self, spec, *, drop=False, **kwargs):
