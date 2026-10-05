@@ -1774,6 +1774,133 @@ class TestSelectedTemplateDerivation(unittest.TestCase):
                                         {'cases': [{'values': {'guide_version': 0}}]}, body)
 
 
+class TestNativeSharedRouteDerivation(unittest.TestCase):
+    """Native rendering is separately selected; it is never an API25 case."""
+    RENDER = 'src/data_sheets_schema/native_shared_render.py'
+    CONTRACT = 'src/data_sheets_schema/native_shared_contract.py'
+    CLI = 'src/data_sheets_schema/cli/prompt.py'
+
+    def fixture(self, directory):
+        root = Path(directory)
+        for path in (scan.RUNNER, self.RENDER, self.CONTRACT, self.CLI):
+            _write(root / path, (ROOT / path).read_text())
+        return root
+
+    def derive(self, root):
+        return scan.derive_native_shared_route(root, scan._tree(root / scan.RUNNER))
+
+    def test_actual_native_route_and_api_cases_are_distinct(self):
+        selected = self.derive(ROOT)
+        self.assertEqual((selected['field'], selected['default'], selected['enabled_values']),
+                         ('native_shared_generation_version', 0, [1]))
+        self.assertEqual((selected['condition'], selected['renderer'], selected['runtime']),
+                         ('generic_v10', 26, 'Claude Code (direct)'))
+        self.assertEqual(selected['companion_axes'], dict.fromkeys((
+            'native_source_attribution_version', 'shared_generation_version',
+            'api_playbook_version', 'receipt_completion_version', 'removal_repair_version'), 0))
+        self.assertIsNone(selected['model_calls_minimum'])
+        self.assertIn('not established', selected['scope'])
+        tree = scan._tree(ROOT / scan.RUNNER)
+        consts = scan._module_constants(ROOT / scan.RUNNER)
+        turns = scan.derive_followups(tree, consts['PHASES'], consts, root=ROOT)
+        receipt = turns['full_receipt_completion']['selection']['cases']
+        actual = {(row['values']['receipt_completion_version'], row['values']['shared_generation_version'],
+                   tuple(row['renderers']), tuple(row['conditions'])) for row in receipt}
+        self.assertEqual(actual, {(1, 0, (8,), ('generic_v7', 'generic_v8', 'generic_v9')),
+                                 (2, 1, (25,), ('generic_v10',))})
+        self.assertTrue(all('native_shared_generation_version' not in row['values'] for row in receipt))
+
+    def test_guard_and_delegate_mutations_cannot_claim_native_api_admission(self):
+        guard = "if getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26:"
+        mutations = [
+            (scan.RUNNER, guard, guard.replace(' or ', ' and ')),
+            (scan.RUNNER, guard, guard.replace(', 0)', ', 1)')),
+            (scan.RUNNER, guard, guard.replace(', 0)', ', False)')),
+            (scan.RUNNER, "raise ValueError('native shared generation requires its separate native execution registration')", 'pass'),
+            (scan.RUNNER, "    " + guard + "\n        raise ValueError('native shared generation requires its separate native execution registration')",
+             "    dispatch(spec)\n    " + guard + "\n        raise ValueError('native shared generation requires its separate native execution registration')"),
+            (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared(other)'),
+            (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared = foreign\n        validate_native_shared(self)'),
+            (scan.RUNNER, 'return instruction(spec)', 'return instruction(other)'),
+            (self.RENDER, "version not in (0, 1)", 'version not in (0, 1, 2)'),
+            (self.RENDER, 'spec.runtime != c.RUNTIME', 'spec.runtime == c.RUNTIME'),
+            (self.RENDER, "'api_playbook_version', 'receipt_completion_version',", "'api_playbook_version',"),
+            (self.RENDER, 'getattr(spec, key) != 0', 'getattr(spec, key) != 1'),
+            (self.RENDER, 'def validate_spec(spec):', '@foreign\ndef validate_spec(spec):'),
+            (self.RENDER, 'version = getattr(spec,', "spec.runtime = 'foreign'\n    version = getattr(spec,"),
+            (self.CONTRACT, 'RENDERER = 26', 'RENDERER = 25'),
+            (self.CLI, 'render_version=contract.RENDERER', 'render_version=25'),
+            (self.CLI, 'native_shared_generation_version=1', 'native_shared_generation_version=0'),
+            (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(other, runtime_declaration, max_draft_checks)'),
+            (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(spec, runtime_declaration, 1)'),
+            (self.CLI, 'text = spec.instruction', 'execute(spec)\n        text = spec.instruction'),
+            (self.CLI, 'captured = capture(selection)', 'captured = capture(other)'),
+            (self.CLI, '@prompt.command("render-native-shared")', '@prompt.command("other")'),
+        ]
+        for path, before, after in mutations:
+            with self.subTest(path=path, after=after), tempfile.TemporaryDirectory() as directory:
+                root = self.fixture(directory)
+                target = root / path; source = target.read_text(); self.assertIn(before, source)
+                _write(target, source.replace(before, after))
+                with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                    self.derive(root)
+
+    def test_native_disabled_api_invariant_is_guard_derived_not_name_based(self):
+        # Exercise the same reciprocal reduction with synthetic renamed fields
+        # and renderer values; no project or phase/version allowlist is used.
+        fixture = TestCorrelatedFollowupDerivation()
+        with tempfile.TemporaryDirectory() as directory:
+            root = fixture.root(directory); path = root / scan.RUNNER
+            source = path.read_text().replace('flow_version: int = 0',
+                'flow_version: int = 0\n    separate_version: int = 0')
+            source = source.replace("self.condition == 'generic_v3' and self.flow_version != 1",
+                "self.condition == 'generic_v3' and self.flow_version != 1 and self.separate_version != 1")
+            source = source.replace('def execute(spec, *, dry_run=False):', '''def execute(spec, *, dry_run=False):
+    if getattr(spec, 'separate_version', 0) or spec.render_version == 20:
+        raise ValueError('separate runtime')''')
+            _write(path, source)
+            actual = fixture.derive(root)['restore_full']['selection']['cases']
+            self.assertEqual({tuple(row['renderers']) for row in actual}, {(8,), (9,)})
+            _write(path, source.replace("getattr(spec, 'separate_version', 0) or", "getattr(spec, 'separate_version', 0) and"))
+            with self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                fixture.derive(root)
+
+    def test_api_template_only_skips_a_proven_unreachable_native_delegate(self):
+        tree = scan._tree(ROOT / scan.RUNNER)
+        consts = scan._module_constants(ROOT / scan.RUNNER)
+        turns = scan.derive_followups(tree, consts['PHASES'], consts, root=ROOT)
+        selected = next(row['selection'] for row in turns.values()
+                        if row.get('selection', {}).get('field') == 'shared_generation_version')
+        prompt = consts['CONDITION_PROMPTS']['generic_v10']
+        body = (ROOT / prompt).read_text().split('## Prompt body', 1)[1]
+        from data_sheets_schema.api_playbook import adapt_template
+        adapted, _ = scan._selected_template(ROOT, tree, selected, body)
+        self.assertEqual(adapted, adapt_template(body, version=2))
+        source = (ROOT / scan.RUNNER).read_text()
+        guard = "getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26"
+        for before, after in ((guard, guard.replace(' or ', ' and ')),
+                              (guard, guard.replace('== 26', '== 25')),
+                              ('return instruction(spec)', 'return instruction(other)')):
+            with self.subTest(after=after), self.assertRaisesRegex(scan.ConfigError, 'not derived'):
+                scan._selected_template(ROOT, ast.parse(source.replace(before, after)), selected, body)
+
+    def test_runtime_binding_presence_is_not_controller_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = self.fixture(directory)
+            row = self.derive(root)
+            self.assertFalse(row['runtime_binding']['source_present'])
+            self.assertIn('not established', row['runtime_binding']['basis'])
+            path = root / row['runtime_binding']['path']
+            _write(path, 'def bind_runtime(*args):\n    raise ValueError("unavailable")\n')
+            row = self.derive(root)
+            self.assertTrue(row['runtime_binding']['source_present'])
+            self.assertIn('not executed', row['runtime_binding']['basis'])
+            self.assertIn('not established', row['scope'])
+            _write(path, 'def invalid syntax')
+            with self.assertRaises(scan.ConfigError):
+                self.derive(root)
+
+
 class TestApiMeaning(unittest.TestCase):
     """The "api" section agrees with what the runtime does (#4022, #4025,
     #4055, #4057, #4058)."""
@@ -1884,10 +2011,13 @@ class TestApiMeaning(unittest.TestCase):
         (#4055). Nothing here reaches a provider: the run stops at the lock."""
         from data_sheets_schema import api_runner
         ex = self.meaning["audit_continuations"]["execute_refuses"]
-        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24])
-        for n in ex["refused"]:
+        self.assertEqual(ex["refused"], [19, 20, 21, 22, 23, 24, 26])
+        for n in (19, 20, 21, 22, 23, 24):
             with self.subTest(renderer=n), self.assertRaisesRegex(ValueError, "separately registered"):
                 api_runner.execute(self._spec_at(n))
+        from types import SimpleNamespace
+        with self.assertRaisesRegex(ValueError, 'separate native execution registration'):
+            api_runner.execute(SimpleNamespace(render_version=26, native_shared_generation_version=0))
         selected = {r for procedure in self.meaning.get('selected_procedures', {}).values()
                     for r in procedure['selection']['renderers']}
         allowed = max(r for r in self.meaning["audit_continuations"]["admitted_renderers"]

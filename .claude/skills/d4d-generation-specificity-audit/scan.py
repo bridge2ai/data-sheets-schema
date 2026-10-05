@@ -4115,6 +4115,262 @@ def derive_admitted_renderers(tree: ast.Module) -> list[int]:
     raise _not_derived("the renderers RunSpec admits", "no raising `render_version not in (...)` in api_runner.py")
 
 
+def _early_axis_refusal(tree: ast.Module) -> dict:
+    """A positive version-axis refusal at the first executable statement.
+
+    This proves an API continuation has a false axis; it does not infer what
+    an opaque native validator admits. Only a default-zero integer field and
+    the literal ``getattr(spec, field, 0) or spec.render_version == N`` guard
+    are supported. A reordered, weakened or rebound guard is not evidence.
+    """
+    fn = _function(tree, 'execute')
+    if fn is None:
+        raise _not_derived('early API axis refusal', 'missing execute')
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    fields = {n.target.id for n in cls.body if isinstance(n, ast.AnnAssign)
+              and isinstance(n.target, ast.Name) and isinstance(n.annotation, ast.Name)
+              and n.annotation.id == 'int' and isinstance(n.value, ast.Constant)
+              and type(n.value.value) is int and n.value.value == 0} if cls else set()
+    candidates = [n for n in ast.walk(fn) if isinstance(n, ast.If)
+        and any(isinstance(x, ast.Call) and isinstance(x.func, ast.Name) and x.func.id == 'getattr'
+                and len(x.args) >= 2 and ast.unparse(x.args[0]) == 'spec'
+                and isinstance(x.args[1], ast.Constant) and x.args[1].value in fields
+                for x in ast.walk(n.test))
+        and any(isinstance(x, ast.Raise) for x in ast.walk(n))]
+    # Later ordinary optional dispatches may contain refusals. Only direct
+    # raising guards claim an API boundary; the selected native guard must be
+    # one of these, not a nested check reached after effects.
+    candidates = [n for n in candidates if any(isinstance(x, ast.Raise) for x in n.body)]
+    if not candidates:
+        return {}
+    body = fn.body[1:] if (isinstance(fn.body[0], ast.Expr)
+        and isinstance(fn.body[0].value, ast.Constant) and type(fn.body[0].value.value) is str) else fn.body
+    fail = lambda: _not_derived('early API axis refusal', 'unsupported guard, default, binding or statement order')
+    if len(candidates) != 1 or candidates[0] is not body[0] or fn.decorator_list or 'getattr' in _params(fn):
+        raise fail()
+    guard = candidates[0]
+    if sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == 'execute' for n in tree.body) != 1:
+        raise fail()
+    if guard.orelse or len(guard.body) != 1 or not isinstance(guard.body[0], ast.Raise):
+        raise fail()
+    if not isinstance(guard.test, ast.BoolOp) or not isinstance(guard.test.op, ast.Or) or len(guard.test.values) != 2:
+        raise fail()
+    call, compare = guard.test.values
+    if not (isinstance(call, ast.Call) and len(call.args) == 3 and not call.keywords
+            and isinstance(call.args[1], ast.Constant) and call.args[1].value in fields
+            and isinstance(call.args[2], ast.Constant) and type(call.args[2].value) is int and call.args[2].value == 0
+            and isinstance(compare, ast.Compare) and len(compare.ops) == 1
+            and isinstance(compare.ops[0], ast.Eq) and ast.unparse(compare.left) == 'spec.render_version'
+            and isinstance(compare.comparators[0], ast.Constant) and type(compare.comparators[0].value) is int):
+        raise fail()
+    field, renderer = call.args[1].value, compare.comparators[0].value
+    expected = ast.parse(f"getattr(spec, {field!r}, 0) or spec.render_version == {renderer}", mode='eval').body
+    if ast.dump(guard.test) != ast.dump(expected):
+        raise fail()
+    if any((isinstance(n, ast.Name) and n.id == 'getattr' and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, 'getattr', fn) for n in ast.walk(tree)):
+        raise fail()
+    return {'field': field, 'api_value': 0, 'renderer': renderer, 'line': guard.lineno}
+
+
+def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
+    """Source proof of a separate native render selector, not launch approval.
+
+    Recognize the closed validator prefix and its actual RunSpec/CLI call
+    sites. No generation module is imported. The remaining capture validators
+    can narrow admission; they cannot be used to infer an API procedure or a
+    successful controller execution.
+    """
+    field = 'native_shared_generation_version'
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    declarations = [n for n in cls.body if isinstance(n, ast.AnnAssign)
+                    and isinstance(n.target, ast.Name) and n.target.id == field] if cls else []
+    if not declarations:
+        return None
+    fail = lambda detail: _not_derived('separate native shared render route', detail)
+    dump = lambda n: ast.dump(n, include_attributes=False)
+    declaration = ast.parse(f'{field}: int = 0').body[0]
+    if len(declarations) != 1 or dump(declarations[0]) != dump(declaration):
+        raise fail('axis is not one default-zero integer declaration')
+    early = _early_axis_refusal(tree)
+    if not early or early['field'] != field:
+        raise fail('missing proven early API refusal')
+    relative = 'src/data_sheets_schema/native_shared_render.py'
+    contract_path = 'src/data_sheets_schema/native_shared_contract.py'
+    renderer_tree, contract = _tree(root / relative), _tree(root / contract_path)
+    constants = {}
+    for name, expected_type in (('RENDERER', int), ('CONDITION', str), ('RUNTIME', str), ('VERSION', int)):
+        bindings = [n for n in contract.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+        if len(bindings) != 1 or not isinstance(bindings[0].value, ast.Constant) or type(bindings[0].value.value) is not expected_type:
+            raise fail('contract constants lack unique typed literal bindings')
+        binding = bindings[0]
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del))
+                and n is not binding.targets[0]) or isinstance(n, ast.arg) and n.arg == name
+               or _rebinding(n, name, None) for n in ast.walk(contract)):
+            raise fail('contract constant is rebound')
+        constants[name] = binding.value.value
+    if constants['VERSION'] != 1 or constants['RENDERER'] != early['renderer']:
+        raise fail('validator contract and API refusal disagree')
+    fn = _function(renderer_tree, 'validate_spec')
+    if (fn is None or fn.decorator_list or ast.unparse(fn.args) != 'spec'
+            or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef)) and n.name == 'validate_spec'
+                   for n in renderer_tree.body) != 1):
+        raise fail('unsupported validator signature or decorator')
+    imports = [n for n in renderer_tree.body if isinstance(n, ast.ImportFrom) and n.level == 1
+               and n.module is None and len(n.names) == 1 and n.names[0].name == 'native_shared_contract'
+               and n.names[0].asname == 'c']
+    if len(imports) != 1:
+        raise fail('validator contract import is not exact')
+    for name in ('c', 'getattr', 'type', 'int'):
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or _rebinding(n, name, fn) for n in ast.walk(renderer_tree)
+               if n is not imports[0].names[0]):
+            raise fail('validator authority or builtin is rebound')
+    # Exception messages are diagnostics, not selector authority. Everything
+    # else in these six statements is exact, including zero/default semantics.
+    class RaisingShape(ast.NodeTransformer):
+        def visit_Raise(self, node):
+            return ast.Raise(exc=None, cause=None)
+    def shape(nodes):
+        return dump(RaisingShape().visit(ast.parse('\n'.join(ast.unparse(n) for n in nodes))))
+    companions = ('native_source_attribution_version', 'shared_generation_version',
+                  'api_playbook_version', 'receipt_completion_version', 'removal_repair_version')
+    prefix = ast.parse(f'''version = getattr(spec, {field!r}, 0)
+registration = getattr(spec, 'native_shared_generation_registration', None)
+if type(version) is not int or version not in (0, 1):
+    raise ValueError()
+if not version:
+    if registration is not None or spec.render_version == {constants['RENDERER']}:
+        raise ValueError()
+    return None
+if (spec.condition != c.CONDITION or type(spec.render_version) is not int
+        or spec.render_version != c.RENDERER or spec.runtime != c.RUNTIME
+        or spec.method != 'claudecode_direct' or spec.out_dir is not None
+        or spec.prompt_text_env is not True):
+    raise ValueError()
+for key in {companions!r}:
+    if type(getattr(spec, key)) is not int or getattr(spec, key) != 0:
+        raise ValueError()
+''').body
+    if shape(fn.body[:len(prefix)]) != shape(prefix):
+        raise fail('unsupported delegated admission prefix')
+    if any((isinstance(n, ast.Attribute) and isinstance(n.ctx, (ast.Store, ast.Del))
+            and ast.unparse(n.value) == 'spec') or isinstance(n, ast.Name) and n.id == 'spec'
+           and isinstance(n.ctx, (ast.Store, ast.Del)) or _rebinding(n, 'spec', fn)
+           or isinstance(n, ast.Call) and ast.unparse(n.func) in {'setattr', 'delattr'}
+           or isinstance(n, ast.Call) and ast.unparse(n.func) != 'getattr'
+              and (any(isinstance(x, ast.Name) and x.id == 'spec' for x in n.args)
+                   or isinstance(n.func, ast.Attribute) and ast.unparse(n.func.value) == 'spec')
+           for n in ast.walk(fn)):
+        raise fail('delegated selector mutates its spec')
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None)
+    expected_import = ast.parse('from .native_shared_render import validate_spec as validate_native_shared').body[0]
+    expected_call = ast.parse('validate_native_shared(self)').body[0]
+    imports_at = [i for i, n in enumerate(init.body) if dump(n) == dump(expected_import)] if init else []
+    if (len(imports_at) != 1 or imports_at[0] + 1 >= len(init.body)
+            or dump(init.body[imports_at[0] + 1]) != dump(expected_call)):
+        raise fail('RunSpec does not call the exact validator directly')
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom)) for n in ast.walk(init)):
+        raise fail('RunSpec can exit before completing selector validation')
+    allowed_alias = init.body[imports_at[0]].names[0]
+    if any((isinstance(n, ast.Name) and n.id == 'validate_native_shared' and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, 'validate_native_shared', init) for n in ast.walk(init) if n is not allowed_alias):
+        raise fail('RunSpec validator is rebound')
+    guard_test = ast.parse(f"getattr(spec, {field!r}, 0) or spec.render_version == {constants['RENDERER']}", mode='eval').body
+    evidence = [f'{RUNNER}:{declarations[0].lineno}', f'{RUNNER}:{early["line"]}',
+                f'{RUNNER}:{init.body[imports_at[0]+1].lineno}', f'{relative}:{fn.lineno}']
+    for name in ('resolve_prompt', 'build_phase'):
+        caller = _function(tree, name)
+        body = caller.body if caller else []
+        if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) and type(body[0].value.value) is str:
+            body = body[1:]
+        guard = body[0] if body else None
+        if not isinstance(guard, ast.If) or dump(guard.test) != dump(guard_test) or guard.orelse:
+            raise fail('prompt/phase route is not an early exact guarded branch')
+        expected = ast.parse('from .native_shared_render import instruction\nreturn instruction(spec)').body
+        if name == 'resolve_prompt':
+            if [dump(n) for n in guard.body] != [dump(n) for n in expected]:
+                raise fail('selected instruction delegates another spec or builder')
+        elif len(guard.body) != 1 or not isinstance(guard.body[0], ast.Raise):
+            raise fail('API phase builder does not refuse the selected native route')
+        evidence.append(f'{RUNNER}:{guard.lineno}')
+
+    cli_path = 'src/data_sheets_schema/cli/prompt.py'
+    cli = _tree(root / cli_path)
+    command = _function(cli, 'render_native_shared')
+    if command is None or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
+                              and n.name == 'render_native_shared' for n in cli.body) != 1:
+        raise fail('missing offline render CLI consumer')
+    command_decorators = [n for n in command.decorator_list if isinstance(n, ast.Call)
+                          and ast.unparse(n.func) == 'prompt.command']
+    if (len(command_decorators) != 1 or command_decorators[0].keywords
+            or [ast.unparse(n) for n in command_decorators[0].args] != [repr('render-native-shared')]):
+        raise fail('offline CLI command spelling is not derived')
+    expected_imports = ast.parse('''from data_sheets_schema.api_runner import RunSpec
+from data_sheets_schema import native_shared_contract as contract
+from data_sheets_schema.native_shared_selection import capture
+from data_sheets_schema.native_shared_controller import bind_runtime
+''').body
+    for imp in expected_imports:
+        matches = [n for n in command.body if dump(n) == dump(imp)]
+        if len(matches) != 1:
+            raise fail('CLI uses an unproved constructor, contract or runtime binding')
+        alias = matches[0].names[0]
+        name = alias.asname or alias.name
+        if any((isinstance(n, ast.Name) and n.id == name and isinstance(n.ctx, (ast.Store, ast.Del)))
+               or _rebinding(n, name, command) for n in ast.walk(command) if n is not alias):
+            raise fail('CLI selected binding is rebound')
+    tries = [n for n in command.body if isinstance(n, ast.Try)]
+    if len(tries) != 1:
+        raise fail('unsupported offline CLI structure')
+    statements = tries[0].body
+    capture_prefix = ast.parse("captured = capture(selection)\ndocument = captured.document()\ninputs = document['inputs']").body
+    if [dump(n) for n in statements[:3]] != [dump(n) for n in capture_prefix]:
+        raise fail('CLI does not capture its actual selection argument')
+    assignments = [(i, n) for i, n in enumerate(statements) if isinstance(n, ast.Assign)
+                   and len(n.targets) == 1 and ast.unparse(n.targets[0]) == 'spec']
+    if len(assignments) != 1:
+        raise fail('CLI lacks one selected spec')
+    index, assignment = assignments[0]
+    call = assignment.value
+    if not isinstance(call, ast.Call) or ast.unparse(call.func) != 'RunSpec' or call.args:
+        raise fail('CLI spec constructor is not proven')
+    keywords = {k.arg: k.value for k in call.keywords}
+    required = {'condition': 'contract.CONDITION', 'render_version': 'contract.RENDERER',
+                'runtime': 'contract.RUNTIME', field: '1', 'prompt_text_env': 'True'}
+    if len(keywords) != len(call.keywords) or any(k not in keywords or ast.unparse(keywords[k]) != v for k,v in required.items()):
+        raise fail('CLI native identity differs from the contract')
+    tail = ast.parse('bind_runtime(spec, runtime_declaration, max_draft_checks)\ntext = spec.instruction').body
+    if [dump(n) for n in statements[index+1:index+3]] != [dump(n) for n in tail]:
+        raise fail('CLI does not bind the explicit runtime before rendering the same spec')
+    # The consumer is render-only. A new call here is not silently relabeled an
+    # execution gate; its source shape needs a separate derivation/review.
+    allowed_calls = {'capture', 'captured.document', 'ValueError', 'RunSpec', 'Path',
+        'captured.registration.raw.decode', 'run_date.strftime', 'bind_runtime',
+        'spec.instruction', 'Path(out).resolve', 'destination.open', 'stream.write'}
+    if any(ast.unparse(n.func) not in allowed_calls for n in ast.walk(tries[0]) if isinstance(n, ast.Call)
+           and n not in [x for h in tries[0].handlers for x in ast.walk(h)]):
+        raise fail('offline render consumer contains an unsupported call')
+    evidence.append(f'{cli_path}:{command.lineno}')
+    binder = 'src/data_sheets_schema/native_shared_controller.py'
+    binder_present = (root / binder).is_file()
+    if binder_present:
+        _tree(root / binder)  # a present but unreadable/unparsed module is not coverage
+    return {'field': field, 'default': 0, 'enabled_values': [constants['VERSION']],
+            'condition': constants['CONDITION'], 'renderer': constants['RENDERER'],
+            'runtime': constants['RUNTIME'], 'companion_axes': dict.fromkeys(companions, 0),
+            'api_execute': 'refused before dry-run, locks or dispatch',
+            'api_phase_builder': 'refused', 'instruction_builder': relative + ':instruction',
+            'cli': 'd4d prompt render-native-shared',
+            'runtime_binding': {'path': binder, 'source_present': binder_present,
+                'basis': 'Source presence only; the binder is not executed or its acceptance inferred.'
+                if binder_present else 'Referenced binder source is absent in this snapshot; runnable rendering is not established.'},
+            'scope': 'Offline rendering of the explicit native selection and runtime declaration; '
+                     'separate execution registration and controller acceptance are not established by this scan.',
+            'model_calls_minimum': None, 'evidence': evidence}
+
+
 def derive_execute_refusal(tree: ast.Module, admitted: list[int]) -> dict:
     """The renderers `api_runner.execute` refuses before it runs anything: a
     raising `render_version in (...)` or `>= N` test in its body (#4055). No
@@ -4122,7 +4378,8 @@ def derive_execute_refusal(tree: ast.Module, admitted: list[int]) -> dict:
     fn = _function(tree, "execute")
     if fn is None:
         raise _not_derived("what api_runner.execute refuses", "api_runner.py defines no execute()")
-    refused, line = set(), None
+    early = _early_axis_refusal(tree)
+    refused, line = ({early['renderer']}, early['line']) if early else (set(), None)
     for node in ast.walk(fn):
         if not (isinstance(node, ast.If) and any(isinstance(b, ast.Raise) for b in node.body)):
             continue
@@ -4750,6 +5007,26 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
     attrs = lambda node: {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
                          and isinstance(n.value, ast.Name) and n.value.id == 'self'}
     dump = lambda n: ast.dump(n, include_attributes=False)
+    early = _early_axis_refusal(tree)
+    api_fixed = {early['field']: early['api_value']} if early else {}
+    # Reduce only comparisons whose operand is proved by the actual early
+    # execute refusal. This does not grant a native case or interpret its
+    # delegated validation as an API selector.
+    def api_test(node):
+        if (isinstance(node, ast.Compare) and len(node.ops) == 1
+                and isinstance(node.left, ast.Attribute) and ast.unparse(node.left.value) == 'self'
+                and node.left.attr in api_fixed and isinstance(node.comparators[0], ast.Constant)
+                and type(node.comparators[0].value) is int and isinstance(node.ops[0], (ast.Eq, ast.NotEq))):
+            equal = api_fixed[node.left.attr] == node.comparators[0].value
+            return ast.Constant(equal if isinstance(node.ops[0], ast.Eq) else not equal)
+        if isinstance(node, ast.BoolOp):
+            values = [api_test(x) for x in node.values]
+            if isinstance(node.op, ast.And):
+                values = [x for x in values if not (isinstance(x, ast.Constant) and x.value is True)]
+            elif isinstance(node.op, ast.Or):
+                values = [x for x in values if not (isinstance(x, ast.Constant) and x.value is False)]
+            return values[0] if len(values) == 1 else ast.BoolOp(op=node.op, values=values)
+        return node
     domains, domain_nodes = {}, {}
     for name, declaration in declarations.items():
         if not (isinstance(declaration.value, ast.Constant) and type(declaration.value.value) is int
@@ -4855,7 +5132,7 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
                 raise fail('exclusive nested protocol must have one enabled value')
             name, value = compare.left.attr, compare.comparators[0].value
             expected = ast.parse(f'self.{name} == {value!r} and self.{parent_field} != {enabled[0]}',mode='eval').body
-            if not any(p is None and dump(g.test) == dump(expected) for g,p in relevant):
+            if not any(p is None and dump(api_test(g.test)) == dump(expected) for g,p in relevant):
                 raise fail('exclusive nested protocol lacks a reciprocal direct guard')
     constants = {}
     parents = _parents(tree)
@@ -4929,7 +5206,7 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
         if not axes[field]: continue
         allowed = []
         for renderer, native, condition in product(admitted, (False, True), conditions):
-            row = {**axes, 'render_version': renderer, 'is_agentic': native, 'condition': condition}
+            row = {**axes, **api_fixed, 'render_version': renderer, 'is_agentic': native, 'condition': condition}
             violated = []
             for guard, parent in relevant:
                 test_value = evaluate(guard.test, row)
@@ -5449,6 +5726,23 @@ def _selected_template(root, tree, selection, body):
     if fn is None:
         raise fail('resolve_prompt is missing')
     statements = [n for n in fn.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    # A standalone legacy adapter fixture need not define an executor. Without
+    # one, no new branch may be skipped; full api_meaning still requires it.
+    early = _early_axis_refusal(tree) if _function(tree, 'execute') is not None else {}
+    if early and statements and isinstance(statements[0], ast.If):
+        expected = ast.parse(f"getattr(spec, {early['field']!r}, 0) or spec.render_version == {early['renderer']}", mode='eval').body
+        cases = selection.get('cases', [])
+        guard = statements[0]
+        # This branch is unreachable on each selected API case: the early
+        # execute refusal fixes its axis to zero, and no selected renderer is
+        # the refused native renderer. Its exact instruction delegate is
+        # separately reported; no native prompt is adapted as an API prompt.
+        if (ast.dump(guard.test) == ast.dump(expected) and not guard.orelse and cases
+                and all(case.get('renderers') and early['renderer'] not in case['renderers']
+                        and case.get('values', {}).get(early['field'], 0) == 0 for case in cases)
+                and [ast.dump(n) for n in guard.body] == [ast.dump(n) for n in
+                     ast.parse('from .native_shared_render import instruction\nreturn instruction(spec)').body]):
+            statements = statements[1:]
     if len(statements) < 2 or ast.unparse(statements[0]) != 'body = prompt_body(spec.base_prompt)':
         raise fail('base prompt does not enter an unchanged body')
     branch = statements[1]
@@ -5630,6 +5924,10 @@ def api_meaning(root: Path, facts: dict) -> dict:
     floor = derive_agentic_audit_from(build)
     continuation = audit_continuations(root, floor, sorted(facts["controllers"]), tree, cond["agentic_runtimes"])
     followups = derive_followups(tree, phases, consts, root=root)
+    native_shared = derive_native_shared_route(root, tree)
+    if native_shared and (native_shared['runtime'] not in cond['agentic_runtimes']
+                          or native_shared['condition'] not in cond['prompts']):
+        raise _not_derived('native shared runtime/condition', 'contract is outside the declared runtime/condition universe')
     gh = facts.get("github_assistant_run") or {}
 
     def turns_for(c, *, optional=False):
@@ -5841,10 +6139,16 @@ def api_meaning(root: Path, facts: dict) -> dict:
             + ".")
     verdict.append("The agentic runtimes " + ", ".join(cond["agentic_runtimes"]) + (" render the legacy condition " if selected_procedures else " render the same condition ")
                    + "names (one name, two procedures); a run is one or the other, not a hybrid.")
+    if native_shared:
+        verdict.append('Separate native selection ' + native_shared['field'] + '=1, '
+            + native_shared['condition'] + ', renderer ' + str(native_shared['renderer'])
+            + ': API execution and API phase construction refuse it. '
+            + native_shared['cli'] + ' binds the explicit runtime before rendering. ' + native_shared['scope'])
     return {"definition": ("api = MONOLITHIC: one model call whose input is the prompt, the full LinkML "
                            "schema and the input documents concatenated with separators"),
             "phases": phases, "derived_phases": derived, "model_phases": model_phases,
             **({"selected_procedures": selected_procedures} if selected_procedures else {}),
+            **({'native_shared_route': native_shared} if native_shared else {}),
             "schema_form": schema_form, "followup_turns": followups,
             "agentic_audit_from_renderer": floor,
             "default_renderer": continuation["default_renderer"],
@@ -6241,6 +6545,15 @@ def render_markdown(result: dict) -> str:
     nv = m["native"]
     L += [f"Native: `{nv['playbook']}` — {nv['shape']}; {nv['schema_form']}; "
           f"{len(nv['phases'])} phase headings.", ""]
+    if m.get('native_shared_route'):
+        selected = m['native_shared_route']
+        L += [f"Separate native shared route: `{selected['field']}=1`, `{selected['condition']}`, "
+              f"renderer {selected['renderer']}, `{selected['runtime']}`. API execution: {selected['api_execute']}; "
+              f"API phase construction: {selected['api_phase_builder']}. Offline consumer: `{selected['cli']}`. "
+              + selected['scope'],
+              selected['runtime_binding']['basis'],
+              'Companion axes: ' + ', '.join(f'`{key}={value}`' for key,value in selected['companion_axes'].items())
+              + '. Evidence: ' + ', '.join(selected['evidence']) + '.', '']
     L += ["Verdict:", ""] + [f"- {v}" for v in m["verdict"]] + [""]
     return "\n".join(L)
 
