@@ -27,10 +27,17 @@ MAX_RUNS = 1024
 
 @dataclass(frozen=True)
 class _Footprint:
-    mutable: tuple[Path, ...]
+    mutable: tuple[tuple[str, Path], ...]
     evidence: tuple[Path, ...]
     namespaces: tuple[tuple[Path, str], ...]
     declarations: tuple[tuple[str, Path], ...]
+
+
+@dataclass(frozen=True)
+class _Point:
+    owner: int | None
+    role: str
+    path: Path
 
 
 def _selected(spec):
@@ -78,6 +85,13 @@ def _inode(path):
     return info.st_dev, info.st_ino
 
 
+def _spelling(path):
+    # Resolve the container, not a final symlink (or a case-different leaf).
+    # Only this exact intended artifact can repeat as harmless evidence.
+    path = Path(path)
+    return path.parent.resolve() / path.name
+
+
 def _entries(directory, prefix, budget):
     """Only the existing project-owned leaves; do not follow directory links."""
     directory = Path(directory).resolve()
@@ -114,17 +128,21 @@ def _describe(spec, budget):
     progress = api._progress_path(spec)
     index = snapshot_store.index_path(spec.metadata_dir, project)
     ledger = usage_ledger.ledger_path(spec)
-    points = (*primary, api._receipt_path(spec), progress, api._reasoning_path(spec),
-              usage_ledger.abandoned_journal_path(spec), ledger, index, *locks)
+    points = (*zip(('full', 'core', 'report', 'provenance'), primary),
+              ('receipt', api._receipt_path(spec)), ('progress', progress),
+              ('reasoning', api._reasoning_path(spec)),
+              ('abandoned', usage_ledger.abandoned_journal_path(spec)),
+              ('ledger', ledger), ('index', index),
+              *((f'output-lock:{number}', lock) for number, lock in enumerate(locks)))
     prefix = _fold(project + '_')
     namespaces = tuple(dict.fromkeys((Path(p).resolve(), prefix)
                       for p in (spec.metadata_dir, index.parent)))
     evidence = tuple(dict.fromkeys(p for directory, name in namespaces
                                   for p in _entries(directory, name, budget)))
-    lock_locations = {_location(p) for p in locks}
+    lock_spellings = {_spelling(p) for p in locks}
     # Persistent lock files alone are harmless; do not classify them as spent.
-    evidence = tuple(p for p in evidence if _location(p) not in lock_locations)
-    for point in points:
+    evidence = tuple(p for p in evidence if _spelling(p) not in lock_spellings)
+    for _, point in points:
         _inode(point)
     declarations = [('ledger', ledger), ('progress', progress),
                     ('provenance', Path(spec.provenance_path)), ('index', index)]
@@ -136,15 +154,69 @@ def _describe(spec, budget):
                 and active_ledger.fullmatch(path.name)
                 and _location(path) != _location(ledger)):
             declarations.append(('ledger', path))
-    return _Footprint(tuple(dict.fromkeys(points)), evidence, namespaces, tuple(declarations))
+    return _Footprint(points, evidence, namespaces, tuple(declarations))
 
 
-def require_disjoint_selected_outputs(specs) -> None:
-    """Reject selected cross-run aliases before planning, locking or dispatch.
+def _check_points(points):
+    """Keep writer roles distinct while allowing exact evidence enumeration."""
+    locations, inodes = {}, {}
+    for point in points:
+        for seen, key in ((locations, _location(point.path)), (inodes, _inode(point.path))):
+            if key is None:
+                continue
+            representatives = seen.setdefault(key, [])
+            for other in representatives:
+                evidence = point.role == 'evidence'
+                other_evidence = other.role == 'evidence'
+                if (point.owner == other.owner and
+                        ((evidence and other_evidence) or
+                         ((evidence or other_evidence) and
+                          _spelling(point.path) == _spelling(other.path)))):
+                    continue
+                raise ValueError('selected outputs have conflicting output ownership: '
+                                 f'{other.role} {other.path} and {point.role} {point.path}')
+            if point.role != 'evidence':
+                # Do not let later evidence conceal an existing writer role.
+                representatives[:] = [point]
+            elif (not any(p.role != 'evidence' for p in representatives)
+                  and len(representatives) < 2
+                  and all(_spelling(p.path) != _spelling(point.path) for p in representatives)):
+                # Two different same-owner immutable leaves suffice: a later
+                # writer cannot be the exact intended artifact of both leaves.
+                representatives.append(point)
+
+
+def _check_roles(footprints, control_paths=()):
+    from .resources import resource_path
+    from .schema_digest import INVENTORY_LEDGER
+
+    def points():
+        for owner, footprint in enumerate(footprints):
+            for role, path in footprint.mutable:
+                yield _Point(owner, role, path)
+            for path in footprint.evidence:
+                yield _Point(owner, 'evidence', path)
+        # The inventory is one genuinely shared writer, never per-run state.
+        yield _Point(None, 'shared-inventory', Path(resource_path(INVENTORY_LEDGER)))
+        controls = set()
+        for path in control_paths:
+            path = Path(path)
+            spelling = _spelling(path)
+            if spelling not in controls:
+                controls.add(spelling)
+                yield _Point(None, 'batch-control', path)
+
+    _check_points(points())
+
+
+def require_disjoint_selected_outputs(specs, *, control_paths=()) -> None:
+    """Reject selected artifact/control aliases before any locking or dispatch.
 
     The case-fold and delimiter-prefix rules are conservative compatibility
     limits, not claims that an exclusive numbered snapshot overwrites a leaf.
-    Global digest inventories and reusable read-only inputs are not run outputs.
+    The resource-resolved digest inventory is shared bookkeeping, but cannot
+    alias run data or controls. Reusable read-only inputs are not run outputs.
+    Batch callers supply their actual derived control paths at every check.
     """
     selected = []
     for spec in specs:
@@ -152,20 +224,13 @@ def require_disjoint_selected_outputs(specs) -> None:
             selected.append(spec)
             if len(selected) > MAX_RUNS:
                 raise ValueError('selected batch exceeds output ownership run limit')
+    if not selected:
+        return
     budget = [0]
     footprints = [_describe(spec, budget) for spec in selected]
-    locations, inodes = {}, {}
+    _check_roles(footprints, control_paths)
     namespaces = []
     for owner, footprint in enumerate(footprints):
-        for path in (*footprint.mutable, *footprint.evidence):
-            keys = ((locations, _location(path)), (inodes, _inode(path)))
-            for seen, key in keys:
-                if key is None:
-                    continue
-                other = seen.get(key)
-                if other is not None and other[0] != owner:
-                    raise ValueError(f'selected runs have conflicting output ownership: {other[1]} and {path}')
-                seen[key] = (owner, path)
         for directory, prefix in footprint.namespaces:
             physical = _location(directory / '__selected_namespace__')[:-1]
             # Preserve the suffix too for a not-yet-created container.
@@ -224,6 +289,7 @@ def require_selected_resume_owner(spec, *, resume: bool) -> None:
     if type(resume) is not bool:
         raise ValueError('selected resume must be a boolean')
     footprint = _describe(spec, [0])
+    _check_roles((footprint,))
     expected = usage_ledger.run_identity(spec)
     generations = set()
     present = []
@@ -251,7 +317,7 @@ def require_selected_resume_owner(spec, *, resume: bool) -> None:
     locks = {lock for _, lock in usage_ledger.output_locks(
         (spec.full_path, spec.core_path, spec.report_path, spec.provenance_path))}
     spent = bool(footprint.evidence or present or any(
-        _exists(path) for path in footprint.mutable if path not in locks))
+        _exists(path) for _, path in footprint.mutable if path not in locks))
     if spent and not resume:
         raise ValueError('selected outputs are already spent; no-resume requires a fresh run')
     if spent and not generations:

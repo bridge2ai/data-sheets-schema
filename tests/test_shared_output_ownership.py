@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import hashlib
 import json
 import os
+from itertools import permutations
 
 import pytest
 import yaml
@@ -286,3 +287,228 @@ def test_preserved_previous_ledger_archive_is_not_current_ownership(tmp_path):
     before=snapshot(tmp_path)
     ownership.require_selected_resume_owner(s,resume=True)
     assert snapshot(tmp_path)==before
+
+
+@pytest.fixture
+def no_effects(monkeypatch):
+    """Even a regression cannot run an unsafe lock, writer or transport."""
+    import socket
+    from filelock import FileLock
+    from data_sheets_schema import run_lock, schema_digest
+    calls = []
+
+    def forbidden(*args, **kwargs):
+        calls.append('unexpected effect')
+        raise AssertionError('read-only admission must precede writers and transports')
+
+    for module, name in ((FileLock, 'acquire'), (run_lock, 'acquire'),
+                         (run_lock, 'release'), (api, 'execute'), (api, '_execute'),
+                         (api, '_call_with_usage'), (api, '_call_with_retry'),
+                         (schema_digest, 'record_inventory'), (socket.socket, 'connect')):
+        monkeypatch.setattr(module, name, forbidden)
+    yield
+    assert calls == []
+
+
+def alias(source, destination, kind):
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if kind == 'symlink':
+        destination.symlink_to(source)
+    else:
+        os.link(source, destination)
+
+
+def check_one(s, mode):
+    if mode == 'batch':
+        ownership.require_disjoint_selected_outputs([s])
+    else:
+        ownership.require_selected_resume_owner(s, resume=True)
+
+
+@pytest.mark.parametrize('mode', ['batch', 'resume'])
+@pytest.mark.parametrize('kind', ['hardlink', 'symlink'])
+def test_own_full_and_actual_sidecar_refuse_before_any_writer(tmp_path, no_effects, mode, kind):
+    s = spec(tmp_path)
+    install(s, ('progress',))
+    s.full_path.parent.mkdir(parents=True)
+    s.full_path.write_bytes(b'neutral full record must remain intact')
+    lock = ledger.output_locks((s.full_path,))[0][1]
+    alias(s.full_path, lock, kind)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        check_one(s, mode)
+    assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize('mode', ['batch', 'resume'])
+@pytest.mark.parametrize('other', ['core', 'receipt', 'evidence'])
+@pytest.mark.parametrize('kind', ['hardlink', 'symlink'])
+def test_own_distinct_artifact_alias_refuses(tmp_path, no_effects, mode, other, kind):
+    s = spec(tmp_path)
+    install(s, ('progress',))
+    s.full_path.parent.mkdir(parents=True)
+    s.full_path.write_bytes(b'neutral exact original')
+    target = {'core': s.core_path, 'receipt': api._receipt_path(s),
+              'evidence': s.metadata_dir / 'intermediate' / 'A_full_2.yaml'}[other]
+    alias(s.full_path, target, kind)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        check_one(s, mode)
+    assert snapshot(tmp_path) == before
+
+
+def test_distinct_mutable_roles_do_not_collapse_equal_paths(tmp_path, no_effects):
+    s = spec(tmp_path)
+    s.core_path = s.full_path
+    before = snapshot(tmp_path)
+    for mode in ('batch', 'resume'):
+        with pytest.raises(ValueError, match='conflicting output ownership'):
+            check_one(s, mode)
+    assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize('kind', ['regular', 'symlink'])
+def test_exact_artifact_repeated_as_evidence_is_harmless(tmp_path, no_effects, kind):
+    s = spec(tmp_path, flat=True)
+    install(s, ('progress',))
+    if kind == 'symlink':
+        target = tmp_path / 'same-intended-artifact.yaml'
+        target.write_bytes(b'neutral full record')
+        s.full_path.symlink_to(target)
+    else:
+        s.full_path.write_bytes(b'neutral full record')
+    before = snapshot(tmp_path)
+    for mode in ('batch', 'resume'):
+        check_one(s, mode)
+    assert snapshot(tmp_path) == before
+
+
+def test_parent_alias_preserves_exact_leaf_evidence_identity(tmp_path, no_effects):
+    s = spec(tmp_path, flat=True)
+    install(s, ('progress',))
+    s.full_path.write_bytes(b'neutral full record')
+    parent_alias = tmp_path / 'same-parent'
+    parent_alias.symlink_to(s.metadata_dir, target_is_directory=True)
+    s.full_path = parent_alias / s.full_path.name
+    before = snapshot(tmp_path)
+    check_one(s, 'batch')
+    check_one(s, 'resume')
+    assert snapshot(tmp_path) == before
+
+
+def test_two_distinct_evidence_spellings_cannot_hide_writer_in_any_order(tmp_path, no_effects):
+    first, second = tmp_path / 'first.yaml', tmp_path / 'second.yaml'
+    first.write_bytes(b'one preserved immutable inode')
+    os.link(first, second)
+    points = [ownership._Point(0, 'evidence', first),
+              ownership._Point(0, 'evidence', second),
+              ownership._Point(0, 'full', first)]
+    before = snapshot(tmp_path)
+    ownership._check_points(points[:2])  # Immutable evidence alone is not banned.
+    for ordered in permutations(points):
+        with pytest.raises(ValueError, match='conflicting output ownership'):
+            ownership._check_points(ordered)
+    assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize('target', ['progress', 'full', 'evidence'])
+@pytest.mark.parametrize('kind', ['hardlink', 'symlink'])
+def test_actual_batch_control_alias_refuses(tmp_path, no_effects, target, kind):
+    from data_sheets_schema import run_lock
+    s = spec(tmp_path)
+    install(s, ('progress',))
+    point = {'progress': api._progress_path(s), 'full': s.full_path,
+             'evidence': s.metadata_dir / 'intermediate' / 'A_full_2.yaml'}[target]
+    if not point.exists():
+        point.parent.mkdir(parents=True, exist_ok=True)
+        point.write_bytes(b'preserved neutral artifact')
+    control = run_lock._path_for('neutral/batch', lock_dir=tmp_path / 'locks')
+    alias(point, control, kind)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        ownership.require_disjoint_selected_outputs([s], control_paths=(control,))
+    assert snapshot(tmp_path) == before
+
+
+def test_separate_batch_control_and_exact_repeated_enumeration_pass(tmp_path, no_effects):
+    from data_sheets_schema import run_lock
+    a, b = spec(tmp_path, 'A'), spec(tmp_path, 'AB')
+    install(a); install(b)
+    control = run_lock._path_for('neutral/batch', lock_dir=tmp_path / 'locks')
+    before = snapshot(tmp_path)
+    ownership.require_disjoint_selected_outputs([a, b], control_paths=(control, control))
+    assert snapshot(tmp_path) == before
+
+
+def test_different_control_leaves_sharing_inode_refuse(tmp_path, no_effects):
+    from data_sheets_schema import run_lock
+    first = run_lock._path_for('one', lock_dir=tmp_path / 'locks')
+    second = run_lock._path_for('two', lock_dir=tmp_path / 'locks')
+    first.parent.mkdir()
+    first.write_bytes(b'neutral control')
+    os.link(first, second)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        ownership.require_disjoint_selected_outputs([spec(tmp_path)], control_paths=(first, second))
+    assert snapshot(tmp_path) == before
+
+
+@pytest.fixture
+def private_inventory(tmp_path, monkeypatch):
+    """Use the real resource resolver; never link or write the source resource."""
+    from data_sheets_schema import resources, schema_digest
+    original = resources.resource_path(schema_digest.INVENTORY_LEDGER).resolve()
+    raw = original.read_bytes()
+    private = tmp_path / schema_digest.INVENTORY_LEDGER
+    private.parent.mkdir(parents=True)
+    private.write_bytes(raw)
+    monkeypatch.chdir(tmp_path)
+    assert resources.resource_path(schema_digest.INVENTORY_LEDGER).resolve() == private
+    yield private
+    assert original.read_bytes() == raw
+
+
+def test_actual_shared_inventory_is_not_a_per_run_conflict(tmp_path, no_effects, private_inventory):
+    a, b = spec(tmp_path, 'A'), spec(tmp_path, 'AB')
+    install(a); install(b)
+    before = snapshot(tmp_path)
+    ownership.require_disjoint_selected_outputs([a, b])
+    check_one(a, 'resume'); check_one(b, 'resume')
+    assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize('mode', ['batch', 'resume'])
+@pytest.mark.parametrize('target', ['full', 'sidecar', 'evidence'])
+@pytest.mark.parametrize('kind', ['hardlink', 'symlink'])
+def test_resource_inventory_cannot_alias_run_roles(tmp_path, no_effects, private_inventory,
+                                                  mode, target, kind):
+    s = spec(tmp_path)
+    install(s, ('progress',))
+    point = {'full': s.full_path, 'sidecar': ledger.output_locks((s.full_path,))[0][1],
+             'evidence': s.metadata_dir / 'intermediate' / 'A_full_2.yaml'}[target]
+    alias(private_inventory, point, kind)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        check_one(s, mode)
+    assert snapshot(tmp_path) == before
+
+
+@pytest.mark.parametrize('kind', ['hardlink', 'symlink'])
+def test_resource_inventory_cannot_alias_batch_control(tmp_path, no_effects, private_inventory, kind):
+    from data_sheets_schema import run_lock
+    control = run_lock._path_for('neutral/batch', lock_dir=tmp_path / 'locks')
+    alias(private_inventory, control, kind)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match='conflicting output ownership'):
+        ownership.require_disjoint_selected_outputs([spec(tmp_path)], control_paths=(control,))
+    assert snapshot(tmp_path) == before
+
+
+def test_legacy_only_does_not_resolve_inventory_or_controls(tmp_path, monkeypatch, no_effects):
+    from data_sheets_schema import resources
+    def forbidden(*args, **kwargs):
+        raise AssertionError('legacy admission must not impose new resource contracts')
+    monkeypatch.setattr(resources, 'resource_path', forbidden)
+    legacy = spec(tmp_path, shared=0)
+    ownership.require_disjoint_selected_outputs([legacy], control_paths=(object(),))
+    ownership.require_selected_resume_owner(legacy, resume=False)
