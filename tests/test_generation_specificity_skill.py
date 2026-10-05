@@ -1997,6 +1997,90 @@ class TestNativeSharedProcedure:
         assert row['helper_commands'][0] == 'neutral_chunk_check'
         assert 'chunk_check' not in row['helper_commands']
 
+    def refuse_producer_mutation(self, root, module, before, after):
+        self.fixture(root)
+        target = root / 'src/data_sheets_schema' / (module + '.py')
+        raw = target.read_text()
+        assert raw.count(before) == 1, (module, before)
+        target.write_text(raw.replace(before, after))
+        with unittest.TestCase().assertRaisesRegex(scan.ConfigError, 'not derived'):
+            scan.derive_native_shared_procedure(root)
+
+    def test_original_receipt_paths_overwritten_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_receipts',
+            "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+            "    paths = []\n    return {'protocol': contract.NAME, 'stage': 'receipt',")
+
+    def test_original_native_packet_workers_filtered_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'native_shared_stage', '        return packet\n',
+            "        packet['plan']['workers'] = packet['plan']['workers'][:1]\n        return packet\n")
+
+    def test_original_typed_producer_detached_witness(self, tmp_path):
+        self.refuse_producer_mutation(tmp_path, 'typed_audit',
+            'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)',
+            'derived, _, _ = foreign(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)')
+
+    def test_counted_values_and_fixed_producer_delegates_cannot_escape(self, tmp_path):
+        # Source-only witnesses for the finite local-use/return joins. No
+        # mutated producer or runtime is imported or executed.
+        cases = [
+            ('native_shared_receipts', "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+             "    paths.clear()\n    return {'protocol': contract.NAME, 'stage': 'receipt',"),
+            ('native_shared_receipts', "    return {'protocol': contract.NAME, 'stage': 'receipt',",
+             "    alias = paths\n    return {'protocol': contract.NAME, 'stage': 'receipt',"),
+            ('native_shared_stage', '        return packet\n', '        packet = foreign(packet)\n        return packet\n'),
+            ('native_shared_stage', '        return packet\n', '        foreign(packet)\n        return packet\n'),
+            ('native_shared_stage', '        return packet\n',
+             '        if selected:\n            return foreign()\n        return packet\n'),
+            ('native_shared_stage', "        roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]",
+             "        self.packet['plan']['workers'].clear()\n        roster = [('worker', worker['id']) for worker in self.packet['plan']['workers']]"),
+            ('typed_audit', 'project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))',
+             'project=project, limits=limits, **foreign(derived), limitations=list(LIMITATIONS)))'),
+            ('typed_audit', '    packet = _seal(dict(kind=PACKET,',
+             "    derived['plan']['workers'].clear()\n    packet = _seal(dict(kind=PACKET,"),
+            ('typed_audit', '    packet = _seal(dict(kind=PACKET,',
+             "    inputs['original_full'] = foreign()\n    packet = _seal(dict(kind=PACKET,"),
+            ('typed_audit', 'return _derive_uncached(inputs, schema_rows, project, limits)',
+             'return foreign(inputs, schema_rows, project, limits)'),
+            ('typed_audit', 'return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)',
+             'return derivations.foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets)'),
+            ('typed_audit', 'derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)',
+             'derived, raw, prepared = foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets)'),
+            ('typed_audit', "encoded = _json({'derived': derived, 'raw':",
+             "encoded = _json({'derived': foreign(derived), 'raw':"),
+            ('typed_audit', "return value['derived'], {name: _unblob(blob)",
+             "return foreign(value['derived']), {name: _unblob(blob)"),
+            ('typed_audit', '        value = json.loads(encoded)\n',
+             "        encoded = foreign(encoded)\n        value = json.loads(encoded)\n"),
+            ('typed_audit', '        encoded = self._rows.get(key)\n',
+             '        self._rows[key] = foreign()\n        encoded = self._rows.get(key)\n'),
+            ('typed_audit', '    return {"plan": plan, "omission_request": prepared.request(),',
+             '    plan["workers"] = plan["workers"][:1]\n    return {"plan": plan, "omission_request": prepared.request(),'),
+            ('typed_audit', '    return {"plan": plan, "omission_request": prepared.request(),',
+             '    prepared = foreign(prepared)\n    return {"plan": plan, "omission_request": prepared.request(),'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):',
+             '_derive = foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):',
+             'DerivationCache = Foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):'),
+            ('audit_omissions', '    encoded = _json(payload)\n',
+             '    payload["chunks"] = payload["chunks"][:1]\n    encoded = _json(payload)\n'),
+            ('audit_omissions', '    return Prepared(encoded)\n',
+             '    encoded = foreign(encoded)\n    return Prepared(encoded)\n'),
+            ('audit_omissions', '                "payload": payload, "limitations": list(LIMITATIONS)}',
+             '                "payload": foreign(payload), "limitations": list(LIMITATIONS)}'),
+        ]
+        assert scan.derive_native_shared_procedure(ROOT)['protocol_responses']['formula'] == 'R + W + 2'
+        for index, (module, before, after) in enumerate(cases):
+            self.refuse_producer_mutation(tmp_path / str(index), module, before, after)
+
+    def test_producer_comments_and_descriptions_do_not_change_semantic_disclosure(self, tmp_path):
+        root = self.fixture(tmp_path)
+        path = root / 'src/data_sheets_schema/typed_audit.py'
+        path.write_text(path.read_text().replace(
+            '    """Capture a new packet; no saved response or self-reported success is trusted."""',
+            '    """An equivalent descriptive docstring."""\n    # A harmless source annotation.'))
+        assert scan.derive_native_shared_procedure(root) == scan.derive_native_shared_procedure(ROOT)
+
     def test_description_is_not_an_inherited_phase_or_launch_validator(self, tmp_path):
         root = self.fixture(tmp_path)
         # No phase, attribution or execution modules in this structural fixture.
