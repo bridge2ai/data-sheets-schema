@@ -126,8 +126,13 @@ def _file_dialects(source: Mapping[str, Any]) -> list[Any]:
     return out
 
 
-def derive_core(full: Mapping[str, Any], pair_schema=None) -> dict[str, Any]:
-    """The core record implied by `full`, as a dict without header lines."""
+def derive_core(full: Mapping[str, Any], pair_schema=None, *,
+                core_schema_identity: str = CORE_SCHEMA_REL) -> dict[str, Any]:
+    """The core record implied by `full`, as a dict without header lines.
+
+    Callers selecting a pair schema can also name its core schema in the
+    per-record identity; omitting that keyword preserves the historical name.
+    """
     from data_sheets_schema.d4d_pair_consistency import (load_pair_schema,
                                                         synchronize_core_data)
     ps = pair_schema or load_pair_schema()
@@ -137,7 +142,7 @@ def derive_core(full: Mapping[str, Any], pair_schema=None) -> dict[str, Any]:
     if dialects and all(d == dialects[0] for d in dialects):
         core["dialect"] = copy.deepcopy(dialects[0])
     core["conforms_to_class"] = CORE_CLASS
-    core["conforms_to_schema"] = CORE_SCHEMA_REL
+    core["conforms_to_schema"] = core_schema_identity
     # Slot order as the core schema declares it, so two derivations of one
     # full record are byte-identical and a diff against a generated core is
     # readable.
@@ -171,7 +176,8 @@ def _header_lines(text: str) -> list[str]:
     return out
 
 
-def core_header(full_text: str, full_path: Path, phase4_complete: bool = False) -> list[str]:
+def core_header(full_text: str, full_path: Path, phase4_complete: bool = False, *,
+                core_schema_identity: str = CORE_SCHEMA_REL) -> list[str]:
     """The core's header, derived from the full record's, in the order the
     generic-v6 condition text mandates: the same identity lines, the method
     line saying what this record is, `Sources:` naming the full record it was
@@ -195,32 +201,36 @@ def core_header(full_text: str, full_path: Path, phase4_complete: bool = False) 
             if not sources_written:
                 out.append(sources)
                 sources_written = True
-            out.append(f"# Schema: {CORE_SCHEMA_REL}")
+            out.append(f"# Schema: {core_schema_identity}")
         else:
             out.append(line)
     if not sources_written:
         out.append(sources)
-        out.append(f"# Schema: {CORE_SCHEMA_REL}")
+        out.append(f"# Schema: {core_schema_identity}")
     if phase4_complete:
         out.append("# Phase 4 reconciliation: completed")
     return out
 
 
 def core_text(full_path: Path, pair_schema=None,
-              phase4_complete: bool = False) -> tuple[str, dict[str, Any]]:
+              phase4_complete: bool = False, *,
+              core_schema_identity: str = CORE_SCHEMA_REL) -> tuple[str, dict[str, Any]]:
     """The derived core as text (header + YAML) and its derivation facts."""
     text = full_path.read_text(encoding="utf-8")
     full = yaml.safe_load(text) or {}
-    core = derive_core(full, pair_schema)
+    core = derive_core(full, pair_schema, core_schema_identity=core_schema_identity)
     body = yaml.safe_dump(core, sort_keys=False, allow_unicode=True, width=88)
-    header = "\n".join(core_header(text, full_path, phase4_complete))
+    header = "\n".join(core_header(text, full_path, phase4_complete,
+                                 core_schema_identity=core_schema_identity))
     return (header + "\n\n" if header else "") + body, derivation_facts(full_path, pair_schema)
 
 
 def write_core(full_path: Path, core_path: Path, pair_schema=None,
-               phase4_complete: bool = False) -> dict[str, Any]:
+               phase4_complete: bool = False, *,
+               core_schema_identity: str = CORE_SCHEMA_REL) -> dict[str, Any]:
     """Derive and write the core beside its full record; return the facts."""
-    text, facts = core_text(full_path, pair_schema, phase4_complete)
+    text, facts = core_text(full_path, pair_schema, phase4_complete,
+                           core_schema_identity=core_schema_identity)
     core_path.parent.mkdir(parents=True, exist_ok=True)
     core_path.write_text(text, encoding="utf-8")
     return facts
