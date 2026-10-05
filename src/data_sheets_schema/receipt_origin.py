@@ -870,9 +870,18 @@ class _CapturedTarget:
     def __init__(self, kind: str, path: str, identities: dict[str, frozenset[str]], reasons: list[str]):
         self.kind, self.name = kind, os.path.basename(path)
         self.identities, self.reasons = identities, reasons
-        self.identity = identities[_captured_path(path)]
-        if len(self.identity) != 1:
+        self.identity = self._identity(_captured_path(path))
+        if self.identity is None:
             self._unknown()
+
+    def _identity(self, path: str) -> frozenset[str] | None:
+        identity = self.identities.get(path)
+        # A recorded physical target is terminal, not another unresolved alias.
+        # Check only the consulted identity; unrelated conflicts stay irrelevant.
+        if (identity is not None and len(identity) == 1
+                and self.identities.get(next(iter(identity))) == identity):
+            return identity
+        return None
 
     def _unknown(self):
         reason = f"captured path identity for the {_LABEL[self.kind]} is unresolved or conflicting"
@@ -885,8 +894,8 @@ class _CapturedTarget:
             if not isinstance(cwd, str) or not os.path.isabs(cwd):
                 return self._unknown()
             spelled = os.path.join(cwd, spelled)
-        identity = self.identities.get(os.path.normpath(spelled))
-        if identity is None or len(identity) != 1 or len(self.identity) != 1:
+        identity = self._identity(os.path.normpath(spelled))
+        if identity is None or self.identity is None:
             return self._unknown()
         return identity == self.identity
 

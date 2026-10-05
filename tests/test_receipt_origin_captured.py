@@ -214,3 +214,30 @@ def test_legacy_acquisition_order_and_missing_receipt_reason_stay_exact(tmp_path
     assert result["reasons"] == ["the receipt cannot be read (FileNotFoundError)"]
     assert result["receipt"]["sha256"] is None
     assert result["receipt"]["rebuilt_sha256"] is not None
+
+
+@pytest.mark.parametrize("case", ["target", "consulted_other", "unused_other"])
+def test_terminal_physical_identity_conflicts_are_local_to_consulted_paths(tmp_path, case):
+    run = fixture(tmp_path / case, "simple")
+    physical = str(run.root / "physical.yaml")
+    foreign = str(run.root / "foreign.yaml")
+    alias = run.root / "other-spelling.yaml"
+    if case == "consulted_other":
+        run.write(alias, "an unclassified possible receipt mutation\n")
+    value = inputs(run)
+    if case == "target":
+        value["aliases"] = tuple(row for row in value["aliases"] if row[0] != str(run.receipt))
+        value["aliases"] += ((str(run.receipt), physical),)
+    else:
+        value["aliases"] += ((str(alias), physical),)
+    # The singleton alias alone is a lawful captured identity.
+    valid = ro.origin_captured(**value)
+    assert valid["status"] == "checked", valid["reasons"]
+    value["aliases"] += ((physical, foreign),)
+    result = ro.origin_captured(**value)
+    if case == "unused_other":
+        assert wire(result) == wire(valid)
+    else:
+        assert result["status"] == "unknown", result["reasons"]
+        assert "origin" not in result
+        assert any("captured path identity" in reason for reason in result["reasons"])
