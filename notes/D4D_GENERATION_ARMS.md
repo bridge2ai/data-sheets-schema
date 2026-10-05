@@ -129,9 +129,9 @@ encoding (#3357); #4386 asks where the value belongs.
 `Creator.principal_investigator`, under the `creators` the `author` row
 fills, and making a `Creator` or `Person` of a free-text name is a decision
 #2915 asks for, not a rename.
-`contentSize`'s `bytes` row is out of scope, but its value is not carried
-elsewhere: only CM4AI's crate has the exact `evi:totalContentSizeBytes`, so
-CHORUS's and VOICE's records carry no size (see `total_size_bytes` below).
+`contentSize`'s `bytes` row is out of scope, and only CM4AI's crate has the
+exact `evi:totalContentSizeBytes` that `total_size_bytes` reads, so CHORUS's
+and VOICE's records carry no size at all (see `total_size_bytes` below).
 
 ### What remains upstream-only, and why it is correct
 
