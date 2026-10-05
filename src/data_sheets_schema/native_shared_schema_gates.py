@@ -15,7 +15,7 @@ from .schema_view import captured_view
 
 
 def _records(selection, full_raw, core_raw):
-    limit = min(selection.bounds()['max_input_bytes'], contract.HARD_LIMITS['original_full_bytes'])
+    limit = min(selection.bounds()['max_input_bytes'], contract.HARD_LIMITS['input_bytes'])
     return tuple(audit_omissions._mapping(raw, 'native final ' + kind, limit=limit)
                  for kind, raw in (('full', full_raw), ('core', core_raw)))
 

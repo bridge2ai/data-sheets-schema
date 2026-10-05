@@ -1,5 +1,6 @@
 """Actual selected schema and pair validation without ambient schema reads."""
 from dataclasses import replace
+import json
 from pathlib import Path
 
 import pytest
@@ -127,3 +128,25 @@ def test_supplied_record_bound_is_enforced_before_parsing(declaration, reader):
     captured = selected.capture(declaration['registration_path'])
     with pytest.raises(ValueError, match='16384-byte bound'):
         reader(captured, b'#' + b'x' * 16384, raw('CoreDataset'))
+
+
+@pytest.mark.parametrize('reader', [gates.check_schemas, gates.check_pair])
+def test_expanded_final_records_use_selected_input_bound(captured, reader):
+    # Final reconciliation may legitimately add supported values beyond the
+    # smaller original seal limit. A real shared value must still conform
+    # to both selected schemas and their pair rules.
+    title = 'x' * 4_000_001
+    records = tuple(json.dumps({'id': 'example:1', 'title': title,
+                               'conforms_to_class': cls}).encode()
+                    for cls in ('Dataset', 'CoreDataset'))
+    assert all(4_000_000 < len(record) < 8_000_000 for record in records)
+    assert reader(captured, *records)['passed'] is True
+
+
+@pytest.mark.parametrize('reader', [gates.check_schemas, gates.check_pair])
+@pytest.mark.parametrize('kind', ['full', 'core'])
+def test_final_input_ceiling_refuses_before_parsing(captured, reader, kind):
+    records = {'full': raw('Dataset'), 'core': raw('CoreDataset')}
+    records[kind] = b'x' * 8_000_001
+    with pytest.raises(ValueError, match='native final ' + kind + '.*8000000-byte bound'):
+        reader(captured, records['full'], records['core'])
