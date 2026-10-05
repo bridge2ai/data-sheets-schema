@@ -77,6 +77,57 @@ def test_native_instruction_roundtrip_uses_only_sole_runtime(native_spec, monkey
     assert restored.instruction == text
 
 
+def _refuse_ambient_replay(patch):
+    from data_sheets_schema import corpus
+    def forbidden(*args, **kwargs):
+        pytest.fail('captured native replay consulted ambient paths or bytes')
+    patch.setattr(api, 'select_manifest', forbidden)
+    patch.setattr(corpus, 'root', forbidden)
+    for name in ('cwd', 'resolve', 'absolute', 'read_bytes', 'read_text', 'open'):
+        patch.setattr(Path, name, forbidden)
+
+
+def test_native_captured_restore_does_not_discover_or_normalize_paths(native_spec, monkeypatch):
+    recorded = native_spec.render_spec()
+    with monkeypatch.context() as patch:
+        _refuse_ambient_replay(patch)
+        restored = api.RunSpec.from_render_spec(recorded, project=native_spec.project,
+            method=native_spec.method, label=native_spec.label)
+        assert restored.render_spec() == recorded
+
+
+@pytest.mark.parametrize('field', ['bundle', 'manifest', 'chunk_manifest'])
+def test_native_captured_inputs_refuse_relative_paths_without_ambient_lookup(native_spec, monkeypatch, field):
+    recorded = native_spec.render_spec()
+    recorded[field] = 'relative/' + Path(recorded[field]).name
+    with monkeypatch.context() as patch:
+        _refuse_ambient_replay(patch)
+        with pytest.raises(ValueError, match='path'):
+            api.RunSpec.from_render_spec(recorded, project=native_spec.project,
+                method=native_spec.method, label=native_spec.label)
+
+
+def test_historical_native_replay_retains_existing_corpus_initialization(native_spec, monkeypatch):
+    from data_sheets_schema import corpus
+    historical = replace(native_spec, render_version=23, condition='generic_v9',
+        native_shared_generation_version=0, native_shared_generation_registration=None)
+    recorded = historical.render_spec()
+    calls = []
+    select, root = api.select_manifest, corpus.root
+    def selected(*args, **kwargs):
+        calls.append('manifest')
+        return select(*args, **kwargs)
+    def rooted(*args, **kwargs):
+        calls.append('root')
+        return root(*args, **kwargs)
+    monkeypatch.setattr(api, 'select_manifest', selected)
+    monkeypatch.setattr(corpus, 'root', rooted)
+    restored = api.RunSpec.from_render_spec(recorded, project=historical.project,
+        method=historical.method, label=historical.label)
+    assert restored.render_spec() == recorded
+    assert calls == ['manifest', 'root']
+
+
 def test_no_runtime_or_draft_allowance_means_no_instruction(native_spec):
     native_spec._native_shared_runtime_capture = None
     with pytest.raises(ValueError, match='sole captured runtime'):

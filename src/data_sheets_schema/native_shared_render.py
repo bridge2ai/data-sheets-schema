@@ -67,7 +67,11 @@ def _same_spec_inputs(spec, doc):
     for field, key in (('bundle', 'bundle'), ('chunk_manifest', 'chunk_manifest'), ('manifest', 'source_manifest')):
         actual = getattr(spec, field)
         declared = doc['inputs'][key]
-        if actual is None or declared is None or str(Path(actual).absolute()) != declared['path']:
+        if actual is None or declared is None:
+            raise ValueError('native render input differs from selected ' + key)
+        path = (c.canonical_path(str(actual), 'recorded native ' + key) if spec._replay_only
+                else str(Path(actual).absolute()))
+        if path != declared['path']:
             raise ValueError('native render input differs from selected ' + key)
     if not spec.manifest_used:
         raise ValueError('native render cannot declare its source manifest unused')

@@ -626,20 +626,25 @@ class RunSpec:
             raise ValueError("prompt_text_env applies only to agentic renderers 9 and later")
         self._chunk_check_uses_manifest = self.render_version >= 5 and self.is_agentic
         default_line = type(self).__dataclass_fields__["manifest_line"].default
-        self.manifest = select_manifest(self.project, self.bundle, self.manifest)
-        if self.manifest is not None:
-            self.manifest = Path(self.manifest)
-        from data_sheets_schema.corpus import root
-        self._corpus_root = root(self.manifest)
-        if self._corpus_root != Path.cwd().resolve():
-            # CLI input paths belong to the launch directory, not to the
-            # manifest's output tree. Preserve that identity in the record.
-            if self.bundle is not None:
-                self.bundle = Path(self.bundle).absolute()
+        if self.native_shared_generation_version == 1 and self._replay_only:
+            # Native replay restores exact captured paths below. Its temporary
+            # constructor values must not discover or normalize a live corpus.
+            self._corpus_root = None
+        else:
+            self.manifest = select_manifest(self.project, self.bundle, self.manifest)
             if self.manifest is not None:
-                self.manifest = self.manifest.absolute()
-            if self.chunk_manifest is not None:
-                self.chunk_manifest = Path(self.chunk_manifest).absolute()
+                self.manifest = Path(self.manifest)
+            from data_sheets_schema.corpus import root
+            self._corpus_root = root(self.manifest)
+            if self._corpus_root != Path.cwd().resolve():
+                # CLI input paths belong to the launch directory, not to the
+                # manifest's output tree. Preserve that identity in the record.
+                if self.bundle is not None:
+                    self.bundle = Path(self.bundle).absolute()
+                if self.manifest is not None:
+                    self.manifest = self.manifest.absolute()
+                if self.chunk_manifest is not None:
+                    self.chunk_manifest = Path(self.chunk_manifest).absolute()
         if self.chunk_manifest is not None:
             self.chunk_manifest = Path(self.chunk_manifest)
         elif ((self.render_version >= 4 and self.is_agentic)
