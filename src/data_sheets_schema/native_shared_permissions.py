@@ -566,7 +566,9 @@ def _classification(expected, selection, launch, session, case, controls):
     _, effects = _dependencies()
     context = case['context'] if case['context'] in CONTEXTS else 'worker'
     view = _view(expected, selection, launch, session, context, read=case['tool'] == 'Write')
-    governed = effects.governs_stage_effect(view, tool_name=case['tool'], tool_input=case['input'])
+    policy = projected_policy(expected, selection, launch['effect_root'])
+    governed = command_policy.stage_overlay_governs(view, tool_name=case['tool'],
+        tool_input=case['input'], policy=policy)
     _need(type(governed) is bool, 'effect routing is not a strict boolean')
     effect = None
     if governed:
@@ -578,7 +580,6 @@ def _classification(expected, selection, launch, session, case, controls):
         return effect, view
     if effect is not None:
         _need(effect[0] == ('prescribed' if case['mode'] == 'allowed' else 'not_prescribed'), 'effect classification differs')
-    policy = projected_policy(expected, selection, launch['effect_root'])
     if case['tool'] == 'Bash':
         result = effect if governed else command_policy.classify_bash(case['input']['command'], policy['python'], set(), policy, controls)
     else:

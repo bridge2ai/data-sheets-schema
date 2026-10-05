@@ -124,6 +124,26 @@ def classify_bash(command,python,programs,policy,controls=None):
     return controls['run_native_canary']._classify_command(command,python,programs,policy)
 
 
+def stage_overlay_governs(view, *, tool_name, tool_input, policy):
+    """Route exact selected helpers after the independent phase check.
+
+    This is routing, not permission: a helper routed outside the stage
+    overlay still needs the fixed command classifier. File effects retain
+    the unchanged restrictive overlay and real FileAccess checks.
+    """
+    from . import native_shared_effects as effects
+    governed = effects.governs_stage_effect(view, tool_name=tool_name, tool_input=tool_input)
+    commands = helper_commands(policy)
+    if (view.static_policy_sha256 != c.sha(c.canonical(policy))
+            or view.stage_command != commands['advance']):
+        raise ValueError('stage routing policy differs from the selected view')
+    if governed and tool_name == 'Bash':
+        command = tool_input['command']
+        if command != commands['advance'] and command in commands.values():
+            return False
+    return governed
+
+
 def command_guidance(policy):
     """Truthful new helper guidance, without the old copy/freeze instruction."""
     commands = helper_commands(policy)

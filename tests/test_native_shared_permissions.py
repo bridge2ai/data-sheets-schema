@@ -514,13 +514,22 @@ def test_recipe_source_capture_preserves_raw_newline_bytes(monkeypatch):
 
 def test_saved_bash_replay_uses_same_fixed_native_classifier(fixture, monkeypatch):
     calls = []
+    routing = []
     actual = command_policy.classify_bash
+    actual_routing = command_policy.stage_overlay_governs
     def observed(command, *args, **kwargs):
         calls.append(command)
         return actual(command, *args, **kwargs)
     def obsolete(*args, **kwargs):
         pytest.fail('saved native replay called the old attribution classifier')
+    def observed_routing(view, *, tool_name, tool_input, policy):
+        routing.append((tool_name, tool_input))
+        return actual_routing(view, tool_name=tool_name, tool_input=tool_input, policy=policy)
     monkeypatch.setattr(command_policy, 'classify_bash', observed)
+    monkeypatch.setattr(command_policy, 'stage_overlay_governs', observed_routing)
     monkeypatch.setattr(composition, '_classify', obsolete)
     assert verify(fixture['manifest'], fixture['expected'])['passed'] is True
     assert {fixture['expected']['commands'][name] for name in ('draft', 'final_evidence', 'recorder')} <= set(calls)
+    assert {tool for tool, _ in routing} == {'Bash', 'Read', 'Write'}
+    assert {fixture['expected']['commands'][name] for name in ('stage', 'draft', 'final_evidence', 'recorder')} <= {
+        payload['command'] for tool, payload in routing if tool == 'Bash'}
