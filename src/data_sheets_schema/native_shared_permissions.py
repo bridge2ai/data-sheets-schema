@@ -19,6 +19,7 @@ from urllib.parse import urlsplit
 
 from data_sheets_schema import native_attribution_controller as composition
 from data_sheets_schema import native_shared_contract as contract
+from data_sheets_schema import native_shared_policy as command_policy
 
 KIND = contract.KINDS['permission']
 EXPECTED_KIND = contract.KINDS['permission_expected']
@@ -236,7 +237,8 @@ def _source_closure(expected):
     by_module = {row['module']: row for row in rows}
     for module, file in [('data_sheets_schema.native_shared_permissions', __file__),
                          ('data_sheets_schema.native_shared_contract', contract.__file__),
-                         ('data_sheets_schema.native_shared_effects', effects.__file__)]:
+                         ('data_sheets_schema.native_shared_effects', effects.__file__),
+                         ('data_sheets_schema.native_shared_policy', command_policy.__file__)]:
         raw = Path(file).read_bytes()
         wanted = {'module': module, 'path': str(Path(file).resolve()), 'bytes': len(raw), 'sha256': _sha(raw)}
         _need(_same(by_module.get(module), wanted), 'loaded fixed source differs: ' + module)
@@ -578,7 +580,7 @@ def _classification(expected, selection, launch, session, case, controls):
         _need(effect[0] == ('prescribed' if case['mode'] == 'allowed' else 'not_prescribed'), 'effect classification differs')
     policy = projected_policy(expected, selection, launch['effect_root'])
     if case['tool'] == 'Bash':
-        result = effect if governed else composition._classify(case['input']['command'], policy['python'], set(), policy, controls)
+        result = effect if governed else command_policy.classify_bash(case['input']['command'], policy['python'], set(), policy, controls)
     else:
         result = _file_classification(policy, case)
     _need(result[0] == ('prescribed' if case['mode'] == 'allowed' else 'not_prescribed'), 'required native classification differs')

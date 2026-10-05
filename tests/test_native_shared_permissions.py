@@ -20,6 +20,7 @@ import pytest
 from data_sheets_schema import native_shared_permissions as p
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_effects as effects
+from data_sheets_schema import native_shared_policy as command_policy
 from data_sheets_schema import native_attribution_controller as composition
 from data_sheets_schema import native_attribution_registration as draft
 from data_sheets_schema import native_execution_registration as registration
@@ -177,8 +178,18 @@ def fixture(tmp_path_factory):
                    for role in ('draft','final_evidence')}
     command_map.update(recorder=policy['post_final_recorder']['command'],stage=shlex.join([
         policy['python'],'-m','data_sheets_schema.native_shared_stage','advance','--registration',selected['registration_path']]))
+    # This fabricated saved-probe fixture isolates permission replay. Its
+    # unexercised phase-helper spellings are distinct inert placeholders;
+    # actual source-derived policies are covered by controller integration.
+    policy['native_shared_generation_version'] = 1
+    policy['native_shared_helpers'] = {name: shlex.join([
+        policy['python'], '-m', 'data_sheets_schema.fixture_helper', name])
+        for name in command_policy.HELPERS}
+    policy['native_shared_helpers'].update(advance=command_map['stage'],
+        draft=command_map['draft'], final_evidence=command_map['final_evidence'],
+        recorder=command_map['recorder'])
     production = []
-    for name in ('native_shared_permissions','native_shared_contract','native_shared_effects',
+    for name in ('native_shared_permissions','native_shared_contract','native_shared_effects','native_shared_policy',
                  'source_attribution_preflight','evidence_assertions','cli.__main__'):
         path = Path(p.__file__).with_name(name+'.py')
         if name=='cli.__main__':path=Path(p.__file__).parent/'cli/__main__.py'
@@ -420,9 +431,10 @@ def test_expected_environment_cannot_relax_inherited_fixed_fields(fixture,field,
     with pytest.raises(ValueError):verify(changed,expected)
 
 
-def test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture):
+@pytest.mark.parametrize('module', ['native_shared_effects', 'native_shared_policy'])
+def test_loaded_fixed_source_cannot_be_replaced_by_an_advertised_pin(fixture, module):
     changed=deepcopy(fixture['manifest']);expected=deepcopy(fixture['expected'])
-    row=next(x for x in expected['production_sources'] if x['module']=='data_sheets_schema.native_shared_effects')
+    row=next(x for x in expected['production_sources'] if x['module']=='data_sheets_schema.'+module)
     row['sha256']='0'*64
     expected['probe_recipe']=p.recipe(expected);changed['binding']=deepcopy(expected)
     with pytest.raises(ValueError,match='loaded fixed source differs'):
@@ -498,3 +510,17 @@ def test_recipe_source_capture_preserves_raw_newline_bytes(monkeypatch):
     raw=b'# exact CRLF recipe source\r\n'
     monkeypatch.setattr(Path,'read_bytes',lambda path:raw if path==Path(p.__file__) else original(path))
     assert p.recipe_sources()['recipe/projection.py'].encode()==raw
+
+
+def test_saved_bash_replay_uses_same_fixed_native_classifier(fixture, monkeypatch):
+    calls = []
+    actual = command_policy.classify_bash
+    def observed(command, *args, **kwargs):
+        calls.append(command)
+        return actual(command, *args, **kwargs)
+    def obsolete(*args, **kwargs):
+        pytest.fail('saved native replay called the old attribution classifier')
+    monkeypatch.setattr(command_policy, 'classify_bash', observed)
+    monkeypatch.setattr(composition, '_classify', obsolete)
+    assert verify(fixture['manifest'], fixture['expected'])['passed'] is True
+    assert {fixture['expected']['commands'][name] for name in ('draft', 'final_evidence', 'recorder')} <= set(calls)
