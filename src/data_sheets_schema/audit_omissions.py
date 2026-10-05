@@ -54,6 +54,29 @@ def _asset(name: str) -> bytes:
     return raw
 
 
+def captured_asset_bytes(captured_assets=None) -> dict[str, bytes]:
+    """Verify the fixed contract from immutable bytes, or use the legacy reader.
+
+    Explicit captures never fall back to installed files. Returning a new map
+    keeps caller-owned tuples immutable and does not retain a global loader.
+    """
+    if captured_assets is None:
+        return {name: _asset(name) for name in ASSET_SHA256}
+    if type(captured_assets) is not tuple or len(captured_assets) != len(ASSET_SHA256):
+        raise ValueError("captured omission assets require the exact immutable roster")
+    result = {}
+    for row in captured_assets:
+        if type(row) is not tuple or len(row) != 2:
+            raise ValueError("invalid captured omission asset row")
+        name, raw = row
+        if (type(name) is not str or name not in ASSET_SHA256 or name in result
+                or type(raw) is not bytes or not raw or len(raw) > MAX_INPUT_BYTES
+                or _sha(raw) != ASSET_SHA256[name]):
+            raise ValueError("captured omission asset name/bytes/hash mismatch")
+        result[name] = raw
+    return result
+
+
 def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_INPUT_BYTES):
     if type(raw) is not bytes or not raw or len(raw) > limit:
         raise ValueError(f"{label} must be nonempty bytes within the {limit}-byte bound")
@@ -79,7 +102,7 @@ def _shape(value, schema):
     return list(Draft202012Validator(schema).iter_errors(value))
 
 
-def _schema(path: Path, *, schema_snapshot=None) -> dict:
+def _schema(path: Path, *, schema_snapshot=None, logical_paths=False) -> dict:
     """Capture and validate each file once before constructing a schema view."""
     from linkml_runtime.dumpers import json_dumper
     from data_sheets_schema.schema_snapshot import SchemaSnapshot, capture_schema
@@ -95,6 +118,8 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
         _mapping(raw, "schema")
         return raw
 
+    if logical_paths and schema_snapshot is None:
+        raise ValueError("logical schema replay requires captured schema bytes")
     if schema_snapshot is None:
         captured = capture_schema(path.absolute(), read_bytes=read, strict=True)
     else:
@@ -125,7 +150,8 @@ def _schema(path: Path, *, schema_snapshot=None) -> dict:
                 raise ValueError("schema import is outside the captured closure")
             return frozen[selected]
 
-        replay = capture_schema(root, read_bytes=frozen_read, strict=True)
+        replay = capture_schema(root, read_bytes=frozen_read, strict=True,
+                                **({'logical_paths': True} if logical_paths else {}))
         if replay.sources != schema_snapshot.sources:
             raise ValueError("schema snapshot is not the exact declared import closure")
         captured = replay
@@ -320,13 +346,14 @@ class Prepared:
 
 def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
-            max_request_bytes: int = 32_000_000) -> Prepared:
+            max_request_bytes: int = 32_000_000, captured_assets=None) -> Prepared:
     """Read schema once, capture input bytes, render no transport-specific call."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
-    policy = _asset("policy.md").decode("utf-8")
-    response_schema = json.loads(_asset("response.schema.json"))
-    context_schema = json.loads(_asset("context.schema.json"))
+    assets = captured_asset_bytes(captured_assets)
+    policy = assets["policy.md"].decode("utf-8")
+    response_schema = json.loads(assets["response.schema.json"])
+    context_schema = json.loads(assets["context.schema.json"])
     document = _mapping(record, "record")
     receipt_doc = _mapping(receipt, "receipt")
     _mapping(manifest, "manifest")
@@ -358,7 +385,8 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             raise ValueError("receipt contains an unknown chunk status")
         prior[key] = status
     try:
-        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot)
+        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                          logical_paths=captured_assets is not None)
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
     owners = _owners(document, catalog, context_doc["vocabulary"])

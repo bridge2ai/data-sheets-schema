@@ -58,7 +58,7 @@ def resolve_import_path(name, source: Path, namespaces) -> Path:
 def capture_schema(path: str | Path, *, content: bytes | None = None,
                    read_bytes: Callable[[Path], bytes] | None = None,
                    namespace_orders: tuple[bool, ...] | None = None,
-                   strict: bool = False) -> SchemaSnapshot:
+                   strict: bool = False, logical_paths: bool = False) -> SchemaSnapshot:
     """Capture both supported namespace-initialization orders (#1273).
 
     Callers can initialize namespaces before loading imports, or allow the first
@@ -68,10 +68,21 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     The source preflight supplies its existing byte capture and requests the
     generator's default traversal alone, with errors raised before generation.
     """
-    from data_sheets_schema.resources import resource_path
-    read = read_bytes or Path.read_bytes
-    from data_sheets_schema.resources import physical
-    root = physical(resource_path(path))              # from any directory; `..` through the filesystem (#1301, #1570)
+    if type(logical_paths) is not bool:
+        raise ValueError("logical_paths must be an explicit boolean")
+    if logical_paths:
+        # An already captured closure has canonical lexical identities. Never
+        # consult today's aliases, resource installation or filesystem metadata.
+        root = Path(path)
+        if (read_bytes is None or not strict or not root.is_absolute()
+                or str(root) != str(path) or '..' in root.parts
+                or os.path.normpath(str(root)) != str(root)):
+            raise ValueError("logical schema replay requires a strict captured reader and canonical absolute root")
+        read = read_bytes
+    else:
+        from data_sheets_schema.resources import resource_path, physical
+        read = read_bytes or Path.read_bytes
+        root = physical(resource_path(path))              # from any directory; `..` through the filesystem (#1301, #1570)
     files = {root: read(root) if content is None else content}
     root_meta = _metadata(files[root])
     names = {root: root_meta[0]}
@@ -124,15 +135,19 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
 
     identity = []
     for p, data in sorted(files.items()):
-        try:
-            target = str(p.resolve())
-        except (OSError, RuntimeError):
+        if logical_paths:
             target = str(p)
+        else:
+            try:
+                target = str(p.resolve())
+            except (OSError, RuntimeError):
+                target = str(p)
         stamp = (f"{type(data).__name__}:{data.errno}" if isinstance(data, OSError)
                  else hashlib.sha256(data).hexdigest())
         identity.append((str(p), target, stamp))
     # Distinct logical aliases may resolve imports differently. Keep each
     # stable alias cached rather than evicting views by their shared target.
     key = (str(root), hashlib.blake2b(
-        json.dumps(identity, ensure_ascii=False).encode("utf-8"), digest_size=16).hexdigest())
+        json.dumps({'domain': 'captured_logical_schema_v1', 'sources': identity}
+                   if logical_paths else identity, ensure_ascii=False).encode("utf-8"), digest_size=16).hexdigest())
     return SchemaSnapshot(tuple((names[p], p, data) for p, data in files.items()), key)
