@@ -6,6 +6,7 @@ captured authority. These functions never select a run or create a controller.
 from __future__ import annotations
 
 from pathlib import Path, PurePosixPath
+from dataclasses import replace
 import os
 import shlex
 import tempfile
@@ -131,7 +132,15 @@ def publish_derived(invocation,proposal):
         observed.append(actual)
     after=next((item.captured.pin.sha256 for item in observed if item.captured.pin.role=='journal'),
                invocation.history.journal.pin.sha256)
-    state=proposal.state if type(proposal) is c.StageDecision else proposal.disposition
+    after_journal=next((item.captured for item in observed if item.captured.pin.role=='journal'),
+                       invocation.history.journal)
+    updated=replace(invocation.history,journal=after_journal,
+        records=invocation.history.records+tuple(item.captured for item in observed if item.captured.pin.role=='record'),
+        artifacts=invocation.history.artifacts+tuple(item.captured for item in observed
+            if item.captured.pin.role not in ('record','journal')))
+    # Report the actual reconstructed state after publication, never the
+    # earlier proposal's state or an unobserved next helper's effects.
+    state=stage.prepare_next(invocation.selection,invocation.execution,invocation.phase1,updated).state
     result={'kind':c.KINDS['advance_result'],'version':c.VERSION,
         'selection_sha256':invocation.selection.registration.pin.sha256,
         'execution_sha256':invocation.execution.execution.pin.sha256,

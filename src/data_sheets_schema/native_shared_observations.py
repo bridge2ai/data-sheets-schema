@@ -69,11 +69,14 @@ class Trace:
     unique selected call/callback/admission/result joins for durable stage
     observations, including a currently admitted but still pending advance.
     """
-    def __init__(self,transcript,control,*,session_id,policy):
+    def __init__(self,transcript,control,*,session_id,policy,runtime):
         if transcript.stream!='transcript' or control.stream!='control':
             raise ValueError('observation streams have exchanged roles')
         self.transcript,self.control=transcript,control
         self.session,self.policy=session_id,policy
+        initialized,*_=initialization(transcript,control,policy=policy,runtime=runtime)
+        if initialized!=session_id:
+            raise ValueError('supplied observation session differs from actual init')
         if type(session_id) is not str or not session_id:
             raise ValueError('observation requires actual initialized session')
         self.calls={};self.callbacks={};self.results={};self.decisions={}
@@ -82,6 +85,13 @@ class Trace:
         for number,raw,value in rows(transcript):
             self.frames[number]=value
             kind=value.get('type')
+            if value.get('parent_tool_use_id') is not None:
+                raise ValueError('native prefix contains a child-session frame')
+            if kind in ('assistant','user','result'):
+                message=value.get('message')
+                if value.get('model',runtime['model'])!=runtime['model'] or (
+                        type(message) is dict and message.get('model',runtime['model'])!=runtime['model']):
+                    raise ValueError('native event contradicts the selected model')
             if self.terminal is not None:
                 raise ValueError('native events appear after terminal completion')
             if kind=='control_cancel_request':

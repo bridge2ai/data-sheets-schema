@@ -43,7 +43,9 @@ def events(tool='Read',raw=b'{"complete":"outer request"}\n'):
 
 
 def trace(native,parent):
-    return observed.Trace(prefix('transcript',native),prefix('control',parent),session_id=SESSION,policy=POLICY)
+    initialized,sent,runtime=initial()
+    return observed.Trace(prefix('transcript',initialized+native),prefix('control',sent+parent),
+        session_id=SESSION,policy=POLICY,runtime=runtime)
 
 
 @pytest.mark.parametrize('raw',[b'{}',b'{"long":"'+b'a'*100000+b'"}\n','{"text":"α\u2028β"}\n'.encode()])
@@ -89,9 +91,9 @@ def test_partial_or_contradictory_read_cannot_authorize_response(change):
 def test_result_cannot_be_borrowed_from_future_prefetched_frame():
     native,parent,request=events();value=trace(native[:2],parent)
     with pytest.raises(ValueError,match='pending'):value.settled('tool-1')
-    all_rows=prefix('transcript',native)
+    all_rows=prefix('transcript',initial()[0]+native)
     with pytest.raises(ValueError,match='beyond its observed prefix'):
-        observed.event(value.transcript,observed.reference(all_rows,3,0))
+        observed.event(value.transcript,observed.reference(all_rows,5,0))
 
 
 @pytest.mark.parametrize('change',[None,'updated','content','intent','error','patch','modified','success_path'])
@@ -151,3 +153,15 @@ def test_actual_init_binding_is_not_a_declared_session(change):
     if change is None:assert observed.initialization(*args,policy=POLICY,runtime=runtime)[0]==SESSION
     else:
         with pytest.raises(ValueError):observed.initialization(*args,policy=POLICY,runtime=runtime)
+
+
+@pytest.mark.parametrize('change',['missing_init','foreign_declared_session','contradictory_model','child_callback'])
+def test_tool_observation_requires_the_real_parent_runtime_before_join(change):
+    native,parent,_=events();initialized,sent,runtime=initial();session=SESSION
+    if change=='missing_init':initialized=[]
+    elif change=='foreign_declared_session':session='foreign'
+    elif change=='contradictory_model':native[0]['message']['model']='foreign'
+    elif change=='child_callback':native[1]['parent_tool_use_id']='parent'
+    with pytest.raises(ValueError):
+        observed.Trace(prefix('transcript',initialized+native),prefix('control',sent+parent),
+            session_id=session,policy=POLICY,runtime=runtime)

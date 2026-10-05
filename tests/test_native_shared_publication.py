@@ -72,6 +72,7 @@ def test_actual_pure_stage_proposal_publishes_once_and_journal_last(private_case
     old=Path(selected.history.journal.pin.path).read_bytes()
     result, observed=pub.publish_derived(selected,proposal)
     assert result['advance_tool_use_id']=='synthetic-advance'
+    assert result['state']=='awaiting_response'
     assert observed[-1].captured.pin.role=='journal'
     assert result['before_history_sha256']==c.sha(old)
     assert Path(selected.history.journal.pin.path).read_bytes()==observed[-1].captured.raw
