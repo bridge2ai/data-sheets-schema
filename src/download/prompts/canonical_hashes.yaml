@@ -551,4 +551,22 @@ files:
     reason: Add explicitly selected shared_generation_v1 assets (#4345); preserve every
       released condition.
     sha256: 34608f26b4a0407da036486a6e8ec6692df6b54594335140bdc3df4229d78450
+  src/download/prompts/native_shared_generation_v1.md:
+    sha256: ff679e9a6a76a760e57d7c0e6df88102fe630a6b802b513dc0b0144aa39ac18c
+    body_sha256: c228c5c65d38b543ac4e731b6fe0425b7aa54991f27b400cdeb76cce940882d5
+    bytes: 4084
+    pinned_on: '2026-10-05'
+    pinned_at_commit: 567152de07c72684f8c61430e37ffc5a891e3c64
+    pinned_blob_path: src/download/prompts/native_shared_generation_v1.md
+    reason: Add explicitly selected native shared-generation policy v1 (#4354); preserve every
+      released condition.
+  src/download/prompts/native_shared_receipt_policy_v1.md:
+    sha256: de90df8ec7818b645e352fbae6bcc153387c02d7fcf71ef8f2abe409a083b75a
+    body_sha256: a2a3247204b5ec0b019bbfb6574aedeb32c296a61da41d7090bca2f749645476
+    bytes: 2336
+    pinned_on: '2026-10-05'
+    pinned_at_commit: 567152de07c72684f8c61430e37ffc5a891e3c64
+    pinned_blob_path: src/download/prompts/native_shared_receipt_policy_v1.md
+    reason: Add explicitly selected native shared-generation policy v1 (#4354); preserve every
+      released condition.
 hash_algorithm: sha256

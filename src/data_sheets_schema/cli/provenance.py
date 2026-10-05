@@ -619,6 +619,12 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
                        manifest=selected, manifest_basis=manifest_basis,
                        selected_manifest=selected_manifest,
                        chunk_manifest=Path(chunk_manifest) if chunk_manifest else None)
+    if registered is not None and registered.native_shared_generation_version:
+        from data_sheets_schema.native_shared_capture import live_provenance_block
+        from data_sheets_schema.native_shared_render import validate_spec
+        native_selection = validate_spec(registered)
+        rec.data["native_shared_generation"] = live_provenance_block(
+            native_selection["registration_path"])
     if phases_skipped:
         known = _known_phases()
         bad = [n for n in phases_skipped if n not in known]

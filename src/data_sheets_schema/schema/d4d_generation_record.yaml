@@ -202,6 +202,11 @@ classes:
         inlined: true
         range: SharedGenerationExecution
 
+      native_shared_generation:
+        description: Optional native shared-generation identity captured by the selected live recorder before independent saved runtime readback (#4354).
+        inlined: true
+        range: NativeSharedGenerationExecution
+
       removal_repair:
         description: Opt-in restore-only policy, admitted attempt and mechanically checked final outcome (#2923).
         inlined: true
@@ -687,6 +692,46 @@ classes:
         pattern: '^unverified evaluator declarations$'
         required: true
 
+  NativeSharedGenerationExecution:
+    description: >-
+      Exact native execution and completed helper-stage identities. This recorder
+      runs inside the child; runtime acceptance awaits independent readback after
+      the child exits and cleanup completes. Scientific support remains unverified.
+    attributes:
+      protocol:
+        range: NativeSharedGenerationProtocol
+        required: true
+      selection_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      execution_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      attempt_id:
+        pattern: '^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$'
+        required: true
+      session_id:
+        pattern: '^.+$'
+        required: true
+      assembly_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      audit_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      receipt_result_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      stage_completion_sha256:
+        pattern: '^[0-9a-f]{64}$'
+        required: true
+      scientific_support:
+        pattern: '^unverified evaluator declarations$'
+        required: true
+      runtime_acceptance:
+        pattern: '^pending independent saved readback$'
+        required: true
+
   AnyBlock:
     description: >-
       A block whose interior varies legitimately across record modes and
@@ -702,6 +747,11 @@ classes:
     class_uri: linkml:Any
 
 enums:
+  NativeSharedGenerationProtocol:
+    description: Explicitly selected native shared-generation protocol, distinct from the API protocol.
+    permissible_values:
+      native_shared_generation_v1:
+
   SharedGenerationProtocol:
     description: Explicitly selected shared-generation execution protocol.
     permissible_values:
