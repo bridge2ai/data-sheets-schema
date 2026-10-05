@@ -248,6 +248,7 @@ class TestARequestIsOneExplicitLine(unittest.TestCase):
                 (f"<details>\n<summary>Generation request</summary> <!-- uncomment the line below to run\n\n"
                  f"{H} CM4AI\n\n-->\n</details>", 4, 2, 2),                           # in a tag's HTML block
                 (f"> <!--\n\n{H} CM4AI\n\n-->", 3, 1, 1),                             # in a block quote
+                (f"- > <!--\n\n{H} CM4AI\n\n-->", 3, 1, 1),                           # in one in a list item
                 (f"<!-- a --> <!-- b\n\n{H} CM4AI\n\n-->", 3, 1, 1),                 # after a closed one
                 (f"<!--\nnote\n--> <!-- b\n\n{H} CM4AI\n\n-->", 5, 1, 3),             # on a comment's last line
                 (f"- item\n  - nested\n\n      <!--\n\n{H} CM4AI\n\n-->", 6, 4, 4),   # in a nested list item
@@ -257,13 +258,15 @@ class TestARequestIsOneExplicitLine(unittest.TestCase):
                 (f"<pre>\n<!--\n</pre>\n\n{H} CM4AI\n\n-->", 5, 1, 3),                # it swallows the </pre>
                 (f'<div title="\n\n{H} CM4AI\n\n">', 3, 1, 1),                        # an attribute value
                 (f'<div title = "x>y\n\n{H} CM4AI\n\n">', 3, 1, 1),                   # one after "=" and spaces
+                (f'<p>a</p> <!x <a b="> <!-- ">\n\n{H} CM4AI', 3, 1, 1),              # a bogus comment ends at ">"
                 (f"<div><textarea>\n\n{H} CM4AI\n\n</textarea></div>", 3, 1, 1),
                 (f"<svg>\n\n{H} CM4AI", 3, 1, 1),
                 (f"Text <textarea> more\n\n{H} CM4AI", 3, 1, 1),                     # inline, in a paragraph
                 (f"`<!--` <textarea> `-->`\n\n{H} CM4AI", 3, 1, 1),                  # between code spans
                 (f"a <? b > <!-- ?>\n\n{H} CM4AI", 3, 1, 1),                         # ends at the first ">"
                 (f"x <![CDATA[ a > <!-- ]]>\n\n{H} CM4AI", 3, 1, 1),                 # so does CDATA
-                (f'<!-- a --!> <a title=" -->\n\n{H} CM4AI', 3, 1, 1)):              # a comment ends at "--!>"
+                (f'<!-- a --!> <a title=" -->\n\n{H} CM4AI', 3, 1, 1),               # a comment ends at "--!>",
+                (f'Text <!-- a --!> <a title=" -->\n\n{H} CM4AI', 3, 1, 1)):         # also inline
             with self.subTest(text=text):
                 self.assertEqual(_ask(text), (None, None, (_left_open(at, first, last),)))
 
