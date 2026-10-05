@@ -20,6 +20,7 @@ from data_sheets_schema import native_shared_registration as registration
 from data_sheets_schema import native_shared_execution as execute
 from data_sheets_schema import native_shared_policy as policy
 from data_sheets_schema import native_execution_authority as authority
+from data_sheets_schema import native_attribution_registration as inherited_registration
 
 
 def make_case(root):
@@ -58,7 +59,7 @@ def make_case(root):
     raw = c.canonical(value)
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
         'source_commit': value['dependencies']['base']['source_commit'],
-        'dependencies_sha256': c.sha(c.canonical(value['dependencies']))}
+        'dependencies_sha256': c.sha(inherited_registration._encoded(value['dependencies']))}
     review = {**binding, 'kind': 'd4d_native_execution_review', 'version': 1,
         'reviewer': 'invented-independent-reviewer', 'author': 'invented-author',
         'independent': True, 'decision': 'approved', 'reviewed_at': 'synthetic-time',
