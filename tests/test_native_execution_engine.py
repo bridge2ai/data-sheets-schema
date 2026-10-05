@@ -133,3 +133,27 @@ def test_public_read_final_recomputes_each_present_lifecycle_artifact(tmp_path,m
         'started_sha256':encoding._sha(started),'registration_sha256':encoding._sha(raw)}))
     with pytest.raises(ValueError,match='disagree'):
         old.read_final(raw)
+
+
+def test_fixed_activation_preserves_legacy_and_requires_new_phase_authority():
+    contract,_=old._engine_bindings()
+    contract.activate_before_dispatch(object(),b'old started identity')
+    contract=replace(contract,kind='d4d_native_shared_attempt')
+    calls=[]
+    adapter=SimpleNamespace(spec=SimpleNamespace(render_version=26,native_shared_generation_version=1),
+        policy={'selected':True},classify=lambda:None,observe=lambda:None,
+        require_phase_authority=lambda:calls.append('phase'),
+        activate_before_dispatch=lambda raw:calls.append(raw))
+    contract.activate_before_dispatch(adapter,b'new exact started bytes')
+    assert calls==['phase',b'new exact started bytes']
+    adapter.spec.render_version=25
+    with pytest.raises(ValueError):contract.activate_before_dispatch(adapter,b'foreign')
+    assert calls[-1]=='phase' and b'foreign' not in calls
+
+
+def test_public_authorizations_retains_call_time_file_failure(monkeypatch):
+    error=OSError('original observation load fault')
+    monkeypatch.setattr(old,'_file',lambda *args:(_ for _ in ()).throw(error))
+    with pytest.raises(OSError) as caught:
+        old.authorizations(b'registration',{},review_path='/review',ci_path='/ci',launch_word_path='/owner')
+    assert caught.value is error

@@ -42,57 +42,11 @@ def _now():
 
 
 def authorizations(raw, value, *, review_path, ci_path, launch_word_path):
-    """Check exact saved external declarations; this performs no web discovery.
-
-    The artifacts are caller-supplied review/CI/owner evidence, not signatures.
-    A matching hash does not authenticate their author or GitHub's service.
-    """
-    inputs = {name: str(Path(path).absolute()) for name, path in {
-        'review': review_path, 'ci': ci_path, 'launch_word': launch_word_path}.items()}
-    captured = {name: _file(path, name + ' evidence') for name, path in inputs.items()}
-    records = {name: draft._json(body) for name, body in captured.items()}
-    binding = {'registration_sha256': draft._sha(raw), 'attempt_id': value['attempt_id'],
-               'source_commit': value['dependencies']['base']['source_commit'],
-               'dependencies_sha256': draft._sha(draft._encoded(value['dependencies']))}
-    for name, item in records.items():
-        if not isinstance(item, dict) or any(item.get(key) != val for key, val in binding.items()):
-            raise ValueError(f'{name} is not bound to this exact registration, attempt and source closure')
-        if type(item.get('version')) is not int or item['version'] != 1:
-            raise ValueError(f'{name} has no supported exact version')
-    review = records['review']
-    registration._closed(review, set(binding) | {'kind', 'version', 'reviewer', 'author',
-        'independent', 'decision', 'reviewed_at', 'evidence'}, 'independent review')
-    if (review['kind'] != 'd4d_native_execution_review' or review['independent'] is not True
-            or review['decision'] != 'approved' or review['reviewer'] == review['author']):
-        raise ValueError('explicit independent approval is required')
-    for key in ('reviewer', 'author', 'reviewed_at', 'evidence'):
-        registration._text(review[key], 'review ' + key)
-    ci = records['ci']
-    registration._closed(ci, set(binding) | {'kind', 'version', 'checks'}, 'CI evidence')
-    if ci['kind'] != 'd4d_native_execution_ci' or type(ci['checks']) is not dict or set(ci['checks']) != set(REQUIRED_CHECKS):
-        raise ValueError('exact full required CI evidence is missing')
-    for name, row in ci['checks'].items():
-        registration._closed(row, {'head_sha', 'status', 'conclusion', 'details_url'}, 'CI check')
-        if (row['head_sha'] != binding['source_commit'] or row['status'] != 'completed'
-                or row['conclusion'] != 'success'):
-            raise ValueError(f'required CI check is not successful at the exact source: {name}')
-        if not isinstance(row['details_url'], str) or not row['details_url'].startswith('https://github.com/bridge2ai/data-sheets-schema/actions/'):
-            raise ValueError('CI evidence requires its explicit repository check URL')
-    launch = records['launch_word']
-    registration._closed(launch, set(binding) | {'kind', 'version', 'owner', 'authorized_at',
-        'word', 'review_sha256', 'ci_sha256', 'permission_probe_sha256'}, 'owner launch evidence')
-    if (launch['kind'] != 'd4d_native_execution_launch_authorization'
-            or launch['word'] != 'AUTHORIZE_ONE_NATIVE_ATTEMPT'
-            or launch['review_sha256'] != draft._sha(captured['review'])
-            or launch['ci_sha256'] != draft._sha(captured['ci'])
-            or launch['permission_probe_sha256'] != value['permission_probe_sha256']):
-        raise ValueError('owner launch evidence does not authorize this exact one-use attempt')
-    registration._text(launch['owner'], 'authorizing owner')
-    registration._text(launch['authorized_at'], 'owner authorization time')
-    selected = composition.verified_composition(value['composition_raw_json'].encode())
-    registration._paths(value, selected, fresh=False, extra_protected=list(inputs.values()))
-    return {'inputs': inputs, 'raw': captured, 'records': records, 'binding': binding,
-            'identity': {name: {'path': inputs[name], 'sha256': draft._sha(body)} for name, body in captured.items()}}
+    """Check exact saved external declarations without web discovery."""
+    from data_sheets_schema import native_execution_engine
+    contract, _ = _engine_bindings()
+    return native_execution_engine.authorizations(raw, value, review_path=review_path,
+        ci_path=ci_path, launch_word_path=launch_word_path, contract=contract, file=_file)
 
 
 def _probe_runtime(value):
