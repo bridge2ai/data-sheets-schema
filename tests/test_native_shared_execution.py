@@ -23,8 +23,14 @@ from data_sheets_schema import native_execution_authority as authority
 from data_sheets_schema import native_attribution_registration as inherited_registration
 
 
-def make_case(root):
-    data = build_native_fixture(root, registered_python=sys.executable)
+def make_case(root, *, fixture='neutral'):
+    if fixture == 'neutral':
+        builder = build_native_fixture
+    elif fixture == 'omission':
+        from tests.native_shared_omission_fixture import build_native_fixture as builder
+    else:
+        raise ValueError('unknown synthetic native fixture')
+    data = builder(root, registered_python=sys.executable)
     spec = replace(data['spec'])
     parent = data['runtime_path'].parent
     fake = root / 'ordinary-python-test-peer'
@@ -46,7 +52,7 @@ def make_case(root):
     comp = parent / 'composition-execution.json'; comp.write_bytes(c.canonical(selected))
     (parent / 'synthetic-seeds.json').write_bytes(c.canonical({'full': data['full_raw'].decode(),
         'receipt': data['receipt_raw'].decode(), 'source_text': data['source_text'],
-        'chunk_id': data['chunk_id'], 'correction': True}))
+        'chunk_id': data['chunk_id'], 'correction': True, 'answer_fixture': fixture}))
     system = parent / 'system.txt'; system.write_text('Explicitly synthetic Python software test. No actual native or provider.\n')
     attempt = root / 'native-attempt'; output = root / 'native-evidence'
     dependencies = authority.dependency_identity()
@@ -79,9 +85,8 @@ def make_case(root):
         'kwargs': {'review_path': review_path, 'ci_path': ci_path, 'launch_word_path': word_path}}
 
 
-def test_actual_public_correction_three_workers_and_saved_completion(tmp_path, monkeypatch):
-    monkeypatch.chdir(authority.ROOT)
-    case = make_case(tmp_path / 'native26')
+def launch_case(case, monkeypatch):
+    """Use the actual public lifetime; only runtime/review/provider data is synthetic."""
     monkeypatch.setattr(execute, '_probe_runtime', fake_observation)
     with authority.loaded_dependencies(case['value']['dependencies']) as modules:
         def forbidden(*a, **k):
@@ -92,6 +97,11 @@ def test_actual_public_correction_three_workers_and_saved_completion(tmp_path, m
                 if hasattr(modules[module], name): monkeypatch.setattr(modules[module], name, forbidden)
         result = execute.launch(case['raw'], **case['kwargs'])
     (case['root'] / 'actual-result.json').write_bytes(c.canonical(result))
+    return result
+
+
+def assert_completed_case(case, result):
+    """Both data variants require the same actual gates, readback and spent refusal."""
     assert result['runtime_gates_passed'], json.dumps(result, indent=2)
     assert result['state'] == 'completed_pending_independent_review'
     assert set(result['gates']) == set(execute.gates.GATES)
@@ -109,3 +119,11 @@ def test_actual_public_correction_three_workers_and_saved_completion(tmp_path, m
     assert result['scientific_acceptance'] == 'not_assessed'
     with pytest.raises(ValueError, match='new|resume'):
         execute.launch(case['raw'], **case['kwargs'])
+    return records
+
+
+def test_actual_public_correction_three_workers_and_saved_completion(tmp_path, monkeypatch):
+    monkeypatch.chdir(authority.ROOT)
+    case = make_case(tmp_path / 'native26')
+    result = launch_case(case, monkeypatch)
+    assert_completed_case(case, result)

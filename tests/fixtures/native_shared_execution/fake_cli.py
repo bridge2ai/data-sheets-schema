@@ -22,7 +22,6 @@ def main():
     # Test data is deliberately outside the production package import path.
     # Load it only from the already verified, exact registered source checkout.
     sys.path.insert(0, value['working_directory'])
-    from tests.native_shared_fixture import _Answers
     assert sys.argv[1:] == value['argv'][1:]
     assert all(os.environ.get(k) == v for k, v in value['environment'].items())
     assert not any(k in os.environ for k in ('ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'CBORG_API_KEY'))
@@ -30,6 +29,12 @@ def main():
     selection = selected.capture(c.parse_selection(composition['selection_raw_json'].encode())['registration_path'])
     root = Path(composition['instruction_path']).parent
     fixture = c.strict_json((root / 'synthetic-seeds.json').read_bytes(), max_bytes=c.HARD_LIMITS['request_bytes'])
+    if fixture['answer_fixture'] == 'neutral':
+        from tests.native_shared_fixture import _Answers
+    elif fixture['answer_fixture'] == 'omission':
+        from tests.native_shared_omission_fixture import _Answers
+    else:
+        raise ValueError('unknown synthetic native answer fixture')
     full = fixture['full'].encode(); receipt = fixture['receipt']
     quote = {'source': 'neutral.txt', 'chunk': fixture['chunk_id'], 'quote': fixture['source_text'].strip()}
     answer = _Answers(selection, full, quote)
