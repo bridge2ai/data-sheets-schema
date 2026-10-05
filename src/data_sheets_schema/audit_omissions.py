@@ -6,6 +6,7 @@ No provider, runtime, cache, record mutation or semantic certification. Execute
 from __future__ import annotations
 
 import argparse
+from collections import deque
 from dataclasses import dataclass
 import hashlib
 import json
@@ -31,6 +32,8 @@ MAX_SCHEMA_BYTES = 16_000_000
 MAX_RESPONSE_BYTES = 8_000_000
 MAX_NODES = 200_000
 MAX_DEPTH = 64
+_YAML_REPLAY_MAX_EVENTS = 400_008
+_YAML_REPLAY_MAX_TEXT_BYTES = 40_000_000
 LIMITATIONS = [
     "Scientific support, applicability, novelty and exhaustive recall are unverified.",
     "Chunk coverage and matching quotations are declaration/identity checks only.",
@@ -77,14 +80,95 @@ def captured_asset_bytes(captured_assets=None) -> dict[str, bytes]:
     return result
 
 
+class _EventReplayLoader(_UniqueLoader):
+    """Compose the same preflight events with the existing strict constructors."""
+    def __init__(self, text, events):
+        self._events = events
+        super().__init__(text)
+
+    def check_event(self, *choices):
+        return bool(self._events) and (not choices or isinstance(self._events[0], choices))
+
+    def peek_event(self):
+        return self._events[0] if self._events else None
+
+    def get_event(self):
+        return self._events.popleft() if self._events else None
+
+    def dispose(self):
+        self._events.clear()
+        super().dispose()
+
+
+def _legacy_yaml(text):
+    if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
+        raise ValueError("depth bound exceeded")
+    return yaml.load(text, Loader=_UniqueLoader)
+
+
+def _event_text_bytes(event):
+    # Marks share the original Reader text (including its terminal NUL).
+    # Count expanded tags/directives too; text bytes are not an RSS estimate.
+    strings = [getattr(event, name, None) for name in ('value', 'tag', 'anchor', 'style', 'encoding')]
+    for key, value in (getattr(event, 'tags', None) or {}).items():
+        strings.extend((key, value))
+    return sum(len(value.encode('utf-8')) for value in strings if value is not None)
+
+
+def _load_yaml(text):
+    """Reuse only a complete bounded depth-safe SafeLoader event stream.
+
+    Malformed/over-budget input takes the exact legacy path, including its
+    error precedence. No input is refused because this optimization is full.
+    """
+    events = deque()
+    parser = yaml.parse(text, Loader=yaml.SafeLoader)
+    reusable = False
+    try:
+        total, depth = len(text.encode('utf-8')) + 1, 0
+        if total <= _YAML_REPLAY_MAX_TEXT_BYTES:
+            for event in parser:
+                if isinstance(event, (yaml.MappingStartEvent, yaml.SequenceStartEvent)):
+                    depth += 1
+                elif isinstance(event, (yaml.MappingEndEvent, yaml.SequenceEndEvent)):
+                    depth -= 1
+                total += _event_text_bytes(event)
+                if (depth > MAX_DEPTH or len(events) >= _YAML_REPLAY_MAX_EVENTS
+                        or total > _YAML_REPLAY_MAX_TEXT_BYTES):
+                    break
+                events.append(event)
+            else:
+                reusable = True
+    except (yaml.YAMLError, UnicodeError, TypeError, AttributeError, ValueError):
+        # In particular, an escaped surrogate may be accepted by the old
+        # reader although UTF-8 accounting cannot encode its scalar value.
+        pass
+    finally:
+        parser.close()
+    if not reusable:
+        events.clear()
+        return _legacy_yaml(text)
+    try:
+        loader = _EventReplayLoader(text, events)
+        try:
+            return loader.get_single_data()
+        finally:
+            loader.dispose()
+    finally:
+        events.clear()
+
+
 def _read(raw: bytes, label: str, *, json_only: bool = False, limit: int = MAX_INPUT_BYTES):
     if type(raw) is not bytes or not raw or len(raw) > limit:
         raise ValueError(f"{label} must be nonempty bytes within the {limit}-byte bound")
     try:
         text = raw.decode("utf-8")
-        if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
-            raise ValueError("depth bound exceeded")
-        value = evidence.load_json(text) if json_only else yaml.load(text, Loader=_UniqueLoader)
+        if json_only:
+            if nesting_exceeds(text, yaml.SafeLoader, MAX_DEPTH):
+                raise ValueError("depth bound exceeded")
+            value = evidence.load_json(text)
+        else:
+            value = _load_yaml(text)
         _validate_json(value, max_nodes=MAX_NODES, max_depth=MAX_DEPTH)
         return value
     except (ValueError, TypeError, KeyError, AttributeError, RecursionError, yaml.YAMLError) as exc:
