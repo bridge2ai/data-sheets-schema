@@ -122,3 +122,19 @@ def classify_bash(command,python,programs,policy,controls=None):
         if words[1]=='-c' and words[2] in selected_programs:
             return 'not_prescribed','native shared inline helper differs from its exact selected arguments'
     return controls['run_native_canary']._classify_command(command,python,programs,policy)
+
+
+def command_guidance(policy):
+    """Truthful new helper guidance, without the old copy/freeze instruction."""
+    commands = helper_commands(policy)
+    controls = inherited.load_controls()
+    return ('\n\n## Exact native shared helper spellings\n\n'
+        'Use each command exactly as written, only when its selected phase permits it. '
+        'The fixed advance helper alone publishes stage requests, first-response records, '
+        'receipts, seals and checked assembly. Helper permission is not evidence of stage completion.\n\n'
+        + '\n\n'.join('```bash\n' + commands[name] + '\n```' for name in sorted(commands))
+        + controls['native_readonly'].lookup_guidance()
+        + '\nRead only registered inputs, current complete stage requests, observed sealed outputs '
+          'and ordinary run outputs. Write only ordinary run outputs when their phase allows, '
+          'or the exact current stage response after its complete observed Read. Never write '
+          'a sealed, future, stale, consumed, helper-owned or immutable input path.\n')
