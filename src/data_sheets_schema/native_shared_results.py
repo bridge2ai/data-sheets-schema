@@ -101,6 +101,8 @@ def rebuild(pool, value):
     """Reconstruct the captured run; this function performs no filesystem reads."""
     from .api_runner import RunSpec
     selected = _captured_selection(pool, value)
+    if sum(member.captured.pin.bytes for member in pool.members) > selected.bounds()['max_evidence_bytes']:
+        raise ValueError('complete capture exceeds the selected evidence bound')
     reader = capture_api._Reader(selected, pool=pool)
     composition = c.strict_json(value['composition_raw_json'].encode(), 'captured composition', c.HARD_LIMITS['request_bytes'])
     if (composition['selection_raw_json'].encode() != selected.registration.raw
