@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/created_on/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/shared-generation-api-v1/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: created_on - data-sheets-schema</title>
+        <title>Registered shared-generation API protocol - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-created_on" class="md-skip">
+        <a href="#registered-shared-generation-api-protocol" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: created_on
+              Registered shared-generation API protocol
             
           </span>
         </div>
@@ -316,56 +316,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#supply-authority-before-execution" class="md-nav__link">
+    Supply authority before execution
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#actual-request-and-recovery-boundaries" class="md-nav__link">
+    Actual request and recovery boundaries
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#remaining-scope" class="md-nav__link">
+    Remaining scope
   </a>
   
 </li>
@@ -384,124 +350,148 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/created_on.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/shared-generation-api-v1.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-created_on">Slot: created_on</h1>
-<p><em>The date and time when the resource was created. Requires a UTC offset (<code>…T00:00:00Z</code>); RFC 3339 <code>date-time</code> rejects a naive timestamp.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/created">dcterms:created</a>
-Alias: created_on</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
+<h1 id="registered-shared-generation-api-protocol">Registered shared-generation API protocol</h1>
+<p><code>shared_generation_v1</code> selects <code>generic_v10</code>, renderer 25, API playbook 2 and
+receipt completion 2 together. This is the API implementation tracked by
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/4345">#4345</a>. It has no
+default selection. Renderer 24 remains offline; receipt completion 1 remains
+an API renderer 8 condition. Old prompts, playbooks and rendering identities
+are preserved.</p>
+<p>The protocol connects actual full generation, receipt completion, derived core,
+typed audit workers, a complete source-first omission pass, integration,
+reconciliation and final reporting. It uses the existing evidence and typed
+audit checkers. Passing those checks establishes complete declared structures,
+literal evidence links and input association; it does not establish entailment,
+exhaustive recall or scientific correctness.</p>
+<h2 id="supply-authority-before-execution">Supply authority before execution</h2>
+<p>The caller supplies strict UTF-8 JSON with <code>format:
+shared_generation_registration_v1</code>. Every field below is required; omitted,
+extra, duplicate or malformed fields refuse. The public
+<code>data_sheets_schema.shared_generation.parse_registration</code> checks the declaration
+without constructing a client. <code>file_pin</code> and <code>schema_pin</code> can describe existing
+files and captured schema closures; they do not choose experimental settings.</p>
 <ul>
-<li>Range: <a href="../Datetime/">Datetime</a></li>
+<li><code>registration_id</code> and an absolute <code>registration_path</code>, plus <code>run</code> containing
+  the exact project, arm, method and run label. A registration belongs to one
+  run. Its own exact bytes must exist at the declared caller-owned path.</li>
+<li><code>selection</code>, obtained from <code>shared_generation.descriptor()</code>. It binds the
+  condition, renderer, runtime, typed protocol, policy versions and selected
+  prompt/playbook SHA-256 values. Installed bytes and their transitive selected
+  references must actually match.</li>
+<li><code>inputs</code>: project; exact bundle, chunk manifest, source manifest or explicit
+  null, and generation-scope context pins; explicit profile name, basis and
+  vocabulary-file pin or explicit null; and
+  full/core schema roots with all captured transitive source pins. Each file pin
+  contains its absolute path, SHA-256 and byte length. The context uses
+  <code>omission_context_v1</code>; it names the selected dataset/release and source scope,
+  not calibration labels or historical diagnoses.</li>
+<li><code>runtime</code>: actual provider and endpoint declarations, model, temperature,
+  thinking, effort and effective configuration pin or explicit null. Resolved
+  settings and the actual client's endpoint must agree. No credential is part
+  of the registration.</li>
+<li><code>audit_limits</code>: positive <code>max_paths</code>, <code>max_inventory_bytes</code>, <code>max_workers</code>,
+  <code>max_request_bytes</code>, <code>max_input_tokens_per_call</code>, <code>worker_output_tokens</code>,
+  <code>omission_output_tokens</code>, <code>integration_output_tokens</code>,
+  <code>aggregate_input_tokens</code>, <code>aggregate_output_tokens</code>, <code>max_calls</code>,
+  <code>context_limit_tokens</code>, and a nonblank <code>context_limit_basis</code>.</li>
+<li><code>audit_transport</code>: exactly <code>transport_attempts: 1</code>, <code>sdk_max_retries: 0</code> and
+  <code>malformed_response_retries: 0</code>.</li>
+<li><code>receipt</code>: a <code>receipt_completion_registration_v2</code> for <code>generic_v10</code>, with
+  the selected v2 policy SHA-256, receipt instrument 4, explicit request,
+  output and context limits, and an explicit pending or registered coverage
+  floor. Its counter, merge, padding and exact-fraction gate semantics are
+  those described in <a href="../receipt-completion-runtime/">registered receipt completion</a>.</li>
 </ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>2021-03-01T00:00:00Z</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcterms:created</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:created_on</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: created_on
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: '2021-03-01T00:00:00Z'
-description: The date and time when the resource was created. Requires a UTC offset
-  (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:created
-alias: created_on
-domain_of:
-- Information
-range: datetime
-
+<p>Booleans cannot replace integer counts. Input authority must remain separate
+from every run-owned output, progress and evidence directory. Files are captured
+once and rechecked before admission; later replacement bytes cannot become a
+new authority for the same run.</p>
+<p>No model, route, output cap, empirical floor, comparator or campaign is selected
+by this software. A plan uses the caller's declaration and makes no model or
+token-count request:</p>
+<pre><code class="language-bash">d4d api plan --project &quot;$PROJECT&quot; --label &quot;$RUN_LABEL&quot; \
+  --shared-generation-version 1 \
+  --shared-generation-registration /absolute/caller-inputs/registration.json
 </code></pre>
-
-</details>
+<p><code>render-prompt</code> accepts the same selection. An explicitly conflicting legacy
+condition, runtime, arm or policy option refuses instead of being overridden.
+Only the actual full request has a byte-derived token estimate. The later
+record-dependent roster and total remain unknown. Declared audit token
+allowances are not measured consumption or dollar estimates.</p>
+<p>For <code>batch</code>, that option names a distinct closed
+<code>shared_generation_batch_roster_v1</code> document with <code>registrations</code> rows of
+<code>{project, label, registration_path}</code>. Rows must cover the explicitly requested
+project × replicate labels exactly once, with distinct registration paths and
+IDs. A single-run file is not a batch roster, even for one run. The roster is
+itself immutable caller authority. A pending floor cannot authorize fan-out or
+use the ordinary canary bypass.</p>
+<h2 id="actual-request-and-recovery-boundaries">Actual request and recovery boundaries</h2>
+<p>Generation receives the selected factual rules, actual induced Software keys,
+and captured schema structure. The rules retain ongoing status and clause-local
+date scope; allow complete source-supported prose lineage; distinguish actual
+data-file variables and software used for the declared activity; and preserve
+source-enumerated lists and supported role rosters without invented members.</p>
+<p>The original full, effective receipt and derived core are preserved before the
+typed audit. Every populated-field worker receives complete source/record
+context and its exact path assignment. The omission pass accounts for every
+captured chunk, including prior negative, redundant and duplicate statuses.
+Integration accounts for every candidate retained or dropped. A retained
+candidate must link to exactly one full-record omission finding.</p>
+<p>Every actual typed request also carries the complete receipt-completion
+unsupported-candidate block, source authority, exact outer request identity,
+and complete schema owners/containing values. Receipt candidates are distinct
+from source facts that never entered the record. The whole payload must fit;
+neither group can be silently truncated.</p>
+<p>Workers, omission and integration use the same client's count endpoint before
+their one admitted response. The endpoint count and explicit output cap must
+fit the declared route window and aggregate allowances. Unknown counts refuse.
+SDK retries and answer retries are disabled for these selected calls. Other
+ordinary generation phases retain their existing separately accounted retry
+behavior.</p>
+<p>The usage ledger records ordered prepared, admitted, response-saved and checked
+states. Complete raw response, usage, finish reason and reasoning are preserved
+before parsing. A saved complete response may settle its exact pending usage
+once after interruption. An admitted response that was not preserved, unknown
+usage or a terminal refusal cannot purchase a replacement. Losing progress
+cannot restart generation after its receipt/audit boundary; <code>no-resume</code> cannot
+reuse spent outputs as a fresh run.</p>
+<p>The exact checked derived audit reaches reconciliation. Both final report and
+report recheck receive the selected role-relationship rule and complete final
+containing entities under captured schema owners, including unchanged members.
+A name match does not establish responsibility. The existing evidence output
+grammar is preserved; the model still declares its relationship judgment.</p>
+<p>Final publication and completed resume reconstruct the assembly from captured
+requests and replies. They recheck source/schema/context/registration identity,
+original full/core, effective receipt, accounting, exact downstream audit carry
+and the saved audit snapshot. Its selected index or portable attestation must
+name the unique checked and settled integration call, not merely another paid
+stage. Completed-record checks use that exact record's attestation. The provenance <code>shared_generation</code> block names
+the resulting assembly and audit hashes and labels scientific support
+unverified. Saved success flags alone are not authority.</p>
+<p>An explicit per-run cache stores only serialized pure packet derivations, keyed
+by all captured input/schema/context bytes, project and limits. It returns fresh
+objects and never caches response verdicts or terminal state. Every packet open
+still compares the complete reconstructed packet, and final completion and
+completed resume use a new derivation cache whose first reconstruction is
+independent of the runtime cache. Default offline typed-audit calls remain
+uncached and byte-identical.</p>
+<h2 id="remaining-scope">Remaining scope</h2>
+<p>The <a href="../typed-audit-offline/">pure typed-audit tools</a> remain model-free. The new
+runtime is their separately selected live API consumer. Existing historical
+controllers, registrations, artifacts, protected figures and audit28 are not
+rewritten.</p>
+<p>Native/direct selection refuses in this slice. A matching supervisor adapter
+must use the same selected authority after its separate runtime review. No
+API-only result satisfies that cross-arm requirement. Independent labels,
+calibrated thresholds, canary/comparator selection, owner approval and actual
+campaign execution remain under the original parent issues; synthetic tests
+are engineering evidence only.</p>
 
 
 
