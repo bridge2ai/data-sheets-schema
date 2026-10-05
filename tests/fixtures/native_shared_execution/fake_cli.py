@@ -13,12 +13,16 @@ import sys
 from data_sheets_schema import native_shared_contract as c
 from data_sheets_schema import native_shared_selection as selected
 from data_sheets_schema import source_review
-from tests.native_shared_fixture import _Answers
 
 
 def main():
     attempt = Path(os.environ['CLAUDE_CONFIG_DIR']).parent
     value = c.strict_json((attempt / 'registration.json').read_bytes(), max_bytes=c.HARD_LIMITS['request_bytes'])
+    assert os.getcwd() == value['working_directory']
+    # Test data is deliberately outside the production package import path.
+    # Load it only from the already verified, exact registered source checkout.
+    sys.path.insert(0, value['working_directory'])
+    from tests.native_shared_fixture import _Answers
     assert sys.argv[1:] == value['argv'][1:]
     assert all(os.environ.get(k) == v for k, v in value['environment'].items())
     assert not any(k in os.environ for k in ('ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'CBORG_API_KEY'))
