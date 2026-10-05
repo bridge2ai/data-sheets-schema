@@ -130,6 +130,16 @@ def for_record(prior: Any, receipt: Path, full: Path, *, transcripts: Sequence[P
                    prior=deepcopy(last))
 
 
+def _other_bytes(receipts: dict[str, Any], origin: dict[str, Any]) -> bool:
+    """Whether the origin was measured on a receipt other than the one the
+    receipts block pins (where it pins one)."""
+    artifacts = receipts.get("artifacts")
+    pinned = (artifacts["receipt"].get("sha256")
+              if isinstance(artifacts, dict) and isinstance(artifacts.get("receipt"), dict) else None)
+    measured_on = origin["receipt"].get("sha256") if isinstance(origin.get("receipt"), dict) else None
+    return pinned is not None and pinned != measured_on
+
+
 def split(receipts: Any) -> dict[str, int] | None:
     """The counts a gate summary shows beside "snippets verified": each
     origin, `post_draft` (the two after the draft), `removed_contemporaneous`
@@ -139,11 +149,7 @@ def split(receipts: Any) -> dict[str, int] | None:
     origin = receipts.get("origin") if isinstance(receipts, dict) else None
     if not isinstance(origin, dict) or origin.get("status") != "checked" or not isinstance(origin.get("origin"), dict):
         return None
-    artifacts = receipts.get("artifacts")
-    pinned = (artifacts["receipt"].get("sha256")
-              if isinstance(artifacts, dict) and isinstance(artifacts.get("receipt"), dict) else None)
-    measured_on = origin["receipt"].get("sha256") if isinstance(origin.get("receipt"), dict) else None
-    if pinned is not None and pinned != measured_on:
+    if _other_bytes(receipts, origin):
         return None
     values = {k: origin["origin"].get(k) for k in ro.ORIGINS}
     values.update(removed_contemporaneous=origin.get("removed_contemporaneous"), readdressed=origin.get("readdressed"))
@@ -166,7 +172,8 @@ def line(receipts: Any) -> str | None:
                 "post-draft, unaccepted as semantic support until independent review, #2067) · "
                 f"{counts['removed_contemporaneous']} contemporaneous removed · {counts['readdressed']} re-addressed")
     if origin.get("status") == "checked":
-        return "receipt origin: measured on other bytes than the receipt checked here; not shown beside its counts"
+        return ("receipt origin: measured on other bytes than the receipt checked here; not shown beside its counts"
+                if _other_bytes(receipts, origin) else "receipt origin: checked, but its counts are not integers")
     reasons = [r for r in origin.get("reasons") or [] if isinstance(r, str)]
     more = f" (+{len(reasons) - 1} more)" if len(reasons) > 1 else ""
     return f"receipt origin: unknown — {reasons[0] if reasons else 'no reason recorded'}{more}"

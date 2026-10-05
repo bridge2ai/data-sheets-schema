@@ -183,8 +183,11 @@ def test_the_split_is_shown_only_beside_the_receipt_it_was_measured_on(tmp_path)
                             "0 contemporaneous removed · 0 re-addressed")
     other = {**rb, "artifacts": {"receipt": {"sha256": "0" * 64}}}
     assert ror.split(other) is None
-    assert "not shown" in ror.line(other)
-    assert ror.split({**rb, "origin": {**measured, "origin": {**measured["origin"], "phase3_backport": True}}}) is None
+    assert ror.line(other) == ("receipt origin: measured on other bytes than the receipt checked here; "
+                               "not shown beside its counts")
+    malformed = {**rb, "origin": {**measured, "origin": {**measured["origin"], "phase3_backport": True}}}
+    assert ror.split(malformed) is None
+    assert ror.line(malformed) == "receipt origin: checked, but its counts are not integers"
     assert ror.line({"checked": True}) is None and ror.split(None) is None
 
 
