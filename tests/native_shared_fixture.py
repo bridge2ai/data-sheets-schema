@@ -97,7 +97,7 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
     from data_sheets_schema import native_shared_selection as selected
     from data_sheets_schema import native_shared_controller as controller
     from data_sheets_schema import native_shared_receipts as nr
-    from data_sheets_schema.chunking import manifest_from_bytes
+    from data_sheets_schema.chunking import build_manifest
     from data_sheets_schema.schema_snapshot import capture_schema
     from data_sheets_schema.native_execution_registration import ROUTE
     from data_sheets_schema.derive_core import derive_core
@@ -129,7 +129,7 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
     bundle = ('FILE: neutral.txt\nPATH: neutral.txt\n' + source_text).encode()
     bundle_path = authority / 'bundle.txt'
     bundle_pin = _save(bundle_path, bundle)
-    chunks = manifest_from_bytes(bundle, str(bundle_path))
+    chunks = build_manifest(bundle_path)
     chunk_pin = _save(authority / 'chunks.json', c.canonical(chunks))
     relevant = [row for row in chunks['chunks'] if row.get('source') == 'neutral.txt']
     if len(relevant) != 1:
@@ -145,7 +145,9 @@ def build_native_fixture(root: Path, *, registered_python: str) -> dict:
     source_manifest = {'profile': 'neutral', 'projects': {'SYNTHETIC': {
         'bundle': str(bundle_path), 'sources': [{'id': 'neutral', 'source_type': 'documentation',
             'priority': 1, 'processed_file': 'neutral.txt'}]}},
-        'naming': {'SYNTHETIC': {'canonical_label': 'Offline Neutral Dataset'}}}
+        'naming': {'SYNTHETIC': {'canonical_label': 'Offline Neutral Dataset'}},
+        'scope': {'SYNTHETIC': {'referent': 'Offline Neutral Dataset',
+            'referent_id': 'https://example.org/offline-neutral', 'related_but_distinct': []}}}
     source_manifest_path = root / 'sources.yaml'
     source_pin = _save(source_manifest_path, yaml.safe_dump(source_manifest, sort_keys=False).encode())
     context = {'format': 'omission_context_v1', 'root_class': 'Dataset',
