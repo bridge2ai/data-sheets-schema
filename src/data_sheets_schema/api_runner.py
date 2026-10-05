@@ -6513,8 +6513,13 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
 
     if getattr(spec, 'shared_generation_version', 0):
         from .shared_generation import assert_current
+        from .output_ownership import require_selected_resume_owner
         assert_current(spec)  # authority isolation precedes even sidecar lock writes
+        require_selected_resume_owner(spec, resume=resume)
     with _exclusive_run(spec):
+        if getattr(spec, 'shared_generation_version', 0):
+            # Another sequential writer may have changed ownership while we waited.
+            require_selected_resume_owner(spec, resume=resume)
         if resume:
             _restore_resume_date(spec)
         return _execute(spec, resume=resume, client=client)

@@ -201,6 +201,8 @@ def _shared_current(specs, roster=None, *, batch_label_prefix=None):
             extra = (() if batch_label_prefix is None else
                      (run_lock._path_for(batch_label_prefix),))
             shared._separate_authorities(specs, authority_paths, extra_outputs=extra)
+            from data_sheets_schema.output_ownership import require_disjoint_selected_outputs
+            require_disjoint_selected_outputs(specs, control_paths=extra)
     except (ValueError, OSError) as exc:
         raise click.ClickException(str(exc)) from exc
 
