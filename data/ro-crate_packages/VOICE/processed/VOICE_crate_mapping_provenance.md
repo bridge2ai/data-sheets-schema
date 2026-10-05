@@ -8,24 +8,24 @@ its declared path resolves in the crate.
 - Crate metadata: `data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json`
 - Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 table rows applied, plus the record's `id`, taken from the crate root)
 - Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-10-05 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
-- Distinct top-level `Dataset` slots filled: 46 (from 46 filled rows, the `id` among them)
+- Distinct top-level `Dataset` slots filled: 45 (from 45 filled rows, the `id` among them)
 
 ## Outcome
 
 | Status | Rows | Meaning |
 |--------|------|---------|
-| filled | 46 | path resolved; value placed (includes the record's `id`, which no table row supplies) |
+| filled | 45 | path resolved; value placed (includes the record's `id`, which no table row supplies) |
 | subsumed | 6 | path resolved, but a `Dataset` row already placed the same crate value in the host slot |
 | empty | 33 | path valid but the crate has no value there |
 | unresolvable | 10 | the table declares no crate path |
-| unplaceable | 42 | no route into a `Dataset` record; the mapping table says why for 42 of them: 11 out of scope, 31 awaiting an owner's decision |
+| unplaceable | 43 | no route into a `Dataset` record; the mapping table says why for 43 of them: 11 out of scope, 32 awaiting an owner's decision |
 
 ## Fidelity of what was filled
 
 | Mapping type | Filled fields |
 |---|---|
 | closeMatch | 12 |
-| exactMatch | 32 |
+| exactMatch | 31 |
 | narrowMatch | 1 |
 | relatedMatch | 1 |
 
@@ -33,7 +33,7 @@ its declared path resolves in the crate.
 |---|---|
 | minimal | 12 |
 | moderate | 2 |
-| none | 32 |
+| none | 31 |
 
 Fields marked `moderate` or `high` loss carry a value that the mapping
 table itself flags as an imperfect representation of the crate's
@@ -43,7 +43,6 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 
 | D4D path | Status | Mapping | Loss | Source path | Value / note |
 |---|---|---|---|---|---|
-| DataGovernance.committee_name | filled | exactMatch | none | @graph[?@type='Dataset']['dataGovernanceCommittee'] | Satrajit Ghosh |
 | Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Prospective observational study conducted at multiple specialty clinics… — string -> InstanceAcquisition.description; wrapped scalar into a list |
 | Dataset.annotation_analyses | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataAnnotationAnalysis'] | [{"description": "Questionnaire-based labels are generated using the standard scoring rul… — string -> AnnotationAnalysis.description |
 | Dataset.citation | filled | exactMatch | none | @graph[?@type='Dataset']['citation'] | Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., R… |
@@ -139,6 +138,7 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.was_derived_from | empty | exactMatch | none | @graph[?@type='Dataset']['isBasedOn'] | @type=Dataset present but 'isBasedOn' empty or absent |
 | DatasetCollection.completeness | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Completeness']['value'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No completeness slot at schema 3.0.0; adding one is a schema decision. The crate roots also carry an unprefixed `completeness`, which this path does not read. |
 | DatasetCollection.contact_email | unplaceable | exactMatch | none | @graph[?@type='Dataset']['contactEmail'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No dataset-level contact slot at schema 3.0.0. An address fits `Person.email`, two levels down, under a `Person`-ranged slot such as `DataGovernance.committee_contact`; which one is a judgement. |
+| DatasetCollection.data_governance_committee | unplaceable | exactMatch | none | @graph[?@type='Dataset']['dataGovernanceCommittee'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor is `Dataset.data_governance` (`DataGovernance.committee_name`, #503), but every crate's `dataGovernanceCommittee` names a person, and CHORUS's adds an email address, not a committee. Whether to place it, in `committee_name` or as a contact, is an owner decision. |
 | DatasetCollection.data_sharing_agreement | unplaceable | exactMatch | none | @graph[?@type='Dataset']['dataSharingAgreement'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No data-sharing-agreement slot at schema 3.0.0; whether `license_and_use_terms` or `ip_restrictions` should carry it is a judgement. No crate carries `dataSharingAgreement`. |
 | DatasetCollection.funding_and_acknowledgements | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['funder'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor, `Dataset.funders`, is already that row's target from the same `funder`. Remove the row, or retarget it to a `FundingMechanism` slot, where it would be reported subsumed. |
 | DatasetCollection.parent_datasets | unplaceable | relatedMatch | minimal | @graph[?@type='Dataset']['isPartOf'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor is `Dataset.parent_datasets` (slot_uri `schema:isPartOf`), but CHORUS's and CM4AI's `isPartOf` name an organization and a project, not datasets. Whether to place them is #4047's open question. |

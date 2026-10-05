@@ -572,5 +572,3 @@ citation: 'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Do
   voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
   https://doi.org/10.13026/k81f-qr68'
 id: doi:10.13026/k81f-qr68
-data_governance:
-  committee_name: Satrajit Ghosh

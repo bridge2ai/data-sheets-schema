@@ -102,19 +102,20 @@ judgment, and altering them would change what the arm measures.
 ### Stale slot names: retargeted or declared (#2915)
 
 `d4d rocrate map` still reported 54 of the 136 rows `unplaceable`, each naming
-a slot or class the schema does not have. Twelve had an obvious successor and
+a slot or class the schema does not have. Eleven had an obvious successor and
 now name it: `vulnerable_populations` → `at_risk_populations` (with the prefix
 correction above, to `d4d:atRiskPopulations`, the slot's own `slot_uri`, which
 CM4AI carries), `external_resource` → `external_resources`,
-`machine_annotation_analyses` → `machine_annotation_tools`,
-`DatasetCollection.data_governance_committee` → `DataGovernance.committee_name`,
-and the `Subset`, `Variable`, `SamplingStrategy`, `MachineAnnotation` and
-`Maintenance.frequency` rows. The other 42 say why they place nowhere, in two
+`machine_annotation_analyses` → `machine_annotation_tools`, and the `Subset`, `Variable`, `SamplingStrategy`, `MachineAnnotation` and
+`Maintenance.frequency` rows. The other 43 say why they place nowhere, in two
 new columns: `Unplaced` (`out_of_scope`, 11 rows: the eight `File` slots,
 `contentSize`'s `bytes` among them, the two `FormatDialect` rows and
-`principal_investigator`; or `owner_question`, 31 rows) and `Unplaced_Reason`. The provenance report shows both, and
+`principal_investigator`; or `owner_question`, 32 rows) and `Unplaced_Reason`. The provenance report shows both, and
 `TestTableAgainstSchema` in `tests/test_rocrate/test_map.py` fails on a row
 that places nowhere without a declaration, or that places and keeps one.
+The governance row (`dataGovernanceCommittee`) is one of the owner questions:
+every crate names a person there, CHORUS with an email address, not a
+committee, so it is not placed in `DataGovernance.committee_name`.
 
 ### What remains upstream-only, and why it is correct
 

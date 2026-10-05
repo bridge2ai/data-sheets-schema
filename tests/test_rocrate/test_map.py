@@ -369,13 +369,15 @@ class TestTableAgainstSchema(unittest.TestCase):
         """A crate holding each property a retargeted row reads fills the
         slot the schema now has for it, and the record validates. The two
         nested rows read the property a `Dataset` row already placed, so
-        they are subsumed, not placed twice."""
+        they are subsumed, not placed twice. The governance row is not
+        retargeted: every crate's `dataGovernanceCommittee` names a person, so
+        it stays unplaceable as an owner question and writes nothing."""
         graph = copy.deepcopy(GRAPH)
         graph[1].update({
             "d4d:atRiskPopulations": "No minors enrolled.",
             "relatedLink": "https://example.org/related",
             "rai:machineAnnotationTools": ["OpenSMILE 3.0", "Praat 6.4"],
-            "dataGovernanceCommittee": "Data Access Committee",
+            "dataGovernanceCommittee": "Jane Doe",
             "rai:dataReleaseMaintenancePlan": "Released annually.",
         })
         res = map_crate(graph, self.rows, self.sv, "TEST")
@@ -385,12 +387,11 @@ class TestTableAgainstSchema(unittest.TestCase):
                          [{"name": "https://example.org/related"}])
         self.assertEqual(record["machine_annotation_tools"],
                          [{"name": "OpenSMILE 3.0"}, {"name": "Praat 6.4"}])
-        self.assertEqual(record["data_governance"],
-                         {"committee_name": "Data Access Committee"})
+        self.assertNotIn("data_governance", record)
         status = {f.d4d_path: f.status for f in res.fields}
         self.assertEqual(status["MachineAnnotationTools.tools"], "subsumed")
         self.assertEqual(status["UpdatePlan.frequency"], "subsumed")
-        self.assertEqual(status["DataGovernance.committee_name"], "filled")
+        self.assertEqual(status["DatasetCollection.data_governance_committee"], "unplaceable")
         with tempfile.TemporaryDirectory() as tmp:
             path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
             path.write_text(yaml.safe_dump(record, sort_keys=False,
