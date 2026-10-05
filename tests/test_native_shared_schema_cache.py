@@ -331,7 +331,7 @@ def test_final_receipt_routes_fresh_rebuild_before_assessment(
 
     monkeypatch.setattr(capture, 'current_artifact', lambda _run, role, _path:
                         {'final_full': full, 'original_receipt_output': original}[role])
-    monkeypatch.setattr(capture, '_load', lambda _path: run)
+    monkeypatch.setattr(capture, '_load_live', lambda _path: run)
     monkeypatch.setattr(capture, '_recorded_run', lambda _spec, _record: run)
     monkeypatch.setattr(capture, 'phase_replay', lambda _run: ({'passed': True}, None))
     monkeypatch.setattr(capture.stage, 'prepare_next', decision)
