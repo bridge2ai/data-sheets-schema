@@ -91,7 +91,7 @@ def _captured_selection(pool, value):
         raise ValueError('saved selection differs from the execution declaration')
     artifacts = {role: _member(pool, role, pin['path']).captured
                  for role, pin in selection_api._declarations(doc)}
-    schemas = selection_api._schemas(doc, artifacts)
+    schemas = selection_api._declared_schemas(doc, artifacts)
     authority = tuple(a for role, a in artifacts.items()
         if role != 'receipt_policy' and not role.startswith(('full_schema:', 'core_schema:')))
     return selection_api.rebuild(registration, authority, schemas, artifacts['receipt_policy'])

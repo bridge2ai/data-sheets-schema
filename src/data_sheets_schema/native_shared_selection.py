@@ -151,6 +151,20 @@ def _declarations(doc):
             yield f'{kind}:{index}', {k: source[k] for k in ('path', 'bytes', 'sha256')}
 
 
+def _declared_schemas(doc, artifacts):
+    """Package declared bytes for rebuild; this does not validate the graph."""
+    result = []
+    for kind, cls in (('full', 'Dataset'), ('core', 'CoreDataset')):
+        declaration = doc['inputs'][kind + '_schema']
+        sources = tuple(artifacts[f'{kind}_schema:{i}'] for i in range(len(declaration['sources'])))
+        rows = tuple((source['name'], artifact.pin.role)
+                     for source, artifact in zip(declaration['sources'], sources))
+        result.append(contract.SchemaClosureCapture(
+            contract.schema_closure_sha(sources, rows), rows, kind, cls,
+            declaration['sources'][0]['name'], sources))
+    return tuple(result)
+
+
 def _schemas(doc, artifacts):
     result = []
     for kind, cls in (('full', 'Dataset'), ('core', 'CoreDataset')):
@@ -351,7 +365,7 @@ def capture(selection_path: str | Path) -> contract.NativeSelectionCapture:
         artifacts[role] = _artifact(role, pin['path'], data)
         if _pin(artifacts[role]) != pin:
             raise ValueError('native authority bytes differ from their registration: ' + role)
-    schemas = _schemas(doc, artifacts)
+    schemas = _declared_schemas(doc, artifacts)
     authority = tuple(a for role, a in artifacts.items()
                       if role != 'receipt_policy' and not role.startswith(('full_schema:', 'core_schema:')))
     result = rebuild(_artifact('selection', path, raw), authority, schemas, artifacts['receipt_policy'])
