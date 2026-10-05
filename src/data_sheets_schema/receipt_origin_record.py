@@ -26,8 +26,9 @@ Which block a writer records (`for_record`):
 The copy names no local path: transcripts by basename and sha256, as records
 name them elsewhere (`run_observed_extended`), and the receipt by sha256 (the
 receipts block beside it names the receipt's path). It keeps the instrument
-and `NON_CHECKS` beside the counts. A block read from no transcript carries
-neither: no instrument ran, so nothing is claimed to qualify.
+and `NON_CHECKS` beside the counts. A block read from no transcript names the
+instrument but carries no `NON_CHECKS`: nothing was read, so no count is
+claimed for them to qualify.
 
 Reported, never gated: post-draft snippets stay unaccepted for semantic
 support until independent review (#2067), and no floor reads them.
