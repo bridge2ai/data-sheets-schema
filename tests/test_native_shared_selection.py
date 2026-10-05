@@ -295,3 +295,35 @@ def test_actual_registered_schema_imports_are_captured_not_discovered_later(decl
     assert len(saved.schemas[0].sources) == 2
     imported.write_text('Invalid later ambient document.\n')
     assert selected.rebuild(saved.registration, saved.authority, saved.schemas, saved.receipt_policy) == saved
+
+
+def test_vocabulary_exact_input_limit_and_rebound_smaller_limit(declaration, tmp_path, monkeypatch):
+    from data_sheets_schema import schema_digest
+    vocabulary = tmp_path.resolve() / 'bounded-vocabulary.yaml'
+    raw = b'#' + b'x' * 4095 + b'\n'
+    vocabulary.write_bytes(raw)
+    monkeypatch.setattr(schema_digest, 'VOCABULARY_PIN', vocabulary)
+    declaration['inputs']['profile'] = {'name': 'bridge2ai', 'basis': 'explicit caller',
+                                         'vocabulary': pin(vocabulary, raw)}
+    declaration['bounds']['max_input_bytes'] = len(raw)
+    save(declaration)
+    saved = selected.capture(declaration['registration_path'])
+    assert selected.rebuild(saved.registration, saved.authority, saved.schemas, saved.receipt_policy) == saved
+    declaration['bounds']['max_input_bytes'] = 2048
+    save(declaration)
+    rejected = c.canonical(declaration)
+    with pytest.raises(ValueError, match='vocabulary.*input bound'):
+        c.parse_selection(rejected)
+    with pytest.raises(ValueError, match='vocabulary.*input bound'):
+        selected.capture(declaration['registration_path'])
+    with pytest.raises(ValueError, match='vocabulary.*input bound'):
+        selected.rebuild(artifact('selection', saved.registration.pin.path, rejected),
+                         saved.authority, saved.schemas, saved.receipt_policy)
+
+
+def test_declared_vocabulary_above_fixed_input_ceiling_refuses(declaration, tmp_path):
+    declaration['inputs']['profile'] = {'name': 'bridge2ai', 'basis': 'explicit caller',
+        'vocabulary': {'path': str(tmp_path.resolve() / 'oversized-vocabulary'),
+                       'bytes': c.HARD_LIMITS['input_bytes'] + 1, 'sha256': 'f' * 64}}
+    with pytest.raises(ValueError, match='vocabulary.*input ceiling'):
+        c.parse_selection(c.canonical(declaration))

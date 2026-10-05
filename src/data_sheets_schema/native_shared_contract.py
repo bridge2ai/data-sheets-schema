@@ -661,6 +661,8 @@ def parse_selection(raw: bytes) -> dict:
     _text(profile["basis"], "profile basis")
     if profile["vocabulary"] is not None:
         file_pin(profile["vocabulary"], "profile vocabulary")
+        if profile["vocabulary"]["bytes"] > HARD_LIMITS["input_bytes"]:
+            raise ValueError("native vocabulary exceeds the typed input ceiling")
     for key, cls in (("full_schema", "Dataset"), ("core_schema", "CoreDataset")):
         schema = exact(inputs[key], {"root", "root_class", "sources"}, key)
         canonical_path(schema["root"], "schema root")
@@ -708,6 +710,8 @@ def parse_selection(raw: bytes) -> dict:
     if any(inputs[k] is not None and inputs[k]["bytes"] > bounds["max_input_bytes"]
            for k in ("bundle", "chunk_manifest", "context", "source_manifest")):
         raise ValueError("declared input exceeds the supplied input bound")
+    if profile["vocabulary"] is not None and profile["vocabulary"]["bytes"] > bounds["max_input_bytes"]:
+        raise ValueError("declared vocabulary exceeds the supplied input bound")
     return value
 
 
