@@ -68,11 +68,16 @@ def output_ceiling(execution):
 
 
 def policy(selection):
-    value = contract.parse_receipt_policy(selection.receipt_policy.raw)
-    if value['runtime_policy_sha256'] not in {
-            pin['sha256'] for pin in selection.document()['selection']['assets'].values()}:
-        raise ValueError('native receipt policy is outside the selected asset closure')
-    return value
+    descriptor = contract.strict_json(selection.descriptor.raw, 'native descriptor')
+    expected = descriptor.get('receipt_policy')
+    contract.exact(expected, {'path', 'sha256'}, 'native descriptor receipt policy')
+    selected = selection.document()['selection']['assets'].get(expected['path'])
+    if selected is None or selected['sha256'] != expected['sha256']:
+        raise ValueError('native receipt policy is outside its exact selected asset role')
+    raw = selection.raw(selected['path'])
+    if len(raw) != selected['bytes'] or contract.sha(raw) != expected['sha256']:
+        raise ValueError('native receipt policy asset bytes differ from the descriptor')
+    return contract.parse_receipt_policy(selection.receipt_policy.raw, expected['sha256'])
 
 
 def floor(coverage, selection):

@@ -52,7 +52,9 @@ def case(supplied, request):
         'registration_id': 'native-test-floor', 'condition': c.CONDITION,
         'runtime_policy_sha256': policy.pin.sha256, 'receipt_instrument_version': 4,
         'coverage_floor': {'state': 'registered', 'numerator': 0, 'denominator': 1}}))
-    descriptor_raw = c.canonical({'protocol': c.NAME, 'assets': {name: pin['sha256'] for name, pin in assets.items()}})
+    descriptor_raw = c.canonical({'protocol': c.NAME,
+        'receipt_policy': {'path': 'src/download/prompts/native_fixture.md', 'sha256': policy.pin.sha256},
+        'assets': {name: pin['sha256'] for name, pin in assets.items()}})
     descriptor = c.DescriptorCapture(descriptor_raw, c.sha(descriptor_raw))
     doc = {'kind': c.KINDS['selection'], 'version': 1, 'registration_id': 'native-offline-case',
         'registration_path': '/neutral/selection.json',
@@ -89,7 +91,7 @@ def case(supplied, request):
         row.pop('reason')
         row.update(status='extracted', extracted=[{'slot': 'name', 'snippet': 'Example release provides a complete description.'}])
     phase1 = c.Phase1Capture(core=None, core_seal=None, core_seal_observation=None,
-        full=at('phase1_full', supplied['original_full']), original_receipt=at('phase1_receipt', c.canonical(receipt)),
+        full=at('phase1_full', options.get('full', supplied['original_full'])), original_receipt=at('phase1_receipt', c.canonical(receipt)),
         seal=at('phase1_seal', {'fixture': 'sealed full/receipt'}),
         full_seal_observation=artifact('observation', root + '/observations/000001.json', b'{"fixture":"full helper"}'))
     journal = artifact('journal', selection.role('journal'), stage.journal_bytes(
@@ -325,3 +327,86 @@ def test_receipt_floor_never_certifies_pending_or_empty_scope(case):
         registration=artifact('selection', case[0].registration.pin.path, c.canonical(doc)),
         authority=tuple(policy if item.pin.role == 'receipt_policy' else item for item in case[0].authority))
     assert nr.floor({'receiptable': 10, 'with_receipt': 10}, selected)['passed'] is False
+
+
+def test_native_policy_requires_exact_descriptor_role_not_any_captured_asset(case):
+    selection = case[0]
+    wrong = next(pin for name, pin in selection.document()['selection']['assets'].items()
+                 if name.endswith('/policy.md'))
+    value = c.strict_json(selection.receipt_policy.raw)
+    value['runtime_policy_sha256'] = wrong['sha256']
+    receipt_policy = artifact('receipt_policy', selection.receipt_policy.pin.path, c.canonical(value))
+    doc = selection.document()
+    doc['receipt_policy'] = plain(receipt_policy)
+    changed = replace(selection, receipt_policy=receipt_policy,
+        registration=artifact('selection', selection.registration.pin.path, c.canonical(doc)),
+        authority=tuple(receipt_policy if item.pin.role == 'receipt_policy' else item for item in selection.authority))
+    with pytest.raises(ValueError, match='selected policy'):
+        nr.policy(changed)
+    # An asset's bytes/hash remain insufficient when its exact named role is absent.
+    doc = selection.document()
+    doc['selection']['assets']['src/download/prompts/another-role.md'] = doc['selection']['assets'].pop('src/download/prompts/native_fixture.md')
+    changed = replace(selection, registration=artifact('selection', selection.registration.pin.path, c.canonical(doc)))
+    with pytest.raises(ValueError, match='exact selected asset role'):
+        nr.policy(changed)
+
+
+def test_receipt_addition_retains_original_status_and_origin_counts(case):
+    selection, execution, phase1 = case[:3]
+    manifest = c.strict_json(selection.raw(selection.document()['inputs']['chunk_manifest']['path']))
+    chunk = next(row for row in manifest['chunks'] if row.get('source') == 'manual.txt')
+    answer = c.canonical({'rereceipt': [{'path': 'name', 'receipt': {'chunk': chunk['id'],
+        'snippet': 'Example release provides a complete description.'}}]})
+    result = nr.complete(selection, execution, phase1, answer)
+    counts = c.strict_json(result.result_json)
+    merged = om._mapping(result.effective_receipt, 'result receipt')
+    entry = next(row for row in merged['chunks'] if row['id'] == chunk['id'])
+    assert entry['extracted'][0]['origin'] == 'rereceipt'
+    assert entry['rereceipt_prior'] == {'status': 'nothing_relevant', 'reason': 'No initial claim receipt declared.'}
+    assert counts['state'] == 'answers_complete'
+    assert counts['counts']['receipts_added'] == counts['counts']['status_reversals_added'] == 1
+    assert counts['after']['snippets']['by_origin']['rereceipt']['total'] == 1
+    assert counts['after']['snippets']['by_origin']['phase1']['total'] == 0
+    assert counts['after']['slots']['with_receipt'] == 1
+    assert c.strict_json(result.carry_json)['added_pairs'][0]['origin'] == 'rereceipt'
+    assert all(row['status'] == 'nothing_relevant' for row in c.strict_json(phase1.original_receipt.raw)['chunks'])
+
+
+def test_partial_rejected_receipt_retains_diagnostics_and_cannot_continue(case):
+    raw = c.canonical({'rereceipt': [{'path': 'name', 'receipt': {'chunk': 'absent', 'snippet': 'No evidence.'}}]})
+    updated, transition = respond(case, raw)
+    assert transition.disposition == 'failed'
+    outputs = {item.artifact.pin.role: item.artifact.raw for item in transition.publications}
+    result, carry = c.strict_json(outputs['receipt_result']), c.strict_json(outputs['receipt_carry'])
+    assert result['state'] == 'answers_incomplete'
+    assert result['counts']['rejected_answers'] == 1
+    assert result['rejected_paths'] == result['still_uncovered_paths'] == ['name']
+    assert carry['rejections'][0]['reason'] == "unknown chunk 'absent'"
+    assert carry['rejected_paths'] == ['name']
+    assert stage.prepare_next(*updated).state == 'failed'
+
+
+@pytest.mark.parametrize('case', [{'full': b'name: Example\ndescription: Existing description.\nissued: 2026-10-05\n',
+    'bounds': {'max_paths_per_worker': 1, 'max_workers': 3, 'max_submissions': 6}}], indirect=True)
+def test_every_worker_and_every_source_chunk_survives_multiworker_roundtrip(case):
+    complete_case, completion = full_roundtrip(case)
+    records = [c.strict_json(item.raw) for item in complete_case[3].records]
+    checked = [row['payload']['cursor']['kind'] for row in records if row['record_type'] == 'stage_checked']
+    assert checked == ['receipt', 'worker', 'worker', 'worker', 'omission', 'integration']
+    assembly = c.strict_json(completion.assembly.raw, max_bytes=c.HARD_LIMITS['assembly_bytes'])
+    check = typed.check(assembly, captured_assets=nr.omission_assets(case[0]))
+    assert check['passed'] and len(assembly['workers']) == 3
+    assert check['omission_counts']['expected_chunks'] == check['omission_counts']['declared_unique_chunks'] == 3
+
+
+@pytest.mark.parametrize('case', [{'bounds': {'max_history_records': 4}}], indirect=True)
+def test_oversized_history_refuses_before_record_parsing(case, monkeypatch):
+    original = c.strict_json
+    def no_record(raw, label='JSON', max_bytes=c.HARD_LIMITS['metadata_record_bytes']):
+        if label == 'native stage record':
+            raise AssertionError('oversized record list must refuse before replay parsing')
+        return original(raw, label, max_bytes)
+    monkeypatch.setattr(c, 'strict_json', no_record)
+    oversized = replace(case[3], records=case[3].records * 2)
+    with pytest.raises(ValueError, match='history record bound'):
+        stage.prepare_next(*case[:3], oversized)

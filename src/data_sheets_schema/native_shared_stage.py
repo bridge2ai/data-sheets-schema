@@ -104,6 +104,21 @@ def _history(selection, execution, history):
         raise ValueError('native history does not name the selected journal')
     if execution.selection_sha256 != selection.registration.pin.sha256:
         raise ValueError('native execution belongs to another selection')
+    bounds = selection.bounds()
+    # Refuse oversized captures before parsing or independently reconstructing
+    # any historical request. The outer evidence pool has additional bounds;
+    # these checks are also necessary at this public pure entry point.
+    if len(history.records) > bounds['max_history_records']:
+        raise ValueError('native history record bound exceeded')
+    if len(history.observations) > c.HARD_LIMITS['observation_records']:
+        raise ValueError('native history observation bound exceeded')
+    members = (history.journal, *history.records, *history.artifacts, *history.observations)
+    if len(members) > c.HARD_LIMITS['captured_members']:
+        raise ValueError('native history member bound exceeded')
+    if sum(len(item.raw) for item in history.records) + len(history.journal.raw) > bounds['max_history_bytes']:
+        raise ValueError('native history byte bound exceeded')
+    if sum(len(item.raw) for item in members) > bounds['max_evidence_bytes']:
+        raise ValueError('native history evidence byte bound exceeded')
     rows, previous = [], None
     for sequence, artifact in enumerate(history.records):
         if artifact.pin.role != 'record' or artifact.pin.path != _dynamic(selection, 'record', sequence):
@@ -123,10 +138,6 @@ def _history(selection, execution, history):
         records=tuple(item.pin for item in history.records))
     if history.journal.raw != expected:
         raise ValueError('native journal omits, reorders or changes captured records')
-    if len(rows) > selection.bounds()['max_history_records']:
-        raise ValueError('native history record bound exceeded')
-    if sum(len(item.raw) for item in history.records) + len(expected) > selection.bounds()['max_history_bytes']:
-        raise ValueError('native history byte bound exceeded')
     artifacts = {}
     for item in (*history.artifacts, *history.observations):
         if item.pin.path in artifacts:
