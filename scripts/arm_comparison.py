@@ -53,7 +53,8 @@ Bases, stated once and printed into the output:
   bytes recovered from git where they drifted
   (`replicate_structure.record_chunk_texts`); `–` exactly where no replicate
   of the group has a readable receipt; the receipts instrument's exempt keys
-  (`notes`, `source_caveats`, `conforms_to_*`) are commentary, never a
+  (`conforms_to_class`, `conforms_to_schema`, `notes`, `source_caveats`; not
+  `conforms_to` or `conforms_to_standard`, #4434) are commentary, never a
   candidate (#3892, #3893).
 - **release inventory** (#3282): `release_inventory` on today's source and
   crate manifests, and on the source-manifest version each arm's records
@@ -1083,13 +1084,17 @@ def nested_omission_section(data) -> list[str]:
     fields of objects and the entries of nested lists, over the groups the
     replicate-structure table compares."""
     from data_sheets_schema.replicate_structure import (
-        CANDIDATE, COMMENTARY, NESTED_KINDS, NOT_CANDIDATE, UNMEASURED, compare_structure, dataset_slots,
-        nested_omission_candidates,
+        CANDIDATE, COMMENTARY, COMMENTARY_KEYS, EXCLUDED_SLOTS, NESTED_KINDS, NOT_CANDIDATE, UNMEASURED,
+        compare_structure, dataset_slots, nested_omission_candidates,
     )
     slots = dataset_slots()
     shown = {"field": (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY),     # an entry is never commentary
              "entry": (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}
     rows, top = [], []
+    # The legend names the keys the walk reads, not a wildcard (#4434):
+    # `conforms_to_standard` matches `conforms_to_*` and is classified.
+    skipped = ", ".join(f"`{k}`" for k in EXCLUDED_SLOTS)
+    commentary = ", ".join(f"`{k}`" for k in COMMENTARY_KEYS if k not in EXCLUDED_SLOTS)
 
     def cells(counts: dict[str, dict[str, int]], measured: bool) -> list[str]:
         return [c for kind in NESTED_KINDS for c in (
@@ -1133,13 +1138,18 @@ def nested_omission_section(data) -> list[str]:
             "**single-object** step, into a field of an object every replicate holds there, and a "
             "**keyed-list** step, into an entry every replicate holds, identified as in the table "
             "above. A **field** is filled, as in the replicate-structure table, in some "
-            "replicates' object and not in all; `source_caveats` is skipped at any depth, and a "
-            "`notes` or `conforms_to_*` field is **commentary**: counted, never classified, never "
-            "an omitted candidate. A **nested entry** is an identified object in a list below the "
-            "first level that some replicates' lists carry and others' do not. A keyed identity is "
-            "that key's exact value, as in the table above: an entry one replicate names otherwise, "
-            "or identifies by another key (an affiliation by its ROR `id` in one replicate and by "
-            "its `name` in another), reads as two entries, each missing from the other. Below the first "
+            "replicates' object and not in all. Of the keys the receipts instrument exempts (as in "
+            "the omission-candidates table, #3335), " + skipped + " is skipped at any depth, as in "
+            "the paths below the top level (#3337), and a field that is one of the others (" + commentary
+            + ") is **commentary**: counted, never classified, never an omitted candidate; every "
+            "other field is classified. A **nested entry** is an identified object in a list below "
+            "the first level that some replicates' lists carry and others' do not. A keyed identity "
+            "is that key's value as `receipts._entry_key` reads it, as in the table above: stripped "
+            "of surrounding whitespace, and a resolver URL of a declared prefix read as its CURIE "
+            "(`https://doi.org/10.x/y` and `doi:10.x/y` are one entry). Nothing else is "
+            "normalised: an entry one replicate names otherwise, or identifies by another key (an "
+            "affiliation by its ROR `id` in one replicate and by its `name` in another), reads as "
+            "two entries, each missing from the other. Below the first "
             "level only objects are identified: a **keyless** object has no identity to be missing "
             "by (#908), and a string entry is a **value** whose only identity is its exact text — "
             "mostly the prose items of a list of values (`ip_restrictions.restrictions`, "

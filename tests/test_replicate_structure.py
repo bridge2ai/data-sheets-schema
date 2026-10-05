@@ -658,18 +658,20 @@ def _deep_group():
     """Three replicates with structure below the first level: a keyed list
     whose shared entries hold a nested list of objects (one keyless), a
     nested list of values and an object; a top-level keyless entry with a
-    list inside it; a key repeated within one list; a slot holding one
-    object; a slot that is a list in two replicates and an object in the
-    third; a top-level list of values and an intermittent slot."""
+    list inside it; a key repeated within one list; a string entry in that
+    class-ranged list, in r1 only (#4437); a slot holding one object; a slot
+    that is a list in two replicates and an object in the third, whose
+    entry carries a field in r1 that the others' do not (#4436); a
+    top-level list of values and an intermittent slot."""
     recs = {
         "r1": {"s": [{"name": "A", "affiliations": [{"name": "MIT"}, {"name": "UCL"}, {"role": "k"}], "orcid": "o1",
                       "roles": ["lead", "writing"]},
                      {"name": "B"},
                      {"description": "keyless", "x": [{"name": "Q"}]},
                      {"id": "x:1", "license": {"name": "CC", "url": "u"}},
-                     {"name": "D"}, {"name": "D"}, {"name": "E"}],
+                     {"name": "D"}, {"name": "D"}, {"name": "E"}, "S1"],
                "o": {"irb": "yes", "board": {"name": "IRB-1", "notes": "n"}, "source_caveats": "c"},
-               "m": [{"name": "Z"}], "t": ["k1", "k2"], "u": [{"name": "U"}]},
+               "m": [{"name": "Z", "role": "chair"}], "t": ["k1", "k2"], "u": [{"name": "U"}]},
         "r2": {"s": [{"name": "A", "affiliations": [{"name": "MIT"}], "roles": ["lead"]},
                      {"description": "keyless", "x": [{"name": "R"}]},
                      {"id": "x:1", "license": {"name": "CC"}},
@@ -688,19 +690,24 @@ def _deep_group():
 
 
 #: Verified receipt paths, resolved into each replicate's final record. r1
-#: receipts entry B, A's UCL affiliation and x:1's licence url — and also
-#: the list `s`, a zero count on D's second entry, A's value "writing", a
-#: sibling key of `o.irb` and the object `o` above it, none of which
-#: credits a node. r2's receipt verifies nothing; r3 has none to read.
+#: receipts entry B, its string entry "S1", A's UCL affiliation and x:1's
+#: licence url — and also the list `s`, a zero count on D's second entry,
+#: A's value "writing", a sibling key of `o.irb` and the object `o` above
+#: it, none of which credits a node. r2's receipt verifies nothing; r3 has
+#: none to read.
 DEEP_RESOLVED = {"r1": {"s": 2, "s[1].name": 1, "s[5]": 0, "s[0].affiliations[1].name": 1,
-                        "s[0].roles[1]": 1, "s[3].license.url": 1, "o.irb_date": 1, "o": 1},
+                        "s[0].roles[1]": 1, "s[3].license.url": 1, "s[7]": 1, "o.irb_date": 1, "o": 1},
                  "r2": {}, "r3": None}
 
 
 def test_the_first_level_entry_reading_is_unchanged_by_the_nested_one():
     """The output of `entry_omission_candidates` as main produced it before
     #3934, on a group with structure below its first level: the nested
-    reading neither moves a first-level row nor adds one."""
+    reading neither moves a first-level row nor adds one. The literal was
+    produced by origin/main's module (bc1f41d69) on this fixture. Its
+    string entry "S1" is the one input the shared `_keyed`'s `objects_only`
+    switch reads differently: main keys it by its text and classifies it
+    (`value=S1`), and the first level must still do so (#4437)."""
     recs, res = _deep_group()
     assert entry_omission_candidates(recs, res, DEEP_RESOLVED) == {
         "entries": [
@@ -710,10 +717,12 @@ def test_the_first_level_entry_reading_is_unchanged_by_the_nested_one():
              "unreceipted": ["r3"], "status": "unmeasured"},
             {"slot": "s", "key": "name=E", "held_by": ["r1", "r2"], "receipted_in": [],
              "unreceipted": [], "status": "not_candidate"},
+            {"slot": "s", "key": "value=S1", "held_by": ["r1"], "receipted_in": ["r1"],
+             "unreceipted": [], "status": "candidate"},
             {"slot": "s", "key": "name=D (#3)", "held_by": ["r3"], "receipted_in": [],
              "unreceipted": ["r3"], "status": "unmeasured"}],
-        "keyless": 2, "measured": True, "per_replicate": {"r1": 0, "r2": 1, "r3": 0},
-        "counts": {"candidate": 1, "not_candidate": 1, "unmeasured": 2}}
+        "keyless": 2, "measured": True, "per_replicate": {"r1": 0, "r2": 2, "r3": 1},
+        "counts": {"candidate": 2, "not_candidate": 1, "unmeasured": 2}}
 
 
 def test_nested_rows_are_the_fields_of_held_objects_and_the_entries_of_nested_lists():
@@ -722,8 +731,10 @@ def test_nested_rows_are_the_fields_of_held_objects_and_the_entries_of_nested_li
     object `o` has `irb` in r1 and r2 and its board's `notes` in r1 only.
     A's `roles` are values, counted and never classified, although
     "writing" is in r1 and r3 only and r1 receipts it. Nothing is read
-    below the keyless entry, below B (a first-level row), in `m` (a list
-    and an object), in the top-level value list `t` or in `u`."""
+    below the keyless entry, below B or the string entry "S1" (first-level
+    rows), in `m` (a list and an object: its `role`, in r1 only, would be a
+    row if the walk read through the disagreement, #4436), in the top-level
+    value list `t` or in `u`."""
     recs, res = _deep_group()
     got = nested_omission_candidates(recs, res, DEEP_RESOLVED)
     rows = {r["chain"]: r for r in got["rows"]}
@@ -749,8 +760,10 @@ def test_nested_rows_are_the_fields_of_held_objects_and_the_entries_of_nested_li
                                     "r3": {"field": 0, "entry": 0}}
     assert got["counts"] == {"field": {"candidate": 1, "not_candidate": 1, "unmeasured": 1, "commentary": 1},
                              "entry": {"candidate": 1, "not_candidate": 0, "unmeasured": 0, "commentary": 0}}
-    # The two readings are disjoint: no nested row is a first-level entry.
+    # The two readings are disjoint: no nested row is a first-level entry,
+    # and none is read through `m`'s list/object disagreement.
     assert not {r["path"] for r in got["rows"]} & {"s[*]", "m[*]", "u[*]"}
+    assert not [r for r in got["rows"] if r["path"].startswith("m")]
 
 
 def test_a_value_in_a_nested_list_is_counted_never_classified():
@@ -794,20 +807,75 @@ def test_a_receipt_credits_a_nested_node_only_through_its_own_chain():
         assert status({path: 1}, "s[name=A].aff[name=UCL]") == "candidate", path
 
 
+def test_a_receipt_at_another_holders_path_for_a_nested_node_credits_nothing():
+    """#4435: A's `orcid` has two holders at different indices — r1's
+    `s[0]` and r2's `s[1]` — and B's the reverse. Each holder receipts B's
+    `orcid` at its own index for B, which is the other holder's index for
+    A: that credits B's `orcid`, never A's. On v6 agentic VOICE an
+    affiliation held at `creators[6].affiliations[0]` in rep1 and at
+    `creators[8].affiliations[0]` in rep2, with rep2's verified receipt at
+    `creators[6].affiliations[0].description`, is this case."""
+    recs = {"r1": {"s": [{"name": "A", "orcid": "a"}, {"name": "B", "orcid": "b"}]},
+            "r2": {"s": [{"name": "B", "orcid": "b"}, {"name": "A", "orcid": "a"}]},
+            "r3": {"s": [{"name": "A"}, {"name": "B"}]}}
+    res = compare_structure(recs, {"s": "nested"})
+
+    def rows(resolved):
+        got = nested_omission_candidates(recs, res, resolved)
+        return {r["chain"]: (r["held_by"], r["receipted_in"], r["status"]) for r in got["rows"]}, got
+
+    got_rows, got = rows({"r1": {"s[1].orcid": 1}, "r2": {"s[0].orcid": 1}, "r3": {}})
+    assert got_rows == {"s[name=A].orcid": (["r1", "r2"], [], "not_candidate"),
+                        "s[name=B].orcid": (["r1", "r2"], ["r1", "r2"], "candidate")}
+    assert got["per_replicate"]["r3"] == {"field": 1, "entry": 0}
+    # Each holder's receipt at its own path for A credits A.
+    for resolved, by in (({"r1": {"s[0].orcid": 1}, "r2": {}, "r3": {}}, ["r1"]),
+                         ({"r1": {}, "r2": {"s[1].orcid": 1}, "r3": {}}, ["r2"])):
+        assert rows(resolved)[0]["s[name=A].orcid"] == (["r1", "r2"], by, "candidate"), resolved
+
+
+def test_a_receipt_at_another_holders_index_for_a_first_level_entry_credits_nothing():
+    """#4435, at the first level, which shares `_status`: B is r1's `s[1]`
+    and r3's `s[0]`, and r2 lacks it. r1's receipt on its A (`s[0]`) and
+    r3's on its A (`s[1]`) each sit at the other holder's index for B and
+    credit nothing; r3's at its own index for B credits B."""
+    recs = {"r1": {"s": [{"name": "A", "x": "a"}, {"name": "B", "x": "b"}]},
+            "r2": {"s": [{"name": "A", "x": "a"}]},
+            "r3": {"s": [{"name": "B", "x": "b"}, {"name": "A", "x": "a"}]}}
+    res = compare_structure(recs, {"s": "nested"})
+
+    def entries(resolved):
+        return {e["key"]: (e["held_by"], e["receipted_in"], e["status"])
+                for e in entry_omission_candidates(recs, res, resolved)["entries"]}
+
+    assert entries({"r1": {"s[0].x": 1}, "r2": {}, "r3": {"s[1].x": 1}}) == {
+        "name=B": (["r1", "r3"], [], "not_candidate")}
+    assert entries({"r1": {}, "r2": {}, "r3": {"s[0].x": 1}}) == {"name=B": (["r1", "r3"], ["r3"], "candidate")}
+
+
 def test_nothing_is_read_below_a_keyless_entry_a_partly_held_entry_or_a_shape_disagreement():
     """A keyless entry is joined by position, no evidence of identity
     (#908); B, held by r1 and r2 and not r3, is a first-level row, with no
     identity across every replicate below it, although its two holders
     disagree on UCL; a list in one replicate and an object in another has
-    none either. Receipts on all three credit nothing: there is no row."""
+    none either. Receipts on all three credit nothing: there is no row.
+
+    The disagreeing values differ below it (#4436): Q carries `role` in r1
+    only, so a walk that read through the disagreement — wrapping r2's
+    object as a one-entry list, or unwrapping the one-entry lists — would
+    find a `role` field some replicates lack; one that iterated r2's
+    object as a list would meet its key as a value. `o.r` is a list in two
+    replicates and a string in the third: reading it as a list would count
+    values."""
     recs = {"r1": {"s": [{"d": "x", "aff": [{"name": "MIT"}]},
                          {"name": "B", "aff": [{"name": "MIT"}, {"name": "UCL"}]}],
-                   "o": {"p": [{"name": "Q"}], "q": "v"}},
+                   "o": {"p": [{"name": "Q", "role": "chair"}], "q": "v", "r": ["w"]}},
             "r2": {"s": [{"d": "y", "aff": [{"name": "UCL"}]}, {"name": "B", "aff": [{"name": "MIT"}]}],
-                   "o": {"p": {"name": "Q"}, "q": "v"}},
-            "r3": {"s": [{"d": "z"}], "o": {"p": [{"name": "Q"}], "q": "v"}}}
+                   "o": {"p": {"name": "Q"}, "q": "v", "r": "w"}},
+            "r3": {"s": [{"d": "z"}], "o": {"p": [{"name": "Q"}], "q": "v", "r": ["w"]}}}
     res = compare_structure(recs, {"s": "nested", "o": "nested"})
-    got = nested_omission_candidates(recs, res, {"r1": {"s[0].aff[0]": 1, "s[1].aff[1]": 1, "o.p[0]": 1},
+    got = nested_omission_candidates(recs, res, {"r1": {"s[0].aff[0]": 1, "s[1].aff[1]": 1, "o.p[0]": 1,
+                                                        "o.p[0].role": 1, "o.p.role": 1},
                                                  "r2": {"s[0].aff[0]": 1, "o.p": 1}, "r3": {}})
     assert got["rows"] == [] and got["keyless"] == 0 and got["values"] == 0
     assert got["per_replicate"] == {r: {"field": 0, "entry": 0} for r in ("r1", "r2", "r3")}
@@ -822,6 +890,48 @@ def test_nested_candidates_without_receipts_are_unmeasured_never_zero():
     got = nested_omission_candidates(recs, res, {"r1": None, "r2": None, "r3": None})
     assert not got["measured"] and got["per_replicate"] == {"r1": None, "r2": None, "r3": None}
     assert got["counts"]["field"] == {"candidate": 0, "not_candidate": 0, "unmeasured": 3, "commentary": 1}
+
+
+def test_only_the_receipts_instruments_exempt_keys_are_nested_commentary():
+    """#4434: `conforms_to_standard` and `conforms_to` match the wildcard
+    `conforms_to_*` but carry facts from the bundle, and the receipts
+    instrument does not exempt them, so a nested one is classified like any
+    other field — here a candidate r3 omits. `conforms_to_class` beside it
+    is commentary, receipt or not, and `source_caveats` is skipped."""
+    recs = {"r1": {"resources": [{"id": "x:1", "conforms_to_standard": "OMOP", "conforms_to": "DICOM",
+                                  "conforms_to_class": "Dataset", "source_caveats": "c"}]},
+            "r2": {"resources": [{"id": "x:1", "conforms_to_standard": "OMOP", "conforms_to": "DICOM",
+                                  "conforms_to_class": "Dataset"}]},
+            "r3": {"resources": [{"id": "x:1"}]}}
+    res = compare_structure(recs, {"resources": "nested"})
+    got = nested_omission_candidates(recs, res, {
+        "r1": {"resources[0].conforms_to_standard": 1, "resources[0].conforms_to_class": 1,
+               "resources[0].source_caveats": 1}, "r2": {}, "r3": {}})
+    assert {r["chain"]: (r["held_by"], r["status"]) for r in got["rows"]} == {
+        "resources[id=x:1].conforms_to": (["r1", "r2"], "not_candidate"),
+        "resources[id=x:1].conforms_to_class": (["r1", "r2"], "commentary"),
+        "resources[id=x:1].conforms_to_standard": (["r1", "r2"], "candidate")}
+    assert got["per_replicate"]["r3"] == {"field": 1, "entry": 0}
+
+
+def test_a_nested_entry_is_identified_by_its_key_as_entry_key_reads_it():
+    """#4439: a keyed identity is the key's value as `receipts._entry_key`
+    reads it, not its exact text: a resolver URL of a declared prefix is
+    its CURIE (`https://doi.org/…` and `doi:…`) and surrounding whitespace
+    is stripped, so the three replicates hold one affiliation. Nothing else
+    is normalised: a DOI suffix in another case is another entry."""
+    def rows(r3_id):
+        recs = {"r1": {"s": [{"name": "A", "aff": [{"id": "https://doi.org/10.13026/abc"}]}]},
+                "r2": {"s": [{"name": "A", "aff": [{"id": "doi:10.13026/abc"}]}]},
+                "r3": {"s": [{"name": "A", "aff": [{"id": r3_id}]}]}}
+        got = nested_omission_candidates(recs, compare_structure(recs, {"s": "nested"}),
+                                         {"r1": {}, "r2": {}, "r3": {}})
+        return [(r["chain"], r["held_by"]) for r in got["rows"]]
+
+    assert rows(" doi:10.13026/abc ") == []
+    assert rows("HTTPS://DOI.ORG/10.13026/abc") == []
+    assert rows("doi:10.13026/ABC") == [("s[name=A].aff[id=doi:10.13026/abc]", ["r1", "r2"]),
+                                        ("s[name=A].aff[id=doi:10.13026/ABC]", ["r3"])]
 
 
 def test_receipted_where_empty_lists_replicates_that_leave_a_slot_empty_and_receipt_it():
@@ -930,6 +1040,25 @@ def test_the_nested_section_counts_fields_and_nested_entries_and_dashes_a_group_
     text = "\n".join(m.nested_omission_section(data))
     assert ("| v8 API production (2026-09-04f/g) | VOICE | 3 | 0 / 0 / 2 / 1 | 1 | 0 / 0 / 1 | 0 / 3 | "
             "rep1 0 + 0 · rep2 0 + 0 |") in text
+
+
+def test_the_nested_section_names_the_commentary_keys_the_walk_reads(tmp_path, monkeypatch):
+    """#4434: the legend names the keys the walk reads as commentary — the
+    receipts instrument's exempt keys less `EXCLUDED_SLOTS`, which it skips
+    — from the code, never the wildcard `conforms_to_*`, which
+    `conforms_to_standard` matches and the walk classifies. #4439: it says
+    a keyed identity is the key's value as `receipts._entry_key` reads it,
+    not its exact value."""
+    from data_sheets_schema.replicate_structure import COMMENTARY_KEYS, EXCLUDED_SLOTS
+    m, data = _section_fixture(tmp_path, monkeypatch, {"rep1": {"purposes": [{"name": "A"}]},
+                                                       "rep2": {"purposes": [{"name": "A"}]}})
+    monkeypatch.setattr(m, "_replicate_receipt", lambda label, project: (None, None, None))
+    legend = m.nested_omission_section(data)[2]
+    commentary = ", ".join(f"`{k}`" for k in COMMENTARY_KEYS if k not in EXCLUDED_SLOTS)
+    assert f"({commentary}) is **commentary**" in legend
+    assert ", ".join(f"`{k}`" for k in EXCLUDED_SLOTS) + " is skipped at any depth" in legend
+    assert "conforms_to_*" not in legend
+    assert "that key's value as `receipts._entry_key` reads it" in legend and "exact value" not in legend
 
 
 def test_replicate_receipt_tells_an_unusable_snapshot_from_an_absent_one(tmp_path, monkeypatch):

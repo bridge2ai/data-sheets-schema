@@ -390,8 +390,10 @@ def summarize_nested(nested: Mapping[str, Any]) -> dict[str, Any]:
 
 # ------------------------------------------------ omission candidates (#3335)
 #: The keys the receipts instrument reads as the run's own commentary or as
-#: set by the runner — `receipts.EXEMPT_LEAVES` (`notes`, `source_caveats`,
-#: `conforms_to_*`, at any depth) and `receipts.EXEMPT_SLOTS` — imported, not
+#: set by the runner — `receipts.EXEMPT_LEAVES` (`conforms_to_class`,
+#: `conforms_to_schema`, `notes`, `source_caveats`, at any depth; not
+#: `conforms_to` or `conforms_to_standard`, which carry facts from the bundle,
+#: #4434) and `receipts.EXEMPT_SLOTS` — imported, not
 #: copied, so the two instruments cannot disagree about what is a claim
 #: (#3893). A receipt path through one of them receipts commentary about the
 #: slot, not a claim of it: `human_subject_research.source_caveats` quoting
@@ -746,7 +748,10 @@ def nested_omission_candidates(records: Mapping[str, Mapping[str, Any]], result:
     field of an object every replicate holds there, and a **keyed-list**
     step, to an entry every replicate holds, identified as
     `entry_omission_candidates` identifies one (`receipts._entry_key` and
-    its occurrence). Below the first level only an entry that is an object
+    its occurrence): by its key's value as `_entry_key` reads it — stripped,
+    and a resolver URL of a declared prefix read as its CURIE — and nothing
+    else normalised, so a name in other words, or another key, is another
+    entry (#4439). Below the first level only an entry that is an object
     is identified. A keyless object has only its index to be joined by, no
     evidence of identity (#908); a string (or other scalar) entry is a
     **value**, whose only identity is its exact text — most are the prose
@@ -765,12 +770,19 @@ def nested_omission_candidates(records: Mapping[str, Mapping[str, Any]], result:
     replicates fill (`is_empty`) and others do not — `EXCLUDED_SLOTS`
     excepted, at any depth, as in `compare_nested` — or, below the first
     level, an **entry** some replicates' lists carry and others' do not. A
-    field in `COMMENTARY_KEYS` (`notes`) is **commentary**: counted, never
-    classified, never a candidate a replicate omits (#3893). Any other row
-    is a **candidate** when a replicate holding it has a verified receipt
-    path (`resolve_verified`'s, resolved into its final record by identity)
-    on the node or below it, at the node's own path in that replicate — so
-    a receipt credits a node only through the same chain of entries. One on
+    field in `COMMENTARY_KEYS` (`conforms_to_class`, `conforms_to_schema`,
+    `notes`; `source_caveats` is excepted above) is **commentary**:
+    counted, never classified, never a candidate a replicate omits (#3893);
+    `conforms_to` and `conforms_to_standard`, which the receipts instrument
+    does not exempt, are classified like any other field (#4434). Any other
+    row is a **candidate** when a replicate holding it has a verified
+    receipt path on the node or below it, at the node's own path in that
+    replicate — `resolve_verified`'s path, followed into the final record by
+    identity where the run left a phase-1 snapshot and read as written (an
+    index join, the agentic path's) where it left none (#4438) — so a
+    receipt credits a node only through the same chain of entries in its
+    own replicate: a receipt at the path where another holder has the node
+    and its own replicate has something else credits nothing (#4435). One on
     the object or entry holding the node attests that object or entry, not
     the field or entry another replicate lacks; one on a list covers only
     the list (#721). It is **not_candidate** when every holder has a
