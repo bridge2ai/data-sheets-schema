@@ -12,8 +12,9 @@ request is now one explicit line, and nothing else is one:
   letter case), spaces or tabs, then the name of one directory under the
   inputs directory, spelled as the directory is; only spaces or tabs follow;
 - it starts a paragraph: it is the first line of the text or follows a blank
-  line. No code span, inline HTML comment, quotation or list item continues
-  across a blank line, so such a line cannot sit inside one;
+  line. No code span, inline HTML comment or quotation continues across a
+  blank line, and after one a list item continues only on indented lines,
+  so such a line cannot sit inside any of them;
 - it lies outside fenced code blocks, and outside the HTML blocks that run
   past a blank line (a comment, <pre>, <script>, <style>, <textarea>, a
   processing instruction, a declaration, CDATA).
@@ -37,8 +38,9 @@ Run by the workflow's "Read the request" step:
         --body "$RUNNER_TEMP/assistant-request-text.md" \\
         --github-output "$GITHUB_OUTPUT"
 
-It logs `request: ...` or `no request: ...` and, with --github-output,
-appends `request=true|false` and `dataset=<name>` (empty without a request).
+It logs `request: ...`, or `no request` with the reason each line that starts
+with the handle is not one, and, with --github-output, appends
+`request=true|false` and `dataset=<name>` (empty without a request).
 Standard library only, Python 3.9 or later: the workflow runs it on the
 runner's own python3 before anything is installed.
 """
@@ -84,7 +86,8 @@ TAG = re.compile(r" {0,3}</?[A-Za-z]")
 
 class Decision(NamedTuple):
     """The input directory a text requests, the line asking for it, and why
-    each other line that starts with the handle is not a request."""
+    each other line that starts with the handle is not a request (or why
+    the text's requests conflict)."""
     dataset: Optional[str]
     line: Optional[int]
     notes: tuple
