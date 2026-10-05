@@ -10,11 +10,19 @@ Authorized users (listed in `.github/ai-controllers.json`) request a datasheet w
 
 - start with the assistant's handle (shown above), at the very start of the line;
 - continue with a space and the name of one directory under `data/sheets_d4dassistant/inputs/`, spelled exactly as the directory is, and nothing else;
-- start a paragraph: be the first line, or follow a blank line.
+- stand alone: have a blank line, or the start or end of the text, both before it and after it.
 
-The workflow generates the datasheet for that directory from the documents in it; the rest of the text is not read. Put a new dataset's documents under `data/sheets_d4dassistant/inputs/<name>/` first.
+Nothing else is a request (#4108): not the handle in a sentence, in a code span or code block, in a quote (`>`) or an HTML comment, and not the handle followed by anything but one input directory name. Nor is a request line read after a code fence or HTML block whose end the workflow cannot place (one opened on a list marker, for example), or after HTML that leaves something open (an unclosed comment or tag, or an element such as `<textarea>`), since the page may hide it. For those the workflow logs "no request" and does nothing. A text whose request lines name different directories holds no request.
 
-Nothing else is a request (#4108): not the handle in a sentence, in a code span or code block, in a quote (`>`) or an HTML comment, and not the handle followed by anything but one input directory name. For those the workflow logs "no request" and does nothing.
+**Which file is read.** The workflow generates the datasheet from one file: the first `.txt` or `.md` file under the directory, subdirectories included, with the paths sorted. It reads no other file there (no second `.txt` or `.md` file, and no `.pdf`, `.json` or `.html` file), and none of the rest of the text that holds the request. To generate from several documents, put them into one `.txt` or `.md` file.
+
+**Where the directory must be.** The workflow looks for it in the version of the repository it checks out for the event:
+
+- a request in an issue, or in a comment on an issue or in a pull request's conversation: the default branch;
+- a request in a pull request description, or in a review comment on its changes: the pull request's merge commit, so a pull request that adds the directory can request it in its own description;
+- a manual run of the workflow: the branch it is run on.
+
+The directory name must start with an ASCII letter or digit and hold only ASCII letters, digits, `_`, `.` and `-`, because the workflow passes it to shell commands. A request that names a directory that is not there, or one whose name breaks this rule, logs "no request" with the reason and gets no reply.
 
 ### What the Assistant Does
 
@@ -91,6 +99,7 @@ Only authorized users can trigger the assistant by mentioning `@d4dassistant`.
 - Check that you're in the authorized users list
 - Ensure you mentioned `@d4dassistant` (not `@d4d-assistant` or similar)
 - Check that the request line has exactly the form described above; the "Read the request" step of the workflow run logs why a text holds no request
+- If that log says the name is not an input directory, check that the directory is where the workflow looks for it (see "Where the directory must be" above)
 - Check GitHub Actions logs for errors
 
 **Generated D4D is incomplete:**

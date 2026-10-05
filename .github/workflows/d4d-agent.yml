@@ -171,13 +171,14 @@ jobs:
               controllers: allowedUsers.map(u => '@' + u).join(', ')
             };
 
-      # The authoritative decision (#4108). A request is one line that starts
-      # a paragraph with the assistant's handle at the very start of the line,
-      # followed by the name of one directory under
-      # data/sheets_d4dassistant/inputs/ and nothing else, outside code spans,
-      # fenced code, quotes and HTML comments. Anything else (a handle quoted
-      # in prose or code, an unknown dataset, extra words) logs "no request"
-      # and runs nothing. The rules are in the script's docstring.
+      # The authoritative decision (#4108). A request is one line with a blank
+      # line, or the start or end of the text, on each side: the assistant's
+      # handle at the very start of the line, then the name of one directory
+      # under data/sheets_d4dassistant/inputs/ and nothing else, outside code
+      # spans, fenced code, quotes and HTML blocks, and after no raw HTML that
+      # is left open. Anything else (a handle quoted in prose or code, an
+      # unknown dataset, extra words) logs "no request" and runs nothing. The
+      # rules are in the script's docstring.
       - name: Read the request
         id: request
         if: steps.detect.outputs.allowed == 'true'
@@ -232,6 +233,8 @@ jobs:
             echo "::error::the request names no input directory in this checkout: '$DATASET'"
             exit 1
           fi
+          # One file is the bundle: the first .txt or .md under the directory,
+          # paths sorted. The assistant's README says so (#4424).
           BUNDLE=$(find "data/sheets_d4dassistant/inputs/$DATASET" -type f \
                      \( -name '*.txt' -o -name '*.md' \) | sort | head -1)
           if [ -z "$BUNDLE" ]; then
