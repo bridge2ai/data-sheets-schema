@@ -58,6 +58,9 @@ carry and others do not, joined by key only, crediting a verified receipt
 path that `resolve_verified` follows into the entry; `receipted_where_empty`
 lists the slots a replicate leaves empty and yet receipts, and
 `removal_status` reads what the removals block (#2923) says of them.
+`nested_omission_candidates` (#3934) applies the same reading below that:
+to the fields of objects and the entries of nested lists, wherever a chain
+of single-object and keyed-list steps identifies them in every replicate.
 """
 from __future__ import annotations
 
@@ -572,6 +575,60 @@ def _into(paths: Mapping[str, int], entry: str) -> bool:
                for p, n in paths.items())
 
 
+def _keyed(lists: Mapping[str, list[Any]], *,
+           objects_only: bool = False) -> tuple[dict[tuple[str, str, int], dict[str, int]], int, int]:
+    """The n-way keyed join of one list per replicate: (key name, key value,
+    occurrence among that replicate's entries with the key) -> {replicate:
+    index}, in first-seen order, then the numbers of keyless entries and of
+    values over every replicate. The occurrence makes it the one-to-one
+    join `align` counts, so an entry is missing from a replicate exactly
+    where that join leaves it unpaired. With `objects_only`, an entry that
+    is not a mapping is a value, neither joined nor keyless; otherwise a
+    string entry is its own key and the value count is 0."""
+    from data_sheets_schema.receipts import _entry_key
+    where: dict[tuple[str, str, int], dict[str, int]] = {}
+    keyless = values = 0
+    for rep, entries in lists.items():
+        seen: Counter[tuple[str, str]] = Counter()
+        for i, entry in enumerate(entries):
+            if objects_only and not isinstance(entry, dict):
+                values += 1
+                continue
+            key = _entry_key(entry)
+            if key is None:
+                keyless += 1
+                continue
+            seen[key] += 1
+            where.setdefault((key[0], key[1], seen[key]), {})[rep] = i
+    return where, keyless, values
+
+
+def _status(held: Mapping[str, str],
+            resolved: Mapping[str, Mapping[str, int] | None]) -> tuple[list[str], list[str], str]:
+    """(receipted in, unreceipted, status) of a node the replicates in
+    `held` carry, each at its own path in its final record: a candidate
+    where a holder has a verified path on that node or below it (`_into`),
+    unmeasured where none does and some holder has no readable receipt,
+    else not a candidate."""
+    receipted = [rep for rep, path in held.items() if resolved.get(rep) is not None and _into(resolved[rep], path)]
+    unreceipted = [rep for rep in held if resolved.get(rep) is None]
+    return receipted, unreceipted, CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
+
+
+def _key_label(kname: str, kval: str, nth: int) -> str:
+    """An identified entry as a row names it: `name=B`, or `name=B (#2)`
+    for the second of a replicate's entries carrying that key."""
+    return f"{kname}={kval}" + (f" (#{nth})" if nth > 1 else "")
+
+
+def _held_in_all(result: Mapping[str, Any]) -> list[str]:
+    """The slots the entry readings start from: class-ranged (a slot
+    without a `kind` is taken as class-ranged), filled in every replicate,
+    and not in `COMMENTARY_KEYS`, in `result`'s order."""
+    return [name for name, r in result["slots"].items()
+            if r["state"] in PRESENT_STATES and r.get("kind", "nested") == "nested" and name not in COMMENTARY_KEYS]
+
+
 def entry_omission_candidates(records: Mapping[str, Mapping[str, Any]], result: Mapping[str, Any],
                               resolved: Mapping[str, Mapping[str, int] | None]) -> dict[str, Any]:
     """Receipt-backed omission candidates one level down (#3880 (1)): list
@@ -595,41 +652,156 @@ def entry_omission_candidates(records: Mapping[str, Mapping[str, Any]], result: 
     (one row per such entry: `slot`, `key`, `held_by`, `receipted_in`,
     `unreceipted`, `status`), `counts` by status, `keyless`, `measured` and
     `per_replicate` (replicate -> the number of candidate entries it lacks,
-    or None when no replicate has a readable receipt)."""
-    from data_sheets_schema.receipts import _entry_key
+    or None when no replicate has a readable receipt). Below these entries,
+    and in the fields of a slot holding one object, see
+    `nested_omission_candidates` (#3934)."""
     reps = list(result["replicates"])
     rows: list[dict[str, Any]] = []
     keyless = 0
-    for name, r in result["slots"].items():
-        if (r["state"] not in PRESENT_STATES or not r["counted"] or r.get("kind", "nested") != "nested"
-                or name in COMMENTARY_KEYS):
+    for name in _held_in_all(result):
+        if not result["slots"][name]["counted"]:
             continue
-        where: dict[tuple[str, str, int], dict[str, int]] = {}
-        for rep in reps:
-            seen: Counter[tuple[str, str]] = Counter()
-            for i, entry in enumerate(records[rep][name]):
-                key = _entry_key(entry)
-                if key is None:
-                    keyless += 1
-                    continue
-                seen[key] += 1
-                where.setdefault((key[0], key[1], seen[key]), {})[rep] = i
-        for (kname, kval, nth), held in where.items():
-            if len(held) == len(reps):
+        where, n, _values = _keyed({rep: records[rep][name] for rep in reps})
+        keyless += n
+        for (kname, kval, nth), at in where.items():
+            if len(at) == len(reps):
                 continue
-            receipted = [rep for rep, i in held.items()
-                         if resolved.get(rep) is not None and _into(resolved[rep], f"{name}[{i}]")]
-            unreceipted = [rep for rep in held if resolved.get(rep) is None]
-            status = CANDIDATE if receipted else UNMEASURED if unreceipted else NOT_CANDIDATE
-            rows.append({"slot": name, "key": f"{kname}={kval}" + (f" (#{nth})" if nth > 1 else ""),
-                         "held_by": list(held), "receipted_in": receipted, "unreceipted": unreceipted,
-                         "status": status})
+            receipted, unreceipted, status = _status({rep: f"{name}[{i}]" for rep, i in at.items()}, resolved)
+            rows.append({"slot": name, "key": _key_label(kname, kval, nth), "held_by": list(at),
+                         "receipted_in": receipted, "unreceipted": unreceipted, "status": status})
     measured = any(resolved.get(rep) is not None for rep in reps)
     per_replicate = {rep: (sum(1 for e in rows if e["status"] == CANDIDATE and rep not in e["held_by"])
                            if measured else None) for rep in reps}
     counts = Counter(e["status"] for e in rows)
     return {"entries": rows, "keyless": keyless, "measured": measured, "per_replicate": per_replicate,
             "counts": {k: counts.get(k, 0) for k in (CANDIDATE, NOT_CANDIDATE, UNMEASURED)}}
+
+
+#: The rows `nested_omission_candidates` classifies: a field of an object,
+#: and an entry of a list below the first level.
+NESTED_KINDS = ("field", "entry")
+
+
+def _below(node: Mapping[str, Any], at: Mapping[str, str], path: str, chain: str, basis: str,
+           resolved: Mapping[str, Mapping[str, int] | None], rows: list[dict[str, Any]], *,
+           first: bool = False) -> Counter[str]:
+    """`nested_omission_candidates`' walk below a node every replicate
+    holds, appending its rows to `rows` and returning the `keyless` and
+    `values` entries it met: `node` is replicate -> its value at the node,
+    `at` replicate -> the node's path in that replicate's final record.
+    The `first` level, a top-level list, is joined as
+    `entry_omission_candidates` joins it, and its entries that some
+    replicates lack and its keyless entries are that function's."""
+    n, met = len(node), Counter()
+    if all(isinstance(v, dict) for v in node.values()):
+        for k in sorted(set().union(*node.values()), key=str):
+            if k in EXCLUDED_SLOTS:
+                continue
+            held = {rep: f"{at[rep]}.{k}" for rep, v in node.items() if not is_empty(v.get(k))}
+            if len(held) == n:
+                if k not in COMMENTARY_KEYS:
+                    met += _below({rep: v[k] for rep, v in node.items()}, held, f"{path}.{k}",
+                                  f"{chain}.{k}", basis, resolved, rows)
+            elif held:
+                rows.append(_nested_row("field", f"{path}.{k}", f"{chain}.{k}", basis, held, resolved,
+                                        commentary=k in COMMENTARY_KEYS))
+    elif all(isinstance(v, list) for v in node.values()):
+        where, keyless, values = _keyed(node, objects_only=not first)
+        if not first:
+            met.update(keyless=keyless, values=values)
+        for (kname, kval, nth), idx in where.items():
+            held = {rep: f"{at[rep]}[{i}]" for rep, i in idx.items()}
+            step = f"{chain}[{_key_label(kname, kval, nth)}]"
+            if len(held) == n:
+                met += _below({rep: node[rep][i] for rep, i in idx.items()}, held, f"{path}[*]", step,
+                              "key", resolved, rows)
+            elif not first:
+                rows.append(_nested_row("entry", f"{path}[*]", step, "key", held, resolved))
+    return met
+
+
+def _nested_row(kind: str, path: str, chain: str, basis: str, held: Mapping[str, str],
+                resolved: Mapping[str, Mapping[str, int] | None], *, commentary: bool = False) -> dict[str, Any]:
+    """One `nested_omission_candidates` row; `held` is holder -> its path."""
+    if commentary:
+        receipted, unreceipted, status = [], [rep for rep in held if resolved.get(rep) is None], COMMENTARY
+    else:
+        receipted, unreceipted, status = _status(held, resolved)
+    return {"kind": kind, "path": path, "chain": chain, "basis": basis, "held_by": list(held),
+            "receipted_in": receipted, "unreceipted": unreceipted, "status": status}
+
+
+def nested_omission_candidates(records: Mapping[str, Mapping[str, Any]], result: Mapping[str, Any],
+                               resolved: Mapping[str, Mapping[str, int] | None]) -> dict[str, Any]:
+    """Receipt-backed omission candidates below the entries
+    `entry_omission_candidates` reads (#3934): the fields of objects and the
+    entries of nested lists that some replicates carry and others do not.
+    Pure.
+
+    The walk starts from the class-ranged slots every replicate fills, less
+    `COMMENTARY_KEYS` — a slot holding a list in every replicate, whose
+    entries `entry_omission_candidates` reads, and one holding one object in
+    every replicate, which it does not — and goes down only by steps that
+    identify one node in every replicate: a **single-object** step, to a
+    field of an object every replicate holds there, and a **keyed-list**
+    step, to an entry every replicate holds, identified as
+    `entry_omission_candidates` identifies one (`receipts._entry_key` and
+    its occurrence). Below the first level only an entry that is an object
+    is identified. A keyless object has only its index to be joined by, no
+    evidence of identity (#908); a string (or other scalar) entry is a
+    **value**, whose only identity is its exact text — most are the prose
+    items of a list of values (`ip_restrictions.restrictions`), where one
+    replicate's rewording of another's item would read as two items, each
+    missing from the other — so both are counted (`keyless`, `values`) and
+    never classified, as the items of a top-level list of values are not. A
+    top-level list's keyless entries are `entry_omission_candidates`' to
+    count. Nothing is read below a keyless entry, below a value that is a
+    list in one replicate and not in another (as `compare_nested` does not
+    descend there), below a field in `COMMENTARY_KEYS`, or below a node some
+    replicate lacks: that node is a row, and below it there is no identity
+    across every replicate.
+
+    A row is one step below a node every replicate holds: a **field** some
+    replicates fill (`is_empty`) and others do not — `EXCLUDED_SLOTS`
+    excepted, at any depth, as in `compare_nested` — or, below the first
+    level, an **entry** some replicates' lists carry and others' do not. A
+    field in `COMMENTARY_KEYS` (`notes`) is **commentary**: counted, never
+    classified, never a candidate a replicate omits (#3893). Any other row
+    is a **candidate** when a replicate holding it has a verified receipt
+    path (`resolve_verified`'s, resolved into its final record by identity)
+    on the node or below it, at the node's own path in that replicate — so
+    a receipt credits a node only through the same chain of entries. One on
+    the object or entry holding the node attests that object or entry, not
+    the field or entry another replicate lacks; one on a list covers only
+    the list (#721). It is **not_candidate** when every holder has a
+    readable receipt and none does, **unmeasured** otherwise.
+
+    Returns `rows` (`kind`: `field` or `entry`; `path`, as `compare_nested`
+    names it, `[*]` for each list step; `chain`, the same path naming each
+    entry by its key (`creators[name=Ada].affiliations[name=MIT]`);
+    `basis`, as in `compare_nested`: `single` when every step to the row is
+    a single-object step, else `key`; `held_by`, `receipted_in`,
+    `unreceipted`, `status`), `counts` (kind -> status -> rows), `keyless`
+    and `values` (entries of the nested lists read, over every replicate),
+    `measured` and `per_replicate` (replicate -> kind -> the candidate rows
+    it lacks, or None when no replicate has a readable receipt). Every
+    row's parent is held by every replicate, so a replicate missing from
+    `held_by` holds the parent and lacks that field or entry."""
+    reps = list(result["replicates"])
+    rows: list[dict[str, Any]] = []
+    met: Counter[str] = Counter()
+    for name in _held_in_all(result):
+        met += _below({rep: records[rep][name] for rep in reps}, {rep: name for rep in reps}, name, name,
+                      "single", resolved, rows, first=True)
+    measured = any(resolved.get(rep) is not None for rep in reps)
+    per_replicate = {rep: ({kind: sum(1 for e in rows if e["kind"] == kind and e["status"] == CANDIDATE
+                                      and rep not in e["held_by"]) for kind in NESTED_KINDS}
+                           if measured else None) for rep in reps}
+    statuses = (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY)
+    counts = Counter((e["kind"], e["status"]) for e in rows)
+    return {"rows": rows, "keyless": met["keyless"], "values": met["values"], "measured": measured,
+            "per_replicate": per_replicate,
+            "counts": {kind: {s: counts.get((kind, s), 0) for s in statuses} for kind in NESTED_KINDS}}
 
 
 def receipted_where_empty(result: Mapping[str, Any],
