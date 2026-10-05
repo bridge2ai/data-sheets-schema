@@ -14,7 +14,9 @@ This is the *our-mapping* deterministic arm. It differs from
 No inference and no gap-filling: a field appears only when the declared path
 resolves in the crate. Everything the table declares but the crate does not
 supply is reported as unfilled, and every table row that cannot be placed in a
-``Dataset`` record is reported with the reason.
+``Dataset`` record is reported with the reason. Where the table says why such
+a row maps nowhere (its ``Unplaced`` and ``Unplaced_Reason`` columns), the
+report gives that declaration too (#2915).
 """
 
 from __future__ import annotations
@@ -56,6 +58,18 @@ GRAPH_RE = re.compile(
 )
 NOT_A_PATH = re.compile(r"^(N/A|\s*|.*\s+MIME\s+parameter|d4d:.*)$", re.IGNORECASE)
 
+#: What the table's `Unplaced` column may say of a row whose D4D path places
+#: nowhere in a `Dataset` record, and how the report says it (#2915). A row
+#: `out_of_scope` maps nowhere by design; an `owner_question` row waits for a
+#: decision no rename makes: which slot, if any, should hold its value. The
+#: column's `Unplaced_Reason` says why, and
+#: `tests/test_rocrate/test_map.py::TestTableAgainstSchema` fails on a row
+#: that places nowhere without a declaration, or that places and keeps one.
+UNPLACED_KINDS = {
+    "out_of_scope": "out of scope",
+    "owner_question": "awaiting an owner's decision",
+}
+
 
 @dataclass
 class FieldResult:
@@ -86,6 +100,11 @@ class FieldResult:
     #: Outcome legend counts these apart, since "no route into a `Dataset`
     #: record" is not true of them (#3258).
     merge_undecided: bool = False
+    #: On an `unplaceable` row whose D4D path places nowhere, what the
+    #: table's `Unplaced` column declares of it (an `UNPLACED_KINDS` key);
+    #: empty where it declares nothing. `detail` carries the declared
+    #: reason, and the report's Outcome legend counts these (#2915).
+    unplaced: str = ""
 
 
 @dataclass
@@ -492,8 +511,10 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     # only ones where the arms agree on the values alone and not on the
     # list (#4194):
     # - A single-valued slot whose range is a class (`updates`,
-    #   `human_subject_research`). The converter, which joins only text into
-    #   one object, refuses the whole list, and this arm keeps the value.
+    #   `human_subject_research`, and `at_risk_populations`, which both arms
+    #   read from `d4d:atRiskPopulations` since #2915). The converter, which
+    #   joins only text into one object, refuses the whole list, and this
+    #   arm keeps the value.
     # - `collection_timeframes`, from a `rai:dataCollectionTimeframe` list
     #   holding an item written as a date (`2022`, `2022-09-01`,
     #   `9/1/2022`). The converter's `_timeframe` reads that list before
@@ -633,23 +654,34 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                                           status, detail, preview,
                                           rewritten_from))
 
+        def unplaceable(why):
+            # The table may say why this row maps nowhere: by design, or
+            # until an owner decides (#2915). The report gives the reason
+            # beside the schema's.
+            kind = (row.get("Unplaced") or "").strip()
+            if kind:
+                reason = (row.get("Unplaced_Reason") or "").strip()
+                why += (f"; {UNPLACED_KINDS.get(kind, kind)}, as the table "
+                        "declares" + (f": {reason}" if reason else ""))
+            record("unplaceable", why)
+            res.fields[-1].unplaced = kind
+
         # Can this row be placed in a Dataset record at all?
         if cls == TARGET_CLASS:
             slot = dataset_slots.get(slot_name)
             if slot is None:
-                record("unplaceable", f"'{slot_name}' is not a slot on {TARGET_CLASS}")
+                unplaceable(f"'{slot_name}' is not a slot on {TARGET_CLASS}")
                 continue
             target = ("root", slot)
         else:
             host_slot_name = placement.get(cls)
             if host_slot_name is None:
-                record("unplaceable",
-                       f"no {TARGET_CLASS} slot ranges over {cls}")
+                unplaceable(f"no {TARGET_CLASS} slot ranges over {cls}")
                 continue
             nested_slots = {s.name: s for s in sv.class_induced_slots(cls)}
             slot = nested_slots.get(slot_name)
             if slot is None:
-                record("unplaceable", f"'{slot_name}' is not a slot on {cls}")
+                unplaceable(f"'{slot_name}' is not a slot on {cls}")
                 continue
             target = (host_slot_name, slot)
 
@@ -851,6 +883,13 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     filled_rows = c.get("filled", 0)
     merge_undecided = sum(1 for f in res.fields
                           if f.status == "unplaceable" and f.merge_undecided)
+    # What the table declares of the rows that place nowhere, by kind, the
+    # known kinds first (#2915).
+    declared = [f.unplaced for f in res.fields
+                if f.status == "unplaceable" and f.unplaced]
+    declared_kinds = ", ".join(
+        f"{declared.count(kind)} {UNPLACED_KINDS.get(kind, kind)}"
+        for kind in dict.fromkeys([*UNPLACED_KINDS, *declared]) if kind in declared)
     # A slot is counted once however many rows filled it: nested rows fill
     # one object in their host slot (#2915).
     slots = len([k for k, v in res.record.items() if v not in (None, "", [], {})])
@@ -884,7 +923,9 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         + (f"; {merge_undecided} of them do resolve, but a `{TARGET_CLASS}` row "
            "already filled the host slot, from another crate property or from "
            "the same property with a different value, and merging the two is "
-           "not decided" if merge_undecided else "") + " |",
+           "not decided" if merge_undecided else "")
+        + (f"; the mapping table says why for {len(declared)} of them: "
+           f"{declared_kinds}" if declared else "") + " |",
         "",
         "## Fidelity of what was filled",
         "",

@@ -7,33 +7,33 @@ its declared path resolves in the crate.
 
 - Crate metadata: `data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json`
 - Mapping table: `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 table rows applied, plus the record's `id`, taken from the crate root)
-- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-09-29 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
-- Distinct top-level `Dataset` slots filled: 44 (from 44 filled rows, the `id` among them)
+- Validation: **PASS** — schema 3.0.0 / sha256 eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f / 2026-10-05 (`src/data_sheets_schema/schema/data_sheets_schema_all.yaml`)
+- Distinct top-level `Dataset` slots filled: 46 (from 46 filled rows, the `id` among them)
 
 ## Outcome
 
 | Status | Rows | Meaning |
 |--------|------|---------|
-| filled | 44 | path resolved; value placed (includes the record's `id`, which no table row supplies) |
-| subsumed | 4 | path resolved, but a `Dataset` row already placed the same crate value in the host slot |
-| empty | 31 | path valid but the crate has no value there |
-| unresolvable | 4 | the table declares no crate path |
-| unplaceable | 54 | no route into a `Dataset` record |
+| filled | 46 | path resolved; value placed (includes the record's `id`, which no table row supplies) |
+| subsumed | 6 | path resolved, but a `Dataset` row already placed the same crate value in the host slot |
+| empty | 33 | path valid but the crate has no value there |
+| unresolvable | 10 | the table declares no crate path |
+| unplaceable | 42 | no route into a `Dataset` record; the mapping table says why for 42 of them: 11 out of scope, 31 awaiting an owner's decision |
 
 ## Fidelity of what was filled
 
 | Mapping type | Filled fields |
 |---|---|
-| closeMatch | 11 |
-| exactMatch | 31 |
+| closeMatch | 12 |
+| exactMatch | 32 |
 | narrowMatch | 1 |
 | relatedMatch | 1 |
 
 | Information loss | Filled fields |
 |---|---|
-| minimal | 11 |
+| minimal | 12 |
 | moderate | 2 |
-| none | 31 |
+| none | 32 |
 
 Fields marked `moderate` or `high` loss carry a value that the mapping
 table itself flags as an imperfect representation of the crate's
@@ -43,6 +43,7 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 
 | D4D path | Status | Mapping | Loss | Source path | Value / note |
 |---|---|---|---|---|---|
+| DataGovernance.committee_name | filled | exactMatch | none | @graph[?@type='Dataset']['dataGovernanceCommittee'] | Satrajit Ghosh |
 | Dataset.acquisition_methods | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollection'] | [{"description": "Prospective observational study conducted at multiple specialty clinics… — string -> InstanceAcquisition.description; wrapped scalar into a list |
 | Dataset.annotation_analyses | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataAnnotationAnalysis'] | [{"description": "Questionnaire-based labels are generated using the standard scoring rul… — string -> AnnotationAnalysis.description |
 | Dataset.citation | filled | exactMatch | none | @graph[?@type='Dataset']['citation'] | Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Dorr, D., Payne, P., R… |
@@ -71,6 +72,7 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.labeling_strategies | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:dataAnnotationProtocol'] | [{"description": "Annotations for this dataset consist primarily of clinical labels and q… — string -> LabelingStrategy.description; wrapped scalar into a list |
 | Dataset.license | filled | exactMatch | none | @graph[?@type='Dataset']['license'] | https://physionet.org/content/b2ai-voice/view-license/3.0.0/ |
 | Dataset.license_and_use_terms | filled | closeMatch | moderate | @graph[?@type='Dataset']['license'] | {"name": "https://physionet.org/content/b2ai-voice/view-license/3.0.0/"} — string -> LicenseAndUseTerms.name |
+| Dataset.machine_annotation_tools | filled | closeMatch | minimal | @graph[?@type='Dataset']['rai:machineAnnotationTools'] | [{"name": "OpenSMILE for extraction of acoustic feature sets capturing temporal dynamics … — string -> MachineAnnotationTools.name; string -> MachineAnnotationTools.description |
 | Dataset.missing_data_documentation | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataCollectionMissingData'] | [{"description": "Phenotype tables include a row for a participant only when at least one… — string -> MissingDataDocumentation.description; wrapped scalar into a list |
 | Dataset.name | filled | exactMatch | none | @graph[?@type='Dataset']['name'] | B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information |
 | Dataset.other_tasks | filled | exactMatch | none | @graph[?@type='Dataset']['rai:dataUseCases'] | [{"description": "Development, training and fine-tuning of machine-learning models that a… — string -> OtherTask.description; wrapped scalar into a list |
@@ -89,24 +91,27 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.version_access | filled | relatedMatch | minimal | @graph[?@type='Dataset']['version'] | {"name": "3.0.0"} — string -> VersionAccess.name |
 | AnnotationAnalysis.description | subsumed | closeMatch | moderate | rai:dataAnnotationAnalysis | Dataset.annotation_analyses already carries this crate value (rai:dataAnnotationAnalysis); not placed a second time (#2915) |
 | CleaningStrategy.description | subsumed | closeMatch | moderate | rai:dataManipulationProtocol | Dataset.cleaning_strategies already carries this crate value (rai:dataManipulationProtocol); not placed a second time (#2915) |
-| CleaningStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'pipeline_step' is not a slot on CleaningStrategy |
-| CleaningStrategy.step_type | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'step_type' is not a slot on CleaningStrategy |
+| CleaningStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'pipeline_step' is not a slot on CleaningStrategy; awaiting an owner's decision, as the table declares: No slot for a step's place in a pipeline on `CleaningStrategy` at schema 3.0.0, and the schema never had one (`git log -S pipeline_step`). |
+| CleaningStrategy.step_type | unplaceable | closeMatch | high | rai:dataManipulationProtocol | 'step_type' is not a slot on CleaningStrategy; awaiting an owner's decision, as the table declares: No slot for a step type on `CleaningStrategy` at schema 3.0.0, and the schema never had one (`git log -S step_type`). |
+| DataSubset.is_data_split | unresolvable | unmapped | high | N/A | not a crate path |
+| DataSubset.is_subpopulation | unresolvable | unmapped | high | N/A | not a crate path |
 | Dataset.addressing_gaps | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:addressingGaps'] | @type=Dataset present but 'd4d:addressingGaps' empty or absent |
 | Dataset.anomalies | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:anomalies'] | @type=Dataset present but 'd4d:anomalies' empty or absent |
-| Dataset.bytes | unplaceable | exactMatch | none | @graph[?@type='Dataset']['contentSize'] | 'bytes' is not a slot on Dataset |
+| Dataset.at_risk_populations | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:atRiskPopulations'] | @type=Dataset present but 'd4d:atRiskPopulations' empty or absent |
+| Dataset.bytes | unplaceable | exactMatch | none | @graph[?@type='Dataset']['contentSize'] | 'bytes' is not a slot on Dataset; out of scope, as the table declares: `bytes` is a `File` slot, and `contentSize` is a rounded human string ('1.2 tb', '12.9 GB'), not a byte count. The record's size is `Dataset.total_size_bytes`, which its own row reads from the exact `evi:totalContentSizeBytes`. |
 | Dataset.compression | empty | closeMatch | minimal | @graph[?@type='Dataset']['evi:formats'] | @type=Dataset present but 'evi:formats' empty or absent |
 | Dataset.conforms_to | empty | exactMatch | none | @graph[?@type='Dataset']['conformsTo'] | @type=Dataset present but 'conformsTo' empty or absent |
 | Dataset.content_warnings | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:contentWarnings'] | @type=Dataset present but 'd4d:contentWarnings' empty or absent |
 | Dataset.created_on | empty | exactMatch | none | @graph[?@type='Dataset']['dateCreated'] | @type=Dataset present but 'dateCreated' empty or absent |
 | Dataset.data_collectors | empty | relatedMatch | moderate | @graph[?@type='Dataset']['contributor'] | @type=Dataset present but 'contributor' empty or absent |
-| Dataset.dialect | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['encodingFormat'] | 'dialect' is not a slot on Dataset |
+| Dataset.dialect | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['encodingFormat'] | 'dialect' is not a slot on Dataset; out of scope, as the table declares: `dialect` is a `File` slot; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. |
 | Dataset.discouraged_uses | empty | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | @type=Dataset present but 'prohibitedUses' empty or absent |
 | Dataset.distribution_dates | empty | exactMatch | none | @graph[?@type='Dataset']['dateCreated'] | @type=Dataset present but 'dateCreated' empty or absent |
 | Dataset.distribution_formats | empty | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | @type=Dataset present but 'evi:formats' empty or absent |
-| Dataset.encoding | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['evi:formats'] | 'encoding' is not a slot on Dataset |
+| Dataset.encoding | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['evi:formats'] | 'encoding' is not a slot on Dataset; out of scope, as the table declares: `encoding` is a `File` slot, one file's character encoding; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. `evi:formats` lists file formats, which the `Dataset.distribution_formats` row already reads. |
 | Dataset.errata | empty | exactMatch | none | @graph[?@type='Dataset']['correction'] | @type=Dataset present but 'correction' empty or absent |
-| Dataset.external_resource | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['relatedLink'] | 'external_resource' is not a slot on Dataset |
-| Dataset.hash | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:md5'] | 'hash' is not a slot on Dataset |
+| Dataset.external_resources | empty | closeMatch | minimal | @graph[?@type='Dataset']['relatedLink'] | @type=Dataset present but 'relatedLink' empty or absent |
+| Dataset.hash | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:md5'] | 'hash' is not a slot on Dataset; out of scope, as the table declares: `hash` is a `File` slot, the checksum of one file; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. |
 | Dataset.human_subject_research | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:humanSubject'] | @type=Dataset present but 'd4d:humanSubject' empty or absent |
 | Dataset.imputation_protocols | empty | exactMatch | none | @graph[?@type='Dataset']['rai:imputationProtocol'] | @type=Dataset present but 'rai:imputationProtocol' empty or absent |
 | Dataset.informed_consent | empty | exactMatch | none | @graph[?@type='Dataset']['d4d:informedConsent'] | @type=Dataset present but 'd4d:informedConsent' empty or absent |
@@ -115,68 +120,63 @@ content. Treat them as weaker evidence than `none`/`minimal` fields.
 | Dataset.is_tabular | empty | narrowMatch | minimal | @graph[?@type='Dataset']['encodingFormat'] | @type=Dataset present but 'encodingFormat' empty or absent |
 | Dataset.language | empty | exactMatch | none | @graph[?@type='Dataset']['inLanguage'] | @type=Dataset present but 'inLanguage' empty or absent |
 | Dataset.last_updated_on | empty | exactMatch | none | @graph[?@type='Dataset']['dateModified'] | @type=Dataset present but 'dateModified' empty or absent |
-| Dataset.machine_annotation_analyses | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['rai:machineAnnotationTools'] | 'machine_annotation_analyses' is not a slot on Dataset |
 | Dataset.maintainers | empty | relatedMatch | minimal | @graph[?@type='Dataset']['maintainer'] | @type=Dataset present but 'maintainer' empty or absent |
-| Dataset.md5 | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:md5'] | 'md5' is not a slot on Dataset |
-| Dataset.media_type | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['encodingFormat'] | 'media_type' is not a slot on Dataset |
+| Dataset.md5 | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:md5'] | 'md5' is not a slot on Dataset; out of scope, as the table declares: `md5` is a `File` slot, the checksum of one file; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. |
+| Dataset.media_type | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['encodingFormat'] | 'media_type' is not a slot on Dataset; out of scope, as the table declares: `media_type` is a `File` slot; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. |
 | Dataset.modified_by | empty | closeMatch | minimal | @graph[?@type='Dataset']['contributor'] | @type=Dataset present but 'contributor' empty or absent |
 | Dataset.page | empty | exactMatch | none | @graph[?@type='Dataset']['url'] | @type=Dataset present but 'url' empty or absent |
-| Dataset.path | unplaceable | narrowMatch | minimal | @graph[?@type='Dataset']['contentUrl'] | 'path' is not a slot on Dataset |
+| Dataset.path | unplaceable | narrowMatch | minimal | @graph[?@type='Dataset']['contentUrl'] | 'path' is not a slot on Dataset; out of scope, as the table declares: `path` locates one file or one file collection (`File.path`, `FileCollection.path`), not the dataset. The root's `contentUrl` already fills `Dataset.download_url`. |
 | Dataset.prohibited_uses | empty | exactMatch | none | @graph[?@type='Dataset']['prohibitedUses'] | @type=Dataset present but 'prohibitedUses' empty or absent |
 | Dataset.resources | empty | relatedMatch | moderate | @graph[?@type='Dataset']['hasPart'] | @type=Dataset present but 'hasPart' empty or absent |
 | Dataset.sampling_strategies | empty | relatedMatch | moderate | @graph[?@type='Dataset']['d4d:samplingStrategy'] | @type=Dataset present but 'd4d:samplingStrategy' empty or absent |
-| Dataset.sha256 | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:sha256'] | 'sha256' is not a slot on Dataset |
+| Dataset.sha256 | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:sha256'] | 'sha256' is not a slot on Dataset; out of scope, as the table declares: `sha256` is a `File` slot, the checksum of one file; `File` sits two levels below `Dataset` (`file_collections`, then `FileCollection.resources`), and a row places one level deep. |
 | Dataset.status | empty | exactMatch | none | @graph[?@type='Dataset']['creativeWorkStatus'] | @type=Dataset present but 'creativeWorkStatus' empty or absent |
 | Dataset.subpopulations | empty | relatedMatch | moderate | @graph[?@type='Dataset']['variableMeasured'] | @type=Dataset present but 'variableMeasured' empty or absent |
 | Dataset.subsets | empty | relatedMatch | high | @graph[?@type='Dataset']['hasPart'] | @type=Dataset present but 'hasPart' empty or absent |
 | Dataset.total_size_bytes | empty | exactMatch | none | @graph[?@type='Dataset']['evi:totalContentSizeBytes'] | @type=Dataset present but 'evi:totalContentSizeBytes' empty or absent |
 | Dataset.use_repository | empty | relatedMatch | minimal | @graph[?@type='Dataset']['relatedLink'] | @type=Dataset present but 'relatedLink' empty or absent |
 | Dataset.variables | unresolvable | unmapped | high | N/A | not a crate path |
-| Dataset.vulnerable_populations | unplaceable | exactMatch | none | @graph[?@type='Dataset']['rai:atRiskPopulations'] | 'vulnerable_populations' is not a slot on Dataset |
 | Dataset.was_derived_from | empty | exactMatch | none | @graph[?@type='Dataset']['isBasedOn'] | @type=Dataset present but 'isBasedOn' empty or absent |
-| DatasetCollection.completeness | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Completeness']['value'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.contact_email | unplaceable | exactMatch | none | @graph[?@type='Dataset']['contactEmail'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.data_governance_committee | unplaceable | exactMatch | none | @graph[?@type='Dataset']['dataGovernanceCommittee'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.data_sharing_agreement | unplaceable | exactMatch | none | @graph[?@type='Dataset']['dataSharingAgreement'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.funding_and_acknowledgements | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['funder'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.parent_datasets | unplaceable | relatedMatch | minimal | @graph[?@type='Dataset']['isPartOf'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.principal_investigator | unplaceable | exactMatch | none | @graph[?@type='Dataset']['principalInvestigator'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.provenance_and_lineage | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['generatedBy'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.quality_control | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Quality Control']['value'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.related_datasets | unplaceable | relatedMatch | minimal | @graph[?@type='Dataset']['relatedLink'] | no Dataset slot ranges over DatasetCollection |
-| DatasetCollection.summary_statistics | unplaceable | exactMatch | none | @graph[?@type='Dataset']['hasSummaryStatistics'] | no Dataset slot ranges over DatasetCollection |
-| EthicalReview.irb_id | unplaceable | closeMatch | moderate | rai:ethicalReview | 'irb_id' is not a slot on EthicalReview |
-| EvidenceMetadata.computation_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:computationCount'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.dataset_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:datasetCount'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.entities_with_checksums | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:entitiesWithChecksums'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.entities_with_summary_stats | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:entitiesWithSummaryStats'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.formats | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.schema_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:schemaCount'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.software_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:softwareCount'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.total_content_size_bytes | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:totalContentSizeBytes'] | no Dataset slot ranges over EvidenceMetadata |
-| EvidenceMetadata.total_entities | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:totalEntities'] | no Dataset slot ranges over EvidenceMetadata |
-| FormatDialect.delimiter | unplaceable | closeMatch | moderate | encodingFormat MIME parameter | no Dataset slot ranges over FormatDialect |
-| FormatDialect.header | unplaceable | closeMatch | moderate | encodingFormat MIME parameter | no Dataset slot ranges over FormatDialect |
-| HumanSubjectResearch.exemption | unplaceable | closeMatch | moderate | d4d:humanSubject | 'exemption' is not a slot on HumanSubjectResearch |
+| DatasetCollection.completeness | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Completeness']['value'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No completeness slot at schema 3.0.0; adding one is a schema decision. The crate roots also carry an unprefixed `completeness`, which this path does not read. |
+| DatasetCollection.contact_email | unplaceable | exactMatch | none | @graph[?@type='Dataset']['contactEmail'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No dataset-level contact slot at schema 3.0.0. An address fits `Person.email`, two levels down, under a `Person`-ranged slot such as `DataGovernance.committee_contact`; which one is a judgement. |
+| DatasetCollection.data_sharing_agreement | unplaceable | exactMatch | none | @graph[?@type='Dataset']['dataSharingAgreement'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No data-sharing-agreement slot at schema 3.0.0; whether `license_and_use_terms` or `ip_restrictions` should carry it is a judgement. No crate carries `dataSharingAgreement`. |
+| DatasetCollection.funding_and_acknowledgements | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['funder'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor, `Dataset.funders`, is already that row's target from the same `funder`. Remove the row, or retarget it to a `FundingMechanism` slot, where it would be reported subsumed. |
+| DatasetCollection.parent_datasets | unplaceable | relatedMatch | minimal | @graph[?@type='Dataset']['isPartOf'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor is `Dataset.parent_datasets` (slot_uri `schema:isPartOf`), but CHORUS's and CM4AI's `isPartOf` name an organization and a project, not datasets. Whether to place them is #4047's open question. |
+| DatasetCollection.principal_investigator | unplaceable | exactMatch | none | @graph[?@type='Dataset']['principalInvestigator'] | no Dataset slot ranges over DatasetCollection; out of scope, as the table declares: `principal_investigator` is a slot only on `Creator` (range `Person`), under `Dataset.creators`, which its own row fills from `author`. The crate value is free text naming a person; making a Creator or Person of it is a structural decision, not a rename. |
+| DatasetCollection.provenance_and_lineage | unplaceable | closeMatch | minimal | @graph[?@type='Dataset']['generatedBy'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No provenance or lineage slot at schema 3.0.0. `generatedBy` names the computation that made the data; `Dataset.was_derived_from`, read from `isBasedOn`, names a source, not that. |
+| DatasetCollection.quality_control | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Quality Control']['value'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No quality-control slot at schema 3.0.0. No crate carries this `additionalProperty`. |
+| DatasetCollection.related_datasets | unplaceable | relatedMatch | minimal | @graph[?@type='Dataset']['relatedLink'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: The successor `Dataset.related_datasets` ranges over `DatasetRelationship`, which requires a `relationship_type`; `relatedLink` states none, so a placed value would fail the schema. The `Dataset.external_resources` and `Dataset.use_repository` rows already read `relatedLink`. |
+| DatasetCollection.summary_statistics | unplaceable | exactMatch | none | @graph[?@type='Dataset']['hasSummaryStatistics'] | no Dataset slot ranges over DatasetCollection; awaiting an owner's decision, as the table declares: No summary-statistics slot at schema 3.0.0. No crate carries `hasSummaryStatistics`. |
+| EthicalReview.irb_id | unplaceable | closeMatch | moderate | rai:ethicalReview | 'irb_id' is not a slot on EthicalReview; awaiting an owner's decision, as the table declares: Left as it is pending #4043, which asks the owner to rule on this row's crate side (`rai:ethicalReview`). `irb_id` is not a slot on `EthicalReview`; `HumanSubjectResearch.irb_approval` is the nearest. |
+| EvidenceMetadata.computation_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:computationCount'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.dataset_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:datasetCount'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.entities_with_checksums | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:entitiesWithChecksums'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.entities_with_summary_stats | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:entitiesWithSummaryStats'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.formats | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:formats'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: The successor, `Dataset.distribution_formats`, is already that row's target from the same `evi:formats`, so a retarget would place the value twice. Remove the row, or keep it as a documented duplicate. |
+| EvidenceMetadata.schema_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:schemaCount'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.software_count | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:softwareCount'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| EvidenceMetadata.total_content_size_bytes | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:totalContentSizeBytes'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: The successor, `Dataset.total_size_bytes`, is already that row's target from the same `evi:totalContentSizeBytes`, so a retarget would place the value twice. Remove the row, or keep it as a documented duplicate. |
+| EvidenceMetadata.total_entities | unplaceable | exactMatch | none | @graph[?@type='Dataset']['evi:totalEntities'] | no Dataset slot ranges over EvidenceMetadata; awaiting an owner's decision, as the table declares: No `EvidenceMetadata` class and no slot for FAIRSCAPE evidence-graph counts at schema 3.0.0; adding one is a schema decision. |
+| FormatDialect.delimiter | unplaceable | closeMatch | moderate | encodingFormat MIME parameter | no Dataset slot ranges over FormatDialect; out of scope, as the table declares: `FormatDialect` describes one file's CSV dialect, and no `Dataset` slot ranges over it. The source is prose, not a crate path. |
+| FormatDialect.header | unplaceable | closeMatch | moderate | encodingFormat MIME parameter | no Dataset slot ranges over FormatDialect; out of scope, as the table declares: `FormatDialect` describes one file's CSV dialect, and no `Dataset` slot ranges over it. The source is prose, not a crate path. |
+| HumanSubjectResearch.exemption | unplaceable | closeMatch | moderate | d4d:humanSubject | 'exemption' is not a slot on HumanSubjectResearch; awaiting an owner's decision, as the table declares: No `exemption` slot on `HumanSubjectResearch` at schema 3.0.0; `regulatory_compliance` names frameworks, not an exemption. The crates carry `humanSubjectExemption`, not the `d4d:humanSubject` this row names. |
 | Instance.counts | unresolvable | unmapped | high | N/A | not a crate path |
 | Instance.data_topic | unresolvable | unmapped | high | N/A | not a crate path |
 | Instance.instance_type | unresolvable | unmapped | high | N/A | not a crate path |
-| LabelingStrategy.annotator_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'annotator_type' is not a slot on LabelingStrategy |
+| LabelingStrategy.annotator_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'annotator_type' is not a slot on LabelingStrategy; awaiting an owner's decision, as the table declares: No slot for an annotator type on `LabelingStrategy` at schema 3.0.0, and the schema never had one (`git log -S annotator_type`); `annotator_demographics` describes annotators, not their type. |
 | LabelingStrategy.description | subsumed | closeMatch | moderate | rai:dataAnnotationProtocol | Dataset.labeling_strategies already carries this crate value (rai:dataAnnotationProtocol); not placed a second time (#2915) |
-| LabelingStrategy.evidence_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'evidence_type' is not a slot on LabelingStrategy |
-| MachineAnnotation.tool_name | unplaceable | closeMatch | moderate | rai:machineAnnotationTools | no Dataset slot ranges over MachineAnnotation |
-| Maintenance.frequency | unplaceable | closeMatch | moderate | rai:dataReleaseMaintenancePlan | no Dataset slot ranges over Maintenance |
-| Maintenance.versioning_strategy | unplaceable | closeMatch | moderate | rai:dataReleaseMaintenancePlan | no Dataset slot ranges over Maintenance |
+| LabelingStrategy.evidence_type | unplaceable | closeMatch | high | rai:dataAnnotationProtocol | 'evidence_type' is not a slot on LabelingStrategy; awaiting an owner's decision, as the table declares: No slot for an ECO evidence type on `LabelingStrategy` at schema 3.0.0, and the schema never had one (`git log -S evidence_type`). |
+| MachineAnnotationTools.tools | subsumed | closeMatch | moderate | rai:machineAnnotationTools | Dataset.machine_annotation_tools already carries this crate value (rai:machineAnnotationTools); not placed a second time (#2915) |
+| Maintenance.versioning_strategy | unplaceable | closeMatch | moderate | rai:dataReleaseMaintenancePlan | no Dataset slot ranges over Maintenance; awaiting an owner's decision, as the table declares: The schema has no `Maintenance` class. A versioning strategy fits neither `UpdatePlan.update_details` (planned update types) nor `VersionAccess.version_details` without a judgement. |
 | PreprocessingStrategy.description | subsumed | closeMatch | moderate | rai:dataPreprocessingProtocol | Dataset.preprocessing_strategies already carries this crate value (rai:dataPreprocessingProtocol); not placed a second time (#2915) |
-| PreprocessingStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'pipeline_step' is not a slot on PreprocessingStrategy |
-| PreprocessingStrategy.step_type | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'step_type' is not a slot on PreprocessingStrategy |
-| QualityControl.accuracy | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Accuracy']['value'] | no Dataset slot ranges over QualityControl |
-| QualityControl.data_quality_report | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Data Quality Report']['value'] | no Dataset slot ranges over QualityControl |
-| QualityControl.fda_compliant | unplaceable | exactMatch | none | @graph[?@type='Dataset']['fdaRegulated'] | no Dataset slot ranges over QualityControl |
-| SamplingStrategy.details | unplaceable | relatedMatch | moderate | d4d:samplingStrategy | 'details' is not a slot on SamplingStrategy |
-| SamplingStrategy.strategy_type | unplaceable | relatedMatch | moderate | d4d:samplingStrategy | 'strategy_type' is not a slot on SamplingStrategy |
-| Subset.is_data_split | unplaceable | unmapped | high | N/A | no Dataset slot ranges over Subset |
-| Subset.is_sub_population | unplaceable | unmapped | high | N/A | no Dataset slot ranges over Subset |
-| ValidationMetrics.validation_method | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Validation Method']['value'] | no Dataset slot ranges over ValidationMetrics |
-| Variable.name | unplaceable | unmapped | high | N/A | no Dataset slot ranges over Variable |
-| Variable.type | unplaceable | unmapped | high | N/A | no Dataset slot ranges over Variable |
+| PreprocessingStrategy.pipeline_step | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'pipeline_step' is not a slot on PreprocessingStrategy; awaiting an owner's decision, as the table declares: No slot for a step's place in a pipeline on `PreprocessingStrategy` at schema 3.0.0, and the schema never had one (`git log -S pipeline_step`). |
+| PreprocessingStrategy.step_type | unplaceable | closeMatch | high | rai:dataPreprocessingProtocol | 'step_type' is not a slot on PreprocessingStrategy; awaiting an owner's decision, as the table declares: No slot for a step type on `PreprocessingStrategy` at schema 3.0.0, and the schema never had one (`git log -S step_type`). |
+| QualityControl.accuracy | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Accuracy']['value'] | no Dataset slot ranges over QualityControl; awaiting an owner's decision, as the table declares: No `QualityControl` class and no accuracy slot at schema 3.0.0. No crate carries this `additionalProperty`. |
+| QualityControl.data_quality_report | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Data Quality Report']['value'] | no Dataset slot ranges over QualityControl; awaiting an owner's decision, as the table declares: No `QualityControl` class and no data-quality-report slot at schema 3.0.0. No crate carries this `additionalProperty`. |
+| QualityControl.fda_compliant | unplaceable | exactMatch | none | @graph[?@type='Dataset']['fdaRegulated'] | no Dataset slot ranges over QualityControl; awaiting an owner's decision, as the table declares: No `QualityControl` class and no FDA slot at schema 3.0.0. `fdaRegulated` is a boolean (CHORUS true, VOICE false); whether `HumanSubjectResearch.regulatory_compliance` or `ExportControlRegulatoryRestrictions.other_compliance` should carry it is a judgement. |
+| SamplingStrategy.description | unresolvable | relatedMatch | moderate | d4d:samplingStrategy | not a crate path |
+| SamplingStrategy.strategies | unresolvable | relatedMatch | moderate | d4d:samplingStrategy | not a crate path |
+| UpdatePlan.frequency | subsumed | closeMatch | moderate | rai:dataReleaseMaintenancePlan | Dataset.updates already carries this crate value (rai:dataReleaseMaintenancePlan); not placed a second time (#2915) |
+| ValidationMetrics.validation_method | unplaceable | exactMatch | none | @graph[?@type='Dataset']['additionalProperty'][?name='Validation Method']['value'] | no Dataset slot ranges over ValidationMetrics; awaiting an owner's decision, as the table declares: No `ValidationMetrics` class and no validation-method slot at schema 3.0.0. No crate carries this `additionalProperty`. |
+| VariableMetadata.data_type | unresolvable | unmapped | high | N/A | not a crate path |
+| VariableMetadata.variable_name | unresolvable | unmapped | high | N/A | not a crate path |

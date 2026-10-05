@@ -55,7 +55,8 @@ would have revealed alone. Table went **133 → 136 rows** on 2026-07-27.
 
 Counts are top-level slots in the emitted record. `d4d rocrate map` separately
 reports *filled rows* (including the crate-root `id`, which no table row
-supplies), which now equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44). VOICE used to report 48, because four nested `*.description`
+supplies), which equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44; 33, 44
+and 46 since the #2915 retargets below). VOICE used to report 48, because four nested `*.description`
 rows overwrote host slots that Dataset rows had already filled and both rows
 were counted. Those four rows are now `subsumed` (#2915, #3269).
 
@@ -96,7 +97,24 @@ judgment, and altering them would change what the arm measures.
 - **`Dataset.vulnerable_populations`** — `vulnerable_populations` is **not a
   slot on `Dataset`** at all, so the row is `unplaceable` regardless of its
   path. It looks like a stale reference to a renamed or removed slot; it needs
-  re-targeting, not a prefix change.
+  re-targeting, not a prefix change. *Retargeted in #2915 (below).*
+
+### Stale slot names: retargeted or declared (#2915)
+
+`d4d rocrate map` still reported 54 of the 136 rows `unplaceable`, each naming
+a slot or class the schema does not have. Twelve had an obvious successor and
+now name it: `vulnerable_populations` → `at_risk_populations` (with the prefix
+correction above, to `d4d:atRiskPopulations`, the slot's own `slot_uri`, which
+CM4AI carries), `external_resource` → `external_resources`,
+`machine_annotation_analyses` → `machine_annotation_tools`,
+`DatasetCollection.data_governance_committee` → `DataGovernance.committee_name`,
+and the `Subset`, `Variable`, `SamplingStrategy`, `MachineAnnotation` and
+`Maintenance.frequency` rows. The other 42 say why they place nowhere, in two
+new columns: `Unplaced` (`out_of_scope`, 11 rows: the eight `File` slots,
+`contentSize`'s `bytes` among them, the two `FormatDialect` rows and
+`principal_investigator`; or `owner_question`, 31 rows) and `Unplaced_Reason`. The provenance report shows both, and
+`TestTableAgainstSchema` in `tests/test_rocrate/test_map.py` fails on a row
+that places nowhere without a declaration, or that places and keeps one.
 
 ### What remains upstream-only, and why it is correct
 

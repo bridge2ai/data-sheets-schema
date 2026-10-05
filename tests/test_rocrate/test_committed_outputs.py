@@ -23,7 +23,7 @@ import pytest
 import yaml
 
 from data_sheets_schema.rocrate_map import (
-    FULL_SCHEMA, PACKAGES_DIR, build_placement, validate,
+    FULL_SCHEMA, MAPPING_TSV, PACKAGES_DIR, build_placement, load_mapping, validate,
 )
 from data_sheets_schema.schema_view import shared_view
 
@@ -119,6 +119,28 @@ class TestCommittedMapperOutputs(unittest.TestCase):
                               text, re.M)
                 self.assertIsNotNone(m)
                 self.assertEqual(int(m.group(1)), len(record))
+
+    def test_every_unplaceable_row_reported_is_one_the_table_declares(self):
+        """#2915. A report's rows that place nowhere are the rows the current
+        table declares unplaced, each with the table's reason, so a report
+        left behind by a table edit fails here. A nested row whose merge is
+        undecided does place, so it is not among them (#3270)."""
+        declared = {row["D4D_Full_Path"].strip(): row["Unplaced_Reason"].strip()
+                    for row in load_mapping(ROOT / MAPPING_TSV)
+                    if (row.get("Unplaced") or "").strip()}
+        self.assertTrue(declared)
+        reports = sorted(PACKAGES.glob("*/processed/*_crate_mapping_provenance.md"))
+        self.assertTrue(reports)
+        for report in reports:
+            with self.subTest(report=report.name):
+                rows = re.findall(r"^\| (\S+) \| unplaceable \| (.*)$",
+                                  report.read_text(encoding="utf-8"), re.M)
+                placed_nowhere = {path: rest for path, rest in rows
+                                  if "into one object is not decided" not in rest}
+                self.assertEqual(set(declared), set(placed_nowhere))
+                self.assertEqual([], [path for path, rest in placed_nowhere.items()
+                                      if f"as the table declares: {declared[path]}"
+                                      not in rest])
 
 
 if __name__ == "__main__":

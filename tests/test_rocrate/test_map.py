@@ -16,6 +16,7 @@ from linkml_runtime import SchemaView
 from data_sheets_schema.rocrate_map import (
     FULL_SCHEMA,
     GRAPH_RE,
+    UNPLACED_KINDS,
     CrateEncodingError,
     MapResult,
     _normalize_datetime,
@@ -266,10 +267,163 @@ class TestMapping(unittest.TestCase):
         self.assertEqual(res.record, {})
 
     def test_unplaceable_rows_state_a_reason(self):
+        """Every row placed nowhere says why, the table's own reason with
+        the schema's. None has to be unplaceable: a table whose every row
+        places passes too (#2915)."""
         res = map_crate(GRAPH, self.rows, self.sv, "TEST")
-        unplaceable = [f for f in res.fields if f.status == "unplaceable"]
-        self.assertTrue(unplaceable)
-        self.assertTrue(all(f.detail for f in unplaceable))
+        declared = {row["D4D_Full_Path"].strip(): row for row in self.rows}
+        for f in res.fields:
+            if f.status != "unplaceable":
+                continue
+            with self.subTest(row=f.d4d_path):
+                self.assertTrue(f.detail)
+                row = declared[f.d4d_path]
+                self.assertEqual(f.unplaced, row["Unplaced"].strip())
+                self.assertIn(row["Unplaced_Reason"].strip(), f.detail)
+
+
+def unplaced_problems(rows, sv):
+    """`(d4d path, problem)` for each table row the schema contradicts.
+
+    A row's D4D path is judged by the placement `map_crate` applies, run on
+    a crate with nothing in it, where a row is `unplaceable` only because
+    its path places nowhere in a `Dataset` record. Such a row must say why
+    in the table's `Unplaced` column (an `UNPLACED_KINDS` key) and
+    `Unplaced_Reason`; a row that places must say neither, or the report
+    would call a placed row unplaced (#2915)."""
+    fields = [f for f in map_crate([], rows, sv, "TABLE").fields if f.from_table]
+    problems = []
+    for row, field in zip(rows, fields, strict=True):
+        kind = (row.get("Unplaced") or "").strip()
+        reason = (row.get("Unplaced_Reason") or "").strip()
+        if field.status != "unplaceable":
+            if kind or reason:
+                problems.append((field.d4d_path, "places, but the table "
+                                 "declares it unplaced"))
+        elif not kind:
+            problems.append((field.d4d_path, "places nowhere, and the table "
+                             f"does not say why: {field.detail}"))
+        elif kind not in UNPLACED_KINDS:
+            problems.append((field.d4d_path, f"declares {kind!r}, which is "
+                             f"not one of {sorted(UNPLACED_KINDS)}"))
+        elif not reason:
+            problems.append((field.d4d_path, f"declares {kind!r} with no reason"))
+    return problems
+
+
+class TestTableAgainstSchema(unittest.TestCase):
+    """#2915. 54 of the table's 136 rows named a slot or class the schema
+    does not have, and `map_crate` dropped every value they read, `exactMatch`
+    rows included, with nothing to say the table was wrong. Every row's D4D
+    path is now judged against the merged schema: it places in a `Dataset`
+    record, or the table says why it does not."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.sv = SchemaView(str(FULL_SCHEMA))
+        cls.rows = load_mapping()
+
+    def row(self, path):
+        return next(r for r in self.rows if r["D4D_Full_Path"].strip() == path)
+
+    def test_every_row_places_or_the_table_says_why(self):
+        self.assertEqual([], unplaced_problems(self.rows, self.sv))
+
+    def test_the_guard_fails_a_stale_name_restored(self):
+        """The pre-#2915 form of one row: the slot the schema renamed."""
+        rows = copy.deepcopy(self.rows)
+        stale = next(r for r in rows
+                     if r["D4D_Full_Path"].strip() == "Dataset.at_risk_populations")
+        stale["D4D_Full_Path"] = "Dataset.vulnerable_populations"
+        self.assertEqual(unplaced_problems(rows, self.sv), [(
+            "Dataset.vulnerable_populations", "places nowhere, and the table "
+            "does not say why: 'vulnerable_populations' is not a slot on Dataset")])
+
+    def test_the_guard_fails_a_declaration_on_a_row_that_places(self):
+        """A retargeted row that kept its declaration would be reported
+        unplaced while it places."""
+        for kind, reason in (("out_of_scope", "a reason"), ("", "a reason"),
+                             ("owner_question", "")):
+            rows = copy.deepcopy(self.rows)
+            title = next(r for r in rows if r["D4D_Full_Path"].strip() == "Dataset.title")
+            title["Unplaced"], title["Unplaced_Reason"] = kind, reason
+            with self.subTest(kind=kind, reason=reason):
+                self.assertEqual(unplaced_problems(rows, self.sv), [(
+                    "Dataset.title", "places, but the table declares it unplaced")])
+
+    def test_the_guard_fails_a_declaration_with_no_kind_it_knows_or_no_reason(self):
+        for kind, reason, problem in (
+                ("wontfix", "a reason", "declares 'wontfix', which is not one of "
+                 f"{sorted(UNPLACED_KINDS)}"),
+                ("out_of_scope", " ", "declares 'out_of_scope' with no reason"),
+                ("", "a reason", "places nowhere, and the table does not say why: "
+                 "'bytes' is not a slot on Dataset")):
+            rows = copy.deepcopy(self.rows)
+            row = next(r for r in rows if r["D4D_Full_Path"].strip() == "Dataset.bytes")
+            row["Unplaced"], row["Unplaced_Reason"] = kind, reason
+            with self.subTest(kind=kind, reason=reason):
+                self.assertEqual(unplaced_problems(rows, self.sv),
+                                 [("Dataset.bytes", problem)])
+
+    def test_the_retargeted_rows_place_the_crate_values_they_read(self):
+        """A crate holding each property a retargeted row reads fills the
+        slot the schema now has for it, and the record validates. The two
+        nested rows read the property a `Dataset` row already placed, so
+        they are subsumed, not placed twice."""
+        graph = copy.deepcopy(GRAPH)
+        graph[1].update({
+            "d4d:atRiskPopulations": "No minors enrolled.",
+            "relatedLink": "https://example.org/related",
+            "rai:machineAnnotationTools": ["OpenSMILE 3.0", "Praat 6.4"],
+            "dataGovernanceCommittee": "Data Access Committee",
+            "rai:dataReleaseMaintenancePlan": "Released annually.",
+        })
+        res = map_crate(graph, self.rows, self.sv, "TEST")
+        record = res.record
+        self.assertEqual(record["at_risk_populations"], {"name": "No minors enrolled."})
+        self.assertEqual(record["external_resources"],
+                         [{"name": "https://example.org/related"}])
+        self.assertEqual(record["machine_annotation_tools"],
+                         [{"name": "OpenSMILE 3.0"}, {"name": "Praat 6.4"}])
+        self.assertEqual(record["data_governance"],
+                         {"committee_name": "Data Access Committee"})
+        status = {f.d4d_path: f.status for f in res.fields}
+        self.assertEqual(status["MachineAnnotationTools.tools"], "subsumed")
+        self.assertEqual(status["UpdatePlan.frequency"], "subsumed")
+        self.assertEqual(status["DataGovernance.committee_name"], "filled")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapped_d4d.yaml"
+            path.write_text(yaml.safe_dump(record, sort_keys=False,
+                                           allow_unicode=True), encoding="utf-8")
+            self.assertEqual(validate(path), "PASS")
+
+    def test_the_report_says_what_the_table_declares(self):
+        res = map_crate(GRAPH, self.rows, self.sv, "TEST")
+        res.validation = "PASS"
+        field = next(f for f in res.fields if f.d4d_path == "Dataset.bytes")
+        self.assertEqual(field.unplaced, "out_of_scope")
+        self.assertEqual(field.detail, "'bytes' is not a slot on Dataset; out of "
+                         "scope, as the table declares: "
+                         + self.row("Dataset.bytes")["Unplaced_Reason"].strip())
+        field = next(f for f in res.fields if f.d4d_path == "EthicalReview.irb_id")
+        self.assertIn("awaiting an owner's decision, as the table declares: "
+                      "Left as it is pending #4043", field.detail)
+        kinds = [r["Unplaced"].strip() for r in self.rows if r["Unplaced"].strip()]
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "TEST_crate_mapping_provenance.md"
+            write_provenance(res, path, Path("crate/ro-crate-metadata.json"))
+            text = path.read_text(encoding="utf-8")
+        legend = next(line for line in text.splitlines()
+                      if line.startswith("| unplaceable | "))
+        self.assertTrue(legend.startswith(
+            f"| unplaceable | {res.counts()['unplaceable']} | no route into a "
+            "`Dataset` record"), legend)
+        self.assertTrue(legend.endswith(
+            f"; the mapping table says why for {len(kinds)} of them: "
+            f"{kinds.count('out_of_scope')} out of scope, "
+            f"{kinds.count('owner_question')} awaiting an owner's decision |"), legend)
+        self.assertRegex(text, r"\| Dataset\.bytes \| unplaceable \| .* out of "
+                               r"scope, as the table declares: `bytes` is a `File` slot")
 
 
 PROTOCOL = "rai:dataPreprocessingProtocol"
@@ -1052,8 +1206,11 @@ class TestNestedListsAcrossTheArms(unittest.TestCase):
                         if theirs_mixed != theirs_alone:
                             changed.add((slot, kind))
                             self.assertEqual(ours_alone, theirs_alone)
+        # The single-valued class-range slots; #2915 made
+        # `at_risk_populations` one the arms share.
         expected = {(slot, kind)
-                    for slot in ("updates", "human_subject_research")
+                    for slot in ("updates", "human_subject_research",
+                                 "at_risk_populations")
                     for kind in kinds if kind != "boolean"}
         expected.update(("collection_timeframes", kind) for kind in (
             "iso_date", "slash_date", "ambiguous_date", "digits"))
