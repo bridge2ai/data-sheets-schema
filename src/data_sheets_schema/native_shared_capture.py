@@ -821,6 +821,20 @@ def phase_replay(run, *, complete=False):
         report_path=paths['report'], receipt_path=paths['receipt'], working_directory=run.binding.working_directory)
     catalog, advance_before, advance_after, visible, seal_observations = _chronology(run)
     actions = {}
+    previous = None
+
+    def decision_at(digest):
+        # One immutable result for this captured run and this replay only.
+        # Release the previous buffers on a transition; never retain failures.
+        nonlocal previous
+        if previous is not None and previous[0] == digest:
+            return previous[1]
+        previous = None
+        value = _decision_at(run, digest)
+        if value.state != 'failed':
+            previous = (digest, value)
+        return value
+
     for line, _, frame in observed.rows(run.transcript):
         count = 0
         for item in run.history.records:
@@ -832,16 +846,16 @@ def phase_replay(run, *, complete=False):
             raw = stage.journal_bytes(selection_sha256=run.selection.registration.pin.sha256,
                 execution_sha256=run.binding.execution.pin.sha256, attempt_id=run.binding.attempt_id,
                 records=tuple(item.pin for item in run.history.records[:count]))
-            decision = _decision_at(run, c.sha(raw))
+            decision = decision_at(c.sha(raw))
         blocks = frame.get('message', {}).get('content', [])
         for block in blocks if type(blocks) is list else ():
             if type(block) is not dict:
                 continue
             identity = block.get('id') if block.get('type') == 'tool_use' else block.get('tool_use_id')
             if block.get('type') == 'tool_use' and identity in advance_before:
-                decision = _decision_at(run, advance_before[identity])
+                decision = decision_at(advance_before[identity])
             if block.get('type') == 'tool_result' and identity in advance_after:
-                decision = _decision_at(run, advance_after[identity])
+                decision = decision_at(advance_after[identity])
         emitted = phase.observe(frame, stage_decision=decision)
         if emitted:
             actions[line] = (emitted, phase.report())
