@@ -193,8 +193,8 @@ def policy_from_block(block: dict, *, policy: dict | None = None) -> dict | None
     return selected
 
 
-def evaluate_floor(coverage: dict, policy: dict) -> dict:
-    """Compare integer fractions exactly; never certify pending or empty data."""
+def coverage_counts(coverage: dict) -> tuple[int, int]:
+    """Validate the released integer coverage accounting without selecting a policy."""
     if not isinstance(coverage, dict):
         raise ValueError("receipt coverage must be a mapping")
     eligible = _integer(coverage.get("receiptable"), "receiptable")
@@ -232,6 +232,12 @@ def evaluate_floor(coverage: dict, policy: dict) -> dict:
     if all(coverage.get(k) is not None for k in ("never_receipted", "added_after_receipt")):
         if coverage["never_receipted"] + coverage["added_after_receipt"] != missing:
             raise ValueError("coverage phase-1 missing counters disagree")
+    return covered, eligible
+
+
+def evaluate_floor(coverage: dict, policy: dict) -> dict:
+    """Compare integer fractions exactly; never certify pending or empty data."""
+    covered, eligible = coverage_counts(coverage)
     registration = _identity(policy["identity"])
     if registration != policy.get("registration") or registration["runtime_policy_sha256"] != policy.get("runtime_policy_sha256"):
         raise ValueError("selected receipt policy differs from its pinned registration")

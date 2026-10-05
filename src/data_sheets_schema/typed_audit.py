@@ -189,7 +189,8 @@ class DerivationCache:
         exact_json(selected)
         # These bytes are checked on every lookup, not merely when cached.
         assets = {name: _sha(raw) for name, raw in omissions.captured_asset_bytes(captured_assets).items()}
-        identity = _json([selected, assets])
+        identity = _json([selected, assets] if captured_assets is None else
+                         ['captured_logical_schema_v1', selected, assets])
         key = (len(identity), _sha(identity))
         encoded = self._rows.get(key)
         if encoded is None:

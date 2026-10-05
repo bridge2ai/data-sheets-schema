@@ -108,3 +108,20 @@ def test_logical_replay_never_falls_back_and_separates_cache_identity(supplied, 
         capture_schema(supplied['schema_path'], strict=True, logical_paths=True)
     with pytest.raises(ValueError, match='captured schema'):
         typed.prepare(**supplied, captured_assets=captured)
+
+
+@pytest.mark.parametrize('captured_first', [False, True])
+def test_cache_mode_boundary_rederives_once_in_each_direction(supplied, monkeypatch, captured_first):
+    captured, packet = assets(), typed.prepare(**supplied)
+    worker = packet['plan']['workers'][0]['id']
+    cache, calls, original = typed.DerivationCache(), [], typed._derive_uncached
+    def counted(*args, **kwargs):
+        calls.append(kwargs.get('captured_assets') is not None)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(typed, '_derive_uncached', counted)
+    outputs = []
+    for mode in (captured_first, captured_first, not captured_first, not captured_first):
+        outputs.append(typed.worker_request(packet, worker, derivations=cache,
+                                            captured_assets=captured if mode else None))
+    assert calls == [captured_first, not captured_first]
+    assert all(output == outputs[0] for output in outputs)

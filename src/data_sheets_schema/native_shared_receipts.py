@@ -1,0 +1,232 @@
+"""Pure captured receipt accounting for native_shared_generation_v1.
+
+The native selection is distinct from both API receipt registrations. These
+functions perform no file, runtime, provider or environment operations.
+"""
+from __future__ import annotations
+
+from dataclasses import dataclass
+import hashlib
+from pathlib import Path
+
+import yaml
+
+from . import audit_omissions as omissions, receipts
+from . import native_shared_contract as contract
+from .chunking import chunk_texts, validate_manifest_mapping
+from .grounding import declared_bases_of
+from .receipt_completion_policy import coverage_counts
+from .schema_snapshot import SchemaSnapshot
+
+
+@dataclass(frozen=True)
+class ReceiptResult:
+    requested_paths: tuple[str, ...]
+    request_json: bytes
+    effective_receipt: bytes
+    result_json: bytes
+    carry_json: bytes
+
+
+def schema_snapshot(selection, kind='full'):
+    """Reconstruct the exact captured logical closure without a live resolver."""
+    rows = [schema for schema in selection.schemas if schema.kind == kind]
+    if len(rows) != 1:
+        raise ValueError('native stage requires exactly one selected schema closure')
+    schema = rows[0]
+    names = {role: name for name, role in schema.import_roles}
+    sources = tuple((names[item.pin.role], Path(item.pin.path), item.raw) for item in schema.sources)
+    return SchemaSnapshot(sources, (str(sources[0][1]), schema.closure_sha256))
+
+
+def omission_assets(selection):
+    selected = selection.document()['selection']['assets']
+    prefix = 'src/data_sheets_schema/omission_inventory_v1/'
+    rows = []
+    for name in omissions.ASSET_SHA256:
+        pin = selected.get(prefix + name)
+        if pin is None:
+            raise ValueError('native selection omits the captured omission contract')
+        raw = selection.raw(pin['path'])
+        if len(raw) != pin['bytes'] or contract.sha(raw) != pin['sha256']:
+            raise ValueError('native omission asset capture differs from selection')
+        rows.append((name, raw))
+    captured = tuple(rows)
+    omissions.captured_asset_bytes(captured)
+    return captured
+
+
+def output_ceiling(execution):
+    """Sole R assertion; no per-stage enforcement or session token budget."""
+    if execution.runtime_declaration.pin.sha256 != execution.runtime_declaration_sha256:
+        raise ValueError('native runtime declaration identity differs')
+    runtime = contract.strict_json(execution.runtime_declaration.raw, 'runtime declaration')
+    limits = runtime.get('limits')
+    if type(limits) is not dict:
+        raise ValueError('native runtime declaration lacks asserted output ceiling')
+    return contract.positive_int(limits.get('maxOutputTokens'), 'asserted runtime output ceiling')
+
+
+def policy(selection):
+    value = contract.parse_receipt_policy(selection.receipt_policy.raw)
+    if value['runtime_policy_sha256'] not in {
+            pin['sha256'] for pin in selection.document()['selection']['assets'].values()}:
+        raise ValueError('native receipt policy is outside the selected asset closure')
+    return value
+
+
+def floor(coverage, selection):
+    """The released strict counters and exact fraction comparison, native authority."""
+    covered, eligible = coverage_counts(coverage)
+    chosen = policy(selection)['coverage_floor']
+    result = {'with_receipt': covered, 'receiptable': eligible, 'floor': chosen,
+              'passed': False, 'registration_sha256': selection.receipt_policy.pin.sha256}
+    if chosen['state'] == 'pending':
+        return {**result, 'state': 'pending', 'reason': 'diagnostic pilot; coverage floor not registered'}
+    if eligible == 0:
+        return {**result, 'state': 'not_applicable', 'reason': 'no eligible leaves; coverage unmeasurable'}
+    passed = covered * chosen['denominator'] >= eligible * chosen['numerator']
+    return {**result, 'state': 'passed' if passed else 'failed', 'passed': passed}
+
+
+def _inputs(selection, phase1):
+    chosen = selection.document()['inputs']
+    bounds = selection.bounds()
+    for item in (phase1.full, phase1.original_receipt):
+        if len(item.raw) > min(bounds['max_input_bytes'], contract.HARD_LIMITS['original_full_bytes']):
+            raise ValueError('phase-1 input exceeds the supplied native byte bound')
+    full = omissions._mapping(phase1.full.raw, 'sealed native full')
+    receipt = omissions._mapping(phase1.original_receipt.raw, 'sealed native receipt')
+    bundle = selection.raw(chosen['bundle']['path'])
+    manifest = omissions._mapping(selection.raw(chosen['chunk_manifest']['path']), 'captured chunks')
+    validate_manifest_mapping(manifest, bundle, manifest.get('bundle'))
+    md5 = hashlib.md5(bundle).hexdigest()
+    if receipt.get('bundle_md5') != md5:
+        raise ValueError('native original receipt differs from captured bundle')
+    texts = dict(zip((row['id'] for row in manifest['chunks']),
+                     chunk_texts(bundle.decode('utf-8'), manifest['chunks'])))
+    if len(receipts.populated_leaves(full)) > bounds['max_populated_paths']:
+        raise ValueError('complete native populated inventory exceeds the global bound')
+    snapshot = schema_snapshot(selection)
+    # The released rule uses the selected root's declared prefixes. Explicit
+    # empty bases are meaningful; never fall back to the current installation.
+    bases = tuple(declared_bases_of(omissions._mapping(snapshot.sources[0][2], 'captured schema')))
+    catalog = omissions._schema(snapshot.sources[0][1], schema_snapshot=snapshot, logical_paths=True)
+    # LinkML's URIorCURIE import names are string subclasses. The released
+    # omission wire serializes them as strings; retain that exact JSON meaning.
+    catalog = contract.strict_json(omissions._json(catalog).encode('utf-8'),
+                                   'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+    context = omissions._mapping(selection.raw(chosen['context']['path']), 'scope context', json_only=True)
+    owners = omissions._owners(full, catalog, context['vocabulary'])
+    scopes = [row['owner'] for row in context['scopes']]
+    if scopes.count('') != 1 or len(set(scopes)) != len(scopes) or any(p not in owners for p in scopes):
+        raise ValueError('native scope must name distinct existing full-record owners and root once')
+    return full, receipt, manifest, texts, md5, bases, catalog, owners
+
+
+def prepare(selection, execution, phase1):
+    full, receipt, manifest, texts, md5, bases, catalog, owners = _inputs(selection, phase1)
+    chosen = selection.document()['inputs']
+    paths = receipts.uncovered_receiptable_leaves(receipt, manifest, texts, full, md5,
+                                                  original=full, identifier_bases=bases)
+    return {'protocol': contract.NAME, 'stage': 'receipt',
+        'selection_sha256': selection.registration.pin.sha256,
+        'receipt_policy': policy(selection),
+        'phase1_seal_sha256': phase1.seal.pin.sha256,
+        'original_full_sha256': phase1.full.pin.sha256,
+        'original_receipt_sha256': phase1.original_receipt.pin.sha256,
+        'record_yaml': phase1.full.raw.decode('utf-8'),
+        'receipt_yaml': phase1.original_receipt.raw.decode('utf-8'),
+        'bundle': selection.raw(chosen['bundle']['path']).decode('utf-8'),
+        'manifest': selection.raw(chosen['chunk_manifest']['path']).decode('utf-8'),
+        'schema': catalog, 'owner_classes': owners, 'requested_paths': paths,
+        'max_output_tokens': output_ceiling(execution),
+        'output_limit_basis': 'asserted runtime output ceiling; not per-stage enforcement or a whole-session token budget',
+        'response_contract': 'Return only {rereceipt: [...]}; exactly one existing path and receipt {chunk,snippet} or unsupported:true with reason per requested leaf. Verified quotes do not establish semantic support.'}
+
+
+def complete(selection, execution, phase1, response_raw):
+    request = prepare(selection, execution, phase1)
+    full, receipt, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1)
+    listed = request['requested_paths']
+    if response_raw is None:
+        if listed:
+            raise ValueError('receipt response is mandatory for every uncovered leaf')
+        answers, problem = [], None
+    else:
+        if not listed:
+            raise ValueError('zero-work receipt cannot consume a model response')
+        if type(response_raw) is not bytes or len(response_raw) > min(
+                selection.bounds()['max_response_bytes'], omissions.MAX_RESPONSE_BYTES):
+            raise ValueError('receipt response exceeds the supplied bound')
+        problem = None
+        try:
+            parsed = omissions._mapping(response_raw, 'native receipt response')
+            contract.exact(parsed, {'rereceipt'}, 'native receipt answer')
+            answers = parsed['rereceipt']
+            if type(answers) is not list:
+                raise ValueError('rereceipt must be a list')
+        except ValueError as exc:
+            answers, problem = [], str(exc)
+    before = receipts.check(receipt, manifest, texts, full, md5, full,
+                             instrument_version=4, identifier_bases=bases)
+    merged = receipts.apply_rereceipt(receipt, full, answers, texts, listed=listed, instrument_version=4)
+    after = receipts.check(merged['receipt'], manifest, texts, full, md5, full,
+                            instrument_version=4, identifier_bases=bases)
+    supplied = {row['path'] for row in answers if type(row) is dict and type(row.get('path')) is str and row['path'] in listed}
+    rejected = {row['path'] for row in merged['rejections'] if type(row.get('path')) is str and row['path'] in listed}
+    unanswered = [path for path in listed if path not in supplied]
+    pending = receipts.uncovered_receiptable_leaves(merged['receipt'], manifest, texts, full, md5,
+                                                    original=full, identifier_bases=bases)
+    accepted = merged['added'] + merged['already_present'] + merged['unsupported']
+    effective = (phase1.original_receipt.raw if response_raw is None else
+        yaml.safe_dump(merged['receipt'], sort_keys=False, allow_unicode=True, width=10000).encode('utf-8'))
+    result = {'protocol': contract.NAME, 'receipt_instrument_version': 4,
+        'selection_sha256': selection.registration.pin.sha256,
+        'policy_sha256': selection.receipt_policy.pin.sha256,
+        'request_sha256': contract.sha(contract.canonical(request)),
+        'response_sha256': None if response_raw is None else contract.sha(response_raw),
+        'original_receipt_sha256': phase1.original_receipt.pin.sha256,
+        'effective_receipt_sha256': contract.sha(effective),
+        'state': 'answers_complete' if accepted == len(listed) and not merged['rejected'] and not problem else 'answers_incomplete',
+        'response_problem': problem, 'requested_paths': listed, 'unanswered_paths': unanswered,
+        'rejected_paths': [path for path in listed if path in rejected], 'still_uncovered_paths': pending,
+        'counts': {'requested': len(listed), 'answers_received': len(answers), 'accepted': accepted,
+            'unanswered': len(unanswered), 'rejected_answers': merged['rejected'], 'rejected_paths': len(rejected),
+            'receipts_added': merged['added'], 'already_present': merged['already_present'],
+            'unsupported': merged['unsupported'], 'never_receipted_before': len(listed),
+            'never_receipted_after': len(pending), 'status_reversals_added': len(merged['status_changed'])},
+        'unsupported_audit_candidates': merged['unsupported_paths'], 'rejections': merged['rejections'],
+        'added_pairs': merged['added_pairs'], 'before': before, 'after': after,
+        'coverage_floor': floor(after['slots'], selection), 'semantic_support': 'unverified'}
+    result_raw = contract.canonical(result)
+    carry = {'selection_sha256': selection.registration.pin.sha256,
+        'original_full_sha256': phase1.full.pin.sha256,
+        'original_receipt_sha256': phase1.original_receipt.pin.sha256,
+        'effective_receipt_sha256': contract.sha(effective), 'result_sha256': contract.sha(result_raw),
+        'response_sha256': result['response_sha256'],
+        'unsupported_audit_candidates': merged['unsupported_paths'],
+        'unanswered_paths': unanswered, 'rejected_paths': result['rejected_paths'],
+        'rejections': merged['rejections'], 'added_pairs': merged['added_pairs'],
+        'scientific_support': 'unverified; independent audit required, no deletion instruction'}
+    return ReceiptResult(tuple(listed), contract.canonical(request), effective, result_raw, contract.canonical(carry))
+
+
+def check_final(selection, execution, phase1, completion, *, final_full, final_receipt):
+    """Check final coverage against the same selected original/effective bytes."""
+    if (completion.selection_sha256 != selection.registration.pin.sha256
+            or completion.execution_sha256 != execution.execution.pin.sha256
+            or completion.phase1_seal_sha256 != phase1.seal.pin.sha256
+            or final_receipt != completion.effective_receipt.raw):
+        raise ValueError('final native receipt lineage differs from checked stage completion')
+    original, _, manifest, texts, md5, bases, _, _ = _inputs(selection, phase1)
+    full = omissions._mapping(final_full, 'native final full')
+    receipt = omissions._mapping(final_receipt, 'native effective receipt')
+    block = receipts.check(receipt, manifest, texts, full, md5, original,
+                           instrument_version=4, identifier_bases=bases)
+    return {**block, 'expected': True, 'checked': True,
+            'coverage_floor': floor(block['slots'], selection),
+            'native_shared_receipt_policy': {'sha256': selection.receipt_policy.pin.sha256,
+                'raw_json': selection.receipt_policy.raw.decode('utf-8')},
+            'identity_rules': {'basis': 'captured native full schema', 'identifier_bases': [list(p) for p in bases]},
+            'native_stage_completion_history_sha256': completion.history_sha256}
