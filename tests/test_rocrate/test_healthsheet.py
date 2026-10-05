@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -201,6 +202,40 @@ class TestOrigin(unittest.TestCase):
         lines = text.splitlines()
         source = next(i for i, line in enumerate(lines) if line.startswith("Source: "))
         self.assertEqual(lines[source + 1:source + 3], ["Origin: Clinic portal export", ""])
+
+
+class TestDefaultName(unittest.TestCase):
+    """Every place that states the default file name states the one the
+    code writes: a record that is not the profile's is named after the
+    project it is filed under, not after the record's file (#1493, #4420)."""
+
+    @staticmethod
+    def _stated_names(text, project):
+        """Each `…_healthsheet_only.txt` a text names, with its project
+        placeholder filled in."""
+        return {re.sub(r"\{project\}", project, found, flags=re.IGNORECASE)
+                for found in re.findall(r"[^\s`(]*_healthsheet_only\.txt", text or "")}
+
+    def test_the_stated_default_name_is_the_name_written(self):
+        import click.testing
+        from data_sheets_schema.cli.healthsheet import healthsheet as cli
+        command = cli.commands["bundle"]
+        stated = {"the --name help": next(p.help for p in command.params if p.name == "name"),
+                  "the command's help": command.help,
+                  "build_bundle's docstring": build_bundle.__doc__}
+        for profile in ("bridge2ai", "neutral"):
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as d, \
+                    mock.patch.dict(os.environ, {"D4D_PROFILE": profile}):
+                record = Path(d) / "clinic_record.json"
+                record.write_text(json.dumps(FOREIGN), encoding="utf-8")
+                out = Path(d) / "out"
+                r = click.testing.CliRunner().invoke(
+                    cli, ["bundle", "--record", str(record), "--project", "CLINIC", "--output-dir", str(out)])
+                self.assertEqual(r.exit_code, 0, r.output)
+                written = sorted(p.name for p in out.iterdir())
+                self.assertEqual(written, ["CLINIC_healthsheet_only.txt"])
+                for where, text in stated.items():
+                    self.assertEqual(self._stated_names(text, "CLINIC"), set(written), where)
 
 
 class TestArmRegistration(unittest.TestCase):

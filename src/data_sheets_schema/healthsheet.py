@@ -155,12 +155,15 @@ def build_bundle(record_path: Path | None = None,
                  output_dir: Path = OUTPUT_DIR, *,
                  name: str | None = None,
                  project: str | None = None) -> tuple[Path, HealthsheetStats]:
-    """`name` is the bundle's file name: the caller's, else the active
-    profile's, else derived from the record's stem. `project` is the
-    dataset the bundle identifies itself as: the caller's, else the
-    active profile's (#1464). The `Origin:` line is the profile's for its
-    own record, whatever project the caller names, and absent for any
-    other record (#4009)."""
+    """`name` is the bundle's file name: the caller's; else, for the active
+    profile's own record filed under the profile's project, the profile's
+    bundle name; else `{project}_healthsheet_only.txt` (not the record's
+    stem, #1493), refused when that is any profile's bundle name (#1543,
+    #1565). `project` is the dataset the bundle identifies itself as: the
+    caller's, else the active profile's for its own record only (#1464,
+    #1493). The `Origin:` line is the profile's for its own record,
+    whatever project the caller names, and absent for any other record
+    (#4009)."""
     record_path = _record(record_path)
     # The profile's name and project describe the profile's *own* record;
     # any other record names its project and gets its own file (#1493).
