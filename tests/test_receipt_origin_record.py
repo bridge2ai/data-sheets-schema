@@ -276,10 +276,15 @@ def test_backfill_writes_unknown_with_no_transcript_and_keeps_a_measurement(tmp_
     assert f"({measured['origin']['contemporaneous']} contemporaneous, 0 post-draft)" in summary
     bc.apply(prov, again, overwrite=True)
     assert _body(prov)["receipts"]["origin"] == measured
-    # An origin that is not this receipt's is not carried over its counts.
+    # An origin that is not this receipt's is not carried over its counts,
+    # and the line says the measurement stopped applying rather than going
+    # silent as for a record never measured.
     receipt.write_text(receipt.read_text(encoding="utf-8") + "# edited\n", encoding="utf-8")
-    moved = bc.compute(prov, only={"receipts"})["receipts"]["origin"]
+    moved_blocks = bc.compute(prov, only={"receipts"})
+    moved = moved_blocks["receipts"]["origin"]
     assert moved["status"] == "unknown" and moved["prior"] == measured
+    assert moved_blocks["receipts"]["checked"] and ror.ever_measured(moved) and not ror.measured(moved)
+    assert bc.summarise(moved_blocks).endswith(" snippets (origin unknown)")
 
 
 def test_an_api_path_record_says_why_there_is_no_transcript(tmp_path):
@@ -384,6 +389,25 @@ def test_check_write_with_a_transcript_records_the_split_beside_snippets_verifie
     assert "receipt origin: 6 contemporaneous" in again.output
 
 
+def test_check_says_when_the_receipt_moved_away_from_its_measured_origin(tmp_path, check):
+    """A measurement the receipt no longer matches is printed as unknown with
+    the reason, and kept under `prior`; never the old split, never silence."""
+    r, transcript, prov = _checked_run(tmp_path)
+    assert check(r, prov, "--write", "--transcript", str(transcript)).exit_code == 0
+    origin = _body(prov)["receipts"]["origin"]
+    r.receipt.write_text(r.receipt.read_text(encoding="utf-8") + "# edited after the run\n", encoding="utf-8")
+    result = check(r, prov, "--write")
+    assert result.exit_code == 0, result.output
+    lines = result.output.splitlines()
+    summary = next(i for i, text in enumerate(lines) if "snippets" in text and "verified" in text)
+    assert lines[summary + 1].strip().startswith("receipt origin: unknown — the receipt on disk (sha256 "
+                                                 f"{_sha(r.receipt)}) is not the receipt"), result.output
+    assert "6 contemporaneous" not in result.output
+    written = _body(prov)["receipts"]
+    assert written["checked"] and written["origin"]["status"] == "unknown" and written["origin"]["prior"] == origin
+    assert ror.split(written) is None
+
+
 def test_check_without_a_transcript_prints_what_it_printed_before(tmp_path, check):
     r, _, prov = _checked_run(tmp_path)
     result = check(r, prov, "--write")
@@ -411,7 +435,13 @@ def test_a_withheld_write_says_so_instead_of_ticking(tmp_path, check):
     result = check(r, prov, "--write", "--transcript", str(transcript))
     assert result.exit_code == 0, result.output
     assert "✓ receipts block written" not in result.output
-    assert "not written" in result.output and "receipt origin read here is not written either" in result.output
+    assert "not written" in result.output
+    assert "the receipt origin read from --transcript is not written either" in result.output
+    assert _body(prov)["receipts"] == kept
+    # With no --transcript nothing was read, so nothing read is said to be lost.
+    plain = check(r, prov, "--write")
+    assert plain.exit_code == 0, plain.output
+    assert "not written" in plain.output and "receipt origin" not in plain.output
     assert _body(prov)["receipts"] == kept
 
 

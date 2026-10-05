@@ -476,15 +476,16 @@ def summarise(blocks: dict[str, Any]) -> str:
     if "receipts" not in blocks:
         pass
     elif rcp.get("checked"):
-        # Beside the snippets, the origin split where a transcript was read
-        # (#2933). An origin read from none says nothing here: that is every
-        # record the recorder writes during a run, whose line stays as it was.
-        from data_sheets_schema.receipt_origin_record import measured, split
+        # Beside the snippets, the origin split where a transcript was read,
+        # now or before (#2933). An origin read from none says nothing here:
+        # that is every record the recorder writes during a run, whose line
+        # stays as it was.
+        from data_sheets_schema.receipt_origin_record import ever_measured, split
         origin = split(rcp)
         bits.append(f"receipts {rcp['chunks']['reviewed']}/{rcp['chunks']['total']} chunks, "
                     f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets"
                     + (f" ({origin['contemporaneous']} contemporaneous, {origin['post_draft']} post-draft)"
-                       if origin is not None else " (origin unknown)" if measured(rcp.get("origin")) else ""))
+                       if origin is not None else " (origin unknown)" if ever_measured(rcp.get("origin")) else ""))
     else:
         bits.append("receipts —" if rcp.get("expected") else "receipts n/a")
     return " · ".join(bits)

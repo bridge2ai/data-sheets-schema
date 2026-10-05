@@ -94,6 +94,14 @@ def _last_measurement(prior: Any) -> dict[str, Any] | None:
     return None
 
 
+def ever_measured(block: Any) -> bool:
+    """Whether a transcript was read for this block, now or before: a
+    measurement, or an `unknown` keeping one under `prior` because the
+    receipt changed after it. The summaries print the origin for these: a
+    measurement that stopped applying says so rather than going silent."""
+    return _last_measurement(block) is not None
+
+
 def _sha256(path: Path) -> str | None:
     try:
         return hashlib.sha256(Path(path).read_bytes()).hexdigest()

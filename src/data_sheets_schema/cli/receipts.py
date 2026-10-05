@@ -47,7 +47,7 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
 @click.option("--full-at-run", type=click.Path(dir_okay=False, path_type=Path),
               help="with --transcript: the full record's path as the transcript spelled it, where it has moved since the run")
 def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
-          transcripts=(), receipt_at_run=None, full_at_run=None):
+          transcripts, receipt_at_run, full_at_run):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -138,11 +138,11 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
                                      transcripts=transcripts, receipt_at_run=receipt_at_run, full_at_run=full_at_run,
                                      api_path=bool(isinstance(record, dict) and record.get("api_usage")),
                                      recorded_by="d4d receipts check")
-    # Printed only where a transcript was read, now or before: the playbook
-    # runs this command mid-run with none, and what it prints there is
-    # unchanged (#2933).
+    # Printed only where a transcript was read, now or before (a measurement
+    # the receipt has since moved away from says so): the playbook runs this
+    # command mid-run with none, and what it prints there is unchanged (#2933).
     origin_lines = ([ror.line(block)] + [f"· {r}" for r in (block["origin"].get("reasons") or [])[1:]]
-                    if ror.measured(block["origin"]) else [])
+                    if ror.ever_measured(block["origin"]) else [])
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
@@ -170,7 +170,7 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             # (#907); the tick said it was written, origin included (#2933).
             click.echo(f"   · not written: {p['provenance']} keeps its checked receipts block, which this "
                        "unchecked recomputation does not replace (#907)"
-                       + ("; the receipt origin read here is not written either" if ror.measured(block["origin"]) else ""))
+                       + ("; the receipt origin read from --transcript is not written either" if transcripts else ""))
         else:
             click.echo(f"   ✓ receipts block written to {p['provenance']}")
         if block.get("checked"):
