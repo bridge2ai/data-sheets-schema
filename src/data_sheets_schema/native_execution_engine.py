@@ -14,7 +14,7 @@ from types import ModuleType
 from typing import Callable
 
 from data_sheets_schema import native_attribution_registration as draft
-from data_sheets_schema import native_execution_gates as lifecycle
+from data_sheets_schema import native_execution_gates as lifecycle_checks
 
 GATES = ('terminal', 'shutdown', 'first_stop', 'live_attribution', 'saved_attribution',
          'phase_history', 'tool_history', 'schema', 'pair', 'receipts', 'evidence',
@@ -266,12 +266,12 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
             lifecycle_raw = {name: _file(attempt/name, 'lifecycle artifact')
                 for name in ('runtime-observation.json', 'keep-awake.json') if (attempt/name).exists()}
             if 'runtime-observation.json' in lifecycle_raw:
-                results['runtime_authority'] = lifecycle.runtime_observation_result(
+                results['runtime_authority'] = lifecycle_checks.runtime_observation_result(
                     lifecycle_raw['runtime-observation.json'], observation, runtime_identity)
             else:
                 results['runtime_authority'] = {'checked': False, 'passed': False, 'reason': 'runtime observation unavailable'}
             if 'keep-awake.json' in lifecycle_raw:
-                results['keep_awake'] = lifecycle.cleanup_result(
+                results['keep_awake'] = lifecycle_checks.cleanup_result(
                     lifecycle_raw['keep-awake.json'], awake, value['runtime']['keep_awake'])
             else:
                 results['keep_awake'] = {'checked': False, 'passed': False, 'reason': 'cleanup evidence unavailable'}
@@ -379,7 +379,7 @@ def read_final(registration_raw, *, contract: ExecutionContract,
     runtime_gate = checks['runtime_authority']
     if 'runtime-observation.json' in lifecycle_raw:
         body = lifecycle_raw.get('runtime-observation.json')
-        recomputed = lifecycle.runtime_observation_result(body, result.get('runtime_observation'),
+        recomputed = lifecycle_checks.runtime_observation_result(body, result.get('runtime_observation'),
                                                      expected_runtime_observation(value))
         if draft._encoded(runtime_gate) != draft._encoded(recomputed):
             raise ValueError('runtime observation, captured authority gate and lifecycle record disagree')
@@ -388,7 +388,7 @@ def read_final(registration_raw, *, contract: ExecutionContract,
         raise ValueError('runtime observation fallback requires an unchecked failed gate and no artifact')
     cleanup_gate = checks['keep_awake']
     if 'keep-awake.json' in lifecycle_raw:
-        recomputed = lifecycle.cleanup_result(lifecycle_raw.get('keep-awake.json'),
+        recomputed = lifecycle_checks.cleanup_result(lifecycle_raw.get('keep-awake.json'),
             result.get('keep_awake'), value['runtime']['keep_awake'])
         if draft._encoded(cleanup_gate) != draft._encoded(recomputed):
             raise ValueError('cleanup evidence, observed release outcome and gate disagree')

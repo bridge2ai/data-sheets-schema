@@ -76,3 +76,60 @@ def test_engine_in_actual_source_closure_and_foreign_loaded_origin_refused(monke
     monkeypatch.setitem(sys.modules, foreign.__name__, foreign)
     with pytest.raises(ValueError,match='another origin'):
         authority.dependency_identity()
+
+
+@pytest.mark.parametrize('present',[
+    ('runtime-observation.json',), ('keep-awake.json',),
+    ('runtime-observation.json','keep-awake.json'),
+])
+def test_public_read_final_recomputes_each_present_lifecycle_artifact(tmp_path,monkeypatch,present):
+    """Synthetic failed publication; real disk/readback and canonical gates.
+
+    Registration parsing alone is supplied as a private fixture seam. This is
+    not a launch/auth fixture and does not claim an accepted native attempt.
+    """
+    from data_sheets_schema import native_attribution_registration as encoding
+    from data_sheets_schema import native_execution_gates as checks
+    attempt=tmp_path/'attempt';attempt.mkdir()
+    evidence=tmp_path/'evidence';evidence.mkdir()
+    executable=tmp_path/'synthetic-runtime-file';executable.write_bytes(b'never executed\n');executable.chmod(0o700)
+    policy={'policy':'not_applicable','host_platform':sys.platform,'basis':'synthetic readback only'}
+    value={'attempt_directory':str(attempt),'evidence_directory':str(evidence),
+        'attempt_id':'synthetic-readback','composition_sha256':'a'*64,
+        'runtime':{'executable':{'path':str(executable),'sha256':encoding._sha(executable.read_bytes()),
+            'version':'synthetic'},'auth':{'loggedIn':True,'authMethod':'synthetic',
+            'apiProvider':'synthetic','subscriptionType':'synthetic'},'keep_awake':policy},'environment':{}}
+    raw=encoding._encoded({'fixture':'only private registration parser is supplied'})
+    monkeypatch.setattr(old.registration,'verified',lambda supplied:value if supplied==raw else None)
+    started=b'{}\n';(attempt/'started.json').write_bytes(started);(attempt/'registration.json').write_bytes(raw)
+    observation={'checked':False,'passed':False,'reason':'synthetic auth refusal'}
+    awake={'passed':True,'policy':policy,'state':'explicitly_not_applicable','signals_received':[]}
+    lifecycle_raw={'runtime-observation.json':encoding._encoded(observation),
+                   'keep-awake.json':encoding._encoded(awake)}
+    gates={name:{'checked':False,'passed':False,'reason':'synthetic incomplete run'} for name in engine.GATES}
+    identity=old.expected_runtime_observation(value)
+    if 'runtime-observation.json' in present:
+        gates['runtime_authority']=checks.runtime_observation_result(lifecycle_raw['runtime-observation.json'],observation,identity)
+    if 'keep-awake.json' in present:
+        gates['keep_awake']=checks.cleanup_result(lifecycle_raw['keep-awake.json'],awake,policy)
+    result={'kind':old.KIND,'version':old.VERSION,'attempt_id':value['attempt_id'],
+        'composition_sha256':value['composition_sha256'],'registration_sha256':encoding._sha(raw),
+        'started_sha256':encoding._sha(started),**old.UNASSESSED,'gates':gates,
+        'runtime_gates_passed':False,'state':'failed','first_stop':'synthetic incomplete run',
+        'captured_files':{},'captured_aliases':{},'captured_metadata':{},'captured_alias_metadata':{},
+        'runtime_observation':observation,'keep_awake':awake,'additional_report':None,
+        'lifecycle_artifacts':{name:{'path':str(attempt/name),'sha256':encoding._sha(lifecycle_raw[name])} for name in present}}
+    for name in present:(attempt/name).write_bytes(lifecycle_raw[name])
+    final=encoding._encoded(result);(evidence/'final.json').write_bytes(final)
+    (evidence/'published.json').write_bytes(encoding._encoded({'final_sha256':encoding._sha(final),
+        'started_sha256':encoding._sha(started),'registration_sha256':encoding._sha(raw)}))
+    assert old.read_final(raw)==result
+    # A rewritten, internally rehashed top-level outcome is still compared with
+    # the captured raw bytes by the actual canonical reader.
+    field='runtime_observation' if 'runtime-observation.json' in present else 'keep_awake'
+    result[field]['passed']=not result[field]['passed']
+    final=encoding._encoded(result);(evidence/'final.json').write_bytes(final)
+    (evidence/'published.json').write_bytes(encoding._encoded({'final_sha256':encoding._sha(final),
+        'started_sha256':encoding._sha(started),'registration_sha256':encoding._sha(raw)}))
+    with pytest.raises(ValueError,match='disagree'):
+        old.read_final(raw)
