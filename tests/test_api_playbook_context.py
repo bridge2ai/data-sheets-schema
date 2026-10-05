@@ -24,7 +24,7 @@ def offline(monkeypatch):
     monkeypatch.setattr(api, "MAX_ATTEMPTS", 1)
 
 
-@pytest.mark.parametrize("condition", list(api.CONDITION_PROMPTS))
+@pytest.mark.parametrize("condition", [name for name in api.CONDITION_PROMPTS if name != "generic_v10"])
 def test_actual_requests_deliver_policy_and_keep_selected_rules(external, condition):
     spec = replace(external, condition=condition, api_playbook_version=1)
     original = replace(external, condition=condition)

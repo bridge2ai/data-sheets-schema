@@ -106,6 +106,7 @@ MODEL_FACING_MODULES = frozenset({
     "scope", "source_priority", "source_metadata", "chunking", "evidence_assertions",
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
+    "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
 })
 
 # Explicitly reviewed builders outside every live generation call path. Keep
@@ -4367,7 +4368,8 @@ def audit_continuations(root: Path, floor: int, controllers: list[str], runner_t
       setter that can reach the floor with neither, or whose value cannot be
       resolved, makes a runtime hybrid possible: never a false "no".
     - An API run that itself reaches the floor is not a hybrid: `build_phase`
-      refuses its audit, and `api_runner.execute` refuses what it lists."""
+      refuses its ordinary audit request, and `api_runner.execute` refuses
+      what it lists. Selected helper replacements are derived separately."""
     setters, propagating, packages, gates_by_dir = [], 0, {}, {}
     for rel in controllers:
         p = root / rel
@@ -4454,8 +4456,8 @@ def audit_continuations(root: Path, floor: int, controllers: list[str], runner_t
     if refusal["refused"]:
         api_path += (f"; api_runner.execute refuses renderers {_span(refusal['refused'])} before it runs "
                      f"(api_runner.py:{refusal['line']})")
-    api_path += (f"; and `build_phase` refuses the audit phase at renderer >= {floor} on any spec, so an API run "
-                 "that reached it would stop at audit, not become a hybrid")
+    api_path += (f"; `build_phase` refuses its ordinary audit request at renderer >= {floor}; "
+                 "that builder call stops rather than dispatching a native agent")
     return {"floor": floor, "setters": setters, "propagating_setters": propagating,
             "continuations": continuations, "gates": [{"at": k, **g} for k, g in sorted(used.items())],
             "ungated_continuations": [c["package"] for c in ungated],
@@ -4652,7 +4654,7 @@ def _optional_condition_scope(tree, init, field: str, validated: set[int]) -> tu
     return sorted(scope), sorted(set(evidence))
 
 
-def _optional_turn_selection(tree: ast.Module, test) -> dict:
+def _simple_optional_turn_selection(tree: ast.Module, test) -> dict:
     """A narrow, validated opt-in RunSpec axis, never an unknown truthy gate.
 
     Read the default, finite integer domain and API/renderer restriction from
@@ -4725,7 +4727,244 @@ def _optional_turn_selection(tree: ast.Module, test) -> dict:
                          (declarations[0].lineno, domain[0][1], restrictions[0][1], *condition_evidence)]}
 
 
-def _plan_scopes(tree: ast.Module, consts: dict) -> dict:
+def _correlated_turn_selection(tree: ast.Module, test) -> dict:
+    """Finite, source-derived alternatives for directly guarded version axes.
+
+    Only explicit integer domains and direct raising Boolean comparisons are
+    interpreted. This is not an interpreter for delegated validators or state.
+    Each row preserves a complete correlated assignment rather than a product
+    of independent renderer/version sets.
+    """
+    from itertools import product
+    fail = lambda detail: _not_derived("which conditions make a follow-up turn", detail)
+    if not (isinstance(test, ast.Attribute) and ast.unparse(test).startswith('spec.')):
+        raise fail('correlated selection requires a direct positive spec axis')
+    field = test.attr
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None) if cls else None
+    if init is None:
+        raise fail('missing RunSpec initializer')
+    declarations = {n.target.id: n for n in cls.body if isinstance(n, ast.AnnAssign)
+                    and isinstance(n.target, ast.Name) and isinstance(n.annotation, ast.Name)
+                    and n.annotation.id == 'int'}
+    attrs = lambda node: {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
+                         and isinstance(n.value, ast.Name) and n.value.id == 'self'}
+    dump = lambda n: ast.dump(n, include_attributes=False)
+    domains, domain_nodes = {}, {}
+    for name, declaration in declarations.items():
+        if not (isinstance(declaration.value, ast.Constant) and type(declaration.value.value) is int
+                and declaration.value.value == 0):
+            continue
+        for guard in init.body:
+            if not (isinstance(guard, ast.If) and not guard.orelse and len(guard.body) == 1
+                    and isinstance(guard.body[0], ast.Raise)):
+                continue
+            for compare in ast.walk(guard.test):
+                if not (isinstance(compare, ast.Compare) and len(compare.ops) == 1
+                        and isinstance(compare.ops[0], ast.NotIn) and ast.unparse(compare.left) == f'self.{name}'):
+                    continue
+                try:
+                    values = ast.literal_eval(compare.comparators[0])
+                except (ValueError, TypeError):
+                    continue
+                if (not isinstance(values, (tuple, list)) or not values or 0 not in values
+                        or any(type(v) is not int or v < 0 for v in values) or not any(values)):
+                    continue
+                expected = ast.parse(f'type(self.{name}) is not int or self.{name} not in {values!r}', mode='eval').body
+                if dump(guard.test) == dump(expected):
+                    if name in domains:
+                        raise fail('ambiguous version domain')
+                    domains[name], domain_nodes[name] = sorted(set(values)), guard
+    if field not in domains:
+        raise fail('missing exact integer/default/domain validation')
+    if any(sum(isinstance(n, ast.AnnAssign) and isinstance(n.target, ast.Name) and n.target.id == name
+               for n in cls.body) != 1 for name in domains):
+        raise fail('duplicate version field declaration')
+    # Only the new nested renderer guard or explicit per-version restrictions
+    # activates this grammar. The legacy unsupported-shape tests stay strict.
+    candidates = []
+    for block in init.body:
+        if isinstance(block, ast.If):
+            if len(block.body) == 1 and isinstance(block.body[0], ast.Raise) and not block.orelse:
+                candidates.append((block, None))
+            elif isinstance(block.test, ast.Attribute) and attrs(block.test) <= set(domains):
+                for child in block.body:
+                    if isinstance(child, ast.If) and (any(isinstance(n, (ast.Raise, ast.Assert, ast.Return))
+                            for n in ast.walk(child)) or attrs(child) & (set(domains) | {"condition"})):
+                        candidates.append((child, block))
+    connected = {field}
+    while True:
+        expanded = connected | set().union(*(attrs(g.test) | (attrs(p.test) if p else set())
+            for g, p in candidates if (attrs(g.test) | (attrs(p.test) if p else set())) & connected)) & set(domains)
+        if expanded == connected:
+            break
+        connected = expanded
+    relevant = [(g, p) for g, p in candidates if
+                (attrs(g.test) | (attrs(p.test) if p else set())) & connected and g not in domain_nodes.values()]
+    nested_renderer = any(p is not None and 'render_version' in attrs(g.test) for g, p in relevant)
+    if not nested_renderer:
+        raise fail('unsupported optional selector shape')
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom, ast.Assert)) for n in ast.walk(init)):
+        raise fail('version initializer has an early exit or assertion')
+    if any(isinstance(n, ast.Raise) for n in init.body):
+        raise fail('version initializer unconditionally raises')
+    protected = connected | {'condition'}
+    first_domain = min(domain_nodes[name].lineno for name in connected)
+    if any(isinstance(n, ast.Attribute) and attrs(n) & {'render_version', 'runtime', 'is_agentic'}
+           and isinstance(n.ctx, (ast.Store, ast.Del)) and n.lineno > first_domain for n in ast.walk(init)):
+        raise fail('runtime or renderer changes after version admission')
+    if any((isinstance(n, ast.Attribute) and attrs(n) & protected and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or (isinstance(n, ast.Name) and n.id == 'self' and isinstance(n.ctx, (ast.Store, ast.Del)))
+           or _rebinding(n, 'self', init) for n in ast.walk(init)):
+        raise fail('correlated selector or spec is reassigned')
+    recognized = {id(g) for g, _ in relevant} | {id(p) for _, p in relevant if p} | {id(domain_nodes[n]) for n in connected}
+    for node in ast.walk(init):
+        if isinstance(node, (ast.If, ast.IfExp, ast.While, ast.Match)):
+            condition = node.subject if isinstance(node, ast.Match) else node.test
+            if attrs(condition) & connected and id(node) not in recognized:
+                # A direct positive block may only call a validator/capture;
+                # it cannot contain another unproved selector or condition.
+                if not (isinstance(node, ast.If) and node in init.body and isinstance(node.test, ast.Attribute)
+                        and node.test.attr in connected and not node.orelse
+                        and not any(isinstance(x, (ast.Raise, ast.Assert, ast.Return))
+                                    or attrs(x) & {'condition'} for stmt in node.body for x in ast.walk(stmt))):
+                    raise fail('unknown correlated guard or selector path')
+    for g, parent in relevant:
+        if g.orelse or len(g.body) != 1 or not isinstance(g.body[0], ast.Raise):
+            raise fail('correlated constraints must be unconditional raising guards')
+        if parent is not None:
+            if any(isinstance(x, (ast.Raise, ast.Assert, ast.Return, ast.For, ast.Try, ast.With,
+                                 ast.FunctionDef, ast.ClassDef)) for x in parent.body):
+                raise fail('unproved control flow in positive selector')
+            if any('condition' in attrs(x) for x in parent.orelse):
+                raise fail('disabled selector carries a condition restriction')
+    # A nested exclusive protocol has a reciprocal direct guard for each
+    # condition/renderer/companion it requires. Without it, an opaque later
+    # validator could invalidate the apparent complementary legacy case.
+    for guard, parent in relevant:
+        if parent is None:
+            continue
+        parent_field = parent.test.attr
+        enabled = [v for v in domains[parent_field] if v]
+        comparisons = [n for n in ast.walk(guard.test) if isinstance(n, ast.Compare)
+            and len(n.ops) == 1 and isinstance(n.ops[0], ast.NotEq)
+            and isinstance(n.left, ast.Attribute) and isinstance(n.left.value, ast.Name)
+            and n.left.value.id == 'self' and isinstance(n.comparators[0], ast.Constant)]
+        for compare in comparisons:
+            if len(enabled) != 1:
+                raise fail('exclusive nested protocol must have one enabled value')
+            name, value = compare.left.attr, compare.comparators[0].value
+            expected = ast.parse(f'self.{name} == {value!r} and self.{parent_field} != {enabled[0]}',mode='eval').body
+            if not any(p is None and dump(g.test) == dump(expected) for g,p in relevant):
+                raise fail('exclusive nested protocol lacks a reciprocal direct guard')
+    constants = {}
+    parents = _parents(tree)
+    def constant_set(name):
+        if name in constants:
+            return constants[name]
+        bindings = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+        if len(bindings) != 1:
+            raise fail('condition set lacks a unique literal binding')
+        binding = bindings[0]; value = binding.value
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id in {'set','frozenset','tuple'}:
+            if len(value.args) != 1 or value.keywords or any(_rebinding(n, value.func.id, init)
+                    or isinstance(n, ast.Name) and n.id == value.func.id and isinstance(n.ctx, (ast.Store, ast.Del))
+                    for n in ast.walk(tree)):
+                raise fail('condition set constructor is ambiguous')
+            value = value.args[0]
+        if not isinstance(value, (ast.Set, ast.List, ast.Tuple)) or not value.elts or any(
+                not isinstance(x, ast.Constant) or type(x.value) is not str or not x.value for x in value.elts):
+            raise fail('condition set is not a nonempty literal string set')
+        for n in ast.walk(tree):
+            if _rebinding(n, name, init) or isinstance(n, ast.arg) and n.arg == name:
+                raise fail('condition set is shadowed')
+            if isinstance(n, ast.Name) and n.id == name and n is not binding.targets[0]:
+                parent = parents.get(id(n))
+                if not (isinstance(n.ctx, ast.Load) and isinstance(parent, ast.Compare)
+                        and len(parent.ops) == 1 and isinstance(parent.ops[0], (ast.In, ast.NotIn))
+                        and n is parent.comparators[0]):
+                    raise fail('condition set has an unproved use or mutation')
+        constants[name] = [x.value for x in value.elts]
+        return constants[name]
+    def evaluate(node, assignment):
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name) and node.value.id == 'self':
+            if node.attr not in assignment:
+                raise fail('unknown field in correlated constraint')
+            return assignment[node.attr]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int):
+            return node.value
+        if isinstance(node, ast.Name):
+            return constant_set(node.id)
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
+            # Evaluate every term even when truth values would short-circuit:
+            # unknown source syntax may never disappear in a disabled case.
+            values = [bool(evaluate(x, assignment)) for x in node.values]
+            return all(values) if isinstance(node.op, ast.And) else any(values)
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            left, right = evaluate(node.left, assignment), evaluate(node.comparators[0], assignment)
+            op = node.ops[0]
+            if isinstance(op, ast.Eq): return type(left) is type(right) and left == right
+            if isinstance(op, ast.NotEq): return type(left) is not type(right) or left != right
+            if isinstance(op, ast.In) and isinstance(right, list): return left in right
+            if isinstance(op, ast.NotIn) and isinstance(right, list): return left not in right
+        raise fail('unsupported correlated constraint expression')
+    declared_conditions = next((n.value for n in tree.body if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == 'CONDITION_PROMPTS' for t in n.targets)), None)
+    if not isinstance(declared_conditions, ast.Dict) or any(not isinstance(k, ast.Constant)
+            or type(k.value) is not str for k in declared_conditions.keys):
+        raise fail('condition universe must be a literal prompt mapping')
+    conditions = sorted(k.value for k in declared_conditions.keys)
+    admitted = derive_admitted_renderers(tree)
+    refused = derive_execute_refusal(tree, admitted)['refused']
+    names = sorted(connected)
+    count = len(conditions) * len(admitted) * 2
+    for name in names:
+        count *= len(domains[name])
+    if count > 100000:
+        raise fail('correlated selection exceeds finite derivation bound')
+    cases = []
+    for values in product(*(domains[n] for n in names)):
+        axes = dict(zip(names, values))
+        if not axes[field]: continue
+        allowed = []
+        for renderer, native, condition in product(admitted, (False, True), conditions):
+            row = {**axes, 'render_version': renderer, 'is_agentic': native, 'condition': condition}
+            violated = []
+            for guard, parent in relevant:
+                test_value = evaluate(guard.test, row)
+                enabled = parent is None or bool(evaluate(parent.test, row))
+                violated.append(enabled and bool(test_value))
+            if not any(violated): allowed.append((renderer, native, condition))
+        if not allowed: continue
+        renderers = {r for r, _, _ in allowed}
+        if len(renderers) != 1 or any(native for _, native, _ in allowed) or renderers & set(refused):
+            raise fail('each correlated case requires one admitted API-only renderer')
+        cases.append({'values': axes, 'runtime': 'api', 'renderers': sorted(renderers),
+                      'conditions': sorted({c for _, _, c in allowed})})
+    if {c['values'][field] for c in cases} != set(domains[field]) - {0}:
+        raise fail('enabled version domain has an unproved or impossible case')
+    evidence = sorted({declarations[n].lineno for n in names} | {domain_nodes[n].lineno for n in names}
+                      | {g.lineno for g, _ in relevant} | {p.lineno for _, p in relevant if p})
+    return {'field': field, 'default': 0, 'enabled_values': [v for v in domains[field] if v],
+            'runtime': 'api', 'renderers': sorted({r for c in cases for r in c['renderers']}),
+            'conditions': sorted({v for c in cases for v in c['conditions']}), 'cases': cases,
+            'evidence': [f'api_runner.py:{line}' for line in evidence]}
+
+
+def _optional_turn_selection(tree: ast.Module, test) -> dict:
+    try:
+        return _simple_optional_turn_selection(tree, test)
+    except ConfigError as original:
+        try:
+            return _correlated_turn_selection(tree, test)
+        except ConfigError as changed:
+            if "unsupported optional selector shape" in str(changed):
+                raise original
+            raise
+
+
+def _local_plan_scopes(tree: ast.Module, consts: dict) -> dict:
     """Condition and explicit opt-in selection, from plan()'s actual syntax."""
     plan = _function(tree, "plan")
     if plan is None:
@@ -4777,6 +5016,120 @@ def _plan_scopes(tree: ast.Module, consts: dict) -> dict:
     return scopes
 
 
+def _literal_phase(root, path, tree, fn, node):
+    """One literal phase binding, optionally imported at this exact use."""
+    if isinstance(node, ast.Constant) and type(node.value) is str:
+        return node.value
+    if not isinstance(node, ast.Name):
+        raise _not_derived('the follow-up turns', 'phase is not a literal or uniquely bound constant')
+    name = node.id
+    bindings = _bindings(root, path, tree, {})
+    if name in bindings:
+        _require_followup_binding(_rel(root, path), tree, fn, node)
+        target, name = bindings[name]
+        if name is None:
+            raise _not_derived('the follow-up turns', 'phase import names a module')
+        tree = _tree(target)
+    else:
+        if name in _params(fn) or any(isinstance(n, ast.Name) and n.id == name
+                and isinstance(n.ctx, (ast.Store, ast.Del)) for n in ast.walk(fn)):
+            raise _not_derived('the follow-up turns', 'phase constant is locally shadowed')
+    declarations = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+    if (len(declarations) != 1 or not isinstance(declarations[0].value, ast.Constant)
+            or type(declarations[0].value.value) is not str):
+        raise _not_derived('the follow-up turns', 'phase constant lacks one literal binding')
+    declaration = declarations[0]
+    if any((_rebinding(n, name, fn) or isinstance(n, ast.Name) and n.id == name
+            and isinstance(n.ctx, (ast.Store, ast.Del)) and n is not declaration.targets[0]) for n in ast.walk(tree)):
+        raise _not_derived('the follow-up turns', 'phase constant is reassigned')
+    return declaration.value.value
+
+
+def _delegated_plan(root, tree):
+    """Read one directly returned optional plan without interpreting its code."""
+    plan = _function(tree, 'plan')
+    branches = [n for n in plan.body if isinstance(n, ast.If) and any(isinstance(x, ast.Return)
+                for x in ast.walk(n))]
+    if not branches:
+        return None
+    if len(branches) != 1:
+        raise _not_derived('the optional plan', 'ambiguous early plan routes')
+    branch = branches[0]
+    if (branch.orelse or len(branch.body) != 2 or not isinstance(branch.body[0], ast.ImportFrom)
+            or not isinstance(branch.body[1], ast.Return) or not isinstance(branch.body[1].value, ast.Call)):
+        raise _not_derived('the optional plan', 'expected exact import and early delegate return')
+    call = branch.body[1].value
+    selection = _optional_turn_selection(tree, branch.test)
+    runner = _resolved(root / RUNNER)
+    binding = _imported_target(call, _bindings(root, runner, tree, {}))
+    if binding is None or binding[1] is None:
+        raise _not_derived('the optional plan', 'delegate is not a uniquely imported function')
+    _require_followup_binding(RUNNER, tree, plan, call)
+    guards = _optional_guard_evidence(plan, call, selection, RUNNER)
+    if not guards:
+        raise _not_derived('the optional plan', 'delegate lacks a positive selector')
+    target, name = binding
+    helper_tree = _tree(target); helper = _function(helper_tree, name)
+    passed = _call_arg(call, helper, 'spec') if helper is not None else None
+    if not isinstance(passed, ast.Name) or passed.id != 'spec':
+        raise _not_derived('the optional plan', 'delegate receives another spec')
+    if any((isinstance(n, ast.Name) and n.id == 'spec' and isinstance(n.ctx, (ast.Store, ast.Del)))
+            or (isinstance(n, ast.Attribute) and isinstance(n.value, ast.Name) and n.value.id == 'spec'
+                and isinstance(n.ctx, (ast.Store, ast.Del))) for n in ast.walk(helper)):
+        raise _not_derived('the optional plan', 'delegate reassigns its spec')
+    if any(isinstance(n, (ast.Raise, ast.Assert)) for n in helper.body):
+        raise _not_derived('the optional plan', 'delegate unconditionally refuses')
+    returns = [n for n in ast.walk(helper) if isinstance(n, ast.Return)]
+    if len(returns) != 1 or returns[0] not in helper.body or not isinstance(returns[0].value, ast.Dict):
+        raise _not_derived('the optional plan', 'delegate must return its one literal plan dictionary')
+    keys = [k.value if isinstance(k, ast.Constant) else None for k in returns[0].value.keys]
+    if keys.count('conditional_calls') != 1:
+        raise _not_derived('the optional plan', 'delegate lacks unique conditional_calls')
+    value = returns[0].value.values[keys.index('conditional_calls')]
+    if not isinstance(value, (ast.List, ast.Tuple)):
+        raise _not_derived('the optional plan', 'delegate phases must be a literal sequence')
+    phases = []
+    for item in value.elts:
+        if isinstance(item, ast.Constant) and type(item.value) is str:
+            text = item.value
+        elif (isinstance(item, ast.JoinedStr) and len(item.values) == 2
+                and isinstance(item.values[0], ast.FormattedValue)
+                and item.values[0].conversion == -1 and item.values[0].format_spec is None
+                and isinstance(item.values[1], ast.Constant) and type(item.values[1].value) is str):
+            text = _literal_phase(root, target, helper_tree, helper, item.values[0].value) + item.values[1].value
+        else:
+            raise _not_derived('the optional plan', 'unknown delegated phase expression')
+        match = re.match(r'^(\w+):', text)
+        if match is None or match.group(1) in phases:
+            raise _not_derived('the optional plan', 'duplicate or missing exact phase-colon prefix')
+        phases.append(match.group(1))
+    # The legacy return must remain the single unconditional alternative.
+    if len([n for n in ast.walk(plan) if isinstance(n, ast.Return)]) != 2 or not (
+            isinstance(plan.body[-1], ast.Return) and isinstance(plan.body[-1].value, ast.Dict)):
+        raise _not_derived('the optional plan', 'unproved legacy alternative or early bypass')
+    return {'selection': selection, 'phases': phases,
+            'evidence': [*guards, f'{_rel(root, target)}:{returns[0].lineno}']}
+
+
+def _plan_scopes(tree: ast.Module, consts: dict, *, root=None) -> dict:
+    scopes = _local_plan_scopes(tree, consts)
+    delegate = _delegated_plan(root, tree) if root is not None else None
+    if delegate is None:
+        return scopes
+    field = delegate['selection']['field']
+    for phase, scope in scopes.items():
+        cases = scope.get('selection', {}).get('cases', [])
+        if any(case['values'].get(field) for case in cases) and phase not in delegate['phases']:
+            raise _not_derived('the optional plan', 'early delegate omits enabled phase ' + phase)
+    for phase in delegate['phases']:
+        if phase not in scopes:
+            scopes[phase] = {'conditions': delegate['selection'].get('conditions'),
+                             'selection': delegate['selection']}
+        scopes[phase]['delegated_plan'] = delegate
+    return scopes
+
+
 def _imported_target(call, bindings: dict):
     if isinstance(call.func, ast.Name):
         return bindings.get(call.func.id)
@@ -4793,7 +5146,7 @@ def _require_followup_binding(path: str, tree, fn, call) -> None:
     The broad discovery import map deliberately includes every function. This
     narrower derivation must not borrow another function's local import.
     """
-    name = call.func.id if isinstance(call.func, ast.Name) else call.func.value.id
+    name = call.id if isinstance(call, ast.Name) else (call.func.id if isinstance(call.func, ast.Name) else call.func.value.id)
     fail = lambda: _not_derived("the follow-up turns", f"ambiguous import binding `{name}` at {path}:{call.lineno}")
     parents = _parents(tree)
     imports = []
@@ -4842,6 +5195,9 @@ def _optional_guard_evidence(fn, call, selection: dict, path: str) -> list[str]:
     """Require a positive exact opt-in guard, retaining branch polarity."""
     field = selection["field"]
     protected = {f"spec.{field}"}
+    if selection.get('cases'):
+        protected |= {f'spec.{name}' for case in selection['cases'] for name in case['values']}
+        protected |= {'spec.render_version', 'spec.runtime', 'spec.is_agentic'}
     if selection.get("conditions") is not None:
         protected.add("spec.condition")
     parents, cur, evidence = _parents(fn), call, []
@@ -4864,6 +5220,47 @@ def _optional_guard_evidence(fn, call, selection: dict, path: str) -> list[str]:
                 evidence.append(f"{path}:{par.lineno}")
         cur = par
     return evidence
+
+
+def _helper_replacement(caller, entry, selection, funcs, wrappers):
+    """A positive optional helper replacing one loop phase's normal call."""
+    parents = _parents(caller)
+    path, node = [], entry
+    while id(node) in parents:
+        node = parents[id(node)]; path.append(node)
+    axis = next((n for n in path if isinstance(n, ast.If)
+                 and ast.unparse(n.test) == 'spec.' + selection['field']), None)
+    if axis is None or not axis.orelse:
+        return None
+    phase_guard = next((n for n in path if isinstance(n, ast.If) and isinstance(n.test, ast.Compare)
+        and len(n.test.ops) == 1 and isinstance(n.test.ops[0], ast.Eq)
+        and isinstance(n.test.left, ast.Name) and isinstance(n.test.comparators[0], ast.Constant)
+        and type(n.test.comparators[0].value) is str and any(axis is x for stmt in n.body for x in ast.walk(stmt))), None)
+    if phase_guard is None:
+        raise _not_derived('the selected phase replacement', 'optional alternative has no positive loop-phase equality')
+    variable, phase = phase_guard.test.left.id, phase_guard.test.comparators[0].value
+    if not any(isinstance(n, ast.For) and isinstance(n.target, ast.Name) and n.target.id == variable
+               and isinstance(n.iter, ast.Name) and n.iter.id == 'PHASES' for n in path):
+        raise _not_derived('the selected phase replacement', 'phase is not the actual PHASES loop variable')
+    calls = [n for stmt in axis.orelse for n in ast.walk(stmt) if isinstance(n, ast.Call)]
+    if len(calls) != 1 or not isinstance(calls[0].func, ast.Name) or calls[0].func.id not in funcs:
+        raise _not_derived('the selected phase replacement', 'ordinary alternative is not one known runner function')
+    call = calls[0]; ordinary = funcs[call.func.id]
+    if not (call.args and isinstance(call.args[0], ast.Name) and call.args[0].id == 'spec'
+            and len(call.args) > 1 and isinstance(call.args[1], ast.Name) and call.args[1].id == variable
+            and any(isinstance(n, ast.Call) and _attr_or_name(n.func) in wrappers for n in ast.walk(ordinary))):
+        raise _not_derived('the selected phase replacement', 'ordinary alternative is not the bound model phase')
+    return {'phase': phase, 'evidence': [f'api_runner.py:{phase_guard.lineno}', f'api_runner.py:{axis.lineno}',
+                                       f'api_runner.py:{call.lineno}']}
+
+
+def _selection_text(selection):
+    if 'cases' in selection:
+        return ' OR '.join('(' + ', '.join(f'{key}={value}' for key, value in case['values'].items())
+            + f"; runtime {case['runtime']}; renderer {_span(case['renderers'])}; conditions "
+            + ', '.join(case['conditions']) + ')' for case in selection['cases'])
+    return (f"{selection['field']} in {selection['enabled_values']}, runtime {selection['runtime']}, "
+            f"renderer {_span(selection['renderers'])}")
 
 
 def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes: dict) -> dict:
@@ -4901,7 +5298,10 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                 arg = _call_arg(call, funcs[target[1]], "phase")
                 if arg is None:
                     raise _not_derived("the follow-up turns", f"helper call at {rel}:{call.lineno} names no phase")
-                values = _phase_names(arg, fn, helper_funcs, _module_constants(path))
+                constants = _module_constants(path)
+                values = ({_literal_phase(root, path, helper_tree, fn, arg)}
+                          if isinstance(arg, ast.Name) and arg.id in constants else
+                          _phase_names(arg, fn, helper_funcs, constants))
                 entries = [(caller, c) for caller in funcs.values() for c in ast.walk(caller)
                            if isinstance(c, ast.Call) and _imported_target(c, runner_bindings) == (_resolved(path), name)]
                 if not entries:
@@ -4924,10 +5324,14 @@ def _helper_followups(root: Path, tree, funcs: dict, wrappers: set[str], scopes:
                         if not guards:
                             raise _not_derived("which conditions make a follow-up turn",
                                                f"helper phase `{phase}` has an unguarded runner caller")
-                        via.append({"call": f"api_runner.py:{entry.lineno}", "guards": guards})
+                        replacement = _helper_replacement(caller, entry, selection, funcs, wrappers)
+                        via.append({"call": f"api_runner.py:{entry.lineno}", "guards": guards,
+                                    **({'replacement': replacement} if replacement else {})})
                     row = out.setdefault(phase, {"calls": [], "conditions": scopes[phase]["conditions"],
                                                 "selection": selection, "via": [],
                                                 "basis": "per plan() and validated opt-in helper call path"})
+                    if scopes[phase].get('delegated_plan'):
+                        row['delegated_plan'] = scopes[phase]['delegated_plan']
                     row["calls"].append(f"{rel}:{call.lineno}")
                     row["via"].extend(via)
     return out
@@ -4970,7 +5374,7 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict, *, root:
                 calls.setdefault(value, []).append((name, c))
     if "PHASES" not in calls:
         raise _not_derived("the model phases", "no model call iterates the runner's PHASES")
-    scopes = _plan_scopes(tree, consts)
+    scopes = _plan_scopes(tree, consts, root=root)
     turns = {}
     for turn, sites in sorted(calls.items()):
         if turn == "PHASES" or turn in phases:
@@ -5000,6 +5404,202 @@ def derive_followups(tree: ast.Module, phases: list[str], consts: dict, *, root:
     if missing:
         raise _not_derived("the follow-up turns", "planned optional turns have no derived helper call: " + ", ".join(missing))
     return turns
+
+
+# A deliberately closed string-template shape. Text constants are read from
+# the source being scanned; this skeleton proves which sections it retains.
+# This is not execution of the production adapter or its imports.
+_TEMPLATE_SELECTION_SHAPE = '''
+markers = ('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j')
+positions = []
+for marker in markers:
+    if body.count(marker) != 1:
+        raise ValueError(f'section {marker!r}')
+    positions.append(body.index(marker))
+if positions != sorted(positions):
+    raise ValueError('order')
+declarations = body[positions[1]:positions[2]].strip().replace(markers[1], 'label', 1)
+header = body[positions[3]:positions[4]].strip().replace('old', 'new').replace('old', 'new')
+rules = body[positions[8]:positions[9]].strip()
+ending = body[positions[9]:].strip()
+if ending != 'expected':
+    raise ValueError('ending')
+return policy_text(version=version) + '\\n\\n' + declarations + '\\n\\n' + header + '\\n\\n' + rules + 'return'
+'''
+
+
+def _template_shape(statements):
+    class TextShape(ast.NodeTransformer):
+        def visit_Constant(self, node):
+            return ast.copy_location(ast.Constant(value='<text>'), node) if type(node.value) is str else node
+    copied = ast.parse('\n'.join(ast.unparse(n) for n in statements))
+    return ast.dump(TextShape().visit(copied), include_attributes=False)
+
+
+def _selected_template(root, tree, selection, body):
+    """Derive the selected base text from one proven section-selection adapter.
+
+    Only inert string slicing/concatenation/replacement is evaluated. No import,
+    production function, registration, environment, or generated record runs.
+    Unknown call/control/template shapes refuse instead of claiming raw prompt
+    references survive an opt-in adaptation.
+    """
+    fail = lambda why: _not_derived('the selected prompt adaptation', why)
+    fn = _function(tree, 'resolve_prompt')
+    if fn is None:
+        raise fail('resolve_prompt is missing')
+    statements = [n for n in fn.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    if len(statements) < 2 or ast.unparse(statements[0]) != 'body = prompt_body(spec.base_prompt)':
+        raise fail('base prompt does not enter an unchanged body')
+    branch = statements[1]
+    if (not isinstance(branch, ast.If) or not isinstance(branch.test, ast.Attribute)
+            or not isinstance(branch.test.value, ast.Name) or branch.test.value.id != 'spec'
+            or branch.orelse or len(branch.body) != 2 or not isinstance(branch.body[0], ast.ImportFrom)
+            or not isinstance(branch.body[1], ast.Assign) or len(branch.body[1].targets) != 1
+            or ast.unparse(branch.body[1].targets[0]) != 'body'):
+        raise fail('expected direct positive import and body adaptation')
+    versions = {case['values'].get(branch.test.attr) for case in selection.get('cases', [])}
+    if len(versions) != 1 or None in versions or 0 in versions:
+        raise fail('adapter is not required by every correlated selected case')
+    version = next(iter(versions)); call = branch.body[1].value
+    if (not isinstance(call, ast.Call) or len(call.args) != 1 or ast.unparse(call.args[0]) != 'body'
+            or len(call.keywords) != 1 or call.keywords[0].arg != 'version'
+            or ast.dump(call.keywords[0].value) != ast.dump(branch.test)):
+        raise fail('adapter receives changed body/version')
+    _require_followup_binding(RUNNER, tree, fn, call)
+    target = _imported_target(call, _bindings(root, _resolved(root / RUNNER), tree, {}))
+    if target is None or target[1] is None:
+        raise fail('adapter is not one imported function')
+    path, name = target; adapter_tree = _tree(path); adapter = _function(adapter_tree, name)
+    if adapter is None or sum(isinstance(n, ast.FunctionDef) and n.name == name for n in adapter_tree.body) != 1:
+        raise fail('adapter definition is missing or ambiguous')
+    if any(isinstance(n, ast.Name) and n.id in {name, 'policy_text'} and isinstance(n.ctx, (ast.Store, ast.Del))
+           for statement in adapter_tree.body if not isinstance(statement, (ast.FunctionDef, ast.ClassDef))
+           for n in ast.walk(statement)):
+        raise fail('adapter/policy binding is reassigned')
+    code = [n for n in adapter.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    if _template_shape(code) != _template_shape(ast.parse(_TEMPLATE_SELECTION_SHAPE).body):
+        raise fail('unsupported section-selection shape')
+    policy = _function(adapter_tree, 'policy_text')
+    if policy is None or sum(isinstance(n, ast.FunctionDef) and n.name == 'policy_text' for n in adapter_tree.body) != 1:
+        raise fail('policy text binding is ambiguous')
+    if adapter.decorator_list or policy.decorator_list:
+        raise fail('decorated template/policy function is not a direct source binding')
+    for binding_name, binding_fn in ((name, adapter), ('policy_text', policy)):
+        for statement in adapter_tree.body:
+            if statement is binding_fn:
+                continue
+            if isinstance(statement, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                if statement.name == binding_name:
+                    raise fail('template/policy binding is shadowed')
+                continue
+            if any(_rebinding(n, binding_name, binding_fn) or isinstance(n, ast.Name)
+                   and n.id == binding_name and isinstance(n.ctx, (ast.Store, ast.Del))
+                   for n in ast.walk(statement)):
+                raise fail('template/policy binding is shadowed')
+    prefix = [n for n in policy.body if not isinstance(n, ast.Expr) or not isinstance(n.value, ast.Constant)]
+    if (len(prefix) < 2 or not isinstance(prefix[0], ast.If) or prefix[0].orelse
+            or len(prefix[0].body) != 1 or not isinstance(prefix[0].body[0], ast.Raise)):
+        raise fail('unsupported policy version guard')
+    guard = prefix[0].test
+    if (not isinstance(guard, ast.BoolOp) or not isinstance(guard.op, ast.Or) or len(guard.values) != 2
+            or ast.unparse(guard.values[0]) != 'type(version) is not int'
+            or not isinstance(guard.values[1], ast.Compare) or len(guard.values[1].ops) != 1
+            or not isinstance(guard.values[1].ops[0], ast.NotIn)
+            or ast.unparse(guard.values[1].left) != 'version'):
+        raise fail('unsupported policy version guard')
+    try:
+        domain = ast.literal_eval(guard.values[1].comparators[0])
+    except (ValueError, TypeError):
+        raise fail('policy version domain is not literal')
+    if not isinstance(domain, tuple) or any(type(n) is not int for n in domain) or version not in domain:
+        raise fail('selected policy version is not admitted')
+    route = prefix[1]
+    if (not isinstance(route, ast.If) or ast.unparse(route.test) != f'version == {version}' or route.orelse
+            or len(route.body) != 2 or not isinstance(route.body[0], ast.ImportFrom)
+            or not isinstance(route.body[1], ast.Return)):
+        raise fail('selected policy is not the direct captured-asset route')
+    expression = route.body[1].value
+    if ast.unparse(expression) != "captured_assets()[API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()":
+        raise fail('unsupported captured policy expression')
+    names = [n for n in ast.walk(expression) if isinstance(n, ast.Name)]
+    for used in names:
+        _require_followup_binding(_rel(root, path), adapter_tree, policy, used)
+    asset_node = next(n for n in names if n.id == 'API_POLICY')
+    asset = _literal_phase(root, path, adapter_tree, policy, asset_node)
+    policy_bindings = _bindings(root, path, adapter_tree, {})
+    if (policy_bindings.get('captured_assets', (None,))[0] != policy_bindings.get('API_POLICY', (None,))[0]):
+        raise fail('policy loader and asset have different source authorities')
+    asset_path = _resolved(root / asset)
+    if _resolved(root) not in asset_path.parents or not asset_path.is_file():
+        raise fail('captured policy asset is outside the source tree or missing')
+    policy_raw = asset_path.read_text(encoding='utf-8')
+    if policy_raw.count('## Prompt body') != 1:
+        raise fail('policy body marker is not unique')
+    policy_body = policy_raw.split('## Prompt body', 1)[1].strip()
+    try:
+        markers = ast.literal_eval(code[0].value)
+        if any(type(marker) is not str or body.count(marker) != 1 for marker in markers):
+            raise fail('prompt section marker is missing or repeated')
+        positions = [body.index(marker) for marker in markers]
+        if positions != sorted(positions):
+            raise fail('prompt sections are reordered')
+        values = {'body': body, 'markers': markers, 'positions': positions}
+        def text_expr(n):
+            if isinstance(n, ast.Constant) and type(n.value) in (str, int):
+                return n.value
+            if isinstance(n, ast.Name) and n.id in values:
+                return values[n.id]
+            if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Add):
+                return text_expr(n.left) + text_expr(n.right)
+            if isinstance(n, ast.Subscript):
+                index = n.slice
+                if isinstance(index, ast.Slice):
+                    index = slice(*(text_expr(part) if part is not None else None
+                                    for part in (index.lower, index.upper, index.step)))
+                else:
+                    index = text_expr(index)
+                return text_expr(n.value)[index]
+            if isinstance(n, ast.Call) and ast.unparse(n) == 'policy_text(version=version)':
+                return policy_body
+            if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and not n.keywords:
+                value = text_expr(n.func.value); args = [text_expr(arg) for arg in n.args]
+                if type(value) is str and n.func.attr in ('strip', 'replace'):
+                    return getattr(value, n.func.attr)(*args)
+            raise fail('unsupported inert string expression')
+        for statement in code[4:8]:
+            values[statement.targets[0].id] = text_expr(statement.value)
+        if values['ending'] != ast.literal_eval(code[8].test.comparators[0]):
+            raise fail('completion instruction changed')
+        adapted = text_expr(code[9].value)
+    except (IndexError, KeyError, TypeError, ValueError) as exc:
+        raise fail('unreadable selected template: ' + str(exc)) from exc
+    return adapted, {'field': branch.test.attr, 'version': version, 'policy_asset': asset,
+                     'basis': 'Adapted base prompt and selected policy, before runtime substitutions and request additions.',
+                     'evidence': [f'{RUNNER}:{call.lineno}', f'{_rel(root, path)}:{adapter.lineno}',
+                                  f'{_rel(root, path)}:{route.lineno}', asset]}
+
+
+def _selected_request_additions(root, tree, selection):
+    """Name actual guarded text-builder calls without guessing their output size."""
+    fn = _function(tree, 'build_phase'); additions = []
+    for branch in fn.body:
+        if not isinstance(branch, ast.If) or ast.unparse(branch.test) != 'spec.' + selection['field']:
+            continue
+        for node in ast.walk(branch):
+            if not isinstance(node, ast.Dict):
+                continue
+            for key, value in zip(node.keys, node.values):
+                if not isinstance(key, ast.Constant) or key.value != 'text' or not isinstance(value, ast.Call):
+                    continue
+                _require_followup_binding(RUNNER, tree, fn, value)
+                target = _imported_target(value, _bindings(root, _resolved(root / RUNNER), tree, {}))
+                if target is None or target[1] is None or not value.args or ast.unparse(value.args[0]) != 'spec':
+                    raise _not_derived('selected request additions', 'unbound text builder or changed spec')
+                additions.append({'builder': _rel(root, target[0]) + ':' + target[1],
+                                  'call': f'{RUNNER}:{value.lineno}',
+                                  'size_basis': 'Selected request text; not part of the legacy digest-only estimate.'})
+    return additions
 
 
 def api_meaning(root: Path, facts: dict) -> dict:
@@ -5075,6 +5675,59 @@ def api_meaning(root: Path, facts: dict) -> dict:
             "appends": list(tuned.get("appends") or []) if name == "tuned" else [],
         }
 
+    selected_procedures = {}
+    for turn, row in followups.items():
+        for via in row.get('via', []):
+            replacement = via.get('replacement')
+            if not replacement:
+                continue
+            selection = row['selection']
+            field = selection['field']
+            procedure = selected_procedures.setdefault(field, {'selection': selection,
+                'replaced_model_phases': {}, 'model_calls_minimum': None,
+                'count_basis': 'Actual record-dependent helper multiplicity; no fixed count inferred from phase families.',
+                'stage_scope': 'Replacement stages belong to the selected procedure, not optional additions to its old model phase.',
+                'shape': 'MULTI-PHASE', 'native_runtime': 'not admitted by this API-only selector'})
+            procedure['replaced_model_phases'].setdefault(replacement['phase'], []).append(turn)
+    for procedure in selected_procedures.values():
+        procedure['request_additions'] = _selected_request_additions(root, tree, procedure['selection'])
+        procedure['ordinary_model_phases'] = [phase for phase in model_phases
+            if phase not in procedure['replaced_model_phases']]
+        for name in procedure['selection'].get('conditions', []):
+            # This is a separately selected procedure, not the legacy audit
+            # request followed by extra optional calls.
+            conditions[name]['selected_procedure'] = procedure
+            conditions[name]['requires_explicit_selection'] = True
+            conditions[name]['model_calls_minimum'] = None
+            row = conditions[name]
+            if procedure['request_additions']:
+                row['schema_form'] += '; additional selected text from ' + ', '.join(
+                    item['builder'] for item in procedure['request_additions']) + ' (outside the legacy digest-only estimate)'
+            if row['prompt_body_references']:
+                raw_body = (root / row['prompt']).read_text(encoding='utf-8').split('## Prompt body', 1)[-1]
+                adapted, adaptation = _selected_template(root, tree, procedure['selection'], raw_body)
+                row['raw_prompt_body_references'] = row['prompt_body_references']
+                row['prompt_body_references'] = sorted(_named_claude_files(adapted, claude_names))
+                row['selected_template_adaptation'] = adaptation
+                row['prompt_hybrid'] = bool(row['prompt_body_references'])
+                row['hybrid_reasons'] = [reason for reason in row['hybrid_reasons']
+                    if not reason.startswith('the prompt body tells the model to read ')]
+                if row['prompt_hybrid']:
+                    row['hybrid_reasons'].append('the source-derived adapted base prompt retains references to '
+                        + ', '.join(row['prompt_body_references']))
+            conditions[name]['optional_followup_turns'] = [turn for turn in conditions[name]['optional_followup_turns']
+                if any(case['conditions'] == procedure['selection']['conditions']
+                       and all(case['values'].get(k) == v for k, v in selected_case['values'].items())
+                       for case in followups[turn].get('selection', {}).get('cases', [])
+                       for selected_case in procedure['selection'].get('cases', []))]
+
+    for procedure in selected_procedures.values():
+        replacement = procedure['replaced_model_phases'].get('audit')
+        if replacement:
+            continuation['api_path'] += ('; source-derived selected audit replacement under '
+                + _selection_text(procedure['selection']) + ' uses ' + ', '.join(replacement)
+                + ' instead of that ordinary builder; it does not admit native execution')
+
     arms_table = _module_constants(root / CLI_API).get("ARMS")
     if not isinstance(arms_table, dict) or not arms_table:
         raise _not_derived("the API arms", "cli/api.py ARMS is not a module-level dict literal")
@@ -5134,7 +5787,7 @@ def api_meaning(root: Path, facts: dict) -> dict:
     else:
         why = []
         if len(model_phases) > 1:
-            why.append(f"each run makes at least {len(model_phases)} model calls ({', '.join(model_phases)})")
+            why.append(f"{'the default procedure' if selected_procedures else 'each run'} makes at least {len(model_phases)} model calls ({', '.join(model_phases)})")
         else:
             why.append(f"each run makes one model call ({', '.join(model_phases)}) before any follow-up turn")
         if not full_schema:
@@ -5151,9 +5804,22 @@ def api_meaning(root: Path, facts: dict) -> dict:
     for turn, row in sorted(followups.items()):
         if row.get("selection"):
             s = row["selection"]
-            verdict.append(f"Optional {turn} may run only with {s['field']} in {s['enabled_values']}, "
-                           f"runtime {s['runtime']}, renderer {_span(s['renderers'])}; default "
+            verdict.append(f"Optional {turn} may run only with {_selection_text(s)}; default "
                            f"{s['default']} disables it. It is not a default-condition follow-up.")
+    for field, procedure in selected_procedures.items():
+        verdict.append('Selected procedure ' + _selection_text(procedure['selection'])
+            + ': replaces ' + '; '.join(phase + ' with ' + ', '.join(turns)
+                for phase, turns in procedure['replaced_model_phases'].items())
+            + '; ordinary model phases ' + ', '.join(procedure['ordinary_model_phases'])
+            + '; call count is record-dependent and not inferred from the legacy phase count. Native execution is not admitted.')
+    for name, row in conditions.items():
+        if row.get('selected_template_adaptation'):
+            adaptation = row['selected_template_adaptation']
+            verdict.append(name + ': source-proven base-template adaptation under ' + adaptation['field']
+                + '=' + str(adaptation['version']) + '; raw template references ('
+                + ', '.join(row['raw_prompt_body_references']) + ') are retained separately from adapted base references ('
+                + (', '.join(row['prompt_body_references']) or 'none') + '). Selected policy: '
+                + adaptation['policy_asset'] + '; request additions are reported separately from the legacy digest estimate.')
     if mono_legacy:
         verdict.append("The monolithic shape (prompt + full LinkML schema + concatenated documents, one call) "
                        f"survives only in {len(mono_legacy)} scripts outside the runner: "
@@ -5173,11 +5839,12 @@ def api_meaning(root: Path, facts: dict) -> dict:
         verdict.append("No API condition is a runtime hybrid: " + "; ".join(
             t for t in (continuation["continuations_text"], continuation["why"], continuation["api_path"]) if t)
             + ".")
-    verdict.append("The agentic runtimes " + ", ".join(cond["agentic_runtimes"]) + " render the same condition "
-                   "names (one name, two procedures); a run is one or the other, not a hybrid.")
+    verdict.append("The agentic runtimes " + ", ".join(cond["agentic_runtimes"]) + (" render the legacy condition " if selected_procedures else " render the same condition ")
+                   + "names (one name, two procedures); a run is one or the other, not a hybrid.")
     return {"definition": ("api = MONOLITHIC: one model call whose input is the prompt, the full LinkML "
                            "schema and the input documents concatenated with separators"),
             "phases": phases, "derived_phases": derived, "model_phases": model_phases,
+            **({"selected_procedures": selected_procedures} if selected_procedures else {}),
             "schema_form": schema_form, "followup_turns": followups,
             "agentic_audit_from_renderer": floor,
             "default_renderer": continuation["default_renderer"],
@@ -5526,9 +6193,8 @@ def render_markdown(result: dict) -> str:
           "- Follow-up turns (model calls besides the phases, from the runner's model-call wrapper): "
           + "; ".join(f"{k} ({', '.join(v['calls'])}; " + ("every condition" if v["conditions"] is None
                       else "only " + ", ".join(v["conditions"]))
-                      + (f"; OPT-IN {v['selection']['field']} in {v['selection']['enabled_values']}, "
-                         f"default {v['selection']['default']}, runtime {v['selection']['runtime']}, "
-                         f"renderer {_span(v['selection']['renderers'])}; "
+                      + (f"; OPT-IN {_selection_text(v['selection'])}, "
+                         f"default {v['selection']['default']}; "
                          f"selection evidence {', '.join(v['selection']['evidence'])}; "
                          f"via {', '.join(x['call'] for x in v['via'])}" if v.get("selection") else "")
                       + f", {v['basis']})"
@@ -5549,7 +6215,7 @@ def render_markdown(result: dict) -> str:
                 ["renderer setter", "renderers", "origin", "runtime", f"reaches {ac['floor']}", "covered by"]) + [""]
     L += [f"{ac['propagating_setters']} further setters pass on a renderer recorded or registered elsewhere "
           "(a record, a registration, a spec or a caller).", ""]
-    L += _table([[c, v["status"], v["role"], v["shape"], v["model_calls_minimum"],
+    L += _table([[c, v["status"], v["role"], v["shape"], "record-dependent" if v["model_calls_minimum"] is None else v["model_calls_minimum"],
                   ", ".join(v["followup_turns"]) or "none",
                   ", ".join(v["optional_followup_turns"]) or "none",
                   "yes" if v["receipt_condition"] else "", "yes" if v["prompt_hybrid"] else "no",

@@ -403,22 +403,19 @@ class TestTheCLI(unittest.TestCase):
         self.prompt = Path("src/download/prompts/d4d_generic_arm_prompt.md")
         self.prompt.parent.mkdir(parents=True)
         self.prompt.write_text("# v1\n\n## Prompt body\nbody\n")
-        # Derived from the condition registry, not restated. A hardcoded
+        # Derived from the complete consumed-file registry, not restated. A hardcoded
         # ("_v2", "_v3", "_v4") meant that adding generic_v5 left `check
         # --strict` reporting a real file the fixture had not created, and two
         # tests failed for a reason that had nothing to do with what they test.
         # Same shape as #467, where a four-project literal silently excluded
         # VOICE_PEDIATRIC.
-        from data_sheets_schema.api_runner import CONDITION_PROMPTS
-        from data_sheets_schema.api_playbook import POLICY_PATH
-        from data_sheets_schema.removal_repair import POLICY_PATH as REMOVAL_POLICY_PATH
-        from data_sheets_schema.receipt_completion import POLICY_PATH as RECEIPT_POLICY_PATH
-        from data_sheets_schema.native_source_attribution import POLICY_PATH as NATIVE_ATTRIBUTION_POLICY_PATH
-        for real in set(CONDITION_PROMPTS.values()) | {POLICY_PATH, REMOVAL_POLICY_PATH, RECEIPT_POLICY_PATH, NATIVE_ATTRIBUTION_POLICY_PATH}:
-            here = self.prompt.with_name(real.name)
+        # Selected conditions also consume policies and .claude playbooks.
+        # Keep their logical paths; a basename copy does not pin the original.
+        self.files = tuple(pr.prompt_files())
+        for here in self.files:
+            here.parent.mkdir(parents=True, exist_ok=True)
             if not here.exists():
-                here.write_text(f"# {real.stem}\n\n## Prompt body\nbody\n")
-        self.prompt.with_name("d4d_tuned_arm_prompt.md").write_text("# tuned\n")
+                here.write_text(f"# {here.stem}\n\n## Prompt body\nbody\n")
 
 
     def _run(self, *args):
@@ -427,8 +424,9 @@ class TestTheCLI(unittest.TestCase):
         return CliRunner().invoke(api, ["prompts", *args])
 
     def _pin_all(self):
-        for p in sorted(self.prompt.parent.glob("*.md")):
-            self._run("pin", "--file", str(p), "--reason", "initial")
+        for p in self.files:
+            result = self._run("pin", "--file", str(p), "--reason", "initial")
+            self.assertEqual(0, result.exit_code, result.output)
 
     def test_an_undeclared_prompt_file_fails_the_repo_gate(self):
         """A condition prompt nobody pinned is text that was never declared —
@@ -461,6 +459,27 @@ class TestTheCLI(unittest.TestCase):
         self.assertEqual(0, r.exit_code, r.output)
         self.assertIn("superseded", r.output)
         self.assertEqual(0, self._run("check", "--strict").exit_code)
+
+    def test_a_selected_playbook_edit_requires_its_own_logical_pin(self):
+        self._pin_all()
+        playbook = Path(".claude/commands/d4d-agent-v2.md")
+        self.assertIn(playbook, self.files)
+        playbook.write_text(playbook.read_text() + "\nChanged selected rule.\n")
+        result = self._run("check", "--strict")
+        self.assertEqual(1, result.exit_code, result.output)
+        self.assertIn("uncanonical", result.output)
+        self.assertIn(playbook.as_posix(), result.output)
+        # Pinning a same-named file in the prompt directory cannot bless the
+        # changed playbook at its distinct logical identity.
+        copy = self.prompt.with_name(playbook.name)
+        copy.write_bytes(playbook.read_bytes())
+        result = self._run("pin", "--file", str(copy), "--reason", "separate fixture")
+        self.assertEqual(0, result.exit_code, result.output)
+        self.assertEqual(1, self._run("check", "--strict").exit_code)
+        result = self._run("pin", "--file", str(playbook), "--reason", "selected rule changed")
+        self.assertEqual(0, result.exit_code, result.output)
+        result = self._run("check", "--strict")
+        self.assertEqual(0, result.exit_code, result.output)
 
 
 if __name__ == "__main__":

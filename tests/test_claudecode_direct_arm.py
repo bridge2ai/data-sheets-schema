@@ -708,5 +708,9 @@ def test_writes_receipt_is_one_answer_for_the_record_and_the_launcher(native, tm
     (tmp_path / "api").mkdir()
     api = specification(tmp_path / "api", "Claude API (direct)")
     assert not api.is_agentic
-    for condition in ("generic", "generic_v6", *sorted(RECEIPT_CONDITIONS)):
+    # v10 has a distinct registered API selection, covered with its actual
+    # receipt policy in test_shared_generation_condition_compatibility.
+    for condition in ("generic", "generic_v6", *sorted(set(RECEIPT_CONDITIONS) - {"generic_v10"})):
         assert replace(api, condition=condition).writes_receipt is (condition in RECEIPT_CONDITIONS)
+    with pytest.raises(ValueError, match="requires shared generation 1"):
+        replace(api, condition="generic_v10")

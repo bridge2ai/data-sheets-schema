@@ -40,8 +40,187 @@ ARMS = {
 _CONDITIONS = sorted(CONDITION_PROMPTS)
 
 
+def _explicit(name, value, default=None):
+    """Distinguish a historical Click default from a caller's selection."""
+    from click.core import ParameterSource
+    context = click.get_current_context(silent=True)
+    if context is not None and name in context.params:
+        return context.get_parameter_source(name) not in (None, ParameterSource.DEFAULT)
+    return value != default
+
+
+def _bounded_registration_bytes(path):
+    import os
+    import stat
+    from data_sheets_schema.shared_generation import MAX_REGISTRATION_BYTES
+    try:
+        fd = os.open(path, os.O_RDONLY | os.O_NONBLOCK)
+        with os.fdopen(fd, 'rb') as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_size > MAX_REGISTRATION_BYTES:
+                raise ValueError('shared registration must be a bounded regular file')
+            raw = stream.read(MAX_REGISTRATION_BYTES + 1)
+        if not 0 < len(raw) <= MAX_REGISTRATION_BYTES:
+            raise ValueError('shared registration exceeds its byte bound or is empty')
+        return raw
+    except (OSError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+def _capture_shared_registration(path):
+    from data_sheets_schema import shared_generation as shared
+    raw = _bounded_registration_bytes(path)
+    try:
+        document = shared.parse_registration(raw)
+        if str(Path(path).absolute()) != document['registration_path']:
+            raise ValueError('shared registration path differs from its declared authority')
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    return {'path': Path(path).absolute(), 'raw': raw, 'document': document}
+
+
+def _shared_spec(project, arm, label, condition, bundle, out_dir, runtime, provider,
+                 manifest, chunk_manifest, api_playbook_version, removal_repair_version,
+                 receipt_completion_version, receipt_completion_registration, captured):
+    from data_sheets_schema import api_runner as api, shared_generation as shared
+    reg, raw = captured['document'], captured['raw']
+    run, inputs = reg['run'], reg['inputs']
+    matches = [key for key, row in ARMS.items() if row[:2] == (run['arm'], run['method'])]
+    if len(matches) != 1 or run['project'] != project or run['label'] != label:
+        raise click.ClickException('shared registration belongs to another project, arm, method or label')
+    expected = {'arm': matches[0], 'condition': 'generic_v10', 'runtime': api.RUNTIME,
+                'provider': reg['runtime']['provider'], 'api_playbook_version': 2,
+                'receipt_completion_version': 2, 'removal_repair_version': 0}
+    supplied = dict(arm=arm, condition=condition, runtime=runtime, provider=provider,
+                    api_playbook_version=api_playbook_version,
+                    receipt_completion_version=receipt_completion_version,
+                    removal_repair_version=removal_repair_version)
+    defaults = {'arm': 'baseline', 'api_playbook_version': 0,
+                'receipt_completion_version': 0, 'removal_repair_version': 0}
+    for key, value in supplied.items():
+        if _explicit(key, value, defaults.get(key)) and value != expected[key]:
+            raise click.ClickException(f'--{key.replace("_", "-")} conflicts with shared registration')
+    source = inputs['source_manifest']
+    selected_manifest = None if source is None else Path(source['path'])
+    for key, value, selected in [('bundle', bundle, inputs['bundle']['path']),
+            ('chunk_manifest', chunk_manifest, inputs['chunk_manifest']['path']),
+            ('manifest', manifest, selected_manifest)]:
+        if _explicit(key, value, _UNSET if key == 'manifest' else None):
+            actual = None if value is None else str(Path(value).absolute())
+            if actual != (None if selected is None else str(selected)):
+                raise click.ClickException(f'--{key.replace("_", "-")} conflicts with shared registration')
+    receipt_raw = shared.canonical(reg['receipt']).decode('utf-8')
+    if receipt_completion_registration is not None:
+        try:
+            from data_sheets_schema.receipt_completion_policy import parse_registration
+            other = parse_registration(_bounded_registration_bytes(receipt_completion_registration), version=2)
+            if shared.canonical(other) != shared.canonical(reg['receipt']):
+                raise ValueError('receipt registration conflicts with shared registration')
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+    try:
+        return api.RunSpec(project=project, arm=run['arm'], method=run['method'], label=label,
+            condition='generic_v10', condition_stated=True, render_version=25,
+            bundle=Path(inputs['bundle']['path']), chunk_manifest=Path(inputs['chunk_manifest']['path']),
+            manifest=selected_manifest, profile=inputs['profile']['name'],
+            profile_basis=inputs['profile']['basis'], runtime=api.RUNTIME,
+            provider=expected['provider'], out_dir=Path(out_dir) if out_dir else None,
+            shared_generation_version=1, shared_generation_registration=raw.decode('utf-8'),
+            api_playbook_version=2, receipt_completion_version=2,
+            receipt_completion_registration=receipt_raw)
+    except (ValueError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+def _shared_roster(path, pairs):
+    """Capture an explicit exact run roster; a single-run file is never a roster."""
+    def distinct(items):
+        result = {}
+        for key, value in items:
+            if key in result:
+                raise ValueError('duplicate batch roster key')
+            result[key] = value
+        return result
+    def nonfinite(_value):
+        raise ValueError('nonfinite roster value')
+    raw = _bounded_registration_bytes(path)
+    try:
+        value = json.loads(raw.decode('utf-8'), object_pairs_hook=distinct, parse_constant=nonfinite)
+        if (type(value) is not dict or set(value) != {'format', 'registrations'}
+                or value['format'] != 'shared_generation_batch_roster_v1'
+                or type(value['registrations']) is not list or not value['registrations']):
+            raise ValueError('batch requires a closed shared_generation_batch_roster_v1 roster')
+        selected, paths, identities = {}, set(), set()
+        for row in value['registrations']:
+            if (type(row) is not dict or set(row) != {'project', 'label', 'registration_path'}
+                    or any(type(v) is not str or not v.strip() for v in row.values())):
+                raise ValueError('invalid batch registration row')
+            key = (row['project'], row['label'])
+            if key in selected:
+                raise ValueError('duplicate project/label in shared batch roster')
+            captured = _capture_shared_registration(row['registration_path'])
+            reg = captured['document']
+            identity = reg['registration_id']
+            resolved = captured['path'].resolve()
+            if resolved in paths or identity in identities or any(
+                    captured['path'].samefile(previous['path']) for previous in selected.values()):
+                raise ValueError('shared batch cannot reuse registration paths or IDs')
+            if (reg['run']['project'], reg['run']['label']) != key:
+                raise ValueError('roster row differs from its registered run')
+            selected[key] = captured
+            paths.add(resolved)
+            identities.add(identity)
+        if len(pairs) != len(set(pairs)) or set(selected) != set(pairs):
+            raise ValueError('shared roster must match every requested project/replicate label exactly once')
+        return {'path': Path(path).absolute(), 'raw': raw, 'registrations': selected}
+    except (ValueError, UnicodeError, RecursionError, OSError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+def _shared_current(specs, roster=None, *, batch_label_prefix=None, canary_baseline=None):
+    from data_sheets_schema import shared_generation as shared
+    try:
+        captures = [shared.assert_current(spec) for spec in specs if spec.shared_generation_version]
+        # Reuse the complete closure for every run; one run must not overwrite
+        # another run's authority before a later drift check can refuse it.
+        authority_paths = tuple(path for capture in captures for path, _ in capture.files)
+        if canary_baseline:
+            from data_sheets_schema import canary, provenance
+            # Match baseline_for/report_basis exactly: their default method
+            # spans agent-family arms, not only the current run's method.
+            authority_paths += tuple(path for spec in specs for path in
+                canary._baseline_records(provenance.CONCAT_DIR, None, canary_baseline, spec.project))
+        if roster is not None:
+            path = roster['path']
+            if _bounded_registration_bytes(path) != roster['raw']:
+                raise ValueError('shared batch roster changed after capture')
+            for spec in specs:
+                owned = {Path(spec.metadata_dir).resolve(), spec.full_path.parent.resolve(), spec.core_path.parent.resolve()}
+                if any(path.resolve() == parent or parent in path.resolve().parents for parent in owned):
+                    raise ValueError('shared batch roster must be outside every run output/evidence directory')
+            for capture in captures:
+                if any(path.resolve() == Path(name).resolve() or path.samefile(name) for name, _ in capture.files):
+                    raise ValueError('shared batch roster aliases selected input authority')
+            authority_paths += (path,)
+        if authority_paths:
+            from data_sheets_schema import run_lock
+            extra = (() if batch_label_prefix is None else
+                     (run_lock._path_for(batch_label_prefix),))
+            shared._separate_authorities(specs, authority_paths, extra_outputs=extra)
+            from data_sheets_schema.output_ownership import require_disjoint_selected_outputs
+            require_disjoint_selected_outputs(specs, control_paths=extra)
+    except (ValueError, OSError, LookupError) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+
+def _shared_plan_line(plan):
+    click.echo('dynamic total unavailable; explicit audit allowances: '
+               + json.dumps(plan['registered_audit_allowances'], sort_keys=True))
+    click.echo(f"   full request ~{plan['full_request_approx_input_tokens']:,} input tokens")
+
+
 def _spec(project, arm, label, condition, bundle=None, out_dir=None,
-          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None):
+          runtime=None, provider=None, manifest=_UNSET, chunk_manifest=None, api_playbook_version=0, removal_repair_version=0, receipt_completion_version=0, receipt_completion_registration=None, shared_generation_version=0, shared_generation_registration=None, _shared_capture=None):
     """Resolve a run spec.
 
     `project` is a free string rather than a click.Choice because the GitHub
@@ -56,6 +235,14 @@ def _spec(project, arm, label, condition, bundle=None, out_dir=None,
     `--bundle` does not select the study's declarations for that bundle, and
     a run without a manifest records that it had none.
     """
+    if shared_generation_version or shared_generation_registration is not None:
+        if shared_generation_version != 1 or shared_generation_registration is None:
+            raise click.ClickException("shared generation requires explicit version 1 and registration")
+        captured = _shared_capture or _capture_shared_registration(shared_generation_registration)
+        return _shared_spec(project, arm, label, condition, bundle, out_dir,
+                            runtime, provider, manifest, chunk_manifest,
+                            api_playbook_version, removal_repair_version,
+                            receipt_completion_version, receipt_completion_registration, captured)
     from data_sheets_schema.api_runner import RunSpec
     from data_sheets_schema.chunking import CONCAT_DIR as BUNDLE_DIR
     display, method, pattern, manifest_line = ARMS[arm]
@@ -150,6 +337,8 @@ def _require_canonical_prompts(spec):
 
 
 def _require_bundle(spec, project, bundle):
+    if getattr(spec, 'shared_generation_version', 0):
+        bundle = spec.bundle  # Explicit authority, even when no CLI --bundle was repeated.
     if bundle is None and not load_registry(spec.manifest).declares_bundle(project, spec.bundle):
         reg = load_registry(spec.manifest)
         where = (f"{reg.path} declares {', '.join(reg.projects()) or 'no projects'}"
@@ -219,7 +408,7 @@ def _plan_or_refuse(spec):
     from data_sheets_schema.profiles import MissingVocabulary
     try:
         return plan(spec)
-    except (RuntimeError, MissingVocabulary) as exc:           # a vocabulary the checkout lacks too (#1729)
+    except (RuntimeError, ValueError, MissingVocabulary) as exc:           # a vocabulary the checkout lacks too (#1729)
         raise click.ClickException(str(exc))
 
 @click.group()
@@ -228,14 +417,18 @@ def api():
 
 
 @api.command("render-prompt")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+              help="explicit shared-generation API condition; requires its immutable registration")
+@click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
+              help="single-run registration, or exact per-run registration roster for batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -259,7 +452,7 @@ def api():
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="render even though the label names a different condition (#1094)")
 def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, runtime, allow_condition_mismatch,
-                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
+                      provider, out, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
     """Render the exact instruction a run should receive, for any runtime.
 
     The API path never types an instruction: `resolve_prompt()` builds it from
@@ -283,6 +476,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
     spec = _spec(project, arm, label, condition, bundle,
                  runtime=runtime, provider=provider, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration,
+                 shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration,
                  **_manifest_kw(manifest, chunk_manifest))
     _refuse_condition_mismatch(spec, allow_condition_mismatch)   # the agentic path's launch instrument (#1130 round 2)
     _require_bundle(spec, project, bundle)
@@ -301,9 +495,21 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
     text = resolve_prompt(spec)
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+    if spec.shared_generation_version:
+        _shared_current([spec])
     if out:
-        Path(out).write_text(text, encoding="utf-8")
+        if spec.shared_generation_version:
+            try:
+                with Path(out).open('x', encoding='utf-8') as stream:
+                    stream.write(text)
+            except OSError as exc:
+                raise click.ClickException(str(exc)) from exc
+        else:
+            Path(out).write_text(text, encoding="utf-8")
         click.echo(f"✓ {out}", err=True)
+    if spec.shared_generation_version:
+        condition, runtime = spec.condition, spec.runtime
+        arm = next(key for key, row in ARMS.items() if row[:2] == (spec.arm, spec.method))
     click.echo(f"# rendered {condition} for {project} / {arm} / runtime={runtime}",
                err=True)
     click.echo(f"# sha256 {digest}  ({len(text.encode('utf-8'))} bytes)", err=True)
@@ -314,14 +520,18 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 
 
 @api.command("plan")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+              help="explicit shared-generation API condition; requires its immutable registration")
+@click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
+              help="single-run registration, or exact per-run registration roster for batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -340,14 +550,20 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--json", "as_json", is_flag=True, help="emit the full plan as JSON")
-def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
+def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, out_dir, as_json, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
     """Render every phase without calling the API — no key, no charge."""
     from data_sheets_schema.api_runner import plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     p = _plan_or_refuse(spec)
     if as_json:
         click.echo(json.dumps(p, indent=2))
+        return
+    if spec.shared_generation_version:
+        click.echo(f"📋 {spec.project} / {spec.arm} / {spec.condition}")
+        _shared_plan_line(p)
+        for key, value in p['outputs'].items():
+            click.echo(f"   -> {key:6} {value}")
         return
     click.echo(f"📋 {p['project']} / {arm} / {p['condition']}")
     click.echo(f"   model    {p['model']['name']}  temp={p['model']['temperature']}  "
@@ -371,14 +587,18 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 
 
 @api.command("run")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+              help="explicit shared-generation API condition; requires its immutable registration")
+@click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
+              help="single-run registration, or exact per-run registration roster for batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--project", required=True,
               help="a dataset the selected manifest declares, or any name with --bundle")
 @click.option("--arm", type=click.Choice(sorted(ARMS)), default="baseline",
@@ -400,12 +620,12 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--out-dir", type=click.Path(), default=None,
               help="flat output directory (the assistant layout)")
 @click.option("--yes", is_flag=True, help="skip the cost confirmation")
-def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
+def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, manifest, chunk_manifest, out_dir, yes, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
     """Execute every phase (four model calls, plus one bounded re-addressing call under a receipt condition when a receipt entry names a slot the record does not carry, #952; the core is derived from the full) and write outputs plus a live provenance record."""
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d api run")          # the record and the outputs land under the cwd (#1643)
     from data_sheets_schema.api_runner import execute, plan
-    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **_manifest_kw(manifest, chunk_manifest))
+    spec = _spec(project, arm, label, condition, bundle, out_dir, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, shared_generation_version=shared_generation_version, shared_generation_registration=shared_generation_registration, **_manifest_kw(manifest, chunk_manifest))
     _require_bundle(spec, project, bundle)
     _require_canonical_prompts(spec)
     _refuse_condition_mismatch(spec, allow_condition_mismatch)
@@ -414,12 +634,20 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
             f"{spec.full_path} already exists; a run label is never reused")
 
     p = _plan_or_refuse(spec)
-    click.echo(f"~{p['approx_total_input_tokens']:,} input tokens across 6 phases "
-               f"on {p['model']['name']}")
+    if spec.shared_generation_version:
+        _shared_plan_line(p)
+    else:
+        click.echo(f"~{p['approx_total_input_tokens']:,} input tokens across 6 phases "
+                   f"on {p['model']['name']}")
     if not yes and not click.confirm("Proceed with billed API calls?"):
         click.echo("aborted")
         return
-    res = execute(spec)
+    if spec.shared_generation_version:
+        _shared_current([spec])
+    try:
+        res = execute(spec)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     for u in res["usage"]:
         click.echo(f"   {u['phase']:10} in={u.get('input_tokens')} out={u.get('output_tokens')} "
                    f"cache_read={u.get('cache_read')} cache_write={u.get('cache_write')}"
@@ -445,14 +673,18 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 
 
 @api.command("batch")
-@click.option("--receipt-completion-version", type=click.IntRange(0, 1), default=0,
-              help="opt-in registered receipt continuation; requires API renderer 8")
+@click.option("--shared-generation-version", type=click.IntRange(0, 1), default=0,
+              help="explicit shared-generation API condition; requires its immutable registration")
+@click.option("--shared-generation-registration", type=click.Path(exists=True, dir_okay=False),
+              help="single-run registration, or exact per-run registration roster for batch")
+@click.option("--receipt-completion-version", type=click.IntRange(0, 2), default=0,
+              help="opt-in registered receipt continuation; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--receipt-completion-registration", type=click.Path(exists=True, dir_okay=False),
               help="immutable JSON registration with explicit cap, request bound and coverage policy")
 @click.option("--removal-repair-version", type=click.IntRange(0, 1), default=0,
               help="opt-in restore-only removal repair; 1 requires API renderer 8, new condition")
-@click.option("--api-playbook-version", type=click.IntRange(0, 1), default=0, show_default=True,
-              help="opt-in inline API factual/phase policy; 1 requires API renderer 8")
+@click.option("--api-playbook-version", type=click.IntRange(0, 2), default=0, show_default=True,
+              help="opt-in inline API factual/phase policy; 1 requires API renderer 8; 2 requires shared generation 1 / API renderer 25")
 @click.option("--projects", default=None,
               help="comma-separated; default: every project the selected manifest declares "
                    "(#623), or the --project-bundle names")
@@ -488,7 +720,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
 @click.option("--yes", is_flag=True)
 def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_condition_mismatch,
               replicates, label_prefix, dry_run,
-              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration):
+              continue_on_error, canary_baseline, no_canary_gate, yes, branch_guard, api_playbook_version, removal_repair_version, receipt_completion_version, receipt_completion_registration, shared_generation_version=0, shared_generation_registration=None):
     """Run a sweep of projects x replicates, reporting cumulative cost.
 
     Each run resumes independently, so a sweep interrupted partway costs only
@@ -505,7 +737,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         name, sep, path = item.partition("=")
         if not sep or not name.strip() or not path.strip():
             raise click.ClickException(f"--project-bundle {item!r}: expected NAME=PATH")
+        if shared_generation_version and name.strip() in bundles:
+            raise click.ClickException('duplicate --project-bundle in registered batch')
         bundles[name.strip()] = path.strip()
+    if shared_generation_version and not projects and not bundles:
+        raise click.ClickException('shared batch requires explicit --projects or --project-bundle selections')
     if projects:
         names = [p.strip() for p in projects.split(",") if p.strip()]
     else:
@@ -515,11 +751,22 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         raise click.ClickException(
             "no projects: the selected manifest declares none and no --project-bundle "
             "was given; pass --projects, --project-bundle NAME=PATH, or --manifest")
+    roster = None
+    if shared_generation_version or shared_generation_registration is not None:
+        if shared_generation_version != 1 or shared_generation_registration is None:
+            raise click.ClickException('shared batch requires explicit version 1 and registration roster')
+        if replicates < 1 or len(names) != len(set(names)) or set(bundles) - set(names):
+            raise click.ClickException('shared batch requires positive replicates and distinct exact projects')
+        pairs = [(p, f'{label_prefix}_rep{n}') for p in names for n in range(1, replicates + 1)]
+        roster = _shared_roster(shared_generation_registration, pairs)
     specs = []
     for p in names:
         for n in range(1, replicates + 1):
+            shared_kw = ({'shared_generation_version': 1,
+                          'shared_generation_registration': str(roster['registrations'][(p, f'{label_prefix}_rep{n}')]['path']),
+                          '_shared_capture': roster['registrations'][(p, f'{label_prefix}_rep{n}')]} if roster else {})
             s = _spec(p, arm, f"{label_prefix}_rep{n}", condition,
-                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration)
+                      bundle=bundles.get(p), manifest=requested, api_playbook_version=api_playbook_version, removal_repair_version=removal_repair_version, receipt_completion_version=receipt_completion_version, receipt_completion_registration=receipt_completion_registration, **shared_kw)
             # As `plan` and `run` do: a project no selected manifest declares
             # needs an explicit bundle, never the repository's by convention
             # (#1367 round 2, #1386).
@@ -528,8 +775,11 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             _refuse_condition_mismatch(s, allow_condition_mismatch)   # before any spend (#1094)
             specs.append(s)
 
+    if roster:
+        _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
+    selected_receipts = any(getattr(s, 'receipt_completion_version', 0) for s in specs)
     receipt_gating = False
-    if receipt_completion_version and not dry_run:
+    if selected_receipts and not dry_run:
         from data_sheets_schema.receipt_completion import registration
         if no_canary_gate:
             raise click.ClickException("registered receipt completion cannot bypass its canary/coverage gate")
@@ -537,19 +787,25 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             raise click.ClickException("diagnostic receipt completion floor is pending; fan-out is blocked")
         receipt_gating = registration(specs[0])["coverage_floor"]["state"] == "registered"
     plans = [_plan_or_refuse(s) for s in specs]
-    total = sum(x["approx_total_input_tokens"] for x in plans)
+    total = None if roster else sum(x["approx_total_input_tokens"] for x in plans)
+    if roster:
+        arm, condition = 'registered', 'generic_v10'
     click.echo(f"📦 {len(specs)} runs — {len(names)} projects x {replicates} "
                f"replicates, arm={arm}, condition={condition}")
     for s, x in zip(specs, plans):
-        click.echo(f"   {s.project:9} {s.label:44} ~{x['approx_total_input_tokens']:>8,} tok")
-    click.echo(f"   {'TOTAL':9} {'':44} ~{total:>8,} input tokens (uncached)")
+        if roster:
+            click.echo(f"   {s.project:9} {s.label}")
+            _shared_plan_line(x)
+        else:
+            click.echo(f"   {s.project:9} {s.label:44} ~{x['approx_total_input_tokens']:>8,} tok")
+    if not roster:
+        click.echo(f"   {'TOTAL':9} {'':44} ~{total:>8,} input tokens (uncached)")
 
     if dry_run:
         return
     if not yes and not click.confirm(f"Run {len(specs)} billed generations?"):
         click.echo("aborted")
         return
-
     # Claim the label prefix before spending anything (#513). Two batches
     # writing the same label directories is not a tolerable race: each writes
     # phase snapshots and a progress file under the same names, so the
@@ -565,6 +821,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
         raise click.ClickException(run_guard.message(found))
 
     from data_sheets_schema import run_lock
+    if roster:
+        _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
     try:
         lock_path = run_lock.acquire(label_prefix, names)
     except run_lock.AlreadyRunning as exc:
@@ -594,6 +852,8 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                 canary_stop = run_guard.message(late)
                 break
         try:
+            if roster:
+                _shared_current(specs, roster, batch_label_prefix=label_prefix, canary_baseline=canary_baseline)
             res = execute(s)
             spent_in += sum(u.get("input_tokens") or 0 for u in res["usage"])
             spent_out += sum(u.get("output_tokens") or 0 for u in res["usage"])
@@ -627,7 +887,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # first run, gating the fan-out.
             from data_sheets_schema import canary as _canary
             checks = res.get("checks") or {}
-            if receipt_completion_version:
+            if s.receipt_completion_version:
                 from data_sheets_schema import receipt_completion_policy as cp
                 try:
                     selected_policy = cp.select_policy(s.render_spec())
@@ -645,7 +905,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
             # #602. Displayed after the gated ones, never gated.
             counts.update(_canary.counts_from(checks,
                                               _canary.REPORTED_ONLY))
-            if receipt_completion_version:
+            if s.receipt_completion_version:
                 floor = _canary.receipt_coverage_floor(checks.get("receipts") or {})
                 counts["registered receipt coverage"] = (floor or {}).get("state", "unmeasurable")
             if _canary.report_vacuous(checks.get("report")):
@@ -687,7 +947,7 @@ def batch_cmd(projects, manifest, project_bundles, arm, condition, allow_conditi
                     canary_stop = (
                         f"registered receipt gate {v['status']} for {s.project} {s.label}: "
                         "coverage or required checks did not pass. Remaining runs were stopped."
-                        if receipt_completion_version else
+                        if s.receipt_completion_version else
                         f"canary {v['status']}: the first run is worse than "
                         f"the {canary_baseline} baseline for {s.project}, or a "
                         "check could not run. Fanning out would spend the rest "
