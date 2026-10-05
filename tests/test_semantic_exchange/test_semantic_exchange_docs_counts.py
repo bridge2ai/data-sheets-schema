@@ -88,7 +88,9 @@ class TestCoverageAtAGlanceStatesTheFiles(unittest.TestCase):
 
     def test_the_comprehensive_tables(self):
         """The pair that replaced the retired "semantic SSSOM" (#3884): both
-        tables have the stated number of rows."""
+        tables have the stated number of rows. That the rows are the schema's
+        slot names, one each, is TestEverySlotHasOneRow's
+        (test_comprehensive_sssom.py)."""
         stated = int(self.said["comprehensive"].group(1))
         self.assertEqual({path.name: len(data_rows(path))
                           for path in COMPREHENSIVE},

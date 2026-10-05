@@ -862,16 +862,12 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
         cls.holders = slots_holding(cls.aligned)
         cls.slot_names = schema_slot_names()
 
-    def problems(self, pairs=None, exceptions=STRENGTH_EXCEPTIONS,
-                 holders=None, slot_names=None):
-        """What the rule reports, on the TTL and the merged schemas unless
-        given others."""
+    def problems(self, pairs=None):
+        """What the rule reports on the merged schemas and the TTL's pairs,
+        or ``pairs`` in their place."""
         found = strength_disagreements(
-            self.pairs if pairs is None else pairs,
-            self.holders if holders is None else holders, self.classes)
-        return strength_problems(
-            found, exceptions,
-            self.slot_names if slot_names is None else slot_names)
+            self.pairs if pairs is None else pairs, self.holders, self.classes)
+        return strength_problems(found, STRENGTH_EXCEPTIONS, self.slot_names)
 
     def changed(self, subject, add, drop=None):
         """The TTL's pairs, with ``add`` added to ``subject`` and ``drop``
@@ -882,7 +878,9 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
         return pairs
 
     def test_every_slot_agrees_with_the_class_it_holds_or_is_listed(self):
-        self.assertEqual(self.problems(), [])
+        problems = self.problems()
+        self.assertEqual(problems, [], "\n" + "\n".join(
+            f"{slot}: {problem}" for slot, problem in problems))
 
     def test_the_rule_reads_the_holders_of_every_aligned_class(self):
         """Not vacuous: every class with a class-level triple has a holder
@@ -896,14 +894,18 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
 
     def test_a_planted_disagreement_fails_in_either_form(self):
         """known_biases holds DatasetBias, and both say exactMatch
-        rai:dataBiases. A closeMatch on the slot fails whether its subject
-        is the slot or the slot in a class, a class of either merged schema
-        (CoreDataset is a class only the core schema defines). So does the
-        class changing strength without its slot."""
+        rai:dataBiases. A closeMatch on the slot is reported whether its
+        subject is the slot or the slot in a class, a class of either merged
+        schema (CoreDataset is a class only the core schema defines), and so
+        is the class changing strength without its slot. Each is all it adds
+        to what the TTL alone reports, as in
+        test_the_check_reads_a_triple_in_either_form, so a problem in the
+        TTL fails the test above and not this one."""
         exact = ("exactMatch", "rai:dataBiases")
         close = ("closeMatch", "rai:dataBiases")
         self.assertEqual(self.pairs["known_biases"], {exact})
         self.assertEqual(self.pairs["DatasetBias"], {exact})
+        alone = set(self.problems())
         for subject, drop, carried, held in (
                 ("known_biases", exact, "closeMatch", "exactMatch"),
                 ("Dataset_known_biases", None, "closeMatch/exactMatch",
@@ -912,49 +914,66 @@ class TestASlotAgreesWithTheClassItHolds(unittest.TestCase):
                  "exactMatch"),
                 ("DatasetBias", exact, "exactMatch", "closeMatch")):
             with self.subTest(subject=subject):
+                added = set(self.problems(
+                    pairs=self.changed(subject, close, drop))) - alone
                 self.assertEqual(
-                    self.problems(pairs=self.changed(subject, close, drop)),
-                    [("known_biases", f"unlisted: {carried} rai:dataBiases "
-                                      f"where DatasetBias carries {held}")])
+                    added,
+                    {("known_biases", f"unlisted: {carried} rai:dataBiases "
+                                      f"where DatasetBias carries {held}")})
+
+    #: The listing tests use a world of their own, so a problem in the TTL
+    #: or in STRENGTH_EXCEPTIONS fails only the test that reads them: class C
+    #: carries closeMatch x:t, and slot s, which holds C, says exactMatch
+    #: x:t, the disagreement this listing allows.
+    LISTING = StrengthException("C", "x:t", ("exactMatch",), ("closeMatch",),
+                                "C and s are a fixture of these tests")
+
+    def listed(self, carried="exactMatch", exceptions=None, held=True,
+               declared=True):
+        """What the rule reports in that world: s carries ``carried`` on x:t,
+        holds C unless ``held`` is false, and is a slot name of the schemas
+        unless ``declared`` is false; ``exceptions`` is {s: LISTING} unless
+        given."""
+        found = strength_disagreements(
+            {"C": {("closeMatch", "x:t")}, "s": {(carried, "x:t")}},
+            {"C": {"s"} if held else set()}, {"C"})
+        return strength_problems(
+            found, {"s": self.LISTING} if exceptions is None else exceptions,
+            {"s"} if declared else set())
+
+    def test_a_listed_disagreement_holds_and_an_unlisted_one_fails(self):
+        self.assertEqual(self.listed(), [])
+        self.assertEqual(
+            self.listed(exceptions={}),
+            [("s", "unlisted: exactMatch x:t where C carries closeMatch")])
 
     def test_a_listing_without_a_reason_fails(self):
         for reason in (None, "", "   ", "see #4037"):
-            listing = STRENGTH_EXCEPTIONS["distribution_formats"]._replace(
-                reason=reason)
             with self.subTest(reason=reason):
                 self.assertEqual(
-                    self.problems(exceptions={"distribution_formats": listing}),
-                    [("distribution_formats", "listed without a reason")])
+                    self.listed(exceptions={
+                        "s": self.LISTING._replace(reason=reason)}),
+                    [("s", "listed without a reason")])
 
     def test_a_stale_listing_fails(self):
-        """A listing whose disagreement is gone fails: the slot follows its
-        class, the slot is gone from both merged schemas, or the listing
-        names a slot no schema declares. A listing whose predicates changed
-        fails as not the listed disagreement."""
-        exact, close = ("exactMatch", "evi:formats"), ("closeMatch", "evi:formats")
-        stale = ("distribution_formats",
-                 "stale: no disagreement with DistributionFormat on evi:formats")
+        """A listing whose disagreement is gone fails: the slot agrees with
+        its class, no longer holds it, or is gone from both merged schemas;
+        so does a listing that names a slot neither schema declares. A
+        listing whose predicates changed fails as not the listed
+        disagreement."""
+        gone = ("s", "stale: no disagreement with C on x:t")
+        undeclared = "stale: neither merged schema declares it"
+        self.assertEqual(self.listed(carried="closeMatch"), [gone])
+        self.assertEqual(self.listed(held=False), [gone])
+        self.assertEqual(self.listed(held=False, declared=False),
+                         [("s", undeclared)])
         self.assertEqual(
-            self.problems(pairs=self.changed("distribution_formats", close,
-                                             exact)),
-            [stale])
-        gone = {c: s - {"distribution_formats"} for c, s in self.holders.items()}
+            self.listed(exceptions={"s": self.LISTING, "t": self.LISTING}),
+            [("t", undeclared)])
         self.assertEqual(
-            self.problems(holders=gone,
-                          slot_names=self.slot_names - {"distribution_formats"}),
-            [("distribution_formats",
-              "stale: neither merged schema declares it")])
-        self.assertEqual(
-            self.problems(exceptions={
-                **STRENGTH_EXCEPTIONS,
-                "no_such_slot": STRENGTH_EXCEPTIONS["distribution_formats"]}),
-            [("no_such_slot", "stale: neither merged schema declares it")])
-        self.assertEqual(
-            self.problems(pairs=self.changed(
-                "distribution_formats", ("relatedMatch", "evi:formats"), exact)),
-            [("distribution_formats",
-              "not the listed disagreement: relatedMatch evi:formats where "
-              "DistributionFormat carries closeMatch")])
+            self.listed(carried="relatedMatch"),
+            [("s", "not the listed disagreement: relatedMatch x:t where C "
+                   "carries closeMatch")])
 
 
 #: Each EVI term the TTL names, with whether EVI defines it. The repository
