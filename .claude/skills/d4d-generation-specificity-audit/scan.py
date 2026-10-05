@@ -4210,7 +4210,8 @@ def derive_native_shared_route(root: Path, tree: ast.Module) -> dict | None:
                or _rebinding(n, name, None) for n in ast.walk(contract)):
             raise fail('contract constant is rebound')
         constants[name] = binding.value.value
-    if constants['VERSION'] != 1 or constants['RENDERER'] != early['renderer']:
+    if (constants['VERSION'] != 1 or constants['RENDERER'] != early['renderer']
+            or constants['RENDERER'] not in derive_admitted_renderers(tree)):
         raise fail('validator contract and API refusal disagree')
     fn = _function(renderer_tree, 'validate_spec')
     if (fn is None or fn.decorator_list or ast.unparse(fn.args) != 'spec'
@@ -4348,9 +4349,10 @@ from data_sheets_schema.native_shared_controller import bind_runtime
     # execution gate; its source shape needs a separate derivation/review.
     allowed_calls = {'capture', 'captured.document', 'ValueError', 'RunSpec', 'Path',
         'captured.registration.raw.decode', 'run_date.strftime', 'bind_runtime',
-        'spec.instruction', 'Path(out).resolve', 'destination.open', 'stream.write'}
-    if any(ast.unparse(n.func) not in allowed_calls for n in ast.walk(tries[0]) if isinstance(n, ast.Call)
-           and n not in [x for h in tries[0].handlers for x in ast.walk(h)]):
+        'Path(out).resolve', 'destination.open', 'stream.write', 'click.ClickException',
+        'str', 'text.encode', 'click.echo', 'hashlib.sha256', 'hashlib.sha256(raw).hexdigest', 'len'}
+    if any(ast.unparse(n.func) not in allowed_calls for statement in command.body
+           for n in ast.walk(statement) if isinstance(n, ast.Call)):
         raise fail('offline render consumer contains an unsupported call')
     evidence.append(f'{cli_path}:{command.lineno}')
     binder = 'src/data_sheets_schema/native_shared_controller.py'

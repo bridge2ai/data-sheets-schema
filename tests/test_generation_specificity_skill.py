@@ -1155,8 +1155,16 @@ class TestDiscovery(unittest.TestCase):
         through the directory setup_repo_imports puts on sys.path (#4054)."""
         self.assertEqual(set(self.facts["deterministic_commands"]),
                          {"src/data_sheets_schema/cli/healthsheet.py", "src/data_sheets_schema/cli/rocrate.py"})
-        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts"])
+        # The selected native renderer now imports the explicit runtime schema.
+        # Its controller/authority dependencies add their actual frozen lookup
+        # roots to this static closure, without running a native controller.
+        self.assertEqual(self.facts["deterministic_sys_path"], [".claude/agents/scripts",
+            "notes/claudecode_direct", "notes/matched_cborg_2026-09-13",
+            "notes/matched_cborg_2026-09-13/native_controls"])
         closure = set(self.facts["deterministic_closure"])
+        for module in ('native_shared_render', 'native_execution_registration',
+                       'native_execution_authority', 'native_attribution_controller'):
+            self.assertIn(f'src/data_sheets_schema/{module}.py', closure)
         for rel in ("src/data_sheets_schema/healthsheet.py", "src/data_sheets_schema/rocrate_normalize.py",
                     ".claude/agents/scripts/rocrate_to_d4d.py", ".claude/agents/scripts/field_prioritizer.py"):
             self.assertIn(rel, closure)
@@ -1822,6 +1830,7 @@ class TestNativeSharedRouteDerivation(unittest.TestCase):
             (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared(other)'),
             (scan.RUNNER, 'validate_native_shared(self)', 'validate_native_shared = foreign\n        validate_native_shared(self)'),
             (scan.RUNNER, 'return instruction(spec)', 'return instruction(other)'),
+            (scan.RUNNER, '24, 25, 26)', '24, 25)'),
             (self.RENDER, "version not in (0, 1)", 'version not in (0, 1, 2)'),
             (self.RENDER, 'spec.runtime != c.RUNTIME', 'spec.runtime == c.RUNTIME'),
             (self.RENDER, "'api_playbook_version', 'receipt_completion_version',", "'api_playbook_version',"),
@@ -1834,6 +1843,7 @@ class TestNativeSharedRouteDerivation(unittest.TestCase):
             (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(other, runtime_declaration, max_draft_checks)'),
             (self.CLI, 'bind_runtime(spec, runtime_declaration, max_draft_checks)', 'bind_runtime(spec, runtime_declaration, 1)'),
             (self.CLI, 'text = spec.instruction', 'execute(spec)\n        text = spec.instruction'),
+            (self.CLI, "    raw = text.encode('utf-8')", "    execute(spec)\n    raw = text.encode('utf-8')"),
             (self.CLI, 'captured = capture(selection)', 'captured = capture(other)'),
             (self.CLI, '@prompt.command("render-native-shared")', '@prompt.command("other")'),
         ]
