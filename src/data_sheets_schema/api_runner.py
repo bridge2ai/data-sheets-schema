@@ -550,6 +550,12 @@ class RunSpec:
     receipt_completion_registration: str | None = None
     shared_generation_version: int = 0
     shared_generation_registration: str | None = None
+    native_shared_generation_version: int = 0
+    native_shared_generation_registration: str | None = None
+    _native_shared_generation_capture: Any = field(default=None, init=False, repr=False)
+    _native_shared_generation_metadata: bytes | None = field(default=None, init=False, repr=False)
+    _native_shared_runtime_capture: Any = field(default=None, init=False, repr=False)
+    _native_shared_max_draft_checks: int | None = field(default=None, init=False, repr=False)
     _shared_generation_capture: Any = field(default=None, init=False, repr=False)
     _replay_only: bool = field(default=False, repr=False)
     _automatic_run_date: str | None = field(default=None, init=False, repr=False)
@@ -569,8 +575,10 @@ class RunSpec:
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
+        from .native_shared_render import validate_spec as validate_native_shared
+        validate_native_shared(self)
         from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
         validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
@@ -578,7 +586,7 @@ class RunSpec:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
         if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1):
             raise ValueError("shared_generation_version must be 0 or 1")
-        if self.condition == "generic_v10" and self.shared_generation_version != 1:
+        if self.condition == "generic_v10" and self.shared_generation_version != 1 and self.native_shared_generation_version != 1:
             raise ValueError("generic_v10 requires shared generation 1")
         if self.render_version == 25 and self.shared_generation_version != 1:
             raise ValueError("renderer 25 requires shared generation 1")
@@ -667,6 +675,9 @@ class RunSpec:
             parse_registration(self.shared_generation_registration.encode("utf-8"))
             if not self._replay_only:
                 capture(self)
+        if self.native_shared_generation_version:
+            from .native_shared_render import bind_selection
+            bind_selection(self)
 
     def _select_profile(self) -> None:
         from data_sheets_schema.profiles import select_profile
@@ -720,6 +731,9 @@ class RunSpec:
         this instruction. It may have moved since the run. Execution still
         requires a freshly validated spec; this object is only for replay.
         """
+        if any(k.startswith("native_shared_") for k in recorded):
+            from .native_shared_render import validate_metadata
+            validate_metadata(recorded)
         if any(k.startswith("receipt_completion_") for k in recorded):
             from data_sheets_schema.receipt_completion_policy import select_policy
             select_policy(render_spec=recorded)
@@ -744,6 +758,8 @@ class RunSpec:
                    receipt_completion_registration=(recorded.get("receipt_completion_registration") or {}).get("raw_json"),
                    shared_generation_version=recorded.get("shared_generation_version", 0),
                    shared_generation_registration=(recorded.get("shared_generation_registration") or {}).get("raw_json"),
+                   native_shared_generation_version=recorded.get("native_shared_generation_version", 0),
+                   native_shared_generation_registration=(recorded.get("native_shared_generation_registration") or {}).get("raw_json"),
                    _replay_only=True)
         if spec.native_source_attribution_version:
             if {k for k in recorded if k.startswith("native_source_attribution_")} != {
@@ -814,6 +830,9 @@ class RunSpec:
         spec.profile = recorded.get("profile")                    # what was recorded, or None for an older spec
         spec.profile_basis = recorded.get("profile_basis")
         spec._replay_only = True
+        if spec.native_shared_generation_version:
+            from .native_shared_render import restore
+            restore(spec, recorded)
         return spec
 
     @property
@@ -912,6 +931,9 @@ class RunSpec:
         "do not intervene" from a rule into something detectable (#420).
         """
         policy_metadata = {}
+        if self.native_shared_generation_version:
+            from .native_shared_render import metadata
+            policy_metadata.update(metadata(self))
         if self.native_source_attribution_version:
             from data_sheets_schema.native_source_attribution import policy_identity
             policy_metadata.update(native_source_attribution_version=1,
@@ -1032,6 +1054,9 @@ class RunSpec:
 
     @property
     def prompt_files(self) -> list[Path]:
+        if self.native_shared_generation_version:
+            from .native_shared_selection import capture_assets
+            return [Path(a.pin.role[len('asset:'):]) for a in capture_assets()]
         if self.shared_generation_version:
             from .shared_generation import captured_assets
             return [Path(name) for name in sorted(captured_assets())]
@@ -1133,7 +1158,7 @@ def context_blocks(spec: "RunSpec") -> dict[str, Any]:
     return out
 
 
-def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0) -> dict[str, Any]:
+def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, removal_repair_version: int = 0, receipt_completion_version: int = 0, native_source_attribution_version: int = 0, shared_generation_version: int = 0, native_shared_generation_version: int = 0) -> dict[str, Any]:
     """Fingerprint of how requests are assembled, for provenance (#353).
 
     The prompt-file and resolved-text hashes witness the arm prompt only. #352
@@ -1144,6 +1169,16 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
     instruction texts, report re-check headers and the order the parts are
     assembled in.
     """
+    if type(native_shared_generation_version) is not int or native_shared_generation_version not in (0, 1):
+        raise ValueError('unsupported native shared assembly version')
+    if native_shared_generation_version or render_version == 26:
+        axes = (api_playbook_version, removal_repair_version, receipt_completion_version,
+                native_source_attribution_version, shared_generation_version)
+        if (native_shared_generation_version != 1 or type(render_version) is not int
+                or render_version != 26 or any(type(axis) is not int or axis != 0 for axis in axes)):
+            raise ValueError('native shared assembly requires its exact selected axes')
+        from .native_shared_render import assembly_digest as native_assembly
+        return native_assembly()
     instructions = {phase: phase_instruction(phase, render_version)
                     for phase in PHASE_INSTRUCTIONS}
     layout = ASSEMBLY_LAYOUT
@@ -1285,6 +1320,9 @@ def resolve_prompt(spec: RunSpec, *, _include_shared: bool = True, _omit_phase_c
     Built here rather than handed to the model as a file reference, so the text
     in the request is the text that was hashed.
     """
+    if getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26:
+        from .native_shared_render import instruction
+        return instruction(spec)
     body = prompt_body(spec.base_prompt)
     if spec.api_playbook_version:
         from data_sheets_schema.api_playbook import adapt_template
@@ -2698,6 +2736,8 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
     The bundle and schema digest are the cached prefix: identical across all
     six phases of a run, and by far the largest inputs.
     """
+    if getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26:
+        raise ValueError('native shared generation uses the registered native stage controller')
     if phase not in PHASES:
         raise ValueError(f"unknown phase {phase!r}")
     if spec.render_version >= 20 and phase == "audit":
@@ -6498,6 +6538,8 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
     at phase 5 costs one call to finish rather than six. Set it False to force
     a clean regeneration.
     """
+    if getattr(spec, 'native_shared_generation_version', 0) or spec.render_version == 26:
+        raise ValueError('native shared generation requires its separate native execution registration')
     if spec._replay_only:
         raise ValueError("historical prompt replay cannot execute; construct a new validated RunSpec")
     if dry_run:

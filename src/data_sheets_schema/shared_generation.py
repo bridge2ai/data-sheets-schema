@@ -94,6 +94,10 @@ def select(spec) -> dict | None:
         raise ValueError("shared_generation_version must be the integer 0 or 1")
     registration = getattr(spec, "shared_generation_registration", None)
     if not version:
+        if getattr(spec, 'native_shared_generation_version', 0):
+            from .native_shared_render import validate_spec
+            validate_spec(spec)
+            return None
         if (registration is not None or spec.condition == "generic_v10"
                 or spec.render_version == 25 or spec.api_playbook_version == 2
                 or spec.receipt_completion_version == 2):

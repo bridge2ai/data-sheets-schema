@@ -98,12 +98,16 @@ def _body(raw: bytes) -> str:
 
 
 def projected_rules(selection: contract.NativeSelectionCapture) -> str:
+    return rules_from_assets(selection.authority)
+
+
+def rules_from_assets(authority: tuple[contract.CapturedArtifact, ...]) -> str:
     """Select pinned factual rules; replace the parent's execution procedure.
 
     Parent playbooks remain provenance inputs, not a second set of executable
     instructions. The common v10 rules are included once, including role review.
     """
-    assets = _asset_bytes(selection.authority)
+    assets = _asset_bytes(authority)
     parent = _body(assets[PROMPT])
     start = 'UNIFORM DECISION RULES — these apply identically to every project and every arm:'
     end = '## Shared generation rules v1'
