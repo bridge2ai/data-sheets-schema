@@ -79,11 +79,14 @@ When a D4D class or slot joins the exchange layer, follow the [`/d4d-add-mapping
 | `evi` | `https://w3id.org/EVI#` | FAIRSCAPE Evidence: hashes (md5, sha256), formats, ROCrate root |
 | `rai` | `http://mlcommons.org/croissant/RAI/` | Responsible AI (the 20 Croissant RAI 1.0 properties only): dataCollection, biases, limitations, use cases |
 | `d4d` | `https://w3id.org/bridge2ai/data-sheets-schema/` | D4D-specific terms with no external equivalent |
+| `rdf` | `http://www.w3.org/1999/02/22-rdf-syntax-ns#` | One slot-level triple, `id` to `rdf:ID`, an open disagreement in `generate_comprehensive_sssom.py` |
 
 ## Coverage at a glance
 
-- **108** rows in the semantic SSSOM
-- **156** rows in the structural SSSOM
-- **112** SKOS mapping triples
-- **6** SKOS predicates in use (`exactMatch`, `closeMatch`, `relatedMatch`, `narrowMatch`, `broadMatch`, plus class-level alignments)
-- **5** target namespaces (schema.org, DCAT, EVI, RAI, d4d-internal)
+- **301** rows in each comprehensive SSSOM table, one per schema slot name
+- **165** rows in the structural SSSOM
+- **150** SKOS mapping triples in the alignment TTL, whose `Alignment Statistics` block breaks them down by predicate and by target namespace
+- **5** SKOS predicates in use: `exactMatch`, `closeMatch`, `relatedMatch`, `narrowMatch`, `broadMatch`
+- **6** target namespaces: schema.org, RAI, EVI, DCAT, d4d-internal, rdf
+
+`tests/test_semantic_exchange/test_semantic_exchange_docs_counts.py` derives each number in this list from the file it counts, so a change that moves one fails until the list follows it (#4032).
