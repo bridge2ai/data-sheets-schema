@@ -47,7 +47,7 @@ def make_case(root):
         'receipt': data['receipt_raw'].decode(), 'source_text': data['source_text'],
         'chunk_id': data['chunk_id'], 'correction': True}))
     system = parent / 'system.txt'; system.write_text('Explicitly synthetic Python software test. No actual native or provider.\n')
-    attempt = root / 'fresh-attempt'; output = root / 'native-evidence'
+    attempt = root / 'native-attempt'; output = root / 'native-evidence'
     dependencies = authority.dependency_identity()
     expected = registration.permission_expectation(runtime, selected, spec,
         system.read_text() + policy.command_guidance(selected['policy']), attempt / 'cli_config', dependencies)
