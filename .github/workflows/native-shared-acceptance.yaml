@@ -1,0 +1,56 @@
+name: Native shared offline acceptance
+run-name: Native shared offline acceptance at ${{ github.sha }}
+
+on:
+  push:
+    branches: [review/4354-offline-acceptance]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: native-shared-offline-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  acceptance:
+    if: github.repository == 'bridge2ai/data-sheets-schema' && !github.event.deleted
+    runs-on: ubuntu-latest
+    # Aggregate setup + two sequential tests; their 900/180/120s limits stay fixed.
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Run neutral then omission only after neutral passes
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: src:scripts:.
+        run: >-
+          poetry run python utils/native_shared_acceptance.py run
+          --expected-head "$GITHUB_SHA"
+          --output "$RUNNER_TEMP/d4d-native-shared-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Preserve complete fresh cases and source identity
+        if: always()
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: >-
+          python3 utils/native_shared_acceptance.py finalize
+          --expected-head "$GITHUB_SHA"
+          --output "$RUNNER_TEMP/d4d-native-shared-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+      - name: Upload synthetic acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-shared-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/d4d-native-shared-${{ github.run_id }}-${{ github.run_attempt }}/upload/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
