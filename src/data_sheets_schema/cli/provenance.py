@@ -124,7 +124,7 @@ def _recorded_receipt_origin(path: Path):
     return receipts.get("origin") if isinstance(receipts, dict) else None
 
 
-def _inline_checks(path: Path, origin_prior=None) -> None:
+def _inline_checks(path: Path, *, origin_prior=None) -> None:
     """Write the four deterministic check blocks into a just-written record.
 
     The API runner computes pair consistency, report claims, grounding and
@@ -653,7 +653,7 @@ def record(project, method, label, input_bundle, prompts, prompt_text,
     # Evidence pins retain the same portable spelling as the record's
     # outputs. Reuse the resolved address without another corpus selection.
     inline_address = out if registered is not None or concat_dir.is_absolute() else out.relative_to(Path.cwd())
-    _inline_checks(inline_address, origin_prior)
+    _inline_checks(inline_address, origin_prior=origin_prior)
 
     # Say it here, but do not refuse. Recording an uncanonical prompt is the
     # honest act — it is what puts the evidence in the record for `d4d runs
