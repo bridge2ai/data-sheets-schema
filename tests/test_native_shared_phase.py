@@ -353,3 +353,61 @@ def test_fresh_stage_regression_cannot_hide_after_observed_assembly():
     trace = Trace(); trace.assembly(); trace.current = decision(number=4)
     with pytest.raises(ValueError, match='regressed'):
         trace.write('full')
+
+
+@pytest.mark.parametrize('tool', ['Read', 'Write'])
+def test_native_file_success_may_omit_error_flag_without_helper_credit(tool):
+    trace = Trace()
+    inputs = {'file_path': '/neutral/current-stage-file'}
+    if tool == 'Write':
+        inputs['content'] = 'answer'
+    identity = trace.call(tool, inputs)
+    trace.result(identity, bash=False, mutation=lambda event:
+        event['message']['content'][0].pop('is_error'))
+    report = trace.state.report()
+    assert report['passed'] and report['pending_tool_ids'] == []
+    assert report['current_checks'] == [] and report['checks'] == []
+    assert not trace.state.report(complete=True)['passed']
+
+
+def test_omitted_file_success_settles_initial_writes_before_real_helpers():
+    trace = Trace(); trace.helper('chunk_check'); trace.helper('source_scope')
+    for role in ('full', 'receipt'):
+        identity = trace.call('Write', {'file_path': '/neutral/' + role, 'content': 'neutral'})
+        trace.result(identity, bash=False, mutation=lambda event:
+            event['message']['content'][0].pop('is_error'))
+    trace.helper('full_schema'); trace.helper('full_terms')
+    assert trace.helper('phase1_receipts') == ('seal_phase1',)
+    assert trace.state.report()['phase1_sealed']
+
+
+def test_explicit_file_error_settles_without_crediting_failed_generation():
+    trace = Trace(); trace.helper('chunk_check'); trace.helper('source_scope')
+    trace.write('full', code=1)
+    assert trace.state.report()['pending_tool_ids'] == []
+    with pytest.raises(ValueError, match='precedes initial generation'):
+        trace.helper('full_schema')
+
+
+@pytest.mark.parametrize('tool', ['Read', 'Write'])
+@pytest.mark.parametrize('flag', [None, 0, 1])
+def test_present_file_error_flag_must_be_boolean(tool, flag):
+    trace = Trace()
+    identity = trace.call(tool, {'file_path': '/neutral/stage-file', 'content': 'neutral'})
+    with pytest.raises(ValueError, match='boolean outcome'):
+        trace.result(identity, bash=False, mutation=lambda event:
+            event['message']['content'][0].update(is_error=flag))
+
+
+@pytest.mark.parametrize('flag', ['missing', None, 0, 1])
+def test_bash_error_flag_remains_explicit_and_boolean(flag):
+    trace = Trace()
+    identity = trace.call('Bash', {'command': 'cat /neutral/source'})
+    def change(event):
+        item = event['message']['content'][0]
+        if flag == 'missing':
+            item.pop('is_error')
+        else:
+            item['is_error'] = flag
+    with pytest.raises(ValueError, match='boolean outcome'):
+        trace.result(identity, mutation=change)

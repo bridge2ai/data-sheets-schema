@@ -289,8 +289,12 @@ class PhaseState:
         identity = item.get('tool_use_id')
         _require(type(identity) is str and identity in self._pending, 'tool result has no unique pending call')
         row = self._pending.pop(identity)
-        _require(type(item.get('is_error')) is bool, 'tool result lacks explicit boolean outcome')
-        success = not item['is_error']
+        # Native file results omit is_error on success. Their complete result
+        # metadata is checked by the observation layer; an explicitly supplied
+        # flag must still be boolean. Bash keeps its explicit outcome contract.
+        outcome = item.get('is_error') if row['name'] == 'Bash' else item.get('is_error', False)
+        _require(type(outcome) is bool, 'tool result lacks explicit boolean outcome')
+        success = not outcome
         kind = row['kind']
         if row['name'] == 'Bash':
             meta = event.get('tool_use_result')
