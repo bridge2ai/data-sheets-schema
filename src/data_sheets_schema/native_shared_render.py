@@ -197,6 +197,14 @@ def metadata(spec):
 
 def restore(spec, recorded):
     doc = validate_metadata(recorded)
+    # Path construction in the ordinary loader can collapse dots or repeated
+    # separators. Check the captured spellings themselves before accepting the
+    # restored Path objects as the selected authorities.
+    for field, key in (('bundle', 'bundle'), ('chunk_manifest', 'chunk_manifest'), ('manifest', 'source_manifest')):
+        declared = doc['inputs'][key]
+        if (declared is None
+                or c.canonical_path(recorded.get(field), 'recorded native ' + key) != declared['path']):
+            raise ValueError('recorded native input differs from selected ' + key)
     _same_spec_inputs(spec, doc)
     spec._native_shared_generation_metadata = c.canonical({k: recorded[k] for k in METADATA_KEYS})
     spec._native_shared_runtime_capture = _read_identity(recorded['native_shared_runtime_declaration'], 'runtime_declaration')

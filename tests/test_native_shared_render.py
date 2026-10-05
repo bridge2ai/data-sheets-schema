@@ -107,6 +107,19 @@ def test_native_captured_inputs_refuse_relative_paths_without_ambient_lookup(nat
                 method=native_spec.method, label=native_spec.label)
 
 
+@pytest.mark.parametrize('field', ['bundle', 'manifest', 'chunk_manifest'])
+@pytest.mark.parametrize('alias', ['/./', '//'])
+def test_native_replay_checks_raw_path_spelling_before_path_objects(native_spec, monkeypatch, field, alias):
+    recorded = native_spec.render_spec()
+    parent, name = recorded[field].rsplit('/', 1)
+    recorded[field] = parent + alias + name
+    with monkeypatch.context() as patch:
+        _refuse_ambient_replay(patch)
+        with pytest.raises(ValueError, match='canonical absolute path'):
+            api.RunSpec.from_render_spec(recorded, project=native_spec.project,
+                method=native_spec.method, label=native_spec.label)
+
+
 def test_historical_native_replay_retains_existing_corpus_initialization(native_spec, monkeypatch):
     from data_sheets_schema import corpus
     historical = replace(native_spec, render_version=23, condition='generic_v9',
