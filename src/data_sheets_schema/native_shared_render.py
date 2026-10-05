@@ -209,6 +209,7 @@ def commands(spec):
     c.canonical_path(py, 'registered Python')
     roles = {r.role: r.path for r in c.role_paths(doc['registration_path'], doc['stage_root'])}
     full_schema, core_schema = (doc['inputs'][k]['root'] for k in ('full_schema', 'core_schema'))
+    pair_schemas = ('--full-schema', full_schema, '--core-schema', core_schema)
     cli = (py, '-m', 'data_sheets_schema.cli')
     source = ('--source-manifest', str(spec.manifest), '--project', spec.project)
     evidence = (py, '-m', 'data_sheets_schema.evidence_assertions', '--audit', roles['audit'],
@@ -227,9 +228,9 @@ def commands(spec):
             '--bundle', str(spec.bundle), '--chunk-manifest', str(spec.chunk_manifest),
             '--native-shared-selection', doc['registration_path'], '--strict'),
         'advance': (py, '-m', 'data_sheets_schema.native_shared_stage', 'advance', '--registration', doc['registration_path']),
-        'derive_core': (*cli, 'derive', 'core', '--full', paths['full'], '--out', paths['core']),
+        'derive_core': (*cli, 'derive', 'core', '--full', paths['full'], '--out', paths['core'], *pair_schemas),
         'core_schema': (py, '-c', 'from linkml.validator.cli import cli; cli()', '-s', core_schema, '-C', 'CoreDataset', paths['core']),
-        'pair': (py, '-m', 'data_sheets_schema.d4d_pair_consistency', '--full', paths['full'], '--core', paths['core']),
+        'pair': (py, '-m', 'data_sheets_schema.d4d_pair_consistency', '--full', paths['full'], '--core', paths['core'], *pair_schemas),
         'original_source_inventory': (py, '-m', 'data_sheets_schema.source_review', '--record', roles['phase1_full'], '--artifact', 'original_full'),
         'final_source_inventory': (py, '-m', 'data_sheets_schema.source_review', '--record', paths['full'], '--artifact', 'final_full'),
         'draft': (py, '-m', 'data_sheets_schema.source_attribution_preflight', '--report', paths['report'],
@@ -237,7 +238,8 @@ def commands(spec):
             '--protocol-version', '7', *source),
         'audit_evidence': evidence,
         'final_evidence': (*evidence, '--final-full', paths['full'], '--final-core', paths['core'], '--report', paths['report']),
-        'derive_final_core': (*cli, 'derive', 'core', '--full', paths['full'], '--out', paths['core'], '--phase4-complete'),
+        'derive_final_core': (*cli, 'derive', 'core', '--full', paths['full'], '--out', paths['core'],
+                              *pair_schemas, '--phase4-complete'),
         'final_scope': (*cli, 'download', 'scope', '--manifest', str(spec.manifest), '--project', spec.project,
             '--check', '--record', paths['full'], '--record', paths['core'], '--strict'),
     }

@@ -155,6 +155,11 @@ def test_command_roster_uses_stage_originals_and_complete_recorded_context(nativ
     assert cap.role('phase1_core') in commands['audit_evidence']
     assert cap.role('audit') in commands['audit_evidence']
     assert commands['advance'][-1] == cap.registration.pin.path
+    for name in ('derive_core', 'derive_final_core', 'pair'):
+        for kind in ('full', 'core'):
+            flag = '--' + kind + '-schema'
+            assert commands[name].count(flag) == 1
+            assert commands[name][commands[name].index(flag) + 1] == cap.document()['inputs'][kind + '_schema']['root']
     assert commands['draft'][2] == 'data_sheets_schema.source_attribution_preflight'
     assert commands['recorder'][-2:] == ('--prompt-text-env', 'D4D_LAUNCH_INSTRUCTION')
     assert tuple(commands['recorder'][i + 1] for i, item in enumerate(commands['recorder'])
