@@ -163,19 +163,31 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         for nc in block["non_checks"]:
             click.echo(f"   · not checked here: {nc}")
     if write:
+        native_claims_text = None
+        if block.get("checked") and block.get('native_receipt_stage') in {'phase1_initial', 'final'}:
+            # The ordinary path remains the sealed original. Native final
+            # claims must use the same reconstructed effective receipt as the
+            # checked block, before either output is changed.
+            from data_sheets_schema import native_shared_capture
+            try:
+                claims = native_shared_capture.recorded_receipt_claims(None, record=record,
+                    full_path=p["full"], receipt_path=rc.receipt_path(p["core_dir"], project),
+                    expected_block=block)
+                native_claims_text = yaml.safe_dump(claims, sort_keys=False, allow_unicode=True)
+            except (OSError, ValueError, yaml.YAMLError) as exc:
+                raise click.ClickException(f'native receipt claims refused: {exc}') from exc
         block["recorded_by"] = "d4d receipts check"
         bc.apply(p["provenance"], {"receipts": block}, overwrite=True)
         click.echo(f"   ✓ receipts block written to {p['provenance']}")
         if block.get("checked"):
-            receipt = rc.load_receipt(rc.receipt_path(p["core_dir"], project))
-            full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
             out = rc.claims_path(p["core_dir"], project)
-            identity_options = {}
-            if block.get('native_receipt_stage') in {'phase1_initial', 'final'}:
-                identity_options['identifier_bases'] = tuple(tuple(pair) for pair in
-                    block['identity_rules']['identifier_bases'])
-            out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full, **identity_options), sort_keys=False,
-                                          allow_unicode=True), encoding="utf-8")
+            if native_claims_text is not None:
+                out.write_text(native_claims_text, encoding="utf-8")
+            else:
+                receipt = rc.load_receipt(rc.receipt_path(p["core_dir"], project))
+                full = yaml.safe_load(p["full"].read_text(encoding="utf-8")) or {}
+                out.write_text(yaml.safe_dump(rc.claim_receipts(receipt, full), sort_keys=False,
+                                              allow_unicode=True), encoding="utf-8")
             click.echo(f"   ✓ claim receipts written to {out}")
     # A run whose procedure wrote no receipt is not failed by --strict: the
     # block is not a metric for it (#727). Expected-and-unchecked is.
