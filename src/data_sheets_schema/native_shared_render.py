@@ -308,6 +308,10 @@ def instruction(spec):
         + 'The separate original receipt has this shape: ' + receipt[1]
         + '\n\nRun full_schema, full_terms and phase1_receipts on the current originals before advance. '
           'Fix initial source-grounded full/receipt defects and repeat their checks before sealing. '
+          'After sealing, keep the original receipt at its model_files receipt path unchanged. '
+          'The helper owns the completed effective receipt at the effective_receipt role; '
+          'do not copy it over the original receipt. The selected final receipt check verifies the original '
+          'against its seal and assesses the helper-owned effective receipt against the reconciled full record. '
           'After the receipt stage reports await_core, run derive_core, core_schema and pair; advance then binds the genuine core. '
           'Read original_source_inventory before completing typed audit stages. After assembly_complete, run audit_evidence '
           'before applying recommendations. Reconcile full, derive_final_core, validate full/core and pair, '
@@ -331,6 +335,7 @@ def instruction(spec):
 def assembly_digest():
     from . import api_runner as api
     layout = ('native_shared_generation_v1: captured S and sole R; original full/receipt seal; '
+              'preserved original receipt and separately assessed helper-owned effective receipt; '
               'one receipt answer or verified zero work; genuine core seal; all workers, omission and integration; '
               'fresh assembly replay; reconciliation, source draft, final checks and live recorder')
     assets = selection.capture_assets()

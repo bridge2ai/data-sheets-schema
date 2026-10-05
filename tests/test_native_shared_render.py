@@ -61,6 +61,8 @@ def test_native_instruction_roundtrip_uses_only_sole_runtime(native_spec, monkey
     assert 'native_shared_stage advance --registration' in text
     assert 'run derive_core, core_schema and pair; advance then binds the genuine core' in text
     assert '--native-shared-selection' in text
+    assert 'keep the original receipt at its model_files receipt path unchanged' in text
+    assert 'assesses the helper-owned effective receipt against the reconciled full record' in text
     assert '## Role relationship review v1' in text
     assert recorded['native_shared_generation_context'] == spec._native_shared_generation_capture.generation_context()
     assert not any(key.startswith(('shared_generation_', 'receipt_completion_', 'api_playbook_',
