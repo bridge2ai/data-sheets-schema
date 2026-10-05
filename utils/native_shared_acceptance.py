@@ -167,13 +167,21 @@ def finalize(repo, output, expected):
     output.mkdir(parents=True, exist_ok=True)
     upload = output / "upload"
     upload.mkdir(exist_ok=True)
-    current = source(repo)
+    preservation = {"source_unchanged": False, "expected_head_matches": False,
+                    "source_inspection_succeeded": False,
+                    "run_reached": (output / "outcome.json").is_file()}
+    try:
+        current = source(repo)
+        before_path = output / "source-before.json"
+        preservation.update(source_unchanged=before_path.exists() and
+            json.loads(before_path.read_text()) == current,
+            expected_head_matches=current["head"] == expected, source_inspection_succeeded=True)
+    except Exception as exc:
+        error = {"type": type(exc).__name__, "message": str(exc)}
+        current = {"inspection_failed": True, "error": error}
+        preservation["source_inspection_error"] = error
     save(output / "source-final.json", current)
-    before_path = output / "source-before.json"
-    same = before_path.exists() and json.loads(before_path.read_text()) == current
-    save(output / "preservation.json", {"source_unchanged": same,
-        "expected_head_matches": current["head"] == expected,
-        "run_reached": (output / "outcome.json").is_file()})
+    save(output / "preservation.json", preservation)
     cases = output / "cases"
     before = inventory(cases)
     with tarfile.open(upload / "cases.tar.gz", "w:gz", dereference=False) as archive:
@@ -192,7 +200,8 @@ def finalize(repo, output, expected):
     artifacts = inventory(upload)
     artifacts.pop("artifact-manifest.json", None)
     save(upload / "artifact-manifest.json", artifacts)
-    return 0 if same and current["tracked_exact"] and current["head"] == expected and before == after else 1
+    return 0 if (preservation["source_unchanged"] and current.get("tracked_exact") is True
+                 and preservation["expected_head_matches"] and before == after) else 1
 
 
 def main():

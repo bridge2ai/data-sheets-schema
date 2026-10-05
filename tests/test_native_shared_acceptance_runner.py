@@ -124,6 +124,38 @@ def test_source_drift_stops_second_test_and_remains_a_failed_preservation(case, 
     assert (output / "upload/cases.tar.gz").is_file()
 
 
+def test_source_inspection_error_still_exports_failed_case_and_logs(case, monkeypatch):
+    repo, output, head = case
+    calls = []
+
+    def child(repo_arg, out, label, node):
+        calls.append(label)
+        fake_result(out, label, node)
+        (repo / "tracked.txt").unlink()
+        (repo / "tracked.txt").mkdir()
+        return 0
+
+    monkeypatch.setattr(runner, "pytest_child", child)
+    assert runner.run(repo, output, head) == 1
+    assert calls == ["neutral"]
+    assert runner.finalize(repo, output, head) == 1
+    upload = output / "upload"
+    proof = json.loads((upload / "preservation.json").read_text())
+    assert proof["source_inspection_succeeded"] is False
+    assert proof["source_unchanged"] is False and proof["expected_head_matches"] is False
+    assert proof["source_inspection_error"]["type"] == "IsADirectoryError"
+    final_source = json.loads((upload / "source-final.json").read_text())
+    assert final_source["inspection_failed"] is True
+    assert "head" not in final_source and "tree" not in final_source
+    for name in ("neutral.log", "neutral.xml", "outcome.json", "source-before.json"):
+        assert (upload / name).read_bytes() == (output / name).read_bytes()
+    outcome = json.loads((upload / "outcome.json").read_text())
+    assert outcome["status"] == "failed" and outcome["omission_not_run"]
+    with tarfile.open(upload / "cases.tar.gz") as archive:
+        assert archive.extractfile("cases/neutral/.hidden").read() == b"retained synthetic bytes\x00"
+    assert (upload / "artifact-manifest.json").is_file()
+
+
 def test_wrong_head_fails_before_child(case, monkeypatch):
     repo, output, _ = case
     def child(*args):
