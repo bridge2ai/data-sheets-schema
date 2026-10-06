@@ -197,6 +197,69 @@ def test_renderer_mutation_cannot_poison_stored_inventory(case, monkeypatch):
     assert len(calls) == 1
 
 
+def test_same_class_with_replaced_initializer_rebuilds(case, monkeypatch):
+    record, _, _ = case
+    calls = _count_builds(monkeypatch)
+    assert identity.capture(record)['status'] == 'match'
+    constructor = schema_digest.SlotDigest
+    original = constructor.__init__
+
+    def changed(self, *args, **kwargs):
+        original(self, *args, **kwargs)
+        self.description = 'Changed effective constructor'
+
+    monkeypatch.setattr(constructor, '__init__', changed)
+    result = identity.capture(record)
+    assert schema_digest.SlotDigest is constructor
+    assert result['status'] == 'unknown'
+    assert len(calls) == 2
+
+
+def test_replaced_new_method_invalidates_same_class(case, monkeypatch):
+    record, _, _ = case
+    # Use an owned class with an explicit allocator. Restoring object.__new__
+    # after mutating a shared class can leave CPython's type slot changed.
+    class LocalSlot(schema_digest.SlotDigest):
+        def __new__(cls, *args, **kwargs):
+            return object.__new__(cls)
+
+    monkeypatch.setattr(schema_digest, 'SlotDigest', LocalSlot)
+    calls = _count_builds(monkeypatch)
+    assert identity.capture(record)['status'] == 'match'
+
+    def changed(cls, *args, **kwargs):
+        return object.__new__(cls)
+
+    monkeypatch.setattr(LocalSlot, '__new__', staticmethod(changed))
+    assert identity.capture(record)['status'] == 'match'
+    assert len(calls) == 2
+
+
+def test_effective_schema_post_init_rebuilds(case, monkeypatch):
+    record, _, _ = case
+    calls = _count_builds(monkeypatch)
+    assert identity.capture(record)['status'] == 'match'
+    original = schema_view.SchemaDefinition.__post_init__
+
+    def changed(self, *args, **kwargs):
+        original(self, *args, **kwargs)
+        self.classes['Dataset'].attributes['topic'].description = 'Changed schema normalization'
+
+    monkeypatch.setattr(schema_view.SchemaDefinition, '__post_init__', changed)
+    assert identity.capture(record)['status'] == 'unknown'
+    assert len(calls) == 2
+
+
+def test_same_initializer_with_changed_defaults_is_keyed(case, monkeypatch):
+    record, _, _ = case
+    assert identity.capture(record)['status'] == 'match'
+    initializer = schema_digest.SlotDigest.__init__
+    before = identity._inventory_cache_info()['entries']
+    monkeypatch.setattr(initializer, '__defaults__', (True,) + initializer.__defaults__[1:])
+    identity.capture(record)
+    assert identity._inventory_cache_info()['entries'] == before + 1
+
+
 def test_imported_schema_bypasses_retention(case, monkeypatch):
     record, path, _ = case
     _replace(record, path, SCHEMA)

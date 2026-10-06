@@ -73,14 +73,28 @@ def _trim_inventory_cache() -> None:
         _INVENTORY_CACHE_BYTES -= weight
 
 
+def _callable_key(function: Any) -> tuple:
+    return (function, getattr(function, '__code__', None),
+            getattr(function, '__defaults__', None),
+            tuple(sorted((getattr(function, '__kwdefaults__', None) or {}).items())))
+
+
+def _constructor_key(constructor: type) -> tuple:
+    # Replacing a dataclass initializer does not replace the class object.
+    # Include the effective constructor protocol, including inherited methods
+    # and SchemaDefinition's post-init normalization, before reusing its work.
+    return (constructor, _callable_key(type(constructor).__call__),
+            tuple((name, _callable_key(getattr(constructor, name, None)))
+                  for name in ('__new__', '__init__', '__post_init__')))
+
+
 def _inventory_key(raw: bytes, path: Path, renderer: dict[str, Any]) -> tuple:
     from data_sheets_schema import schema_digest as digest, schema_view as views
 
     # Rendering still happens on every call. These are only the functions and
     # settings consumed while constructing Dataset's inventory. Include helper
     # defaults: _truncate's limit is bound when that function is defined.
-    functions = tuple((fn, getattr(fn, '__code__', None), getattr(fn, '__defaults__', None),
-                       tuple(sorted((getattr(fn, '__kwdefaults__', None) or {}).items())))
+    functions = tuple(_callable_key(fn)
                       for fn in (digest._build_from_view, digest._schema_name,
                                  digest._truncate, digest.term_sources_of,
                                  views.version_document, views.version_view))
@@ -88,9 +102,10 @@ def _inventory_key(raw: bytes, path: Path, renderer: dict[str, Any]) -> tuple:
                 digest.MAX_ENUM_VALUES, digest.NESTING_DEPTH,
                 frozenset(digest.UNIVERSAL_ATTRIBUTES), digest.TERM_SOURCES_ANNOTATION,
                 tuple(sorted(digest.TERM_SOURCES.items())))
-    constructors = (digest.ClassDigest, digest.SlotDigest, digest.NestedClass,
-                    views.SchemaDefinition, views._ReleasableView,
-                    views.yaml.load, views.DupCheckYamlLoader)
+    constructors = tuple(_constructor_key(cls)
+                         for cls in (digest.ClassDigest, digest.SlotDigest, digest.NestedClass,
+                                     views.SchemaDefinition, views._ReleasableView,
+                                     views.DupCheckYamlLoader)) + (_callable_key(views.yaml.load),)
     view_source = hashlib.sha256(Path(views.__file__).read_bytes()).hexdigest()
     return (raw, str(path), renderer['source_sha256'], renderer['linkml_runtime_version'],
             view_source, functions, settings, constructors)
