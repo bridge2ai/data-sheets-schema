@@ -1717,8 +1717,9 @@ class TestSelectedTemplateDerivation(unittest.TestCase):
         _write(root / scan.RUNNER, runner)
         for rel in ('src/data_sheets_schema/api_playbook.py', 'src/data_sheets_schema/shared_generation.py'):
             _write(root / rel, (ROOT / rel).read_text())
-        from data_sheets_schema.shared_generation import API_POLICY
-        _write(root / API_POLICY, (ROOT / API_POLICY).read_text())
+        from data_sheets_schema.shared_generation import API_POLICY, ROUTING_API_POLICY
+        for asset in (API_POLICY, ROUTING_API_POLICY):
+            _write(root / asset, (ROOT / asset).read_text())
         prompt = scan.condition_table(ROOT)['prompts'][scan.condition_table(ROOT)['current']]
         body = (ROOT / prompt).read_text().split('## Prompt body', 1)[1]
         return root, body, {'cases': [{'values': {'guide_version': 2}}]}
@@ -1749,7 +1750,7 @@ class TestSelectedTemplateDerivation(unittest.TestCase):
             ('src/data_sheets_schema/api_playbook.py', 'def adapt_template(', '@foreign\ndef adapt_template('),
             ('src/data_sheets_schema/api_playbook.py', 'def policy_identity(', 'class policy_text: pass\n\ndef policy_identity('),
             ('src/data_sheets_schema/api_playbook.py', 'if positions != sorted(positions):', 'if False:'),
-            ('src/data_sheets_schema/api_playbook.py', 'return captured_assets()[API_POLICY]', 'return foreign()[API_POLICY]'),
+            ('src/data_sheets_schema/api_playbook.py', 'return captured_assets(version=version - 1)', 'return foreign(version=version - 1)'),
         ]
         for path, before, after in mutations:
             with self.subTest(after=after), tempfile.TemporaryDirectory() as directory:
@@ -1976,7 +1977,7 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(turn["conditions"], allowed)
         self.assertEqual(selection["conditions"], allowed)
         self.assertEqual(selection["field"], "receipt_completion_version")
-        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1, 2], [8, 25]))
+        self.assertEqual((selection["default"], selection["enabled_values"], selection["renderers"]), (0, [1, 2, 3], [8, 25, 27]))
         legacy_allowed = {condition for case in selection['cases']
                           if case['values']['receipt_completion_version'] == 1 for condition in case['conditions']}
         self.assertEqual(selection["runtime"], "api")
@@ -2097,8 +2098,9 @@ class TestApiMeaning(unittest.TestCase):
         self.assertEqual(ac["default_renderer"]["api"], self._cli_spec().render_version)
         self.assertLess(ac["default_renderer"]["api"], ac["floor"])
         selected = self.meaning['selected_procedures']['shared_generation_version']
-        self.assertEqual(selected['selection']['renderers'], [25])
-        self.assertEqual(selected['selection']['conditions'], ['generic_v10'])
+        self.assertEqual(selected['selection']['renderers'], [25, 27])
+        self.assertEqual(selected['selection']['conditions'], ['generic_v10',
+            'generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'])
         self.assertEqual(set(selected['replaced_model_phases']['audit']),
                          {'typed_audit_worker', 'typed_audit_omission', 'typed_audit_integration'})
         self.assertEqual(selected['native_runtime'], 'not admitted by this API-only selector')

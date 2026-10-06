@@ -4957,19 +4957,443 @@ def _correlated_turn_selection(tree: ast.Module, test) -> dict:
             'evidence': [f'api_runner.py:{line}' for line in evidence]}
 
 
-def _optional_turn_selection(tree: ast.Module, test) -> dict:
+def _delegated_turn_selection(tree: ast.Module, test, root: Path) -> dict:
+    """Prove the fixed shared selector's closed tuples from source (#4503).
+
+    This deliberately does not execute a validator, interpret arbitrary Python,
+    or use a known renderer/condition table as a fallback.
+    """
+    from itertools import product
+    fail = lambda detail: _not_derived('which conditions make a follow-up turn', detail)
+    dump = lambda node: ast.dump(node, include_attributes=False)
+    same = lambda node, text: dump(node) == dump(ast.parse(text).body[0])
+    attrs = lambda node, owner='self': {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)
+        and isinstance(n.value, ast.Name) and n.value.id == owner}
+    if root is None or not (isinstance(test, ast.Attribute) and ast.unparse(test).startswith('spec.')):
+        raise fail('delegated selection needs an actual source root and direct positive axis')
+    cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+    init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None) if cls else None
+    if init is None:
+        raise fail('missing delegated selector constructor')
+    helper_path = root / 'src/data_sheets_schema/shared_generation.py'
+    helper_tree = _tree(helper_path)
+    helper = _function(helper_tree, 'select')
+    if helper is None or _params(helper) != ['spec']:
+        raise fail('shared selector signature changed')
+    # Resolve the effective exported definition, not merely the first AST.
+    # Reuse the scanner's binding classifier for imports/defs/args/global names.
+    def effective_definition(source, definition, name):
+        if (definition is None or definition not in source.body or definition.decorator_list
+                or sum(isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+                       and n.name == name for n in source.body) != 1):
+            raise fail('selector authority is not one undecorated effective definition')
+        for node in ast.walk(source):
+            if (isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))) \
+                    or _rebinding(node, name, definition):
+                raise fail('selector authority is shadowed or rebound')
+            if isinstance(node, ast.ImportFrom) and any(alias.name == '*' for alias in node.names):
+                raise fail('selector authority has an unproved wildcard import')
+    effective_definition(helper_tree, helper, 'select')
+    for source, owner, builtins in ((helper_tree, helper, ('getattr', 'type', 'int', 'str')),
+                                    (tree, init, ('type', 'int'))):
+        for name in builtins:
+            if any(_rebinding(node, name, owner) or isinstance(node, ast.arg) and node.arg == name
+                    or isinstance(node, ast.Name) and node.id == name and isinstance(node.ctx, (ast.Store, ast.Del))
+                    for node in ast.walk(source)):
+                raise fail('selector builtin identity is shadowed')
+    body = helper.body
+    if len(body) != 9:
+        raise fail('unsupported shared selector body')
+    if not (isinstance(body[0], ast.Assign) and len(body[0].targets) == 1
+            and isinstance(body[0].targets[0], ast.Name) and body[0].targets[0].id == 'version'
+            and isinstance(body[0].value, ast.Call) and ast.unparse(body[0].value.func) == 'getattr'
+            and len(body[0].value.args) == 3 and not body[0].value.keywords
+            and ast.unparse(body[0].value.args[0]) == 'spec'
+            and isinstance(body[0].value.args[1], ast.Constant)
+            and type(body[0].value.args[1].value) is str
+            and ast.literal_eval(body[0].value.args[2]) == 0):
+        raise fail('shared selector lacks its exact version binding')
+    axis = body[0].value.args[1].value
+
+    def raising(node):
+        return (isinstance(node, ast.If) and not node.orelse and len(node.body) == 1
+                and isinstance(node.body[0], ast.Raise))
+
+    domain_guard = body[1]
+    if not raising(domain_guard):
+        raise fail('shared selector domain must raise directly')
+    try:
+        domain = ast.literal_eval(domain_guard.test.values[1].comparators[0])
+    except (AttributeError, IndexError, ValueError, TypeError):
+        raise fail('shared selector lacks a finite integer domain')
+    if (type(domain) is not tuple or len(domain) != 3 or len(set(domain)) != 3 or 0 not in domain
+            or any(type(v) is not int or v < 0 for v in domain)
+            or dump(domain_guard.test) != dump(ast.parse(
+                f'type(version) is not int or version not in {domain!r}', mode='eval').body)):
+        raise fail('shared selector domain is not exact')
+    if not same(body[2], 'registration = getattr(spec, "shared_generation_registration", None)'):
+        raise fail('shared registration binding changed')
+    if not same(body[3], 'from .source_heading_runtime import MODES'):
+        raise fail('shared condition map import changed')
+    modes_path = root / 'src/data_sheets_schema/source_heading_runtime.py'
+    modes_tree = _tree(modes_path)
+    declarations = [n for n in modes_tree.body if isinstance(n, ast.Assign)
+        and len(n.targets) == 1 and isinstance(n.targets[0], ast.Name) and n.targets[0].id == 'MODES']
+    if len(declarations) != 1:
+        raise fail('condition map has no unique declaration')
+    modes_line = declarations[0].lineno
+    try:
+        modes = ast.literal_eval(declarations[0].value)
+    except (ValueError, TypeError):
+        raise fail('condition map is not literal')
+    if (type(modes) is not dict or not modes or any(type(k) is not str or not k
+            or type(v) is not str or not v for k, v in modes.items())
+            or len(set(modes.values())) != len(modes)):
+        raise fail('condition map must have unique nonempty literal names')
+    if (not isinstance(declarations[0].value, ast.Dict)
+            or len(declarations[0].value.keys) != len(modes)):
+        raise fail('condition map repeats a literal key')
+    modes_parents = _parents(modes_tree)
+    for node in ast.walk(modes_tree):
+        if _rebinding(node, 'MODES', helper) or isinstance(node, ast.arg) and node.arg == 'MODES':
+            raise fail('condition map is shadowed')
+        if isinstance(node, ast.ImportFrom) and any(alias.name == '*' for alias in node.names):
+            raise fail('condition map has an unproved wildcard import')
+        if isinstance(node, ast.Name) and node.id == 'MODES' and node is not declarations[0].targets[0]:
+            parent = modes_parents.get(id(node))
+            membership = (isinstance(parent, ast.Compare) and len(parent.ops) == 1
+                and isinstance(parent.ops[0], (ast.In, ast.NotIn)) and node is parent.comparators[0])
+            lookup = (isinstance(parent, ast.Subscript) and parent.value is node
+                and isinstance(parent.ctx, ast.Load))
+            if not (isinstance(node.ctx, ast.Load) and (membership or lookup)):
+                raise fail('condition map has an unproved use, escape or mutation')
+    for node in ast.walk(helper):
+        if isinstance(node, (ast.Attribute, ast.Subscript)) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            raise fail('shared selector mutates an input')
+        if isinstance(node, ast.Name) and node.id in {'MODES', 'spec', 'getattr', 'type', 'int', 'str', 'descriptor'} \
+                and isinstance(node.ctx, (ast.Store, ast.Del)):
+            raise fail('shared selector shadows an authority')
+
+    def tuple_guard(guard):
+        if not raising(guard) or not isinstance(guard.test, ast.BoolOp) or not isinstance(guard.test.op, ast.Or):
+            raise fail('shared tuple is not an unconditional OR refusal')
+        required = {}
+        for term in guard.test.values:
+            if isinstance(term, ast.Attribute) and ast.unparse(term).startswith('spec.'):
+                key, value = term.attr, 0
+            elif (isinstance(term, ast.Compare) and len(term.ops) == 1
+                    and isinstance(term.left, ast.Attribute) and ast.unparse(term.left).startswith('spec.')):
+                key = term.left.attr
+                if isinstance(term.ops[0], ast.NotEq) and isinstance(term.comparators[0], ast.Constant):
+                    value = term.comparators[0].value
+                    if type(value) not in (str, int):
+                        raise fail('unsupported tuple literal')
+                elif (key == 'condition' and isinstance(term.ops[0], ast.NotIn)
+                        and ast.unparse(term.comparators[0]) == 'MODES.values()'):
+                    value = tuple(sorted(modes.values()))
+                else:
+                    raise fail('unsupported shared tuple comparison')
+            else:
+                raise fail('unsupported shared tuple term')
+            if key in required:
+                raise fail('duplicate shared tuple field')
+            required[key] = value
+        if not {'condition', 'render_version', 'runtime'} <= required.keys():
+            raise fail('shared tuple omits condition, renderer or runtime')
+        return required
+
+    branch = body[5]
+    if not (isinstance(branch, ast.If) and not branch.orelse and len(branch.body) == 3
+            and isinstance(branch.test, ast.Compare) and len(branch.test.ops) == 1
+            and isinstance(branch.test.ops[0], ast.Eq) and ast.unparse(branch.test.left) == 'version'
+            and isinstance(branch.test.comparators[0], ast.Constant)):
+        raise fail('unsupported enabled shared branch')
+    explicit = branch.test.comparators[0].value
+    if type(explicit) is not int or explicit not in set(domain) - {0}:
+        raise fail('enabled shared branch is outside its domain')
+    implicit = next(v for v in domain if v not in (0, explicit))
+    protocols = {explicit: tuple_guard(branch.body[0]), implicit: tuple_guard(body[6])}
+    registration_test = ast.parse('type(registration) is not str or not registration', mode='eval').body
+    for guard in (branch.body[1], body[7]):
+        if not raising(guard) or dump(guard.test) != dump(registration_test):
+            raise fail('shared branch loses its required registration')
+    if not same(branch.body[2], f'return descriptor(version={explicit!r}, condition=spec.condition)') \
+            or not same(body[8], 'return descriptor()'):
+        raise fail('shared descriptor return is not bound to its branch')
+    descriptor_fn = _function(helper_tree, 'descriptor')
+    effective_definition(helper_tree, descriptor_fn, 'descriptor')
+    defaults = dict(zip((a.arg for a in descriptor_fn.args.kwonlyargs), descriptor_fn.args.kw_defaults)) if descriptor_fn else {}
+    if not isinstance(defaults.get('version'), ast.Constant) or defaults['version'].value != implicit:
+        raise fail('implicit shared branch differs from descriptor default')
+    zero = body[4]
+    if not (isinstance(zero, ast.If) and not zero.orelse and ast.unparse(zero.test) == 'not version'
+            and same(zero.body[-1], 'return None')):
+        raise fail('disabled shared branch changed')
+    zero_body = zero.body[:-1]
+    native_evidence = []
+    if len(zero_body) == 2:
+        native = zero_body.pop(0)
+        expected = ast.parse("if getattr(spec, 'native_shared_generation_version', 0):\n    from .native_shared_render import validate_spec\n    validate_spec(spec)\n    return None").body[0]
+        if dump(native) != dump(expected):
+            raise fail('unsupported separate native dispatch')
+        native_path = root / 'src/data_sheets_schema/native_shared_render.py'
+        native_tree = _tree(native_path)
+        native_fn = _function(native_tree, 'validate_spec')
+        effective_definition(native_tree, native_fn, 'validate_spec')
+        loops = [n for n in native_fn.body if isinstance(n, ast.For)] if native_fn else []
+        zero_axes = []
+        for loop in loops:
+            if ast.unparse(loop.target) == 'key' and len(loop.body) == 1 and raising(loop.body[0]) \
+                    and ast.unparse(loop.body[0].test) == 'type(getattr(spec, key)) is not int or getattr(spec, key) != 0':
+                try: zero_axes = ast.literal_eval(loop.iter)
+                except (ValueError, TypeError): pass
+        if axis not in zero_axes or 'receipt_completion_version' not in zero_axes:
+            raise fail('native dispatch does not exclude API companion axes')
+        native_evidence = [f'{_rel(root, native_path)}:{native_fn.lineno}']
+    if len(zero_body) != 1 or not raising(zero_body[0]) or not isinstance(zero_body[0].test, ast.BoolOp) \
+            or not isinstance(zero_body[0].test.op, ast.Or):
+        raise fail('disabled shared exclusions changed')
+    exclusions = set()
+    for term in zero_body[0].test.values:
+        if ast.unparse(term) == 'registration is not None':
+            exclusions.add(('registration', None))
+        elif (isinstance(term, ast.Compare) and len(term.ops) == 1
+                and isinstance(term.left, ast.Attribute) and ast.unparse(term.left).startswith('spec.')):
+            if isinstance(term.ops[0], ast.Eq) and isinstance(term.comparators[0], ast.Constant):
+                exclusions.add((term.left.attr, term.comparators[0].value))
+            elif term.left.attr == 'condition' and isinstance(term.ops[0], ast.In) \
+                    and ast.unparse(term.comparators[0]) == 'MODES.values()':
+                exclusions.update(('condition', value) for value in modes.values())
+            else: raise fail('unsupported disabled shared comparison')
+        else: raise fail('unsupported disabled shared exclusion')
+    expected_exclusions = {('registration', None)}
+    for required in protocols.values():
+        for name, value in required.items():
+            if name == 'runtime' or value == 0: continue
+            expected_exclusions.update((name, item) for item in (value if type(value) is tuple else (value,)))
+    if exclusions != expected_exclusions:
+        raise fail('disabled shared exclusions do not cover exactly its enabled tuples')
+
+    imports = [n for n in ast.walk(init) if isinstance(n, ast.ImportFrom) and n.module == 'shared_generation'
+               and n.level == 1 and any(a.name == 'select' for a in n.names)]
+    if len(imports) != 2:
+        raise fail('constructor lacks its two exact shared selector calls')
+    parent_map = _parents(init)
+    calls = []
+    for imported in imports:
+        if len(imported.names) != 1:
+            raise fail('ambiguous shared selector import')
+        alias = imported.names[0].asname or 'select'
+        uses = [n for n in ast.walk(init) if isinstance(n, ast.Call) and ast.unparse(n.func) == alias]
+        if len(uses) != 1 or ast.unparse(uses[0]) != alias + '(self)':
+            raise fail('shared selector is not called once with the same spec')
+        _require_followup_binding(RUNNER, tree, init, uses[0])
+        calls.append(uses[0])
+    guarded = [call for call in calls if any(isinstance(n, ast.If) and ast.unparse(n.test) == 'self.' + axis
+        and len(n.body) == 2 and n.body[0] in imports and isinstance(n.body[1], ast.Expr)
+        and n.body[1].value is call and not n.orelse for n in init.body)]
+    final = [call for call in calls if isinstance(parent_map.get(id(call)), ast.Expr)
+        and parent_map.get(id(parent_map[id(call)])) is init]
+    if len(guarded) != 1 or len(final) != 1 or final[0].lineno <= guarded[0].lineno:
+        raise fail('shared selector call guards/order changed')
+
+    declarations = {n.target.id: n for n in cls.body if isinstance(n, ast.AnnAssign)
+        and isinstance(n.target, ast.Name) and isinstance(n.annotation, ast.Name) and n.annotation.id == 'int'}
+    domains, domain_nodes = {}, {}
+    for node in init.body:
+        if not raising(node) or not isinstance(node.test, ast.BoolOp): continue
+        try:
+            compare = node.test.values[1]
+            field = compare.left.attr
+            values = ast.literal_eval(compare.comparators[0])
+        except (AttributeError, IndexError, ValueError, TypeError): continue
+        if dump(node.test) != dump(ast.parse(f'type(self.{field}) is not int or self.{field} not in {values!r}', mode='eval').body): continue
+        declaration = declarations.get(field)
+        if (declaration is None or not isinstance(declaration.value, ast.Constant) or type(declaration.value.value) is not int
+                or declaration.value.value != 0 or type(values) is not tuple or not values or 0 not in values
+                or any(type(v) is not int or v < 0 for v in values) or field in domains):
+            raise fail('delegated axes lack exact unique integer/default/domain guards')
+        domains[field], domain_nodes[field] = sorted(set(values)), node
+    if domains.get(axis) != sorted(domain) or test.attr not in domains:
+        raise fail('constructor/helper domain differs or requested axis is unproved')
+    names = sorted(domains)
+    semantic = set(names) | {'condition', 'render_version', 'runtime', 'is_agentic'}
+    first_domain = min(n.lineno for n in domain_nodes.values())
+    if any(isinstance(n, ast.Attribute) and attrs(n) & semantic and isinstance(n.ctx, (ast.Store, ast.Del))
+           and n.lineno > first_domain for n in ast.walk(init)):
+        raise fail('constructor mutates a selected axis after admission')
+    if any(isinstance(n, (ast.Return, ast.Yield, ast.YieldFrom, ast.Assert)) for n in ast.walk(init)):
+        raise fail('constructor bypasses delegated admission')
+
+    constants = {}
+    literal_parents = _parents(tree)
+    def constant_set(name):
+        if name in constants: return constants[name]
+        bindings = [n for n in tree.body if isinstance(n, ast.Assign) and len(n.targets) == 1
+                    and isinstance(n.targets[0], ast.Name) and n.targets[0].id == name]
+        if len(bindings) != 1: raise fail('selector set lacks one literal binding')
+        binding = bindings[0]
+        value = binding.value
+        if isinstance(value, ast.Call) and isinstance(value.func, ast.Name) and value.func.id in {'set','frozenset','tuple'}:
+            if len(value.args) != 1 or value.keywords or any(_rebinding(n, value.func.id, init)
+                    or isinstance(n, ast.Name) and n.id == value.func.id and isinstance(n.ctx, (ast.Store, ast.Del))
+                    for n in ast.walk(tree)):
+                raise fail('selector set constructor is ambiguous')
+            value = value.args[0]
+        if not isinstance(value, (ast.Set, ast.Tuple, ast.List)) or not value.elts or any(
+                not isinstance(n, ast.Constant) or type(n.value) is not str or not n.value for n in value.elts):
+            raise fail('selector set is not a nonempty literal string set')
+        # Same finite membership-only uses as the legacy correlated reader.
+        for node in ast.walk(tree):
+            if _rebinding(node, name, init) or isinstance(node, ast.arg) and node.arg == name:
+                raise fail('selector set is shadowed')
+            if isinstance(node, ast.Name) and node.id == name and node is not binding.targets[0]:
+                parent = literal_parents.get(id(node))
+                if not (isinstance(node.ctx, ast.Load) and isinstance(parent, ast.Compare)
+                        and len(parent.ops) == 1 and isinstance(parent.ops[0], (ast.In, ast.NotIn))
+                        and node is parent.comparators[0]):
+                    raise fail('selector set has an unproved use, escape or mutation')
+        constants[name] = tuple(n.value for n in value.elts)
+        return constants[name]
+
+    def evaluate(node, row):
+        if isinstance(node, ast.Attribute) and ast.unparse(node).startswith('self.') and node.attr in row:
+            return row[node.attr]
+        if isinstance(node, ast.Constant) and type(node.value) in (str, int, bool): return node.value
+        if isinstance(node, ast.Name): return constant_set(node.id)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not): return not evaluate(node.operand, row)
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
+            values = [bool(evaluate(n, row)) for n in node.values]
+            return all(values) if isinstance(node.op, ast.And) else any(values)
+        if isinstance(node, ast.Compare) and len(node.ops) == 1:
+            a, b = evaluate(node.left, row), evaluate(node.comparators[0], row)
+            if isinstance(node.ops[0], ast.Eq): return type(a) is type(b) and a == b
+            if isinstance(node.ops[0], ast.NotEq): return type(a) is not type(b) or a != b
+            if isinstance(node.ops[0], ast.In): return a in b
+            if isinstance(node.ops[0], ast.NotIn): return a not in b
+        raise fail('unsupported delegated constructor constraint')
+    constraints = []
+    parents = _parents(init)
+    for node in ast.walk(init):
+        if not raising(node) or node in domain_nodes.values() or not (attrs(node.test) & (set(names) | {'condition'})):
+            continue
+        chain, child = [(node.test, True)], node
+        while id(child) in parents:
+            parent = parents[id(child)]
+            if isinstance(parent, ast.If):
+                chain.append((parent.test, child in parent.body))
+            child = parent
+        constraints.append((node, chain))
+    # _module_constants intentionally does not evaluate prompt Paths; only keys
+    # of the actual literal mapping determine the complete condition universe.
+    mapping = next((n.value for n in tree.body if isinstance(n, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == 'CONDITION_PROMPTS' for t in n.targets)), None)
+    if not isinstance(mapping, ast.Dict) or any(not isinstance(k, ast.Constant) or type(k.value) is not str for k in mapping.keys):
+        raise fail('condition universe is not literal')
+    conditions = sorted(k.value for k in mapping.keys)
+    admitted = derive_admitted_renderers(tree)
+    refused = set(derive_execute_refusal(tree, admitted)['refused'])
+    agentic = constant_set('AGENTIC_RUNTIMES')
+    is_agentic = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == 'is_agentic'), None)
+    agentic_returns = [n for n in is_agentic.body if not isinstance(n, ast.Expr)] if is_agentic else []
+    if len(agentic_returns) != 1 or not same(agentic_returns[0], 'return self.runtime in AGENTIC_RUNTIMES'):
+        raise fail('agentic property does not use the proved runtime set')
+    for required in protocols.values():
+        if type(required['runtime']) is not str or required['runtime'] in agentic:
+            raise fail('shared tuple is not API-only')
+        wanted = required['condition'] if type(required['condition']) is tuple else (required['condition'],)
+        if not set(wanted) <= set(conditions): raise fail('shared conditions are outside the actual prompt universe')
+
+    def clauses(node):
+        if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
+            result = [clause for term in node.values for clause in clauses(term)]
+        elif isinstance(node, ast.BoolOp) and isinstance(node.op, ast.And):
+            result = [[]]
+            for term in node.values: result = [a+b for a in result for b in clauses(term)]
+        else: result = [[node]]
+        if len(result) > 64: raise fail('reciprocal guard exceeds finite clause bound')
+        return result
+
+    reciprocal = []
+    for _, chain in constraints:
+        if not all(polarity for _, polarity in chain): continue
+        combined = [[]]
+        for expr, _ in chain: combined = [a+b for a in combined for b in clauses(expr)]
+        reciprocal += combined
+    for version, required in protocols.items():
+        wrong = dump(ast.parse(f'self.{axis} != {version!r}', mode='eval').body)
+        for name, value in required.items():
+            if name == 'runtime' or value == 0: continue
+            for wanted in (value if type(value) is tuple else (value,)):
+                matched = False
+                for clause in reciprocal:
+                    if len(clause) != 2 or not any(dump(term) == wrong for term in clause): continue
+                    atom = next(term for term in clause if dump(term) != wrong)
+                    if not (isinstance(atom, ast.Compare) and len(atom.ops) == 1
+                            and ast.unparse(atom.left) == 'self.' + name): continue
+                    if isinstance(atom.ops[0], ast.Eq) and isinstance(atom.comparators[0], ast.Constant):
+                        matched |= type(atom.comparators[0].value) is type(wanted) and atom.comparators[0].value == wanted
+                    elif name == 'condition' and isinstance(atom.ops[0], ast.In) and isinstance(atom.comparators[0], ast.Name):
+                        matched |= wanted in constant_set(atom.comparators[0].id)
+                if not matched: raise fail('shared tuple lacks an exact reciprocal constructor guard')
+    cases, evaluations = [], 0
+    for values in product(*(domains[n] for n in names)):
+        axes = dict(zip(names, values))
+        if not axes[test.attr]: continue
+        version = axes[axis]
+        required = protocols.get(version)
+        if required and any(name in axes and axes[name] != value for name, value in required.items()): continue
+        renderers = [required['render_version']] if required else admitted
+        allowed = []
+        for renderer, native, condition in product(renderers, (False, True), conditions):
+            evaluations += 1
+            if evaluations > 100000: raise fail('delegated selection exceeds finite derivation bound')
+            row = {**axes, 'render_version':renderer, 'is_agentic':native, 'condition':condition}
+            violations = [all([bool(evaluate(expr, row)) == polarity for expr, polarity in chain])
+                          for _, chain in constraints]
+            if any(violations): continue
+            if required:
+                wanted = required['condition'] if type(required['condition']) is tuple else (required['condition'],)
+                if native or condition not in wanted: continue
+            elif any((name, row.get(name)) in exclusions for name in row): continue
+            allowed.append((renderer, native, condition))
+        if not allowed: continue
+        renderers = {r for r, _, _ in allowed}
+        if len(renderers) != 1 or any(n for _, n, _ in allowed) or renderers & refused:
+            raise fail('delegated case lacks one admitted API-only renderer')
+        extra = {name:value for name,value in (required or {}).items() if name not in semantic}
+        if any(type(value) is not int or value != 0 or name not in declarations for name,value in extra.items()):
+            raise fail('unproved companion selector')
+        cases.append({'values':{**axes, **extra},'runtime':'api','renderers':sorted(renderers),
+                      'conditions':sorted({c for _,_,c in allowed})})
+    if {case['values'][test.attr] for case in cases} != set(domains[test.attr]) - {0}:
+        raise fail('delegated enabled domain has an impossible or unproved case')
+    evidence = [f'api_runner.py:{node.lineno}' for node in [*domain_nodes.values(), *calls, *[n for n,_ in constraints]]]
+    evidence += [f'{_rel(root, helper_path)}:{helper.lineno}', f'{_rel(root, modes_path)}:{modes_line}', *native_evidence]
+    return {'field':test.attr,'default':0,'enabled_values':[v for v in domains[test.attr] if v],
+            'runtime':'api','renderers':sorted({r for c in cases for r in c['renderers']}),
+            'conditions':sorted({v for c in cases for v in c['conditions']}),'cases':cases,'evidence':sorted(set(evidence))}
+
+
+def _optional_turn_selection(tree: ast.Module, test, *, root=None) -> dict:
     try:
         return _simple_optional_turn_selection(tree, test)
     except ConfigError as original:
         try:
             return _correlated_turn_selection(tree, test)
         except ConfigError as changed:
+            if root is not None:
+                cls = next((n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == 'RunSpec'), None)
+                init = next((n for n in cls.body if isinstance(n, ast.FunctionDef) and n.name == '__post_init__'), None) if cls else None
+                if init is not None and any(isinstance(n, ast.ImportFrom) and n.module == 'shared_generation'
+                        and any(a.name == 'select' for a in n.names) for n in ast.walk(init)):
+                    return _delegated_turn_selection(tree, test, root)
             if "unsupported optional selector shape" in str(changed):
                 raise original
             raise
 
 
-def _local_plan_scopes(tree: ast.Module, consts: dict) -> dict:
+def _local_plan_scopes(tree: ast.Module, consts: dict, *, root=None) -> dict:
     """Condition and explicit opt-in selection, from plan()'s actual syntax."""
     plan = _function(tree, "plan")
     if plan is None:
@@ -4990,7 +5414,7 @@ def _local_plan_scopes(tree: ast.Module, consts: dict) -> dict:
                     return {"conditions": sorted(consts[right.id])}
                 if isinstance(op, ast.Eq) and isinstance(right, ast.Constant) and isinstance(right.value, str):
                     return {"conditions": [right.value]}
-        selection = _optional_turn_selection(tree, test)
+        selection = _optional_turn_selection(tree, test, root=root)
         return {"conditions": selection.get("conditions"), "selection": selection}
 
     def visit(node, gate):
@@ -5065,7 +5489,7 @@ def _delegated_plan(root, tree):
             or not isinstance(branch.body[1], ast.Return) or not isinstance(branch.body[1].value, ast.Call)):
         raise _not_derived('the optional plan', 'expected exact import and early delegate return')
     call = branch.body[1].value
-    selection = _optional_turn_selection(tree, branch.test)
+    selection = _optional_turn_selection(tree, branch.test, root=root)
     runner = _resolved(root / RUNNER)
     binding = _imported_target(call, _bindings(root, runner, tree, {}))
     if binding is None or binding[1] is None:
@@ -5098,11 +5522,22 @@ def _delegated_plan(root, tree):
     for item in value.elts:
         if isinstance(item, ast.Constant) and type(item.value) is str:
             text = item.value
-        elif (isinstance(item, ast.JoinedStr) and len(item.values) == 2
+        elif (isinstance(item, ast.JoinedStr) and len(item.values) >= 2
                 and isinstance(item.values[0], ast.FormattedValue)
                 and item.values[0].conversion == -1 and item.values[0].format_spec is None
                 and isinstance(item.values[1], ast.Constant) and type(item.values[1].value) is str):
             text = _literal_phase(root, target, helper_tree, helper, item.values[0].value) + item.values[1].value
+            if not re.match(r'^\w+:', text):
+                raise _not_derived('the optional plan', 'phase prefix is not fixed before description interpolation')
+            axes = {key for case in selection.get('cases', []) for key in case['values']}
+            for suffix in item.values[2:]:
+                if isinstance(suffix, ast.Constant) and type(suffix.value) is str:
+                    continue
+                if not (isinstance(suffix, ast.FormattedValue) and suffix.conversion == -1
+                        and suffix.format_spec is None and isinstance(suffix.value, ast.Attribute)
+                        and ast.unparse(suffix.value) == 'spec.' + suffix.value.attr
+                        and suffix.value.attr in axes):
+                    raise _not_derived('the optional plan', 'description interpolation is not a proved finite selector')
         else:
             raise _not_derived('the optional plan', 'unknown delegated phase expression')
         match = re.match(r'^(\w+):', text)
@@ -5118,7 +5553,7 @@ def _delegated_plan(root, tree):
 
 
 def _plan_scopes(tree: ast.Module, consts: dict, *, root=None) -> dict:
-    scopes = _local_plan_scopes(tree, consts)
+    scopes = _local_plan_scopes(tree, consts, root=root)
     delegate = _delegated_plan(root, tree) if root is not None else None
     if delegate is None:
         return scopes
@@ -5488,6 +5923,11 @@ def _selected_template(root, tree, selection, body):
     policy = _function(adapter_tree, 'policy_text')
     if policy is None or sum(isinstance(n, ast.FunctionDef) and n.name == 'policy_text' for n in adapter_tree.body) != 1:
         raise fail('policy text binding is ambiguous')
+    if (policy.args.posonlyargs or policy.args.args or policy.args.vararg or policy.args.kwarg
+            or [arg.arg for arg in policy.args.kwonlyargs] != ['version']
+            or any(isinstance(n, ast.Name) and n.id == 'version' and isinstance(n.ctx, (ast.Store, ast.Del))
+                   for n in ast.walk(policy))):
+        raise fail('policy version is not the unchanged keyword parameter')
     if adapter.decorator_list or policy.decorator_list:
         raise fail('decorated template/policy function is not a direct source binding')
     for binding_name, binding_fn in ((name, adapter), ('policy_text', policy)):
@@ -5520,20 +5960,41 @@ def _selected_template(root, tree, selection, body):
     if not isinstance(domain, tuple) or any(type(n) is not int for n in domain) or version not in domain:
         raise fail('selected policy version is not admitted')
     route = prefix[1]
-    if (not isinstance(route, ast.If) or ast.unparse(route.test) != f'version == {version}' or route.orelse
+    if (not isinstance(route, ast.If) or route.orelse
             or len(route.body) != 2 or not isinstance(route.body[0], ast.ImportFrom)
             or not isinstance(route.body[1], ast.Return)):
         raise fail('selected policy is not the direct captured-asset route')
     expression = route.body[1].value
-    if ast.unparse(expression) != "captured_assets()[API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()":
+    old_expression = "captured_assets()[API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()"
+    if ast.unparse(route.test) == f'version == {version}' and ast.unparse(expression) == old_expression:
+        asset_name = 'API_POLICY'
+    elif (isinstance(route.test, ast.Compare) and ast.unparse(route.test.left) == 'version'
+          and len(route.test.ops) == 1 and isinstance(route.test.ops[0], ast.In)):
+        try:
+            selected_versions = ast.literal_eval(route.test.comparators[0])
+        except (ValueError, TypeError):
+            raise fail('selected policy versions are not literal')
+        if (type(selected_versions) is not tuple or len(selected_versions) != 2
+                or any(type(v) is not int for v in selected_versions)
+                or len(set(selected_versions)) != 2 or version not in selected_versions
+                or not set(selected_versions) < set(domain)):
+            raise fail('selected policy versions are not a closed subset')
+        first, second = selected_versions
+        expected = (f"captured_assets(version=version - 1)[API_POLICY if version == {first} else "
+                    "ROUTING_API_POLICY].decode('utf-8').split('## Prompt body', 1)[1].strip()")
+        if ast.dump(expression) != ast.dump(ast.parse(expected, mode='eval').body):
+            raise fail('unsupported captured policy expression')
+        asset_name = 'API_POLICY' if version == first else 'ROUTING_API_POLICY'
+    else:
         raise fail('unsupported captured policy expression')
     names = [n for n in ast.walk(expression) if isinstance(n, ast.Name)]
     for used in names:
-        _require_followup_binding(_rel(root, path), adapter_tree, policy, used)
-    asset_node = next(n for n in names if n.id == 'API_POLICY')
+        if used.id != 'version':
+            _require_followup_binding(_rel(root, path), adapter_tree, policy, used)
+    asset_node = next(n for n in names if n.id == asset_name)
     asset = _literal_phase(root, path, adapter_tree, policy, asset_node)
     policy_bindings = _bindings(root, path, adapter_tree, {})
-    if (policy_bindings.get('captured_assets', (None,))[0] != policy_bindings.get('API_POLICY', (None,))[0]):
+    if (policy_bindings.get('captured_assets', (None,))[0] != policy_bindings.get(asset_name, (None,))[0]):
         raise fail('policy loader and asset have different source authorities')
     asset_path = _resolved(root / asset)
     if _resolved(root) not in asset_path.parents or not asset_path.is_file():
@@ -5710,7 +6171,9 @@ def api_meaning(root: Path, facts: dict) -> dict:
                     item['builder'] for item in procedure['request_additions']) + ' (outside the legacy digest-only estimate)'
             if row['prompt_body_references']:
                 raw_body = (root / row['prompt']).read_text(encoding='utf-8').split('## Prompt body', 1)[-1]
-                adapted, adaptation = _selected_template(root, tree, procedure['selection'], raw_body)
+                condition_selection = {**procedure['selection'], 'cases': [
+                    case for case in procedure['selection'].get('cases', []) if name in case['conditions']]}
+                adapted, adaptation = _selected_template(root, tree, condition_selection, raw_body)
                 row['raw_prompt_body_references'] = row['prompt_body_references']
                 row['prompt_body_references'] = sorted(_named_claude_files(adapted, claude_names))
                 row['selected_template_adaptation'] = adaptation
@@ -5721,7 +6184,7 @@ def api_meaning(root: Path, facts: dict) -> dict:
                     row['hybrid_reasons'].append('the source-derived adapted base prompt retains references to '
                         + ', '.join(row['prompt_body_references']))
             conditions[name]['optional_followup_turns'] = [turn for turn in conditions[name]['optional_followup_turns']
-                if any(case['conditions'] == procedure['selection']['conditions']
+                if any(name in case['conditions'] and name in selected_case['conditions']
                        and all(case['values'].get(k) == v for k, v in selected_case['values'].items())
                        for case in followups[turn].get('selection', {}).get('cases', [])
                        for selected_case in procedure['selection'].get('cases', []))]
