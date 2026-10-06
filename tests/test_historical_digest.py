@@ -299,3 +299,121 @@ def test_profile_unknown_stays_unknown_and_schema_is_recovered_once(candidate, m
     assert context['status'] == 'unknown' and context['finding'] is None
     assert context['historical_digest_text']['status'] == 'reproduced'
     assert context['historical_digest_text']['historical_profile_identity'] == 'unrecorded'
+
+
+def test_actual_git_replacement_and_ambient_repository_cannot_redirect_commit(candidate, monkeypatch, tmp_path):
+    root, record = candidate
+    commit = record['repo']['commit']
+    original = history._git_blob(commit, history.RENDERER_PATH, root)
+    (root / history.RENDERER_PATH).write_bytes(b'replacement renderer bytes\n')
+    subprocess.check_call(['git', '-C', str(root), 'add', '.'])
+    subprocess.check_call(['git', '-C', str(root), '-c', 'user.name=Fixture',
+                           '-c', 'user.email=fixture@example.org', 'commit', '-qm', 'replacement'])
+    replacement = subprocess.check_output(['git', '-C', str(root), 'rev-parse', 'HEAD']).decode().strip()
+    subprocess.check_call(['git', '-C', str(root), 'replace', commit, replacement])
+    redirected = subprocess.check_output(['git', '-C', str(root), 'show', f'{commit}:{history.RENDERER_PATH}'])
+    assert redirected != original[0]  # the real fixture exercises replacement
+    monkeypatch.setenv('GIT_DIR', str(tmp_path / 'unrelated.git'))
+    monkeypatch.setenv('GIT_NO_REPLACE_OBJECTS', '0')
+    monkeypatch.setenv('GIT_CONFIG_COUNT', '1')
+    monkeypatch.setenv('GIT_CONFIG_KEY_0', 'core.bare')
+    monkeypatch.setenv('GIT_CONFIG_VALUE_0', 'true')
+    assert history._git_blob(commit, history.RENDERER_PATH, root) == original
+    assert history.reconstruct(record, SCHEMA, PATH, git_root=root)['status'] == 'reproduced'
+
+
+def _synthetic_git_child(monkeypatch, code):
+    """Exercise real bounded pipes, without executing historical renderer code."""
+    import sys
+    actual = subprocess.Popen
+    children = []
+    environments = []
+
+    def start(arguments, **kwargs):
+        environments.append(kwargs['env'])
+        child = actual([sys.executable, '-c', code], **kwargs)
+        children.append(child)
+        return child
+
+    monkeypatch.setattr(history.subprocess, 'Popen', start)
+    return children, environments
+
+
+def test_git_output_bound_and_no_network_child_environment(monkeypatch, tmp_path):
+    children, environments = _synthetic_git_child(monkeypatch, 'import sys; sys.stdout.buffer.write(b"x" * 65)')
+    with pytest.raises(ValueError, match='byte limit'):
+        history._git_output(['synthetic'], tmp_path, 64)
+    assert all(child.poll() is not None for child in children)
+    assert environments[0]['GIT_NO_REPLACE_OBJECTS'] == '1'
+    assert environments[0]['GIT_NO_LAZY_FETCH'] == '1'
+    assert environments[0]['GIT_ALLOW_PROTOCOL'] == ''
+    assert environments[0]['GIT_TERMINAL_PROMPT'] == '0'
+
+
+def test_git_output_exact_boundary_is_accepted(monkeypatch, tmp_path):
+    _synthetic_git_child(monkeypatch, 'import sys; sys.stdout.buffer.write(b"x" * 64)')
+    assert history._git_output(['synthetic'], tmp_path, 64) == b'x' * 64
+
+
+def test_git_deadline_reaps_the_child(monkeypatch, tmp_path):
+    children, _ = _synthetic_git_child(monkeypatch, 'import time; time.sleep(30)')
+    monkeypatch.setattr(history, '_GIT_SECONDS', .05)
+    with pytest.raises(ValueError, match='time limit'):
+        history._git_output(['synthetic'], tmp_path, 64)
+    assert all(child.poll() is not None for child in children)
+
+
+def test_git_missing_object_does_not_fall_back(candidate):
+    root, _ = candidate
+    with pytest.raises(ValueError, match='unavailable'):
+        history._git_blob('0' * 40, history.RENDERER_PATH, root)
+
+
+def test_git_blob_hash_is_still_verified(monkeypatch, tmp_path):
+    replies = iter([b'1' * 40 + b'\n', b'different bytes'])
+    monkeypatch.setattr(history, '_git_output', lambda *a: next(replies))
+    with pytest.raises(ValueError, match='object identity'):
+        history._git_blob('0' * 40, history.RENDERER_PATH, tmp_path)
+
+
+def test_sixty_enum_limit_applies_to_top_and_nested_values():
+    raw = SCHEMA.replace(b'      a: {}\n      b: {}',
+                         '\n'.join(f'      v{i:02}: {{}}' for i in range(61)).encode())
+    text = history.render_captured(raw, PATH, 'nested_enum60')
+    assert text.count('`v59` (+1 more)') == 2
+    assert '`v60`' not in text
+
+
+@pytest.mark.parametrize('count', [24, 25])
+def test_inline_mirror_shortcut_requires_more_than_twenty_four_optional_keys(count):
+    top = '\n'.join(f'      a{i:02}: {{range: string}}' for i in range(count))
+    raw = (f'id: https://example.org/optional-limit\nname: optional_limit\ndefault_range: string\n'
+           f'classes:\n  Dataset:\n    attributes:\n      child: {{range: Child}}\n{top}\n'
+           f'  Child:\n    attributes:\n{top}\n').encode()
+    text = history.render_captured(raw, PATH, 'inline_depth2', vocabulary_bytes=VOCABULARY)
+    assert ('also accepts the same slots as the top-level listing above' in text) is (count > 24)
+    if count == 24:
+        assert 'also accepts: `a00`, `a01`' in text and '`a23`\n' in text
+
+
+def test_runs_check_reports_text_agreement_without_changing_profile_or_strict_result(monkeypatch):
+    from click.testing import CliRunner
+    from data_sheets_schema import provenance
+    from data_sheets_schema.cli import runs as runs_cli
+    root = Path(__file__).resolve().parents[1]
+    label = '2026-07-31_claude-opus-5-api-generic_rep2'
+    monkeypatch.chdir(root)
+    context = {'status': 'unknown', 'reason': 'original historical profile remains unknown'}
+    monkeypatch.setattr(provenance, 'profile_assessment', lambda record: ([], deepcopy(context)))
+    arguments = ['check', '--strict', '--method', 'claudecode_agent_crate_only',
+                 '--label', label, '--project', 'CHORUS']
+    before = CliRunner().invoke(runs_cli.runs, arguments)
+    context['historical_digest_text'] = {
+        'status': 'reproduced', 'reason': 'candidate text agrees; consumed identity remains unrecorded'}
+    after = CliRunner().invoke(runs_cli.runs, arguments)
+    assert after.exit_code == before.exit_code
+    assert 'historical profile identity is not established' in after.output
+    assert 'historical digest-text reconstruction(s)' in after.output
+    assert 'Candidate agreement does not attest the consumed implementation or profile' in after.output
+    assert 'reproduced: candidate text agrees; consumed identity remains unrecorded' in after.output
+    assert 'two instruments' not in after.output

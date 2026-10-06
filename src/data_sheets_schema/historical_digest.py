@@ -9,9 +9,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 import hashlib
 from importlib.metadata import version
+import os
 from pathlib import Path
 import re
+import selectors
 import subprocess
+import time
 from typing import Any
 
 
@@ -21,6 +24,8 @@ FULL_SCHEMA_PATH = 'src/data_sheets_schema/schema/data_sheets_schema_all.yaml'
 RUNTIME_VERSION = '1.9.4'
 VOCABULARY_SHA256 = 'e8be07eb6d5c99cdc44e10936cdfc9d4873fc812f341caf3427230d784dce914'
 _UNIVERSAL = frozenset({'id', 'name', 'description', 'used_software'})
+_GIT_SECONDS = 5.0
+_GIT_BLOB_BYTES = 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -234,20 +239,59 @@ def render_captured(raw_schema: bytes, logical_path: str, family: str, *,
     return '\n'.join(lines)
 
 
+def _git_output(arguments: list[str], root: Path, limit: int) -> bytes:
+    """Read bounded local Git output without replacement, fetching or redirection."""
+    environment = {key: value for key, value in os.environ.items()
+                   if not key.startswith('GIT_')}
+    environment.update(GIT_NO_REPLACE_OBJECTS='1', GIT_NO_LAZY_FETCH='1',
+                       GIT_ALLOW_PROTOCOL='', GIT_TERMINAL_PROMPT='0',
+                       GIT_OPTIONAL_LOCKS='0', GIT_CONFIG_NOSYSTEM='1',
+                       GIT_CONFIG_GLOBAL=os.devnull)
+    process = subprocess.Popen(['git', *arguments], cwd=root, env=environment,
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                               stdin=subprocess.DEVNULL, bufsize=0)
+    deadline = time.monotonic() + _GIT_SECONDS
+    output = bytearray()
+    selector = selectors.DefaultSelector()
+    try:
+        selector.register(process.stdout, selectors.EVENT_READ)
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0 or not selector.select(remaining):
+                raise ValueError('historical Git read exceeded its time limit')
+            chunk = os.read(process.stdout.fileno(), min(65536, limit + 1 - len(output)))
+            if not chunk:
+                break
+            output.extend(chunk)
+            if len(output) > limit:
+                raise ValueError('historical Git output exceeded its byte limit')
+        try:
+            code = process.wait(timeout=max(0, deadline - time.monotonic()))
+        except subprocess.TimeoutExpired as exc:
+            raise ValueError('historical Git read exceeded its time limit') from exc
+        if code:
+            raise ValueError('historical Git object unavailable')
+        return bytes(output)
+    finally:
+        selector.close()
+        if process.poll() is None:
+            process.kill()
+        try:
+            process.wait(timeout=1)
+        finally:
+            process.stdout.close()
+
+
 def _git_blob(commit: str, path: str, root: Path) -> tuple[bytes, str]:
     """Resolve fixed-path data at the exact commit; no code is imported."""
-    identity = subprocess.run(['git', 'rev-parse', '--verify', f'{commit}:{path}'],
-                              cwd=root, capture_output=True, check=False)
-    if identity.returncode:
-        raise ValueError(f'historical Git object unavailable at {commit}:{path}')
-    oid = identity.stdout.decode('ascii').strip()
+    identity = _git_output(['rev-parse', '--verify', f'{commit}:{path}'], root, 64)
+    oid = identity.decode('ascii').strip()
     if re.fullmatch(r'[0-9a-f]{40}', oid) is None:
         raise ValueError('historical Git blob identity is malformed')
-    read = subprocess.run(['git', 'cat-file', 'blob', oid], cwd=root,
-                          capture_output=True, check=False)
-    if read.returncode or hashlib.sha1(b'blob ' + str(len(read.stdout)).encode() + b'\0' + read.stdout).hexdigest() != oid:
+    raw = _git_output(['cat-file', 'blob', oid], root, _GIT_BLOB_BYTES)
+    if hashlib.sha1(b'blob ' + str(len(raw)).encode() + b'\0' + raw).hexdigest() != oid:
         raise ValueError('historical Git blob bytes do not match their object identity')
-    return read.stdout, oid
+    return raw, oid
 
 
 def reconstruct(record: dict[str, Any], raw_schema: bytes, logical_path: str, *,
