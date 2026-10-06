@@ -134,3 +134,23 @@ This implements the structured figure consumer for [#4333](https://github.com/br
 The parent [#2920](https://github.com/bridge2ai/data-sheets-schema/issues/2920)
 remains subject to its full acceptance review; this guide does not declare it
 closed or introduce a new scoring instrument.
+
+Completion publication uses a shared helper whose exact source is captured in
+publication metadata. The hidden `.figure-completion.pending` entry is retained
+for diagnosis and is never a completion marker. Its data stream is closed and
+read back before an exclusive link creates the fixed completion name. That link
+remains provisional until source, artifact and directory checks finish. If an
+observed precommit failure occurs, the helper invalidates its owned inode through
+a held descriptor, even in a displaced directory; it does not unlink a pathname
+that another writer could replace. Other outputs and replacement winners are
+preserved. An empty final marker is a failed publication. Failed invalidation is
+reported explicitly as uncertified cleanup, chained to the original error.
+
+After commitment, an operating-system error closing a bookkeeping descriptor is
+reported separately on stderr and does not turn the completed publication into
+a failed return. Data-stream close errors remain publication failures. If writing and closing
+both fail, the first write error remains primary and the close error is its
+explicit cause. These
+bounded checks do not promise crash or power-loss recovery, atomic visibility to
+concurrent readers, or protection against future external mutation. Select a new
+fresh directory after a failed attempt; there is no automatic retry or cleanup.

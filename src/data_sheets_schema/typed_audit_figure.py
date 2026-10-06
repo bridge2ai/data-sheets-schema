@@ -16,6 +16,7 @@ import stat
 import tempfile
 
 from . import audit_batches, audit_protocol, typed_audit, typed_audit_report
+from . import figure_publication as publication
 
 FORMAT = 'typed_audit_figure_v1'
 KINDS = tuple(sorted(audit_protocol.KINDS)) + ('untyped',)
@@ -111,7 +112,7 @@ def prepare(paths) -> PreparedFigure:
             raise ValueError('selected assembly bytes exceed report bound')
         selected.append(capture)
     implementation = tuple(_read(path, typed_audit.MAX_ASSEMBLY_BYTES) for path in
-                           (__file__, typed_audit_report.__file__))
+                           (__file__, typed_audit_report.__file__, publication.__file__))
     checked = typed_audit_report.build_report([(file.spelling, file.raw) for file in selected])
     for file in [*selected, *implementation]:
         file.verify()
@@ -224,6 +225,10 @@ def publish(prepared: PreparedFigure, output_dir: str | Path):
     """
     if not isinstance(prepared, PreparedFigure):
         raise ValueError('expected prepare() output from checked assembly bytes')
+    expected = tuple(str(Path(p).resolve(strict=True)) for p in
+                     (__file__, typed_audit_report.__file__, publication.__file__))
+    if tuple(file.resolved for file in prepared.implementation) != expected:
+        raise ValueError('prepared implementation source roster differs')
     output = Path(output_dir).absolute()
     if os.path.lexists(output):
         raise ValueError('figure destination must be new')
@@ -255,25 +260,33 @@ def publish(prepared: PreparedFigure, output_dir: str | Path):
             (Path(staging) / name).write_bytes(raw)
         for file in [*prepared.selected, *prepared.implementation]:
             file.verify()
-        output.mkdir(mode=0o700)
-        directory = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
-        try:
+    output.mkdir(mode=0o700)
+    directory = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    committed = False
+    try:
+        if not os.path.samestat(os.fstat(directory), output.stat(follow_symlinks=False)):
+            raise ValueError('publication directory identity changed')
+        for name, raw in artifacts.items():
+            _publish_file(directory, name, raw)
+        for name, raw in artifacts.items():
+            fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+            with os.fdopen(fd, 'rb') as stream:
+                if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw) + 1) != raw:
+                    raise ValueError(f'published artifact changed: {name}')
+        def verify_completion():
             if not os.path.samestat(os.fstat(directory), output.stat(follow_symlinks=False)):
-                raise ValueError('publication directory identity changed')
-            for name, raw in artifacts.items():
-                _publish_file(directory, name, raw)
+                raise ValueError('publication directory moved or replaced')
+            for file in [*prepared.selected, *prepared.implementation]:
+                file.verify()
             for name, raw in artifacts.items():
                 fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
                 with os.fdopen(fd, 'rb') as stream:
                     if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw) + 1) != raw:
                         raise ValueError(f'published artifact changed: {name}')
-            for file in [*prepared.selected, *prepared.implementation]:
-                file.verify()
             if not os.path.samestat(os.fstat(directory), output.stat(follow_symlinks=False)):
                 raise ValueError('publication directory moved or replaced')
-            _publish_file(directory, 'manifest.json', audit_batches.canonical_bytes(manifest))
-            if not os.path.samestat(os.fstat(directory), output.stat(follow_symlinks=False)):
-                raise ValueError('publication directory moved or replaced')
-        finally:
-            os.close(directory)
+        publication.complete(directory, 'manifest.json', audit_batches.canonical_bytes(manifest), verify_completion)
+        committed = True
+    finally:
+        publication.close_descriptor(directory, committed=committed)
     return manifest
