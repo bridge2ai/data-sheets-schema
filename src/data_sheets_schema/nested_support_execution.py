@@ -6,6 +6,7 @@ scientific approval. No legacy judge, cache or retry behavior is selected here.
 """
 from __future__ import annotations
 
+import copy
 from datetime import datetime, timezone
 from decimal import Context, Decimal, DecimalException, DivisionByZero, InvalidOperation, Overflow, localcontext, ROUND_HALF_EVEN
 import hashlib
@@ -126,8 +127,9 @@ def _declaration(value, descriptor):
         _text(t[key], f"transport.{key}")
     _header(t["anthropic_version"], "anthropic_version")
     u = urlsplit(t["url"])
-    _need(u.hostname and u.path.endswith("/messages") and not u.username and not u.password
-          and not u.query and not u.fragment and not any(c.isspace() for c in t["url"]), "invalid messages endpoint")
+    _need(u.hostname and u.path.endswith("/messages") and u.username is None and u.password is None
+          and not u.query and not u.fragment
+          and not any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in t["url"]), "invalid messages endpoint")
     try:
         u.port
     except ValueError as exc:
@@ -217,7 +219,7 @@ def _registration(capture, descriptor_raw, declaration, identity):
             "declaration": declaration, "implementation": identity,
             "requests": requests,
             "original_readiness": descriptor["readiness"], "scientific_eligibility": False,
-            "limitations": LIMITATIONS}
+            "limitations": list(LIMITATIONS)}
 
 
 def _load(capture, raw):
@@ -398,10 +400,10 @@ def _assessment(capture, registration, selection, response, body):
     result = None
     # Raw native assessment is distinct from HTTP success. Complete failed HTTP
     # replies may still report usage; preserve it without accepting the call.
-    if response["body_complete"] and response["failure"] is None:
+    if response["body_complete"]:
         descriptor_raw = capture.get(registration["descriptor"], limit=saved.MAX_MANIFEST_BYTES)
         envelope = saved.package_response(descriptor_raw, attempt_id=selection["attempt_id"], native_message=body)
-        result = saved._attempt(capture, descriptor_raw, envelope, selection["attempt_id"])
+        result = copy.deepcopy(saved._attempt(capture, descriptor_raw, envelope, selection["attempt_id"]))
     assessment = result["assessment"] if result else None
     usage = _usage(assessment)
     problems = [] if result and assessment["status"] == "accepted" else ["response_not_accepted"]
@@ -571,7 +573,7 @@ def recheck_captured(capture, ledger):
               "accepted_accounted_output_tokens": output_used, "response_bytes": response_used,
               "all_selected_accepted": len(rows) == len(reg["requests"]) and all(r["status"] == "accepted" for r in rows),
               "original_readiness": reg["original_readiness"], "scientific_eligibility": False,
-              "fitness": "separate_and_unscored", "limitations": LIMITATIONS}
+              "fitness": "separate_and_unscored", "limitations": list(LIMITATIONS)}
     _need(len(canonical(result)) <= saved.MAX_MANIFEST_BYTES, "report exceeds storage bound")
     return result
 

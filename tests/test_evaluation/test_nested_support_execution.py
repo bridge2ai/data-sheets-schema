@@ -183,7 +183,8 @@ def test_one_failed_call_preserves_raw_and_stops_without_retry(make, peer, case)
 
 
 @pytest.mark.parametrize("case", ["bool_calls", "hard_spend", "header", "query", "credentials", "external_fixture",
-                                  "approval", "model", "request_limit", "price_nan", "proxy", "retry"])
+                                  "approval", "model", "request_limit", "price_nan", "proxy", "retry",
+                                  "empty_userinfo", "leading_control"])
 def test_invalid_declarations_refuse_before_admission(make, peer, case):
     def change(d):
         if case == "bool_calls": d["limits"]["max_calls"] = True
@@ -198,6 +199,8 @@ def test_invalid_declarations_refuse_before_admission(make, peer, case):
         elif case == "price_nan": d["prices"] = {"currency": "TEST", "per_tokens": 1000, "source": "fictional", "as_of": "synthetic", "rates": {"input_tokens": "NaN"}}
         elif case == "proxy": d["transport"]["environment_proxies"] = True
         elif case == "retry": d["transport"]["retries"] = 1
+        elif case == "empty_userinfo": d["transport"]["url"] = d["transport"]["url"].replace("http://", "http://@")
+        elif case == "leading_control": d["transport"]["url"] = "\x00" + d["transport"]["url"]
     with pytest.raises(ValueError):
         make(change=change)
     assert peer["requests"] == []
@@ -347,3 +350,44 @@ def test_actual_positive_rejects_rehashed_impossible_transport_states(make, peer
             ex.recheck_captured(capture, mutated)
     assert ex.recheck(output) == expected
     assert len(peer["requests"]) == 2
+
+
+def test_actual_complete_http_body_retains_usage_after_late_close_failure(make, peer, monkeypatch):
+    import httpx
+    registered, output, _, _ = make(count=2)
+    original_exit = httpx.Client.__exit__
+    def failed_exit(client, *args):
+        original_exit(client, *args)
+        raise httpx.CloseError("fictional credential-like detail must not be recorded")
+    monkeypatch.setattr(httpx.Client, "__exit__", failed_exit)
+    report = ex.run(registered)
+    outcome = json.loads((output / "attempts/000000/response.json").read_bytes())
+    assert outcome["stage"] == "complete" and outcome["body_complete"] is True
+    assert outcome["status_code"] == 200 and outcome["failure"] == "transport_CloseError"
+    assert "credential-like" not in json.dumps(outcome)
+    assert (output / "artifacts" / outcome["body"]["sha256"]).read_bytes() == peer["body"]
+    assert report["rows"][0]["status"] == "failed"
+    assert report["rows"][0]["saved_result"]["assessment"]["status"] == "accepted"
+    assert report["observed_usage_totals"]["input_tokens"] == 12
+    assert report["observed_usage_totals"]["output_tokens"] == 23
+    assert sum(c["not_started"] for c in report["selected_counts"].values()) == 1
+    assert ex.recheck(output) == report
+    assert len(peer["requests"]) == 1
+
+
+def test_returned_metadata_cannot_mutate_later_contracts_or_readback(make):
+    own_limits = list(ex.LIMITATIONS)
+    old_limits, old_contract = list(saved.LIMITATIONS), copy.deepcopy(saved.CONTRACT)
+    registered, output, registration, _ = make()
+    registration["limitations"].append("caller mutation")
+    assert ex.LIMITATIONS == own_limits
+    report = ex.run(registered)
+    expected = copy.deepcopy(report)
+    report["limitations"].clear()
+    report["rows"][0]["saved_result"]["limitations"].clear()
+    report["rows"][0]["saved_result"]["contract"]["limits"]["nodes"] = -1
+    assert ex.LIMITATIONS == own_limits and saved.LIMITATIONS == old_limits
+    assert saved.CONTRACT == old_contract
+    assert ex.recheck(output) == expected
+    _, _, later, _ = make(name="later-registration")
+    assert later["limitations"] == own_limits
