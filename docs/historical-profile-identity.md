@@ -15,6 +15,10 @@ conflict and remains fatal under `--strict`. If no candidate matches, historical
 identity is unknown: recovering a schema does not recover an old renderer or
 vocabulary. Unknown identity is reported separately and is not fatal.
 
+A captured vocabulary file must contain a `vocabularies` mapping whose named
+tables map string identifiers to string labels. Empty mappings are valid;
+missing mappings, lists, booleans, numbers and nulls are unavailable evidence.
+
 `profile_identity.capture(record)` returns the comparison status, reason,
 schema-resolution basis, renderer identity, vocabulary hashes and candidate
 digests. `provenance.profile_assessment(record)` returns findings and that

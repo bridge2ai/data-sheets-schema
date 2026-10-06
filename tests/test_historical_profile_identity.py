@@ -196,3 +196,34 @@ def test_md5_only_historical_record_remains_supported(historical):
     record, _, _, _ = historical
     del record['schema']['full_sha256']
     assert profile_identity.capture(record)['status'] == 'match'
+
+
+@pytest.mark.parametrize('value', ['[]', 'false', '0', '""', 'null'])
+@pytest.mark.parametrize('level', ['outer', 'nested'])
+def test_falsey_malformed_vocabulary_cannot_certify_a_match(historical, level, value):
+    record, candidates, _, pin = historical
+    record['schema'].update(profile='bridge2ai', digest_md5=candidates['neutral'])
+    pin.write_text('vocabularies: ' + (value if level == 'outer' else '\n  B2AI_TOPIC: ' + value) + '\n')
+    context = profile_identity.capture(record)
+    assert context['status'] == 'unknown'
+    assert context['finding'] is None and context['candidate_digests'] == {}
+
+
+@pytest.mark.parametrize('raw', [b'other: {}\n', b'vocabularies:\n  1: {}\n',
+    b'vocabularies:\n  B2AI_TOPIC:\n    1: term\n',
+    b'vocabularies:\n  B2AI_TOPIC:\n    ex:term: false\n',
+    b'vocabularies:\n  B2AI_TOPIC:\n    ex:term: {}\n'])
+def test_malformed_vocabulary_structure_stays_unknown(historical, raw):
+    record, _, _, pin = historical
+    pin.write_bytes(raw)
+    context = profile_identity.capture(record)
+    assert context['status'] == 'unknown' and context['finding'] is None
+
+
+def test_legitimate_empty_named_vocabulary_keeps_own_match(historical):
+    record, candidates, _, pin = historical
+    record['schema'].update(profile='bridge2ai', digest_md5=candidates['neutral'])
+    pin.write_text('vocabularies:\n  B2AI_TOPIC: {}\n')
+    context = profile_identity.capture(record)
+    assert context['status'] == 'match' and context['finding'] is None
+    assert len(set(context['candidate_digests'].values())) == 1

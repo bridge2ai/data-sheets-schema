@@ -60,9 +60,14 @@ def _vocabulary(profile) -> tuple[dict, dict]:
         return {}, {'path': None, 'sha256': None, 'bytes': 0, 'source': 'profile declares no vocabulary'}
     raw = pin.read_bytes()
     document = version_document(raw)
-    vocabulary = document.get('vocabularies') or {}
+    vocabulary = document.get('vocabularies')
     if not isinstance(vocabulary, dict):
         raise ValueError('profile vocabulary must be a mapping')
+    for name, terms in vocabulary.items():
+        if not isinstance(name, str) or not isinstance(terms, dict):
+            raise ValueError('each named profile vocabulary must be a mapping')
+        if any(not isinstance(key, str) or not isinstance(label, str) for key, label in terms.items()):
+            raise ValueError('profile vocabulary identifiers and labels must be strings')
     return vocabulary, {'path': str(pin), 'sha256': hashlib.sha256(raw).hexdigest(),
                         'bytes': len(raw), 'source': 'current profile vocabulary'}
 
