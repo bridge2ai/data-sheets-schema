@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from collections.abc import Callable
+from copy import deepcopy
 import functools
 import hashlib
 import json
@@ -32,6 +33,10 @@ class SchemaSnapshot:
 @functools.lru_cache(maxsize=128)
 def _metadata(content: bytes) -> tuple:
     doc = yaml.safe_load(content) or {}
+    return _metadata_document(doc)
+
+
+def _metadata_document(doc) -> tuple:
     # Let the installed metamodel normalize its supported mapping/list forms.
     fields = {k: doc[k] for k in
         ("id", "name", "imports", "prefixes", "default_curi_maps") if k in doc}
@@ -68,6 +73,47 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
     The source preflight supplies its existing byte capture and requests the
     generator's default traversal alone, with errors raised before generation.
     """
+    return _capture_schema(path, content=content, read_bytes=read_bytes,
+                           namespace_orders=namespace_orders, strict=strict,
+                           logical_paths=logical_paths, metadata_reader=_metadata)
+
+
+def _capture_native_schema(path: Path, members: tuple[tuple[Path, bytes], ...],
+                           *, member_bytes: int) -> SchemaSnapshot:
+    """Strict-check every native member, then reuse only its private metadata.
+
+    All occurrences are checked before traversal, including replaced paths.
+    Normalization remains lazy in traversal order. No caller supplies parsed
+    data, a validator or a cached validation result.
+    """
+    from .audit_omissions import _mapping
+    fields, frozen = {}, {}
+    for source, raw in members:
+        doc = _mapping(raw, 'native schema', limit=member_bytes)
+        fields[raw] = {key: doc[key] for key in
+                       ('id', 'name', 'imports', 'prefixes', 'default_curi_maps') if key in doc}
+        frozen[source] = raw
+
+    def read(source):
+        if source not in frozen:
+            raise ValueError('selected schema import is outside the complete captured closure')
+        return frozen[source]
+
+    normalized = {}
+
+    def metadata(raw):
+        if raw not in normalized:
+            # The metamodel may normalize mutable inlined values. Its input
+            # belongs to this call and cannot mutate another source's fields.
+            normalized[raw] = _metadata_document(deepcopy(fields[raw]))
+        return normalized[raw]
+
+    return _capture_schema(path, read_bytes=read, strict=True, logical_paths=True,
+                           metadata_reader=metadata)
+
+
+def _capture_schema(path, *, content=None, read_bytes=None, namespace_orders=None,
+                    strict=False, logical_paths=False, metadata_reader):
     if type(logical_paths) is not bool:
         raise ValueError("logical_paths must be an explicit boolean")
     if logical_paths:
@@ -84,7 +130,7 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
         read = read_bytes or Path.read_bytes
         root = physical(resource_path(path))              # from any directory; `..` through the filesystem (#1301, #1570)
     files = {root: read(root) if content is None else content}
-    root_meta = _metadata(files[root])
+    root_meta = metadata_reader(files[root])
     names = {root: root_meta[0]}
     orders = namespace_orders if namespace_orders is not None else ((False, True) if root_meta[1] else (False,))
     for early in orders:
@@ -119,7 +165,7 @@ def capture_schema(path: str | Path, *, content: bytes | None = None,
                 data = files[source]
                 if isinstance(data, OSError):
                     raise data
-                meta = metadata[name] = _metadata(data)
+                meta = metadata[name] = metadata_reader(data)
                 for imp in meta[1]:
                     if imp == name:
                         continue
