@@ -220,3 +220,87 @@ def test_selector_builtin_identity_is_proved_in_its_source_module(tmp_path, name
     path.write_text(path.read_text() + addition)
     with pytest.raises(scan.ConfigError, match='not derived'):
         scopes(root)
+
+
+def native_fixture_root(tmp_path):
+    """Real API sources with the combined native admission shape only.
+
+    On the future combined tree use its actual native module. Standalone CI
+    uses this small inert native-validator source; neither route imports it.
+    The separate author evidence also exercises all six immutable c9da files.
+    """
+    root = fixture_root(tmp_path)
+    native = 'src/data_sheets_schema/native_shared_render.py'
+    if (ROOT / native).is_file():
+        (root / native).write_bytes((ROOT / native).read_bytes())
+        return root
+    runner = root / RUNNER
+    text = runner.read_text().replace('    shared_generation_version: int = 0',
+        '    native_shared_generation_version: int = 0\n    shared_generation_version: int = 0')
+    text = text.replace('        from data_sheets_schema.native_source_attribution import validate as validate_native_attribution',
+        '        from .native_shared_render import validate_spec as validate_native_shared\n        validate_native_shared(self)\n        from data_sheets_schema.native_source_attribution import validate as validate_native_attribution')
+    text = text.replace('self.condition == "generic_v10" and self.shared_generation_version != 1:',
+        'self.condition == "generic_v10" and self.shared_generation_version != 1 and self.native_shared_generation_version != 1:')
+    runner.write_text(text)
+    shared = root / SHARED
+    shared.write_text(shared.read_text().replace('    if not version:\n',
+        "    if not version:\n        if getattr(spec, 'native_shared_generation_version', 0):\n            from .native_shared_render import validate_spec\n            validate_spec(spec)\n            return None\n",1))
+    (root / native).write_text('''def validate_spec(spec):
+    version = getattr(spec, 'native_shared_generation_version', 0)
+    registration = getattr(spec, 'native_shared_generation_registration', None)
+    if type(version) is not int or version not in (0, 1):
+        raise ValueError('native version')
+    if not version:
+        if registration is not None or spec.render_version == 26:
+            raise ValueError('native selector required')
+        return None
+    if (spec.condition != 'generic_v10' or type(spec.render_version) is not int
+            or spec.render_version != 26 or spec.runtime != 'Claude Code (direct)'):
+        raise ValueError('native tuple')
+    for key in ('native_source_attribution_version', 'shared_generation_version',
+                'api_playbook_version', 'receipt_completion_version', 'removal_repair_version'):
+        if type(getattr(spec, key)) is not int or getattr(spec, key) != 0:
+            raise ValueError('native cannot mix API axes')
+    return None
+''')
+    return root
+
+
+def test_combined_native_domain_proves_inactive_api_cases(tmp_path):
+    root = native_fixture_root(tmp_path)
+    selected = scopes(root)['full_receipt_completion']['selection']
+    assert selected['renderers'] == [8, 25, 27]
+    assert all(case['values']['native_shared_generation_version'] == 0 for case in selected['cases'])
+    assert len(selected['cases']) == 6
+    assert any('native_shared_render.py:' in path for path in selected['evidence'])
+    by_version = {(case['values']['receipt_completion_version'], tuple(case['conditions']))
+                  for case in selected['cases']}
+    assert by_version == {(1, ('generic_v7', 'generic_v8', 'generic_v9')),
+        (2, ('generic_v10',)),
+        (3, ('generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'))}
+
+
+@pytest.mark.parametrize('name,before,after', [
+    (RUNNER, 'validate_native_shared(self)', 'unproved(self)'),
+    (RUNNER, 'validate_native_shared(self)', 'validate_native_shared(other)'),
+    (RUNNER, '        validate_native_shared(self)', '        if self.native_shared_generation_version:\n            validate_native_shared(self)'),
+    (RUNNER, 'from .native_shared_render import validate_spec as validate_native_shared',
+     'from .foreign import validate_spec as validate_native_shared'),
+    (RUNNER, 'native_shared_generation_version: int = 0', 'native_shared_generation_version: int = 1'),
+    (RUNNER, 'and self.native_shared_generation_version != 1:', 'and self.native_shared_generation_version == 1:'),
+    (RUNNER, 'and self.native_shared_generation_version != 1:', 'and self.native_shared_generation_version != 2:'),
+    ('src/data_sheets_schema/native_shared_render.py', 'version not in (0, 1)', 'version not in (0, 1, 2)'),
+    ('src/data_sheets_schema/native_shared_render.py', "'shared_generation_version',", ''),
+    ('src/data_sheets_schema/native_shared_render.py', "'receipt_completion_version',", ''),
+    ('src/data_sheets_schema/native_shared_render.py', "    for key in ('native_source_attribution_version',", "    return None\n    for key in ('native_source_attribution_version',"),
+    ('src/data_sheets_schema/native_shared_render.py', 'def validate_spec(spec):', '@foreign\ndef validate_spec(spec):'),
+    ('src/data_sheets_schema/native_shared_render.py', 'def validate_spec(spec):', 'type = lambda value: int\ndef validate_spec(spec):'),
+])
+def test_native_exclusion_needs_the_actual_early_validated_domain(tmp_path, name, before, after):
+    root = native_fixture_root(tmp_path)
+    path = root / name
+    text = path.read_text()
+    assert before in text
+    path.write_text(text.replace(before, after))
+    with pytest.raises(scan.ConfigError, match='not derived'):
+        scopes(root)
