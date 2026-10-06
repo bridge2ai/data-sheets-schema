@@ -788,7 +788,48 @@ class Attainability:
         return [e for e in self.document["entries"] if status is None or e["status"] == status]
 
 
+@dataclass(frozen=True)
+class _CapturedAttainabilityBytes:
+    """Fixed immutable bytes for the captured validator; no resolver callback."""
+    artifacts: tuple[tuple[str, bytes], ...]
+
+    def __post_init__(self):
+        if type(self.artifacts) is not tuple or any(
+                type(row) is not tuple or len(row) != 2 or type(row[0]) is not str
+                or not row[0] or type(row[1]) is not bytes for row in self.artifacts):
+            raise ValueError("captured attainability sources require immutable path/bytes pairs")
+        if len({path for path, _ in self.artifacts}) != len(self.artifacts):
+            raise ValueError("duplicate captured attainability path")
+
+
+def _validation_bytes(path, *, md5=None, sha256=None, captured=None):
+    if captured is None:
+        return resolve_bytes(path, md5=md5, sha256=sha256)
+    if type(captured) is not _CapturedAttainabilityBytes:
+        raise TypeError("expected fixed captured attainability bytes")
+    if "\0" in path:
+        raise AttainabilityError(path.replace("\0", "\\0"), ["the path carries a NUL byte"])
+    for declared, raw in captured.artifacts:
+        if declared == path and _hashes_match(raw, md5, sha256):
+            return raw, {"source": "captured bytes", "path": path,
+                         "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
+    raise AttainabilityError(path, ["captured bytes do not contain this path with every requested digest"])
+
+
 def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attainability | None]:
+    """Validate v1 through its original live resolution and ordered checks."""
+    return _validate_text(text, name, captured=None)
+
+
+def _validate_captured_text(text: str, name: str | None = None, *,
+                            captured: _CapturedAttainabilityBytes) -> tuple[list[str], Attainability | None]:
+    """The same v1 validator, using only the supplied fixed captured bytes."""
+    if type(captured) is not _CapturedAttainabilityBytes:
+        raise TypeError("expected fixed captured attainability bytes")
+    return _validate_text(text, name, captured=captured)
+
+
+def _validate_text(text: str, name: str | None = None, *, captured: _CapturedAttainabilityBytes | None) -> tuple[list[str], Attainability | None]:
     """Every problem with an attainability file's text (empty when it is
     valid) and, when valid, the loaded file. `name` is its file name, which
     must be the one its bundle identity gives."""
@@ -813,7 +854,7 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
     if name is not None and name != file_name(doc):
         problems.append(f"file name {name} is not {file_name(doc)}, the name its bundle identity gives")
     try:
-        raw, basis = resolve_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"])
+        raw, basis = _validation_bytes(bundle["path"], md5=bundle["md5"], sha256=bundle["sha256"], captured=captured)
     except AttainabilityError as exc:
         return problems + [f"bundle: {p}" for p in exc.problems], None
     if not identical(bundle.get("bytes"), len(raw)):
@@ -848,7 +889,7 @@ def validate_text(text: str, name: str | None = None) -> tuple[list[str], Attain
             problems.append(f"rubric {rubric}: must name {RUBRIC_PATHS.get(rubric, 'a known rubric')} and its sha256")
             continue
         try:
-            rubric_raw, _ = resolve_bytes(identity["path"], sha256=identity["sha256"])
+            rubric_raw, _ = _validation_bytes(identity["path"], sha256=identity["sha256"], captured=captured)
             items[rubric] = rubric_items(rubric_raw, rubric)
         except (AttainabilityError, ValueError, KeyError, TypeError, yaml.YAMLError) as exc:
             problems.append(f"rubric {rubric}: {exc}")
