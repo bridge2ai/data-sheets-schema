@@ -108,8 +108,10 @@ def _paths(value, selected, *, fresh, extra_protected=()):
 
 
 def registration(composition_path, system_path, *, permission_probe_path, attempt_id,
-                 attempt_directory, evidence_directory, max_draft_checks):
+                 attempt_directory, evidence_directory, max_draft_checks, receipt_origin_version=0):
     """Prepare E, without consuming an attempt or asserting actual permission."""
+    if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
+        raise ValueError('receipt_origin_version must be exact integer 0 or 1')
     if type(attempt_id) is not str or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
         raise ValueError('attempt_id must be an explicit safe component')
     c.positive_int(max_draft_checks, 'execution draft-check allowance')
@@ -149,6 +151,9 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
         'selection': {**doc['run'], 'render_spec': selected['render_spec']},
         'scope': 'Offline proposal only; requires exact independent review, CI and owner launch evidence. '
                  'Saved permission evidence is not cryptographic authentication, production helper validation or scientific acceptance.'}
+    if receipt_origin_version:
+        from .native_receipt_origin import declaration
+        value['receipt_origin_reporting'] = declaration(value['attempt_directory'], spec._agentic_artifact_paths)
     _paths(value, selected, fresh=False)
     if (raw != _read(paths['composition'], 'composition', c.HARD_LIMITS['request_bytes'])
             or system != _read(paths['system_path'], 'system', c.HARD_LIMITS['input_bytes'])
@@ -163,10 +168,15 @@ def verified(raw):
     if (type(value) is not dict or value.get('kind') != KIND or type(value.get('version')) is not int
             or value['version'] != VERSION or value.get('execution') != EXECUTION):
         raise ValueError('not the selected native shared execution registration')
+    origin_version = 0
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import version
+        origin_version = version(value)
     try:
         expected = registration(value['composition'], value['system_path'], permission_probe_path=value['permission_probe'],
             attempt_id=value['attempt_id'], attempt_directory=value['attempt_directory'],
-            evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'])
+            evidence_directory=value['evidence_directory'], max_draft_checks=value['max_draft_checks'],
+            receipt_origin_version=origin_version)
     except (KeyError, TypeError) as exc:
         raise ValueError('incomplete native shared execution registration') from exc
     if c.canonical(value) != c.canonical(expected):

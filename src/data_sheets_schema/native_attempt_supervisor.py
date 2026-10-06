@@ -118,8 +118,10 @@ def recipe_steps(spec, policy, fixture):
 
 
 def registration(composition_path, fixture_path, *, attempt_id, attempt_directory,
-                 evidence_directory, deadline_seconds, synthetic_runtime):
+                 evidence_directory, deadline_seconds, synthetic_runtime, receipt_origin_version=0):
     """Prepare offline identity only. No directory is reserved and no child starts."""
+    if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
+        raise ValueError('receipt_origin_version must be exact integer 0 or 1')
     if not isinstance(attempt_id, str) or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
         raise ValueError('attempt id must be one explicit safe path component')
     if type(deadline_seconds) is not int or not 0 < deadline_seconds <= 3600:
@@ -157,6 +159,9 @@ def registration(composition_path, fixture_path, *, attempt_id, attempt_director
         'dependencies': authority.dependency_identity(), 'gate_plan': list(GATES),
         'driver': {'path': str(authority.ROOT/DRIVER), 'sha256': draft._sha((authority.ROOT/DRIVER).read_bytes())},
         'steps_sha256': draft._sha(draft._encoded(steps)), **UNASSESSED}
+    if receipt_origin_version:
+        from .native_receipt_origin import declaration
+        result['receipt_origin_reporting'] = declaration(result['attempt_directory'], spec._agentic_artifact_paths)
     _paths(result, value, fresh=False)
     return result
 
@@ -168,9 +173,14 @@ def verified(raw):
     if (type(value) is not dict or value.get('kind') != KIND or type(value.get('version')) is not int
             or value['version'] != VERSION or value.get('execution') != EXECUTION):
         raise ValueError('not a supported neutral-only supervisor registration')
+    origin_version = 0
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import version
+        origin_version = version(value)
     expected = registration(value['composition'], value['fixture'], attempt_id=value['attempt_id'],
         attempt_directory=value['attempt_directory'], evidence_directory=value['evidence_directory'],
-        deadline_seconds=value['deadline_seconds'], synthetic_runtime=value['synthetic_runtime'])
+        deadline_seconds=value['deadline_seconds'], synthetic_runtime=value['synthetic_runtime'],
+        receipt_origin_version=origin_version)
     if draft._encoded(expected) != draft._encoded(value):
         raise ValueError('supervisor registration differs from exact selection, dependencies or inputs')
     return value
@@ -318,6 +328,9 @@ def supervise(registration_raw):
             stopped(f'finalization: {type(exc).__name__}: {exc}')
         if first_stop is not None:
             results['first_stop'] = {'checked': True, 'passed': False, 'reason': first_stop}
+        if 'receipt_origin_reporting' in value:
+            from .native_receipt_origin import attach_prepared
+            results = attach_prepared(value, results, prepared)
         completed = (set(results) == set(GATES)
             and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
         final = {'kind': KIND, 'version': VERSION, 'execution': EXECUTION, 'attempt_id': value['attempt_id'],
@@ -366,9 +379,22 @@ def read_final(registration_raw):
     expected_completion = all(row['checked'] and row['passed'] for row in checks.values())
     if type(result.get('engineering_completion')) is not bool or result['engineering_completion'] != expected_completion:
         raise ValueError('final completion disagrees with its required gates')
-    for path, pin in result.get('captured_files', {}).items():
-        if draft._sha(Path(path).read_bytes()) != pin['sha256']:
-            raise ValueError('saved evidence differs from the captured final basis')
+    origin_raw = {}
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import required_paths
+        origin_paths = required_paths(value, checks['receipts'], result.get('captured_aliases', {}))
+        for path, pin in result.get('captured_files', {}).items():
+            body = Path(path).read_bytes()
+            if draft._sha(body) != pin['sha256']:
+                raise ValueError('saved evidence differs from the captured final basis')
+            if path in origin_paths:
+                origin_raw[path] = body
+    else:
+        if 'receipt_origin' in checks['receipts']:
+            raise ValueError('undeclared receipt-origin gate extension')
+        for path, pin in result.get('captured_files', {}).items():
+            if draft._sha(Path(path).read_bytes()) != pin['sha256']:
+                raise ValueError('saved evidence differs from the captured final basis')
     for alias, target in result.get('captured_aliases', {}).items():
         if str(Path(alias).resolve()) != target:
             raise ValueError('saved evidence path identity differs from its capture')
@@ -388,6 +414,10 @@ def read_final(registration_raw):
             current_meta = {'exists': False, 'regular': False}
         if current_meta != expected_meta:
             raise ValueError('saved evidence file metadata differs from its capture')
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import check_saved
+        check_saved(value, checks['receipts'], raw=origin_raw,
+                    aliases=result.get('captured_aliases', {}), metadata=metadata)
     additional = result.get('additional_report')
     if additional is None:
         if expected_completion:

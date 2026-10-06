@@ -401,6 +401,10 @@ def write_report(prepared, destination):
 
 def require_saved_basis(value, result):
     """Additional fixed readback; failed attempts never gain success by omission."""
+    # The common reader has already checked a declared report from the bytes
+    # retained by its file validation loop, including an unavailable capture.
+    if 'receipt_origin_reporting' not in value and 'receipt_origin' in result['gates']['receipts']:
+        raise ValueError('undeclared receipt-origin gate extension')
     additional = result.get('additional_report')
     if additional is None:
         if result['runtime_gates_passed']:
@@ -456,6 +460,9 @@ def require_saved_basis(value, result):
         first_stop=result['first_stop'], runtime_authority=result['runtime_observation'],
         keep_awake=result['keep_awake'], keep_awake_raw=cleanup_raw,
         runtime_authority_expected=expected_runtime_observation(value))
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import attach_prepared
+        fresh = attach_prepared(value, fresh, prepared)
     for name, recomputed in fresh.items():
         old = result['gates'][name]
         if old['passed'] and (recomputed.get('checked') is not True or recomputed.get('passed') is not True):
@@ -469,12 +476,13 @@ def require_saved_basis(value, result):
             raise ValueError('saved projection changed during independent gate reconstruction')
 
 
-def validate_file_basis(value, result):
+def validate_file_basis(value, result, *, retain_paths=()):
     """Native-only bound before the common reader's historical file loop."""
     files = result['captured_files']
     if len(files) > c.HARD_LIMITS['captured_members']:
         raise ValueError('saved native file catalog exceeds its bounded count')
     total = 0
+    retained = {}
     for path, pin in files.items():
         c.canonical_path(path, 'saved native file')
         c.exact(pin, {'bytes', 'sha256', 'roles'}, 'saved native file identity')
@@ -490,6 +498,10 @@ def validate_file_basis(value, result):
         actual = evidence.read_regular(path, 'saved_file', max_bytes=max(1, size)).captured
         if actual.pin.bytes != size or actual.pin.sha256 != pin['sha256']:
             raise ValueError('saved evidence differs from its bounded captured basis')
+        if path in retain_paths:
+            retained[path] = actual.raw
+    if retain_paths:
+        return retained
 
 
 def _read_pool(path, limit):
