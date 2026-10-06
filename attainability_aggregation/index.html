@@ -1,0 +1,581 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/attainability_aggregation/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
+    
+    
+      
+        <title>Source-supported item reporting - data-sheets-schema</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.975780f9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.2505c338.min.css">
+        
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="None" data-md-color-accent="None">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#source-supported-item-reporting" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="data-sheets-schema" class="md-header__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            data-sheets-schema
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Source-supported item reporting
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="data-sheets-schema" class="md-nav__button md-logo" aria-label="data-sheets-schema" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    data-sheets-schema
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/bridge2ai/data-sheets-schema" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../home/" class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../d4d_core/" class="md-nav__link">
+        D4D-Core
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../semantic_exchange/" class="md-nav__link">
+        Semantic Exchange
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Schema Documentation
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cli/" class="md-nav__link">
+        CLI Reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../about/" class="md-nav__link">
+        About
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-a-selected-report" class="md-nav__link">
+    Running a selected report
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#closed-input-contracts" class="md-nav__link">
+    Closed input contracts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interpretation-and-retained-uncertainty" class="md-nav__link">
+    Interpretation and retained uncertainty
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#captured-replay-and-limits" class="md-nav__link">
+    Captured replay and limits
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/attainability_aggregation.md" title="Edit this page" class="md-content__button md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+<h1 id="source-supported-item-reporting">Source-supported item reporting</h1>
+<p><code>data_sheets_schema.attainability_aggregation</code> is an opt-in report over captured
+source readings and existing semantic evaluations. It does not rescore records,
+write source annotations, call a model, approve a campaign, or replace the fixed
+and N/A-adjusted score bases. All declared curator/judge and scope decisions are
+retained statements, not authenticated scientific judgments.</p>
+<p>No E1.1 URI or unique-identifier policy is installed. Before interpreting that
+item's alternatives, an owner must decide which URI/identifier evidence is
+sufficient under the selected scoring instrument and whether the alternatives
+are exhaustive. Changing the scoring interpretation needs a separately pinned
+instrument/policy. A missing DOI/RRID does not establish whole-item absence.</p>
+<h2 id="running-a-selected-report">Running a selected report</h2>
+<p>Supply a version-1 <code>d4d-attainability-report-selection</code> JSON document with a
+nonempty <code>rows</code> array. Every input is a recorded <code>Pin</code> with <code>path</code>, SHA256 and
+byte count. Relative paths are resolved against the selection's directory only
+at initial capture; pure replay never follows them. A bundle pin also carries
+MD5, and every recorded hash must match. Inputs and existing reports are never
+rewritten. Outputs must be new destinations.</p>
+<pre><code class="language-sh">python -m data_sheets_schema.attainability_aggregation \
+  --selection selection.json --output new-result.json
+python scripts/report_semantic_comparison.py evaluation.json \
+  --attainability-selection selection.json --output new-report.md
+python scripts/arm_comparison.py --no-figures \
+  --attainability-selection selection.json --output new-arms.md
+python scripts/reference_rescore.py report \
+  --attainability-selection selection.json --report-output new-report-directory
+</code></pre>
+<p>The first command writes <code>{capture, report}</code>. The two Markdown consumers write
+an adjacent <code>.attainability.json</code> containing the same envelope. The reference
+consumer writes new <code>results.json</code>, <code>results.md</code> and a captured sidecar in the
+new directory, retaining its frozen campaign/receipt checks. Its run/canary/
+accept/recovery actions cannot use the reporting flags. <code>arm_comparison</code> requires
+<code>--no-figures</code> and rejects <code>--check</code> with the new selection. Omitting the new
+flags retains the existing reporting behavior.</p>
+<p>The consumers join the actual evaluation bytes/paths they report to the explicit
+selection. A selected evaluation outside that report refuses; a report's
+unselected evaluations remain visible as unavailable in the added section.
+There is no project-name, filename or percentage-based identity inference.</p>
+<h2 id="closed-input-contracts">Closed input contracts</h2>
+<p>All objects below are closed: unknown or duplicate keys, bool-as-integer
+versions/counts, nonfinite numbers and duplicate logical identities refuse.
+<code>Pin = {path, sha256, bytes}</code> and <code>BundlePin = {path, sha256, bytes, md5}</code>.
+Hashes are lowercase hex. Paths are recorded identities, not approval.
+<code>Decision = {kind, actor, reference, recorded_at, rationale}</code>, where kind is
+<code>declared_curator</code> or <code>declared_judge</code> and the remaining values are nonempty
+recorded strings. The timestamp is retained text, not a verified clock.</p>
+<p>Each selection row has exactly:</p>
+<ul>
+<li><code>evaluation</code>, <code>evaluated_input</code>, <code>generation_provenance</code>, <code>bundle</code>,
+  <code>source_document</code>, <code>policy</code>: corresponding pins;</li>
+<li><code>adjudication</code>: a pin or null; <code>context</code>: a pin or null;</li>
+<li><code>scope_binding</code>: null (unavailable) or
+  <code>{evaluation_scope_sha256, declaration, decision}</code>. Declaration must be
+  <code>source_readings_cover_selected_subject_scope</code> and decision is a Decision.</li>
+</ul>
+<p>The source document is an unchanged validated v1 attainability document. Its
+bundle/rubric/chunk/evidence checks use the original validator with captured
+bytes. Context uses the existing normalization and three-valued applicability
+rules. Generated content is used to identify the evaluation subject scope; it
+is never source support evidence. An all-resource collection scope cannot be
+replaced by a decision about one sibling.</p>
+<p>A policy has exactly <code>format</code>, <code>version</code>, <code>state</code>, <code>rubric</code>, <code>rubric_source</code>,
+<code>scoring_contract</code>, <code>roster_sha256</code>, <code>items</code>, <code>denominator_rule</code>,
+<code>partial_interpretation</code>, <code>decision</code>:</p>
+<ul>
+<li>Format is <code>d4d-attainability-item-policy</code>, version 1; state is <code>draft</code> or
+  <code>declared</code>. Draft requires decision=null and yields unavailable aggregation.
+  Declared requires a Decision, which is not a scientific approval certificate.</li>
+<li>Rubric is <code>rubric10</code> or <code>rubric20</code>; <code>rubric_source</code> pins its actual raw YAML.
+  The complete ordered roster is reconstructed from those bytes, including
+  item names, maxima and applicability expressions. Current rubric10 has
+  E1.1–E10.5 (50 one-point items). Current rubric20 has Q1–Q20, with Q5/Q6/Q16
+  worth one point and the others five, totaling 88.</li>
+<li><code>scoring_contract</code> is <code>{kind, definition, output_schema, semantic_version,
+  evaluator_contract_sources}</code>. Kind is <code>semantic-agent</code>; the definition/schema
+  and every source are pins. Schema references must be local fragments; a fixed
+  non-retrieving registry also guards instance and meta-schema validation across
+  the supported JSON Schema dialects. This
+  release reconstructs version-3 scope/applicability only when the captured
+  <code>evaluation_context.py</code> and <code>judge_contract.py</code> identities match its fixed
+  implementation. Other retained contracts are unavailable, never executed or
+  silently reconstructed under today's source.</li>
+<li>Each item is <code>{item_id, maximum, applies_to, rule, routes,
+  alternatives_complete, justification}</code>. Identity/maximum/applicability must
+  equal the complete raw rubric roster. <code>whole_item_only</code> requires empty routes
+  and false completeness; <code>any_sufficient</code> requires nonempty unique route names.
+  Each declared route is sufficient for the whole item. Completeness is explicit
+  and controls absence inference, never inferred from observed annotations.</li>
+<li>Denominator rule is <code>known_applicable_supported_points_v1</code>;
+  partial interpretation is <code>positive_lower_bound_not_explicit_absence_v1</code>.
+  <code>roster_sha256</code> hashes canonical <code>{rubric,rubric_source,items}</code> with each item
+  <code>{item_id,name,maximum,applies_to}</code>. <code>roster</code>/<code>roster_digest</code> expose this purely
+  structural construction without creating or declaring any policy.</li>
+</ul>
+<p>An adjudication has exactly <code>{format,version,policy,source_document,
+predecessor_documents,bundle,rubric,chunk_rule_sha256,resolutions}</code>. Its format is
+<code>d4d-attainability-adjudication</code>, version 1. All pins must match the selected
+policy/document/bundle/rubric. Predecessors must have the same rubric/chunk and
+bundle identities; originals are retained rather than replaced.</p>
+<p>A resolution is <code>{item_id,route,scope_entries,scope_sha256,resolved_status,
+evidence,decision}</code>. Route must be null; only one resolution per item is allowed.
+Status is supported/partly_supported/not_stated_in_source/unknown. Supported or
+partial readings require verified source snippets. <code>scope_entries</code> is the exact
+complete sorted item scope across the current and explicitly named predecessor
+documents, each <code>{document_sha256,rubric,item_id,route,entry_sha256}</code>. Sort by
+(document SHA, rubric, item ID, null route before named route). Entry SHA hashes
+<code>{format:"d4d-attainability-entry-identity",version:1,entry:&lt;complete v1 entry&gt;}</code>;
+scope SHA hashes the complete sorted list. A changed raw document invalidates an
+old adjudication even when its parsed entries happen to be equal. The separate
+old same-key writer preservation behavior is unchanged.</p>
+<p>Canonical hashes use UTF-8 JSON, sorted string keys, compact separators,
+ensure_ascii=false and finite numbers. No source text is canonicalized in place.
+All original raw bytes remain in the closure. Invalid/tampered identities refuse
+publication; genuine missing historical identity or incomplete readings produce
+explicit unavailable/excluded rows.</p>
+<h2 id="interpretation-and-retained-uncertainty">Interpretation and retained uncertainty</h2>
+<p>For registered sufficient alternatives, supported wins unknown or partial;
+otherwise partial remains a positive lower bound. Complete all-absent alternatives
+establish absence; missing/unknown alternatives or an incomplete set do not.
+Whole-item absence conflicts with partial/full route support; complete route
+absence conflicts with whole-item partial/full support. Whole-item unknown is
+not a denial of positive route evidence. <strong>Any unregistered named route blocks
+the entire item before combining whole status or applying adjudication.</strong> It
+cannot yield eligibility or an absence allegation.</p>
+<p>Eligibility requires resolved support, known applicability, a bound subject
+scope and a usable original score. The numerator sums original item points; the
+denominator sums their pinned maxima, not routes or item count. Partial support,
+unknown/conflict, source absence and N/A remain separate exclusions. Unknown
+applicability still belongs to the old adjusted denominator; only this explicitly
+named new basis excludes it. Missing eligible scores make the entire new ratio
+unavailable rather than shrinking the denominator. Zero eligible items show
+attained=null, attainable=0, percentage=null. Missing identity/policy/scope makes
+all three unavailable.</p>
+<p>Current provenance output entries may be descriptive only. The report checks
+recorded hashes in <code>validation.artifacts.full</code> and any older pinned <code>outputs.full</code>
+against the evaluated input; it never creates a historical hash from a current
+path. Missing evaluation metadata or provenance integrity stays unavailable.
+Every contradictory recorded hash refuses. Original fixed/adjusted measurements
+remain unchanged and are displayed alongside the new basis. Unsupported old
+formats are not silently upgraded.</p>
+<p>Positive scores on resolved whole-item source absence are reported as review
+findings, not automatic scientific hallucination labels. No unregistered-route,
+unknown or conflicting reading creates such a finding. Results retain complete
+item inventory, exclusions, policy/instrument/bundle/context/scope identities,
+raw entry hashes, adjudication and predecessor evidence. A curator label without
+a retained predecessor does not claim retained override history. Eligible-item
+signatures distinguish different denominators; this tool authorizes no pooling,
+ranking, four-project annotation campaign or empirical heatmap refresh.</p>
+<h2 id="captured-replay-and-limits">Captured replay and limits</h2>
+<p><code>capture(selection_path)</code> performs bounded initial file reads.
+<code>recheck_captured(capture)</code> rederives the result after approved module imports,
+using raw retained blobs only: no path lookup, Git, network, process or scoring.
+It checks the exact source implementation roster and refuses unrelated/missing/
+duplicate blobs. A supplied report is accepted by report consumers only if it
+exactly equals rederivation. Returned dictionaries do not mutate future results.</p>
+<p>Defaults (caller <code>Limits</code> may only lower them): 256 rows, 2,048 unique blobs,
+8,192 pin references, 256 MiB decoded / 384 MiB encoded closure, 16 MiB aggregate
+parsed-input plus complete derived-result metadata (repeated fields count), 8 MiB selection, 64 MiB bundle, 16 MiB input/evaluation,
+4 MiB document/policy/adjudication/context/rubric and 8 MiB other source per blob;
+64 metadata depth, 1,000,000 nodes, dependency depth 8, 32 policies,
+8 predecessors, 4,096 entries per v1 document, 32 routes per item and
+128 snippets per reading/resolution. The closed dependency graph has four levels;
+a smaller permitted depth refuses it. Deep/cyclic/duplicate/nonfinite metadata
+refuses before publication. Bounds describe this new opt-in contract, not a
+hard CPU/RSS guarantee or new restrictions on the legacy v1 API.</p>
+<p>Tests use fictional source readings and ratings, retain raw before/after default
+outputs, and exercise the actual three reporting boundaries plus captured-only
+validation. They establish engineering behavior, not scientific validity.</p>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.tabs.link"], "search": "../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
+      
+    
+    
+  </body>
+</html>
