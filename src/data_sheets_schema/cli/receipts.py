@@ -40,8 +40,16 @@ def _run_paths(method: str, label: str, project: str) -> dict[str, Path]:
               help="pinned completion registration before provenance exists; must match an existing run declaration")
 @click.option("--native-shared-selection", type=click.Path(exists=True, dir_okay=False, path_type=Path),
               help="explicit native shared selection; reconstructs initial or final receipt evidence from its observed history")
+@click.option("--transcript", "transcripts", multiple=True, type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help="the run's stream-json transcript, to record under `receipts.origin` which snippets were in the "
+                   "receipt when the full record was first written and which were added after it (#2933); "
+                   "repeat, first invocation first, for a killed-and-resumed run")
+@click.option("--receipt-at-run", type=click.Path(dir_okay=False, path_type=Path),
+              help="with --transcript: the receipt's path as the transcript spelled it, where the file has moved since the run")
+@click.option("--full-at-run", type=click.Path(dir_okay=False, path_type=Path),
+              help="with --transcript: the full record's path as the transcript spelled it, where it has moved since the run")
 def check(method, label, project, write, strict, bundle_opt, chunk_manifest, receipt_completion_registration,
-          native_shared_selection=None):
+          native_shared_selection=None, transcripts=(), receipt_at_run=None, full_at_run=None):
     """Validate `{PROJECT}_coverage_receipt.yaml` against the chunk manifest,
     the bundle and the full record, with affirmative counts.
 
@@ -50,7 +58,18 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
     unchecked, never as clean; whether that is a defect depends on whether
     the run's procedure was to write one, which the provenance record says
     (`inputs.receipt_expected`).
+
+    The block carries `origin` (#2933): with `--transcript`, which snippets
+    were in the receipt when the full record was first written and which a
+    Phase 1 correction or a Phase 3 back-port added after it, read as `d4d
+    receipts origin` reads them, and printed beside the counts. Without it,
+    an origin the record carries is kept while the receipt still has the
+    sha256 it was measured on, and otherwise the origin is `unknown`, never
+    `contemporaneous`. Reported, never gated: `--strict` does not read it.
     """
+    if (receipt_at_run or full_at_run) and not transcripts:
+        raise click.UsageError("--receipt-at-run and --full-at-run name the files as a --transcript spelled them; "
+                               "pass the transcript")
     from data_sheets_schema.cli.provenance import _require_repo_root_cwd
     _require_repo_root_cwd("d4d receipts check")          # a corpus write lands under the cwd (#1685)
     from data_sheets_schema.cli.method import resolve_method
@@ -156,12 +175,29 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
         except (OSError, ValueError) as exc:
             raise click.ClickException(f"receipt completion registration refused: {exc}") from exc
         recovery["receipt_render_spec"] = declaration
-    block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
+    assessment_block = rc.block_for(p["full"], receipt_file, bundle, md5, expected, **recovery)
+    from data_sheets_schema import receipt_origin_record as ror
+    prior = record["receipts"].get("origin") if isinstance(record, dict) and isinstance(record.get("receipts"), dict) else None
+    # Claims compare the exact owner assessment, before reporting-only metadata.
+    block = {**assessment_block, "origin": ror.for_assessment(
+        assessment_block, prior, receipt_file, p["full"],
+        transcripts=transcripts, receipt_at_run=receipt_at_run, full_at_run=full_at_run,
+        api_path=bool(isinstance(record, dict) and record.get("api_usage")),
+        recorded_by="d4d receipts check")}
+    # Printed only where a transcript was read, now or before (a measurement
+    # the receipt has since moved away from says so): the playbook runs this
+    # command mid-run with none, and what it prints there is unchanged (#2933).
+    origin_lines = ([ror.line(block)] + [f"· {r}" for r in (block["origin"].get("reasons") or [])[1:]]
+                    if ror.ever_measured(block["origin"]) else [])
     if not block.get("checked"):
         click.echo(f"   · unchecked: {block['reason']}"
                    + ("" if block["expected"] else " (this run's procedure wrote none)"))
+        for text in origin_lines:
+            click.echo(f"   {text}")
     else:
         click.echo(f"   {block['summary']}")
+        for text in origin_lines:
+            click.echo(f"   {text}")
         if "coverage_floor" in block:
             floor = block["coverage_floor"]
             click.echo(f"   · registered receipt coverage: {floor['state']} "
@@ -181,13 +217,21 @@ def check(method, label, project, write, strict, bundle_opt, chunk_manifest, rec
             try:
                 claims = native_shared_capture.recorded_receipt_claims(None, record=record,
                     full_path=p["full"], receipt_path=receipt_file,
-                    expected_block=block)
+                    expected_block=assessment_block)
                 native_claims_text = yaml.safe_dump(claims, sort_keys=False, allow_unicode=True)
             except (OSError, ValueError, yaml.YAMLError) as exc:
                 raise click.ClickException(f'native receipt claims refused: {exc}') from exc
         block["recorded_by"] = "d4d receipts check"
-        bc.apply(p["provenance"], {"receipts": block}, overwrite=True)
-        click.echo(f"   ✓ receipts block written to {p['provenance']}")
+        withheld: list[str] = []
+        bc.apply(p["provenance"], {"receipts": block}, overwrite=True, withheld=withheld)
+        if withheld:
+            # `apply` keeps a checked block over an unchecked recomputation
+            # (#907); the tick said it was written, origin included (#2933).
+            click.echo(f"   · not written: {p['provenance']} keeps its checked receipts block, which this "
+                       "unchecked recomputation does not replace (#907)"
+                       + ("; the receipt origin read from --transcript is not written either" if transcripts else ""))
+        else:
+            click.echo(f"   ✓ receipts block written to {p['provenance']}")
         if block.get("checked"):
             out = rc.claims_path(p["core_dir"], project)
             if native_claims_text is not None:

@@ -4,7 +4,7 @@ The suite step compiles tests/ and utils/ outside the checkout, and its check
 fails on any path under notes/, tests/ or utils/. The notes/ control steps run
 without writing bytecode, but a Python child the pinned controls start with a
 scrubbed environment can still leave __pycache__/ under notes/: the trailing
-checks on shard 1 and offline-audit report that as a warning and fail on any
+checks on offline-canary and offline-audit report that as a warning and fail on any
 other path; offline-evaluation fails on any path. This is why #3865 stays open.
 """
 import os
@@ -50,7 +50,7 @@ CHECKS = [(job, index, step) for job, index, step in steps()
 
 def test_the_notes_controls_run_without_bytecode_and_without_a_prefix():
     """A prefix would trip transport_probe.verify_bytecode, so not that one."""
-    assert {job for job, _, _ in NOTES_STEPS} == {"python-tests", "offline-audit", "offline-evaluation"}
+    assert {job for job, _, _ in NOTES_STEPS} == {"offline-canary", "offline-audit", "offline-evaluation"}
     assert len(NOTES_STEPS) == 4
     for job, _, step in NOTES_STEPS:
         env = effective_env(job, step)
@@ -86,11 +86,10 @@ def trailing_check(job):
 
 
 def suite_check():
-    """The check between the tests/ suite step and the first notes/ control step."""
+    """The check after the tests/ suite step, including when controls are separate."""
     [(_, suite, _)] = [s for s in steps() if runs_pytest_on(s[2], "tests ")]
-    first_notes = min(index for name, index, _ in NOTES_STEPS if name == "python-tests")
     [step] = [step for name, index, step in CHECKS
-              if name == "python-tests" and suite < index < first_notes]
+              if name == "python-tests" and suite < index]
     return step
 
 
@@ -123,7 +122,7 @@ def check(step, tmp_path, porcelain, pathspec="notes/"):
     return result
 
 
-@pytest.mark.parametrize("job", ["python-tests", "offline-audit"])
+@pytest.mark.parametrize("job", ["offline-canary", "offline-audit"])
 def test_scrubbed_child_bytecode_is_reported_and_anything_else_fails(job, tmp_path):
     """Pinned controls start their Python child with a whitelisted environment,
     which no step variable reaches: its bytecode is a warning, any other path fails."""

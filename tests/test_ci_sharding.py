@@ -5,6 +5,7 @@ from itertools import product
 from pathlib import Path
 import os
 import json
+import shlex
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -152,7 +153,7 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
     gate = workflow["jobs"]["test"]
     assert gate["if"] == "always()"
     assert set(gate["needs"]) == {
-        "python-tests", "offline-audit", "offline-evaluation", "schema-examples"
+        "python-tests", "offline-canary", "offline-audit", "offline-evaluation", "schema-examples"
     }
     step = gate["steps"][0]
     statuses = ("success", "failure", "cancelled", "skipped")
@@ -172,6 +173,60 @@ def test_aggregate_check_rejects_failed_cancelled_and_skipped_dependencies(tmp_p
             expected_build = "skipped" if event == "pull_request" else "success"
             assert (result.returncode == 0) == (
                 all(results[job] == "success" for job in
-                    ("python-tests", "offline-audit", "offline-evaluation"))
+                    ("python-tests", "offline-canary", "offline-audit", "offline-evaluation"))
                 and results["schema-examples"] == expected_build
             ), (event, results)
+
+
+def test_offline_canary_retains_complete_commands_and_independent_job_budget():
+    """Relocation must retain every control, its environment, and required artifacts."""
+    jobs = yaml.safe_load((ROOT / ".github/workflows/main.yaml").read_text())["jobs"]
+    job = jobs["offline-canary"]
+    assert job["runs-on"] == "ubuntu-latest"
+    assert job["timeout-minutes"] == jobs["python-tests"]["timeout-minutes"] == 45
+    assert "if" not in job and "strategy" not in job and "needs" not in job
+    steps = job["steps"]
+    checkout, submodule, setup = steps[:3]
+    assert checkout["uses"] == "actions/checkout@v5"
+    assert checkout["with"]["fetch-depth"] == 0
+    assert submodule["run"] == "git submodule update --init fairscape_models"
+    assert setup["uses"] == "./.github/actions/setup-project"
+    assert setup["with"] == {"python-version": "3.12"}
+
+    notes = "notes/matched_cborg_2026-09-13/"
+    budget_files = [notes + name + ".py" for name in (
+        "test_budgeted_cborg", "test_budget_amendment", "test_second_budget_amendment",
+        "test_budget_amendment_chain", "test_continuation_sequence", "test_sequence_claim",
+    )]
+    native_files = [notes + "native_controls/" + name + ".py" for name in (
+        "test_native_proxy", "test_native_launch", "test_native_command_policy",
+        "test_native_readonly", "test_native_control", "test_native_history_control",
+        "test_probe_native_history", "test_native_file_policy", "test_native_phase_history",
+        "test_native_phase_control", "test_native_stall_policy", "test_native_stall_controls",
+        "test_native_thinking_display", "test_native_response_buffer", "test_transport_probe",
+        "test_audit_after_probe",
+    )] + ["notes/claudecode_direct/test_direct_arm.py"]
+    controls = [step for step in steps if "pytest" in step.get("run", "")]
+    assert len(controls) == 2
+    for step, files, report in zip(controls, (budget_files, native_files), ("budget", "native")):
+        expected = ["poetry", "run", "python", "-m", "pytest", *files,
+                    "-q", "-p", "no:cacheprovider", f"--junitxml=test-results/{report}.xml"]
+        assert shlex.split(step["run"]) == expected
+        assert "if" not in step
+        # Each fixed command runs once, independently of the core shard matrix.
+        owners = [name for name, spec in jobs.items() for other in spec.get("steps", [])
+                  if shlex.split(other.get("run", "")) == expected]
+        assert owners == ["offline-canary"]
+    assert controls[0]["env"] == {"PYTHONDONTWRITEBYTECODE": "1"}
+    assert controls[1]["env"] == {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls",
+    }
+    [upload] = [step for step in steps if step.get("uses", "").startswith("actions/upload-artifact@")]
+    assert upload["uses"] == "actions/upload-artifact@v4"
+    assert upload["if"] == "always()"
+    assert upload["with"] == {
+        "name": "tests-py3.12-offline-canary", "path": "test-results/*.xml", "retention-days": 14,
+    }
+    assert sum(step.get("with", {}).get("name") == "tests-py3.12-offline-canary"
+               for spec in jobs.values() for step in spec.get("steps", [])) == 1

@@ -8,7 +8,7 @@ import pytest
 import yaml
 
 import data_sheets_schema
-from data_sheets_schema import backfill_checks as bc, receipts as rc
+from data_sheets_schema import backfill_checks as bc, receipts as rc, receipt_origin_record as ror
 from tests.test_native_shared_selection import declaration
 from tests.test_native_shared_receipt_readers import routed
 
@@ -77,7 +77,13 @@ def test_native_write_uses_effective_claims_before_changing_either_output(write_
     assert order == ['claims', 'apply']
     assert calls == [('recorded', None, {'record': record, 'full_path': paths['full'], 'receipt_path': receipt})]
     saved = yaml.safe_load(paths['provenance'].read_bytes())
-    assert saved == {**record, 'receipts': {**expected_block, 'recorded_by': 'd4d receipts check'}}
+    origin = saved['receipts']['origin']
+    assert origin['status'] == 'unknown' and ror.split(saved['receipts']) is None
+    assert origin['original_receipt_origin'] == ror.unknown(ror.NO_TRANSCRIPT)
+    assert origin['native_receipt_inputs'] is None  # This adapter fixture stubs capture.
+    assert 'prior' not in origin and 'origin' not in origin
+    assert saved == {**record, 'receipts': {**expected_block, 'origin': origin,
+                                           'recorded_by': 'd4d receipts check'}}
     assert yaml.safe_load(claims_path.read_bytes()) == expected_claims
     assert 'description' in expected_claims['slots']  # Absent from the ordinary original receipt.
     assert {p: p.read_bytes() for p in (paths['full'], receipt)} == {
