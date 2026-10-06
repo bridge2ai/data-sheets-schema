@@ -136,7 +136,7 @@ def test_real_http_interruption_retains_unknown_and_recovers_only_complete_raw_r
     assert fit.recheck_index(tmp_path / 'index') == value
 
 
-@pytest.mark.parametrize('mutation', ['report_flag', 'unknown_ledger', 'missing_preceding_settlement', 'missing_body'])
+@pytest.mark.parametrize('mutation', ['report_flag', 'unknown_ledger', 'missing_preceding_settlement', 'missing_body', 'unadmitted_gap'])
 def test_portable_index_rechecks_actual_ledger_not_stored_flags(make, peer, tmp_path, mutation):
     descriptor, registered, run, _ = make()
     ex.run(registered)
@@ -146,11 +146,13 @@ def test_portable_index_rechecks_actual_ledger_not_stored_flags(make, peer, tmp_
     if mutation == 'report_flag': changed['execution']['report']['all_selected_accepted'] = False
     elif mutation == 'unknown_ledger': changed['execution']['ledger']['format'] = 'foreign'
     elif mutation == 'missing_preceding_settlement': changed['execution']['ledger']['attempts'][0]['settled'] = None
+    elif mutation == 'unadmitted_gap':
+        changed['execution']['ledger']['attempts'][0] = {'admitted': None, 'response': None, 'settled': None}
     else:
         response = changed['execution']['report']['rows'][0]['saved_result']['response']
         (output / 'artifacts' / response['sha256']).unlink()
     (output / 'index.json').write_bytes(canonical(changed))
-    with pytest.raises((ValueError, OSError)):
+    with pytest.raises((ValueError, OSError), match='unadmitted empty entry must be terminal' if mutation == 'unadmitted_gap' else None):
         fit.recheck_index(output)
     assert len(peer['requests']) == 2
 
