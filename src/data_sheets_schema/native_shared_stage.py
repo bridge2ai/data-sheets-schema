@@ -14,6 +14,7 @@ from pathlib import PurePosixPath
 from . import native_shared_contract as c
 from . import native_shared_receipts as nr
 from . import typed_audit as typed
+from . import native_catalog_reuse as catalog_reuse
 
 
 PAYLOAD_KEYS = {
@@ -265,7 +266,7 @@ class _Replay:
     def _packet(self):
         inputs, limits = self.s.document()['inputs'], self.s.bounds()
         schema = nr.schema_snapshot(self.s)
-        packet = typed.prepare(protocol='typed_audit_protocol_v1', original_full=self.p.full.raw,
+        packet = typed._prepare(protocol='typed_audit_protocol_v1', original_full=self.p.full.raw,
             original_core=self.p.core.raw, bundle=self.s.raw(inputs['bundle']['path']),
             manifest=self.s.raw(inputs['chunk_manifest']['path']), receipt=self.receipt.effective_receipt,
             context=self.s.raw(inputs['context']['path']),
@@ -274,7 +275,8 @@ class _Replay:
             schema_path=schema.sources[0][1], schema_snapshot=schema,
             max_output_tokens=nr.output_ceiling(self.e), max_paths=limits['max_paths_per_worker'],
             max_inventory_bytes=limits['max_inventory_bytes'], max_workers=limits['max_workers'],
-            max_request_bytes=limits['max_request_bytes'], **self.options)
+            max_request_bytes=limits['max_request_bytes'],
+            _catalog_lookup=catalog_reuse._CatalogLookup(self.catalogs, self.s), **self.options)
         if len(packet['plan']['inventory']['values']) > limits['max_populated_paths']:
             raise ValueError('native global populated path bound exceeded')
         return packet

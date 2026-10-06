@@ -4484,6 +4484,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
 
     fixed_import('native_shared_stage', '', 'native_shared_receipts', 'nr')
     fixed_import('native_shared_stage', '', 'typed_audit', 'typed')
+    fixed_import('native_shared_stage', '', 'native_catalog_reuse', 'catalog_reuse')
     # typed_audit's existing grouped import is intentionally read as a binding,
     # rather than imposing a new import layout on that producer.
     for module, name, alias in (('typed_audit', 'audit_batches', 'batches'),
@@ -4521,9 +4522,11 @@ def derive_native_shared_procedure(root: Path) -> dict:
     packet_fn = function('native_shared_stage', '_packet', '_Replay')
     packet_assignment = assignment(packet_fn, 'packet')
     packet_call = packet_assignment.value
-    if not isinstance(packet_call, ast.Call) or ast.unparse(packet_call.func) != 'typed.prepare' or packet_call.args:
+    if not isinstance(packet_call, ast.Call) or ast.unparse(packet_call.func) != 'typed._prepare' or packet_call.args:
         raise fail('native worker packet is not the fixed typed preparation')
     kwargs = {k.arg: ast.unparse(k.value) for k in packet_call.keywords}
+    if kwargs.get('_catalog_lookup') != 'catalog_reuse._CatalogLookup(self.catalogs, self.s)':
+        raise fail('native packet lacks its fixed private receipt-catalog association')
     for key, value in {'original_full': 'self.p.full.raw', 'max_paths': "limits['max_paths_per_worker']",
                        'max_inventory_bytes': "limits['max_inventory_bytes']", 'max_workers': "limits['max_workers']"}.items():
         if kwargs.get(key) != value:
@@ -4536,7 +4539,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
     # The public producer must actually reach the inspected fresh derivation.
     # The cache branch below recognizes only its fixed product transport; it
     # does not reproduce cache limits, key security or runtime validation.
-    prepare = function('typed_audit', 'prepare')
+    exact_body(function('typed_audit', 'prepare'), '''return _prepare(
+        protocol=protocol, original_full=original_full, bundle=bundle, manifest=manifest,
+        receipt=receipt, context=context, schema_path=schema_path,
+        max_output_tokens=max_output_tokens, original_core=original_core,
+        source_manifest=source_manifest, project=project, max_request_bytes=max_request_bytes,
+        max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers,
+        schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets)''')
+    prepare = function('typed_audit', '_prepare')
     inputs = statement(prepare, '''inputs = {key: _blob(value) for key, value in dict(
         original_full=original_full, bundle=bundle, manifest=manifest, receipt=receipt,
         context=context, original_core=original_core, source_manifest=source_manifest).items()
