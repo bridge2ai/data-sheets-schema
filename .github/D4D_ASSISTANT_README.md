@@ -14,7 +14,16 @@ Authorized users (listed in `.github/ai-controllers.json`) request a datasheet w
 
 Nothing else is a request (#4108): not the handle in a sentence, in a code span or code block, in a quote (`>`) or an HTML comment, and not the handle followed by anything but one input directory name. Nor is a request line read after a code fence or HTML block whose end the workflow cannot place (one opened on a list marker, for example), or after HTML that leaves something open (an unclosed comment or tag, or an element such as `<textarea>`), since the page may hide it. For those the workflow logs "no request" and does nothing. A text whose request lines name different directories holds no request.
 
-**Which file is read.** The workflow generates the datasheet from one file: the first `.txt` or `.md` file under the directory, subdirectories included, with the paths sorted. It reads no other file there (no second `.txt` or `.md` file, and no `.pdf`, `.json` or `.html` file), and none of the rest of the text that holds the request. To generate from several documents, put them into one `.txt` or `.md` file.
+**Which files are read.** The workflow prepares every regular file in the selected directory, recursively, including hidden files, in sorted relative-path order. Each named occurrence has its own labeled section; equal contents or equal basenames are not deduplicated. The rest of the request text is not source documentation. Preparation finishes before generation starts; one unsupported, unreadable or failed document stops the run rather than producing a partial bundle.
+
+Supported filename extensions are case-insensitive:
+
+- `.txt`, `.md`, `.json` and `.html` must be strict UTF-8. Their bundle sections preserve lexical contents, including BOM, whitespace, JSON formatting and HTML markup. JSON is not reserialized; HTML is not rendered or stripped. Links and scripts are not fetched or executed. Before provider submission, the existing API reader converts CRLF and lone CR to LF and adds its existing prompt headers; the bundle's raw section hashes remain available.
+- `.pdf` contributes offline text extraction from all pages, using the reviewed pdfminer.six version (currently `20221105`). The actual installed converter version is checked and recorded. Encrypted PDFs, extraction failures and PDFs with no extractable text refuse. Images, OCR and complete layout reconstruction are outside this text-only contract.
+
+Other formats, symlinks and nonregular members refuse. There is no Latin-1 fallback, automatic format preference, hidden-file omission or silent truncation. An empty directory, or one with no non-whitespace document text, refuses. The workflow has no aggregate input-size admission cap in this generic route; including all documents can increase billed input, and preparation success does not establish provider context fit or generation success.
+
+**Source provenance.** The generated PR includes `{dataset}_input_manifest.json` alongside the datasheet: the checked-out source commit, every relative source path and raw SHA256/size, text/converter policy, exact section byte ranges and hashes, and final bundle SHA256/size. This is an ingestion manifest, not a scientific coverage judgment or the runner's source/chunk manifest. Original input files remain unchanged. The PR body links the manifest and identifies the complete member count and bundle hash.
 
 **Where the directory must be.** The workflow looks for it in the version of the repository it checks out for the event:
 
@@ -26,11 +35,11 @@ The directory name must start with an ASCII letter or digit and hold only ASCII 
 
 ### What the Assistant Does
 
-1. **Analyzes** your dataset description and any provided URLs
-2. **Fetches** documentation from web pages, PDFs, or repositories
+1. **Prepares** every supported document in the requested repository input directory
+2. **Records** the source files, conversions and bundle hashes; it does not fetch linked resources
 3. **Generates** a valid D4D YAML file conforming to the LinkML schema
 4. **Validates** the YAML against the schema
-5. **Creates** a pull request with the D4D file in `html-demos/user_d4ds/`
+5. **Creates** a pull request with generated files and the input manifest in `data/sheets_d4dassistant/`
 6. **Comments** on your issue with a link to the PR
 
 ## What Information to Provide
@@ -61,9 +70,7 @@ The assistant creates a YAML file following the D4D schema with sections like:
 
 ## File Location
 
-Generated D4D files are saved to: `html-demos/user_d4ds/{dataset_name}_d4d.yaml`
-
-Each filename includes a timestamp or unique identifier to avoid conflicts.
+Generated D4D files use the existing flat layout in `data/sheets_d4dassistant/`: `{dataset}_d4d.yaml`, `{dataset}_d4d_core.yaml`, `{dataset}_reconciliation.md` and `{dataset}_provenance.yaml`. Complete-input preparation adds `{dataset}_input_manifest.json`; the run label remains timestamped by the workflow.
 
 ## Reviewing the Generated D4D
 
