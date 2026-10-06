@@ -95,7 +95,15 @@ def setting_key(value: Any) -> tuple:
 class FunctionBindings:
     """A closed set of effective functions; changes bypass the consumer cache."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, additional_modules: frozenset[str] = frozenset(),
+                 callable_defaults: bool = False) -> None:
+        if (type(additional_modules) is not frozenset
+                or any(type(name) is not str or not name for name in additional_modules)):
+            raise TypeError('cache module additions require a closed set of names')
+        if type(callable_defaults) is not bool:
+            raise TypeError('callable defaults opt-in must be a bool')
+        self._callable_defaults = callable_defaults
+        self._modules = _SHIPPED_MODULES | additional_modules
         self._functions: dict[Any, tuple[tuple, int]] = {}
         self._binding = False
         self._dataclass_reprs: set[Any] = set()
@@ -124,6 +132,10 @@ class FunctionBindings:
             return self.key(value, seen)
         if any(value is cls for cls in (list, dict, set, tuple, frozenset)):
             return type(value), value
+        if self._callable_defaults and value is object:
+            # Frozen native dataclass initializers close over this immutable
+            # builtin for object.__setattr__; historical bindings are unchanged.
+            return type(value), value
         if type(value) in (tuple, list):
             return type(value), tuple(self._closure_key(item, nested) for item in value)
         if type(value) is dict:
@@ -131,6 +143,26 @@ class FunctionBindings:
                                for k, v in value.items())
         if type(value) in (set, frozenset):
             return type(value), frozenset(self._closure_key(item, nested) for item in value)
+        return setting_key(value)
+
+    def _default_key(self, value: Any, seen: frozenset[int]) -> tuple:
+        # Optional serializer defaults only. The historical route below still
+        # uses setting_key verbatim, including its refusal behavior.
+        if id(value) in seen:
+            raise ValueError('cyclic cache dependency default')
+        nested = seen | {id(value)}
+        if any(value is cls for cls in (bool, int, float, str, bytes, list,
+                                       dict, set, tuple, frozenset, ValueError)):
+            return type(value), value
+        if callable(value):
+            return self.key(value, seen)
+        if type(value) in (tuple, list):
+            return type(value), tuple(self._default_key(item, nested) for item in value)
+        if type(value) is dict:
+            return dict, tuple((self._default_key(k, nested), self._default_key(v, nested))
+                               for k, v in value.items())
+        if type(value) in (set, frozenset):
+            return type(value), frozenset(self._default_key(item, nested) for item in value)
         return setting_key(value)
 
     def key(self, function: Any, seen: frozenset[int] = frozenset()) -> tuple:
@@ -144,7 +176,7 @@ class FunctionBindings:
                 types.ClassMethodDescriptorType, type(CParser.check_event))):
             raise TypeError('unsupported cache dependency callable state')
         if (self._binding and isinstance(function, types.FunctionType)
-                and function.__module__ not in _SHIPPED_MODULES):
+                and function.__module__ not in self._modules):
             raise TypeError('replacement function present before cache binding')
         if self._binding and isinstance(function, types.FunctionType):
             module_path = getattr(sys.modules.get(function.__module__), '__file__', None)
@@ -158,7 +190,14 @@ class FunctionBindings:
                            if function in self._dataclass_reprs else ())
         bound = getattr(function, '__self__', None)
         if bound is not None and not isinstance(bound, (types.ModuleType, type)):
-            raise TypeError('unsupported bound cache dependency callable state')
+            immutable_regex = (
+                self._callable_defaults and type(bound) is re.Pattern
+                and isinstance(function, types.BuiltinFunctionType)
+                and function.__name__ in ('match', 'search', 'fullmatch')
+                and type(function) is type(getattr(re.Pattern, function.__name__).__get__(bound, re.Pattern))
+                and function == getattr(re.Pattern, function.__name__).__get__(bound, re.Pattern))
+            if not immutable_regex:
+                raise TypeError('unsupported bound cache dependency callable state')
         if id(function) in seen:
             raise ValueError('cyclic cache dependency callable')
         nested = seen | {id(function)}
@@ -175,8 +214,14 @@ class FunctionBindings:
             else:
                 state = self._closure_key(value, nested)
             closure.append((name, state))
-        state = (function, code, setting_key(getattr(function, '__defaults__', None)),
-                 setting_key(getattr(function, '__kwdefaults__', None)), tuple(closure),
+        defaults = getattr(function, '__defaults__', None)
+        kwdefaults = getattr(function, '__kwdefaults__', None)
+        if self._callable_defaults:
+            defaults_key = self._default_key(defaults, nested)
+            kwdefaults_key = self._default_key(kwdefaults, nested)
+        else:
+            defaults_key, kwdefaults_key = setting_key(defaults), setting_key(kwdefaults)
+        state = (function, code, defaults_key, kwdefaults_key, tuple(closure),
                  dataclass_state, self.key(getattr(function, '__wrapped__', None), nested))
         if self._binding:
             token = self._functions.get(function, ((), len(self._functions)))[1]
@@ -219,8 +264,8 @@ def _methods_key(cls: type, functions: FunctionBindings, views) -> tuple:
     return tuple(methods)
 
 
-def schema_key(functions: FunctionBindings) -> tuple:
-    """The parser, constructors and effective view methods used by both caches."""
+def _schema_parts(functions: FunctionBindings) -> tuple:
+    """The dependencies evaluated before the historical source read."""
     from data_sheets_schema import schema_view as views
     from linkml_runtime.linkml_model import meta
     parsers = tuple(functions.key(fn) for fn in
@@ -234,6 +279,22 @@ def schema_key(functions: FunctionBindings) -> tuple:
                         for name in ('yaml_constructors', 'yaml_multi_constructors'))
     resolvers = tuple((name, setting_key(getattr(views.DupCheckYamlLoader, name)))
                       for name in ('yaml_implicit_resolvers', 'yaml_path_resolvers'))
+    return views, parsers, models, constructors, yaml_tables, resolvers
+
+
+def _schema_state(functions: FunctionBindings) -> tuple:
+    """Effective schema dependencies, without filesystem/environment reads."""
+    views, parsers, models, constructors, yaml_tables, resolvers = _schema_parts(functions)
+    return (parsers, models, constructors,
+            _methods_key(views._ReleasableView, functions, views),
+            _methods_key(views.DupCheckYamlLoader, functions, views), yaml_tables, resolvers)
+
+
+def schema_key(functions: FunctionBindings) -> tuple:
+    """The parser, constructors and effective view methods used by both caches."""
+    views, parsers, models, constructors, yaml_tables, resolvers = _schema_parts(functions)
+    # Preserve both sides of the historical read/error order: the locals above
+    # precede the read, while effective method checks followed it in the tuple.
     return (hashlib.sha256(Path(views.__file__).read_bytes()).digest(), parsers, models, constructors,
             _methods_key(views._ReleasableView, functions, views),
             _methods_key(views.DupCheckYamlLoader, functions, views), yaml_tables, resolvers)

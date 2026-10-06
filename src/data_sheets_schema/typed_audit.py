@@ -293,6 +293,18 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
             max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16,
             schema_snapshot=None, derivations=None, captured_assets=None):
     """Capture a new packet; no saved response or self-reported success is trusted."""
+    return _prepare(protocol=protocol, original_full=original_full, bundle=bundle,
+        manifest=manifest, receipt=receipt, context=context, schema_path=schema_path,
+        max_output_tokens=max_output_tokens, original_core=original_core,
+        source_manifest=source_manifest, project=project, max_request_bytes=max_request_bytes,
+        max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers,
+        schema_snapshot=schema_snapshot, derivations=derivations, captured_assets=captured_assets)
+
+
+def _prepare(*, protocol, original_full, bundle, manifest, receipt, context, schema_path,
+             max_output_tokens, original_core=None, source_manifest=None, project=None,
+             max_request_bytes=32_000_000, max_paths=96, max_inventory_bytes=16384, max_workers=16,
+             schema_snapshot=None, derivations=None, captured_assets=None, _catalog_lookup=None):
     if audit_protocol.select(protocol)["protocol"] != audit_protocol.TYPED:
         raise ValueError("this consumer requires explicitly selected typed_audit_protocol_v1")
     inputs = {key: _blob(value) for key, value in dict(original_full=original_full,
@@ -302,8 +314,14 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
     if schema_snapshot is not None:
         # This first constructor verifies exact transitive
         # closure/root identity from these bytes, with no ambient import reads.
-        catalog = omissions._schema(Path(schema_path), schema_snapshot=schema_snapshot,
-                                    logical_paths=captured_assets is not None)
+        catalog = None
+        if captured_assets is not None and _catalog_lookup is not None:
+            from .native_catalog_reuse import _CatalogLookup
+            if type(_catalog_lookup) is _CatalogLookup:
+                catalog = _catalog_lookup.for_snapshot(schema_path, schema_snapshot)
+        if catalog is None:
+            catalog = omissions._schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                                        logical_paths=captured_assets is not None)
         rows = _snapshot_rows(schema_snapshot)
         if captured_assets is not None:
             _schema_reuse = _SchemaReuse(schema_snapshot.sources, catalog)

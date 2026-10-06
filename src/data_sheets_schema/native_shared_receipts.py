@@ -15,6 +15,7 @@ import yaml
 
 from . import audit_omissions as omissions, receipts
 from . import native_shared_contract as contract
+from . import native_catalog_reuse as catalog_reuse
 from .chunking import chunk_texts, validate_manifest_mapping
 from .receipt_completion_policy import coverage_counts
 from .schema_snapshot import SchemaSnapshot
@@ -81,6 +82,7 @@ class _ReceiptCatalogContext:
     """One bounded immutable derivation, owned by one capture or live attempt."""
     def __init__(self):
         self._entry = None
+        self._typed_marker = None
         self._bytes = 0
         self._lock = Lock()
 
@@ -94,17 +96,55 @@ class _ReceiptCatalogContext:
         if entry is None:
             # Root-only prefixes are intentional: an explicit empty tuple must
             # never inherit imported or current-installation identifier bases.
+            before = catalog_reuse.runtime_token()
             bases, catalog = omissions._schema_with_root_bases(snapshot.sources[0][1], schema_snapshot=snapshot)
             # LinkML URIorCURIE names have the same released JSON meaning.
             raw = omissions._json(catalog).encode('utf-8')
             result = contract.strict_json(raw, 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
             bases_bytes = json.dumps(bases, ensure_ascii=True, separators=(',', ':')).encode('ascii')
+            after = catalog_reuse.runtime_token()
+            marker = (before if before is not None and before is after
+                      and catalog_reuse.supported_snapshot(snapshot) else None)
             size = len(key[0]) + sum(len(item) for item in key[1]) + len(raw) + len(bases_bytes)
             if size <= _CATALOG_PAYLOAD_BYTES:
                 with self._lock:
                     self._entry, self._bytes = (key, raw, bases), size
+                    self._typed_marker = marker
             return bases, result
         return entry[2], contract.strict_json(entry[1], 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+
+    def _typed_catalog(self, selection, path, snapshot):
+        """Only an existing, exactly associated catalog may skip construction."""
+        try:
+            if (type(snapshot) is not SchemaSnapshot or type(snapshot.sources) is not tuple
+                    or not snapshot.sources or type(path) is not type(Path())
+                    or not path.is_absolute()):
+                return None
+            for row in snapshot.sources:
+                if (type(row) is not tuple or len(row) != 3 or type(row[0]) is not str
+                        or type(row[1]) is not type(Path()) or not row[1].is_absolute()
+                        or type(row[2]) is not bytes):
+                    return None
+            if path != snapshot.sources[0][1]:
+                return None
+            key = _catalog_key(selection, snapshot)
+            token = catalog_reuse.runtime_token()
+            with self._lock:
+                entry = self._entry
+                if (token is None or self._typed_marker is not token or entry is None
+                        or entry[0] != key or self._bytes > _CATALOG_PAYLOAD_BYTES):
+                    return None
+            catalog = contract.strict_json(entry[1], 'captured schema catalog', omissions.MAX_SCHEMA_BYTES)
+            if catalog['sources'] != [
+                    {'name': name, 'sha256': omissions._sha(raw)} for name, _path, raw in snapshot.sources]:
+                return None
+            if catalog_reuse.runtime_token() is not token:
+                return None
+            return catalog
+        except Exception:
+            # A failed eligibility lookup must not replace the original typed
+            # constructor's error or move it ahead of protocol/input checks.
+            return None
 
 
 def _catalog_context(value=None):
