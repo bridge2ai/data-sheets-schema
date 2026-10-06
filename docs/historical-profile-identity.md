@@ -38,6 +38,14 @@ does not cover installed LinkML import bytes. Every record still recovers and
 verifies its schema, captures and validates current vocabularies, renders both
 profile candidates, and makes a fresh comparison.
 
+Both pure-work caches bind their shipped helper, parser, constructor and view
+functions during module initialization. Every reuse checks those effective
+signatures again. Unfamiliar replacements and modified functions take the fresh
+path, even before the first cached call; arbitrary replacement-function globals
+are not inferred. If the optional initial binding cannot be established, only
+reuse is disabled. Shared dependency collection includes runtime view methods,
+so an unchanged source file does not hide a replaced method.
+
 The comparison does not alter records, the digest inventory, generation
 instructions, validation schemas or scoring. Pair comparison still compares a
 recorded digest with the current digest to report instrument drift. Historical
@@ -102,8 +110,8 @@ in a separate 32-entry, 16-MiB cache. The byte budget includes retained keys and
 text; oversized entries bypass retention and least recently used entries are
 evicted. Keys include the exact schema and vocabulary bytes, logical path,
 family policy, runtime, and effective rendering/parsing/view dependencies.
-Supported helper closure contents are snapshotted; opaque callable instances,
-ambiguous closure state and cycles bypass retention.
+Bound helper closure contents are checked; unfamiliar callables, opaque state
+and cycles bypass retention.
 Unsupported dependency state and rendering failures use the original renderer
 without retention. No parsed document, SchemaView, record or conclusion is
 stored. Every reconstruction still verifies schema authority and reads and
