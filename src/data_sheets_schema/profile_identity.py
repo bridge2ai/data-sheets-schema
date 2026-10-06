@@ -214,8 +214,9 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
     """
     from data_sheets_schema import profiles
 
-    schema = record.get('schema') if isinstance(record, dict) else None
-    schema = deepcopy(schema) if isinstance(schema, dict) else {}
+    snapshot = deepcopy(record) if isinstance(record, dict) else {}
+    schema = snapshot.get('schema')
+    schema = schema if isinstance(schema, dict) else {}
     stated, recorded = schema.get('profile'), schema.get('digest_md5')
     effective = profiles.for_record({'schema': schema}).name if stated is None else stated
     context: dict[str, Any] = {
@@ -253,6 +254,7 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
     if effective not in dict(registered_profiles):
         context['reason'] = 'the recorded profile is not available in this renderer'
         return context
+    historical_raw = None
     try:
         from data_sheets_schema import run_schema, schema_digest
         raw, basis = run_schema.run_schema_bytes({'schema': schema})
@@ -265,6 +267,7 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
             context['reason'] = 'recovered full-schema bytes do not match every recorded hash'
             return context
         context['schema_sha256'] = hashlib.sha256(raw).hexdigest()
+        historical_raw = raw
         renderer_raw = Path(schema_digest.__file__).read_bytes()
         context['renderer'] = {'module': 'data_sheets_schema.schema_digest',
                                'source_sha256': hashlib.sha256(renderer_raw).hexdigest(),
@@ -287,4 +290,9 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
         _choose(context, candidates, historical=True)
     except Exception as exc:  # malformed or unavailable history is a disclosed unknown
         context['reason'] = f'historical profile identity unavailable: {type(exc).__name__}: {exc}'
+    if context['status'] == 'unknown' and historical_raw is not None:
+        from data_sheets_schema.historical_digest import reconstruct
+        # Reuse the exact already-verified bytes; text reconstruction does not
+        # change the profile comparison or pretend the dirty source was pinned.
+        context['historical_digest_text'] = reconstruct(snapshot, historical_raw, path)
     return context
