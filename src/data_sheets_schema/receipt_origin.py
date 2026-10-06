@@ -857,7 +857,104 @@ class _Target:
         return spelled in self.forms or os.path.realpath(spelled) in self.forms
 
 
+def _captured_path(value: str) -> str:
+    """Normalize only an explicitly supplied absolute POSIX spelling."""
+    if type(value) is not str or not value.startswith("/") or "\x00" in value:
+        raise ValueError("captured paths must be absolute strings without NUL")
+    return os.path.normpath(value)
+
+
+class _CapturedTarget:
+    """Match recorded identities only; an unrecorded alias is not a nonmatch."""
+
+    def __init__(self, kind: str, path: str, identities: dict[str, frozenset[str]], reasons: list[str]):
+        self.kind, self.name = kind, os.path.basename(path)
+        self.identities, self.reasons = identities, reasons
+        self.identity = self._identity(_captured_path(path))
+        if self.identity is None:
+            self._unknown()
+
+    def _identity(self, path: str) -> frozenset[str] | None:
+        identity = self.identities.get(path)
+        # A recorded physical target is terminal, not another unresolved alias.
+        # Check only the consulted identity; unrelated conflicts stay irrelevant.
+        if (identity is not None and len(identity) == 1
+                and self.identities.get(next(iter(identity))) == identity):
+            return identity
+        return None
+
+    def _unknown(self):
+        reason = f"captured path identity for the {_LABEL[self.kind]} is unresolved or conflicting"
+        if reason not in self.reasons:
+            self.reasons.append(reason)
+        return None
+
+    def matches(self, spelled: str, cwd: str | None) -> bool | None:
+        if not os.path.isabs(spelled):
+            if not isinstance(cwd, str) or not os.path.isabs(cwd):
+                return self._unknown()
+            spelled = os.path.join(cwd, spelled)
+        identity = self._identity(os.path.normpath(spelled))
+        if identity is None or self.identity is None:
+            return self._unknown()
+        return identity == self.identity
+
+
+def _captured_identities(aliases: tuple[tuple[str, str], ...], paths: tuple[str, str]):
+    if type(aliases) is not tuple:
+        raise ValueError("captured aliases must be an immutable tuple")
+    identities: dict[str, set[str]] = {}
+    for alias in aliases:
+        if type(alias) is not tuple or len(alias) != 2:
+            raise ValueError("each captured alias must be a spelling/physical-target tuple")
+        spelling, physical = (_captured_path(value) for value in alias)
+        identities.setdefault(spelling, set()).add(physical)
+        identities.setdefault(physical, set()).add(physical)
+    for path in paths:
+        identities.setdefault(_captured_path(path), {_captured_path(path)})
+    return {path: frozenset(values) for path, values in identities.items()}
+
+
 # ---------------------------------------------------------------- transcripts
+def _loaded_bytes(data: bytes, t: int, entry: dict, reasons: list[str]) -> list[tuple[int, int, dict]]:
+    """Parse already acquired transcript bytes without changing physical lines."""
+    events: list[tuple[int, int, dict]] = []
+    entry["sha256"] = _sha256(data)
+    try:
+        text = data.decode("utf-8")
+    except UnicodeDecodeError:
+        reasons.append(f"transcript {t} is not UTF-8")
+        return events
+    lines = text.split("\n")
+    terminated = lines[-1] == ""
+    if terminated:
+        lines.pop()
+    entry["lines"] = len(lines)
+    if not lines:
+        reasons.append(f"transcript {t} carries no events")
+        return events
+    bad: list[str] = []
+    for n, line in enumerate(lines, 1):
+        if not line.strip():
+            bad.append(f"line {n} is blank")
+            continue
+        if n == len(lines) and not terminated:
+            bad.append(f"line {n} is unterminated")
+            continue
+        try:
+            event = json.loads(line)
+        except ValueError:
+            bad.append(f"line {n} is not JSON")
+            continue
+        if not isinstance(event, dict):
+            bad.append(f"line {n} is not a JSON object")
+            continue
+        events.append((t, n, event))
+    if bad:
+        reasons.append(f"transcript {t} has {len(bad)} malformed line(s), first: {bad[0]}")
+    return events
+
+
 def _load(paths: list[Path], reasons: list[str]) -> tuple[list[dict], list[tuple[int, int, dict]]]:
     """Every transcript's events with their physical line numbers. A missing,
     unreadable, empty, blank-lined, truncated or non-JSON transcript is a
@@ -872,39 +969,7 @@ def _load(paths: list[Path], reasons: list[str]) -> tuple[list[dict], list[tuple
         except OSError as exc:
             reasons.append(f"transcript {t} cannot be read ({type(exc).__name__})")
             continue
-        entry["sha256"] = _sha256(data)
-        try:
-            text = data.decode("utf-8")
-        except UnicodeDecodeError:
-            reasons.append(f"transcript {t} is not UTF-8")
-            continue
-        lines = text.split("\n")
-        terminated = lines[-1] == ""
-        if terminated:
-            lines.pop()
-        entry["lines"] = len(lines)
-        if not lines:
-            reasons.append(f"transcript {t} carries no events")
-            continue
-        bad: list[str] = []
-        for n, line in enumerate(lines, 1):
-            if not line.strip():
-                bad.append(f"line {n} is blank")
-                continue
-            if n == len(lines) and not terminated:
-                bad.append(f"line {n} is unterminated")
-                continue
-            try:
-                event = json.loads(line)
-            except ValueError:
-                bad.append(f"line {n} is not JSON")
-                continue
-            if not isinstance(event, dict):
-                bad.append(f"line {n} is not a JSON object")
-                continue
-            events.append((t, n, event))
-        if bad:
-            reasons.append(f"transcript {t} has {len(bad)} malformed line(s), first: {bad[0]}")
+        events.extend(_loaded_bytes(data, t, entry, reasons))
     return info, events
 
 
@@ -3489,10 +3554,11 @@ def _where(call: dict, result: dict | None = None) -> dict[str, Any]:
 
 
 def _touches(target: _Target, spelled: str, cwd: str | None) -> bool:
-    """A path names the target; a relative one with no working directory
-    does when its basename is the target's."""
+    """A path names the target. Only the legacy live-path route uses the
+    basename fallback for a relative path without a working directory."""
     hit = target.matches(spelled, cwd)
-    return hit is True or (hit is None and os.path.basename(spelled) == target.name)
+    return hit is True or (hit is None and not isinstance(target, _CapturedTarget)
+                           and os.path.basename(spelled) == target.name)
 
 
 def _replace(text: str, old: Any, new: Any, replace_all: Any) -> tuple[str | None, str | None]:
@@ -3873,12 +3939,64 @@ def origin(transcripts: list[Path], receipt: Path, full: Path, *, receipt_at_run
     h = _history(calls, results, [_Target("receipt", spelled_receipt), _Target("full", spelled_full)], reasons,
                  _runtime_denials(events, calls, results))
     first, derived = _boundaries(h, reasons)
-    writes = h["writes"]["receipt"]
     try:
         on_disk = _sha256(Path(receipt).read_bytes())
     except OSError as exc:
         on_disk = None
         reasons.append(f"the receipt cannot be read ({type(exc).__name__})")
+    return _origin_report(info, h, first, derived, reasons, receipt, full,
+                          receipt_at_run, full_at_run, on_disk)
+
+
+def origin_captured(transcripts: tuple[tuple[str, bytes], ...], *, receipt_raw: bytes,
+                    receipt_path: str, full_path: str, aliases: tuple[tuple[str, str], ...],
+                    receipt_at_run: str | None = None, full_at_run: str | None = None) -> dict[str, Any]:
+    """Receipt origin from immutable captured bytes and recorded path identities.
+
+    Transcript pairs are ordered (absolute name, raw bytes). Alias pairs bind
+    absolute spellings to recorded physical targets; they are data, never
+    resolved against this host. Include known unrelated paths consulted by the
+    instrument as well as aliases of the receipt/full record. Unrecorded or
+    conflicting identities yield unknown, including an alias with another
+    basename. Exact target spellings are self-identities unless an alias binds
+    them. The optional at-run spellings retain the moved-artifact semantics of
+    :func:`origin`. No path is read and no working directory is consulted.
+    """
+    if type(transcripts) is not tuple or type(receipt_raw) is not bytes:
+        raise ValueError("captured transcripts must be a tuple and receipt_raw must be bytes")
+    _captured_path(receipt_path)
+    _captured_path(full_path)
+    for value in (receipt_at_run, full_at_run):
+        if value is not None:
+            _captured_path(value)
+    reasons: list[str] = []
+    info: list[dict] = []
+    events: list[tuple[int, int, dict]] = []
+    for t, captured in enumerate(transcripts):
+        if type(captured) is not tuple or len(captured) != 2 or type(captured[1]) is not bytes:
+            raise ValueError("each captured transcript must be an immutable name/bytes tuple")
+        name, raw = captured
+        _captured_path(name)
+        entry = {"path": name, "sha256": None, "lines": None}
+        info.append(entry)
+        events.extend(_loaded_bytes(raw, t, entry, reasons))
+    calls, results = _pair(events, reasons)
+    spelled_receipt = receipt_at_run if receipt_at_run is not None else receipt_path
+    spelled_full = full_at_run if full_at_run is not None else full_path
+    identities = _captured_identities(aliases, (spelled_receipt, spelled_full))
+    h = _history(calls, results,
+                 [_CapturedTarget("receipt", spelled_receipt, identities, reasons),
+                  _CapturedTarget("full", spelled_full, identities, reasons)], reasons,
+                 _runtime_denials(events, calls, results))
+    first, derived = _boundaries(h, reasons)
+    return _origin_report(info, h, first, derived, reasons, receipt_path, full_path,
+                          receipt_at_run, full_at_run, _sha256(receipt_raw))
+
+
+def _origin_report(info, h, first, derived, reasons, receipt, full,
+                   receipt_at_run, full_at_run, on_disk) -> dict[str, Any]:
+    """The common classifier; acquisition and target identity are already fixed."""
+    writes = h["writes"]["receipt"]
     last = writes[-1] if writes else None
     rebuilt = _sha256(last["content"].encode("utf-8")) if last and last["content"] is not None else None
     if last is None:
