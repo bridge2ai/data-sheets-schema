@@ -102,6 +102,8 @@ in a separate 32-entry, 16-MiB cache. The byte budget includes retained keys and
 text; oversized entries bypass retention and least recently used entries are
 evicted. Keys include the exact schema and vocabulary bytes, logical path,
 family policy, runtime, and effective rendering/parsing/view dependencies.
+Supported helper closure contents are snapshotted; opaque callable instances,
+ambiguous closure state and cycles bypass retention.
 Unsupported dependency state and rendering failures use the original renderer
 without retention. No parsed document, SchemaView, record or conclusion is
 stored. Every reconstruction still verifies schema authority and reads and

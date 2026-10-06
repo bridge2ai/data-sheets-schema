@@ -4,6 +4,7 @@ from copy import deepcopy
 from dataclasses import replace
 import hashlib
 import subprocess
+import sys
 
 import pytest
 
@@ -16,7 +17,9 @@ def empty_cache():
     # LinkML initializes the loader's class constructor tables on first use.
     schema_view.version_document(b'name: initialize\n')
     history._text_cache_clear()
+    previous_profile = sys.getprofile()
     yield
+    sys.setprofile(previous_profile)
     history._text_cache_clear()
 
 
@@ -25,13 +28,12 @@ def render(raw=SCHEMA, path=PATH, family='canonical_paths', vocabulary=VOCABULAR
 
 
 def count_inventory(monkeypatch):
-    calls, original = [], history._inventory
-
-    def inventory(*args, **kwargs):
-        calls.append(1)
-        return original(*args, **kwargs)
-
-    monkeypatch.setattr(history, '_inventory', inventory)
+    calls, code = [], history._inventory.__code__
+    # Observe execution without adding a stateful closure to the pure renderer.
+    def observe(frame, event, _arg):
+        if event == 'call' and frame.f_code is code:
+            calls.append(1)
+    sys.setprofile(observe)
     return calls
 
 
@@ -268,3 +270,68 @@ def test_actual_git_replacement_still_cannot_redirect_a_warm_candidate(candidate
         record['repo']['commit'] + ':' + history.RENDERER_PATH])
     assert redirected != original[0]
     assert history.reconstruct(record, SCHEMA, PATH, git_root=root) == expected
+
+
+def test_same_callable_with_mutated_closed_dictionary_gets_fresh_text(monkeypatch):
+    original, state = history._terms, {'prefix': 'before '}
+    def terms(names, vocabulary):
+        value = original(names, vocabulary)
+        return state['prefix'] + value if value else None
+    monkeypatch.setattr(history, '_terms', terms)
+    before = render()
+    before_key = history._text_key(SCHEMA, PATH, 'canonical_paths', VOCABULARY)
+    state['prefix'] = 'after '
+    after_key = history._text_key(SCHEMA, PATH, 'canonical_paths', VOCABULARY)
+    after = render()
+    assert before_key != after_key and before != after
+    assert after == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
+
+
+def test_closed_list_and_nested_function_state_are_snapshotted(monkeypatch):
+    original, state = history._terms, ['before ']
+    def prefix(): return state[0]
+    def terms(names, vocabulary):
+        value = original(names, vocabulary)
+        return prefix() + value if value else None
+    monkeypatch.setattr(history, '_terms', terms)
+    before = render()
+    state[0] = 'after '
+    assert render() != before
+    assert render() == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
+
+
+@pytest.mark.parametrize('kind', ['callable_instance', 'opaque_closure', 'cyclic_closure'])
+def test_opaque_or_cyclic_callable_state_bypasses_retention(monkeypatch, kind):
+    original = history._terms
+    class Stateful:
+        prefix = 'before '
+        def __call__(self, names, vocabulary):
+            value = original(names, vocabulary)
+            return self.prefix + value if value else None
+    state = Stateful()
+    if kind == 'callable_instance':
+        terms = state
+    elif kind == 'opaque_closure':
+        def terms(names, vocabulary): return state(names, vocabulary)
+    else:
+        cycle = []
+        cycle.append(cycle)
+        def terms(names, vocabulary):
+            assert cycle[0] is cycle
+            return state(names, vocabulary)
+    monkeypatch.setattr(history, '_terms', terms)
+    before = render()
+    state.prefix = 'after '
+    after = render()
+    assert before != after and history._text_cache_info()['entries'] == 0
+    assert after == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
+
+
+def test_change_to_closure_during_construction_prevents_retention(monkeypatch):
+    original, state = history._terms, {'calls': 0}
+    def terms(names, vocabulary):
+        state['calls'] += 1
+        return original(names, vocabulary)
+    monkeypatch.setattr(history, '_terms', terms)
+    assert render() == GOLDEN['canonical_paths']
+    assert history._text_cache_info()['entries'] == 0

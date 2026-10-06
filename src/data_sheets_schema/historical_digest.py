@@ -20,6 +20,7 @@ import subprocess
 import sys
 from threading import RLock
 import time
+import types
 from typing import Any
 
 
@@ -121,19 +122,58 @@ def _setting_key(value: Any) -> tuple:
     raise TypeError('unsupported mutable rendering dependency')
 
 
-def _function_key(function: Any) -> tuple:
-    # Contextmanager and other wrappers retain an effective underlying function.
-    # Code/default changes on the same callable must also invalidate the text.
-    chain, seen = [], set()
-    while function is not None:
-        if id(function) in seen:
-            raise ValueError('cyclic rendering callable')
-        seen.add(id(function))
-        chain.append((function, getattr(function, '__code__', None),
-                      _setting_key(getattr(function, '__defaults__', None)),
-                      _setting_key(getattr(function, '__kwdefaults__', None))))
-        function = getattr(function, '__wrapped__', None)
-    return tuple(chain)
+def _closure_key(value: Any, seen: frozenset[int]) -> tuple:
+    if id(value) in seen:
+        raise ValueError('cyclic rendering closure')
+    nested = seen | {id(value)}
+    if isinstance(value, types.FunctionType):
+        return _function_key(value, seen)
+    if any(value is cls for cls in (list, dict, set, tuple, frozenset)):
+        return type(value), value  # built-in dataclass default factories
+    if type(value) in (tuple, list):
+        return type(value), tuple(_closure_key(item, nested) for item in value)
+    if type(value) is dict:
+        return dict, tuple((_closure_key(k, nested), _closure_key(v, nested))
+                           for k, v in value.items())
+    if type(value) in (set, frozenset):
+        return type(value), frozenset(_closure_key(item, nested) for item in value)
+    return _setting_key(value)
+
+
+def _function_key(function: Any, seen: frozenset[int] = frozenset()) -> tuple:
+    # Hashable callable instances can have arbitrary mutable state. Only known
+    # function/descriptor forms have inspectable code/default/closure semantics.
+    from yaml._yaml import CParser
+    if function is None:
+        return ()
+    if not isinstance(function, (types.FunctionType, types.BuiltinFunctionType,
+            types.MethodDescriptorType, types.WrapperDescriptorType,
+            types.ClassMethodDescriptorType, type(CParser.check_event))):
+        raise TypeError('unsupported rendering callable state')
+    bound = getattr(function, '__self__', None)
+    if bound is not None and not isinstance(bound, (types.ModuleType, type)):
+        raise TypeError('unsupported bound rendering callable state')
+    if id(function) in seen:
+        raise ValueError('cyclic rendering callable')
+    nested = seen | {id(function)}
+    code = getattr(function, '__code__', None)
+    cells = getattr(function, '__closure__', None) or ()
+    names = getattr(code, 'co_freevars', ())
+    if len(cells) != len(names):
+        raise ValueError('uninspectable rendering closure')
+    closure = []
+    for name, cell in zip(names, cells):
+        value = cell.cell_contents  # an empty cell also bypasses retention
+        if name == '__class__' and isinstance(value, type):
+            # Compiler-created super() cells identify a defining class. Its
+            # effective constructors/methods are independently included below.
+            state = (type(value), value)
+        else:
+            state = _closure_key(value, nested)
+        closure.append((name, state))
+    return (function, code, _setting_key(getattr(function, '__defaults__', None)),
+            _setting_key(getattr(function, '__kwdefaults__', None)), tuple(closure),
+            _function_key(getattr(function, '__wrapped__', None), nested))
 
 
 def _constructor_key(cls: type) -> tuple:
