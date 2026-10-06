@@ -749,3 +749,9 @@ def support_request_cmd(plan, target):
 # A separate opt-in saved-response protocol; the existing planners stay unchanged.
 from data_sheets_schema.cli.support_results import support_results
 evaluate.add_command(support_results)
+
+from data_sheets_schema.cli.support_execution import support_execution
+evaluate.add_command(support_execution)
+
+from data_sheets_schema.cli.fitness_results import fitness_results
+evaluate.add_command(fitness_results)
