@@ -594,6 +594,21 @@ def _checked_observations(run):
     previous = {'transcript': 0, 'control': 0}
     seen_reads, seen_intents, seen_writes, seen_advances = {}, {}, set(), set()
     checked = []
+    previous_decision = None
+
+    def decision_at(digest):
+        # This invocation owns one immutable captured run. Reuse only the
+        # immediately preceding successful reconstruction; every observation's
+        # raw joins and causal checks below still run. Never reuse across loads.
+        nonlocal previous_decision
+        if previous_decision is not None and previous_decision[0] == digest:
+            return previous_decision[1]
+        previous_decision = None
+        value = _decision_at(run, digest)
+        if value.state != 'failed':
+            previous_decision = (digest, value)
+        return value
+
     for index, artifact in enumerate(run.observations):
         doc, transcript, control = observation(artifact, run.selection, run.binding, run.pool)
         for prefix in (transcript, control):
@@ -615,7 +630,7 @@ def _checked_observations(run):
                 raise ValueError('settled observation does not match actual raw tool events')
             if kind == 'request_read':
                 request = run.reader.pinned(payload['request'])
-                current = _decision_at(run, payload['history_sha256'])
+                current = decision_at(payload['history_sha256'])
                 if current.state != 'awaiting_response' or current.request != request:
                     raise ValueError('Read observation names a stale or unpublished request')
                 observed.complete_request_read(trace, actual, request)
@@ -640,7 +655,7 @@ def _checked_observations(run):
                     raise ValueError('advance settlement lacks actual earlier selected admission')
                 observed.helper_result(trace, actual, result)
                 _history_prefix(run, result['before_history_sha256'])
-                after = _decision_at(run, result['after_history_sha256'])
+                after = decision_at(result['after_history_sha256'])
                 if after.state != result['state']:
                     raise ValueError('advance settlement differs from actual post-publication state')
                 for pin in result['publications']:
@@ -651,7 +666,7 @@ def _checked_observations(run):
                     else:
                         run.reader.pinned(pin)
         elif kind == 'response_intent':
-            current = _decision_at(run, payload['history_sha256'])
+            current = decision_at(payload['history_sha256'])
             request = trace.request(payload['tool_use_id'])
             if (asdict(request.call) != payload['call'] or asdict(request.callback) != payload['callback']
                     or request.tool_name != 'Write' or request.input_json.decode('utf-8') != payload['input_json']
