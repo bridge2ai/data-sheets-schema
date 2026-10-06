@@ -2,6 +2,7 @@
 from copy import deepcopy
 import hashlib
 from pathlib import Path
+import sys
 
 import pytest
 
@@ -12,8 +13,11 @@ from tests.test_historical_profile_identity import SCHEMA, VOCABULARY
 
 @pytest.fixture(autouse=True)
 def empty_cache():
+    schema_view.version_document(b'name: initialize\n')
+    previous_profile = sys.getprofile()
     identity._inventory_cache_clear()
     yield
+    sys.setprofile(previous_profile)
     identity._inventory_cache_clear()
 
 
@@ -41,13 +45,11 @@ def _replace(record, path, raw):
 
 def _count_builds(monkeypatch):
     calls = []
-    original = schema_digest._build_from_view
-
-    def build(*args, **kwargs):
-        calls.append(args[1])
-        return original(*args, **kwargs)
-
-    monkeypatch.setattr(schema_digest, '_build_from_view', build)
+    code = schema_digest._build_from_view.__code__
+    def observe(frame, event, _arg):
+        if event == 'call' and frame.f_code is code:
+            calls.append(1)
+    sys.setprofile(observe)
     return calls
 
 
@@ -140,8 +142,75 @@ def test_effective_function_defaults_are_keyed(case, monkeypatch, function, attr
     identity.capture(record)
     before = identity._inventory_cache_info()['entries']
     monkeypatch.setattr(getattr(schema_digest, function), attribute, value)
-    identity.capture(record)
-    assert identity._inventory_cache_info()['entries'] == before + 1
+    actual = identity.capture(record)
+    assert identity._inventory_cache_info()['entries'] == before
+    identity._inventory_cache_clear()
+    assert identity.capture(record) == actual
+
+
+def test_stateful_replacement_builder_never_retains_first_observed_state(case, monkeypatch):
+    record, _, _ = case
+    original, state = schema_digest._build_from_view, {'change': False}
+    def builder(*args, **kwargs):
+        inventory = original(*args, **kwargs)
+        if state['change']:
+            inventory.slots[0].description = 'Changed closed-over builder state'
+        return inventory
+    monkeypatch.setattr(schema_digest, '_build_from_view', builder)
+    assert identity.capture(record)['status'] == 'match'
+    state['change'] = True
+    actual = identity.capture(record)
+    assert actual['status'] == 'unknown' and identity._inventory_cache_info()['entries'] == 0
+    identity._inventory_cache_clear()
+    assert identity.capture(record) == actual
+
+
+_GLOBAL_BUILDER_STATE = {}
+
+
+def _global_builder(*args, **kwargs):
+    inventory = _GLOBAL_BUILDER_STATE['original'](*args, **kwargs)
+    if _GLOBAL_BUILDER_STATE['change']:
+        inventory.slots[0].description = 'Changed module-global builder state'
+    return inventory
+
+
+@pytest.mark.parametrize('warm_original', [False, True])
+def test_global_reading_builder_bypasses_before_and_after_warming(case, monkeypatch, warm_original):
+    record, _, _ = case
+    if warm_original:
+        assert identity.capture(record)['status'] == 'match'
+    retained = identity._inventory_cache_info()['entries']
+    monkeypatch.setitem(_GLOBAL_BUILDER_STATE, 'original', schema_digest._build_from_view)
+    monkeypatch.setitem(_GLOBAL_BUILDER_STATE, 'change', False)
+    assert _global_builder.__closure__ is None
+    monkeypatch.setattr(schema_digest, '_build_from_view', _global_builder)
+    assert identity.capture(record)['status'] == 'match'
+    _GLOBAL_BUILDER_STATE['change'] = True
+    actual = identity.capture(record)
+    assert actual['status'] == 'unknown' and identity._inventory_cache_info()['entries'] == retained
+    identity._inventory_cache_clear()
+    assert identity.capture(record) == actual
+
+
+def test_runtime_view_method_replacement_is_fresh_with_identical_source_file(case, monkeypatch):
+    record, _, _ = case
+    assert identity.capture(record)['status'] == 'match'
+    descriptor = schema_view._ReleasableView.class_induced_slots
+    original, state = descriptor.function, {'change': False}
+    def induced(self, *args, **kwargs):
+        slots = original(self, *args, **kwargs)
+        if state['change']:
+            for slot in slots:
+                slot.description = 'Changed effective view method'
+        return slots
+    monkeypatch.setattr(descriptor, 'function', induced)
+    assert identity.capture(record)['status'] == 'match'
+    state['change'] = True
+    actual = identity.capture(record)
+    assert actual['status'] == 'unknown'
+    identity._inventory_cache_clear()
+    assert identity.capture(record) == actual
 
 
 @pytest.mark.parametrize('changed', [None, b'vocabularies: false\n',
@@ -256,8 +325,10 @@ def test_same_initializer_with_changed_defaults_is_keyed(case, monkeypatch):
     initializer = schema_digest.SlotDigest.__init__
     before = identity._inventory_cache_info()['entries']
     monkeypatch.setattr(initializer, '__defaults__', (True,) + initializer.__defaults__[1:])
-    identity.capture(record)
-    assert identity._inventory_cache_info()['entries'] == before + 1
+    actual = identity.capture(record)
+    assert identity._inventory_cache_info()['entries'] == before
+    identity._inventory_cache_clear()
+    assert identity.capture(record) == actual
 
 
 def test_imported_schema_bypasses_retention(case, monkeypatch):
