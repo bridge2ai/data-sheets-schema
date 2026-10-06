@@ -93,6 +93,8 @@ To add users who can invoke the assistant, edit `.github/ai-controllers.json`:
 
 Only authorized users can trigger the assistant by mentioning `@d4dassistant`.
 
+The allow-list and request parser come from one immutable trusted commit: the PR's base SHA for pull-request descriptions and review comments, or the resolved default-branch SHA for other events and manual dispatch. Input directories still come from the event-selected checkout described above, so a PR can add a dataset without changing its authorization rules. The trusted parser runs in Python isolated mode without site initialization. Missing or invalid trusted gate files stop the gate; a PR introducing the parser cannot use its own copy before the base branch has it.
+
 ## Technical Details
 
 - **Agent**: Four-phase generation via `d4d api run` (`src/data_sheets_schema/api_runner.py`), run directly in the workflow. Previously used the `dragon-ai-agent/run-claude-obo` action, which no longer exists — see issue #172.

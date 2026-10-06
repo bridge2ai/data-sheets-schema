@@ -526,6 +526,8 @@ class TestTheWorkflow(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
             (tmp / "bin").mkdir()
+            trusted_parser = tmp / "trusted-parser.py"
+            trusted_parser.write_bytes(SCRIPT.read_bytes())
             # this interpreter, whatever python3 is on PATH; -S leaves out
             # site-packages, as on the runner, where nothing is installed yet
             python3 = tmp / "bin" / "python3"
@@ -538,7 +540,8 @@ class TestTheWorkflow(unittest.TestCase):
                     (runner_temp / body_name).write_bytes(text.encode("utf-8"))
                     out = runner_temp / "github_output"
                     env = {**os.environ, "PATH": f"{tmp / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}",
-                           "RUNNER_TEMP": str(runner_temp), "GITHUB_OUTPUT": str(out)}
+                           "RUNNER_TEMP": str(runner_temp), "GITHUB_OUTPUT": str(out),
+                           "TRUSTED_REQUEST_PARSER": str(trusted_parser)}
                     run = subprocess.run(["bash", "-c", self.step["request"]["run"]], cwd=ROOT, env=env,
                                          capture_output=True, text=True)
                     self.assertEqual(run.returncode, 0, run.stderr)

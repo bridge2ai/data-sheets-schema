@@ -54,18 +54,56 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_FOR_PR }}
           script: |
-            // Load allowed users from config
+            // The checkout supplies dataset directories, never gate authority (#4392).
+            // Resolve once, then read both gate files from that immutable commit.
             const fs = require('fs');
-            let allowedUsers = [];
-            try {
-              const configContent = fs.readFileSync('.github/ai-controllers.json', 'utf8');
-              allowedUsers = JSON.parse(configContent);
-            } catch (error) {
-              console.log('Error loading allowed users:', error);
-              // Use fallback controllers if provided
-              const fallback = 'jtr4v';
-              allowedUsers = fallback ? fallback.split(',').map(u => u.trim()) : [];
+            const path = require('path');
+            const crypto = require('crypto');
+            let gateSha;
+            if (context.eventName === 'pull_request' || context.eventName === 'pull_request_review_comment') {
+              gateSha = context.payload.pull_request?.base?.sha;
+            } else {
+              const repository = await github.rest.repos.get(context.repo);
+              const branch = await github.rest.repos.getBranch({
+                ...context.repo, branch: repository.data.default_branch
+              });
+              gateSha = branch.data.commit.sha;
             }
+            if (typeof gateSha !== 'string' || !/^[0-9a-f]{40}$/.test(gateSha)) {
+              throw new Error('No immutable trusted base commit for the request gate');
+            }
+            async function gateFile(filePath) {
+              const response = await github.rest.repos.getContent({
+                ...context.repo, path: filePath, ref: gateSha
+              });
+              const file = response.data;
+              if (!file || file.type !== 'file' || file.path !== filePath || file.encoding !== 'base64' ||
+                  typeof file.content !== 'string' || !Number.isSafeInteger(file.size) || file.size < 0) {
+                throw new Error('Trusted gate file has an unsupported response: ' + filePath);
+              }
+              const encoded = file.content.replace(/\s/g, '');
+              const bytes = Buffer.from(encoded, 'base64');
+              const blob = crypto.createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
+              if (bytes.toString('base64') !== encoded || bytes.length !== file.size || blob !== file.sha) {
+                throw new Error('Trusted gate file bytes do not match its blob: ' + filePath);
+              }
+              return bytes;
+            }
+            const [controllers, parser] = await Promise.all([
+              gateFile('.github/ai-controllers.json'), gateFile('src/github/assistant_request.py')
+            ]);
+            const allowedUsers = JSON.parse(controllers.toString('utf8'));
+            if (!Array.isArray(allowedUsers) || !allowedUsers.every(user => typeof user === 'string')) {
+              throw new Error('Trusted controller list must be an array of usernames');
+            }
+            const gateDirectory = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP, 'd4d-assistant-gate-'));
+            const gateParser = path.join(gateDirectory, 'assistant_request.py');
+            fs.writeFileSync(gateParser, parser, {flag: 'wx', mode: 0o600});
+            core.setOutput('gate-parser', gateParser);
+            core.setOutput('gate-base-sha', gateSha);
+            console.log('Request gate base commit: ' + gateSha);
+            // Missing base files intentionally fail closed, including while a
+            // PR is introducing this parser. Never fall back to candidate code.
 
             // Get content and user from event payload
             let content = '';
@@ -182,8 +220,10 @@ jobs:
       - name: Read the request
         id: request
         if: steps.detect.outputs.allowed == 'true'
+        env:
+          TRUSTED_REQUEST_PARSER: ${{ steps.detect.outputs.gate-parser }}
         run: >-
-          python3 src/github/assistant_request.py
+          python3 -I -S "$TRUSTED_REQUEST_PARSER"
           --inputs data/sheets_d4dassistant/inputs
           --body "$RUNNER_TEMP/assistant-request-text.md"
           --github-output "$GITHUB_OUTPUT"
