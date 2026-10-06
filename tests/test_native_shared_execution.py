@@ -23,7 +23,7 @@ from data_sheets_schema import native_execution_authority as authority
 from data_sheets_schema import native_attribution_registration as inherited_registration
 
 
-def make_case(root, *, fixture='neutral'):
+def make_case(root, *, fixture='neutral', receipt_origin_version=0):
     if fixture == 'neutral':
         builder = build_native_fixture
     elif fixture == 'omission':
@@ -61,7 +61,8 @@ def make_case(root, *, fixture='neutral'):
     manifest = fabricated_manifest(expected, data['selection'].document(), root / 'invented-probe', spec.bundle.read_bytes())
     probe = parent / 'invented-permissions.json'; probe.write_bytes(c.canonical(manifest))
     value = registration.registration(comp, system, permission_probe_path=probe,
-        attempt_id=attempt.name, attempt_directory=attempt, evidence_directory=output, max_draft_checks=3)
+        attempt_id=attempt.name, attempt_directory=attempt, evidence_directory=output, max_draft_checks=3,
+        receipt_origin_version=receipt_origin_version)
     raw = c.canonical(value)
     binding = {'registration_sha256': c.sha(raw), 'attempt_id': value['attempt_id'],
         'source_commit': value['dependencies']['base']['source_commit'],

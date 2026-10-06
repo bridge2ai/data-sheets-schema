@@ -49,9 +49,28 @@ def _report_only_correction(case):
 
 def test_actual_public_merged_omissions_and_all_chunk_statuses(tmp_path, monkeypatch):
     monkeypatch.chdir(authority.ROOT)
-    case = make_case(tmp_path / 'native26-omissions', fixture='omission')
+    case = make_case(tmp_path / 'native26-omissions', fixture='omission', receipt_origin_version=1)
     result = launch_case(case, monkeypatch)
     records = assert_completed_case(case, result)
+    declared = case['value']['receipt_origin_reporting']
+    receipt_gate = result['gates']['receipts']
+    origin = receipt_gate['receipt_origin']
+    assert declared['version'] == origin['version'] == 1
+    assert origin['family'] == 'native_shared'
+    assert origin['declaration'] == declared
+    assert set(origin['inputs']) == {'transcript', 'full', 'original_receipt', 'effective_receipt'}
+    for role in ('transcript', 'full'):
+        assert origin['inputs'][role] is not None
+        assert origin['inputs'][role]['path'] == declared[role + '_path']
+    for role in ('original_receipt', 'effective_receipt'):
+        pin = origin['inputs'][role]
+        assert pin is not None
+        assert set(pin) == {'path', 'captured_path', 'bytes', 'sha256'}
+        assert {key: pin[key] for key in ('path', 'bytes', 'sha256')} == {
+            key: receipt_gate[role][key] for key in ('path', 'bytes', 'sha256')}
+    assert origin['inputs']['original_receipt']['path'] == declared['receipt_path']
+    assert origin['effective_receipt']['status'] == 'unknown'
+    assert origin['effective_receipt'].get('split') is None
     selection = case['selection']
     carry = c.strict_json(Path(selection.role('receipt_carry')).read_bytes())
     requests = [c.strict_json(Path(row['payload']['request']['path']).read_bytes(),
