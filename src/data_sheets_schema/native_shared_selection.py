@@ -17,7 +17,7 @@ from . import native_shared_contract as contract
 from . import audit_omissions as omissions
 from .profiles import profile_named
 from .resources import resource_path
-from .schema_snapshot import capture_schema
+from .schema_snapshot import _capture_native_schema
 from .schema_view import captured_view
 
 PROMPT = 'src/download/prompts/d4d_generic_arm_prompt_v10.md'
@@ -224,17 +224,9 @@ def _schemas(doc, artifacts):
         sources = tuple(artifacts[f'{kind}_schema:{i}'] for i in range(len(declaration['sources'])))
         rows = tuple((source['name'], artifact.pin.role)
                      for source, artifact in zip(declaration['sources'], sources))
-        frozen = {Path(a.pin.path): a.raw for a in sources}
-
-        def read(path):
-            if path not in frozen:
-                raise ValueError('selected schema import is outside the complete captured closure')
-            return frozen[path]
-
-        for artifact in sources:
-            omissions._mapping(artifact.raw, 'native schema', limit=contract.HARD_LIMITS['schema_member_bytes'])
-        snapshot = capture_schema(Path(declaration['root']), read_bytes=read,
-                                  strict=True, logical_paths=True)
+        snapshot = _capture_native_schema(
+            Path(declaration['root']), tuple((Path(a.pin.path), a.raw) for a in sources),
+            member_bytes=contract.HARD_LIMITS['schema_member_bytes'])
         actual = [(str(name), str(path), raw) for name, path, raw in snapshot.sources]
         expected = [(row['name'], a.pin.path, a.raw) for row, a in zip(declaration['sources'], sources)]
         if actual != expected:
