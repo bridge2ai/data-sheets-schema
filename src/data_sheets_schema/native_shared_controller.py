@@ -264,7 +264,8 @@ class CallbackAdapter:
                 name, inputs = data.get('tool_name'), data.get('tool_input')
                 # Mandatory phase-before-effect and phase-before-attribution.
                 self.phase.before(name, inputs, stage_decision=decision)
-                view = self._view(run, exclude_pending=data.get('tool_use_id'))
+                view = capture._effect_view_from_decision(run, decision,
+                    correction_window=bool(self.state.checks), exclude_pending=data.get('tool_use_id'))
                 if policy.stage_overlay_governs(view, tool_name=name, tool_input=inputs, policy=self.policy):
                     classification, basis = effects.classify_effect(view, tool_name=name, tool_input=inputs)
                     if classification != 'prescribed':

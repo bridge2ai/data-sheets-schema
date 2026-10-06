@@ -957,7 +957,17 @@ def seal_originals(run, kind):
 
 def current_effect_view(run, *, correction_window=False, exclude_pending=None):
     """Derive the restrictive overlay solely from captured state and events."""
-    decision = run.decision()
+    return _effect_view_from_decision(run, run.decision(),
+        correction_window=correction_window, exclude_pending=exclude_pending)
+
+
+def _effect_view_from_decision(run, decision, *, correction_window=False, exclude_pending=None):
+    """Use a decision just derived by the fixed caller from this captured run.
+
+    No result is retained across calls. The public wrapper always derives its
+    own decision; the controller can pass the one it just checked for this
+    event before granting an effect. All view and chronology checks stay here.
+    """
     state = decision.state if decision is not None else 'request_ready'
     request = decision.request if decision is not None else None
     response = decision.response if decision is not None else None
