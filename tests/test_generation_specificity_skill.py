@@ -1968,7 +1968,7 @@ class TestNativeSharedProcedure:
             ('native_shared_receipts', "'requested_paths': paths", "'requested_paths': paths[:1]"),
             ('native_shared_receipts', 'paths = receipts.uncovered_receiptable_leaves(', 'paths = foreign('),
             ('typed_audit', "batches.make_plan(raw[\"original_full\"].decode(\"utf-8\")", 'batches.make_plan("{}"'),
-            ('typed_audit', 'prepared = omissions.prepare(', 'prepared = foreign('),
+            ('typed_audit', 'prepared = omissions._prepare(', 'prepared = foreign('),
             ('typed_audit', '"omission_request": prepared.request()', '"omission_request": {}'),
             ('audit_omissions', 'evidence.source_chunks_from_bytes(bundle, manifest)',
              'evidence.source_chunks_from_bytes(bundle, other)'),
@@ -2017,8 +2017,8 @@ class TestNativeSharedProcedure:
 
     def test_original_typed_producer_detached_witness(self, tmp_path):
         self.refuse_producer_mutation(tmp_path, 'typed_audit',
-            'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)',
-            'derived, _, _ = foreign(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)')
+            'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+            'derived, _, _ = foreign(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)')
 
     def test_return_unpack_cannot_override_counted_receipt_field(self, tmp_path):
         # Exact independent #4403 witness, preserving the original literal
@@ -2059,10 +2059,10 @@ class TestNativeSharedProcedure:
              "    inputs['original_full'] = foreign()\n    packet = _seal(dict(kind=PACKET,"),
             ('typed_audit', 'return _derive_uncached(inputs, schema_rows, project, limits)',
              'return foreign(inputs, schema_rows, project, limits)'),
-            ('typed_audit', 'return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)',
-             'return derivations.foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets)'),
-            ('typed_audit', 'derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)',
-             'derived, raw, prepared = foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets)'),
+            ('typed_audit', 'return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+             'return derivations.foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)'),
+            ('typed_audit', 'derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)',
+             'derived, raw, prepared = foreign(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)'),
             ('typed_audit', "encoded = _json({'derived': derived, 'raw':",
              "encoded = _json({'derived': foreign(derived), 'raw':"),
             ('typed_audit', "return value['derived'], {name: _unblob(blob)",
@@ -2075,10 +2075,10 @@ class TestNativeSharedProcedure:
              '    plan["workers"] = plan["workers"][:1]\n    return {"plan": plan, "omission_request": prepared.request(),'),
             ('typed_audit', '    return {"plan": plan, "omission_request": prepared.request(),',
              '    prepared = foreign(prepared)\n    return {"plan": plan, "omission_request": prepared.request(),'),
-            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):',
-             '_derive = foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):'),
-            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):',
-             'DerivationCache = Foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):',
+             '_derive = foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):'),
+            ('typed_audit', 'def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):',
+             'DerivationCache = Foreign\n\ndef _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):'),
             ('audit_omissions', '    encoded = _json(payload)\n',
              '    payload["chunks"] = payload["chunks"][:1]\n    encoded = _json(payload)\n'),
             ('audit_omissions', '    return Prepared(encoded)\n',
@@ -2087,6 +2087,17 @@ class TestNativeSharedProcedure:
              '                "payload": foreign(payload), "limitations": list(LIMITATIONS)}'),
         ]
         assert scan.derive_native_shared_procedure(ROOT)['protocol_responses']['formula'] == 'R + W + 2'
+        for index, (module, before, after) in enumerate(cases):
+            self.refuse_producer_mutation(tmp_path / str(index), module, before, after)
+
+    def test_private_omission_route_still_uses_complete_public_constructor(self, tmp_path):
+        cases = [
+            ('audit_omissions', '    return _prepare(record=record,', '    return foreign(record=record,'),
+            ('audit_omissions', '    return _prepare(record=record, bundle=bundle, manifest=manifest, receipt=receipt,',
+             '    return _prepare(record=record, bundle=other, manifest=manifest, receipt=receipt,'),
+            ('audit_omissions', 'def _prepare(*, record: bytes,', '_prepare = foreign\n\ndef _prepare(*, record: bytes,'),
+            ('typed_audit', '_catalog=(_schema_reuse.for_snapshot(snapshot)', '_catalog=(foreign(snapshot)'),
+        ]
         for index, (module, before, after) in enumerate(cases):
             self.refuse_producer_mutation(tmp_path / str(index), module, before, after)
 

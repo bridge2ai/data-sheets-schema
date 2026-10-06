@@ -159,6 +159,28 @@ def _source_authority(raw, project):
 
 
 
+class _SchemaReuse:
+    """A fresh logical catalog owned only by one prepare stack, never cached."""
+    def __init__(self, sources, catalog):
+        self.sources, self.catalog = sources, catalog
+
+    def for_snapshot(self, snapshot):
+        # Row encoding normalizes names/paths. Unusual supported subclasses
+        # retain the original constructor instead of adding a new refusal.
+        for sources in (self.sources, snapshot.sources):
+            if type(sources) is not tuple or any(
+                    type(row) is not tuple or len(row) != 3
+                    or type(row[0]) is not str or type(row[1]) is not type(Path())
+                    or type(row[2]) is not bytes for row in sources):
+                return None
+        if snapshot.sources != self.sources:
+            return None
+        if self.catalog['sources'] != [
+                {'name': name, 'sha256': _sha(raw)} for name, _path, raw in snapshot.sources]:
+            return None
+        return self.catalog
+
+
 class DerivationCache:
     """Bounded, caller-owned pure packet derivations; never response verdicts.
 
@@ -173,7 +195,7 @@ class DerivationCache:
         self.max_entries, self.max_bytes = max_entries, max_bytes
         self._rows, self._bytes = {}, 0
 
-    def _derive(self, inputs, schema_rows, project, limits, *, captured_assets=None):
+    def _derive(self, inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):
         def exact_json(value):
             if type(value) is dict:
                 if any(type(key) is not str for key in value):
@@ -194,7 +216,7 @@ class DerivationCache:
         key = (len(identity), _sha(identity))
         encoded = self._rows.get(key)
         if encoded is None:
-            derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+            derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
             encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
                              'prepared_payload_json': prepared.payload_json})
             if len(encoded) <= self.max_bytes:
@@ -206,16 +228,18 @@ class DerivationCache:
         return value['derived'], {name: _unblob(blob) for name, blob in value['raw'].items()}, omissions.Prepared(value['prepared_payload_json'])
 
 
-def _derive(inputs, schema_rows, project, limits, *, derivations=None, captured_assets=None):
+def _derive(inputs, schema_rows, project, limits, *, derivations=None, captured_assets=None, _schema_reuse=None):
     if derivations is not None:
         if type(derivations) is not DerivationCache:
             raise ValueError('derivations must be an explicit DerivationCache')
-        return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+        return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     if captured_assets is None:
         return _derive_uncached(inputs, schema_rows, project, limits)
+    if _schema_reuse is not None:
+        return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)
 
-def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None):
+def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=None, _schema_reuse=None):
     if type(inputs) is not dict or not _REQUIRED <= set(inputs) <= _REQUIRED | _OPTIONAL:
         raise ValueError("captured input roster differs from protocol")
     raw = {key: _unblob(value) for key, value in inputs.items()}
@@ -229,11 +253,13 @@ def _derive_uncached(inputs, schema_rows, project, limits, *, captured_assets=No
         authority = _source_authority(raw["source_manifest"], project)
     _exact(limits, {"max_paths", "max_inventory_bytes", "max_workers", "max_output_tokens", "max_request_bytes"}, "limits")
     snapshot = _snapshot(schema_rows)
-    prepared = omissions.prepare(record=raw["original_full"], bundle=raw["bundle"],
+    prepared = omissions._prepare(record=raw["original_full"], bundle=raw["bundle"],
         manifest=raw["manifest"], receipt=raw["receipt"], context=raw["context"],
         schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
         max_output_tokens=limits["max_output_tokens"], max_request_bytes=limits["max_request_bytes"],
-        captured_assets=captured_assets)
+        captured_assets=captured_assets,
+        _catalog=(_schema_reuse.for_snapshot(snapshot)
+                  if captured_assets is not None and type(_schema_reuse) is _SchemaReuse else None))
     plan = batches.make_plan(raw["original_full"].decode("utf-8"), version=2,
         **{k: limits[k] for k in ("max_paths", "max_inventory_bytes", "max_workers")})
     contracts = {stage: {"contract": output_format.contract(stage, version=2),
@@ -272,19 +298,22 @@ def prepare(*, protocol, original_full, bundle, manifest, receipt, context, sche
     inputs = {key: _blob(value) for key, value in dict(original_full=original_full,
         bundle=bundle, manifest=manifest, receipt=receipt, context=context,
         original_core=original_core, source_manifest=source_manifest).items() if value is not None}
+    _schema_reuse = None
     if schema_snapshot is not None:
-        # The omission constructor independently verifies exact transitive
+        # This first constructor verifies exact transitive
         # closure/root identity from these bytes, with no ambient import reads.
-        omissions._schema(Path(schema_path), schema_snapshot=schema_snapshot,
-                          logical_paths=captured_assets is not None)
+        catalog = omissions._schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                                    logical_paths=captured_assets is not None)
         rows = _snapshot_rows(schema_snapshot)
+        if captured_assets is not None:
+            _schema_reuse = _SchemaReuse(schema_snapshot.sources, catalog)
     elif captured_assets is not None:
         raise ValueError("captured omission assets require the explicit captured schema closure")
     else:
         rows = _snapshot_rows(_capture(Path(schema_path)))
     limits = dict(max_output_tokens=max_output_tokens, max_request_bytes=max_request_bytes,
                   max_paths=max_paths, max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)
-    derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)
+    derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     packet = _seal(dict(kind=PACKET, protocol=audit_protocol.select(protocol), inputs=inputs,
         schema_sources=rows, project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))
     _bounded_json(_json(packet), "packet", MAX_PACKET_BYTES)

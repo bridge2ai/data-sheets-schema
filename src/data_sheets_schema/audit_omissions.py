@@ -453,6 +453,16 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
             max_request_bytes: int = 32_000_000, captured_assets=None) -> Prepared:
     """Read schema once, capture input bytes, render no transport-specific call."""
+    return _prepare(record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
+        schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
+        captured_assets=captured_assets)
+
+
+def _prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
+             context: bytes, schema_path: Path, max_output_tokens: int, schema_snapshot=None,
+             max_request_bytes: int = 32_000_000, captured_assets=None, _catalog=None) -> Prepared:
+    """Common constructor; only the typed prepare stack supplies a fresh catalog."""
     if any(type(n) is not int or n < 1 for n in (max_output_tokens, max_request_bytes)):
         raise ValueError("request/output limits must be explicit positive integers")
     assets = captured_asset_bytes(captured_assets)
@@ -490,8 +500,9 @@ def prepare(*, record: bytes, bundle: bytes, manifest: bytes, receipt: bytes,
             raise ValueError("receipt contains an unknown chunk status")
         prior[key] = status
     try:
-        catalog = _schema(Path(schema_path), schema_snapshot=schema_snapshot,
-                          logical_paths=captured_assets is not None)
+        catalog = (_catalog if _catalog is not None else
+                   _schema(Path(schema_path), schema_snapshot=schema_snapshot,
+                           logical_paths=captured_assets is not None))
     except (KeyError, TypeError, AttributeError, RecursionError, yaml.YAMLError) as exc:
         raise ValueError("selected schema cannot be captured unambiguously") from exc
     owners = _owners(document, catalog, context_doc["vocabulary"])

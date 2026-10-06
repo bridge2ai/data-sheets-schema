@@ -4544,7 +4544,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
     limits = statement(prepare, '''limits = dict(max_output_tokens=max_output_tokens,
         max_request_bytes=max_request_bytes, max_paths=max_paths,
         max_inventory_bytes=max_inventory_bytes, max_workers=max_workers)''')
-    derive_call = statement(prepare, 'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets)')
+    derive_call = statement(prepare, 'derived, _, _ = _derive(inputs, rows, project, limits, derivations=derivations, captured_assets=captured_assets, _schema_reuse=_schema_reuse)')
     seal = statement(prepare, '''packet = _seal(dict(kind=PACKET,
         protocol=audit_protocol.select(protocol), inputs=inputs, schema_sources=rows,
         project=project, limits=limits, **derived, limitations=list(LIMITATIONS)))''')
@@ -4569,9 +4569,11 @@ def derive_native_shared_procedure(root: Path) -> dict:
     exact_body(dispatch, '''if derivations is not None:
         if type(derivations) is not DerivationCache:
             raise ValueError('derivations must be an explicit DerivationCache')
-        return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+        return derivations._derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     if captured_assets is None:
         return _derive_uncached(inputs, schema_rows, project, limits)
+    if _schema_reuse is not None:
+        return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
     return _derive_uncached(inputs, schema_rows, project, limits, captured_assets=captured_assets)''')
     cache_init = function('typed_audit', '__init__', 'DerivationCache')
     empty = statement(cache_init, 'self._rows, self._bytes = {}, 0')
@@ -4583,7 +4585,7 @@ def derive_native_shared_procedure(root: Path) -> dict:
         raise fail('cache producer lacks its unique miss branch')
     miss = misses[0]
     expected_miss = ast.parse('''if encoded is None:
-        derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets)
+        derived, raw, prepared = _derive(inputs, schema_rows, project, limits, captured_assets=captured_assets, _schema_reuse=_schema_reuse)
         encoded = _json({'derived': derived, 'raw': {name: _blob(value) for name, value in raw.items()},
                          'prepared_payload_json': prepared.payload_json})
         if len(encoded) <= self.max_bytes:
@@ -4610,8 +4612,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
     if not same(plan, "plan = batches.make_plan(raw['original_full'].decode('utf-8'), version=2, **{k: limits[k] for k in ('max_paths', 'max_inventory_bytes', 'max_workers')})"):
         raise fail('typed plan is not derived from the original full and partition limits')
     prepared = assignment(derived, 'prepared').value
-    if not isinstance(prepared, ast.Call) or ast.unparse(prepared.func) != 'omissions.prepare':
+    if not isinstance(prepared, ast.Call) or ast.unparse(prepared.func) != 'omissions._prepare':
         raise fail('typed omission request does not use its actual constructor')
+    statement(derived, '''prepared = omissions._prepare(record=raw['original_full'], bundle=raw['bundle'],
+        manifest=raw['manifest'], receipt=raw['receipt'], context=raw['context'],
+        schema_path=snapshot.sources[0][1], schema_snapshot=snapshot,
+        max_output_tokens=limits['max_output_tokens'], max_request_bytes=limits['max_request_bytes'],
+        captured_assets=captured_assets, _catalog=(_schema_reuse.for_snapshot(snapshot)
+            if captured_assets is not None and type(_schema_reuse) is _SchemaReuse else None))''')
     result = [n for n in derived.body if isinstance(n, ast.Return) and isinstance(n.value, ast.Tuple)]
     if len(result) != 1 or ast.unparse(field(result[0].value.elts[0], 'plan')) != 'plan' or \
             ast.unparse(field(result[0].value.elts[0], 'omission_request')) != 'prepared.request()':
@@ -4650,7 +4658,14 @@ def derive_native_shared_procedure(root: Path) -> dict:
     if sum(isinstance(n, ast.Name) and n.id == 'roster' for n in ast.walk(run)) != 4:
         raise fail('required roster is filtered, extended or otherwise reused')
 
-    omission = function('audit_omissions', 'prepare')
+    # Public and typed callers reach the same fixed chunk/request constructor.
+    # The private catalog handoff does not establish runtime schema validity.
+    exact_body(function('audit_omissions', 'prepare'), '''return _prepare(
+        record=record, bundle=bundle, manifest=manifest, receipt=receipt,
+        context=context, schema_path=schema_path, max_output_tokens=max_output_tokens,
+        schema_snapshot=schema_snapshot, max_request_bytes=max_request_bytes,
+        captured_assets=captured_assets)''')
+    omission = function('audit_omissions', '_prepare')
     chunk_calls = [n for n in ast.walk(omission) if isinstance(n, ast.Assign) and
                    same(n, 'chunks, _pins = evidence.source_chunks_from_bytes(bundle, manifest)')]
     if len(chunk_calls) != 1:
