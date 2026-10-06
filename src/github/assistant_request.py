@@ -19,6 +19,7 @@ request is now one explicit line, and nothing else is one:
 - it lies outside fenced code blocks, and outside the HTML blocks that run
   past a blank line (a comment, <pre>, <script>, <style>, <textarea>, a
   processing instruction, a declaration, CDATA);
+- it lies outside a video or rp element, including across blank lines;
 - no line before it leaves raw HTML open (see below).
 
 Standing alone keeps the line out of code spans, quotes, lists, tables and
@@ -41,9 +42,10 @@ its last line. And no line outside a fenced code block may hold a start
 tag of one of those elements, a processing instruction, CDATA or "--!>":
 CommonMark passes them through as raw HTML even inside a paragraph, and
 the tokenizer ends the last three sooner than CommonMark does. Otherwise
-no later line is read as a request. (An element that hides content it
-does hold, such as <template> or one with a `hidden` attribute, is not
-covered: that is a question of rendering, not of where markup ends.)
+no later line is read as a request. Separately, video and rp content is
+excluded until an explicit matching close (#4452). This is a finite rule
+for the request renderer, not a general stylesheet or visibility evaluator;
+other elements and attributes retain the existing handling.
 
 This reads lines, not a Markdown tree. Where it cannot tell where a fence or
 an HTML block ends without parsing lists or HTML (one opened on a list
@@ -125,6 +127,10 @@ OPAQUE = re.compile(r"<(?:iframe|math|noembed|noframes|noscript|plaintext|script
                     r"(?=[\t\n\f />]|\Z)|<\?|<!\[CDATA\[|--!>", re.IGNORECASE | re.ASCII)
 #: The HTML tokenizer's white space.
 HTML_SPACE = "\t\n\f "
+#: Exact nonvoid elements whose content cannot authorize a request (#4452).
+HIDDEN_TAG = re.compile(r"<(?P<close>/)?(?P<name>video|rp)(?=[\t\n\f />]|\Z)",
+                        re.IGNORECASE | re.ASCII)
+BACKTICKS = re.compile(r"`+")
 
 #: Why a line that starts with the handle does not stand alone.
 BEFORE_NOT_BLANK = ("the line before it is not blank (a request line stands alone between blank lines, "
@@ -236,6 +242,86 @@ def _tag_end(text: str, start: int) -> Optional[int]:
     return None
 
 
+class _HiddenRegions:
+    """Track only explicit video/rp regions; leave uncertain HTML to `lost`.
+
+    Use the existing tokenizer for attributes/comments. Markdown examples
+    do not open regions, and a slash on these nonvoid tags does not close
+    them. This is deliberately not an HTML tree builder: mismatched closes
+    refuse the remaining text instead of guessing an implied end.
+    """
+
+    def __init__(self) -> None:
+        self.stack: list = []       # (tag name, opening line)
+        self.code_end: Optional[tuple] = None  # (line index, column)
+
+    def _code_close(self, lines: list, index: int, start: int, width: int) -> Optional[tuple]:
+        # A code span can continue across lines of its paragraph, but not
+        # across a blank line. Only a whole run of the same width closes it.
+        for at in range(index, len(lines)):
+            if at != index and not lines[at].strip(" "):
+                break
+            for run in BACKTICKS.finditer(lines[at], start if at == index else 0):
+                if run.end() - run.start() == width:
+                    return at, run.end()
+        return None
+
+    def scan(self, text: str, lines: list, index: int, *, raw: bool = False) -> bool:
+        """Update regions; True means a tag/comment or nesting is uncertain.
+
+        Fences and HTML blocks are handled by the caller before this scan.
+        `raw` disables Markdown escapes/code spans inside a known HTML run.
+        """
+        i = 0
+        if self.code_end is not None:
+            end_line, end_column = self.code_end
+            if index < end_line:
+                return False
+            if index == end_line:
+                i = end_column
+            self.code_end = None
+        while i < len(text):
+            if not raw and text[i] == "\\" and text[i + 1:i + 2] in ("\\", "`", "<"):
+                i += 2
+                continue
+            if not raw and text[i] == "`":
+                run = BACKTICKS.match(text, i)
+                close = self._code_close(lines, index, run.end(), run.end() - i)
+                if close is not None:
+                    if close[0] != index:
+                        self.code_end = close
+                        return False
+                    i = close[1]
+                    continue
+                i = run.end()
+                continue
+            if text[i] != "<":
+                i += 1
+                continue
+            if text.startswith("<!--", i):
+                end = _comment_end(text, i)
+            elif TAG_OPEN.match(text, i):
+                end = _tag_end(text, i)
+                hidden = HIDDEN_TAG.match(text, i)
+                if end is not None and hidden is not None:
+                    name = hidden["name"].lower()
+                    if not hidden["close"]:
+                        self.stack.append((name, index + 1))
+                    elif self.stack:
+                        if self.stack[-1][0] != name:
+                            return True
+                        self.stack.pop()
+            elif text.startswith(("<!", "<?", "</"), i):
+                close = text.find(">", i + 2)
+                end = None if close < 0 else close + 1
+            else:
+                end = i + 1
+            if end is None:
+                return bool(self.stack) or HIDDEN_TAG.match(text, i) is not None
+            i = end
+        return False
+
+
 def _leaves_html_open(text: str) -> bool:
     """Whether `text`, read as raw HTML, may leave something open that hides
     what the page shows after it: anything OPAQUE matches, or an HTML
@@ -303,6 +389,7 @@ def find_request(text: Optional[str], datasets: Iterable[str]) -> Decision:
     notes: list = []
     block: Optional[_Block] = None
     lost: Optional[str] = None      # why no line from here on can be read
+    hidden = _HiddenRegions()
     maybe_html = False              # this run of lines may be an HTML block 6-7
     previous_blank = True
     pending: Optional[tuple] = None   # (line, dataset, read): a request line until the line after it is seen
@@ -336,6 +423,10 @@ def find_request(text: Optional[str], datasets: Iterable[str]) -> Decision:
                 if block.fence is None:
                     if _leaves_html_open("\n".join(lines[block.line - 1:number])):
                         lost = _left_open(block.line, number)
+                    if lost is None:
+                        tail = line[block.end.search(line).end():]
+                        if hidden.scan(tail, lines, number - 1, raw=True):
+                            lost = _left_open(block.line, number)
                     block = None
                 elif _indent(line) <= 3:
                     block = None
@@ -358,7 +449,10 @@ def find_request(text: Optional[str], datasets: Iterable[str]) -> Decision:
             if end is None and TAG.match(rest):
                 maybe_html = True
             elif starts:
-                if not follows_blank:
+                if hidden.stack:
+                    tag, opened = hidden.stack[0]
+                    notes.append(f"line {number}: inside the hidden <{tag}> element opened on line {opened}")
+                elif not follows_blank:
                     notes.append(f"line {number}: {BEFORE_NOT_BLANK}")
                 else:
                     name, why = _requested(line, datasets)
@@ -366,6 +460,13 @@ def find_request(text: Optional[str], datasets: Iterable[str]) -> Decision:
                         notes.append(f"line {number}: {why}")
                     else:
                         pending = (number, name, True)
+            # Quoted/list/indented examples keep their existing container
+            # rules. Fences/HTML blocks above are authoritative; a closing
+            # HTML block can be followed by a real tag on the same line.
+            if not nested and _indent(line) <= 3 and not QUOTE_MARKER.match(line):
+                region_text = line if end is None else line[end.search(line).end():]
+                if hidden.scan(region_text, lines, number - 1, raw=maybe_html or end is not None):
+                    lost = _left_open(number, number)
             # A line that may be raw HTML must close what it opens; any other
             # line, read as a paragraph, may still hold OPAQUE (module docstring).
             if maybe_html or end is not None or nested or _indent(line) or QUOTE_MARKER.match(line):

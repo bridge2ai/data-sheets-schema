@@ -340,6 +340,142 @@ class TestARequestIsOneExplicitLine(unittest.TestCase):
                 self.assertEqual(_ask(text), ("CM4AI", 1, (_unsure(7, 3),)))
 
 
+class TestHiddenRequestRegions(unittest.TestCase):
+    """#4452: video is stripped with its content; rp is a hidden HTML element.
+
+    These are synthetic parser controls. They do not claim a fresh browser
+    rendering measurement; the other seven observed sanitizer cases remain
+    compatible rather than becoming a generic visibility policy.
+    """
+
+    def test_original_hidden_requests_are_not_admitted(self):
+        for tag in ("video", "rp"):
+            with self.subTest(tag=tag):
+                result = _ask(f"<{tag}>\n\n{H} CM4AI\n\n</{tag}>")
+                self.assertEqual(result[:2], (None, None))
+                self.assertEqual(result.notes, (f"line 3: inside the hidden <{tag}> element opened on line 1",))
+
+    def test_explicit_close_recovers_the_visible_request(self):
+        for tag in ("video", "rp"):
+            with self.subTest(tag=tag):
+                result = _ask(f"<{tag}>\n\n{H} CM4AI\n\n</{tag}>\n\n{H} CHORUS")
+                self.assertEqual(result[:2], ("CHORUS", 7))
+                self.assertEqual(len(result.notes), 1)
+
+    def test_hidden_other_dataset_does_not_cancel_visible_request(self):
+        text = f"{H} CM4AI\n\n<video>\n\n{H} CHORUS\n\n</video>"
+        self.assertEqual(_ask(text), ("CM4AI", 1, ("line 5: inside the hidden <video> element opened on line 3",)))
+        # Both actually visible requests still conflict.
+        self.assertFalse(_ask(text + f"\n\n{H} CHORUS").request)
+
+    def test_case_attributes_and_html_delimiters(self):
+        for opened, closed in (("<VIDEO>", "</video>"), ("<Rp title='x>y'>", "</RP>"),
+                                ('<video title="</video>">', "</video>"),
+                                ("<video\fcontrols>", "</video >"),
+                                ("<video/>", "</video>"), ("<rp\tclass=x>", "</rp>")):
+            with self.subTest(opened=opened):
+                self.assertFalse(_ask(f"{opened}\n\n{H} CM4AI\n\n{closed}").request)
+                self.assertEqual(_ask(f"{opened}{closed}\n\n{H} CM4AI")[:2], ("CM4AI", 3))
+        for name in ("videox", "rpx", "video-player", "rp_suffix", "vıdeo"):
+            with self.subTest(name=name):
+                self.assertEqual(_ask(f"<{name}>\n\n{H} CM4AI\n\n</{name}>")[:2], ("CM4AI", 3))
+
+    def test_missing_and_nonvoid_self_closing_tags_stay_hidden(self):
+        for opened in ("<video>", "<rp>", "<video/>", "<rp />"):
+            with self.subTest(opened=opened):
+                self.assertFalse(_ask(f"{opened}\n\n{H} CM4AI").request)
+
+    def test_nested_regions_need_matching_closes(self):
+        for inside in ("<video><rp></rp>", "<video><video></video>"):
+            with self.subTest(inside=inside):
+                text = f"{inside}\n\n{H} CM4AI\n\n</video>\n\n{H} CHORUS"
+                self.assertEqual(_ask(text)[:2], ("CHORUS", 7))
+        self.assertFalse(_ask(f"<video><rp></video></rp>\n\n{H} CM4AI").request)
+
+    def test_attribute_and_comment_fake_closes_do_not_recover(self):
+        for fake in ('<span title="</video>">', "<!-- </video> -->",
+                     "<!--\n</video>\n-->", "<!--> <!-- </video> -->"):
+            with self.subTest(fake=fake):
+                text = f"<video>\n\n{fake}\n\n{H} CM4AI\n\n</video>\n\n{H} CHORUS"
+                result = _ask(text)
+                self.assertEqual(result.dataset, "CHORUS")
+                self.assertEqual(result.line, text.count("\n") + 1)
+                self.assertEqual(len(result.notes), 1)
+
+    def test_comments_and_attributes_do_not_open_hidden_regions(self):
+        for example in ("<!-- <video> -->", "<!--\n<video>\n-->",
+                        '<span title="<video>">text</span>', '<div data="<rp>"></div>'):
+            with self.subTest(example=example):
+                result = _ask(f"{example}\n\n{H} CM4AI")
+                self.assertEqual(result[:2], ("CM4AI", example.count("\n") + 3))
+                self.assertEqual(result.notes, ())
+
+    def test_literal_markdown_examples_do_not_open_regions(self):
+        for example in (r"\<video>", "Use `<video>`.", "Use ``<rp> ` x``.",
+                        "Use `\n<video>\n` here.", "> `<video>`", "    <video>",
+                        "```html\n<video>\n```", "~~~\n<rp>\n~~~"):
+            with self.subTest(example=example):
+                result = _ask(f"{example}\n\n{H} CM4AI")
+                self.assertEqual(result[:2], ("CM4AI", example.count("\n") + 3))
+                self.assertEqual(result.notes, ())
+        # An unmatched backtick is literal text; two backslashes leave '<'
+        # unescaped. Neither may manufacture a visible request.
+        for example in ("Use ` <video>", "\\\\<video>"):
+            with self.subTest(example=example):
+                self.assertFalse(_ask(f"{example}\n\n{H} CM4AI").request)
+
+    def test_literal_closing_tags_in_code_do_not_recover(self):
+        for example in ("`</video>`", "```html\n</video>\n```", "~~~\n</video>\n~~~"):
+            with self.subTest(example=example):
+                text = f"<video>\n\n{example}\n\n{H} CM4AI\n\n</video>\n\n{H} CHORUS"
+                result = _ask(text)
+                self.assertEqual(result.dataset, "CHORUS")
+                self.assertEqual(len(result.notes), 1)
+
+    def test_html_block_tail_is_still_scanned(self):
+        for prefix in ("<!-- note -->", "<!--\nnote\n-->", "<pre>example</pre>"):
+            with self.subTest(prefix=prefix):
+                text = f"{prefix}<video>\n\n{H} CM4AI\n\n</video>\n\n{H} CHORUS"
+                self.assertEqual(_ask(text).dataset, "CHORUS")
+        text = f"<video>\n\n<!--\nnote\n--> </video>\n\n{H} CM4AI"
+        self.assertEqual(_ask(text)[:2], ("CM4AI", 7))
+
+    def test_other_observed_sanitizer_cases_and_details_are_unchanged(self):
+        for opened, closed in (("<div hidden>", "</div>"), ("<template>", "</template>"),
+                                ("<select>", "</select>"), ("<dialog>", "</dialog>"),
+                                ("<audio>", "</audio>"), ("<canvas>", "</canvas>"),
+                                ("<object>", "</object>"),
+                                ("<details><summary>Request</summary>", "</details>")):
+            with self.subTest(opened=opened):
+                self.assertEqual(_ask(f"{opened}\n\n{H} CM4AI\n\n{closed}"), ("CM4AI", 3, ()))
+
+    def test_existing_opaque_uncertainty_is_not_cleared_by_hidden_close(self):
+        for opaque in ("<textarea>", "<svg>", '<span title="unclosed'):
+            with self.subTest(opaque=opaque):
+                self.assertFalse(_ask(f"<video>\n\n{opaque}\n\n</video>\n\n{H} CM4AI").request)
+
+    def test_actual_cli_emits_only_the_visible_dataset(self):
+        with tempfile.TemporaryDirectory() as directory:
+            tmp = Path(directory)
+            inputs = tmp / "inputs"
+            inputs.mkdir()
+            for dataset in DATASETS:
+                (inputs / dataset).mkdir()
+            cases = ((f"<video>\n\n{H} CM4AI\n\n</video>", "false", ""),
+                     (f"<rp>\n\n{H} CM4AI\n\n</rp>\n\n{H} CHORUS", "true", "CHORUS"))
+            for at, (text, request, dataset) in enumerate(cases):
+                with self.subTest(request=request):
+                    body, output = tmp / f"body-{at}.md", tmp / f"output-{at}"
+                    body.write_text(text, encoding="utf-8")
+                    result = subprocess.run([sys.executable, "-B", "-S", str(SCRIPT),
+                                             "--inputs", str(inputs), "--body", str(body),
+                                             "--github-output", str(output)],
+                                            capture_output=True, text=True, timeout=15)
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    self.assertEqual(output.read_text(encoding="utf-8"), f"request={request}\ndataset={dataset}\n")
+                    self.assertTrue(result.stdout.startswith("request:" if request == "true" else "no request"))
+
+
 class TestTheWorkflow(unittest.TestCase):
     """d4d-agent.yml: `contains()` is only a pre-filter; the request step
     decides, and the run takes its dataset from that step alone."""
