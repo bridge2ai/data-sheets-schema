@@ -807,6 +807,71 @@ class TestProjectKeyedCode(unittest.TestCase):
                             for h in hits), hits)
 
 
+# Native scanner support can ship before the native runtime. Only this complete
+# optional group may be absent from a standalone API checkout (#4514).
+_OPTIONAL_NATIVE_MODEL_FACING = frozenset({
+    "native_shared_render", "native_shared_stage", "native_shared_receipts", "native_shared_contract",
+})
+
+
+def _missing_model_facing_modules(root, closures):
+    def paths(name):
+        return (f"src/data_sheets_schema/{name}.py",
+                f"src/data_sheets_schema/{name}/__init__.py")
+    required = scan.MODEL_FACING_MODULES
+    # Any present native source makes the whole group mandatory: a partial
+    # implementation or missing closure edge must not become an exemption.
+    if not any((root / path).exists() or (root / path).is_symlink()
+               for name in _OPTIONAL_NATIVE_MODEL_FACING for path in paths(name)):
+        required = required - _OPTIONAL_NATIVE_MODEL_FACING
+    return {name for name in required if not any(path in closures for path in paths(name))}
+
+
+class TestModelFacingClosureCoverage(unittest.TestCase):
+    def test_all_optional_native_sources_absent(self):
+        with tempfile.TemporaryDirectory() as d:
+            ordinary = scan.MODEL_FACING_MODULES - _OPTIONAL_NATIVE_MODEL_FACING
+            closure = {f"src/data_sheets_schema/{name}.py" for name in ordinary}
+            self.assertEqual(_missing_model_facing_modules(Path(d), closure), set())
+
+    def test_an_ordinary_missing_module_is_never_exempted(self):
+        with tempfile.TemporaryDirectory() as d:
+            ordinary = scan.MODEL_FACING_MODULES - _OPTIONAL_NATIVE_MODEL_FACING
+            closure = {f"src/data_sheets_schema/{name}.py" for name in ordinary if name != "api_runner"}
+            # Its file is absent too: filtering the whole roster by existence
+            # would silently hide this mandatory missing module.
+            self.assertEqual(_missing_model_facing_modules(Path(d), closure), {"api_runner"})
+
+    def test_present_native_sources_require_every_closure_edge(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            for name in _OPTIONAL_NATIVE_MODEL_FACING:
+                _write(root / f"src/data_sheets_schema/{name}.py", "VALUE = 1\n")
+            closure = {f"src/data_sheets_schema/{name}.py" for name in scan.MODEL_FACING_MODULES}
+            self.assertEqual(_missing_model_facing_modules(root, closure), set())
+            closure.remove("src/data_sheets_schema/native_shared_stage.py")
+            self.assertEqual(_missing_model_facing_modules(root, closure), {"native_shared_stage"})
+
+    def test_a_dangling_native_module_entry_is_not_absence(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            link = root / "src/data_sheets_schema/native_shared_render.py"
+            link.parent.mkdir(parents=True)
+            link.symlink_to("missing.py")
+            ordinary = scan.MODEL_FACING_MODULES - _OPTIONAL_NATIVE_MODEL_FACING
+            closure = {f"src/data_sheets_schema/{name}.py" for name in ordinary}
+            self.assertEqual(_missing_model_facing_modules(root, closure), _OPTIONAL_NATIVE_MODEL_FACING)
+
+    def test_partial_native_source_group_is_not_an_exemption(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            _write(root / "src/data_sheets_schema/native_shared_render.py", "VALUE = 1\n")
+            ordinary = scan.MODEL_FACING_MODULES - _OPTIONAL_NATIVE_MODEL_FACING
+            closure = {f"src/data_sheets_schema/{name}.py" for name in ordinary | {"native_shared_render"}}
+            self.assertEqual(_missing_model_facing_modules(root, closure),
+                             _OPTIONAL_NATIVE_MODEL_FACING - {"native_shared_render"})
+
+
 class TestDiscovery(unittest.TestCase):
     """Surfaces are derived from the code, not a glob list (#4023, #4054)."""
 
@@ -1207,10 +1272,7 @@ class TestDiscovery(unittest.TestCase):
         the api, native or deterministic closure, matched by path so that
         cli/healthsheet.py does not stand in for healthsheet.py (#4054)."""
         closures = set(self.facts["api_closure"] + self.facts["native_closure"] + self.facts["deterministic_closure"])
-        missing = {name for name in scan.MODEL_FACING_MODULES
-                   if f"src/data_sheets_schema/{name}.py" not in closures
-                   and f"src/data_sheets_schema/{name}/__init__.py" not in closures}
-        self.assertEqual(missing, set())
+        self.assertEqual(_missing_model_facing_modules(ROOT, closures), set())
 
 
 #: A runner small enough to make monolithic: one phase, a model-call
