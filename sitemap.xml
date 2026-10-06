@@ -1761,6 +1761,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/nested-support-execution/</loc>
+         <lastmod>2026-10-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/nested-support-results/</loc>
          <lastmod>2026-10-06</lastmod>
          <changefreq>daily</changefreq>
@@ -2307,6 +2312,11 @@
     </url>
     <url>
          <loc>https://bridge2ai.github.io/data-sheets-schema/tools/</loc>
+         <lastmod>2026-10-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bridge2ai.github.io/data-sheets-schema/top-level-fitness-results/</loc>
          <lastmod>2026-10-06</lastmod>
          <changefreq>daily</changefreq>
     </url>

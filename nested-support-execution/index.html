@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/created_on/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/nested-support-execution/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: created_on - data-sheets-schema</title>
+        <title>Registered nested-support execution - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-created_on" class="md-skip">
+        <a href="#registered-nested-support-execution" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: created_on
+              Registered nested-support execution
             
           </span>
         </div>
@@ -316,56 +316,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
+  <a href="#explicit-top-level-fitness-selection" class="md-nav__link">
+    Explicit top-level fitness selection
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
+  <a href="#registration-and-execution" class="md-nav__link">
+    Registration and execution
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
+  <a href="#scheduling-accounting-and-failure-capture" class="md-nav__link">
+    Scheduling, accounting and failure capture
   </a>
   
 </li>
@@ -384,124 +350,159 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/created_on.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/nested-support-execution.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-created_on">Slot: created_on</h1>
-<p><em>The date and time when the resource was created. Requires a UTC offset (<code>…T00:00:00Z</code>); RFC 3339 <code>date-time</code> rejects a naive timestamp.</em></p>
-<p>URI: <a href="http://purl.org/dc/terms/created">dcterms:created</a>
-Alias: created_on</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../DatasetCollection/">DatasetCollection</a></td>
-<td>A collection of related datasets, likely containing multiple files of multipl...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Information/">Information</a></td>
-<td>Grouping for datasets and data files</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../Dataset/">Dataset</a></td>
-<td>A single component of related observations and/or information that can be rea...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DataSubset/">DataSubset</a></td>
-<td>A subset of a dataset, likely containing multiple files of multiple potential...</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../FileCollection/">FileCollection</a></td>
-<td>A collection of files with shared characteristics (format, purpose, structure...</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../Datetime/">Datetime</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>2021-03-01T00:00:00Z</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcterms:created</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:created_on</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: created_on
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: '2021-03-01T00:00:00Z'
-description: The date and time when the resource was created. Requires a UTC offset
-  (`…T00:00:00Z`); RFC 3339 `date-time` rejects a naive timestamp.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-rank: 1000
-slot_uri: dcterms:created
-alias: created_on
-domain_of:
-- Information
-range: datetime
-
+<h1 id="registered-nested-support-execution">Registered nested-support execution</h1>
+<h2 id="explicit-top-level-fitness-selection">Explicit top-level fitness selection</h2>
+<p>The same <code>support-execution</code> commands also accept a declaration whose <code>format</code>
+is exactly <code>top_level_fitness_execution_v1</code>, paired with a descriptor prepared
+by <code>fitness-results prepare --protocol top_level_fitness_result_v1</code>. This is a
+separate, fixed instrument; a support descriptor cannot be used with the fitness
+protocol or conversely. The existing support protocol and saved support reader
+retain their original formats and behavior.</p>
+<p>The original fitness request retains its captured model, field specification,
+typed value and system prompt. The effective wire request separately records
+removal of null temperature, <code>stream: false</code>, and any explicitly declared
+thinking/effort options. A fitness registration additionally pins the fitness
+result, schema-digest and fitness-instrument source modules. Captured recheck
+uses the retained authority and does not inspect current source or reconnect.</p>
+<p>Fitness execution reports identify <code>axis: fitness</code> and count only the
+<code>fitness_top_level</code> stratum. Each admitted row contains its complete
+<code>saved_result</code> with the strict fitness/failure/reason assessment, plus a separate
+outer dispatch status. A valid score body received with an HTTP or transport
+failure remains a failed execution; observed usage is still retained. Unstarted
+requests and admitted requests with missing responses remain distinct.</p>
+<p>All scheduling, single-attempt, raw-capture and caller-decision rules below also
+apply to fitness. Local fixture replies and mechanically accepted replies remain
+scientifically ineligible. No registration changes the original plan readiness,
+establishes calibration, combines fitness with nested support, or authorizes a
+paid campaign.</p>
+<p><code>d4d evaluate support-execution</code> explicitly opts into <code>nested_support_execution_v1</code>.
+It consumes an existing <code>nested_support_result_v1</code> descriptor and preserves its
+original readiness blockers, selected records, context, schemas and requests.
+The existing planner, saved-response commands and legacy evaluation calls do not
+select this executor automatically. Top-level fitness requires its separate
+descriptor and adapter; it is not a support verdict.</p>
+<h2 id="registration-and-execution">Registration and execution</h2>
+<p>Prepare a descriptor with <code>support-results prepare</code>, then provide a closed JSON
+declaration. This example is a <strong>fictional local test configuration</strong>. All limits
+are illustrative, not evaluation recommendations. The loopback endpoint must be
+an explicitly started local fixture; this command does not start a server.</p>
+<pre><code class="language-json">{
+  &quot;format&quot;: &quot;nested_support_execution_v1&quot;,
+  &quot;registration_id&quot;: &quot;fictional-local-example&quot;,
+  &quot;purpose&quot;: &quot;local_fixture&quot;,
+  &quot;run_output&quot;: &quot;/absolute/fresh/local-run&quot;,
+  &quot;transport&quot;: {
+    &quot;adapter&quot;: &quot;native_message_http_json_v1&quot;,
+    &quot;url&quot;: &quot;http://127.0.0.1:8765/v1/messages&quot;,
+    &quot;model&quot;: &quot;EXACT_MODEL_FROM_DESCRIPTOR&quot;,
+    &quot;auth&quot;: &quot;none&quot;,
+    &quot;anthropic_version&quot;: &quot;2023-06-01&quot;,
+    &quot;timeout_ms&quot;: 2000,
+    &quot;thinking&quot;: null,
+    &quot;effort&quot;: null,
+    &quot;retries&quot;: 0,
+    &quot;redirects&quot;: false,
+    &quot;environment_proxies&quot;: false
+  },
+  &quot;limits&quot;: {
+    &quot;max_calls&quot;: 2,
+    &quot;request_bytes&quot;: 100000,
+    &quot;response_bytes&quot;: 50000,
+    &quot;total_response_bytes&quot;: 100002,
+    &quot;input_reservation_per_call&quot;: 100,
+    &quot;input_scheduling_threshold&quot;: 200,
+    &quot;output_scheduling_threshold&quot;: 834
+  },
+  &quot;decisions&quot;: {
+    &quot;instrument_review&quot;: null,
+    &quot;context_review&quot;: null,
+    &quot;controls_review&quot;: null,
+    &quot;private_control_handling&quot;: null,
+    &quot;paid_authorization&quot;: null,
+    &quot;calibration_acceptance&quot;: null,
+    &quot;canary_acceptance&quot;: null
+  },
+  &quot;prices&quot;: null
+}
 </code></pre>
-
-</details>
+<pre><code class="language-sh">d4d evaluate support-execution prepare --descriptor descriptor-dir \
+  --declaration declaration.json --output registration-dir
+d4d evaluate support-execution run --registration registration-dir
+d4d evaluate support-execution recheck --run /absolute/fresh/local-run
+</code></pre>
+<p>The actual dispatcher makes one nonstreaming messages POST per admitted request
+using HTTPX, with no retries, redirects or environment proxies. The registered
+wire transformation removes only the planned null temperature, adds
+<code>stream: false</code>, and applies explicit <code>thinking</code> (null or adaptive) and <code>effort</code>
+(null, low, medium, high, max). The model and requested <code>max_tokens</code> remain exact.
+Both original and effective request bytes are retained. Unsupported request
+shapes refuse before dispatch. <code>timeout_ms</code> is HTTP phase inactivity timeout,
+not a total wall-clock deadline.</p>
+<p><code>local_fixture</code> requires a literal loopback HTTP address, rejects credentials and
+approval references, and remains scientifically ineligible even when a response
+is mechanically accepted. <code>calibration</code> and <code>cohort</code> require HTTPS, explicit
+<code>bearer</code> or <code>x-api-key</code> authentication, and explicit decision references. Each
+reference is <code>{ "reference": "...", "sha256": "64 lowercase hex characters" }</code>.
+Calibration requires the first five decisions; cohort requires all seven.
+These declarations are not authenticated approvals or checks of scientific
+truth. The software does not discover private controls or choose their handling.
+The caller must review the exact captured request content and authorize any
+export of selected private material before using a paid route.
+Paid use still needs actual owner authorization; preparing a declaration does
+not provide it. Credentials are supplied only at runtime through an explicitly
+named <code>--credential-env</code> variable and are not saved.</p>
+<h2 id="scheduling-accounting-and-failure-capture">Scheduling, accounting and failure capture</h2>
+<p>Input reservations are <strong>provisional scheduling thresholds</strong>. There is no
+tokenizer or count endpoint, so the first call can exceed its reservation.
+Unknown usage, a reservation overrun, an incomplete or rejected reply, and any
+transport failure stop further admission. This is not a hard input-token or
+monetary cap. Such unimplemented configuration fields are rejected. Requested
+output tokens, actual call count and captured byte limits are enforced.
+Zero-valued reported cache counters remain zero; absent counters remain unknown.
+Reported usage from failed calls remains in accounting rather than disappearing
+into accepted-only totals.</p>
+<p>Optional prices have exactly <code>currency</code>, <code>per_tokens</code>, <code>source</code>, <code>as_of</code>, and
+<code>rates</code> fields. Rates are finite nonnegative decimal strings keyed by any of
+<code>input_tokens</code>, <code>output_tokens</code>, <code>cache_read_input_tokens</code>, and
+<code>cache_creation_input_tokens</code>. A cost is calculated only with all four counters
+and corresponding rates; otherwise it is unknown. No current prices are fetched.
+These calculations use the declared rate basis and do not verify a provider bill.</p>
+<p>Rates have at most 32 significant digits and a stored decimal exponent from
+-18 through 18; the positive integer denominator is at most 10^18. Costs use an
+explicit 64-digit ROUND_HALF_EVEN context independent of ambient decimal
+settings. Extreme rates refuse before admission. A complete failed HTTP reply
+can report usage and an estimated cost while its execution status remains
+failed; observed counters are not verified billing.</p>
+<p>Admission is exclusively created and fsynced at the one registered run location
+before HTTP dispatch. Reentry, including a copied registration pointing to that
+location, refuses. A process interruption after admission cannot purchase a
+replacement. Incomplete admitted evidence is <code>spent_unknown</code>; complete retained
+raw evidence can be settled offline without another request. Recheck never
+resumes unstarted calls. Symlink destinations and aliases are rejected.
+Every later admission requires the preceding durable settlement. A missing
+terminal settlement can still be reconstructed from its retained complete raw
+response, without purchasing a replacement or accepting a later admission.</p>
+<p>Raw HTTP body bytes are bounded during reading, with at most one extra byte to
+prove overflow. Identity encoding is requested; unexpected encodings fail and
+their bounded raw bytes are retained without decompression. HTTP status,
+request-id, transport stage, sanitized failure class and elapsed duration are
+saved before semantic parsing. Headers, cookies, credentials and exception text
+are not recorded. Raw message usage, reasoning and redacted reasoning remain
+available through the saved assessment; none establishes response correctness.</p>
+<p><code>capture_run(directory)</code> captures a closed ledger and all referenced artifacts.
+<code>recheck_captured(capture, ledger)</code> reconstructs it using captured bytes only,
+including after relocation. It does not verify the current runtime, contact a
+provider, read original records or trust saved acceptance flags. This proves
+internal evidence consistency and local invocation association, not cryptographic
+provider provenance. Reports keep support edge/value counts separate and retain
+<code>scientific_eligibility: false</code>; empirical calibration, reviewed human labels,
+context choice and subsequent campaign authorization remain separate work.</p>
 
 
 
