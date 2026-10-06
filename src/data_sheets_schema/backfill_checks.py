@@ -99,7 +99,8 @@ def declared_bundle(record: dict[str, Any], provenance: Path | None = None) -> P
 def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
             only: set[str] | None = None,
             ranges: dict[str, dict[str, str | None]] | None = None, *,
-            report_claims_version: int = 8, schema_policy: str = "recorded") -> dict[str, Any]:
+            report_claims_version: int = 8, schema_policy: str = "recorded",
+            origin_prior: dict[str, Any] | None = None) -> dict[str, Any]:
     """The check blocks for one record, or reasons they cannot be computed.
     `only` restricts the computation to the named blocks (`--blocks`): the
     receipts and grounding checks read the bundle and every chunk, which
@@ -115,7 +116,13 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     today's, and say so under `schema_basis` (#3931): which prefixes were
     declared, and which slots were identifiers or Persons, are facts about
     the schema the run was given. Pair/report rules likewise use the recorded
-    full and core schema bytes, with per-file fallback reasons and hashes (#4062)."""
+    full and core schema bytes, with per-file fallback reasons and hashes (#4062).
+
+    The receipts block carries `origin` (#2933, `receipt_origin_record`): no
+    transcript is read here, so it is the measurement the record carries
+    while it still describes the receipt, else `unknown`. `origin_prior` is
+    that measurement where the record no longer holds it -- a re-record
+    rewrites the file before its inline checks run."""
     if schema_policy not in {"recorded", "legacy_current"}:
         raise ValueError("schema_policy must be recorded or legacy_current")
     want = (lambda name: only is None or name in only)
@@ -314,10 +321,17 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
     if want("receipts"):
         from data_sheets_schema.receipts import block_for, receipt_path
         from data_sheets_schema.provenance import resolve_record_input
+        from data_sheets_schema.receipt_origin_record import for_record
         inputs = record.get("inputs") or {}
         chunks = inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None
         declared_mapping = chunks.get("path") if chunks else None
-        out["receipts"] = {**block_for(full, receipt_path(provenance.parent, paths["project"]),
+        receipt = receipt_path(provenance.parent, paths["project"])
+        # The receipt's origin (#2933) is read from the run's transcript, which
+        # no recomputation here holds: a measurement the record carries is kept
+        # while it describes the receipt on disk, and otherwise it says unknown.
+        if origin_prior is None and isinstance(record.get("receipts"), dict):
+            origin_prior = record["receipts"].get("origin")
+        out["receipts"] = {**block_for(full, receipt,
                                        bundle, inputs.get("bundle_md5"),
                                        bool(inputs.get("receipt_expected")),
                                        manifest=resolve_record_input(Path(declared_mapping), provenance) if declared_mapping else None,
@@ -326,6 +340,7 @@ def compute(provenance: Path, declared: dict[str, set[str]] | None = None,
                                        record_bundle_sha256=inputs.get("bundle_sha256"),
                                        record_chunks=inputs.get("chunks") if isinstance(inputs.get("chunks"), dict) else None,
                                        snapshot_record=record),
+                           "origin": for_record(origin_prior, receipt, full, api_path=bool(record.get("api_usage"))),
                            "recorded_by": RECORDED_BY}
     return out
 
@@ -461,8 +476,16 @@ def summarise(blocks: dict[str, Any]) -> str:
     if "receipts" not in blocks:
         pass
     elif rcp.get("checked"):
+        # Beside the snippets, the origin split where a transcript was read,
+        # now or before (#2933). An origin read from none says nothing here:
+        # that is every record the recorder writes during a run, whose line
+        # stays as it was.
+        from data_sheets_schema.receipt_origin_record import ever_measured, split
+        origin = split(rcp)
         bits.append(f"receipts {rcp['chunks']['reviewed']}/{rcp['chunks']['total']} chunks, "
-                    f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets")
+                    f"{rcp['snippets']['verified']}/{rcp['snippets']['total']} snippets"
+                    + (f" ({origin['contemporaneous']} contemporaneous, {origin['post_draft']} post-draft)"
+                       if origin is not None else " (origin unknown)" if ever_measured(rcp.get("origin")) else ""))
     else:
         bits.append("receipts —" if rcp.get("expected") else "receipts n/a")
     return " · ".join(bits)

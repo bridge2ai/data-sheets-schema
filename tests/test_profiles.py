@@ -1069,11 +1069,13 @@ class TestRoundSeven(_Clean):
         self.assertEqual(rec["schema"]["profile"], "neutral")
         self.assertTrue(rec["schema"]["profile_basis"].startswith("rendered instruction (this process would select bridge2ai"))
         self.assertEqual(rec["schema"]["digest_md5"], CURRENT_NEUTRAL)
-        # A profile whose digest is the other profile's current digest is a finding.
+        # The recorded full-schema hashes select the comparison instrument.
+        # A digest reproduced only under the other profile is still a finding.
         bad = dict(rec); bad["schema"] = dict(rec["schema"], digest_md5=CURRENT_STUDY)
         violations, why = check_record(bad)
         self.assertIsNone(why)
-        self.assertTrue(any("bridge2ai profile's current digest" in v for v in violations), violations)
+        self.assertTrue(any("bridge2ai profile's digest rendered from the recorded schema" in v
+                            for v in violations), violations)
 
     def test_an_unknown_stated_profile_fails_at_construction(self):
         """#1585"""
