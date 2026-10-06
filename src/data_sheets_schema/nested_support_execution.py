@@ -1,4 +1,4 @@
-"""Registered, one-attempt HTTP execution of captured nested support (#4458).
+"""Registered, one-attempt HTTP execution of two explicit instruments (#4458/59).
 
 The original draft descriptor remains draft. Local call association is an
 auditable execution record, not cryptographic provider authentication or human
@@ -24,6 +24,7 @@ from . import nested_support_results as saved
 from .support_plan import canonical
 
 FORMAT = "nested_support_execution_v1"
+FITNESS_FORMAT = "top_level_fitness_execution_v1"
 ADAPTER = "native_message_http_json_v1"
 MAX_REGISTRATION_BYTES = 4_000_000
 MAX_CALLS = 100_000
@@ -40,6 +41,9 @@ _SOURCE_NAMES = (
     "nested_support_execution.py", "nested_support_results.py", "support_targets.py",
     "support_plan.py", "support_judge.py", "evidence_assertions.py", "duplicate_keys.py",
     "schema_snapshot.py", "schema_view.py", "evaluation_model.py",
+)
+_FITNESS_SOURCE_NAMES = _SOURCE_NAMES + (
+    "top_level_fitness_results.py", "schema_digest.py", "evidence_score.py",
 )
 
 
@@ -78,13 +82,36 @@ def _pin(raw):
     return {"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw)}
 
 
-def _identity():
+def _adapter(protocol):
+    # This closed dispatch table selects a captured instrument, not a caller
+    # supplied implementation or a transport callback.
+    if protocol == FORMAT:
+        return saved
+    if protocol == FITNESS_FORMAT:
+        from . import top_level_fitness_results
+        return top_level_fitness_results
+    raise ExecutionError("explicit execution protocol required")
+
+
+def _source_names(protocol):
+    _adapter(protocol)
+    return _SOURCE_NAMES if protocol == FORMAT else _FITNESS_SOURCE_NAMES
+
+
+def _limitations(protocol):
+    values = list(LIMITATIONS)
+    if protocol == FITNESS_FORMAT:
+        values[-1] = "Top-level fitness is separate from nested support; accepted replies are not scientific scores."
+    return values
+
+
+def _identity(protocol=FORMAT):
     # Called only at registration/admission. Offline recheck never reads code or
     # installed package metadata as a substitute for captured input authority.
     root = Path(__file__).parent
     return {"python": platform.python_version(),
             "packages": {name: version(name) for name in ("httpx", "httpcore", "h11", "PyYAML", "linkml-runtime")},
-            "sources": {name: _pin((root / name).read_bytes()) for name in _SOURCE_NAMES}}
+            "sources": {name: _pin((root / name).read_bytes()) for name in _source_names(protocol)}}
 
 
 def _price(value):
@@ -111,7 +138,7 @@ def _price(value):
 def _declaration(value, descriptor):
     _keys(value, {"format", "registration_id", "purpose", "run_output", "transport",
                   "limits", "decisions", "prices"}, "declaration")
-    _need(value["format"] == FORMAT, "explicit execution protocol required")
+    _need(descriptor["format"] == _adapter(value["format"]).FORMAT, "descriptor differs from selected execution instrument")
     _text(value["registration_id"], "registration_id")
     _text(value["run_output"], "run_output")
     _need(Path(value["run_output"]).is_absolute(), "run_output must be absolute")
@@ -197,14 +224,15 @@ def _requests(capture, descriptor, declaration):
 
 
 def _registration(capture, descriptor_raw, declaration, identity):
-    descriptor = saved._load_descriptor(capture, descriptor_raw)
+    protocol = declaration["format"]
+    descriptor = _adapter(protocol)._load_descriptor(capture, descriptor_raw)
     _declaration(declaration, descriptor)
     _keys(identity, {"python", "packages", "sources"}, "implementation identity")
     _text(identity["python"], "Python identity")
     _keys(identity["packages"], {"httpx", "httpcore", "h11", "PyYAML", "linkml-runtime"}, "package identity")
     for package_version in identity["packages"].values():
         _text(package_version, "package version")
-    _need(type(identity["sources"]) is dict and set(identity["sources"]) == set(_SOURCE_NAMES), "implementation source roster differs")
+    _need(type(identity["sources"]) is dict and set(identity["sources"]) == set(_source_names(protocol)), "implementation source roster differs")
     for pin in identity["sources"].values():
         _keys(pin, {"sha256", "bytes"}, "source pin")
         _need(type(pin["sha256"]) is str and bool(saved._SHA.fullmatch(pin["sha256"])), "invalid source digest")
@@ -215,11 +243,11 @@ def _registration(capture, descriptor_raw, declaration, identity):
     overhead = len(canonical(descriptor)) + 16_384 * len(requests)
     response_budget = declaration["limits"]["total_response_bytes"]
     _need(8 * response_budget + 2 * overhead <= saved.MAX_MANIFEST_BYTES, "declared responses exceed bounded report storage")
-    return {"format": FORMAT, "kind": "registration", "descriptor": capture.add(descriptor_raw),
+    return {"format": protocol, "kind": "registration", "descriptor": capture.add(descriptor_raw),
             "declaration": declaration, "implementation": identity,
             "requests": requests,
             "original_readiness": descriptor["readiness"], "scientific_eligibility": False,
-            "limitations": list(LIMITATIONS)}
+            "limitations": _limitations(protocol)}
 
 
 def _load(capture, raw):
@@ -240,7 +268,7 @@ def prepare(descriptor: Path, declaration: Path, output: Path):
     _need(str(target.resolve()) == str(target), "run_output must have its canonical absolute spelling")
     for source in (Path(descriptor).resolve(), Path(declaration).resolve(), Path(output).resolve()):
         _need(not target.is_relative_to(source) and not source.is_relative_to(target), "run output overlaps input/registration")
-    result = _registration(capture, descriptor_raw, declared, _identity())
+    result = _registration(capture, descriptor_raw, declared, _identity(declared["format"]))
     _need(len(canonical(result)) <= MAX_REGISTRATION_BYTES, "registration exceeds byte bound")
     capture.add(canonical(result) + b"\n")
     _reserve_storage(capture, result)
@@ -281,8 +309,8 @@ def _store(output, raw):
     return pin
 
 
-def _admission(registration_raw, request, index, started):
-    return {"format": FORMAT, "index": index, "registration": _pin(registration_raw),
+def _admission(registration_raw, request, index, started, *, protocol=FORMAT):
+    return {"format": protocol, "index": index, "registration": _pin(registration_raw),
             "target_id": request["target_id"], "attempt_id": request["attempt_id"],
             "effective_request": request["effective_request"], "started_at": started}
 
@@ -402,8 +430,9 @@ def _assessment(capture, registration, selection, response, body):
     # replies may still report usage; preserve it without accepting the call.
     if response["body_complete"]:
         descriptor_raw = capture.get(registration["descriptor"], limit=saved.MAX_MANIFEST_BYTES)
-        envelope = saved.package_response(descriptor_raw, attempt_id=selection["attempt_id"], native_message=body)
-        result = copy.deepcopy(saved._attempt(capture, descriptor_raw, envelope, selection["attempt_id"]))
+        adapter = _adapter(registration["format"])
+        envelope = adapter.package_response(descriptor_raw, attempt_id=selection["attempt_id"], native_message=body)
+        result = copy.deepcopy(adapter._attempt(capture, descriptor_raw, envelope, selection["attempt_id"]))
     assessment = result["assessment"] if result else None
     usage = _usage(assessment)
     problems = [] if result and assessment["status"] == "accepted" else ["response_not_accepted"]
@@ -436,7 +465,7 @@ def run(registration: Path, *, credential: str | None = None):
     capture = saved.Capture(registration)
     raw = capture.entry("registration.json", limit=MAX_REGISTRATION_BYTES)
     reg = _load(capture, raw)
-    _need(reg["implementation"] == _identity(), "execution implementation/runtime differs from registration")
+    _need(reg["implementation"] == _identity(reg["format"]), "execution implementation/runtime differs from registration")
     _reserve_storage(capture, reg)
     declared = reg["declaration"]
     if declared["purpose"] == "local_fixture":
@@ -460,7 +489,7 @@ def run(registration: Path, *, credential: str | None = None):
         directory = attempts / f"{index:06d}"
         directory.mkdir()
         _fsync_dir(attempts)
-        admitted = _admission(raw, request, index, datetime.now(timezone.utc).isoformat())
+        admitted = _admission(raw, request, index, datetime.now(timezone.utc).isoformat(), protocol=reg["format"])
         _exclusive(directory / "admitted.json", canonical(admitted))
         response, body = _dispatch(declared["transport"], capture.get(request["effective_request"]),
                                    limits["response_bytes"], credential)
@@ -485,7 +514,9 @@ def run(registration: Path, *, credential: str | None = None):
 def capture_run(output: Path):
     """Capture the closed durable ledger, without trusting derived status flags."""
     capture = saved.Capture(output)
-    registration = capture.add(capture.entry("registration.json", limit=MAX_REGISTRATION_BYTES))
+    registration_raw = capture.entry("registration.json", limit=MAX_REGISTRATION_BYTES)
+    registration = capture.add(registration_raw)
+    protocol = _json(registration_raw, "registration")["format"]
     attempts = Path(output) / "attempts"
     _need(attempts.is_dir() and not attempts.is_symlink(), "missing or unsafe attempts directory")
     entries = sorted(attempts.iterdir())
@@ -499,7 +530,7 @@ def capture_run(output: Path):
         rows.append({key: capture.add(saved._file(directory / (key + ".json"),
                          saved.MAX_MANIFEST_BYTES if key == "settled" else MAX_REGISTRATION_BYTES))
                      if key + ".json" in names else None for key in ("admitted", "response", "settled")})
-    ledger = {"format": FORMAT, "registration": registration, "attempts": rows}
+    ledger = {"format": protocol, "registration": registration, "attempts": rows}
     # Materialize the exact closure into this capture, for portable indexes.
     recheck_captured(capture, ledger)
     return capture, ledger
@@ -508,9 +539,11 @@ def capture_run(output: Path):
 def recheck_captured(capture, ledger):
     """Reconstruct from a captured ledger; no original paths, runtime or calls."""
     _keys(ledger, {"format", "registration", "attempts"}, "captured ledger")
-    _need(ledger["format"] == FORMAT and type(ledger["attempts"]) is list, "unknown ledger format")
+    _adapter(ledger["format"])
+    _need(type(ledger["attempts"]) is list, "unknown ledger attempts")
     raw = capture.get(ledger["registration"], limit=MAX_REGISTRATION_BYTES)
     reg = _load(capture, raw)
+    _need(ledger["format"] == reg["format"], "ledger differs from registered instrument")
     entries = ledger["attempts"]
     _need(len(entries) <= len(reg["requests"]), "attempts exceed selected requests")
     rows = []
@@ -531,7 +564,7 @@ def recheck_captured(capture, ledger):
             break
         admission = _json(capture.get(entry["admitted"], limit=MAX_REGISTRATION_BYTES), "admission")
         _text(admission.get("started_at"), "admission time")
-        _need(canonical(admission) == canonical(_admission(raw, request, index, admission["started_at"])), "admission differs from bound request")
+        _need(canonical(admission) == canonical(_admission(raw, request, index, admission["started_at"], protocol=reg["format"])), "admission differs from bound request")
         if entry["response"] is None:
             _need(entry["settled"] is None, "settlement without response")
             rows.append({"target_id": request["target_id"], "attempt_id": request["attempt_id"],
@@ -554,7 +587,7 @@ def recheck_captured(capture, ledger):
         else:
             stopped = True
     counts = {kind: {"selected": 0, "accepted": 0, "failed": 0, "spent_unknown": 0, "not_started": 0}
-              for kind in ("relationship_edge", "attribute_value")}
+              for kind in (("relationship_edge", "attribute_value") if reg["format"] == FORMAT else ("fitness_top_level",))}
     for i, request in enumerate(reg["requests"]):
         count = counts[request["kind"]]
         count["selected"] += 1
@@ -565,7 +598,7 @@ def recheck_captured(capture, ledger):
     costs = [r.get("cost") for r in rows]
     with localcontext(_cost_context()):
         cost = format(sum((Decimal(x) for x in costs), Decimal(0)), "f") if costs and all(x is not None for x in costs) else None
-    result = {"format": FORMAT, "kind": "execution_report", "registration": _pin(raw),
+    result = {"format": reg["format"], "kind": "execution_report", "registration": _pin(raw),
               "purpose": reg["declaration"]["purpose"], "selected_counts": counts, "rows": rows,
               "admitted_calls": len(rows), "observed_usage_totals": totals, "observed_cost": cost,
               "cost_currency": reg["declaration"]["prices"]["currency"] if reg["declaration"]["prices"] else None,
@@ -573,7 +606,9 @@ def recheck_captured(capture, ledger):
               "accepted_accounted_output_tokens": output_used, "response_bytes": response_used,
               "all_selected_accepted": len(rows) == len(reg["requests"]) and all(r["status"] == "accepted" for r in rows),
               "original_readiness": reg["original_readiness"], "scientific_eligibility": False,
-              "fitness": "separate_and_unscored", "limitations": list(LIMITATIONS)}
+              "fitness": "separate_and_unscored", "limitations": _limitations(reg["format"])}
+    if reg["format"] == FITNESS_FORMAT:
+        result["axis"] = "fitness"
     _need(len(canonical(result)) <= saved.MAX_MANIFEST_BYTES, "report exceeds storage bound")
     return result
 

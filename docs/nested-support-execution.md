@@ -1,5 +1,34 @@
 # Registered nested-support execution
 
+## Explicit top-level fitness selection
+
+The same `support-execution` commands also accept a declaration whose `format`
+is exactly `top_level_fitness_execution_v1`, paired with a descriptor prepared
+by `fitness-results prepare --protocol top_level_fitness_result_v1`. This is a
+separate, fixed instrument; a support descriptor cannot be used with the fitness
+protocol or conversely. The existing support protocol and saved support reader
+retain their original formats and behavior.
+
+The original fitness request retains its captured model, field specification,
+typed value and system prompt. The effective wire request separately records
+removal of null temperature, `stream: false`, and any explicitly declared
+thinking/effort options. A fitness registration additionally pins the fitness
+result, schema-digest and fitness-instrument source modules. Captured recheck
+uses the retained authority and does not inspect current source or reconnect.
+
+Fitness execution reports identify `axis: fitness` and count only the
+`fitness_top_level` stratum. Each admitted row contains its complete
+`saved_result` with the strict fitness/failure/reason assessment, plus a separate
+outer dispatch status. A valid score body received with an HTTP or transport
+failure remains a failed execution; observed usage is still retained. Unstarted
+requests and admitted requests with missing responses remain distinct.
+
+All scheduling, single-attempt, raw-capture and caller-decision rules below also
+apply to fitness. Local fixture replies and mechanically accepted replies remain
+scientifically ineligible. No registration changes the original plan readiness,
+establishes calibration, combines fitness with nested support, or authorizes a
+paid campaign.
+
 `d4d evaluate support-execution` explicitly opts into `nested_support_execution_v1`.
 It consumes an existing `nested_support_result_v1` descriptor and preserves its
 original readiness blockers, selected records, context, schemas and requests.

@@ -1,4 +1,4 @@
-"""Explicit registered support execution; saved commands remain offline."""
+"""Explicit registered support or fitness execution; saved commands stay offline."""
 import os
 from pathlib import Path
 
@@ -11,7 +11,7 @@ from data_sheets_schema.support_plan import canonical
 
 @click.group("support-execution")
 def support_execution():
-    """Register and execute explicit nested-support requests without retries."""
+    """Execute the explicitly declared support or fitness instrument, without retries."""
 
 
 @support_execution.command("prepare")
