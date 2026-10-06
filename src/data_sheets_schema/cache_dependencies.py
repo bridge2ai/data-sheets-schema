@@ -7,6 +7,8 @@ We do not attempt to discover arbitrary replacement-function global state.
 from __future__ import annotations
 
 import dataclasses
+import builtins
+import _thread
 import contextlib
 from enum import Enum
 import hashlib
@@ -14,6 +16,7 @@ from pathlib import Path
 import re
 import reprlib
 import sys
+import sysconfig
 import types
 from typing import Any, Callable
 
@@ -25,6 +28,49 @@ _SHIPPED_MODULES = frozenset({
     'linkml_runtime.utils.metamodelcore', 'jsonasobj2._jsonobj',
     'yaml', 'yaml.constructor', 'yaml._yaml', 'yaml.resolver',
 })
+
+
+def _stdlib_dataclass_repr():
+    # Read the active runtime's source, not mutable dataclasses file/loader
+    # metadata. Compile only: no historical or stdlib source is executed.
+    try:
+        path = Path(sysconfig.get_path('stdlib')) / 'dataclasses.py'
+        code = compile(path.read_bytes(), str(path), 'exec', dont_inherit=True)
+        helpers = [value for value in code.co_consts
+                   if type(value) is types.CodeType and value.co_name == '_recursive_repr']
+        if len(helpers) == 1:
+            return str(path), helpers[0]
+    except Exception:
+        pass  # Unavailable provenance disables this optional cache exception.
+    return None, None
+
+
+_DATACLASS_PATH, _DATACLASS_REPR_CODE = _stdlib_dataclass_repr()
+
+
+def _dataclass_repr_state(function):
+    namespace = vars(dataclasses)
+    helper = namespace.get('_recursive_repr')
+    if (_DATACLASS_REPR_CODE is None or type(helper) is not types.FunctionType
+            or helper.__code__ != _DATACLASS_REPR_CODE
+            or helper.__globals__ is not namespace or helper.__closure__ is not None
+            or helper.__defaults__ is not None or helper.__kwdefaults__ is not None
+            or function.__globals__ is not namespace or function.__name__ != '__repr__'
+            or function.__code__.co_filename != _DATACLASS_PATH
+            or not any(function.__code__ is value for value in helper.__code__.co_consts
+                       if type(value) is types.CodeType)):
+        raise TypeError('unverified stdlib dataclass repr')
+    thread = namespace.get('_thread')
+    builtin_namespace = function.__builtins__
+    if thread is not _thread or type(thread) is not types.ModuleType or type(builtin_namespace) is not dict:
+        raise TypeError('unverified dataclass repr globals')
+    get_ident = vars(thread).get('get_ident')
+    identity = namespace.get('id', builtin_namespace.get('id'))
+    for value, name, module in ((get_ident, 'get_ident', _thread), (identity, 'id', builtins)):
+        if (type(value) is not types.BuiltinFunctionType or value.__name__ != name
+                or value.__module__ != module.__name__ or value.__self__ is not module):
+            raise TypeError('unverified dataclass repr builtin')
+    return helper, thread, get_ident, identity
 
 
 def setting_key(value: Any) -> tuple:
@@ -52,6 +98,7 @@ class FunctionBindings:
     def __init__(self) -> None:
         self._functions: dict[Any, tuple[tuple, int]] = {}
         self._binding = False
+        self._dataclass_reprs: set[Any] = set()
         self._bound = False
         self.ready = False
 
@@ -63,6 +110,7 @@ class FunctionBindings:
             capture()
         except Exception:
             self._functions.clear()
+            self._dataclass_reprs.clear()
         else:
             self.ready = True
         finally:
@@ -104,7 +152,10 @@ class FunctionBindings:
             generated = origin == '<string>' and function.__name__ in (
                 '__init__', '__repr__', '__eq__', '__hash__')
             if not generated and origin not in (module_path, contextlib.__file__, reprlib.__file__):
-                raise TypeError('replacement function has an unbound source origin')
+                _dataclass_repr_state(function)
+                self._dataclass_reprs.add(function)
+        dataclass_state = (_dataclass_repr_state(function)
+                           if function in self._dataclass_reprs else ())
         bound = getattr(function, '__self__', None)
         if bound is not None and not isinstance(bound, (types.ModuleType, type)):
             raise TypeError('unsupported bound cache dependency callable state')
@@ -126,7 +177,7 @@ class FunctionBindings:
             closure.append((name, state))
         state = (function, code, setting_key(getattr(function, '__defaults__', None)),
                  setting_key(getattr(function, '__kwdefaults__', None)), tuple(closure),
-                 self.key(getattr(function, '__wrapped__', None), nested))
+                 dataclass_state, self.key(getattr(function, '__wrapped__', None), nested))
         if self._binding:
             token = self._functions.get(function, ((), len(self._functions)))[1]
             self._functions[function] = state, token
