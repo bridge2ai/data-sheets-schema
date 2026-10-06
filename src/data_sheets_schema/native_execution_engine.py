@@ -341,6 +341,9 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path,
                     lifecycle_raw['keep-awake.json'], awake, value['runtime']['keep_awake'])
             else:
                 results['keep_awake'] = {'checked': False, 'passed': False, 'reason': 'cleanup evidence unavailable'}
+            if 'receipt_origin_reporting' in value:
+                from .native_receipt_origin import attach_prepared
+                results = attach_prepared(value, results, prepared)
             completed = (set(results) == set(GATES)
                 and all(row.get('checked') is True and row.get('passed') is True for row in results.values()))
             final = {'kind': KIND, 'version': VERSION, 'attempt_id': value['attempt_id'],
@@ -415,8 +418,25 @@ def read_final(registration_raw, *, contract: ExecutionContract,
     files, aliases, metadata = result.get('captured_files'), result.get('captured_aliases'), result.get('captured_metadata')
     if not all(type(v) is dict for v in (files, aliases, metadata)) or not set(files) <= set(metadata) or not set(aliases.values()) <= set(metadata):
         raise ValueError('final evidence lacks complete captured metadata')
+    origin_raw = {}
+    origin_paths = ()
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import required_paths
+        origin_paths = required_paths(value, checks['receipts'], aliases)
+    elif 'receipt_origin' in checks['receipts']:
+        raise ValueError('undeclared receipt-origin gate extension')
     if KIND == 'd4d_native_shared_attempt':
-        replay.validate_file_basis(value, result)
+        if origin_paths:
+            origin_raw = replay.validate_file_basis(value, result, retain_paths=origin_paths)
+        else:
+            replay.validate_file_basis(value, result)
+    elif origin_paths:
+        for path, pin in files.items():
+            body = Path(path).read_bytes()
+            if draft._sha(body) != pin['sha256']:
+                raise ValueError('saved evidence differs from the captured basis')
+            if path in origin_paths:
+                origin_raw[path] = body
     else:
         for path, pin in files.items():
             if draft._sha(Path(path).read_bytes()) != pin['sha256']:
@@ -434,6 +454,9 @@ def read_final(registration_raw, *, contract: ExecutionContract,
             actual = {'exists': False, 'regular': False}
         if actual != expected_meta:
             raise ValueError('saved evidence file metadata changed')
+    if 'receipt_origin_reporting' in value:
+        from .native_receipt_origin import check_saved
+        check_saved(value, checks['receipts'], raw=origin_raw, aliases=aliases, metadata=metadata)
     lifecycle = result.get('lifecycle_artifacts')
     if (type(lifecycle) is not dict or not set(lifecycle) <= {'runtime-observation.json', 'keep-awake.json'}
             or completion and set(lifecycle) != {'runtime-observation.json', 'keep-awake.json'}):

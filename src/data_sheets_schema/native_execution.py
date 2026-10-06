@@ -168,6 +168,8 @@ def main(argv=None):
     prepare = commands.add_parser('prepare', help='offline explicit registration; no runtime or auth calls')
     for name in ('composition', 'system', 'permission-probe', 'runtime', 'attempt-id', 'attempt-directory', 'evidence-directory', 'output'):
         prepare.add_argument('--' + name, required=True)
+    prepare.add_argument('--receipt-origin-version', type=int, choices=(0, 1), default=0,
+                         help='explicit reported-only captured receipt origin; default keeps legacy output')
     execute = commands.add_parser('launch', help='separately authorized single native attempt; can invoke runtime/auth')
     for name in ('registration', 'review', 'ci', 'launch-word'):
         execute.add_argument('--' + name, required=True)
@@ -179,7 +181,8 @@ def main(argv=None):
             result = registration.write_registration(args.output, composition_path=args.composition,
                 system_path=args.system, permission_probe_path=args.permission_probe,
                 runtime=draft._json(_file(args.runtime, 'runtime declaration')), attempt_id=args.attempt_id,
-                attempt_directory=args.attempt_directory, evidence_directory=args.evidence_directory)
+                attempt_directory=args.attempt_directory, evidence_directory=args.evidence_directory,
+                receipt_origin_version=args.receipt_origin_version)
         elif args.command == 'launch':
             result = launch(_file(args.registration, 'native registration'), review_path=args.review,
                             ci_path=args.ci, launch_word_path=args.launch_word)
