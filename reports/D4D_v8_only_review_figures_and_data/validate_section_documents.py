@@ -1,5 +1,6 @@
 """Independent checks of pooled measures and all report artifacts."""
 from pathlib import Path
+from urllib.parse import urlparse
 import json,statistics,re,xml.etree.ElementTree as ET
 from PIL import Image
 O=Path(__file__).resolve().parent;D=O/'data';load=lambda n:json.loads((D/f'{n}.json').read_text())
@@ -29,6 +30,8 @@ for f in (O/'figures').glob('*.png'):
 s=(O/'D4D_v8_summary.html').read_text();assert s.count('<figure>')==14 and s.count('class="issue"')==303 and 'id="pooled-sections"' in s
 for href in re.findall(r'href="([^"]+)"',s):
  if href.startswith('#'):assert 'id="'+href[1:]+'"' in s
+ elif urlparse(href).scheme in {'http','https'}:
+  parsed=urlparse(href);assert parsed.netloc and parsed.hostname and not any(c.isspace() for c in href),href
  else:assert (O/href).is_file(),href
 v=load('validation');v.pop('all_8_svg_files_parse',None);v.pop('all_8_png_files_verify',None);v.update({'figures':14,'html_embedded_figures':14,'all_svg_files_parse':True,'all_png_files_verify':True,'pooled_section_document_record_cells':len(rows),'pooled_section_document_summary_cells':len(summ),'single_section_rubric10_items':39,'pooled_comment_and_score_arithmetic_verified':True,'overlapping_cohort_claims_verified':True,'plots_visually_checked':'Original eight-figure contact sheet and new three pooled section figures'})
 (D/'validation.json').write_text(json.dumps(v,indent=2));print('Validated 14 figures, 303 comments,',len(rows),'pooled record cells and',len(summ),'summary cells.')
