@@ -50,7 +50,14 @@ const github = {rest: {
   },
   issues: {
     get: async args => {record('issues.get', args); return {data: {body: input.body}};},
-    listComments: async args => {record('issues.listComments', args); return {data: []};}
+    listComments: async args => {
+      record('issues.listComments', args);
+      assert.deepStrictEqual(args, {...repo, issue_number: 7, per_page: 100, page: args.page});
+      if (input.pageError === args.page) throw new Error('Owned page retrieval failure');
+      if (input.pageOverrides && Object.prototype.hasOwnProperty.call(input.pageOverrides, args.page))
+        return {data: input.pageOverrides[args.page]};
+      return {data: input.comments.slice((args.page-1)*100, args.page*100)};
+    }
   },
   pulls: {get: async args => {record('pulls.get', args); return {data: {body: input.body, base: {sha: input.baseSha}, head: {sha: input.headSha}}};}}
 }};
@@ -66,7 +73,7 @@ const context = {...input.context, repo};
 '''
 
 
-class TestTrustedAssistantGate(unittest.TestCase):
+class _GateFixture(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.node = shutil.which("node")
@@ -79,7 +86,8 @@ class TestTrustedAssistantGate(unittest.TestCase):
         cls.parser = PARSER.read_text(encoding="utf-8")
 
     def _fixture(self, directory, *, event="pull_request", actor="trusted-user", body=None,
-                 missing=None, base=BASE, default=DEFAULT, changes=None, controllers=None, content_author=None):
+                 missing=None, base=BASE, default=DEFAULT, changes=None, controllers=None, content_author=None,
+                 event_data=None, comments=None, page_error=None, page_overrides=None, parser_text=None):
         tmp = Path(directory)
         candidate = tmp / "candidate"
         candidate.mkdir()
@@ -90,11 +98,13 @@ class TestTrustedAssistantGate(unittest.TestCase):
         (scripts / "assistant_request.py").write_text('raise SystemExit("candidate parser executed")\n')
         inputs = candidate / "data/sheets_d4dassistant/inputs"
         (inputs / "BranchOnly").mkdir(parents=True)
+        (inputs / "BranchOther").mkdir()
         # Both cwd imports and PYTHONPATH/site initialization must be ignored.
         for name in ("pathlib.py", "sitecustomize.py"):
             (candidate / name).write_text('raise RuntimeError("candidate import executed")\n')
         runtime = tmp / "runner"
         runtime.mkdir()
+        python_bin = self._python(runtime)
         body = body if body is not None else f"{HANDLE} BranchOnly"
         author = actor if content_author is None else content_author
         payload = {"pull_request": {"base": {"sha": base}, "head": {"sha": HEAD},
@@ -102,45 +112,60 @@ class TestTrustedAssistantGate(unittest.TestCase):
                    "issue": {"body": body, "user": {"login": author}, "number": 7},
                    "comment": {"body": body, "user": {"login": author}},
                    "inputs": {"item-type": "pull_request", "item-number": "7"}}
+        payload.update(event_data or {})
         context = {"eventName": event, "actor": actor, "payload": payload}
         files = {".github/ai-controllers.json": json.dumps(controllers if controllers is not None else ["trusted-user"]),
-                 "src/github/assistant_request.py": self.parser}
+                 "src/github/assistant_request.py": self.parser if parser_text is None else parser_text}
         if missing:
             del files[missing]
         expected = base if event in ("pull_request", "pull_request_review_comment") else default
         fixture = {"context": context, "files": files, "script": self.detect, "expectedSha": expected,
                    "defaultSha": default, "baseSha": base, "headSha": HEAD, "body": body,
-                   "responseChanges": changes or {}}
+                   "responseChanges": changes or {}, "comments": comments or [],
+                   "pageError": page_error, "pageOverrides": page_overrides or {}}
         control, input_path, output = tmp / "control.js", tmp / "input.json", tmp / "result.json"
         control.write_text(NODE_HARNESS)
         input_path.write_text(json.dumps(fixture))
         result = subprocess.run([self.node, str(control), str(input_path), str(output)], cwd=candidate,
-                                env={**os.environ, "RUNNER_TEMP": str(runtime)}, capture_output=True, text=True, timeout=20)
+                                env={**os.environ, "RUNNER_TEMP": str(runtime), "PYTHONPATH": str(candidate),
+                                     "PATH": str(python_bin) + os.pathsep + os.environ.get("PATH", "")},
+                                capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, result.stderr)
         return json.loads(output.read_text()), candidate, runtime
 
-    def _request(self, result, candidate, runtime):
+    @staticmethod
+    def _python(runtime):
+        binary = runtime.parent / "python-bin"
+        binary.mkdir(exist_ok=True)
+        executable = binary / "python3"
+        executable.write_text(f'#!/bin/sh\nexec "{sys.executable}" -B "$@"\n')
+        executable.chmod(0o755)
+        return binary
+
+    def _run_request(self, result, candidate, runtime):
         self.assertIsNone(result["error"])
         self.assertIs(result["outputs"]["allowed"], True)
         parser = Path(result["outputs"]["gate-parser"])
         self.assertTrue(parser.is_relative_to(runtime))
         self.assertEqual(parser.read_bytes(), PARSER.read_bytes())
         self.assertFalse((parser.parent / "data").exists())
-        binary = runtime / "bin"
-        binary.mkdir()
-        executable = binary / "python3"
-        executable.write_text(f'#!/bin/sh\nexec "{sys.executable}" -B "$@"\n')
-        executable.chmod(0o755)
+        binary = self._python(runtime)
         output = runtime / "github-output"
         run = subprocess.run(["bash", "-c", self.request["run"]], cwd=candidate,
                              env={**os.environ, "PATH": str(binary) + os.pathsep + os.environ.get("PATH", ""),
                                   "PYTHONPATH": str(candidate), "RUNNER_TEMP": str(runtime),
                                   "TRUSTED_REQUEST_PARSER": str(parser), "GITHUB_OUTPUT": str(output)},
                              capture_output=True, text=True, timeout=20)
+        return run, output
+
+    def _request(self, result, candidate, runtime):
+        run, output = self._run_request(result, candidate, runtime)
         self.assertEqual(run.returncode, 0, run.stderr)
         self.assertEqual(run.stderr, "")
         return output.read_text(), run.stdout
 
+
+class TestTrustedAssistantGate(_GateFixture):
     def test_pr_base_gate_accepts_branch_only_input_despite_candidate_poison(self):
         with tempfile.TemporaryDirectory() as directory:
             result, candidate, runtime = self._fixture(directory)
@@ -229,3 +254,186 @@ class TestTrustedAssistantGate(unittest.TestCase):
         self.assertIn('python3 -I -S "$TRUSTED_REQUEST_PARSER"', self.request["run"])
         self.assertIn('--inputs data/sheets_d4dassistant/inputs', self.request["run"])
         self.assertNotIn('python3 src/github/assistant_request.py', self.request["run"])
+
+
+class TestRequestSelection(_GateFixture):
+    EVENTS = ("issues", "issue_comment", "pull_request", "pull_request_review_comment")
+    REQUEST = f"{HANDLE} BranchOnly"
+
+    def _edited(self, before, after, event="issues"):
+        with tempfile.TemporaryDirectory() as directory:
+            result, candidate, runtime = self._fixture(
+                directory, event=event, body=after,
+                event_data={"action": "edited", "changes": {"body": {"from": before}}})
+            return self._request(result, candidate, runtime)
+
+    def test_unrelated_edits_do_not_repeat_any_event_request(self):
+        for event in self.EVENTS:
+            with self.subTest(event=event):
+                output, log = self._edited(self.REQUEST, "New surrounding prose.\n\n" + self.REQUEST, event)
+                self.assertEqual(output, "request=false\ndataset=\n")
+                self.assertIn("same parsed request", log)
+
+    def test_spelling_line_and_same_dataset_duplicates_are_not_new_requests(self):
+        for after in ("@D4DASSISTANT\tBranchOnly  ", "\n\n" + self.REQUEST,
+                      self.REQUEST + "\n\n" + self.REQUEST):
+            with self.subTest(after=after):
+                output, _ = self._edited(self.REQUEST, after)
+                self.assertEqual(output, "request=false\ndataset=\n")
+
+    def test_new_changed_or_newly_visible_request_qualifies(self):
+        other = f"{HANDLE} BranchOther"
+        for before, after, dataset in (
+                ("No request yet", self.REQUEST, "BranchOnly"),
+                (self.REQUEST, other, "BranchOther"),
+                (f"<video>\n\n{self.REQUEST}\n\n</video>", self.REQUEST, "BranchOnly"),
+                (f"`{self.REQUEST}`", self.REQUEST, "BranchOnly"),
+                (self.REQUEST + "\n\n" + other, self.REQUEST, "BranchOnly")):
+            with self.subTest(before=before, after=after):
+                output, _ = self._edited(before, after)
+                self.assertEqual(output, f"request=true\ndataset={dataset}\n")
+
+    def test_removed_hidden_unknown_or_conflicting_after_text_never_qualifies(self):
+        for after in ("Removed", f"<rp>\n\n{self.REQUEST}\n\n</rp>",
+                      f"{HANDLE} Missing", self.REQUEST + f"\n\n{HANDLE} BranchOther"):
+            with self.subTest(after=after):
+                output, _ = self._edited(self.REQUEST, after)
+                self.assertEqual(output, "request=false\ndataset=\n")
+
+    def test_title_or_other_edits_without_body_history_skip(self):
+        for event in self.EVENTS:
+            for changes in ({}, {"title": {"from": "old"}}, None):
+                with self.subTest(event=event, changes=changes), tempfile.TemporaryDirectory() as directory:
+                    result, candidate, runtime = self._fixture(
+                        directory, event=event, event_data={"action": "edited", "changes": changes})
+                    output, log = self._request(result, candidate, runtime)
+                    self.assertEqual(output, "request=false\ndataset=\n")
+                    self.assertIn("no body change", log)
+
+    def test_malformed_edit_history_fails_closed_before_request_step(self):
+        for changes in ([], "invalid", {"body": None}, {"body": {}},
+                        {"body": {"from": None}}, {"body": {"from": []}}):
+            with self.subTest(changes=changes), tempfile.TemporaryDirectory() as directory:
+                result, _, runtime = self._fixture(
+                    directory, event_data={"action": "edited", "changes": changes})
+                self.assertIsNotNone(result["error"])
+                self.assertNotIn("allowed", result["outputs"])
+                self.assertFalse((runtime / "assistant-request-selection.json").exists())
+
+    def test_created_events_keep_the_original_request_behavior(self):
+        for event in self.EVENTS:
+            with self.subTest(event=event), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(directory, event=event,
+                                                          event_data={"action": "created"})
+                output, _ = self._request(result, candidate, runtime)
+                self.assertEqual(output, "request=true\ndataset=BranchOnly\n")
+
+    def test_manual_valid_body_wins_without_fetching_comments(self):
+        for body in (self.REQUEST, "@D4DASSISTANT BranchOnly"):
+            with self.subTest(body=body), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(
+                    directory, event="workflow_dispatch", body=body,
+                    comments=[{"id": 1, "body": f"{HANDLE} BranchOther"}],
+                    page_error=1, event_data={"action": "edited", "changes": {"body": {"from": body}}})
+                output, _ = self._request(result, candidate, runtime)
+                self.assertEqual(output, "request=true\ndataset=BranchOnly\n")
+                self.assertFalse(any(c["method"] == "issues.listComments" for c in result["calls"]))
+
+    def test_manual_newer_nonrequests_do_not_hide_older_actual_request(self):
+        newer = (f"`{self.REQUEST}`", f"```\n{self.REQUEST}\n```",
+                 f"<video>\n\n{self.REQUEST}\n\n</video>", f"{HANDLE} Missing",
+                 self.REQUEST + f"\n\n{HANDLE} BranchOther")
+        for text in newer:
+            with self.subTest(text=text), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(
+                    directory, event="workflow_dispatch", body=f"`{self.REQUEST}`",
+                    comments=[{"id": 1, "body": "@D4DASSISTANT BranchOther"}, {"id": 2, "body": text}])
+                output, log = self._request(result, candidate, runtime)
+                self.assertEqual(output, "request=true\ndataset=BranchOther\n")
+                self.assertIn("conversation comment 1", log)
+
+    def test_manual_pagination_selects_newest_valid_request_across_all_pages(self):
+        comments = [{"id": i, "body": "ordinary prose"} for i in range(1, 202)]
+        comments[0]["body"] = self.REQUEST
+        comments[100]["body"] = f"{HANDLE} BranchOther"
+        comments[200]["body"] = f"`{self.REQUEST}`"
+        for item_type in ("issue", "pull_request"):
+            with self.subTest(item_type=item_type), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(
+                    directory, event="workflow_dispatch", body="No body request", comments=comments,
+                    event_data={"inputs": {"item-type": item_type, "item-number": "7"}})
+                output, log = self._request(result, candidate, runtime)
+                self.assertEqual(output, "request=true\ndataset=BranchOther\n")
+                self.assertIn("conversation comment 101", log)
+                self.assertEqual([c["args"]["page"] for c in result["calls"]
+                                  if c["method"] == "issues.listComments"], [1, 2, 3])
+
+    def test_manual_creation_order_and_actor_policy_stay_unchanged(self):
+        comments = [
+            {"id": 1, "body": self.REQUEST, "updated_at": "2099-01-01T00:00:00Z"},
+            {"id": 2, "body": f"{HANDLE} BranchOther", "updated_at": "2000-01-01T00:00:00Z",
+             "user": {"login": "candidate-attacker"}}]
+        with tempfile.TemporaryDirectory() as directory:
+            result, candidate, runtime = self._fixture(
+                directory, event="workflow_dispatch", body="No request", comments=comments,
+                actor="trusted-user", content_author="candidate-attacker")
+            output, log = self._request(result, candidate, runtime)
+            self.assertEqual(output, "request=true\ndataset=BranchOther\n")
+            self.assertEqual(result["outputs"]["user"], "trusted-user")
+            self.assertIn("conversation comment 2", log)
+
+    def test_manual_comments_are_separate_documents(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result, candidate, runtime = self._fixture(
+                directory, event="workflow_dispatch", body="No request",
+                comments=[{"id": 1, "body": "```"}, {"id": 2, "body": self.REQUEST}])
+            output, _ = self._request(result, candidate, runtime)
+            self.assertEqual(output, "request=true\ndataset=BranchOnly\n")
+
+    def test_manual_no_valid_candidate_has_no_request(self):
+        for comments in ([], [{"id": 1, "body": None}, {"id": 2, "body": f"`{self.REQUEST}`"}]):
+            with self.subTest(comments=comments), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(
+                    directory, event="workflow_dispatch", body="No request", comments=comments)
+                output, _ = self._request(result, candidate, runtime)
+                self.assertEqual(output, "request=false\ndataset=\n")
+
+    def test_partial_or_malformed_comment_pages_fail_closed(self):
+        comments = [{"id": i, "body": self.REQUEST if i == 1 else "prose"} for i in range(1, 101)]
+        variants = ({"comments": comments, "page_error": 2}, {"page_overrides": {"1": {}}},
+                    {"comments": [{"id": 1, "body": self.REQUEST}, {"id": 1, "body": self.REQUEST}]},
+                    {"comments": [{"id": True, "body": self.REQUEST}]},
+                    {"comments": [{"id": 1, "body": []}]})
+        for options in variants:
+            with self.subTest(options=options), tempfile.TemporaryDirectory() as directory:
+                result, _, runtime = self._fixture(directory, event="workflow_dispatch", body="No request", **options)
+                self.assertIsNotNone(result["error"])
+                self.assertNotIn("allowed", result["outputs"])
+                self.assertFalse((runtime / "assistant-request-selection.json").exists())
+
+    def test_unaware_or_malformed_trusted_body_probe_never_falls_back_to_candidate(self):
+        parsers = ("import argparse\nargparse.ArgumentParser().parse_args()\n",
+                   'print(\'{"request":"true","dataset":"BranchOnly","line":1}\')\n',
+                   'print(\'{"request":false}\')\n')
+        for parser in parsers:
+            with self.subTest(parser=parser), tempfile.TemporaryDirectory() as directory:
+                result, _, runtime = self._fixture(directory, event="workflow_dispatch", parser_text=parser)
+                self.assertIsNotNone(result["error"])
+                self.assertNotIn("allowed", result["outputs"])
+                self.assertFalse((runtime / "assistant-request-selection.json").exists())
+
+    def test_malformed_selection_file_refuses_even_with_valid_body(self):
+        invalid = ('[]', '{"kind":"unknown"}', '{"kind":"single","extra":true}',
+                   '{"kind":"edited"}', '{"kind":"edited","before":null}',
+                   '{"kind":"manual","comments":null}',
+                   '{"kind":"manual","comments":[{"id":true,"body":""}]}',
+                   '{"kind":"manual","comments":[{"id":1,"body":""},{"id":1,"body":""}]}',
+                   '{"kind":"single","kind":"unchanged"}', '{"kind":"edited","before":NaN}', '{')
+        for raw in invalid:
+            with self.subTest(raw=raw), tempfile.TemporaryDirectory() as directory:
+                result, candidate, runtime = self._fixture(directory)
+                (runtime / "assistant-request-selection.json").write_text(raw)
+                run, output = self._run_request(result, candidate, runtime)
+                self.assertNotEqual(run.returncode, 0)
+                self.assertIn("invalid request selection", run.stderr)
+                self.assertFalse(output.exists())

@@ -33,28 +33,28 @@ Other formats, symlinks and nonregular members refuse. There is no Latin-1 fallb
 
 The directory name must start with an ASCII letter or digit and hold only ASCII letters, digits, `_`, `.` and `-`, because the workflow passes it to shell commands. A request that names a directory that is not there, or one whose name breaks this rule, logs "no request" with the reason and gets no reply.
 
+### Edits and manual runs
+
+Editing unrelated prose, moving a request line, or changing only its handle case or whitespace does not submit the same parsed request again. On an edited event, the workflow compares the before and after bodies with the same trusted parser and current input-directory view. It proceeds only when the after text has a valid request for a different dataset, or the before text had no valid request. Edits without a body change are skipped; malformed previous-body data stops the gate. Removing or hiding a request does not run generation.
+
+A manual dispatch authorizes the person who starts it. It first uses the issue or PR body if that body holds a valid parsed request. Otherwise it reads every page of conversation comments and selects the newest valid request in API creation order. Quoted, fenced, hidden or otherwise invalid mentions do not hide an older valid request, and handle case follows the same rules as on events. Editing an old comment does not move it ahead of a newer comment. PR review-thread comments are not part of this manual conversation search.
+
+This check suppresses unrelated body edits; it is not a persistent history of every past run. Separate new comments and explicit manual dispatches may request generation again. The existing run-label and output checks still apply, so a repeat is not a promise that a new run will be accepted.
+
 ### What the Assistant Does
 
 1. **Prepares** every supported document in the requested repository input directory
 2. **Records** the source files, conversions and bundle hashes; it does not fetch linked resources
-3. **Generates** a valid D4D YAML file conforming to the LinkML schema
+3. **Generates** a candidate datasheet through the configured `d4d api run` phases
 4. **Validates** the YAML against the schema
 5. **Creates** a pull request with generated files and the input manifest in `data/sheets_d4dassistant/`
 6. **Comments** on your issue with a link to the PR
 
 ## What Information to Provide
 
-The more information you provide, the better the D4D will be. Useful information includes:
+Put source documentation in the named repository input directory using the supported formats above, then submit the explicit request line. The issue or comment text selects the directory; additional prose and URLs in that request are not generation inputs. URLs inside source documents remain text references: the workflow does not fetch their contents. To supply a linked document, include its contents as a supported file in the input directory.
 
-- **URLs**: Dataset landing pages, documentation, PDFs, GitHub repos
-- **Dataset name**: Short and descriptive
-- **Description**: What the dataset contains and why it exists
-- **Creators**: Who created/maintains the dataset
-- **Size**: Number of instances, file size
-- **Format**: CSV, JSON, Parquet, etc.
-- **License**: How the data can be used
-- **Collection details**: How and when data was gathered
-- **Use cases**: What tasks it's intended for
+Useful source documentation describes the dataset's purpose, contents, creators, size, formats, license, collection methods and intended uses. Schema validation checks structure; a reviewer still needs to check whether the generated statements accurately reflect those documents.
 
 ## What Gets Generated
 
@@ -78,10 +78,10 @@ Once the PR is created:
 
 1. Review the generated YAML file
 2. Check that metadata is accurate
-3. Request changes if needed (comment on the PR)
+3. Review requested corrections and edit the generated files or their source documentation as appropriate
 4. Merge when satisfied
 
-The assistant can update the D4D based on your feedback - just comment on the PR with your requested changes.
+Ordinary feedback comments do not instruct the assistant to edit a datasheet. Generating again requires an explicit request under the rules above and remains subject to the existing run/output checks.
 
 ## Authorization
 
@@ -99,8 +99,8 @@ The allow-list and request parser come from one immutable trusted commit: the PR
 
 - **Agent**: Four-phase generation via `d4d api run` (`src/data_sheets_schema/api_runner.py`), run directly in the workflow. Previously used the `dragon-ai-agent/run-claude-obo` action, which no longer exists — see issue #172.
 - **Schema**: Uses LinkML schema from `src/data_sheets_schema/schema/`
-- **Validation**: Runs `make test-examples` to ensure schema compliance
-- **Examples**: References `src/data/examples/valid/` for guidance
+- **Validation**: Runs `linkml-validate -s src/data_sheets_schema/schema/data_sheets_schema_all.yaml -C Dataset` on the generated full YAML before opening the PR
+- **Workflow**: `.github/workflows/d4d-agent.yml` defines input preparation, generation, validation, PR creation and the final status comment
 
 ## Troubleshooting
 
@@ -112,18 +112,18 @@ The allow-list and request parser come from one immutable trusted commit: the PR
 - Check GitHub Actions logs for errors
 
 **Generated D4D is incomplete:**
-- Provide more information in a follow-up comment
-- Share additional URLs or documentation
-- The assistant can update the D4D based on new info
+- Check the input manifest and the source files in the requested directory
+- Add missing documentation as supported repository files; follow-up prose and links alone are not ingested
+- Review the generated statements and correct the files or make a new explicit request when appropriate
 
 **Validation errors:**
-- The assistant should fix these automatically
-- If the PR has validation errors, comment with details
-- The assistant will update the PR
+- Inspect the failing validation step and its run log
+- A failed generation or validation is reported; the workflow does not automatically repair it or update a PR from feedback
+- Correct the relevant source or generated content before requesting another run
 
 ## Support
 
 For issues or questions:
 - Open a GitHub issue
 - Tag authorized users for assistance
-- Check `.goosehints` file for assistant instructions
+- Consult the request rules above and the linked workflow steps in GitHub Actions

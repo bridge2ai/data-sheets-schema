@@ -73,6 +73,7 @@ runner's own python3 before anything is installed.
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -496,6 +497,68 @@ def find_request(text: Optional[str], datasets: Iterable[str]) -> Decision:
     return Decision(None, None, tuple(notes))
 
 
+def select_request(text: str, datasets: Iterable[str], selection: dict) -> Decision:
+    """Apply event selection to the unchanged visible-request grammar.
+
+    Both edited texts use one current directory roster. Manual dispatch keeps
+    a valid body first, otherwise takes the newest valid conversation comment
+    by the API's creation order; editing an old comment does not reorder it.
+    """
+    if type(selection) is not dict or type(selection.get("kind")) is not str:
+        raise ValueError("request selection must name one mode")
+    kind = selection["kind"]
+    fields = {"single": {"kind"}, "unchanged": {"kind"},
+              "edited": {"kind", "before"}, "manual": {"kind", "comments"}}
+    if kind not in fields or set(selection) != fields[kind]:
+        raise ValueError("request selection fields differ")
+    if kind == "edited" and type(selection["before"]) is not str:
+        raise ValueError("edited request needs the previous body")
+    if kind == "manual":
+        comments = selection["comments"]
+        if type(comments) is not list:
+            raise ValueError("manual comments must be an ordered list")
+        seen = set()
+        for comment in comments:
+            if (type(comment) is not dict or set(comment) != {"id", "body"}
+                    or type(comment["id"]) is not int or comment["id"] < 1
+                    or comment["id"] in seen or type(comment["body"]) is not str):
+                raise ValueError("manual comment identity or body is invalid")
+            seen.add(comment["id"])
+    # Materialize once: the previous/current/comment decisions share exactly
+    # the same current input-directory view, including a caller's iterator.
+    names = tuple(datasets)
+    current = find_request(text, names)
+    if kind == "unchanged":
+        return Decision(None, None, ("edited event has no body change",))
+    if kind == "edited":
+        previous = find_request(selection["before"], names)
+        if current.request and previous.dataset == current.dataset:
+            return Decision(None, None, ("edited body keeps the same parsed request",) + current.notes)
+    if kind == "manual" and not current.request:
+        for comment in reversed(selection["comments"]):
+            decision = find_request(comment["body"], names)
+            if decision.request:
+                return Decision(decision.dataset, decision.line,
+                                (f"manual selection: conversation comment {comment['id']}",) + decision.notes)
+        return Decision(None, None, ("manual selection: no valid request in the body or comments",) + current.notes)
+    return current
+
+
+def _selection_document(raw: str) -> dict:
+    def unique(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError("duplicate request selection field")
+            value[key] = item
+        return value
+
+    def nonfinite(value):
+        raise ValueError("nonfinite request selection value")
+
+    return json.loads(raw, object_pairs_hook=unique, parse_constant=nonfinite)
+
+
 def input_directories(inputs: Path) -> list:
     """The names of the subdirectories of `inputs`. A request can name one
     whose name also matches NAME, since the workflow passes it to shell
@@ -519,6 +582,10 @@ def main(argv: Optional[list] = None) -> int:
     parser.add_argument("--inputs", required=True, type=Path,
                         help="directory whose subdirectories are the datasets a request may name")
     parser.add_argument("--body", type=Path, help="file holding the text (default: standard input)")
+    parser.add_argument("--selection", type=Path,
+                        help="workflow event selection envelope (default: one body)")
+    parser.add_argument("--decision-json", action="store_true",
+                        help="emit the parsed decision as JSON for the trusted manual body probe")
     parser.add_argument("--github-output", type=Path,
                         help="append request=true|false and dataset=<name> to this file")
     args = parser.parse_args(argv)
@@ -526,8 +593,18 @@ def main(argv: Optional[list] = None) -> int:
         parser.error(f"--inputs {args.inputs} is not a directory")
     text = (args.body.read_bytes().decode("utf-8", errors="replace") if args.body
             else sys.stdin.read())
-    decision = find_request(text, input_directories(args.inputs))
-    print(report(decision))
+    if args.decision_json and args.github_output:
+        parser.error("--decision-json and --github-output are separate output modes")
+    try:
+        selection = (_selection_document(args.selection.read_text(encoding="utf-8"))
+                     if args.selection else {"kind": "single"})
+        decision = select_request(text, input_directories(args.inputs), selection)
+    except (OSError, ValueError, TypeError, RecursionError) as exc:
+        parser.error(f"invalid request selection: {exc}")
+    if args.decision_json:
+        print(json.dumps({"request": decision.request, "dataset": decision.dataset, "line": decision.line}))
+    else:
+        print(report(decision))
     if args.github_output:
         with args.github_output.open("a", encoding="utf-8") as out:
             out.write(f"request={'true' if decision.request else 'false'}\n")

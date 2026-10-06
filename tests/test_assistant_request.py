@@ -538,6 +538,7 @@ class TestTheWorkflow(unittest.TestCase):
                     runner_temp = tmp / f"runner{i}"
                     runner_temp.mkdir()
                     (runner_temp / body_name).write_bytes(text.encode("utf-8"))
+                    (runner_temp / "assistant-request-selection.json").write_text('{"kind":"single"}')
                     out = runner_temp / "github_output"
                     env = {**os.environ, "PATH": f"{tmp / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}",
                            "RUNNER_TEMP": str(runner_temp), "GITHUB_OUTPUT": str(out),

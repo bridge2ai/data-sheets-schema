@@ -110,6 +110,7 @@ jobs:
             let userLogin = '';
             let itemType = '';
             let itemNumber = 0;
+            let selection = {kind: 'single'};
 
             if (context.eventName === 'workflow_dispatch') {
               // Manual trigger - fetch the issue/PR from GitHub API
@@ -118,50 +119,57 @@ jobs:
               userLogin = context.actor; // Use the person who triggered the workflow
 
               if (itemType === 'issue') {
-                // First check issue body
                 const issue = await github.rest.issues.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: itemNumber
+                  ...context.repo, issue_number: itemNumber
                 });
                 content = issue.data.body || '';
-
-                // If no @d4dassistant in body, check comments
-                if (!content.includes('@d4dassistant')) {
-                  const comments = await github.rest.issues.listComments({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: itemNumber
-                  });
-                  // Find the most recent comment with @d4dassistant
-                  for (let i = comments.data.length - 1; i >= 0; i--) {
-                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
-                      content = comments.data[i].body;
-                      break;
-                    }
-                  }
-                }
               } else if (itemType === 'pull_request') {
                 const pr = await github.rest.pulls.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: itemNumber
+                  ...context.repo, pull_number: itemNumber
                 });
                 content = pr.data.body || '';
-
-                // If no @d4dassistant in body, check comments
-                if (!content.includes('@d4dassistant')) {
-                  const comments = await github.rest.issues.listComments({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: itemNumber
-                  });
-                  // Find the most recent comment with @d4dassistant
-                  for (let i = comments.data.length - 1; i >= 0; i--) {
-                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
-                      content = comments.data[i].body;
-                      break;
+              }
+              selection = {kind: 'manual', comments: []};
+              if (allowedUsers.includes(userLogin)) {
+                // Preserve body-first policy using the same trusted parser.
+                // A substring (including quoted or differently cased text)
+                // cannot decide whether comment discovery is needed (#4394).
+                const probe = path.join(gateDirectory, 'body-probe.md');
+                fs.writeFileSync(probe, content, {flag: 'wx'});
+                const {execFileSync} = require('child_process');
+                const parsed = JSON.parse(execFileSync('python3', [
+                  '-I', '-S', gateParser, '--inputs', 'data/sheets_d4dassistant/inputs',
+                  '--body', probe, '--decision-json'
+                ], {encoding: 'utf8'}));
+                if (!parsed || Object.keys(parsed).sort().join(',') !== 'dataset,line,request' ||
+                    typeof parsed.request !== 'boolean' ||
+                    (parsed.request ? typeof parsed.dataset !== 'string' ||
+                      !Number.isSafeInteger(parsed.line) || parsed.line < 1 :
+                      parsed.dataset !== null || parsed.line !== null)) {
+                  throw new Error('Trusted body parser returned an invalid decision');
+                }
+                if (!parsed.request) {
+                  // The API lists conversation comments in creation order.
+                  // Retain every page; the parser selects newest valid first.
+                  const seen = new Set();
+                  for (let page = 1; ; page++) {
+                    const response = await github.rest.issues.listComments({
+                      ...context.repo, issue_number: itemNumber, per_page: 100, page
+                    });
+                    const comments = response.data;
+                    if (!Array.isArray(comments) || comments.length > 100) {
+                      throw new Error('Comment page has an invalid shape');
                     }
+                    for (const comment of comments) {
+                      if (!comment || !Number.isSafeInteger(comment.id) || comment.id < 1 ||
+                          seen.has(comment.id) ||
+                          (comment.body !== null && typeof comment.body !== 'string')) {
+                        throw new Error('Comment identity or body is invalid');
+                      }
+                      seen.add(comment.id);
+                      selection.comments.push({id: comment.id, body: comment.body || ''});
+                    }
+                    if (comments.length < 100) break;
                   }
                 }
               }
@@ -187,10 +195,32 @@ jobs:
               itemNumber = context.payload.pull_request.number;
             }
 
+            // Only a changed parsed request can qualify an edited body (#4391).
+            // Missing body changes mean bookkeeping; malformed history refuses.
+            if (context.eventName !== 'workflow_dispatch' && context.payload.action === 'edited') {
+              const changes = context.payload.changes;
+              if (changes !== undefined && changes !== null &&
+                  (typeof changes !== 'object' || Array.isArray(changes))) {
+                throw new Error('Edited event changes have an invalid shape');
+              }
+              if (!changes || !Object.prototype.hasOwnProperty.call(changes, 'body')) {
+                selection = {kind: 'unchanged'};
+              } else {
+                const previous = changes.body;
+                if (!previous || typeof previous !== 'object' || Array.isArray(previous) ||
+                    typeof previous.from !== 'string') {
+                  throw new Error('Edited body has no valid previous text');
+                }
+                selection = {kind: 'edited', before: previous.from};
+              }
+            }
+
             // Check if user is allowed. Whether the text holds a request is
             // decided by the next step, which reads it from this file (#4108).
             const isAllowed = allowedUsers.includes(userLogin);
             fs.writeFileSync(`${process.env.RUNNER_TEMP}/assistant-request-text.md`, content);
+            fs.writeFileSync(`${process.env.RUNNER_TEMP}/assistant-request-selection.json`,
+              JSON.stringify(selection), {flag: 'wx'});
 
             console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Content: "${content}"`);
 
@@ -226,6 +256,7 @@ jobs:
           python3 -I -S "$TRUSTED_REQUEST_PARSER"
           --inputs data/sheets_d4dassistant/inputs
           --body "$RUNNER_TEMP/assistant-request-text.md"
+          --selection "$RUNNER_TEMP/assistant-request-selection.json"
           --github-output "$GITHUB_OUTPUT"
 
   respond-to-mention:
