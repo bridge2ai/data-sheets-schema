@@ -55,7 +55,7 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
     whole = _run(tmp_path, "--junitxml=all.xml")
     assert whole.returncode == 0, whole.stdout + whole.stderr
     expected = _cases(tmp_path / "all.xml")
-    assert sum(expected.values()) == (71 if lanes else 64)
+    assert sum(expected.values()) == (74 if lanes else 64)
     flags = []
     if weighted:
         # Only half the files have timings. Untimed files must still run;
@@ -81,7 +81,11 @@ def _assert_complete_partition(tmp_path, weighted, total, lanes=False):
             assert sum(cases.values()) == 1
             actual.update(cases)
     assert actual == expected
-    assert set(actual.values()) == {1}
+    if lanes:
+        # Existing ordinary parameter IDs may collide; both occurrences run.
+        assert max(actual.values()) == 2
+    else:
+        assert set(actual.values()) == {1}
 
 
 @pytest.mark.parametrize("weighted", [False, True])
@@ -257,6 +261,8 @@ def _lane_fixture(root, *, body="assert True", decorator="", fixture=""):
             text += f"def {name}(): assert True\n"
     text += "@pytest.mark.parametrize('value', [1, 2])\ndef test_ordinary_parameter(value): assert value\n"
     text += "def test_new_ordinary_case_is_not_lost(): assert True\n"
+    text += "@pytest.mark.parametrize('value', [0, '0', '00'])\n"
+    text += "def test_ordinary_collision(value): assert value in (0, '0', '00')\n"
     path.write_text(text)
     return path
 
@@ -273,7 +279,14 @@ def test_lane_partition_is_complete_order_preserving_and_strict():
     split = partition_lanes(nodes)
     assert split["ordinary"] == ordinary
     assert Counter(node for group in split.values() for node in group) == Counter(nodes)
-    for changed in (nodes[:-2] + nodes[-1:], nodes + [nodes[0]]):
+    repeated = nodes + [ordinary[0]]
+    preserved = partition_lanes(repeated)
+    assert preserved["ordinary"] == ordinary + [ordinary[0]]
+    assert Counter(node for group in preserved.values() for node in group) == Counter(repeated)
+    owners = {node: [lane for lane, group in preserved.items() if node in group]
+              for node in repeated}
+    assert all(len(lanes) == 1 for lanes in owners.values())
+    for changed in (nodes[:-2] + nodes[-1:], nodes + [nodes[1]]):
         with pytest.raises(pytest.UsageError):
             partition_lanes(changed)
 
@@ -369,3 +382,13 @@ def test_dedicated_guard_preserves_an_earlier_nonzero_session_finish(tmp_path):
     )
     result = _run(tmp_path, "--ci-lane=routing-dispatch")
     assert result.returncode == 17, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("lane", ["ordinary", "routing-dispatch"])
+def test_repeated_dedicated_target_cannot_enter_any_lane(tmp_path, lane):
+    path = _lane_fixture(tmp_path).relative_to(tmp_path)
+    flags = ["--ci-shard=1/4"] if lane == "ordinary" else []
+    result = _run(tmp_path, str(path), str(path), "--keep-duplicates",
+                  f"--ci-lane={lane}", *flags)
+    assert result.returncode == 4, result.stdout + result.stderr
+    assert "dedicated target exactly once" in result.stderr

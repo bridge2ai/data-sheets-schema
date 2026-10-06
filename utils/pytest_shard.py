@@ -29,14 +29,12 @@ def partition_lanes(nodeids):
     """Partition the entire actual collection, never a test allowlist."""
     nodeids = list(nodeids)
     counts = Counter(nodeids)
-    if any(count != 1 for count in counts.values()):
-        raise pytest.UsageError("--ci-lane requires unique collected node IDs")
     if len(set(API_CASE_LANES.values())) != len(API_CASE_LANES):
         raise pytest.UsageError("--ci-lane has duplicate dedicated targets")
-    missing = [node for node in API_CASE_LANES.values() if counts[node] != 1]
-    if missing:
-        raise pytest.UsageError("--ci-lane requires the complete collection; missing: "
-                                + ", ".join(missing))
+    invalid = [node for node in API_CASE_LANES.values() if counts[node] != 1]
+    if invalid:
+        raise pytest.UsageError("--ci-lane requires the complete collection with each "
+                                "dedicated target exactly once: " + ", ".join(invalid))
     dedicated = set(API_CASE_LANES.values())
     return {"ordinary": [node for node in nodeids if node not in dedicated],
             **{lane: [node] for lane, node in API_CASE_LANES.items()}}

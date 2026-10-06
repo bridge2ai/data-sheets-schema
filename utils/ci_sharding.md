@@ -93,8 +93,10 @@ four dedicated lanes for each long offline API case. All jobs collect `tests`.
 `utils.pytest_shard.API_CASE_LANES` is the single exact node roster for dispatch,
 portable completed capture, regated report, and default-layout completion.
 `partition_lanes` requires all four exact nodes once before returning singleton
-case lanes and the complete ordinary complement. A missing, renamed or duplicate
-node fails collection. Newly added tests stay ordinary automatically, including
+case lanes and the complete ordinary complement. A missing, renamed or repeated dedicated
+target fails collection. Ordinary parameter IDs may collide: every occurrence
+is retained, with its original order and one owning shard, and coverage is
+compared as a multiset rather than a mapping. Newly added tests stay ordinary automatically, including
 new tests in the same API file. Timing data cannot select or omit a case.
 
 No `--ci-lane` means the original full/default or file-sharded behavior. The
