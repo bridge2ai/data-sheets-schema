@@ -415,7 +415,55 @@ def _support(capture, raw):
     return expected
 
 
-def _index(capture, descriptor_raw, result_pins, support_pins):
+def _execution(capture, descriptor_raw, descriptor, supplied):
+    """One fixed captured ledger; never infer dispatch from response text."""
+    from data_sheets_schema import nested_support_execution as executor
+
+    _require(type(supplied) is dict and set(supplied) == {"ledger", "saved_report"},
+             "execution index input requires the closed captured ledger")
+    ledger = supplied["ledger"]
+    _require(type(ledger) is dict and ledger.get("format") == "top_level_fitness_execution_v1",
+             "fitness index requires the explicit top-level fitness execution protocol")
+    report = executor.recheck_captured(capture, ledger)
+    registration = saved._mapping(saved._read(capture.get(ledger["registration"],
+        limit=executor.MAX_REGISTRATION_BYTES), "execution registration"), "registration")
+    _require(registration["format"] == "top_level_fitness_execution_v1"
+             and registration["descriptor"] == saved._pin(descriptor_raw),
+             "execution belongs to another fitness descriptor")
+    selections, requests = descriptor["selections"], registration["requests"]
+    _require(len(requests) == len(selections), "execution selected request count differs")
+    for selection, request in zip(selections, requests):
+        _require(request["target_id"] == selection["target_id"]
+                 and request["attempt_id"] == selection["attempt_id"]
+                 and request["kind"] == "fitness_top_level"
+                 and request["planned_request"] == selection["binding"]["request"]
+                 and request["max_tokens"] == selection["binding"]["max_tokens"],
+                 "execution selected request differs from fitness binding")
+    _require(type(report["rows"]) is list and len(report["rows"]) <= len(selections),
+             "execution rows exceed selected fitness attempts")
+    rows = {}
+    for selection, row in zip(selections, report["rows"]):
+        _require(row["target_id"] == selection["target_id"] and row["attempt_id"] == selection["attempt_id"]
+                 and row["kind"] == "fitness_top_level"
+                 and row["status"] in {"accepted", "failed", "spent_unknown"},
+                 "execution row is not a known selected fitness attempt")
+        result = row.get("saved_result")
+        if result is not None:
+            result = _recheck_captured(capture, canonical(result))
+            _require(result["descriptor"] == saved._pin(descriptor_raw)
+                     and result["attempt_id"] == selection["attempt_id"]
+                     and result["target_id"] == selection["target_id"], "execution fitness result differs")
+        _require(row["status"] != "accepted" or result is not None and result["assessment"]["status"] == "accepted",
+                 "accepted execution lacks a strict accepted fitness response")
+        rows[selection["attempt_id"]] = (row, result)
+    if supplied["saved_report"] is not None:
+        _require(capture.get(supplied["saved_report"], limit=saved.MAX_MANIFEST_BYTES) == canonical(report),
+                 "saved execution report differs from captured reconstruction")
+    _require(report["scientific_eligibility"] is False, "execution does not establish scientific eligibility")
+    return rows, {**supplied, "report": report}, registration["declaration"]
+
+
+def _index(capture, descriptor_raw, result_pins, support_pins, execution=None):
     descriptor = _load_descriptor(capture, descriptor_raw)
     by_attempt, pins = {}, {}
     for pin in result_pins:
@@ -424,12 +472,27 @@ def _index(capture, descriptor_raw, result_pins, support_pins):
         aid = result["attempt_id"]
         _require(aid not in by_attempt, "duplicate fitness attempt")
         by_attempt[aid], pins[aid] = result, pin
+    execution_rows, execution_value, declaration = {}, None, None
+    if execution is not None:
+        execution_rows, execution_value, declaration = _execution(capture, descriptor_raw, descriptor, execution)
+        for aid, result in by_attempt.items():
+            _require(aid in execution_rows and execution_rows[aid][1] is not None
+                     and canonical(result) == canonical(execution_rows[aid][1]),
+                     "supplied fitness result differs from its actual execution ledger")
     rows, records = [], {}
     counts = {"selected": 0, "missing": 0, "rejected": 0, "accepted": 0}
     for selection in descriptor["selections"]:
         binding = selection["binding"]
         result = by_attempt.get(selection["attempt_id"])
         state = result["assessment"]["status"] if result else "missing"
+        dispatch, spent = "unknown", None
+        if execution is not None:
+            actual = execution_rows.get(selection["attempt_id"])
+            dispatch = actual[0]["status"] if actual else "not_started"
+            spent = dispatch != "not_started"
+            result = actual[1] if actual else None
+            # A valid score in a failed HTTP body remains raw evidence only.
+            state = "accepted" if dispatch == "accepted" else "rejected" if dispatch == "failed" else "missing"
         counts["selected"] += 1
         counts[state] += 1
         records[binding["record_id"]] = binding["record"]
@@ -437,7 +500,7 @@ def _index(capture, descriptor_raw, result_pins, support_pins):
                      "record_id": binding["record_id"], "record": binding["record"], "pointer": binding["pointer"],
                      "request": binding["request"], "state": state, "result": pins.get(selection["attempt_id"]),
                      "assessment": result["assessment"] if result else None,
-                     "dispatch_state": "unknown", "spent": None})
+                     "dispatch_state": dispatch, "spent": spent})
     support_rows, support_seen = [], set()
     for pin in support_pins:
         result = _support(capture, capture.get(pin))
@@ -456,13 +519,19 @@ def _index(capture, descriptor_raw, result_pins, support_pins):
             "fitness_propagated": False})
     support_counts = {kind: dict(Counter(row["state"] for row in support_rows if row["kind"] == kind))
                       for kind in targets.KINDS}
-    return {"format": INDEX_FORMAT, "descriptor": capture.add(descriptor_raw), "plan": descriptor["plan"],
+    value = {"format": INDEX_FORMAT, "descriptor": capture.add(descriptor_raw), "plan": descriptor["plan"],
         "result_artifacts": result_pins, "support_result_artifacts": support_pins,
         "fitness_rows": rows, "support_rows": support_rows,
         "strata": {"fitness_top_level": counts, **support_counts},
         "support_count_basis": "supplied independently rechecked attempts only",
         "execution": None, "mode": "caller_saved", "approval_basis": "caller_labelled_saved_bytes",
         "scientific_scoring_eligible": False, "readiness": descriptor["readiness"], "limitations": list(LIMITATIONS)}
+    if execution is not None:
+        value.update(execution=execution_value, mode=declaration["purpose"],
+            approval_basis="captured_execution_declarations_not_scientific_validation",
+            decision_references=declaration["decisions"],
+            fitness_state_basis="accepted_requires_both_transport_and_strict_response")
+    return value
 
 
 def _copy(into, source):
@@ -471,8 +540,6 @@ def _copy(into, source):
 
 
 def build_index(descriptor: Path, results: list[Path], output: Path, *, execution=None, support_results=()) -> dict:
-    # Fixed ledger bridge is added only with its reviewed immutable executor.
-    _require(execution is None, "execution-ledger integration is not registered yet")
     capture = saved.Capture(descriptor)
     descriptor_raw = capture.entry("descriptor.json")
     result_pins, support_pins = [], []
@@ -484,15 +551,27 @@ def build_index(descriptor: Path, results: list[Path], output: Path, *, executio
             checker(other, raw)
             _copy(capture, other)
             selected.append(capture.add(raw))
-    value = _index(capture, descriptor_raw, result_pins, support_pins)
-    _write_document(output, capture, "index.json", value, protected=(*results, *support_results))
+    execution_input = None
+    if execution is not None:
+        from data_sheets_schema import nested_support_execution as executor
+        other, ledger = executor.capture_run(Path(execution))
+        report_path = Path(execution) / "report.json"
+        report_pin = other.add(saved._file(report_path, saved.MAX_MANIFEST_BYTES)) if report_path.exists() or report_path.is_symlink() else None
+        _copy(capture, other)
+        execution_input = {"ledger": ledger, "saved_report": report_pin}
+    value = _index(capture, descriptor_raw, result_pins, support_pins, execution_input)
+    protected = (*results, *support_results, *((execution,) if execution is not None else ()))
+    _write_document(output, capture, "index.json", value, protected=protected)
     return value
 
 
 def recheck_index(index: Path) -> dict:
     capture = saved.Capture(index)
     recorded = saved._mapping(saved._read(capture.entry("index.json"), "fitness index"), "index")
+    execution = recorded.get("execution")
+    execution_input = ({"ledger": execution["ledger"], "saved_report": execution["saved_report"]}
+                       if execution is not None else None)
     expected = _index(capture, capture.get(recorded["descriptor"], limit=saved.MAX_MANIFEST_BYTES),
-                      recorded["result_artifacts"], recorded["support_result_artifacts"])
+                      recorded["result_artifacts"], recorded["support_result_artifacts"], execution_input)
     _require(canonical(recorded) == canonical(expected), "fitness index differs from reconstructed evidence")
     return expected

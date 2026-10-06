@@ -49,7 +49,8 @@ def recheck(result):
 @click.option("--result", "paths", multiple=True, type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--support-result", "support_paths", multiple=True,
               type=click.Path(exists=True, file_okay=False, path_type=Path))
-@click.option("--execution", type=click.Path(exists=True, file_okay=False, path_type=Path))
+@click.option("--execution", type=click.Path(exists=True, file_okay=False, path_type=Path),
+              help="Capture and independently recheck the fixed execution ledger; never dispatch or retry.")
 @click.option("--output", required=True, type=click.Path(path_type=Path))
 def index(descriptor, paths, support_paths, execution, output):
     click.echo(canonical(_call(results.build_index, descriptor, list(paths), output,
