@@ -328,3 +328,22 @@ def test_raw_and_derived_storage_reservation_is_checked_before_http(make, peer, 
     monkeypatch.setattr(saved, "MAX_CAPTURE_BYTES", needed)
     assert ex.run(registered)["all_selected_accepted"]
     assert len(peer["requests"]) == 2
+
+
+def test_actual_positive_rejects_rehashed_impossible_transport_states(make, peer):
+    registered, output, _, _ = make(count=2)
+    expected = ex.run(registered)
+    capture, ledger = ex.capture_run(output)
+    original = json.loads(capture.get(ledger["attempts"][0]["response"]))
+    assert original["stage"] == "complete" and original["body_complete"] is True
+    assert ex.recheck_captured(capture, ledger) == expected
+    for change in ({"stage": "connect_or_send"}, {"body_complete": False},
+                   {"failure": "response_byte_limit_exceeded"},
+                   {"stage": "response_body", "body_complete": False,
+                    "failure": "unsupported_content_encoding"}):
+        mutated = copy.deepcopy(ledger)
+        mutated["attempts"][0]["response"] = capture.add(canonical({**original, **change}))
+        with pytest.raises(ValueError, match="conflict|requires"):
+            ex.recheck_captured(capture, mutated)
+    assert ex.recheck(output) == expected
+    assert len(peer["requests"]) == 2

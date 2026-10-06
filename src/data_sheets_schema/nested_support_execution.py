@@ -356,6 +356,34 @@ def _cost(usage, price):
         return None
 
 
+def _transport_state(response, body, limit):
+    """Check the combinations produced by the fixed dispatcher, before use."""
+    _need(response["body"] == _pin(body), "HTTP body identity differs")
+    stage, failure = response["stage"], response["failure"]
+    transport_failures = {"transport_timeout", *("transport_" + name for name in (
+        "HTTPError", "RequestError", "TransportError", "NetworkError", "ReadError",
+        "WriteError", "ConnectError", "CloseError", "ProxyError", "UnsupportedProtocol",
+        "ProtocolError", "LocalProtocolError", "RemoteProtocolError", "DecodingError",
+        "TooManyRedirects", "HTTPStatusError"))}
+    _need(failure is None or failure in transport_failures | {
+        "response_byte_limit_exceeded", "unsupported_content_encoding"}, "unknown transport failure")
+    _need(response["body_complete"] is (stage == "complete"), "transport stage/completeness conflict")
+    _need((response["status_code"] is None) == (stage == "connect_or_send"),
+          "transport stage/HTTP status conflict")
+    if stage == "connect_or_send":
+        _need(not body and response["request_id"] is None and failure in transport_failures,
+              "pre-header transport state conflicts")
+    elif stage == "response_body":
+        _need(failure in transport_failures or failure == "response_byte_limit_exceeded",
+              "interrupted body requires a transport or byte-limit failure")
+    if failure == "response_byte_limit_exceeded":
+        _need(stage == "response_body" and len(body) == limit + 1, "overflow state conflicts")
+    else:
+        _need(len(body) <= limit, "body exceeds limit without overflow evidence")
+    if failure == "unsupported_content_encoding":
+        _need(stage == "complete", "encoding failure requires a completed raw body")
+
+
 def _assessment(capture, registration, selection, response, body):
     _keys(response, {"status_code", "request_id", "body_complete", "failure", "duration_seconds", "body", "stage"}, "HTTP outcome")
     _need(response["status_code"] is None or type(response["status_code"]) is int and 100 <= response["status_code"] <= 599,
@@ -366,6 +394,7 @@ def _assessment(capture, registration, selection, response, body):
     _need(type(response["duration_seconds"]) in (int, float) and math.isfinite(response["duration_seconds"]) and response["duration_seconds"] >= 0, "invalid duration")
     _need(response["failure"] is None or type(response["failure"]) is str, "invalid failure")
     _need(response["request_id"] is None or type(response["request_id"]) is str, "invalid request identifier")
+    _transport_state(response, body, registration["declaration"]["limits"]["response_bytes"])
     result = None
     # Raw native assessment is distinct from HTTP success. Complete failed HTTP
     # replies may still report usage; preserve it without accepting the call.
