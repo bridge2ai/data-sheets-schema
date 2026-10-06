@@ -151,6 +151,17 @@ class _Reader:
                     if found.pin.path in target and target[found.pin.path] != found:
                         raise ValueError('history substitutes an already consumed artifact')
                     target[found.pin.path] = found
+            if kind == 'request_admitted':
+                cursor = c.StageCursor(**c.exact(payload['cursor'], {'ordinal', 'kind', 'target_id'},
+                                                 'captured request cursor'))
+                # These fixed-role outputs are published beside the first
+                # worker/integration request, not in a stage_checked record.
+                # The pure replay reconstructs and compares their exact bytes;
+                # capture must retain them before that comparison can run.
+                role = {'worker': 'packet', 'integration': 'typed_index'}.get(cursor.kind)
+                if role is not None:
+                    found = self.read(role, self.selection.role(role))
+                    artifacts[found.pin.path] = found
             if 'outputs' in payload:
                 if type(payload['outputs']) is not list or len(payload['outputs']) > len(stage.OUTPUT_ROLES):
                     raise ValueError('stage output pin list exceeds its closed roles')
