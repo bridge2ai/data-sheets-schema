@@ -449,3 +449,142 @@ def test_output_protection_uses_every_consulted_yaml_pin_after_input_disappears(
     assert extra in protected
     with pytest.raises(ValueError, match='outside all inputs'):aa.write_new(extra, b'not a replacement', protected)
     assert not extra.exists() and retained.read_bytes() == raw
+
+
+def schema_variant(selected, selected_doc, schema):
+    """Repin a real captured positive; never create accepted summary flags."""
+    import base64
+    capture = aa.capture(selected)
+    old_policy_pin = selected_doc['rows'][0]['policy']
+    old_policy = json.loads((selected.parent / old_policy_pin['path']).read_bytes())
+    old_schema_pin = old_policy['scoring_contract']['output_schema']
+    raw_schema = aa.canonical(schema)
+    schema_path = selected.parent / 'variant-schema.json'; schema_path.write_bytes(raw_schema)
+    policy = copy.deepcopy(old_policy)
+    policy['scoring_contract']['output_schema'] = aa.pin(schema_path.name, raw_schema)
+    variant = repin_json(selected, selected_doc, 'policy', policy, 'variant-policy')
+    raw_policy = (selected.parent / 'variant-policy.json').read_bytes()
+    raw_selection = variant.read_bytes()
+    changed = copy.deepcopy(capture)
+    removed = {capture['selection']['sha256'], old_policy_pin['sha256'], old_schema_pin['sha256']}
+    changed['blobs'] = [b for b in changed['blobs'] if b['sha256'] not in removed]
+    for raw in (raw_schema, raw_policy, raw_selection):
+        changed['blobs'].append({'sha256': aa.sha(raw), 'bytes': len(raw),
+                                'content_base64': base64.b64encode(raw).decode('ascii')})
+    changed['blobs'].sort(key=lambda b: b['sha256'])
+    changed['selection'] = aa.pin(str(variant), raw_selection)
+    return variant, changed
+
+
+def trap_retrieval(monkeypatch):
+    import urllib.request
+    import jsonschema.validators
+    calls = []
+    def refuse(*args, **kwargs):
+        calls.append('unexpected I/O attempt')
+        raise AssertionError('captured schema reached external I/O')
+    monkeypatch.setattr(urllib.request, 'urlopen', refuse)
+    monkeypatch.setattr(jsonschema.validators, 'urlopen', refuse)
+    monkeypatch.setattr(socket, 'socket', refuse)
+    monkeypatch.setattr(socket, 'getaddrinfo', refuse)
+    monkeypatch.setattr(subprocess, 'Popen', refuse)
+    return calls
+
+
+@pytest.mark.parametrize('keyword,dialect', [
+    ('$ref', 'http://json-schema.org/draft-07/schema#'),
+    ('$dynamicRef', 'https://json-schema.org/draft/2020-12/schema'),
+    ('$recursiveRef', 'https://json-schema.org/draft/2019-09/schema'),
+])
+def test_external_schema_references_refuse_in_actual_capture_and_pure_recheck(tmp_path, monkeypatch, keyword, dialect):
+    selected, _, selected_doc, _ = fixture(tmp_path / 'external')
+    variant, captured = schema_variant(selected, selected_doc, {
+        '$schema': dialect, 'allOf': [{keyword: 'https://example.invalid/3046-never-fetch'}]})
+    calls = trap_retrieval(monkeypatch)
+    for invoke in (lambda: aa.capture(variant), lambda: aa.recheck_captured(captured)):
+        with pytest.raises(ValueError, match='requires local references'):invoke()
+    assert calls == []
+
+
+DIALECTS = [
+    'http://json-schema.org/draft-03/schema#', 'http://json-schema.org/draft-04/schema#',
+    'http://json-schema.org/draft-06/schema#', 'http://json-schema.org/draft-07/schema#',
+    'https://json-schema.org/draft/2019-09/schema', 'https://json-schema.org/draft/2020-12/schema',
+]
+
+
+@pytest.mark.parametrize('dialect', DIALECTS)
+def test_fixed_real_registry_preserves_local_semantics_and_has_no_external_fallback(monkeypatch, dialect):
+    import jsonschema
+    from referencing.exceptions import Unresolvable
+    calls = trap_retrieval(monkeypatch)
+    schema = {'$schema': dialect, 'definitions': {'number': {'type': 'integer'}}, '$ref': '#/definitions/number'}
+    original = jsonschema.validators.validator_for(schema)
+    original.check_schema(schema)
+    before = original(schema)
+    after = aa._output_validator(schema)
+    before.validate(4); after.validate(4)
+    with pytest.raises(jsonschema.ValidationError) as a:before.validate(4.5)
+    with pytest.raises(jsonschema.ValidationError) as b:after.validate(4.5)
+    assert (a.value.message, list(a.value.schema_path)) == (b.value.message, list(b.value.schema_path))
+    # Exercise the real configured resolver beneath the lexical policy guard.
+    # If its registry were omitted, this would reach the intercepted URL opener.
+    remote = {'$schema': dialect, '$ref': 'https://example.invalid/3046-never-fetch'}
+    with pytest.raises(Unresolvable):aa._output_validator(remote).validate(4)
+    assert calls == []
+
+
+def test_local_dynamic_anchor_and_real_local_fragment_capture_keep_validator_semantics(tmp_path, monkeypatch):
+    import jsonschema
+    from referencing.exceptions import Unresolvable
+    calls = trap_retrieval(monkeypatch)
+    dynamic = {'$schema': DIALECTS[-1], '$defs': {'number': {'$dynamicAnchor': 'number', 'type': 'integer'}},
+               '$dynamicRef': '#number'}
+    validator = aa._output_validator(dynamic)
+    validator.validate(3)
+    with pytest.raises(jsonschema.ValidationError):validator.validate('not an integer')
+    with pytest.raises(Unresolvable):
+        aa._output_validator({'$schema': DIALECTS[-1], '$dynamicRef': 'https://example.invalid/3046-never-fetch'}).validate(3)
+    selected, _, selected_doc, _ = fixture(tmp_path / 'local')
+    policy = json.loads((selected.parent / selected_doc['rows'][0]['policy']['path']).read_bytes())
+    original_schema = json.loads((selected.parent / policy['scoring_contract']['output_schema']['path']).read_bytes())
+    variant, captured = schema_variant(selected, selected_doc, {
+        '$schema': DIALECTS[-1], '$defs': {'original': original_schema}, '$ref': '#/$defs/original'})
+    assert aa.capture(variant) == captured
+    row = aa.recheck_captured(captured)['rows'][0]
+    assert row['basis']['attained'] == row['basis']['attainable'] == 1
+    assert calls == []
+
+
+@pytest.mark.parametrize('routes', [1, 3])
+def test_complete_derived_metadata_is_charged_at_exact_boundary(tmp_path, monkeypatch, routes):
+    selected, *_ = fixture(tmp_path / 'amplified', readings=[
+        ('E1.2', 'UNREGISTERED_' + str(i) + '_' + 'x' * 60_000, 'supported') for i in range(routes)])
+    captured = aa.capture(selected)
+    samples = []
+    original = aa._Reader.account
+    def observe(self, value):
+        result = original(self, value)
+        samples.append((value.get('format') if type(value) is dict else None,
+                        len(aa.canonical(value)), self.metadata_bytes))
+        return result
+    with monkeypatch.context() as m:
+        m.setattr(aa._Reader, 'account', observe)
+        report = aa.recheck_captured(captured)
+    assert samples[-1][0] == 'd4d-attainability-report'
+    output_bytes = len(aa.canonical(report))
+    input_bytes = sum(size for kind, size, _ in samples[:-1])
+    total = input_bytes + output_bytes
+    assert samples[-1][1:] == (output_bytes, total) and output_bytes > input_bytes
+    (tmp_path / 'metadata-bound.json').write_bytes(aa.canonical({
+        'input': input_bytes, 'result': output_bytes, 'total': total, 'route_count': routes}))
+    # Decisive calls are uninstrumented: old input-only cap now refuses;
+    # exact aggregate cap succeeds; consuming one byte beyond the cap refuses.
+    exact = replace(aa.DEFAULT_LIMITS, metadata_bytes=total)
+    assert aa.capture(selected, limits=exact) == captured
+    assert aa.recheck_captured(captured, limits=exact) == report
+    for limit in (input_bytes, total - 1):
+        lower = replace(aa.DEFAULT_LIMITS, metadata_bytes=limit)
+        for invoke in (lambda: aa.capture(selected, limits=lower),
+                       lambda: aa.recheck_captured(captured, limits=lower)):
+            with pytest.raises(ValueError, match='total metadata budget exceeded'):invoke()

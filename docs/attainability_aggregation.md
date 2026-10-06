@@ -85,7 +85,9 @@ A policy has exactly `format`, `version`, `state`, `rubric`, `rubric_source`,
   worth one point and the others five, totaling 88.
 - `scoring_contract` is `{kind, definition, output_schema, semantic_version,
   evaluator_contract_sources}`. Kind is `semantic-agent`; the definition/schema
-  and every source are pins. Schema references must be local fragments. This
+  and every source are pins. Schema references must be local fragments; a fixed
+  non-retrieving registry also guards instance and meta-schema validation across
+  the supported JSON Schema dialects. This
   release reconstructs version-3 scope/applicability only when the captured
   `evaluation_context.py` and `judge_contract.py` identities match its fixed
   implementation. Other retained contracts are unavailable, never executed or
@@ -174,8 +176,8 @@ duplicate blobs. A supplied report is accepted by report consumers only if it
 exactly equals rederivation. Returned dictionaries do not mutate future results.
 
 Defaults (caller `Limits` may only lower them): 256 rows, 2,048 unique blobs,
-8,192 pin references, 256 MiB decoded / 384 MiB encoded closure, 16 MiB total
-parsed metadata, 8 MiB selection, 64 MiB bundle, 16 MiB input/evaluation,
+8,192 pin references, 256 MiB decoded / 384 MiB encoded closure, 16 MiB aggregate
+parsed-input plus complete derived-result metadata (repeated fields count), 8 MiB selection, 64 MiB bundle, 16 MiB input/evaluation,
 4 MiB document/policy/adjudication/context/rubric and 8 MiB other source per blob;
 64 metadata depth, 1,000,000 nodes, dependency depth 8, 32 policies,
 8 predecessors, 4,096 entries per v1 document, 32 routes per item and

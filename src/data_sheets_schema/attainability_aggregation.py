@@ -15,6 +15,7 @@ from pathlib import Path
 
 import jsonschema
 import yaml
+from referencing import Registry
 
 from data_sheets_schema import attainability as at
 from data_sheets_schema.evaluation_context import context_digest, normalize_context, unwrap_document
@@ -55,6 +56,22 @@ _SOURCE_FILES = tuple((p, Path(__file__).parent / p.removeprefix("src/data_sheet
                       for p in SOURCE_PATHS)
 _IMPLEMENTATION_RAW = tuple((p, actual.read_bytes()) for p, actual in _SOURCE_FILES)
 _IMPLEMENTATION = tuple(pin(p, raw) for p, raw in _IMPLEMENTATION_RAW)
+
+# An explicit Registry has no retrieval callback. jsonschema retains its
+# packaged meta-schemas and the current in-memory schema resources, but cannot
+# fall back to its default URL opener for any dialect's reference keywords.
+_NO_RETRIEVAL = Registry()
+
+
+def _output_validator(schema):
+    validator = jsonschema.validators.validator_for(schema)
+    meta = jsonschema.validators.validator_for(validator.META_SCHEMA, default=validator)
+    # The same validators, format checker and SchemaError conversion used by
+    # check_schema, with retrieval disabled at this boundary as well.
+    for error in meta(validator.META_SCHEMA, format_checker=meta.FORMAT_CHECKER,
+                      registry=_NO_RETRIEVAL).iter_errors(schema):
+        raise jsonschema.SchemaError.create_from(error)
+    return validator(schema, registry=_NO_RETRIEVAL)
 
 
 @dataclass(frozen=True)
@@ -372,8 +389,9 @@ def _policy(reader, identity):
     while stack:
         node = stack.pop()
         if isinstance(node, dict):
-            if "$ref" in node and (type(node["$ref"]) is not str or not node["$ref"].startswith("#")):
-                raise ValueError("captured output schema requires local references")
+            for keyword in ("$ref", "$dynamicRef", "$recursiveRef"):
+                if keyword in node and (type(node[keyword]) is not str or not node[keyword].startswith("#")):
+                    raise ValueError("captured output schema requires local references")
             stack.extend(node.values())
         elif isinstance(node, list):
             stack.extend(node)
@@ -664,10 +682,9 @@ def _row(reader, row):
             unavailable.append(_reason("score_missing", "No recorded applicable item score: " + key))
         if "applicable" not in assessment or "applicability_status" not in assessment:
             unavailable.append(_reason("identity_unrecorded", "Missing original item applicability: " + key))
-    validator = jsonschema.validators.validator_for(schema)
-    validator.check_schema(schema)
+    validator = _output_validator(schema)
     if not unavailable:
-        validator(schema).validate(doc)
+        validator.validate(doc)
     resolutions, prior = _adjudications(reader, row, p, checked, keys)
     result_items, excluded, eligible, findings = [], [], [], []
     attained = 0
@@ -753,9 +770,13 @@ def _derive(reader, selection_pin):
     policies = {r.get("policy", {}).get("sha256") for r in rows}
     if len(policies) > reader.limits.policies:
         raise ValueError("policy count limit exceeded")
-    return {"format": "d4d-attainability-report", "version": 1, "selection": selection_pin,
+    result = {"format": "d4d-attainability-report", "version": 1, "selection": selection_pin,
             "implementation": [dict(p) for p in _IMPLEMENTATION], "limitations": list(LIMITATIONS),
             "rows": [_row(reader, r) for r in rows]}
+    # Charge every derived field, including repeated route/reason/entry text,
+    # to the same aggregate metadata budget as the parsed inputs. Both initial
+    # capture and pure recheck enter here before returning a successful result.
+    return reader.account(result)
 
 
 def capture(selection_path, *, limits=DEFAULT_LIMITS):
