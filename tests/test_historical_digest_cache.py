@@ -279,11 +279,11 @@ def test_same_callable_with_mutated_closed_dictionary_gets_fresh_text(monkeypatc
         return state['prefix'] + value if value else None
     monkeypatch.setattr(history, '_terms', terms)
     before = render()
-    before_key = history._text_key(SCHEMA, PATH, 'canonical_paths', VOCABULARY)
+    with pytest.raises(TypeError, match='unfamiliar'):
+        history._text_key(SCHEMA, PATH, 'canonical_paths', VOCABULARY)
     state['prefix'] = 'after '
-    after_key = history._text_key(SCHEMA, PATH, 'canonical_paths', VOCABULARY)
     after = render()
-    assert before_key != after_key and before != after
+    assert history._text_cache_info()['entries'] == 0 and before != after
     assert after == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
 
 
@@ -297,6 +297,7 @@ def test_closed_list_and_nested_function_state_are_snapshotted(monkeypatch):
     before = render()
     state[0] = 'after '
     assert render() != before
+    assert history._text_cache_info()['entries'] == 0
     assert render() == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
 
 
@@ -335,3 +336,58 @@ def test_change_to_closure_during_construction_prevents_retention(monkeypatch):
     monkeypatch.setattr(history, '_terms', terms)
     assert render() == GOLDEN['canonical_paths']
     assert history._text_cache_info()['entries'] == 0
+
+
+_GLOBAL_TERMS_STATE = {}
+
+
+def _global_terms(names, vocabulary):
+    value = _GLOBAL_TERMS_STATE['original'](names, vocabulary)
+    return _GLOBAL_TERMS_STATE['prefix'] + value if value else None
+
+
+@pytest.mark.parametrize('warm_original', [False, True])
+def test_global_reading_replacement_never_becomes_a_shipped_function(monkeypatch, warm_original):
+    if warm_original:
+        render()
+    entries = history._text_cache_info()['entries']
+    monkeypatch.setitem(_GLOBAL_TERMS_STATE, 'original', history._terms)
+    monkeypatch.setitem(_GLOBAL_TERMS_STATE, 'prefix', 'before ')
+    assert _global_terms.__closure__ is None
+    monkeypatch.setattr(history, '_terms', _global_terms)
+    before = render()
+    _GLOBAL_TERMS_STATE['prefix'] = 'after '
+    after = render()
+    assert before != after and history._text_cache_info()['entries'] == entries
+    assert after == history._render_captured(SCHEMA, PATH, 'canonical_paths', vocabulary_bytes=VOCABULARY)
+
+
+def test_failed_or_closed_binding_cannot_admit_first_seen_replacement():
+    from data_sheets_schema.cache_dependencies import FunctionBindings
+    dependencies = FunctionBindings()
+    dependencies.bind(lambda: dependencies.key(_global_terms))
+    assert dependencies.ready is False
+    with pytest.raises(RuntimeError, match='already closed'):
+        dependencies.bind(lambda: None)
+    with pytest.raises(TypeError, match='unfamiliar'):
+        history._FUNCTION_BINDINGS.key(_global_terms)
+
+
+def test_unavailable_initial_bindings_only_disable_reuse(monkeypatch):
+    monkeypatch.setattr(history._FUNCTION_BINDINGS, 'ready', False)
+    assert render() == GOLDEN['canonical_paths']
+    assert render() == GOLDEN['canonical_paths']
+    assert history._text_cache_info()['entries'] == 0
+
+
+def test_wrapped_replacement_present_before_binding_is_not_shipped():
+    from functools import wraps
+    from data_sheets_schema.cache_dependencies import FunctionBindings
+    original = history._terms
+    @wraps(original)
+    def replacement(*args, **kwargs):
+        return original(*args, **kwargs)
+    assert replacement.__module__ == original.__module__
+    dependencies = FunctionBindings()
+    dependencies.bind(lambda: dependencies.key(replacement))
+    assert dependencies.ready is False

@@ -7,9 +7,7 @@ Generation and current-profile comparison continue to use schema_digest.
 from __future__ import annotations
 
 from collections import OrderedDict
-import dataclasses
 from dataclasses import dataclass
-from enum import Enum
 import hashlib
 from importlib.metadata import version
 import os
@@ -20,8 +18,9 @@ import subprocess
 import sys
 from threading import RLock
 import time
-import types
 from typing import Any
+
+from data_sheets_schema.cache_dependencies import FunctionBindings, schema_key, setting_key as _setting_key
 
 
 RENDERER_PATH = 'src/data_sheets_schema/schema_digest.py'
@@ -103,131 +102,21 @@ def _trim_text_cache() -> None:
         _TEXT_CACHE_BYTES -= weight
 
 
-def _setting_key(value: Any) -> tuple:
-    """Snapshot simple mutable defaults/settings; unfamiliar state bypasses."""
-    if value is dataclasses.MISSING or value is dataclasses._HAS_DEFAULT_FACTORY:
-        return type(value), value  # dataclass constructor identity sentinels
-    if isinstance(value, Enum):
-        return type(value), value.name, _setting_key(value.value)
-    if isinstance(value, re.Pattern):
-        return type(value), value.pattern, value.flags
-    if value is None or type(value) in (bool, int, float, str, bytes):
-        return type(value), value
-    if type(value) in (tuple, list):
-        return type(value), tuple(_setting_key(item) for item in value)
-    if type(value) is dict:
-        return dict, tuple((_setting_key(k), _setting_key(v)) for k, v in value.items())
-    if type(value) in (set, frozenset):
-        return type(value), frozenset(_setting_key(item) for item in value)
-    raise TypeError('unsupported mutable rendering dependency')
+_FUNCTION_BINDINGS = FunctionBindings()
 
 
-def _closure_key(value: Any, seen: frozenset[int]) -> tuple:
-    if id(value) in seen:
-        raise ValueError('cyclic rendering closure')
-    nested = seen | {id(value)}
-    if isinstance(value, types.FunctionType):
-        return _function_key(value, seen)
-    if any(value is cls for cls in (list, dict, set, tuple, frozenset)):
-        return type(value), value  # built-in dataclass default factories
-    if type(value) in (tuple, list):
-        return type(value), tuple(_closure_key(item, nested) for item in value)
-    if type(value) is dict:
-        return dict, tuple((_closure_key(k, nested), _closure_key(v, nested))
-                           for k, v in value.items())
-    if type(value) in (set, frozenset):
-        return type(value), frozenset(_closure_key(item, nested) for item in value)
-    return _setting_key(value)
-
-
-def _function_key(function: Any, seen: frozenset[int] = frozenset()) -> tuple:
-    # Hashable callable instances can have arbitrary mutable state. Only known
-    # function/descriptor forms have inspectable code/default/closure semantics.
-    from yaml._yaml import CParser
-    if function is None:
-        return ()
-    if not isinstance(function, (types.FunctionType, types.BuiltinFunctionType,
-            types.MethodDescriptorType, types.WrapperDescriptorType,
-            types.ClassMethodDescriptorType, type(CParser.check_event))):
-        raise TypeError('unsupported rendering callable state')
-    bound = getattr(function, '__self__', None)
-    if bound is not None and not isinstance(bound, (types.ModuleType, type)):
-        raise TypeError('unsupported bound rendering callable state')
-    if id(function) in seen:
-        raise ValueError('cyclic rendering callable')
-    nested = seen | {id(function)}
-    code = getattr(function, '__code__', None)
-    cells = getattr(function, '__closure__', None) or ()
-    names = getattr(code, 'co_freevars', ())
-    if len(cells) != len(names):
-        raise ValueError('uninspectable rendering closure')
-    closure = []
-    for name, cell in zip(names, cells):
-        value = cell.cell_contents  # an empty cell also bypasses retention
-        if name == '__class__' and isinstance(value, type):
-            # Compiler-created super() cells identify a defining class. Its
-            # effective constructors/methods are independently included below.
-            state = (type(value), value)
-        else:
-            state = _closure_key(value, nested)
-        closure.append((name, state))
-    return (function, code, _setting_key(getattr(function, '__defaults__', None)),
-            _setting_key(getattr(function, '__kwdefaults__', None)), tuple(closure),
-            _function_key(getattr(function, '__wrapped__', None), nested))
-
-
-def _constructor_key(cls: type) -> tuple:
-    return (cls, _function_key(type(cls).__call__),
-            tuple((name, _function_key(getattr(cls, name, None)))
-                  for name in ('__new__', '__init__', '__post_init__')))
-
-
-def _view_methods_key(cls: type, views) -> tuple:
-    effective = {}
-    for base in cls.__mro__:
-        for name, member in vars(base).items():
-            effective.setdefault(name, member)
-    methods = []
-    for name, member in sorted(effective.items()):
-        if isinstance(member, views._InstanceCached):
-            state = (member, _function_key(member.function), member.name,
-                     member.maxsize, member.typed)
-        elif isinstance(member, (staticmethod, classmethod)):
-            state = _function_key(member.__func__)
-        elif isinstance(member, property):
-            state = tuple(_function_key(fn) for fn in (member.fget, member.fset, member.fdel))
-        elif callable(member):
-            state = _function_key(member)
-        else:
-            continue
-        methods.append((name, state))
-    return tuple(methods)
+def _function_key(function: Any) -> tuple:
+    return _FUNCTION_BINDINGS.key(function)
 
 
 def _text_key(raw: bytes, path: str, family: str, vocabulary: bytes | None) -> tuple:
-    from data_sheets_schema import schema_view as views
-    from linkml_runtime.linkml_model import meta
-
     policy = POLICIES[family]
     functions = tuple(_function_key(fn) for fn in
-                      (_render_captured, _inventory, _enum, _vocabulary, _terms,
-                       version, views.version_document, views.version_view, views.yaml.load))
-    models = tuple((name, _constructor_key(cls)) for name, cls in sorted(vars(meta).items())
-                   if isinstance(cls, type) and cls.__module__ == meta.__name__)
-    constructors = tuple(_constructor_key(cls) for cls in
-                         (views.SchemaDefinition, views._ReleasableView, views.DupCheckYamlLoader))
-    yaml_tables = tuple((name, tuple((prefix, _function_key(fn)) for prefix, fn in
-                                    getattr(views.DupCheckYamlLoader, name).items()))
-                        for name in ('yaml_constructors', 'yaml_multi_constructors'))
-    yaml_resolvers = tuple((name, _setting_key(getattr(views.DupCheckYamlLoader, name)))
-                           for name in ('yaml_implicit_resolvers', 'yaml_path_resolvers'))
+                      (_render_captured, _inventory, _enum, _vocabulary, _terms, version))
     key = (raw, path, family, _setting_key(vars(policy)), vocabulary,
            version('linkml-runtime'), RUNTIME_VERSION, FULL_SCHEMA_PATH, frozenset(_UNIVERSAL),
-           hashlib.sha256(Path(views.__file__).read_bytes()).digest(),
-           functions, constructors, models,
-           _view_methods_key(views._ReleasableView, views),
-           _view_methods_key(views.DupCheckYamlLoader, views), yaml_tables, yaml_resolvers)
-    hash(key)  # Unhashable extension state falls back to the original renderer.
+           functions, schema_key(_FUNCTION_BINDINGS))
+    hash(key)
     return key
 
 
@@ -584,3 +473,8 @@ def reconstruct(record: dict[str, Any], raw_schema: bytes, logical_path: str, *,
     except Exception as exc:
         result['reason'] = f'{type(exc).__name__}: {exc}'
     return result
+
+
+# Optional binding failure disables only reuse, never the public renderer.
+# Bind before callers can install a replacement and before the first cache hit.
+_FUNCTION_BINDINGS.bind(lambda: _text_key(b'', FULL_SCHEMA_PATH, 'required_enum40', None))
