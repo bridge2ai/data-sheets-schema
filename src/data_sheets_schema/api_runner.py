@@ -216,7 +216,10 @@ def condition_delta(a: str, b: str, records_a: Any = None,
                     records_b: Any = None) -> list[str]:
     """Which axes two conditions differ on.
 
-    The two named axes are properties of the **prompt**, so a change to how
+    Base and tuning are properties of the **prompt**. Selected source-heading
+    conditions also declare a routing axis; an absent routing value means no
+    selected routing. These software axes do not establish scientific
+    comparability. A change to how
     the runner assembles a request is invisible to them. That is not
     hypothetical: the declared-scope block (#932) landed after every v8
     record was generated, so a v9 run differs from the retained v8 corpus by
@@ -249,6 +252,8 @@ def condition_delta(a: str, b: str, records_a: Any = None,
     if ax is None or bx is None:
         return ["unknown condition"]
     delta = [k for k in ("base", "tuned") if ax[k] != bx[k]]
+    if ax.get("routing") != bx.get("routing"):
+        delta.append("routing")
     if records_a is None and records_b is None:
         return delta
     # Asked and could not answer is a third state, not agreement (#1092).
@@ -290,9 +295,10 @@ def _base_step(base: str) -> int:
 
 def comparable_conditions(a: str, b: str, records_a: Any = None,
                           records_b: Any = None) -> bool:
-    """True when a difference between the two *prompt conditions* is one step.
+    """True when registered condition metadata differs on one software axis.
 
-    **This answers a question about prompt text and nothing else.** Two arms can
+    Base changes must be adjacent; routing is a categorical selection, not an
+    ordered prompt revision. This is not scientific comparability. Two arms can
     satisfy it and still be uncomparable, because a schema digest, a phase
     instruction or a runtime can change between them — none of which is visible
     in a condition name. `runs.arm_confounds` reads what the records state and

@@ -38,6 +38,8 @@ ARMS = {
 # from every CLI entry point — the condition was staged, tested, and could not be
 # launched.
 _CONDITIONS = sorted(CONDITION_PROMPTS)
+_CONDITION_SCOPE = (" API generic_v10 requires registered API25; source-heading conditions require "
+                    "registered API27/shared2/playbook3/receipt3. Source-heading selections do not support native/direct launchers.")
 
 
 def _explicit(name, value, default=None):
@@ -437,7 +439,7 @@ def api():
               show_default=True)
 @click.option("--label", required=True, help="run label")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
-              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for a dataset the selected manifest does not declare")
 @click.option("--manifest", default=None,
@@ -540,7 +542,7 @@ def render_prompt_cmd(project, arm, label, condition, bundle, manifest, chunk_ma
               show_default=True)
 @click.option("--label", required=True, help="run label, e.g. 2026-07-29_claude-opus-5-api-generic_rep1")
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
-              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)")
+              help="prompt condition; omitted, `generic` applies without being called a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--bundle", type=click.Path(), default=None,
               help="explicit input bundle; required for a dataset the selected manifest does not declare")
 @click.option("--manifest", default=None,
@@ -608,7 +610,7 @@ def plan_cmd(project, arm, label, condition, bundle, manifest, chunk_manifest, o
 @click.option("--label", required=True)
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies and the record derives its "
-                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="run even though the label names a different condition (#1094)")
 @click.option("--bundle", type=click.Path(), default=None,
@@ -701,7 +703,7 @@ def run_cmd(project, arm, label, condition, allow_condition_mismatch, bundle, ma
               show_default=True)
 @click.option("--condition", type=click.Choice(_CONDITIONS), default=None,
               help="prompt condition; omitted, `generic` applies and each record derives its "
-                   "condition from the prompt it hashes rather than calling the default a choice (#1094)")
+                   "condition from the prompt it hashes rather than calling the default a choice (#1094)" + _CONDITION_SCOPE)
 @click.option("--allow-condition-mismatch", is_flag=True,
               help="run even though the label prefix names a different condition (#1094)")
 @click.option("--replicates", type=int, default=3, show_default=True)

@@ -2057,15 +2057,164 @@ def condition_from_label(label: str) -> str | None:
     # the registry does not know yet (`generic-v10` before it is registered)
     # names no registered condition rather than its prefix. Two registered
     # conditions both present as tokens is an ambiguous label, also None.
-    hits = [cond for cond in CONDITION_PROMPTS
-            if re.search(r"(?<![a-z0-9])" + re.escape(cond.replace("_", "-")) + r"(?![a-z0-9])", hay)]
-    versioned = re.search(r"(?<![a-z0-9])generic-v\d+(?![a-z0-9])", hay)
-    if versioned and versioned.group(0).replace("-", "_") not in CONDITION_PROMPTS:
+    matches = [(cond, match.span()) for cond in CONDITION_PROMPTS
+               for match in re.finditer(r"(?<![a-z0-9])" + re.escape(cond.replace("_", "-"))
+                                        + r"(?![a-z0-9])", hay)]
+    versioned = re.finditer(r"(?<![a-z0-9])generic-v\d+(?![a-z0-9])", hay)
+    if any(match.group(0).replace("-", "_") not in CONDITION_PROMPTS for match in versioned):
         return None
-    # `generic` sits inside every `generic-vN`; the versioned token wins.
-    if len(hits) > 1 and "generic" in hits and versioned:
-        hits.remove("generic")
-    return hits[0] if len(hits) == 1 else None
+    # Only discard the overlapping occurrence, not a separate token elsewhere
+    # in the label. A routed name contains its base name, but a label explicitly
+    # naming both the base and the route is still ambiguous (#4511).
+    hits = {cond for cond, (start, end) in matches if not any(
+        other_start <= start and end <= other_end and (start, end) != (other_start, other_end)
+        for _, (other_start, other_end) in matches)}
+    return next(iter(hits)) if len(hits) == 1 else None
+
+
+def _recorded_routing_condition(record: dict[str, Any]) -> tuple[str | None, str | None]:
+    """Attribute a recorded v2 selection, without reopening its authorities.
+
+    This checks the condition-bearing joins in captured metadata. It does not
+    verify the whole registration, its historical implementation, execution or
+    scientific eligibility. In particular, current installed descriptor hashes
+    must not replace the historical ones in a reporting operation (#4511).
+    """
+    import hashlib
+    import json
+    import math
+    from data_sheets_schema.api_runner import CONDITION_AXES, SOURCE_HEADING_CONDITIONS
+
+    prompts = record.get("prompts")
+    request = prompts.get("request") if isinstance(prompts, dict) else None
+    spec = request.get("spec") if isinstance(request, dict) else None
+    shared = record.get("shared_generation")
+    run = record.get("run")
+    route_claim = (isinstance(run, dict) and type(run.get("condition")) is str
+                   and run["condition"] in SOURCE_HEADING_CONDITIONS)
+    if not ((isinstance(spec, dict) and (spec.get("shared_generation_version") == 2
+                                        or (type(spec.get("condition")) is str
+                                            and spec["condition"] in SOURCE_HEADING_CONDITIONS)))
+            or (isinstance(shared, dict) and shared.get("protocol") == "shared_generation_v2")
+            or (route_claim and ((isinstance(prompts, dict) and "request" in prompts)
+                                 or "shared_generation" in record))):
+        return None, None
+
+    def require(ok, message):
+        if not ok:
+            raise ValueError(message)
+
+    def distinct(pairs):
+        value = {}
+        for key, item in pairs:
+            require(key not in value, "duplicate recorded registration key")
+            value[key] = item
+        return value
+
+    def nonfinite(value):
+        raise ValueError("nonfinite recorded registration value")
+
+    def finite_float(text):
+        value = float(text)
+        require(math.isfinite(value), "nonfinite recorded registration value")
+        return value
+
+    def pinned_json(pin):
+        require(type(pin) is dict and set(pin) == {"raw_json", "sha256"},
+                "recorded registration requires raw JSON and SHA256")
+        require(type(pin["raw_json"]) is str and len(pin["raw_json"]) <= 2_000_000,
+                "recorded registration exceeds its text bound")
+        raw = pin["raw_json"].encode("utf-8")
+        require(0 < len(raw) <= 2_000_000, "recorded registration exceeds its byte bound")
+        require(type(pin["sha256"]) is str and hashlib.sha256(raw).hexdigest() == pin["sha256"],
+                "recorded registration SHA256 differs from its raw JSON")
+        value = json.loads(raw, object_pairs_hook=distinct, parse_constant=nonfinite,
+                           parse_float=finite_float)
+        require(type(value) is dict, "recorded registration is not an object")
+        pending, nodes = [(value, 0)], 0
+        while pending:
+            item, depth = pending.pop()
+            nodes += 1
+            require(depth <= 100 and nodes <= 100_000,
+                    "recorded registration exceeds its depth or node bound")
+            if type(item) is dict:
+                pending.extend((child, depth + 1) for child in item.values())
+            elif type(item) is list:
+                pending.extend((child, depth + 1) for child in item)
+        return value
+
+    def exact_int(value, expected):
+        return type(value) is int and value == expected
+
+    try:
+        require(type(spec) is dict, "selected routing lacks its recorded request specification")
+        condition = spec.get("condition")
+        require(type(condition) is str and condition in SOURCE_HEADING_CONDITIONS,
+                "recorded request does not name a supported routing condition")
+        require(all(exact_int(spec.get(key), expected) for key, expected in (
+            ("shared_generation_version", 2), ("render_version", 27),
+            ("api_playbook_version", 3), ("receipt_completion_version", 3)))
+            and spec.get("runtime") == "Claude API (direct)",
+            "recorded request differs from the selected API routing tuple")
+        pin = spec.get("shared_generation_registration")
+        registration = pinned_json(pin)
+        require(registration.get("format") == "shared_generation_registration_v2",
+                "recorded routing registration has a different format")
+        selected = registration.get("selection")
+        require(type(selected) is dict, "recorded routing selection is missing")
+        require(all(exact_int(selected.get(key), expected) for key, expected in (
+            ("version", 2), ("renderer", 27), ("api_playbook_version", 3),
+            ("receipt_completion_version", 3)))
+            and selected.get("protocol") == "shared_generation_v2"
+            and selected.get("runtime") == spec["runtime"]
+            and selected.get("condition") == condition,
+            "recorded descriptor and request routing selection disagree")
+        assets = selected.get("assets")
+        require(type(assets) is dict and assets
+                and all(type(key) is str and type(value) is str
+                        and re.fullmatch(r"[0-9a-f]{64}", value) for key, value in assets.items())
+                and spec.get("shared_generation_assets") == assets,
+                "recorded descriptor and request asset identities disagree")
+        require(spec.get("api_playbook_sha256") == assets.get("src/download/prompts/api_playbook_v3.md")
+                and type(spec.get("api_playbook_sha256")) is str
+                and spec.get("receipt_completion_policy_sha256")
+                == assets.get("src/download/prompts/receipt_completion_runtime_v3.md")
+                and type(spec.get("receipt_completion_policy_sha256")) is str,
+                "recorded request policy identities differ from the descriptor")
+        routing = registration.get("routing")
+        require(type(routing) is dict and routing.get("mode") == CONDITION_AXES[condition]["routing"],
+                "recorded routing mode and condition disagree")
+        run, registered_run = record.get("run"), registration.get("run")
+        require(type(run) is dict and type(registered_run) is dict
+                and set(registered_run) == {"project", "arm", "method", "label"}
+                and all(type(value) is str and value and run.get(key) == value
+                        for key, value in registered_run.items()),
+                "recorded routing registration belongs to a different run")
+        require(type(spec.get("arm")) is str and spec["arm"] == registered_run["arm"],
+                "recorded request and routing registration arms disagree")
+        receipt = pinned_json(spec.get("receipt_completion_registration"))
+        require(receipt.get("format") == "receipt_completion_registration_v3"
+                and receipt.get("condition") == condition
+                and receipt.get("runtime_policy_sha256") == spec["receipt_completion_policy_sha256"]
+                and json.dumps(receipt, sort_keys=True, allow_nan=False)
+                == json.dumps(registration.get("receipt"), sort_keys=True, allow_nan=False),
+                "recorded receipt and routing registration disagree")
+        if "shared_generation" in record:
+            require(type(shared) is dict and shared.get("protocol") == "shared_generation_v2"
+                    and type(run.get("generation_id")) is str and bool(run["generation_id"])
+                    and shared.get("generation_id") == run["generation_id"],
+                    "recorded routing summary belongs to a different generation")
+            authority = shared.get("authority")
+            require(type(authority) is dict and authority.get("registration") == pin,
+                    "recorded routing authority differs from the request registration")
+            admission = shared.get("routing")
+            if "routing" in shared:
+                require(type(admission) is dict and admission.get("generation_id") == run["generation_id"]
+                        and admission.get("registration_sha256") == pin["sha256"],
+                        "recorded routing admissions name a different registration or generation")
+        return condition, None
+    except (ValueError, TypeError, UnicodeError, RecursionError) as exc:
+        return None, str(exc)
 
 
 def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, Any] | None:
@@ -2081,15 +2230,21 @@ def condition_contradiction(record: dict[str, Any], label: str) -> dict[str, Any
     stated = run.get("condition")
     if not isinstance(stated, str) or not stated.strip():
         return None
-    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS
     files = ((record.get("prompts") or {}).get("files") or (record.get("prompts") or {}).get("paths") or []) \
         if isinstance(record.get("prompts"), dict) else []
     by_prompt = condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f) for f in files)
     by_label = condition_from_label(label)
+    by_selection, selection_problem = _recorded_routing_condition(record)
     disagree = {}
     if stated not in CONDITION_PROMPTS:
         disagree["registry"] = "not a registered condition"
-    if by_prompt and by_prompt != stated:
+    if selection_problem:
+        disagree["selected routing"] = selection_problem
+    elif by_selection and by_selection != stated:
+        disagree["selected routing"] = by_selection
+    if by_prompt and by_prompt != stated and not (
+            stated in SOURCE_HEADING_CONDITIONS and by_prompt == "generic_v10"):
         disagree["hashed prompt"] = by_prompt
     if by_label and by_label != stated:
         disagree["label"] = by_label
@@ -2114,12 +2269,18 @@ def condition_unfalsifiable(record: dict[str, Any], label: str) -> bool:
     files = ((record.get("prompts") or {}).get("files") or (record.get("prompts") or {}).get("paths") or []) \
         if isinstance(record.get("prompts"), dict) else []
     by_prompt = condition_from_prompt_paths(f.get("path", "") if isinstance(f, dict) else str(f) for f in files)
+    from data_sheets_schema.api_runner import SOURCE_HEADING_CONDITIONS
+    if type(run["condition"]) is str and run["condition"] in SOURCE_HEADING_CONDITIONS:
+        selected, problem = _recorded_routing_condition(record)
+        # The base filename alone cannot attest the registered routing choice.
+        # Invalid supplied evidence is a contradiction, not a positive match.
+        return selected is None and problem is None
     return by_prompt is None and condition_from_label(label) is None
 
 
 def prompt_condition_mismatch(method: str, label: str, project: str,
                               concat_dir: Path = CONCAT_DIR) -> str | None:
-    """Whether a run's label and its hashed prompt name the same condition.
+    """Whether its label and recorded condition evidence name the same condition.
 
     The 2026-08-07 sweep is labelled `generic-v3` and hashes
     `d4d_generic_arm_prompt.md`, which is v1 (#420). v3 adds seven decision
@@ -2135,7 +2296,10 @@ def prompt_condition_mismatch(method: str, label: str, project: str,
     recorded = condition_of(method, label, project, concat_dir)
     if not claimed or not recorded or claimed == recorded:
         return None
-    from data_sheets_schema.api_runner import CONDITION_PROMPTS
+    from data_sheets_schema.api_runner import CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS
+    if recorded in SOURCE_HEADING_CONDITIONS:
+        return (f"label claims {claimed!r} but the captured routing selection is "
+                f"{recorded!r}; the two are different conditions")
     return (f"label claims {claimed!r} but the hashed prompt is "
             f"{recorded!r} ({CONDITION_PROMPTS[recorded].name}); "
             "the two are different conditions")
@@ -2143,13 +2307,28 @@ def prompt_condition_mismatch(method: str, label: str, project: str,
 
 def condition_of(method: str, label: str, project: str,
                  concat_dir: Path = CONCAT_DIR) -> str | None:
-    """The prompt condition a run recorded, read from its provenance prompts."""
+    """Read the historical condition attribution from recorded evidence.
+
+    A routed condition needs consistent captured selection metadata; its shared
+    base prompt cannot distinguish it. This attribution is separate from the
+    contradiction gate, which also compares the run claim and base prompt.
+    Legacy conditions retain their prompt-file inference.
+    """
     import yaml as _yaml
     from data_sheets_schema.provenance import record_path_for
     p = record_path_for(project, method, label, concat_dir)
     if not p.exists():
         return None
     data = _cached_yaml(p) or {}
+    if isinstance(data, dict):
+        selected, problem = _recorded_routing_condition(data)
+        if selected is not None or problem is not None:
+            return selected
+        from data_sheets_schema.api_runner import SOURCE_HEADING_CONDITIONS
+        run = data.get("run")
+        if (isinstance(run, dict) and type(run.get("condition")) is str
+                and run["condition"] in SOURCE_HEADING_CONDITIONS):
+            return None
     paths = ((data.get("prompts") or {}).get("files")
              or (data.get("prompts") or {}).get("paths") or [])
     # Entries are mappings — `{"path": ..., "sha256": ...}` — not bare strings.

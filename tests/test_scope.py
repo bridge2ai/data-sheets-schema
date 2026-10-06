@@ -617,11 +617,11 @@ class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
             run_date="2026-08-11"))
 
     def test_no_rendered_instruction_names_another_project(self):
-        from data_sheets_schema.api_runner import CONDITION_PROMPTS
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS
         # The registered API-only v10 instruction is exercised in full in
         # test_shared_generation_condition_compatibility; it has no legacy
         # unregistered/native specification.
-        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"}):
+        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"} - SOURCE_HEADING_CONDITIONS):
             for project in ALL_PROJECTS:
                 text = self._rendered(project, condition)
                 for other in ALL_PROJECTS:
@@ -648,9 +648,9 @@ class TestTheInstructionCarriesNoProjectSpecificScope(unittest.TestCase):
         they apply to every project identically. What must not appear is
         another dataset's bundle.
         """
-        from data_sheets_schema.api_runner import CONDITION_PROMPTS
+        from data_sheets_schema.api_runner import CONDITION_PROMPTS, SOURCE_HEADING_CONDITIONS
         pattern = re.compile(r"data/preprocessed/concatenated/[\w.-]+")
-        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"}):
+        for condition in sorted(set(CONDITION_PROMPTS) - {"generic_v10"} - SOURCE_HEADING_CONDITIONS):
             for project in ALL_PROJECTS:
                 text = self._rendered(project, condition)
                 named = set(pattern.findall(text))
