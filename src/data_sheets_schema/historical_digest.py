@@ -174,7 +174,7 @@ def render_captured(raw_schema: bytes, logical_path: str, family: str, *,
             raise ValueError('historical schema does not define Dataset')
         slots, nested = _inventory(view, policy)
     displayed = (FULL_SCHEMA_PATH if policy.canonical_path and
-                 Path(logical_path).name == Path(FULL_SCHEMA_PATH).name else logical_path)
+                 Path(logical_path).name == Path(FULL_SCHEMA_PATH).name else str(Path(logical_path)))
     lines = ['# Target class `Dataset` — slot inventory', '',
              f'Derived from `{displayed}`. Structure only: this states what '
              'shape a record takes, never what any dataset contains.', '',

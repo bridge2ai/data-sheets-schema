@@ -417,3 +417,30 @@ def test_runs_check_reports_text_agreement_without_changing_profile_or_strict_re
     assert 'Candidate agreement does not attest the consumed implementation or profile' in after.output
     assert 'reproduced: candidate text agrees; consumed identity remains unrecorded' in after.output
     assert 'two instruments' not in after.output
+
+
+@pytest.mark.parametrize('family', tuple(GOLDEN))
+@pytest.mark.parametrize('logical_path, normalized', [
+    ('./captured/custom.yaml', 'captured/custom.yaml'),
+    ('captured//custom.yaml', 'captured/custom.yaml'),
+    ('captured/./custom.yaml', 'captured/custom.yaml'),
+    ('./captured/data_sheets_schema_all.yaml', 'captured/data_sheets_schema_all.yaml'),
+    ('captured//data_sheets_schema_all.yaml', 'captured/data_sheets_schema_all.yaml'),
+    ('captured/./data_sheets_schema_all.yaml', 'captured/data_sheets_schema_all.yaml'),
+])
+def test_original_path_display_and_later_canonical_basename(family, logical_path, normalized):
+    vocabulary = VOCABULARY if history.POLICIES[family].vocabulary else None
+    text = history.render_captured(SCHEMA, logical_path, family, vocabulary_bytes=vocabulary)
+    shown = (history.FULL_SCHEMA_PATH if family in ('canonical_paths', 'inline_depth2') and
+             normalized.endswith('/data_sheets_schema_all.yaml') else normalized)
+    assert text.splitlines()[2] == (
+        f'Derived from `{shown}`. Structure only: this states what shape a record takes, '
+        'never what any dataset contains.')
+
+
+def test_display_normalization_does_not_normalize_declared_authority(candidate):
+    root, record = candidate
+    record['schema']['full_path'] = './captured/custom.yaml'
+    result = history.reconstruct(record, SCHEMA, 'captured/custom.yaml', git_root=root)
+    assert result['status'] == 'unavailable'
+    assert 'path/bytes do not match the declaration' in result['reason']
