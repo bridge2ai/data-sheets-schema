@@ -381,8 +381,9 @@ def _roots(expected, selection, launch):
                  *expected['policy']['readonly_lookups']['output_directories']]
     protected += [value for key,value in expected['permission_environment'].items()
                   if key in ('CLAUDE_CONFIG_DIR', 'D4D_LAUNCH_INSTRUCTION') and value.startswith('/')]
+    protected_paths = [_path(x) for x in protected]
     for number, root in enumerate(roots):
-        for other in roots[number+1:] + [_path(x) for x in protected]:
+        for other in roots[number+1:] + protected_paths:
             _need(root != other and root not in other.parents and other not in root.parents, 'neutral roots overlap authority')
     return roots
 
