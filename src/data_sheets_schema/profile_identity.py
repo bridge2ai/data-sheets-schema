@@ -17,6 +17,8 @@ import sys
 from threading import RLock
 from typing import Any
 
+from data_sheets_schema.cache_dependencies import FunctionBindings, schema_key
+
 
 # Only positive, content-derived inventories live here. A record's authority,
 # vocabulary, rendered candidates and final judgement are always read afresh.
@@ -25,6 +27,7 @@ _INVENTORY_CACHE_MAX_BYTES = 16 * 1024 * 1024
 _INVENTORY_CACHE: OrderedDict[tuple, tuple[Any, int]] = OrderedDict()
 _INVENTORY_CACHE_BYTES = 0
 _INVENTORY_CACHE_LOCK = RLock()
+_FUNCTION_BINDINGS = FunctionBindings()
 
 
 def _inventory_cache_clear() -> None:
@@ -74,9 +77,7 @@ def _trim_inventory_cache() -> None:
 
 
 def _callable_key(function: Any) -> tuple:
-    return (function, getattr(function, '__code__', None),
-            getattr(function, '__defaults__', None),
-            tuple(sorted((getattr(function, '__kwdefaults__', None) or {}).items())))
+    return _FUNCTION_BINDINGS.key(function)
 
 
 def _constructor_key(constructor: type) -> tuple:
@@ -103,12 +104,10 @@ def _inventory_key(raw: bytes, path: Path, renderer: dict[str, Any]) -> tuple:
                 frozenset(digest.UNIVERSAL_ATTRIBUTES), digest.TERM_SOURCES_ANNOTATION,
                 tuple(sorted(digest.TERM_SOURCES.items())))
     constructors = tuple(_constructor_key(cls)
-                         for cls in (digest.ClassDigest, digest.SlotDigest, digest.NestedClass,
-                                     views.SchemaDefinition, views._ReleasableView,
-                                     views.DupCheckYamlLoader)) + (_callable_key(views.yaml.load),)
-    view_source = hashlib.sha256(Path(views.__file__).read_bytes()).hexdigest()
+                         for cls in (digest.ClassDigest, digest.SlotDigest, digest.NestedClass))
     return (raw, str(path), renderer['source_sha256'], renderer['linkml_runtime_version'],
-            view_source, functions, settings, constructors)
+            functions, settings, constructors, schema_key(_FUNCTION_BINDINGS))
+
 
 
 def _historical_inventory(raw: bytes, path: Path, renderer: dict[str, Any]):
@@ -117,10 +116,14 @@ def _historical_inventory(raw: bytes, path: Path, renderer: dict[str, Any]):
     from data_sheets_schema.schema_view import version_document, version_view
     global _INVENTORY_CACHE_BYTES
 
-    key = _inventory_key(raw, path, renderer)
     with _INVENTORY_CACHE_LOCK:
         _trim_inventory_cache()
-        stored = _INVENTORY_CACHE.get(key)
+    try:
+        key = _inventory_key(raw, path, renderer)
+    except Exception:
+        key = None  # an unfamiliar dependency still uses the fresh builder
+    with _INVENTORY_CACHE_LOCK:
+        stored = _INVENTORY_CACHE.get(key) if key is not None else None
         if stored is not None:
             _INVENTORY_CACHE.move_to_end(key)
             return deepcopy(stored[0])
@@ -132,7 +135,12 @@ def _historical_inventory(raw: bytes, path: Path, renderer: dict[str, Any]):
     # Even permitted linkml: imports read installed package YAML. A root hash
     # and runtime version cannot attest those mutable bytes, so imported
     # schemas retain the existing fresh construction path on every call.
-    if document.get('imports'):
+    if key is None or document.get('imports'):
+        return inventory
+    try:
+        if _inventory_key(raw, path, renderer) != key:
+            return inventory
+    except Exception:
         return inventory
     # Include the entry tuple and a conservative OrderedDict node allowance,
     # in addition to the complete raw key and derived inventory object graph.
@@ -185,6 +193,12 @@ def _current(context: dict[str, Any]) -> dict[str, Any]:
     return context
 
 
+# Bind the shipped implementation while importing this module, before any
+# record is checked. Failure disables reuse only; authority/rendering stays fresh.
+_FUNCTION_BINDINGS.bind(lambda: _inventory_key(
+    b'', Path('cache-binding'), {'source_sha256': '', 'linkml_runtime_version': ''}))
+
+
 def _vocabulary(profile) -> tuple[dict, dict]:
     """Capture a profile's selected vocabulary once, without ambient selection."""
     from data_sheets_schema.schema_view import version_document
@@ -214,8 +228,9 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
     """
     from data_sheets_schema import profiles
 
-    schema = record.get('schema') if isinstance(record, dict) else None
-    schema = deepcopy(schema) if isinstance(schema, dict) else {}
+    snapshot = deepcopy(record) if isinstance(record, dict) else {}
+    schema = snapshot.get('schema')
+    schema = schema if isinstance(schema, dict) else {}
     stated, recorded = schema.get('profile'), schema.get('digest_md5')
     effective = profiles.for_record({'schema': schema}).name if stated is None else stated
     context: dict[str, Any] = {
@@ -253,6 +268,7 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
     if effective not in dict(registered_profiles):
         context['reason'] = 'the recorded profile is not available in this renderer'
         return context
+    historical_raw = None
     try:
         from data_sheets_schema import run_schema, schema_digest
         raw, basis = run_schema.run_schema_bytes({'schema': schema})
@@ -265,6 +281,7 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
             context['reason'] = 'recovered full-schema bytes do not match every recorded hash'
             return context
         context['schema_sha256'] = hashlib.sha256(raw).hexdigest()
+        historical_raw = raw
         renderer_raw = Path(schema_digest.__file__).read_bytes()
         context['renderer'] = {'module': 'data_sheets_schema.schema_digest',
                                'source_sha256': hashlib.sha256(renderer_raw).hexdigest(),
@@ -287,4 +304,9 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
         _choose(context, candidates, historical=True)
     except Exception as exc:  # malformed or unavailable history is a disclosed unknown
         context['reason'] = f'historical profile identity unavailable: {type(exc).__name__}: {exc}'
+    if context['status'] == 'unknown' and historical_raw is not None:
+        from data_sheets_schema.historical_digest import reconstruct
+        # Reuse the exact already-verified bytes; text reconstruction does not
+        # change the profile comparison or pretend the dirty source was pinned.
+        context['historical_digest_text'] = reconstruct(snapshot, historical_raw, path)
     return context
