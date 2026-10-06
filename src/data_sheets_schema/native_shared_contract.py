@@ -5,12 +5,14 @@ constructing a carrier neither reads a file nor establishes tool observation.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
 from dataclasses import dataclass, fields
 import hashlib
 import json
 import math
 from pathlib import PurePosixPath
 import re
+from threading import Lock
 from types import MappingProxyType
 from typing import Optional, Union, get_args, get_origin, get_type_hints
 
@@ -524,17 +526,61 @@ def _lexical_budget(text):
             raise ValueError("native shared JSON exceeds its structural bound")
 
 
+class _JSONValidationCache:
+    """Bound successful pure byte validation, never mutable values or authority."""
+    def __init__(self, max_entries=128, max_bytes=16 * 1024 * 1024):
+        if type(max_entries) is not int or max_entries < 1 or type(max_bytes) is not int or max_bytes < 1:
+            raise ValueError("JSON validation cache requires positive integer bounds")
+        self._max_entries, self._max_bytes = max_entries, max_bytes
+        self._entries = OrderedDict()
+        self._bytes = 0
+        self._lock = Lock()
+
+    def contains(self, key):
+        with self._lock:
+            if key not in self._entries:
+                return False
+            self._entries.move_to_end(key)
+            return True
+
+    def remember(self, key):
+        size = len(key[0])
+        if size > self._max_bytes:
+            return
+        with self._lock:
+            if key in self._entries:
+                self._entries.move_to_end(key)
+                return
+            while self._entries and (len(self._entries) >= self._max_entries
+                                     or self._bytes + size > self._max_bytes):
+                prior, _ = self._entries.popitem(last=False)
+                self._bytes -= len(prior[0])
+            self._entries[key] = None
+            self._bytes += size
+
+
+_JSON_VALIDATION = _JSONValidationCache()
+
+
 def strict_json(raw: bytes, label="native shared JSON", max_bytes=2_000_000):
     positive_int(max_bytes, "JSON byte bound")
     if type(raw) is not bytes or not raw or len(raw) > max_bytes:
         raise ValueError(f"{label} requires bounded nonempty immutable bytes")
+    # The key names only pure validation inputs. Live file/hash/observation
+    # checks remain with their callers, and the per-call byte ceiling above
+    # always applies. Retain both limits so a different bound cannot reuse an
+    # earlier validation. No parsed object crosses calls through this cache.
+    key = (raw, HARD_LIMITS["json_yaml_depth"], HARD_LIMITS["json_yaml_nodes_per_document"])
     try:
         text = raw.decode("utf-8")
+        if _JSON_VALIDATION.contains(key):
+            return json.loads(text, object_pairs_hook=_pairs, parse_constant=_reject_constant)
         _lexical_budget(text)
         value = json.loads(text, object_pairs_hook=_pairs, parse_constant=_reject_constant)
         _json_values(value)
         # Surrogate escapes can parse, but cannot represent canonical UTF-8.
         canonical(value)
+        _JSON_VALIDATION.remember(key)
         return value
     except (UnicodeError, json.JSONDecodeError, RecursionError) as exc:
         raise ValueError(f"{label} is not strict UTF-8 JSON") from exc

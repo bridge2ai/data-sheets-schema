@@ -11,6 +11,7 @@ from data_sheets_schema import native_shared_streams as streams
 from data_sheets_schema import native_shared_evidence as evidence
 from data_sheets_schema import native_shared_capture as capture
 from data_sheets_schema.native_shared_controller import CallbackAdapter
+from data_sheets_schema.native_shared_receipts import _ReceiptCatalogContext
 
 
 def prefix(path, raw, role='transcript'):
@@ -35,6 +36,7 @@ def endpoint(value):
     adapter = CallbackAdapter.__new__(CallbackAdapter)
     adapter.execution = value
     adapter._stream_prefixes, adapter._stream_files = {}, {}
+    adapter._receipt_catalogs = _ReceiptCatalogContext()
     return adapter
 
 
@@ -246,6 +248,9 @@ def test_complete_report_run_remains_strict_and_live_recapture_rechecks_prefixes
     adapter._observed_endpoint({'first': 1})
     wrong = SimpleNamespace(transcript=prefix(native, b'{"first":9}\n'),
         control=prefix(control, control.read_bytes(), 'control'))
-    monkeypatch.setattr(capture, '_load_live', lambda *a, **k: wrong)
+    def live(*args, **kwargs):
+        assert kwargs['_catalogs'] is adapter._receipt_catalogs
+        return wrong
+    monkeypatch.setattr(capture, '_load_live', live)
     with pytest.raises(ValueError, match='parent-observed'): adapter._run((adapter._stream_prefixes['transcript'].bytes,
         adapter._stream_prefixes['control'].bytes))
