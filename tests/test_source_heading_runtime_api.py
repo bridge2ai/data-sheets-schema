@@ -526,3 +526,115 @@ def test_selected_form_captures_actual_default_instrument_per_invocation(tmp_pat
         frozen._ledger[complete.FORM_KEY]['naming']['base64'] = 'e30='
         with pytest.raises(ValueError, match='bytes differ'):
             complete._captured_form(frozen, full, core, rules)
+
+
+def test_actual_default_layout_completed_capture(tmp_path, draft_files, monkeypatch):
+    """Genuine split-output default layout and captured public readback."""
+    import base64
+    import builtins
+    import io
+    import os
+    import socket
+    import subprocess
+    from click.testing import CliRunner
+    from data_sheets_schema.cli import cli
+    from data_sheets_schema import source_heading_completed as complete
+
+    base = selected_spec(tmp_path, draft_files)
+    launch = tmp_path / 'launch'; launch.mkdir()
+    monkeypatch.chdir(launch)
+    spec = replace(base, out_dir=None)
+    assert spec.out_dir is None and spec.manifest is None
+    assert spec.full_path.parent != spec.core_path.parent
+    assert spec.output_root == launch / api.CONCAT_DIR
+    c = client(spec)
+    result = api.execute(spec, client=c)
+    assert result['validation_problems'] == []
+    raw = Path(result['routing_completed_capture']['path']).read_bytes()
+    initial = complete.recheck_completed(raw)
+    assert initial['complete'] and initial['scientific_eligibility'] is False
+    value = json.loads(raw)
+    assert value['selection']['paths'] == {
+        'full': str(spec.full_path), 'core': str(spec.core_path),
+        'report': str(spec.report_path), 'provenance': str(spec.provenance_path),
+        'receipt': str(api._receipt_path(spec))}
+    assert all(Path(p).is_absolute() and '..' not in Path(p).parts
+               for p in value['selection']['paths'].values())
+    forbidden = {os.path.abspath(row['path']) for row in value['files']}
+    pin = next(p for p in value['files'] if p['path'] == value['selection']['ledger'])
+    usage = json.loads(base64.b64decode(value['blobs'][pin['sha256']]))
+    forbidden.add(usage[complete.FORM_KEY]['naming']['path'])
+    reader_dir = tmp_path / 'reader'; reader_dir.mkdir()
+    captured_file = reader_dir / 'completed.json'; captured_file.write_bytes(raw)
+    monkeypatch.chdir(reader_dir)
+    original = launch / api.CONCAT_DIR
+    preserved = tmp_path / 'preserved-default-output'
+    original.rename(preserved)
+    original_open, original_io_open = builtins.open, io.open
+    original_os_open, original_resolve = os.open, Path.resolve
+
+    def checked_open(fn):
+        def call(path, mode='r', *args, **kwargs):
+            if isinstance(path, (str, Path)) and os.path.abspath(path) in forbidden:
+                raise AssertionError('original captured default-layout path opened')
+            if any(flag in mode for flag in ('w', 'a', '+', 'x')):
+                raise AssertionError('pure reader attempted a write')
+            return fn(path, mode, *args, **kwargs)
+        return call
+
+    def checked_os_open(path, flags, *args, **kwargs):
+        if isinstance(path, (str, bytes, Path)) and os.path.abspath(os.fsdecode(path)) in forbidden:
+            raise AssertionError('original captured path opened through os.open')
+        if flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND):
+            raise AssertionError('pure reader attempted an os.open write')
+        return original_os_open(path, flags, *args, **kwargs)
+
+    def checked_resolve(path, *args, **kwargs):
+        if os.path.abspath(path) in forbidden:
+            raise AssertionError('original captured path resolved')
+        return original_resolve(path, *args, **kwargs)
+
+    def denied(*args, **kwargs):
+        raise AssertionError('pure readback attempted execution/count/network/child')
+
+    before_calls = (len(c.messages.calls), len(c.messages.count_calls))
+    try:
+        with monkeypatch.context() as m:
+            m.setattr(builtins, 'open', checked_open(original_open))
+            m.setattr(io, 'open', checked_open(original_io_open))
+            m.setattr(os, 'open', checked_os_open)
+            m.setattr(Path, 'resolve', checked_resolve)
+            m.setattr(socket, 'getaddrinfo', denied)
+            m.setattr(socket.socket, 'connect', denied)
+            m.setattr(subprocess, 'Popen', denied)
+            m.setattr(api, 'execute', denied)
+            m.setattr(c.messages, 'create', denied)
+            m.setattr(c.messages, 'count_tokens', denied)
+            checked = CliRunner().invoke(cli, ['api', 'check-routing-completed', str(captured_file)])
+            assert checked.exit_code == 0, checked.output + repr(checked.exception)
+            assert json.loads(checked.output) == initial
+    finally:
+        preserved.rename(original)
+    assert before_calls == (len(c.messages.calls), len(c.messages.count_calls))
+    assert captured_file.read_bytes() == raw
+
+
+@pytest.mark.parametrize('module', ['profile_identity.py', 'cache_dependencies.py', 'historical_digest.py'])
+def test_selected_registration_binds_live_historical_validation(tmp_path, draft_files, monkeypatch, module):
+    from data_sheets_schema import resources
+    spec = selected_spec(tmp_path, draft_files)
+    registration = spec.shared_generation_registration.encode()
+    selected = sg.parse_registration(registration)
+    legacy = sg.descriptor(version=1)
+    name = 'src/data_sheets_schema/' + module
+    original = resources.resource_path
+    raw = original(name).read_bytes()
+    copy = tmp_path / ('installed-' + module)
+    copy.write_bytes(raw)
+    monkeypatch.setattr(resources, 'resource_path', lambda p: copy if str(p) == name else original(p))
+    assert sg.parse_registration(registration) == selected
+    assert sg.descriptor(version=1) == legacy
+    copy.write_bytes(raw + b'\n# controlled installed dependency change\n')
+    with pytest.raises(ValueError, match='descriptor|selection|registration'):
+        sg.parse_registration(registration)
+    assert sg.descriptor(version=1) == legacy

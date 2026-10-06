@@ -87,6 +87,9 @@ ROUTING_CODE = ("src/data_sheets_schema/source_heading_runtime.py",
                 "src/data_sheets_schema/resources.py",
                 "src/data_sheets_schema/d4d_pair_consistency.py",
                 "src/data_sheets_schema/provenance.py",
+                "src/data_sheets_schema/profile_identity.py",
+                "src/data_sheets_schema/cache_dependencies.py",
+                "src/data_sheets_schema/historical_digest.py",
                 "src/data_sheets_schema/run_schema.py")
 
 
