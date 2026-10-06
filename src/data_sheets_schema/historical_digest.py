@@ -6,7 +6,10 @@ Generation and current-profile comparison continue to use schema_digest.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
+import dataclasses
 from dataclasses import dataclass
+from enum import Enum
 import hashlib
 from importlib.metadata import version
 import os
@@ -14,6 +17,8 @@ from pathlib import Path
 import re
 import selectors
 import subprocess
+import sys
+from threading import RLock
 import time
 from typing import Any
 
@@ -65,6 +70,138 @@ SOURCE_FAMILIES = {
     '5b866504aa3c94fd66bcfa5a8aa8ef782ac574fdb84b1f5b07976e6ebe9d1d63': 'inline_depth2',
     '0fd427ddabae87147568af3c64afdd5dd372eda601d691b6d2db03be004311bf': 'inline_depth2',
 }
+
+
+# This separate cache retains successful immutable text, not live Git objects,
+# schema authority, a SchemaView, failures, or a record's comparison result.
+_TEXT_CACHE_MAX_ENTRIES = 32
+_TEXT_CACHE_MAX_BYTES = 16 * 1024 * 1024
+_TEXT_CACHE: OrderedDict[tuple, tuple[str, int]] = OrderedDict()
+_TEXT_CACHE_BYTES = 0
+_TEXT_CACHE_LOCK = RLock()
+
+
+def _text_cache_clear() -> None:
+    global _TEXT_CACHE_BYTES
+    with _TEXT_CACHE_LOCK:
+        _TEXT_CACHE.clear()
+        _TEXT_CACHE_BYTES = 0
+
+
+def _text_cache_info() -> dict[str, int]:
+    with _TEXT_CACHE_LOCK:
+        return {'entries': len(_TEXT_CACHE), 'bytes': _TEXT_CACHE_BYTES,
+                'max_entries': _TEXT_CACHE_MAX_ENTRIES, 'max_bytes': _TEXT_CACHE_MAX_BYTES}
+
+
+def _trim_text_cache() -> None:
+    global _TEXT_CACHE_BYTES
+    while _TEXT_CACHE and (len(_TEXT_CACHE) > max(0, _TEXT_CACHE_MAX_ENTRIES)
+                          or _TEXT_CACHE_BYTES > max(0, _TEXT_CACHE_MAX_BYTES)):
+        _, (_, weight) = _TEXT_CACHE.popitem(last=False)
+        _TEXT_CACHE_BYTES -= weight
+
+
+def _setting_key(value: Any) -> tuple:
+    """Snapshot simple mutable defaults/settings; unfamiliar state bypasses."""
+    if value is dataclasses.MISSING or value is dataclasses._HAS_DEFAULT_FACTORY:
+        return type(value), value  # dataclass constructor identity sentinels
+    if isinstance(value, Enum):
+        return type(value), value.name, _setting_key(value.value)
+    if isinstance(value, re.Pattern):
+        return type(value), value.pattern, value.flags
+    if value is None or type(value) in (bool, int, float, str, bytes):
+        return type(value), value
+    if type(value) in (tuple, list):
+        return type(value), tuple(_setting_key(item) for item in value)
+    if type(value) is dict:
+        return dict, tuple((_setting_key(k), _setting_key(v)) for k, v in value.items())
+    if type(value) in (set, frozenset):
+        return type(value), frozenset(_setting_key(item) for item in value)
+    raise TypeError('unsupported mutable rendering dependency')
+
+
+def _function_key(function: Any) -> tuple:
+    # Contextmanager and other wrappers retain an effective underlying function.
+    # Code/default changes on the same callable must also invalidate the text.
+    chain, seen = [], set()
+    while function is not None:
+        if id(function) in seen:
+            raise ValueError('cyclic rendering callable')
+        seen.add(id(function))
+        chain.append((function, getattr(function, '__code__', None),
+                      _setting_key(getattr(function, '__defaults__', None)),
+                      _setting_key(getattr(function, '__kwdefaults__', None))))
+        function = getattr(function, '__wrapped__', None)
+    return tuple(chain)
+
+
+def _constructor_key(cls: type) -> tuple:
+    return (cls, _function_key(type(cls).__call__),
+            tuple((name, _function_key(getattr(cls, name, None)))
+                  for name in ('__new__', '__init__', '__post_init__')))
+
+
+def _view_methods_key(cls: type, views) -> tuple:
+    effective = {}
+    for base in cls.__mro__:
+        for name, member in vars(base).items():
+            effective.setdefault(name, member)
+    methods = []
+    for name, member in sorted(effective.items()):
+        if isinstance(member, views._InstanceCached):
+            state = (member, _function_key(member.function), member.name,
+                     member.maxsize, member.typed)
+        elif isinstance(member, (staticmethod, classmethod)):
+            state = _function_key(member.__func__)
+        elif isinstance(member, property):
+            state = tuple(_function_key(fn) for fn in (member.fget, member.fset, member.fdel))
+        elif callable(member):
+            state = _function_key(member)
+        else:
+            continue
+        methods.append((name, state))
+    return tuple(methods)
+
+
+def _text_key(raw: bytes, path: str, family: str, vocabulary: bytes | None) -> tuple:
+    from data_sheets_schema import schema_view as views
+    from linkml_runtime.linkml_model import meta
+
+    policy = POLICIES[family]
+    functions = tuple(_function_key(fn) for fn in
+                      (_render_captured, _inventory, _enum, _vocabulary, _terms,
+                       version, views.version_document, views.version_view, views.yaml.load))
+    models = tuple((name, _constructor_key(cls)) for name, cls in sorted(vars(meta).items())
+                   if isinstance(cls, type) and cls.__module__ == meta.__name__)
+    constructors = tuple(_constructor_key(cls) for cls in
+                         (views.SchemaDefinition, views._ReleasableView, views.DupCheckYamlLoader))
+    yaml_tables = tuple((name, tuple((prefix, _function_key(fn)) for prefix, fn in
+                                    getattr(views.DupCheckYamlLoader, name).items()))
+                        for name in ('yaml_constructors', 'yaml_multi_constructors'))
+    yaml_resolvers = tuple((name, _setting_key(getattr(views.DupCheckYamlLoader, name)))
+                           for name in ('yaml_implicit_resolvers', 'yaml_path_resolvers'))
+    key = (raw, path, family, _setting_key(vars(policy)), vocabulary,
+           version('linkml-runtime'), RUNTIME_VERSION, FULL_SCHEMA_PATH, frozenset(_UNIVERSAL),
+           hashlib.sha256(Path(views.__file__).read_bytes()).digest(),
+           functions, constructors, models,
+           _view_methods_key(views._ReleasableView, views),
+           _view_methods_key(views.DupCheckYamlLoader, views), yaml_tables, yaml_resolvers)
+    hash(key)  # Unhashable extension state falls back to the original renderer.
+    return key
+
+
+def _text_retained_bytes(value: Any, seen: set[int] | None = None) -> int:
+    # Shared implementation callables/classes count as referenced objects, not
+    # the modules/interpreter they reach. Raw keys and text are counted in full.
+    seen = set() if seen is None else seen
+    if id(value) in seen:
+        return 0
+    seen.add(id(value))
+    size = sys.getsizeof(value)
+    if isinstance(value, (tuple, list, set, frozenset)):
+        size += sum(_text_retained_bytes(item, seen) for item in value)
+    return size
 
 
 def _vocabulary(raw: bytes | None, policy: Policy) -> dict[str, dict[str, str]]:
@@ -158,6 +295,42 @@ def _inventory(view, policy: Policy) -> tuple[list[dict], list[dict]]:
 
 def render_captured(raw_schema: bytes, logical_path: str, family: str, *,
                     vocabulary_bytes: bytes | None = None) -> str:
+    """Render explicit data, reusing only bounded successful pure text work."""
+    global _TEXT_CACHE_BYTES
+    with _TEXT_CACHE_LOCK:
+        _trim_text_cache()
+    try:
+        key = _text_key(raw_schema, logical_path, family, vocabulary_bytes)
+    except Exception:
+        # Optimization must not change public validation or exception behavior.
+        return _render_captured(raw_schema, logical_path, family, vocabulary_bytes=vocabulary_bytes)
+    with _TEXT_CACHE_LOCK:
+        _trim_text_cache()
+        stored = _TEXT_CACHE.get(key)
+        if stored is not None:
+            _TEXT_CACHE.move_to_end(key)
+            return stored[0]
+    text = _render_captured(raw_schema, logical_path, family, vocabulary_bytes=vocabulary_bytes)
+    try:
+        # A loader may initialize its constructor tables on its first use.
+        # Do not retain text across any dependency change during construction.
+        if _text_key(raw_schema, logical_path, family, vocabulary_bytes) != key:
+            return text
+        weight = _text_retained_bytes((key, text)) + 256
+    except Exception:
+        return text
+    with _TEXT_CACHE_LOCK:
+        _trim_text_cache()
+        if (key not in _TEXT_CACHE and _TEXT_CACHE_MAX_ENTRIES > 0
+                and weight <= _TEXT_CACHE_MAX_BYTES):
+            _TEXT_CACHE[key] = (text, weight)
+            _TEXT_CACHE_BYTES += weight
+            _trim_text_cache()
+    return text
+
+
+def _render_captured(raw_schema: bytes, logical_path: str, family: str, *,
+                     vocabulary_bytes: bytes | None = None) -> str:
     """Render explicit data with reviewed semantics; never read historical code."""
     from data_sheets_schema.schema_view import version_document, version_view
     policy = POLICIES[family]

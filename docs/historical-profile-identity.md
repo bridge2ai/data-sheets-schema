@@ -96,3 +96,14 @@ Git reads use a fresh child environment with replacement refs, lazy fetching,
 network protocols and ambient Git repository overrides disabled. Each command
 has a five-second limit, identity output is limited to 64 bytes, and candidate
 blob output to 1 MiB. Oversized or unavailable objects remain unavailable.
+
+Repeated historical reconstruction also reuses successful immutable digest text
+in a separate 32-entry, 16-MiB cache. The byte budget includes retained keys and
+text; oversized entries bypass retention and least recently used entries are
+evicted. Keys include the exact schema and vocabulary bytes, logical path,
+family policy, runtime, and effective rendering/parsing/view dependencies.
+Unsupported dependency state and rendering failures use the original renderer
+without retention. No parsed document, SchemaView, record or conclusion is
+stored. Every reconstruction still verifies schema authority and reads and
+verifies the exact renderer/vocabulary Git blobs before using this pure work,
+then constructs fresh candidate metadata and compares the recorded digest.
