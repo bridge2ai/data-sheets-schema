@@ -560,6 +560,7 @@ def recheck_captured(capture, ledger):
         _need(_can_admit(limits, index, input_used, output_used, response_used, request), "admission exceeded scheduling thresholds")
         if entry["admitted"] is None:
             _need(entry["response"] is None and entry["settled"] is None, "response without admission")
+            _need(index == len(entries) - 1, "unadmitted empty entry must be terminal")
             stopped = True
             break
         admission = _json(capture.get(entry["admitted"], limit=MAX_REGISTRATION_BYTES), "admission")
