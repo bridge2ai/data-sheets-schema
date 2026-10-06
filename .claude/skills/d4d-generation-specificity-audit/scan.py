@@ -107,10 +107,11 @@ MODEL_FACING_MODULES = frozenset({
     "agentic_runtime", "audit_batch_context", "audit_batch_format", "audit_grammar",
     "healthsheet", "rocrate_normalize",
     "shared_generation", "typed_audit_runtime", "typed_audit", "audit_omissions", "audit_batches",
+    "source_heading_runtime",
 })
 
-# Explicitly reviewed builders outside every live generation call path. Keep
-# this separate from MODEL_FACING_MODULES: the latter asserts live reachability.
+# Offline draft text remains distinct from live request text. The compiler can
+# also be a run-shaping dependency of the explicit captured routing adapter.
 OFFLINE_DRAFT_MODULES = ("src/data_sheets_schema/source_heading_routing.py",)
 
 #: How strongly an approach reaches a file. Per approach the strongest wins:
@@ -1577,7 +1578,10 @@ def condition_table(root: Path) -> dict:
         raise _not_derived("the current generic condition", "no generic_vN in CONDITION_PROMPTS")
     current = max(versions, key=versions.get)
     default = derive_cli_default(_tree(root / CLI_API), prompts)
-    live = sorted({current, default})
+    routed = _required(env, "SOURCE_HEADING_CONDITIONS", tuple) if "SOURCE_HEADING_CONDITIONS" in env else ()
+    if any(name not in prompts for name in routed):
+        raise _not_derived("selected routing conditions", "a declared condition lacks its prompt")
+    live = sorted({current, default, *routed})
     tuned = "tuned" in prompts
     reads = None
     if tuned:
@@ -1585,6 +1589,7 @@ def condition_table(root: Path) -> dict:
         reads["sends_tuned_prompt"] = "TUNED_PROMPT" in reads["reads"]
         reads["sends_components"] = "COMPONENTS" in reads["reads"]
     return {"prompts": prompts, "current": current, "default": default, "live": live,
+            **({"registered_routing_conditions": list(routed)} if routed else {}),
             "tuned_prompt": _required(env, "TUNED_PROMPT", str) if tuned else None,
             "components": _required(env, "COMPONENTS", str) if tuned else None,
             "tuned": reads,

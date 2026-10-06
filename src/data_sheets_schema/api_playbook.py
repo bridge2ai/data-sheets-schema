@@ -8,11 +8,11 @@ POLICY_SHA256 = "6870fd69c6ca377b6f6a349b0161f503ef742176228074db57325b7368db601
 
 def policy_text(*, version: int = 1) -> str:
     """Fail closed on changed policy bytes, including during historical replay."""
-    if type(version) is not int or version not in (1, 2):
+    if type(version) is not int or version not in (1, 2, 3):
         raise ValueError("unsupported API playbook version")
-    if version == 2:
-        from .shared_generation import captured_assets, API_POLICY
-        return captured_assets()[API_POLICY].decode("utf-8").split("## Prompt body", 1)[1].strip()
+    if version in (2, 3):
+        from .shared_generation import captured_assets, API_POLICY, ROUTING_API_POLICY
+        return captured_assets(version=version - 1)[API_POLICY if version == 2 else ROUTING_API_POLICY].decode("utf-8").split("## Prompt body", 1)[1].strip()
     from data_sheets_schema.resources import resource_path
     raw = resource_path(POLICY_PATH).read_bytes()
     if hashlib.sha256(raw).hexdigest() != POLICY_SHA256:
@@ -61,5 +61,6 @@ def policy_identity(*, version: int = 1) -> dict:
     policy_text(version=version)
     if version == 1:
         return {"path": str(POLICY_PATH), "sha256": POLICY_SHA256}
-    from .shared_generation import API_POLICY, ASSET_HASHES
-    return {"path": API_POLICY, "sha256": ASSET_HASHES[API_POLICY]}
+    from .shared_generation import API_POLICY, ASSET_HASHES, ROUTING_API_POLICY, ROUTING_ASSET_HASHES
+    path = API_POLICY if version == 2 else ROUTING_API_POLICY
+    return {"path": path, "sha256": {**ASSET_HASHES, **ROUTING_ASSET_HASHES}[path]}

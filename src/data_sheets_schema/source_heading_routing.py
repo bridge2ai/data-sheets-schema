@@ -194,7 +194,7 @@ def _capture_schema(path):
     return [{'name': str(n), 'path': str(p), 'content': _blob(raw)} for n, p, raw in snapshot.sources]
 
 
-def _snapshot(rows):
+def _snapshot(rows, *, _captured_schema=False):
     if type(rows) is not list or not 0 < len(rows) <= MAX_FILES:
         raise ValueError('invalid schema closure')
     frozen, sources, total = {}, [], 0
@@ -217,7 +217,11 @@ def _snapshot(rows):
             raise ValueError('schema import outside captured closure')
         return frozen[selected]
 
-    replay = capture_schema(sources[0][1], read_bytes=read, strict=True)
+    if _captured_schema:
+        from .schema_snapshot import _capture_schema as captured_schema
+        replay = captured_schema(sources[0][1], read, strict=True)
+    else:
+        replay = capture_schema(sources[0][1], read_bytes=read, strict=True)
     if replay.sources != tuple(sources):
         raise ValueError('schema capture is not its complete exact declared import closure')
     return replay
@@ -233,7 +237,7 @@ def _tabular_unique(text, key):
         seen.add(row[key])
 
 
-def _catalog(authority):
+def _catalog(authority, *, _captured_schema=False):
     _exact(authority, {'schema', 'ttl', 'recommendations', 'comprehensive'}, 'authority')
     compiler = _compiler()
     ttl = _authority_text(_unblob(authority['ttl']), 'TTL')
@@ -245,7 +249,7 @@ def _catalog(authority):
     if len(dates) != 1:
         raise ValueError('comprehensive table must declare one exact mapping date')
     mapping_date = compiler.iso_date(dates[0])
-    with captured_view(_snapshot(authority['schema'])) as view:
+    with captured_view(_snapshot(authority['schema'], _captured_schema=_captured_schema)) as view:
         generator = compiler.ComprehensiveSSSOMGenerator.from_captured(view, ttl, recommendations)
         # Same deterministic regeneration as the compiler's --check, no file writes.
         if generator.render_sssom(mapping_date) != comprehensive:
@@ -555,7 +559,7 @@ def _archive(inputs, source_raw):
     return {'archive_sha256': _sha(raw), 'member_name': member, 'member_sha256': _sha(source_raw)}
 
 
-def _derive(inputs):
+def _derive(inputs, *, _captured_schema=False):
     _exact(inputs, {'format', 'base', 'source', 'profile', 'crosswalk', 'scope', 'authority', 'code', 'archive', 'archive_member'}, 'captured inputs')
     if inputs['format'] != FORMAT or inputs['code'] != _code():
         raise ValueError('capture protocol or current implementation/compiler bytes differ')
@@ -565,7 +569,7 @@ def _derive(inputs):
     _utf8(base, 'base prompt', empty=True)
     profile, crosswalk, scope = (_parse(_unblob(inputs[key]), key) for key in ('profile', 'crosswalk', 'scope'))
     archive = _archive(inputs, source)
-    catalog = _catalog(inputs['authority'])
+    catalog = _catalog(inputs['authority'], _captured_schema=_captured_schema)
     evidence = _inventory(source, profile, crosswalk, scope, catalog)
     evidence['archive'] = archive
     supplement = render_supplement(catalog, evidence)
@@ -598,12 +602,21 @@ def prepare(*, base, source, profile, crosswalk, scope, schema_path, ttl, recomm
 
 def check_files(files):
     """Reconstruct every emitted artifact from captured inputs, not trusted hashes."""
+    return _check_files(files, _captured_schema=False)
+
+
+def _check_captured_files(files):
+    """Selected saved route: exact import closure without original path resolution."""
+    return _check_files(files, _captured_schema=True)
+
+
+def _check_files(files, *, _captured_schema):
     if type(files) is not dict or set(files) != {*FILES, 'manifest.json'}:
         raise ValueError('unexpected or missing draft artifacts')
     for raw in files.values():
         _raw(raw, 'artifact', MAX_CAPTURE, empty=True)
     inputs = _parse(files['inputs.json'], 'captured inputs', MAX_CAPTURE)
-    expected = _derive(inputs)
+    expected = _derive(inputs, _captured_schema=_captured_schema)
     expected['manifest.json'] = _json(_manifest(expected))
     if files != expected:
         raise ValueError('draft artifacts differ from independent reconstruction')

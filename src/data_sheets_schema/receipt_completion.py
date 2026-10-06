@@ -28,11 +28,11 @@ def canonical(value) -> bytes:
 
 
 def policy_text(*, version: int = 1) -> str:
-    if type(version) is not int or version not in (1, 2):
+    if type(version) is not int or version not in (1, 2, 3):
         raise ValueError('unsupported receipt completion runtime policy')
-    if version == 2:
-        from .shared_generation import captured_assets, RECEIPT_POLICY
-        return captured_assets()[RECEIPT_POLICY].decode('utf-8')
+    if version in (2, 3):
+        from .shared_generation import captured_assets, RECEIPT_POLICY, ROUTING_RECEIPT_POLICY
+        return captured_assets(version=version - 1)[RECEIPT_POLICY if version == 2 else ROUTING_RECEIPT_POLICY].decode('utf-8')
     from data_sheets_schema.resources import resource_path
     raw = resource_path(POLICY_PATH).read_bytes()
     if sha(raw) != POLICY_SHA256:
@@ -43,7 +43,9 @@ def policy_text(*, version: int = 1) -> str:
 def policy_identity(*, version: int = 1) -> dict:
     policy_text(version=version)
     from data_sheets_schema.receipts import RERECEIPTS_INSTRUMENT
-    from .shared_generation import RECEIPT_POLICY, ASSET_HASHES
+    from .shared_generation import RECEIPT_POLICY, ASSET_HASHES, ROUTING_RECEIPT_POLICY, ROUTING_ASSET_HASHES
+    if version == 3:
+        RECEIPT_POLICY, ASSET_HASHES = ROUTING_RECEIPT_POLICY, ROUTING_ASSET_HASHES
     return {'version': version, 'path': str(POLICY_PATH) if version == 1 else RECEIPT_POLICY,
             'sha256': POLICY_SHA256 if version == 1 else ASSET_HASHES[RECEIPT_POLICY],
             'receipt_instrument_version': 4, 'receipt_instrument': copy.deepcopy(RERECEIPTS_INSTRUMENT),
@@ -414,6 +416,65 @@ def _result(inputs, raw: bytes, *, truncated=False) -> dict:
     return value
 
 
+def _check_input_identity(inputs, input_identity):
+    from .usage_ledger import UsageLedgerError
+    if inputs['input_identity'] != input_identity:
+        raise UsageLedgerError('receipt completion inputs/registration changed')
+
+
+def _check_registration_identity(inputs, selected_registration):
+    from .usage_ledger import UsageLedgerError
+    if inputs['registration'] != selected_registration:
+        raise UsageLedgerError('receipt completion inputs/registration changed')
+
+
+def _check_request_payload(inputs, payload, requested_paths, req, inventory, reg):
+    from .usage_ledger import UsageLedgerError
+    if (payload != request_payload(req, inputs['request_settings'], reg)
+            or requested_paths != inventory['requested_paths']):
+        raise UsageLedgerError('receipt completion request/inventory differs from captured inputs')
+
+
+def _check_request_context(requested_paths, context, payload, reg):
+    from .usage_ledger import UsageLedgerError
+    if requested_paths:
+        _context_check(context, payload, reg)
+    elif context is not None:
+        raise UsageLedgerError('no-work completion cannot claim a context measurement')
+
+
+def _check_request(inputs, payload, requested_paths, context, *, input_identity, registration_identity, reg):
+    """Same request/inventory/context validation for captured reads."""
+    _check_input_identity(inputs, input_identity)
+    _check_registration_identity(inputs, registration_identity)
+    req, inventory = build_request(inputs)
+    _check_request_payload(inputs, payload, requested_paths, req, inventory, reg)
+    _check_request_context(requested_paths, context, payload, reg)
+
+
+def _check_accounted_response(state, response, rows):
+    from .usage_ledger import UsageLedgerError
+    if response['stop_reason'] == 'no_work':
+        if state['requested_paths'] or response['usage_id'] is not None:
+            raise UsageLedgerError('invalid no-work receipt completion')
+        return None
+    matching = [r for r in rows if r.get('usage_id') == response['usage_id'] and r.get('phase') == PHASE]
+    if len(matching) != 1:
+        raise UsageLedgerError('completion response has no unique matching accounted usage')
+    if (state.get('usage_id') != response['usage_id'] or response.get('usage') != matching[0]
+            or _usage_problems(matching[0])):
+        raise UsageLedgerError('receipt completion response usage is unresolved or conflicts with its captured counters')
+    return matching[0]
+
+
+def _checked_result(inputs, response, result):
+    from .usage_ledger import UsageLedgerError
+    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
+    if result != expected:
+        raise UsageLedgerError('receipt completion saved result differs from checked response')
+    return result
+
+
 def recover(spec, *, allow_unfinished=False) -> dict | None:
     """Recover only pinned outcomes; missing progress can never restart full."""
     from data_sheets_schema import usage_ledger as ledger
@@ -423,19 +484,15 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
     if not isinstance(state, dict) or state.get('state') not in ('intent', 'admitted', 'response', 'result', 'complete', 'failed'):
         raise ledger.UsageLedgerError('invalid receipt completion journal')
     inputs = _load(state['inputs'])
-    if inputs['input_identity'] != spec.input_identity() or inputs['registration'] != registration_identity(spec):
-        raise ledger.UsageLedgerError('receipt completion inputs/registration changed')
+    _check_input_identity(inputs, spec.input_identity())
+    _check_registration_identity(inputs, registration_identity(spec))
     _load(inputs['transcript_pin'])
     payload = _load(state['request'])
     req, inventory = build_request(inputs)
     reg = registration(spec)
-    if (payload != request_payload(req, inputs['request_settings'], reg)
-            or state['requested_paths'] != inventory['requested_paths']):
-        raise ledger.UsageLedgerError('receipt completion request/inventory differs from captured inputs')
-    if state['requested_paths']:
-        _context_check(_load(state['context']), payload, reg)
-    elif state.get('context') is not None:
-        raise ledger.UsageLedgerError('no-work completion cannot claim a context measurement')
+    _check_request_payload(inputs, payload, state['requested_paths'], req, inventory, reg)
+    _check_request_context(state['requested_paths'],
+        _load(state['context']) if state['requested_paths'] else state.get('context'), payload, reg)
     if state['state'] in ('admitted', 'failed'):
         raise ledger.UsageLedgerError('receipt completion attempt lacks an accepted recoverable response; terminal')
     if state['state'] == 'intent':
@@ -444,17 +501,9 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
         return None
     response = _load(state['response'])
     rows = ledger._read(spec)['rows']
-    if response['stop_reason'] == 'no_work':
-        if state['requested_paths'] or response['usage_id'] is not None:
-            raise ledger.UsageLedgerError('invalid no-work receipt completion')
-    else:
-        matching = [r for r in rows if r.get('usage_id') == response['usage_id'] and r.get('phase') == PHASE]
-        if len(matching) != 1:
-            raise ledger.UsageLedgerError('completion response has no unique matching accounted usage')
-        if (state.get('usage_id') != response['usage_id'] or response.get('usage') != matching[0]
-                or _usage_problems(matching[0])):
-            raise ledger.UsageLedgerError('receipt completion response usage is unresolved or conflicts with its captured counters')
-        _recover_reasoning(spec, response, matching[0], payload)
+    row = _check_accounted_response(state, response, rows)
+    if row is not None:
+        _recover_reasoning(spec, response, row, payload)
     if state['state'] == 'response':
         result = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
         state.update(state='result', result=_save(spec, 'receipt_completion_result.json', result,
@@ -463,9 +512,7 @@ def recover(spec, *, allow_unfinished=False) -> dict | None:
     result = _load(state['result'])
     # Recompute every result from fixed inputs + raw response; stored passed flags
     # and mutable receipt origin markers are not acceptance authority.
-    expected = _result(inputs, response['text'].encode(), truncated=response['stop_reason'] == 'max_tokens')
-    if result != expected:
-        raise ledger.UsageLedgerError('receipt completion saved result differs from checked response')
+    _checked_result(inputs, response, result)
     if state['state'] == 'result':
         _receipt_publish(spec, inputs, result)
         state['state'] = 'complete'
@@ -482,6 +529,10 @@ def audit_carry(spec) -> str:
     outcome = recover(spec)
     if outcome is None:
         raise ValueError('audit requires completed receipt continuation')
+    return _audit_carry(outcome)
+
+
+def _audit_carry(outcome):
     return AUDIT_HEADER + canonical({'input_identity': outcome['input_identity'],
         'registration': outcome['registration'], 'result_artifact': outcome['journal']['result'],
         'unsupported_audit_candidates': outcome['unsupported_audit_candidates'],
@@ -663,7 +714,7 @@ def recover_delivered(spec) -> None:
     Released v1 retains its existing recovery boundary. No incomplete response,
     unknown count or merely asserted result can purchase or authorize a retry.
     """
-    if spec.receipt_completion_version != 2:
+    if spec.receipt_completion_version not in (2, 3):
         return
     from . import usage_ledger as ledger
     state = _state(spec)

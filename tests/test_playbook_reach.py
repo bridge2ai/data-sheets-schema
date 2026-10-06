@@ -493,3 +493,17 @@ class TestTheRuleSetsDoNotSilentlyDiverge(unittest.TestCase):
         for probe in ("comes from the evidence", "does not identify a person"):
             with self.subTest(probe=probe):
                 self.assertIn(probe, playbook)
+
+
+class TestSelectedSourceHeadingInstruction(unittest.TestCase):
+    def test_selected_builder_keeps_candidates_negation_and_draft_status(self):
+        from data_sheets_schema import source_heading_runtime as routing
+        from data_sheets_schema import api_runner as api
+        self.assertEqual(set(routing.MODES.values()), set(api.SOURCE_HEADING_CONDITIONS))
+        self.assertTrue(set(api.SOURCE_HEADING_CONDITIONS) <= api.RECEIPT_CONDITIONS)
+        for phrase in ('every candidate', 'direction', 'negation', 'caller declaration',
+                       'does not establish confidential', 'separately from unsupported'):
+            self.assertIn(phrase, routing.INSTRUCTION)
+        # Actual selected SDK delivery is checked in test_source_heading_runtime_api.
+        self.assertEqual(api.CONDITION_AXES[routing.MODES['declared_heading_spans_v1']]['routing'],
+                         'declared_heading_spans_v1')

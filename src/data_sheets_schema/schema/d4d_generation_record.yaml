@@ -687,6 +687,22 @@ classes:
         pattern: '^unverified evaluator declarations$'
         required: true
 
+  SharedGenerationRoutingExecution:
+    is_a: SharedGenerationExecution
+    description: >-
+      Explicitly selected draft source-heading routing execution. The runtime
+      rechecks its exact counted requests, usage associations and captured
+      corpus projection; this does not approve a scientific correspondence.
+    attributes:
+      protocol:
+        range: SharedGenerationRoutingProtocol
+        required: true
+      routing:
+        description: Complete generation-bound routing admission result, independently rechecked by the selected runtime; scientific eligibility remains false.
+        inlined: true
+        range: AnyBlock
+        required: true
+
   AnyBlock:
     description: >-
       A block whose interior varies legitimately across record modes and
@@ -702,6 +718,11 @@ classes:
     class_uri: linkml:Any
 
 enums:
+  SharedGenerationRoutingProtocol:
+    description: Explicit opt-in API routing protocol, distinct from the unchanged v1 result.
+    permissible_values:
+      shared_generation_v2:
+
   SharedGenerationProtocol:
     description: Explicitly selected shared-generation execution protocol.
     permissible_values:

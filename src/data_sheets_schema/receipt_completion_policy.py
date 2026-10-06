@@ -47,12 +47,15 @@ def parse_registration(raw: bytes, *, version: int = 1) -> dict:
     keys = {"format", "registration_id", "condition", "runtime_policy_sha256",
             "receipt_instrument_version", "max_output_tokens", "max_request_bytes",
             "context_limit_tokens", "context_limit_basis", "coverage_floor"}
-    if not isinstance(value, dict) or set(value) != keys or value["format"] != (FORMAT if version == 1 else "receipt_completion_registration_v2"):
+    if not isinstance(value, dict) or set(value) != keys or value["format"] != (FORMAT if version == 1 else f"receipt_completion_registration_v{version}"):
         raise ValueError("registration fields do not match receipt_completion_registration_v1")
     for name in ("registration_id", "condition", "context_limit_basis"):
         if not isinstance(value[name], str) or not value[name].strip():
             raise ValueError(f"registration {name} must be a nonempty string")
     conditions = {"generic_v7", "generic_v8", "generic_v9"} if version == 1 else {"generic_v10"}
+    if version == 3:
+        from .source_heading_runtime import MODES
+        conditions = set(MODES.values())
     if value["condition"] not in conditions:
         raise ValueError("receipt completion requires a receipt-producing condition")
     if value["runtime_policy_sha256"] != POLICY_SHA256:
@@ -95,7 +98,9 @@ def _identity(value):
         format_name = json.loads(raw, object_pairs_hook=_pairs, parse_constant=_invalid_constant).get("format")
     except (ValueError, AttributeError, RecursionError) as exc:
         raise ValueError("receipt completion registration is unreadable") from exc
-    version = 2 if format_name == "receipt_completion_registration_v2" else 1
+    version = {FORMAT: 1, "receipt_completion_registration_v2": 2, "receipt_completion_registration_v3": 3}.get(format_name)
+    if version is None:
+        raise ValueError("unsupported receipt registration format")
     if registration_identity(raw, version=version) != value:
         raise ValueError("receipt completion registration bytes differ from their SHA256")
     return parse_registration(raw, version=version)
@@ -107,24 +112,24 @@ def _selection(spec):
         raise ValueError("recorded render spec must be a mapping")
     if not SPEC_KEYS.intersection(spec):
         return None
-    if not SPEC_KEYS <= set(spec) or type(spec["receipt_completion_version"]) is not int or spec["receipt_completion_version"] not in (1, 2):
+    if not SPEC_KEYS <= set(spec) or type(spec["receipt_completion_version"]) is not int or spec["receipt_completion_version"] not in (1, 2, 3):
         raise ValueError("new receipt condition has missing or contradictory selection fields")
     version = spec["receipt_completion_version"]
     POLICY_SHA256 = policy_identity(version=version)["sha256"]
     if spec["receipt_completion_policy_sha256"] != POLICY_SHA256:
         raise ValueError("render spec names a different receipt completion policy")
     registration = _identity(spec["receipt_completion_registration"])
-    if registration["format"] != (FORMAT if version == 1 else "receipt_completion_registration_v2"):
+    if registration["format"] != (FORMAT if version == 1 else f"receipt_completion_registration_v{version}"):
         raise ValueError("receipt registration and selected version differ")
     if registration["condition"] != spec.get("condition"):
         raise ValueError("registered condition differs from the recorded render spec")
     from data_sheets_schema.api_runner import RUNTIME
-    if spec.get("runtime") != RUNTIME or type(spec.get("render_version")) is not int or spec["render_version"] != (8 if version == 1 else 25):
+    if spec.get("runtime") != RUNTIME or type(spec.get("render_version")) is not int or spec["render_version"] != ({1: 8, 2: 25, 3: 27}[version]):
         raise ValueError("receipt completion requires API renderer 8")
-    if version == 2:
+    if version in (2, 3):
         from .shared_generation import parse_registration as parse_shared, descriptor
-        if (type(spec.get("shared_generation_version")) is not int or spec["shared_generation_version"] != 1
-                or type(spec.get("api_playbook_version")) is not int or spec["api_playbook_version"] != 2):
+        if (type(spec.get("shared_generation_version")) is not int or spec["shared_generation_version"] != version - 1
+                or type(spec.get("api_playbook_version")) is not int or spec["api_playbook_version"] != version):
             raise ValueError("receipt v2 requires the explicit shared-generation selection")
         shared = spec.get("shared_generation_registration")
         if type(shared) is not dict or set(shared) != {"sha256", "raw_json"} or type(shared["raw_json"]) is not str:
@@ -132,7 +137,7 @@ def _selection(spec):
         raw = shared["raw_json"].encode("utf-8")
         if hashlib.sha256(raw).hexdigest() != shared["sha256"] or parse_shared(raw)["receipt"] != registration:
             raise ValueError("receipt v2 registration differs from shared authority")
-        if spec.get("shared_generation_assets") != descriptor()["assets"]:
+        if spec.get("shared_generation_assets") != descriptor(version=version - 1, condition=spec["condition"])["assets"]:
             raise ValueError("receipt v2 selected asset identities differ")
     return {"registration": registration,
             "identity": dict(spec["receipt_completion_registration"]),

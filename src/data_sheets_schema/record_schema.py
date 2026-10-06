@@ -45,16 +45,36 @@ def _non_null_required(schema: dict) -> None:
 
 def compile_record_schema(path: Path, *, content: bytes | None = None) -> dict:
     raw = path.read_bytes() if content is None else content
+    definition, policy = _record_definition(raw)
+    logical_path = path.resolve()
+    definition.source_file = str(logical_path)
+    return _compile_definition(definition, policy, logical_path)
+
+
+def _compile_record_schema(raw: bytes, logical_path: Path) -> dict:
+    """Same compiler with an already selected logical identity, no path I/O."""
+    definition, policy = _record_definition(raw)
+    definition.source_file = str(logical_path)
+    return _compile_definition(definition, policy, logical_path)
+
+
+def _record_definition(raw):
     source = yaml.safe_load(raw)
     policy = (source.get("annotations") or {}).get("required_values_non_null", False)
     if not isinstance(policy, bool):
         raise ValueError("required_values_non_null must be a boolean schema annotation")
-    definition = SchemaDefinition(**source)
-    definition.source_file = str(path.resolve())
+    return SchemaDefinition(**source), policy
+
+
+def _compile_definition(definition, policy, logical_path):
     schema = json.loads(JsonSchemaGenerator(
         definition, top_class="GenerationRecord", not_closed=False,
-        mergeimports=True, base_dir=str(path.resolve().parent),
+        mergeimports=True, base_dir=str(logical_path.parent),
         include_range_class_descendants=True).serialize())
+    return _record_policy(schema, policy)
+
+
+def _record_policy(schema, policy):
     if policy:
         _non_null_required(schema)
         schema["$comment"] = (

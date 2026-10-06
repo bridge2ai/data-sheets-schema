@@ -104,7 +104,10 @@ GENERIC_PROMPT_V10 = PROMPTS / "d4d_generic_arm_prompt_v10.md"
 #: they see carries chunk markers and the phase instruction asks for the
 #: second document, so this is a condition boundary, never a flag on an
 #: existing condition.
-RECEIPT_CONDITIONS = frozenset({"generic_v7", "generic_v8", "generic_v9", "generic_v10"})
+from .source_heading_runtime import MODES as SOURCE_HEADING_MODES
+SOURCE_HEADING_CONDITIONS = frozenset({"generic_v10_source_heading_routing_v1", "generic_v10_source_heading_span_v1"})
+RECEIPT_CONDITIONS = frozenset({"generic_v7", "generic_v8", "generic_v9", "generic_v10",
+    "generic_v10_source_heading_routing_v1", "generic_v10_source_heading_span_v1"})
 RECEIPT_MARK = "--- COVERAGE RECEIPT ---"
 CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v2": GENERIC_PROMPT_V2,
@@ -116,7 +119,9 @@ CONDITION_PROMPTS = {"generic": GENERIC_PROMPT,
                      "generic_v8": GENERIC_PROMPT_V8,
                      "generic_v9": GENERIC_PROMPT_V9,
                      "generic_v10": GENERIC_PROMPT_V10,
-                     "tuned": GENERIC_PROMPT}
+                     "tuned": GENERIC_PROMPT,
+                     "generic_v10_source_heading_routing_v1": GENERIC_PROMPT_V10,
+                     "generic_v10_source_heading_span_v1": GENERIC_PROMPT_V10}
 
 # Which generic base each condition is built on. The generic/tuned comparison
 # assumes both arms share a base and differ only in the project-specific block;
@@ -140,6 +145,8 @@ CONDITION_AXES = {
     "generic_v9": {"base": "v9", "tuned": False},
     "generic_v10": {"base": "v10", "tuned": False},
     "tuned":      {"base": "v1", "tuned": True},
+    "generic_v10_source_heading_routing_v1": {"base": "v10", "tuned": False, "routing": "captured_json_values_v1"},
+    "generic_v10_source_heading_span_v1": {"base": "v10", "tuned": False, "routing": "declared_heading_spans_v1"},
 }
 
 
@@ -564,45 +571,52 @@ class RunSpec:
             # An explicit override belongs to the launch directory. Freeze
             # it so later provenance readers cannot adopt an ancestor corpus.
             self.out_dir = Path(self.out_dir).absolute()
+            if type(self.shared_generation_version) is int and self.shared_generation_version == 2:
+                # The selected v2 captured contract requires a normalized
+                # identity before any call, including symlink/.. spellings.
+                self.out_dir = self.out_dir.resolve()
         if self.run_date is AUTO:
             self.run_date = datetime.now(timezone.utc).date().isoformat()
             self._automatic_run_date = self.run_date
         if self.render_version is AUTO:
             self.render_version = 7 if self.is_agentic else 8
-        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25):
+        if self.render_version not in (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27):
             raise ValueError(f"unsupported prompt render version: {self.render_version}")
         from data_sheets_schema.native_source_attribution import validate as validate_native_attribution
         validate_native_attribution(self.native_source_attribution_version, native=self.runtime in CLAUDE_CODE_RUNTIMES,
                                     renderer=self.render_version, max_checks=self.native_source_attribution_max_checks)
         if self.render_version == 24 and self.is_agentic:
             raise ValueError("renderer 24 is an API-only offline receipt boundary")
-        if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1):
-            raise ValueError("shared_generation_version must be 0 or 1")
+        if type(self.shared_generation_version) is not int or self.shared_generation_version not in (0, 1, 2):
+            raise ValueError("shared_generation_version must be 0, 1 or 2")
         if self.condition == "generic_v10" and self.shared_generation_version != 1:
             raise ValueError("generic_v10 requires shared generation 1")
         if self.render_version == 25 and self.shared_generation_version != 1:
             raise ValueError("renderer 25 requires shared generation 1")
+        if self.condition in SOURCE_HEADING_CONDITIONS or self.render_version == 27:
+            if self.shared_generation_version != 2:
+                raise ValueError("routing/API27 requires shared generation 2")
         if self.shared_generation_version:
-            if self.is_agentic or self.render_version != 25:
-                raise ValueError("shared generation requires API renderer 25")
-            if self.condition != "generic_v10":
-                raise ValueError("shared generation requires generic_v10")
-            if self.api_playbook_version != 2 or self.receipt_completion_version != 2:
-                raise ValueError("shared generation requires playbook2 and receipt2")
-        if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1, 2):
-            raise ValueError("api_playbook_version must be 0, 1 or 2")
+            from .shared_generation import select
+            select(self)
+        if type(self.api_playbook_version) is not int or self.api_playbook_version not in (0, 1, 2, 3):
+            raise ValueError("api_playbook_version must be 0, 1, 2 or 3")
         if self.api_playbook_version == 2 and self.shared_generation_version != 1:
             raise ValueError("api_playbook_version 2 requires shared_generation_version 1")
+        if self.api_playbook_version == 3 and self.shared_generation_version != 2:
+            raise ValueError("playbook3 requires shared generation 2")
         if self.api_playbook_version == 1 and (self.is_agentic or self.render_version != 8):
             raise ValueError("API playbook v1 supports only API renderer 8")
         if type(self.removal_repair_version) is not int or self.removal_repair_version not in (0, 1):
             raise ValueError("removal_repair_version must be 0 or 1")
         if self.removal_repair_version and (self.is_agentic or self.render_version != 8):
             raise ValueError("removal repair v1 requires API renderer 8")
-        if type(self.receipt_completion_version) is not int or self.receipt_completion_version not in (0, 1, 2):
-            raise ValueError("receipt_completion_version must be 0, 1 or 2")
+        if type(self.receipt_completion_version) is not int or self.receipt_completion_version not in (0, 1, 2, 3):
+            raise ValueError("receipt_completion_version must be 0, 1, 2 or 3")
         if self.receipt_completion_version == 2 and self.shared_generation_version != 1:
             raise ValueError("receipt_completion_version 2 requires shared_generation_version 1")
+        if self.receipt_completion_version == 3 and self.shared_generation_version != 2:
+            raise ValueError("receipt3 requires shared generation 2")
         if self.receipt_completion_version == 1 and (self.is_agentic or self.render_version != 8):
             raise ValueError("receipt completion v1 requires API renderer 8")
         if self.receipt_completion_version:
@@ -766,7 +780,7 @@ class RunSpec:
             from .shared_generation import descriptor, parse_registration, sha
             raw = spec.shared_generation_registration.encode("utf-8")
             parse_registration(raw)
-            if (recorded.get("shared_generation_assets") != descriptor()["assets"]
+            if (recorded.get("shared_generation_assets") != descriptor(version=spec.shared_generation_version, condition=spec.condition)["assets"]
                     or recorded.get("shared_generation_registration") != {"sha256": sha(raw), "raw_json": raw.decode("utf-8")}):
                 raise ValueError("invalid recorded shared-generation authority")
         elif any(key.startswith("shared_generation_") for key in recorded):
@@ -933,9 +947,9 @@ class RunSpec:
             from .shared_generation import descriptor, parse_registration, sha
             raw = self.shared_generation_registration.encode("utf-8")
             parse_registration(raw)
-            policy_metadata.update(shared_generation_version=1,
+            policy_metadata.update(shared_generation_version=self.shared_generation_version,
                 shared_generation_registration={"sha256": sha(raw), "raw_json": raw.decode("utf-8")},
-                shared_generation_assets=descriptor()["assets"])
+                shared_generation_assets=descriptor(version=self.shared_generation_version, condition=self.condition)["assets"])
         return {**policy_metadata,
                 **({"agentic_artifact_paths": dict(self._agentic_artifact_paths)}
                    if self.render_version >= 4 and self._agentic_artifact_paths is not None else {}),
@@ -979,6 +993,10 @@ class RunSpec:
 
     @property
     def output_root(self) -> Path:
+        if self.shared_generation_version == 2:
+            # Keep the ordinary destination but freeze its absolute identity;
+            # later cwd changes must not change selected output ownership.
+            return self._corpus_root / CONCAT_DIR
         from data_sheets_schema.corpus import relative_to_root
         return (relative_to_root(CONCAT_DIR, self._corpus_root)
                 if self._corpus_root is not None else CONCAT_DIR)
@@ -1165,7 +1183,7 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
         parts.append({"full_rereceipt_header": HEADER, "full_rereceipt_instruction": INSTRUCTION,
                       "full_rereceipt_policy": POLICY, "receipts_instrument": RERECEIPTS_INSTRUMENT})
     if api_playbook_version:
-        if type(api_playbook_version) is not int or (api_playbook_version, render_version) not in ((1, 8), (2, 25)):
+        if type(api_playbook_version) is not int or (api_playbook_version, render_version) not in ((1, 8), (2, 25), (3, 27)):
             raise ValueError("API playbook v1 supports only API renderer 8")
         from data_sheets_schema.api_playbook import policy_identity
         parts.append({"api_playbook_version": api_playbook_version, "api_playbook_sha256": policy_identity(version=api_playbook_version)["sha256"],
@@ -1177,10 +1195,10 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
             raise ValueError("removal repair v1 requires API renderer 8")
         from data_sheets_schema.removal_repair import policy_identity
         parts.append({"removal_repair": policy_identity()})
-    if type(receipt_completion_version) is not int or receipt_completion_version not in (0, 1, 2):
+    if type(receipt_completion_version) is not int or receipt_completion_version not in (0, 1, 2, 3):
         raise ValueError("unsupported receipt completion assembly version")
     if receipt_completion_version:
-        if (receipt_completion_version, render_version) not in ((1, 8), (2, 25)):
+        if (receipt_completion_version, render_version) not in ((1, 8), (2, 25), (3, 27)):
             raise ValueError("receipt completion requires API renderer 8")
         from data_sheets_schema.receipt_completion import policy_identity
         parts.append({"receipt_completion": policy_identity(version=receipt_completion_version)})
@@ -1192,15 +1210,22 @@ def assembly_digest(render_version: int = 8, *, api_playbook_version: int = 0, r
         from data_sheets_schema.native_source_attribution import policy_identity
         parts.append({"native_source_attribution": policy_identity(),
                       "ordering": "saved report draft preflight before unchanged terminal evidence check"})
-    if shared_generation_version or render_version == 25:
-        if (type(shared_generation_version) is not int or shared_generation_version != 1
-                or render_version != 25 or api_playbook_version != 2 or receipt_completion_version != 2
+    if shared_generation_version or render_version in (25, 27):
+        if (type(shared_generation_version) is not int
+                or (shared_generation_version, render_version, api_playbook_version, receipt_completion_version)
+                   not in ((1, 25, 2, 2), (2, 27, 3, 3))
                 or native_source_attribution_version or removal_repair_version):
             raise ValueError("shared-generation assembly requires its exact selected axes")
         from .shared_generation import descriptor
         layout += "; shared_generation_v1: common contracts once; typed workers + source-first omission + integration; checked exact audit carry; bound terminal reconstruction"
         parts[0] = layout
-        parts.append({"shared_generation": descriptor()})
+        if shared_generation_version == 1:
+            parts.append({"shared_generation": descriptor()})
+        else:
+            layout += "; source-heading routing: complete captured projection and ordinary counted request journal"
+            parts[0] = layout
+            parts.append({"shared_generation": {name: descriptor(version=2, condition=name)
+                                                for name in SOURCE_HEADING_MODES.values()}})
     basis = json.dumps(parts, sort_keys=True)
     return {"sha256": hashlib.sha256(basis.encode("utf-8")).hexdigest(),
             "layout": layout}
@@ -2290,7 +2315,7 @@ def evidence_phase_contract(phase: str, render_version: int, *, _include_shared:
                          "registered. Independent scientific acceptance remains required.")
         if render_version >= 19 and phase == "audit":
             contract += "\n\n" + SCHEMA_SEMANTICS_CONTRACT_V19
-        if render_version == 25 and phase in {"report", "report_regate"}:
+        if render_version in (25, 27) and phase in {"report", "report_regate"}:
             from .shared_generation import role_instruction
             contract += "\n\n" + role_instruction()
         return contract
@@ -2838,6 +2863,9 @@ def build_phase(spec: RunSpec, phase: str, *, carry: dict[str, str],
                            else carry.get("Completed full record") if phase == "reconcile_full" else None)
         parts.append({"type": "text", "text": schema_context(spec, selected_record)})
         parts.append({"type": "text", "text": generation_context(spec)})
+        routing = shared.routing_context(spec)
+        if routing is not None:
+            parts.append({"type": "text", "text": routing})
     instruction = phase_instruction(phase, spec.render_version)
     if receipted and phase == "full":
         instruction += PHASE_INSTRUCTIONS["full_receipt"]
@@ -3107,7 +3135,7 @@ PHASE_SCHEMA = {
 
 
 def _looks_like_a_record(parsed: dict, schema_path: str = FULL_SCHEMA_PATH,
-                         class_name: str = "Dataset") -> bool:
+                         class_name: str = "Dataset", *, _slots=None) -> bool:
     """Is this the record the phase was asked for, or something else entirely?
 
     Three separate things have reached this guard and been let through, each
@@ -3129,7 +3157,7 @@ def _looks_like_a_record(parsed: dict, schema_path: str = FULL_SCHEMA_PATH,
     keys = {str(k) for k in parsed}
     if "id" not in keys:
         return False
-    if keys - _known_slots(schema_path, class_name):
+    if keys - (_known_slots(schema_path, class_name) if _slots is None else _slots):
         return False
     return len(keys) >= MIN_RECORD_SLOTS
 
@@ -3469,7 +3497,7 @@ def _readdress_receipt(spec: RunSpec, req: PhaseRequest, response_text: str,
 
 def _extract(text: str, kind: str,
              schema_path: str = FULL_SCHEMA_PATH,
-             class_name: str = "Dataset") -> str:
+             class_name: str = "Dataset", *, _slots=None) -> str:
     """Pull YAML or JSON out of a response, refusing anything that is neither.
 
     Falling back to the raw response when no fence was found wrote the model's
@@ -3522,7 +3550,7 @@ def _extract(text: str, kind: str,
             if problem:
                 audit_shape_problems.append(problem)
             return problem is None
-        return _looks_like_a_record(parsed, schema_path, class_name)
+        return _looks_like_a_record(parsed, schema_path, class_name, _slots=_slots)
 
     # Fences first, and *all* of them. Taking the last one on the grounds that
     # the model corrects itself as it goes is a guess about narrative order,
@@ -3607,6 +3635,10 @@ def _enum_aliases() -> dict[str, dict[str, str]]:
     if not schema.exists():
         return {}
     doc = load_schema(schema) or {}                  # one parse per process (#1203)
+    return _enum_aliases_of(doc)
+
+
+def _enum_aliases_of(doc):
     enums = doc.get("enums") or {}
 
     def table_for(enum_name: str) -> dict[str, str]:
@@ -3647,7 +3679,7 @@ _ENUM_LINE = re.compile(r"^(?P<head>[ \t]*-?[ \t]*(?P<slot>[a-z_]+):[ \t]+)"
                         r"(?P<value>[A-Za-z][A-Za-z0-9_./+-]*)[ \t]*$")
 
 
-def normalise_enum_aliases(text: str) -> str:
+def normalise_enum_aliases(text: str, *, _table=None) -> str:
     """Rewrite a declared alias to the permissible value it names.
 
     Text-level for the same reason as `normalise_temporal`: re-dumping the YAML
@@ -3658,7 +3690,7 @@ def normalise_enum_aliases(text: str) -> str:
     series as` is a real generation failure and normalising it into silence
     would hide it.
     """
-    by_slot = _enum_aliases()
+    by_slot = _enum_aliases() if _table is None else _table
     if not by_slot:
         return text
 
@@ -4601,14 +4633,18 @@ def _multivalued_slots() -> set[str]:
         for schema, in ((FULL_SCHEMA_PATH,), (CORE_SCHEMA_PATH,)):
             try:
                 sv = shared_view(schema)
-                for cls in sv.all_classes():
-                    for slot in sv.class_induced_slots(cls):
-                        if slot.multivalued and str(slot.range) == "string":
-                            names.add(str(slot.name))
+                names.update(_multivalued_of(sv))
             except Exception:                                      # noqa: BLE001
                 continue
         _MULTIVALUED = names
     return _MULTIVALUED
+
+
+def _multivalued_of(view):
+    for cls in view.all_classes():
+        for slot in view.class_induced_slots(cls):
+            if slot.multivalued and str(slot.range) == 'string':
+                yield str(slot.name)
 
 
 #: `  key: value` on one line — a plain scalar, or a block-scalar indicator.
@@ -4673,7 +4709,7 @@ def curie_form(value: str, bases: tuple[tuple[str, str], ...]) -> str | None:
     return None
 
 
-def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
+def normalise_identifier_form(text: str, *, phase: str | None = None, _tables=None) -> str:
     """Rewrite a resolver URL in a `uriorcurie` slot to the CURIE it names (#974).
 
     The rule has been in every arm prompt since v5 — write `doi:…`, not the
@@ -4695,7 +4731,7 @@ def normalise_identifier_form(text: str, *, phase: str | None = None) -> str:
     `_REWRITE_LOG` when one is set, with `phase`, so the record can say how
     often the model wrote the resolver form.
     """
-    slots, bases = _identifier_form_tables()
+    slots, bases = _identifier_form_tables() if _tables is None else _tables
     if not slots or not bases:
         return text
     log = _REWRITE_LOG.get()
@@ -4773,7 +4809,7 @@ def _yaml_scalar(value: str) -> str:
     return '"' + value.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
+def normalise_mailto_ids(text: str, *, phase: str | None = None, _persons=None) -> str:
     """A `mailto:` written as a Person's identifier becomes a fragment on the
     record's own id, and the address is kept in the sibling `email` slot
     (#981).
@@ -4801,7 +4837,7 @@ def normalise_mailto_ids(text: str, *, phase: str | None = None) -> str:
     URIs" goes stale after the rewrite; the log is the record of that.
     """
     root = _ROOT_ID_LINE.search(text)
-    persons = _person_slots()
+    persons = _person_slots() if _persons is None else _persons
     log = _REWRITE_LOG.get()
     if not root:
         if log is not None:
@@ -5043,15 +5079,17 @@ def stamp_provenance_header(text: str, settings: dict[str, Any]) -> str:
     return "\n".join(out)
 
 
-def normalise_record_text(text: str, *, phase: str | None = None) -> str:
+def normalise_record_text(text: str, *, phase: str | None = None, _rules=None) -> str:
     """Every write-time normalisation, in the order the record is written.
 
     Spelling runs last (#1002): it reads prose, and the identifier
     normalisers before it have already settled every id.
     """
     from data_sheets_schema.american_spelling import normalise_british_spellings
+    rules = {} if _rules is None else _rules
     return normalise_british_spellings(normalise_mailto_ids(normalise_identifier_form(normalise_multivalued(
-        normalise_enum_aliases(normalise_temporal(text))), phase=phase), phase=phase),
+        normalise_enum_aliases(normalise_temporal(text), _table=rules.get('enums')), _slots=rules.get('multivalued')),
+        phase=phase, _tables=rules.get('identifiers')), phase=phase, _persons=rules.get('persons')),
         phase=phase, log=_REWRITE_LOG.get())
 
 
@@ -5101,7 +5139,7 @@ def identifier_rewrite_summary(log: list[dict[str, Any]] | None) -> dict[str, An
             "british_normaliser": NORMALISER_VERSION}
 
 
-def normalise_multivalued(text: str) -> str:
+def normalise_multivalued(text: str, *, _slots=None) -> str:
     """Wrap a lone scalar into a list where the slot declares multivalued.
 
     Text-level for the same reason as `normalise_temporal` and
@@ -5121,7 +5159,7 @@ def normalise_multivalued(text: str) -> str:
     are either already correct or a real generation failure that normalising
     would hide.
     """
-    slots = _multivalued_slots()
+    slots = _multivalued_slots() if _slots is None else _slots
     if not slots:
         return text
     out = []
@@ -5311,6 +5349,10 @@ def _repair_invalid(spec: RunSpec, client, settings: dict[str, Any],
                 from .shared_generation import generation_context
                 req.messages[0]['content'].insert(-1,
                     {'type': 'text', 'text': generation_context(spec)})
+                from .shared_generation import routing_context
+                routing = routing_context(spec)
+                if routing is not None:
+                    req.messages[0]['content'].insert(-1, {'type': 'text', 'text': routing})
             attempt_started = datetime.now(timezone.utc).isoformat(
                 timespec="seconds")
             attempt_t0 = time.monotonic()
@@ -5508,7 +5550,13 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
     if spec.shared_generation_version:
         from .typed_audit_runtime import require_request
         require_request(spec, phase, kwargs)
+    if spec.shared_generation_version == 2:
+        from . import source_heading_admission as routing_admission
+        client, kwargs = routing_admission.prepare(spec, phase, attempt, client, kwargs)
     identifier = _begin_usage_call(spec, phase, attempt, started_at)
+    if spec.shared_generation_version == 2:
+        routing_admission.require_wire(spec, phase, identifier, kwargs)
+    call_started = time.monotonic()
     try:
         response = _call_with_retry(client, **kwargs)
     except UsageLedgerError:
@@ -5519,6 +5567,21 @@ def _call_with_usage(spec: RunSpec, phase: str, attempt: int, started_at: str, c
         # process exit or interrupt instead retains the unresolved marker.
         _cancel_usage_call(spec, identifier)
         raise
+    if spec.shared_generation_version == 2:
+        if routing_admission.ordinary(phase):
+            # Preserve completed reported counters before ANY new routing
+            # reconstruction or snapshot can fail. The caller later enriches
+            # this same usage ID through the unchanged append/upsert path.
+            _persist_usage(spec, {
+                'usage_id': identifier, 'phase': phase, 'attempt': attempt,
+                'started_at': started_at, 'seconds': round(time.monotonic() - call_started, 3),
+                'input_tokens': getattr(response.usage, 'input_tokens', None),
+                'output_tokens': getattr(response.usage, 'output_tokens', None),
+                'cache_read': getattr(response.usage, 'cache_read_input_tokens', None),
+                'cache_write': getattr(response.usage, 'cache_creation_input_tokens', None),
+                'thinking_tokens': reasoning.thinking_tokens(response),
+                'max_tokens': kwargs['max_tokens'], 'stop_reason': getattr(response, 'stop_reason', None)})
+        routing_admission.remember_response(spec, phase, identifier, response)
     return response, identifier
 
 
@@ -5825,6 +5888,22 @@ def _carried_record_text(spec: RunSpec, path: Path) -> str:
             else path.read_text(encoding="utf-8"))
 
 
+def _append_regate(req, spec, report_text, contradictions):
+    listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
+                              for c in contradictions], sort_keys=False, allow_unicode=True)
+    if spec.shared_generation_version:
+        # The new complete regate suffix replaces the report suffix; old
+        # renderers keep their historical duplicate layout.
+        previous = req.messages[0]["content"].pop()
+        if previous != {"type": "text", "text": phase_instruction("report", spec.render_version)}:
+            raise ValueError("shared report-regate lost the expected report suffix")
+    req.messages[0]["content"].extend([
+        {"type": "text", "text": REGATE_HEADERS[0]
+         + report_text},
+        {"type": "text", "text": REGATE_HEADERS[1] + listing},
+        {"type": "text", "text": phase_instruction("report_regate", spec.render_version)}])
+
+
 def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
                        usage: list[dict[str, Any]],
                        carry: dict[str, str], *, phase: str = "report_after_repair",
@@ -5850,19 +5929,8 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     started = datetime.now(timezone.utc).isoformat(timespec="seconds")
     t0 = time.monotonic()
     if contradictions is not None:
-        listing = yaml.safe_dump([{k: v for k, v in c.items() if k in ("kind", "slot", "record", "detail", "claim")}
-                                  for c in contradictions], sort_keys=False, allow_unicode=True)
-        if spec.shared_generation_version:
-            # The new complete regate suffix replaces the report suffix; old
-            # renderers keep their historical duplicate layout.
-            previous = req.messages[0]["content"].pop()
-            if previous != {"type": "text", "text": phase_instruction("report", spec.render_version)}:
-                raise ValueError("shared report-regate lost the expected report suffix")
-        req.messages[0]["content"].extend([
-            {"type": "text", "text": REGATE_HEADERS[0]
-             + (spec.report_path.read_text(encoding="utf-8") if spec.report_path.exists() else "")},
-            {"type": "text", "text": REGATE_HEADERS[1] + listing},
-            {"type": "text", "text": phase_instruction("report_regate", spec.render_version)}])
+        _append_regate(req, spec,
+            spec.report_path.read_text(encoding='utf-8') if spec.report_path.exists() else '', contradictions)
     try:
         resp, call_id = _call_with_usage(
             spec, phase, 1, started, client,
@@ -5909,6 +5977,10 @@ def _regenerate_report(spec: RunSpec, client, settings: dict[str, Any],
     spec.report_path.write_text(body, encoding="utf-8")
     require_source_reviews(spec, carry)
     return True
+
+
+DISPOSITIONS_MISSING_DETAIL = ("the report has no `## Dispositions` table with "
+    "`slot` and `disposition` columns; every slot the audit touched, changed or questioned needs a row")
 
 
 def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
@@ -5972,9 +6044,7 @@ def _gate_report(spec: RunSpec, client, settings: dict[str, Any],
     contradictions = list(before.get("findings") or [])
     if not before.get("disposition_rows"):
         contradictions.append({"kind": "dispositions_table_missing",
-                               "detail": "the report has no `## Dispositions` table with "
-                                         "`slot` and `disposition` columns; every slot the "
-                                         "audit touched, changed or questioned needs a row"})
+                               "detail": DISPOSITIONS_MISSING_DETAIL})
         out["table_missing_before"] = True
     if not contradictions:
         return out
@@ -6243,6 +6313,10 @@ def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
         raise                                        # already says what it could not establish (#2884)
     except OSError as exc:
         raise UsageLedgerError(f"cannot establish surviving abandoned attempts: {exc}") from exc
+    return _abandoned_rows_bytes(raw, boundary, path)
+
+
+def _abandoned_rows_bytes(raw, boundary, path):
     if boundary is None:
         boundary = len(raw)
     if boundary > len(raw):
@@ -6267,10 +6341,14 @@ def _abandoned_rows(spec: RunSpec) -> list[dict[str, Any]]:
 
 def _unrecorded_abandoned(spec: RunSpec, prior: dict[str, Any]) -> bool:
     """Identified charge evidence not already preserved in this run's record."""
+    return _unrecorded_abandoned_rows(spec, prior, _abandoned_rows(spec))
+
+
+def _unrecorded_abandoned_rows(spec, prior, rows):
     recorded = prior.get("api_usage") or []
     generation = (prior.get("run") or {}).get("generation_id")
     superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
-    for row in _abandoned_rows(spec):
+    for row in rows:
         if row.get("generation_id") is None or _foreign_usage_identity(spec, row.get("run_identity")):
             continue
         if row["generation_id"] in superseded:
@@ -6288,6 +6366,10 @@ def _unrecorded_reasoning(spec: RunSpec, prior: dict[str, Any]) -> bool:
         entries = reasoning.read(_reasoning_path(spec))
     except (OSError, ValueError) as exc:
         raise UsageLedgerError(f"cannot establish surviving reasoning usage: {exc}") from exc
+    return _unrecorded_reasoning_entries(spec, prior, entries)
+
+
+def _unrecorded_reasoning_entries(spec, prior, entries):
     recorded = prior.get("api_usage") or []
     generation = (prior.get("run") or {}).get("generation_id")
     superseded = ((prior.get("run") or {}).get("prior_generation_ids") or []) if generation else []
@@ -6522,7 +6604,11 @@ def execute(spec: RunSpec, *, dry_run: bool = False, resume: bool = True,
             require_selected_resume_owner(spec, resume=resume)
         if resume:
             _restore_resume_date(spec)
-        return _execute(spec, resume=resume, client=client)
+        result = _execute(spec, resume=resume, client=client)
+        if spec.shared_generation_version == 2 and not result.get('validation_problems'):
+            from .source_heading_completed import publish_completed
+            result['routing_completed_capture'] = publish_completed(spec)
+        return result
 
 
 def _restore_resume_date(spec: RunSpec) -> None:
@@ -7485,7 +7571,11 @@ def _execute(spec: RunSpec, *, resume: bool, client) -> dict[str, Any]:
     rec.data["grounding"] = grounding_block(spec)
     # Properties of the records alone, so they survive a drifted bundle (#602).
     from data_sheets_schema.grounding import form_facts
-    rec.data["form"] = form_facts(spec.full_path, spec.core_path)
+    if spec.shared_generation_version == 2:
+        from .source_heading_completed import measure_form
+        rec.data["form"] = measure_form(spec)
+    else:
+        rec.data["form"] = form_facts(spec.full_path, spec.core_path)
     # The coverage receipt checked against the manifest and the bundle
     # (#708/#710). Under a receipt condition an absent or failing receipt is
     # what the canary gate stops on; under any other it is not a metric.

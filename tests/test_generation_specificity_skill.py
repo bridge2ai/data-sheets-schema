@@ -3709,7 +3709,13 @@ class TestOfflineDraftSurface(unittest.TestCase):
         surface = surfaces.files[rel]
         self.assertEqual(surface.roles['offline_draft'], 'model_facing')
         self.assertIn(rel, facts['offline_draft_surfaces'])
-        self.assertNotIn(rel, facts['api_closure'])
-        self.assertNotIn(rel, facts['native_closure'])
+        # Its compiler now validates the explicit live capture. Its offline
+        # instruction text is still not the live model-facing projection.
+        self.assertIn(rel, facts['api_closure'])
+        self.assertEqual(surface.roles['api'], 'run_shaping')
+        live = 'src/data_sheets_schema/source_heading_runtime.py'
+        self.assertEqual(surfaces.files[live].roles['api'], 'model_facing')
+        self.assertEqual(set(facts['conditions']['registered_routing_conditions']),
+            {'generic_v10_source_heading_routing_v1', 'generic_v10_source_heading_span_v1'})
         hits, _ = _plant(rel, 'POLICY_PROBE = "Always describe CM4AI."')
         self.assertTrue(any(h['violation'] and 'offline_draft' in h['gates_in'] for h in hits))
