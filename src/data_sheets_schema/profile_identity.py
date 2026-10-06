@@ -6,12 +6,130 @@ therefore establish unknown identity, never agreement or a replacement digest.
 """
 from __future__ import annotations
 
+from collections import OrderedDict
 from copy import deepcopy
+from dataclasses import is_dataclass
 import hashlib
 from importlib.metadata import version
 from pathlib import Path
 import re
+import sys
+from threading import RLock
 from typing import Any
+
+
+# Only positive, content-derived inventories live here. A record's authority,
+# vocabulary, rendered candidates and final judgement are always read afresh.
+_INVENTORY_CACHE_MAX_ENTRIES = 32
+_INVENTORY_CACHE_MAX_BYTES = 16 * 1024 * 1024
+_INVENTORY_CACHE: OrderedDict[tuple, tuple[Any, int]] = OrderedDict()
+_INVENTORY_CACHE_BYTES = 0
+_INVENTORY_CACHE_LOCK = RLock()
+
+
+def _inventory_cache_clear() -> None:
+    global _INVENTORY_CACHE_BYTES
+    with _INVENTORY_CACHE_LOCK:
+        _INVENTORY_CACHE.clear()
+        _INVENTORY_CACHE_BYTES = 0
+
+
+def _inventory_cache_info() -> dict[str, int]:
+    with _INVENTORY_CACHE_LOCK:
+        return {'entries': len(_INVENTORY_CACHE), 'bytes': _INVENTORY_CACHE_BYTES,
+                'max_entries': _INVENTORY_CACHE_MAX_ENTRIES,
+                'max_bytes': _INVENTORY_CACHE_MAX_BYTES}
+
+
+def _retained_bytes(value: Any, seen: set[int] | None = None) -> int:
+    """Account for the retained key and inventory graph, once per object.
+
+    Module-owned callables/classes in a key are shared references: count the
+    reference's object, not the module and interpreter it can reach. Separate
+    entries conservatively count any shared strings/bytes again.
+    """
+    seen = set() if seen is None else seen
+    if id(value) in seen:
+        return 0
+    seen.add(id(value))
+    size = sys.getsizeof(value)
+    if isinstance(value, dict):
+        size += sum(_retained_bytes(k, seen) + _retained_bytes(v, seen)
+                    for k, v in value.items())
+    elif isinstance(value, (tuple, list, set, frozenset)):
+        size += sum(_retained_bytes(v, seen) for v in value)
+    elif is_dataclass(value) and not isinstance(value, type):
+        size += _retained_bytes(vars(value), seen)
+    return size
+
+
+def _trim_inventory_cache() -> None:
+    """Called under the lock, including when limits were lowered."""
+    global _INVENTORY_CACHE_BYTES
+    while _INVENTORY_CACHE and (
+            len(_INVENTORY_CACHE) > max(0, _INVENTORY_CACHE_MAX_ENTRIES)
+            or _INVENTORY_CACHE_BYTES > max(0, _INVENTORY_CACHE_MAX_BYTES)):
+        _, (_, weight) = _INVENTORY_CACHE.popitem(last=False)
+        _INVENTORY_CACHE_BYTES -= weight
+
+
+def _inventory_key(raw: bytes, path: Path, renderer: dict[str, Any]) -> tuple:
+    from data_sheets_schema import schema_digest as digest, schema_view as views
+
+    # Rendering still happens on every call. These are only the functions and
+    # settings consumed while constructing Dataset's inventory. Include helper
+    # defaults: _truncate's limit is bound when that function is defined.
+    functions = tuple((fn, getattr(fn, '__code__', None), getattr(fn, '__defaults__', None),
+                       tuple(sorted((getattr(fn, '__kwdefaults__', None) or {}).items())))
+                      for fn in (digest._build_from_view, digest._schema_name,
+                                 digest._truncate, digest.term_sources_of,
+                                 views.version_document, views.version_view))
+    settings = (tuple(sorted((name, str(source)) for name, source in digest.CLASS_SCHEMA.items())),
+                digest.MAX_ENUM_VALUES, digest.NESTING_DEPTH,
+                frozenset(digest.UNIVERSAL_ATTRIBUTES), digest.TERM_SOURCES_ANNOTATION,
+                tuple(sorted(digest.TERM_SOURCES.items())))
+    constructors = (digest.ClassDigest, digest.SlotDigest, digest.NestedClass,
+                    views.SchemaDefinition, views._ReleasableView,
+                    views.yaml.load, views.DupCheckYamlLoader)
+    view_source = hashlib.sha256(Path(views.__file__).read_bytes()).hexdigest()
+    return (raw, str(path), renderer['source_sha256'], renderer['linkml_runtime_version'],
+            view_source, functions, settings, constructors)
+
+
+def _historical_inventory(raw: bytes, path: Path, renderer: dict[str, Any]):
+    """Bounded pure work, detached even on the first call; no view is retained."""
+    from data_sheets_schema import schema_digest
+    from data_sheets_schema.schema_view import version_document, version_view
+    global _INVENTORY_CACHE_BYTES
+
+    key = _inventory_key(raw, path, renderer)
+    with _INVENTORY_CACHE_LOCK:
+        _trim_inventory_cache()
+        stored = _INVENTORY_CACHE.get(key)
+        if stored is not None:
+            _INVENTORY_CACHE.move_to_end(key)
+            return deepcopy(stored[0])
+    document = version_document(raw)
+    with version_view(path, document) as view:
+        if view.get_class('Dataset') is None:
+            raise ValueError('recorded schema does not define Dataset')
+        inventory = schema_digest._build_from_view('Dataset', path, view)
+    # Even permitted linkml: imports read installed package YAML. A root hash
+    # and runtime version cannot attest those mutable bytes, so imported
+    # schemas retain the existing fresh construction path on every call.
+    if document.get('imports'):
+        return inventory
+    # Include the entry tuple and a conservative OrderedDict node allowance,
+    # in addition to the complete raw key and derived inventory object graph.
+    weight = _retained_bytes((key, inventory)) + 256
+    with _INVENTORY_CACHE_LOCK:
+        _trim_inventory_cache()
+        if (key not in _INVENTORY_CACHE and _INVENTORY_CACHE_MAX_ENTRIES > 0
+                and weight <= _INVENTORY_CACHE_MAX_BYTES):
+            _INVENTORY_CACHE[key] = (inventory, weight)
+            _INVENTORY_CACHE_BYTES += weight
+            _trim_inventory_cache()
+    return deepcopy(inventory)
 
 
 def _choose(context: dict[str, Any], candidates: dict[str, str], *, historical: bool) -> None:
@@ -122,7 +240,6 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
         return context
     try:
         from data_sheets_schema import run_schema, schema_digest
-        from data_sheets_schema.schema_view import version_document, version_view
         raw, basis = run_schema.run_schema_bytes({'schema': schema})
         context['schema_basis'] = deepcopy(basis)
         if raw is None:
@@ -138,11 +255,7 @@ def capture(record: dict[str, Any]) -> dict[str, Any]:
                                'source_sha256': hashlib.sha256(renderer_raw).hexdigest(),
                                'linkml_runtime_version': version('linkml-runtime'),
                                'basis': 'current installed renderer, not a recovered historical renderer'}
-        document = version_document(raw)
-        with version_view(Path(path), document) as view:
-            if view.get_class('Dataset') is None:
-                raise ValueError('recorded schema does not define Dataset')
-            inventory = schema_digest._build_from_view('Dataset', Path(path), view)
+        inventory = _historical_inventory(raw, Path(path), context['renderer'])
         candidates = {}
         for name, profile in registered_profiles:
             try:
