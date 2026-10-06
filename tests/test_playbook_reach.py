@@ -501,9 +501,22 @@ class TestSelectedSourceHeadingInstruction(unittest.TestCase):
         from data_sheets_schema import api_runner as api
         self.assertEqual(set(routing.MODES.values()), set(api.SOURCE_HEADING_CONDITIONS))
         self.assertTrue(set(api.SOURCE_HEADING_CONDITIONS) <= api.RECEIPT_CONDITIONS)
+        # Phrase reach is insensitive to prose line wrapping, while every
+        # word (including the negation) remains required (#4515).
+        instruction = " ".join(routing.INSTRUCTION.split())
+        self.assertIn('draft, unreviewed', instruction)
         for phrase in ('every candidate', 'direction', 'negation', 'caller declaration',
                        'does not establish confidential', 'separately from unsupported'):
-            self.assertIn(phrase, routing.INSTRUCTION)
+            self.assertIn(phrase, instruction)
         # Actual selected SDK delivery is checked in test_source_heading_runtime_api.
         self.assertEqual(api.CONDITION_AXES[routing.MODES['declared_heading_spans_v1']]['routing'],
                          'declared_heading_spans_v1')
+
+    def test_removing_the_actual_negation_still_fails_the_reach_check(self):
+        from unittest.mock import patch
+        from data_sheets_schema import source_heading_runtime as routing
+        changed = routing.INSTRUCTION.replace("does\nnot establish", "does\nestablish")
+        self.assertNotEqual(changed, routing.INSTRUCTION)
+        with patch.object(routing, "INSTRUCTION", changed):
+            with self.assertRaisesRegex(AssertionError, "does not establish confidential"):
+                self.test_selected_builder_keeps_candidates_negation_and_draft_status()
