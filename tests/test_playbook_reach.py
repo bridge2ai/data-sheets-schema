@@ -515,8 +515,10 @@ class TestSelectedSourceHeadingInstruction(unittest.TestCase):
     def test_removing_the_actual_negation_still_fails_the_reach_check(self):
         from unittest.mock import patch
         from data_sheets_schema import source_heading_runtime as routing
-        changed = routing.INSTRUCTION.replace("does\nnot establish", "does\nestablish")
-        self.assertNotEqual(changed, routing.INSTRUCTION)
+        instruction = " ".join(routing.INSTRUCTION.split())
+        phrase = "does not establish"
+        self.assertEqual(instruction.count(phrase), 1)
+        changed = instruction.replace(phrase, "does establish", 1)
         with patch.object(routing, "INSTRUCTION", changed):
             with self.assertRaisesRegex(AssertionError, "does not establish confidential"):
                 self.test_selected_builder_keeps_candidates_negation_and_draft_status()
