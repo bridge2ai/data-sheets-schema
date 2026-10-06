@@ -18,6 +18,7 @@ import stat
 import xml.etree.ElementTree as ET
 
 from . import attainability_aggregation as aggregation
+from . import figure_publication as publication
 from .attainability import identical
 
 FORMAT = 'd4d-attainability-figure-v1'
@@ -135,7 +136,7 @@ def prepare(path, *, limits=DEFAULT_LIMITS):
         raise TypeError('expected fixed figure Limits')
     selected = _read(path, limits.envelope_bytes)
     implementation = tuple(_read(p, aggregation.DEFAULT_LIMITS.source_bytes)
-                           for p in (__file__, *(actual for _, actual in aggregation._SOURCE_FILES)))
+                           for p in (__file__, publication.__file__, *(actual for _, actual in aggregation._SOURCE_FILES)))
     _, report = _checked(selected.raw, limits)
     for file in (selected, *implementation):
         file.verify()
@@ -286,7 +287,7 @@ def publish(prepared, output_dir):
     if type(prepared) is not _Prepared:
         raise TypeError('expected prepare() result')
     expected_sources = tuple(str(Path(p).resolve(strict=True)) for p in
-                             (__file__, *(actual for _, actual in aggregation._SOURCE_FILES)))
+                             (__file__, publication.__file__, *(actual for _, actual in aggregation._SOURCE_FILES)))
     if (type(prepared.selected) is not _File or type(prepared.implementation) is not tuple or
             any(type(file) is not _File for file in prepared.implementation) or
             tuple(file.resolved for file in prepared.implementation) != expected_sources):
@@ -326,6 +327,7 @@ def publish(prepared, output_dir):
     def check_parent():
         if original.parent.resolve(strict=True) != parent or not os.path.samestat(os.fstat(parent_fd), parent.stat()):
             raise ValueError('publication parent changed')
+    committed = False
     try:
         check_parent()
         for file in (prepared.selected, *prepared.implementation):
@@ -345,15 +347,22 @@ def publish(prepared, output_dir):
                 with os.fdopen(fd, 'rb') as stream:
                     if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw)+1) != raw:
                         raise ValueError('published artifact changed: ' + name)
-            for file in (prepared.selected, *prepared.implementation):
-                file.verify()
-            check_output()
-            _publish_file(directory, 'manifest.json', manifest_raw)
-            check_output()
+            def verify_completion():
+                check_output()
+                for file in (prepared.selected, *prepared.implementation):
+                    file.verify()
+                for name, raw in artifacts.items():
+                    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+                    with os.fdopen(fd, 'rb') as stream:
+                        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw)+1) != raw:
+                            raise ValueError('published artifact changed: ' + name)
+                check_output()
+            publication.complete(directory, 'manifest.json', manifest_raw, verify_completion)
+            committed = True
         finally:
-            os.close(directory)
+            publication.close_descriptor(directory, committed=committed)
     finally:
-        os.close(parent_fd)
+        publication.close_descriptor(parent_fd, committed=committed)
     return manifest
 
 

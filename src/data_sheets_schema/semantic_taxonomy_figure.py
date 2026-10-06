@@ -19,6 +19,7 @@ import tempfile
 import jsonschema
 import yaml
 
+from data_sheets_schema import figure_publication as publication
 from data_sheets_schema.evaluation_context import normalize_context, unwrap_document
 from data_sheets_schema.semantic_comparison import evaluator_key
 from data_sheets_schema.semantic_evidence import ISSUE_CATEGORIES, check_issue_links
@@ -273,6 +274,8 @@ def prepare(selection_path: str | Path) -> PreparedFigure:
                      'validation': state, 'issue_links': findings_to_dict(links),
                      'evidence': findings_to_dict(evidence) if evidence is not None else None,
                      'taxonomy': taxonomy})
+    capture(Path(__file__))
+    capture(Path(publication.__file__))
     # Shared validators use their normal resources; verify the entire captured
     # resource/input set after validation. Rendering never reads selected paths.
     for cap in cache.values():
@@ -370,6 +373,10 @@ def publish(prepared: PreparedFigure, output_dir: str | Path) -> dict:
     """
     if not isinstance(prepared, PreparedFigure):
         raise ValueError("expected a prepared taxonomy figure")
+    expected = (str(Path(__file__).resolve(strict=True)), str(Path(publication.__file__).resolve(strict=True)))
+    sources = tuple(cap for path in expected for cap in prepared.captures if cap.resolved == path)
+    if tuple(cap.resolved for cap in sources) != expected:
+        raise ValueError('prepared implementation source roster differs')
     output = Path(output_dir).absolute()
     if output.exists() or output.is_symlink():
         raise FileExistsError(f"output must be fresh: {output}")
@@ -383,6 +390,7 @@ def publish(prepared: PreparedFigure, output_dir: str | Path) -> dict:
     report = prepared.report()
     artifacts = _artifacts(report)
     final = {'state': 'complete', 'payload_sha256': _sha(prepared.payload), 'report': report,
+             'consumer_sources': [cap.pin() for cap in sources],
              'artifacts': {name: {'sha256': _sha(raw), 'bytes': len(raw)}
                            for name, raw in artifacts.items()}}
     # Render every byte before reserving the destination. Revalidate both raw
@@ -392,27 +400,35 @@ def publish(prepared: PreparedFigure, output_dir: str | Path) -> dict:
             (Path(staging) / name).write_bytes(raw)
         for cap in prepared.captures:
             cap.verify()
-        output.mkdir(mode=0o700)
-        handle = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
-        try:
-            if _identity(os.fstat(handle)) != _identity(output.stat(follow_symlinks=False)):
-                raise ValueError("publication directory identity changed")
+    output.mkdir(mode=0o700)
+    handle = os.open(output, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    committed = False
+    try:
+        if _identity(os.fstat(handle)) != _identity(output.stat(follow_symlinks=False)):
+            raise ValueError("publication directory identity changed")
+        for name, raw in artifacts.items():
+            _publish_file(handle, name, raw)
+        for name, raw in artifacts.items():
+            fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=handle)
+            with os.fdopen(fd, 'rb') as stream:
+                if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw) + 1) != raw:
+                    raise ValueError(f"published artifact changed: {name}")
+        def verify_completion():
+            if not os.path.samestat(os.fstat(handle), output.stat(follow_symlinks=False)):
+                raise ValueError("publication directory moved or replaced")
+            for cap in prepared.captures:
+                cap.verify()
             for name, raw in artifacts.items():
-                _publish_file(handle, name, raw)
-            for name, raw in artifacts.items():
-                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW, dir_fd=handle)
+                fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=handle)
                 with os.fdopen(fd, 'rb') as stream:
                     if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode) or stream.read(len(raw) + 1) != raw:
                         raise ValueError(f"published artifact changed: {name}")
-            for cap in prepared.captures:
-                cap.verify()
             if not os.path.samestat(os.fstat(handle), output.stat(follow_symlinks=False)):
                 raise ValueError("publication directory moved or replaced")
-            _publish_file(handle, 'report.json', _encoded(final))
-            if not os.path.samestat(os.fstat(handle), output.stat(follow_symlinks=False)):
-                raise ValueError("publication directory moved or replaced")
-        finally:
-            os.close(handle)
+        publication.complete(handle, 'report.json', _encoded(final), verify_completion)
+        committed = True
+    finally:
+        publication.close_descriptor(handle, committed=committed)
     return final
 
 
