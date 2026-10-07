@@ -156,6 +156,24 @@
       "code_unchanged": true,
       "started": "2026-10-07T20:47:31.695957+00:00",
       "finished": "2026-10-07T20:47:38.389109+00:00"
+    },
+    "tests-fairscape-contract-09": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_fairscape_integration/test_fairscape_to_d4d.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/private/tmp/d4d-2915-implementation-root-knlcr3by/tests-fairscape-contract-09/tmp",
+        "--junitxml=/private/tmp/d4d-2915-implementation-root-knlcr3by/tests-fairscape-contract-09/junit.xml"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-07T21:13:57.580976+00:00",
+      "finished": "2026-10-07T21:14:08.844795+00:00"
     }
   },
   "replay": {
@@ -206,7 +224,7 @@
         "changed_slots": [],
         "output_sha256": "ba9f27964ec5a4c8fa55351c6dea86e769a2200f75860626576170d1a14643cc",
         "human_subject_research": {
-          "description": "Source humanSubjectResearch: None - data collected from commercially available cell lines\nSource humanSubjectExemption: Exempt — research with commercially available de-identified human cell lines does not constitute human subjects research."
+          "description": "Source humanSubjectResearch: None - data collected from commercially available cell lines\nSource humanSubjectExemption: Exempt \u2014 research with commercially available de-identified human cell lines does not constitute human subjects research."
         },
         "data_governance": {
           "description": "Jilian Parker"
@@ -322,7 +340,7 @@
         "changed_slots": [],
         "output_sha256": "ba9f27964ec5a4c8fa55351c6dea86e769a2200f75860626576170d1a14643cc",
         "human_subject_research": {
-          "description": "Source humanSubjectResearch: None - data collected from commercially available cell lines\nSource humanSubjectExemption: Exempt — research with commercially available de-identified human cell lines does not constitute human subjects research."
+          "description": "Source humanSubjectResearch: None - data collected from commercially available cell lines\nSource humanSubjectExemption: Exempt \u2014 research with commercially available de-identified human cell lines does not constitute human subjects research."
         },
         "data_governance": {
           "description": "Jilian Parker"

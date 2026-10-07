@@ -1045,16 +1045,31 @@ class TestRootDataEntity(unittest.TestCase):
             with self.subTest(title=title):
                 record, _ = converted({"@graph": graph})
                 self.assertEqual(record["title"], title)
-        # The third rule is the one `rocrate_map.crate_root` and FAIRSCAPE apply
-        self.assertIs(root_data_entity(first), crate_root(first))
+        # #2915 hardens the static mapper. The converter's historical
+        # fallback is separately tracked by #4586; it is not shared policy.
+        for graph in (dot_slash, list(reversed(dot_slash))):
+            with self.subTest(order=[node['@id'] for node in graph]):
+                self.assertIs(root_data_entity(graph), dot_slash[1])
+                self.assertIs(crate_root(graph), dot_slash[1])
+        for graph in (first, list(reversed(first))):
+            with self.subTest(order=[node['@id'] for node in graph]):
+                self.assertIs(root_data_entity(graph), graph[0])
+                self.assertIsNone(crate_root(graph))
+        self.assertIs(root_data_entity(first[:1]), first[0])
+        self.assertIs(crate_root(first[:1]), first[0])
 
     def test_a_descriptor_naming_no_entity_falls_back(self):
+        from data_sheets_schema.rocrate_map import crate_root
         graph = [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
                   "about": {"@id": "ark:59853/not-in-the-graph"}},
                  {"@id": "./", "@type": ROCRATE, "name": "The root"},
                  {"@id": "ark:59853/rocrate-a", "@type": ROCRATE, "name": "Later"}]
         record, _ = converted({"@graph": graph})
         self.assertEqual(record["title"], "The root")
+        # Unlike the historical converter (#4586), the static mapper must
+        # not silently override an explicit but unresolved root reference.
+        self.assertIsNone(crate_root(graph))
+        self.assertIsNone(crate_root(list(reversed(graph))))
 
     def test_the_tracked_cm4ai_release_crate_is_its_june_2026_release(self):
         """The reduced crate keeps every entity; its hasPart lists are
@@ -1805,14 +1820,16 @@ class TestDatasetParts(unittest.TestCase):
     def test_the_arms_differ_only_where_the_converter_says_they_do(self):
         """Every slot this converter and the static-map arm both write holds
         the same value, apart from a split author string, a start and end
-        date, and `prohibited_uses`, which this converter fills from two
-        crate properties."""
+        date, `prohibited_uses`, which this converter fills from two crate
+        properties, and the #2915 human-subject construction. The latter
+        consumes explicit root assertions rather than a named additional
+        property; converter routing remains tracked by #4046."""
         from data_sheets_schema.rocrate_map import (
             MAPPING_TSV, load_mapping, map_crate)
         rows = load_mapping(repo_root / MAPPING_TSV)
         view = FairscapeToD4DConverter()._schema_view()
         expected = {BUNDLED[0]: {"creators", "collection_timeframes",
-                                 "prohibited_uses"},
+                                 "prohibited_uses", "human_subject_research"},
                     BUNDLED[1]: {"creators", "collection_timeframes"},
                     BUNDLED[2]: {"creators"},
                     BUNDLED[3]: {"creators"}}
@@ -1823,6 +1840,21 @@ class TestDatasetParts(unittest.TestCase):
                 theirs = map_crate(crate_json["@graph"], rows, view).record
                 self.assertEqual({slot for slot in set(ours) & set(theirs)
                                   if ours[slot] != theirs[slot]}, differ)
+                if path == BUNDLED[0]:
+                    root = root_data_entity(crate_json["@graph"])
+                    human = theirs["human_subject_research"]
+                    self.assertEqual(set(human), {"description"})
+                    for key in ("humanSubjectResearch", "humanSubjects",
+                                "humanSubjectExemption", "irb", "irbProtocolId"):
+                        self.assertIn(f"Source {key}: {root[key]}",
+                                      human["description"])
+                    self.assertEqual(ours["human_subject_research"], {
+                        "name": "None - data collected from commercially available cell lines"})
+                elif path == BUNDLED[1]:
+                    # The shared-slot comparison alone would conceal this
+                    # legacy-only input, outside the approved root builder.
+                    self.assertIn("human_subject_research", ours)
+                    self.assertNotIn("human_subject_research", theirs)
 
 
 class TestTheRecordValidates(unittest.TestCase):
