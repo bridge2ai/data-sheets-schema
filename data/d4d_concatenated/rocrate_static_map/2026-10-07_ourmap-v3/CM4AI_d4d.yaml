@@ -1,9 +1,13 @@
-# D4D record for CM4AI, mapped from its RO-Crate
-# Method: static mapping using this repo's own mapping table
-# Mapping table: data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
-# Source: data/ro-crate_packages/CM4AI/raw/ro-crate-metadata.json
-# Upstream ro-crate-linkml.yaml deliberately NOT used
-# No inferred values; see the provenance report alongside
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: rocrate_static_map (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/CM4AI
+# Normalized from: data/ro-crate_packages/CM4AI/processed/CM4AI_crate_mapped_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-10-07_ourmap-v3
 title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
 description: This dataset is the June 2026 Data Release of Cell Maps for Artificial
   Intelligence (CM4AI; CM4AI.org), the Functional Genomics Grand Challenge in the

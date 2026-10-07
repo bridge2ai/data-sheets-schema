@@ -1,9 +1,13 @@
-# D4D record for VOICE, mapped from its RO-Crate
-# Method: static mapping using this repo's own mapping table
-# Mapping table: data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
-# Source: data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json
-# Upstream ro-crate-linkml.yaml deliberately NOT used
-# No inferred values; see the provenance report alongside
+# D4D Datasheet for VOICE Dataset
+# Generation Method: rocrate_static_map (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/VOICE
+# Normalized from: data/ro-crate_packages/VOICE/processed/VOICE_crate_mapped_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-10-07_ourmap-v3
 title: 'B2AI Voice: An ethically-sourced, diverse voice dataset linked to health information'
 description: "The human voice contains complex acoustic markers which have been linked\
   \ to important health conditions including dementia, mood disorders, and cancer.\

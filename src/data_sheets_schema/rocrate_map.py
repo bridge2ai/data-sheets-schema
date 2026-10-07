@@ -11,17 +11,18 @@ This is the *our-mapping* deterministic arm. It differs from
   emitted field therefore carries its own declared provenance: the source path,
   the SKOS mapping type, and the expected information loss.
 
-No inference and no gap-filling: a field appears only when the declared path
-resolves in the crate. Everything the table declares but the crate does not
-supply is reported as unfilled, and every table row that cannot be placed in a
-``Dataset`` record is reported with the reason. Where the table says why such
-a row maps nowhere (its ``Unplaced`` and ``Unplaced_Reason`` columns), the
-report gives that declaration too (#2915).
+No member-to-root gap-filling: fields use the selected root and explicit
+construction rules. Every original row has a reported disposition, including
+retired and deferred rules. Complete root/member source assertions are retained
+separately; placement and table-declared fidelity are not source-coverage scores.
 """
 
 from __future__ import annotations
 
 import csv
+from copy import deepcopy
+import hashlib
+import io
 import json
 import re
 import subprocess
@@ -40,23 +41,18 @@ MAPPING_TSV = Path("data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv")
 FULL_SCHEMA = Path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml")
 PACKAGES_DIR = Path("data/ro-crate_packages")
 TARGET_CLASS = "Dataset"
+PRODUCER_SOURCE_FILES = ("rocrate_map.py", "rocrate_sources.py", "rocrate_assertions.py",
+                         "scope.py", "schema_view.py")
 
 #: The slot whose pattern is anchored to the bare DOI (#646). Crates carry the
 #: resolver URL, and copying it through failed the schema while the report
 #: still said PASS (#2916).
 DOI_SLOT = "doi"
 
-# Path grammar actually present in the table (verified against all 136 rows):
-#   @graph[?@type='T']['prop']
-#   @graph[?@type='T']['prop'][?name='N']['prop2']
-#   bare property name, e.g. rai:dataBiases  -> looked up on the crate root
-# Anything else (N/A, prose such as "encodingFormat MIME parameter", or a
-# d4d:* URI naming the D4D side rather than the crate side) is not a path.
-GRAPH_RE = re.compile(
-    r"^@graph\[\?@type='(?P<type>[^']+)'\]\['(?P<prop>[^']+)'\]"
-    r"(?:\[\?name='(?P<name>[^']+)'\]\['(?P<prop2>[^']+)'\])?$"
+from data_sheets_schema.rocrate_sources import (
+    GRAPH_RE, NOT_A_PATH, _types_of, _type_matches, crate_root, select_root,
+    resolve_path, crate_property, source_report,
 )
-NOT_A_PATH = re.compile(r"^(N/A|\s*|.*\s+MIME\s+parameter|d4d:.*)$", re.IGNORECASE)
 
 #: What the table's `Unplaced` column may say of a row whose D4D path places
 #: nowhere in a `Dataset` record, and how the report says it (#2915). A row
@@ -77,7 +73,7 @@ class FieldResult:
     source_path: str
     mapping_type: str
     information_loss: str
-    status: str           # filled | subsumed | empty | unresolvable | unplaceable
+    status: str           # filled | subsumed | empty | unresolvable | unplaceable | retired | deferred
     detail: str = ""
     value_preview: str = ""
     #: The crate's value, previewed, on the two identifier rows where the
@@ -105,6 +101,8 @@ class FieldResult:
     #: empty where it declares nothing. `detail` carries the declared
     #: reason, and the report's Outcome legend counts these (#2915).
     unplaced: str = ""
+    rule_id: str = ""
+    execution: str = "active"
 
 
 @dataclass
@@ -114,6 +112,7 @@ class MapResult:
     fields: list[FieldResult] = field(default_factory=list)
     outputs: dict[str, Path] = field(default_factory=dict)
     validation: str = ""
+    sources: dict = field(default_factory=dict)
 
     def counts(self) -> dict[str, int]:
         out: dict[str, int] = {}
@@ -127,91 +126,15 @@ def load_mapping(path: Path = MAPPING_TSV) -> list[dict]:
         return [r for r in csv.DictReader(fh, delimiter="\t") if r.get("D4D_Full_Path")]
 
 
+def _mapping_from_bytes(data: bytes) -> list[dict]:
+    """Read and later hash one table revision, with the usual newline handling."""
+    with io.StringIO(data.decode("utf-8"), newline=None) as fh:
+        return [r for r in csv.DictReader(fh, delimiter="\t") if r.get("D4D_Full_Path")]
+
+
 # --------------------------------------------------------------------------
 # crate access
 # --------------------------------------------------------------------------
-
-def _types_of(entity: dict) -> list[str]:
-    t = entity.get("@type")
-    return t if isinstance(t, list) else ([t] if t else [])
-
-
-def _type_matches(entity: dict, wanted: str) -> bool:
-    """Match 'Dataset' against 'Dataset' or 'https://w3id.org/EVI#Dataset'."""
-    for t in _types_of(entity):
-        if t == wanted or re.search(rf"[#/:]{re.escape(wanted)}$", str(t)):
-            return True
-    return False
-
-
-def crate_root(graph: list[dict]) -> dict | None:
-    """The crate's own top entity: the ROCrate-typed one, else first Dataset."""
-    for e in graph:
-        if any("ROCrate" in str(t) for t in _types_of(e)):
-            return e
-    for e in graph:
-        if _type_matches(e, "Dataset"):
-            return e
-    return None
-
-
-def resolve_path(expr: str, graph: list[dict], root: dict | None) -> tuple[Any, str]:
-    """Return (value, note). value is None when the path does not resolve."""
-    expr = (expr or "").strip()
-    if NOT_A_PATH.match(expr):
-        return None, "not a crate path"
-
-    m = GRAPH_RE.match(expr)
-    if m:
-        wanted, prop = m.group("type"), m.group("prop")
-        entities = [e for e in graph if _type_matches(e, wanted)]
-        if not entities:
-            return None, f"no @type={wanted} entity in crate"
-        for entity in entities:
-            value = entity.get(prop)
-            if value in (None, "", [], {}):
-                continue
-            if m.group("name"):
-                # nested selector: pick the list item whose name matches
-                items = value if isinstance(value, list) else [value]
-                for item in items:
-                    if isinstance(item, dict) and item.get("name") == m.group("name"):
-                        inner = item.get(m.group("prop2"))
-                        if inner not in (None, "", [], {}):
-                            return inner, ""
-                continue
-            return value, ""
-        return None, f"@type={wanted} present but '{prop}' empty or absent"
-
-    # bare property on the crate root (the rai:* rows)
-    if root is not None and expr in root:
-        value = root[expr]
-        return (value, "") if value not in (None, "", [], {}) else (None, "root property empty")
-    if root is None:
-        return None, "no crate root entity"
-    return None, f"'{expr}' not present on crate root"
-
-
-def crate_property(expr: str) -> str | None:
-    """The crate property a source path reads, whichever form spells it.
-
-    The table writes one property two ways: a Dataset row as
-    ``@graph[?@type='Dataset']['rai:dataPreprocessingProtocol']`` and the
-    nested row beside it as the bare ``rai:dataPreprocessingProtocol``. A
-    name-selected path names its selector too, so two different
-    ``additionalProperty`` entries are two properties. None for anything
-    `resolve_path` does not read as a path.
-    """
-    expr = (expr or "").strip()
-    if NOT_A_PATH.match(expr):
-        return None
-    m = GRAPH_RE.match(expr)
-    if not m:
-        return expr
-    if m.group("name"):
-        return f"{m.group('prop')}[?name='{m.group('name')}']['{m.group('prop2')}']"
-    return m.group("prop")
-
 
 # --------------------------------------------------------------------------
 # placing values into a Dataset record
@@ -482,9 +405,7 @@ def _coerce(value: Any, slot, sv: SchemaView, project: str,
     # reports them alike whatever its slot (#4164). A list whose every item
     # is null holds no value: the row is empty, and its reason names the
     # null, as `resolve_path` names an empty root property. That is decided
-    # here, not in `resolve_path`, which passes an empty value by and reads
-    # the next entity of the type: there the null would change which entity
-    # a row reads. Here the entity is the same, and what changes is the row:
+    # here after root-scoped lookup, without reading another entity. What changes is the row:
     # its reason everywhere, and its status and record wherever the rules
     # below had made the null a value. A null beside a value is dropped
     # before shaping the remaining values (#4172). A list inside the list
@@ -632,7 +553,7 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
     """
     res = MapResult(project=project)
     counter: dict[str, int] = {}
-    root = crate_root(graph)
+    root, root_note = select_root(graph)
     dataset_slots = {s.name: s for s in sv.class_induced_slots(TARGET_CLASS)}
     placement = build_placement(sv)
     nested: dict[str, dict] = {}
@@ -642,17 +563,32 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
     #: (their report row, host slot, nested slot name, value, property, crate value)
     held: list[tuple[FieldResult, str, str, Any, str | None, Any]] = []
 
+    adapters = {"human_subjects": "Dataset.human_subject_research",
+                "imputation": "Dataset.imputation_protocols",
+                "typed_parents": "Dataset.parent_datasets"}
     for row in rows:
+        adapter = (row.get("Mapping_Rule") or "").strip()
+        if adapter and adapters.get(adapter) != row["D4D_Full_Path"].strip():
+            raise ValueError(f"Unsupported mapping adapter/target: {adapter!r}, "
+                             f"{row['D4D_Full_Path']}")
+
+    for row_index, row in enumerate(rows):
         d4d_path = row["D4D_Full_Path"].strip()
         source = (row.get("RO_Crate_JSON_Path") or "").strip()
         mtype = (row.get("Mapping_Type") or "").strip()
         loss = (row.get("Information_Loss") or "").strip()
         cls, _, slot_name = d4d_path.partition(".")
+        execution = (row.get("Execution") or "active").strip()
+        if execution not in ("active", "retired", "deferred"):
+            raise ValueError(f"Unknown execution disposition {execution!r}: {d4d_path}")
+        rule_id = (row.get("Rule_ID") or f"row:{row_index + 1}").strip()
 
         def record(status, detail="", preview="", rewritten_from=""):
             res.fields.append(FieldResult(d4d_path, source, mtype, loss,
                                           status, detail, preview,
                                           rewritten_from))
+            res.fields[-1].rule_id = rule_id
+            res.fields[-1].execution = execution
 
         def unplaceable(why):
             # The table may say why this row maps nowhere: by design, or
@@ -665,6 +601,13 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                         "declares" + (f": {reason}" if reason else ""))
             record("unplaceable", why)
             res.fields[-1].unplaced = kind
+
+        if execution != "active":
+            reason = (row.get("Execution_Reason") or "").strip()
+            if not reason:
+                raise ValueError(f"Non-executable rule has no disposition reason: {rule_id}")
+            record(execution, reason)
+            continue
 
         # Can this row be placed in a Dataset record at all?
         if cls == TARGET_CLASS:
@@ -685,13 +628,33 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
                 continue
             target = (host_slot_name, slot)
 
-        value, note = resolve_path(source, graph, root)
+        adapter = (row.get("Mapping_Rule") or "").strip()
+        if adapter:
+            from data_sheets_schema.rocrate_assertions import (
+                human_subject_record, imputation_values, typed_parent_values,
+            )
+            if root is None:
+                value, note = None, root_note
+            elif adapter == "human_subjects":
+                value, note = human_subject_record(root, graph)
+            elif adapter == "imputation":
+                value, note = imputation_values(root)
+            else:
+                value, note = typed_parent_values(root, graph)
+        else:
+            value, note = resolve_path(source, graph, root)
         if value is None:
             record("unresolvable" if note == "not a crate path" else "empty", note)
             continue
 
         crate_value = value
-        value, coercion = _coerce(value, slot, sv, project or 'd4d', counter)
+        if adapter == "human_subjects":
+            # This adapter constructs defined fields explicitly. Generic class
+            # coercion would discard the boolean and named board fields.
+            coercion = note
+        else:
+            value, coercion = _coerce(value, slot, sv, project or 'd4d', counter)
+            coercion = "; ".join(part for part in (note, coercion) if part)
         if value is None:
             record("empty", coercion)
             continue
@@ -772,18 +735,22 @@ def map_crate(graph: list[dict], rows: list[dict], sv: SchemaView,
             rewritten_from = (_preview(crate_value)
                               if res.record["id"] != crate_value else "")
             res.fields.append(FieldResult(
-                "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
+                "Dataset.id", "crate root identifier/@id", "", "",
                 "filled", detail, _preview(res.record["id"]), rewritten_from,
                 from_table=False))
         elif id_notes:
             res.fields.append(FieldResult(
-                "Dataset.id", "crate root identifier/@id", "exactMatch", "none",
+                "Dataset.id", "crate root identifier/@id", "", "",
                 "empty", "; ".join(id_notes), from_table=False))
 
     # attach nested objects, respecting each host slot's cardinality
     for host_slot_name, obj in nested.items():
         host = dataset_slots[host_slot_name]
         res.record[host_slot_name] = [obj] if host.multivalued else obj
+
+    res.sources = source_report(graph, root, rows, res.fields, placement, root_note,
+                                dataset_slots)
+    res.sources["project"] = project
 
     return res
 
@@ -858,7 +825,11 @@ def read_crate_json(path: Path, *, hint: str = ENCODING_NOTE_HINT) -> Any:
     that reads a crate from any path passes `TRANSCODE_HINT` instead,
     since the note need not describe that crate (#4192).
     """
-    data = path.read_bytes()
+    return _crate_json_from_bytes(path.read_bytes(), path, hint=hint)
+
+
+def _crate_json_from_bytes(data: bytes, path: Path, *, hint: str = ENCODING_NOTE_HINT) -> Any:
+    """Decode the same immutable bytes that the producer binds in provenance."""
     try:
         text = data.decode("utf-8")
     except UnicodeDecodeError as e:
@@ -878,9 +849,10 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
     c = res.counts()
     table_rows = sum(1 for f in res.fields if f.from_table)
     id_rows = len(res.fields) - table_rows
-    applied = f"{table_rows} table rows applied" + (
+    applied = f"{table_rows} table rows declared" + (
         ", plus the record's `id`, taken from the crate root" if id_rows else "")
     filled_rows = c.get("filled", 0)
+    active_rows = sum(f.from_table and f.execution == "active" for f in res.fields)
     merge_undecided = sum(1 for f in res.fields
                           if f.status == "unplaceable" and f.merge_undecided)
     # What the table declares of the rows that place nowhere, by kind, the
@@ -898,11 +870,18 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "",
         "Produced by `d4d rocrate map`. Every field below was placed by this",
         f"repo's own mapping table (`{MAPPING_TSV}`), not by an upstream",
-        "D4D-shaped rendering. No value is inferred: a field is filled only when",
-        "its declared path resolves in the crate.",
+        "D4D-shaped rendering. Fields use selected-root assertions and the",
+        "table's explicit construction rules; each rule reports its evidence and decisions.",
         "",
         f"- Crate metadata: `{source_file}`",
         f"- Mapping table: `{MAPPING_TSV}` ({applied})",
+        f"- Executable table rules: {active_rows}; retired: {c.get('retired', 0)}; "
+        f"deferred: {c.get('deferred', 0)}; original table rows: {table_rows}",
+        "- Retired/deferred rows remain in the original-row denominator; their removal "
+        "from execution is not increased source coverage.",
+        "- Mapping relations and loss labels are table declarations, not verified "
+        "semantic equivalence; blank labels are unassessed. Inactive labels are historical.",
+        f"- Root selection: {res.sources.get('root', {}).get('selection_note', '(not recorded)')}",
         f"- Validation: **{res.validation.splitlines()[0]}** — {verdict_basis()}",
         f"- Distinct top-level `{TARGET_CLASS}` slots filled: {slots} "
         f"(from {filled_rows} filled rows"
@@ -919,6 +898,10 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "row already placed the same crate value in the host slot |",
         f"| empty | {c.get('empty',0)} | path valid but the crate has no value there |",
         f"| unresolvable | {c.get('unresolvable',0)} | the table declares no crate path |",
+        f"| retired | {c.get('retired',0)} | historical rule retained for accounting; "
+        "not executed, source assertions retained |",
+        f"| deferred | {c.get('deferred',0)} | outside current executable scope; "
+        "source assertions and limitation retained |",
         f"| unplaceable | {c.get('unplaceable',0)} | no route into a `Dataset` record"
         + (f"; {merge_undecided} of them do resolve, but a `{TARGET_CLASS}` row "
            "already filled the host slot, from another crate property or from "
@@ -930,6 +913,11 @@ def write_provenance(res: MapResult, path: Path, source_file: Path) -> None:
         "## Fidelity of what was filled",
         "",
     ]
+    if "sources" in res.outputs:
+        lines[lines.index("## Outcome"):lines.index("## Outcome")] = [
+            f"Complete source values and root/member scope: `{res.outputs['sources'].name}`.",
+            "This evidence inventory is not a scientific support or recall score.", "",
+        ]
     filled = [f for f in res.fields if f.status == "filled"]
     by_type: dict[str, int] = {}
     by_loss: dict[str, int] = {}
@@ -986,11 +974,45 @@ def map_project(project: str, packages_dir: Path = PACKAGES_DIR,
             f"No ro-crate-metadata.json under {project_dir}/raw or {project_dir}/crate"
         )
 
-    sv = sv or shared_view(FULL_SCHEMA)
-    rows = rows if rows is not None else load_mapping()
-    graph = read_crate_json(source).get("@graph", [])
+    # Capture before interpreting. Hashing a fresh read after mapping could
+    # otherwise bind replacement source bytes to a record made from old ones.
+    source_bytes = source.read_bytes()
+    graph = _crate_json_from_bytes(source_bytes, source).get("@graph", [])
+    table_bytes = MAPPING_TSV.read_bytes() if MAPPING_TSV.is_file() else None
+    if rows is None:
+        if table_bytes is None:
+            raise FileNotFoundError(f"Mapping table does not exist: {MAPPING_TSV}")
+        rows = _mapping_from_bytes(table_bytes)
+    else:
+        rows = deepcopy(rows)
+    matches_table = table_bytes is not None and rows == _mapping_from_bytes(table_bytes)
+    rules_bytes = json.dumps(rows, ensure_ascii=False, sort_keys=True).encode()
+
+    from data_sheets_schema.resources import resource_path
+    schema_path = Path(resource_path(FULL_SCHEMA))
+    schema_bytes = schema_path.read_bytes()
+    sv = sv or shared_view(schema_path, content=schema_bytes)
+    captured = [("source", source, source_bytes), ("schema", schema_path, schema_bytes)]
+    if table_bytes is not None:
+        captured.append(("mapping table", MAPPING_TSV, table_bytes))
+    producer_files = {}
+    for filename in PRODUCER_SOURCE_FILES:
+        path = Path(__file__).resolve().parent / filename
+        content = path.read_bytes()
+        producer_files[f"src/data_sheets_schema/{filename}"] = hashlib.sha256(content).hexdigest()
+        captured.append((f"producer {filename}", path, content))
+
+    def verify_inputs():
+        for name, path, expected in captured:
+            try:
+                current = path.read_bytes()
+            except OSError as exc:
+                raise ValueError(f"Crate mapping {name} changed during generation: {path}") from exc
+            if current != expected:
+                raise ValueError(f"Crate mapping {name} changed during generation: {path}")
 
     res = map_crate(graph, rows, sv, project)
+    verify_inputs()
 
     out_dir = project_dir / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -1003,14 +1025,49 @@ def map_project(project: str, packages_dir: Path = PACKAGES_DIR,
         "# Upstream ro-crate-linkml.yaml deliberately NOT used\n"
         "# No inferred values; see the provenance report alongside\n"
     )
-    target.write_text(
-        header + yaml.safe_dump(res.record, sort_keys=False, allow_unicode=True),
-        encoding="utf-8",
-    )
+    record_bytes = (header + yaml.safe_dump(res.record, sort_keys=False,
+                                          allow_unicode=True)).encode("utf-8")
+    target.write_bytes(record_bytes)
+
+    def verify_record():
+        try:
+            actual = target.read_bytes()
+        except OSError as exc:
+            raise ValueError(f"Crate mapping output changed during generation: {target}") from exc
+        if actual != record_bytes:
+            raise ValueError(f"Crate mapping output changed during generation: {target}")
+
     res.outputs["d4d"] = target
     res.validation = validate(target)
+    # Validation is a separate process and may take time. Refuse changed inputs
+    # before publishing a provenance binding or a new success report.
+    verify_inputs()
+    verify_record()
+
+    # Preserve complete literals and source scope for every declared rule,
+    # including rules intentionally not executed. A truncated markdown preview
+    # is not a substitute for the evidence, and moving rows out of execution
+    # does not make their source facts disappear from the accounting.
+    res.sources["source"] = {"path": str(source),
+                             "sha256": hashlib.sha256(source_bytes).hexdigest()}
+    res.sources["mapping_table"] = {
+        "path": str(MAPPING_TSV) if matches_table else None,
+        "sha256": hashlib.sha256(table_bytes).hexdigest() if matches_table else None,
+        "rules_sha256": hashlib.sha256(rules_bytes).hexdigest(),
+    }
+    res.sources["schema"] = {"path": str(FULL_SCHEMA),
+                             "sha256": hashlib.sha256(schema_bytes).hexdigest()}
+    res.sources["producer"] = {"files_sha256": producer_files}
+    res.sources["record_sha256"] = hashlib.sha256(record_bytes).hexdigest()
+    evidence = out_dir / f"{project}_crate_mapping_sources.json"
+    verify_inputs()
+    verify_record()
+    evidence.write_text(json.dumps(res.sources, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    res.outputs["sources"] = evidence
 
     report = out_dir / f"{project}_crate_mapping_provenance.md"
     write_provenance(res, report, source)
+    verify_inputs()
+    verify_record()
     res.outputs["provenance"] = report
     return res

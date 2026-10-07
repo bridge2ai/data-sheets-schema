@@ -1,9 +1,13 @@
-# D4D record for CHORUS, mapped from its RO-Crate
-# Method: static mapping using this repo's own mapping table
-# Mapping table: data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
-# Source: data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json
-# Upstream ro-crate-linkml.yaml deliberately NOT used
-# No inferred values; see the provenance report alongside
+# D4D Datasheet for CHORUS Dataset
+# Generation Method: rocrate_static_map (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/CHORUS
+# Normalized from: data/ro-crate_packages/CHORUS/processed/CHORUS_crate_mapped_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-10-07_ourmap-v3
 title: CHoRUS RO-Crate Package
 description: 'The Collaborative Hospital Repository Uniting Standards (CHoRUS) for
   Clinical Care AI is a clinical data network developing a flagship multi-hospital,

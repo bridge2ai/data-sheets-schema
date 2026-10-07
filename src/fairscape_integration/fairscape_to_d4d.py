@@ -289,7 +289,7 @@ def _distinct(values: List[Any]) -> List[Any]:
 
 
 def is_rocrate(entity: Dict[str, Any]) -> bool:
-    """ROCrate-typed, by the test `rocrate_map.crate_root` applies."""
+    """ROCrate-typed under this converter's historical type matching."""
     return any('ROCrate' in t for t in _types(entity))
 
 
@@ -304,14 +304,16 @@ def is_dataset(entity: Dict[str, Any]) -> bool:
 
 
 def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
-    """The crate's root data entity, by the RO-Crate rule (#4072).
+    """The crate's root data entity under this converter's policy (#4072).
 
     1. The entity the metadata descriptor (`ro-crate-metadata.json`) names
        in `about`. That is how RO-Crate defines the root.
     2. Otherwise the entity whose `@id` is `./`.
-    3. Otherwise the first ROCrate-typed entity, which is the one
-       `rocrate_map.crate_root` and FAIRSCAPE's
-       `ROCrateV1_2.getCrateMetadata` return.
+    3. Otherwise the first ROCrate-typed entity.
+
+    The static mapper now refuses ambiguous roots and unresolved descriptor
+    references. This converter retains its historical fallback pending
+    #4586; its result can still depend on graph order in ambiguous crates.
 
     A FAIRSCAPE release crate lists its sub-crates in the same `@graph`,
     each typed ROCrate like the release itself. Taking the last such

@@ -1,7 +1,13 @@
-# Normalized from the upstream crate's own LinkML rendering.
-# Source: data/ro-crate_packages/CM4AI/raw/ro-crate-linkml.yaml
-# Tool: d4d rocrate normalize — see the changes report alongside.
-# No facts added; repairs only.
+# D4D Datasheet for CM4AI Dataset
+# Generation Method: rocrate_mapped (no model)
+# Arm: deterministic — measures mapping fidelity, not extraction
+# Source crate: data/ro-crate_packages/CM4AI
+# Normalized from: data/ro-crate_packages/CM4AI/processed/CM4AI_crate_d4d.yaml
+# Crate manifest: data/ro-crate_packages/crate_manifest.yaml
+# Schema: src/data_sheets_schema/schema/data_sheets_schema_all.yaml
+# Prior D4D factual reuse: prohibited
+# Model: none
+# Version: 2026-10-07_deterministic-v2
 citation: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chinn
   B; Churas CP; Dailamy A; Doctor Y; Fall J; Forget A; Gao J; Hansen JN; Hu M; Johannesson
   A; Khaliq H; Lee YH; Lenkiewicz J; Levinson MA; Metallo C; Muralidharan M; Nourreddine

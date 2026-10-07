@@ -35,9 +35,11 @@ They consume different things and can therefore claim different things:
   for VOICE** — and is opaque about how good each mapping is.
 - **`deterministic_ours`** (`d4d rocrate map`) reads `ro-crate-metadata.json`,
   which every crate has, and applies
-  `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 rows). It runs
-  for **all three crates**, and every filled field carries its declared SKOS
-  mapping type and information loss, so the result is graded rather than flat.
+  `data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv` (136 historical
+  rule identities: 85 active, 19 retired, 32 deferred after the #2915 decisions
+  below). It runs for the three UTF-8 release crates. Filled fields carry
+  source provenance and any declared mapping/loss claims; blank claims mean
+  unassessed. Those declarations are not measured scientific fidelity.
 
 Keeping both is what makes the comparison possible; collapsing them under one
 method name would have hidden that they measure different mappings.
@@ -53,16 +55,17 @@ would have revealed alone. Table went **133 → 136 rows** on 2026-07-27.
 | CM4AI | 26 | 34 | **42** | 1 |
 | VOICE | n/a | 39 | **44** | — |
 
-Counts are top-level slots in the emitted record. `d4d rocrate map` separately
-reports *filled rows* (including the crate-root `id`, which no table row
-supplies), which equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44; since
-the #2915 retargets below, CM4AI 43 and VOICE 45, and CHORUS's record is
-unchanged). VOICE used to report 48, because four nested `*.description`
+These historical counts are top-level slots in the emitted record.
+`d4d rocrate map` separately reports *filled rows* (including the crate-root
+`id`, which no table row supplies). At #4382 those equal the slot counts:
+CHORUS 32, CM4AI 43 and VOICE 45. The later root-scoped #2915 rules below
+require a fresh replay and label; those old counts are not their result. VOICE used to report 48, because four nested `*.description`
 rows overwrote host slots that Dataset rows had already filled and both rows
 were counted. Those four rows are now `subsumed` (#2915, #3269).
 
-**Added (3)** — present in all three crates, absent from the table:
-`Dataset.name`, `Dataset.citation`, `Dataset.total_size_bytes`.
+**Added (3)** — absent from the table: `Dataset.name` and
+`Dataset.citation`, supported by all three crates, and `Dataset.total_size_bytes`,
+whose exact byte-size source is present in CM4AI only.
 
 **Prefix corrections (5)** — the systematic defect: the table declared a
 prefixed or unprefixed property name that no crate emits. Found by sweeping
@@ -80,8 +83,9 @@ chasing them one at a time.
 | `vulnerable_populations` | `rai:atRiskPopulations` | `d4d:atRiskPopulations` | ❌ see below |
 
 Every applied fix changed **only** the property name. Target slot, SKOS relation
-and information-loss annotation were left untouched — those encode reviewed
-judgment, and altering them would change what the arm measures.
+and information-loss annotation retained the table's historical declarations.
+Those declarations are not evidence of verified semantic fidelity; the broader
+alignment review remains open in #4039.
 
 ### Two left deliberately unfixed
 
@@ -100,19 +104,19 @@ judgment, and altering them would change what the arm measures.
   path. It looks like a stale reference to a renamed or removed slot; it needs
   re-targeting, not a prefix change. *Retargeted in #2915 (below).*
 
-### Stale slot names: retargeted or declared (#2915)
+### Stale slot names: the #4382 baseline for #2915
 
-`d4d rocrate map` still reported 54 of the 136 rows `unplaceable`. Fifty-two
+Before #4382, `d4d rocrate map` reported 54 of the 136 rows `unplaceable`. Fifty-two
 named a slot or class the schema does not have; the two `FormatDialect` rows
 name a class that exists but that no `Dataset` slot ranges over. Each report
 row gave the schema's reason, but no test failed on a table row the schema
 contradicts. Eleven had an obvious successor and
-now name it: `vulnerable_populations` → `at_risk_populations` (with the prefix
+were retargeted: `vulnerable_populations` → `at_risk_populations` (with the prefix
 correction above, to `d4d:atRiskPopulations`, the slot's own `slot_uri`, which
 CM4AI carries), `external_resource` → `external_resources`,
 `machine_annotation_analyses` → `machine_annotation_tools`, and the `Subset`, `Variable`, `SamplingStrategy`, `MachineAnnotation` and
-`Maintenance.frequency` rows. The other 43 say why they place nowhere, in two
-new columns: `Unplaced` (`out_of_scope`, 10 rows: the eight `File` slots,
+`Maintenance.frequency` rows. The other 43 received explanations in two
+columns: `Unplaced` (`out_of_scope`, 10 rows: the eight `File` slots,
 `contentSize`'s `bytes` among them, and the two `FormatDialect` rows; or
 `owner_question`, 33 rows) and `Unplaced_Reason`. The provenance report shows both, and
 `TestTableAgainstSchema` in `tests/test_rocrate/test_map.py` fails on a row
@@ -120,18 +124,106 @@ that places nowhere without a declaration, or that places and keeps one. The
 corpus-lane `test_every_unplaceable_row_reported_is_one_the_table_declares`
 fails on a committed report whose unplaceable rows, declared kinds, reasons
 or legend counts differ from the table's.
-The governance row (`dataGovernanceCommittee`) is one of the owner questions:
-in each crate the arm maps it names a person, CHORUS's with an email address,
-not a committee, so it is not placed in `DataGovernance.committee_name`.
-AI_READI's names a consortium, but the arm refuses that crate for its
-encoding (#3357); #4386 asks where the value belongs.
-`principal_investigator` is an owner question too: its one slot is
-`Creator.principal_investigator`, under the `creators` the `author` row
-fills, and making a `Creator` or `Person` of a free-text name is a decision
-#2915 asks for, not a rename.
-`contentSize`'s `bytes` row is out of scope, and only CM4AI's crate has the
-exact `evi:totalContentSizeBytes` that `total_size_bytes` reads, so CHORUS's
-and VOICE's records carry no size at all (see `total_size_bytes` below).
+At that baseline, governance and principal-investigator placement remained
+owner questions. The former now has the narrative route below; the latter
+remains deferred because a root PI literal does not identify the `Creator`
+object it belongs to. The original 43 declarations and every original mapping
+claim are preserved in the versioned ledger. The `bytes` rule remains deferred:
+only CM4AI's crate supplies the exact `evi:totalContentSizeBytes` read by
+`total_size_bytes`; rounded `contentSize` text does not become an exact count.
+
+### Root-scoped execution decisions and the stable denominator (#2915)
+
+The table retains all **136 original rows**. `Rule_ID` is permanently tied to
+its line in commit `49c24423cb86b50599862990fd094a904d437c4d`, for example
+`49c24423:legacy-line-89`. Reordering a future table must not renumber these
+identities. `data/ro-crate_mapping/d4d_rocrate_interface_rules_v1.json` records
+the original complete row values and table SHA256, the accepted 43-row policy
+snapshot, each current row, decision links, reasons and successor rule IDs.
+The current table's bytes are pinned by a separate SHA256 in that ledger.
+Edit the table and ledger together; do not regenerate them from the old
+hardcoded crosswalk. The historical
+`.claude/agents/scripts/generate_interface_mapping.py` now refuses execution
+before opening an output file (#4043).
+
+The loader contract adds four columns:
+
+| Column | Meaning |
+|---|---|
+| `Rule_ID` | Stable original identity, never recycled or inferred from today's row position |
+| `Execution` | `active`, `retired`, or `deferred`; only active rows resolve into a D4D target |
+| `Execution_Reason` | Current decision and, for deferred rules, the missing source/structure/semantics dependency |
+| `Mapping_Rule` | Empty for ordinary placement; `typed_parents`, `human_subjects`, or `imputation` for the declared adapters |
+
+The current split is **85 active / 19 retired / 32 deferred**. Of the former
+43 structurally unplaced rows, two become active (parent relations and
+governance), 19 retire and 22 defer. Ten additional N/A or non-executable
+source placeholders defer, including the six rows whose D4D targets #4382
+repaired but whose source expressions still supplied no executable path.
+Retired rules include duplicate targets, unsupported protocol subfields,
+versioning extraction, ethical-review-to-IRB inference and unobserved quality
+placeholders. File/dialect rules, PI/contact roles, graph metrics,
+completeness, computation provenance and regulated-versus-compliant semantics
+retain their explicit deferred dependencies.
+
+Every run must reconcile active outcomes plus retired/deferred outcomes to
+**136 original rules**, with the crate-root record `id` counted separately.
+Distinct D4D slots and source properties retained are separate measures.
+Retiring a bad mapping or reducing the active denominator is not increased
+coverage, improved fidelity or successful scientific scoring. Inactive rows
+never fill a slot; their original claims and full source assertions remain
+available. Their legacy `Unplaced` columns are historical explanations, not
+execution controls. Actual empty/missing/invalid/merge-refused active outcomes
+must still be reported honestly.
+
+All source expressions are evaluated within the selected crate root. A missing
+root property stays missing even when a child supplies it; graph order must
+not promote a member claim to a project claim. Source assertion provenance
+retains the original JSON value, property/pointer, subject/entity identity,
+source bytes hash and disposition, including deferred/retired assertions,
+false, zero, lists and member-scoped facts. Markdown value previews do not
+replace those full values.
+
+The approved routes are deliberately bounded:
+
+- **Governance (legacy line 89):** root `dataGovernanceCommittee` goes to
+  `DataGovernance.description`. Its complete literal is retained without
+  setting a committee name, contact, membership or Person identity. PI and
+  generic contact literals remain deferred and must not be attached to an
+  arbitrary author/creator. Existing incompatible-host merge refusal remains.
+- **Parents (line 26, `typed_parents`):** read root `isPartOf` only, and accept
+  only references whose targets are explicitly Dataset-typed. Unknown or
+  other entity types, self links and cyclic ancestry stay refused with their
+  source evidence. URI spelling supplies no entity type. In particular, a
+  child's link back to the root cannot become the root's own parent.
+- **Human subjects (line 80, `human_subjects`):** one object reads the root keys
+  `humanSubjectResearch`, `humanSubjects`, `humanSubjectExemption`, `irb` and
+  `irbProtocolId`. Preserve each full statement and its source label. Only
+  explicit Yes/No or native booleans support boolean normalization;
+  `humanSubjects` is distinct from a research-participation statement.
+  Exemption prose, an IRB name and a protocol identifier do not establish
+  approval, exemption status or compliance. Legacy line 88 is retired in
+  favor of this single builder; line 87's IRB extraction is also retired.
+  The separate `ethicalReview` whole-text route (line 79) remains in place.
+- **Imputation (line 67, `imputation`):** read canonical root
+  `rai:dataImputationProtocol` and the explicit legacy alias
+  `rai:imputationProtocol`. Retain which key supplied each assertion, including
+  both values when they conflict; do not silently choose a conflicting value.
+
+The new governance, parent, human-subject and imputation routes leave `Mapping_Type` and
+`Information_Loss` blank and explicitly mark their semantic relation as
+unassessed. Copying a literal or constructing a schema-valid object does not
+prove `exactMatch` or no information loss. Their original claims remain in
+the ledger. Other active rows' historical claims are retained unchanged here;
+this does not resolve the broader alignment review in #4039. Runtime routing,
+SKOS alignment, actual transformation and scientific support are separate.
+
+These rules change the method: replay and validate the three working crates,
+then publish under fresh deterministic labels (#2916). Preserve historical
+`data/d4d_concatenated/` outputs. Regenerate fig09 only through its separate
+reviewed path (#4385), retaining its historical v8 comparator and the original
+row denominator. Carrying raw governance narrative does not satisfy a more
+specific committee/contact evaluation predicate.
 
 ### What remains upstream-only, and why it is correct
 
