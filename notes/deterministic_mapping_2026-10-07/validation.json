@@ -138,6 +138,24 @@
       "code_unchanged": true,
       "started": "2026-10-07T20:42:26.113414+00:00",
       "finished": "2026-10-07T20:42:47.071298+00:00"
+    },
+    "tests-size-policy-06": {
+      "argv": [
+        "/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_check_large_files.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=/private/tmp/d4d-2915-implementation-root-knlcr3by/tests-size-policy-06/tmp",
+        "--junitxml=/private/tmp/d4d-2915-implementation-root-knlcr3by/tests-size-policy-06/junit.xml"
+      ],
+      "exit_code": 0,
+      "code_unchanged": true,
+      "started": "2026-10-07T20:47:31.695957+00:00",
+      "finished": "2026-10-07T20:47:38.389109+00:00"
     }
   },
   "replay": {

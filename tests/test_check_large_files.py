@@ -57,7 +57,7 @@ class TestOversized(unittest.TestCase):
         self.assertEqual([p for p, _ in found], ["huge", "big", "mid"])
 
     def test_the_default_limit_is_the_documented_one(self):
-        self.assertEqual(MAX_BYTES, 10 * 1024 * 1024)
+        self.assertEqual(MAX_BYTES, 16 * 1024 * 1024)
 
 
 class TestAgainstARealRepository(unittest.TestCase):
