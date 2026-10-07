@@ -537,6 +537,21 @@ annotation_analyses:
     for internal consistency, missingness patterns and data entry issues, but per-annotator
     disagreement statistics or detailed label-uncertainty measures are not presently
     included in the released dataset.
+machine_annotation_tools:
+- name: OpenSMILE for extraction of acoustic feature sets capturing temporal dynamics
+    and spectral characteristics.
+- description: Praat and the parselmouth interface for phonetic and prosodic feature
+    extraction, including measures of fundamental frequency, formants and voice quality.
+- name: TorchAudio-based pipelines for computing spectrograms, mel spectrograms, MFCCs
+    and pitch tracks.
+- name: Speech Articulatory Coding (sparc) package for estimating articulatory kinematics
+    and related features.
+- name: Phonetic posteriorgram models that produce time-varying distributions over
+    phonetic units for each recording.
+- description: OpenAI Whisper Large for automatic speech transcription of structured
+    speech tasks, with transcripts from free-speech audio removed before release.
+- description: The open-source b2aiprep library for orchestrating preprocessing, feature
+    extraction and merging of phenotype data into the released files.
 ethical_reviews:
 - name: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics
 license_and_use_terms:

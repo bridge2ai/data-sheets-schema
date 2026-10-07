@@ -55,7 +55,9 @@ would have revealed alone. Table went **133 → 136 rows** on 2026-07-27.
 
 Counts are top-level slots in the emitted record. `d4d rocrate map` separately
 reports *filled rows* (including the crate-root `id`, which no table row
-supplies), which now equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44). VOICE used to report 48, because four nested `*.description`
+supplies), which equal the slot counts (CHORUS 32, CM4AI 42, VOICE 44; since
+the #2915 retargets below, CM4AI 43 and VOICE 45, and CHORUS's record is
+unchanged). VOICE used to report 48, because four nested `*.description`
 rows overwrote host slots that Dataset rows had already filled and both rows
 were counted. Those four rows are now `subsumed` (#2915, #3269).
 
@@ -96,7 +98,40 @@ judgment, and altering them would change what the arm measures.
 - **`Dataset.vulnerable_populations`** — `vulnerable_populations` is **not a
   slot on `Dataset`** at all, so the row is `unplaceable` regardless of its
   path. It looks like a stale reference to a renamed or removed slot; it needs
-  re-targeting, not a prefix change.
+  re-targeting, not a prefix change. *Retargeted in #2915 (below).*
+
+### Stale slot names: retargeted or declared (#2915)
+
+`d4d rocrate map` still reported 54 of the 136 rows `unplaceable`. Fifty-two
+named a slot or class the schema does not have; the two `FormatDialect` rows
+name a class that exists but that no `Dataset` slot ranges over. Each report
+row gave the schema's reason, but no test failed on a table row the schema
+contradicts. Eleven had an obvious successor and
+now name it: `vulnerable_populations` → `at_risk_populations` (with the prefix
+correction above, to `d4d:atRiskPopulations`, the slot's own `slot_uri`, which
+CM4AI carries), `external_resource` → `external_resources`,
+`machine_annotation_analyses` → `machine_annotation_tools`, and the `Subset`, `Variable`, `SamplingStrategy`, `MachineAnnotation` and
+`Maintenance.frequency` rows. The other 43 say why they place nowhere, in two
+new columns: `Unplaced` (`out_of_scope`, 10 rows: the eight `File` slots,
+`contentSize`'s `bytes` among them, and the two `FormatDialect` rows; or
+`owner_question`, 33 rows) and `Unplaced_Reason`. The provenance report shows both, and
+`TestTableAgainstSchema` in `tests/test_rocrate/test_map.py` fails on a row
+that places nowhere without a declaration, or that places and keeps one. The
+corpus-lane `test_every_unplaceable_row_reported_is_one_the_table_declares`
+fails on a committed report whose unplaceable rows, declared kinds, reasons
+or legend counts differ from the table's.
+The governance row (`dataGovernanceCommittee`) is one of the owner questions:
+in each crate the arm maps it names a person, CHORUS's with an email address,
+not a committee, so it is not placed in `DataGovernance.committee_name`.
+AI_READI's names a consortium, but the arm refuses that crate for its
+encoding (#3357); #4386 asks where the value belongs.
+`principal_investigator` is an owner question too: its one slot is
+`Creator.principal_investigator`, under the `creators` the `author` row
+fills, and making a `Creator` or `Person` of a free-text name is a decision
+#2915 asks for, not a rename.
+`contentSize`'s `bytes` row is out of scope, and only CM4AI's crate has the
+exact `evi:totalContentSizeBytes` that `total_size_bytes` reads, so CHORUS's
+and VOICE's records carry no size at all (see `total_size_bytes` below).
 
 ### What remains upstream-only, and why it is correct
 
