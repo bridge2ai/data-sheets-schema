@@ -26,8 +26,10 @@ on:
 jobs:
   check-mention:
     # Most issue/PR edits are bookkeeping. Avoid allocating a runner when
-    # the relevant body has no mention; the existing script still authorizes
-    # the actor and parses the request. Manual dispatch still searches comments.
+    # the relevant body has no mention. This is only a cheap first gate: a
+    # handle quoted in prose or code passes it too. The steps below authorize
+    # the author, and "Read the request" decides whether the text holds a
+    # request (#4108). Manual dispatch still searches comments.
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'issues' && contains(github.event.issue.body, '@d4dassistant')) ||
@@ -35,8 +37,9 @@ jobs:
       ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') && contains(github.event.comment.body, '@d4dassistant'))
     runs-on: ubuntu-latest
     outputs:
-      qualified-mention: ${{ steps.detect.outputs.qualified-mention }}
-      prompt: ${{ steps.detect.outputs.prompt }}
+      # 'true' only when "Read the request" ran (an allowed author) and found one
+      qualified-mention: ${{ steps.request.outputs.request }}
+      dataset: ${{ steps.request.outputs.dataset }}
       user: ${{ steps.detect.outputs.user }}
       item-type: ${{ steps.detect.outputs.item-type }}
       item-number: ${{ steps.detect.outputs.item-number }}
@@ -51,24 +54,63 @@ jobs:
         with:
           github-token: ${{ secrets.PAT_FOR_PR }}
           script: |
-            // Load allowed users from config
+            // The checkout supplies dataset directories, never gate authority (#4392).
+            // Resolve once, then read both gate files from that immutable commit.
             const fs = require('fs');
-            let allowedUsers = [];
-            try {
-              const configContent = fs.readFileSync('.github/ai-controllers.json', 'utf8');
-              allowedUsers = JSON.parse(configContent);
-            } catch (error) {
-              console.log('Error loading allowed users:', error);
-              // Use fallback controllers if provided
-              const fallback = 'jtr4v';
-              allowedUsers = fallback ? fallback.split(',').map(u => u.trim()) : [];
+            const path = require('path');
+            const crypto = require('crypto');
+            let gateSha;
+            if (context.eventName === 'pull_request' || context.eventName === 'pull_request_review_comment') {
+              gateSha = context.payload.pull_request?.base?.sha;
+            } else {
+              const repository = await github.rest.repos.get(context.repo);
+              const branch = await github.rest.repos.getBranch({
+                ...context.repo, branch: repository.data.default_branch
+              });
+              gateSha = branch.data.commit.sha;
             }
+            if (typeof gateSha !== 'string' || !/^[0-9a-f]{40}$/.test(gateSha)) {
+              throw new Error('No immutable trusted base commit for the request gate');
+            }
+            async function gateFile(filePath) {
+              const response = await github.rest.repos.getContent({
+                ...context.repo, path: filePath, ref: gateSha
+              });
+              const file = response.data;
+              if (!file || file.type !== 'file' || file.path !== filePath || file.encoding !== 'base64' ||
+                  typeof file.content !== 'string' || !Number.isSafeInteger(file.size) || file.size < 0) {
+                throw new Error('Trusted gate file has an unsupported response: ' + filePath);
+              }
+              const encoded = file.content.replace(/\s/g, '');
+              const bytes = Buffer.from(encoded, 'base64');
+              const blob = crypto.createHash('sha1').update('blob ' + bytes.length + '\0').update(bytes).digest('hex');
+              if (bytes.toString('base64') !== encoded || bytes.length !== file.size || blob !== file.sha) {
+                throw new Error('Trusted gate file bytes do not match its blob: ' + filePath);
+              }
+              return bytes;
+            }
+            const [controllers, parser] = await Promise.all([
+              gateFile('.github/ai-controllers.json'), gateFile('src/github/assistant_request.py')
+            ]);
+            const allowedUsers = JSON.parse(controllers.toString('utf8'));
+            if (!Array.isArray(allowedUsers) || !allowedUsers.every(user => typeof user === 'string')) {
+              throw new Error('Trusted controller list must be an array of usernames');
+            }
+            const gateDirectory = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP, 'd4d-assistant-gate-'));
+            const gateParser = path.join(gateDirectory, 'assistant_request.py');
+            fs.writeFileSync(gateParser, parser, {flag: 'wx', mode: 0o600});
+            core.setOutput('gate-parser', gateParser);
+            core.setOutput('gate-base-sha', gateSha);
+            console.log('Request gate base commit: ' + gateSha);
+            // Missing base files intentionally fail closed, including while a
+            // PR is introducing this parser. Never fall back to candidate code.
 
             // Get content and user from event payload
             let content = '';
             let userLogin = '';
             let itemType = '';
             let itemNumber = 0;
+            let selection = {kind: 'single'};
 
             if (context.eventName === 'workflow_dispatch') {
               // Manual trigger - fetch the issue/PR from GitHub API
@@ -77,50 +119,57 @@ jobs:
               userLogin = context.actor; // Use the person who triggered the workflow
 
               if (itemType === 'issue') {
-                // First check issue body
                 const issue = await github.rest.issues.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: itemNumber
+                  ...context.repo, issue_number: itemNumber
                 });
                 content = issue.data.body || '';
-
-                // If no @d4dassistant in body, check comments
-                if (!content.includes('@d4dassistant')) {
-                  const comments = await github.rest.issues.listComments({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: itemNumber
-                  });
-                  // Find the most recent comment with @d4dassistant
-                  for (let i = comments.data.length - 1; i >= 0; i--) {
-                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
-                      content = comments.data[i].body;
-                      break;
-                    }
-                  }
-                }
               } else if (itemType === 'pull_request') {
                 const pr = await github.rest.pulls.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: itemNumber
+                  ...context.repo, pull_number: itemNumber
                 });
                 content = pr.data.body || '';
-
-                // If no @d4dassistant in body, check comments
-                if (!content.includes('@d4dassistant')) {
-                  const comments = await github.rest.issues.listComments({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    issue_number: itemNumber
-                  });
-                  // Find the most recent comment with @d4dassistant
-                  for (let i = comments.data.length - 1; i >= 0; i--) {
-                    if (comments.data[i].body && comments.data[i].body.includes('@d4dassistant')) {
-                      content = comments.data[i].body;
-                      break;
+              }
+              selection = {kind: 'manual', comments: []};
+              if (allowedUsers.includes(userLogin)) {
+                // Preserve body-first policy using the same trusted parser.
+                // A substring (including quoted or differently cased text)
+                // cannot decide whether comment discovery is needed (#4394).
+                const probe = path.join(gateDirectory, 'body-probe.md');
+                fs.writeFileSync(probe, content, {flag: 'wx'});
+                const {execFileSync} = require('child_process');
+                const parsed = JSON.parse(execFileSync('python3', [
+                  '-I', '-S', gateParser, '--inputs', 'data/sheets_d4dassistant/inputs',
+                  '--body', probe, '--decision-json'
+                ], {encoding: 'utf8'}));
+                if (!parsed || Object.keys(parsed).sort().join(',') !== 'dataset,line,request' ||
+                    typeof parsed.request !== 'boolean' ||
+                    (parsed.request ? typeof parsed.dataset !== 'string' ||
+                      !Number.isSafeInteger(parsed.line) || parsed.line < 1 :
+                      parsed.dataset !== null || parsed.line !== null)) {
+                  throw new Error('Trusted body parser returned an invalid decision');
+                }
+                if (!parsed.request) {
+                  // The API lists conversation comments in creation order.
+                  // Retain every page; the parser selects newest valid first.
+                  const seen = new Set();
+                  for (let page = 1; ; page++) {
+                    const response = await github.rest.issues.listComments({
+                      ...context.repo, issue_number: itemNumber, per_page: 100, page
+                    });
+                    const comments = response.data;
+                    if (!Array.isArray(comments) || comments.length > 100) {
+                      throw new Error('Comment page has an invalid shape');
                     }
+                    for (const comment of comments) {
+                      if (!comment || !Number.isSafeInteger(comment.id) || comment.id < 1 ||
+                          seen.has(comment.id) ||
+                          (comment.body !== null && typeof comment.body !== 'string')) {
+                        throw new Error('Comment identity or body is invalid');
+                      }
+                      seen.add(comment.id);
+                      selection.comments.push({id: comment.id, body: comment.body || ''});
+                    }
+                    if (comments.length < 100) break;
                   }
                 }
               }
@@ -146,32 +195,69 @@ jobs:
               itemNumber = context.payload.pull_request.number;
             }
 
-            // Check if user is allowed and mention exists
+            // Only a changed parsed request can qualify an edited body (#4391).
+            // Missing body changes mean bookkeeping; malformed history refuses.
+            if (context.eventName !== 'workflow_dispatch' && context.payload.action === 'edited') {
+              const changes = context.payload.changes;
+              if (changes !== undefined && changes !== null &&
+                  (typeof changes !== 'object' || Array.isArray(changes))) {
+                throw new Error('Edited event changes have an invalid shape');
+              }
+              if (!changes || !Object.prototype.hasOwnProperty.call(changes, 'body')) {
+                selection = {kind: 'unchanged'};
+              } else {
+                const previous = changes.body;
+                if (!previous || typeof previous !== 'object' || Array.isArray(previous) ||
+                    typeof previous.from !== 'string') {
+                  throw new Error('Edited body has no valid previous text');
+                }
+                selection = {kind: 'edited', before: previous.from};
+              }
+            }
+
+            // Check if user is allowed. Whether the text holds a request is
+            // decided by the next step, which reads it from this file (#4108).
             const isAllowed = allowedUsers.includes(userLogin);
-            const mentionRegex = new RegExp('@d4dassistant\\s+(.*)', 'i');
-            const mentionMatch = content.match(mentionRegex);
+            fs.writeFileSync(`${process.env.RUNNER_TEMP}/assistant-request-text.md`, content);
+            fs.writeFileSync(`${process.env.RUNNER_TEMP}/assistant-request-selection.json`,
+              JSON.stringify(selection), {flag: 'wx'});
 
-            const qualifiedMention = isAllowed && mentionMatch !== null;
-            const prompt = qualifiedMention ? mentionMatch[1].trim() : '';
-
-            console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Has mention: ${mentionMatch !== null}, Content: "${content}"`);
+            console.log(`User: ${userLogin}, Allowed: ${isAllowed}, Content: "${content}"`);
 
             // Set outputs
-            core.setOutput('qualified-mention', qualifiedMention);
-            core.setOutput('prompt', prompt);
+            core.setOutput('allowed', isAllowed);
             core.setOutput('user', userLogin);
             core.setOutput('item-type', itemType);
             core.setOutput('item-number', itemNumber);
             core.setOutput('controllers', allowedUsers.map(u => '@' + u).join(', '));
 
             return {
-              qualifiedMention,
+              allowed: isAllowed,
               itemType,
               itemNumber,
-              prompt,
               user: userLogin,
               controllers: allowedUsers.map(u => '@' + u).join(', ')
             };
+
+      # The authoritative decision (#4108). A request is one line with a blank
+      # line, or the start or end of the text, on each side: the assistant's
+      # handle at the very start of the line, then the name of one directory
+      # under data/sheets_d4dassistant/inputs/ and nothing else, outside code
+      # spans, fenced code, quotes and HTML blocks, and after no raw HTML that
+      # is left open. Anything else (a handle quoted in prose or code, an
+      # unknown dataset, extra words) logs "no request" and runs nothing. The
+      # rules are in the script's docstring.
+      - name: Read the request
+        id: request
+        if: steps.detect.outputs.allowed == 'true'
+        env:
+          TRUSTED_REQUEST_PARSER: ${{ steps.detect.outputs.gate-parser }}
+        run: >-
+          python3 -I -S "$TRUSTED_REQUEST_PARSER"
+          --inputs data/sheets_d4dassistant/inputs
+          --body "$RUNNER_TEMP/assistant-request-text.md"
+          --selection "$RUNNER_TEMP/assistant-request-selection.json"
+          --github-output "$GITHUB_OUTPUT"
 
   respond-to-mention:
     needs: check-mention
@@ -208,46 +294,26 @@ jobs:
       - name: Resolve dataset from the request
         id: resolve
         env:
-          PROMPT: ${{ needs.check-mention.outputs.prompt }}
+          DATASET: ${{ needs.check-mention.outputs.dataset }}
         run: |
           set -euo pipefail
-          # The dataset is whichever inputs/ directory the request names. Matching
-          # against what exists avoids inventing a name from free text.
-          DATASET=""
-          for d in data/sheets_d4dassistant/inputs/*/; do
-            name=$(basename "$d")
-            if printf '%s' "$PROMPT" | grep -qiE "(^|[^A-Za-z0-9_])${name}([^A-Za-z0-9_]|$)"; then
-              DATASET="$name"; break
-            fi
-          done
-          if [ -z "$DATASET" ]; then
-            echo "no-dataset=true" >> "$GITHUB_OUTPUT"
-            echo "available=$(ls data/sheets_d4dassistant/inputs/ | tr '\n' ' ')" >> "$GITHUB_OUTPUT"
-            exit 0
+          # The dataset is the inputs/ directory the request line names exactly,
+          # as "Read the request" in check-mention found it (#4108); never a
+          # name matched in free text. Re-checked against this checkout.
+          if [ -z "$DATASET" ] || [ ! -d "data/sheets_d4dassistant/inputs/$DATASET" ]; then
+            echo "::error::the request names no input directory in this checkout: '$DATASET'"
+            exit 1
           fi
-          BUNDLE=$(find "data/sheets_d4dassistant/inputs/$DATASET" -type f \
-                     \( -name '*.txt' -o -name '*.md' \) | sort | head -1)
-          if [ -z "$BUNDLE" ]; then
-            echo "no-bundle=true" >> "$GITHUB_OUTPUT"
-            echo "dataset=$DATASET" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          # Prepare every member before any billed generation (#4450).
+          # Outputs stay outside the input tree; failures stop this job.
+          BUNDLE_DIR=$(mktemp -d "$RUNNER_TEMP/d4d-assistant-input.XXXXXXXX")
+          poetry run python src/github/assistant_bundle.py \
+            --inputs-root data/sheets_d4dassistant/inputs \
+            --dataset "$DATASET" --output-dir "$BUNDLE_DIR" \
+            --source-commit "$(git rev-parse HEAD)" \
+            --github-output "$GITHUB_OUTPUT"
           echo "dataset=$DATASET" >> "$GITHUB_OUTPUT"
-          echo "bundle=$BUNDLE"   >> "$GITHUB_OUTPUT"
           echo "label=$(date -u +%Y-%m-%d)_claude-opus-5-assistant" >> "$GITHUB_OUTPUT"
-
-      - name: Report unresolvable request
-        if: steps.resolve.outputs.no-dataset == 'true' || steps.resolve.outputs.no-bundle == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.PAT_FOR_PR }}
-        run: |
-          if [ "${{ steps.resolve.outputs.no-dataset }}" = "true" ]; then
-            MSG="I could not tell which dataset to generate. Name one of these input directories in your request: ${{ steps.resolve.outputs.available }}"
-          else
-            MSG="Found the input directory for **${{ steps.resolve.outputs.dataset }}** but no .txt or .md file inside it, so there is nothing to read."
-          fi
-          gh issue comment "${{ needs.check-mention.outputs.item-number }}" --body "$MSG"
-          exit 1
 
       - name: Generate datasheet
         env:
@@ -280,21 +346,34 @@ jobs:
           git config user.name  "d4dassistant"
           git config user.email "d4dassistant@users.noreply.github.com"
           git checkout -b "$BRANCH"
+          MANIFEST="data/sheets_d4dassistant/${D}_input_manifest.json"
+          if [ -L "$MANIFEST" ] || { [ -e "$MANIFEST" ] && [ ! -f "$MANIFEST" ]; }; then
+            echo "::error::input manifest destination is not a regular file"
+            exit 1
+          fi
+          cp -- "${{ steps.resolve.outputs.input-manifest }}" "$MANIFEST"
           git add "data/sheets_d4dassistant/${D}_d4d.yaml" \
                   "data/sheets_d4dassistant/${D}_d4d_core.yaml" \
                   "data/sheets_d4dassistant/${D}_reconciliation.md" \
-                  "data/sheets_d4dassistant/${D}_provenance.yaml"
+                  "data/sheets_d4dassistant/${D}_provenance.yaml" \
+                  "$MANIFEST"
           git commit -m "Add ${D} datasheet generated by the D4D assistant
 
           Four-phase generation from data/sheets_d4dassistant/inputs/${D}/,
+          all ${{ steps.resolve.outputs.member-count }} documents; bundle SHA256
+          ${{ steps.resolve.outputs.bundle-sha256 }}; sources in ${D}_input_manifest.json,
           via the same deterministic path the batch pipeline uses. Requested in
           #${{ needs.check-mention.outputs.item-number }}."
+          GENERATED_SHA=$(git rev-parse HEAD)
+          MANIFEST_URL="${{ github.server_url }}/${{ github.repository }}/blob/${GENERATED_SHA}/${MANIFEST}"
           git push -u origin "$BRANCH"
           URL=$(gh pr create \
             --title "Add ${D} datasheet (D4D assistant)" \
             --body "Generated from \`data/sheets_d4dassistant/inputs/${D}/\` in response to #${{ needs.check-mention.outputs.item-number }}.
 
           Four-phase generation (full, core, audit, reconcile) on the model pinned in \`.github/workflows/d4d_assistant_deterministic.config\`. \`${D}_provenance.yaml\` records the input, prompt and schema-digest hashes, the git commit, and per-phase token usage.
+
+          All ${{ steps.resolve.outputs.member-count }} input documents were prepared. [Input manifest](${MANIFEST_URL}) records source paths, raw hashes, conversion policy and bundle SHA256 \`${{ steps.resolve.outputs.bundle-sha256 }}\`. PDF inputs contribute extracted text only; images/OCR and layout completeness are not claimed.
 
           Validated against \`Dataset\` before this PR was opened." \
             --head "$BRANCH")
@@ -308,6 +387,9 @@ jobs:
           if [ "${{ job.status }}" = "success" ]; then
             gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
               --body "Generated the **${{ steps.resolve.outputs.dataset }}** datasheet: ${{ steps.pr.outputs.url }}"
+          elif [ "${{ steps.resolve.outcome }}" = "failure" ]; then
+            gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
+              --body "Complete-input preparation failed before generation. Every file must be supported and readable: strict UTF-8 TXT/MD/JSON/HTML or an unencrypted PDF with extractable text. [Run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
           else
             gh issue comment "${{ needs.check-mention.outputs.item-number }}" \
               --body "Generation failed. [Run log](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
