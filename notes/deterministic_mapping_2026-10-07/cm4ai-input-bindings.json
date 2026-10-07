@@ -1,0 +1,16 @@
+[
+  {
+    "archive": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+    "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+    "member": "cm4ai_release_metadata/ro-crate-metadata.json",
+    "member_sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e",
+    "size": 12242926
+  },
+  {
+    "archive": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+    "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+    "member": "cm4ai_release_metadata/ro-crate-linkml.yaml",
+    "member_sha256": "21abada110d0e47a2cf949a16ed4bc73dad4cd13802e211fe0dda8cbbae66c65",
+    "size": 9484
+  }
+]
