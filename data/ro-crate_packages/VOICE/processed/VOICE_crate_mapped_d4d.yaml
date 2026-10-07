@@ -44,7 +44,6 @@ keywords:
 publisher: PhysioNet
 version: 3.0.0
 license: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
-download_url: file:///features/ppgs.parquet
 issued: '2025-12-16T00:00:00Z'
 doi: 10.13026/k81f-qr68
 creators:
@@ -500,6 +499,12 @@ preprocessing_strategies:
     JSON data dictionaries; static per-recording feature summaries are provided in
     static_features.tsv, and de-identification and filtering steps are applied before
     packaging.
+imputation_protocols:
+- description: The public datasets do not apply global statistical imputation to missing
+    fields; instead, missing questionnaire responses, phenotype variables and derived
+    features are left as explicit missing values or omitted rows. The data release
+    team audited missingness and users can implement study-specific imputation or
+    complete-case strategies appropriate to their analyses.
 raw_sources:
 - description: The original raw data consist of high-quality voice, speech and respiratory
     audio waveforms recorded on tablet or smartphone devices with headset microphones
@@ -554,6 +559,21 @@ machine_annotation_tools:
     extraction and merging of phenotype data into the released files.
 ethical_reviews:
 - name: Ethical Review by Vardit Ravitsky at the Hastings Center for Bioethics
+human_subject_research:
+  description: 'Source humanSubjectResearch: Yes
+
+    Source humanSubjects: Yes
+
+    Source humanSubjectExemption: No
+
+    Source irb: {"@type": "Organization", "address": {"@type": "PostalAddress", "addressCountry":
+    "US", "addressLocality": "Tampa", "addressRegion": "FL", "postalCode": "33620",
+    "streetAddress": "3702 Spectrum Blvd., Suite 165 Usf"}, "contactPoint": {"@type":
+    "ContactPoint", "contactType": "(813) 974-5638", "email": "RSCH-IRB@usf.edu",
+    "telephone": "(813) 974-5638"}, "name": "University of South Florida Institutional
+    Review Board"}'
+  involves_human_subjects: true
+  ethics_review_board: University of South Florida Institutional Review Board
 license_and_use_terms:
   name: https://physionet.org/content/b2ai-voice/view-license/3.0.0/
 ip_restrictions:
@@ -572,3 +592,5 @@ citation: 'Bensoussan, Y., Sigaras, A., Rameau, A., Elemento, O., Powell, M., Do
   voice dataset linked to health information (version 3.0.0). PhysioNet. RRID:SCR_007345.
   https://doi.org/10.13026/k81f-qr68'
 id: doi:10.13026/k81f-qr68
+data_governance:
+  description: Satrajit Ghosh

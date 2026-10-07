@@ -1,7 +1,7 @@
 # D4D record for CM4AI, mapped from its RO-Crate
 # Method: static mapping using this repo's own mapping table
 # Mapping table: data/ro-crate_mapping/d4d_rocrate_interface_mapping.tsv
-# Source: data/ro-crate_packages/CM4AI/crate/ro-crate-metadata.json
+# Source: data/ro-crate_packages/CM4AI/raw/ro-crate-metadata.json
 # Upstream ro-crate-linkml.yaml deliberately NOT used
 # No inferred values; see the provenance report alongside
 title: Cell Maps for Artificial Intelligence - June 2026 Data Release (Beta)
@@ -57,11 +57,9 @@ keywords:
 - Perturb-seq
 - Protein-protein interaction
 - cell maps
-page: https://massive.ucsd.edu/ProteoSAFe/dataset.jsp?task=ad8b8084f5b14af5bafac70fdd42a577
 publisher: https://dataverse.lib.virginia.edu/
 version: '1.0'
 license: https://creativecommons.org/licenses/by-nc-sa/4.0/
-download_url: ftp://massive-ftp.ucsd.edu/v10/MSV000098237/
 issued: '2026-06-30T00:00:00Z'
 doi: 10.18130/V3/HIGT4C
 resources:
@@ -294,6 +292,12 @@ distribution_formats:
 ethical_reviews:
 - name: Vardit Ravistky ravitskyv@thehastingscenter.org and Jean-Christophe Belisle-Pipon
     jean-christophe_belisle-pipon@sfu.ca.
+human_subject_research:
+  description: 'Source humanSubjectResearch: None - data collected from commercially
+    available cell lines
+
+    Source humanSubjectExemption: Exempt — research with commercially available de-identified
+    human cell lines does not constitute human subjects research.'
 at_risk_populations:
   name: None — no human subjects involved; commercially sourced de-identified cell
     lines only.
@@ -388,3 +392,5 @@ citation: Clark T; Parker J; Al Manir S; Axelsson U; Ballllosero Navarro F; Chin
   V1
 total_size_bytes: 21051331945400
 id: doi:10.18130/V3/HIGT4C
+data_governance:
+  description: Jilian Parker

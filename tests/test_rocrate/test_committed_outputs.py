@@ -15,6 +15,10 @@ they keep the verdicts they were published with (#426/#520).
 """
 
 import re
+import json
+import hashlib
+import zipfile
+from collections import Counter
 import tempfile
 import unittest
 from pathlib import Path
@@ -137,8 +141,8 @@ class TestCommittedMapperOutputs(unittest.TestCase):
         declared = {row["D4D_Full_Path"].strip(): (row["Unplaced"].strip(),
                                                    row["Unplaced_Reason"].strip())
                     for row in load_mapping(ROOT / MAPPING_TSV)
-                    if (row.get("Unplaced") or "").strip()}
-        self.assertTrue(declared)
+                    if row.get("Execution", "active") == "active"
+                    and (row.get("Unplaced") or "").strip()}
         reports = sorted(PACKAGES.glob("*/processed/*_crate_mapping_provenance.md"))
         self.assertTrue(reports)
         for report in reports:
@@ -153,7 +157,126 @@ class TestCommittedMapperOutputs(unittest.TestCase):
                     if not rest.endswith(declaration_cell(*declared[path]))])
                 legend = re.findall(r"^\| unplaceable \| \d+ \| .*$", text, re.M)
                 self.assertEqual(1, len(legend))
-                self.assertTrue(legend[0].endswith(legend_tail(declared)), legend[0])
+                if declared:
+                    self.assertTrue(legend[0].endswith(legend_tail(declared)), legend[0])
+                else:
+                    self.assertNotIn("the mapping table says why", legend[0])
+
+    def test_every_original_rule_has_the_current_execution_outcome(self):
+        """Retirement is visible and stays in the same 136-row denominator;
+        inactive rows retain their current reason rather than an old fill."""
+        rows = load_mapping(ROOT / MAPPING_TSV)
+        self.assertEqual(len(rows), 136)
+        self.assertEqual(Counter(row["Execution"] for row in rows),
+                         {"active": 85, "retired": 19, "deferred": 32})
+        reports = sorted(PACKAGES.glob("*/processed/*_crate_mapping_provenance.md"))
+        self.assertGreaterEqual(len(reports), 3)
+        for report in reports:
+            with self.subTest(report=report.name):
+                text = report.read_text(encoding="utf-8")
+                self.assertIn("136 table rows declared", text)
+                self.assertIn("Executable table rules: 85; retired: 19; deferred: 32; "
+                              "original table rows: 136", text)
+                detailed = re.findall(
+                    r"^\| (\w+\.\w+) \| (filled|subsumed|empty|unresolvable|"
+                    r"unplaceable|retired|deferred) \| (.*)$", text, re.M)
+                by_path = {path: (status, rest) for path, status, rest in detailed}
+                self.assertEqual(len(detailed), len(by_path))
+                self.assertEqual(set(by_path),
+                                 {row["D4D_Full_Path"] for row in rows} | {"Dataset.id"})
+                totals = Counter(status for _, status, _ in detailed)
+                for status in ("filled", "subsumed", "empty", "unresolvable",
+                               "unplaceable", "retired", "deferred"):
+                    self.assertRegex(text, rf"(?m)^\| {status} \| {totals[status]} \|")
+                self.assertEqual(totals["retired"], 19)
+                self.assertEqual(totals["deferred"], 32)
+                for row in rows:
+                    status, rest = by_path[row["D4D_Full_Path"]]
+                    if row["Execution"] == "active":
+                        self.assertNotIn(status, ("retired", "deferred"))
+                    else:
+                        self.assertEqual(status, row["Execution"])
+                        reason = row["Execution_Reason"].replace("|", "\\|").replace("\n", " ")
+                        self.assertTrue(rest.endswith(reason + " |"), row["Rule_ID"])
+
+    def test_source_sidecars_pin_outputs_and_preserve_values_at_their_subjects(self):
+        """Full source evidence must survive inactive rules, false values and
+        member-only facts, with every recorded pointer joining to source bytes."""
+        table_rows = load_mapping(ROOT / MAPPING_TSV)
+        table_sha = hashlib.sha256((ROOT / MAPPING_TSV).read_bytes()).hexdigest()
+        rules_sha = hashlib.sha256(json.dumps(table_rows, ensure_ascii=False,
+                                             sort_keys=True).encode()).hexdigest()
+        schema_sha = hashlib.sha256((ROOT / FULL_SCHEMA).read_bytes()).hexdigest()
+        for project in ("CHORUS", "CM4AI", "VOICE"):
+            with self.subTest(project=project):
+                processed = PACKAGES / project / "processed"
+                sidecar = processed / f"{project}_crate_mapping_sources.json"
+                evidence = json.loads(sidecar.read_text(encoding="utf-8"))
+                source = ROOT / evidence["source"]["path"]
+                if source.is_file():
+                    source_bytes = source.read_bytes()
+                else:
+                    self.assertEqual(project, "CM4AI")
+                    with zipfile.ZipFile(PACKAGES / project / "raw/cm4ai_release_metadata.zip") as archive:
+                        member = archive.getinfo("cm4ai_release_metadata/ro-crate-metadata.json")
+                        self.assertLessEqual(member.file_size, 16 * 1024 * 1024)
+                        source_bytes = archive.read(member)
+                document = json.loads(source_bytes)
+                self.assertEqual(evidence["format_version"], 1)
+                self.assertEqual(evidence["source"]["sha256"], hashlib.sha256(source_bytes).hexdigest())
+                self.assertEqual(evidence["mapping_table"]["sha256"], table_sha)
+                self.assertEqual(evidence["mapping_table"]["rules_sha256"], rules_sha)
+                self.assertEqual(evidence["schema"]["sha256"], schema_sha)
+                record = processed / f"{project}_crate_mapped_d4d.yaml"
+                self.assertEqual(evidence["record_sha256"], hashlib.sha256(record.read_bytes()).hexdigest())
+                root_index = evidence["root"]["graph_index"]
+                self.assertIsInstance(root_index, int)
+                root = document["@graph"][root_index]
+                self.assertEqual(evidence["root"]["properties"], root)
+                self.assertEqual(evidence["root"]["id"], root["@id"])
+                self.assertEqual(len(evidence["rows"]), 136)
+                self.assertEqual([row["rule_id"] for row in evidence["rows"]],
+                                 [row["Rule_ID"] for row in table_rows])
+                for row, original in zip(evidence["rows"], table_rows, strict=True):
+                    self.assertEqual(row["execution"], original["Execution"])
+                    self.assertEqual(row["d4d_path"], original["D4D_Full_Path"])
+                    self.assertEqual(row["source_expression"], original["RO_Crate_JSON_Path"])
+                    if row["execution"] != "active":
+                        self.assertEqual(row["status"], row["execution"])
+                    for scope in ("root_assertions", "member_assertions", "linked_assertions"):
+                        for assertion in row[scope]:
+                            pointer = assertion["json_pointer"]
+                            self.assertEqual(pointer_value(document, pointer), assertion["value"])
+                            entity_index = int(pointer.split("/")[2])
+                            self.assertEqual(document["@graph"][entity_index].get("@id"),
+                                             assertion["entity_id"])
+                            if scope == "root_assertions":
+                                self.assertEqual(entity_index, root_index)
+                            elif scope == "member_assertions":
+                                self.assertNotEqual(entity_index, root_index)
+                # A deferred FDA claim stays regulated, never silently drops
+                # false or changes it into a compliance assertion.
+                fda = next(row for row in evidence["rows"]
+                           if row["rule_id"] == "49c24423:legacy-line-115")
+                self.assertEqual(fda["status"], "deferred")
+                if "fdaRegulated" in root:
+                    self.assertEqual([a["value"] for a in fda["root_assertions"]],
+                                     [root["fdaRegulated"]])
+                if project == "VOICE":
+                    self.assertIs(root["fdaRegulated"], False)
+                    lineage = next(row for row in evidence["rows"]
+                                   if row["rule_id"] == "49c24423:legacy-line-111")
+                    self.assertEqual(lineage["root_assertions"], [])
+                    self.assertTrue(lineage["member_assertions"])
+
+
+def pointer_value(document, pointer):
+    """Read an RFC6901 pointer without importing the producer's evidence code."""
+    value = document
+    for part in pointer.split("/")[1:]:
+        key = part.replace("~1", "/").replace("~0", "~")
+        value = value[int(key)] if isinstance(value, list) else value[key]
+    return value
 
 
 def placed_nowhere_rows(text):

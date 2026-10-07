@@ -221,6 +221,21 @@ ethical_reviews:
     and Barbara J. Evans in collaboration with the Mass General Brigham IRB with local
     context review by IRBs, HIPAA Privacy Officers, and institutional counsels at
     contributing medical centers.
+human_subject_research:
+  description: 'Source humanSubjectResearch: Yes
+
+    Source humanSubjectExemption: HIPAA exemption 4 ((45 CFR 46.104(d)(4))
+
+    Source irb: {"@type": "Organization", "address": {"@type": "PostalAddress", "addressCountry":
+    "US", "addressLocality": "Somerville", "addressRegion": "MA", "postalCode": "02145",
+    "streetAddress": "399 Revolution Drive, Suite 710"}, "contactPoint": {"@type":
+    "ContactPoint", "contactType": "IRB Reliance and Compliance", "email": "irbreliance@mgb.org",
+    "telephone": "+1-857-282-1900"}, "name": "Mass General Brigham Institutional Review
+    Board (MGB IRB)"}
+
+    Source irbProtocolId: #2022P000707'
+  involves_human_subjects: true
+  ethics_review_board: Mass General Brigham Institutional Review Board (MGB IRB)
 license_and_use_terms:
   name: Data Use Agreement available at 'https://chorus4ai.org/dataset/'
 ip_restrictions:
@@ -241,3 +256,5 @@ citation: 'The CHoRUS for Clinical Care AI Network. The Bridge2AI CHoRUS for Cli
   Care AI Dataset: A Multi-Center, Multi-Modal, High-Resolution Critical Care Dataset,
   version 1.0 Beta. Harvard Dataverse, Apr. 2026.'
 id: doi:10.18130/V3/XNBOPG
+data_governance:
+  description: Eric Rosenthal, EROSENTHAL@mgh.harvard.edu
