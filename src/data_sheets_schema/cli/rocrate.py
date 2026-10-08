@@ -10,7 +10,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from data_sheets_schema.cli._repo_utils import setup_repo_imports, require_repo_context
+from data_sheets_schema.cli._repo_utils import (
+    get_repo_root, setup_repo_imports, require_repo_context,
+)
 
 
 def _outcome_line(refused: int, invalid: int, failed: int = 0) -> str:
@@ -77,6 +79,12 @@ def parse(input_file, output):
         # error (#4186).
         read_crate_json(Path(input_file), hint=TRANSCODE_HINT)
         parser = ROCrateParser(input_file)
+        # Inspection may show a rootless graph, but must not imply a child
+        # dataset was selected as its root.
+        try:
+            parser.require_root_dataset()
+        except ValueError as exc:
+            click.echo(f"⚠️  {exc}", err=True)
         entities = parser.get_all_entities()
 
         if output:
@@ -115,6 +123,16 @@ def transform(input_file, output, merge, inputs, primary):
                 "--merge requires at least one --inputs PATH.",
                 ctx=click.get_current_context(),
             )
+        primary_index = 0
+        if primary:
+            matches = [i for i, path in enumerate(inputs)
+                       if Path(path).resolve() == Path(primary).resolve()]
+            if not matches:
+                raise click.UsageError(
+                    "--primary must name one of the --inputs files.",
+                    ctx=click.get_current_context(),
+                )
+            primary_index = matches[0]
         click.echo(f"🔄 Transforming {len(inputs)} RO-Crates to D4D (merge mode)...")
     else:
         if not input_file:
@@ -127,24 +145,27 @@ def transform(input_file, output, merge, inputs, primary):
     # Import and call the transform script
     setup_repo_imports()
 
+    old_argv = sys.argv
     try:
         from rocrate_to_d4d import main as transform_main
 
         # Set up args for the transform script
-        old_argv = sys.argv
+        mapping = get_repo_root() / "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv"
         if merge:
             sys.argv = ['rocrate_to_d4d.py',
                         '--merge',
                         '--inputs'] + list(inputs) + [
-                        '-o', output]
+                        '-o', output, '--mapping', str(mapping)]
             if primary:
-                sys.argv.extend(['--primary', primary])
+                sys.argv.extend(['--primary', str(primary_index)])
         else:
             sys.argv = ['rocrate_to_d4d.py',
                         '-i', input_file,
-                        '-o', output]
+                        '-o', output, '--mapping', str(mapping)]
 
-        transform_main()
+        status = transform_main()
+        if status:
+            raise SystemExit(status)
         click.echo(f"✓ D4D YAML saved to {output}")
 
     except Exception as e:

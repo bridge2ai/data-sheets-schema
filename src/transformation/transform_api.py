@@ -557,13 +557,20 @@ def batch_transform_rocrates(
     """
     input_path = Path(input_dir)
     output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
+
+    # Refuse an invalid later source before an earlier source can overwrite
+    # its destination. Keep inspect-only parsers permissive; this is a
+    # Dataset-producing batch (#4588, #4591).
+    rocrate_files = sorted(input_path.glob(pattern))
+    for rocrate_file in rocrate_files:
+        _parse_rocrate(rocrate_file).require_root_dataset()
 
     config = TransformationConfig(validate_output=validate)
     transformer = SemanticTransformer(config)
+    output_path.mkdir(parents=True, exist_ok=True)
 
     results = []
-    for rocrate_file in input_path.glob(pattern):
+    for rocrate_file in rocrate_files:
         out_file = output_path / f"{rocrate_file.stem}_d4d.yaml"
         result = transformer.rocrate_to_d4d(rocrate_file, output_path=out_file)
         results.append(result)

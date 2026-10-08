@@ -266,9 +266,6 @@ Examples:
         print(f"✗ Error: Mapping TSV not found: {mapping_path}", file=sys.stderr)
         return 1
 
-    # Create output directory if needed
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
     print("="*80)
     if args.merge:
         print("Multi-RO-Crate Merge to D4D")
@@ -301,9 +298,9 @@ Examples:
             for input_path in input_paths:
                 print(f"  - {input_path.name}")
                 parser = ROCrateParser(str(input_path))
-                if not parser.get_root_dataset():
-                    print(f"⚠ Warning: No root Dataset in {input_path.name}, skipping")
-                    continue
+                # Every requested source participates or the whole operation
+                # fails. Skipping one silently changes the published merge.
+                parser.require_root_dataset()
                 parsers.append(parser)
 
             if not parsers:
@@ -353,11 +350,15 @@ Examples:
         # Save with provenance
         print("\n[5/5] Saving merged D4D YAML...")
         try:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            header_paths = [input_paths[primary_index]] + [
+                path for i, path in enumerate(input_paths) if i != primary_index
+            ]
             save_d4d_yaml(
                 dataset,
                 output_path,
                 mapping_path,
-                rocrate_paths=input_paths,
+                rocrate_paths=header_paths,
                 provenance=provenance
             )
         except Exception as e:
@@ -383,12 +384,9 @@ Examples:
         print("\n[2/5] Parsing RO-Crate...")
         try:
             rocrate = ROCrateParser(str(input_path))
+            rocrate.require_root_dataset()
         except Exception as e:
             print(f"✗ Error parsing RO-Crate: {e}", file=sys.stderr)
-            return 1
-
-        if not rocrate.get_root_dataset():
-            print("✗ Error: No root Dataset found in RO-Crate", file=sys.stderr)
             return 1
 
         # Step 3: Build D4D structure
@@ -403,6 +401,7 @@ Examples:
         # Step 4: Save D4D YAML
         print("\n[4/5] Saving D4D YAML...")
         try:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
             save_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=input_path)
         except Exception as e:
             print(f"✗ Error saving YAML: {e}", file=sys.stderr)

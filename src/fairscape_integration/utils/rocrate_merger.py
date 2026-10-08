@@ -65,6 +65,11 @@ class ROCrateMerger:
         if primary_index >= len(rocrate_parsers):
             raise ValueError(f"Primary index {primary_index} out of range")
 
+        # Validate the entire batch before changing state or building even
+        # the primary source. A later invalid source must not be omitted.
+        for parser in rocrate_parsers:
+            parser.require_root_dataset()
+
         # Reset state so the same instance can be reused for multiple merges
         self.merged_data = {}
         self.provenance = {}
