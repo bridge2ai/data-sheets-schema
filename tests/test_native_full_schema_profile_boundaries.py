@@ -445,3 +445,293 @@ def test_links_require_absolute_paths_and_measurement_stays_read_only(profile, l
     with pytest.raises(profile.BoundaryError):
         link_case.policy.audit("os.symlink", (str(link_case.staging), str(link_case.destination), -1))
     assert not link_case.destination.exists()
+
+
+MUTATOR_AUDIT_ARGS = (
+    ("os.mkdir", ("victim", 0o700, -1), 2),
+    ("os.rmdir", ("victim", -1), 1),
+    ("os.remove", ("victim", -1), 1),
+    ("os.chmod", ("victim", 0o600, -1), 2),
+    ("os.utime", ("victim", None, None, -1), 3),
+)
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("descriptor", ["outside", True, False, 0, -2])
+def test_preparation_mutators_reject_descriptor_relative_escape_before_effect(
+        profile, link_case, tmp_path, monkeypatch, event, template, descriptor_index, descriptor):
+    """#4646: cwd-relative authorization cannot authorize an outside dir_fd."""
+    outside = tmp_path / "protected-mutation-inputs"
+    outside.mkdir()
+    victim = outside / "victim"
+    victim.write_bytes(b"protected bytes")
+    before = victim.read_bytes(), victim.stat().st_mode
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        monkeypatch.chdir(link_case.root)
+        args = list(template)
+        args[descriptor_index] = fd if descriptor == "outside" else descriptor
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, tuple(args))
+        assert (victim.read_bytes(), victim.stat().st_mode) == before
+        assert not (link_case.root / "victim").exists()
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("descriptor", [None, -1])
+def test_preparation_mutators_allow_only_default_descriptor_and_physical_case_path(
+        link_case, event, template, descriptor_index, descriptor):
+    args = list(template)
+    args[0] = str(link_case.root / "new-file")
+    args[descriptor_index] = descriptor
+    link_case.policy.audit(event, tuple(args))
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("change", ["short", "long"])
+def test_descriptor_mutator_audit_shape_is_complete(profile, link_case, event, template, descriptor_index, change):
+    args = (str(link_case.root / "new-file"), *template[1:])
+    args = args[:-1] if change == "short" else (*args, -1)
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit(event, args)
+
+
+@pytest.mark.parametrize("event,tail", [("os.chmod", (0o600, -1)), ("os.utime", (None, None, -1)),
+                                      ("os.truncate", (0,))])
+def test_unregistered_file_descriptor_mutations_refuse(profile, link_case, tmp_path, event, tail):
+    outside = tmp_path / "protected-descriptor-input"
+    outside.write_bytes(b"retain original data")
+    before = outside.read_bytes(), outside.stat().st_mode
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, (fd, *tail))
+        assert (outside.read_bytes(), outside.stat().st_mode) == before
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,tail", [("os.chmod", (0o600, -1)), ("os.utime", (None, None, -1)),
+                                      ("os.truncate", (0,))])
+def test_tracked_checkpoint_write_descriptor_retains_identity_check(profile, link_case, tmp_path, event, tail):
+    path = link_case.root / "tracked-file"
+    path.write_bytes(b"private checkpoint bytes")
+    fd = os.open(path, os.O_RDWR)
+    try:
+        info = os.fstat(fd)
+        link_case.policy.write_descriptors[fd] = (info.st_dev, info.st_ino, info.st_mode)
+        link_case.policy.audit(event, (fd, *tail))
+        link_case.policy.write_descriptors[fd] = (info.st_dev, info.st_ino + 1, info.st_mode)
+        with pytest.raises(profile.BoundaryError, match="descriptor"):
+            link_case.policy.audit(event, (fd, *tail))
+        assert path.read_bytes() == b"private checkpoint bytes"
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("kind", ["case", "outside", "descriptor"])
+def test_cwd_changes_are_forbidden_during_preparation(profile, link_case, tmp_path, kind):
+    fd = os.open(tmp_path, os.O_RDONLY)
+    try:
+        destination = {"case": str(link_case.root), "outside": str(tmp_path), "descriptor": fd}[kind]
+        before = Path.cwd()
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit("os.chdir", (destination,))
+        assert Path.cwd() == before
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,args", [("ctypes.dlopen", (None,)),
+    ("ctypes.dlopen", ("/outside/unreported-library.dylib",)),
+    ("ctypes.dlsym", (object(), "system")), ("ctypes.dlsym/handle", (7, "system")),
+    ("ctypes.call_function", (7, ())), ("ctypes.set_exception", (7,))])
+@pytest.mark.parametrize("phase", ["prepare", "measure"])
+def test_direct_native_load_and_symbol_events_are_denied_after_bootstrap(
+        profile, link_case, event, args, phase):
+    policy = link_case.policy if phase == "prepare" else profile.PhasePolicy(
+        source=link_case.root, write_root=None, git=link_case.root / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError):
+        policy.audit(event, args)
+
+
+@pytest.fixture
+def bootstrap_case(profile, imports, tmp_path, monkeypatch):
+    """Synthetic loader objects; no actual ctypes or native binary is loaded."""
+    owner, source_path = imports
+    stdlib = tmp_path / "synthetic-interpreter"
+    package = stdlib / "ctypes"
+    package.mkdir(parents=True)
+    (stdlib / "lib-dynload").mkdir()
+    init, endian = package / "__init__.py", package / "_endian.py"
+    init.write_bytes(b"VALUE = 'fictional fixed ctypes init'\n")
+    endian.write_bytes(b"VALUE = 'fictional fixed endian init'\n")
+    extension = stdlib / "lib-dynload/_ctypes.fixture.so"
+    extension.write_bytes(b"FICTIONAL EXTENSION BYTES: NEVER LOADED\n")
+    owner.stdlib = stdlib
+    hooks, executed = [], []
+    fake_sys = SimpleNamespace(modules={}, path=[str(stdlib)], addaudithook=hooks.append)
+    monkeypatch.setattr(profile, "sys", fake_sys)
+    for cls, method in ((importlib.machinery.SourceFileLoader, "get_code"),
+                        (importlib.machinery.ExtensionFileLoader, "create_module"),
+                        (importlib.machinery.SourcelessFileLoader, "get_code")):
+        monkeypatch.setattr(cls, method, getattr(cls, method))
+
+    def extension_body(loader, spec):
+        executed.append(("synthetic extension initialization", spec.origin))
+        module = ModuleType("_ctypes")
+        module.__spec__ = spec
+        return module
+
+    owner.original_extension = extension_body
+    owner.install(add_paths=False)
+    assert fake_sys.path == [str(stdlib)]
+
+    def python_module(name, path):
+        loader = importlib.machinery.SourceFileLoader(name, str(path))
+        module = ModuleType(name)
+        module.__spec__ = SimpleNamespace(origin=str(path), loader=loader)
+        code = loader.get_code(name)
+        owner.audit("exec", (code,))
+        exec(code, module.__dict__)
+        executed.append((name, str(path)))
+        fake_sys.modules[name] = module
+        return module
+
+    def extension_module(path):
+        loader = importlib.machinery.ExtensionFileLoader("_ctypes", str(path))
+        spec = SimpleNamespace(origin=str(path), loader=loader)
+        module = loader.create_module(spec)
+        fake_sys.modules["_ctypes"] = module
+        return module
+
+    def successful_import(name):
+        assert name == "ctypes" and owner.interpreter_only is True
+        python_module("ctypes", init)
+        python_module("ctypes._endian", endian)
+        extension_module(extension)
+        return fake_sys.modules["ctypes"]
+
+    monkeypatch.setattr(profile.importlib, "import_module", successful_import)
+    return SimpleNamespace(owner=owner, sys=fake_sys, hooks=hooks, executed=executed, init=init,
+        endian=endian, extension=extension, python_module=python_module,
+        extension_module=extension_module, source_path=source_path)
+
+
+def test_ctypes_bootstrap_pins_fixed_interpreter_inputs_without_exposing_selected_paths(profile, bootstrap_case):
+    case = bootstrap_case
+    assert case.owner.preload_ctypes() is None
+    assert case.owner.interpreter_only is False
+    assert case.sys.path == [str(case.owner.stdlib)]
+    assert set(case.owner.loaded) == {str(case.init), str(case.endian), str(case.extension)}
+    for path in (case.init, case.endian, case.extension):
+        assert case.owner.loaded[str(path)] == {"sha256": profile.sha(path.read_bytes()), "bytes": path.stat().st_size}
+    case.owner.enable_selected_paths()
+    assert case.sys.path[:3] == [str(case.owner.source / "src"), str(case.owner.source), str(case.owner.dependencies)]
+
+
+@pytest.mark.parametrize("name", ["ctypes", "_ctypes", "ctypes._endian"])
+def test_untracked_ctypes_preload_refuses_before_import(profile, bootstrap_case, name):
+    case = bootstrap_case
+    case.sys.modules[name] = ModuleType(name)
+    with pytest.raises(profile.BoundaryError, match="must not precede"):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+    assert case.sys.path == [str(case.owner.stdlib)]
+
+
+@pytest.mark.parametrize("foreign", ["dependency_ctypes", "dependency_transitive", "recovered_transitive",
+                                   "dependency_extension", "stdlib_site_packages"])
+def test_ctypes_bootstrap_refuses_shadow_or_transitive_foreign_code_before_execution(
+        profile, bootstrap_case, monkeypatch, foreign):
+    case = bootstrap_case
+    if foreign == "dependency_ctypes":
+        path, name = case.owner.dependencies / "ctypes.py", "ctypes"
+    elif foreign == "dependency_transitive":
+        path, name = case.owner.dependencies / "sysconfig.py", "sysconfig"
+    elif foreign == "recovered_transitive":
+        path, name = case.source_path, "recovered_transitive"
+    elif foreign == "stdlib_site_packages":
+        path, name = case.owner.stdlib / "site-packages/foreign.py", "foreign"
+    else:
+        path, name = case.owner.dependencies / "_ctypes.fixture.so", "_ctypes"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if foreign != "recovered_transitive":
+        path.write_bytes(b"EXECUTED = 'must not run'\n")
+    before = path.read_bytes()
+    def attempt(name_requested):
+        assert name_requested == "ctypes" and case.owner.interpreter_only is True
+        if foreign == "dependency_extension":
+            return case.extension_module(path)
+        return case.python_module(name, path)
+    monkeypatch.setattr(profile.importlib, "import_module", attempt)
+    with pytest.raises(profile.BoundaryError):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+    assert case.owner.interpreter_only is False
+    assert case.sys.path == [str(case.owner.stdlib)] and path.read_bytes() == before
+
+
+def test_bootstrap_exec_audit_blocks_transitive_foreign_code_even_with_precompiled_object(
+        profile, bootstrap_case, monkeypatch):
+    case = bootstrap_case
+    path = case.owner.dependencies / "shadow.py"
+    path.write_bytes(b"EXECUTED = True\n")
+    code = compile(path.read_bytes(), str(path), "exec")
+    namespace = {}
+    def attempt(name):
+        case.owner.audit("exec", (code,))
+        exec(code, namespace)
+    monkeypatch.setattr(profile.importlib, "import_module", attempt)
+    with pytest.raises(profile.BoundaryError, match="bootstrap execution"):
+        case.owner.preload_ctypes()
+    assert "EXECUTED" not in namespace
+    assert case.owner.interpreter_only is False
+
+
+def test_bootstrap_cannot_enable_recovered_or_dependency_paths(profile, bootstrap_case, monkeypatch):
+    case = bootstrap_case
+    monkeypatch.setattr(profile.importlib, "import_module", lambda _: case.owner.enable_selected_paths())
+    with pytest.raises(profile.BoundaryError, match="during interpreter bootstrap"):
+        case.owner.preload_ctypes()
+    assert case.sys.path == [str(case.owner.stdlib)] and case.owner.interpreter_only is False
+
+
+@pytest.mark.parametrize("name", ["ctypes", "ctypes._endian"])
+def test_ctypes_source_identity_is_exact_even_inside_interpreter_root(profile, bootstrap_case, monkeypatch, name):
+    case = bootstrap_case
+    foreign = case.owner.stdlib / "same_root_wrong_module.py"
+    foreign.write_bytes(b"EXECUTED = True\n")
+    monkeypatch.setattr(profile.importlib, "import_module", lambda _: case.python_module(name, foreign))
+    with pytest.raises(profile.BoundaryError, match="ctypes bootstrap source identity"):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+
+
+def test_bootstrap_bytes_stay_in_final_rechecked_import_closure(profile, bootstrap_case):
+    case = bootstrap_case
+    case.owner.preload_ctypes()
+    rows = case.owner.verify()
+    assert {row["origin"] for row in rows} == {
+        "interpreter/ctypes/__init__.py", "interpreter/ctypes/_endian.py",
+        "interpreter/lib-dynload/_ctypes.fixture.so"}
+    case.init.write_bytes(b"mutated interpreter bootstrap")
+    with pytest.raises(ValueError):
+        case.owner.verify()
+
+
+@pytest.mark.parametrize("event,args", [("os.chown", ("ignored", 0, 0, -1)),
+    ("os.chflags", ("ignored", 0)), ("os.setxattr", ("ignored", "user.test", b"value", 0)),
+    ("os.removexattr", ("ignored", "user.test"))])
+def test_unsupported_metadata_mutations_are_refused(profile, link_case, event, args):
+    with pytest.raises(profile.BoundaryError, match="filesystem mutation"):
+        link_case.policy.audit(event, args)
+
+
+@pytest.mark.parametrize("tail", [(), (0, -1)])
+def test_truncate_requires_exact_audit_shape(profile, link_case, tail):
+    with pytest.raises(profile.BoundaryError, match="audit shape"):
+        link_case.policy.audit("os.truncate", (str(link_case.staging), *tail))

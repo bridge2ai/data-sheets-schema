@@ -90,6 +90,22 @@ bytecode. Dependency Python sources also bypass bytecode caches. Imported
 dependency/extension bytes are recorded and rechecked. Preparation's imported
 closure is rechecked before measurement. These checks describe local bytes and
 origins; they are not an authenticated interpreter or operating-system proof.
+
+Before exposing recovered or dependency import paths, a small interpreter-only
+bootstrap initializes `ctypes` under the source/extension tracking hooks.
+Preexisting `ctypes` modules are refused. Every new file-backed bootstrap import
+must originate in the selected interpreter's stdlib (excluding site-packages,
+the recovered tree and the dependency tree) before its code executes. The
+`ctypes` and `_endian` source paths are fixed to their stdlib locations; their
+bytes and the `_ctypes` extension bytes enter `loaded_closure` and are rechecked.
+Built-in/frozen modules belong to the separately pinned interpreter identity.
+This permits the reviewed POSIX stdlib initialization of its existing process
+handle, which the original preparation used. It supplies no later exception for
+`CDLL(None)` or arbitrary libraries. The effect hook then denies all `ctypes.*`
+events, including direct loading and symbol lookup, before selected recovered
+and dependency paths become available. This is a local audit restriction, not a
+complete operating-system sandbox
+([#4647](https://github.com/bridge2ai/data-sheets-schema/issues/4647)).
 `loaded_closure` covers imported Python/extension bytes, not a complete installed
 environment or every metadata, dependency-resource or operating-system read.
 Selected schema import closures, policy, runtime and case files have separate
@@ -136,6 +152,15 @@ automatically.
 If the child exits between timeout detection and group termination, the parent
 still reaps it, verifies input preservation and publishes `diagnostic_timeout`
 ([#4625](https://github.com/bridge2ai/data-sheets-schema/issues/4625)).
+
+Filesystem mutation checks validate the complete audit tuple. Directory-relative
+descriptor overrides are refused for creation, removal, chmod, utime, rename
+and link operations; descriptor forms of chmod, utime and truncate require a
+descriptor already opened for writing inside the fresh case. Working-directory
+changes, ownership/flag/extended-attribute mutations and symbolic links are
+forbidden. These checks prevent a pathname checked inside the new case from
+being applied through an unrelated directory descriptor to protected inputs
+([#4646](https://github.com/bridge2ai/data-sheets-schema/issues/4646)).
 
 Measurement selects exactly one ordered plain/instrumented pair per invocation:
 
@@ -216,6 +241,10 @@ recovered modules, run operations, invoke Git, inspect historical origin paths,
 or infer missing measurements. It checks bounded strict JSON, report roles,
 current case bytes and common identity bindings. Duplicate operation IDs and
 mixed preparation/driver/runtime/source/case identities are refused.
+Operation parents must retain the exact scope and limitations as well as the
+closed fields and evidence bindings; changing those statements cannot be hidden
+by an unchanged child-result hash
+([#4648](https://github.com/bridge2ai/data-sheets-schema/issues/4648)).
 
 Every completed child import closure must contain unique canonical
 `recovered/`, `dependency/` or `interpreter/` relative origins, lowercase SHA256

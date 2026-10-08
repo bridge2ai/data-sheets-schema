@@ -477,3 +477,45 @@ def test_environment_disclosure_uses_local_values_without_processor_probe(profil
     assert set(value) == {"python", "platform", "machine"}
     assert all(type(item) is str for item in value.values())
     assert calls == ["local uname syscall"]
+
+
+def test_child_installs_effect_hook_before_exposing_selected_import_paths(profile, parent_case, monkeypatch):
+    """#4647: test actual child orchestration; stop before any fixture work."""
+    case = parent_case
+    artifacts = case.recovery / "artifact"
+    artifacts.mkdir()
+    (artifacts / "source-before.json").write_bytes(b'{"entries":{}}')
+    case.args.output.mkdir()
+    events = []
+    class ReachedGuardedBoundary(Exception):
+        pass
+    class Policy:
+        def __init__(self, **kwargs):
+            self.git_pin = case.result["git"]["identity"]
+        def install(self):
+            events.append("effect hook")
+    class Imports:
+        def __init__(self, source, dependencies, pins, tools):
+            assert source == case.source and dependencies == case.dependencies
+        def install(self, *, add_paths):
+            assert add_paths is False
+            events.append("verified loaders without selected paths")
+        def preload_ctypes(self):
+            assert events == ["verified loaders without selected paths"]
+            events.append("interpreter-only bootstrap")
+        def enable_selected_paths(self):
+            assert events == ["verified loaders without selected paths", "interpreter-only bootstrap", "effect hook"]
+            events.append("selected paths")
+            raise ReachedGuardedBoundary
+    monkeypatch.setattr(profile, "PhasePolicy", Policy)
+    monkeypatch.setattr(profile, "SourceImports", Imports)
+    monkeypatch.setattr(profile, "utility", lambda: case.tools)
+    config = {"mode": "prepare", "source": str(case.source), "recovery": str(case.recovery),
+        "dependencies": str(case.dependencies), "case": str(case.args.output / "case"),
+        "driver_sha256": profile.sha(case.driver.read_bytes()), "python_identity": case.selected,
+        "git": str(case.git), "git_identity": case.result["git"]["identity"],
+        "recovered_provenance": case.result["recovered_provenance"]}
+    with pytest.raises(ReachedGuardedBoundary):
+        profile.child(config)
+    assert events[-1] == "selected paths"
+    assert not (case.args.output / "case").exists() and case.invocations == []

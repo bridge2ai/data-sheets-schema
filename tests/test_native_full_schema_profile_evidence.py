@@ -341,3 +341,31 @@ def test_equal_rehashed_duplicate_typed_fields_are_still_malformed(profile, coll
         profile.collect_reports(fixture.case.checkpoint, fixture.paths, fixture.output)
     assert not fixture.output.exists()
     assert_inputs(before)
+
+
+@pytest.mark.parametrize("status", ["completed", "diagnostic_timeout"])
+@pytest.mark.parametrize("fault", ["scope", "empty_limitations", "partial_limitations", "wrong_limitations_type"])
+def test_operation_parent_scope_and_limitations_are_required_evidence(profile, collection_case, status, fault):
+    fixture = collection_case
+    document = fixture.documents[0]
+    if status == "diagnostic_timeout":
+        document.update(status=status, result=None, child_exit_code=-9,
+            operation_set=profile.operation_set({document["operation"]: status}))
+    stream_pin = document["stdout_sha256"], document["stdout_bytes"]
+    if fault == "scope":
+        document["scope"] = "completed historical native acceptance"
+    elif fault == "empty_limitations":
+        document["limitations"] = []
+    elif fault == "partial_limitations":
+        document["limitations"] = document["limitations"][:-1]
+    else:
+        document["limitations"] = {"assumed": "all caveats retained"}
+    # The changed fields are outside the child result. Its previously valid
+    # stream pins remain untouched, so they cannot conceal a parent defect.
+    rewrite(profile, fixture, 0)
+    assert (document["stdout_sha256"], document["stdout_bytes"]) == stream_pin
+    before = retain_inputs(fixture)
+    with pytest.raises(ValueError, match="scope|limitations"):
+        profile.collect_reports(fixture.case.checkpoint, fixture.paths, fixture.output)
+    assert not fixture.output.exists()
+    assert_inputs(before)

@@ -315,20 +315,27 @@ class SourceImports:
     def __init__(self, source, dependencies, pins, tools):
         self.source, self.dependencies, self.pins, self.tools = source, dependencies, pins, tools
         self.loaded, self.approved_code = {}, set()
+        self.interpreter_only = False
         self.stdlib = Path(os.__file__).resolve().parent
         self.original_code = importlib.machinery.SourceFileLoader.get_code
         self.original_extension = importlib.machinery.ExtensionFileLoader.create_module
         self.original_sourceless = importlib.machinery.SourcelessFileLoader.get_code
 
     def allowed_dependency(self, path):
-        return (path.is_relative_to(self.dependencies) or
-                path.is_relative_to(self.stdlib) and
-                not {"site-packages", "dist-packages"}.intersection(path.relative_to(self.stdlib).parts))
+        interpreter = self.interpreter_origin(path)
+        return interpreter if self.interpreter_only else path.is_relative_to(self.dependencies) or interpreter
+
+    def interpreter_origin(self, path):
+        return (path.is_relative_to(self.stdlib)
+                and not {"site-packages", "dist-packages"}.intersection(path.relative_to(self.stdlib).parts)
+                and not path.is_relative_to(self.source) and not path.is_relative_to(self.dependencies))
 
     def source_code(self, path):
         original = Path(path).absolute()
         path = original.resolve(strict=True)
         require(path == original, "import path contains a symlink")
+        require(not self.interpreter_only or self.interpreter_origin(path),
+                "bootstrap import outside selected interpreter")
         raw = self.tools.read_file(path)
         if path.is_relative_to(self.source):
             key = path.relative_to(self.source).as_posix()
@@ -362,13 +369,19 @@ class SourceImports:
             filename = code.co_filename
             if not filename.startswith("<") and Path(filename).is_absolute():
                 path = Path(filename).resolve()
+                require(not self.interpreter_only or self.interpreter_origin(path),
+                        "bootstrap execution outside selected interpreter")
                 if path.is_relative_to(self.source):
                     require(sha(marshal.dumps(code)) in self.approved_code,
                             "recovered code did not come from verified source compilation")
 
-    def install(self):
+    def install(self, *, add_paths=True):
         owner = self
         def get_code(loader, fullname):
+            if owner.interpreter_only and fullname in {"ctypes", "ctypes._endian"}:
+                expected = owner.stdlib / ("ctypes/__init__.py" if fullname == "ctypes" else "ctypes/_endian.py")
+                require(Path(loader.get_filename(fullname)).absolute() == expected,
+                        "ctypes bootstrap source identity differs")
             return owner.source_code(loader.get_filename(fullname))
         def extension(loader, spec):
             path = Path(spec.origin).resolve(strict=True)
@@ -392,7 +405,49 @@ class SourceImports:
         importlib.machinery.ExtensionFileLoader.create_module = extension
         importlib.machinery.SourcelessFileLoader.get_code = sourceless
         sys.addaudithook(self.audit)
+        if add_paths:
+            self.enable_selected_paths()
+
+    def enable_selected_paths(self):
+        require(not self.interpreter_only, "selected paths cannot be exposed during interpreter bootstrap")
         sys.path[:0] = [str(self.source / "src"), str(self.source), str(self.dependencies)]
+
+    def preload_ctypes(self):
+        """Pin the selected interpreter's fixed initialization before effect denial.
+
+        This bootstrap exposes no recovered/dependency search paths. Loader and
+        exec checks reject such origins before execution, including shadow modules.
+        The selected POSIX stdlib initializes its own process handle; subsequent
+        ctypes audit events receive no initialization exception from PhasePolicy.
+        """
+        require(not any(name == "_ctypes" or name == "ctypes" or name.startswith("ctypes.")
+                        for name in sys.modules), "ctypes must not precede tracked interpreter bootstrap")
+        before = set(sys.modules)
+        self.interpreter_only = True
+        try:
+            importlib.import_module("ctypes")
+            for name in set(sys.modules) - before:
+                module = sys.modules[name]
+                origin = getattr(getattr(module, "__spec__", None), "origin", None)
+                if origin in {"built-in", "frozen"}:
+                    continue  # These belong to the selected interpreter identity.
+                require(type(origin) is str and Path(origin).is_absolute(),
+                        "bootstrap module has no physical interpreter origin")
+                path = Path(origin)
+                require(path.resolve(strict=True) == path and self.interpreter_origin(path)
+                        and str(path) in self.loaded, "bootstrap module escaped tracked interpreter imports")
+            for name, relative in (("ctypes", "ctypes/__init__.py"), ("ctypes._endian", "ctypes/_endian.py")):
+                module = sys.modules.get(name)
+                origin = getattr(getattr(module, "__spec__", None), "origin", None)
+                require(origin == str(self.stdlib / relative) and origin in self.loaded,
+                        "ctypes bootstrap source identity differs")
+            extension = sys.modules.get("_ctypes")
+            origin = getattr(getattr(extension, "__spec__", None), "origin", None)
+            require(type(origin) is str and origin in self.loaded
+                    and isinstance(extension.__spec__.loader, importlib.machinery.ExtensionFileLoader),
+                    "ctypes bootstrap extension identity differs")
+        finally:
+            self.interpreter_only = False
 
     def verify(self):
         for path, pin in self.loaded.items():
@@ -449,6 +504,10 @@ class PhasePolicy:
                 "publication hard-link destination already exists")
 
     def audit(self, event, args):
+        if event.startswith("ctypes."):
+            raise BoundaryError("direct ctypes effects are forbidden after interpreter bootstrap")
+        if event == "os.chdir":
+            raise BoundaryError("working-directory changes are forbidden")
         if event.startswith("socket.") or event in {"os.system", "os.exec", "os.posix_spawn", "os.posix_spawnp",
                 "os.fork", "os.forkpty", "pty.spawn"}:
             raise BoundaryError("network or unregistered process forbidden")
@@ -465,7 +524,19 @@ class PhasePolicy:
             if ((isinstance(mode, str) and any(c in mode for c in "wax+"))
                     or isinstance(flags, int) and flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)):
                 self.writable(path)
-        if event in {"os.mkdir", "os.rmdir", "os.remove", "os.chmod", "os.utime", "os.truncate"}:
+        descriptor_events = {"os.mkdir": (3, 2), "os.rmdir": (2, 1), "os.remove": (2, 1),
+                             "os.chmod": (3, 2), "os.utime": (4, 3)}
+        if event in descriptor_events:
+            size, descriptor = descriptor_events[event]
+            require(len(args) == size, "filesystem mutation audit shape differs")
+            fd = args[descriptor]
+            require(fd is None or type(fd) is int and fd == -1,
+                    "filesystem mutation dir_fd overrides are forbidden")
+            require(event in {"os.chmod", "os.utime"} or not isinstance(args[0], int),
+                    "filesystem mutation requires a path")
+            self.writable(args[0])
+        if event == "os.truncate":
+            require(len(args) == 2, "filesystem mutation audit shape differs")
             self.writable(args[0])
         if event == "os.rename":
             # The actual publisher replaces only its exact journal after CAS.
@@ -475,7 +546,7 @@ class PhasePolicy:
         if event == "os.link":
             require(len(args) == 4, "publication hard-link audit shape differs")
             self.publication_link(*args)
-        if event == "os.symlink":
+        if event in {"os.symlink", "os.chown", "os.chflags", "os.setxattr", "os.removexattr"}:
             raise BoundaryError("unregistered filesystem mutation forbidden")
 
     def install(self):
@@ -931,9 +1002,11 @@ def child(config):
     policy = PhasePolicy(source=source, write_root=case if config["mode"] == "prepare" else None,
                          git=Path(config["git"]), tools=tools)
     require(policy.git_pin == config["git_identity"], "child Git identity differs")
-    policy.install()
     imports = SourceImports(source, dependencies, source_pins, tools)
-    imports.install()
+    imports.install(add_paths=False)
+    imports.preload_ctypes()
+    policy.install()
+    imports.enable_selected_paths()
     if config["mode"] == "measure":
         verify_declared_closure(config["declaration"]["loaded_closure"], imports)
         require(tree_manifest(case, read=tools.read_file) == config["declaration"]["case_inventory"],
@@ -1242,6 +1315,8 @@ def collect_reports(checkpoint, reports, output):
         require(set(report) == PARENT_REPORT_FIELDS, "operation parent report shape differs")
         require(report.get("format") == FORMAT and report.get("mode") == "measure"
                 and report.get("report_role") == "measured_operation_pair", "input is not an operation report")
+        require(report["scope"] == SCOPE and canonical(report["limitations"]) == canonical(LIMITATIONS),
+                "operation scope or limitations differ")
         operation = report.get("operation")
         require(type(operation) is str and operation in dict(OPERATIONS), "report selects another operation")
         require(operation not in statuses, "duplicate selected operation report")
