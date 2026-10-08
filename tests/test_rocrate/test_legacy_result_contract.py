@@ -89,8 +89,10 @@ def test_merge_explicit_envelope_and_legacy_draft(legacy, mapping, tmp_path, mon
     output = tmp_path / 'merge.yaml'
     new = transformer.merge_rocrates([source], output_path=output,
                                      auto_prioritize=False, result_contract='dataset_v1')
-    assert set(old) == {'d4d', 'merge_report'}
-    assert set(new) == {'format', 'data', 'transformation_metadata', 'merge_report'}
+    assert set(old) == {'d4d', 'merge_report', 'source_presence'}
+    assert set(new) == {'format', 'data', 'transformation_metadata', 'merge_report', 'source_presence'}
+    assert old['source_presence'] == new['source_presence']
+    assert new['source_presence']['reason'] == 'different_source_property'
     assert new['format'] == 'd4d_transformation_result_v1'
     assert new['merge_report'] == old['merge_report']
     assert yaml.safe_load(output.read_bytes()) == new['data']

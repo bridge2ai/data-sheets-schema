@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Union
 from data_sheets_schema.legacy_doi import doi_value, source_value
 from data_sheets_schema.legacy_root_identity import root_identity_route, resolve_root_identity
 from data_sheets_schema.legacy_update_plan import update_plan_route, update_plan_value
+from data_sheets_schema.legacy_creators import creator_route, creator_value
 
 
 class D4DBuilder:
@@ -44,6 +45,7 @@ class D4DBuilder:
         root = rocrate_parser.require_root_dataset()
         marked_id = root_identity_route(self.mapping)
         update_plan_route(self.mapping)  # Refuse changed invalid routes before state reset.
+        marked_creators = creator_route(self.mapping)
         identity = resolve_root_identity(root) if marked_id else None
         self.d4d_data = {}
 
@@ -56,6 +58,13 @@ class D4DBuilder:
         # Map each covered field
         mapped_count = 0
         for d4d_field in covered_fields:
+            if marked_creators and d4d_field == 'creators':
+                # The closed marker selects the root's exact property, not a
+                # cached/custom lookup or a referenced member's person record.
+                if root.get('author') is not None:
+                    self.d4d_data['creators'] = creator_value(root['author'])
+                    mapped_count += 1
+                continue
             if marked_id and d4d_field == 'id':
                 if identity['id'] is not None:
                     self.d4d_data['id'] = identity['id']
@@ -105,7 +114,10 @@ class D4DBuilder:
         if not mapping_info:
             return value
 
-        # The explicit route precedes generic Type/list/string coercion.
+        # Explicit constructors precede generic Type/list/person/string coercion.
+        if field_name == 'creators' and creator_route(self.mapping):
+            return creator_value(value)
+
         if field_name == 'updates' and update_plan_route(self.mapping):
             return update_plan_value(value)
 

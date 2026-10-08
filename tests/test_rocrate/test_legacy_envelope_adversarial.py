@@ -123,14 +123,23 @@ def test_default_legacy_single_shape_and_embedded_alias_remain_exact(api, mappin
     assert asdict(result) == {"data": expected_data, "source": str(path), "target": "d4d",
         "timestamp": STAMP, "mapping_version": "v2_semantic", "coverage_percentage": 5 / 6 * 100,
         "unmapped_fields": ["unknown_slot"], "validation_passed": None,
-        "validation_errors": None, "transformation_metadata": metadata}
+        "validation_errors": None, "transformation_metadata": metadata,
+        "coverage_basis": {"kind": "constructed_field_presence", "count_rule": "non_null_mapped_value",
+            "numerator": 5, "denominator": 6, "is_source_coverage": False,
+            "is_validation_success": False},
+        "source_presence": {"format": "legacy_author_source_presence_v1", "status": "not_measured",
+            "reason": "no_covered_creators_route", "target": "creators", "source_property": "author",
+            "root_scope": "selected_root", "sources": []}}
 
 
 @pytest.mark.parametrize("provenance", [False, True])
-def test_default_legacy_merge_has_only_old_keys(api, mapping, tmp_path, provenance):
+def test_default_legacy_merge_keeps_data_and_adds_explicit_source_diagnostic(api, mapping, tmp_path, provenance):
     path = source(tmp_path)
     result = transformer(api, mapping, provenance=provenance).merge_rocrates([path], auto_prioritize=False)
-    assert set(result) == {"d4d", "merge_report"}
+    assert set(result) == {"d4d", "merge_report", "source_presence"}
+    assert result["source_presence"] == {"format": "legacy_author_source_presence_v1",
+        "status": "not_measured", "reason": "no_covered_creators_route", "target": "creators",
+        "source_property": "author", "root_scope": "selected_root", "sources": []}
     assert bool(result["merge_report"])
     if provenance:
         assert result["d4d"]["transformation_metadata"] == {

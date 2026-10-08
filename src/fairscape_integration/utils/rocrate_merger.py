@@ -6,6 +6,7 @@ This module intelligently merges data from multiple related RO-Crate files
 (e.g., parent + children) into a comprehensive D4D dataset.
 """
 
+from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
@@ -13,6 +14,11 @@ from typing import Any, Dict, List, Optional, Tuple
 from ..constants import MergeStrategy
 from .field_prioritizer import FieldPrioritizer
 from .d4d_builder import D4DBuilder
+
+from data_sheets_schema.legacy_creators import (
+    creator_route, author_source_presence, merge_creator_values,
+    source_presence_lines, creator_assertion_lines,
+)
 
 from data_sheets_schema.legacy_root_identity import (
     root_identity_route, merge_identity_evidence, identity_report_lines,
@@ -32,6 +38,8 @@ class ROCrateMerger:
         """
         self.mapping = mapping_loader
         self.root_identity_sources = None
+        self.source_presence = None
+        self.creator_assertion_sources = None
         self.prioritizer = FieldPrioritizer()
         self.merged_data: Dict[str, Any] = {}
         self.provenance: Dict[str, List[str]] = {}
@@ -67,6 +75,11 @@ class ROCrateMerger:
         if not rocrate_parsers:
             raise ValueError("No RO-Crate parsers provided")
 
+        marked_creators = creator_route(self.mapping)
+        if marked_creators and (type(primary_index) is not int
+                                or not 0 <= primary_index < len(rocrate_parsers)):
+            raise ValueError('Marked Creator primary_index must be an integer in the selected source range')
+
         if primary_index >= len(rocrate_parsers):
             raise ValueError(f"Primary index {primary_index} out of range")
 
@@ -76,16 +89,18 @@ class ROCrateMerger:
             parser.require_root_dataset()
 
         marked_id = root_identity_route(self.mapping)
-        identity_sources = None
-        if marked_id:
-            if source_names is None:
-                source_names = [Path(parser.rocrate_path).name.replace(
-                    '-ro-crate-metadata.json', '') for parser in rocrate_parsers]
-            if len(source_names) != len(rocrate_parsers):
-                raise ValueError('source_names must match the selected RO-Crates')
-            identity_sources = merge_identity_evidence(
-                rocrate_parsers, source_names, primary_index)
+        if source_names is None:
+            source_names = [Path(parser.rocrate_path).name.replace(
+                '-ro-crate-metadata.json', '') for parser in rocrate_parsers]
+        if len(source_names) != len(rocrate_parsers):
+            raise ValueError('source_names must match the selected RO-Crates')
+        presence = author_source_presence(
+            self.mapping, rocrate_parsers, source_names, primary_index)
+        identity_sources = (merge_identity_evidence(
+            rocrate_parsers, source_names, primary_index) if marked_id else None)
         self.root_identity_sources = identity_sources
+        self.source_presence = presence
+        self.creator_assertion_sources = None
 
         # Reset state so the same instance can be reused for multiple merges
         self.merged_data = {}
@@ -147,6 +162,11 @@ class ROCrateMerger:
             data = builder.build_dataset(parser)
             secondary_data.append((data, name))
 
+        if marked_creators:
+            creator_merged, creator_sources, self.creator_assertion_sources = merge_creator_values(
+                presence, [primary_data.get('creators')]
+                + [data.get('creators') for data, _ in secondary_data])
+
         # Merge field by field
         if self.verbose:
             print(f"\nMerging fields...")
@@ -159,7 +179,9 @@ class ROCrateMerger:
             ]
 
             # Merge this field
-            if marked_id and field_name == 'id':
+            if marked_creators and field_name == 'creators':
+                merged_value, sources = creator_merged, creator_sources
+            elif marked_id and field_name == 'id':
                 merged_value = primary_value
                 sources = [primary_name] if primary_value is not None else []
             else:
@@ -225,6 +247,14 @@ class ROCrateMerger:
         sources = [primary_name if s == "primary" else s for s in sources]
 
         return merged_value, sources
+
+    def get_source_presence(self):
+        """Return detached raw source measurements, independent of provenance flags."""
+        return deepcopy(self.source_presence)
+
+    def get_creator_assertion_sources(self):
+        """Return detached marked construction ranges; custom merges return None."""
+        return deepcopy(self.creator_assertion_sources)
 
     def get_merged_dataset(self) -> Dict[str, Any]:
         """
@@ -297,16 +327,18 @@ class ROCrateMerger:
             marker = "(PRIMARY)" if i == self.primary_index else ""
             report.append(f"{i+1}. {name} {marker}")
             report.append(f"   - Size: {file_size_kb:.1f} KB")
-            report.append(f"   - D4D fields contributed: {contributed_fields}")
+            report.append(f"   - Constructed Dataset fields contributed: {contributed_fields}")
             report.append("")
 
         report.extend(identity_report_lines(self.root_identity_sources))
+        report.extend(source_presence_lines(self.source_presence))
+        report.extend(creator_assertion_lines(self.creator_assertion_sources))
 
         # Merge statistics
         report.append("MERGE STATISTICS")
         report.append("-"*80)
         stats = self.merge_stats
-        report.append(f"Total unique D4D fields: {stats['total_unique_fields']}")
+        report.append(f"Total constructed Dataset fields: {stats['total_unique_fields']}")
         report.append(f"Fields from primary only: {stats['fields_from_primary']}")
         report.append(f"Fields from secondary sources: {stats['fields_from_secondary']}")
         report.append(f"Fields combined (descriptive): {stats['fields_combined']}")

@@ -73,6 +73,10 @@ except ImportError as e:
 
 from data_sheets_schema.legacy_publication import PublicationError, prepare_dataset, publish
 from data_sheets_schema.legacy_root_identity import scoring_fields
+from data_sheets_schema.legacy_creators import (
+    creator_route, author_source_presence, construction_basis, source_presence_lines,
+    VALUE_BASIS_LABEL, MEASUREMENT_LIMIT,
+)
 
 RESULT_CONTRACTS = frozenset({"legacy", "dataset_v1"})
 RESULT_FORMAT = "d4d_transformation_result_v1"
@@ -150,7 +154,8 @@ class TransformationConfig:
     output_indent: int = 2
     output_encoding: str = "utf-8"
 
-    # Explicit compatibility choice; legacy in-memory drafts retain their shape.
+    # Explicit compatibility choice for Dataset/metadata placement. Outer
+    # diagnostics qualify compatible construction counts in both contracts.
     result_contract: str = "legacy"
 
 
@@ -167,7 +172,7 @@ class TransformationResult:
     timestamp: str
     mapping_version: str
 
-    # Coverage statistics
+    # Legacy-named construction statistics; see coverage_basis, not source coverage.
     coverage_percentage: Optional[float] = None
     unmapped_fields: Optional[List[str]] = None
 
@@ -177,6 +182,11 @@ class TransformationResult:
 
     # Provenance
     transformation_metadata: Optional[Dict[str, Any]] = None
+
+    # Additive diagnostics: construction counts and original route evidence.
+    # These remain available when optional provenance is disabled.
+    coverage_basis: Optional[Dict[str, Any]] = None
+    source_presence: Optional[Dict[str, Any]] = None
 
 
 class SemanticTransformer:
@@ -332,6 +342,10 @@ class SemanticTransformer:
             mapped_count = len([f for f in covered_fields if d4d_dict.get(f) is not None])
             coverage_percentage = (mapped_count / len(covered_fields) * 100) if covered_fields else 0.0
             unmapped_fields = [f for f in covered_fields if d4d_dict.get(f) is None]
+            basis = construction_basis(mapped_count, len(covered_fields))
+            source_presence = author_source_presence(
+                self.mapping_loader, [parser], [source_path])
+            marked_creators = creator_route(self.mapping_loader)
 
         finally:
             # Clean up temp file if created
@@ -354,6 +368,8 @@ class SemanticTransformer:
                 'unmapped_fields': deepcopy(unmapped_fields) if mapping is not None else unmapped_fields,
                 'transformer_version': 'semantic_transformer_1.0'
             }
+            if marked_creators:
+                metadata['coverage_basis'] = deepcopy(basis)
             if mapping is None:
                 d4d_dict['transformation_metadata'] = metadata
             else:
@@ -415,7 +431,8 @@ class SemanticTransformer:
             unmapped_fields=unmapped_fields,
             validation_passed=validation_passed,
             validation_errors=validation_errors,
-            transformation_metadata=d4d_dict.get('transformation_metadata') if mapping is None else metadata
+            transformation_metadata=d4d_dict.get('transformation_metadata') if mapping is None else metadata,
+            coverage_basis=basis, source_presence=source_presence
         )
 
     # =========================================================================
@@ -472,11 +489,13 @@ class SemanticTransformer:
             auto_prioritize: Use informativeness scoring to rank sources
             validate: Override config.validate_output
             result_contract: dataset_v1 returns a versioned data/metadata envelope;
-                legacy preserves the existing d4d/merge_report draft shape.
+                legacy preserves Dataset/metadata placement. Both envelopes expose
+                a separate source_presence diagnostic.
 
         Returns:
-            Legacy: 'd4d' and 'merge_report'. dataset_v1: 'format', 'data',
-            'transformation_metadata' and the unchanged 'merge_report'.
+            Legacy: 'd4d', 'merge_report', 'source_presence'. dataset_v1:
+            'format', 'data', 'transformation_metadata', 'merge_report',
+            'source_presence'. No merged coverage percentage is measured.
         """
         contract = self._contract(result_contract)
         mapping = self._mapping_identity() if contract == "dataset_v1" else None
@@ -512,6 +531,7 @@ class SemanticTransformer:
 
         # Get merge report
         merge_report = merger.generate_merge_report(parsers, source_names=source_names)
+        source_presence = merger.get_source_presence()
 
         # Metadata is separate only in the explicitly selected contract.
         metadata = None
@@ -583,11 +603,13 @@ class SemanticTransformer:
         if mapping is not None:
             self._mapping_identity()
             return {'format': RESULT_FORMAT, 'data': merged_d4d,
-                    'transformation_metadata': metadata, 'merge_report': merge_report}
+                    'transformation_metadata': metadata, 'merge_report': merge_report,
+                    'source_presence': source_presence}
 
         return {
             'd4d': merged_d4d,
-            'merge_report': merge_report
+            'merge_report': merge_report,
+            'source_presence': source_presence
         }
 
     # =========================================================================
@@ -805,14 +827,21 @@ def main(argv=None):
     result = perform()
     if args.command == "transform":
         print(f"✓ Transformation complete")
-        print(f"  Coverage: {result.coverage_percentage:.1f}%")
+        print(f"  {VALUE_BASIS_LABEL}: {result.coverage_percentage:.1f}%")
+        print(f"  {MEASUREMENT_LIMIT}")
+        print('\n'.join(source_presence_lines(result.source_presence, raw=False)))
         if result.validation_passed is not None:
             print(f"  Validation: {'PASS' if result.validation_passed else 'FAIL'}")
 
     elif args.command == "batch":
         print(f"\n✓ Batch transformation complete: {len(result)} files")
+        for item in result:
+            print(f"  {item.source}: {VALUE_BASIS_LABEL}: {item.coverage_percentage:.1f}%")
+            print('\n'.join(source_presence_lines(item.source_presence, raw=False)))
+        print(MEASUREMENT_LIMIT)
     elif args.command == "merge":
         print(f"✓ Merged {len(args.inputs)} RO-Crates → {args.output}")
+        print('\n'.join(source_presence_lines(result['source_presence'], raw=False)))
     elif args.command == "stats":
         print("\nMapping Statistics:")
         print("=" * 50)
