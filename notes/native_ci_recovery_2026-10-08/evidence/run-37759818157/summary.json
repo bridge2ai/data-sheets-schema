@@ -1,0 +1,223 @@
+{
+  "all_shards_completed": true,
+  "format": "native_ci_completed_run_summary_v1",
+  "limitations": [
+    "The absence of a selected node in one worker or shard is not a global unrun conclusion.",
+    "A stable case archive may include partial, failed or malformed application content.",
+    "Saved whole-test durations are not per-operation performance profiles.",
+    "No native/helper execution, provider call or replay was used in this recovery.",
+    "Frozen controller and native production source were not changed by recovery."
+  ],
+  "native_cases": {
+    "case_completeness": "not_assessed",
+    "completed": 0,
+    "failed": 2,
+    "literal_inspections": [
+      "shard1-literal-inspection.json",
+      "shard3-literal-inspection.json"
+    ],
+    "retained": 2
+  },
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "run_conclusion": "failure",
+  "run_id": 37759818157,
+  "scope": "Six generic suite shards only; offline evaluation/audit/canary jobs are reported in GitHub metadata but are not included in these JUnit totals. Content consistency and saved declarations, not execution authentication.",
+  "shards": [
+    {
+      "job_conclusion": "failure",
+      "job_id": 113253227003,
+      "junit_archive": {
+        "bytes": 54965,
+        "sha256": "1405d00408d25cb3e2ee927334ae3c0b85767e41fe4294dcc5d70e62b6ccefc7"
+      },
+      "junit_artifact_id": 11542835217,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 1,
+        "skipped": 22,
+        "tests": 2654
+      },
+      "junit_xml": {
+        "bytes": 659984,
+        "sha256": "849ca236bc78f87bfaac63423d3288e882500507db61fccdb5d3918e37d3dd8f"
+      },
+      "native_archive": {
+        "bytes": 530121,
+        "sha256": "f5092f972f34ebc1e8e78e27b1abc3227b9ba3305c0b9edc79e0ba57164e0f15"
+      },
+      "native_artifact_id": 11541743902,
+      "native_junit_nodes": [
+        {
+          "error": false,
+          "failure": true,
+          "node_id": "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+          "seconds": "253.860",
+          "skipped": false
+        }
+      ],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion"
+      ],
+      "shard": 1
+    },
+    {
+      "job_conclusion": "success",
+      "job_id": 113253226974,
+      "junit_archive": {
+        "bytes": 54741,
+        "sha256": "571297d49dfcc29dacdefe835a2f71d4879a5df541a88b4dd3b0e7b7f6eb3f4e"
+      },
+      "junit_artifact_id": 11542616381,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 1,
+        "tests": 2784
+      },
+      "junit_xml": {
+        "bytes": 435477,
+        "sha256": "ed454994e58a6df24fc62a2ec2572a1ae4ee9d691a481b44f80edf6c51db47fd"
+      },
+      "native_archive": {
+        "bytes": 4744,
+        "sha256": "21f8b4831f5c7e9c87ec879ef3d3e1972ca5fcd8dfbeeb8653279a751f9b89d1"
+      },
+      "native_artifact_id": 11542626279,
+      "native_junit_nodes": [],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [],
+      "shard": 2
+    },
+    {
+      "job_conclusion": "failure",
+      "job_id": 113253227068,
+      "junit_archive": {
+        "bytes": 52182,
+        "sha256": "710d6848a1c4c294717fab45b5a9d08e7863e59a72d44b83ae50c1dadea5d884"
+      },
+      "junit_artifact_id": 11542792451,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 1,
+        "skipped": 0,
+        "tests": 2287
+      },
+      "junit_xml": {
+        "bytes": 419445,
+        "sha256": "ff623f0e573cde0c50763a0211622f0c8bdb7d2258a09f5d2e1cab83abb03ee7"
+      },
+      "native_archive": {
+        "bytes": 1682466,
+        "sha256": "d3a04a06ae77579fc89ee1f6683fec6ef356dfcf0fac13443a1215ff4d571170"
+      },
+      "native_artifact_id": 11543225487,
+      "native_junit_nodes": [
+        {
+          "error": false,
+          "failure": true,
+          "node_id": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses",
+          "seconds": "1006.478",
+          "skipped": false
+        }
+      ],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ],
+      "shard": 3
+    },
+    {
+      "job_conclusion": "success",
+      "job_id": 113253227097,
+      "junit_archive": {
+        "bytes": 57027,
+        "sha256": "2456f77c25ccc386debc3c3a931e3b57a7856d6babd30efbaa828d978b5af9fb"
+      },
+      "junit_artifact_id": 11542207663,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 3,
+        "tests": 2839
+      },
+      "junit_xml": {
+        "bytes": 435614,
+        "sha256": "9b8a5a9af604c0f02ab7207799338af2b9d6b7b600420b6a6aa451508d4a17ae"
+      },
+      "native_archive": {
+        "bytes": 4744,
+        "sha256": "78fe512e34c0317f03522e34c10b4893fc03508d8a49e109773adf952ceeafb4"
+      },
+      "native_artifact_id": 11542920446,
+      "native_junit_nodes": [],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [],
+      "shard": 4
+    },
+    {
+      "job_conclusion": "success",
+      "job_id": 113253227020,
+      "junit_archive": {
+        "bytes": 48510,
+        "sha256": "1252b81cc08982882c09e1215d1801aa07d3f0503279d9ac2b0431cee5aa52ca"
+      },
+      "junit_artifact_id": 11542720666,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 0,
+        "tests": 2511
+      },
+      "junit_xml": {
+        "bytes": 374428,
+        "sha256": "12ebec98afdae1ef6a630161c7738e43f4a8719e0375afc9e55b847cecff227d"
+      },
+      "native_archive": {
+        "bytes": 4744,
+        "sha256": "ea4ab840739d8b4c0777e0938bd5f15cb49a4ac6d70423d6734afed4f441d4e2"
+      },
+      "native_artifact_id": 11542770430,
+      "native_junit_nodes": [],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [],
+      "shard": 5
+    },
+    {
+      "job_conclusion": "success",
+      "job_id": 113253227032,
+      "junit_archive": {
+        "bytes": 41625,
+        "sha256": "9bef24073e52242e847087a5c1504b2f66a5ccf2974537e7d1e05ec6c008d991"
+      },
+      "junit_artifact_id": 11543206632,
+      "junit_counts": {
+        "errors": 0,
+        "failures": 0,
+        "skipped": 9,
+        "tests": 2016
+      },
+      "junit_xml": {
+        "bytes": 411715,
+        "sha256": "21202460bf13bbd2814366aac994d8c69e790305b40401d025062b2b21709b51"
+      },
+      "native_archive": {
+        "bytes": 4744,
+        "sha256": "29f2f5deae01189660926a7feb6e3d160b2967d950451757f2349f1babce206d"
+      },
+      "native_artifact_id": 11543211633,
+      "native_junit_nodes": [],
+      "native_recheck_matches_saved_report": true,
+      "nodes_with_manifests": [],
+      "shard": 6
+    }
+  ],
+  "tested_merge": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+  "tested_tree": "8bdb68b58a410756871bf5b99cba90fbc8d6581b",
+  "totals": {
+    "errors": 0,
+    "failures": 2,
+    "skipped": 35,
+    "tests": 15091
+  }
+}

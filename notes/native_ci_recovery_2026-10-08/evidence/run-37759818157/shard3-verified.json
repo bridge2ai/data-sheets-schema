@@ -1,0 +1,862 @@
+{
+  "archive": {
+    "bytes": 1682466,
+    "sha256": "d3a04a06ae77579fc89ee1f6683fec6ef356dfcf0fac13443a1215ff4d571170"
+  },
+  "artifact_id": 11543225487,
+  "artifact_name": "native-synthetic-cases-cfe68ee650e3de0f775bd476f055f25c29eb7a72-37759818157-1-shard3",
+  "cases": [
+    {
+      "actual_archive": {
+        "bytes": 1621942,
+        "sha256": "c14a83acc23b2d90c3037fa1f07384cdf6d37551d179e404d7461a6e73ad3e9b"
+      },
+      "actual_inventory": {
+        ".": {
+          "mode": 493,
+          "type": "directory"
+        },
+        ".data": {
+          "mode": 493,
+          "type": "directory"
+        },
+        ".data/README.md": {
+          "bytes": 1566,
+          "mode": 420,
+          "sha256": "bb199a3397c0966f77600d2a1b50bcdb6bd378abaae8f1af239b6b36668581bb",
+          "type": "file"
+        },
+        ".data/oaklib": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "actual-result.json": {
+          "bytes": 15512,
+          "mode": 420,
+          "sha256": "6ca4ce1cd63f3278ea75b4ac7de7f8027e58676d755ecd02bb2540d119a77647",
+          "type": "file"
+        },
+        "authority": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "authority/bundle.txt": {
+          "bytes": 682,
+          "mode": 420,
+          "sha256": "7eff6ff16eb77b51d7ec41523d82961295da0889730ad7ac2473ac671d2e78ab",
+          "type": "file"
+        },
+        "authority/chunks.json": {
+          "bytes": 818,
+          "mode": 420,
+          "sha256": "c18873ba5d0b5955413b2fbeb908f2587c0ec04eb60b04510f101415af8444c5",
+          "type": "file"
+        },
+        "authority/composition-execution.json": {
+          "bytes": 150181,
+          "mode": 420,
+          "sha256": "f4b4ee2888c54e987b5428c20e20ee8d150e28fdb7199c1860060169c064db13",
+          "type": "file"
+        },
+        "authority/composition.json": {
+          "bytes": 149689,
+          "mode": 420,
+          "sha256": "f745c473e18438c901bde647d8d604402ba048a0b9e98f77b5148828d503ca30",
+          "type": "file"
+        },
+        "authority/context.json": {
+          "bytes": 323,
+          "mode": 420,
+          "sha256": "77e927a7f1598b1cd8c4894636bcc50336a1278dd6b98695e0655476733bf70b",
+          "type": "file"
+        },
+        "authority/instruction-execution.md": {
+          "bytes": 104847,
+          "mode": 420,
+          "sha256": "bd55198f774e3ae99d229f081a57596aed736bdfa5e8b422861ccad4879e7175",
+          "type": "file"
+        },
+        "authority/instruction.md": {
+          "bytes": 104770,
+          "mode": 420,
+          "sha256": "11861c937e0004e0de7dbdcb01cf68404340d35f61c5cb3d2ef097650a8ab803",
+          "type": "file"
+        },
+        "authority/invented-ci.json": {
+          "bytes": 2491,
+          "mode": 420,
+          "sha256": "2fb3953c17262e55e9491debe871ec3284c82a7e6582dc6ff22dd75aa0e30515",
+          "type": "file"
+        },
+        "authority/invented-owner.json": {
+          "bytes": 687,
+          "mode": 420,
+          "sha256": "5df5d843e126f10453cfbad2ea8ae956a838a28c7a0bc034f8885204f9d60015",
+          "type": "file"
+        },
+        "authority/invented-permissions.json": {
+          "bytes": 3200488,
+          "mode": 420,
+          "sha256": "4fb03716ddc0f0a01fa48496ce249dfc2648798e90cb3a199723e6d0612bdb06",
+          "type": "file"
+        },
+        "authority/invented-review.json": {
+          "bytes": 531,
+          "mode": 420,
+          "sha256": "906545b978ae89677210f68bc7a509efc24669afc7749b307fa06fd67ddc4cb7",
+          "type": "file"
+        },
+        "authority/receipt-policy.json": {
+          "bytes": 327,
+          "mode": 420,
+          "sha256": "9ecc2d8b7c1ecea131acd0a0592a32fa7d94fc8e20c6ffd70d368556284aff1c",
+          "type": "file"
+        },
+        "authority/runtime-execution.json": {
+          "bytes": 1164,
+          "mode": 420,
+          "sha256": "23d07aaf71f7752db83b76a2839f15395177da2123e8187452f05635d3c23e39",
+          "type": "file"
+        },
+        "authority/runtime.json": {
+          "bytes": 1097,
+          "mode": 420,
+          "sha256": "42011be0b65022450f0332b5b657e5d6abe6605edbe399d96c65fdf56bb34c7a",
+          "type": "file"
+        },
+        "authority/selection.json": {
+          "bytes": 6690,
+          "mode": 420,
+          "sha256": "d95cff589d93857441e15f8e5e7c378c36c55f39172c069c6b38395b20c93f9d",
+          "type": "file"
+        },
+        "authority/synthetic-seeds.json": {
+          "bytes": 1163,
+          "mode": 420,
+          "sha256": "bf1342f3bbc92b477510c701a0d303ab81cedcd3589f23ad3169428a55d967b5",
+          "type": "file"
+        },
+        "authority/system.txt": {
+          "bytes": 73,
+          "mode": 420,
+          "sha256": "ed3ef8205712aad869ff9dab0ae315069acf4af33fcbac8fa8d67f90c9610e20",
+          "type": "file"
+        },
+        "data": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct/offline-neutral": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct/offline-neutral/SYNTHETIC_d4d.yaml": {
+          "bytes": 239,
+          "mode": 420,
+          "sha256": "b4e47afa24ccab79ac9d2397edf8c18b02b0c106bb197dcdee9ebb324a84d66f",
+          "type": "file"
+        },
+        "data/d4d_concatenated/claudecode_direct_core": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct_core/offline-neutral": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "data/d4d_concatenated/claudecode_direct_core/offline-neutral/SYNTHETIC_coverage_receipt.yaml": {
+          "bytes": 324,
+          "mode": 420,
+          "sha256": "82f7e82afdcb658cb24bf4977758e8294caebe445c1ed92395965648f7eb9303",
+          "type": "file"
+        },
+        "data/d4d_concatenated/claudecode_direct_core/offline-neutral/SYNTHETIC_d4d_core.yaml": {
+          "bytes": 717,
+          "mode": 420,
+          "sha256": "9c8440e67dcffaf3877a2839f18185041adc44fe9b41fb35fde8982ec0ee4cf3",
+          "type": "file"
+        },
+        "declared-never-invoked": {
+          "bytes": 18,
+          "mode": 448,
+          "sha256": "0a5fb2d3a9e42d8cd0cd06a68ffdbc8cdd3e26ad2ec801c47867e457e7433e1a",
+          "type": "file"
+        },
+        "fresh-attempt": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/binding": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/binding/execution.json": {
+          "bytes": 365702,
+          "mode": 384,
+          "sha256": "630304fe54bbce4063a22f5adf7d8e514a6e7f7376463c729a8a9f9f9cfdb70d",
+          "type": "file"
+        },
+        "fresh-attempt/stages/binding/session.json": {
+          "bytes": 1492,
+          "mode": 384,
+          "sha256": "798a90473a2f64da5aa6e62e6a49f2c261bd0e420230c1e14d9a6c5b10782b35",
+          "type": "file"
+        },
+        "fresh-attempt/stages/binding/started.json": {
+          "bytes": 1346,
+          "mode": 384,
+          "sha256": "c206083a2ecc3f4e8e3b62427112566d648da800cea4561aeb3ea2617d1f9347",
+          "type": "file"
+        },
+        "fresh-attempt/stages/journal.json": {
+          "bytes": 2091,
+          "mode": 384,
+          "sha256": "08122052617ad4bfdd7cea58675e94796ad16f7690d9a595dc49e88bbf04e1b6",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/observations/000000.json": {
+          "bytes": 1861,
+          "mode": 384,
+          "sha256": "bde0fa4f86952ec3dbeaa9d202a59ac20120a9e902204e3b134d8fea720ede45",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000001.json": {
+          "bytes": 1719,
+          "mode": 384,
+          "sha256": "b712024e53c296c488138ff4d685e2c00d699ad066b9b72d85fd82016315f2e7",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000002.json": {
+          "bytes": 2239,
+          "mode": 384,
+          "sha256": "e02a71436f9449b993dff7234b5e6752bda7a921ee36126e81d6082c5e855b2a",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000003.json": {
+          "bytes": 3934,
+          "mode": 384,
+          "sha256": "27b0acb717ee692124aac52328f32199f7a67827b6b507097f7a310623c381f3",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000004.json": {
+          "bytes": 2824,
+          "mode": 384,
+          "sha256": "6b154ef3e8ad4821406ae47318a581775a7f68e64aaf511ef31d61dd69d783d4",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000005.json": {
+          "bytes": 3458,
+          "mode": 384,
+          "sha256": "1169bd23094c516526e6f73bb7141ee29b45197019934f490ae699ee7d5db269",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000006.json": {
+          "bytes": 3986,
+          "mode": 384,
+          "sha256": "d8c956fd4b9adf56638f79100f9e3c440d4e7636d233a1d0d82ec266ad709361",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000007.json": {
+          "bytes": 2241,
+          "mode": 384,
+          "sha256": "6509dc72d26bf30a8bc76f198cc70f84c71ae43049492ea9d626e2ba3da58875",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000008.json": {
+          "bytes": 4473,
+          "mode": 384,
+          "sha256": "e7e4674e93da1eebd774d4fa1eca6910f1e0dc1b8bac64d1401508a54897635a",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000009.json": {
+          "bytes": 1405,
+          "mode": 384,
+          "sha256": "4a7cf6fbc9de470f2c67be2554a8eb280b0468ea104f9fbe6d1f7496d64034ee",
+          "type": "file"
+        },
+        "fresh-attempt/stages/observations/000010.json": {
+          "bytes": 2241,
+          "mode": 384,
+          "sha256": "e1e9f3dc9b0f1d5d93acad3fdd7152abeafedaf5f7a05c2cb479eb3e7eb705da",
+          "type": "file"
+        },
+        "fresh-attempt/stages/outputs": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/outputs/effective-receipt.yaml": {
+          "bytes": 324,
+          "mode": 384,
+          "sha256": "82f7e82afdcb658cb24bf4977758e8294caebe445c1ed92395965648f7eb9303",
+          "type": "file"
+        },
+        "fresh-attempt/stages/outputs/receipt-carry.json": {
+          "bytes": 1274,
+          "mode": 384,
+          "sha256": "9e3b58c7cbfb26ebd7b24d14e75462cc3fd49852bcdfb64de4c7c37ef997b44e",
+          "type": "file"
+        },
+        "fresh-attempt/stages/outputs/receipt-result.json": {
+          "bytes": 8191,
+          "mode": 384,
+          "sha256": "27ecc3c06034e274a6e9dba6ceead1348338fe2d093981662d42af3ac70557ca",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/records/000000.json": {
+          "bytes": 898,
+          "mode": 384,
+          "sha256": "f69d38f912869a483fd24d07e438516d5f6782eb2607e91890d8ba2735a3306f",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000001.json": {
+          "bytes": 1001,
+          "mode": 384,
+          "sha256": "f557b447bc9d69da8623cef4acf5362701a60a7ec1b1cf3eac0144d74e7c636a",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000002.json": {
+          "bytes": 1528,
+          "mode": 384,
+          "sha256": "72bcc035961fad01c24e2d177eea20b1964fcc8d30d86020a8c9409b2bf4147a",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000003.json": {
+          "bytes": 1105,
+          "mode": 384,
+          "sha256": "1a655d25ec12d718173880dffb517775089489f296a880c2694bcf668d83c1f2",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000004.json": {
+          "bytes": 1426,
+          "mode": 384,
+          "sha256": "786498091cb154565fa757cd81678be68ca564489301fcb48568bed4d4a1d901",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000005.json": {
+          "bytes": 1519,
+          "mode": 384,
+          "sha256": "b01401100890bef54eba566441f09cfabc1be4e4a2faa1856e8b4c936cea77fd",
+          "type": "file"
+        },
+        "fresh-attempt/stages/records/000006.json": {
+          "bytes": 1242,
+          "mode": 384,
+          "sha256": "a52cf40144d90904799df498449a36a2c8e68f32b0b633205ab28bcedfa07d63",
+          "type": "file"
+        },
+        "fresh-attempt/stages/requests": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/requests/000001.json": {
+          "bytes": 2456231,
+          "mode": 384,
+          "sha256": "7c39f48e8d3b3e7792915ef9d790f11be8599ef219f6b743dc5927cbf8acd432",
+          "type": "file"
+        },
+        "fresh-attempt/stages/responses": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/responses/000001.bin": {
+          "bytes": 676,
+          "mode": 420,
+          "sha256": "c5cb6881fce4ab8e985fa64aad20dcfa2fe8e5c99d6e6a113bb0eddb241d86fd",
+          "type": "file"
+        },
+        "fresh-attempt/stages/sealed": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "fresh-attempt/stages/sealed/core-seal.json": {
+          "bytes": 892,
+          "mode": 384,
+          "sha256": "309d3700b43192c58616cca067f09d486fbf18891c90968de02b2229c6b8030b",
+          "type": "file"
+        },
+        "fresh-attempt/stages/sealed/core.yaml": {
+          "bytes": 717,
+          "mode": 384,
+          "sha256": "9c8440e67dcffaf3877a2839f18185041adc44fe9b41fb35fde8982ec0ee4cf3",
+          "type": "file"
+        },
+        "fresh-attempt/stages/sealed/full.yaml": {
+          "bytes": 239,
+          "mode": 384,
+          "sha256": "b4e47afa24ccab79ac9d2397edf8c18b02b0c106bb197dcdee9ebb324a84d66f",
+          "type": "file"
+        },
+        "fresh-attempt/stages/sealed/original-receipt.yaml": {
+          "bytes": 324,
+          "mode": 384,
+          "sha256": "82f7e82afdcb658cb24bf4977758e8294caebe445c1ed92395965648f7eb9303",
+          "type": "file"
+        },
+        "fresh-attempt/stages/sealed/phase1.json": {
+          "bytes": 1090,
+          "mode": 384,
+          "sha256": "a2f9a886019cf5cefbe03e83f287526993473290d7271867e02e6c2e7b0d0414",
+          "type": "file"
+        },
+        "native-attempt": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-attempt/ci.json": {
+          "bytes": 2491,
+          "mode": 384,
+          "sha256": "2fb3953c17262e55e9491debe871ec3284c82a7e6582dc6ff22dd75aa0e30515",
+          "type": "file"
+        },
+        "native-attempt/cli_config": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-attempt/control.jsonl": {
+          "bytes": 20688,
+          "mode": 420,
+          "sha256": "c4607f83f7348dbf4bc33c84571ca7f65e7f95f8d651f0947c8ed34ce743ee6b",
+          "type": "file"
+        },
+        "native-attempt/keep-awake.json": {
+          "bytes": 224,
+          "mode": 384,
+          "sha256": "80643af0969f07308f199f82e413f3a7a849d6f178e42898e2d4b7586a0e8b00",
+          "type": "file"
+        },
+        "native-attempt/launch_word.json": {
+          "bytes": 687,
+          "mode": 384,
+          "sha256": "5df5d843e126f10453cfbad2ea8ae956a838a28c7a0bc034f8885204f9d60015",
+          "type": "file"
+        },
+        "native-attempt/registration.json": {
+          "bytes": 365702,
+          "mode": 384,
+          "sha256": "630304fe54bbce4063a22f5adf7d8e514a6e7f7376463c729a8a9f9f9cfdb70d",
+          "type": "file"
+        },
+        "native-attempt/review.json": {
+          "bytes": 531,
+          "mode": 384,
+          "sha256": "906545b978ae89677210f68bc7a509efc24669afc7749b307fa06fd67ddc4cb7",
+          "type": "file"
+        },
+        "native-attempt/runtime-observation.json": {
+          "bytes": 732,
+          "mode": 384,
+          "sha256": "9c97d6f195ed71f24ed2714fcdce1073ec0e48cce57fab3d5a0dfc5cc5f49035",
+          "type": "file"
+        },
+        "native-attempt/started.json": {
+          "bytes": 1346,
+          "mode": 384,
+          "sha256": "c206083a2ecc3f4e8e3b62427112566d648da800cea4561aeb3ea2617d1f9347",
+          "type": "file"
+        },
+        "native-attempt/stderr.txt": {
+          "bytes": 0,
+          "mode": 420,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": "file"
+        },
+        "native-attempt/transcript.jsonl": {
+          "bytes": 5462596,
+          "mode": 420,
+          "sha256": "68406f415085fc5bfc6eb76846d1f2ef29d2cda1d279b0d3da66ac3ae8a42ad9",
+          "type": "file"
+        },
+        "native-evidence": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-evidence/captured": {
+          "mode": 448,
+          "type": "directory"
+        },
+        "native-evidence/captured/0": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/0/composition-execution.json": {
+          "bytes": 150181,
+          "mode": 256,
+          "sha256": "f4b4ee2888c54e987b5428c20e20ee8d150e28fdb7199c1860060169c064db13",
+          "type": "file"
+        },
+        "native-evidence/captured/1": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/1/control.jsonl": {
+          "bytes": 20688,
+          "mode": 256,
+          "sha256": "c4607f83f7348dbf4bc33c84571ca7f65e7f95f8d651f0947c8ed34ce743ee6b",
+          "type": "file"
+        },
+        "native-evidence/captured/2": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/2/runtime-observation.json": {
+          "bytes": 732,
+          "mode": 256,
+          "sha256": "9c97d6f195ed71f24ed2714fcdce1073ec0e48cce57fab3d5a0dfc5cc5f49035",
+          "type": "file"
+        },
+        "native-evidence/captured/3": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/3/stderr.txt": {
+          "bytes": 0,
+          "mode": 256,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "type": "file"
+        },
+        "native-evidence/captured/4": {
+          "mode": 493,
+          "type": "directory"
+        },
+        "native-evidence/captured/4/transcript.jsonl": {
+          "bytes": 5462596,
+          "mode": 256,
+          "sha256": "68406f415085fc5bfc6eb76846d1f2ef29d2cda1d279b0d3da66ac3ae8a42ad9",
+          "type": "file"
+        },
+        "native-evidence/final.json": {
+          "bytes": 19995,
+          "mode": 384,
+          "sha256": "bd94b5e3a567b28cb1510af6ae4478d197943975af49a8ecc1798e0f39c0f962",
+          "type": "file"
+        },
+        "native-evidence/published.json": {
+          "bytes": 270,
+          "mode": 384,
+          "sha256": "36512211ef31a27f331c856e37c9e388e962be16222ffaf2222aa8b9994a37d9",
+          "type": "file"
+        },
+        "ordinary-python-test-peer": {
+          "bytes": 9509,
+          "mode": 448,
+          "sha256": "cb8a11ae42cd81451e0a8f9395d680ef8acadbd5bd22238474fd34b3dc489b5c",
+          "type": "file"
+        },
+        "sources.yaml": {
+          "bytes": 699,
+          "mode": 420,
+          "sha256": "341b9ec3f8c1aa1a5b74c74ac7855dcb4d40f971c84d0cd8e6e2289c93ec4f4a",
+          "type": "file"
+        }
+      },
+      "archive_pin_matches": true,
+      "availability": {
+        "actual-result.json": "file",
+        "authority/composition-execution.json": "file",
+        "authority/runtime-execution.json": "file",
+        "authority/runtime.json": "file",
+        "authority/selection.json": "file",
+        "fresh-attempt/stages/journal.json": "file",
+        "native-attempt/control.jsonl": "file",
+        "native-attempt/registration.json": "file",
+        "native-attempt/started.json": "file",
+        "native-attempt/stderr.txt": "file",
+        "native-attempt/transcript.jsonl": "file"
+      },
+      "before_archived_after_equal": true,
+      "capture_status": "retained",
+      "case_completeness": "not_assessed",
+      "diagnostic": {
+        "child_exit_code": null,
+        "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+        "native_completion": "not_inferred",
+        "phase_history": {
+          "assembly_complete": false,
+          "checked": true,
+          "checks": [
+            {
+              "call_event": 12,
+              "exit_code": 0,
+              "helper": "chunk_check",
+              "result_event": 14,
+              "tool_use_id": "shared-test-4"
+            },
+            {
+              "call_event": 15,
+              "exit_code": 0,
+              "helper": "source_scope",
+              "result_event": 17,
+              "tool_use_id": "shared-test-5"
+            },
+            {
+              "call_event": 24,
+              "exit_code": 0,
+              "helper": "full_schema",
+              "result_event": 26,
+              "tool_use_id": "shared-test-8"
+            },
+            {
+              "call_event": 27,
+              "exit_code": 0,
+              "helper": "full_terms",
+              "result_event": 29,
+              "tool_use_id": "shared-test-9"
+            },
+            {
+              "call_event": 30,
+              "exit_code": 0,
+              "helper": "phase1_receipts",
+              "result_event": 32,
+              "tool_use_id": "shared-test-10"
+            },
+            {
+              "call_event": 33,
+              "exit_code": 0,
+              "helper": "advance",
+              "result_event": 35,
+              "tool_use_id": "shared-test-11"
+            },
+            {
+              "call_event": 42,
+              "exit_code": 0,
+              "helper": "advance",
+              "result_event": 44,
+              "tool_use_id": "shared-test-14"
+            },
+            {
+              "call_event": 45,
+              "exit_code": 0,
+              "helper": "derive_core",
+              "result_event": 47,
+              "tool_use_id": "shared-test-15"
+            },
+            {
+              "call_event": 48,
+              "exit_code": 0,
+              "helper": "core_schema",
+              "result_event": 50,
+              "tool_use_id": "shared-test-16"
+            },
+            {
+              "call_event": 51,
+              "exit_code": 0,
+              "helper": "pair",
+              "result_event": 53,
+              "tool_use_id": "shared-test-17"
+            },
+            {
+              "call_event": 54,
+              "exit_code": 0,
+              "helper": "original_source_inventory",
+              "result_event": 56,
+              "tool_use_id": "shared-test-18"
+            }
+          ],
+          "complete": true,
+          "core_sealed": true,
+          "current_checks": [
+            "chunk_check",
+            "core_schema",
+            "derive_core",
+            "full_schema",
+            "full_terms",
+            "original_source_inventory",
+            "pair",
+            "phase1_receipts",
+            "source_scope"
+          ],
+          "native_terminal": false,
+          "passed": false,
+          "pending_tool_ids": [
+            "shared-test-19"
+          ],
+          "phase1_sealed": true,
+          "problems": [
+            "unsettled native tool calls",
+            "no observed checked stage assembly",
+            "missing current final obligations",
+            "missing native terminal"
+          ],
+          "scope": "Ordered settled helper obligations; capture, callback authority, file bytes and scientific support are separate checks.",
+          "terminal_failures": []
+        },
+        "result_available": true,
+        "result_pin": {
+          "bytes": 15512,
+          "sha256": "6ca4ce1cd63f3278ea75b4ac7de7f8027e58676d755ecd02bb2540d119a77647"
+        },
+        "runtime_gates_passed": false,
+        "saved_capture_bindings": [
+          {
+            "matches_saved_capture": true,
+            "relative": "authority/composition-execution.json"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/control.jsonl"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/runtime-observation.json"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/stderr.txt"
+          },
+          {
+            "matches_saved_capture": true,
+            "relative": "native-attempt/transcript.jsonl"
+          }
+        ],
+        "scope": "Saved result and literal transcript inspection only; no replay, timing attribution or authenticated-execution claim.",
+        "shutdown": {
+          "control_initialized": true,
+          "control_shutdown_complete": true,
+          "unfinished_control_workers": 0
+        },
+        "state": "failed",
+        "transcript": {
+          "ends_in_newline": true,
+          "events": 58,
+          "parse_errors": [],
+          "pending_tool_observations": [
+            {
+              "event_type": "assistant",
+              "line": 57,
+              "pending_tool": {
+                "id": "shared-test-19",
+                "input": {
+                  "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.native_shared_stage advance --registration /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_merged_omis0/native26-omissions/authority/selection.json"
+                },
+                "name": "Bash",
+                "type": "tool_use"
+              }
+            }
+          ]
+        },
+        "transcript_available": true
+      },
+      "manifest_pin": {
+        "bytes": 54752,
+        "sha256": "bf3509003bbec6ccffa1fecf8ce50cdd3b619f6e56885942617f2a250ab878a1"
+      },
+      "matches_archived_inventory": true,
+      "node_id": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses",
+      "test_outcome": {
+        "call": {
+          "duration_seconds": 1006.4760311999999,
+          "outcome": "failed"
+        },
+        "setup": {
+          "duration_seconds": 0.0012487110000165558,
+          "outcome": "passed"
+        },
+        "teardown": {
+          "duration_seconds": 0.0003605320000588108,
+          "outcome": "passed"
+        }
+      },
+      "worker": "gw3"
+    }
+  ],
+  "nodes_with_manifests": [
+    "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+  ],
+  "nodes_without_manifests_in_this_shard": [
+    "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion"
+  ],
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "run_id": 37759818157,
+  "source": {
+    "files_checked": 8,
+    "head": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+    "tree": "8bdb68b58a410756871bf5b99cba90fbc8d6581b"
+  },
+  "verification_scope": "Content consistency and declared GitHub/source bindings; not authenticated execution.",
+  "worker_outcomes": {
+    "controller": {
+      "events": [],
+      "pytest_exitstatus": 1,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw0": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw1": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw2": {
+      "events": [],
+      "pytest_exitstatus": 0,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion",
+        "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses"
+      ]
+    },
+    "gw3": {
+      "events": [
+        {
+          "capture_status": "retained",
+          "directory": "51df4ab17f6bf118ee96a503bf0a4d7d8c3fe57eeb877f43f9e4a175b204c6dc",
+          "node_id": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses",
+          "test_outcome": {
+            "call": {
+              "duration_seconds": 1006.4760311999999,
+              "outcome": "failed"
+            },
+            "setup": {
+              "duration_seconds": 0.0012487110000165558,
+              "outcome": "passed"
+            },
+            "teardown": {
+              "duration_seconds": 0.0003605320000588108,
+              "outcome": "passed"
+            }
+          }
+        }
+      ],
+      "pytest_exitstatus": 1,
+      "unobserved_meaning": "Not observed in this worker; may be unselected, unrun, or run elsewhere.",
+      "unobserved_nodes": [
+        "tests/test_native_shared_execution.py::test_actual_public_correction_three_workers_and_saved_completion"
+      ]
+    }
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "case_artifact": {
+    "bytes": 1682466,
+    "sha256": "d3a04a06ae77579fc89ee1f6683fec6ef356dfcf0fac13443a1215ff4d571170"
+  },
+  "conclusion": "The saved attempt stopped at its existing deadline. The test duration includes fixture/preparation/cleanup and is not the attempt-only duration. Live phase1 and core are sealed; assembly and native terminal are absent. Tool19 stage advance is pending. No whole-path acceptance or native performance-cause conclusion follows.",
+  "control": {
+    "events": [
+      {
+        "at": "2026-10-08T09:59:32.178358+00:00",
+        "basis": null,
+        "kind": "initialize_sent",
+        "line": 1,
+        "tool_id": null
+      },
+      {
+        "at": "2026-10-08T09:59:43.481390+00:00",
+        "basis": null,
+        "kind": "initialize_ack",
+        "line": 2,
+        "tool_id": null
+      },
+      {
+        "at": "2026-10-08T10:00:12.368571+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 3,
+        "tool_id": "shared-test-1"
+      },
+      {
+        "at": "2026-10-08T10:00:34.321230+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 4,
+        "tool_id": "shared-test-2"
+      },
+      {
+        "at": "2026-10-08T10:00:56.177711+00:00",
+        "basis": "a registered input the instruction reads",
+        "kind": "decision",
+        "line": 5,
+        "tool_id": "shared-test-3"
+      },
+      {
+        "at": "2026-10-08T10:01:17.538286+00:00",
+        "basis": "exact selected native shared helper: chunk_check",
+        "kind": "decision",
+        "line": 6,
+        "tool_id": "shared-test-4"
+      },
+      {
+        "at": "2026-10-08T10:01:40.514785+00:00",
+        "basis": "exact selected native shared helper: source_scope",
+        "kind": "decision",
+        "line": 7,
+        "tool_id": "shared-test-5"
+      },
+      {
+        "at": "2026-10-08T10:02:03.421430+00:00",
+        "basis": "a file inside the registered output directories",
+        "kind": "decision",
+        "line": 8,
+        "tool_id": "shared-test-6"
+      },
+      {
+        "at": "2026-10-08T10:02:24.174354+00:00",
+        "basis": "a file inside the registered output directories",
+        "kind": "decision",
+        "line": 9,
+        "tool_id": "shared-test-7"
+      },
+      {
+        "at": "2026-10-08T10:02:45.111892+00:00",
+        "basis": "exact selected native shared helper: full_schema",
+        "kind": "decision",
+        "line": 10,
+        "tool_id": "shared-test-8"
+      },
+      {
+        "at": "2026-10-08T10:03:09.851741+00:00",
+        "basis": "exact selected native shared helper: full_terms",
+        "kind": "decision",
+        "line": 11,
+        "tool_id": "shared-test-9"
+      },
+      {
+        "at": "2026-10-08T10:03:42.993753+00:00",
+        "basis": "exact selected native shared helper: phase1_receipts",
+        "kind": "decision",
+        "line": 12,
+        "tool_id": "shared-test-10"
+      },
+      {
+        "at": "2026-10-08T10:04:59.164876+00:00",
+        "basis": "exact selected native shared helper: advance",
+        "kind": "decision",
+        "line": 13,
+        "tool_id": "shared-test-11"
+      },
+      {
+        "at": "2026-10-08T10:06:56.889983+00:00",
+        "basis": "a file inside the registered output directories",
+        "kind": "decision",
+        "line": 14,
+        "tool_id": "shared-test-12"
+      },
+      {
+        "at": "2026-10-08T10:07:30.974606+00:00",
+        "basis": "a file inside the registered output directories",
+        "kind": "decision",
+        "line": 15,
+        "tool_id": "shared-test-13"
+      },
+      {
+        "at": "2026-10-08T10:08:03.417021+00:00",
+        "basis": "exact selected native shared helper: advance",
+        "kind": "decision",
+        "line": 16,
+        "tool_id": "shared-test-14"
+      },
+      {
+        "at": "2026-10-08T10:10:24.415954+00:00",
+        "basis": "exact selected native shared helper: derive_core",
+        "kind": "decision",
+        "line": 17,
+        "tool_id": "shared-test-15"
+      },
+      {
+        "at": "2026-10-08T10:11:17.554856+00:00",
+        "basis": "exact selected native shared helper: core_schema",
+        "kind": "decision",
+        "line": 18,
+        "tool_id": "shared-test-16"
+      },
+      {
+        "at": "2026-10-08T10:11:55.942985+00:00",
+        "basis": "exact selected native shared helper: pair",
+        "kind": "decision",
+        "line": 19,
+        "tool_id": "shared-test-17"
+      },
+      {
+        "at": "2026-10-08T10:12:45.341885+00:00",
+        "basis": "exact selected native shared helper: original_source_inventory",
+        "kind": "decision",
+        "line": 20,
+        "tool_id": "shared-test-18"
+      },
+      {
+        "at": "2026-10-08T10:13:21.337272+00:00",
+        "basis": "exact selected native shared helper: advance",
+        "kind": "decision",
+        "line": 21,
+        "tool_id": "shared-test-19"
+      }
+    ],
+    "pin": {
+      "bytes": 20688,
+      "sha256": "c4607f83f7348dbf4bc33c84571ca7f65e7f95f8d651f0947c8ed34ce743ee6b"
+    }
+  },
+  "controller_exitstatus": 1,
+  "format": "native_ci_literal_case_inspection_v1",
+  "junit_archive": {
+    "bytes": 52182,
+    "sha256": "710d6848a1c4c294717fab45b5a9d08e7863e59a72d44b83ae50c1dadea5d884"
+  },
+  "junit_duration_matches_sum_of_pytest_phases_within_1ms": true,
+  "junit_failure_embedded_result_equals_archived_result": true,
+  "junit_seconds": "1006.478",
+  "junit_totals": {
+    "errors": 0,
+    "failures": 1,
+    "skipped": 0,
+    "testcases": 2287
+  },
+  "junit_xml": {
+    "bytes": 419445,
+    "sha256": "ff623f0e573cde0c50763a0211622f0c8bdb7d2258a09f5d2e1cab83abb03ee7"
+  },
+  "node_id": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses",
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "result": {
+    "child_exit_code": null,
+    "first_stop": "native attempt deadline elapsed; retain all incomplete charge reservations",
+    "phase_history": {
+      "assembly_complete": false,
+      "checked": true,
+      "checks": [
+        {
+          "call_event": 12,
+          "exit_code": 0,
+          "helper": "chunk_check",
+          "result_event": 14,
+          "tool_use_id": "shared-test-4"
+        },
+        {
+          "call_event": 15,
+          "exit_code": 0,
+          "helper": "source_scope",
+          "result_event": 17,
+          "tool_use_id": "shared-test-5"
+        },
+        {
+          "call_event": 24,
+          "exit_code": 0,
+          "helper": "full_schema",
+          "result_event": 26,
+          "tool_use_id": "shared-test-8"
+        },
+        {
+          "call_event": 27,
+          "exit_code": 0,
+          "helper": "full_terms",
+          "result_event": 29,
+          "tool_use_id": "shared-test-9"
+        },
+        {
+          "call_event": 30,
+          "exit_code": 0,
+          "helper": "phase1_receipts",
+          "result_event": 32,
+          "tool_use_id": "shared-test-10"
+        },
+        {
+          "call_event": 33,
+          "exit_code": 0,
+          "helper": "advance",
+          "result_event": 35,
+          "tool_use_id": "shared-test-11"
+        },
+        {
+          "call_event": 42,
+          "exit_code": 0,
+          "helper": "advance",
+          "result_event": 44,
+          "tool_use_id": "shared-test-14"
+        },
+        {
+          "call_event": 45,
+          "exit_code": 0,
+          "helper": "derive_core",
+          "result_event": 47,
+          "tool_use_id": "shared-test-15"
+        },
+        {
+          "call_event": 48,
+          "exit_code": 0,
+          "helper": "core_schema",
+          "result_event": 50,
+          "tool_use_id": "shared-test-16"
+        },
+        {
+          "call_event": 51,
+          "exit_code": 0,
+          "helper": "pair",
+          "result_event": 53,
+          "tool_use_id": "shared-test-17"
+        },
+        {
+          "call_event": 54,
+          "exit_code": 0,
+          "helper": "original_source_inventory",
+          "result_event": 56,
+          "tool_use_id": "shared-test-18"
+        }
+      ],
+      "complete": true,
+      "core_sealed": true,
+      "current_checks": [
+        "chunk_check",
+        "core_schema",
+        "derive_core",
+        "full_schema",
+        "full_terms",
+        "original_source_inventory",
+        "pair",
+        "phase1_receipts",
+        "source_scope"
+      ],
+      "native_terminal": false,
+      "passed": false,
+      "pending_tool_ids": [
+        "shared-test-19"
+      ],
+      "phase1_sealed": true,
+      "problems": [
+        "unsettled native tool calls",
+        "no observed checked stage assembly",
+        "missing current final obligations",
+        "missing native terminal"
+      ],
+      "scope": "Ordered settled helper obligations; capture, callback authority, file bytes and scientific support are separate checks.",
+      "terminal_failures": []
+    },
+    "pin": {
+      "bytes": 15512,
+      "sha256": "6ca4ce1cd63f3278ea75b4ac7de7f8027e58676d755ecd02bb2540d119a77647"
+    },
+    "shutdown": {
+      "control_initialized": true,
+      "control_shutdown_complete": true,
+      "unfinished_control_workers": 0
+    },
+    "state": "failed"
+  },
+  "run_id": 37759818157,
+  "scope": "Literal inspection of verified saved bytes only; no extraction, native execution, helper execution or replay. No causal or operation timing conclusion is inferred.",
+  "tested_merge": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+  "transcript": {
+    "event_count": 58,
+    "pin": {
+      "bytes": 5462596,
+      "sha256": "68406f415085fc5bfc6eb76846d1f2ef29d2cda1d279b0d3da66ac3ae8a42ad9"
+    },
+    "tail_events": [
+      {
+        "event": {
+          "request": {
+            "callback_id": "d4d_tool_policy_v3",
+            "input": {
+              "cwd": "/home/runner/work/data-sheets-schema/data-sheets-schema",
+              "effort": "high",
+              "hook_event_name": "PreToolUse",
+              "tool_input": {
+                "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.source_review --record /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_merged_omis0/native26-omissions/fresh-attempt/stages/sealed/full.yaml --artifact original_full"
+              },
+              "tool_name": "Bash",
+              "tool_use_id": "shared-test-18"
+            },
+            "subtype": "hook_callback"
+          },
+          "request_id": "callback-shared-test-18",
+          "type": "control_request"
+        },
+        "line": 55
+      },
+      {
+        "event": {
+          "message": {
+            "content": [
+              {
+                "content": "{\n  \"artifact\": \"original_full\",\n  \"sha256\": \"b4e47afa24ccab79ac9d2397edf8c18b02b0c106bb197dcdee9ebb324a84d66f\",\n  \"values\": [\n    {\n      \"path\": \"/id\",\n      \"text\": \"https://example.org/offline-neutral\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/name\",\n      \"text\": \"offline-neutral\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/title\",\n      \"text\": \"Offline Neutral Dataset\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/description\",\n      \"text\": \"This fictional dataset supports offline software verification.\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/version\",\n      \"text\": \"1.0\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/keywords/0\",\n      \"text\": \"synthetic\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/creators/0/name\",\n      \"text\": \"Offline Author\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    }\n  ]\n}\n",
+                "is_error": false,
+                "tool_use_id": "shared-test-18",
+                "type": "tool_result"
+              }
+            ]
+          },
+          "session_id": "43540000-0000-4000-8000-000000000001",
+          "tool_use_result": {
+            "exitCode": 0,
+            "stdout": "{\n  \"artifact\": \"original_full\",\n  \"sha256\": \"b4e47afa24ccab79ac9d2397edf8c18b02b0c106bb197dcdee9ebb324a84d66f\",\n  \"values\": [\n    {\n      \"path\": \"/id\",\n      \"text\": \"https://example.org/offline-neutral\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/name\",\n      \"text\": \"offline-neutral\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/title\",\n      \"text\": \"Offline Neutral Dataset\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/description\",\n      \"text\": \"This fictional dataset supports offline software verification.\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/version\",\n      \"text\": \"1.0\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/keywords/0\",\n      \"text\": \"synthetic\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    },\n    {\n      \"path\": \"/creators/0/name\",\n      \"text\": \"Offline Author\",\n      \"record_metadata_allowed\": false,\n      \"whole_value_required\": false\n    }\n  ]\n}\n"
+          },
+          "type": "user"
+        },
+        "line": 56
+      },
+      {
+        "event": {
+          "message": {
+            "content": [
+              {
+                "id": "shared-test-19",
+                "input": {
+                  "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.native_shared_stage advance --registration /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_merged_omis0/native26-omissions/authority/selection.json"
+                },
+                "name": "Bash",
+                "type": "tool_use"
+              }
+            ]
+          },
+          "session_id": "43540000-0000-4000-8000-000000000001",
+          "type": "assistant"
+        },
+        "line": 57
+      },
+      {
+        "event": {
+          "request": {
+            "callback_id": "d4d_tool_policy_v3",
+            "input": {
+              "cwd": "/home/runner/work/data-sheets-schema/data-sheets-schema",
+              "effort": "high",
+              "hook_event_name": "PreToolUse",
+              "tool_input": {
+                "command": "/home/runner/work/data-sheets-schema/data-sheets-schema/.venv/bin/python -m data_sheets_schema.native_shared_stage advance --registration /tmp/pytest-of-runner/pytest-0/popen-gw3/test_actual_public_merged_omis0/native26-omissions/authority/selection.json"
+              },
+              "tool_name": "Bash",
+              "tool_use_id": "shared-test-19"
+            },
+            "subtype": "hook_callback"
+          },
+          "request_id": "callback-shared-test-19",
+          "type": "control_request"
+        },
+        "line": 58
+      }
+    ]
+  },
+  "verified_inventory_report": {
+    "bytes": 30353,
+    "sha256": "74f5c7c030d61703783fda676e9d4b95921f9bb922ca278eff3c99cf9e660071"
+  },
+  "worker": "gw3/outcomes.json",
+  "worker_event": {
+    "capture_status": "retained",
+    "directory": "51df4ab17f6bf118ee96a503bf0a4d7d8c3fe57eeb877f43f9e4a175b204c6dc",
+    "node_id": "tests/test_native_shared_execution_variant.py::test_actual_public_merged_omissions_and_all_chunk_statuses",
+    "test_outcome": {
+      "call": {
+        "duration_seconds": 1006.4760311999999,
+        "outcome": "failed"
+      },
+      "setup": {
+        "duration_seconds": 0.0012487110000165558,
+        "outcome": "passed"
+      },
+      "teardown": {
+        "duration_seconds": 0.0003605320000588108,
+        "outcome": "passed"
+      }
+    }
+  },
+  "worker_exitstatus": 1
+}
