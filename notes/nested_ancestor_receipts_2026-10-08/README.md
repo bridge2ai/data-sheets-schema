@@ -44,7 +44,8 @@ This option requires `--output`, `--no-figures` and no `--check`. Existing files
 and symlinks are refused. It can accompany an explicit attainability selection;
 that selection's existing captured sidecar behavior is retained. No historical
 report, figure, receipt, source bundle or generation output is replaced by the
-opt-in route. This change itself includes no corpus replay or report regeneration.
+opt-in route. No full report regeneration or new empirical comparison was
+performed for this change.
 
 These are deterministic path diagnostics, not scientific support, source
 coverage improvement, established omissions or recall measurements. The 17
@@ -53,7 +54,39 @@ matching under #4398 and the human annotation/matching decisions under #2921
 remain pending; this change grants no approval to score those annotations or
 run a generation campaign.
 
-Focused tests are in `tests/test_nested_ancestor_receipts.py`, with existing
-replicate-structure, receipt and attainability-report tests retained as
-regression controls. Execution results will be recorded after the serialized
-validation run; no test outcome is claimed in this implementation note.
+## Validation
+
+The serialized suite passed **236 tests** with zero failures, errors or skips:
+25 new diagnostics cases and 211 existing regression cases. JUnit records
+221.436 seconds; the coordinator's terminal summary reports 221.50 seconds
+and one dateutil dependency deprecation warning. No material finding remained
+after independent source review.
+
+| Test module | Passed |
+|---|---:|
+| `test_nested_ancestor_receipts.py` | 25 |
+| `test_replicate_structure.py` | 68 |
+| `test_receipts.py` | 50 |
+| `test_attainability_aggregation.py` | 53 |
+| `test_arm_comparison.py` | 40 |
+
+Tested commit: `baeb92d315c488af25661ac60ceaf98536c37e2c`.
+Tested tree: `5d11d690826df39c5938f14f4a7eb613c2b180c7`.
+The working tree was clean after the run, before these evidence notes changed.
+[validation.json](validation.json) records 13 source/test/dependency declaration
+pins, each independently matched against both the tested Git blob and working
+bytes. These selected pins are not a complete runtime import closure or an
+attestation of installed dependency versions.
+
+Retained external JUnit artifact: `ancestor-diagnostics-tests-01.xml`, 34,387
+bytes, SHA256
+`bf8b88a65ad2faecb731e32ec555653bad38f1d0cfe010f5874c0d63b7ffbff0`.
+Its digest, module counts and outcome nodes were independently checked.
+The commit and invocation binding come from the coordinator's frozen-run
+record; JUnit itself does not attest source revision or runtime identity.
+
+The suite includes existing corpus-backed regression controls and synthetic
+diagnostic/report fixtures. It does not establish a new empirical comparison,
+recount the historical 17 rows, regenerate a full report or replay generation.
+No historical report or figure was replaced, and the scientific holds above
+remain unchanged.
