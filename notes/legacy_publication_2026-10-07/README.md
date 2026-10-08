@@ -64,24 +64,45 @@ Historical records and source bundles are retained. This change claims neither
 repaired mapping semantics nor improved source coverage. Retiring rows is not
 coverage gain; intact copied text alone does not justify `exactMatch`/`none`.
 
-## Validation plan
+## Validation results
 
-No application, test or real-crate replay was run while editing this change.
-The coordinator will serialize validation after source and review freeze.
+The serialized seven-module run passed **272 tests**, with zero failures,
+errors or skips. It ran against commit
+`f4b1fb670b86fce73036eab39d173bc2b9736b1d`, tree
+`9cdd71aafb2650262d855afc9ebc72e6eb969676`. The coordinator's terminal reported
+20.25 seconds and 14 dependency deprecation warnings; JUnit records 20.212
+seconds and does not encode the warning count.
 
-New integration tests call the real packaged/hidden/API entry points with an
-explicit source-supplied ID mapping and the actual current Dataset validator.
-They cover valid text/list preservation, missing IDs, unknown and malformed
-nested fields, all auto strategies, final-merge validation, late invalid batch
-members, metadata refusals, configured encoding, optional-validator absence,
-strict/diagnostic refusals and existing-file sentinels. Independent adversarial
-tests cover typed readback and duplicate keys, header injection, actual closed
-schema validation, protected aliases, complete staging and injected I/O failure.
+| Module | Passed |
+| --- | ---: |
+| `tests/test_rocrate/test_legacy_publication.py` | 51 |
+| `tests/test_rocrate/test_legacy_publication_adversarial.py` | 39 |
+| `tests/test_rocrate/test_legacy_root_gates.py` | 30 |
+| `tests/test_rocrate/test_production_root_gates.py` | 104 |
+| `tests/test_rocrate/test_transform_api.py` | 3 |
+| `tests/test_cli/test_rocrate_cli.py` | 27 |
+| `tests/test_fairscape_integration/test_rocrate_merger.py` | 18 |
 
-Run the new `test_legacy_publication*.py` modules together with
-`test_legacy_root_gates.py`, `test_production_root_gates.py`,
-`test_transform_api.py`, `tests/test_cli/test_rocrate_cli.py` and the existing
-FAIRSCAPE merger tests. Existing root/member and encoding refusals must remain
-earlier than publication. Success fixtures use a genuine ID mapping rather than
-an always-accepting validator. No scientific scoring or provider calls belong
-to this validation.
+[validation.json](validation.json) pins the nine production modules, current
+full schema and default mapping, all seven test modules, and the JUnit result.
+All 18 pinned files were compared byte-for-byte with the tested commit. The
+44,506-byte JUnit artifact is retained locally at
+`/private/tmp/d4d-goal-resume-5sVO4ntI/legacy-publication-tests-01.xml`; its SHA-256
+is `a39cce112e47ee8ead0491c8d24cb0d2eb20733994348e7daf36fd345175c1b3`.
+The XML contains all 272 successful cases and no failure/error/skipped nodes.
+Only these notes changed after testing; production and test files are unchanged.
+
+The new integration tests call real packaged, hidden and API entry points with
+an explicit source-supplied ID mapping and the actual current Dataset validator.
+They cover text/list preservation, missing IDs, unknown and malformed nested
+fields, all auto strategies, final-merge validation, late invalid batch members,
+metadata refusals, configured encoding, optional-validator absence, strict and
+diagnostic refusals, and destination sentinels. Independent controls cover typed
+readback, duplicate keys, header injection, actual closed-schema validation,
+protected aliases, complete staging and injected I/O failures. Existing root,
+member, CLI delegation and encoding regressions also passed.
+
+These are software controls. No current-cohort regeneration, provider evaluation,
+paid run, real-crate comparison publication or scientific score was produced.
+They do not settle #4630, #4594 or #2915, authenticate human review, or release any
+existing scientific, paid-run or audit28 hold.
