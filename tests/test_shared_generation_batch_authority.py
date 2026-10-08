@@ -11,6 +11,7 @@ from data_sheets_schema import api_runner as api, run_lock, shared_generation as
 from tests.test_generation_manifest_identity import external  # noqa: F401
 from tests.test_shared_generation_cli import (batch, module, registered, roster,
                                              stub_plan)  # noqa: F401
+from tests.test_shared_generation_selection import registration_for
 
 
 @pytest.fixture(autouse=True)
@@ -148,19 +149,39 @@ def test_roster_hardlink_to_later_output_is_protected(registered, monkeypatch):
     assert {p: p.read_bytes() for p in before} == before
 
 
-def test_actual_schema_closure_hardlink_remains_protected(registered, monkeypatch):
+def test_actual_schema_closure_hardlink_remains_protected(registered, monkeypatch, tmp_path):
     base, reg = registered
+    originals = [Path(pin['path']) for pin in reg['inputs']['full_schema']['sources']]
+    original_state = {p: (p.read_bytes(), p.stat().st_nlink) for p in originals}
+    # #4665: linking a repository schema changes its inode for every xdist
+    # worker, even if the alias is eventually removed. Copy before linking.
+    # The shipped full schema is flattened; fail before linking if that changes.
+    assert originals == [Path(reg['inputs']['full_schema']['root'])]
+    private_schema = tmp_path / 'private-schema' / originals[0].name
+    private_schema.parent.mkdir()
+    private_schema.write_bytes(original_state[originals[0]][0])
+    private_schema = private_schema.resolve()
+    monkeypatch.setattr(api, 'FULL_SCHEMA_PATH', str(private_schema))
+    reg = registration_for(base)
+    assert [Path(pin['path']) for pin in reg['inputs']['full_schema']['sources']] == [private_schema]
     path, rows = roster(base, reg)
     schema = Path(reg['inputs']['full_schema']['sources'][-1]['path'])
     target = specs_for(rows)[1].report_path
     target.parent.mkdir(parents=True)
+    assert schema.resolve().is_relative_to(tmp_path.resolve())
+    assert target.resolve().is_relative_to(tmp_path.resolve())
+    assert not schema.samefile(originals[0]) and schema.stat().st_nlink == 1
     os.link(schema, target)
+    assert schema.samefile(target) and schema.stat().st_nlink == 2
+    assert {p: (p.read_bytes(), p.stat().st_nlink) for p in originals} == original_state
     before = authority_bytes(path, rows)
     seen = dispatch_traps(monkeypatch)
     result = batch(reg, path)
     assert result.exit_code == 1 and 'aliases a run output' in result.output, result.output
     assert seen == {'plan': [], 'lock': [], 'execute': []}
     assert {p: p.read_bytes() for p in before} == before
+    assert schema.samefile(target) and schema.stat().st_nlink == 2
+    assert {p: (p.read_bytes(), p.stat().st_nlink) for p in originals} == original_state
 
 
 def test_current_recheck_rejects_new_alias_without_recapturing(registered):
