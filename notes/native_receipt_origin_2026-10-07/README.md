@@ -60,11 +60,26 @@ evidence, alias handling, detached return values, and saved-report tampering
 after publication hashes have been recomputed. Existing synthetic offline
 consumer fixtures exercise both released paths; their fabricated native
 observations and authorization documents are software test data, never
-production authority. Test results are recorded after the source is frozen
-and the focused suite has completed.
+production authority.
+
+The final serialized suite at commit
+`36483d08ff0936fbe52a9999293b1f2007f05a73` passed **310 tests**, with no
+failures, errors or skips. The JUnit duration is **1625.593 seconds**. This
+includes 76 receipt-origin integration/adversarial tests, 87 existing neutral
+supervisor tests, 73 existing native execution tests, 50 incomplete-evidence
+tests and 24 captured-origin tests. The suite includes the actual 8 MiB origin
+detail case and both publishers' refusal/preservation cases for #4613.
+
+[validation.json](validation.json) records the exact tested head/tree, nine
+source/test SHA-256 pins, module counts and the digest of the external
+`receipt-origin-final.xml` JUnit artifact. Independent read-only verification
+checked those pins against the tested commit, counted all 310 testcase nodes
+and found no failure, error or skipped nodes. Production code and tests were
+unchanged when this evidence note was added. These results address #4609,
+#4611 and #4613; they do not close the broader integration obligations below.
 
 The published but unmerged shared adapter in
-[#4354](https://github.com/bridge2ai/data-sheets-schema/pull/4354),
+[#4354](https://github.com/bridge2ai/data-sheets-schema/issues/4354),
 [#4468](https://github.com/bridge2ai/data-sheets-schema/issues/4468)
 original/effective receipt history, figures, and the held controller/audit28
 work are outside this slice. Human scientific review and paid-run holds
