@@ -1,0 +1,737 @@
+"""Independent local protocol and input-boundary controls for #4618.
+
+These tests do not load recovered code or build a native checkpoint. Synthetic
+frames exercise the driver's actual persistence order; import controls use small
+invented modules. The actual full-schema checkpoint is a separate bounded run.
+"""
+from copy import deepcopy
+from dataclasses import make_dataclass
+import importlib.machinery
+import json
+import os
+from pathlib import Path
+import sys
+from types import ModuleType, SimpleNamespace
+
+import pytest
+
+
+DRIVER = Path(__file__).resolve().parents[1] / "notes/native_full_schema_profile_2026-10-07/profile_checkpoint.py"
+
+
+@pytest.fixture
+def profile():
+    module = ModuleType("_full_schema_boundary_tests")
+    module.__file__ = str(DRIVER)
+    exec(compile(DRIVER.read_bytes(), str(DRIVER), "exec"), module.__dict__)
+    return module
+
+
+@pytest.fixture
+def frames(profile, tmp_path):
+    instance = profile.SyntheticFrames.__new__(profile.SyntheticFrames)
+    instance.c = SimpleNamespace(canonical=profile.canonical)
+    instance.path = str(tmp_path / "selection.json")
+    instance.number, instance.session = 0, "invented-session"
+    instance.native, instance.parent, instance.withheld_grants = [], [], {}
+    instance.value = {"attempt_directory": str(tmp_path), "working_directory": str(tmp_path)}
+    instance.composition = {"policy": {"pretool_control": {"callback_id": "invented-callback"},
+                                      "native_shared_helpers": {"advance": "never launched"}}}
+    response_path = tmp_path / "response.json"
+    request = SimpleNamespace(pin=SimpleNamespace(path=str(tmp_path / "request.json")), raw=b'{"invented":true}\n')
+    instance.paths = {"full": str(tmp_path / "full.yaml")}
+    decision = SimpleNamespace(state="awaiting_response", cursor=SimpleNamespace(kind="worker"),
+                               request=request, response=SimpleNamespace(path=str(response_path)))
+    events = []
+
+    def observe(name, identity):
+        # Inspect persisted bytes at each boundary, including their intermediate
+        # states. A later removed early grant must not escape the regression.
+        transcript = [json.loads(row) for row in (tmp_path / "transcript.jsonl").read_bytes().splitlines()]
+        control = [json.loads(row) for row in (tmp_path / "control.jsonl").read_bytes().splitlines()]
+        events.append((name, identity, transcript, control, response_path.exists()))
+
+    def streams():
+        profile.SyntheticFrames.streams(instance)
+        observe("streams", None)
+
+    instance.streams = streams
+    instance.capture = SimpleNamespace(
+        _load_live=lambda path: SimpleNamespace(decision=lambda: decision),
+        observe_request_read=lambda run, identity: observe("read", identity),
+        observe_response_intent=lambda run, identity: observe("intent", identity),
+        observe_response_written=lambda run, identity: observe("written", identity))
+    return instance, decision, response_path, events
+
+
+def tool_ids(transcript, tool):
+    return [block["id"] for row in transcript for block in row.get("message", {}).get("content", [])
+            if block.get("type") == "tool_use" and block.get("name") == tool]
+
+
+def granted(control, identity):
+    return any(row["request"]["request"]["input"]["tool_use_id"] == identity for row in control)
+
+
+def test_response_intent_is_persisted_before_any_grant_and_file_creation(profile, frames, monkeypatch):
+    instance, decision, response_path, events = frames
+    original_save = profile.save_new
+
+    def save(path, raw):
+        assert path == response_path and not path.exists()
+        transcript = [json.loads(row) for row in (path.parent / "transcript.jsonl").read_bytes().splitlines()]
+        control = [json.loads(row) for row in (path.parent / "control.jsonl").read_bytes().splitlines()]
+        write_id = tool_ids(transcript, "Write")[-1]
+        assert any(event[0] == "intent" and event[1] == write_id for event in events)
+        assert granted(control, write_id), "response bytes preceded the persisted grant"
+        events.append(("save", write_id, transcript, control, path.exists()))
+        original_save(path, raw)
+
+    monkeypatch.setattr(profile, "save_new", save)
+    answers = []
+    instance.respond(lambda raw: answers.append(raw) or b'{"findings":[]}', "worker")
+    assert answers == [decision.request.raw]
+    assert response_path.read_bytes() == b'{"findings":[]}'
+    intents = [event for event in events if event[0] == "intent"]
+    assert len(intents) == 1
+    intent = intents[0]
+    write_id = intent[1]
+    intent_index = events.index(intent)
+    assert not intent[4] and not granted(intent[3], write_id)
+    assert all(not granted(event[3], write_id) for event in events[:intent_index + 1])
+    save_index = next(i for i, event in enumerate(events) if event[0] == "save")
+    assert events[intent_index + 1][0] == "streams" and granted(events[intent_index + 1][3], write_id)
+    assert intent_index + 1 < save_index
+    assert events[-1][0] == "written" and events[-1][4] and granted(events[-1][3], write_id)
+    assert instance.withheld_grants == {}
+
+
+def test_phase1_full_write_has_grant_before_bytes(profile, frames, monkeypatch):
+    instance, _, _, events = frames
+    original = profile.save_new
+
+    def save(path, raw):
+        latest = events[-1]
+        identity = tool_ids(latest[2], "Write")[-1]
+        assert granted(latest[3], identity)
+        assert not path.exists()
+        original(path, raw)
+
+    monkeypatch.setattr(profile, "save_new", save)
+    instance.write("full", b"name: invented\n")
+    assert Path(instance.paths["full"]).read_bytes() == b"name: invented\n"
+
+
+def test_wrong_cursor_stops_before_frames_or_answer(profile, frames):
+    instance, decision, response_path, events = frames
+    decision.cursor.kind = "receipt"
+    with pytest.raises(profile.BoundaryError, match="exact selected cursor"):
+        instance.respond(lambda *_: pytest.fail("stale cursor was answered"), "worker")
+    assert events == [] and instance.native == [] and instance.parent == [] and not response_path.exists()
+
+
+def test_ungranted_begin_and_wrong_grant_do_not_create_transient_permission(profile, frames):
+    instance, _, response_path, events = frames
+    identity, _ = instance.begin("Write", {"file_path": str(response_path), "content": "invented"}, grant=False)
+    assert all(not granted(event[3], identity) for event in events)
+    with pytest.raises(profile.BoundaryError, match="sole pending callback"):
+        instance.grant("foreign-callback")
+    assert instance.parent == [] and set(instance.withheld_grants) == {identity}
+    instance.grant(identity)
+    assert granted(events[-1][3], identity)
+    with pytest.raises(profile.BoundaryError, match="sole pending callback"):
+        instance.grant(identity)
+
+
+@pytest.fixture
+def preparation(profile):
+    identities = {"driver_sha256": "d" * 64, "python_identity": {"sha256": "a" * 64},
+                  "git_identity": {"sha256": "b" * 64}, "recovered_provenance": {"source_commit": profile.SOURCE_COMMIT}}
+    child = {"format": profile.CHILD_FORMAT, "mode": "prepare", "selection_relative": "authority/profile-selection.json",
+        "declared_deadline_seconds": 900, "preparation_stages": [], "synthetic_parameters": {"invented": True},
+        "checkpoint": {"label": profile.LABEL, "complete": False, "workers_declared": 3,
+                       "workers_consumed": 1, "receipt_consumed": True},
+        "case_inventory": {"entries": {}, "files": 0, "bytes": 0},
+        "loaded_closure": [{"origin": "recovered/fake.py", "sha256": "f" * 64, "bytes": 1}],
+        "git": {"identity": identities["git_identity"], "calls": {}},
+        "python_identity": identities["python_identity"], "recovered_provenance": identities["recovered_provenance"],
+        "flags": {"isolated": 1, "no_site": 1, "dont_write_bytecode": True},
+        "environment": {"python": "invented", "platform": "invented", "machine": "invented"},
+        "phase_overhead": {"preflight": {"process_cpu_ns": 1, "wall_ns": 2},
+                           "final_verification": {"process_cpu_ns": 1, "wall_ns": 2}}}
+    report = {"format": profile.FORMAT, "mode": "prepare", "status": "completed",
+        "scope": profile.SCOPE, "diagnostic_wall_bound_seconds": 900,
+        "declared_acceptance_deadline_seconds": 900, "parent_wall_seconds": 0.125,
+        "child_exit_code": 0, "stdout_bytes": len(profile.canonical(child)),
+        "stdout_sha256": profile.sha(profile.canonical(child)),
+        "stderr_bytes": 0, "stderr_sha256": profile.sha(b""), "limitations": list(profile.LIMITATIONS),
+        "report_role": "checkpoint_preparation", "operation": None,
+        "operation_catalog": profile.operation_catalog(), "measurement_binding": None,
+        "operation_set": profile.operation_set({}), "historical_capture_complete": False,
+        "scientific_eligibility": False, "execution_authorized": False, "native_acceptance_evaluated": False,
+        "utility_sha256": profile.UTILITY_SHA256, "driver_sha256": identities["driver_sha256"],
+        "python_identity": identities["python_identity"], "result": child}
+    return report, identities
+
+
+@pytest.mark.parametrize("path", ["/outside/selection.json", "../authority/profile-selection.json",
+    "authority/../authority/profile-selection.json", "authority/alternate.json", "authority\\profile-selection.json"])
+def test_checkpoint_only_accepts_exact_retained_selection_role(profile, preparation, path):
+    report, identities = preparation
+    assert profile.checkpoint_declaration(report, **identities) == report["result"]
+    changed = deepcopy(report)
+    changed["result"]["selection_relative"] = path
+    changed["stdout_sha256"] = profile.sha(profile.canonical(changed["result"]))
+    changed["stdout_bytes"] = len(profile.canonical(changed["result"]))
+    with pytest.raises(profile.BoundaryError, match="role or deadline"):
+        profile.checkpoint_declaration(changed, **identities)
+
+
+@pytest.mark.parametrize("field,value", [("workers_declared", 1), ("workers_consumed", 0),
+    ("workers_consumed", True), ("workers_declared", 3.0), ("receipt_consumed", False),
+    ("complete", True), ("complete", 0), ("label", "historical-native-run")])
+def test_checkpoint_cannot_claim_tiny_or_completed_work(profile, preparation, field, value):
+    report, identities = preparation
+    report["result"]["checkpoint"][field] = value
+    report["stdout_sha256"] = profile.sha(profile.canonical(report["result"]))
+    report["stdout_bytes"] = len(profile.canonical(report["result"]))
+    with pytest.raises(profile.BoundaryError, match="incomplete prefix"):
+        profile.checkpoint_declaration(report, **identities)
+
+
+def test_projection_uses_dataclass_order_and_retains_reader_state(profile):
+    names = ["selection", "value", "composition", "spec", "reader", "pool", "transcript", "control",
+             "binding", "history", "observations", "phase1", "_catalogs"]
+    # Different declaration orders make a set-iteration implementation fail
+    # deterministically, without depending on the test process's hash seed.
+    for ordered in (names, list(reversed(names)), names[4:] + names[:4]):
+        cls = make_dataclass("SyntheticCapturedRun", [(name, object) for name in ordered])
+        values = {name: {"invented": name} for name in names}
+        values["spec"] = SimpleNamespace(render_spec=lambda: {"bound": "rendered"})
+        values["reader"] = SimpleNamespace(selection={"pin": "selected"}, pool=None,
+                                           members={"one": b"captured"}, total=8)
+        run = cls(**values)
+        projected = profile.run_projection(run)
+        assert list(projected) == [name for name in ordered if name not in {"spec", "reader", "_catalogs"}] + ["render_spec", "reader"]
+        assert projected["reader"] == vars(run.reader)
+        assert projected["pool"] == values["pool"] and projected["history"] == values["history"]
+        run.reader.unregistered = "state"
+        with pytest.raises(profile.BoundaryError, match="reader shape changed"):
+            profile.run_projection(run)
+
+
+@pytest.fixture
+def imports(profile, tmp_path):
+    source, dependencies = tmp_path / "source", tmp_path / "dependencies"
+    source.mkdir(); dependencies.mkdir()
+    tools = profile.utility()
+    path = source / "example.py"
+    raw = b"VALUE = 'verified source'\n"
+    path.write_bytes(raw)
+    pins = {"example.py": {"sha256": profile.sha(raw), "mode": "100644"}}
+    return profile.SourceImports(source, dependencies, pins, tools), path
+
+
+def test_source_loader_uses_verified_py_and_refuses_symlink_or_changed_bytes(profile, imports, tmp_path):
+    owner, path = imports
+    path.with_suffix(".pyc").write_bytes(b"hostile bytecode must not be read")
+    namespace = {}
+    code = owner.source_code(path)
+    owner.audit("exec", (code,))
+    exec(code, namespace)
+    assert namespace["VALUE"] == "verified source"
+    forged = compile("VALUE = 'forged'", str(path), "exec")
+    with pytest.raises(profile.BoundaryError, match="verified source compilation"):
+        owner.audit("exec", (forged,))
+    alias = owner.source / "alias.py"
+    alias.symlink_to(path)
+    with pytest.raises(profile.BoundaryError, match="symlink"):
+        owner.source_code(alias)
+    path.write_bytes(b"VALUE = 'changed'\n")
+    with pytest.raises(profile.BoundaryError, match="source changed"):
+        owner.source_code(path)
+
+
+def test_sourceless_dependency_import_is_refused_before_execution(profile, imports, monkeypatch):
+    owner, _ = imports
+    # Register restoration before install's direct assignments. No permanent
+    # audit hook is installed in the pytest process.
+    with monkeypatch.context() as local:
+        for cls, method in ((importlib.machinery.SourceFileLoader, "get_code"),
+                            (importlib.machinery.ExtensionFileLoader, "create_module"),
+                            (importlib.machinery.SourcelessFileLoader, "get_code")):
+            local.setattr(cls, method, getattr(cls, method))
+        local.setattr(sys, "addaudithook", lambda *_: None)
+        local.setattr(sys, "path", list(sys.path))
+        owner.install()
+        bytecode = owner.dependencies / "foreign.pyc"
+        bytecode.write_bytes(b"must refuse without loading bytecode")
+        loader = importlib.machinery.SourcelessFileLoader("foreign", str(bytecode))
+        with pytest.raises(profile.BoundaryError, match="sourceless recovered/dependency"):
+            loader.get_code("foreign")
+
+
+def test_declared_import_closure_binds_exact_bytes_and_rejects_escape(profile, imports):
+    owner, path = imports
+    raw = path.read_bytes()
+    row = {"origin": "recovered/example.py", "sha256": profile.sha(raw), "bytes": len(raw)}
+    profile.verify_declared_closure([row], owner)
+    for origin in ("recovered/../example.py", "recovered//outside.py", "foreign/example.py"):
+        with pytest.raises(profile.BoundaryError, match="canonical role-relative"):
+            profile.verify_declared_closure([{**row, "origin": origin}], owner)
+    with pytest.raises(profile.BoundaryError, match="repeats"):
+        profile.verify_declared_closure([row, row], owner)
+    path.write_bytes(b"changed declared dependency")
+    with pytest.raises(ValueError):
+        profile.verify_declared_closure([row], owner)
+
+
+@pytest.mark.parametrize("event,args", [("os.exec", ("/bin/echo", ["echo"], {})),
+    ("os.system", (b"echo ignored",)), ("os.posix_spawn", ("/bin/echo", [], {})),
+    ("socket.connect", (None, ("example.invalid", 443))),
+    ("os.symlink", ("target", "link", -1)), ("os.link", ("source", "target", -1, -1))])
+def test_measurement_refuses_process_network_and_link_events(profile, tmp_path, event, args):
+    policy = profile.PhasePolicy(source=tmp_path, write_root=None, git=tmp_path / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError):
+        policy.audit(event, args)
+
+
+def test_measurement_write_denial_and_exact_readonly_git_allowlist(profile, tmp_path):
+    git = tmp_path / "not-executed-git"
+    policy = profile.PhasePolicy(source=tmp_path, write_root=None, git=git,
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError, match="measurement forbids writes"):
+        policy.audit("open", (str(tmp_path / "output"), "w", os.O_WRONLY | os.O_CREAT))
+    assert profile.validate_git_call(["git", "rev-parse", "HEAD"], cwd=tmp_path, source=tmp_path,
+                                     executable=git) == [str(git), "rev-parse", "HEAD"]
+    for argv in (["git", "status"], ["git", "checkout", "main"], ["sh", "-c", "git rev-parse HEAD"]):
+        with pytest.raises(profile.BoundaryError):
+            profile.validate_git_call(argv, cwd=tmp_path, source=tmp_path, executable=git)
+    query = (profile.SOURCE_COMMIT + ":src/example.py\n").encode()
+    profile.validate_git_call(["git", "cat-file", "--batch"], cwd=tmp_path, source=tmp_path,
+                              executable=git, input_bytes=query)
+    with pytest.raises(profile.BoundaryError, match="another revision"):
+        profile.validate_git_call(["git", "cat-file", "--batch"], cwd=tmp_path, source=tmp_path,
+                                  executable=git, input_bytes=b"HEAD:src/example.py\n")
+
+
+def test_tree_inventory_includes_hidden_ignored_files_and_refuses_links(profile, tmp_path):
+    root = tmp_path / "checkpoint"
+    root.mkdir()
+    (root / ".gitignore").write_bytes(b"ignored.bin\n")
+    (root / "ignored.bin").write_bytes(b"retained bytes")
+    (root / ".hidden").write_bytes(b"hidden evidence")
+    inventory = profile.tree_manifest(root)
+    assert set(inventory["entries"]) == {".gitignore", "ignored.bin", ".hidden"}
+    (root / "alias").symlink_to(root / "ignored.bin")
+    with pytest.raises(profile.BoundaryError, match="symlink"):
+        profile.tree_manifest(root)
+
+
+@pytest.fixture
+def link_case(profile, tmp_path):
+    root = tmp_path / "fresh-case"
+    root.mkdir()
+    directory = root / "stages"
+    directory.mkdir()
+    destination = directory / "capture.json"
+    staging = directory / ".capture.json.pending-fixture"
+    staging.write_bytes(b"synthetic captured bytes\n")
+    policy = profile.PhasePolicy(source=tmp_path / "protected-source", write_root=root,
+        git=tmp_path / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    return SimpleNamespace(root=root, destination=destination, staging=staging, policy=policy)
+
+
+def test_prepare_allows_actual_durable_new_link_but_never_replaces_winner(profile, link_case, monkeypatch):
+    # Exercise the project's actual primitive, including mkstemp naming and
+    # exclusive link publication. Only the link event is routed through the
+    # new policy; no permanent audit hook is installed in this test process.
+    from data_sheets_schema import native_attempt_supervisor as supervisor
+
+    output = link_case.destination
+    original = os.link
+    observed = []
+
+    def checked_link(source, target, *, src_dir_fd=None, dst_dir_fd=None, follow_symlinks=True):
+        link_case.policy.audit("os.link", (str(source), str(target),
+            -1 if src_dir_fd is None else src_dir_fd, -1 if dst_dir_fd is None else dst_dir_fd))
+        observed.append((Path(source), Path(target)))
+        return original(source, target, src_dir_fd=src_dir_fd,
+                        dst_dir_fd=dst_dir_fd, follow_symlinks=follow_symlinks)
+
+    with monkeypatch.context() as local:
+        local.setattr(supervisor.os, "link", checked_link)
+        supervisor.durable_new(output, b"first retained result\n")
+        assert output.read_bytes() == b"first retained result\n"
+        assert len(observed) == 1 and observed[0][0].parent == output.parent
+        assert not observed[0][0].exists(), "successful private staging link was not cleaned up"
+        assert output.stat().st_nlink == 1
+        with pytest.raises(profile.BoundaryError):
+            supervisor.durable_new(output, b"replacement must refuse\n")
+    assert output.read_bytes() == b"first retained result\n"
+    assert len(observed) == 1
+
+
+@pytest.mark.parametrize("direction", ["source", "destination"])
+def test_prepare_link_cannot_cross_case_boundary(profile, link_case, tmp_path, direction):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    source, target = link_case.staging, link_case.destination
+    if direction == "source":
+        source = outside / link_case.staging.name
+        source.write_bytes(b"outside source must remain untouched")
+    else:
+        target = outside / target.name
+    before = source.read_bytes()
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (str(source), str(target), -1, -1))
+    assert source.read_bytes() == before and not target.exists()
+
+
+@pytest.mark.parametrize("kind", ["source_symlink", "destination_symlink", "parent_symlink",
+    "source_directory", "source_already_linked", "different_parent", "unrelated_name", "empty_suffix"])
+def test_prepare_link_requires_one_private_regular_staging_file(profile, link_case, tmp_path, kind):
+    source, target = link_case.staging, link_case.destination
+    if kind == "source_symlink":
+        real = link_case.root / "real-data"
+        real.write_bytes(b"preserve original")
+        source.unlink()
+        source.symlink_to(real)
+    elif kind == "destination_symlink":
+        target.symlink_to(link_case.root / "absent")
+    elif kind == "parent_symlink":
+        alias = link_case.root / "alias"
+        alias.symlink_to(source.parent, target_is_directory=True)
+        source, target = alias / source.name, alias / target.name
+    elif kind == "source_directory":
+        source.unlink(); source.mkdir()
+    elif kind == "source_already_linked":
+        os.link(source, tmp_path / "external-alias")
+    elif kind == "different_parent":
+        target = link_case.root / target.name
+    elif kind == "unrelated_name":
+        replacement = source.with_name("unrelated.tmp")
+        source.rename(replacement); source = replacement
+    else:
+        replacement = source.with_name("." + target.name + ".pending-")
+        source.rename(replacement); source = replacement
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (str(source), str(target), -1, -1))
+    assert not target.exists()  # A refused dangling symlink still does not resolve.
+    if kind == "destination_symlink":
+        assert target.is_symlink()
+
+
+@pytest.mark.parametrize("fds", [(0, -1), (-1, 0), (True, -1), (-1, False), (-2, -1)])
+def test_link_and_rename_refuse_directory_descriptor_overrides(profile, link_case, fds):
+    for event in ("os.link", "os.rename"):
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, (str(link_case.staging), str(link_case.destination), *fds))
+    assert link_case.staging.read_bytes() == b"synthetic captured bytes\n"
+    assert not link_case.destination.exists()
+
+
+def test_links_require_absolute_paths_and_measurement_stays_read_only(profile, link_case, monkeypatch):
+    monkeypatch.chdir(link_case.staging.parent)
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (link_case.staging.name, link_case.destination.name, -1, -1))
+    measurement = profile.PhasePolicy(source=link_case.root, write_root=None,
+        git=link_case.root / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError, match="measurement forbids"):
+        measurement.audit("os.link", (str(link_case.staging), str(link_case.destination), -1, -1))
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.symlink", (str(link_case.staging), str(link_case.destination), -1))
+    assert not link_case.destination.exists()
+
+
+MUTATOR_AUDIT_ARGS = (
+    ("os.mkdir", ("victim", 0o700, -1), 2),
+    ("os.rmdir", ("victim", -1), 1),
+    ("os.remove", ("victim", -1), 1),
+    ("os.chmod", ("victim", 0o600, -1), 2),
+    ("os.utime", ("victim", None, None, -1), 3),
+)
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("descriptor", ["outside", True, False, 0, -2])
+def test_preparation_mutators_reject_descriptor_relative_escape_before_effect(
+        profile, link_case, tmp_path, monkeypatch, event, template, descriptor_index, descriptor):
+    """#4646: cwd-relative authorization cannot authorize an outside dir_fd."""
+    outside = tmp_path / "protected-mutation-inputs"
+    outside.mkdir()
+    victim = outside / "victim"
+    victim.write_bytes(b"protected bytes")
+    before = victim.read_bytes(), victim.stat().st_mode
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        monkeypatch.chdir(link_case.root)
+        args = list(template)
+        args[descriptor_index] = fd if descriptor == "outside" else descriptor
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, tuple(args))
+        assert (victim.read_bytes(), victim.stat().st_mode) == before
+        assert not (link_case.root / "victim").exists()
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("descriptor", [None, -1])
+def test_preparation_mutators_allow_only_default_descriptor_and_physical_case_path(
+        link_case, event, template, descriptor_index, descriptor):
+    args = list(template)
+    args[0] = str(link_case.root / "new-file")
+    args[descriptor_index] = descriptor
+    link_case.policy.audit(event, tuple(args))
+
+
+@pytest.mark.parametrize("event,template,descriptor_index", MUTATOR_AUDIT_ARGS)
+@pytest.mark.parametrize("change", ["short", "long"])
+def test_descriptor_mutator_audit_shape_is_complete(profile, link_case, event, template, descriptor_index, change):
+    args = (str(link_case.root / "new-file"), *template[1:])
+    args = args[:-1] if change == "short" else (*args, -1)
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit(event, args)
+
+
+@pytest.mark.parametrize("event,tail", [("os.chmod", (0o600, -1)), ("os.utime", (None, None, -1)),
+                                      ("os.truncate", (0,))])
+def test_unregistered_file_descriptor_mutations_refuse(profile, link_case, tmp_path, event, tail):
+    outside = tmp_path / "protected-descriptor-input"
+    outside.write_bytes(b"retain original data")
+    before = outside.read_bytes(), outside.stat().st_mode
+    fd = os.open(outside, os.O_RDONLY)
+    try:
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, (fd, *tail))
+        assert (outside.read_bytes(), outside.stat().st_mode) == before
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,tail", [("os.chmod", (0o600, -1)), ("os.utime", (None, None, -1)),
+                                      ("os.truncate", (0,))])
+def test_tracked_checkpoint_write_descriptor_retains_identity_check(profile, link_case, tmp_path, event, tail):
+    path = link_case.root / "tracked-file"
+    path.write_bytes(b"private checkpoint bytes")
+    fd = os.open(path, os.O_RDWR)
+    try:
+        info = os.fstat(fd)
+        link_case.policy.write_descriptors[fd] = (info.st_dev, info.st_ino, info.st_mode)
+        link_case.policy.audit(event, (fd, *tail))
+        link_case.policy.write_descriptors[fd] = (info.st_dev, info.st_ino + 1, info.st_mode)
+        with pytest.raises(profile.BoundaryError, match="descriptor"):
+            link_case.policy.audit(event, (fd, *tail))
+        assert path.read_bytes() == b"private checkpoint bytes"
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("kind", ["case", "outside", "descriptor"])
+def test_cwd_changes_are_forbidden_during_preparation(profile, link_case, tmp_path, kind):
+    fd = os.open(tmp_path, os.O_RDONLY)
+    try:
+        destination = {"case": str(link_case.root), "outside": str(tmp_path), "descriptor": fd}[kind]
+        before = Path.cwd()
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit("os.chdir", (destination,))
+        assert Path.cwd() == before
+    finally:
+        os.close(fd)
+
+
+@pytest.mark.parametrize("event,args", [("ctypes.dlopen", (None,)),
+    ("ctypes.dlopen", ("/outside/unreported-library.dylib",)),
+    ("ctypes.dlsym", (object(), "system")), ("ctypes.dlsym/handle", (7, "system")),
+    ("ctypes.call_function", (7, ())), ("ctypes.set_exception", (7,))])
+@pytest.mark.parametrize("phase", ["prepare", "measure"])
+def test_direct_native_load_and_symbol_events_are_denied_after_bootstrap(
+        profile, link_case, event, args, phase):
+    policy = link_case.policy if phase == "prepare" else profile.PhasePolicy(
+        source=link_case.root, write_root=None, git=link_case.root / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError):
+        policy.audit(event, args)
+
+
+@pytest.fixture
+def bootstrap_case(profile, imports, tmp_path, monkeypatch):
+    """Synthetic loader objects; no actual ctypes or native binary is loaded."""
+    owner, source_path = imports
+    stdlib = tmp_path / "synthetic-interpreter"
+    package = stdlib / "ctypes"
+    package.mkdir(parents=True)
+    (stdlib / "lib-dynload").mkdir()
+    init, endian = package / "__init__.py", package / "_endian.py"
+    init.write_bytes(b"VALUE = 'fictional fixed ctypes init'\n")
+    endian.write_bytes(b"VALUE = 'fictional fixed endian init'\n")
+    extension = stdlib / "lib-dynload/_ctypes.fixture.so"
+    extension.write_bytes(b"FICTIONAL EXTENSION BYTES: NEVER LOADED\n")
+    owner.stdlib = stdlib
+    hooks, executed = [], []
+    fake_sys = SimpleNamespace(modules={}, path=[str(stdlib)], addaudithook=hooks.append)
+    monkeypatch.setattr(profile, "sys", fake_sys)
+    for cls, method in ((importlib.machinery.SourceFileLoader, "get_code"),
+                        (importlib.machinery.ExtensionFileLoader, "create_module"),
+                        (importlib.machinery.SourcelessFileLoader, "get_code")):
+        monkeypatch.setattr(cls, method, getattr(cls, method))
+
+    def extension_body(loader, spec):
+        executed.append(("synthetic extension initialization", spec.origin))
+        module = ModuleType("_ctypes")
+        module.__spec__ = spec
+        return module
+
+    owner.original_extension = extension_body
+    owner.install(add_paths=False)
+    assert fake_sys.path == [str(stdlib)]
+
+    def python_module(name, path):
+        loader = importlib.machinery.SourceFileLoader(name, str(path))
+        module = ModuleType(name)
+        module.__spec__ = SimpleNamespace(origin=str(path), loader=loader)
+        code = loader.get_code(name)
+        owner.audit("exec", (code,))
+        exec(code, module.__dict__)
+        executed.append((name, str(path)))
+        fake_sys.modules[name] = module
+        return module
+
+    def extension_module(path):
+        loader = importlib.machinery.ExtensionFileLoader("_ctypes", str(path))
+        spec = SimpleNamespace(origin=str(path), loader=loader)
+        module = loader.create_module(spec)
+        fake_sys.modules["_ctypes"] = module
+        return module
+
+    def successful_import(name):
+        assert name == "ctypes" and owner.interpreter_only is True
+        python_module("ctypes", init)
+        python_module("ctypes._endian", endian)
+        extension_module(extension)
+        return fake_sys.modules["ctypes"]
+
+    monkeypatch.setattr(profile.importlib, "import_module", successful_import)
+    return SimpleNamespace(owner=owner, sys=fake_sys, hooks=hooks, executed=executed, init=init,
+        endian=endian, extension=extension, python_module=python_module,
+        extension_module=extension_module, source_path=source_path)
+
+
+def test_ctypes_bootstrap_pins_fixed_interpreter_inputs_without_exposing_selected_paths(profile, bootstrap_case):
+    case = bootstrap_case
+    assert case.owner.preload_ctypes() is None
+    assert case.owner.interpreter_only is False
+    assert case.sys.path == [str(case.owner.stdlib)]
+    assert set(case.owner.loaded) == {str(case.init), str(case.endian), str(case.extension)}
+    for path in (case.init, case.endian, case.extension):
+        assert case.owner.loaded[str(path)] == {"sha256": profile.sha(path.read_bytes()), "bytes": path.stat().st_size}
+    case.owner.enable_selected_paths()
+    assert case.sys.path[:3] == [str(case.owner.source / "src"), str(case.owner.source), str(case.owner.dependencies)]
+
+
+@pytest.mark.parametrize("name", ["ctypes", "_ctypes", "ctypes._endian"])
+def test_untracked_ctypes_preload_refuses_before_import(profile, bootstrap_case, name):
+    case = bootstrap_case
+    case.sys.modules[name] = ModuleType(name)
+    with pytest.raises(profile.BoundaryError, match="must not precede"):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+    assert case.sys.path == [str(case.owner.stdlib)]
+
+
+@pytest.mark.parametrize("foreign", ["dependency_ctypes", "dependency_transitive", "recovered_transitive",
+                                   "dependency_extension", "stdlib_site_packages"])
+def test_ctypes_bootstrap_refuses_shadow_or_transitive_foreign_code_before_execution(
+        profile, bootstrap_case, monkeypatch, foreign):
+    case = bootstrap_case
+    if foreign == "dependency_ctypes":
+        path, name = case.owner.dependencies / "ctypes.py", "ctypes"
+    elif foreign == "dependency_transitive":
+        path, name = case.owner.dependencies / "sysconfig.py", "sysconfig"
+    elif foreign == "recovered_transitive":
+        path, name = case.source_path, "recovered_transitive"
+    elif foreign == "stdlib_site_packages":
+        path, name = case.owner.stdlib / "site-packages/foreign.py", "foreign"
+    else:
+        path, name = case.owner.dependencies / "_ctypes.fixture.so", "_ctypes"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if foreign != "recovered_transitive":
+        path.write_bytes(b"EXECUTED = 'must not run'\n")
+    before = path.read_bytes()
+    def attempt(name_requested):
+        assert name_requested == "ctypes" and case.owner.interpreter_only is True
+        if foreign == "dependency_extension":
+            return case.extension_module(path)
+        return case.python_module(name, path)
+    monkeypatch.setattr(profile.importlib, "import_module", attempt)
+    with pytest.raises(profile.BoundaryError):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+    assert case.owner.interpreter_only is False
+    assert case.sys.path == [str(case.owner.stdlib)] and path.read_bytes() == before
+
+
+def test_bootstrap_exec_audit_blocks_transitive_foreign_code_even_with_precompiled_object(
+        profile, bootstrap_case, monkeypatch):
+    case = bootstrap_case
+    path = case.owner.dependencies / "shadow.py"
+    path.write_bytes(b"EXECUTED = True\n")
+    code = compile(path.read_bytes(), str(path), "exec")
+    namespace = {}
+    def attempt(name):
+        case.owner.audit("exec", (code,))
+        exec(code, namespace)
+    monkeypatch.setattr(profile.importlib, "import_module", attempt)
+    with pytest.raises(profile.BoundaryError, match="bootstrap execution"):
+        case.owner.preload_ctypes()
+    assert "EXECUTED" not in namespace
+    assert case.owner.interpreter_only is False
+
+
+def test_bootstrap_cannot_enable_recovered_or_dependency_paths(profile, bootstrap_case, monkeypatch):
+    case = bootstrap_case
+    monkeypatch.setattr(profile.importlib, "import_module", lambda _: case.owner.enable_selected_paths())
+    with pytest.raises(profile.BoundaryError, match="during interpreter bootstrap"):
+        case.owner.preload_ctypes()
+    assert case.sys.path == [str(case.owner.stdlib)] and case.owner.interpreter_only is False
+
+
+@pytest.mark.parametrize("name", ["ctypes", "ctypes._endian"])
+def test_ctypes_source_identity_is_exact_even_inside_interpreter_root(profile, bootstrap_case, monkeypatch, name):
+    case = bootstrap_case
+    foreign = case.owner.stdlib / "same_root_wrong_module.py"
+    foreign.write_bytes(b"EXECUTED = True\n")
+    monkeypatch.setattr(profile.importlib, "import_module", lambda _: case.python_module(name, foreign))
+    with pytest.raises(profile.BoundaryError, match="ctypes bootstrap source identity"):
+        case.owner.preload_ctypes()
+    assert case.executed == [] and case.owner.loaded == {}
+
+
+def test_bootstrap_bytes_stay_in_final_rechecked_import_closure(profile, bootstrap_case):
+    case = bootstrap_case
+    case.owner.preload_ctypes()
+    rows = case.owner.verify()
+    assert {row["origin"] for row in rows} == {
+        "interpreter/ctypes/__init__.py", "interpreter/ctypes/_endian.py",
+        "interpreter/lib-dynload/_ctypes.fixture.so"}
+    case.init.write_bytes(b"mutated interpreter bootstrap")
+    with pytest.raises(ValueError):
+        case.owner.verify()
+
+
+@pytest.mark.parametrize("event,args", [("os.chown", ("ignored", 0, 0, -1)),
+    ("os.chflags", ("ignored", 0)), ("os.setxattr", ("ignored", "user.test", b"value", 0)),
+    ("os.removexattr", ("ignored", "user.test"))])
+def test_unsupported_metadata_mutations_are_refused(profile, link_case, event, args):
+    with pytest.raises(profile.BoundaryError, match="filesystem mutation"):
+        link_case.policy.audit(event, args)
+
+
+@pytest.mark.parametrize("tail", [(), (0, -1)])
+def test_truncate_requires_exact_audit_shape(profile, link_case, tail):
+    with pytest.raises(profile.BoundaryError, match="audit shape"):
+        link_case.policy.audit("os.truncate", (str(link_case.staging), *tail))
