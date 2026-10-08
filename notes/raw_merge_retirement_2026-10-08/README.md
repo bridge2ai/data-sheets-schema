@@ -27,8 +27,26 @@ root-policy review notes remain evidence of the earlier finding.
 Focused controls cover real CLI refusal, primary-path aliases, new and existing
 outputs, output/input aliases, symlinks and hard links, directory sentinels,
 malformed/undecodable input bytes, blocked content opens/producer imports and
-help/usage behavior. Validation is pending the root agent's serialized test run;
-no tests or applications were run while implementing this change.
+help/usage behavior. All **66 tests passed** across four modules: 27 existing
+RO-Crate CLI cases (including the replaced fake-merger test), 12 new retirement
+cases, 17 transform mapping-selection cases and 10 adversarial mapping-selection
+cases. There were no failures, errors or skips. JUnit records 13.560 seconds;
+the coordinator's console reported 13.59 seconds and 14 dependency deprecation
+warnings. No provider, native or real-project replay was run for this change.
+
+The tested commit is `9eefd41b8e0bdb731a3ab86d0f5c55d2ced4cc7c`, tree
+`bc845b160dce1a7a87134d4eb318a02595e40638`.
+[validation.json](validation.json) records the exact module counts, invocation
+with private path prefixes replaced by roles, and nine file pins checked
+against both the tested commit and working bytes. These include the changed
+production module, all four tested modules, the two active documentation files
+and declared dependency files; they do not attest the complete runtime or
+installed dependency versions.
+
+The retained external JUnit file `raw-merge-retirement-tests-01.xml` is 11,084
+bytes, SHA-256 `5d1fd129724c5c29c4ca7e3fcba66be35d6928a5234961371240d0880ffa4c77`.
+Independent source review was clear after correcting the command-summary table
+in the CLI documentation to describe retirement.
 
 #4594 remains open for default Dataset mapping construction/disposition and its
 five retained-input replays. #2915 and its scientific, comparison/publication
