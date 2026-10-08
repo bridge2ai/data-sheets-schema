@@ -76,8 +76,9 @@ def prepare_dataset(dataset: dict, *, text: str | None = None,
         report = _validator(str(schema), digest).validate(record, "Dataset")
         if report.results:
             details = "; ".join(str(item.message) for item in report.results)
-            metadata = (" transformation_metadata is not a Dataset field; its API "
-                        "envelope remains unresolved in #4630."
+            metadata = (" transformation_metadata is not a Dataset field; use the API's "
+                        "explicit result_contract='dataset_v1' to keep provenance "
+                        "in its separate result field (#4630)."
                         if "transformation_metadata" in record else "")
             raise PublicationError(
                 f"Dataset publication refused against {schema.name} (sha256 {digest}): "

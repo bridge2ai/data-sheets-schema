@@ -1,0 +1,102 @@
+{
+  "format": "legacy_dataset_contract_validation_v1",
+  "tested_head": "2cfbfa016291b5f80be28abef1faed8fb4af693e",
+  "tested_tree": "dc405c72723c8da5f5d868e6161e272cc723687d",
+  "scope": "Explicit legacy API Dataset/result separation, exact publication bindings and explicit wrapper mapping selection; synthetic fixture and existing regression tests",
+  "addressed_issues": [
+    4630,
+    4635
+  ],
+  "depends_on": {
+    "pull_request": 4634,
+    "branch_commit_included": "9c8b73ee7d0be062aff2532b2a9bd64ba73702e5",
+    "status_at_evidence_capture": "open; required publication gate included in this tested tree"
+  },
+  "not_closed_by_this_slice": [
+    4594,
+    2915
+  ],
+  "source_sha256": {
+    "src/data_sheets_schema/legacy_publication.py": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9",
+    "src/fairscape_integration/cli.py": "463a3e9a574ab8133c31bbc5a44895b02640842b76e754f844e927657ad418ad",
+    "src/fairscape_integration/utils/rocrate_merger.py": "7b7e98d48ecc1043de077c2db7342e08b216d05d9c10778a986c1b922a836b56",
+    ".claude/agents/scripts/rocrate_to_d4d.py": "8c6cd41fb0e32fbc8c457208d863460ac462c76cd4c20f4215d2f90c6a9dce5e",
+    ".claude/agents/scripts/rocrate_merger.py": "f39b4aa31164dc477cb58067de002e6b19c182b61985b447eb6917da1153d68c",
+    ".claude/agents/scripts/auto_process_rocrates.py": "f7d8cf5765e100f5d7012e8f4c9a66a27e5ea385003b44c031174bae10a5b9e7",
+    "src/transformation/transform_api.py": "b7602e5940d18e008f528dffa2b77846af64d8b7f76504219f4a52787b39ac39",
+    "src/data_sheets_schema/cli/rocrate.py": "185131e862f39fcdfb75614dbcc0adc5cb3915559e92859b21f1faadb144d845",
+    "src/data_sheets_schema/resources.py": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+  },
+  "resource_sha256": {
+    "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+    "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv": "28af70ed814690645ecf58b6bfd0a716d5300866c0018eaf07704387a410614e"
+  },
+  "test_sha256": {
+    "tests/test_rocrate/test_legacy_publication.py": "b61058a2e214370d2f93eaaff49296bcfe410280be7b30873202713be35fa537",
+    "tests/test_rocrate/test_legacy_publication_adversarial.py": "b1a132a5d8ca1aa8d7a06c9c5baf6b986dc385165dc70bc2669e35aa1a5744f2",
+    "tests/test_rocrate/test_legacy_root_gates.py": "148a779603259842cd3e231c62d4561715641bbe6089959b1e61df1d512500cf",
+    "tests/test_rocrate/test_production_root_gates.py": "a932de723170585e18a1ef6d757701af1a197672194c5c66774ba560284ac8d8",
+    "tests/test_rocrate/test_transform_api.py": "56b01376c2ef60759fe514f7fec863fe3752e9342d38e3e740b0a27f1fee63ae",
+    "tests/test_cli/test_rocrate_cli.py": "81770d073b0cc2dc01ab66416df96f075bfd62d773df820f8539075e27adcefa",
+    "tests/test_fairscape_integration/test_rocrate_merger.py": "d83b2c814847f24f54dec22dd19e1247662d2a48391a3d431ef414bc6f1b5bfa",
+    "tests/test_rocrate/test_legacy_result_contract.py": "b95715c56bd1c7ac52eb97224fbeb8b37c69bca1e1e931264ed0acc4d0ea40e4",
+    "tests/test_rocrate/test_legacy_envelope_adversarial.py": "97fe763933dfc33e14934668840c364e4b8ab58b52f48ef57fe11e1d7f0448bd"
+  },
+  "tests": {
+    "passed": 319,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "junit_duration_seconds": 58.107,
+    "junit_timestamp": "2026-10-07T22:25:28.975556",
+    "by_module": {
+      "tests.test_cli.test_rocrate_cli": 27,
+      "tests.test_fairscape_integration.test_rocrate_merger": 18,
+      "tests.test_rocrate.test_legacy_envelope_adversarial": 28,
+      "tests.test_rocrate.test_legacy_publication": 51,
+      "tests.test_rocrate.test_legacy_publication_adversarial": 39,
+      "tests.test_rocrate.test_legacy_result_contract": 19,
+      "tests.test_rocrate.test_legacy_root_gates": 30,
+      "tests.test_rocrate.test_production_root_gates": 104,
+      "tests.test_rocrate.test_transform_api": 3
+    },
+    "junit": {
+      "artifact": "legacy-envelope-tests-01.xml",
+      "bytes": 52182,
+      "sha256": "cec2c725a1f8f1c06c69c9cd16d50fe575bf5450ca52e31ae0362e996edb09f8"
+    },
+    "coordinator_console_summary": {
+      "passed": 319,
+      "duration_seconds": 58.14,
+      "warnings": 14,
+      "warning_kind": "dependency deprecations",
+      "basis": "Coordinator terminal summary; warning count is not encoded in this JUnit file"
+    }
+  },
+  "evidence_checks": {
+    "head_matches_tested_head": true,
+    "tree_matches_tested_tree": true,
+    "pinned_files_match_tested_commit": true,
+    "pinned_files_match_working_bytes": true,
+    "junit_has_319_testcases": true,
+    "junit_has_no_failure_error_or_skipped_nodes": true,
+    "module_counts_sum_to_319": true,
+    "production_and_test_files_unchanged_during_evidence_update": true
+  },
+  "limitations": [
+    "This suite verifies the software API/publication contract using synthetic mapped records and existing regressions; it does not validate scientific mapping meaning or source coverage.",
+    "The dataset_v1 contract is explicit. Default legacy no-output shapes remain unchanged; default legacy file publication with embedded transformation_metadata still refuses closed-Dataset validation.",
+    "The unchanged default legacy TSV omits required Dataset.id. Successful tests explicitly select compatible small mappings; no default mapping repair, invented ID or automatic mapper switch is supplied.",
+    "No-output dataset_v1 results remain unaccepted drafts with publication=null. preserve_provenance=False leaves transformation metadata absent, even for successful file publication.",
+    "Publication bindings identify exact written bytes at return time, including UTF-16 cases; they do not authenticate the algorithm or guarantee later unchanged files.",
+    "Mapping pins are local before/after byte checks, not atomic source snapshots or protection against changes that restore the same bytes.",
+    "The reused PR #4634 gate validates all batch candidates and stages all outputs before individual atomic replacements; no rollback across already-replaced files is promised.",
+    "Negative controls inject diagnostic, I/O and mapping-drift failures; these are regression controls, not measured production failure rates.",
+    "No current-cohort regeneration, real-project comparison publication, provider evaluation, paid attempt or scientific score was produced by this validation.",
+    "The PR depends on required-publication-gate PR #4634; only issues #4630 and #4635 are addressed by this result-contract slice. Parents #4594 and #2915 remain open.",
+    "Human scientific review, paid-run authorization, audit28 and held figure-branch decisions are unchanged; moving metadata or retiring rows is not improved source coverage."
+  ],
+  "scientific_scores_produced": 0,
+  "production_attempts_authorized": false,
+  "scientific_eligibility": false
+}

@@ -4,6 +4,14 @@
 **Date**: 2026-03-12
 **Status**: Phase 1-3 Complete (Core Implementation)
 
+**API compatibility update (2026-10-07, #4630):** This is a historical implementation
+summary. Its embedded `transformation_metadata` examples describe legacy in-memory
+drafts. File publication now requires a closed Dataset. Select the explicit
+`dataset_v1` result contract to retain provenance beside the Dataset, including
+the published-byte identity, without placing metadata in the YAML document.
+See [the current result contract](legacy_dataset_contract_2026-10-07/README.md).
+This change does not repair the mapping limitations tracked in #4594/#2915.
+
 ---
 
 ## Overview
