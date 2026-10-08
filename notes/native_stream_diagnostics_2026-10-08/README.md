@@ -19,7 +19,19 @@ Diagnostic serialization or decoding failure falls back to the original refusal 
 
 The deterministic tests inject metadata schedules into real stream reads, including an equal-size/changed-mtime pair at every sampled stage and a split-field ambiguity. These are synthetic observation controls, not reproductions or explanations of the hosted failure. Existing stream tests retain append success, same-size rewriting, truncation, replacement, hardlink/symlink, prior-prefix and byte-bound controls. Adapter tests exercise the real failure latch, endpoint cursor updates and report path without a native process, controller helper, or provider.
 
-Validation is pending coordinator execution after independent source review. The proposed focused suite is:
+The independently reviewed implementation passed all **105 focused tests**, with no failures, errors or skips, at commit `d01ef23c37e22137be367a73f252cc74d4a58d73` (tree `b072f25cbcec36306ab8de421beecb3c3f6af21a`). JUnit records 141.224 seconds; the coordinator recorded 141.32 seconds at the console and one dateutil deprecation warning. The recorded interpreter was the existing primary-checkout virtual environment using CPython 3.13.12. These invocation and console observations are coordinator provenance; JUnit does not independently attest the interpreter or tested commit.
+
+| Test module | Passed |
+| --- | ---: |
+| `test_native_shared_stream_diagnostics.py` | 26 |
+| `test_native_shared_stream_diagnostics_adversarial.py` | 15 |
+| `test_native_shared_streams.py` | 31 |
+| `test_native_shared_stream_bindings.py` | 7 |
+| `test_native_shared_controller.py` | 26 |
+
+[validation.json](validation.json) records the complete tested change list, eight selected source pins, five test-module pins, dependency declarations, and the unchanged frozen controller manifest plus all 12 dependency pins. Each selected working file was checked against its tested Git blob. The manifest and its dependencies also match their declared hashes and parent bytes. This is selected source evidence, not a complete installed-environment or import-cache snapshot.
+
+The external JUnit artifact, `native-stream-diagnostic-tests-01.xml`, is 17,180 bytes with SHA256 `7d36cd9da496dad8b3cc60b43ca9f2679a346d13e34f211cb9af69012da1c394`. The coordinator executed the following command from the candidate checkout; `$PYTHON` and `$EVIDENCE` stand for the selected interpreter and external evidence directory:
 
 ```bash
 PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src:. \
@@ -30,8 +42,8 @@ PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONPATH=src:. \
   tests/test_native_shared_stream_bindings.py \
   tests/test_native_shared_controller.py \
   -q -p no:cacheprovider \
-  --basetemp="$EVIDENCE/native-stream-diagnostics-pytest-01" \
-  --junitxml="$EVIDENCE/native-stream-diagnostics-tests-01.xml"
+  --basetemp="$EVIDENCE/native-stream-diagnostic-pytest-01" \
+  --junitxml="$EVIDENCE/native-stream-diagnostic-tests-01.xml"
 ```
 
-No native workload, hosted-race reproduction or performance comparison is included. The frozen controller source manifest and its dependencies are unchanged. Issues #4680, #4537 and #4354 remain open for their separate cause, performance and acceptance obligations.
+The original retained CI evidence and reviewed verifier remain separately preserved in [PR #4683](https://github.com/bridge2ai/data-sheets-schema/pull/4683). These diagnostics do not alter or reinterpret those historical artifacts. No native workload, hosted-race reproduction or performance comparison is included. Issues #4680, #4537 and #4354 remain open for their separate cause, performance and acceptance obligations; native execution acceptance and scientific eligibility are not established here.
