@@ -1,0 +1,36 @@
+{
+  "base_commit": "24d688388126a56f1515bb84f9024ed666635b0e",
+  "source_sha256": {
+    "src/data_sheets_schema/cross_family_panel.py": "7b50644a7c5cdda824294124001a61193b5fc40dd3ea73e53528f56a288cf838",
+    "src/data_sheets_schema/cli/cross_family_panel.py": "caf16f612d0246316076f99855b7fd14a29ece016dab3439505a024af93acb5a",
+    "src/data_sheets_schema/cli/evaluate.py": "e669d9900e22106118149c4ebd0026eba35e1dcb237d110d266935d8de9efdd4",
+    "tests/test_evaluation/test_cross_family_panel.py": "610b7c89f3b5b9720ee563ebfae68083431654e199935d1fc74afa6432c44a62",
+    "tests/test_evaluation/test_cross_family_panel_adversarial.py": "2840938dbc9c5a6e513a8dd85aa908734413d59c735dcb35d673696cf34938dd",
+    "tests/test_evaluation/test_cross_family_panel_cli.py": "a8afecca1ef1dd76564ce57113b8df837fff4b70d810b8cbcc1d67f6a2b4786a"
+  },
+  "runs": [
+    {
+      "junit_file": "panel-first.xml",
+      "sha256": "bfb817db360c543e1f164767cdf9f7509686fbde80a57a07774deac3f3dba7d8",
+      "tests": 61,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "junit_file": "panel-contracts.xml",
+      "sha256": "bf166a3be8a902d6bf0c941f8793583114a26c85dedd7d5cd5442c529f38b7fe",
+      "tests": 194,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "passed": 255,
+  "provider_calls": 0,
+  "scientific_scores_produced": 0,
+  "review_issues": [
+    4607,
+    4608
+  ]
+}
