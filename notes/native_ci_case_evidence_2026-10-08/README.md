@@ -68,7 +68,32 @@ failure was a test assumption that a symlink always has mode `0777`; this macOS
 fixture's actual `lstat` mode was `0755`, which the implementation correctly
 preserved. Under #4677, the assertion now uses the actual link mode and also
 checks that mode in the archive. External-byte and non-dereference controls are
-unchanged. No production behavior changed; a fresh focused run is pending.
+unchanged. No production behavior changed.
+
+The fresh run passed **35 tests**, with no failures, errors or skips, at commit
+`b90ef8a142cdc5770674059b08e81b648e963f5e`, tree
+`6324c0d1a479be31f6d3a64a1a301befaf8de73b`. The coordinator reported 6.16 seconds
+and zero warnings; JUnit records 6.130 seconds. Module counts are 16 retention
+controls, six independent adversarial controls, and 13 existing acceptance-runner
+controls. The independent controls include small invented pytest children that
+prove capture follows fixture teardown and preserves original exit outcomes.
+
+[validation.json](validation.json) records both JUnit artifact hashes, the exact
+coordinator-reported invocation, and 54 source/test/workflow/dependency file
+pins verified against the tested Git blobs and current bytes. Of those, 46
+native production, acceptance, fixture and dedicated-workflow files also match
+the `cfe61d29afc6edbf79cf6970e014fd951bee6d15` base. All files under
+`src/data_sheets_schema` are unchanged from that base. JUnit itself does not
+attest the source commit or command environment.
+
+The same validation record binds the externally retained logs, JUnit, extracted
+results and archive hashes from the preceding hosted failure: shard 1 had
+2,237 passed, one omission-case failure and two skips; shard 2 had 2,854 passed,
+one neutral-case failure and two skips. Both returned the native deadline stop
+reason, and both downloaded archives contained only `pytest.xml`. The local
+35-test result establishes retention behavior only. It is not a hosted case
+capture or native completion result; no new 900-second native test was run
+locally. Fresh exact-head hosted acceptance remains pending.
 
 The focused controls cover failed and partial cases, missing fixtures, collisions,
 mode/byte drift, bounded refusal, unrelated-node exclusion, symlink isolation,
