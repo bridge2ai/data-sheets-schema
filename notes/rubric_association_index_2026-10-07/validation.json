@@ -1,0 +1,378 @@
+{
+  "format": "d4d_rubric_association_validation_v1",
+  "issues": {
+    "implementation": 4639,
+    "review_findings": [
+      4645
+    ],
+    "parents_remaining_open": [
+      2929,
+      3342,
+      3343
+    ]
+  },
+  "tested_source": {
+    "commit": "713bc5deca8a2fa5c2ed66d78b195ee521bb55bb",
+    "tree": "5e5d9d529a9624bb87f31482951e161cfd0d98e3",
+    "working_file_comparison": "Every listed file was independently read from the tested commit and working tree after the run; all SHA-256 hashes agree.",
+    "pin_scope": "Focused production code and direct captured-plan/context/schema dependencies, all ten executed test modules, two shared fixture modules, and repository dependency declarations; not a complete loaded-code or installed-environment snapshot.",
+    "files": [
+      {
+        "path": "src/data_sheets_schema/rubric_association.py",
+        "git_blob": "e647eaff0de6a9665781c3092bc3e012a28dc2ed",
+        "bytes": 9126,
+        "sha256": "83f4dca6de92b029f3097960ae296892bfa0918162ab86962829a147797a9f01",
+        "working_sha256": "83f4dca6de92b029f3097960ae296892bfa0918162ab86962829a147797a9f01"
+      },
+      {
+        "path": "src/data_sheets_schema/top_level_fitness_results.py",
+        "git_blob": "32f49056274890897a2a47fcfb722072725f8b83",
+        "bytes": 47531,
+        "sha256": "d59f3a6eb24b438c27eaa7c293cdc2da0139e1eccb729a50a7a44e9745ced78f",
+        "working_sha256": "d59f3a6eb24b438c27eaa7c293cdc2da0139e1eccb729a50a7a44e9745ced78f"
+      },
+      {
+        "path": "src/data_sheets_schema/cli/fitness_results.py",
+        "git_blob": "5f2c1145c21b5d4a8e72ff1fdf3be0af95d9ae33",
+        "bytes": 4292,
+        "sha256": "633f2663bfa727ef8c566167ac07bdec74eaceeae38c7b2e3ac81d9af2ed6215",
+        "working_sha256": "633f2663bfa727ef8c566167ac07bdec74eaceeae38c7b2e3ac81d9af2ed6215"
+      },
+      {
+        "path": "src/data_sheets_schema/nested_support_results.py",
+        "git_blob": "1f26715c689b999f913b8274120e465f5f7939b6",
+        "bytes": 39429,
+        "sha256": "5a7fec7624b73c026048c06e45be2fb46b265731d41c3d17edea1247662358ef",
+        "working_sha256": "5a7fec7624b73c026048c06e45be2fb46b265731d41c3d17edea1247662358ef"
+      },
+      {
+        "path": "src/data_sheets_schema/nested_support_execution.py",
+        "git_blob": "aaf723d2ade2a50bb0ad6adfc44066989026069c",
+        "bytes": 33946,
+        "sha256": "ddc673506e16d9612f5481eec91480c6148562d029dd1fa65d71dd6cb06a42a7",
+        "working_sha256": "ddc673506e16d9612f5481eec91480c6148562d029dd1fa65d71dd6cb06a42a7"
+      },
+      {
+        "path": "src/data_sheets_schema/support_plan.py",
+        "git_blob": "047d5fc3064e0f836e42cd218ce065014d0eb972",
+        "bytes": 29068,
+        "sha256": "da17006b1f45aa651287abc0ba1afddb13a06ab428023e8fad8f0b8290dc82df",
+        "working_sha256": "da17006b1f45aa651287abc0ba1afddb13a06ab428023e8fad8f0b8290dc82df"
+      },
+      {
+        "path": "src/data_sheets_schema/nested_support_plan.py",
+        "git_blob": "6c9335dba569a946077de7de2ba8bcf221c62259",
+        "bytes": 18098,
+        "sha256": "0edf4642734f7c27d9b41281214e2bd60d238ac39cb93fe75df05cee332561db",
+        "working_sha256": "0edf4642734f7c27d9b41281214e2bd60d238ac39cb93fe75df05cee332561db"
+      },
+      {
+        "path": "src/data_sheets_schema/evaluation_context.py",
+        "git_blob": "feb21722e05a026e97cc4d1db97773f2a3d268a1",
+        "bytes": 9204,
+        "sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e",
+        "working_sha256": "e27856877cac196034cad20ca5429906afb6d85fce28d5eaf10b24ab14d0878e"
+      },
+      {
+        "path": "src/data_sheets_schema/semantic_instrument.py",
+        "git_blob": "d10e3bd58774f1c8b1ff42152771f648c4d8c8f1",
+        "bytes": 2065,
+        "sha256": "b77f2a957a7accbb17d00e39d5d03ff095c5f4cc93925dffdf3eef854685a0a7",
+        "working_sha256": "b77f2a957a7accbb17d00e39d5d03ff095c5f4cc93925dffdf3eef854685a0a7"
+      },
+      {
+        "path": "src/data_sheets_schema/support_targets.py",
+        "git_blob": "c66f7a4f539f6b502d1852bb17ee5468794ddc28",
+        "bytes": 25178,
+        "sha256": "1b1293b7def82abf98b84f67f2a7200588e54fb55cd464e6211473ef9f9616bf",
+        "working_sha256": "1b1293b7def82abf98b84f67f2a7200588e54fb55cd464e6211473ef9f9616bf"
+      },
+      {
+        "path": "src/data_sheets_schema/evidence_score.py",
+        "git_blob": "a6c3c0ef79fafb5c9edc8999befd5a38b5351fa7",
+        "bytes": 50671,
+        "sha256": "33b564eb9c76673239eed85f93a8d386dc9b79b06c7a8ef55b7e5632a74f5a50",
+        "working_sha256": "33b564eb9c76673239eed85f93a8d386dc9b79b06c7a8ef55b7e5632a74f5a50"
+      },
+      {
+        "path": "src/data_sheets_schema/support_judge.py",
+        "git_blob": "2bc33de26ebf98399d38de8c9f1372c43d097479",
+        "bytes": 25032,
+        "sha256": "ed463973104b81c4dca8e693cb22b40189543683fdadacf849d50a6f79d8f63b",
+        "working_sha256": "ed463973104b81c4dca8e693cb22b40189543683fdadacf849d50a6f79d8f63b"
+      },
+      {
+        "path": "src/data_sheets_schema/schema_digest.py",
+        "git_blob": "f0d475f0206d38052b6eb94c087d0442a2e3fc45",
+        "bytes": 41676,
+        "sha256": "2626779774de80349c127579d06b250a4566fc12d471b0fd3db8e2b7fd33e950",
+        "working_sha256": "2626779774de80349c127579d06b250a4566fc12d471b0fd3db8e2b7fd33e950"
+      },
+      {
+        "path": "src/data_sheets_schema/schema_snapshot.py",
+        "git_blob": "bf39c396db8ce936c1495da5a427f7566e65c9eb",
+        "bytes": 6234,
+        "sha256": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1",
+        "working_sha256": "33e2928f435d1f1ca9c6d13edb0ec0c3e393d4ee28c5e9e4957c60c089ef52b1"
+      },
+      {
+        "path": "src/data_sheets_schema/schema_view.py",
+        "git_blob": "33dd8ab8e76ebd3628843be59b32193131c8060e",
+        "bytes": 12420,
+        "sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff",
+        "working_sha256": "81d659271854cb645e5cf56af83338765cdd30ad04f9cd64d2b977720dfa8eff"
+      },
+      {
+        "path": "src/data_sheets_schema/duplicate_keys.py",
+        "git_blob": "e331c1d1a82ce5aaee5a7af36ff931bb00a4ca21",
+        "bytes": 15690,
+        "sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2",
+        "working_sha256": "22e3d2b9cef5a60bae8c6b34b49322f9c732ffdd51e49a1875b241b938cef5e2"
+      },
+      {
+        "path": "src/data_sheets_schema/evidence_assertions.py",
+        "git_blob": "8c981582447c5e725f6d6571ba81e76ba5ae466d",
+        "bytes": 34760,
+        "sha256": "da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583",
+        "working_sha256": "da12afbaa9a4b2e394cf5ded319c57da80cf76b62fb8d323333f8ab6d8e50583"
+      },
+      {
+        "path": "tests/test_evaluation/test_execution_ledger_suffix.py",
+        "git_blob": "65c4b74bdf651e412c7a5016a5d34efbf5d6d763",
+        "bytes": 2508,
+        "sha256": "946237d472627f60588bc9c58f110175ff2a9aa29a147a64de5e6918f4a36ffb",
+        "working_sha256": "946237d472627f60588bc9c58f110175ff2a9aa29a147a64de5e6918f4a36ffb"
+      },
+      {
+        "path": "tests/test_evaluation/test_fitness_execution.py",
+        "git_blob": "bc5497b95d966fe96097a20a40d95794ca5fa5fc",
+        "bytes": 10731,
+        "sha256": "7b1b0acf3b194fdd5599b2638a4f650e8d0aa1b3f39818eb25c66dd41c2b0faa",
+        "working_sha256": "7b1b0acf3b194fdd5599b2638a4f650e8d0aa1b3f39818eb25c66dd41c2b0faa"
+      },
+      {
+        "path": "tests/test_evaluation/test_fitness_execution_index.py",
+        "git_blob": "eade1a18c3796ed80b705785d64b27662b203b72",
+        "bytes": 10035,
+        "sha256": "a8dabd5371542b41317ddc06e9847c180538987f3e85e3a245c8776e15a9842e",
+        "working_sha256": "a8dabd5371542b41317ddc06e9847c180538987f3e85e3a245c8776e15a9842e"
+      },
+      {
+        "path": "tests/test_evaluation/test_nested_support_execution.py",
+        "git_blob": "6a0af6e014a6d1504614cb9830a489c37567173d",
+        "bytes": 20409,
+        "sha256": "05d0dcccf66af9f56e972fabe1563dd93ec15e5fef9c7ec4a674cbb2298ca321",
+        "working_sha256": "05d0dcccf66af9f56e972fabe1563dd93ec15e5fef9c7ec4a674cbb2298ca321"
+      },
+      {
+        "path": "tests/test_evaluation/test_nested_support_results.py",
+        "git_blob": "87be7dc72123fff597607bcac0060b602cd6d2c7",
+        "bytes": 29675,
+        "sha256": "a8e66c5f34fe7b87f94fed68ea97033fe962e8cd93c6efc6a8a8a2481b98ae1d",
+        "working_sha256": "a8e66c5f34fe7b87f94fed68ea97033fe962e8cd93c6efc6a8a8a2481b98ae1d"
+      },
+      {
+        "path": "tests/test_evaluation/test_rubric_association_adversarial.py",
+        "git_blob": "7b1585768a5f3f60b87b54c38c365c45bf1b0ba3",
+        "bytes": 8334,
+        "sha256": "7826d68b4c4f9ec179aada5b6eccf5b518e270ba366f59c0a60cec3d09f799df",
+        "working_sha256": "7826d68b4c4f9ec179aada5b6eccf5b518e270ba366f59c0a60cec3d09f799df"
+      },
+      {
+        "path": "tests/test_evaluation/test_rubric_association_index.py",
+        "git_blob": "1250b4469899d064049dbda45fb10cfa6ae7c5ac",
+        "bytes": 18322,
+        "sha256": "eca60c64a3b9d5dc26568525abdcdbe373f40e8ee7e657d72812c5ee3072ea01",
+        "working_sha256": "eca60c64a3b9d5dc26568525abdcdbe373f40e8ee7e657d72812c5ee3072ea01"
+      },
+      {
+        "path": "tests/test_evaluation/test_support_execution_index.py",
+        "git_blob": "61f925bbfdbd2add7ebd751b11a72457f1bcb520",
+        "bytes": 10690,
+        "sha256": "2d4d2391bae3d00df4897a3a1c6e5f0f569c94972e0cab253ac8cadf395cd9c8",
+        "working_sha256": "2d4d2391bae3d00df4897a3a1c6e5f0f569c94972e0cab253ac8cadf395cd9c8"
+      },
+      {
+        "path": "tests/test_evaluation/test_support_execution_index_adversarial.py",
+        "git_blob": "8e1945d149204d1c2680bd88aa4eed90f8f7b31c",
+        "bytes": 16243,
+        "sha256": "02f11bd3c9cd7d262e1832e85e67e01b91c6914d0a0a4f7190a47aca79bf9771",
+        "working_sha256": "02f11bd3c9cd7d262e1832e85e67e01b91c6914d0a0a4f7190a47aca79bf9771"
+      },
+      {
+        "path": "tests/test_evaluation/test_top_level_fitness_results.py",
+        "git_blob": "97a5ffaae462aa874b48d9c9a8722be7ca52c098",
+        "bytes": 17638,
+        "sha256": "c5a126a820e27ce7594a2956bba5710e7ef5801a8139cd713479d6703e32fa69",
+        "working_sha256": "c5a126a820e27ce7594a2956bba5710e7ef5801a8139cd713479d6703e32fa69"
+      },
+      {
+        "path": "tests/test_evaluation/test_support_plan.py",
+        "git_blob": "84e13d626f10cfbe08e0781d266c131ec6a17bf2",
+        "bytes": 24568,
+        "sha256": "f190e48360dff056f71024a874128e6d82faf356e5fe3317d8220c9843ef8a69",
+        "working_sha256": "f190e48360dff056f71024a874128e6d82faf356e5fe3317d8220c9843ef8a69"
+      },
+      {
+        "path": "tests/test_evaluation/test_nested_support_plan.py",
+        "git_blob": "6f1fa61a45cf3bbef812a00af364f4fe73eeb206",
+        "bytes": 15154,
+        "sha256": "7c72abe2ed7ae4a190de0f79a8f05b6eb7faeb6779f010b9dc7cb96b9792db06",
+        "working_sha256": "7c72abe2ed7ae4a190de0f79a8f05b6eb7faeb6779f010b9dc7cb96b9792db06"
+      },
+      {
+        "path": "pyproject.toml",
+        "git_blob": "87a84c564d243c134fead266600e96561562a75e",
+        "bytes": 4446,
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "working_sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b"
+      },
+      {
+        "path": "poetry.lock",
+        "git_blob": "cfe519359b0be36a52544377584f0217c6763fed",
+        "bytes": 592155,
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "working_sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+      }
+    ]
+  },
+  "validation": {
+    "status": "passed",
+    "tests": 279,
+    "passed": 279,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "warnings": {
+      "count": 0,
+      "basis": "coordinator-supplied completed pytest terminal summary"
+    },
+    "duration_seconds": {
+      "pytest_terminal_summary": 274.21,
+      "junit_suite": 274.134
+    },
+    "junit": {
+      "external_artifact_basename": "support-rubric-tests-01.xml",
+      "sha256": "035c0e1d6691fdeed56478f709f5260c32b16d227be7ec1a533c0084f87431df",
+      "bytes": 47978,
+      "retained_external": true,
+      "independently_checked": [
+        "SHA-256",
+        "byte length",
+        "tests",
+        "failures",
+        "errors",
+        "skipped",
+        "suite duration",
+        "per-module test counts"
+      ]
+    },
+    "modules": [
+      {
+        "path": "tests/test_evaluation/test_rubric_association_index.py",
+        "tests": 32
+      },
+      {
+        "path": "tests/test_evaluation/test_rubric_association_adversarial.py",
+        "tests": 26
+      },
+      {
+        "path": "tests/test_evaluation/test_support_execution_index.py",
+        "tests": 9
+      },
+      {
+        "path": "tests/test_evaluation/test_support_execution_index_adversarial.py",
+        "tests": 19
+      },
+      {
+        "path": "tests/test_evaluation/test_fitness_execution.py",
+        "tests": 9
+      },
+      {
+        "path": "tests/test_evaluation/test_fitness_execution_index.py",
+        "tests": 15
+      },
+      {
+        "path": "tests/test_evaluation/test_top_level_fitness_results.py",
+        "tests": 52
+      },
+      {
+        "path": "tests/test_evaluation/test_nested_support_execution.py",
+        "tests": 40
+      },
+      {
+        "path": "tests/test_evaluation/test_nested_support_results.py",
+        "tests": 73
+      },
+      {
+        "path": "tests/test_evaluation/test_execution_ledger_suffix.py",
+        "tests": 4
+      }
+    ],
+    "execution": {
+      "basis": "coordinator-supplied command; JUnit and source pins independently inspected after completion",
+      "cwd": "{checkout}",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "{checkout}/src:{checkout}"
+      },
+      "interpreter": {
+        "selected_path": "{primary_checkout}/.venv/bin/python",
+        "implementation": "CPython",
+        "version": "3.13.12",
+        "version_basis": "previously identified by coordinator; not re-executed for this evidence note"
+      },
+      "argv": [
+        "{python}",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_evaluation/test_rubric_association_index.py",
+        "tests/test_evaluation/test_rubric_association_adversarial.py",
+        "tests/test_evaluation/test_support_execution_index.py",
+        "tests/test_evaluation/test_support_execution_index_adversarial.py",
+        "tests/test_evaluation/test_fitness_execution.py",
+        "tests/test_evaluation/test_fitness_execution_index.py",
+        "tests/test_evaluation/test_top_level_fitness_results.py",
+        "tests/test_evaluation/test_nested_support_execution.py",
+        "tests/test_evaluation/test_nested_support_results.py",
+        "tests/test_evaluation/test_execution_ledger_suffix.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp={external}/support-rubric-tests-01-tmp",
+        "--junitxml={external}/support-rubric-tests-01.xml"
+      ],
+      "network_scope": "Existing local loopback fixtures were authorized; no external provider calls.",
+      "apps_rerun_for_this_note": false
+    }
+  },
+  "coverage": [
+    "Default v1/v2 results remain unchanged when rubric association is omitted; v3 retains the existing support execution section.",
+    "Explicit additional captured plan must match the descriptor's exact raw plan pin; only selected primary roster jobs supply rubric blobs.",
+    "Relocated index reconstruction uses captured files only, without historical result paths or an original plan directory.",
+    "Every selected primary job remains in the denominator, including missing, malformed, unsupported and mismatched results.",
+    "Declared record hashes and aliases, explicit semantic version/instrument, applicability context and scope units are compared without scoring.",
+    "Optional roster output pin conflicts remain mismatched even when other fields or JSON are unsupported; missing results remain missing with the declaration retained.",
+    "Capture corruption, changed join membership, forged saved association/eligibility fields and document/job bounds refuse."
+  ],
+  "claims": {
+    "association_basis": "captured_declared_identity_only",
+    "rating_accepted": false,
+    "scientific_scoring_eligible": false,
+    "rubric_schema_validated": false,
+    "rubric_arithmetic_validated": false,
+    "scores_extracted": false,
+    "provider_execution_authenticated": false,
+    "canonical_instrument_bytes_authenticated": false,
+    "empirical_calibration_performed": false
+  },
+  "limitations": [
+    "Passing software tests do not establish scientific validity, human control acceptance, calibration or campaign readiness.",
+    "Associated rubric declarations are not accepted ratings; supplied instrument hashes identify declarations only.",
+    "Repository dependency-file pins do not attest installed dependency versions or the complete runtime environment.",
+    "Historical missing context remains unsupported; no historical output is rescored, rewritten or relabelled.",
+    "JUnit evidence remains external at the recorded hash; this note does not include its machine-specific paths or hostname."
+  ]
+}

@@ -76,3 +76,62 @@ attribute-value and top-level fitness counts remain separate. Links identify
 corresponding targets without propagating a top-level fitness score to nested
 support targets. These engineering checks do not complete empirical calibration,
 human control review, or the parent evaluation campaign in #2929.
+
+## Captured rubric identity declarations (index v3)
+
+```sh
+d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --rubric-associations --rubric-plan captured-plan-dir --output associated-index
+d4d evaluate fitness-results recheck-index --index associated-index
+```
+
+`--rubric-associations` explicitly selects `top_level_fitness_index_v3`.
+Without this option the original v1/v2 behavior and format remain unchanged.
+`--rubric-plan` supplies an already captured plan whose exact manifest bytes
+must match the descriptor's plan pin. Normal fitness descriptors omit rubric
+result blobs; this separate input supplies those blobs through captured hashes.
+The option may be omitted when all referenced blobs are already captured with
+the descriptor, or when every selected job declares an absent result. Indexing
+never follows the roster's historical result paths. Recheck uses only the
+portable index and its captured artifacts.
+
+One rubric row is retained for every primary roster job belonging to a record
+selected by the fitness descriptor. The denominator is these declared jobs,
+including distinct primary job IDs for the same record/rubric; it is not the
+entire planned cohort or an inferred set of repeated ratings. At most 10,000
+roster jobs are supported. Duplicate job IDs or changed join membership refuse.
+
+| State | Meaning |
+| --- | --- |
+| `associated` | Captured identity declarations agree. |
+| `missing` | The captured plan explicitly declares no result artifact. |
+| `mismatched` | A declared record, job, instrument, context or scope identity conflicts. |
+| `unsupported` | Historical identity fields are absent, the semantic contract is unsupported, or captured result bytes are not a strict bounded JSON mapping. |
+
+A declared artifact with missing or changed captured bytes refuses rather than
+becoming `missing`. Known conflicts remain `mismatched` even when other fields
+are absent. Every state remains in `rubric_counts.selected`.
+
+If the roster also declares `pinned_files[job.output]`, the captured result
+bytes must agree with that SHA-256 declaration. A valid conflicting hash makes
+the row `mismatched`; a malformed declared hash makes it `unsupported` unless
+another known conflict already makes it `mismatched`. Both diagnostics remain
+visible. An absent result remains `missing`, with its original declaration
+retained and no inferred byte conflict. Each row exposes `roster_output_pin`
+and distinguishes `captured_plan_only` from
+`captured_plan_with_roster_output_declaration` in `result_pin_basis`. Neither
+basis authenticates evaluator execution.
+
+The check supports explicitly declared semantic v3 and rubric20 v4 identities.
+It reconciles input hashes and label aliases, declared instrument resource pins,
+the v4 predecessor declaration, explicit applicability context and its digest,
+and every dataset scope unit. Missing historical context is not silently
+converted to an empty context; false and missing remain distinct.
+
+`associated` means agreement of captured declarations only. Instrument hashes
+are roster declarations, not proof of canonical released bytes. This index does
+not validate rubric schemas, scores, arithmetic, scientific labels, evaluator
+execution or calibration. `rubric_rating_acceptance`, per-row `rating_accepted`
+and `scientific_scoring_eligible` remain false. Existing readiness blockers and
+all fitness/support axis counts are preserved; no score is propagated between
+targets, records or repeated ratings.

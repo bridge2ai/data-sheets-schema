@@ -23,6 +23,7 @@ FORMAT = "top_level_fitness_result_v1"
 RESPONSE_FORMAT = "top_level_fitness_response_v1"
 INDEX_FORMAT = "top_level_fitness_index_v1"
 INDEX_FORMAT_V2 = "top_level_fitness_index_v2"
+INDEX_FORMAT_V3 = "top_level_fitness_index_v3"
 MAX_DOCUMENT_BYTES = saved.MAX_MANIFEST_BYTES
 FAILURES = ("none", "form", "target", "substance")
 CONTRACT = {
@@ -523,7 +524,82 @@ def _support_execution_index(capture, descriptor, supplied, fitness_rows, suppor
     return rows, counts, metadata
 
 
-def _index(capture, descriptor_raw, result_pins, support_pins, execution=None, support_execution=None):
+def _rubric_index(capture, descriptor):
+    from data_sheets_schema import rubric_association as rubric
+    from data_sheets_schema.support_plan import _roster_records
+
+    manifest, records, _ = saved._manifest(capture, capture.get(descriptor["plan"]))
+    roster_raw = capture.get(manifest["roster"])
+    roster = saved._mapping(saved._read(roster_raw, "rubric roster"), "rubric roster")
+    jobs = roster.get("jobs")
+    _require(isinstance(jobs, list) and len(jobs) <= rubric.MAX_ROSTER_JOBS,
+             "rubric roster exceeds job bound or has no jobs list")
+    groups, pins = _roster_records(roster_raw)
+    rows = []
+    selected = {s["binding"]["record_id"] for s in descriptor["selections"]}
+    for rid in sorted(selected):
+        record = records[rid]
+        document, raw, _, _ = _record(capture, manifest, record, rid, groups, pins)
+        expected = {job["id"]: job for job in groups[record["record"]["path"]][1]}
+        joins = record.get("rubric_join_jobs")
+        _require(isinstance(joins, list) and len(joins) == len(expected),
+                 "rubric join membership differs from captured primary roster")
+        seen = set()
+        for join in joins:
+            _require(isinstance(join, dict) and isinstance(join.get("id"), str)
+                     and join["id"] in expected and join["id"] not in seen,
+                     "duplicate or foreign rubric join job")
+            seen.add(join["id"])
+            job = expected[join["id"]]
+            _require(all(join.get(key) == job[key] for key in ("rubric", "output")),
+                     "rubric join identity differs from captured primary roster")
+            _require("result_artifact" in join, "rubric join must declare its result artifact")
+            pin = join["result_artifact"]
+            output_declared = job["output"] in pins
+            output_sha = pins.get(job["output"])
+            row = {"record_id": rid, "record": saved._pin(raw), "job_id": job["id"],
+                   "rubric": job["rubric"], "output": job["output"], "result_artifact": pin,
+                   "roster_output_pin": {"present": output_declared, "sha256": output_sha},
+                   "result_pin_basis": ("captured_plan_with_roster_output_declaration" if output_declared
+                                        else "captured_plan_only"),
+                   "identity": {key: job[key] for key in ("project", "cohort", "label", "method", "generation_rep")},
+                   "rating_accepted": False, "scientific_scoring_eligible": False}
+            if pin is None:
+                _require(join.get("status") == "unavailable_locally; materialize sparse paths if tracked",
+                         "missing rubric artifact contradicts captured status")
+                assessment = {"state": "missing", "conflicts": [], "unsupported": []}
+            else:
+                _require(join.get("status") == "captured_for_later_join",
+                         "captured rubric artifact contradicts captured status")
+                # Missing/corrupt captured bytes refuse; they cannot be relabelled as an absent result.
+                result_raw = capture.get(pin)
+                try:
+                    result = saved._mapping(saved._read(result_raw, "rubric result"), "rubric result")
+                except ResultError:
+                    assessment = {"state": "unsupported", "conflicts": [], "unsupported": [
+                        {"field": "result", "reason": "invalid_bounded_json_mapping"}]}
+                else:
+                    assessment = rubric.assess(result, job, roster, document)
+                if output_declared:
+                    if not isinstance(output_sha, str) or not saved._SHA.fullmatch(output_sha):
+                        assessment["unsupported"].append({"field": "roster.pinned_files.output",
+                                                          "reason": "invalid_sha256"})
+                        if assessment["state"] == "associated":
+                            assessment["state"] = "unsupported"
+                    elif sha256(result_raw) != output_sha:
+                        assessment["conflicts"].append({"field": "roster.pinned_files.output",
+                                                       "reason": "captured_result_sha256_conflicts"})
+                        assessment["state"] = "mismatched"
+            rows.append({**row, **assessment})
+    rows.sort(key=lambda row: (row["record_id"], row["job_id"]))
+    counts = {"selected": len(rows), **{state: sum(r["state"] == state for r in rows) for state in rubric.STATES}}
+    return {"rubric_rows": rows, "rubric_counts": counts, "rubric_count_basis": rubric.COUNT_BASIS,
+            "rubric_association_basis": "captured_declared_identity_only",
+            "rubric_rating_acceptance": False, "rubric_limitations": list(rubric.LIMITATIONS)}
+
+
+def _index(capture, descriptor_raw, result_pins, support_pins, execution=None, support_execution=None,
+           rubric_associations=False):
     descriptor = _load_descriptor(capture, descriptor_raw)
     by_attempt, pins = {}, {}
     for pin in result_pins:
@@ -597,6 +673,8 @@ def _index(capture, descriptor_raw, result_pins, support_pins, execution=None, s
             fitness_state_basis="accepted_requires_both_transport_and_strict_response")
     if support_execution is not None:
         value.update(format=INDEX_FORMAT_V2, **support_metadata)
+    if rubric_associations:
+        value.update(format=INDEX_FORMAT_V3, **_rubric_index(capture, descriptor))
     return value
 
 
@@ -616,9 +694,18 @@ def _capture_execution(capture, path):
 
 
 def build_index(descriptor: Path, results: list[Path], output: Path, *, execution=None, support_results=(),
-                support_execution=None) -> dict:
+                support_execution=None, rubric_associations=False, rubric_plan=None) -> dict:
+    _require(type(rubric_associations) is bool, "rubric_associations must be boolean")
+    _require(rubric_plan is None or rubric_associations, "rubric_plan requires explicit rubric_associations")
     capture = saved.Capture(descriptor)
     descriptor_raw = capture.entry("descriptor.json")
+    if rubric_plan is not None:
+        selected = _load_descriptor(capture, descriptor_raw)
+        other = saved.Capture(rubric_plan)
+        plan_raw = other.entry("manifest.json")
+        _require(saved._pin(plan_raw) == selected["plan"], "rubric plan differs from fitness descriptor plan")
+        _rubric_index(other, selected)
+        _copy(capture, other)
     result_pins, support_pins = [], []
     for paths, selected, checker in ((results, result_pins, _recheck_captured),
                                      (support_results, support_pins, _support)):
@@ -630,8 +717,10 @@ def build_index(descriptor: Path, results: list[Path], output: Path, *, executio
             selected.append(capture.add(raw))
     execution_input = _capture_execution(capture, execution) if execution is not None else None
     support_input = _capture_execution(capture, support_execution) if support_execution is not None else None
-    value = _index(capture, descriptor_raw, result_pins, support_pins, execution_input, support_input)
-    protected = (*results, *support_results, *(p for p in (execution, support_execution) if p is not None))
+    value = _index(capture, descriptor_raw, result_pins, support_pins, execution_input, support_input,
+                   rubric_associations)
+    protected = (*results, *support_results,
+                 *(p for p in (execution, support_execution, rubric_plan) if p is not None))
     _write_document(output, capture, "index.json", value, protected=protected)
     return value
 
@@ -642,13 +731,14 @@ def recheck_index(index: Path) -> dict:
     execution = recorded.get("execution")
     execution_input = ({"ledger": execution["ledger"], "saved_report": execution["saved_report"]}
                        if execution is not None else None)
-    _require(recorded.get("format") in (INDEX_FORMAT, INDEX_FORMAT_V2), "unknown fitness index format")
+    _require(recorded.get("format") in (INDEX_FORMAT, INDEX_FORMAT_V2, INDEX_FORMAT_V3), "unknown fitness index format")
     support_input = None
-    if recorded["format"] == INDEX_FORMAT_V2:
+    if recorded["format"] == INDEX_FORMAT_V2 or (recorded["format"] == INDEX_FORMAT_V3 and "support_execution" in recorded):
         support_execution = recorded.get("support_execution")
         _require(type(support_execution) is dict, "v2 index requires captured support execution")
         support_input = {"ledger": support_execution["ledger"], "saved_report": support_execution["saved_report"]}
     expected = _index(capture, capture.get(recorded["descriptor"], limit=saved.MAX_MANIFEST_BYTES),
-                      recorded["result_artifacts"], recorded["support_result_artifacts"], execution_input, support_input)
+                      recorded["result_artifacts"], recorded["support_result_artifacts"], execution_input, support_input,
+                      recorded["format"] == INDEX_FORMAT_V3)
     _require(canonical(recorded) == canonical(expected), "fitness index differs from reconstructed evidence")
     return expected
