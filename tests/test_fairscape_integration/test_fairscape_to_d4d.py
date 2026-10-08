@@ -998,10 +998,9 @@ def release_crate():
 
 
 class TestRootDataEntity(unittest.TestCase):
-    """#4072: the record describes the crate's root data entity, by the
-    RO-Crate rule: the descriptor's `about`, else `./`, else the first
-    ROCrate-typed entity. The last ROCrate-typed entity, which the converter
-    took, is a sub-crate in a FAIRSCAPE release crate."""
+    """#4072, #4586: explicit root identity precedes conventional and
+    unique-root fallback; an ambiguous or broken reference is refused.
+    Graph order cannot select a member as the release."""
 
     def test_the_root_is_the_entity_the_descriptor_is_about(self):
         record, dropped = converted(release_crate())
@@ -1032,44 +1031,166 @@ class TestRootDataEntity(unittest.TestCase):
         record, _ = converted(crate_json)
         self.assertEqual(record["title"], "The release")
 
-    def test_without_a_descriptor_the_root_is_dot_slash_then_the_first_rocrate(self):
+    def test_without_a_descriptor_a_conventional_or_unique_root_is_selected(self):
         from data_sheets_schema.rocrate_map import crate_root
-        dot_slash = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE,
-                      "name": "A sub-crate"},
-                     {"@id": "./", "@type": "Dataset", "name": "The root"},
-                     {"@id": "ark:59853/rocrate-b", "@type": ROCRATE,
-                      "name": "Another sub-crate"}]
-        first = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE, "name": "First"},
-                 {"@id": "ark:59853/rocrate-b", "@type": ROCRATE, "name": "Second"}]
-        for graph, title in ((dot_slash, "The root"), (first, "First")):
-            with self.subTest(title=title):
-                record, _ = converted({"@graph": graph})
-                self.assertEqual(record["title"], title)
-        # #2915 hardens the static mapper. The converter's historical
-        # fallback is separately tracked by #4586; it is not shared policy.
-        for graph in (dot_slash, list(reversed(dot_slash))):
-            with self.subTest(order=[node['@id'] for node in graph]):
-                self.assertIs(root_data_entity(graph), dot_slash[1])
-                self.assertIs(crate_root(graph), dot_slash[1])
-        for graph in (first, list(reversed(first))):
-            with self.subTest(order=[node['@id'] for node in graph]):
-                self.assertIs(root_data_entity(graph), graph[0])
-                self.assertIsNone(crate_root(graph))
-        self.assertIs(root_data_entity(first[:1]), first[0])
-        self.assertIs(crate_root(first[:1]), first[0])
+        for identifier in ("./", "."):
+            root = {"@id": identifier, "@type": "Dataset", "name": "The root"}
+            entities = [{"@id": "ark:59853/rocrate-a", "@type": ROCRATE,
+                         "name": "A sub-crate"}, root,
+                        {"@id": "ark:59853/rocrate-b", "@type": ROCRATE,
+                         "name": "Another sub-crate"}]
+            for graph in (entities, list(reversed(entities))):
+                with self.subTest(identifier=identifier, graph=graph):
+                    self.assertIs(root_data_entity(graph), root)
+                    self.assertIs(crate_root(graph), root)
+                    record, _ = converted({"@graph": graph})
+                    self.assertEqual(record["title"], "The root")
+                    self.assertEqual(record["id"], identifier)
+                    self.assertEqual(problems(record), [])
+        for kind in (ROCRATE, "Dataset", "https://w3id.org/EVI#Dataset"):
+            root = {"@id": "https://example.org/root", "@type": kind,
+                    "name": "Unique root"}
+            other = {"@id": "https://example.org/person", "@type": "Person"}
+            for graph in ([root, other], [other, root]):
+                with self.subTest(kind=kind, graph=graph):
+                    self.assertIs(root_data_entity(graph), root)
+                    self.assertIs(crate_root(graph), root)
+                    record, _ = converted({"@graph": graph})
+                    self.assertEqual(record["title"], "Unique root")
+                    self.assertEqual(problems(record), [])
 
-    def test_a_descriptor_naming_no_entity_falls_back(self):
+    def test_a_unique_anonymous_root_with_a_doi_still_converts(self):
+        root = {"@type": ROCRATE, "name": "Anonymous crate node",
+                "identifier": "https://doi.org/10.5555/ANONYMOUS"}
+        other = {"@type": "Person", "name": "An unrelated anonymous person"}
+        for graph in ([other, root], [root, other]):
+            with self.subTest(graph=graph):
+                self.assertIs(root_data_entity(graph), root)
+                record, dropped = converted({"@graph": graph})
+                self.assertEqual(record["id"], "doi:10.5555/ANONYMOUS")
+                self.assertEqual(record["doi"], "10.5555/ANONYMOUS")
+                self.assertEqual(record["title"], "Anonymous crate node")
+                self.assertEqual(dropped, [])
+                self.assertEqual(problems(record), [])
+
+    def test_malformed_unrelated_member_ids_do_not_break_the_selected_root(self):
+        expected, expected_dropped = converted(crate({"identifier": "doi:10.5555/ROOT"}))
+        for identifier in ([], {}, ["./"], {"@id": "./"}, None, False, 0):
+            for kind in ("File", "Dataset"):
+                data = crate({"identifier": "doi:10.5555/ROOT"},
+                             {"@id": identifier, "@type": kind, "name": "Unrelated"})
+                for graph in (data["@graph"], list(reversed(data["@graph"]))):
+                    with self.subTest(identifier=identifier, kind=kind, graph=graph):
+                        before = json.dumps(graph)
+                        record, dropped = converted({"@graph": graph})
+                        self.assertEqual(record, expected)
+                        self.assertEqual(dropped, expected_dropped)
+                        self.assertEqual(json.dumps(graph), before)
+
+    def test_an_explicit_root_wins_over_a_conventional_decoy_in_either_order(self):
+        graph = crate({"@id": "https://example.org/root", "name": "Explicit root"},
+                      {"@id": "./", "@type": ROCRATE, "name": "Decoy"})["@graph"]
+        graph[0]["about"] = {"@id": "https://example.org/root"}
+        for name in ("ro-crate-metadata.json", "ro-crate-metadata.jsonld"):
+            graph[0]["@id"] = name
+            for ordered in (graph, list(reversed(graph))):
+                with self.subTest(descriptor=name, graph=ordered):
+                    self.assertIs(root_data_entity(ordered), graph[1])
+                    record, _ = converted({"@graph": ordered})
+                    self.assertEqual(record["title"], "Explicit root")
+                    self.assertEqual(record["id"], "https://example.org/root")
+
+    @staticmethod
+    def refused_graphs():
+        root = {"@id": "./", "@type": ROCRATE, "name": "Conventional decoy"}
+        descriptor = {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+                      "about": {"@id": "./"}}
+        return (
+            ("unresolved", [{**descriptor, "about": {"@id": "missing"}}, root]),
+            ("empty", [{**descriptor, "about": []}, root]),
+            ("invalid", [{**descriptor, "about": None}, root]),
+            ("duplicate", [descriptor, root, {"@id": "./", "name": "Same ID"}]),
+            ("disagree", [descriptor, root,
+                          {"@id": "ro-crate-metadata.jsonld", "about": {"@id": "other"}},
+                          {"@id": "other", "@type": ROCRATE}]),
+            ("itself", [{**descriptor, "@type": ROCRATE,
+                         "about": {"@id": "ro-crate-metadata.json"}}, root]),
+            ("not typed", [{**descriptor, "about": {"@id": "person"}}, root,
+                           {"@id": "person", "@type": "Person"}]),
+            ("multiple", [{"@id": "a", "@type": ROCRATE},
+                          {"@id": "b", "@type": ROCRATE}]),
+            ("multiple", [{"@id": "a", "@type": "Dataset"},
+                          {"@id": "b", "@type": "Dataset"}]),
+        )
+
+    def test_broken_or_ambiguous_root_references_are_refused_in_either_order(self):
         from data_sheets_schema.rocrate_map import crate_root
-        graph = [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
-                  "about": {"@id": "ark:59853/not-in-the-graph"}},
-                 {"@id": "./", "@type": ROCRATE, "name": "The root"},
-                 {"@id": "ark:59853/rocrate-a", "@type": ROCRATE, "name": "Later"}]
-        record, _ = converted({"@graph": graph})
-        self.assertEqual(record["title"], "The root")
-        # Unlike the historical converter (#4586), the static mapper must
-        # not silently override an explicit but unresolved root reference.
-        self.assertIsNone(crate_root(graph))
-        self.assertIsNone(crate_root(list(reversed(graph))))
+        for reason, entities in self.refused_graphs():
+            messages = []
+            for graph in (entities, list(reversed(entities))):
+                with self.subTest(reason=reason, graph=graph):
+                    self.assertIsNone(root_data_entity(graph))
+                    self.assertIsNone(crate_root(graph))
+                    converter = FairscapeToD4DConverter()
+                    with self.assertRaises(ValueError) as cm:
+                        quietly(converter.convert, {"@graph": graph})
+                    message = str(cm.exception)
+                    self.assertTrue(message.startswith(
+                        "No unambiguous root data entity in the RO-Crate `@graph`: "))
+                    self.assertIn(reason, message)
+                    self.assertEqual(converter.dropped, [])
+                    messages.append(message)
+            self.assertEqual(len(messages), 2)
+            self.assertEqual(messages[0], messages[1])
+
+    def test_root_refusal_preserves_cli_destinations_and_cannot_skip_validation(self):
+        from src.fairscape_integration.cli import cli
+
+        sentinel = b"existing record must survive\n"
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path = directory / "ambiguous.json"
+            path.write_text(json.dumps({"@graph": [
+                {"@id": "a", "@type": ROCRATE},
+                {"@id": "b", "@type": ROCRATE}]}), encoding="utf-8")
+            for exists in (False, True):
+                for no_validate in (False, True):
+                    output = directory / f"script-{exists}-{no_validate}.yaml"
+                    if exists:
+                        output.write_bytes(sentinel)
+                    argv = ["fairscape_to_d4d.py", "--input", str(path),
+                            "--output", str(output)]
+                    if no_validate:
+                        argv.append("--no-validate")
+                    with self.subTest(command="script", exists=exists,
+                                      no_validate=no_validate):
+                        printed = io.StringIO()
+                        with mock.patch.object(sys, "argv", argv), \
+                                contextlib.redirect_stdout(printed), \
+                                contextlib.redirect_stderr(io.StringIO()):
+                            self.assertEqual(main(), 1)
+                        self.assertIn("No unambiguous root data entity", printed.getvalue())
+                        self.assertIn("multiple ROCrate", printed.getvalue())
+                        if exists:
+                            self.assertEqual(output.read_bytes(), sentinel)
+                        else:
+                            self.assertFalse(output.exists())
+                output = directory / f"click-{exists}.yaml"
+                if exists:
+                    output.write_bytes(sentinel)
+                with self.subTest(command="fairscape-cli", exists=exists):
+                    result = cli_runner().invoke(
+                        cli, ["rocrate-to-d4d", str(path), "-o", str(output)])
+                    self.assertEqual(result.exit_code, 1)
+                    self.assertIsInstance(result.exception, SystemExit)
+                    self.assertIn("✗ Error: No unambiguous root data entity", result.stderr)
+                    self.assertIn("multiple ROCrate", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
+                    self.assertNotIn("D4D YAML written", result.stdout)
+                    if exists:
+                        self.assertEqual(output.read_bytes(), sentinel)
+                    else:
+                        self.assertFalse(output.exists())
 
     def test_the_tracked_cm4ai_release_crate_is_its_june_2026_release(self):
         """The reduced crate keeps every entity; its hasPart lists are

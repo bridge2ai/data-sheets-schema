@@ -39,7 +39,8 @@ from data_sheets_schema.rocrate_map import (
 from data_sheets_schema.schema_cache import sha256_of
 
 GRAPH = [
-    {"@id": "ro-crate-metadata.json", "@type": "CreativeWork"},
+    {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+     "about": {"@id": "ark:59853/thing"}},
     {"@id": "ark:59853/thing", "@type": ["https://w3id.org/EVI#Dataset",
                                          "https://w3id.org/EVI#ROCrate"],
      "name": "Test Crate", "description": "A crate for tests",
@@ -55,7 +56,7 @@ class TestPathResolution(unittest.TestCase):
     def setUp(self):
         self.root = crate_root(GRAPH)
 
-    def test_crate_root_prefers_the_rocrate_entity(self):
+    def test_crate_root_is_the_entity_named_by_the_descriptor(self):
         self.assertEqual(self.root["@id"], "ark:59853/thing")
 
     def test_type_match_tolerates_evi_prefixed_types(self):
@@ -984,7 +985,8 @@ def _crate_holding(source, value):
         root[m.group("prop")] = [{"name": m.group("name"), m.group("prop2"): value}]
     else:
         root[m.group("prop") if m else source] = value
-    return [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork"}, root]
+    return [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+             "about": {"@id": root["@id"]}}, root]
 
 
 class TestNullAndNestedListItems(unittest.TestCase):
@@ -1156,7 +1158,8 @@ class TestEnumNonTextItems(unittest.TestCase):
 
 
 class TestRecordIdListItems(unittest.TestCase):
-    """#4174: the required id uses the same null/nested-list refusals."""
+    """#4174: identifier lists are shaped only after an unambiguous root
+    is selected; #4587 refuses a malformed root identity before shaping."""
 
     @classmethod
     def setUpClass(cls):
@@ -1190,17 +1193,16 @@ class TestRecordIdListItems(unittest.TestCase):
                 self.assertIn("null; dropped", field.detail)
                 self.assertNotIn("fell back", field.detail)
 
-    def test_root_id_is_filtered_too_and_refusals_are_reported_if_both_are_empty(self):
-        res, field = self.mapped([None], [None, "ark:59853/fallback"])
-        self.assertEqual(res.record, {"id": "ark:59853/fallback"})
-        self.assertIn("@id: 1 of 2 list items is null; dropped", field.detail)
-        for root_id in ([None], [["x"]], None):
-            with self.subTest(root_id=root_id):
-                res, field = self.mapped([["identifier"]], root_id)
-                self.assertEqual(res.record, {})
-                self.assertEqual(field.status, "empty")
-                self.assertFalse(field.from_table)
-                self.assertIn("dropped rather than flattened", field.detail)
+    def test_malformed_root_id_refuses_selection_and_retains_the_reason(self):
+        for root_id in ([None, "ark:59853/fallback"], [None], [["x"]], None):
+            for identifier in ([["identifier"]], ["https://doi.org/10.5555/x"]):
+                with self.subTest(root_id=root_id, identifier=identifier):
+                    root = {**BARE_ROOT, "@id": root_id, "identifier": identifier}
+                    res = map_crate([root], [], self.sv, "TEST")
+                    self.assertEqual(res.record, {})
+                    self.assertEqual(res.fields, [])
+                    self.assertIsNone(res.sources["root"]["properties"])
+                    self.assertIn("invalid @id", res.sources["root"]["selection_note"])
 
 
 class TestNestedListsAcrossTheArms(unittest.TestCase):

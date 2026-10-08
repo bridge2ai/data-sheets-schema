@@ -24,6 +24,20 @@ def row(path, source, **options):
 
 
 class TestExplicitRootSelection(unittest.TestCase):
+    def assert_root_in_both_orders(self, graph, root):
+        for ordered in (graph, list(reversed(graph))):
+            with self.subTest(graph=ordered):
+                chosen, detail = select_root(ordered)
+                self.assertIs(chosen, root)
+                self.assertTrue(detail)
+
+    def assert_refused_in_both_orders(self, graph):
+        for ordered in (graph, list(reversed(graph))):
+            with self.subTest(graph=ordered):
+                chosen, detail = select_root(ordered)
+                self.assertIsNone(chosen)
+                self.assertTrue(detail, "A refused root needs a diagnostic")
+
     def test_descriptor_precedes_conventional_and_rocrate_typed_decoys(self):
         root = {"@id": ROOT_ID, "@type": "Dataset", "name": "Root"}
         decoy = {"@id": "./", "@type": ["Dataset", "ROCrate"], "name": "Decoy"}
@@ -35,19 +49,80 @@ class TestExplicitRootSelection(unittest.TestCase):
     def test_conflicting_descriptors_and_unresolved_about_never_fall_back(self):
         root = {"@id": ROOT_ID, "@type": "Dataset"}
         conventional = {"@id": "./", "@type": "Dataset"}
-        other = {"@id": "folder/ro-crate-metadata.json", "about": {"@id": "other"}}
+        other = {"@id": "./ro-crate-metadata.json", "about": {"@id": "other"}}
         graphs = ([descriptor(), other, root, conventional],
                   [descriptor("missing"), conventional],
                   [{"@id": "ro-crate-metadata.json", "about": []}, conventional],
                   [{"@id": "ro-crate-metadata.json", "about": None}, conventional])
         for graph in graphs:
             with self.subTest(graph=graph):
-                self.assertIsNone(select_root(graph)[0])
+                self.assert_refused_in_both_orders(graph)
 
     def test_same_target_repeated_by_descriptors_is_not_a_conflict(self):
         root = {"@id": ROOT_ID, "@type": "Dataset"}
-        other = {"@id": "folder/ro-crate-metadata.json", "about": [{"@id": ROOT_ID}]}
-        self.assertIs(select_root([descriptor(), other, root])[0], root)
+        other = {"@id": "./ro-crate-metadata.json", "about": [{"@id": ROOT_ID}]}
+        self.assert_root_in_both_orders([descriptor(), other, root], root)
+
+    def test_all_crate_level_descriptor_names_select_their_explicit_root(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        decoy = {"@id": "./", "@type": "ROCrate"}
+        for name in ("ro-crate-metadata.json", "./ro-crate-metadata.json",
+                     "ro-crate-metadata.jsonld", "./ro-crate-metadata.jsonld"):
+            with self.subTest(name=name):
+                metadata = {**descriptor(), "@id": name}
+                self.assert_root_in_both_orders([metadata, root, decoy], root)
+
+    def test_nested_and_absolute_metadata_members_are_not_root_descriptors(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        member = {"@id": "member", "@type": "Dataset"}
+        for name in ("folder/ro-crate-metadata.json", "folder/ro-crate-metadata.jsonld",
+                     "https://example.org/ro-crate-metadata.json",
+                     "https://example.org/ro-crate-metadata.jsonld"):
+            with self.subTest(name=name):
+                metadata = {"@id": name, "about": {"@id": "member"}}
+                self.assert_root_in_both_orders(
+                    [metadata, descriptor(), root, member], root)
+                # Without a crate-level descriptor, this member file still
+                # cannot override a conventional root or resolve ambiguity.
+                conventional = {"@id": "./", "@type": "Dataset"}
+                self.assert_root_in_both_orders(
+                    [metadata, member, conventional], conventional)
+                self.assert_refused_in_both_orders([metadata, root, member])
+
+    def test_duplicate_descriptor_identity_refuses_even_when_about_agrees(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        for duplicate in (descriptor(), {"@id": "ro-crate-metadata.json"}):
+            with self.subTest(duplicate=duplicate):
+                self.assert_refused_in_both_orders([descriptor(), duplicate, root])
+
+    def test_missing_or_malformed_about_never_uses_conventional_or_unique_fallback(self):
+        malformed = (None, "", " ", False, 0, [], {}, {"@id": None},
+                     {"@id": []}, {"@id": " "}, [None], [[{"@id": ROOT_ID}]],
+                     [{"@id": ROOT_ID}, {"@id": "other"}])
+        for name in ("ro-crate-metadata.json", "./ro-crate-metadata.jsonld"):
+            metadata_variants = [{"@id": name}] + [
+                {"@id": name, "about": value} for value in malformed]
+            for metadata in metadata_variants:
+                for identifier in ("./", ROOT_ID):
+                    root = {"@id": identifier, "@type": "ROCrate"}
+                    with self.subTest(metadata=metadata, identifier=identifier):
+                        self.assert_refused_in_both_orders([metadata, root])
+
+    def test_one_valid_descriptor_does_not_hide_another_missing_about(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        invalid = {"@id": "ro-crate-metadata.jsonld"}
+        self.assert_refused_in_both_orders([descriptor(), invalid, root])
+
+    def test_repeated_about_reference_is_one_target(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        metadata = {**descriptor(), "about": [{"@id": ROOT_ID}, ROOT_ID]}
+        self.assert_root_in_both_orders([metadata, root], root)
+
+    def test_descriptor_cannot_select_itself_even_when_typed_as_dataset(self):
+        metadata = {"@id": "ro-crate-metadata.json", "@type": "Dataset",
+                    "about": {"@id": "ro-crate-metadata.json"}}
+        child = {"@id": "child", "@type": "ROCrate"}
+        self.assert_refused_in_both_orders([metadata, child])
 
     def test_duplicate_target_ids_are_rejected_even_when_one_is_untyped(self):
         for identifier, reference in ((ROOT_ID, [descriptor()]), ("./", []), (".", [])):
@@ -62,14 +137,89 @@ class TestExplicitRootSelection(unittest.TestCase):
         self.assertIsNone(select_root(graph)[0])
         self.assertIsNone(select_root(list(reversed(graph)))[0])
 
+    def test_ambiguous_rocrates_do_not_fall_back_to_a_unique_dataset(self):
+        graph = [{"@id": "a", "@type": "ROCrate"},
+                 {"@id": "b", "@type": "https://w3id.org/EVI#ROCrate"},
+                 {"@id": "child", "@type": "Dataset"}]
+        self.assert_refused_in_both_orders(graph)
+
+    def test_conventional_identity_precedes_unique_typed_fallback(self):
+        for identifier in (".", "./"):
+            root = {"@id": identifier, "@type": "Dataset"}
+            child = {"@id": "child", "@type": "ROCrate"}
+            self.assert_root_in_both_orders([child, root], root)
+
+    def test_two_conventional_identities_are_ambiguous(self):
+        self.assert_refused_in_both_orders([
+            {"@id": ".", "@type": "Dataset"},
+            {"@id": "./", "@type": "Dataset"}])
+
+    def test_wrongly_typed_conventional_identity_does_not_fall_back_to_child(self):
+        for identifier in (".", "./"):
+            for type_value in (None, "Organization", "NotROCrate", [], {}, False):
+                root = {"@id": identifier, "@type": type_value}
+                child = {"@id": "child", "@type": "ROCrate"}
+                with self.subTest(identifier=identifier, type_value=type_value):
+                    self.assert_refused_in_both_orders([root, child])
+
+    def test_unique_typed_fallback_requires_no_graph_position_assumption(self):
+        for type_value in ("Dataset", "ROCrate", "https://w3id.org/EVI#ROCrate"):
+            root = {"@id": ROOT_ID, "@type": type_value}
+            unrelated = {"@id": "person", "@type": "Person"}
+            with self.subTest(type_value=type_value):
+                self.assert_root_in_both_orders([root, unrelated], root)
+
+    def test_unique_rocrate_precedes_other_dataset_candidates(self):
+        root = {"@id": ROOT_ID, "@type": "ROCrate"}
+        members = [{"@id": "a", "@type": "Dataset"},
+                   {"@id": "b", "@type": "Dataset"}]
+        self.assert_root_in_both_orders([root, *members], root)
+
+    def test_anonymous_unique_typed_fallback_is_preserved(self):
+        for type_value in ("Dataset", "ROCrate"):
+            root = {"@type": type_value, "identifier": "https://doi.org/10.5555/root"}
+            unrelated = {"@id": "person", "@type": "Person"}
+            with self.subTest(type_value=type_value):
+                self.assert_root_in_both_orders([root, unrelated], root)
+                self.assert_refused_in_both_orders([root, dict(root)])
+
+    def test_present_malformed_fallback_identity_refuses_instead_of_choosing_child(self):
+        child = {"@id": "child", "@type": "Dataset"}
+        for identifier in (None, "", " ", False, 0, [], {}, [ROOT_ID]):
+            root = {"@id": identifier, "@type": "ROCrate",
+                    "identifier": "https://doi.org/10.5555/root"}
+            with self.subTest(identifier=identifier):
+                self.assert_refused_in_both_orders([root, child])
+
+    def test_unique_typed_fallback_rejects_duplicate_identity_with_untyped_node(self):
+        root = {"@id": ROOT_ID, "@type": "ROCrate"}
+        duplicate = {"@id": ROOT_ID, "name": "Conflicting identity"}
+        self.assert_refused_in_both_orders([root, duplicate])
+
+    def test_type_name_substrings_do_not_establish_rocrate_identity(self):
+        for type_value in ("NotROCrate", "ROCrateDescription", "https://example.org/NotROCrate"):
+            root = {"@id": ROOT_ID, "@type": type_value}
+            with self.subTest(type_value=type_value):
+                self.assert_refused_in_both_orders([root])
+
+    def test_graph_must_be_a_list(self):
+        root = {"@id": ROOT_ID, "@type": "Dataset"}
+        for graph in (None, {}, {"root": root}, "@graph", 0, False, (root,)):
+            with self.subTest(graph=graph):
+                chosen, detail = select_root(graph)
+                self.assertIsNone(chosen)
+                self.assertIn("graph", detail.lower())
+
     def test_descriptor_cannot_promote_an_organization_to_root_dataset(self):
         root = {"@id": ROOT_ID, "@type": "Organization"}
         self.assertIsNone(select_root([descriptor(), root])[0])
 
     def test_unrelated_malformed_member_identifier_cannot_crash_descriptor_selection(self):
         root = {"@id": ROOT_ID, "@type": "Dataset"}
-        member = {"@id": "http://[", "@type": "Dataset"}
-        self.assertIs(select_root([member, descriptor(), root])[0], root)
+        for identifier in ("http://[", None, [], {}, False):
+            member = {"@id": identifier, "@type": "Dataset"}
+            with self.subTest(identifier=identifier):
+                self.assert_root_in_both_orders([member, descriptor(), root], root)
 
 
 class TestRootPathResolution(unittest.TestCase):
