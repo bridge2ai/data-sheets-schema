@@ -233,7 +233,7 @@ def test_default_mapping_real_cli_publishes_explicit_identity(tmp_path, monkeypa
 
 def test_default_mapping_other_type_errors_still_refuse(implementation, tmp_path):
     source = crate(tmp_path / 'input.json', {'@id': './', 'identifier': 'doi:10.1234/Valid',
-                                           'name': 'Selected root', 'author': 'A source author'})
+                                           'name': 'Selected root', 'author': {'@id': 'https://orcid.org/explicit-reference'}})
     record = build(implementation, source, DEFAULT)
     assert record['id'] == 'doi:10.1234/Valid'
     with pytest.raises(publication.PublicationError):
@@ -272,13 +272,13 @@ def test_actual_cli_reports_exclude_only_marked_construction_identity(
     percentage = count / denominator * 100 if denominator else 0
     report = report_path.read_text()
     if entrypoint == 'packaged':
-        assert f'Fields populated: {count}/{denominator}' in report
-        assert f'Coverage: {percentage:.1f}%' in report
-        assert f'Coverage: {percentage:.1f}%' in result.output
+        assert f'Constructed output keys: {count}/{denominator}' in report
+        assert f'Constructed-field presence (output keys; null-valued keys included): {percentage:.1f}%' in report
+        assert f'Constructed-field presence (output keys; null-valued keys included): {percentage:.1f}%' in result.output
     else:
-        assert f'Coverage: {count}/{denominator} ({percentage:.1f}%)' in report
-        assert f'Coverage: {count}/{denominator} mapped fields' in result.output
-        assert f'Percentage: {percentage:.1f}%' in result.output
+        assert f'Constructed-field presence (output keys; null-valued keys included): {count}/{denominator} ({percentage:.1f}%)' in report
+        assert f'Constructed-field presence (output keys; null-valued keys included): {count}/{denominator} mapped fields' in result.output
+        assert f'Construction percentage: {percentage:.1f}%' in result.output
     assert ('Required Dataset.id construction is excluded' in report) is marked
     assert {path: path.read_bytes() for path in before} == before
 

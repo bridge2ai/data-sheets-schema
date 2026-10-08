@@ -346,7 +346,9 @@ class UnifiedValidator:
         Args:
             input_path: Path to file to validate
             schema: Which schema to validate against ("d4d" or "rocrate")
-            target_class: Specific class to validate (default: Dataset)
+            target_class: D4D class to validate; None leaves class selection to
+                LinkML and the schema (currently DatasetCollection). Ignored
+                for RO-Crate validation.
 
         Returns:
             ValidationReport with semantic errors
@@ -676,7 +678,9 @@ class UnifiedValidator:
         format: str = "yaml",
         schema: str = "d4d",
         profile_level: str = "basic",
-        skip_levels: Optional[List[ValidationLevel]] = None
+        skip_levels: Optional[List[ValidationLevel]] = None,
+        *,
+        target_class: Optional[str] = None
     ) -> Dict[ValidationLevel, ValidationReport]:
         """
         Run all validation levels and return comprehensive report.
@@ -687,6 +691,8 @@ class UnifiedValidator:
             schema: Schema to validate against ("d4d", "rocrate")
             profile_level: Profile level for Level 3 ("minimal", "basic", "complete")
             skip_levels: Optional levels to skip
+            target_class: D4D class to validate; None preserves LinkML's schema
+                default. Ignored for RO-Crate validation.
 
         Returns:
             Dict mapping ValidationLevel to ValidationReport
@@ -711,7 +717,11 @@ class UnifiedValidator:
 
         # Level 2: Semantic
         if ValidationLevel.SEMANTIC not in skip_levels:
-            semantic = self.validate_semantic(input_path, schema=schema)
+            if target_class is None:
+                semantic = self.validate_semantic(input_path, schema=schema)
+            else:
+                semantic = self.validate_semantic(
+                    input_path, schema=schema, target_class=target_class)
             reports[ValidationLevel.SEMANTIC] = semantic
 
         # Level 3: Profile

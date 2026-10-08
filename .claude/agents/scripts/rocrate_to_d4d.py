@@ -44,6 +44,9 @@ from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
 from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
+from data_sheets_schema.legacy_creators import (
+    author_source_presence, source_presence_lines, KEY_BASIS_LABEL, MEASUREMENT_LIMIT,
+)
 
 
 def render_transformation_report(
@@ -67,12 +70,16 @@ def render_transformation_report(
 
     f.write("TRANSFORMATION SUMMARY\n")
     f.write("-"*80 + "\n")
-    f.write(f"Total D4D fields in mapping: {len(covered_fields)}\n")
-    f.write(f"Fields populated from RO-Crate: {populated_count}\n")
-    f.write(f"Coverage: {populated_count}/{len(covered_fields)} ")
+    f.write(f"Eligible mapped fields: {len(covered_fields)}\n")
+    f.write(f"Constructed output keys: {populated_count}\n")
+    f.write(f"{KEY_BASIS_LABEL}: {populated_count}/{len(covered_fields)} ")
     f.write(f"({percentage:.1f}%)\n\n")
+    f.write(MEASUREMENT_LIMIT + "\n")
+    presence = author_source_presence(
+        mapping_loader, [rocrate_parser], [str(rocrate_parser.rocrate_path)])
+    f.write("\n".join(source_presence_lines(presence)) + "\n")
     if identity_construction:
-        f.write("Required Dataset.id construction is excluded from coverage.\n\n")
+        f.write("Required Dataset.id construction is excluded from this count.\n\n")
 
     # Unmapped RO-Crate properties
     mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
@@ -88,7 +95,7 @@ def render_transformation_report(
 
     if unmapped:
         f.write("\nThese properties could be added to the mapping TSV for future ")
-        f.write("iterations to improve D4D coverage.\n")
+        f.write("iterations to add mapping routes; this alone adds no source evidence.\n")
 
     return f.getvalue()
 
@@ -461,15 +468,19 @@ Examples:
         print(f"\nInput:  {Path(args.input).name}")
 
     print(f"Output: {output_path}")
-    print(f"\nFields populated: {len(dataset)}")
+    print(f"\nConstructed Dataset keys: {len(dataset)}")
     covered_fields = scoring_fields(mapping)
     identity_construction = root_identity_route(mapping)
     populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
     percentage = populated_count / len(covered_fields) * 100 if covered_fields else 0
-    print(f"Coverage: {populated_count}/{len(covered_fields)} mapped fields")
-    print(f"Percentage: {percentage:.1f}%")
+    print(f"{KEY_BASIS_LABEL}: {populated_count}/{len(covered_fields)} mapped fields")
+    print(f"Construction percentage: {percentage:.1f}%")
+    print(MEASUREMENT_LIMIT)
+    presence = (merger.get_source_presence() if args.merge else
+                author_source_presence(mapping, [rocrate], [str(input_path)]))
+    print("\n".join(source_presence_lines(presence, raw=False)))
     if identity_construction:
-        print("Required Dataset.id construction is excluded from coverage.")
+        print("Required Dataset.id construction is excluded from this count.")
 
     return 0
 

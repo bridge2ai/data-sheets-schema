@@ -18,6 +18,7 @@ if (_source / 'data_sheets_schema/legacy_root_identity.py').is_file() and str(_s
 
 from data_sheets_schema.legacy_root_identity import MARKER, validate_rows
 from data_sheets_schema.legacy_update_plan import validate_rows as validate_update_rows
+from data_sheets_schema.legacy_creators import validate_rows as validate_creator_rows
 
 
 class MappingLoader:
@@ -48,6 +49,7 @@ class MappingLoader:
             rows = list(csv.DictReader(f, delimiter='\t'))
             validate_rows(rows)
             validate_update_rows(rows)
+            validate_creator_rows(rows)
 
             for row in rows:
                 # Skip header rows and empty rows

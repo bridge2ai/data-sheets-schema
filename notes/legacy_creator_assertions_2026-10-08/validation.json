@@ -1,0 +1,1199 @@
+{
+  "format": "legacy_creator_assertion_validation_v1",
+  "implementation_issues": [
+    4685,
+    4684
+  ],
+  "review_issues": [
+    4686,
+    4688,
+    4689,
+    4690
+  ],
+  "open_parent_issues": [
+    4594,
+    2915,
+    4449
+  ],
+  "baseline_commit": "bd64f1cd3e5646206da43453e862d8aa0a68f93a",
+  "baseline_tree": "7a7858804b2bced15be5b6ecb3288cb6e69d9c36",
+  "tested_commit": "89a9856283c1e5e6ff81758fb423804fdd0a9494",
+  "tested_tree": "c50ff4b28634e327d0763ab3cee80d5b5e1d4c2b",
+  "test_binding_provenance": "Coordinator recorded clean committed heads, source inventories and invocations. Independent checks parse saved XML and rehash selected working/Git bytes; XML itself does not attest source or execution identity.",
+  "test_history": [
+    {
+      "run": "01",
+      "tested_commit": "45fa817cb9a18479800f3539c9205b6e771d7fea",
+      "cases": 853,
+      "passed": 846,
+      "failures": 7,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 161.053,
+      "junit": {
+        "artifact": "legacy-creator-tests-01.xml",
+        "bytes": 193811,
+        "sha256": "70870b03f243b257490dc44df2dd5c1097e3496dad1ef7ca835bedf5e3b021e8"
+      },
+      "command": {
+        "artifact": "legacy-creator-test-command.json",
+        "bytes": 2909,
+        "sha256": "011d678c0b1ff42e78071df2df915ee392e192bcd19a13e12057ad4818a192d4"
+      },
+      "module_counts": [
+        {
+          "path": "tests/test_rocrate/test_legacy_creators.py",
+          "cases": 91
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_creators_adversarial.py",
+          "cases": 51
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_update_plan.py",
+          "cases": 103
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_update_plan_adversarial.py",
+          "cases": 38
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_identity.py",
+          "cases": 95
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_identity_adversarial.py",
+          "cases": 42
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_doi.py",
+          "cases": 155
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_gates.py",
+          "cases": 30
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_publication.py",
+          "cases": 51
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_publication_adversarial.py",
+          "cases": 39
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_result_contract.py",
+          "cases": 19
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+          "cases": 28
+        },
+        {
+          "path": "tests/test_cli/test_rocrate_transform_mapping.py",
+          "cases": 17
+        },
+        {
+          "path": "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+          "cases": 10
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_d4d_builder.py",
+          "cases": 37
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_mapping_loader.py",
+          "cases": 15
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_informativeness_scorer.py",
+          "cases": 14
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_rocrate_merger.py",
+          "cases": 18
+        }
+      ]
+    },
+    {
+      "run": "02",
+      "tested_commit": "89a9856283c1e5e6ff81758fb423804fdd0a9494",
+      "cases": 886,
+      "passed": 886,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xml_seconds": 77.365,
+      "junit": {
+        "artifact": "legacy-creator-tests-02.xml",
+        "bytes": 147852,
+        "sha256": "8fd3a6668df63c73e3ff86fc01cf109a710b8ae8fc124add55bdbecafb6b4903"
+      },
+      "command": {
+        "artifact": "legacy-creator-test-command-02.json",
+        "bytes": 3137,
+        "sha256": "34319f14a589fae3bfd4b5245e77639a12ce05db17f7abca713240e78f0f491c"
+      },
+      "module_counts": [
+        {
+          "path": "tests/test_rocrate/test_legacy_creators.py",
+          "cases": 91
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_creators_adversarial.py",
+          "cases": 51
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_update_plan.py",
+          "cases": 103
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_update_plan_adversarial.py",
+          "cases": 38
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_identity.py",
+          "cases": 95
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_identity_adversarial.py",
+          "cases": 42
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_doi.py",
+          "cases": 155
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_root_gates.py",
+          "cases": 30
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_publication.py",
+          "cases": 51
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_publication_adversarial.py",
+          "cases": 39
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_result_contract.py",
+          "cases": 19
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+          "cases": 28
+        },
+        {
+          "path": "tests/test_cli/test_rocrate_transform_mapping.py",
+          "cases": 17
+        },
+        {
+          "path": "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+          "cases": 10
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_d4d_builder.py",
+          "cases": 37
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_mapping_loader.py",
+          "cases": 15
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_informativeness_scorer.py",
+          "cases": 14
+        },
+        {
+          "path": "tests/test_fairscape_integration/test_rocrate_merger.py",
+          "cases": 18
+        },
+        {
+          "path": "tests/test_rocrate/test_legacy_validation_target.py",
+          "cases": 10
+        },
+        {
+          "path": "tests/test_rocrate/test_profile_unavailable.py",
+          "cases": 23
+        }
+      ]
+    }
+  ],
+  "current_run_coordinator_reported": {
+    "exit_code": 0,
+    "console_seconds": 77.41,
+    "dependency_deprecation_warnings": 14,
+    "python_version": "CPython 3.13.12"
+  },
+  "first_run_coordinator_reported": {
+    "exit_code": 1,
+    "console_seconds": 161.14,
+    "dependency_deprecation_warnings": 14,
+    "failure_disposition": {
+      "4689_real_cli_output_target": 6,
+      "4690_stale_closed_envelope_expectation": 1
+    }
+  },
+  "invocation": {
+    "cwd": "candidate checkout",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONPATH": "src:."
+    },
+    "argv": [
+      "$PYTHON",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_rocrate/test_legacy_creators.py",
+      "tests/test_rocrate/test_legacy_creators_adversarial.py",
+      "tests/test_rocrate/test_legacy_update_plan.py",
+      "tests/test_rocrate/test_legacy_update_plan_adversarial.py",
+      "tests/test_rocrate/test_legacy_root_identity.py",
+      "tests/test_rocrate/test_legacy_root_identity_adversarial.py",
+      "tests/test_rocrate/test_legacy_doi.py",
+      "tests/test_rocrate/test_legacy_root_gates.py",
+      "tests/test_rocrate/test_legacy_publication.py",
+      "tests/test_rocrate/test_legacy_publication_adversarial.py",
+      "tests/test_rocrate/test_legacy_result_contract.py",
+      "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+      "tests/test_cli/test_rocrate_transform_mapping.py",
+      "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+      "tests/test_fairscape_integration/test_d4d_builder.py",
+      "tests/test_fairscape_integration/test_mapping_loader.py",
+      "tests/test_fairscape_integration/test_informativeness_scorer.py",
+      "tests/test_fairscape_integration/test_rocrate_merger.py",
+      "tests/test_rocrate/test_legacy_validation_target.py",
+      "tests/test_rocrate/test_profile_unavailable.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=$EVIDENCE/legacy-creator-pytest-02",
+      "--junitxml=$EVIDENCE/legacy-creator-tests-02.xml"
+    ]
+  },
+  "baseline_selected_replay_source_pins": [
+    {
+      "path": ".claude/agents/scripts/d4d_builder.py",
+      "bytes": 11651,
+      "sha256": "9f4c766dd46e2dd0d07f2f6114a1961101c3271e81eebb76a363ac763dda52ea",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/field_prioritizer.py",
+      "bytes": 10263,
+      "sha256": "031d1d0f8ac000f4c9f74eff18ea268dbfa23901fe9b52e7d5b5ddba1ed99e00",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/informativeness_scorer.py",
+      "bytes": 12331,
+      "sha256": "d55c17a21a3f5d38de1f88bd90c1a976a2a29751f8206a61c8731dfbee3c77bd",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/mapping_loader.py",
+      "bytes": 7234,
+      "sha256": "29a4e37c61cae70de3d11fbc8bcca043b76b8434524b7062245749afd856ed08",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_merger.py",
+      "bytes": 13862,
+      "sha256": "da41ad436c59115a5150db2b02a5455b785e82bd57735f7efdc0f55e2357ec93",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_parser.py",
+      "bytes": 1930,
+      "sha256": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_to_d4d.py",
+      "bytes": 17099,
+      "sha256": "a6d299a0759f3ef7f93e73acff68325965cf98813b93885e21b3435db97b4a68",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "bytes": 24597,
+      "sha256": "c609e907bbadab5ee502493aa3bee6fd7cf93178792af1e192232910595c1e79",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "notes/parser_root_policy_2026-10-07/replay.py",
+      "bytes": 8793,
+      "sha256": "1c62c61e2cd646b23218594696ccd019989f6f8a26babc5fdbd1ccfcf351b9c2",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "notes/parser_root_policy_2026-10-07/validation.json",
+      "bytes": 19691,
+      "sha256": "efa7d37ec3999b891700d85a6a5d95eda882b958f2111e6f38a6f0d42c158efc",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "poetry.lock",
+      "bytes": 592155,
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 4446,
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_doi.py",
+      "bytes": 2148,
+      "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_publication.py",
+      "bytes": 6374,
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_root_identity.py",
+      "bytes": 3882,
+      "sha256": "d839ec3a8af433d30624f8fe02518b9e4ce149f5bb8ba0a32db0101ea9b6df93",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_update_plan.py",
+      "bytes": 1459,
+      "sha256": "4078e94c2a412f99de7469590cda3dc327363640aa9fcacfe745d001e9218242",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/rocrate_map.py",
+      "bytes": 52876,
+      "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/rocrate_sources.py",
+      "bytes": 11731,
+      "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "bytes": 1442513,
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/data_sheets_schema/scope.py",
+      "bytes": 25356,
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/cli.py",
+      "bytes": 21751,
+      "sha256": "75ceebbe98633a768287dc260d0aa9a71d0adf211a2645a382206c0b0cb23a51",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/constants.py",
+      "bytes": 8887,
+      "sha256": "bba150257a445af4326f186decf18b37c0878f5d53cb84c2fa1674de2188f1e6",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/fairscape_to_d4d.py",
+      "bytes": 97645,
+      "sha256": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/d4d_builder.py",
+      "bytes": 10836,
+      "sha256": "4197baf1a4dc43752cd26800afeb9b8c601f9483d0f9fa2715d8e7a76b6d6411",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/field_prioritizer.py",
+      "bytes": 6815,
+      "sha256": "3cfc67a3609ed766825184bd6e1750e79e2358053960f09dcfee8279daae889e",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/informativeness_scorer.py",
+      "bytes": 11026,
+      "sha256": "952b8941a2ef26e28ddd95d5a6ce5ec09e874c169b12562dd84d32978c05e782",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/mapping_loader.py",
+      "bytes": 6797,
+      "sha256": "12e9cc74a0d130a8fd1173920fc1348418295514de4f537a8f51ca44b1a52848",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_merger.py",
+      "bytes": 13108,
+      "sha256": "6e9e7a36ab62b707df0323e7bf84f966c0a70853a5e3db229476f932ac75e5c4",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_parser.py",
+      "bytes": 11273,
+      "sha256": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    },
+    {
+      "path": "src/transformation/transform_api.py",
+      "bytes": 34261,
+      "sha256": "24bd0c6f3dc92763b97a9d3d3202ac988eef88e8c15c90e394eb4704da0c0622",
+      "matches_tested_git_blob": true,
+      "current_working_bytes_checked": false
+    }
+  ],
+  "candidate_selected_source_and_test_pins": [
+    {
+      "path": ".claude/agents/scripts/d4d_builder.py",
+      "bytes": 12308,
+      "sha256": "aa3106cac2b085e20a5dd2da542b0b2efd6a06af39dc345c77d5d1e9e75acb3b",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/field_prioritizer.py",
+      "bytes": 10263,
+      "sha256": "031d1d0f8ac000f4c9f74eff18ea268dbfa23901fe9b52e7d5b5ddba1ed99e00",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/informativeness_scorer.py",
+      "bytes": 12331,
+      "sha256": "d55c17a21a3f5d38de1f88bd90c1a976a2a29751f8206a61c8731dfbee3c77bd",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/mapping_loader.py",
+      "bytes": 7360,
+      "sha256": "d53ab3aa864cd10cd55c5d4f662ec9f97f39531ab5652d6a00d07967464c603b",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_merger.py",
+      "bytes": 15598,
+      "sha256": "cce7962e338b13abd942bb37f53211a31cd3783e8a8e13f25c2d75f6ede2d1c7",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_parser.py",
+      "bytes": 1930,
+      "sha256": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_to_d4d.py",
+      "bytes": 17757,
+      "sha256": "6bed37db963fc5df95eb57ddb825c5741006181bfee2514d167a0567e64ca409",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "bytes": 24623,
+      "sha256": "0654828b8c73a83a6bb1b6fca996cdd91536f5b9f5be951f811f6b09ab890080",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "notes/parser_root_policy_2026-10-07/replay.py",
+      "bytes": 8793,
+      "sha256": "1c62c61e2cd646b23218594696ccd019989f6f8a26babc5fdbd1ccfcf351b9c2",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "notes/parser_root_policy_2026-10-07/validation.json",
+      "bytes": 19691,
+      "sha256": "efa7d37ec3999b891700d85a6a5d95eda882b958f2111e6f38a6f0d42c158efc",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "poetry.lock",
+      "bytes": 592155,
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 4446,
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_creators.py",
+      "bytes": 6480,
+      "sha256": "bb4a5978547354881666837c316ca0c1e527a8b707654c8a2ebd7a8813ba0752",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_doi.py",
+      "bytes": 2148,
+      "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_publication.py",
+      "bytes": 6374,
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_root_identity.py",
+      "bytes": 3882,
+      "sha256": "d839ec3a8af433d30624f8fe02518b9e4ce149f5bb8ba0a32db0101ea9b6df93",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_update_plan.py",
+      "bytes": 1459,
+      "sha256": "4078e94c2a412f99de7469590cda3dc327363640aa9fcacfe745d001e9218242",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/rocrate_map.py",
+      "bytes": 52876,
+      "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/rocrate_sources.py",
+      "bytes": 11731,
+      "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "bytes": 1442513,
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/scope.py",
+      "bytes": 25356,
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/cli.py",
+      "bytes": 22244,
+      "sha256": "694280850f6b6070db9fd5cb16485ef5613a4ef180abc25c7f7f3a66efa0f9d8",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/constants.py",
+      "bytes": 8887,
+      "sha256": "bba150257a445af4326f186decf18b37c0878f5d53cb84c2fa1674de2188f1e6",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/fairscape_to_d4d.py",
+      "bytes": 97645,
+      "sha256": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/d4d_builder.py",
+      "bytes": 11493,
+      "sha256": "b5bc30365c94c5543f81440518fbef5e2a30057c3f21e81187a0d6b6e4048267",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/field_prioritizer.py",
+      "bytes": 6815,
+      "sha256": "3cfc67a3609ed766825184bd6e1750e79e2358053960f09dcfee8279daae889e",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/informativeness_scorer.py",
+      "bytes": 11026,
+      "sha256": "952b8941a2ef26e28ddd95d5a6ce5ec09e874c169b12562dd84d32978c05e782",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/mapping_loader.py",
+      "bytes": 6923,
+      "sha256": "82c82049cc0bb9bfe6a2396bb5d1ec1da61a0dc02ac8cba2f8c8da45d5cadcd6",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_merger.py",
+      "bytes": 14760,
+      "sha256": "693977246d2f34ea51eab85d6b2851c08638485ca08b9b759104e252437cc3ee",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_parser.py",
+      "bytes": 11273,
+      "sha256": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/transformation/transform_api.py",
+      "bytes": 36073,
+      "sha256": "27157538b6c03f3d6df046e663dd509a2afa36c105eb308c1cf2966ade0239d7",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "src/validation/unified_validator.py",
+      "bytes": 30443,
+      "sha256": "b9ec39e1fd6db29c73eb726cb830c598c2fbd9472defc4e8e9579b6ce197f010",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_cli/test_rocrate_transform_mapping.py",
+      "bytes": 8103,
+      "sha256": "149b9a7b75aa35bd414418134671075424b58145ceb7347f9c1ac4ec335085b6",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+      "bytes": 4708,
+      "sha256": "b619461ada2b2ce8431d7f10f318c061659dd2f10656dc03e038affeb4102224",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_fairscape_integration/test_d4d_builder.py",
+      "bytes": 13549,
+      "sha256": "696a4d829adb15aebbdcdca13d0ef5bd8f931cbfccd64ef15f311700b672efeb",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_fairscape_integration/test_informativeness_scorer.py",
+      "bytes": 13782,
+      "sha256": "640119c5038fbede851c52d1b44d5e13e9ba892097235db0969dc3e76d96e0b9",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_fairscape_integration/test_mapping_loader.py",
+      "bytes": 7924,
+      "sha256": "8aac068633b5d7fea3208cf529e835ef90fed306d1d97290bf629e697988f6f0",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_fairscape_integration/test_rocrate_merger.py",
+      "bytes": 14479,
+      "sha256": "d83b2c814847f24f54dec22dd19e1247662d2a48391a3d431ef414bc6f1b5bfa",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_creators.py",
+      "bytes": 18480,
+      "sha256": "6a6ff44b17d378c1761b4a149b153048996be798b0ac34836b26c5e490ec4366",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_creators_adversarial.py",
+      "bytes": 15939,
+      "sha256": "f0caf458a979fd8f55940c86da6c18705b79ec7e577ab84c704298b7e4e98088",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_doi.py",
+      "bytes": 12579,
+      "sha256": "fe150f57a8505b75623b78fb66060a5104495922b3ada37d341ae5f59e9f7535",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+      "bytes": 18319,
+      "sha256": "f6c3bce2b13772b02e8531af7b3587af44ac458b63b822c738f15d7655fec5da",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_publication.py",
+      "bytes": 19018,
+      "sha256": "b61058a2e214370d2f93eaaff49296bcfe410280be7b30873202713be35fa537",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_publication_adversarial.py",
+      "bytes": 16106,
+      "sha256": "b1a132a5d8ca1aa8d7a06c9c5baf6b986dc385165dc70bc2669e35aa1a5744f2",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_result_contract.py",
+      "bytes": 11105,
+      "sha256": "ae4250cc093105aab68dbd37585d3a646b71e7f8293f8ae95aa07a3b5e248681",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_root_gates.py",
+      "bytes": 13090,
+      "sha256": "6dbc5c0ea1ee9a5fc61c42bec02eef0b4b294366bd1418e68b73fe424a6ef9f5",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_root_identity.py",
+      "bytes": 16272,
+      "sha256": "60b78c4f96a50d0d482ad23cc011cde057598b1b9e74bb2fe339011463000afe",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_root_identity_adversarial.py",
+      "bytes": 11773,
+      "sha256": "1c4773300bf102143ef235b538fc8ead3419d4dbf5c9dc470d69aba47d964dcc",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_update_plan.py",
+      "bytes": 14749,
+      "sha256": "6b4b9a007dbd58d318324c61ec46ed2f73dec14eb45a692baca73c9c61c7559f",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_update_plan_adversarial.py",
+      "bytes": 8345,
+      "sha256": "e076f68bb8b7ba4c3b128d55dad3a8d0e8e336e26328e9e67c56609bc0f5babf",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_validation_target.py",
+      "bytes": 5514,
+      "sha256": "d8c63c5c460be3319934a293d17572dd5103ac9194912e514f278d9679b60569",
+      "working_matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_profile_unavailable.py",
+      "bytes": 10588,
+      "sha256": "655ebd08f48817b0e4e17455038196a30e4d2ed9d75f3f2c26c4daa3248bb9f7",
+      "working_matches_tested_git_blob": true
+    }
+  ],
+  "complete_tested_diff_pins": [
+    {
+      "path": ".claude/agents/scripts/d4d_builder.py",
+      "bytes": 12308,
+      "sha256": "aa3106cac2b085e20a5dd2da542b0b2efd6a06af39dc345c77d5d1e9e75acb3b"
+    },
+    {
+      "path": ".claude/agents/scripts/mapping_loader.py",
+      "bytes": 7360,
+      "sha256": "d53ab3aa864cd10cd55c5d4f662ec9f97f39531ab5652d6a00d07967464c603b"
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_merger.py",
+      "bytes": 15598,
+      "sha256": "cce7962e338b13abd942bb37f53211a31cd3783e8a8e13f25c2d75f6ede2d1c7"
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_to_d4d.py",
+      "bytes": 17757,
+      "sha256": "6bed37db963fc5df95eb57ddb825c5741006181bfee2514d167a0567e64ca409"
+    },
+    {
+      "path": "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "bytes": 24623,
+      "sha256": "0654828b8c73a83a6bb1b6fca996cdd91536f5b9f5be951f811f6b09ab890080"
+    },
+    {
+      "path": "docs/cli.md",
+      "bytes": 12529,
+      "sha256": "3ee8d13d150cad867964995b18443f28c21224d39fca11bf9ddb6cc03aa24ff5"
+    },
+    {
+      "path": "notes/legacy_creator_assertions_2026-10-08/README.md",
+      "bytes": 11992,
+      "sha256": "257c864d11050924f18b947c2530ba92802356809a9db394437004016194c4b5"
+    },
+    {
+      "path": "notes/legacy_creator_assertions_2026-10-08/reviewed_contract.md",
+      "bytes": 28943,
+      "sha256": "09f30a4e1a242cb82aaa17b6a2224b76c28a2217c22344e406d8336796bf837b"
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_creators.py",
+      "bytes": 6480,
+      "sha256": "bb4a5978547354881666837c316ca0c1e527a8b707654c8a2ebd7a8813ba0752"
+    },
+    {
+      "path": "src/fairscape_integration/cli.py",
+      "bytes": 22244,
+      "sha256": "694280850f6b6070db9fd5cb16485ef5613a4ef180abc25c7f7f3a66efa0f9d8"
+    },
+    {
+      "path": "src/fairscape_integration/utils/d4d_builder.py",
+      "bytes": 11493,
+      "sha256": "b5bc30365c94c5543f81440518fbef5e2a30057c3f21e81187a0d6b6e4048267"
+    },
+    {
+      "path": "src/fairscape_integration/utils/mapping_loader.py",
+      "bytes": 6923,
+      "sha256": "82c82049cc0bb9bfe6a2396bb5d1ec1da61a0dc02ac8cba2f8c8da45d5cadcd6"
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_merger.py",
+      "bytes": 14760,
+      "sha256": "693977246d2f34ea51eab85d6b2851c08638485ca08b9b759104e252437cc3ee"
+    },
+    {
+      "path": "src/transformation/transform_api.py",
+      "bytes": 36073,
+      "sha256": "27157538b6c03f3d6df046e663dd509a2afa36c105eb308c1cf2966ade0239d7"
+    },
+    {
+      "path": "src/validation/unified_validator.py",
+      "bytes": 30443,
+      "sha256": "b9ec39e1fd6db29c73eb726cb830c598c2fbd9472defc4e8e9579b6ce197f010"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_creators.py",
+      "bytes": 18480,
+      "sha256": "6a6ff44b17d378c1761b4a149b153048996be798b0ac34836b26c5e490ec4366"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_creators_adversarial.py",
+      "bytes": 15939,
+      "sha256": "f0caf458a979fd8f55940c86da6c18705b79ec7e577ab84c704298b7e4e98088"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+      "bytes": 18319,
+      "sha256": "f6c3bce2b13772b02e8531af7b3587af44ac458b63b822c738f15d7655fec5da"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_result_contract.py",
+      "bytes": 11105,
+      "sha256": "ae4250cc093105aab68dbd37585d3a646b71e7f8293f8ae95aa07a3b5e248681"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_root_identity.py",
+      "bytes": 16272,
+      "sha256": "60b78c4f96a50d0d482ad23cc011cde057598b1b9e74bb2fe339011463000afe"
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_validation_target.py",
+      "bytes": 5514,
+      "sha256": "d8c63c5c460be3319934a293d17572dd5103ac9194912e514f278d9679b60569"
+    }
+  ],
+  "complete_tested_diff_scope": "All paths changed from baseline to tested candidate, including docs and tests; distinct from the narrower selected_replay_source_changes in comparison.json.",
+  "runtime": {
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "resolved_python_bytes": {
+      "bytes": 5777152,
+      "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+    },
+    "dependency_versions_observed_by_supplement": {
+      "PyYAML": "6.0.2",
+      "linkml": "1.9.3",
+      "linkml-runtime": "1.9.4"
+    },
+    "linkml_validate_entrypoint": {
+      "bytes": 198,
+      "sha256": "084b48fea01f3ba0966a0c2de7485c9b1dd5685af4ad26fb2fe5ea4012b582d7",
+      "shebang_selects_same_resolved_python_bytes": true,
+      "observed_after_run": true,
+      "selection_provenance": "Coordinator identifies the PATH-resolved miniforge linkml-validate used by the real enabled-validation CLI tests. The entrypoint bytes and shebang target were independently rehashed after the run; this is not an authenticated subprocess receipt or complete import snapshot."
+    }
+  },
+  "source_preservation": [
+    {
+      "role": "baseline",
+      "head": "bd64f1cd3e5646206da43453e862d8aa0a68f93a",
+      "tree": "7a7858804b2bced15be5b6ecb3288cb6e69d9c36",
+      "before": {
+        "artifact": "legacy-creator-baseline-preservation-before.json",
+        "bytes": 2181448,
+        "sha256": "44d5ef6d74e096876a8eb322d503e9ac6ebffab651c2fb38d2b1df53ec7ffb16"
+      },
+      "after": {
+        "artifact": "legacy-creator-baseline-preservation-after.json",
+        "bytes": 2181448,
+        "sha256": "44d5ef6d74e096876a8eb322d503e9ac6ebffab651c2fb38d2b1df53ec7ffb16"
+      },
+      "byte_identical": true,
+      "files": 9291,
+      "total_file_bytes": 447277720,
+      "scope": "All actual regular checkout files including hidden/ignored files, excluding .git; bytes, hashes and permission modes.",
+      "current_full_inventory_independently_rehashed": false,
+      "selected_archive_member": {
+        "bytes": 12242926,
+        "path": "cm4ai_release_metadata/ro-crate-metadata.json",
+        "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+      }
+    },
+    {
+      "role": "candidate",
+      "head": "89a9856283c1e5e6ff81758fb423804fdd0a9494",
+      "tree": "c50ff4b28634e327d0763ab3cee80d5b5e1d4c2b",
+      "before": {
+        "artifact": "legacy-creator-candidate-02-preservation-before.json",
+        "bytes": 2182656,
+        "sha256": "1ef34614a7ea6284fd7901d6bd5f1bda4ac37af9d544d5ea72a8f5f7c2308cc0"
+      },
+      "after": {
+        "artifact": "legacy-creator-candidate-02-preservation-after.json",
+        "bytes": 2182656,
+        "sha256": "1ef34614a7ea6284fd7901d6bd5f1bda4ac37af9d544d5ea72a8f5f7c2308cc0"
+      },
+      "byte_identical": true,
+      "files": 9297,
+      "total_file_bytes": 447375950,
+      "scope": "All actual regular checkout files including hidden/ignored files, excluding .git; bytes, hashes and permission modes.",
+      "current_full_inventory_independently_rehashed": true,
+      "selected_archive_member": {
+        "bytes": 12242926,
+        "path": "cm4ai_release_metadata/ro-crate-metadata.json",
+        "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+      }
+    }
+  ],
+  "supplement_preservation": {
+    "baseline_selected_files": 84,
+    "candidate_selected_files": 85,
+    "baseline_source_pins": 30,
+    "candidate_source_pins": 31,
+    "replay_pins_per_arm": 71,
+    "all_saved_pins_verified": true
+  },
+  "comparison": {
+    "artifact": "comparison.json",
+    "bytes": 19128,
+    "sha256": "b6268d99876df85bfdd9d2a36af921c5a6e05e17810a23429a0a586fbebdef03",
+    "denominators": {
+      "record_pairs": 20,
+      "ranking_pairs": 4,
+      "merge_pairs": 8,
+      "gates_per_arm": 28
+    },
+    "record_results": [
+      {
+        "input": "CHORUS",
+        "baseline_errors": 30,
+        "candidate_errors": 29,
+        "literal_units": 1,
+        "reference_errors": 0,
+        "gate": "refused"
+      },
+      {
+        "input": "VOICE",
+        "baseline_errors": 150,
+        "candidate_errors": 33,
+        "literal_units": 117,
+        "reference_errors": 0,
+        "gate": "refused"
+      },
+      {
+        "input": "CM4AI_reduced",
+        "baseline_errors": 75,
+        "candidate_errors": 66,
+        "literal_units": 9,
+        "reference_errors": 38,
+        "gate": "refused"
+      },
+      {
+        "input": "VOICE_provenance",
+        "baseline_errors": 0,
+        "candidate_errors": 0,
+        "literal_units": 0,
+        "reference_errors": 0,
+        "gate": "accepted"
+      },
+      {
+        "input": "CM4AI_original",
+        "baseline_errors": 75,
+        "candidate_errors": 66,
+        "literal_units": 9,
+        "reference_errors": 38,
+        "gate": "refused"
+      }
+    ],
+    "merge_results": [
+      {
+        "implementation": "packaged",
+        "order": "original",
+        "mode": "ranked_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 216,
+        "candidate_schema_errors": 127,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "packaged",
+        "order": "original",
+        "mode": "voice_provenance_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 228,
+        "candidate_schema_errors": 139,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "packaged",
+        "order": "reversed",
+        "mode": "ranked_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 216,
+        "candidate_schema_errors": 127,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "packaged",
+        "order": "reversed",
+        "mode": "voice_provenance_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 228,
+        "candidate_schema_errors": 139,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "hidden",
+        "order": "original",
+        "mode": "ranked_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 216,
+        "candidate_schema_errors": 127,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "hidden",
+        "order": "original",
+        "mode": "voice_provenance_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 228,
+        "candidate_schema_errors": 139,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "hidden",
+        "order": "reversed",
+        "mode": "ranked_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 216,
+        "candidate_schema_errors": 127,
+        "candidate_reference_errors": 76
+      },
+      {
+        "implementation": "hidden",
+        "order": "reversed",
+        "mode": "voice_provenance_primary",
+        "baseline_units": 165,
+        "candidate_units": 212,
+        "baseline_schema_errors": 228,
+        "candidate_schema_errors": 139,
+        "candidate_reference_errors": 76
+      }
+    ],
+    "gates_each_arm": {
+      "individual_accepted": 4,
+      "individual_refused": 16,
+      "merged_refused": 8
+    },
+    "raw_source_presence_equal": true,
+    "full_non_creator_record_and_provenance_equal": true,
+    "all_rankings_and_scores_equal": true,
+    "merge_statistics_equal": true,
+    "whole_report_expected_deltas_only": true,
+    "scientific_eligibility": false,
+    "source_coverage_gain": false,
+    "general_legacy_validity": false
+  },
+  "external_artifacts": [
+    {
+      "artifact": "legacy-creator-baseline-supplement-01/summary.json",
+      "bytes": 2473455,
+      "sha256": "7e464fb1021b48621782b4a1ba3623acde36437a91ce6cc2cb9ad8679498d9a6"
+    },
+    {
+      "artifact": "legacy-creator-candidate-supplement-01/summary.json",
+      "bytes": 2590122,
+      "sha256": "2f08642612d3938785b689583d116bfe860fd2719a8e6a705f9e8011d9c3c39d"
+    },
+    {
+      "artifact": "legacy-updateplan-candidate-replay-01/summary.json",
+      "bytes": 236569,
+      "sha256": "da409165cba55955c1cbadfacae77c6123e3453c2b06fc52f416569a74446b20"
+    },
+    {
+      "artifact": "legacy-creator-candidate-replay-01/summary.json",
+      "bytes": 188957,
+      "sha256": "e2d888e6c9517f2152ddff92192a53008fe06c92700168a615361d24f146407b"
+    },
+    {
+      "artifact": "legacy-creator-comparison-01.json",
+      "bytes": 19128,
+      "sha256": "b6268d99876df85bfdd9d2a36af921c5a6e05e17810a23429a0a586fbebdef03"
+    }
+  ],
+  "durable_utilities": [
+    {
+      "path": "replay_supplement.py",
+      "bytes": 18824,
+      "sha256": "e1d52cd80726cce352ee8088286f38d130b7452a8027efd24c6f5f46b562341e"
+    },
+    {
+      "path": "compare_saved.py",
+      "bytes": 21778,
+      "sha256": "b29e6e85120281dcea1c6d9f0ca5b317ee02579689d133ad77329beadbd263e1"
+    }
+  ],
+  "optional_model_warning": {
+    "coordinator_observed_in_replay_and_supplement": true,
+    "text": "FAIRSCAPE models not available: No module named 'fairscape_models.rocrate'",
+    "scope": "Legacy builders, Dataset gate, scorer and merger executed; no claim that optional FAIRSCAPE model validation ran."
+  },
+  "independent_author_checks": [
+    "All 20 complete record/root pairs preserve every non-Creator value, exact literal assertions and raw source facts.",
+    "Four complete ranking/score groups match; all eight merges retain every immediate assertion, duplicate, source row and half-open range with unchanged non-Creator provenance and statistics.",
+    "All 28 gate outcomes per arm and full refusal messages match their schema errors; candidate reference-error positions and unchanged unrelated errors were checked.",
+    "All 16 full merge-report files match pins; complete report differences are only the reviewed labels, raw-author/Creator disclosures, captured input paths and generated timestamps.",
+    "All saved replay pins and 30 baseline selected Git pins plus 52 candidate working/Git source/test pins were checked.",
+    "Full candidate 9297-file inventory and permission modes were independently rehashed before editing notes; baseline before/after inventory equality was checked without rereading that checkout."
+  ],
+  "limitations": [
+    "A constructor repair is not improved source coverage, unique people, a PI decision or a semantic-label upgrade.",
+    "Mixed five-input merges are software controls, not scientifically valid combined datasets; all eight remain refused.",
+    "The baseline union has 165 assertion units and the candidate retains 212; preserved duplicates do not identify new or distinct people.",
+    "Ranked-primary mode uses the real scorer-selected primary with fixed original secondary order, not a full auto-reordered CLI replay.",
+    "Accepted prepared Dataset bytes are represented by observed saved hashes; this supplement does not retain those raw serialized bytes for independent reconstruction.",
+    "The optional validation target fix is covered by real CLI tests and explicitly pinned validator code; the supplement does not execute that API validation route.",
+    "No provider campaign, scientific rating, historical corpus overwrite or new deterministic-label publication is performed.",
+    "Saved/source/runtime pins are local observations and declarations, not authenticated execution or a full installed dependency/import-cache snapshot.",
+    "Full raw records, reports, inventories and private paths remain external; only bounded comparison results and exact pins are published."
+  ]
+}
