@@ -43,6 +43,7 @@ from validator import D4DValidator
 from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
 from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
+from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
 
 
 def render_transformation_report(
@@ -58,15 +59,20 @@ def render_transformation_report(
     f.write("="*80 + "\n\n")
 
     # Transformation summary
-    covered_fields = mapping_loader.get_covered_fields()
+    covered_fields = scoring_fields(mapping_loader)
     dataset = d4d_builder.get_dataset()
+    identity_construction = root_identity_route(mapping_loader)
+    populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+    percentage = populated_count / len(covered_fields) * 100 if covered_fields else 0
 
     f.write("TRANSFORMATION SUMMARY\n")
     f.write("-"*80 + "\n")
     f.write(f"Total D4D fields in mapping: {len(covered_fields)}\n")
-    f.write(f"Fields populated from RO-Crate: {len(dataset)}\n")
-    f.write(f"Coverage: {len(dataset)}/{len(covered_fields)} ")
-    f.write(f"({len(dataset)/len(covered_fields)*100:.1f}%)\n\n")
+    f.write(f"Fields populated from RO-Crate: {populated_count}\n")
+    f.write(f"Coverage: {populated_count}/{len(covered_fields)} ")
+    f.write(f"({percentage:.1f}%)\n\n")
+    if identity_construction:
+        f.write("Required Dataset.id construction is excluded from coverage.\n\n")
 
     # Unmapped RO-Crate properties
     mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
@@ -456,8 +462,14 @@ Examples:
 
     print(f"Output: {output_path}")
     print(f"\nFields populated: {len(dataset)}")
-    print(f"Coverage: {len(dataset)}/{len(mapping.get_covered_fields())} mapped fields")
-    print(f"Percentage: {len(dataset)/len(mapping.get_covered_fields())*100:.1f}%")
+    covered_fields = scoring_fields(mapping)
+    identity_construction = root_identity_route(mapping)
+    populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+    percentage = populated_count / len(covered_fields) * 100 if covered_fields else 0
+    print(f"Coverage: {populated_count}/{len(covered_fields)} mapped fields")
+    print(f"Percentage: {percentage:.1f}%")
+    if identity_construction:
+        print("Required Dataset.id construction is excluded from coverage.")
 
     return 0
 

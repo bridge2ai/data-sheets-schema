@@ -225,6 +225,10 @@ def test_d4d_default_mapping_refuses_missing_required_id(
 
     first = crate(tmp_path / "a.json", title="First")
     primary = crate(tmp_path / "b.json", title="Chosen primary")
+    first.write_text(first.read_text().replace(
+        'https://example.org/dataset/root', 'doi:10.1234/Secondary'))
+    primary.write_text(json.dumps({'@graph': [
+        {'@type': 'Dataset', 'name': 'Chosen anonymous primary'}]}))
     output = tmp_path / "published" / "record.yaml"
     seed_artifacts(output, True)
     monkeypatch.chdir(tmp_path)
@@ -232,8 +236,8 @@ def test_d4d_default_mapping_refuses_missing_required_id(
         "rocrate", "transform", "--merge", "--inputs", str(first),
         "--inputs", str(primary), "--primary", str(primary), "-o", str(output),
     ])
-    # Current default TSV does not map required Dataset.id. This is a real
-    # publication refusal, not permission to invent an ID or repair the map.
+    # An anonymous selected primary still lacks required Dataset.id. The new
+    # explicit route must not borrow the secondary's identity or invent one.
     assert result.exit_code == 1, result.output
     assert "id" in result.output and "Dataset publication refused" in result.output
     assert_artifacts_preserved(output, True)

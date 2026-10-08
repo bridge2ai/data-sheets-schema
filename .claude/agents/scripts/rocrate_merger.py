@@ -13,6 +13,10 @@ from typing import Any, Dict, List, Optional, Tuple
 from field_prioritizer import FieldPrioritizer, MergeStrategy
 from d4d_builder import D4DBuilder
 
+from data_sheets_schema.legacy_root_identity import (
+    root_identity_route, merge_identity_evidence, identity_report_lines,
+)
+
 
 class ROCrateMerger:
     """Merge multiple RO-Crate sources into single D4D dataset."""
@@ -25,6 +29,7 @@ class ROCrateMerger:
             mapping_loader: MappingLoader instance with field mappings
         """
         self.mapping = mapping_loader
+        self.root_identity_sources = None
         self.primary_index = 0
         self.primary_name = ""
         self.prioritizer = FieldPrioritizer()
@@ -65,6 +70,24 @@ class ROCrateMerger:
         # Refuse the entire batch before changing state or building a source.
         for parser in rocrate_parsers:
             parser.require_root_dataset()
+
+        marked_id = root_identity_route(self.mapping)
+        identity_sources = None
+        if marked_id:
+            if source_names is None:
+                source_names = [Path(parser.rocrate_path).name.replace(
+                    '-ro-crate-metadata.json', '') for parser in rocrate_parsers]
+            if len(source_names) != len(rocrate_parsers):
+                raise ValueError('source_names must match the selected RO-Crates')
+            identity_sources = merge_identity_evidence(
+                rocrate_parsers, source_names, primary_index)
+        if marked_id or self.root_identity_sources is not None:
+            # A new marked merge (or returning to a custom mapping) must not
+            # inherit an earlier Dataset.id when its primary has no identity.
+            self.merged_data = {}
+            self.provenance = {}
+            self.merge_stats = {key: 0 for key in self.merge_stats}
+        self.root_identity_sources = identity_sources
 
         self.merge_stats['total_sources'] = len(rocrate_parsers)
 
@@ -114,12 +137,16 @@ class ROCrateMerger:
             ]
 
             # Merge this field
-            merged_value, sources = self.merge_field(
-                field_name,
-                primary_value,
-                secondary_values,
-                primary_name
-            )
+            if marked_id and field_name == 'id':
+                merged_value = primary_value
+                sources = [primary_name] if primary_value is not None else []
+            else:
+                merged_value, sources = self.merge_field(
+                    field_name,
+                    primary_value,
+                    secondary_values,
+                    primary_name
+                )
 
             if merged_value is not None:
                 self.merged_data[field_name] = merged_value
@@ -246,6 +273,8 @@ class ROCrateMerger:
             report.append(f"   - Size: {file_size_kb:.1f} KB")
             report.append(f"   - D4D fields contributed: {contributed_fields}")
             report.append("")
+
+        report.extend(identity_report_lines(self.root_identity_sources))
 
         # Merge statistics
         report.append("MERGE STATISTICS")

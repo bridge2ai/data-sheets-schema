@@ -11,6 +11,8 @@ import csv
 from pathlib import Path
 from typing import Dict, List, Optional, Set
 
+from data_sheets_schema.legacy_root_identity import MARKER, validate_rows
+
 
 class MappingLoader:
     """Load and manage D4D to RO-Crate field mappings from TSV file."""
@@ -39,9 +41,10 @@ class MappingLoader:
     def _load_mappings(self):
         """Load and parse the TSV mapping file."""
         with open(self.tsv_path, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f, delimiter='\t')
+            rows = list(csv.DictReader(f, delimiter='\t'))
+            validate_rows(rows)
 
-            for row in reader:
+            for row in rows:
                 # Skip header rows and empty rows
                 if not row.get('D4D Property') or row['D4D Property'].startswith('D4D:'):
                     continue
@@ -64,7 +67,10 @@ class MappingLoader:
                         for rc_prop in rocrate_field.split(','):
                             rc_prop = rc_prop.strip()
                             if rc_prop:
-                                self.rocrate_to_d4d[rc_prop] = d4d_field
+                                if row.get('Func', '').strip() == MARKER:
+                                    self.rocrate_to_d4d.setdefault(rc_prop, d4d_field)
+                                else:
+                                    self.rocrate_to_d4d[rc_prop] = d4d_field
 
                         # Track direct mappings (1:1 relationships)
                         direct = row.get('Direct mapping? Yes =1; No = 0', '0').strip()
