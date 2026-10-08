@@ -41,9 +41,11 @@ false versus missing, default refusal, invalid selected records, and preserving
 source/mapping/output/report bytes on refusal. Only import state is isolated;
 the transformation boundary is not replaced by a fake implementation.
 
-Tests have been prepared but not run; the coordinator will serialize execution
-after independent review and source freeze. No real-project replay, record label,
-comparison figure, provider call or scientific score is produced by this change.
+The serialized six-module run passed **174 tests**, with zero failures, errors
+or skips: 17 new real-producer cases, 10 independent adversarial cases, and 147
+existing CLI/root/publication controls. The terminal reported 14.61 seconds and
+14 dependency deprecation warnings. No real-project replay, record label,
+comparison figure, provider call or scientific score was produced.
 
 This addresses only #4638. Parent #4594 still needs an explicit decision about
 legacy construction versus retirement, followed by the five retained legacy
@@ -55,3 +57,16 @@ They are separate from the five already-published deterministic records.
 The raw RO-Crate JSON merge defect #4593 is unchanged. #2915, scientific review
 holds, and held figure branches remain open; accepted serialization is not a
 claim of scientific fidelity or increased source coverage.
+
+## Recorded evidence
+
+Tested commit: `48038abe5f7a447f87941dea099dd3373712ca6d`; tree: `2f724597d32932de2f4523fed1061fa340a2cb5a`.
+[validation.json](validation.json) pins the selected 12 source files, two resources
+and six test modules against both tested commit blobs and working bytes. This is
+a selected code inventory, not a full environment or dependency closure.
+
+JUnit: `legacy-cli-mapping-tests-01.xml`, 28635 bytes, SHA256
+`00a7dcc97a33c06b3cf83e6b43b9c6bca96c0eb35018b1c64054595fed9a42fa`; XML duration 14.580 seconds.
+Independent controls include mapping aliases, report/source collisions, a later
+invalid merge root, filename header injection, and missing root IDs under graph
+reordering.
