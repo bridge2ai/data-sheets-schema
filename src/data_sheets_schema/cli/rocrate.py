@@ -113,7 +113,10 @@ def parse(input_file, output):
               help='Multiple input RO-Crate files for merging')
 @click.option('--primary', type=click.Path(exists=True),
               help='Primary RO-Crate file (for merging)')
-def transform(input_file, output, merge, inputs, primary):
+@click.option('--mapping', 'mapping_file',
+              type=click.Path(exists=True, dir_okay=False, path_type=Path),
+              help='Explicit legacy mapping TSV; omitted uses d4d_rocrate_mapping_v2_semantic.tsv')
+def transform(input_file, output, merge, inputs, primary, mapping_file=None):
     """Transform RO-Crate to D4D YAML format."""
     require_repo_context("d4d rocrate transform")
 
@@ -150,7 +153,8 @@ def transform(input_file, output, merge, inputs, primary):
         from rocrate_to_d4d import main as transform_main
 
         # Set up args for the transform script
-        mapping = get_repo_root() / "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv"
+        mapping = (mapping_file if mapping_file is not None else
+                   get_repo_root() / "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv")
         if merge:
             sys.argv = ['rocrate_to_d4d.py',
                         '--merge',
