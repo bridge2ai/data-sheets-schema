@@ -42,19 +42,43 @@ File publication still validates exact serialized Dataset bytes with the real sc
 
 Requested API output validation selects `Dataset` explicitly for both single and merged results (#4689). `UnifiedValidator.validate_all(..., target_class=None)` keeps its existing generic call and the schema's default class selection; the current schema's tree root is `DatasetCollection`. An explicit keyword selects another D4D class through the existing semantic validator. Raw RO-Crate input validation and the validator's 30-second subprocess bound are unchanged. This repairs the produced-record validation route; it does not disable requested validation or replace the mandatory publication gate.
 
-The five retained input records are expected to remove only literal Creator type errors. The reviewed prediction is 136 fewer validator messages per builder/order, with 76 reference messages and every unrelated error still present. No replay has yet established those candidate counts. References, Person/Organization identity placement, PI selection, other constructors, per-file adapters and semantic labels remain separate work. No historical output is replaced, no rows are retired, and no improved source coverage or scientific acceptance is claimed.
+The completed comparison confirms the predicted literal construction changes for all five retained inputs, both builders and both graph orders. The exact saved result is [comparison.json](comparison.json); the source, test and artifact pins are in [validation.json](validation.json).
+
+| Input | Baseline errors | Candidate errors | Complete literals constructed | Reference errors retained | Dataset gate |
+|---|---:|---:|---:|---:|---|
+| CHORUS | 30 | 29 | 1 | 0 | Refused |
+| VOICE | 150 | 33 | 117 | 0 | Refused |
+| CM4AI reduced | 75 | 66 | 9 | 38 | Refused |
+| VOICE provenance | 0 | 0 | 0 | 0 | Accepted |
+| CM4AI original | 75 | 66 | 9 | 38 | Refused |
+
+The table applies separately to each builder/order: 136 fewer validation messages across its five records, with all 76 reference messages and every unrelated error retained. Across all 20 record runs, both arms have four accepted provenance-only records and 16 refused records. All four complete score/ranking groups match; raw author source facts and all non-Creator record values are unchanged.
+
+All eight mixed-roster merge controls remain refused. They retain 212 immediate assertion units, compared with 165 after the former union deduplication. Their 76 reference errors remain invalid; duplicated source assertions do not count distinct people. Total schema errors change from 216 to 127 for the scorer-selected VOICE primary and from 228 to 139 for the provenance primary. Full non-Creator records/provenance, merge statistics and primary selections match. Complete report differences are limited to the reviewed measurement labels and independently checked author/Creator disclosures, plus captured input paths and generated timestamps. This is a software comparison of mixed inputs, not a scientifically valid merged dataset. Ranked-primary mode retains the original secondary order; it is not a full auto-reordered CLI replay.
+
+References, Person/Organization identity placement, PI selection, other constructors, per-file adapters and semantic labels remain separate work. No historical output is replaced, no rows are retired, and no improved source coverage or scientific acceptance is claimed. Accepted prepared bytes are represented by the supplement's saved byte/hash declarations; the supplement does not retain those serialized bytes for independent reconstruction. Actual CLI publication and refusal behavior is covered separately by the focused tests.
 
 ## Validation status
 
 The coordinator's first serialized suite, bound to commit `45fa817cb9a18479800f3539c9205b6e771d7fea`, completed with 846 passed and 7 failed out of 853 tests, with no errors or skips. The preserved `legacy-creator-tests-01.xml` is 193,811 bytes, SHA256 `70870b03f243b257490dc44df2dd5c1097e3496dad1ef7ca835bedf5e3b021e8`, and records 161.053 seconds. The coordinator separately reported 161.14 seconds and 14 dependency deprecation warnings from the console; JUnit does not attest the source binding or warning count.
 
-Six real CLI controls exposed #4689: produced Dataset records were validated against the schema's default `DatasetCollection`, so complete Creator descriptions were rejected. The seventh failure was #4690: an exact merge-envelope test omitted the intentional `source_presence` field. Its corrected expectation keeps exact keys, source-diagnostic equality across result contracts, all existing data/metadata/report checks, and publication assertions. The failed evidence remains retained; a new serialized run is required for these corrections.
+Six real CLI controls exposed #4689: produced Dataset records were validated against the schema's default `DatasetCollection`, so complete Creator descriptions were rejected. The seventh failure was #4690: an exact merge-envelope test omitted the intentional `source_presence` field. Its corrected expectation keeps exact keys, source-diagnostic equality across result contracts, all existing data/metadata/report checks, and publication assertions. This failed evidence remains distinct from the corrected run.
 
-No application, pytest suite or retained-input replay has been run by the implementation author. Static syntax inspection imports no project code. Final test and retained-input replay evidence will be recorded separately before merge.
+The corrected candidate `89a9856283c1e5e6ff81758fb423804fdd0a9494` (tree `c50ff4b28634e327d0763ab3cee80d5b5e1d4c2b`) passed **all 886 tests**, with zero failures, errors or skips. The 20-module run includes 91 Creator construction tests, 51 independent adversarial cases, ten validation-target controls, and the existing legacy/profile suites. Saved `legacy-creator-tests-02.xml` is 147,852 bytes, SHA256 `8fd3a6668df63c73e3ff86fc01cf109a710b8ae8fc124add55bdbecafb6b4903`, and records 77.365 seconds. The coordinator separately reported 77.41 seconds and 14 dependency deprecation warnings.
+
+The coordinator subsequently completed the candidate 20-record replay, both supplements and the saved-only comparison. The pre-existing baseline replay is retained unchanged. The optional environment warning, `FAIRSCAPE models not available: No module named 'fairscape_models.rocrate'`, was observed in replay/supplement output; the actual legacy builders, Dataset gate, scorer and merger still ran. No claim of optional FAIRSCAPE model validation is made.
+
+Independent metadata-only checks matched all 30 baseline selected pins to baseline Git blobs and all 52 candidate selected source/test pins to current bytes and tested Git blobs. This includes `src/validation/unified_validator.py` separately from the supplement's narrower 31-file source selection. The complete 21-file tested diff is recorded separately from selected replay-source deltas. All 71 replay pins per arm, 40 individual result files, complete records, raw source disclosures, all 56 gate outcomes and 16 full merge reports were checked without rerunning applications.
+
+The baseline before/after full inventories are identical (9,291 files, 447,277,720 file bytes); the corrected candidate inventories are also identical (9,297 files, 447,375,950 file bytes). Both include hidden/ignored files and permission modes and exclude `.git`. The candidate inventory is 2,182,656 bytes, SHA256 `1ef34614a7ea6284fd7901d6bd5f1bda4ac37af9d544d5ea72a8f5f7c2308cc0`; every candidate entry was independently rehashed before these final notes changed. The baseline inventory equality and selected baseline Git pins were independently checked; this evidence author did not reread the entire baseline working tree.
+
+Runtime disclosure records CPython 3.13.12 and observed PyYAML 6.0.2, LinkML 1.9.3 and linkml-runtime 1.9.4. The actual `linkml-validate` entrypoint identified by the coordinator was independently rehashed after the run: 198 bytes, SHA256 `084b48fea01f3ba0966a0c2de7485c9b1dd5685af4ad26fb2fe5ea4012b582d7`. Its shebang resolves to the same observed Python executable bytes. This qualifies the API subprocess route; it is not an authenticated execution receipt or a complete installed dependency/import snapshot. Public notes omit private host paths.
+
+[replay_supplement.py](replay_supplement.py) and [compare_saved.py](compare_saved.py) are exact copies of the reviewed external utilities used by the coordinator. The latter reads saved evidence only. Full raw records, report bodies and inventories remain external; the bounded comparison result and exact pins are retained here. Only this README and the new final evidence files were added or updated after preservation checks; tested source, tests and mapping bytes remain unchanged.
 
 Independent static review also corrected a CLI test fixture before execution (#4688): the real merge command requires at least two sources. Its control now passes two actual crates and checks both disclosed raw-source rows and the absence of an invented merged percentage. This was a fixture correction, not a production change or an observed test run failure.
 
-Proposed focused test modules:
+Executed focused test modules:
 
 ```text
 tests/test_rocrate/test_legacy_creators.py
@@ -79,4 +103,4 @@ tests/test_cli/test_rocrate_transform_mapping.py
 tests/test_cli/test_rocrate_transform_mapping_adversarial.py
 ```
 
-Run once from the frozen checkout with `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `PYTHONPATH=src:.`, the selected environment Python `-B -m pytest`, `-q -p no:cacheprovider`, and fresh external basetemp/JUnit destinations. The coordinator selects the exact invocation and records its source binding. A focused test pass does not replace the retained five-input comparison or resolve the parent issues.
+The saved invocation used `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `PYTHONPATH=src:.`, the selected environment Python `-B -m pytest`, `-q -p no:cacheprovider`, and fresh external `legacy-creator-pytest-02` / `legacy-creator-tests-02.xml` destinations. The exact external command JSON is pinned in `validation.json`, alongside a public symbolic-path command. Commit-to-run attribution and console warnings are coordinator provenance, distinct from JUnit outcomes and independent byte checks. Neither the focused tests nor this five-input comparison resolve the open parent issues.
