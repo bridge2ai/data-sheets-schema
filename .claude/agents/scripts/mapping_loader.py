@@ -17,6 +17,7 @@ if (_source / 'data_sheets_schema/legacy_root_identity.py').is_file() and str(_s
     sys.path.insert(0, str(_source))
 
 from data_sheets_schema.legacy_root_identity import MARKER, validate_rows
+from data_sheets_schema.legacy_update_plan import validate_rows as validate_update_rows
 
 
 class MappingLoader:
@@ -46,6 +47,7 @@ class MappingLoader:
         with open(self.tsv_path, 'r', encoding='utf-8') as f:
             rows = list(csv.DictReader(f, delimiter='\t'))
             validate_rows(rows)
+            validate_update_rows(rows)
 
             for row in rows:
                 # Skip header rows and empty rows

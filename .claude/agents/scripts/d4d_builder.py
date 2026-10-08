@@ -18,6 +18,7 @@ if (_source / 'data_sheets_schema/legacy_doi.py').is_file() and str(_source) not
 
 from data_sheets_schema.legacy_doi import doi_value, source_value
 from data_sheets_schema.legacy_root_identity import root_identity_route, resolve_root_identity
+from data_sheets_schema.legacy_update_plan import update_plan_route, update_plan_value
 
 
 class D4DBuilder:
@@ -46,6 +47,7 @@ class D4DBuilder:
         # Use the same production gate as the packaged builder (#4588).
         root = rocrate_parser.require_root_dataset()
         marked_id = root_identity_route(self.mapping)
+        update_plan_route(self.mapping)  # Refuse changed invalid routes before state reset.
         identity = resolve_root_identity(root) if marked_id else None
         self.d4d_data = {}
 
@@ -104,6 +106,10 @@ class D4DBuilder:
         mapping_info = self.mapping.get_mapping_info(field_name)
         if not mapping_info:
             return value
+
+        # The explicit route precedes generic Type/list/string coercion.
+        if field_name == 'updates' and update_plan_route(self.mapping):
+            return update_plan_value(value)
 
         # Dataset.doi requires the bare form, independently of stale TSV types.
         if field_name == 'doi':
