@@ -299,11 +299,12 @@ class ROCrateMerger:
             rocrate_parsers: List of ROCrateParser instances
             source_names: Optional list of source names
         """
-        report = self.generate_merge_report(rocrate_parsers, source_names)
-
+        from data_sheets_schema.legacy_publication import prepare_dataset, publish
         report_path = output_path.parent / f"{output_path.stem}_merge_report.txt"
-        with open(report_path, 'w', encoding='utf-8') as f:
-            f.write(report)
+        prepare_dataset(self.merged_data, context=f"Merge report output {report_path}")
+        report = self.generate_merge_report(rocrate_parsers, source_names)
+        publish([(report_path, report.encode("utf-8"))],
+                protected=[self.mapping.tsv_path, *(p.rocrate_path for p in rocrate_parsers)])
 
         print(f"\n✓ Merge report saved: {report_path}")
 

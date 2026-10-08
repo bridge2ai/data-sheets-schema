@@ -30,6 +30,7 @@ import sys
 from copy import deepcopy
 from pathlib import Path
 from typing import List, Tuple
+from tempfile import TemporaryDirectory
 
 from informativeness_scorer import InformativenessScorer
 from mapping_loader import MappingLoader
@@ -37,6 +38,7 @@ from rocrate_parser import ROCrateParser
 from rocrate_merger import ROCrateMerger
 from d4d_builder import D4DBuilder
 from data_sheets_schema.rocrate_sources import select_root
+from data_sheets_schema.legacy_publication import publish, diagnostic
 
 
 def discover_rocrates(input_dir: Path) -> List[Path]:
@@ -130,12 +132,11 @@ def _combined_crate(parsers: List[ROCrateParser]) -> dict:
     return concatenated
 
 
-def _save_concatenated_crate(concatenated: dict, output_path: Path) -> Path:
+def _save_concatenated_crate(concatenated: dict, output_path: Path, *, protected=()) -> Path:
     """Publish a combined graph after root preflight has succeeded."""
     concat_path = output_path.parent / f"{output_path.stem}_concatenated.json"
-    concat_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(concat_path, 'w', encoding='utf-8') as f:
-        json.dump(concatenated, f, indent=2)
+    publish([(concat_path, json.dumps(concatenated, indent=2).encode("utf-8"))],
+            protected=protected)
 
     print(f"\n✓ Concatenated RO-Crate saved: {concat_path}")
     return concat_path
@@ -147,7 +148,8 @@ def concatenate_rocrates(
 ) -> Path:
     """Concatenate sources only when their combined graph has a valid root."""
     parsers = [ROCrateParser(str(path)) for path in rocrate_paths]
-    return _save_concatenated_crate(_combined_crate(parsers), output_path)
+    return _save_concatenated_crate(_combined_crate(parsers), output_path,
+                                    protected=rocrate_paths)
 
 
 def main():
@@ -293,113 +295,56 @@ def main():
         print(f"✗ Error preparing RO-Crates: {exc}", file=sys.stderr)
         return 1
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    # Construct the whole operation privately. A combined crate is an input
+    # to construction, not permission to publish an unchecked intermediate.
+    from rocrate_to_d4d import prepare_d4d_yaml
+    try:
+        prepared = []
+        concat_path = output_path.with_name(f"{output_path.stem}_concatenated.json")
+        if combined is not None:
+            combined_raw = json.dumps(combined, indent=2).encode("utf-8")
+            with TemporaryDirectory(prefix="d4d-combined-crate-") as directory:
+                private_path = Path(directory) / concat_path.name
+                private_path.write_bytes(combined_raw)
+                combined_parser = ROCrateParser(str(private_path))
+            # The intended source label is retained in headers and provenance.
+            combined_parser.rocrate_path = concat_path
+            prepared.append((concat_path, combined_raw))
 
-    # Step 5: Process based on strategy
-    print(f"\n[4/5] Processing with '{args.strategy}' strategy...")
-
-    if args.strategy == 'merge':
-        # Direct field-by-field merge
-        from rocrate_to_d4d import save_d4d_yaml
-
-        merger = ROCrateMerger(mapping)
-        dataset = merger.merge_rocrates(parsers, primary_index=0)
-        provenance = merger.get_provenance()
-
-        save_d4d_yaml(
-            dataset,
-            output_path,
-            mapping_path,
-            rocrate_paths=selected_paths,
-            provenance=provenance
-        )
-
-        merger.save_merge_report(output_path, parsers)
-
-    elif args.strategy == 'concatenate':
-        # Concatenate then transform
-        from rocrate_to_d4d import save_d4d_yaml
-
-        concat_path = _save_concatenated_crate(combined, output_path)
-
-        # Transform concatenated file
-        parser = ROCrateParser(str(concat_path))
-        builder = D4DBuilder(mapping)
-        dataset = builder.build_dataset(parser)
-
-        save_d4d_yaml(
-            dataset,
-            output_path,
-            mapping_path,
-            rocrate_path=concat_path
-        )
-
-    elif args.strategy == 'hybrid':
-        # Merge primary, concatenate secondaries
-        print("\n  Hybrid approach:")
-        print(f"    - Primary (merge): {selected_paths[0].name}")
-
-        if len(selected_paths) > 1:
-            print(f"    - Secondaries (concatenate): {len(selected_paths)-1} files")
-
-            # Concatenate secondaries
-            concat_path = _save_concatenated_crate(combined, output_path)
-
-            # Merge primary with concatenated secondaries
-            from rocrate_to_d4d import save_d4d_yaml
-
-            parsers = [
-                parsers[0],
-                ROCrateParser(str(concat_path))
-            ]
+        if args.strategy == 'concatenate':
+            builder = D4DBuilder(mapping)
+            dataset = builder.build_dataset(combined_parser)
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_path=concat_path)
+        elif args.strategy == 'hybrid' and len(parsers) == 1:
+            builder = D4DBuilder(mapping)
+            dataset = builder.build_dataset(parsers[0])
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_path=selected_paths[0])
+        else:
+            if args.strategy == 'hybrid':
+                parsers = [parsers[0], combined_parser]
+                header_paths = [selected_paths[0], concat_path]
+            else:
+                header_paths = selected_paths
             merger = ROCrateMerger(mapping)
             dataset = merger.merge_rocrates(parsers, primary_index=0)
-            provenance = merger.get_provenance()
-
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_paths=[selected_paths[0], concat_path],
-                provenance=provenance
-            )
-
-            merger.save_merge_report(output_path, parsers)
-
-        else:
-            # Only one file, treat as single-file mode
-            parser = parsers[0]
-            builder = D4DBuilder(mapping)
-            dataset = builder.build_dataset(parser)
-
-            from rocrate_to_d4d import save_d4d_yaml
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_path=selected_paths[0]
-            )
-
-    # Step 6: Validate if requested
-    if args.validate:
-        print("\n[5/5] Validating D4D YAML...")
-        schema_path = Path(args.schema)
-
-        if not schema_path.exists():
-            print(f"⚠ Warning: Schema not found: {schema_path}")
-        else:
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_paths=header_paths,
+                                   provenance=merger.get_provenance())
+            report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+            prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        prepared.append((output_path, raw))
+        if args.validate:
             from validator import D4DValidator
-
-            validator = D4DValidator(str(schema_path))
-            is_valid, output = validator.validate_d4d_yaml(str(output_path))
-
-            print(validator.get_validation_summary(is_valid, output))
-
-            if not is_valid:
-                error_path = output_path.parent / f"{output_path.stem}_validation_errors.txt"
-                with open(error_path, 'w') as f:
-                    f.write(output)
-                print(f"\n⚠ Validation errors saved to: {error_path}")
+            validator = D4DValidator(str(Path(args.schema)))
+            detail = diagnostic(raw, validator.validate_d4d_yaml)
+            print(validator.get_validation_summary(True, detail))
+        publish(prepared, protected=[mapping_path, Path(args.schema), *rocrate_paths])
+    except Exception as exc:
+        print(f"✗ Error preparing or publishing Dataset: {exc}", file=sys.stderr)
+        return 1
+    print(f"\n✓ D4D YAML saved: {output_path}")
 
     # Final summary
     print("\n" + "="*80)

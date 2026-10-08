@@ -63,7 +63,8 @@ def mapping(tmp_path):
     path.write_text(
         "Class\tD4D Property\tType\tFAIRSCAPE RO-Crate Property\t"
         "Covered by FAIRSCAPE? Yes =1; No = 0\tDirect mapping? Yes =1; No = 0\n"
-        "Dataset\ttitle\tstr\tname\t1\t1\n",
+        "Dataset\ttitle\tstr\tname\t1\t1\n"
+        "Dataset\tid\tstr\tidentifier\t1\t1\n",
         encoding="utf-8",
     )
     return path
@@ -73,7 +74,8 @@ def crate(path, *, title="Root title", invalid=False):
     graph = [
         {"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
          "about": {"@id": "missing-root" if invalid else "./"}},
-        {"@id": "./", "@type": "Dataset", "name": title},
+        {"@id": "./", "@type": "Dataset", "name": title,
+         "identifier": "https://example.org/dataset/root"},
     ]
     path.write_text(json.dumps({"@graph": graph}), encoding="utf-8")
     return path
@@ -185,7 +187,8 @@ def test_auto_processing_retains_valid_single_source(
         "--strategy", strategy,
     ])
     assert legacy["auto_process_rocrates"].main() == 0
-    assert yaml.safe_load(output.read_text()) == {"title": "Root title"}
+    assert yaml.safe_load(output.read_text()) == {
+        "title": "Root title", "id": "https://example.org/dataset/root"}
     assert source.read_bytes() == before
 
 
@@ -216,19 +219,35 @@ def test_directory_batch_preflights_all_roots_before_any_output(
         assert not output_dir.exists()
 
 
-def test_d4d_transform_uses_default_mapping_and_selected_primary(
+def test_d4d_default_mapping_refuses_missing_required_id(
         legacy, tmp_path, monkeypatch):
     from data_sheets_schema.cli import cli
 
     first = crate(tmp_path / "a.json", title="First")
     primary = crate(tmp_path / "b.json", title="Chosen primary")
-    output = tmp_path / "record.yaml"
-    monkeypatch.chdir(tmp_path)  # The mapping must resolve to the checkout.
+    output = tmp_path / "published" / "record.yaml"
+    seed_artifacts(output, True)
+    monkeypatch.chdir(tmp_path)
     result = CliRunner().invoke(cli, [
         "rocrate", "transform", "--merge", "--inputs", str(first),
         "--inputs", str(primary), "--primary", str(primary), "-o", str(output),
     ])
-    assert result.exit_code == 0, result.output
+    # Current default TSV does not map required Dataset.id. This is a real
+    # publication refusal, not permission to invent an ID or repair the map.
+    assert result.exit_code == 1, result.output
+    assert "id" in result.output and "Dataset publication refused" in result.output
+    assert_artifacts_preserved(output, True)
+
+
+def test_legacy_valid_mapping_preserves_selected_primary(legacy, mapping, tmp_path, monkeypatch):
+    first = crate(tmp_path / "a.json", title="First")
+    primary = crate(tmp_path / "b.json", title="Chosen primary")
+    output = tmp_path / "record.yaml"
+    monkeypatch.setattr(sys, "argv", [
+        "transform", "--merge", "--inputs", str(first), str(primary),
+        "--primary", "1", "-m", str(mapping), "-o", str(output),
+    ])
+    assert legacy["rocrate_to_d4d"].main() == 0
     assert yaml.safe_load(output.read_text())["title"] == "Chosen primary"
     assert f"# Primary source: {primary.name}\n" in output.read_text()
     report = output.with_name("record_merge_report.txt").read_text()

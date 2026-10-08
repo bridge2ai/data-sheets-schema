@@ -10,6 +10,8 @@ import sys
 import click
 from pathlib import Path
 from typing import Optional
+from io import StringIO
+from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
 
 # Resolve repository root for bundled schema lookup.
 # Works both from a repo checkout and when installed as a package.
@@ -398,11 +400,14 @@ def merge(input_files, output, mapping, primary, report, verbose):
         merger = ROCrateMerger(mapping_loader, verbose=verbose)
         dataset = merger.merge_rocrates(parsers, primary_index=primary)
 
-        # Write output
         output_path = Path(output)
-        with open(output_path, 'w') as f:
-            yaml.dump(dataset, f, default_flow_style=False, sort_keys=False)
-
+        prepared = [(output_path, prepare_dataset(
+            dataset, default_flow_style=False, sort_keys=False,
+            context=f"Inputs {input_files}; output {output_path}"))]
+        if report:
+            report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+            prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        publish(prepared, protected=[*input_files, mapping])
         click.echo(f"✓ Merged D4D YAML written to: {output}")
 
         # Show statistics
@@ -416,9 +421,8 @@ def merge(input_files, output, mapping, primary, report, verbose):
         click.echo(f"  Combined: {stats['fields_combined']}")
         click.echo(f"  Merged arrays: {stats['fields_merged_as_arrays']}")
 
-        # Generate merge report if requested
         if report:
-            merger.save_merge_report(output_path, parsers)
+            click.echo(f"✓ Merge report saved: {report_path}")
 
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)
@@ -502,62 +506,42 @@ def transform(input_file, output, mapping, report, validate):
         builder = D4DBuilder(mapping_loader, verbose=False)
         dataset = builder.build_dataset(parser)
 
-        # Write output
         output_path = Path(output)
-        with open(output_path, 'w') as f:
-            yaml.dump(dataset, f, default_flow_style=False, sort_keys=False)
-
-        click.echo(f"✓ D4D YAML written to: {output}")
-
-        # Show statistics
+        raw = prepare_dataset(dataset, default_flow_style=False, sort_keys=False,
+                              context=f"Input {input_file}; output {output_path}")
+        prepared = [(output_path, raw)]
         covered_fields = mapping_loader.get_covered_fields()
-        click.echo(f"  Fields populated: {len(dataset)}/{len(covered_fields)}")
-        click.echo(f"  Coverage: {len(dataset)/len(covered_fields)*100:.1f}%")
-
-        # Generate transformation report if requested
+        coverage = len(dataset) / len(covered_fields) * 100 if covered_fields else 0
         if report:
             report_path = output_path.parent / f"{output_path.stem}_report.txt"
-
-            with open(report_path, 'w') as f:
-                f.write("="*80 + "\n")
-                f.write("RO-Crate to D4D Transformation Report\n")
-                f.write("="*80 + "\n\n")
-
-                f.write("SUMMARY\n")
-                f.write("-"*80 + "\n")
-                f.write(f"Input: {input_file}\n")
-                f.write(f"Output: {output}\n")
-                f.write(f"Mapping: {mapping}\n")
-                f.write(f"Fields populated: {len(dataset)}/{len(covered_fields)}\n")
-                f.write(f"Coverage: {len(dataset)/len(covered_fields)*100:.1f}%\n\n")
-
-                # Show unmapped properties
-                mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-                unmapped = parser.get_unmapped_properties(mapped_props)
-
-                f.write("UNMAPPED RO-CRATE PROPERTIES\n")
-                f.write("-"*80 + "\n")
-                f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
-
-                for prop_path, sample_value in sorted(unmapped.items()):
-                    f.write(f"  • {prop_path}\n")
-                    f.write(f"    Sample: {sample_value}\n\n")
-
-            click.echo(f"✓ Transformation report saved: {report_path}")
-
-        # Validate if requested
+            f = StringIO()
+            f.write("="*80 + "\n")
+            f.write("RO-Crate to D4D Transformation Report\n")
+            f.write("="*80 + "\n\n")
+            f.write("SUMMARY\n" + "-"*80 + "\n")
+            f.write(f"Input: {input_file}\nOutput: {output}\nMapping: {mapping}\n")
+            f.write(f"Fields populated: {len(dataset)}/{len(covered_fields)}\n")
+            f.write(f"Coverage: {coverage:.1f}%\n\n")
+            mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
+            unmapped = parser.get_unmapped_properties(mapped_props)
+            f.write("UNMAPPED RO-CRATE PROPERTIES\n" + "-"*80 + "\n")
+            f.write(f"Found {len(unmapped)} properties with no D4D mapping:\n\n")
+            for prop_path, sample_value in sorted(unmapped.items()):
+                f.write(f"  • {prop_path}\n    Sample: {sample_value}\n\n")
+            prepared.append((report_path, f.getvalue().encode("utf-8")))
         if validate:
             from data_sheets_schema.resources import resource_path
             schema = str(resource_path("src/data_sheets_schema/schema/data_sheets_schema_all.yaml"))
             validator = D4DValidator(schema)
-            is_valid, validation_output = validator.validate_d4d_yaml(str(output_path))
-
-            if is_valid:
-                click.echo(f"✓ Validation passed")
-            else:
-                click.echo(f"✗ Validation failed", err=True)
-                click.echo(validation_output)
-                sys.exit(1)
+            diagnostic(raw, validator.validate_d4d_yaml)
+        publish(prepared, protected=[input_file, mapping])
+        click.echo(f"✓ D4D YAML written to: {output}")
+        click.echo(f"  Fields populated: {len(dataset)}/{len(covered_fields)}")
+        click.echo(f"  Coverage: {coverage:.1f}%")
+        if report:
+            click.echo(f"✓ Transformation report saved: {report_path}")
+        if validate:
+            click.echo("✓ Validation passed")
 
     except Exception as e:
         click.echo(f"✗ Error: {e}", err=True)

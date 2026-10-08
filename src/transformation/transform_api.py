@@ -62,6 +62,8 @@ except ImportError as e:
     print("Ensure transformation scripts exist in .claude/agents/scripts/")
     SCRIPTS_AVAILABLE = False
 
+from data_sheets_schema.legacy_publication import PublicationError, prepare_dataset, publish
+
 # Import validation framework
 # Only add to sys.path if not already present to avoid pollution
 validation_dir = Path(__file__).parent.parent
@@ -306,8 +308,15 @@ class SemanticTransformer:
 
         # Save to output file if requested
         if output_path:
-            with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.safe_dump(d4d_dict, f, indent=self.config.output_indent, sort_keys=False)
+            if validation_passed is False:
+                raise PublicationError(
+                    f"Input {source_path}; output {output_path}: requested Dataset "
+                    f"validation failed: {validation_errors}")
+            raw = prepare_dataset(d4d_dict, context=f"Input {source_path}; output {output_path}",
+                                  encoding=self.config.output_encoding,
+                                  indent=self.config.output_indent, sort_keys=False)
+            publish([(Path(output_path), raw)],
+                    protected=[self.config.mapping_file, rocrate_path])
 
         # Return result
         return TransformationResult(
@@ -424,6 +433,8 @@ class SemanticTransformer:
             }
 
         # Validate merged result if requested
+        validation_passed = None
+        validation_errors = []
         if validate and self.validator:
             # Save to temp file for validation
             import tempfile
@@ -439,18 +450,27 @@ class SemanticTransformer:
                     skip_levels=[ValidationLevel.PROFILE, ValidationLevel.ROUNDTRIP]
                 )
 
-                if not all(r.passed for r in validation_reports.values()):
+                validation_passed = all(r.passed for r in validation_reports.values())
+                if not validation_passed:
                     print("Warning: Merged D4D validation failed")
                     for report in validation_reports.values():
                         if not report.passed:
+                            validation_errors.extend(report.errors)
                             print(f"  {report.level.value}: {', '.join(report.errors)}")
             finally:
                 tmp_path.unlink()
 
         # Save to output file if requested
         if output_path:
-            with open(output_path, 'w', encoding=self.config.output_encoding) as f:
-                yaml.safe_dump(merged_d4d, f, indent=self.config.output_indent, sort_keys=False)
+            if validation_passed is False:
+                raise PublicationError(
+                    f"Inputs {rocrate_inputs}; output {output_path}: requested Dataset "
+                    f"validation failed: {validation_errors}")
+            raw = prepare_dataset(merged_d4d, context=f"Inputs {rocrate_inputs}; output {output_path}",
+                                  encoding=self.config.output_encoding,
+                                  indent=self.config.output_indent, sort_keys=False)
+            publish([(Path(output_path), raw)],
+                    protected=[self.config.mapping_file, *rocrate_inputs])
 
         return {
             'd4d': merged_d4d,
@@ -567,13 +587,22 @@ def batch_transform_rocrates(
 
     config = TransformationConfig(validate_output=validate)
     transformer = SemanticTransformer(config)
-    output_path.mkdir(parents=True, exist_ok=True)
-
+    prepared = []
     results = []
     for rocrate_file in rocrate_files:
         out_file = output_path / f"{rocrate_file.stem}_d4d.yaml"
-        result = transformer.rocrate_to_d4d(rocrate_file, output_path=out_file)
+        result = transformer.rocrate_to_d4d(rocrate_file)
+        if result.validation_passed is False:
+            raise PublicationError(
+                f"Input {rocrate_file}; output {out_file}: requested Dataset "
+                f"validation failed: {result.validation_errors}")
+        prepared.append((out_file, prepare_dataset(
+            result.data, context=f"Input {rocrate_file}; output {out_file}",
+            encoding=config.output_encoding,
+            indent=config.output_indent, sort_keys=False)))
         results.append(result)
+    publish(prepared, protected=[config.mapping_file, *rocrate_files])
+    for rocrate_file, (out_file, _) in zip(rocrate_files, prepared):
         print(f"✓ Transformed: {rocrate_file.name} → {out_file.name}")
 
     return results

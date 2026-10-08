@@ -33,6 +33,7 @@ import yaml
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List
+from io import StringIO
 
 # Import our modules
 from mapping_loader import MappingLoader
@@ -41,55 +42,51 @@ from d4d_builder import D4DBuilder
 from validator import D4DValidator
 from rocrate_merger import ROCrateMerger
 from informativeness_scorer import InformativenessScorer
+from data_sheets_schema.legacy_publication import prepare_dataset, publish, diagnostic
 
 
-def generate_transformation_report(
+def render_transformation_report(
     rocrate_parser: ROCrateParser,
     d4d_builder: D4DBuilder,
     mapping_loader: MappingLoader,
-    output_dir: Path
-) -> Path:
+) -> str:
     """Generate report of unmapped fields and transformation summary."""
-    report_path = output_dir / "transformation_report.txt"
+    f = StringIO()
+    f.write("="*80 + "\n")
+    f.write("RO-Crate to D4D Transformation Report\n")
+    f.write(f"Generated: {datetime.now().isoformat()}\n")
+    f.write("="*80 + "\n\n")
 
-    with open(report_path, 'w', encoding='utf-8') as f:
-        f.write("="*80 + "\n")
-        f.write("RO-Crate to D4D Transformation Report\n")
-        f.write(f"Generated: {datetime.now().isoformat()}\n")
-        f.write("="*80 + "\n\n")
+    # Transformation summary
+    covered_fields = mapping_loader.get_covered_fields()
+    dataset = d4d_builder.get_dataset()
 
-        # Transformation summary
-        covered_fields = mapping_loader.get_covered_fields()
-        dataset = d4d_builder.get_dataset()
+    f.write("TRANSFORMATION SUMMARY\n")
+    f.write("-"*80 + "\n")
+    f.write(f"Total D4D fields in mapping: {len(covered_fields)}\n")
+    f.write(f"Fields populated from RO-Crate: {len(dataset)}\n")
+    f.write(f"Coverage: {len(dataset)}/{len(covered_fields)} ")
+    f.write(f"({len(dataset)/len(covered_fields)*100:.1f}%)\n\n")
 
-        f.write("TRANSFORMATION SUMMARY\n")
-        f.write("-"*80 + "\n")
-        f.write(f"Total D4D fields in mapping: {len(covered_fields)}\n")
-        f.write(f"Fields populated from RO-Crate: {len(dataset)}\n")
-        f.write(f"Coverage: {len(dataset)}/{len(covered_fields)} ")
-        f.write(f"({len(dataset)/len(covered_fields)*100:.1f}%)\n\n")
+    # Unmapped RO-Crate properties
+    mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
+    unmapped = rocrate_parser.get_unmapped_properties(mapped_props)
 
-        # Unmapped RO-Crate properties
-        mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
-        unmapped = rocrate_parser.get_unmapped_properties(mapped_props)
+    f.write("UNMAPPED RO-CRATE PROPERTIES\n")
+    f.write("-"*80 + "\n")
+    f.write(f"Found {len(unmapped)} properties in RO-Crate with no D4D mapping:\n\n")
 
-        f.write("UNMAPPED RO-CRATE PROPERTIES\n")
-        f.write("-"*80 + "\n")
-        f.write(f"Found {len(unmapped)} properties in RO-Crate with no D4D mapping:\n\n")
+    for prop_path, sample_value in sorted(unmapped.items()):
+        f.write(f"  • {prop_path}\n")
+        f.write(f"    Sample value: {sample_value}\n\n")
 
-        for prop_path, sample_value in sorted(unmapped.items()):
-            f.write(f"  • {prop_path}\n")
-            f.write(f"    Sample value: {sample_value}\n\n")
+    if unmapped:
+        f.write("\nThese properties could be added to the mapping TSV for future ")
+        f.write("iterations to improve D4D coverage.\n")
 
-        if unmapped:
-            f.write("\nThese properties could be added to the mapping TSV for future ")
-            f.write("iterations to improve D4D coverage.\n")
+    return f.getvalue()
 
-    print(f"\n✓ Transformation report saved: {report_path}")
-    return report_path
-
-
-def save_d4d_yaml(
+def prepare_d4d_yaml(
     dataset: Dict[str, Any],
     output_path: Path,
     mapping_path: Path,
@@ -97,47 +94,67 @@ def save_d4d_yaml(
     rocrate_paths: List[Path] = None,
     provenance: Dict[str, List[str]] = None
 ):
-    """Save D4D dataset to YAML file with metadata header."""
-    with open(output_path, 'w', encoding='utf-8') as f:
-        # Write metadata header
-        f.write("# D4D Datasheet Generated from RO-Crate\n")
+    """Render and validate bytes, including the existing provenance header."""
+    f = StringIO()
+    # Write metadata header
+    f.write("# D4D Datasheet Generated from RO-Crate\n")
 
-        if rocrate_paths:
-            # Multi-file merge mode
-            f.write(f"# Primary source: {rocrate_paths[0].name}\n")
-            if len(rocrate_paths) > 1:
-                f.write("# Additional sources:\n")
-                for path in rocrate_paths[1:]:
-                    f.write(f"#   - {path.name}\n")
-            f.write(f"# Merged: {datetime.now().isoformat()}\n")
-        elif rocrate_path:
-            # Single file mode
-            f.write(f"# Source: {rocrate_path.name}\n")
-            f.write(f"# Generated: {datetime.now().isoformat()}\n")
+    if rocrate_paths:
+        # Multi-file merge mode
+        f.write(f"# Primary source: {rocrate_paths[0].name}\n")
+        if len(rocrate_paths) > 1:
+            f.write("# Additional sources:\n")
+            for path in rocrate_paths[1:]:
+                f.write(f"#   - {path.name}\n")
+        f.write(f"# Merged: {datetime.now().isoformat()}\n")
+    elif rocrate_path:
+        # Single file mode
+        f.write(f"# Source: {rocrate_path.name}\n")
+        f.write(f"# Generated: {datetime.now().isoformat()}\n")
 
-        f.write(f"# Mapping: {mapping_path.name}\n")
-        f.write(f"# Generator: d4d-rocrate skill\n")
+    f.write(f"# Mapping: {mapping_path.name}\n")
+    f.write(f"# Generator: d4d-rocrate skill\n")
 
-        # Add provenance if available
-        if provenance:
-            f.write("\n# Field provenance (which sources contributed):\n")
-            for field, sources in sorted(provenance.items()):
-                sources_str = ", ".join(sources)
-                f.write(f"#   {field}: {sources_str}\n")
+    # Add provenance if available
+    if provenance:
+        f.write("\n# Field provenance (which sources contributed):\n")
+        for field, sources in sorted(provenance.items()):
+            sources_str = ", ".join(sources)
+            f.write(f"#   {field}: {sources_str}\n")
 
-        f.write("\n")
+    f.write("\n")
 
-        # Write YAML data (use safe_dump to handle special characters)
-        yaml.safe_dump(
-            dataset,
-            f,
-            default_flow_style=False,
-            allow_unicode=True,
-            sort_keys=False
-        )
+    # Write YAML data (use safe_dump to handle special characters)
+    yaml.safe_dump(
+        dataset,
+        f,
+        default_flow_style=False,
+        allow_unicode=True,
+        sort_keys=False
+    )
 
+    return prepare_dataset(dataset, text=f.getvalue(),
+                           context=f"Inputs {rocrate_paths or rocrate_path}; output {output_path}")
+
+
+
+def generate_transformation_report(rocrate_parser, d4d_builder, mapping_loader, output_dir):
+    """Publish a report only after its final Dataset passes the required gate."""
+    prepare_dataset(d4d_builder.get_dataset())
+    path = Path(output_dir) / "transformation_report.txt"
+    raw = render_transformation_report(rocrate_parser, d4d_builder, mapping_loader).encode("utf-8")
+    publish([(path, raw)], protected=[rocrate_parser.rocrate_path, mapping_loader.tsv_path])
+    print(f"\n✓ Transformation report saved: {path}")
+    return path
+
+
+def save_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=None,
+                  rocrate_paths=None, provenance=None):
+    raw = prepare_d4d_yaml(dataset, output_path, mapping_path, rocrate_path,
+                           rocrate_paths, provenance)
+    publish([(Path(output_path), raw)],
+            protected=[mapping_path, *(rocrate_paths or ([rocrate_path] if rocrate_path else []))])
     print(f"\n✓ D4D YAML saved: {output_path}")
-
 
 def main():
     """Main transformation orchestrator."""
@@ -347,30 +364,19 @@ Examples:
             print(f"✗ Error merging RO-Crates: {e}", file=sys.stderr)
             return 1
 
-        # Save with provenance
-        print("\n[5/5] Saving merged D4D YAML...")
+        header_paths = [input_paths[primary_index]] + [
+            path for i, path in enumerate(input_paths) if i != primary_index
+        ]
         try:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            header_paths = [input_paths[primary_index]] + [
-                path for i, path in enumerate(input_paths) if i != primary_index
-            ]
-            save_d4d_yaml(
-                dataset,
-                output_path,
-                mapping_path,
-                rocrate_paths=header_paths,
-                provenance=provenance
-            )
-        except Exception as e:
-            print(f"✗ Error saving YAML: {e}", file=sys.stderr)
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path,
+                                   rocrate_paths=header_paths, provenance=provenance)
+            prepared = [(output_path, raw)]
+            if not args.no_report:
+                report_path = output_path.with_name(f"{output_path.stem}_merge_report.txt")
+                prepared.append((report_path, merger.generate_merge_report(parsers).encode("utf-8")))
+        except Exception as exc:
+            print(f"✗ Error preparing publication: {exc}", file=sys.stderr)
             return 1
-
-        # Generate merge report
-        if not args.no_report:
-            try:
-                merger.save_merge_report(output_path, parsers)
-            except Exception as e:
-                print(f"⚠ Warning: Could not generate merge report: {e}", file=sys.stderr)
 
     else:
         # ========== SINGLE-FILE MODE ==========
@@ -398,22 +404,16 @@ Examples:
             print(f"✗ Error building D4D: {e}", file=sys.stderr)
             return 1
 
-        # Step 4: Save D4D YAML
-        print("\n[4/5] Saving D4D YAML...")
         try:
-            output_path.parent.mkdir(parents=True, exist_ok=True)
-            save_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=input_path)
-        except Exception as e:
-            print(f"✗ Error saving YAML: {e}", file=sys.stderr)
+            raw = prepare_d4d_yaml(dataset, output_path, mapping_path, rocrate_path=input_path)
+            prepared = [(output_path, raw)]
+            if not args.no_report:
+                report_path = output_path.parent / "transformation_report.txt"
+                report = render_transformation_report(rocrate, builder, mapping).encode("utf-8")
+                prepared.append((report_path, report))
+        except Exception as exc:
+            print(f"✗ Error preparing publication: {exc}", file=sys.stderr)
             return 1
-
-        # Step 5: Generate report
-        print("\n[5/5] Generating reports...")
-        if not args.no_report:
-            try:
-                generate_transformation_report(rocrate, builder, mapping, output_path.parent)
-            except Exception as e:
-                print(f"⚠ Warning: Could not generate report: {e}", file=sys.stderr)
 
     # Common validation step for both modes
     if args.strict:
@@ -426,32 +426,19 @@ Examples:
             print("Run without --strict flag or provide missing fields manually", file=sys.stderr)
             return 1
 
-    if args.validate:
-        if not schema_path.exists():
-            print(f"⚠ Warning: Schema not found, skipping validation: {schema_path}", file=sys.stderr)
-        else:
-            print("\n" + "="*80)
-            print("Validating D4D YAML...")
-            print("="*80 + "\n")
-
-            try:
-                validator = D4DValidator(str(schema_path))
-                is_valid, output = validator.validate_d4d_yaml(str(output_path))
-
-                print(validator.get_validation_summary(is_valid, output))
-
-                if not is_valid:
-                    # Save validation errors to file
-                    error_path = output_path.parent / f"{output_path.stem}_validation_errors.txt"
-                    with open(error_path, 'w') as f:
-                        f.write(output)
-                    print(f"\n⚠ Validation errors saved to: {error_path}")
-
-                    if args.strict:
-                        return 1
-
-            except Exception as e:
-                print(f"⚠ Warning: Validation failed: {e}", file=sys.stderr)
+    try:
+        if args.validate:
+            validator = D4DValidator(str(schema_path))
+            detail = diagnostic(raw, validator.validate_d4d_yaml)
+            print(validator.get_validation_summary(True, detail))
+        publish(prepared, protected=[mapping_path, schema_path,
+                                    *(input_paths if args.merge else [input_path])])
+    except Exception as exc:
+        print(f"✗ Error publishing Dataset: {exc}", file=sys.stderr)
+        return 1
+    print(f"\n✓ D4D YAML saved: {output_path}")
+    if not args.no_report:
+        print(f"✓ Report saved: {report_path}")
 
     # Final summary
     print("\n" + "="*80)
