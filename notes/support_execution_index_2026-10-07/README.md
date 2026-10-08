@@ -58,10 +58,30 @@ instrument/context decisions, empirical calibration, paid-run authorization,
 project canaries, the reference cohort and rubric/receipt/figure joins remain
 under #2929, #3342 and #3343.
 
-The focused tests use invented responses through a real local HTTP endpoint.
-They cover both-axis reconstruction, failed HTTP with a valid verdict,
-malformed/truncated responses, interrupted publication, unstarted selections,
-no-repurchase behavior, matching and contradictory standalone support evidence,
-portable rereading and unchanged v1 output. These are software fixtures, not
-calibration measurements. Validation results will be recorded after the
-serialized test run and independent review.
+The integration tests use invented responses through a real localhost HTTP
+endpoint. Independent adversarial tests supply invented bytes in-process under
+a fixture that forbids network and provider access. They cover both-axis
+reconstruction, failed HTTP with a valid verdict, malformed/truncated responses,
+interrupted publication, unstarted selections, explicit false/zero values,
+no-repurchase behavior, matching/contradictory/duplicate standalone results,
+exact plan and selected-record joins, rehashed evidence tampering, portable
+rereading and unchanged v1 output. These are software fixtures, not calibration
+measurements.
+
+## Validation
+
+The serialized eight-module suite passed **221 tests**, with zero failures,
+errors or skips, at commit
+`af75e9f326dea67a0104411b954caa0be7d898b7` (tree
+`fb9197a139cfca3675509716e4289838c1efd005`). This includes 9 new integration
+cases, 19 independent adversarial cases and 193 existing fitness, nested support
+and ledger regressions. JUnit records 254.734 seconds. Its SHA-256 is
+`771cb2f741ac50662105757e3f509f6ed0e10c3d38f6c9b4cd906bcd88eb82b8`.
+[validation.json](validation.json) records the exact source/test hashes, JUnit
+identity and per-module counts. Independent checks confirmed those files match
+the tested commit; the evidence update changes documentation only.
+
+Independent adversarial source review found no confirmed production defects.
+These results complete only the engineering slice in #4619. They do not close
+#2929, #3342 or #3343, authenticate decision references, produce scientific
+scores, or change human review, paid-run, readiness or audit28 holds.
