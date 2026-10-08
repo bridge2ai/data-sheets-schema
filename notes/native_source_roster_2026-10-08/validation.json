@@ -1,0 +1,287 @@
+{
+  "artifacts": {
+    "native-source-roster-01-preservation-after.json": {
+      "bytes": 2104075,
+      "sha256": "e39a741887953f301954a5771106356ddcf1e6ea99b11aec78cbc21cd71d1650"
+    },
+    "native-source-roster-01-preservation-before.json": {
+      "bytes": 2104075,
+      "sha256": "e39a741887953f301954a5771106356ddcf1e6ea99b11aec78cbc21cd71d1650"
+    },
+    "native-source-roster-preserve.py": {
+      "bytes": 2721,
+      "sha256": "0efcd09670c78498a3ab7352b94f6e17901a0b410a2a5ef74e615e02f4d39c32"
+    },
+    "native-source-roster-run.py": {
+      "bytes": 3461,
+      "sha256": "8180ae693fe8716aac90db81d3b53795185b10b6e4b44fedd2588601d66039d7"
+    },
+    "native-source-roster-test-command-01.json": {
+      "bytes": 1211,
+      "sha256": "251878cae5d4bd59c47b49465f8a7a46edff5c0fe7583356ba70d68eaec7caab"
+    },
+    "native-source-roster-tests-01-summary.json": {
+      "bytes": 641,
+      "sha256": "38f0e0a40609436fd8933c323b3fda183745d1eca110b329a63ee5b6e1b9b331"
+    },
+    "native-source-roster-tests-01.log": {
+      "bytes": 207,
+      "sha256": "e912d3dd806c88047c8ff586b1249f222157c70382d702f1d4ac2cd45dde8071"
+    },
+    "native-source-roster-tests-01.xml": {
+      "bytes": 9824,
+      "sha256": "5d2d3212b1e75e6ac28e0228d64234521bccaeff0114d9ff2ff33fc3216150f5"
+    }
+  },
+  "base_head": "7d49d6884112f71238735f21d507dea493a79437",
+  "command": {
+    "arguments": [
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_native_source_roster.py",
+      "tests/test_native_execution.py::test_actual_closed_consumer_real_helpers_complete",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=$EVIDENCE_DIR/native-source-roster-pytest-01",
+      "--junitxml=$EVIDENCE_DIR/native-source-roster-tests-01.xml"
+    ],
+    "attribution": "Saved coordinator command and terminal log; symbolic path roles replace private machine paths.",
+    "cwd": "$SOURCE_REPO",
+    "environment": {
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTHONPATH": "src:.:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls"
+    },
+    "python": "$VALIDATION_PYTHON"
+  },
+  "files": {
+    "notes/claudecode_direct/prepare_direct.py": {
+      "bytes": 23560,
+      "role": "additional_dependencies",
+      "sha256": "034c8851f747e0a767a01da8dddb5b6fe3316a6bb7b807fd9cedcbf02218244d"
+    },
+    "notes/claudecode_direct/run_direct_canary.py": {
+      "bytes": 37684,
+      "role": "additional_dependencies",
+      "sha256": "0f2e031f30e267b0ecfe2404cc5bf50dd540b4423c3bc66c1b5b77b38f6a1251"
+    },
+    "notes/claudecode_direct/run_direct_canary_awake.py": {
+      "bytes": 10731,
+      "role": "additional_dependencies",
+      "sha256": "d0ad068e83a1ddf40c4c2c401ea5a264403e02c569391cf5433c47d14c5b69a5"
+    },
+    "notes/matched_cborg_2026-09-13/budget_amendment.py": {
+      "bytes": 31267,
+      "role": "frozen_dependencies",
+      "sha256": "7347b407611871349a50cdb2e11ade7ace1f23dd703451dba5abd9f627cbd3f9"
+    },
+    "notes/matched_cborg_2026-09-13/budgeted_cborg.py": {
+      "bytes": 32252,
+      "role": "frozen_dependencies",
+      "sha256": "0aef1b59d05fd9a1f7f6e2f83b863800fb48e6c35e22030cbcbcfc373c5375e2"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_command_policy.py": {
+      "bytes": 34944,
+      "role": "frozen_dependencies",
+      "sha256": "99db1879752ea73fea0002ea5a3a2d8333365b4e3843abdab3e1a1f0008709cc"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_control.py": {
+      "bytes": 45573,
+      "role": "frozen_dependencies",
+      "sha256": "e53f9627e629f06f40046460dbe43bb7a62c26d3f28bedf41408531bc5374a36"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_file_policy.py": {
+      "bytes": 9211,
+      "role": "frozen_dependencies",
+      "sha256": "c6fc332b237fe06200437e4e899b0e6dbb2830b9a40d537b4e8db36bd5e5b33e"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_phase_history.py": {
+      "bytes": 17636,
+      "role": "frozen_dependencies",
+      "sha256": "0a318e7bb3eea8d99067da168de09985d92f7f28c6ed0e0b01d7c01dcf85a1d6"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_proxy.py": {
+      "bytes": 49654,
+      "role": "frozen_dependencies",
+      "sha256": "21f2d16e6c9b93f033664c7b95521076b27786a2b1679c008713f2e40bf599b7"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/native_readonly.py": {
+      "bytes": 8254,
+      "role": "frozen_dependencies",
+      "sha256": "a3b40463f1748f5d109b9d018a7d074a6e8521e9bd413151293f37857e3006b8"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/prepare_overlay_roster.py": {
+      "bytes": 916,
+      "role": "frozen_dependencies",
+      "sha256": "36575c39ae3e291320513072337e1b22c890f4498746fa24289e67bf4ce45819"
+    },
+    "notes/matched_cborg_2026-09-13/native_controls/run_native_canary.py": {
+      "bytes": 46837,
+      "role": "frozen_dependencies",
+      "sha256": "fbb98d66b36b392f5291866ede6acff4b162ad626d98ca7d104c0a45ae96ac5d"
+    },
+    "notes/matched_cborg_2026-09-13/prepare_registration.py": {
+      "bytes": 19949,
+      "role": "frozen_dependencies",
+      "sha256": "06a31323dfd893e7e16b8d6778c19ed4489f24b8bc3d74a43391296f881c49ae"
+    },
+    "notes/matched_cborg_2026-09-13/run_api_canary.py": {
+      "bytes": 13596,
+      "role": "frozen_dependencies",
+      "sha256": "8b5ce15695b5808060edfb3d2fb85fd441244c4ee23ea8d8cf556352b8bbbbc4"
+    },
+    "poetry.lock": {
+      "bytes": 592155,
+      "role": "declarations",
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+    },
+    "pyproject.toml": {
+      "bytes": 4446,
+      "role": "declarations",
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b"
+    },
+    "src/data_sheets_schema/native_attempt_supervisor.py": {
+      "bytes": 25348,
+      "role": "production",
+      "sha256": "19976716dff684540e468f6e0508288d60f5742432ec14c6e2908701b4ed67e4"
+    },
+    "src/data_sheets_schema/native_attribution_controller.py": {
+      "bytes": 21181,
+      "role": "production",
+      "sha256": "1213d4704f0754efee6a3b1b09db0d3210eaf4fd64195bf733890ac3b1106967"
+    },
+    "src/data_sheets_schema/native_attribution_registration.py": {
+      "bytes": 24342,
+      "role": "production",
+      "sha256": "135be1958e93c682a2083b53d338c44c3acf66efe74cd5da94f7c66cf72e0ab6"
+    },
+    "src/data_sheets_schema/native_controller_sources_v1.json": {
+      "bytes": 2459,
+      "role": "declarations",
+      "sha256": "d1f13def58c0832aea3644fb68806d829eb4ab6e087045f14d86f439aed557c1"
+    },
+    "src/data_sheets_schema/native_execution.py": {
+      "bytes": 33449,
+      "role": "production",
+      "sha256": "9b9e71190993264bf9feae7302350645ed220ca372ee24356d3b839209eed7f6"
+    },
+    "src/data_sheets_schema/native_execution_authority.py": {
+      "bytes": 7627,
+      "role": "production",
+      "sha256": "12aceb23529ab7d0225b519c2b40da59acdc2133415baf02449521223c150a5e"
+    },
+    "src/data_sheets_schema/native_execution_registration.py": {
+      "bytes": 20251,
+      "role": "production",
+      "sha256": "c23421ab653d76246f82a58d53d994748f4b9771a733074c83308d3a36721c45"
+    },
+    "src/data_sheets_schema/native_supervisor_authority.py": {
+      "bytes": 3536,
+      "role": "production",
+      "sha256": "dd48bee05889e9c9c3bc9dd933999ece38e9edba383e117ed7ec6923171f6247"
+    },
+    "src/data_sheets_schema/resources.py": {
+      "bytes": 15272,
+      "role": "production",
+      "sha256": "7cd61e24e1a0d03d79c45bebccc7759d8ce353e177f19684d1ed5c316a5eb435"
+    },
+    "tests/fixtures/native_execution/fake_cli.py": {
+      "bytes": 5433,
+      "role": "supporting_tests",
+      "sha256": "c3c8c17941e02bf8960832a126c32229e03b91847b79c032a17a0d0fcce09c02"
+    },
+    "tests/test_native_attempt_supervisor.py": {
+      "bytes": 30499,
+      "role": "supporting_tests",
+      "sha256": "397e2c097e6d933df74b86be1b77de5a611e4d9dd7e9a861dbe9327cbfe10ca8"
+    },
+    "tests/test_native_execution.py": {
+      "bytes": 39106,
+      "role": "tests",
+      "sha256": "e7f86cf374ecbb217e111c56043d26312f93710916b24a33928ddbc9d2daadf6"
+    },
+    "tests/test_native_execution_permissions.py": {
+      "bytes": 23941,
+      "role": "supporting_tests",
+      "sha256": "a509d3d40f9f97ffc1906353c414edf919e8ca2c544067b12944e4598d7ee883"
+    },
+    "tests/test_native_source_roster.py": {
+      "bytes": 14186,
+      "role": "tests",
+      "sha256": "f7758facf199687f3fa3dbfa91a7a53df261ec625ddde813b3bf74367c9b16d5"
+    }
+  },
+  "format": "native_source_roster_validation_v1",
+  "frozen_controller": {
+    "bytes": 2459,
+    "manifest": "src/data_sheets_schema/native_controller_sources_v1.json",
+    "modules": 12,
+    "sha256": "d1f13def58c0832aea3644fb68806d829eb4ab6e087045f14d86f439aed557c1",
+    "verification": "Manifest and all 12 dependency bytes agree with named base/tested Git blobs, manifest hashes and current files."
+  },
+  "issues": [
+    4704,
+    4705
+  ],
+  "limitations": [
+    "The dedicated tests execute the corrected proof on fixture-owned sources; the predecessor implementation was not rerun.",
+    "Commit/blob replacement controls establish ordinary Git follows the replacements before proving the corrected original-object refusal.",
+    "Existing closed consumers use fabricated permission/review/CI/owner/auth observations and ordinary Python fixture peers with real local helpers.",
+    "Passing software controls do not authorize a native/provider launch, establish scientific approval, or satisfy full 900-second native acceptance.",
+    "Selected file pins are not an exhaustive imported-runtime dependency attestation; full checkout preservation is a separate claim.",
+    "External artifacts remain coordinator-local and are pinned by basename and digest; their private paths and raw payloads are not published here.",
+    "Cached Python bytecode and arbitrary in-process mutation are outside this file/origin source-proof claim.",
+    "Private owner-profile and all-live-reader integration obligations remain open separately."
+  ],
+  "results": {
+    "cases": 40,
+    "consumer_modes": [
+      "correction",
+      "no_correction"
+    ],
+    "coordinator_elapsed_seconds": 307.64316829200106,
+    "errors": 0,
+    "existing_closed_consumer_cases": 2,
+    "exit_code": 0,
+    "failures": 0,
+    "junit_suite_seconds": 305.935,
+    "module_counts": {
+      "tests.test_native_execution": 2,
+      "tests.test_native_source_roster": 38
+    },
+    "new_dedicated_cases": 38,
+    "passed": 40,
+    "preservation_exit_code": 0,
+    "skipped": 0,
+    "terminal_seconds": 306.03,
+    "warnings_reported_by_coordinator": 0
+  },
+  "scope": "Named-commit source-file roster and blob proof; synthetic ordinary local closed consumers only.",
+  "source_preservation": {
+    "before_after_identical": true,
+    "domain": "Entire source checkout, including hidden and ignored files; only top-level .git excluded. Regular-file bytes/modes and symlink targets/modes inventoried; directory modes not inventoried.",
+    "files": 9364,
+    "independent_post_run_check": "All 9364 current inventory entries were rehashed/compared before note edits; exact equality with both saved inventories.",
+    "inventory_pin": {
+      "bytes": 2104075,
+      "sha256": "e39a741887953f301954a5771106356ddcf1e6ea99b11aec78cbc21cd71d1650"
+    },
+    "regular_file_bytes": 450453050,
+    "source_change_paths": [
+      "notes/native_source_roster_2026-10-08/README.md",
+      "src/data_sheets_schema/native_execution_authority.py",
+      "tests/test_native_source_roster.py"
+    ]
+  },
+  "tested_head": "a92b71159ed315bfd1391f1de5f87ffa5f2d648d",
+  "tested_tree": "6f7172913b2c5a35d32084ace867794acb811e7d",
+  "verification_basis": [
+    "Read complete saved command, summary and terminal log; recomputed JUnit and artifact byte/SHA256 pins.",
+    "Counted each JUnit testcase and inspected failure/error/skipped elements; verified both existing consumer modes.",
+    "Compared both full preservation inventories byte-for-byte and every current source inventory entry before note edits.",
+    "Compared selected source/test/declaration/dependency bytes with tested Git blobs and current files; inspected exact production diff.",
+    "No project application, native/provider helper or test was run during this evidence check."
+  ]
+}

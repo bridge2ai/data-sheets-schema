@@ -9,6 +9,7 @@ from contextlib import contextmanager
 import hashlib
 import importlib
 from pathlib import Path
+import re
 import subprocess
 import sys
 
@@ -23,6 +24,8 @@ ADDITIONAL = {
         'sha256': 'd0ad068e83a1ddf40c4c2c401ea5a264403e02c569391cf5433c47d14c5b69a5',
     },
 }
+PACKAGE = 'src/data_sheets_schema'
+SOURCE_SUFFIXES = frozenset(('.py', '.yaml', '.json'))
 
 
 def dependency_identity():
@@ -37,22 +40,82 @@ def dependency_identity():
     return {'version': 1, 'base': base, 'additional_modules': ADDITIONAL}
 
 
+def _package_roster(raw):
+    """Read literal NUL-delimited tree paths; never follow links or an index."""
+    if not raw or not raw.endswith(b'\0'):
+        raise ValueError('incomplete committed package tree')
+    seen, trees, sources = set(), set(), set()
+    for record in raw[:-1].split(b'\0'):
+        header, separator, path_raw = record.partition(b'\t')
+        parts = header.split(b' ')
+        if (not separator or len(parts) != 3
+                or not re.fullmatch(rb'[0-9a-f]{40}|[0-9a-f]{64}', parts[2])):
+            raise ValueError('malformed committed package tree entry')
+        try:
+            path = path_raw.decode('utf-8')
+        except UnicodeDecodeError as error:
+            raise ValueError('committed package path is not UTF-8') from error
+        if (not path or any(part in ('', '.', '..') for part in path.split('/'))
+                or path in seen
+                or not (path in ('src', PACKAGE) or path.startswith(PACKAGE + '/'))):
+            raise ValueError('duplicate or invalid committed package path')
+        seen.add(path)
+        mode, kind = parts[:2]
+        if mode == b'040000' and kind == b'tree':
+            trees.add(path)
+            continue
+        if path in ('src', PACKAGE) or mode == b'160000' or kind == b'commit':
+            raise ValueError('committed package contains a non-tree boundary or Gitlink')
+        if kind != b'blob' or mode not in (b'100644', b'100755', b'120000'):
+            raise ValueError('invalid committed package object kind or mode')
+        if Path(path).suffix in SOURCE_SUFFIXES:
+            if mode not in (b'100644', b'100755'):
+                raise ValueError('committed package source is not a regular blob: ' + path)
+            # The unchanged batch object proof uses LF-delimited queries.
+            # Refuse unsupported literal names, never split/quote/drop them.
+            if '\n' in path or '\r' in path:
+                raise ValueError('committed package source has an unsupported line-break path')
+            sources.add(path)
+    if not {'src', PACKAGE} <= trees:
+        raise ValueError('committed package tree is missing')
+    return sources
+
+
+def _require_package_roster(source_commit, package_sources):
+    if (type(source_commit) is not str
+            or re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', source_commit) is None
+            or type(package_sources) is not dict
+            or any(type(path) is not str for path in package_sources)):
+        raise ValueError('invalid committed package source declaration')
+    tree = subprocess.run(
+        ['git', '--no-replace-objects', 'ls-tree', '-r', '-t', '-z', '--full-tree',
+         source_commit, '--', PACKAGE + '/'],
+        cwd=ROOT, env=git_env(), capture_output=True, timeout=30, check=True)
+    expected = _package_roster(tree.stdout)
+    current = set(package_sources)
+    if expected != current:
+        raise ValueError('committed package source roster differs: missing=' +
+                         repr(sorted(expected - current)) + '; extra=' + repr(sorted(current - expected)))
+
+
 def require_committed(identity):
     """Review/CI authority cannot describe different uncommitted package bytes.
 
-    Compare actual dependency SHA256 values with blobs in the named local Git
-    commit. This queries the local object database only, with Git overrides
-    removed. Tests/docs outside the consumed closure do not affect admission.
+    Require the complete package roster, then compare actual dependency SHA256
+    values with blobs in the named local Git commit. This queries the local
+    object database only, with Git overrides removed. Tests/docs outside the
+    consumed closure do not affect admission.
     """
     if draft._encoded(dependency_identity()) != draft._encoded(identity):
         raise ValueError('native execution dependency identity changed')
     base = identity['base']
+    _require_package_roster(base['source_commit'], base['package_sources'])
     paths = dict(base['package_sources'])
     paths.update({pin['path']: pin['sha256'] for pin in base['modules'].values()})
     paths.update({pin['path']: pin['sha256'] for pin in identity['additional_modules'].values()})
     # One persistent reader avoids a process for every package source.
     query = ''.join(f"{base['source_commit']}:{path}\n" for path in sorted(paths)).encode()
-    proc = subprocess.run(['git', 'cat-file', '--batch'], cwd=ROOT, env=git_env(),
+    proc = subprocess.run(['git', '--no-replace-objects', 'cat-file', '--batch'], cwd=ROOT, env=git_env(),
                           input=query, capture_output=True, timeout=30, check=True)
     offset = 0
     for path in sorted(paths):
