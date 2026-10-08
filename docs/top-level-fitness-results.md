@@ -55,13 +55,14 @@ The index separates `dispatch_state` from raw `assessment`:
 | --- | --- | --- |
 | `accepted` | true | `accepted`, only with strict accepted response |
 | `failed` | true | `rejected`, even if the failed HTTP body contains valid score text |
-| `spent_unknown` | true | `missing`; an admitted call has no complete retained response |
+| `spent_unknown` | true | `missing`; an admitted call has no captured HTTP outcome artifact |
 | `not_started` | false | `missing`; no admitted call exists |
 
-Without a ledger, dispatch remains `unknown` and spent remains null, even for
-a mechanically accepted caller-supplied result. A last complete raw response
-can be reconstructed after a missing settlement; a later admission without its
-preceding settlement refuses. No replacement call is purchased.
+Here `spent` records admission, not verified billing. Without a ledger, dispatch
+remains `unknown` and spent remains null, even for a mechanically accepted
+caller-supplied result. A retained HTTP outcome and body can be rechecked after
+a missing terminal settlement; a later admission without its preceding
+settlement refuses. No replacement call is purchased.
 
 HTTP/transport failure and incomplete accounting remain authoritative. Reported
 usage and a strict score from a failed body are retained as evidence, never
@@ -101,9 +102,11 @@ the fitness descriptor's selected records. Foreign plans or records refuse.
 Relationship-edge and attribute-value strata each retain selected, missing,
 rejected and accepted counts. `support_dispatch_counts` separately retains
 `accepted`, `failed`, `spent_unknown` and `not_started`. As with fitness above,
-a valid verdict inside a failed HTTP body remains rejected, while an admitted
-call without a complete response is missing with `spent: true`; an unstarted
-call is missing with `spent: false`. Raw assessments do not override dispatch.
+a valid verdict inside a failed HTTP body remains rejected. An admitted call
+with no captured HTTP outcome artifact is missing with `spent: true`. A retained
+timeout, interrupted partial-body or overflow outcome is failed/rejected, even
+when `body_complete` is false. An unstarted call is missing with `spent: false`.
+Raw assessments do not override dispatch.
 Optional `--support-result` inputs must exactly match their ledger-derived
 results and cannot add attempts outside the registration.
 
