@@ -220,6 +220,9 @@ Transform one RO-Crate or a merged set of RO-Crates into D4D YAML.
 
 ```bash
 poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml
+# Explicit compatible legacy TSV; also supported with --merge:
+poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml \
+  --mapping path/to/reviewed-mapping.tsv
 ```
 
 Options:
@@ -231,6 +234,16 @@ Options:
 | `--merge` | Enable merge mode |
 | `--inputs PATH` | Additional RO-Crate inputs for merge mode |
 | `--primary PATH` | Primary RO-Crate for conflict resolution in merge mode |
+| `--mapping PATH` | Explicit legacy mapping TSV. Omitted uses `data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv` |
+
+The selected table is passed to the existing legacy transformer for both single
+and merge modes. Dataset files must pass the mandatory closed-schema publication
+gate before any output or report is replaced. The unchanged default table omits
+required `Dataset.id` and has other construction defects, so current default
+outputs can refuse publication. An explicit mapping must produce a valid Dataset;
+this option does not repair a table or switch to another mapper. Source files,
+the selected mapping, and existing outputs are preserved on validation refusal.
+See [the mapping-selection scope](../notes/legacy_cli_mapping_2026-10-07/README.md).
 
 ### `d4d rocrate merge`
 
