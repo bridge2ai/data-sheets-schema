@@ -215,7 +215,17 @@ def test_versioned_merge_keeps_report_text_and_only_changes_selected_envelope(ap
     output = tmp_path / "merged.yaml"
     versioned = instance.merge_rocrates(paths, auto_prioritize=False,
         result_contract="dataset_v1", output_path=output)
-    assert set(versioned) == {"format", "data", "transformation_metadata", "merge_report"}
+    assert set(versioned) == {
+        "format", "data", "transformation_metadata", "merge_report", "source_presence"}
+    assert versioned["source_presence"] == legacy["source_presence"] == {
+        "format": "legacy_author_source_presence_v1",
+        "status": "not_measured",
+        "reason": "no_covered_creators_route",
+        "target": "creators",
+        "source_property": "author",
+        "root_scope": "selected_root",
+        "sources": [],
+    }
     assert versioned["format"] == "d4d_transformation_result_v1"
     assert versioned["merge_report"] == legacy["merge_report"]
     expected = dict(legacy["d4d"])

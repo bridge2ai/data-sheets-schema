@@ -303,6 +303,8 @@ def test_real_api_cli_json_exposes_measurements_without_dataset_pollution(legacy
         assert row['source_presence']['status'] == 'measured'
         assert 'source_presence' not in row['data']
         if command != 'merge':
+            assert row['validation_passed'] is True
+            assert row['validation_errors'] == []
             assert row['coverage_basis']['kind'] == 'constructed_field_presence'
             assert row['transformation_metadata']['coverage_basis'] == row['coverage_basis']
         else:

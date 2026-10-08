@@ -1,6 +1,6 @@
 # Legacy Creator assertion preservation
 
-Issues [#4685](https://github.com/bridge2ai/data-sheets-schema/issues/4685), [#4684](https://github.com/bridge2ai/data-sheets-schema/issues/4684), [#4686](https://github.com/bridge2ai/data-sheets-schema/issues/4686) and [#4688](https://github.com/bridge2ai/data-sheets-schema/issues/4688). Implementation baseline: `bd64f1cd3e5646206da43453e862d8aa0a68f93a`, the reviewed UpdatePlan successor subsequently merged by PR #4681. Parent #4594, #2915 and the separate PI-role decision #4449 remain open.
+Issues [#4685](https://github.com/bridge2ai/data-sheets-schema/issues/4685), [#4684](https://github.com/bridge2ai/data-sheets-schema/issues/4684), [#4686](https://github.com/bridge2ai/data-sheets-schema/issues/4686), [#4688](https://github.com/bridge2ai/data-sheets-schema/issues/4688), [#4689](https://github.com/bridge2ai/data-sheets-schema/issues/4689) and [#4690](https://github.com/bridge2ai/data-sheets-schema/issues/4690). Implementation baseline: `bd64f1cd3e5646206da43453e862d8aa0a68f93a`, the reviewed UpdatePlan successor subsequently merged by PR #4681. Parent #4594, #2915 and the separate PI-role decision #4449 remain open.
 
 The default legacy TSV now explicitly marks its one `creators <- author` route with `creator_author_literals_v1`. Both real builders wrap each complete string as `Creator.description`; other values are deep-copied intact. The same selected root is used for construction and source evidence. This introduces no people, IDs, affiliations, PI roles, remote reference resolution, name splitting, or semantic-label upgrade.
 
@@ -40,11 +40,17 @@ A pure reference assertion can change API construction presence from 0% to 100% 
 
 File publication still validates exact serialized Dataset bytes with the real schema, independently of optional validators. Unsupported reference/typed units remain visible and invalid. Existing outputs, reports and input files remain protected; a later invalid batch member prevents all publication. The legacy API's embedded metadata remains nonconforming for file publication; `dataset_v1` remains the explicit metadata-separation route. There is no automatic mapper switch or silent field removal.
 
+Requested API output validation selects `Dataset` explicitly for both single and merged results (#4689). `UnifiedValidator.validate_all(..., target_class=None)` keeps its existing generic call and the schema's default class selection; the current schema's tree root is `DatasetCollection`. An explicit keyword selects another D4D class through the existing semantic validator. Raw RO-Crate input validation and the validator's 30-second subprocess bound are unchanged. This repairs the produced-record validation route; it does not disable requested validation or replace the mandatory publication gate.
+
 The five retained input records are expected to remove only literal Creator type errors. The reviewed prediction is 136 fewer validator messages per builder/order, with 76 reference messages and every unrelated error still present. No replay has yet established those candidate counts. References, Person/Organization identity placement, PI selection, other constructors, per-file adapters and semantic labels remain separate work. No historical output is replaced, no rows are retired, and no improved source coverage or scientific acceptance is claimed.
 
 ## Validation status
 
-Implementation and tests are prepared for coordinator-controlled execution. No application, pytest suite or retained-input replay has been run by the implementation author. Static syntax inspection imports no project code. Independent review and serialized test/replay evidence will be recorded separately before merge.
+The coordinator's first serialized suite, bound to commit `45fa817cb9a18479800f3539c9205b6e771d7fea`, completed with 846 passed and 7 failed out of 853 tests, with no errors or skips. The preserved `legacy-creator-tests-01.xml` is 193,811 bytes, SHA256 `70870b03f243b257490dc44df2dd5c1097e3496dad1ef7ca835bedf5e3b021e8`, and records 161.053 seconds. The coordinator separately reported 161.14 seconds and 14 dependency deprecation warnings from the console; JUnit does not attest the source binding or warning count.
+
+Six real CLI controls exposed #4689: produced Dataset records were validated against the schema's default `DatasetCollection`, so complete Creator descriptions were rejected. The seventh failure was #4690: an exact merge-envelope test omitted the intentional `source_presence` field. Its corrected expectation keeps exact keys, source-diagnostic equality across result contracts, all existing data/metadata/report checks, and publication assertions. The failed evidence remains retained; a new serialized run is required for these corrections.
+
+No application, pytest suite or retained-input replay has been run by the implementation author. Static syntax inspection imports no project code. Final test and retained-input replay evidence will be recorded separately before merge.
 
 Independent static review also corrected a CLI test fixture before execution (#4688): the real merge command requires at least two sources. Its control now passes two actual crates and checks both disclosed raw-source rows and the absence of an invented merged percentage. This was a fixture correction, not a production change or an observed test run failure.
 
@@ -53,6 +59,9 @@ Proposed focused test modules:
 ```text
 tests/test_rocrate/test_legacy_creators.py
 tests/test_rocrate/test_legacy_creators_adversarial.py
+tests/test_rocrate/test_legacy_validation_target.py
+tests/test_rocrate/test_profile_unavailable.py
+tests/test_rocrate/test_legacy_doi.py
 tests/test_rocrate/test_legacy_root_identity.py
 tests/test_rocrate/test_legacy_root_identity_adversarial.py
 tests/test_rocrate/test_legacy_update_plan.py
@@ -66,6 +75,8 @@ tests/test_fairscape_integration/test_d4d_builder.py
 tests/test_fairscape_integration/test_mapping_loader.py
 tests/test_fairscape_integration/test_rocrate_merger.py
 tests/test_fairscape_integration/test_informativeness_scorer.py
+tests/test_cli/test_rocrate_transform_mapping.py
+tests/test_cli/test_rocrate_transform_mapping_adversarial.py
 ```
 
 Run once from the frozen checkout with `PYTHONDONTWRITEBYTECODE=1`, `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `PYTHONPATH=src:.`, the selected environment Python `-B -m pytest`, `-q -p no:cacheprovider`, and fresh external basetemp/JUnit destinations. The coordinator selects the exact invocation and records its source binding. A focused test pass does not replace the retained five-input comparison or resolve the parent issues.

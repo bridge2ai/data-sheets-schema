@@ -391,6 +391,7 @@ class SemanticTransformer:
                     tmp_path,
                     format="yaml",
                     schema="d4d",
+                    target_class="Dataset",
                     skip_levels=[ValidationLevel.PROFILE, ValidationLevel.ROUNDTRIP]
                 )
 
@@ -571,6 +572,7 @@ class SemanticTransformer:
                     tmp_path,
                     format="yaml",
                     schema="d4d",
+                    target_class="Dataset",
                     skip_levels=[ValidationLevel.PROFILE, ValidationLevel.ROUNDTRIP]
                 )
 
