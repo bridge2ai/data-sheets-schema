@@ -1107,6 +1107,9 @@ repository-level workflow for all four projects:</p>
 <h3 id="d4d-rocrate-transform"><code>d4d rocrate transform</code></h3>
 <p>Transform one RO-Crate or a merged set of RO-Crates into D4D YAML.</p>
 <pre><code class="language-bash">poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml
+# Explicit compatible legacy TSV; also supported with --merge:
+poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml \
+  --mapping path/to/reviewed-mapping.tsv
 </code></pre>
 <p>Options:</p>
 <table>
@@ -1137,8 +1140,20 @@ repository-level workflow for all four projects:</p>
 <td><code>--primary PATH</code></td>
 <td>Primary RO-Crate for conflict resolution in merge mode</td>
 </tr>
+<tr>
+<td><code>--mapping PATH</code></td>
+<td>Explicit legacy mapping TSV. Omitted uses <code>data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv</code></td>
+</tr>
 </tbody>
 </table>
+<p>The selected table is passed to the existing legacy transformer for both single
+and merge modes. Dataset files must pass the mandatory closed-schema publication
+gate before any output or report is replaced. The unchanged default table omits
+required <code>Dataset.id</code> and has other construction defects, so current default
+outputs can refuse publication. An explicit mapping must produce a valid Dataset;
+this option does not repair a table or switch to another mapper. Source files,
+the selected mapping, and existing outputs are preserved on validation refusal.
+See <a href="../notes/legacy_cli_mapping_2026-10-07/README.md">the mapping-selection scope</a>.</p>
 <h3 id="d4d-rocrate-merge"><code>d4d rocrate merge</code></h3>
 <p>Merge multiple RO-Crate files into one JSON document.</p>
 <pre><code class="language-bash">poetry run d4d rocrate merge crate1.json crate2.json -o merged.json
