@@ -43,31 +43,35 @@ Neither source coverage nor semantic equivalence follows from this correction;
 row retirement is not a coverage gain, and intact text does not establish
 `exactMatch`/`none`.
 
-## Pending suffix-preservation correction
+## Suffix-preservation correction
 
 The second review round found [#4671](https://github.com/bridge2ai/data-sheets-schema/issues/4671)
 before publication: the first implementation used the recognizer's return value,
-which silently removed trailing slashes from prefixed DOI suffixes. The earlier
-suite covered this ending only for bare inputs. The correction now removes only
-the known prefix and adds both-builder controls for all accepted prefix forms,
-mixed case, internal slashes and one/multiple trailing slashes, through actual
-Dataset validation and file publication. Unrecognized forms remain intact for
-refusal. Production code and tests changed; independent review and a fresh
-focused run are pending. The 318-pass evidence below belongs to the earlier
-implementation and does not validate this correction.
+which removed trailing slashes from prefixed DOI suffixes. The earlier suite
+covered this ending only for bare inputs. The correction removes only the known
+prefix and preserves the complete suffix. Root and independent source review
+found no further issues before the fresh run below.
 
-## Earlier validation results
+The [initial 318-test evidence](validation_initial_318.json) is retained as the
+exact original file, pinned to `f85d132ebdb3b26c1d80d6414ec39220c226334d`, tree
+`5371e1734c2f7aeed14b1c0668c3154dbc3136e2`. It does not validate the suffix fix.
+Its external artifact `legacy-doi-tests-01.xml` remains 51,571 bytes, SHA-256
+`30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905`.
+That run recorded 43.473 seconds in XML and 43.51 seconds plus 14 dependency
+warnings in the coordinator's terminal.
 
-The serialized eight-module run passed **318 tests**, with zero failures,
+## Current validation results
+
+The fresh serialized eight-module run passed **356 tests**, with zero failures,
 errors or skips, at commit
-`f85d132ebdb3b26c1d80d6414ec39220c226334d`, tree
-`5371e1734c2f7aeed14b1c0668c3154dbc3136e2`. The coordinator's terminal reported
-43.51 seconds and 14 dependency deprecation warnings. JUnit records 43.473
-seconds; its XML does not encode the warning count or attest the tested commit.
+`1a98255bb28451500d4864876a16d9c6c2f6b435`, tree
+`1935f1c16c676cadb695403a05803b39f1aa1b95`. The coordinator's terminal reported
+44.83 seconds and 14 dependency deprecation warnings. JUnit records 44.795
+seconds; XML does not encode the warning count or attest the tested commit.
 
 | Module | Passed |
 | --- | ---: |
-| `tests/test_rocrate/test_legacy_doi.py` | 117 |
+| `tests/test_rocrate/test_legacy_doi.py` | 155 |
 | `tests/test_fairscape_integration/test_d4d_builder.py` | 37 |
 | `tests/test_rocrate/test_legacy_publication.py` | 51 |
 | `tests/test_rocrate/test_legacy_publication_adversarial.py` | 39 |
@@ -76,26 +80,25 @@ seconds; its XML does not encode the warning count or attest the tested commit.
 | `tests/test_cli/test_rocrate_transform_mapping.py` | 17 |
 | `tests/test_cli/test_rocrate_transform_mapping_adversarial.py` | 10 |
 
-The earlier 117 new cases exercised both real builders and the current closed Dataset
-validator, packaged/hidden publishers, the real API batch path with an explicit
-valid-ID mapping, and direct hidden-script use from another working directory.
-They covered the then-tested accepted forms and preservation/refusal boundaries,
-including a later invalid batch DOI preventing every destination replacement.
-Existing publication, result-contract and wrapper controls also passed.
-Initial independent source review found no issues before that execution; the
-later review found the missing prefixed-suffix case documented above.
+The DOI module's 155 cases exercise both real builders and the current closed
+Dataset validator, packaged/hidden publishers, the API batch path with an
+explicit valid-ID mapping, and direct hidden-script use from another working
+directory. The additional 38 cases cover all accepted prefix families with
+mixed-case suffixes, internal slashes, one/multiple trailing slashes, outer
+whitespace and retained malformed/unrecognized forms. The suffix matrix checks
+actual published YAML bytes. Existing malformed/list/conflict, root/member and
+later-invalid-batch preservation controls also passed.
 
-[validation.json](validation.json) records the command with symbolic paths,
-the eight module counts, and 26 selected production/test/resource/dependency
-pins for that earlier commit. Each selected working file then matched the tested
-Git blob; the current correction intentionally changes the DOI helper and tests.
-These pins cover the named files, not a complete installed environment.
-The retained external JUnit artifact `legacy-doi-tests-01.xml` is 51,571 bytes,
-SHA-256 `30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905`.
-The earlier artifact and its source pins are retained without relabeling them
-as evidence for the pending correction.
+[validation.json](validation.json) records the current command with symbolic
+paths, the eight module counts, 26 selected source/test/resource/dependency pins,
+and the original evidence-file hash. Every current selected file was compared
+byte-for-byte with the fresh tested Git blob. These pins cover the named files,
+not a complete installed environment. The retained external artifact
+`legacy-doi-tests-02.xml` is 58,425 bytes, SHA-256
+`037a764a6cb1ed8594fa748d682e5f86d3b1c9aabee2bb9da7d25580cceb5934`.
+Only evidence notes changed after this fresh run; production and tests are unchanged.
 
 No real-project replay, provider call, scientific rating or new historical label
 was produced. All five retained-input legacy replays and the remaining default
-construction defects remain obligations of #4594; #2915 stays open. The successful
-software controls establish this DOI slice, not overall legacy mapping repair.
+construction defects remain obligations of #4594; #2915 stays open. These software
+controls establish this DOI slice, not overall legacy mapping repair.

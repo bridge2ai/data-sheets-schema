@@ -5,26 +5,25 @@
     4594,
     2915
   ],
-  "tested_commit": "1a98255bb28451500d4864876a16d9c6c2f6b435",
-  "tested_tree": "1935f1c16c676cadb695403a05803b39f1aa1b95",
+  "tested_commit": "f85d132ebdb3b26c1d80d6414ec39220c226334d",
+  "tested_tree": "5371e1734c2f7aeed14b1c0668c3154dbc3136e2",
   "base_commit": "9bf9c31c57bbd48a21feb74de478806dea3f6d1f",
   "verification": {
     "coordinator_provenance": "The coordinator reports running this command at the tested clean commit; XML does not attest commit or environment.",
     "independent_author_checks": [
       "Parsed every JUnit testcase and counted failure/error/skipped nodes.",
-      "Compared all selected working file bytes with the tested Git commit blobs.",
-      "Verified the archived 318-test validation file is byte-identical to the earlier committed evidence."
+      "Compared all selected working file bytes with the tested Git commit blobs."
     ],
     "scope": "Selected source, resources and dependency declarations; not an installed-environment or complete import closure."
   },
   "tests": {
-    "passed": 356,
+    "passed": 318,
     "failed": 0,
     "errors": 0,
     "skipped": 0,
     "exit_code": 0,
     "modules": {
-      "tests/test_rocrate/test_legacy_doi.py": 155,
+      "tests/test_rocrate/test_legacy_doi.py": 117,
       "tests/test_fairscape_integration/test_d4d_builder.py": 37,
       "tests/test_rocrate/test_legacy_publication.py": 51,
       "tests/test_rocrate/test_legacy_publication_adversarial.py": 39,
@@ -33,17 +32,17 @@
       "tests/test_cli/test_rocrate_transform_mapping.py": 17,
       "tests/test_cli/test_rocrate_transform_mapping_adversarial.py": 10
     },
-    "junit_seconds": 44.795,
-    "console_seconds": 44.83,
+    "junit_seconds": 43.473,
+    "console_seconds": 43.51,
     "warnings": {
       "count": 14,
       "kind": "dependency deprecation warnings",
       "provenance": "coordinator terminal report; JUnit does not encode this count"
     },
     "artifact": {
-      "name": "legacy-doi-tests-02.xml",
-      "bytes": 58425,
-      "sha256": "037a764a6cb1ed8594fa748d682e5f86d3b1c9aabee2bb9da7d25580cceb5934"
+      "name": "legacy-doi-tests-01.xml",
+      "bytes": 51571,
+      "sha256": "30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905"
     },
     "invocation": {
       "cwd": "$CHECKOUT",
@@ -68,8 +67,8 @@
         "-q",
         "-p",
         "no:cacheprovider",
-        "--basetemp=$ARTIFACT_ROOT/legacy-doi-pytest-02",
-        "--junitxml=$ARTIFACT_ROOT/legacy-doi-tests-02.xml"
+        "--basetemp=$ARTIFACT_ROOT/legacy-doi-pytest-01",
+        "--junitxml=$ARTIFACT_ROOT/legacy-doi-tests-01.xml"
       ],
       "python": "CPython 3.13.12 in coordinator-selected virtual environment",
       "path_variables": "PYTHON identifies that interpreter; ARTIFACT_ROOT is a separate external evidence directory. Private absolute paths are deliberately not published."
@@ -78,8 +77,8 @@
   "source_pins": [
     {
       "path": "src/data_sheets_schema/legacy_doi.py",
-      "bytes": 2148,
-      "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606",
+      "bytes": 1749,
+      "sha256": "bb30e9f5f1e3824c44707fce03fe8dab1798c374caaec033286c94b16a2a9d3f",
       "matches_tested_git_blob": true
     },
     {
@@ -186,8 +185,8 @@
     },
     {
       "path": "tests/test_rocrate/test_legacy_doi.py",
-      "bytes": 12593,
-      "sha256": "6d96cc545ab759eb0d3363cb0c1f867b0b9313ee8a1ab8bb01cd58dcfb57f649",
+      "bytes": 11040,
+      "sha256": "ef2861e6983ead370f1b5779133d2f9d2a44259655604d4e7ddae72371dabed4",
       "matches_tested_git_blob": true
     },
     {
@@ -235,18 +234,11 @@
   ],
   "review": {
     "kind": "independent read-only adversarial source review",
-    "finding": {
-      "issue": 4671,
-      "round": 2,
-      "problem": "The initial constructor used a recognizer return value that removed source suffix slashes from prefixed DOI strings.",
-      "resolution": "Recognize with the existing parser, then remove only the matched prefix from the source string, preserving its complete suffix."
-    },
-    "result": "Root and independent reviewer rereviewed the committed correction with no further findings before the fresh serialized focused run.",
-    "additional_execution": "No author/reviewer test or project replay rerun during evidence preparation."
+    "result": "No material findings before the serialized focused run.",
+    "additional_execution": "No author or reviewer test/replay rerun during evidence preparation."
   },
   "checked_behavior": [
     "Both legacy builders produce bare DOI from recognized scalar CURIE and HTTP(S) doi.org/dx.doi.org forms.",
-    "Both builders plus actual Dataset publication preserve case and every internal/trailing suffix slash for recognized CURIE and resolver forms; outer-whitespace controls also pass.",
     "Existing bare spellings and malformed/list/non-scalar assertions remain intact; typed Dataset publication decides acceptance.",
     "Competing root source properties refuse before a first-property choice, including distinct spellings of the same DOI.",
     "Root/member isolation, unchanged non-DOI URI behavior and direct hidden script use are tested.",
@@ -258,17 +250,8 @@
     "Other legacy mapping/construction defects remain under #4594; this is not overall legacy producer acceptance.",
     "No new Dataset ID, source-coverage gain, scientific fidelity/score, provider generation or empirical campaign is claimed.",
     "No historical records, mapping TSVs or scientific labels were rewritten; row retirement is not source coverage and copied text does not establish exactMatch/none.",
-    "The existing recognizer is only an admission rule; output removes only the matched prefix after outer-whitespace trim, preserving complete suffixes. Already-bare strings are preserved exactly.",
+    "The existing repair parser trims surrounding whitespace and trailing slashes on prefixed forms; already-bare strings are preserved exactly.",
     "Different nonmissing property spellings, even semantically equivalent DOI spellings, are deliberately refused rather than collapsed."
   ],
-  "scientific_eligibility": false,
-  "review_issue": 4671,
-  "previous_run": {
-    "artifact": "validation_initial_318.json",
-    "bytes": 10563,
-    "sha256": "89ef2d372d629417c56e56493579b0b153484d7013f750c76728c659c13052e9",
-    "passed": 318,
-    "tested_commit": "f85d132ebdb3b26c1d80d6414ec39220c226334d",
-    "scope": "Earlier implementation; did not cover prefixed DOI trailing slashes. Exact original evidence bytes retained, not evidence for the #4671 correction."
-  }
+  "scientific_eligibility": false
 }
