@@ -758,3 +758,6 @@ evaluate.add_command(support_calibration)
 
 from data_sheets_schema.cli.fitness_results import fitness_results
 evaluate.add_command(fitness_results)
+
+from data_sheets_schema.cli.cross_family_panel import cross_family_panel
+evaluate.add_command(cross_family_panel)
