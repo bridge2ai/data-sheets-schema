@@ -1,0 +1,583 @@
+{
+  "actual_diagnostic": {
+    "coordinator_command": [
+      "<selected-venv-python>",
+      "-I",
+      "-B",
+      "-S",
+      "notes/native_trace_comparison_2026-10-08/compare_trace.py",
+      "--baseline",
+      "<recovery>/source",
+      "--candidate",
+      "<candidate-checkout>",
+      "--recovery",
+      "<recovery>",
+      "--preparation",
+      "<external>/full-schema-preparation-05/report.json",
+      "--output",
+      "<external>/native-trace-comparison-01"
+    ],
+    "exit_code": 0,
+    "report": {
+      "binding": {
+        "candidate_authentication_scope": "only the three exact compiled modules",
+        "candidate_declared_commit": "a8c11973da120cc0f792eef2d574dab7d910b09d",
+        "checkpoint": {
+          "case_bytes": 25352291,
+          "case_files": 68,
+          "case_inventory_sha256": "8e5ce647053ca0be4e1e010af8307098a06227a36aefd6a1ae69b66472c038cc",
+          "composition_sha256": "9dacf6049a2e4b51aeb3913d3f82ba546b0b5dee1c58780ec3f6a2ae3eda40c8",
+          "execution_sha256": "db79f171406738be89b70ec67d075234ff2ca8e4dc23508ada809cdcb83e6001",
+          "labels": {
+            "arm": "BASELINE (input documents only)",
+            "label": "offline-full-schema-4618-v1",
+            "method": "claudecode_direct",
+            "project": "SYNTHETIC"
+          },
+          "observation_index": 17,
+          "observation_sha256": "f2408a55879af13685358f11d69144b5fd07a645a9d13a5719688d7b462c55a2",
+          "policy_sha256": "f0b0a132dc6834966f1549e2fe6a320260d504539782959483a0b7fa83a420c8",
+          "preparation_sha256": "b72bcea58c3a64be466b642fd6493a1da51865f7f8afd730d8816f9c01756f15",
+          "runtime_sha256": "45eb3e3e6300cf1ec39ffff0b63cb4a75453922beb67e639ca489732672b3e8f",
+          "selection_sha256": "70c89bc67274e2ff9006c40365f62879e020dc903c23edad3f09e13fe790d6b6",
+          "session_id": "00000000-0000-4000-8000-000000000010",
+          "streams": {
+            "control": {
+              "lines": 22,
+              "sha256": "1b20a176f75b4ce77dc2eb517e9aadc712499dee822398d8f927be48573995d5",
+              "stream": "control",
+              "stream_id": "26fa9be58856ce6db4277a99ddba72ade441ba477d0de15d2e26c899a7c11b9c",
+              "through_bytes": 21246
+            },
+            "transcript": {
+              "lines": 61,
+              "sha256": "84a86d5c2594fdee55d50f64ca7a0e1f6a460d1f1cc05d54f0b0f64ff0db83b7",
+              "stream": "transcript",
+              "stream_id": "a8a9ea22c88173bc15685a7d1483f0b53a4ec206e579c2895b7345a6b3628484",
+              "through_bytes": 11428162
+            }
+          }
+        },
+        "compiled_modules": {
+          "baseline": {
+            "native_shared_contract": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+            "native_shared_evidence": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+            "native_shared_observations": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
+          },
+          "candidate": {
+            "native_shared_contract": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+            "native_shared_evidence": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+            "native_shared_observations": "4dc91259ecb079e8efe3067b0eeb01e584b575bdda813fcc6e7494bf39bcbba4"
+          }
+        },
+        "recovered_provenance": {
+          "artifact_id": 11408295434,
+          "artifact_zip_sha256": "0ec5378065601dae7d81801a6ad051dd9cb07b82c6b99cf0b4ea4d8e4cbc0dae",
+          "case_manifest_sha256": "1fc631110a8dc7d1db8ff28af35243e6edfddb8737d70aad32928410794d0de4",
+          "composition_sha256": "30187b96f56d4e0a6f04f20d41f09fa53f38bd4dc53c95de2691f6c7afb35c8f",
+          "execution_sha256": "0b5cdda0347263a5e6029de36e97d88b3a6c262845b62447a3fba495502d2616",
+          "labels": {
+            "arm": "BASELINE (input documents only)",
+            "label": "offline-neutral",
+            "method": "claudecode_direct",
+            "project": "SYNTHETIC"
+          },
+          "modules": {
+            "native_shared_contract": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+            "native_shared_evidence": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+            "native_shared_observations": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
+          },
+          "opaque_gitlinks_not_imported": {
+            "aurelian": "05741290eb26e88e40dc43440940b228db8741cd",
+            "fairscape_models": "8c80311d7d8b0fadac07dca9567d632103691f48"
+          },
+          "original_path_identities_preserved": true,
+          "policy_sha256": "6758ecc011438e38e18a59653ffd7158de92f6738eee5f646cc29fbad55372dc",
+          "registered_acceptance_deadline_seconds": 900,
+          "regular_case_files_verified": 83,
+          "run_id": 37451274006,
+          "runtime_sha256": "4a7c64dcf73288cdb59e1672c64d9dacaa82f846b8e172f217e5cfb923add205",
+          "selection_sha256": "e1b6b1c4982751de1d7c15f3eecee5c91c98ba2300d2cdcac444e5e8140331da",
+          "source_commit": "0125eebbc214d0907c3b69d23758cd9441911a78",
+          "source_files_verified": 9214,
+          "source_manifest_sha256": "53f8a7378e8babf3c746fef6c2e54c27d9bbba1c0bcd621cb91ee86c004a4798",
+          "source_tree": "142af4bfd8f32bd6b37d61434cfb30e8bfac5bf1",
+          "streams": {
+            "control": {
+              "bytes": 26135,
+              "lines": 24,
+              "sha256": "e9860e4eef293f29a12925415435178f9863e0ba428f92062373052554f489e2"
+            },
+            "transcript": {
+              "bytes": 11453343,
+              "lines": 67,
+              "sha256": "9a50dd49e758a5fbf54d4e961ac4ac90dd3248b7fb4e67d8423f173a04f61faf"
+            }
+          }
+        }
+      },
+      "captured_output_truncated": false,
+      "child_exit_code": 0,
+      "completed": {
+        "advance_controls": 4,
+        "decode_checks": 2,
+        "instance_checks": 2,
+        "refusal_controls": 6,
+        "timed_constructors": 6
+      },
+      "decode_counts": {
+        "baseline": {
+          "control": 2,
+          "transcript": 2
+        },
+        "candidate": {
+          "control": 1,
+          "transcript": 1
+        }
+      },
+      "diagnostic_wall_bound_seconds": 120,
+      "driver_sha256": "4a2825d8fa7306d2eb237b4399721c16ef370f44c1e82c7e5c7cb047efac07c6",
+      "environment": {
+        "machine": "arm64",
+        "platform": "darwin",
+        "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]"
+      },
+      "execution_authorized": false,
+      "failed": [],
+      "format": "native_trace_constructor_comparison_v1",
+      "inputs_unchanged": true,
+      "instance_independence": {
+        "baseline": true,
+        "candidate": true
+      },
+      "limitations": [
+        "Constructor-only comparison; no callback, replay, helper, native or provider execution.",
+        "Three alternating timing pairs share process and filesystem caches; no whole-path fraction or deadline inference.",
+        "Candidate authority is exactly three compiled source modules, not an authenticated whole candidate Git tree.",
+        "Recovered baseline source and original case bytes are verified; extraction-normalized historical file modes are not preserved claims.",
+        "Fixed synthetic preparation05 is unchanged; no labels, source identities or policy/runtime paths are normalized.",
+        "Before/after pins and local audit restrictions are local evidence, not authenticated execution or complete ABA protection.",
+        "The unavailable 4366 source, native 900-second acceptance and scientific eligibility are not evaluated.",
+        "Full evidence sidecars may contain private input paths and remain external; only compact evidence is suitable for repository notes."
+      ],
+      "missing": [],
+      "native_acceptance_evaluated": false,
+      "overhead": {
+        "evidence_pack_wall_ns": 1222370625,
+        "final_verification_wall_ns": 2117788583,
+        "setup_wall_ns": 2181910917
+      },
+      "parent_child_wall_ns": 19499938791,
+      "parity_passed": true,
+      "payloads": {
+        "baseline.json.gz": {
+          "compressed_bytes": 3147518,
+          "compressed_sha256": "3d482b17552dd6e73f0bb31454d8e4806420fbd563c81df485576cc439adfb82",
+          "uncompressed_bytes": 32722082,
+          "uncompressed_sha256": "aa0367166aeb0c04490f6586f19555a023175f38be0edf69837c93b6c49b1782"
+        },
+        "candidate.json.gz": {
+          "compressed_bytes": 3147518,
+          "compressed_sha256": "3d482b17552dd6e73f0bb31454d8e4806420fbd563c81df485576cc439adfb82",
+          "uncompressed_bytes": 32722082,
+          "uncompressed_sha256": "aa0367166aeb0c04490f6586f19555a023175f38be0edf69837c93b6c49b1782"
+        }
+      },
+      "python_identity": {
+        "bytes": 5777152,
+        "metadata_sha256": "6191e4dd999526163482fd1788ac6a9449bdd825fb8504033400a64c625e9716",
+        "path_sha256": "6f01460c77db8b01e64fb2841cf63aea7b554d8d7a9142921f88faefbc0f0c9c",
+        "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+      },
+      "required": {
+        "advance_controls": 4,
+        "decode_checks": 2,
+        "instance_checks": 2,
+        "refusal_controls": 6,
+        "timed_constructors": 6
+      },
+      "samples": [
+        {
+          "fingerprint_wall_ns": 1326371625,
+          "role": "baseline",
+          "sample": 0,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 667125708,
+          "timed": true,
+          "wall_ns": 721220833
+        },
+        {
+          "fingerprint_wall_ns": 1153758584,
+          "role": "candidate",
+          "sample": 1,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 601513584,
+          "timed": true,
+          "wall_ns": 638150625
+        },
+        {
+          "fingerprint_wall_ns": 1105517167,
+          "role": "candidate",
+          "sample": 2,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 54824542,
+          "timed": true,
+          "wall_ns": 55006167
+        },
+        {
+          "fingerprint_wall_ns": 1158434083,
+          "role": "baseline",
+          "sample": 3,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 101295041,
+          "timed": true,
+          "wall_ns": 101522416
+        },
+        {
+          "fingerprint_wall_ns": 1072663834,
+          "role": "baseline",
+          "sample": 4,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 94097125,
+          "timed": true,
+          "wall_ns": 102659917
+        },
+        {
+          "fingerprint_wall_ns": 1025288167,
+          "role": "candidate",
+          "sample": 5,
+          "semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+          "status": "returned",
+          "thread_cpu_ns": 51591542,
+          "timed": true,
+          "wall_ns": 51591833
+        }
+      ],
+      "scientific_eligibility": false,
+      "scope": "Exact 0125 and reviewed single-decode Trace constructors on one preserved synthetic checkpoint",
+      "startup_flags": {
+        "dont_write_bytecode": true,
+        "isolated": 1,
+        "no_site": 1
+      },
+      "status": "completed",
+      "stderr_bytes": 0,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_bytes": 8401884,
+      "stdout_sha256": "e9cd8342ca81dfe5318706f1997daaec4ca0f47ff6514b49789b258a00d9cd2f",
+      "utility_sha256": "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf",
+      "worker_wall_ns": 19361871709
+    },
+    "report_artifact": "native-trace-comparison-01/report.json",
+    "report_pin": {
+      "bytes": 8754,
+      "sha256": "a9c9dfb2fbb556086f078084f2bb1a745057c38f527388eb5a4787d478823537"
+    }
+  },
+  "candidate": {
+    "authentication_scope": "Exact three compiled source modules; not an authenticated complete candidate tree.",
+    "compiled_modules": {
+      "baseline": [
+        {
+          "bytes": 38808,
+          "path": "src/data_sheets_schema/native_shared_contract.py",
+          "sha256": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+          "working_bytes_equal_git_blob": true
+        },
+        {
+          "bytes": 12908,
+          "path": "src/data_sheets_schema/native_shared_evidence.py",
+          "sha256": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+          "working_bytes_equal_git_blob": true
+        },
+        {
+          "bytes": 17785,
+          "path": "src/data_sheets_schema/native_shared_observations.py",
+          "sha256": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab",
+          "working_bytes_equal_git_blob": true
+        }
+      ],
+      "candidate": [
+        {
+          "bytes": 38808,
+          "path": "src/data_sheets_schema/native_shared_contract.py",
+          "sha256": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+          "working_bytes_equal_git_blob": true
+        },
+        {
+          "bytes": 12908,
+          "path": "src/data_sheets_schema/native_shared_evidence.py",
+          "sha256": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+          "working_bytes_equal_git_blob": true
+        },
+        {
+          "bytes": 18263,
+          "path": "src/data_sheets_schema/native_shared_observations.py",
+          "sha256": "4dc91259ecb079e8efe3067b0eeb01e584b575bdda813fcc6e7494bf39bcbba4",
+          "working_bytes_equal_git_blob": true
+        }
+      ]
+    },
+    "declared_commit": "a8c11973da120cc0f792eef2d574dab7d910b09d",
+    "focused_test_pins": [
+      {
+        "bytes": 11494,
+        "path": "tests/test_native_trace_single_decode.py",
+        "sha256": "8bfdc119517b4799419f318acd93148723b59633f7ac62576a139040cf83f0e7",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 10644,
+        "path": "tests/test_native_shared_observations.py",
+        "sha256": "a590f0837fee05ade7b0d4be0fc875afab93c648863f6a6b210d250863a1f507",
+        "working_bytes_equal_git_blob": true
+      }
+    ],
+    "parent": "0125eebbc214d0907c3b69d23758cd9441911a78",
+    "production_change": "Per-Trace reuse of decoded transcript and control rows; public initialization interface and validation preserved.",
+    "tree": "9b7252dda775f3a0398baabb8847ab0aba104b89"
+  },
+  "date": "2026-10-08",
+  "format": "native_trace_constructor_comparison_validation_v1",
+  "independent_saved_evidence_checks": {
+    "basis": "Standalone standard-library JSON/XML/gzip/hash reads; no diagnostic, constructor, test, provider or native rerun.",
+    "case_hidden_members_and_modes_included": true,
+    "case_inventory_equal_preparation": true,
+    "constructor_refusal_graphs_per_role": [
+      {
+        "control": "foreign_session",
+        "exception_nodes": 1,
+        "exception_sha256": "61a3b9832e9072dfaf01329330f6d0a227c261e604e19905bea51db5765ebd32"
+      },
+      {
+        "control": "exchanged_roles",
+        "exception_nodes": 1,
+        "exception_sha256": "83ae5b699f0dd01ff7d305bb3dd1839ef6567a8b1f0ff10f66fd917846c80c1f"
+      },
+      {
+        "control": "foreign_runtime_model",
+        "exception_nodes": 1,
+        "exception_sha256": "7c00a2070aed4c0a6177fbeb1967c66967d96ddc12cd8fb735c5ebafd1cc4e57"
+      }
+    ],
+    "current_advance": {
+      "exact_return_equals_pending_admission": true,
+      "wrong_command_exception_nodes": 1,
+      "wrong_command_exception_sha256": "82ca233892018c092fb351d328c014f493a2ff5235889ad94417b4b596276d8e"
+    },
+    "current_case_bytes_verified": 25352291,
+    "current_case_files_verified": 68,
+    "full_payload_bytes_equal": true,
+    "gzip_eof_no_trailing_members": true,
+    "literal_prefix_bytes_equal_current_case": true,
+    "payload_uncompressed_bytes_per_role": 32722082,
+    "payloads_canonical_strict_json": true,
+    "pending_count_per_role": 1,
+    "positive_semantic_sha256": "b68e3c74233d751f6867cfa0aa272aea909c9634219cc6bb5a48250c19b739b9",
+    "preparation_report_sha256_verified": true,
+    "public_method_statuses_per_role": {
+      "admitted": {
+        "returned": 20
+      },
+      "request": {
+        "returned": 20
+      },
+      "settled": {
+        "refused": 1,
+        "returned": 19
+      }
+    },
+    "selected_interpreter_byte_path_stat_identity_verified": true,
+    "source_pins_equal_current_and_tested_git_blobs": true,
+    "tool_identities_per_role": 20,
+    "trace_state_fields": [
+      "transcript",
+      "control",
+      "session",
+      "policy",
+      "calls",
+      "callbacks",
+      "results",
+      "decisions",
+      "frames",
+      "terminal"
+    ]
+  },
+  "interpretation": {
+    "candidate_merge_status": "Comparison requirement fulfilled; integration/CI and coordinator merge decisions remain separate.",
+    "constructor_comparison_obligation_fulfilled": true,
+    "full_stream_decode_calls_per_stream": {
+      "baseline": 2,
+      "candidate": 1
+    },
+    "native_acceptance_evaluated": false,
+    "observed_thread_cpu_median_seconds": {
+      "baseline": 0.101295041,
+      "candidate": 0.054824542
+    },
+    "provider_execution_authorized": false,
+    "scientific_eligibility": false,
+    "timing_scope": "Six fixed-order constructor observations; retain all samples. Strong first-sample/cache-order effects preclude a generalized speedup claim.",
+    "whole_path_performance_evaluated": false
+  },
+  "issues": {
+    "candidate_pr": 4659,
+    "implementation": 4657,
+    "remain_open": [
+      4537,
+      4354,
+      4400
+    ],
+    "review_findings": [
+      4658,
+      4661,
+      4662,
+      4663
+    ]
+  },
+  "scope": "Exact 0125 and reviewed single-decode Trace constructors on one preserved synthetic checkpoint",
+  "tested_and_measured_source": {
+    "commit": "0dcb348271af127b10819430d5da6d8f7bd45d1b",
+    "execution_commit_binding_basis": "Coordinator-recorded commands and clean source observations; JUnit does not attest a Git commit.",
+    "pins": [
+      {
+        "bytes": 48787,
+        "path": "notes/native_trace_comparison_2026-10-08/compare_trace.py",
+        "sha256": "4a2825d8fa7306d2eb237b4399721c16ef370f44c1e82c7e5c7cb047efac07c6",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 31508,
+        "path": "notes/native_profile_recovery_2026-10-07/trace_prefix_profile.py",
+        "sha256": "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 12333,
+        "path": "tests/test_native_trace_comparison.py",
+        "sha256": "168d5069295f0649f47d6c0b89010a6600c8ff711616e69e38df883942602e94",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 24505,
+        "path": "tests/test_native_trace_comparison_adversarial.py",
+        "sha256": "d687550ca730b2a214d78820ffde95e9dd9821c6e0997dfd2762502b552e8576",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 10436,
+        "path": "tests/test_native_trace_prefix_profile.py",
+        "sha256": "26167f1b6a0860cc666620fe51478aa913df9ab362dd1a648eb021dfee9c51ef",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 10534,
+        "path": "tests/test_native_trace_profile_runtime.py",
+        "sha256": "64bb07d36492b99155786177ef95e4aece1adeca21b50eb8b5af458f5eb562da",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 3446,
+        "path": "tests/conftest.py",
+        "sha256": "768f928bd17d19d2f50a27afa1420fe892621f0db33a8abeb9721154533bfab9",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 4446,
+        "path": "pyproject.toml",
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "working_bytes_equal_git_blob": true
+      },
+      {
+        "bytes": 592155,
+        "path": "poetry.lock",
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "working_bytes_equal_git_blob": true
+      }
+    ],
+    "tree": "e86b9ce04ec9029b3c943dabf76d5d04425feff4",
+    "working_tree_clean_before_note_edits": true
+  },
+  "validation_runs": {
+    "comparison_and_retained_utility": {
+      "argv": [
+        "<selected-venv-python>",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_native_trace_comparison.py",
+        "tests/test_native_trace_comparison_adversarial.py",
+        "tests/test_native_trace_prefix_profile.py",
+        "tests/test_native_trace_profile_runtime.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=<external>/native-trace-comparison-pytest-01",
+        "--junitxml=<external>/native-trace-comparison-tests-01.xml"
+      ],
+      "artifact": "native-trace-comparison-tests-01.xml",
+      "bytes": 29987,
+      "command_basis": "Coordinator-recorded invocation; published paths are placeholders.",
+      "console_seconds": 1.82,
+      "environment": {
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "<checkout>/src:<checkout>"
+      },
+      "errors": 0,
+      "failures": 0,
+      "junit_suite_seconds": 1.791,
+      "modules": {
+        "tests.test_native_trace_comparison": 47,
+        "tests.test_native_trace_comparison_adversarial": 79,
+        "tests.test_native_trace_prefix_profile": 24,
+        "tests.test_native_trace_profile_runtime": 34
+      },
+      "passed": 184,
+      "sha256": "5daf27e2632f016ef88a39985ad0264569918f37f07cbdddd99f064740f67d56",
+      "skipped": 0,
+      "tests": 184,
+      "warnings": "Coordinator reports zero warnings."
+    },
+    "single_decode_candidate": {
+      "artifact": "native-single-decode-tests-01.xml",
+      "bytes": 314546,
+      "console_seconds": 0.3,
+      "errors": 0,
+      "execution_commit_binding_basis": "Coordinator-recorded run; file pins independently checked.",
+      "failures": 0,
+      "junit_suite_seconds": 0.267,
+      "modules": {
+        "tests.test_native_shared_observations": 49,
+        "tests.test_native_trace_single_decode": 41
+      },
+      "modules_are_original_and_new_candidate_controls": true,
+      "passed": 90,
+      "sha256": "b102371639fcb52c92414692eb940010240f0ba27ea0ca9645f1c2d665cc357f",
+      "skipped": 0,
+      "tested_commit": "a8c11973da120cc0f792eef2d574dab7d910b09d",
+      "tests": 90,
+      "warnings": "Coordinator reports zero warnings."
+    }
+  },
+  "verification_limits": [
+    "Original runtime driver reports before/after checks of all 9214 recovered source files and 83 retained historical case bytes; this note independently rehashes selected compiled modules, current 68-file case, source/test/declaration pins and runtime identity.",
+    "Historical extraction-normalized file modes are not claimed preserved; current 68-file case modes match the preparation inventory.",
+    "JUnit proves recorded test outcomes, not source identity or installed-environment completeness; invocation and clean-head bindings are coordinator provenance.",
+    "No complete installed environment or all standard-library resources were snapshotted.",
+    "All full typed evidence remains in external gzip sidecars; repository notes contain only compact identities/counts/timings.",
+    "Constructor-only comparison; no callback, replay, helper, native or provider execution.",
+    "Three alternating timing pairs share process and filesystem caches; no whole-path fraction or deadline inference.",
+    "Candidate authority is exactly three compiled source modules, not an authenticated whole candidate Git tree.",
+    "Recovered baseline source and original case bytes are verified; extraction-normalized historical file modes are not preserved claims.",
+    "Fixed synthetic preparation05 is unchanged; no labels, source identities or policy/runtime paths are normalized.",
+    "Before/after pins and local audit restrictions are local evidence, not authenticated execution or complete ABA protection.",
+    "The unavailable 4366 source, native 900-second acceptance and scientific eligibility are not evaluated.",
+    "Full evidence sidecars may contain private input paths and remain external; only compact evidence is suitable for repository notes."
+  ]
+}

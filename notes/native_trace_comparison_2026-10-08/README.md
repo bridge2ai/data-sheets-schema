@@ -9,8 +9,59 @@ The candidate changes only the observations module: it decodes each stream once
 inside a `Trace` construction and shares those rows between initialization checks
 and indexing. Public initialization keeps its prior interface and validations.
 
-This comparison has not yet run. Source review and focused tests must complete
-before the coordinator starts the one bounded diagnostic.
+The reviewed diagnostic completed successfully at commit
+`0dcb348271af127b10819430d5da6d8f7bd45d1b` (tree
+`e86b9ce04ec9029b3c943dabf76d5d04425feff4`). The comparison/retained-utility suite
+passed **184 tests** with no failures, errors or skips (1.791 seconds in JUnit;
+1.82 seconds reported by the coordinator). The candidate's new and original
+observation tests passed **90 tests** with no failures, errors or skips (0.267
+seconds in JUnit; 0.30 seconds reported). No warnings were reported for either run.
+[validation.json](validation.json) records exact source, test, dependency-declaration,
+runtime and saved-evidence pins. JUnit records outcomes; the coordinator's recorded
+invocations and clean source observations bind those runs to the listed commits.
+
+All six timed constructors returned identical complete typed evidence. Both
+external sidecars contain exactly the same 32,722,082 uncompressed bytes and are
+3,147,518 bytes compressed. Independent saved-file inspection compared the full
+uncompressed bytes, strict canonical JSON, literal stream contents and exception
+graphs. Each role retained 20 tool identities: 20 request returns, 20 admission
+returns, 19 settlement returns and the expected one pending-settlement refusal.
+All three constructor refusal controls, both instance-isolation controls and all
+four exact/wrong-command advance controls passed. No required control is missing
+or failed, and no output was truncated. Separate decode instrumentation observed
+two complete row decodes per stream in the baseline and one in the candidate.
+
+All timing samples are retained in their actual fixed order:
+
+| Sample | Role | Constructor thread CPU (s) | Constructor wall (s) | Separate fingerprint wall (s) |
+| --- | --- | ---: | ---: | ---: |
+| 0 | Baseline | 0.667125708 | 0.721220833 | 1.326371625 |
+| 1 | Candidate | 0.601513584 | 0.638150625 | 1.153758584 |
+| 2 | Candidate | 0.054824542 | 0.055006167 | 1.105517167 |
+| 3 | Baseline | 0.101295041 | 0.101522416 | 1.158434083 |
+| 4 | Baseline | 0.094097125 | 0.102659917 | 1.072663834 |
+| 5 | Candidate | 0.051591542 | 0.051591833 | 1.025288167 |
+
+The observed constructor CPU medians are 0.101295041 seconds for baseline and
+0.054824542 seconds for candidate. The first sample for each role is much slower
+than its later samples. These runs share process and filesystem caches, so order
+and warm-up effects limit interpretation. These six observations do not establish
+a general speedup, callback parsing fraction or the native 900-second acceptance.
+
+The worker completed in 19.361871709 seconds; the parent's bounded child interval
+was 19.499938791 seconds, within the fixed 120-second limit. Worker setup took
+2.181910917 seconds, final input verification 2.117788583 seconds and evidence
+packaging 1.222370625 seconds. Fingerprinting is shown separately above. Other
+untimed method, refusal, decode and instance checks remain part of total worker
+time; these values are not an exhaustive performance attribution.
+
+The exact external report is 8,754 bytes with SHA256
+`a9c9dfb2fbb556086f078084f2bb1a745057c38f527388eb5a4787d478823537`.
+Both gzip sidecars have SHA256
+`3d482b17552dd6e73f0bb31454d8e4806420fbd563c81df485576cc439adfb82`;
+their uncompressed SHA256 is
+`aa0367166aeb0c04490f6586f19555a023175f38be0edf69837c93b6c49b1782`.
+They remain external because complete evidence contains original private paths.
 
 The selected preparation05 report has SHA256
 `b72bcea58c3a64be466b642fd6493a1da51865f7f8afd730d8816f9c01756f15`.
@@ -99,7 +150,9 @@ modules, driver/utility and interpreter identity. Historical extraction-normaliz
 file modes are not asserted preserved. The checks and audit restrictions provide
 local evidence, not authenticated execution or complete ABA protection.
 
-The coordinator may run, only after independent review and focused tests:
+The coordinator ran the following command shape after independent review and
+focused tests. Paths below are placeholders; rerunning requires a fresh external
+output directory and explicit serialization with other local work:
 
 ```bash
 PY=/path/to/selected/python
@@ -121,4 +174,8 @@ The original retained-prefix and full-schema diagnostics remain unchanged. This
 does not reconstruct unavailable `4366` code, complete a native generation,
 evaluate the 900-second acceptance requirement, authorize a provider run or establish
 scientific eligibility. #4354, #4400 and their acceptance obligations remain open;
-#4576/#4577/#4581 retain their separate scope.
+#4537 remains open until its broader acceptance/integration obligations are met,
+and #4576/#4577/#4581 retain their separate scope. This evidence fulfills the
+bounded constructor-comparison obligation of #4657; candidate PR #4659 still has
+its separate integration and CI requirements. This main-branch notes change closes
+only #4657 and its four review findings after merge.
