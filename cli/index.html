@@ -432,8 +432,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#d4d-rocrate-merge" class="md-nav__link">
-    d4d rocrate merge
+  <a href="#d4d-rocrate-merge-retired" class="md-nav__link">
+    d4d rocrate merge (retired)
   </a>
   
 </li>
@@ -685,8 +685,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#d4d-rocrate-merge" class="md-nav__link">
-    d4d rocrate merge
+  <a href="#d4d-rocrate-merge-retired" class="md-nav__link">
+    d4d rocrate merge (retired)
   </a>
   
 </li>
@@ -809,7 +809,7 @@ poetry run d4d --help
 </tr>
 <tr>
 <td><code>d4d rocrate</code></td>
-<td>Parse, merge, and transform RO-Crate metadata</td>
+<td>Parse and transform RO-Crate metadata; raw merge is retired</td>
 </tr>
 <tr>
 <td><code>d4d schema</code></td>
@@ -1154,33 +1154,44 @@ outputs can refuse publication. An explicit mapping must produce a valid Dataset
 this option does not repair a table or switch to another mapper. Source files,
 the selected mapping, and existing outputs are preserved on validation refusal.
 See <a href="../notes/legacy_cli_mapping_2026-10-07/README.md">the mapping-selection scope</a>.</p>
-<h3 id="d4d-rocrate-merge"><code>d4d rocrate merge</code></h3>
-<p>Merge multiple RO-Crate files into one JSON document.</p>
-<pre><code class="language-bash">poetry run d4d rocrate merge crate1.json crate2.json -o merged.json
-</code></pre>
-<p>Options:</p>
+<h3 id="d4d-rocrate-merge-retired"><code>d4d rocrate merge</code> (retired)</h3>
+<p>Raw RO-Crate merging is unsupported. The command remains recognizable but
+always refuses with a nonzero exit and an explanation of
+<a href="https://github.com/bridge2ai/data-sheets-schema/issues/4593">#4593</a>, before
+loading a merger, reading crate contents or writing an output. Keep the source
+crates separate. Existing files are preserved.</p>
+<p>The former implementation called a Dataset-producing merger through methods
+that did not exist. No raw-graph identity, root/descriptor, context or source
+provenance contract was defined. <code>--primary</code> did not resolve those missing
+policies. Restoring raw merge requires an explicit contract and real producer
+tests; this retirement does not invent one.</p>
+<p>The legacy syntax is retained for a useful diagnostic:</p>
 <table>
 <thead>
 <tr>
 <th>Option</th>
-<th>Description</th>
+<th>Status</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>INPUT_FILES...</code></td>
-<td>Required positional arguments. One or more RO-Crate files</td>
+<td>Required positional paths; their contents are not read.</td>
 </tr>
 <tr>
 <td><code>-o, --output PATH</code></td>
-<td>Required. Output merged RO-Crate path</td>
+<td>Required legacy option; no output is created or replaced.</td>
 </tr>
 <tr>
 <td><code>--primary PATH</code></td>
-<td>Primary RO-Crate file for conflict precedence</td>
+<td>Recognized legacy option; no conflict precedence is applied.</td>
 </tr>
 </tbody>
 </table>
+<p><code>d4d rocrate transform --merge</code> remains a separate Dataset YAML operation.
+The retired command does not redirect to it or to the graph-concatenation
+helper. Dataset mapping construction remains tracked in #4594, and #2915
+retains its linked fidelity, comparison and publication obligations.</p>
 <h2 id="d4d-schema"><code>d4d schema</code></h2>
 <p>These commands also depend on helper scripts under <code>.claude/agents/scripts/</code>.</p>
 <h3 id="d4d-schema-stats"><code>d4d schema stats</code></h3>
