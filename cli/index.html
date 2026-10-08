@@ -915,12 +915,22 @@ poetry run d4d rocrate transform path/to/ro-crate-metadata.json -o output.yaml \
 </table>
 <p>The selected table is passed to the existing legacy transformer for both single
 and merge modes. Dataset files must pass the mandatory closed-schema publication
-gate before any output or report is replaced. The unchanged default table omits
-required <code>Dataset.id</code> and has other construction defects, so current default
-outputs can refuse publication. An explicit mapping must produce a valid Dataset;
+gate before any output or report is replaced. The default table now has explicit
+root-identity, maintenance-narrative and Creator-literal constructors, but other
+construction defects and unsupported reference assertions can still refuse
+publication. An explicit mapping must produce a valid Dataset;
 this option does not repair a table or switch to another mapper. Source files,
 the selected mapping, and existing outputs are preserved on validation refusal.
 See <a href="../notes/legacy_cli_mapping_2026-10-07/README.md">the mapping-selection scope</a>.</p>
+<p>The default Creator route preserves complete root <code>author</code> strings as
+<code>Creator.description</code>, and preserves other assertions without inferring people,
+IDs or PI roles. Marked merges retain every assertion, including duplicates.
+Reports label their existing output-key count as <strong>constructed-field presence</strong>,
+including null-valued keys; it is neither source coverage nor validation success.
+A separate raw-author diagnostic distinguishes missing, null, empty and present
+assertions. The API retains its different non-null-value count with an explicit
+<code>coverage_basis</code> and exposes <code>source_presence</code> even when provenance is disabled.
+See the <a href="../notes/legacy_creator_assertions_2026-10-08/README.md">Creator construction and measurement contract</a>.</p>
 <h3 id="d4d-rocrate-merge-retired"><code>d4d rocrate merge</code> (retired)</h3>
 <p>Raw RO-Crate merging is unsupported. The command remains recognizable but
 always refuses with a nonzero exit and an explanation of
