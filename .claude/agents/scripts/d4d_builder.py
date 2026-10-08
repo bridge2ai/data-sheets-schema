@@ -33,6 +33,8 @@ class D4DBuilder:
         Returns:
             Dict with D4D Dataset structure
         """
+        # Use the same production gate as the packaged builder (#4588).
+        rocrate_parser.require_root_dataset()
         self.d4d_data = {}
 
         # Get all covered D4D fields

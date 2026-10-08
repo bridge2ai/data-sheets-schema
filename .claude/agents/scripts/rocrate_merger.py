@@ -25,6 +25,8 @@ class ROCrateMerger:
             mapping_loader: MappingLoader instance with field mappings
         """
         self.mapping = mapping_loader
+        self.primary_index = 0
+        self.primary_name = ""
         self.prioritizer = FieldPrioritizer()
         self.merged_data: Dict[str, Any] = {}
         self.provenance: Dict[str, List[str]] = {}
@@ -60,6 +62,10 @@ class ROCrateMerger:
         if primary_index >= len(rocrate_parsers):
             raise ValueError(f"Primary index {primary_index} out of range")
 
+        # Refuse the entire batch before changing state or building a source.
+        for parser in rocrate_parsers:
+            parser.require_root_dataset()
+
         self.merge_stats['total_sources'] = len(rocrate_parsers)
 
         # Get source names
@@ -71,6 +77,8 @@ class ROCrateMerger:
 
         primary_parser = rocrate_parsers[primary_index]
         primary_name = source_names[primary_index]
+        self.primary_index = primary_index
+        self.primary_name = primary_name
 
         secondary_parsers = [
             (parser, name) for i, (parser, name) in enumerate(zip(rocrate_parsers, source_names))
@@ -230,10 +238,10 @@ class ROCrateMerger:
             # Count fields this source contributed
             contributed_fields = sum(
                 1 for field, sources in self.provenance.items()
-                if name in sources or (i == 0 and "primary" in sources)
+                if name in sources or (i == self.primary_index and self.primary_name in sources)
             )
 
-            marker = "(PRIMARY)" if i == 0 else ""
+            marker = "(PRIMARY)" if i == self.primary_index else ""
             report.append(f"{i+1}. {name} {marker}")
             report.append(f"   - Size: {file_size_kb:.1f} KB")
             report.append(f"   - D4D fields contributed: {contributed_fields}")

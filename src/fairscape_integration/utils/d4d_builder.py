@@ -35,6 +35,9 @@ class D4DBuilder:
         Returns:
             Dict with D4D Dataset structure
         """
+        # Inspection may have no root; producing a Dataset may not. Refuse
+        # before clearing a previous result or mapping any member properties.
+        rocrate_parser.require_root_dataset()
         self.d4d_data = {}
 
         # Get all covered D4D fields

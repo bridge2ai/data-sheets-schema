@@ -1,0 +1,347 @@
+{
+  "issue": 4588,
+  "baseline_commit": "e9884669561d54bfe4a56c7dcd06813787cc4187",
+  "baseline_checkout_equivalent_tree_commit": "e57acbbe1841cae6e7cbebc25a6cb587475a4442",
+  "mapping": {
+    "path": "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+    "sha256": "28af70ed814690645ecf58b6bfd0a716d5300866c0018eaf07704387a410614e"
+  },
+  "schema": {
+    "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+    "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+  },
+  "candidate_code_sha256": {
+    "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+    "src/data_sheets_schema/rocrate_map.py": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592",
+    "src/fairscape_integration/fairscape_to_d4d.py": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd",
+    "src/fairscape_integration/utils/rocrate_parser.py": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec",
+    "src/fairscape_integration/utils/mapping_loader.py": "d90341146c566ed5f03e71213a159b85ff3500cacce78e2f375bf22e4b2d2b67",
+    "src/fairscape_integration/utils/d4d_builder.py": "841f30bd9b20768765be909a0a0bec1d00148da5396d0b1ffcdb6d7e9b332b9c",
+    ".claude/agents/scripts/rocrate_parser.py": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd",
+    ".claude/agents/scripts/mapping_loader.py": "0214e4f250367a93fe97cccb3ae93bf1ee8c9047f6db1fcb82ff68c582bb3e2c",
+    ".claude/agents/scripts/d4d_builder.py": "ec8fef313de9b386ae39eb44b9fa5ebce1501e0c292bfe594e857c503e145147"
+  },
+  "tests": {
+    "passed": 974,
+    "skipped": 6,
+    "skip_reasons": {
+      "linkml_map_unavailable": 1,
+      "optional_fairscape_models_unavailable": 5
+    },
+    "command": [
+      "pytest",
+      "tests/test_fairscape_integration",
+      "tests/test_rocrate",
+      "tests/test_rocrate_file_collection.py",
+      "tests/test_cli/test_rocrate_cli.py",
+      "tests/test_crate_generation_comparison.py",
+      "tests/test_deterministic_publication.py",
+      "tests/test_figure_publication.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=/private/tmp/d4d-4588-parser-roots-gxffLABS/pytest-integration-01",
+      "--junitxml=/private/tmp/d4d-4588-parser-roots-gxffLABS/tests-integration-01/junit.xml"
+    ],
+    "code_unchanged": true
+  },
+  "adversarial_review": "Independent read-only review: no blocking findings in scoped root-policy changes",
+  "parser_builder_replay": {
+    "CHORUS": {
+      "path": "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json",
+      "input_sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774",
+      "graph_shape": "array",
+      "consumers": {
+        "packaged": {
+          "root_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "root_sha256": "3962869c8e0304ba354cef1b6f41dcb1cf19f8e48dc225b07f33dc9b3faed7c5",
+          "record_sha256": "4d0fd47f4afe6226075835a72726819c6a39b532253c15079d92633c8644ecf7",
+          "output_sha256": "7701ba275e592bedae5f44e2187cc3b81a9aab34394e728ce4152032aedc535a",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "7701ba275e592bedae5f44e2187cc3b81a9aab34394e728ce4152032aedc535a",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 33,
+          "validation_errors_sha256": "f9edfec4f1f46e3d5d541c0dc69160cba1dfc56897c1065897ba2ace2c396952"
+        },
+        "hidden": {
+          "root_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+          "root_sha256": "3962869c8e0304ba354cef1b6f41dcb1cf19f8e48dc225b07f33dc9b3faed7c5",
+          "record_sha256": "4d0fd47f4afe6226075835a72726819c6a39b532253c15079d92633c8644ecf7",
+          "output_sha256": "7701ba275e592bedae5f44e2187cc3b81a9aab34394e728ce4152032aedc535a",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "7701ba275e592bedae5f44e2187cc3b81a9aab34394e728ce4152032aedc535a",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 33,
+          "validation_errors_sha256": "f9edfec4f1f46e3d5d541c0dc69160cba1dfc56897c1065897ba2ace2c396952"
+        }
+      }
+    },
+    "VOICE": {
+      "path": "data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json",
+      "input_sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4",
+      "graph_shape": "array",
+      "consumers": {
+        "packaged": {
+          "root_id": "ark:59853/rocrate-b2ai-voice-3.0.0",
+          "root_sha256": "c644fcedf3884ceb53d3d32ebf528804d4706ae20de9c65cea8da76f5718700f",
+          "record_sha256": "2e04421d172eb6198a0172ef744e66db08068af4a18ba095017f77164e55ba72",
+          "output_sha256": "0fdbd83b2beb0603eae8df0542894bea8577dd7a0747f70feb06c27ce6f7a507",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "0fdbd83b2beb0603eae8df0542894bea8577dd7a0747f70feb06c27ce6f7a507",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 153,
+          "validation_errors_sha256": "0e76913107d96ebb1b09babc4740f31399f1c38e871a3c8c13ac8973971d54b8"
+        },
+        "hidden": {
+          "root_id": "ark:59853/rocrate-b2ai-voice-3.0.0",
+          "root_sha256": "c644fcedf3884ceb53d3d32ebf528804d4706ae20de9c65cea8da76f5718700f",
+          "record_sha256": "2e04421d172eb6198a0172ef744e66db08068af4a18ba095017f77164e55ba72",
+          "output_sha256": "0fdbd83b2beb0603eae8df0542894bea8577dd7a0747f70feb06c27ce6f7a507",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "0fdbd83b2beb0603eae8df0542894bea8577dd7a0747f70feb06c27ce6f7a507",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 153,
+          "validation_errors_sha256": "0e76913107d96ebb1b09babc4740f31399f1c38e871a3c8c13ac8973971d54b8"
+        }
+      }
+    },
+    "CM4AI_reduced": {
+      "path": "data/ro-crate_packages/CM4AI/processed/CM4AI_crate_metadata_reduced.json",
+      "input_sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610",
+      "graph_shape": "array",
+      "consumers": {
+        "packaged": {
+          "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+          "root_sha256": "d4ec8e97b7c3d65e2c0f2550c503a11fb1c1a522b809338df63c3d2d41ac3190",
+          "record_sha256": "44ffa988fb94267a5ef67054b80120c803135a34f34629b8328fa6f7fe290c2c",
+          "output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 78,
+          "validation_errors_sha256": "0c0ffa36ab8de03032f9230a115b4bc3c8f5b8ee15fec865e88ed349e9388606"
+        },
+        "hidden": {
+          "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+          "root_sha256": "d4ec8e97b7c3d65e2c0f2550c503a11fb1c1a522b809338df63c3d2d41ac3190",
+          "record_sha256": "44ffa988fb94267a5ef67054b80120c803135a34f34629b8328fa6f7fe290c2c",
+          "output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 78,
+          "validation_errors_sha256": "0c0ffa36ab8de03032f9230a115b4bc3c8f5b8ee15fec865e88ed349e9388606"
+        }
+      }
+    },
+    "VOICE_provenance": {
+      "path": "data/ro-crate_packages/VOICE/raw/ro-crate-prov-graph.json",
+      "input_sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608",
+      "graph_shape": "node object",
+      "consumers": {
+        "packaged": {
+          "root_id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "root_sha256": "dd458cf3e84e783eb3205b32bb47d156182754d683b10cf507d1b10a65c40916",
+          "record_sha256": "7253730705cf9ce294c020aaf8b81ff585032419ef245c525cd3386958838c1d",
+          "output_sha256": "04f9e4e53aeca56e3f7c9e68f8fd7cfdb645e1da9e5146a3fc647c64806927ce",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "04f9e4e53aeca56e3f7c9e68f8fd7cfdb645e1da9e5146a3fc647c64806927ce",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 1,
+          "validation_errors_sha256": "7185e8e52d2053d93561dc74c45924e7ad086be58bdef0b08a1900f318d4c591"
+        },
+        "hidden": {
+          "root_id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "root_sha256": "dd458cf3e84e783eb3205b32bb47d156182754d683b10cf507d1b10a65c40916",
+          "record_sha256": "7253730705cf9ce294c020aaf8b81ff585032419ef245c525cd3386958838c1d",
+          "output_sha256": "04f9e4e53aeca56e3f7c9e68f8fd7cfdb645e1da9e5146a3fc647c64806927ce",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": null,
+          "comparison": "new singleton support; same record as packaged implementation",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 1,
+          "validation_errors_sha256": "7185e8e52d2053d93561dc74c45924e7ad086be58bdef0b08a1900f318d4c591"
+        }
+      }
+    },
+    "CM4AI_original": {
+      "path": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+      "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+      "member": "cm4ai_release_metadata/ro-crate-metadata.json",
+      "input_sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e",
+      "graph_shape": "array",
+      "consumers": {
+        "packaged": {
+          "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+          "root_sha256": "0a5d9afca6aa9da56b26aa762cb3151796a306b27260f1c32712853fe49fb40c",
+          "record_sha256": "44ffa988fb94267a5ef67054b80120c803135a34f34629b8328fa6f7fe290c2c",
+          "output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 78,
+          "validation_errors_sha256": "0c0ffa36ab8de03032f9230a115b4bc3c8f5b8ee15fec865e88ed349e9388606"
+        },
+        "hidden": {
+          "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+          "root_sha256": "0a5d9afca6aa9da56b26aa762cb3151796a306b27260f1c32712853fe49fb40c",
+          "record_sha256": "44ffa988fb94267a5ef67054b80120c803135a34f34629b8328fa6f7fe290c2c",
+          "output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "reversal": {
+            "root_equal": true,
+            "record_equal": true,
+            "comparison": "exact structural equality, including list order"
+          },
+          "baseline_output_sha256": "ef9205fa7f6d3edd1fcda03426b0a3c2dfc90533cb1c18f7890dad7b1516d900",
+          "comparison": "byte-identical",
+          "validation": "FAIL (pre-existing legacy mapping/schema defects; #4594)",
+          "validation_error_count": 78,
+          "validation_errors_sha256": "0c0ffa36ab8de03032f9230a115b4bc3c8f5b8ee15fec865e88ed349e9388606"
+        }
+      }
+    }
+  },
+  "maintained_replay": {
+    "converter_outputs": 8,
+    "static_outputs": 3,
+    "validation": "PASS",
+    "same_as_previous_replay": true,
+    "results": {
+      "profile": {
+        "path": "data/ro-crate/profiles/fairscape/full-ro-crate-metadata.json",
+        "input_sha256": "0e485ec208f013ab9f4009d395b5eae9a217520fc81d8cabfb44190d6728d5a4",
+        "root_id": "ark:59853/rocrate-cell-maps-for-artificial-intelligence-January-2026-data-release",
+        "output_sha256": "64feb8393a6b895384ad36d94dd2763c374e71d21aec4b6a35b435a56f3dee2a",
+        "record_sha256": "9c06b319fb04c8516bbfaca6b79466b22af17069df2fdc65eabce1f807831768",
+        "dropped_sha256": "f95104998cfa1798c52044a8b0ca9d3ee8a59ea65db281aed21318ff98ce5cff",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset"
+      },
+      "cm4ai_roundtrip": {
+        "path": "data/ro-crate/examples/CM4AI_roundtrip.json",
+        "input_sha256": "fe3fc82d572b059376da194274f81c0122fe1c8de21d33c0c71cc3653f76049c",
+        "root_id": "./",
+        "output_sha256": "924dfbb0666bfb84f7590184bffbfd5e5d29cce35f53edcc0f008586f66f6c6f",
+        "record_sha256": "db8b7e7dc19b3e196a1c5c419704df13b51408dc1c54e54c9f607668ba1bb22c",
+        "dropped_sha256": "4e78c82fd24a1284239ef8916ea622ada1f4d36f14d9518aa5f8f60ac41a075c",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset"
+      },
+      "voice_roundtrip": {
+        "path": "data/ro-crate/examples/voice_d4d_to_fairscape.json",
+        "input_sha256": "56a94d9d4f1077f31bfb322bcf5704681df0f84ec892c693a71fce9cc8623194",
+        "root_id": "./",
+        "output_sha256": "af0bac89ff037302561f8cf761eb8cbbc002cfc0d53580ca5e779d7c7a254905",
+        "record_sha256": "511df62edec7726b928178ea67ccda7e6654e21b0c03f687ca5ce50f6094fd75",
+        "dropped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset"
+      },
+      "voice_example": {
+        "path": "data/ro-crate/examples/voice_fairscape_test.json",
+        "input_sha256": "56a94d9d4f1077f31bfb322bcf5704681df0f84ec892c693a71fce9cc8623194",
+        "root_id": "./",
+        "output_sha256": "af0bac89ff037302561f8cf761eb8cbbc002cfc0d53580ca5e779d7c7a254905",
+        "record_sha256": "511df62edec7726b928178ea67ccda7e6654e21b0c03f687ca5ce50f6094fd75",
+        "dropped_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset"
+      },
+      "CHORUS": {
+        "path": "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json",
+        "input_sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774",
+        "root_id": "ark:59853/rocrate-chorus-ro-crate-package/",
+        "output_sha256": "8aab52c16039142c93d7635ec215ca7b21ed5934a47e6131cd17aaacd8aca3f0",
+        "record_sha256": "77a2c22ace040053e553d44b0f6354c77e8780f927f2c2ff000d2653a03e0d75",
+        "dropped_sha256": "2d8c8bb3a5cf800a3dbd5deef9216af379e3fe7fb3c895357488dd8871ec39e1",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset",
+        "static_record_sha256": "0888af609d3a1e1e6b5786bf42b9921679f18e1711f9e04cce1959d10d186c3b"
+      },
+      "VOICE": {
+        "path": "data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json",
+        "input_sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4",
+        "root_id": "ark:59853/rocrate-b2ai-voice-3.0.0",
+        "output_sha256": "845f9cfd43edbbb1787c8e1832acea205ad77c3fb0107a605839b6b95c45c63b",
+        "record_sha256": "63b4d2c65074f0aac63c1f6a232a9f7deb09ee36122cddb3104124925e5c47d9",
+        "dropped_sha256": "6ef88ebce90ba80d86fcc0a27255eb95e391333317cd9ba08a31aaf746b91bda",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset",
+        "static_record_sha256": "db267db7b61249e3517985602589a126096472e1b4f253a8bc32dbf685210ffc"
+      },
+      "CM4AI_reduced": {
+        "path": "data/ro-crate_packages/CM4AI/processed/CM4AI_crate_metadata_reduced.json",
+        "input_sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610",
+        "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+        "output_sha256": "b12c71d12f7a8ab26e6906b4729ba86ad92c96f789a34860e1b3ac0d736d3746",
+        "record_sha256": "9d1aca7cecacddef570fcc489289569de1f4f82b7fea3a843d96f38db427ba7c",
+        "dropped_sha256": "6e95a91c83b6166b617553652ae4bd309a35526dfe97bc89f35e78aafd8f21a4",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset"
+      },
+      "CM4AI": {
+        "path": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+        "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+        "member": "cm4ai_release_metadata/ro-crate-metadata.json",
+        "input_sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e",
+        "root_id": "https://fairscape.net/api/ark:59853/rocrate-cell-maps-for-artificial-intelligence-June-2026-data-release",
+        "output_sha256": "512264050aa262664d3499c01a1a0f29d1864e97768bfdfbe7ead94cf18b1774",
+        "record_sha256": "abce2f9e60be145cf1e8f125453bb7ded8c4099c7c8fb10dafec032d8d9e1318",
+        "dropped_sha256": "40d425740ac653aaecc565364deeb80b82b720a331b6a89d5baf7cc232cbfbcb",
+        "validation": "PASS",
+        "reversal": "same root and contents; file_collections compared as a multiset",
+        "static_record_sha256": "d2478a0e5d9a9ddbbc193e16cf9cd43b9e598f775ed8319ac95d60a98a8715c6"
+      }
+    }
+  },
+  "deferred": {
+    "4593": "raw-crate merge API drift",
+    "4594": "legacy builder schema construction and validation-before-publication",
+    "4595": "profile evaluator root policy"
+  },
+  "parent_2915": "OPEN"
+}

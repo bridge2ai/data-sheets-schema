@@ -52,6 +52,9 @@ class InformativenessScorer:
             - technical_completeness: float (0-1)
             - total_score: float (weighted combination)
         """
+        # Invalid comparison sources would also distort uniqueness scores.
+        for parser in [rocrate_parser, *(other_parsers or [])]:
+            parser.require_root_dataset()
         scores = {}
 
         # 1. D4D Coverage - how many fields can this RO-Crate populate?
@@ -130,6 +133,9 @@ class InformativenessScorer:
             List of (parser, scores, rank) tuples sorted by score descending
             rank is 1-indexed (1 = most informative)
         """
+        # Preflight every source before producing any score/progress output.
+        for parser in rocrate_parsers:
+            parser.require_root_dataset()
         scored = []
 
         for parser in rocrate_parsers:

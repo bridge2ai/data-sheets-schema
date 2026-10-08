@@ -310,11 +310,20 @@ def parse(input_file: str, verbose: bool):
                         value = value[:97] + "..."
                     click.echo(f"  {key}: {value}")
             click.echo()
+        else:
+            # Parsing is inspection: report why no root was selected, while
+            # still allowing empty graphs and member metadata to be inspected.
+            try:
+                parser.require_root_dataset()
+            except ValueError as exc:
+                click.echo(str(exc), err=True)
 
         # Show entity counts by type
         graph = parser.graph
         type_counts = {}
-        for entity in graph:
+        for entity in graph if isinstance(graph, list) else []:
+            if not isinstance(entity, dict):
+                continue
             entity_type = entity.get('@type')
             if isinstance(entity_type, str):
                 types = [entity_type]
@@ -322,9 +331,10 @@ def parse(input_file: str, verbose: bool):
                 types = entity_type if isinstance(entity_type, list) else []
 
             for t in types:
-                type_counts[t] = type_counts.get(t, 0) + 1
+                if isinstance(t, str):
+                    type_counts[t] = type_counts.get(t, 0) + 1
 
-        click.echo(f"Total Entities: {len(graph)}")
+        click.echo(f"Total Entities: {len(graph) if isinstance(graph, list) else 0}")
         click.echo("Entity Types:")
         for entity_type in sorted(type_counts.keys()):
             click.echo(f"  {entity_type}: {type_counts[entity_type]}")

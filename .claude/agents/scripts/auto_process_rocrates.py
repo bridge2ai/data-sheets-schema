@@ -27,6 +27,7 @@ Usage:
 import argparse
 import json
 import sys
+from copy import deepcopy
 from pathlib import Path
 from typing import List, Tuple
 
@@ -35,6 +36,7 @@ from mapping_loader import MappingLoader
 from rocrate_parser import ROCrateParser
 from rocrate_merger import ROCrateMerger
 from d4d_builder import D4DBuilder
+from data_sheets_schema.rocrate_sources import select_root
 
 
 def discover_rocrates(input_dir: Path) -> List[Path]:
@@ -82,15 +84,9 @@ def rank_rocrates(
     # Parse all RO-Crates
     parsers = []
     for path in rocrate_paths:
-        try:
-            parser = ROCrateParser(str(path))
-            if parser.get_root_dataset():
-                parsers.append(parser)
-            else:
-                print(f"⚠ Warning: No root Dataset in {path.name}, skipping")
-        except Exception as e:
-            print(f"⚠ Warning: Could not parse {path.name}: {e}")
-            continue
+        parser = ROCrateParser(str(path))
+        parser.require_root_dataset()
+        parsers.append(parser)
 
     if not parsers:
         raise ValueError("No valid RO-Crate files found")
@@ -109,50 +105,49 @@ def rank_rocrates(
     return ranked_paths
 
 
-def concatenate_rocrates(
-    rocrate_paths: List[Path],
-    output_path: Path
-) -> Path:
+def _combined_crate(parsers: List[ROCrateParser]) -> dict:
+    """Prepare a combined graph only if it still has one authoritative root.
+
+    Concatenation does not reconcile separate crates' relative identifiers.
+    Refuse colliding roots/descriptors before publishing this intermediate
+    artifact; assigning new identities would change the sources' meaning.
     """
-    Concatenate multiple RO-Crate files into single JSON.
-
-    Args:
-        rocrate_paths: List of RO-Crate file paths
-        output_path: Output path for concatenated file
-
-    Returns:
-        Path to concatenated file
-    """
-    print(f"\nConcatenating {len(rocrate_paths)} RO-Crate files...")
-
     concatenated = {
         "@context": "https://w3id.org/ro/crate/1.2/context",
         "@graph": []
     }
-
-    for i, path in enumerate(rocrate_paths):
-        print(f"  [{i+1}/{len(rocrate_paths)}] {path.name}")
-
-        with open(path, 'r', encoding='utf-8') as f:
-            rocrate_data = json.load(f)
-
-        # Add source marker
-        graph = rocrate_data.get('@graph', [])
+    for parser in parsers:
+        parser.require_root_dataset()
+        graph = deepcopy(parser.graph)
         for entity in graph:
-            # Tag each entity with its source file
-            if '@id' not in entity:
-                continue
-            entity['_source'] = path.name
-
+            if isinstance(entity, dict) and '@id' in entity:
+                entity['_source'] = parser.rocrate_path.name
         concatenated['@graph'].extend(graph)
 
-    # Save concatenated file
+    root, reason = select_root(concatenated['@graph'])
+    if root is None:
+        raise ValueError(f"No unambiguous root Dataset in concatenated RO-Crates: {reason}")
+    return concatenated
+
+
+def _save_concatenated_crate(concatenated: dict, output_path: Path) -> Path:
+    """Publish a combined graph after root preflight has succeeded."""
     concat_path = output_path.parent / f"{output_path.stem}_concatenated.json"
+    concat_path.parent.mkdir(parents=True, exist_ok=True)
     with open(concat_path, 'w', encoding='utf-8') as f:
         json.dump(concatenated, f, indent=2)
 
     print(f"\n✓ Concatenated RO-Crate saved: {concat_path}")
     return concat_path
+
+
+def concatenate_rocrates(
+    rocrate_paths: List[Path],
+    output_path: Path
+) -> Path:
+    """Concatenate sources only when their combined graph has a valid root."""
+    parsers = [ROCrateParser(str(path)) for path in rocrate_paths]
+    return _save_concatenated_crate(_combined_crate(parsers), output_path)
 
 
 def main():
@@ -226,9 +221,6 @@ def main():
         print(f"✗ Error: Mapping TSV not found: {mapping_path}", file=sys.stderr)
         return 1
 
-    # Create output directory
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
     print("="*80)
     print("Automated RO-Crate Processing")
     print("="*80)
@@ -284,6 +276,25 @@ def main():
         ]
         print(f"\n✓ Selected {len(selected_paths)} RO-Crates above score threshold {args.min_score}")
 
+    # Validate the selected inputs and any combined intermediate graph before
+    # creating the output directory or replacing an existing artifact.
+    try:
+        if not selected_paths:
+            raise ValueError("No RO-Crate sources meet the selection criteria")
+        parsers = [ROCrateParser(str(path)) for path in selected_paths]
+        for parser in parsers:
+            parser.require_root_dataset()
+        combined = None
+        if args.strategy == 'concatenate':
+            combined = _combined_crate(parsers)
+        elif args.strategy == 'hybrid' and len(parsers) > 1:
+            combined = _combined_crate(parsers[1:])
+    except Exception as exc:
+        print(f"✗ Error preparing RO-Crates: {exc}", file=sys.stderr)
+        return 1
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
     # Step 5: Process based on strategy
     print(f"\n[4/5] Processing with '{args.strategy}' strategy...")
 
@@ -291,7 +302,6 @@ def main():
         # Direct field-by-field merge
         from rocrate_to_d4d import save_d4d_yaml
 
-        parsers = [ROCrateParser(str(p)) for p in selected_paths]
         merger = ROCrateMerger(mapping)
         dataset = merger.merge_rocrates(parsers, primary_index=0)
         provenance = merger.get_provenance()
@@ -310,7 +320,7 @@ def main():
         # Concatenate then transform
         from rocrate_to_d4d import save_d4d_yaml
 
-        concat_path = concatenate_rocrates(selected_paths, output_path)
+        concat_path = _save_concatenated_crate(combined, output_path)
 
         # Transform concatenated file
         parser = ROCrateParser(str(concat_path))
@@ -333,13 +343,13 @@ def main():
             print(f"    - Secondaries (concatenate): {len(selected_paths)-1} files")
 
             # Concatenate secondaries
-            concat_path = concatenate_rocrates(selected_paths[1:], output_path)
+            concat_path = _save_concatenated_crate(combined, output_path)
 
             # Merge primary with concatenated secondaries
             from rocrate_to_d4d import save_d4d_yaml
 
             parsers = [
-                ROCrateParser(str(selected_paths[0])),
+                parsers[0],
                 ROCrateParser(str(concat_path))
             ]
             merger = ROCrateMerger(mapping)
@@ -358,7 +368,7 @@ def main():
 
         else:
             # Only one file, treat as single-file mode
-            parser = ROCrateParser(str(selected_paths[0]))
+            parser = parsers[0]
             builder = D4DBuilder(mapping)
             dataset = builder.build_dataset(parser)
 

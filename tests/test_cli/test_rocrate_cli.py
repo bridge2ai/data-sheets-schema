@@ -89,6 +89,9 @@ class TestROCrateCLI(unittest.TestCase):
             def __init__(self, input_file):
                 self.input_file = input_file
 
+            def require_root_dataset(self):
+                return {"@type": "Dataset"}
+
             def get_all_entities(self):
                 return {"dataset": {"@type": "Dataset"}}
 
