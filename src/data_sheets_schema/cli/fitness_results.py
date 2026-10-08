@@ -51,10 +51,13 @@ def recheck(result):
               type=click.Path(exists=True, file_okay=False, path_type=Path))
 @click.option("--execution", type=click.Path(exists=True, file_okay=False, path_type=Path),
               help="Capture and independently recheck the fixed execution ledger; never dispatch or retry.")
+@click.option("--support-execution", type=click.Path(exists=True, file_okay=False, path_type=Path),
+              help="Opt into index v2 with every registered support selection and its captured dispatch outcome.")
 @click.option("--output", required=True, type=click.Path(path_type=Path))
-def index(descriptor, paths, support_paths, execution, output):
+def index(descriptor, paths, support_paths, execution, support_execution, output):
     click.echo(canonical(_call(results.build_index, descriptor, list(paths), output,
-                              execution=execution, support_results=list(support_paths))).decode())
+                              execution=execution, support_results=list(support_paths),
+                              support_execution=support_execution)).decode())
 
 
 @fitness_results.command("recheck-index")
