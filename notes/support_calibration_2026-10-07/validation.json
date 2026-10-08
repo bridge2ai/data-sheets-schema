@@ -1,0 +1,38 @@
+{
+  "base": "24d688388126a56f1515bb84f9024ed666635b0e",
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+  "runs": [
+    {
+      "artifact": "evaluation-final.xml",
+      "sha256": "7a6f07f69db6a9f2cabdec1d43d8db92681f6f50289ba65396588d586882ca3e",
+      "counts": {
+        "passed": 355,
+        "error": 64
+      }
+    },
+    {
+      "artifact": "loopback-final.xml",
+      "sha256": "58193cc8cff91d68a7f8a7daa93bf14f04bc4bfe27d8c5322697b3c6a22d29a7",
+      "counts": {
+        "passed": 64
+      }
+    }
+  ],
+  "unique_tests_passed": 419,
+  "unresolved_failures_or_errors": 0,
+  "environment_note": "64 loopback fixture setups were blocked by sandbox socket permissions, then all 64 passed with loopback binding allowed. No provider calls.",
+  "review_rounds": 2,
+  "review_issues_addressed": [
+    4600,
+    4601
+  ],
+  "source_sha256": {
+    "src/data_sheets_schema/support_calibration.py": "8b888e89a883663c108a3b0a865e0a8bb45a2f085f74c36c598dc2f7e1bc2482",
+    "src/data_sheets_schema/cli/support_calibration.py": "09027c777dcb6336b735abcefa644beac79c90250d79e5fe1b256b9904407b42",
+    "src/data_sheets_schema/cli/evaluate.py": "640bcaf4ab2b0916edbdca71f455ddfd3ce143556ae2e74bb5c8b8c684a76df1",
+    "tests/test_evaluation/test_support_calibration.py": "495251b0e694325584359315218fb0cf06ee8a593cc83e79b8f7b7e7f68ecda2",
+    "tests/test_evaluation/test_support_calibration_adversarial.py": "92c3d264040f7878a84db09fff09e1d207032edde0692a1d488455ce4021dbeb",
+    "tests/test_evaluation/test_support_calibration_cli.py": "6c458767ae536a18bbfa6fbdda48237fac96e66d437907504523c9e0c789b170"
+  },
+  "scientific_eligibility": false
+}
