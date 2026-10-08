@@ -45,7 +45,9 @@ eligibility. Policy/reviewer references remain declarations rather than
 authenticated approvals. The #2911/#2912 scientific/context decisions and
 #3328's actual rater, route, limits/budget and paid authorization remain pending.
 
-#3328 also retains paired saved-result acceptance, exact agreement, Cohen's
+Paired saved-result acceptance is implemented separately in
+[the #4651 captured-results slice](../cross_family_panel_results_2026-10-07/README.md).
+#3328 retains exact agreement, Cohen's
 kappa, descriptive same-family minus cross-family score differences with
 appropriate uncertainty, separate fitness/support panels, the canary and
 actual second ratings. Two raters alone do not separate family preference from
