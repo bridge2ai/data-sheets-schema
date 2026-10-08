@@ -41,18 +41,43 @@ Neither source coverage nor semantic equivalence follows from this correction;
 row retirement is not a coverage gain, and intact text does not establish
 `exactMatch`/`none`.
 
-## Validation plan
+## Validation results
 
-No tests or project replays have run for this draft. Focused controls use both
-real builders and the actual closed Dataset validator, plus packaged/hidden
-publishers and the API batch path with explicit valid-ID mappings. They cover
-accepted forms and case, broad-schema bare values, malformed and non-scalar
-preservation, competing source properties, root/member isolation, unchanged
-generic URI handling, direct hidden-script imports, and preserved source,
-mapping and destination bytes after refusal. A later invalid batch DOI must
-prevent every destination replacement.
+The serialized eight-module run passed **318 tests**, with zero failures,
+errors or skips, at commit
+`f85d132ebdb3b26c1d80d6414ec39220c226334d`, tree
+`5371e1734c2f7aeed14b1c0668c3154dbc3136e2`. The coordinator's terminal reported
+43.51 seconds and 14 dependency deprecation warnings. JUnit records 43.473
+seconds; its XML does not encode the warning count or attest the tested commit.
 
-Run the new `tests/test_rocrate/test_legacy_doi.py` alongside the existing
-builder, publication, API result-contract and wrapper regressions after
-independent review. Keep all five retained-project legacy replays and their
-historical outputs under the parent issue's separate obligations.
+| Module | Passed |
+| --- | ---: |
+| `tests/test_rocrate/test_legacy_doi.py` | 117 |
+| `tests/test_fairscape_integration/test_d4d_builder.py` | 37 |
+| `tests/test_rocrate/test_legacy_publication.py` | 51 |
+| `tests/test_rocrate/test_legacy_publication_adversarial.py` | 39 |
+| `tests/test_rocrate/test_legacy_result_contract.py` | 19 |
+| `tests/test_rocrate/test_legacy_envelope_adversarial.py` | 28 |
+| `tests/test_cli/test_rocrate_transform_mapping.py` | 17 |
+| `tests/test_cli/test_rocrate_transform_mapping_adversarial.py` | 10 |
+
+The 117 new cases exercise both real builders and the current closed Dataset
+validator, packaged/hidden publishers, the real API batch path with an explicit
+valid-ID mapping, and direct hidden-script use from another working directory.
+They cover the accepted forms and preservation/refusal boundaries above,
+including a later invalid batch DOI preventing every destination replacement.
+Existing publication, result-contract and wrapper controls also passed.
+Independent adversarial source review found no material issues before execution.
+
+[validation.json](validation.json) records the command with symbolic paths,
+the eight module counts, and 26 selected production/test/resource/dependency
+pins. Each selected working file was compared byte-for-byte with the tested Git
+blob. These pins cover the named files, not a complete installed environment.
+The retained external JUnit artifact `legacy-doi-tests-01.xml` is 51,571 bytes,
+SHA-256 `30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905`.
+Only these evidence notes changed after the run; source and tests are unchanged.
+
+No real-project replay, provider call, scientific rating or new historical label
+was produced. All five retained-input legacy replays and the remaining default
+construction defects remain obligations of #4594; #2915 stays open. The successful
+software controls establish this DOI slice, not overall legacy mapping repair.

@@ -1,0 +1,257 @@
+{
+  "format": "legacy_doi_construction_validation_v1",
+  "issue": 4670,
+  "open_parent_issues": [
+    4594,
+    2915
+  ],
+  "tested_commit": "f85d132ebdb3b26c1d80d6414ec39220c226334d",
+  "tested_tree": "5371e1734c2f7aeed14b1c0668c3154dbc3136e2",
+  "base_commit": "9bf9c31c57bbd48a21feb74de478806dea3f6d1f",
+  "verification": {
+    "coordinator_provenance": "The coordinator reports running this command at the tested clean commit; XML does not attest commit or environment.",
+    "independent_author_checks": [
+      "Parsed every JUnit testcase and counted failure/error/skipped nodes.",
+      "Compared all selected working file bytes with the tested Git commit blobs."
+    ],
+    "scope": "Selected source, resources and dependency declarations; not an installed-environment or complete import closure."
+  },
+  "tests": {
+    "passed": 318,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "modules": {
+      "tests/test_rocrate/test_legacy_doi.py": 117,
+      "tests/test_fairscape_integration/test_d4d_builder.py": 37,
+      "tests/test_rocrate/test_legacy_publication.py": 51,
+      "tests/test_rocrate/test_legacy_publication_adversarial.py": 39,
+      "tests/test_rocrate/test_legacy_result_contract.py": 19,
+      "tests/test_rocrate/test_legacy_envelope_adversarial.py": 28,
+      "tests/test_cli/test_rocrate_transform_mapping.py": 17,
+      "tests/test_cli/test_rocrate_transform_mapping_adversarial.py": 10
+    },
+    "junit_seconds": 43.473,
+    "console_seconds": 43.51,
+    "warnings": {
+      "count": 14,
+      "kind": "dependency deprecation warnings",
+      "provenance": "coordinator terminal report; JUnit does not encode this count"
+    },
+    "artifact": {
+      "name": "legacy-doi-tests-01.xml",
+      "bytes": 51571,
+      "sha256": "30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905"
+    },
+    "invocation": {
+      "cwd": "$CHECKOUT",
+      "environment": {
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONPATH": "src:."
+      },
+      "command": [
+        "$PYTHON",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_rocrate/test_legacy_doi.py",
+        "tests/test_fairscape_integration/test_d4d_builder.py",
+        "tests/test_rocrate/test_legacy_publication.py",
+        "tests/test_rocrate/test_legacy_publication_adversarial.py",
+        "tests/test_rocrate/test_legacy_result_contract.py",
+        "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+        "tests/test_cli/test_rocrate_transform_mapping.py",
+        "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp=$ARTIFACT_ROOT/legacy-doi-pytest-01",
+        "--junitxml=$ARTIFACT_ROOT/legacy-doi-tests-01.xml"
+      ],
+      "python": "CPython 3.13.12 in coordinator-selected virtual environment",
+      "path_variables": "PYTHON identifies that interpreter; ARTIFACT_ROOT is a separate external evidence directory. Private absolute paths are deliberately not published."
+    }
+  },
+  "source_pins": [
+    {
+      "path": "src/data_sheets_schema/legacy_doi.py",
+      "bytes": 1749,
+      "sha256": "bb30e9f5f1e3824c44707fce03fe8dab1798c374caaec033286c94b16a2a9d3f",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/d4d_builder.py",
+      "bytes": 10025,
+      "sha256": "38a258d9efcf4706b98fc897af3d22c8df2570b63553945437780814469b939e",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/d4d_builder.py",
+      "bytes": 10840,
+      "sha256": "d71f0fc6959a006b3d87b0458f6c12fa953e22b3dae03eb52569a2b6103ab251",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/scope.py",
+      "bytes": 25356,
+      "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/legacy_publication.py",
+      "bytes": 6374,
+      "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/rocrate_parser.py",
+      "bytes": 11273,
+      "sha256": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_parser.py",
+      "bytes": 1930,
+      "sha256": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/rocrate_sources.py",
+      "bytes": 11731,
+      "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/utils/mapping_loader.py",
+      "bytes": 6358,
+      "sha256": "d90341146c566ed5f03e71213a159b85ff3500cacce78e2f375bf22e4b2d2b67",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/mapping_loader.py",
+      "bytes": 6587,
+      "sha256": "0214e4f250367a93fe97cccb3ae93bf1ee8c9047f6db1fcb82ff68c582bb3e2c",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/fairscape_integration/cli.py",
+      "bytes": 21252,
+      "sha256": "463a3e9a574ab8133c31bbc5a44895b02640842b76e754f844e927657ad418ad",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": ".claude/agents/scripts/rocrate_to_d4d.py",
+      "bytes": 16361,
+      "sha256": "8c6cd41fb0e32fbc8c457208d863460ac462c76cd4c20f4215d2f90c6a9dce5e",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/transformation/transform_api.py",
+      "bytes": 34045,
+      "sha256": "b7602e5940d18e008f528dffa2b77846af64d8b7f76504219f4a52787b39ac39",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/cli/rocrate.py",
+      "bytes": 19375,
+      "sha256": "371a32df2dd466e9bbc74ac35ebaaa175a06b2c8f7685a37157f07350b083e80",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "src/data_sheets_schema/schema/data_sheets_schema_all.yaml",
+      "bytes": 1442513,
+      "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "bytes": 24216,
+      "sha256": "28af70ed814690645ecf58b6bfd0a716d5300866c0018eaf07704387a410614e",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "pyproject.toml",
+      "bytes": 4446,
+      "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "poetry.lock",
+      "bytes": 592155,
+      "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_doi.py",
+      "bytes": 11040,
+      "sha256": "ef2861e6983ead370f1b5779133d2f9d2a44259655604d4e7ddae72371dabed4",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_fairscape_integration/test_d4d_builder.py",
+      "bytes": 13549,
+      "sha256": "696a4d829adb15aebbdcdca13d0ef5bd8f931cbfccd64ef15f311700b672efeb",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_publication.py",
+      "bytes": 19018,
+      "sha256": "b61058a2e214370d2f93eaaff49296bcfe410280be7b30873202713be35fa537",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_publication_adversarial.py",
+      "bytes": 16106,
+      "sha256": "b1a132a5d8ca1aa8d7a06c9c5baf6b986dc385165dc70bc2669e35aa1a5744f2",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_result_contract.py",
+      "bytes": 10932,
+      "sha256": "b95715c56bd1c7ac52eb97224fbeb8b37c69bca1e1e931264ed0acc4d0ea40e4",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+      "bytes": 17149,
+      "sha256": "97fe763933dfc33e14934668840c364e4b8ab58b52f48ef57fe11e1d7f0448bd",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_cli/test_rocrate_transform_mapping.py",
+      "bytes": 8103,
+      "sha256": "149b9a7b75aa35bd414418134671075424b58145ceb7347f9c1ac4ec335085b6",
+      "matches_tested_git_blob": true
+    },
+    {
+      "path": "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+      "bytes": 4708,
+      "sha256": "b619461ada2b2ce8431d7f10f318c061659dd2f10656dc03e038affeb4102224",
+      "matches_tested_git_blob": true
+    }
+  ],
+  "review": {
+    "kind": "independent read-only adversarial source review",
+    "result": "No material findings before the serialized focused run.",
+    "additional_execution": "No author or reviewer test/replay rerun during evidence preparation."
+  },
+  "checked_behavior": [
+    "Both legacy builders produce bare DOI from recognized scalar CURIE and HTTP(S) doi.org/dx.doi.org forms.",
+    "Existing bare spellings and malformed/list/non-scalar assertions remain intact; typed Dataset publication decides acceptance.",
+    "Competing root source properties refuse before a first-property choice, including distinct spellings of the same DOI.",
+    "Root/member isolation, unchanged non-DOI URI behavior and direct hidden script use are tested.",
+    "Real packaged/hidden publication and API batch validation preserve source/mapping/destination bytes on refusal.",
+    "The actual unchanged default table still lacks Dataset.id and refuses publication."
+  ],
+  "limitations": [
+    "No five-project or retained-five-input replay was performed for this DOI slice.",
+    "Other legacy mapping/construction defects remain under #4594; this is not overall legacy producer acceptance.",
+    "No new Dataset ID, source-coverage gain, scientific fidelity/score, provider generation or empirical campaign is claimed.",
+    "No historical records, mapping TSVs or scientific labels were rewritten; row retirement is not source coverage and copied text does not establish exactMatch/none.",
+    "The existing repair parser trims surrounding whitespace and trailing slashes on prefixed forms; already-bare strings are preserved exactly.",
+    "Different nonmissing property spellings, even semantically equivalent DOI spellings, are deliberately refused rather than collapsed."
+  ],
+  "scientific_eligibility": false
+}
