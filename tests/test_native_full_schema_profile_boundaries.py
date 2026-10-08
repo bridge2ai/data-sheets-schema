@@ -313,3 +313,121 @@ def test_tree_inventory_includes_hidden_ignored_files_and_refuses_links(profile,
     (root / "alias").symlink_to(root / "ignored.bin")
     with pytest.raises(profile.BoundaryError, match="symlink"):
         profile.tree_manifest(root)
+
+
+@pytest.fixture
+def link_case(profile, tmp_path):
+    root = tmp_path / "fresh-case"
+    root.mkdir()
+    directory = root / "stages"
+    directory.mkdir()
+    destination = directory / "capture.json"
+    staging = directory / ".capture.json.pending-fixture"
+    staging.write_bytes(b"synthetic captured bytes\n")
+    policy = profile.PhasePolicy(source=tmp_path / "protected-source", write_root=root,
+        git=tmp_path / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    return SimpleNamespace(root=root, destination=destination, staging=staging, policy=policy)
+
+
+def test_prepare_allows_actual_durable_new_link_but_never_replaces_winner(profile, link_case, monkeypatch):
+    # Exercise the project's actual primitive, including mkstemp naming and
+    # exclusive link publication. Only the link event is routed through the
+    # new policy; no permanent audit hook is installed in this test process.
+    from data_sheets_schema import native_attempt_supervisor as supervisor
+
+    output = link_case.destination
+    original = os.link
+    observed = []
+
+    def checked_link(source, target, *, src_dir_fd=None, dst_dir_fd=None, follow_symlinks=True):
+        link_case.policy.audit("os.link", (str(source), str(target),
+            -1 if src_dir_fd is None else src_dir_fd, -1 if dst_dir_fd is None else dst_dir_fd))
+        observed.append((Path(source), Path(target)))
+        return original(source, target, src_dir_fd=src_dir_fd,
+                        dst_dir_fd=dst_dir_fd, follow_symlinks=follow_symlinks)
+
+    with monkeypatch.context() as local:
+        local.setattr(supervisor.os, "link", checked_link)
+        supervisor.durable_new(output, b"first retained result\n")
+        assert output.read_bytes() == b"first retained result\n"
+        assert len(observed) == 1 and observed[0][0].parent == output.parent
+        assert not observed[0][0].exists(), "successful private staging link was not cleaned up"
+        assert output.stat().st_nlink == 1
+        with pytest.raises(profile.BoundaryError):
+            supervisor.durable_new(output, b"replacement must refuse\n")
+    assert output.read_bytes() == b"first retained result\n"
+    assert len(observed) == 1
+
+
+@pytest.mark.parametrize("direction", ["source", "destination"])
+def test_prepare_link_cannot_cross_case_boundary(profile, link_case, tmp_path, direction):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    source, target = link_case.staging, link_case.destination
+    if direction == "source":
+        source = outside / link_case.staging.name
+        source.write_bytes(b"outside source must remain untouched")
+    else:
+        target = outside / target.name
+    before = source.read_bytes()
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (str(source), str(target), -1, -1))
+    assert source.read_bytes() == before and not target.exists()
+
+
+@pytest.mark.parametrize("kind", ["source_symlink", "destination_symlink", "parent_symlink",
+    "source_directory", "source_already_linked", "different_parent", "unrelated_name", "empty_suffix"])
+def test_prepare_link_requires_one_private_regular_staging_file(profile, link_case, tmp_path, kind):
+    source, target = link_case.staging, link_case.destination
+    if kind == "source_symlink":
+        real = link_case.root / "real-data"
+        real.write_bytes(b"preserve original")
+        source.unlink()
+        source.symlink_to(real)
+    elif kind == "destination_symlink":
+        target.symlink_to(link_case.root / "absent")
+    elif kind == "parent_symlink":
+        alias = link_case.root / "alias"
+        alias.symlink_to(source.parent, target_is_directory=True)
+        source, target = alias / source.name, alias / target.name
+    elif kind == "source_directory":
+        source.unlink(); source.mkdir()
+    elif kind == "source_already_linked":
+        os.link(source, tmp_path / "external-alias")
+    elif kind == "different_parent":
+        target = link_case.root / target.name
+    elif kind == "unrelated_name":
+        replacement = source.with_name("unrelated.tmp")
+        source.rename(replacement); source = replacement
+    else:
+        replacement = source.with_name("." + target.name + ".pending-")
+        source.rename(replacement); source = replacement
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (str(source), str(target), -1, -1))
+    assert not target.exists()  # A refused dangling symlink still does not resolve.
+    if kind == "destination_symlink":
+        assert target.is_symlink()
+
+
+@pytest.mark.parametrize("fds", [(0, -1), (-1, 0), (True, -1), (-1, False), (-2, -1)])
+def test_link_and_rename_refuse_directory_descriptor_overrides(profile, link_case, fds):
+    for event in ("os.link", "os.rename"):
+        with pytest.raises(profile.BoundaryError):
+            link_case.policy.audit(event, (str(link_case.staging), str(link_case.destination), *fds))
+    assert link_case.staging.read_bytes() == b"synthetic captured bytes\n"
+    assert not link_case.destination.exists()
+
+
+def test_links_require_absolute_paths_and_measurement_stays_read_only(profile, link_case, monkeypatch):
+    monkeypatch.chdir(link_case.staging.parent)
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.link", (link_case.staging.name, link_case.destination.name, -1, -1))
+    measurement = profile.PhasePolicy(source=link_case.root, write_root=None,
+        git=link_case.root / "not-executed-git",
+        tools=SimpleNamespace(executable_identity=lambda _: {"invented": True}))
+    with pytest.raises(profile.BoundaryError, match="measurement forbids"):
+        measurement.audit("os.link", (str(link_case.staging), str(link_case.destination), -1, -1))
+    with pytest.raises(profile.BoundaryError):
+        link_case.policy.audit("os.symlink", (str(link_case.staging), str(link_case.destination), -1))
+    assert not link_case.destination.exists()

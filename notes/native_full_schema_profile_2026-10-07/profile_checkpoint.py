@@ -262,6 +262,26 @@ class PhasePolicy:
         require(p.resolve() == p and p.is_relative_to(self.write_root),
                 "preparation write is outside fresh checkpoint")
 
+    def publication_link(self, source, destination, source_dir_fd, destination_dir_fd):
+        require(all(fd is None or type(fd) is int and fd == -1
+                    for fd in (source_dir_fd, destination_dir_fd)),
+                "publication hard-link dir_fd overrides are forbidden")
+        require(not isinstance(source, int) and not isinstance(destination, int),
+                "publication hard-link requires absolute paths")
+        source, destination = Path(os.fsdecode(source)), Path(os.fsdecode(destination))
+        require(source.is_absolute() and destination.is_absolute(),
+                "publication hard-link requires absolute paths")
+        self.writable(source); self.writable(destination)
+        prefix = "." + destination.name + ".pending-"
+        require(source.parent == destination.parent and source.name.startswith(prefix)
+                and len(source.name) > len(prefix), "hard-link is not a local pending publication")
+        require(source.is_file() and not source.is_symlink(), "publication source is not a regular physical file")
+        info = source.lstat()
+        require(stat.S_ISREG(info.st_mode) and info.st_nlink == 1,
+                "publication source must have one existing link")
+        require(not destination.exists() and not destination.is_symlink(),
+                "publication hard-link destination already exists")
+
     def audit(self, event, args):
         if event.startswith("socket.") or event in {"os.system", "os.exec", "os.posix_spawn", "os.posix_spawnp",
                 "os.fork", "os.forkpty", "pty.spawn"}:
@@ -283,8 +303,13 @@ class PhasePolicy:
             self.writable(args[0])
         if event == "os.rename":
             # The actual publisher replaces only its exact journal after CAS.
+            require(len(args) == 4 and all(fd is None or type(fd) is int and fd == -1 for fd in args[2:]),
+                    "journal replacement dir_fd overrides are forbidden")
             self.writable(args[0]); self.writable(args[1])
-        if event in {"os.link", "os.symlink"}:
+        if event == "os.link":
+            require(len(args) == 4, "publication hard-link audit shape differs")
+            self.publication_link(*args)
+        if event == "os.symlink":
             raise BoundaryError("unregistered filesystem mutation forbidden")
 
     def install(self):

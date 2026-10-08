@@ -92,6 +92,13 @@ outside the exact Git allowance; see review issue
 
 Preparation may write only inside its new external case directory. Real journal
 publication retains its exact-predecessor replacement and durable writes. All
+create-once publications retain the original writer's atomic hard-link from a
+single-link regular `.DESTINATION.pending-*` sibling to a new destination.
+Both paths must be physical and inside the fresh preparation case; descriptor
+overrides, symlinks, existing destinations and every measurement-phase link
+remain forbidden. The second preparation correctly refused the earlier missing
+allowance; its failed case is retained, and the driver correction requires a
+fresh preparation ([#4628](https://github.com/bridge2ai/data-sheets-schema/issues/4628)). All
 original recovery/source inputs are verified before and after. Measurement
 forbids filesystem writes and networking. The sole process allowance is the
 pinned local Git executable, at the recovered source directory, with exactly
