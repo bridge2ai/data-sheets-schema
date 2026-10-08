@@ -61,8 +61,16 @@ obligations pass; all human/scientific/provider holds remain in place.
 
 ## Validation status
 
-Focused offline tests are prepared for coordinator execution after independent
-review. They cover failed and partial cases, missing fixtures, collisions,
+The first focused coordinator run at
+`0893589bc8153a4416bf9c6f1370dd5771d01da2` completed with 34 passed and one
+failed test (6.26 seconds reported by the coordinator; no warnings). The
+failure was a test assumption that a symlink always has mode `0777`; this macOS
+fixture's actual `lstat` mode was `0755`, which the implementation correctly
+preserved. Under #4677, the assertion now uses the actual link mode and also
+checks that mode in the archive. External-byte and non-dereference controls are
+unchanged. No production behavior changed; a fresh focused run is pending.
+
+The focused controls cover failed and partial cases, missing fixtures, collisions,
 mode/byte drift, bounded refusal, unrelated-node exclusion, symlink isolation,
 separate workers and preservation of original test outcomes. No native test,
 provider call, diagnostic replay or CI rerun has been performed for this change.

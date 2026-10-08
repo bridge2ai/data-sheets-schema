@@ -2,6 +2,7 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+import stat
 import tarfile
 from types import SimpleNamespace
 
@@ -95,10 +96,12 @@ def test_external_symlinks_and_json_authority_paths_are_never_followed(tmp_path)
     (selected / 'authority.json').write_text(json.dumps({'path': str(secret)}))
     result = capture(tmp_path, tmp_path / 'capture')
     assert result['status'] == 'retained'
-    assert result['before']['file-link'] == {'mode': 0o777, 'type': 'symlink', 'target': str(secret)}
+    link_mode = stat.S_IMODE((selected / 'file-link').lstat().st_mode)
+    assert result['before']['file-link'] == {'mode': link_mode, 'type': 'symlink', 'target': str(secret)}
     assert result['before']['dir-link']['type'] == 'symlink'
     with tarfile.open(tmp_path / 'capture/case.tar.gz') as archive:
         assert archive.getmember('case/file-link').issym()
+        assert archive.getmember('case/file-link').mode == link_mode
         assert archive.getmember('case/dir-link').issym()
         assert not any('unrelated.txt' in name for name in archive.getnames())
         assert all(secret.read_bytes() not in archive.extractfile(member).read()
