@@ -183,41 +183,22 @@ def transform(input_file, output, merge, inputs, primary, mapping_file=None):
 @rocrate.command()
 @click.argument('input_files', nargs=-1, type=click.Path(exists=True), required=True)
 @click.option('--output', '-o', type=click.Path(), required=True,
-              help='Output merged RO-Crate file')
+              help='Retained option; this retired command never writes an output.')
 @click.option('--primary', type=click.Path(exists=True),
-              help='Primary RO-Crate file (takes precedence in conflicts)')
+              help='Retained option; no raw merge or conflict precedence is applied.')
 def merge(input_files, output, primary):
-    """Merge multiple RO-Crate files into one."""
-    require_repo_context("d4d rocrate merge")
+    """Retired: raw RO-Crate merging is unsupported (#4593).
 
-    click.echo(f"🔀 Merging {len(input_files)} RO-Crate files...")
-
-    # Import and call the merger script
-    setup_repo_imports()
-
-    try:
-        from rocrate_merger import ROCrateMerger
-
-        merger = ROCrateMerger()
-
-        # Load all input files
-        for input_file in input_files:
-            is_primary = (primary and Path(input_file) == Path(primary))
-            merger.add_rocrate(input_file, is_primary=is_primary)
-            click.echo(f"  + {input_file}{' (primary)' if is_primary else ''}")
-
-        # Merge and save
-        merged = merger.merge()
-
-        import json
-        with open(output, 'w') as f:
-            json.dump(merged, f, indent=2)
-
-        click.echo(f"✓ Merged RO-Crate saved to {output}")
-
-    except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
-        sys.exit(1)
+    The command and options remain recognizable so callers receive an explicit
+    refusal. Dataset transformation and graph concatenation are different
+    operations and cannot supply this command's missing identity/root contract.
+    """
+    raise click.ClickException(
+        "Raw RO-Crate merging is retired (#4593): no supported identity, root "
+        "and conflict policy is defined. This command cannot produce merged "
+        "RO-Crate JSON. Keep source crates separate; see "
+        "https://github.com/bridge2ai/data-sheets-schema/issues/4593."
+    )
 
 
 @rocrate.command()
