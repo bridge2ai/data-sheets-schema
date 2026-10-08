@@ -33,8 +33,9 @@ inventories are not sent. Inventory specifications are deduplicated in a shared
 catalog; each target pins its specification reference. A single target expands
 that specification for request rendering. No ambient profile is selected. A slot's
 `values_from` names must have entries in that vocabulary or the target is blocked.
-Profile-specific registry resolution and manifest selection belong to the later
-planner integration.
+The [version-2 planner](offline_support_plan.md#nested-version-2) captures an
+explicit profile vocabulary or caller-supplied vocabulary override together
+with the selected manifest. This pure inventory API does not select them.
 
 Each populated inline object or list member has a `relationship_edge` target,
 such as `/creators/1` or `/data_governance/committee_contact`. Its question is
@@ -123,8 +124,13 @@ a later, reviewed integration.
   controls. Supplying full/core context does not establish that this draft prompt
   detects self-reference defects. A multi-clause string still yields one verdict
   under declared precedence, not independent coverage of every clause.
-- Version and review execution, output validation, usage/reasoning ledgers and
-  any cache loader. There is currently no v3 provider execution route.
+- Select and review the exact registration before using the implemented
+  [registered executor](nested-support-execution.md). The separate
+  [saved-response reader](nested-support-results.md) validates captured replies;
+  neither route reuses historical judgement caches or clears scientific holds.
+  The [calibration evidence workflow](../notes/support_calibration_2026-10-07/README.md)
+  binds explicit control labels to a registration and reports captured outcomes
+  offline. It does not adjudicate labels or perform empirical calibration itself.
 - Complete independent empirical calibration (#3343) and obtain the required
   paid-run authorization before a canary or the 24-record cohort.
 

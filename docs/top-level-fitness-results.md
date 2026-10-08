@@ -77,6 +77,42 @@ corresponding targets without propagating a top-level fitness score to nested
 support targets. These engineering checks do not complete empirical calibration,
 human control review, or the parent evaluation campaign in #2929.
 
+## Registered support selections (index v2)
+
+```sh
+d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --support-execution /absolute/captured-support-run --output support-fitness-index
+d4d evaluate fitness-results recheck-index --index support-fitness-index
+```
+
+`--support-execution` captures and rechecks an existing
+`nested_support_execution_v1` run and selects `top_level_fitness_index_v2`.
+`--execution` separately supplies a top-level fitness run; either option can be
+used without the other. With neither `--support-execution` nor
+`--rubric-associations`, the existing v1 format remains unchanged.
+
+Every registered support selection remains a row, including failed, admitted
+but incomplete, and unstarted attempts. The denominator is all support selections
+in that registration, not the entire planned cohort or only supplied result
+directories. The support descriptor must bind the same captured plan as the
+fitness descriptor, and every support selection's exact record must be among
+the fitness descriptor's selected records. Foreign plans or records refuse.
+
+Relationship-edge and attribute-value strata each retain selected, missing,
+rejected and accepted counts. `support_dispatch_counts` separately retains
+`accepted`, `failed`, `spent_unknown` and `not_started`. As with fitness above,
+a valid verdict inside a failed HTTP body remains rejected, while an admitted
+call without a complete response is missing with `spent: true`; an unstarted
+call is missing with `spent: false`. Raw assessments do not override dispatch.
+Optional `--support-result` inputs must exactly match their ledger-derived
+results and cannot add attempts outside the registration.
+
+Recheck uses the portable index's captured artifacts after relocation. Support
+mode, decision references and original readiness remain explicit and separate
+from fitness metadata. The index does not dispatch, retry, approve labels or
+propagate fitness scores. Combining `--rubric-associations` selects index v3
+while retaining this support execution accounting.
+
 ## Captured rubric identity declarations (index v3)
 
 ```sh
