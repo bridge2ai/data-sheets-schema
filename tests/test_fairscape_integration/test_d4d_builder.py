@@ -198,11 +198,11 @@ RO-Crate: Root Dataset\tcreators\tPerson\t\tCreators\tauthor\t1\t1
         self.assertIsNone(result)
 
     def test_transform_uri_field(self):
-        """Test URI transformation."""
+        """The DOI slot takes the bare form, not the generic URI form."""
         dataset = self.builder.build_dataset(self.rocrate_parser)
 
         self.assertIn('doi', dataset)
-        self.assertEqual(dataset['doi'], 'https://doi.org/10.1234/test')
+        self.assertEqual(dataset['doi'], '10.1234/test')
 
     def test_transform_uri_doi(self):
         """Test DOI transformation (add https prefix)."""

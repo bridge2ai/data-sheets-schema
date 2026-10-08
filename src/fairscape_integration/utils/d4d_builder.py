@@ -9,6 +9,8 @@ to D4D classes and fields according to the TSV mapping specification.
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
+from data_sheets_schema.legacy_doi import doi_value, source_value
+
 
 class D4DBuilder:
     """Build D4D YAML structure from mapped RO-Crate data."""
@@ -58,10 +60,13 @@ class D4DBuilder:
 
             # Try to extract value from RO-Crate
             value = None
-            for rc_prop in rocrate_props:
-                value = rocrate_parser.get_property(rc_prop)
-                if value is not None:
-                    break
+            if d4d_field == 'doi':
+                value = source_value(rocrate_parser, rocrate_props)
+            else:
+                for rc_prop in rocrate_props:
+                    value = rocrate_parser.get_property(rc_prop)
+                    if value is not None:
+                        break
 
             if value is not None:
                 # Apply transformations based on field type
@@ -89,6 +94,10 @@ class D4DBuilder:
         mapping_info = self.mapping.get_mapping_info(field_name)
         if not mapping_info:
             return value
+
+        # Dataset.doi requires the bare form, independently of stale TSV types.
+        if field_name == 'doi':
+            return doi_value(value)
 
         field_type = mapping_info.get('Type', '').lower()
 
