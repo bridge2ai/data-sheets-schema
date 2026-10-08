@@ -7,9 +7,12 @@ temporary synthetic files and the reviewed diagnostic utility.
 
 from copy import deepcopy
 import json
+import os
 from pathlib import Path
+import platform
 import signal
 import subprocess
+import sys
 from types import ModuleType, SimpleNamespace
 
 import pytest
@@ -377,3 +380,32 @@ def test_parent_isolation_is_checked_before_utility_or_input_access(profile, par
     with pytest.raises(ValueError, match="requires -I -B -S isolation"):
         profile.dispatch(case.args)
     assert not case.args.output.exists() and case.verifications == []
+
+
+def test_environment_disclosure_uses_local_values_without_processor_probe(profile, monkeypatch):
+    """#4633: final reporting cannot launch uname after a valid checkpoint."""
+    actual_uname = os.uname
+    expected = {"python": sys.version, "platform": sys.platform,
+                "machine": actual_uname().machine}
+    calls = []
+
+    def local_uname():
+        calls.append("local uname syscall")
+        return actual_uname()
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("environment reporting attempted a process or processor probe")
+
+    monkeypatch.setattr(profile.os, "uname", local_uname)
+    for name in ("Popen", "run", "check_output", "check_call", "call"):
+        monkeypatch.setattr(subprocess, name, forbidden)
+    for name in ("platform", "processor", "uname", "machine", "system"):
+        monkeypatch.setattr(platform, name, forbidden)
+    monkeypatch.setattr(os, "system", forbidden)
+    monkeypatch.setattr(os, "popen", forbidden)
+
+    value = profile.environment_disclosure()
+    assert value == expected
+    assert set(value) == {"python", "platform", "machine"}
+    assert all(type(item) is str for item in value.values())
+    assert calls == ["local uname syscall"]

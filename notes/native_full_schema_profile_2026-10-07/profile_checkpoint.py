@@ -22,7 +22,6 @@ import json
 import marshal
 import os
 from pathlib import Path
-import platform
 import shlex
 import shutil
 import signal
@@ -70,6 +69,11 @@ def require(condition, reason):
 def require_isolation():
     require(sys.flags.isolated == 1 and sys.flags.no_site == 1 and sys.dont_write_bytecode,
             "diagnostic requires -I -B -S isolation")
+
+
+def environment_disclosure():
+    """Report interpreter/OS identifiers without command-based feature probes."""
+    return {"python": sys.version, "platform": sys.platform, "machine": os.uname().machine}
 
 
 def canonical(value):
@@ -765,7 +769,7 @@ def child(config):
         "case_inventory": inventory, "loaded_closure": closure, "git": policy.verify(),
         "python_identity": python_pin, "flags": {"isolated": sys.flags.isolated, "no_site": sys.flags.no_site,
                                                 "dont_write_bytecode": sys.dont_write_bytecode},
-        "environment": {"python": sys.version, "platform": platform.platform(), "machine": platform.machine()},
+        "environment": environment_disclosure(),
         "recovered_provenance": verified["provenance"]}
 
 

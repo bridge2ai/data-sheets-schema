@@ -85,6 +85,15 @@ origins; they are not an authenticated interpreter or operating-system proof.
 environment or every metadata, dependency-resource or operating-system read.
 Selected schema import closures, policy, runtime and case files have separate
 complete pins; the existing authority checks declared dependency versions.
+Environment disclosure uses only in-process values: `python` is `sys.version`,
+`platform` is Python's `sys.platform` OS identifier, and `machine` is the kernel's
+`os.uname().machine` architecture. It does not invoke `uname` or run platform or
+processor feature probes. These fields keep the report's existing three-key
+shape; `platform` is not a complete OS/version description.
+Preparation 03 reached final report construction before the old
+`platform.platform()` attempted a forbidden `uname -p` subprocess. Its failed
+case is retained; the in-process reporting correction requires a fresh
+preparation ([#4633](https://github.com/bridge2ai/data-sheets-schema/issues/4633)).
 The parent also refuses a call without `-I -B -S` before loading the pinned
 utility. Process replacement through `os.exec` is forbidden, as are subprocesses
 outside the exact Git allowance; see review issue
