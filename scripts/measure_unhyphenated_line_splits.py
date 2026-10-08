@@ -145,16 +145,6 @@ def letter_breaks(lines: list[str]) -> list[tuple[int, str, str]]:
     return out
 
 
-def joinable_breaks(lines: list[str]) -> list[int]:
-    """The line number of every break the missing reading could apply to:
-    both lines carry something other than white space, and the first does
-    not end in a hyphen, whose break `matching_lines` reads already (the
-    compound reading is this join). What ends and starts the lines is not
-    judged, so a letter/digit, digit/digit or punctuation break is one."""
-    return [n for n, (this, after) in enumerate(zip(lines, lines[1:]), 1)
-            if this.strip() and after.strip() and not this.rstrip().endswith("-")]
-
-
 def window_load(lines: dict[int, tuple[str, str]], width: int) -> tuple[int, int]:
     """(windows of `width` consecutive lines holding two or more hyphenated
     breaks, the most such breaks in one window): the windows `_readings`
@@ -165,35 +155,24 @@ def window_load(lines: dict[int, tuple[str, str]], width: int) -> tuple[int, int
     return sum(1 for k in per_window if k >= 2), max(per_window, default=0)
 
 
-def crossing_checks(lines: list[str], line: int) -> set[str]:
-    """The checks with a match across the break after `line` (1-based) read
-    as nothing: a match of the check's pattern on that line and the next,
-    joined with their facing white space removed, that takes a character
-    from each side. Each start position is searched, as in `matching_lines`."""
-    this, after = lines[line - 1].rstrip(), lines[line].lstrip()
-    text, join = this + after, len(this)
-    out = set()
-    for check in at.CHECKS:
-        rx, pos = re.compile(check.pattern), 0
-        while (m := rx.search(text, pos)) is not None:
-            if m.start() < join < m.end():
-                out.add(check.name)
-                break
-            pos = m.start() + 1
-    return out
-
-
-def moved_checks(lines: list[str], joined: Iterable[int], hits: dict[str, set[int]]) -> dict[str, str]:
+def moved_checks(lines: dict[int, tuple[str, str]], joined: Iterable[int],
+                 hits: dict[str, set[int]]) -> dict[str, str]:
     """Check name -> `status` where a match across one of the `joined`
     breaks would take a check with no matching line (`hits`, from
     `matching_lines` on the bytes as they are) to `unknown`, else `lines`
-    where it would add a line to those of a check already `unknown`."""
+    where it would add a line to those of a check already `unknown`.
+
+    Dictionary-selected split-word breaks use the same K=1 matcher as the
+    every-break column. Read each adjacent pair independently, retaining
+    its original line numbers and adding no surrounding context (#3644).
+    """
     out: dict[str, str] = {}
     for line in joined:
-        for name in crossing_checks(lines, line):
-            if not hits[name]:
+        pair = {line: lines[line], line + 1: lines[line + 1]}
+        for name, state in joined_moves(pair, 1, hits).items():
+            if state == "status":
                 out[name] = "status"
-            elif {line, line + 1} - hits[name]:
+            else:
                 out.setdefault(name, "lines")
     return out
 
@@ -239,9 +218,9 @@ def measure(text: str, dictionary: set[str] = frozenset(), compare_window: int |
             splits.append({"line": n, "tail": tail, "head": head, "word": joined})
     _, lines = at._lines_by_chunk(text, dict(DEFAULT_RULE))
     hits = {c.name: set(at.matching_lines(c.pattern, lines)) for c in at.CHECKS}
-    moved = moved_checks(raw_lines, [s["line"] for s in splits], hits)
-    joinable = joinable_breaks(raw_lines)
-    moved_all = moved_checks(raw_lines, joinable, hits)
+    moved = moved_checks(lines, [s["line"] for s in splits], hits)
+    joinable = at.joinable_breaks(lines)
+    moved_all = joined_moves(lines, 1, hits)
     mixed, most = window_load(lines, at.MIXED_WINDOW_LINES)
     wider: dict[str, Any] = {}
     if compare_window:
