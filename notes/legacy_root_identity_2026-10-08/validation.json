@@ -1,0 +1,1246 @@
+{
+  "format": "legacy_root_identity_validation_v1",
+  "issues": {
+    "implementation": 4672,
+    "coverage_review": 4674,
+    "parents_remaining_open": [
+      4594,
+      2915
+    ]
+  },
+  "baseline": {
+    "commit": "f2f1b3f465fa1a06adf150285d2ec1e9083a7839",
+    "tree": "94882d696404a25dc3dee83d1dacab4b957a1956",
+    "production_predecessor": "1a98255bb28451500d4864876a16d9c6c2f6b435",
+    "selected_source_pins": {
+      ".claude/agents/scripts/d4d_builder.py": {
+        "bytes": 10840,
+        "sha256": "d71f0fc6959a006b3d87b0458f6c12fa953e22b3dae03eb52569a2b6103ab251"
+      },
+      ".claude/agents/scripts/field_prioritizer.py": {
+        "bytes": 10263,
+        "sha256": "031d1d0f8ac000f4c9f74eff18ea268dbfa23901fe9b52e7d5b5ddba1ed99e00"
+      },
+      ".claude/agents/scripts/informativeness_scorer.py": {
+        "bytes": 12065,
+        "sha256": "c62469f1631b342c3ece916f87f4cd7e377e587762cde623a3848ec149594a2e"
+      },
+      ".claude/agents/scripts/mapping_loader.py": {
+        "bytes": 6587,
+        "sha256": "0214e4f250367a93fe97cccb3ae93bf1ee8c9047f6db1fcb82ff68c582bb3e2c"
+      },
+      ".claude/agents/scripts/rocrate_merger.py": {
+        "bytes": 12435,
+        "sha256": "f39b4aa31164dc477cb58067de002e6b19c182b61985b447eb6917da1153d68c"
+      },
+      ".claude/agents/scripts/rocrate_parser.py": {
+        "bytes": 1930,
+        "sha256": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd"
+      },
+      "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv": {
+        "bytes": 24216,
+        "sha256": "28af70ed814690645ecf58b6bfd0a716d5300866c0018eaf07704387a410614e"
+      },
+      "notes/parser_root_policy_2026-10-07/replay.py": {
+        "bytes": 8793,
+        "sha256": "1c62c61e2cd646b23218594696ccd019989f6f8a26babc5fdbd1ccfcf351b9c2"
+      },
+      "notes/parser_root_policy_2026-10-07/validation.json": {
+        "bytes": 19691,
+        "sha256": "efa7d37ec3999b891700d85a6a5d95eda882b958f2111e6f38a6f0d42c158efc"
+      },
+      "poetry.lock": {
+        "bytes": 592155,
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+      },
+      "pyproject.toml": {
+        "bytes": 4446,
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b"
+      },
+      "src/data_sheets_schema/legacy_doi.py": {
+        "bytes": 2148,
+        "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606"
+      },
+      "src/data_sheets_schema/legacy_publication.py": {
+        "bytes": 6374,
+        "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+      },
+      "src/data_sheets_schema/rocrate_map.py": {
+        "bytes": 52876,
+        "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592"
+      },
+      "src/data_sheets_schema/rocrate_sources.py": {
+        "bytes": 11731,
+        "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+      },
+      "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+        "bytes": 1442513,
+        "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+      },
+      "src/data_sheets_schema/scope.py": {
+        "bytes": 25356,
+        "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+      },
+      "src/fairscape_integration/constants.py": {
+        "bytes": 8887,
+        "sha256": "bba150257a445af4326f186decf18b37c0878f5d53cb84c2fa1674de2188f1e6"
+      },
+      "src/fairscape_integration/fairscape_to_d4d.py": {
+        "bytes": 97645,
+        "sha256": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd"
+      },
+      "src/fairscape_integration/utils/d4d_builder.py": {
+        "bytes": 10025,
+        "sha256": "38a258d9efcf4706b98fc897af3d22c8df2570b63553945437780814469b939e"
+      },
+      "src/fairscape_integration/utils/field_prioritizer.py": {
+        "bytes": 6815,
+        "sha256": "3cfc67a3609ed766825184bd6e1750e79e2358053960f09dcfee8279daae889e"
+      },
+      "src/fairscape_integration/utils/informativeness_scorer.py": {
+        "bytes": 10968,
+        "sha256": "85664f12e621964869860aa45cf5080fd78806f0832156366bbee7940b64fff0"
+      },
+      "src/fairscape_integration/utils/mapping_loader.py": {
+        "bytes": 6358,
+        "sha256": "d90341146c566ed5f03e71213a159b85ff3500cacce78e2f375bf22e4b2d2b67"
+      },
+      "src/fairscape_integration/utils/rocrate_merger.py": {
+        "bytes": 12035,
+        "sha256": "7b7e98d48ecc1043de077c2db7342e08b216d05d9c10778a986c1b922a836b56"
+      },
+      "src/fairscape_integration/utils/rocrate_parser.py": {
+        "bytes": 11273,
+        "sha256": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec"
+      }
+    }
+  },
+  "candidate": {
+    "tested_and_replayed_commit": "180d1028bb25332ff296eafcbfb4533d3f6ee85d",
+    "tree": "a6d85ba51d120b1a41a74e5da4249e17a36dbf7f",
+    "selected_source_and_test_pins": {
+      ".claude/agents/scripts/d4d_builder.py": {
+        "bytes": 11281,
+        "sha256": "6b34fefa7952e84e215f23ce2031e3abf71700085c44ac53e182ae451aad2271"
+      },
+      ".claude/agents/scripts/field_prioritizer.py": {
+        "bytes": 10263,
+        "sha256": "031d1d0f8ac000f4c9f74eff18ea268dbfa23901fe9b52e7d5b5ddba1ed99e00"
+      },
+      ".claude/agents/scripts/informativeness_scorer.py": {
+        "bytes": 12331,
+        "sha256": "d55c17a21a3f5d38de1f88bd90c1a976a2a29751f8206a61c8731dfbee3c77bd"
+      },
+      ".claude/agents/scripts/mapping_loader.py": {
+        "bytes": 7107,
+        "sha256": "9429e9766381d69811cc464ad3e0cc3280e455535f4d5063025d045373b56137"
+      },
+      ".claude/agents/scripts/rocrate_merger.py": {
+        "bytes": 13862,
+        "sha256": "da41ad436c59115a5150db2b02a5455b785e82bd57735f7efdc0f55e2357ec93"
+      },
+      ".claude/agents/scripts/rocrate_parser.py": {
+        "bytes": 1930,
+        "sha256": "c50f88eecce97c2a53e81f58f6db0af94216ceb637322f6848c260dab7f80bfd"
+      },
+      ".claude/agents/scripts/rocrate_to_d4d.py": {
+        "bytes": 17099,
+        "sha256": "a6d299a0759f3ef7f93e73acff68325965cf98813b93885e21b3435db97b4a68"
+      },
+      "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv": {
+        "bytes": 24573,
+        "sha256": "01f5db8645ac0a98061a28e44b2c8eaac093cd8da2b8ea262a62460d31b27188"
+      },
+      "notes/parser_root_policy_2026-10-07/replay.py": {
+        "bytes": 8793,
+        "sha256": "1c62c61e2cd646b23218594696ccd019989f6f8a26babc5fdbd1ccfcf351b9c2"
+      },
+      "notes/parser_root_policy_2026-10-07/validation.json": {
+        "bytes": 19691,
+        "sha256": "efa7d37ec3999b891700d85a6a5d95eda882b958f2111e6f38a6f0d42c158efc"
+      },
+      "poetry.lock": {
+        "bytes": 592155,
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21"
+      },
+      "pyproject.toml": {
+        "bytes": 4446,
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b"
+      },
+      "src/data_sheets_schema/legacy_doi.py": {
+        "bytes": 2148,
+        "sha256": "6313c18f41feb74254834e886cb55ddb608e1872494a227150b7166cd780a606"
+      },
+      "src/data_sheets_schema/legacy_publication.py": {
+        "bytes": 6374,
+        "sha256": "faa5df37620ba6f005f7e9999ddd7653054c54808efc0988ccbd28a2a44e53a9"
+      },
+      "src/data_sheets_schema/legacy_root_identity.py": {
+        "bytes": 3882,
+        "sha256": "d839ec3a8af433d30624f8fe02518b9e4ce149f5bb8ba0a32db0101ea9b6df93"
+      },
+      "src/data_sheets_schema/rocrate_map.py": {
+        "bytes": 52876,
+        "sha256": "e3f3854ea2df26c5465e4ae3744f447d57efe6984262628f9e78ffe13c271592"
+      },
+      "src/data_sheets_schema/rocrate_sources.py": {
+        "bytes": 11731,
+        "sha256": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+      },
+      "src/data_sheets_schema/schema/data_sheets_schema_all.yaml": {
+        "bytes": 1442513,
+        "sha256": "eb543e1597b29599952359818bc741b0f23eaa3a30e7aa8c63e60212c7bbb92f"
+      },
+      "src/data_sheets_schema/scope.py": {
+        "bytes": 25356,
+        "sha256": "f586f60e1348c99bd2b0d04ce1025d3d998184e9de37b4de27abb515aa01d199"
+      },
+      "src/fairscape_integration/cli.py": {
+        "bytes": 21751,
+        "sha256": "75ceebbe98633a768287dc260d0aa9a71d0adf211a2645a382206c0b0cb23a51"
+      },
+      "src/fairscape_integration/constants.py": {
+        "bytes": 8887,
+        "sha256": "bba150257a445af4326f186decf18b37c0878f5d53cb84c2fa1674de2188f1e6"
+      },
+      "src/fairscape_integration/fairscape_to_d4d.py": {
+        "bytes": 97645,
+        "sha256": "7d5f91de8c6af1712899ddfc76f5b87fa5bb6c35c7ba079e586cc6522700f6fd"
+      },
+      "src/fairscape_integration/utils/d4d_builder.py": {
+        "bytes": 10466,
+        "sha256": "606589bdcaab93e2405d123b37b635c56dd2f04f2334c8a6cd6e47bf6a0fb0cf"
+      },
+      "src/fairscape_integration/utils/field_prioritizer.py": {
+        "bytes": 6815,
+        "sha256": "3cfc67a3609ed766825184bd6e1750e79e2358053960f09dcfee8279daae889e"
+      },
+      "src/fairscape_integration/utils/informativeness_scorer.py": {
+        "bytes": 11026,
+        "sha256": "952b8941a2ef26e28ddd95d5a6ce5ec09e874c169b12562dd84d32978c05e782"
+      },
+      "src/fairscape_integration/utils/mapping_loader.py": {
+        "bytes": 6670,
+        "sha256": "d156f910b31e7176fdf09631706e22246cb41c23889af67e0a3ca830c33c70f1"
+      },
+      "src/fairscape_integration/utils/rocrate_merger.py": {
+        "bytes": 13108,
+        "sha256": "6e9e7a36ab62b707df0323e7bf84f966c0a70853a5e3db229476f932ac75e5c4"
+      },
+      "src/fairscape_integration/utils/rocrate_parser.py": {
+        "bytes": 11273,
+        "sha256": "4c7a7f43a94b17893cde6917e75d4648bcf017f06f7aaa9e13f8cb92b83905ec"
+      },
+      "src/transformation/transform_api.py": {
+        "bytes": 34261,
+        "sha256": "24bd0c6f3dc92763b97a9d3d3202ac988eef88e8c15c90e394eb4704da0c0622"
+      },
+      "tests/test_cli/test_rocrate_transform_mapping.py": {
+        "bytes": 8103,
+        "sha256": "149b9a7b75aa35bd414418134671075424b58145ceb7347f9c1ac4ec335085b6"
+      },
+      "tests/test_cli/test_rocrate_transform_mapping_adversarial.py": {
+        "bytes": 4708,
+        "sha256": "b619461ada2b2ce8431d7f10f318c061659dd2f10656dc03e038affeb4102224"
+      },
+      "tests/test_fairscape_integration/test_d4d_builder.py": {
+        "bytes": 13549,
+        "sha256": "696a4d829adb15aebbdcdca13d0ef5bd8f931cbfccd64ef15f311700b672efeb"
+      },
+      "tests/test_fairscape_integration/test_informativeness_scorer.py": {
+        "bytes": 13782,
+        "sha256": "640119c5038fbede851c52d1b44d5e13e9ba892097235db0969dc3e76d96e0b9"
+      },
+      "tests/test_fairscape_integration/test_mapping_loader.py": {
+        "bytes": 7924,
+        "sha256": "8aac068633b5d7fea3208cf529e835ef90fed306d1d97290bf629e697988f6f0"
+      },
+      "tests/test_fairscape_integration/test_rocrate_merger.py": {
+        "bytes": 14479,
+        "sha256": "d83b2c814847f24f54dec22dd19e1247662d2a48391a3d431ef414bc6f1b5bfa"
+      },
+      "tests/test_rocrate/test_legacy_doi.py": {
+        "bytes": 12579,
+        "sha256": "fe150f57a8505b75623b78fb66060a5104495922b3ada37d341ae5f59e9f7535"
+      },
+      "tests/test_rocrate/test_legacy_envelope_adversarial.py": {
+        "bytes": 17149,
+        "sha256": "97fe763933dfc33e14934668840c364e4b8ab58b52f48ef57fe11e1d7f0448bd"
+      },
+      "tests/test_rocrate/test_legacy_publication.py": {
+        "bytes": 19018,
+        "sha256": "b61058a2e214370d2f93eaaff49296bcfe410280be7b30873202713be35fa537"
+      },
+      "tests/test_rocrate/test_legacy_publication_adversarial.py": {
+        "bytes": 16106,
+        "sha256": "b1a132a5d8ca1aa8d7a06c9c5baf6b986dc385165dc70bc2669e35aa1a5744f2"
+      },
+      "tests/test_rocrate/test_legacy_result_contract.py": {
+        "bytes": 10932,
+        "sha256": "b95715c56bd1c7ac52eb97224fbeb8b37c69bca1e1e931264ed0acc4d0ea40e4"
+      },
+      "tests/test_rocrate/test_legacy_root_gates.py": {
+        "bytes": 13090,
+        "sha256": "6dbc5c0ea1ee9a5fc61c42bec02eef0b4b294366bd1418e68b73fe424a6ef9f5"
+      },
+      "tests/test_rocrate/test_legacy_root_identity.py": {
+        "bytes": 15986,
+        "sha256": "3f38acd8beab08578af6bb9ebb4f17583bbec4628678a4b436a5f75e3b8ab5b6"
+      },
+      "tests/test_rocrate/test_legacy_root_identity_adversarial.py": {
+        "bytes": 11773,
+        "sha256": "1c4773300bf102143ef235b538fc8ead3419d4dbf5c9dc470d69aba47d964dcc"
+      }
+    },
+    "pin_count": 43,
+    "complete_implementation_changed_paths_vs_doi_production_parent": [
+      ".claude/agents/scripts/d4d_builder.py",
+      ".claude/agents/scripts/informativeness_scorer.py",
+      ".claude/agents/scripts/mapping_loader.py",
+      ".claude/agents/scripts/rocrate_merger.py",
+      ".claude/agents/scripts/rocrate_to_d4d.py",
+      "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+      "notes/legacy_root_identity_2026-10-08/README.md",
+      "src/data_sheets_schema/legacy_root_identity.py",
+      "src/fairscape_integration/cli.py",
+      "src/fairscape_integration/utils/d4d_builder.py",
+      "src/fairscape_integration/utils/informativeness_scorer.py",
+      "src/fairscape_integration/utils/mapping_loader.py",
+      "src/fairscape_integration/utils/rocrate_merger.py",
+      "src/transformation/transform_api.py",
+      "tests/test_rocrate/test_legacy_doi.py",
+      "tests/test_rocrate/test_legacy_root_gates.py",
+      "tests/test_rocrate/test_legacy_root_identity.py",
+      "tests/test_rocrate/test_legacy_root_identity_adversarial.py"
+    ],
+    "change_list_scope": "Complete tested Git diff versus DOI-fixed production parent. All changed source/test files are included in selected_source_and_test_pins. Comparison saved_comparison.declared_source_changes is only the narrower replay-source inventory delta."
+  },
+  "evidence_provenance": {
+    "invocation": "Coordinator-recorded serialized commands and commit binding; XML does not attest a Git commit.",
+    "independent_author_checks": "Parsed saved JSON/XML; compared full evidence using compare_saved.py; rehashed selected current files against each recorded Git commit; checked exact copied supplement and saved artifact pins. No producers or tests rerun.",
+    "reviewer_checks": "Independent reviewer rehashed the complete original working-tree inventory against saved entries, including modes; verified full records, raw identity disclosures, source/resource pins and runtime. Notes are added after that preservation snapshot."
+  },
+  "tests": {
+    "tests": 570,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "seconds_xml": 45.483,
+    "seconds_console_coordinator": 45.52,
+    "dependency_deprecation_warnings_coordinator": 14,
+    "module_counts": {
+      "tests.test_rocrate.test_legacy_root_identity": 95,
+      "tests.test_rocrate.test_legacy_root_identity_adversarial": 42,
+      "tests.test_rocrate.test_legacy_doi": 155,
+      "tests.test_rocrate.test_legacy_root_gates": 30,
+      "tests.test_rocrate.test_legacy_publication": 51,
+      "tests.test_rocrate.test_legacy_publication_adversarial": 39,
+      "tests.test_rocrate.test_legacy_result_contract": 19,
+      "tests.test_rocrate.test_legacy_envelope_adversarial": 28,
+      "tests.test_cli.test_rocrate_transform_mapping": 17,
+      "tests.test_cli.test_rocrate_transform_mapping_adversarial": 10,
+      "tests.test_fairscape_integration.test_d4d_builder": 37,
+      "tests.test_fairscape_integration.test_mapping_loader": 15,
+      "tests.test_fairscape_integration.test_informativeness_scorer": 14,
+      "tests.test_fairscape_integration.test_rocrate_merger": 18
+    },
+    "command_provenance": "Coordinator-confirmed actual command, with host paths replaced by descriptive variables.",
+    "environment": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHONPATH": "src:."
+    },
+    "cwd": "$CANDIDATE",
+    "command": [
+      "$PYTHON",
+      "-B",
+      "-m",
+      "pytest",
+      "tests/test_rocrate/test_legacy_root_identity.py",
+      "tests/test_rocrate/test_legacy_root_identity_adversarial.py",
+      "tests/test_rocrate/test_legacy_doi.py",
+      "tests/test_rocrate/test_legacy_root_gates.py",
+      "tests/test_rocrate/test_legacy_publication.py",
+      "tests/test_rocrate/test_legacy_publication_adversarial.py",
+      "tests/test_rocrate/test_legacy_result_contract.py",
+      "tests/test_rocrate/test_legacy_envelope_adversarial.py",
+      "tests/test_cli/test_rocrate_transform_mapping.py",
+      "tests/test_cli/test_rocrate_transform_mapping_adversarial.py",
+      "tests/test_fairscape_integration/test_d4d_builder.py",
+      "tests/test_fairscape_integration/test_mapping_loader.py",
+      "tests/test_fairscape_integration/test_informativeness_scorer.py",
+      "tests/test_fairscape_integration/test_rocrate_merger.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=$EVIDENCE/legacy-root-id-pytest-01",
+      "--junitxml=$EVIDENCE/legacy-root-id-tests-01.xml"
+    ]
+  },
+  "runtime": {
+    "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]",
+    "identity": {
+      "bytes": 5777152,
+      "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+    },
+    "dependencies": {
+      "PyYAML": "6.0.2",
+      "linkml": "1.9.3",
+      "linkml-runtime": "1.9.4"
+    }
+  },
+  "drivers": {
+    "unchanged_parser_replay": {
+      "path": "notes/parser_root_policy_2026-10-07/replay.py",
+      "bytes": 8793,
+      "sha256": "1c62c61e2cd646b23218594696ccd019989f6f8a26babc5fdbd1ccfcf351b9c2"
+    },
+    "supplement": {
+      "path": "notes/legacy_root_identity_2026-10-08/replay_supplement.py",
+      "bytes": 17043,
+      "sha256": "a45dc2e339999d5ca127d2f2a6575bad8ffafe44ee08269c97d9cf0292ee5b6d"
+    },
+    "saved_only_comparator": {
+      "path": "notes/legacy_root_identity_2026-10-08/compare_saved.py",
+      "bytes": 17054,
+      "sha256": "74d9256298c851b15836ac1ea8fa97e583e16cd21171c81c7f33fa17f9c16877"
+    }
+  },
+  "artifacts": {
+    "legacy-root-id-tests-01.xml": {
+      "bytes": 93360,
+      "sha256": "7a11b05f7831f0cf99de06bbfdcbf33236a35b9cb2f30f244518cc2a3869ee1b"
+    },
+    "legacy-root-id-baseline-replay-01/summary.json": {
+      "bytes": 245777,
+      "sha256": "50c0f1e9475abebbe31e195c34c985bb4aa14529b25b4f36156806b05ac2cd35"
+    },
+    "legacy-root-id-candidate-replay-01/summary.json": {
+      "bytes": 244729,
+      "sha256": "9a6684d4bfefde833d5b3e225d2e42bcbb0bae6344c9475cb6e0ad7a9d774541"
+    },
+    "legacy-root-id-baseline-supplement-01/summary.json": {
+      "bytes": 2143054,
+      "sha256": "b85d48c594e941ace663d30b2132cd0953aa00597c9867c75054c51de057f312"
+    },
+    "legacy-root-id-candidate-supplement-01/summary.json": {
+      "bytes": 2170108,
+      "sha256": "7c197b67e7b91d7e5742bf1e480cb27adcf4d450fe23c54a5e6d96c515210eb4"
+    },
+    "legacy-root-id-saved-comparison-02.json": {
+      "bytes": 20446,
+      "sha256": "5aa3c5e96f225655510c85a5e7b03b77245a3df15daa99a205a009877d67b842"
+    },
+    "legacy-root-id-preservation-before.json": {
+      "bytes": 4358251,
+      "sha256": "6a4d05992df40fa97145b5b8ff68509d3eff474cff1a5a7e5793db8876673529"
+    },
+    "legacy-root-id-preservation-after.json": {
+      "bytes": 4358251,
+      "sha256": "6a4d05992df40fa97145b5b8ff68509d3eff474cff1a5a7e5793db8876673529"
+    }
+  },
+  "full_checkout_preservation": {
+    "scope": "All actual files, including hidden and ignored entries, excluding .git; byte identities and modes. Notes below are added after the snapshot.",
+    "before_after_bytes_equal": true,
+    "manifest": {
+      "bytes": 4358251,
+      "sha256": "6a4d05992df40fa97145b5b8ff68509d3eff474cff1a5a7e5793db8876673529"
+    },
+    "arms": {
+      "baseline": {
+        "files": 9278,
+        "total_file_bytes": 447041975,
+        "commit": "f2f1b3f465fa1a06adf150285d2ec1e9083a7839",
+        "tree": "94882d696404a25dc3dee83d1dacab4b957a1956",
+        "zip_member": {
+          "bytes": 12242926,
+          "path": "cm4ai_release_metadata/ro-crate-metadata.json",
+          "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+        }
+      },
+      "candidate": {
+        "files": 9281,
+        "total_file_bytes": 447072243,
+        "commit": "180d1028bb25332ff296eafcbfb4533d3f6ee85d",
+        "tree": "a6d85ba51d120b1a41a74e5da4249e17a36dbf7f",
+        "zip_member": {
+          "bytes": 12242926,
+          "path": "cm4ai_release_metadata/ro-crate-metadata.json",
+          "sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e"
+        }
+      }
+    }
+  },
+  "selected_preservation": {
+    "baseline_files": 79,
+    "candidate_files": 80,
+    "saved_replay_files_per_arm": 71,
+    "equal_before_after": true
+  },
+  "results": {
+    "record_pairs": 20,
+    "ranking_pairs": 4,
+    "merge_pairs": 8,
+    "all_original_reversed_and_implementation_comparisons_equal": true,
+    "baseline_record_gates": {
+      "accepted": 0,
+      "refused": 20
+    },
+    "candidate_record_gates": {
+      "accepted": 4,
+      "refused": 16
+    },
+    "mixed_merge_gates_per_arm": {
+      "accepted": 0,
+      "refused": 8
+    },
+    "gate_denominator_per_arm": 28,
+    "remaining_errors_per_record": {
+      "CHORUS": {
+        "baseline": 32,
+        "candidate": 31
+      },
+      "VOICE": {
+        "baseline": 152,
+        "candidate": 151
+      },
+      "CM4AI_reduced": {
+        "baseline": 77,
+        "candidate": 76
+      },
+      "VOICE_provenance": {
+        "baseline": 1,
+        "candidate": 0
+      },
+      "CM4AI_original": {
+        "baseline": 77,
+        "candidate": 76
+      }
+    },
+    "new_ids": {
+      "CHORUS": "doi:10.18130/V3/XNBOPG",
+      "VOICE": "doi:10.13026/k81f-qr68",
+      "CM4AI_reduced": "doi:10.18130/V3/HIGT4C",
+      "VOICE_provenance": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+      "CM4AI_original": "doi:10.18130/V3/HIGT4C"
+    },
+    "ranking": [
+      {
+        "source": "VOICE",
+        "index": 1,
+        "scores": {
+          "d4d_coverage": 34,
+          "unique_fields": 9,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.25,
+          "total_score": 0.3223129992737836
+        },
+        "rank": 1
+      },
+      {
+        "source": "CM4AI_reduced",
+        "index": 2,
+        "scores": {
+          "d4d_coverage": 27,
+          "unique_fields": 0,
+          "metadata_richness": 0.5,
+          "technical_completeness": 0.25,
+          "total_score": 0.25833333333333336
+        },
+        "rank": 2
+      },
+      {
+        "source": "CM4AI_original",
+        "index": 4,
+        "scores": {
+          "d4d_coverage": 27,
+          "unique_fields": 0,
+          "metadata_richness": 0.5,
+          "technical_completeness": 0.25,
+          "total_score": 0.25833333333333336
+        },
+        "rank": 3
+      },
+      {
+        "source": "CHORUS",
+        "index": 0,
+        "scores": {
+          "d4d_coverage": 21,
+          "unique_fields": 1,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.5,
+          "total_score": 0.21798941798941796
+        },
+        "rank": 4
+      },
+      {
+        "source": "VOICE_provenance",
+        "index": 3,
+        "scores": {
+          "d4d_coverage": 3,
+          "unique_fields": 1,
+          "metadata_richness": 0.25,
+          "technical_completeness": 0.0,
+          "total_score": 0.1648148148148148
+        },
+        "rank": 5
+      }
+    ],
+    "ranked_primary": "VOICE",
+    "explicit_fallback_primary": "VOICE_provenance",
+    "construction_statistics_delta": {
+      "fields_from_primary": 1,
+      "total_unique_fields": 1,
+      "all_other_statistics": 0
+    },
+    "non_id_full_records_roots_provenance_unchanged": true,
+    "all_non_id_validation_errors_retained": true,
+    "merged_identity_disclosures_checked": 40,
+    "accepted_record_prepared_byte_pin": {
+      "status": "accepted",
+      "bytes": 739,
+      "sha256": "79f89f7e0c544997d137d8dac96ff74f2a80cbd8fa72ebc3815cf2186c64fa42"
+    },
+    "saved_comparison": {
+      "format": "legacy_root_identity_comparison_v1",
+      "verified": true,
+      "artifacts": {
+        "baseline": {
+          "supplement": {
+            "bytes": 2143054,
+            "sha256": "b85d48c594e941ace663d30b2132cd0953aa00597c9867c75054c51de057f312"
+          },
+          "replay": {
+            "bytes": 245777,
+            "sha256": "50c0f1e9475abebbe31e195c34c985bb4aa14529b25b4f36156806b05ac2cd35"
+          }
+        },
+        "candidate": {
+          "supplement": {
+            "bytes": 2170108,
+            "sha256": "7c197b67e7b91d7e5742bf1e480cb27adcf4d450fe23c54a5e6d96c515210eb4"
+          },
+          "replay": {
+            "bytes": 244729,
+            "sha256": "9a6684d4bfefde833d5b3e225d2e42bcbb0bae6344c9475cb6e0ad7a9d774541"
+          }
+        }
+      },
+      "commits": {
+        "baseline": "f2f1b3f465fa1a06adf150285d2ec1e9083a7839",
+        "candidate": "180d1028bb25332ff296eafcbfb4533d3f6ee85d"
+      },
+      "denominators": {
+        "record_pairs": 20,
+        "ranking_pairs": 4,
+        "merge_pairs": 8,
+        "gates_per_arm": 28
+      },
+      "records": [
+        {
+          "input": "CHORUS",
+          "implementation": "packaged",
+          "order": "original",
+          "id": "doi:10.18130/V3/XNBOPG",
+          "baseline_errors": 32,
+          "candidate_errors": 31,
+          "remaining_errors_sha256": "e0a63ab6b125749b9b38e358ea6dbf24b8fc935353a3633ae2b37dc086a4763b",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE",
+          "implementation": "packaged",
+          "order": "original",
+          "id": "doi:10.13026/k81f-qr68",
+          "baseline_errors": 152,
+          "candidate_errors": 151,
+          "remaining_errors_sha256": "eb01de42fbff655ebca7bf1f2e5abc4cd5ddaacc657aa87fc05b4f2d1b0fe321",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CM4AI_reduced",
+          "implementation": "packaged",
+          "order": "original",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE_provenance",
+          "implementation": "packaged",
+          "order": "original",
+          "id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "baseline_errors": 1,
+          "candidate_errors": 0,
+          "remaining_errors_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "baseline_gate": "refused",
+          "candidate_gate": "accepted"
+        },
+        {
+          "input": "CM4AI_original",
+          "implementation": "packaged",
+          "order": "original",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CHORUS",
+          "implementation": "packaged",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/XNBOPG",
+          "baseline_errors": 32,
+          "candidate_errors": 31,
+          "remaining_errors_sha256": "e0a63ab6b125749b9b38e358ea6dbf24b8fc935353a3633ae2b37dc086a4763b",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE",
+          "implementation": "packaged",
+          "order": "reversed",
+          "id": "doi:10.13026/k81f-qr68",
+          "baseline_errors": 152,
+          "candidate_errors": 151,
+          "remaining_errors_sha256": "eb01de42fbff655ebca7bf1f2e5abc4cd5ddaacc657aa87fc05b4f2d1b0fe321",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CM4AI_reduced",
+          "implementation": "packaged",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE_provenance",
+          "implementation": "packaged",
+          "order": "reversed",
+          "id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "baseline_errors": 1,
+          "candidate_errors": 0,
+          "remaining_errors_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "baseline_gate": "refused",
+          "candidate_gate": "accepted"
+        },
+        {
+          "input": "CM4AI_original",
+          "implementation": "packaged",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CHORUS",
+          "implementation": "hidden",
+          "order": "original",
+          "id": "doi:10.18130/V3/XNBOPG",
+          "baseline_errors": 32,
+          "candidate_errors": 31,
+          "remaining_errors_sha256": "e0a63ab6b125749b9b38e358ea6dbf24b8fc935353a3633ae2b37dc086a4763b",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE",
+          "implementation": "hidden",
+          "order": "original",
+          "id": "doi:10.13026/k81f-qr68",
+          "baseline_errors": 152,
+          "candidate_errors": 151,
+          "remaining_errors_sha256": "eb01de42fbff655ebca7bf1f2e5abc4cd5ddaacc657aa87fc05b4f2d1b0fe321",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CM4AI_reduced",
+          "implementation": "hidden",
+          "order": "original",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE_provenance",
+          "implementation": "hidden",
+          "order": "original",
+          "id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "baseline_errors": 1,
+          "candidate_errors": 0,
+          "remaining_errors_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "baseline_gate": "refused",
+          "candidate_gate": "accepted"
+        },
+        {
+          "input": "CM4AI_original",
+          "implementation": "hidden",
+          "order": "original",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CHORUS",
+          "implementation": "hidden",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/XNBOPG",
+          "baseline_errors": 32,
+          "candidate_errors": 31,
+          "remaining_errors_sha256": "e0a63ab6b125749b9b38e358ea6dbf24b8fc935353a3633ae2b37dc086a4763b",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE",
+          "implementation": "hidden",
+          "order": "reversed",
+          "id": "doi:10.13026/k81f-qr68",
+          "baseline_errors": 152,
+          "candidate_errors": 151,
+          "remaining_errors_sha256": "eb01de42fbff655ebca7bf1f2e5abc4cd5ddaacc657aa87fc05b4f2d1b0fe321",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "CM4AI_reduced",
+          "implementation": "hidden",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        },
+        {
+          "input": "VOICE_provenance",
+          "implementation": "hidden",
+          "order": "reversed",
+          "id": "ark:59853/b2ai-voice-dataset-feature-ppgs",
+          "baseline_errors": 1,
+          "candidate_errors": 0,
+          "remaining_errors_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "baseline_gate": "refused",
+          "candidate_gate": "accepted"
+        },
+        {
+          "input": "CM4AI_original",
+          "implementation": "hidden",
+          "order": "reversed",
+          "id": "doi:10.18130/V3/HIGT4C",
+          "baseline_errors": 77,
+          "candidate_errors": 76,
+          "remaining_errors_sha256": "c8dc6c5bd374586c957c66998cef3af321236b65d048e31c874a9019dbfb4242",
+          "baseline_gate": "refused",
+          "candidate_gate": "refused"
+        }
+      ],
+      "ranking": [
+        {
+          "source": "VOICE",
+          "index": 1,
+          "scores": {
+            "d4d_coverage": 34,
+            "unique_fields": 9,
+            "metadata_richness": 0.25,
+            "technical_completeness": 0.25,
+            "total_score": 0.3223129992737836
+          },
+          "rank": 1
+        },
+        {
+          "source": "CM4AI_reduced",
+          "index": 2,
+          "scores": {
+            "d4d_coverage": 27,
+            "unique_fields": 0,
+            "metadata_richness": 0.5,
+            "technical_completeness": 0.25,
+            "total_score": 0.25833333333333336
+          },
+          "rank": 2
+        },
+        {
+          "source": "CM4AI_original",
+          "index": 4,
+          "scores": {
+            "d4d_coverage": 27,
+            "unique_fields": 0,
+            "metadata_richness": 0.5,
+            "technical_completeness": 0.25,
+            "total_score": 0.25833333333333336
+          },
+          "rank": 3
+        },
+        {
+          "source": "CHORUS",
+          "index": 0,
+          "scores": {
+            "d4d_coverage": 21,
+            "unique_fields": 1,
+            "metadata_richness": 0.25,
+            "technical_completeness": 0.5,
+            "total_score": 0.21798941798941796
+          },
+          "rank": 4
+        },
+        {
+          "source": "VOICE_provenance",
+          "index": 3,
+          "scores": {
+            "d4d_coverage": 3,
+            "unique_fields": 1,
+            "metadata_richness": 0.25,
+            "technical_completeness": 0.0,
+            "total_score": 0.1648148148148148
+          },
+          "rank": 5
+        }
+      ],
+      "merges": [
+        {
+          "implementation": "packaged",
+          "order": "original",
+          "mode": "ranked_primary",
+          "primary": "VOICE",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 25,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 26,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "packaged_original_ranked_primary.txt",
+            "bytes": 2765,
+            "sha256": "328c9f49a5d09decd3778c2caca30ddb2512a24b8a4138d3c045940c341baacb"
+          },
+          "candidate_report": {
+            "path": "packaged_original_ranked_primary.txt",
+            "bytes": 5619,
+            "sha256": "4710c4d4552ec5533c541582b5f66d34e057b608bcc2ade86b8e92a039d1357d"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "c7e6b23ff2687d2189d06ab202a92f2de4285d993c3eb720adc74d9991db5849"
+        },
+        {
+          "implementation": "packaged",
+          "order": "original",
+          "mode": "voice_provenance_primary",
+          "primary": "VOICE_provenance",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 2,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 3,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "packaged_original_voice_provenance_primary.txt",
+            "bytes": 2791,
+            "sha256": "7518c0c63bf66319808c0b653df597e8ef8908bb45c459d01d2599989b98320c"
+          },
+          "candidate_report": {
+            "path": "packaged_original_voice_provenance_primary.txt",
+            "bytes": 5656,
+            "sha256": "70c4ef0d9617686aab3bef21ab952045f4f896a12e1d4ccf8c05f1acec7abda4"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "3f769fdf2a04b8247e19ff6826b50db31b2f5669b20532187b32256909e20469"
+        },
+        {
+          "implementation": "packaged",
+          "order": "reversed",
+          "mode": "ranked_primary",
+          "primary": "VOICE",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 25,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 26,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "packaged_reversed_ranked_primary.txt",
+            "bytes": 2765,
+            "sha256": "d43dc3d92536144e9eca62afe64f30d4804865e0614669320f6a6e4a2938e1b8"
+          },
+          "candidate_report": {
+            "path": "packaged_reversed_ranked_primary.txt",
+            "bytes": 5664,
+            "sha256": "dbe4be77c1c9bf70c1d5e7073a17c7d9226967e3136f18323c992c0c4c57abff"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "c7e6b23ff2687d2189d06ab202a92f2de4285d993c3eb720adc74d9991db5849"
+        },
+        {
+          "implementation": "packaged",
+          "order": "reversed",
+          "mode": "voice_provenance_primary",
+          "primary": "VOICE_provenance",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 2,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 3,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "packaged_reversed_voice_provenance_primary.txt",
+            "bytes": 2791,
+            "sha256": "2f6fb12b61a1e47a669819951bcfab9f99aeb2c01e1651353a7552719d9029b7"
+          },
+          "candidate_report": {
+            "path": "packaged_reversed_voice_provenance_primary.txt",
+            "bytes": 5701,
+            "sha256": "bdf9b42a03a05599b0e4e2abe56353135e75c097ad0e96a9431dab87baf8b950"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "3f769fdf2a04b8247e19ff6826b50db31b2f5669b20532187b32256909e20469"
+        },
+        {
+          "implementation": "hidden",
+          "order": "original",
+          "mode": "ranked_primary",
+          "primary": "VOICE",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 25,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 26,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "hidden_original_ranked_primary.txt",
+            "bytes": 2765,
+            "sha256": "c670e5567c737c101754e55e8877e57f5026457948ea4462079f17f77e1758ea"
+          },
+          "candidate_report": {
+            "path": "hidden_original_ranked_primary.txt",
+            "bytes": 5619,
+            "sha256": "633554298820882b7260e727e59e29c6c047dba3eaa21fba81c1642267763bcb"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "c7e6b23ff2687d2189d06ab202a92f2de4285d993c3eb720adc74d9991db5849"
+        },
+        {
+          "implementation": "hidden",
+          "order": "original",
+          "mode": "voice_provenance_primary",
+          "primary": "VOICE_provenance",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 2,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 3,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "hidden_original_voice_provenance_primary.txt",
+            "bytes": 2791,
+            "sha256": "a71c3e0c7573099e81b8d1eca0a80aee9daa058ffb73663b413666d30f7fa482"
+          },
+          "candidate_report": {
+            "path": "hidden_original_voice_provenance_primary.txt",
+            "bytes": 5656,
+            "sha256": "f0a0eea399a09706aec99907d62fc67c0384654694c401c29f1675bd8f89db85"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "3f769fdf2a04b8247e19ff6826b50db31b2f5669b20532187b32256909e20469"
+        },
+        {
+          "implementation": "hidden",
+          "order": "reversed",
+          "mode": "ranked_primary",
+          "primary": "VOICE",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 25,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 26,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "hidden_reversed_ranked_primary.txt",
+            "bytes": 2765,
+            "sha256": "eda5382b67d0a3c1016eec3b6402cb49202f6bcb61dcfad63b104e7c792dd807"
+          },
+          "candidate_report": {
+            "path": "hidden_reversed_ranked_primary.txt",
+            "bytes": 5664,
+            "sha256": "0022d6a427cbee0ecdc79fe0df5697e4570f058f4a29db0fb3cb33b5d56bfd53"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "c7e6b23ff2687d2189d06ab202a92f2de4285d993c3eb720adc74d9991db5849"
+        },
+        {
+          "implementation": "hidden",
+          "order": "reversed",
+          "mode": "voice_provenance_primary",
+          "primary": "VOICE_provenance",
+          "baseline_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 2,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 39
+          },
+          "candidate_statistics": {
+            "total_sources": 5,
+            "fields_from_primary": 3,
+            "fields_from_secondary": 3,
+            "fields_combined": 2,
+            "fields_merged_as_arrays": 6,
+            "total_unique_fields": 40
+          },
+          "baseline_report": {
+            "path": "hidden_reversed_voice_provenance_primary.txt",
+            "bytes": 2791,
+            "sha256": "798aa869b8e54eda5d6d48f821c2475fcb0a942cedbc28ef412270447214cfa4"
+          },
+          "candidate_report": {
+            "path": "hidden_reversed_voice_provenance_primary.txt",
+            "bytes": 5701,
+            "sha256": "996ec22e134fd3f025310073febba8b37630d3dfa298d99329580994a45732d7"
+          },
+          "gate": "refused",
+          "remaining_gate_sha256": "3f769fdf2a04b8247e19ff6826b50db31b2f5669b20532187b32256909e20469"
+        }
+      ],
+      "declared_source_changes": [
+        ".claude/agents/scripts/d4d_builder.py",
+        ".claude/agents/scripts/informativeness_scorer.py",
+        ".claude/agents/scripts/mapping_loader.py",
+        ".claude/agents/scripts/rocrate_merger.py",
+        "data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv",
+        "src/fairscape_integration/utils/d4d_builder.py",
+        "src/fairscape_integration/utils/informativeness_scorer.py",
+        "src/fairscape_integration/utils/mapping_loader.py",
+        "src/fairscape_integration/utils/rocrate_merger.py"
+      ],
+      "new_source_declarations": [
+        "src/data_sheets_schema/legacy_root_identity.py"
+      ],
+      "scientific_eligibility": false,
+      "general_legacy_validity": false,
+      "limits": [
+        "Saved-evidence comparison; no producer, schema validator, scorer or merger executed here.",
+        "Source/runtime declarations are compared, not reauthenticated from their original paths.",
+        "Accepted Dataset-byte pins are saved producer observations; full records and preserved validation errors are compared directly.",
+        "Report normalization permits only observed timestamp, the separately verified ID disclosure, and explicit construction-count deltas.",
+        "No source-coverage, entity-equivalence, scientific-accuracy or general publication-validity conclusion."
+      ]
+    }
+  },
+  "warnings": {
+    "optional_fairscape_model_unavailable": "Coordinator observed optional model-import warnings during historical replay; actual legacy builder/parser/gate runs completed. This does not establish availability of the optional FAIRSCAPE integration.",
+    "test_warnings": "14 dependency deprecation warnings are coordinator console evidence; they are not encoded as a JUnit warning count."
+  },
+  "claims": {
+    "scientific_eligibility": false,
+    "source_coverage_gain": false,
+    "entity_equivalence": false,
+    "general_legacy_validity": false,
+    "historical_outputs_republished": false
+  },
+  "limitations": [
+    "Per-arm collection completion is distinct from cross-arm equivalence and Dataset validity.",
+    "Four accepted records are the two implementations and two graph orders of one VOICE provenance input; they are not four independent datasets.",
+    "All four other inputs still fail mandatory Dataset validation; all eight mixed-roster merges per arm also fail.",
+    "Ranked-primary merges retain fixed secondary order; this is not a full auto-reordered CLI replay.",
+    "Mixed-roster merges test software behavior only and do not describe a scientific combined dataset.",
+    "Construction field-count increments are not improved source coverage. No rows were retired; literal preservation is not exactMatch or none.",
+    "Accepted gate bytes were prepared and hashed in memory, not published; the saved YAML draft uses a different serialization. Full accepted records compare exactly, but prepared byte contents were not separately retained.",
+    "Saved comparator executes no repository code and cannot authenticate execution. Selected dependency versions and executable bytes are not a complete environment or import-cache snapshot.",
+    "Full drafts, raw source values, report paths and full preservation inventories stay external. Existing parser and DOI evidence remains unchanged.",
+    "Parent mapping and publication obligations under #4594/#2915, and pending human scientific reviews, remain open."
+  ]
+}
