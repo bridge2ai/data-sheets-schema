@@ -29,6 +29,12 @@ are retained. A separate immutable selection/runtime/spec declares label
 `offline-full-schema-4618-v1`, registration/attempt
 `synthetic-full-schema-4618-v1`, run date `2026-10-07`, and runtime deadline 900
 seconds. These are fresh synthetic identities, never historical labels.
+The attempt directory's basename is the exact attempt identity. Only the shared
+reservation parent is created before registration; the original registration's
+fresh-path checks then verify that attempt, evidence, output and stage directories
+remain new and disjoint. The first preparation correctly refused the earlier
+basename mismatch; its failed case is retained, and this correction requires a
+fresh preparation ([#4627](https://github.com/bridge2ai/data-sheets-schema/issues/4627)).
 
 Preparation uses the unchanged offline permission-manifest helper as fabricated
 software input. Actual registration validation checks that input; its acceptance

@@ -39,6 +39,7 @@ SOURCE_COMMIT = "0125eebbc214d0907c3b69d23758cd9441911a78"
 FORMAT = "native_full_schema_checkpoint_v1"
 CHILD_FORMAT = "native_full_schema_checkpoint_child_v1"
 LABEL = "offline-full-schema-4618-v1"
+ATTEMPT_ID = "synthetic-full-schema-4618-v1"
 PREPARE_WALL_SECONDS = 900
 MEASURE_WALL_SECONDS = 600
 MAX_REPORT_BYTES = 4 * 1024 * 1024
@@ -337,7 +338,7 @@ def fresh_authority(case, tools, imports):
     from data_sheets_schema import native_shared_selection as selection
     data = build_native_fixture(case, registered_python=str(Path(sys.executable).resolve()))
     document = data["selection"].document()
-    document.update(registration_id="synthetic-full-schema-4618-v1",
+    document.update(registration_id=ATTEMPT_ID,
                     registration_path=str(case / "authority/profile-selection.json"),
                     stage_root=str(case / "checkpoint/stages"))
     document["run"]["label"] = LABEL
@@ -375,7 +376,9 @@ def register_synthetic(case, spec, cap, runtime_path, composition, composition_p
                                {"encoded", "member", "fabricated_manifest"}, namespace)
     system = case / "authority/profile-system.txt"
     save_new(system, b"Fictional offline #4618 software checkpoint; no launch authorization.\n")
-    attempt, evidence = case / "checkpoint/attempt", case / "checkpoint/evidence"
+    reservation_parent = case / "checkpoint"
+    reservation_parent.mkdir()
+    attempt, evidence = reservation_parent / ATTEMPT_ID, reservation_parent / "evidence"
     expected = registration.permission_expectation(c.strict_json(runtime_path.read_bytes()), composition, spec,
         system.read_text() + policy.command_guidance(composition["policy"]), attempt / "cli_config",
         authority.dependency_identity())
@@ -383,8 +386,9 @@ def register_synthetic(case, spec, cap, runtime_path, composition, composition_p
     probe_path = case / "authority/fabricated-permission-observations.json"
     save_new(probe_path, c.canonical(probe))
     value = registration.registration(composition_path=composition_path, system_path=system,
-        permission_probe_path=probe_path, attempt_id="synthetic-full-schema-4618-v1",
+        permission_probe_path=probe_path, attempt_id=ATTEMPT_ID,
         attempt_directory=attempt, evidence_directory=evidence, max_draft_checks=3)
+    registration._paths(value, composition, fresh=True)
     raw = c.canonical(value)
     save_new(attempt / "registration.json", raw)
     started = c.canonical({"kind": c.KINDS["attempt"], "version": 1, "state": "started",
