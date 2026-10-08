@@ -64,7 +64,7 @@ d4d evaluate llm --file path/to/file.yaml --project X --method Y  # LLM quality
 ```bash
 d4d rocrate parse input.json                          # Parse RO-Crate
 d4d rocrate transform input.json -o output.yaml       # Convert to D4D
-d4d rocrate merge file1.json file2.json -o merged.json  # Merge RO-Crates
+d4d rocrate merge --help                             # Retired: raw merge is unsupported (#4593)
 ```
 
 ### Schema Operations
@@ -90,7 +90,7 @@ d4d render html input.yaml -o output.html             # Render to HTML
 - **d4d utils**: status, validate-preprocessing
 - **d4d download**: sources, preprocess, concatenate
 - **d4d evaluate**: presence, llm
-- **d4d rocrate**: parse, transform, merge
+- **d4d rocrate**: parse, transform; `merge` is retained only to explain its retirement (#4593)
 - **d4d schema**: stats, validate
 - **d4d render**: html, generate-all
 

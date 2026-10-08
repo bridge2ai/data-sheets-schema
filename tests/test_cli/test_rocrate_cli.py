@@ -110,48 +110,20 @@ class TestROCrateCLI(unittest.TestCase):
         self.assertTrue(output_file.exists(), msg=result.output)
         self.assertIn("Parsed 1 entities", result.output)
 
-    def test_merge_invokes_merger_with_primary_marker(self):
-        calls = []
-
-        class FakeMerger:
-            def add_rocrate(self, input_file, is_primary=False):
-                calls.append(("add", input_file, is_primary))
-
-            def merge(self):
-                calls.append(("merge",))
-                return {"merged": True}
-
-        fake_modules = build_module_tree("rocrate_merger", ROCrateMerger=FakeMerger)
+    def test_raw_merge_refuses_with_real_cli_and_preserves_existing_output(self):
+        """#4593: the actual command must not depend on an invented merger API."""
         output_file = self.test_path / "merged.json"
-
-        with patch("data_sheets_schema.cli.rocrate.require_repo_context"), \
-             patch("data_sheets_schema.cli.rocrate.setup_repo_imports"), \
-             patch.dict(sys.modules, fake_modules):
-            result = self.runner.invoke(
-                cli,
-                [
-                    "rocrate",
-                    "merge",
-                    str(self.input_a),
-                    str(self.input_b),
-                    "--primary",
-                    str(self.input_b),
-                    "-o",
-                    str(output_file),
-                ],
-            )
-
-        self.assertEqual(result.exit_code, 0, msg=result.output)
-        self.assertTrue(output_file.exists(), msg=result.output)
-        self.assertEqual(
-            calls,
-            [
-                ("add", str(self.input_a), False),
-                ("add", str(self.input_b), True),
-                ("merge",),
-            ],
+        output_file.write_bytes(b"retained output sentinel\n")
+        before = [path.read_bytes() for path in (self.input_a, self.input_b, output_file)]
+        result = self.runner.invoke(
+            cli,
+            ["rocrate", "merge", str(self.input_a), str(self.input_b),
+             "--primary", str(self.input_b), "-o", str(output_file)],
         )
-        self.assertIn("Merged RO-Crate saved", result.output)
+        self.assertEqual(result.exit_code, 1, msg=result.output)
+        self.assertIn("Raw RO-Crate merging is retired (#4593)", result.output)
+        self.assertNotIn("Merged RO-Crate saved", result.output)
+        self.assertEqual(before, [path.read_bytes() for path in (self.input_a, self.input_b, output_file)])
 
 
 class TestParseRefusesACrateThatIsNotUtf8(unittest.TestCase):

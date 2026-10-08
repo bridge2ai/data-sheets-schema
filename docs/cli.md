@@ -22,7 +22,7 @@ Most subcommands assume they can import repo-local modules from `src/` and `.cla
 | `d4d download` | Download, preprocess, and concatenate source documents |
 | `d4d evaluate` | Run datasheet evaluation workflows |
 | `d4d render` | Render datasheets and evaluation outputs to HTML |
-| `d4d rocrate` | Parse, merge, and transform RO-Crate metadata |
+| `d4d rocrate` | Parse and transform RO-Crate metadata; raw merge is retired |
 | `d4d schema` | Generate schema metrics and validate YAML against the schema |
 | `d4d utils` | Inspect pipeline status and validate preprocessing results |
 
@@ -245,21 +245,32 @@ this option does not repair a table or switch to another mapper. Source files,
 the selected mapping, and existing outputs are preserved on validation refusal.
 See [the mapping-selection scope](../notes/legacy_cli_mapping_2026-10-07/README.md).
 
-### `d4d rocrate merge`
+### `d4d rocrate merge` (retired)
 
-Merge multiple RO-Crate files into one JSON document.
+Raw RO-Crate merging is unsupported. The command remains recognizable but
+always refuses with a nonzero exit and an explanation of
+[#4593](https://github.com/bridge2ai/data-sheets-schema/issues/4593), before
+loading a merger, reading crate contents or writing an output. Keep the source
+crates separate. Existing files are preserved.
 
-```bash
-poetry run d4d rocrate merge crate1.json crate2.json -o merged.json
-```
+The former implementation called a Dataset-producing merger through methods
+that did not exist. No raw-graph identity, root/descriptor, context or source
+provenance contract was defined. `--primary` did not resolve those missing
+policies. Restoring raw merge requires an explicit contract and real producer
+tests; this retirement does not invent one.
 
-Options:
+The legacy syntax is retained for a useful diagnostic:
 
-| Option | Description |
+| Option | Status |
 | --- | --- |
-| `INPUT_FILES...` | Required positional arguments. One or more RO-Crate files |
-| `-o, --output PATH` | Required. Output merged RO-Crate path |
-| `--primary PATH` | Primary RO-Crate file for conflict precedence |
+| `INPUT_FILES...` | Required positional paths; their contents are not read. |
+| `-o, --output PATH` | Required legacy option; no output is created or replaced. |
+| `--primary PATH` | Recognized legacy option; no conflict precedence is applied. |
+
+`d4d rocrate transform --merge` remains a separate Dataset YAML operation.
+The retired command does not redirect to it or to the graph-concatenation
+helper. Dataset mapping construction remains tracked in #4594, and #2915
+retains its linked fidelity, comparison and publication obligations.
 
 ## `d4d schema`
 
