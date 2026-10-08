@@ -53,11 +53,16 @@ def recheck(result):
               help="Capture and independently recheck the fixed execution ledger; never dispatch or retry.")
 @click.option("--support-execution", type=click.Path(exists=True, file_okay=False, path_type=Path),
               help="Opt into index v2 with every registered support selection and its captured dispatch outcome.")
+@click.option("--rubric-associations", is_flag=True,
+              help="Opt into index v3: compare captured rubric identity declarations, never accept ratings.")
+@click.option("--rubric-plan", type=click.Path(exists=True, file_okay=False, path_type=Path),
+              help="Original captured plan supplying rubric blobs; must match the descriptor's exact plan pin.")
 @click.option("--output", required=True, type=click.Path(path_type=Path))
-def index(descriptor, paths, support_paths, execution, support_execution, output):
+def index(descriptor, paths, support_paths, execution, support_execution, rubric_associations, rubric_plan, output):
     click.echo(canonical(_call(results.build_index, descriptor, list(paths), output,
                               execution=execution, support_results=list(support_paths),
-                              support_execution=support_execution)).decode())
+                              support_execution=support_execution, rubric_associations=rubric_associations,
+                              rubric_plan=rubric_plan)).decode())
 
 
 @fitness_results.command("recheck-index")
