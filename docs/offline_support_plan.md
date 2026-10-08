@@ -75,7 +75,7 @@ worktrees are not modified or borrowed as budget authority.
 
 Each target's input estimate is `ceil(canonical request UTF-8 bytes / 4)`. This is
 an explicit heuristic, not a model tokenizer or guaranteed spend bound. The output
-ceiling uses `--max-tokens` (default 8000), including whatever reasoning the future
+ceiling uses `--max-tokens` (default 8000), including whatever reasoning the selected
 transport charges within that limit. One attempt per target is assumed; retries
 are excluded. The three scenarios are:
 
@@ -149,7 +149,7 @@ separate top-level measurement. Counts distinguish support `relationship_edge`,
 support `attribute_value`, and top-level fitness. The request count is an
 accounting total, not a pooled measurement denominator. Every nested target
 records its many-to-one root-field mapping and the corresponding fitness target
-id; a future top-level fitness verdict must not become multiple nested verdicts.
+id; a top-level fitness verdict must not become multiple nested verdicts.
 
 Each record has a complete hashed target inventory, including its deduplicated
 specification catalog, all blocked pointers/codes, and explicit omissions from
@@ -171,10 +171,18 @@ Estimates still use a byte-count heuristic, optional local prices and a requeste
 output ceiling; they are not measured usage, a transport guarantee, or a spend
 cap. No judgement-cache reuse is credited.
 
-Version 2 completes offline planner integration only. Context-projection review,
-independent scientific controls, #3343 empirical calibration, v3 response and
-execution registration, provider transport and paid authorization remain
-blockers. Actual unresolved target paths and missing rubric join artifacts add
-their own blockers. Schema validation of the record is separate from this
-inventory. No v3 executor, cache loader, model call, or empirical verdict is
-created, and parent #3342/#2929 work remains open.
+Planning remains offline. Downstream software is available through the explicit
+[saved-response protocol](nested-support-results.md),
+[registered execution](nested-support-execution.md),
+[captured calibration evidence workflow](../notes/support_calibration_2026-10-07/README.md)
+and [fitness/support index](top-level-fitness-results.md). These commands are
+separate opt-ins; preparing a plan does not invoke them or reuse judgement caches.
+The version numbers name different contracts: planner v2 uses `grounding_v3`,
+while saved nested-support results and execution each have their own v1 protocol.
+
+Context-projection review, independently adjudicated scientific controls, #3343
+empirical calibration, an explicit per-run transport/decision registration and
+actual paid authorization remain requirements. Software availability does not
+clear a captured plan's readiness blockers. Actual unresolved target paths and
+missing rubric join artifacts add their own blockers. Schema validation of the
+record is separate from this inventory; parent #3342/#2929 work remains open.

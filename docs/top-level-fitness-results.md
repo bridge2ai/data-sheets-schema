@@ -55,13 +55,14 @@ The index separates `dispatch_state` from raw `assessment`:
 | --- | --- | --- |
 | `accepted` | true | `accepted`, only with strict accepted response |
 | `failed` | true | `rejected`, even if the failed HTTP body contains valid score text |
-| `spent_unknown` | true | `missing`; an admitted call has no complete retained response |
+| `spent_unknown` | true | `missing`; an admitted call has no captured HTTP outcome artifact |
 | `not_started` | false | `missing`; no admitted call exists |
 
-Without a ledger, dispatch remains `unknown` and spent remains null, even for
-a mechanically accepted caller-supplied result. A last complete raw response
-can be reconstructed after a missing settlement; a later admission without its
-preceding settlement refuses. No replacement call is purchased.
+Here `spent` records admission, not verified billing. Without a ledger, dispatch
+remains `unknown` and spent remains null, even for a mechanically accepted
+caller-supplied result. A retained HTTP outcome and body can be rechecked after
+a missing terminal settlement; a later admission without its preceding
+settlement refuses. No replacement call is purchased.
 
 HTTP/transport failure and incomplete accounting remain authoritative. Reported
 usage and a strict score from a failed body are retained as evidence, never
@@ -76,6 +77,44 @@ attribute-value and top-level fitness counts remain separate. Links identify
 corresponding targets without propagating a top-level fitness score to nested
 support targets. These engineering checks do not complete empirical calibration,
 human control review, or the parent evaluation campaign in #2929.
+
+## Registered support selections (index v2)
+
+```sh
+d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --support-execution /absolute/captured-support-run --output support-fitness-index
+d4d evaluate fitness-results recheck-index --index support-fitness-index
+```
+
+`--support-execution` captures and rechecks an existing
+`nested_support_execution_v1` run and selects `top_level_fitness_index_v2`.
+`--execution` separately supplies a top-level fitness run; either option can be
+used without the other. With neither `--support-execution` nor
+`--rubric-associations`, the existing v1 format remains unchanged.
+
+Every registered support selection remains a row, including failed, admitted
+but incomplete, and unstarted attempts. The denominator is all support selections
+in that registration, not the entire planned cohort or only supplied result
+directories. The support descriptor must bind the same captured plan as the
+fitness descriptor, and every support selection's exact record must be among
+the fitness descriptor's selected records. Foreign plans or records refuse.
+
+Relationship-edge and attribute-value strata each retain selected, missing,
+rejected and accepted counts. `support_dispatch_counts` separately retains
+`accepted`, `failed`, `spent_unknown` and `not_started`. As with fitness above,
+a valid verdict inside a failed HTTP body remains rejected. An admitted call
+with no captured HTTP outcome artifact is missing with `spent: true`. A retained
+timeout, interrupted partial-body or overflow outcome is failed/rejected, even
+when `body_complete` is false. An unstarted call is missing with `spent: false`.
+Raw assessments do not override dispatch.
+Optional `--support-result` inputs must exactly match their ledger-derived
+results and cannot add attempts outside the registration.
+
+Recheck uses the portable index's captured artifacts after relocation. Support
+mode, decision references and original readiness remain explicit and separate
+from fitness metadata. The index does not dispatch, retry, approve labels or
+propagate fitness scores. Combining `--rubric-associations` selects index v3
+while retaining this support execution accounting.
 
 ## Captured rubric identity declarations (index v3)
 

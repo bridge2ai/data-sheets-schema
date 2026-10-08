@@ -89,6 +89,26 @@ make download-and-preprocess
 
 ## `d4d evaluate`
 
+### Captured support and fitness workflows
+
+These explicit commands separate planning, saved-evidence checks, registered
+execution and reporting. Only `support-execution run` below dispatches requests;
+the other listed commands operate offline. Available software and declared
+decision references do not grant scientific acceptance or paid-run authority.
+
+| Command | Purpose and detailed workflow |
+| --- | --- |
+| `d4d evaluate support-plan`, `support-request` | [Capture a plan and reconstruct exact requests](offline_support_plan.md); `--plan-version 2` selects nested support targets and separate top-level fitness. |
+| `d4d evaluate support-results prepare/accept/recheck/report` | [Bind selected target attempts and check saved nested-support responses](nested-support-results.md). |
+| `d4d evaluate support-execution prepare/run/recheck` | [Register and execute one explicitly selected support or fitness instrument](nested-support-execution.md), then reconstruct its captured execution evidence. |
+| `d4d evaluate support-calibration prepare/report/recheck` | [Bind declared control labels and inspect captured calibration evidence](../notes/support_calibration_2026-10-07/README.md); unresolved labels and missing observations remain visible. |
+| `d4d evaluate fitness-results prepare/accept/recheck/index/recheck-index` | [Check top-level fitness and build a portable index](top-level-fitness-results.md); `--support-execution` includes all registered support selections, and `--rubric-associations` adds declared rubric identity checks. |
+
+Saved-response acceptance is mechanical. Rubric association checks do not accept
+ratings or certify scores. Independently reviewed controls, empirical calibration
+and applicable campaign authorization remain separate requirements under #2929,
+#3342 and #3343.
+
 ### `d4d evaluate presence`
 
 Run the presence-based evaluator across one project or all projects.

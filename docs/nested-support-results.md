@@ -20,8 +20,11 @@ The saved-response envelope is `nested_support_response_v1`. It contains exactly
 `package_response` below is a pure helper for an external capture harness. These
 binding hashes are **caller declarations**: they detect unchanged envelope
 replay into another request/attempt/record. They do not authenticate a provider
-call or prevent a caller from inventing and relabelling evidence. A future
-registered executor must capture this association at the actual call boundary.
+call or prevent a caller from inventing and relabelling evidence. The separate
+[registered executor](nested-support-execution.md) captures the request,
+admission, raw response and settlement at the call boundary. Its recheck
+establishes captured invocation consistency, not authenticated provider
+provenance; these saved-response commands remain offline.
 
 The native-message adapter derives fields from those raw bytes. It requires an
 assistant message, exact requested/reported model equality, `end_turn`, exactly
