@@ -35,57 +35,148 @@ measure scientific fidelity, or increase source coverage. No rows are retired.
 The mandatory final-byte publication gate and producer/result contracts remain
 unchanged.
 
-## Validation status
+## Completed validation
 
-Implementation and focused tests are ready for independent review. No tests,
-producer replay or real-record publication have run for this change yet.
-The new tests cover both real loaders/builders, exact text and whole-value
-preservation, invalid routes, custom compatibility, missing-root isolation,
-merge selection and mutation isolation, score/rank accounting, actual CLI
-publication/refusal and an API batch with a later invalid record. Independent
-adversarial tests additionally cover invalid first-secondary fallback, nonzero
-primary selection, reused merger state, API coverage under both result
-contracts, duplicate route ordering and inert near-marker strings.
+The independently reviewed implementation at
+`839091641c87ffc773543d49a74cd7f2e5460a1f`
+(tree `8894470e04e60adcf64f0cc5097771986dc499ff`) passed **711 tests**
+in sixteen modules, with zero failures, errors or skips. This includes 103 new
+constructor tests, 38 independent adversarial cases and the prior 570
+DOI/root-ID/publication/API/CLI/integration controls. JUnit records 130.621
+seconds; the coordinator recorded 130.95 seconds and fourteen dependency
+deprecation warnings. Invocation and commit bindings are coordinator provenance;
+JUnit does not itself attest a Git commit or console warning count.
 
-Static syntax parsing completed without importing repository code. A byte
-comparison against the parent table verified that removing only the newly
-inserted marker restores the complete original TSV bytes. The original CRLF
-line endings are preserved: ordinary `git diff --check` reports trailing
-whitespace on the modified row, while the scoped
-`git -c core.whitespace=cr-at-eol diff --check` passes. Do not describe the
-ordinary check as clean or normalize unrelated table lines to silence it.
+The tested table retains its original CRLF bytes and every historic semantic
+label. Removing only the inserted Func marker restores the entire baseline
+TSV. Ordinary `git diff --check` therefore flags trailing whitespace on the
+modified CRLF row79; the scoped
+`git -c core.whitespace=cr-at-eol diff --check` passes. Unrelated table lines
+were not normalized to silence that warning.
 
-After coordinator authorization, validation should run the prior fourteen
-root-ID/DOI/publication/API/CLI/packaged-integration modules plus
-`tests/test_rocrate/test_legacy_update_plan.py` and
-`tests/test_rocrate/test_legacy_update_plan_adversarial.py` (sixteen modules).
-Record the exact tested commit, source/table/schema pins, JUnit results and
-warnings. Until then, the following replay outcomes are hypotheses, not results.
+## Completed five-input comparison
 
-## Planned bounded replay
+Baseline `f6e13a1e7624d7cdc7e0cf926f62a972c02b2763` already contains the
+[root-ID repair and evidence](../legacy_root_identity_2026-10-08/README.md).
+The unchanged [parser replay](../parser_root_policy_2026-10-07/replay.py) ran
+against that baseline and the tested candidate. The exact executed
+[supplement](replay_supplement.py) then prepared each retained record with the
+real mandatory Dataset gate and ran actual scorers and mergers. Each arm
+completed all twenty records, four ranking groups and eight merge controls,
+with no missing controls or infrastructure errors.
 
-Reuse the five retained inputs and both implementations/graph orders from the
-[root-ID evidence](../legacy_root_identity_2026-10-08/README.md), comparing the
-root-ID predecessor with this change. Keep every historical output and source
-byte; use fresh external destinations. Both arms contain the root-ID route.
-The expected full-record delta is only `updates` string-to-object construction
-for CHORUS, VOICE and the two CM4AI representations; VOICE provenance and all
-other fields remain unchanged.
+The stdlib-only [saved comparator](compare_saved.py) checked full canonical
+records, selected roots, original error sequences, complete scores/ranks,
+merge content/provenance/statistics, report text and all 28 gate outcomes per
+arm. It executes no producer, validator, scorer or merger code.
 
-Expected per-record validation counts are CHORUS 31→30, VOICE 151→150,
-CM4AI reduced 76→75, VOICE provenance 0→0 and CM4AI original 76→75, repeated
-across two implementations and two graph orders. The expected gate denominator
-remains twenty records per arm, with four accepted variants of one VOICE
-provenance input and sixteen refused drafts. All eight mixed-roster mergers
-are expected to remain refused. Preserve every actual error and denominator
-if an expectation fails; never drop unrelated invalid fields to obtain a pass.
+| Input | Baseline errors | Candidate errors | Gate in both arms |
+|---|---:|---:|---|
+| CHORUS | 31 | 30 | Refused |
+| VOICE | 151 | 150 | Refused |
+| CM4AI reduced | 76 | 75 | Refused |
+| VOICE provenance | 0 | 0 | Accepted |
+| CM4AI original | 76 | 75 | Refused |
 
-Compare complete non-updates records/provenance, actual score/rank dictionaries,
-selected primary, statistics and merge reports. Preserve fixed secondary source
-order and distinguish construction accounting from source coverage. The mixed
-roster is a software control, not a scientific combined dataset.
+Each row is repeated across both implementations and original/reversed graph
+order. All sixteen records that contain maintenance text differ only by
+`updates: text` becoming `updates: {update_details: text}` with the exact same
+text. The four VOICE provenance variants remain unchanged. All original roots,
+DOI/ID values and non-updates validation errors are identical. These message
+counts are not scientific quality scores or independent source observations.
 
-Only #4678 is addressed here. Parent issues #4594/#2915 remain open for broader
-mapping, validation, comparison and publication obligations. Typed PI/creator
-identities, approximate sizes, per-file placement, other narrative routes and
-pending human scientific decisions are outside this change.
+Individual gate counts remain **four accepted and sixteen refused per arm**.
+The four acceptances are variants of one VOICE provenance input. All eight
+mixed-roster merges per arm still refuse publication. No unrelated invalid
+field was removed or repaired to make a record pass; accepted bytes were
+prepared in memory, not published to a corpus.
+
+All four full score/rank groups match exactly. Ranked-primary controls still
+select VOICE; explicit VOICE-provenance-primary controls retain that primary
+and take their maintenance text from CHORUS, the first available secondary in
+the fixed order. All eight full merge pairs preserve every non-updates value,
+source provenance and statistic. No field-count or source-coverage gain occurs.
+The eighty root-identity disclosures across both arms remain exactly bound to
+their source assertions. Full merge report text matches after replacing only
+verified per-arm input paths and observed timestamps. No maintenance object
+fields or source plans are combined.
+
+The mixed roster is a software control, not a scientifically combined dataset.
+Ranked-primary comparison preserves secondary order; it is not a complete
+replay of the CLI's automatic input reordering.
+
+## Evidence and preservation
+
+[validation.json](validation.json) records the tested commit/tree, all nine
+changed implementation paths, 46 selected candidate source/test/resource pins,
+26 baseline pins, executable/dependency observations, all artifact identities
+and compact full comparison results. Raw crates, drafts, private paths and
+full report/inventory payloads remain external. Historic DOI and root-ID
+evidence was retained unchanged.
+
+The full before/after checkout manifests are byte-identical (4,360,876 bytes),
+SHA256 `f51b395993851df2255c49edd84547c5b45cb28776096c5a991c496c6e859d91`.
+They cover 9,284 baseline files (447,162,372 bytes) and 9,288 candidate files
+(447,193,393 bytes), including hidden and ignored files and modes, excluding
+`.git`. New notes are added after these completed runs. The independent reviewer
+also rehashed the original current entries, excluding only this active README.
+The supplement separately checked 71 saved replay files per arm and selected
+80/81 source/history files before and after its execution.
+
+Both supplements reported the optional FAIRSCAPE model import unavailable
+(`No module named 'fairscape_models.rocrate'`), as confirmed by the coordinator.
+Actual legacy construction, scoring, merging and mandatory Dataset gates
+completed. This evidence does not establish that optional integration's
+availability. The selected CPython 3.13.12 executable bytes and dependency
+versions are recorded; they are not a complete installed-environment or import
+cache snapshot. Prepared accepted-byte hashes are observations from execution;
+those byte payloads were not separately retained. Complete accepted records
+and all refusal messages are compared directly.
+
+## Reproduction with new external outputs
+
+Use separate clean checkouts at the baseline and candidate commits above.
+`PYTHON` selects the recorded environment, `NOTES` this evidence directory,
+and `EVIDENCE` a fresh directory outside both checkouts. Preserve both complete
+source inventories before/after execution. The exact focused test command and
+module list are recorded with symbolic paths in `validation.json`.
+
+```sh
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$BASELINE/src:$BASELINE" \
+  "$PYTHON" -B "$BASELINE/notes/parser_root_policy_2026-10-07/replay.py" \
+  --repo "$BASELINE" --output "$EVIDENCE/baseline-replay"
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$CANDIDATE/src:$CANDIDATE" \
+  "$PYTHON" -B "$CANDIDATE/notes/parser_root_policy_2026-10-07/replay.py" \
+  --repo "$CANDIDATE" --output "$EVIDENCE/candidate-replay"
+PYTHONDONTWRITEBYTECODE=1 "$PYTHON" -B "$NOTES/replay_supplement.py" \
+  --repo "$BASELINE" --expect-commit f6e13a1e7624d7cdc7e0cf926f62a972c02b2763 \
+  --role baseline --replay "$EVIDENCE/baseline-replay" \
+  --output "$EVIDENCE/baseline-supplement" \
+  --protect-repo "$BASELINE" --protect-repo "$CANDIDATE"
+PYTHONDONTWRITEBYTECODE=1 "$PYTHON" -B "$NOTES/replay_supplement.py" \
+  --repo "$CANDIDATE" --expect-commit 839091641c87ffc773543d49a74cd7f2e5460a1f \
+  --role candidate --replay "$EVIDENCE/candidate-replay" \
+  --output "$EVIDENCE/candidate-supplement" \
+  --protect-repo "$BASELINE" --protect-repo "$CANDIDATE"
+"$PYTHON" -B "$NOTES/compare_saved.py" \
+  --baseline "$EVIDENCE/baseline-supplement" \
+  --candidate "$EVIDENCE/candidate-supplement" \
+  --baseline-replay "$EVIDENCE/baseline-replay" \
+  --candidate-replay "$EVIDENCE/candidate-replay" \
+  --baseline-commit f6e13a1e7624d7cdc7e0cf926f62a972c02b2763 \
+  --candidate-commit 839091641c87ffc773543d49a74cd7f2e5460a1f \
+  --output "$EVIDENCE/comparison.json"
+```
+
+The historical replay protects only its selected checkout, so preflight all
+output paths against both source trees and original artifacts. The supplement
+checks both supplied protected checkouts. The comparator writes only a new
+sibling file of its four evidence directories; it reads saved payloads and
+declarations without following original source/runtime paths. This is local
+reproducibility evidence, not authenticated execution.
+
+Only #4678 is addressed. Collection completion, cross-arm agreement and Dataset
+validity are separate results. None proves scientific correctness, general
+legacy producer validity or improved source coverage. Parent issues
+#4594/#2915 remain open, as do pending scientific reviews and other mapping,
+identity, precision, file-placement and publication obligations.
