@@ -323,6 +323,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#registered-support-selections-index-v2" class="md-nav__link">
+    Registered support selections (index v2)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#captured-rubric-identity-declarations-index-v3" class="md-nav__link">
     Captured rubric identity declarations (index v3)
   </a>
@@ -412,7 +419,7 @@ supplied. Missing or foreign evidence and changed saved flags refuse.</p>
 <tr>
 <td><code>spent_unknown</code></td>
 <td>true</td>
-<td><code>missing</code>; an admitted call has no complete retained response</td>
+<td><code>missing</code>; an admitted call has no captured HTTP outcome artifact</td>
 </tr>
 <tr>
 <td><code>not_started</code></td>
@@ -421,10 +428,11 @@ supplied. Missing or foreign evidence and changed saved flags refuse.</p>
 </tr>
 </tbody>
 </table>
-<p>Without a ledger, dispatch remains <code>unknown</code> and spent remains null, even for
-a mechanically accepted caller-supplied result. A last complete raw response
-can be reconstructed after a missing settlement; a later admission without its
-preceding settlement refuses. No replacement call is purchased.</p>
+<p>Here <code>spent</code> records admission, not verified billing. Without a ledger, dispatch
+remains <code>unknown</code> and spent remains null, even for a mechanically accepted
+caller-supplied result. A retained HTTP outcome and body can be rechecked after
+a missing terminal settlement; a later admission without its preceding
+settlement refuses. No replacement call is purchased.</p>
 <p>HTTP/transport failure and incomplete accounting remain authoritative. Reported
 usage and a strict score from a failed body are retained as evidence, never
 promoted into an accepted execution row. Mode, decision references, original
@@ -437,6 +445,37 @@ attribute-value and top-level fitness counts remain separate. Links identify
 corresponding targets without propagating a top-level fitness score to nested
 support targets. These engineering checks do not complete empirical calibration,
 human control review, or the parent evaluation campaign in #2929.</p>
+<h2 id="registered-support-selections-index-v2">Registered support selections (index v2)</h2>
+<pre><code class="language-sh">d4d evaluate fitness-results index --descriptor fitness-descriptor \
+  --support-execution /absolute/captured-support-run --output support-fitness-index
+d4d evaluate fitness-results recheck-index --index support-fitness-index
+</code></pre>
+<p><code>--support-execution</code> captures and rechecks an existing
+<code>nested_support_execution_v1</code> run and selects <code>top_level_fitness_index_v2</code>.
+<code>--execution</code> separately supplies a top-level fitness run; either option can be
+used without the other. With neither <code>--support-execution</code> nor
+<code>--rubric-associations</code>, the existing v1 format remains unchanged.</p>
+<p>Every registered support selection remains a row, including failed, admitted
+but incomplete, and unstarted attempts. The denominator is all support selections
+in that registration, not the entire planned cohort or only supplied result
+directories. The support descriptor must bind the same captured plan as the
+fitness descriptor, and every support selection's exact record must be among
+the fitness descriptor's selected records. Foreign plans or records refuse.</p>
+<p>Relationship-edge and attribute-value strata each retain selected, missing,
+rejected and accepted counts. <code>support_dispatch_counts</code> separately retains
+<code>accepted</code>, <code>failed</code>, <code>spent_unknown</code> and <code>not_started</code>. As with fitness above,
+a valid verdict inside a failed HTTP body remains rejected. An admitted call
+with no captured HTTP outcome artifact is missing with <code>spent: true</code>. A retained
+timeout, interrupted partial-body or overflow outcome is failed/rejected, even
+when <code>body_complete</code> is false. An unstarted call is missing with <code>spent: false</code>.
+Raw assessments do not override dispatch.
+Optional <code>--support-result</code> inputs must exactly match their ledger-derived
+results and cannot add attempts outside the registration.</p>
+<p>Recheck uses the portable index's captured artifacts after relocation. Support
+mode, decision references and original readiness remain explicit and separate
+from fitness metadata. The index does not dispatch, retry, approve labels or
+propagate fitness scores. Combining <code>--rubric-associations</code> selects index v3
+while retaining this support execution accounting.</p>
 <h2 id="captured-rubric-identity-declarations-index-v3">Captured rubric identity declarations (index v3)</h2>
 <pre><code class="language-sh">d4d evaluate fitness-results index --descriptor fitness-descriptor \
   --rubric-associations --rubric-plan captured-plan-dir --output associated-index

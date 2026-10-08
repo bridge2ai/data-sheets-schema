@@ -373,8 +373,9 @@ inventories are not sent. Inventory specifications are deduplicated in a shared
 catalog; each target pins its specification reference. A single target expands
 that specification for request rendering. No ambient profile is selected. A slot's
 <code>values_from</code> names must have entries in that vocabulary or the target is blocked.
-Profile-specific registry resolution and manifest selection belong to the later
-planner integration.</p>
+The <a href="../offline_support_plan/#nested-version-2">version-2 planner</a> captures an
+explicit profile vocabulary or caller-supplied vocabulary override together
+with the selected manifest. This pure inventory API does not select them.</p>
 <p>Each populated inline object or list member has a <code>relationship_edge</code> target,
 such as <code>/creators/1</code> or <code>/data_governance/committee_contact</code>. Its question is
 whether this entity occupies that relationship, independent of the truth of all
@@ -456,8 +457,13 @@ a later, reviewed integration.</p>
   controls. Supplying full/core context does not establish that this draft prompt
   detects self-reference defects. A multi-clause string still yields one verdict
   under declared precedence, not independent coverage of every clause.</li>
-<li>Version and review execution, output validation, usage/reasoning ledgers and
-  any cache loader. There is currently no v3 provider execution route.</li>
+<li>Select and review the exact registration before using the implemented
+  <a href="../nested-support-execution/">registered executor</a>. The separate
+  <a href="../nested-support-results/">saved-response reader</a> validates captured replies;
+  neither route reuses historical judgement caches or clears scientific holds.
+  The <a href="../notes/support_calibration_2026-10-07/README.md">calibration evidence workflow</a>
+  binds explicit control labels to a registration and reports captured outcomes
+  offline. It does not adjudicate labels or perform empirical calibration itself.</li>
 <li>Complete independent empirical calibration (#3343) and obtain the required
   paid-run authorization before a canary or the 24-record cohort.</li>
 </ul>
