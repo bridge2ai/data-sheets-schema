@@ -214,13 +214,12 @@ def test_real_publishers_preserve_destinations_on_unaccepted_doi(
     assert {p: p.read_bytes() for p in before} == before
 
 
-def test_unchanged_actual_default_table_still_requires_root_id(implementation, tmp_path):
+def test_actual_default_table_constructs_root_id_without_changing_bare_doi(implementation, tmp_path):
     table = REPO / 'data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv'
     before = table.read_bytes()
     record = build(implementation, crate(tmp_path, 'doi:' + BARE), table)
-    assert record['doi'] == BARE and 'id' not in record
-    with pytest.raises(publication.PublicationError, match='id'):
-        publication.prepare_dataset(record)
+    assert record['doi'] == BARE and record['id'] == 'doi:' + BARE
+    assert yaml.safe_load(publication.prepare_dataset(record)) == record
     assert table.read_bytes() == before
 
 

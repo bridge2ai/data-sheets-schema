@@ -25,6 +25,7 @@ from fairscape_integration.utils.mapping_loader import MappingLoader
 from fairscape_integration.utils.d4d_builder import D4DBuilder
 from fairscape_integration.utils.rocrate_merger import ROCrateMerger
 from fairscape_integration.utils.informativeness_scorer import InformativenessScorer
+from data_sheets_schema.legacy_root_identity import root_identity_route, scoring_fields
 
 
 @click.group()
@@ -510,8 +511,10 @@ def transform(input_file, output, mapping, report, validate):
         raw = prepare_dataset(dataset, default_flow_style=False, sort_keys=False,
                               context=f"Input {input_file}; output {output_path}")
         prepared = [(output_path, raw)]
-        covered_fields = mapping_loader.get_covered_fields()
-        coverage = len(dataset) / len(covered_fields) * 100 if covered_fields else 0
+        covered_fields = scoring_fields(mapping_loader)
+        identity_construction = root_identity_route(mapping_loader)
+        populated_count = len(dataset) - int(identity_construction and 'id' in dataset)
+        coverage = populated_count / len(covered_fields) * 100 if covered_fields else 0
         if report:
             report_path = output_path.parent / f"{output_path.stem}_report.txt"
             f = StringIO()
@@ -520,8 +523,10 @@ def transform(input_file, output, mapping, report, validate):
             f.write("="*80 + "\n\n")
             f.write("SUMMARY\n" + "-"*80 + "\n")
             f.write(f"Input: {input_file}\nOutput: {output}\nMapping: {mapping}\n")
-            f.write(f"Fields populated: {len(dataset)}/{len(covered_fields)}\n")
+            f.write(f"Fields populated: {populated_count}/{len(covered_fields)}\n")
             f.write(f"Coverage: {coverage:.1f}%\n\n")
+            if identity_construction:
+                f.write("Required Dataset.id construction is excluded from coverage.\n\n")
             mapped_props = mapping_loader.get_all_mapped_rocrate_properties()
             unmapped = parser.get_unmapped_properties(mapped_props)
             f.write("UNMAPPED RO-CRATE PROPERTIES\n" + "-"*80 + "\n")
@@ -536,8 +541,10 @@ def transform(input_file, output, mapping, report, validate):
             diagnostic(raw, validator.validate_d4d_yaml)
         publish(prepared, protected=[input_file, mapping])
         click.echo(f"✓ D4D YAML written to: {output}")
-        click.echo(f"  Fields populated: {len(dataset)}/{len(covered_fields)}")
+        click.echo(f"  Fields populated: {populated_count}/{len(covered_fields)}")
         click.echo(f"  Coverage: {coverage:.1f}%")
+        if identity_construction:
+            click.echo("  Required Dataset.id construction is excluded from coverage.")
         if report:
             click.echo(f"✓ Transformation report saved: {report_path}")
         if validate:

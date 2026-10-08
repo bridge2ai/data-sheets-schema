@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
 from data_sheets_schema.legacy_doi import doi_value, source_value
+from data_sheets_schema.legacy_root_identity import root_identity_route, resolve_root_identity
 
 
 class D4DBuilder:
@@ -39,7 +40,9 @@ class D4DBuilder:
         """
         # Inspection may have no root; producing a Dataset may not. Refuse
         # before clearing a previous result or mapping any member properties.
-        rocrate_parser.require_root_dataset()
+        root = rocrate_parser.require_root_dataset()
+        marked_id = root_identity_route(self.mapping)
+        identity = resolve_root_identity(root) if marked_id else None
         self.d4d_data = {}
 
         # Get all covered D4D fields
@@ -51,6 +54,11 @@ class D4DBuilder:
         # Map each covered field
         mapped_count = 0
         for d4d_field in covered_fields:
+            if marked_id and d4d_field == 'id':
+                if identity['id'] is not None:
+                    self.d4d_data['id'] = identity['id']
+                    mapped_count += 1
+                continue
             rocrate_property = self.mapping.get_rocrate_property(d4d_field)
             if not rocrate_property:
                 continue

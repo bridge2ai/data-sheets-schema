@@ -72,6 +72,7 @@ except ImportError as e:
     SCRIPTS_AVAILABLE = False
 
 from data_sheets_schema.legacy_publication import PublicationError, prepare_dataset, publish
+from data_sheets_schema.legacy_root_identity import scoring_fields
 
 RESULT_CONTRACTS = frozenset({"legacy", "dataset_v1"})
 RESULT_FORMAT = "d4d_transformation_result_v1"
@@ -325,7 +326,9 @@ class SemanticTransformer:
             d4d_dict = builder.build_dataset(parser)
 
             # Track coverage statistics
-            covered_fields = self.mapping_loader.get_covered_fields()
+            # Required root identity is construction, not additional source
+            # coverage. Unmarked custom ID mappings keep their prior meaning.
+            covered_fields = scoring_fields(self.mapping_loader)
             mapped_count = len([f for f in covered_fields if d4d_dict.get(f) is not None])
             coverage_percentage = (mapped_count / len(covered_fields) * 100) if covered_fields else 0.0
             unmapped_fields = [f for f in covered_fields if d4d_dict.get(f) is None]
