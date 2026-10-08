@@ -1,0 +1,502 @@
+{
+  "issue": 4595,
+  "base_commit": "e9884669561d54bfe4a56c7dcd06813787cc4187",
+  "baseline_checkout_commit": "833c4b4249649e1d61bfd97a5146e0bf2b1fcedd",
+  "baseline_note": "Validator and shared selector identical to base; parser-only PR4596 changes do not affect this baseline.",
+  "scope": "Profile field presence only; no LinkML, fidelity, or source-coverage claim",
+  "code_sha256": {
+    "src/validation/unified_validator.py": "283a9829be3d10bbba1603da027d554ce8f4864d8069711ea38be9e4dab55a76",
+    "src/data_sheets_schema/rocrate_sources.py": "38c85ac04a1ccdcf3382024d438f48efa577b4871bea683a562a792595907a75"
+  },
+  "requirements_sha256": "9d434ae44f079fe826f78fe6a00d10d9a6a470b7db6e507abe4d0b0442f37e39",
+  "tests": {
+    "passed": 517,
+    "skipped": 0,
+    "code_unchanged": true,
+    "command": [
+      "pytest",
+      "tests/test_rocrate",
+      "tests/test_legacy_migration.py",
+      "tests/test_fairscape_integration/test_rocrate_parser.py",
+      "tests/test_cli/test_rocrate_cli.py",
+      "-q",
+      "-p",
+      "no:cacheprovider",
+      "--basetemp=/private/tmp/d4d-4595-profile-root-ce9CdpAX/pytest-integration-01",
+      "--junitxml=/private/tmp/d4d-4595-profile-root-ce9CdpAX/tests-integration-01/junit.xml"
+    ]
+  },
+  "adversarial_review": "Independent read-only review found no blocking defect",
+  "inputs": {
+    "CHORUS": {
+      "path": "data/ro-crate_packages/CHORUS/raw/ro-crate-metadata.json",
+      "input_sha256": "6d0fc1433008a525164154c635b604c98fb620787fbdcb02b87faf9bce643774",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 87.5,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [],
+            "info": [
+              "Profile level 'minimal' validation passed (100.0% coverage)"
+            ],
+            "coverage_percentage": 100.0,
+            "missing_fields": [],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 8
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "c920b54eca57e1788dbc2f6af7c6482fe6c06b7cfa8f890d9cece951a0a8f601"
+        },
+        "basic": {
+          "baseline_coverage_original": 69.23076923076923,
+          "baseline_coverage_reversed": 30.76923076923077,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "Insufficient coverage for Level 2: 69.2% (need \u226580%)",
+              "Missing fields: d4d:purposes, d4d:addressingGaps, evi:formats, rai:dataCollectionTimeframe, rai:dataManipulationProtocol, rai:dataPreprocessingProtocol, rai:dataUseCases, prohibitedUses"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": 69.23076923076923,
+            "missing_fields": [
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "evi:formats",
+              "rai:dataCollectionTimeframe",
+              "rai:dataManipulationProtocol",
+              "rai:dataPreprocessingProtocol",
+              "rai:dataUseCases",
+              "prohibitedUses"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 18
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "f5a8d1ffdd953e6db843bd086eb11c9232b1c7da471ea72b6ad53b6fe1c22f1d"
+        }
+      }
+    },
+    "VOICE": {
+      "path": "data/ro-crate_packages/VOICE/raw/ro-crate-metadata.json",
+      "input_sha256": "a85057c8d60ed0e10dfac89a733a2ba399c33b7bbc5d291b89b1444dab1901d4",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 75.0,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [],
+            "info": [
+              "Profile level 'minimal' validation passed (100.0% coverage)"
+            ],
+            "coverage_percentage": 100.0,
+            "missing_fields": [],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 8
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "c920b54eca57e1788dbc2f6af7c6482fe6c06b7cfa8f890d9cece951a0a8f601"
+        },
+        "basic": {
+          "baseline_coverage_original": 84.61538461538461,
+          "baseline_coverage_reversed": 23.076923076923077,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [
+              "Missing optional fields: d4d:purposes, d4d:addressingGaps, evi:formats, prohibitedUses"
+            ],
+            "info": [
+              "Profile level 'basic' validation passed (84.6% coverage)"
+            ],
+            "coverage_percentage": 84.61538461538461,
+            "missing_fields": [
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "evi:formats",
+              "prohibitedUses"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 22
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "b3145ffbc54c272541a75e81102420527550fcc1a2c25069ff40bb346f744b79"
+        }
+      }
+    },
+    "CM4AI_reduced": {
+      "path": "data/ro-crate_packages/CM4AI/processed/CM4AI_crate_metadata_reduced.json",
+      "input_sha256": "8f25e9478d1105a008769e25d2a2f67da8475c7218b58946f834ab448dec6610",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 75.0,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [],
+            "info": [
+              "Profile level 'minimal' validation passed (100.0% coverage)"
+            ],
+            "coverage_percentage": 100.0,
+            "missing_fields": [],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 8
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "c920b54eca57e1788dbc2f6af7c6482fe6c06b7cfa8f890d9cece951a0a8f601"
+        },
+        "basic": {
+          "baseline_coverage_original": 80.76923076923077,
+          "baseline_coverage_reversed": 69.23076923076923,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [
+              "Missing optional fields: d4d:purposes, d4d:addressingGaps, rai:dataManipulationProtocol, rai:dataPreprocessingProtocol, deidentified"
+            ],
+            "info": [
+              "Profile level 'basic' validation passed (80.8% coverage)"
+            ],
+            "coverage_percentage": 80.76923076923077,
+            "missing_fields": [
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "rai:dataManipulationProtocol",
+              "rai:dataPreprocessingProtocol",
+              "deidentified"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 21
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "b66af8869c9ffd9d1ae4caf56d8630a15ae3908542cc3eda2c2f95e8be22b752"
+        }
+      }
+    },
+    "VOICE_provenance": {
+      "path": "data/ro-crate_packages/VOICE/raw/ro-crate-prov-graph.json",
+      "input_sha256": "2cedad47ab225713aca18bd250777fb741a5d5ee639e4b0e9cc63205adb08608",
+      "graph_shape": "node object",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 37.5,
+          "baseline_coverage_reversed": 37.5,
+          "baseline_reversal_equal": true,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "Missing required fields for Level 1: datePublished, license, keywords, author, identifier"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": 37.5,
+            "missing_fields": [
+              "datePublished",
+              "license",
+              "keywords",
+              "author",
+              "identifier"
+            ],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 3
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "800d52b4c6acde6231f41e8479f52b265aef7924c7cba73a1939b140440148d1"
+        },
+        "basic": {
+          "baseline_coverage_original": 11.538461538461538,
+          "baseline_coverage_reversed": 11.538461538461538,
+          "baseline_reversal_equal": true,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "Insufficient coverage for Level 2: 11.5% (need \u226580%)",
+              "Missing fields: datePublished, license, keywords, author, identifier, d4d:purposes, d4d:addressingGaps, contentSize, evi:formats, rai:dataCollection, rai:dataCollectionTimeframe, rai:dataManipulationProtocol, rai:dataPreprocessingProtocol, ethicalReview, humanSubjectResearch, deidentified, confidentialityLevel, rai:dataLimitations, rai:dataBiases, rai:dataUseCases, prohibitedUses, publisher, rai:dataReleaseMaintenancePlan"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": 11.538461538461538,
+            "missing_fields": [
+              "datePublished",
+              "license",
+              "keywords",
+              "author",
+              "identifier",
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "contentSize",
+              "evi:formats",
+              "rai:dataCollection",
+              "rai:dataCollectionTimeframe",
+              "rai:dataManipulationProtocol",
+              "rai:dataPreprocessingProtocol",
+              "ethicalReview",
+              "humanSubjectResearch",
+              "deidentified",
+              "confidentialityLevel",
+              "rai:dataLimitations",
+              "rai:dataBiases",
+              "rai:dataUseCases",
+              "prohibitedUses",
+              "publisher",
+              "rai:dataReleaseMaintenancePlan"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 3
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "def07d31f7aaadd8c0dd3e011e741644e0d39bc9fe8332e3df3d0dad51736384"
+        }
+      }
+    },
+    "CM4AI_original": {
+      "path": "data/ro-crate_packages/CM4AI/raw/cm4ai_release_metadata.zip",
+      "archive_sha256": "a8a4fea0aa4cfb9797fe1871de064bf29563516c5de4aa834aa177fb7c6b1d4c",
+      "member": "cm4ai_release_metadata/ro-crate-metadata.json",
+      "input_sha256": "836376f3a997204b14d4d8d3fba90d967b58cbe20726218c95d861b0cb11e66e",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 75.0,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [],
+            "info": [
+              "Profile level 'minimal' validation passed (100.0% coverage)"
+            ],
+            "coverage_percentage": 100.0,
+            "missing_fields": [],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 8
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "c920b54eca57e1788dbc2f6af7c6482fe6c06b7cfa8f890d9cece951a0a8f601"
+        },
+        "basic": {
+          "baseline_coverage_original": 80.76923076923077,
+          "baseline_coverage_reversed": 69.23076923076923,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": true,
+            "errors": [],
+            "warnings": [
+              "Missing optional fields: d4d:purposes, d4d:addressingGaps, rai:dataManipulationProtocol, rai:dataPreprocessingProtocol, deidentified"
+            ],
+            "info": [
+              "Profile level 'basic' validation passed (80.8% coverage)"
+            ],
+            "coverage_percentage": 80.76923076923077,
+            "missing_fields": [
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "rai:dataManipulationProtocol",
+              "rai:dataPreprocessingProtocol",
+              "deidentified"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 21
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "b66af8869c9ffd9d1ae4caf56d8630a15ae3908542cc3eda2c2f95e8be22b752"
+        }
+      }
+    },
+    "descriptor_priority": {
+      "synthetic": true,
+      "input_sha256": "9deb30f8dd5b57904c46cd898aff67d4892f4336bf38ee82295e89df5c06c1ae",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 25.0,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "Missing required fields for Level 1: description, datePublished, license, keywords, author, identifier"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": 25.0,
+            "missing_fields": [
+              "description",
+              "datePublished",
+              "license",
+              "keywords",
+              "author",
+              "identifier"
+            ],
+            "metadata": {
+              "level": "minimal",
+              "required_count": 8,
+              "found_count": 2
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "e5c355b94d2fa156e349e5c177b6900e2df5897a36a4299407393f5d8a3a6646",
+          "counts_authoritative_root_only": true
+        },
+        "basic": {
+          "baseline_coverage_original": 30.76923076923077,
+          "baseline_coverage_reversed": 7.6923076923076925,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "Insufficient coverage for Level 2: 7.7% (need \u226580%)",
+              "Missing fields: description, datePublished, license, keywords, author, identifier, d4d:purposes, d4d:addressingGaps, contentSize, evi:formats, rai:dataCollection, rai:dataCollectionTimeframe, rai:dataManipulationProtocol, rai:dataPreprocessingProtocol, ethicalReview, humanSubjectResearch, deidentified, confidentialityLevel, rai:dataLimitations, rai:dataBiases, rai:dataUseCases, prohibitedUses, publisher, rai:dataReleaseMaintenancePlan"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": 7.6923076923076925,
+            "missing_fields": [
+              "description",
+              "datePublished",
+              "license",
+              "keywords",
+              "author",
+              "identifier",
+              "d4d:purposes",
+              "d4d:addressingGaps",
+              "contentSize",
+              "evi:formats",
+              "rai:dataCollection",
+              "rai:dataCollectionTimeframe",
+              "rai:dataManipulationProtocol",
+              "rai:dataPreprocessingProtocol",
+              "ethicalReview",
+              "humanSubjectResearch",
+              "deidentified",
+              "confidentialityLevel",
+              "rai:dataLimitations",
+              "rai:dataBiases",
+              "rai:dataUseCases",
+              "prohibitedUses",
+              "publisher",
+              "rai:dataReleaseMaintenancePlan"
+            ],
+            "metadata": {
+              "level": "basic",
+              "required_count": 26,
+              "found_count": 2
+            }
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "4a196423bc6eff39dbaabfbdb240807ae85408acd34bab929a815beddce8e59d",
+          "counts_authoritative_root_only": true
+        }
+      }
+    },
+    "descriptor_unresolved": {
+      "synthetic": true,
+      "input_sha256": "cfbc858ad82b47c4c88364425083bba9fdd88d7aa3da2c41e797af5b755f5768",
+      "graph_shape": "array",
+      "levels": {
+        "minimal": {
+          "baseline_coverage_original": 100.0,
+          "baseline_coverage_reversed": 25.0,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "No unambiguous root data entity in RO-Crate @graph: metadata about reference is unresolved or has duplicate entity IDs"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": null,
+            "missing_fields": null,
+            "metadata": {}
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "eb68f61a7cdc93c0fa843d3e9f2f0103aa0981b27af8141d4604213d9309e199",
+          "refused_without_coverage": true
+        },
+        "basic": {
+          "baseline_coverage_original": 30.76923076923077,
+          "baseline_coverage_reversed": 7.6923076923076925,
+          "baseline_reversal_equal": false,
+          "candidate_original": {
+            "level": "profile",
+            "passed": false,
+            "errors": [
+              "No unambiguous root data entity in RO-Crate @graph: metadata about reference is unresolved or has duplicate entity IDs"
+            ],
+            "warnings": [],
+            "info": [],
+            "coverage_percentage": null,
+            "missing_fields": null,
+            "metadata": {}
+          },
+          "candidate_reversal_equal": true,
+          "candidate_report_sha256": "eb68f61a7cdc93c0fa843d3e9f2f0103aa0981b27af8141d4604213d9309e199",
+          "refused_without_coverage": true
+        }
+      }
+    }
+  },
+  "deferred": {
+    "4597": "Complete-profile criteria remain undefined"
+  },
+  "parent_2915": "OPEN"
+}

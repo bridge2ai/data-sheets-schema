@@ -34,6 +34,16 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 import sys
 
+# The source-only CLI is also invoked directly by path. Resolve its sibling
+# package without depending on the caller's cwd or an editable installation.
+if __name__ == "__main__" and not __package__:
+    _source = Path(__file__).resolve().parents[1]
+    if (_source / "data_sheets_schema/rocrate_sources.py").is_file():
+        if str(_source) not in sys.path:
+            sys.path.insert(0, str(_source))
+
+from data_sheets_schema.rocrate_sources import select_root
+
 # Optional imports for advanced features
 try:
     from linkml.validators.jsonschemavalidator import JsonSchemaDataValidator
@@ -532,15 +542,23 @@ class UnifiedValidator:
             report.errors.append(f"Failed to load file: {e}")
             return report
 
-        # Extract Dataset entity from RO-Crate @graph
-        if '@graph' in data and isinstance(data['@graph'], list):
-            datasets = [e for e in data['@graph'] if 'Dataset' in str(e.get('@type', ''))]
-            if not datasets:
+        # A graph always takes precedence over a top-level record. Select its
+        # authoritative root before counting fields; an invalid descriptor
+        # must not let a richer member (or the graph wrapper) supply coverage.
+        if isinstance(data, dict) and '@graph' in data:
+            graph = data['@graph']
+            # JSON-LD permits a one-node object, as in VOICE's provenance
+            # graph. Preserve that reader behavior without importing a parser.
+            if isinstance(graph, dict):
+                graph = [graph]
+            dataset, reason = select_root(graph)
+            if dataset is None:
                 report.passed = False
-                report.errors.append("No Dataset entity found in RO-Crate @graph")
+                report.errors.append(
+                    f"No unambiguous root data entity in RO-Crate @graph: {reason}"
+                )
                 return report
-            dataset = datasets[0]  # Use first Dataset
-        elif '@type' in data:
+        elif isinstance(data, dict) and '@type' in data:
             dataset = data  # Direct D4D format
         else:
             report.passed = False
