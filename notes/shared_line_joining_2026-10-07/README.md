@@ -55,17 +55,48 @@ and dictionary identities, and preserved inputs; it independently compares the
 typed measurement fields to each other and to the historical manifest, and
 requires the complete rendered Markdown reports to agree byte for byte.
 
-## Commands prepared for serialized validation
+## Completed validation
 
-These commands have **not been run** for this change. Independent review and
-the coordinator's application/test slot must finish first. Run baseline and
-candidate sequentially, keeping their outputs separate:
+On 2026-10-07, the five focused modules passed **312 tests**, with no failures,
+errors or skipped cases. The saved JUnit reports 64.458 seconds; the coordinator
+reported 64.58 seconds at the console. The tested commit was
+`fe5b0c800cf29439f069da500d43783fb888335c`, tree
+`689c8a2fef653562ea890bcca712a825ea733a27`.
+
+Both separate baseline and candidate runs measured all **22 versions** and
+preserved their recorded inputs. All 14 measurement fields matched each other
+and the historical manifest, including nested values and original line
+numbers. The complete rendered Markdown was identical. Each run resolved eight
+versions from current files and 14 from exact Git blobs; all 12 current bundle
+paths and six focused source files had unchanged before/after hashes. The
+baseline, candidate and comparison commands all exited zero.
+
+[validation.json](validation.json) records independently inspected report/JUnit
+hashes, the tested commit/tree, 16 focused source/test/driver/input/dependency
+declaration pins, normalized coordinator-supplied commands and the exact
+comparison summary. The five module counts were 30 measurement tests, 239
+attainability tests, 16 join-context tests, 15 check-gate tests and 12 replay
+controls. Full reports and JUnit remain in the external artifact directories;
+no raw bundle text or machine-private paths are copied here.
+
+This establishes behavior preservation for the fixed historical panel and
+focused controls. The dependency declarations are not an installed-environment
+snapshot. These timings are validation elapsed time, not a performance
+comparison. No scientific support, calibration, source-coverage improvement or
+exhaustive absence claim follows; the policy and human-review holds above remain.
+
+## Reproduction commands
+
+The coordinator ran baseline, candidate and comparison sequentially after
+independent review. The following equivalent commands replace local workspace
+and interpreter paths with placeholders. For a fresh reproduction, use new
+external output directories and a candidate checkout at the tested commit:
 
 ```bash
-TASK=/private/tmp/d4d-goal-resume-5sVO4ntI
+TASK=/path/to/isolated-workspace
 BASE="$TASK/line-join-baseline"
 CANDIDATE="$TASK/line-join-source"
-PY=/Users/marcin/Documents/VIMSS/ontology/bridge2ai/data-sheets-schema/.venv/bin/python
+PY=/path/to/venv/bin/python
 RUNNER="$CANDIDATE/notes/shared_line_joining_2026-10-07/replay.py"
 
 git clone --no-hardlinks "$CANDIDATE" "$BASE"
@@ -94,7 +125,7 @@ The unchanged attainability module SHA-256 is
 `b8f9afc15fe6b5a51f36a5c39a85296b25537396651122b335bcd7242012e264`.
 The clone's local `origin` is a donor, not a publication remote.
 
-Proposed focused test modules, run from the candidate checkout with
+The following focused test modules were run from the candidate checkout with
 `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, `PYTHONDONTWRITEBYTECODE=1`, a fresh external
 `--basetemp` and `--junitxml`, and `-p no:cacheprovider`:
 
@@ -104,5 +135,5 @@ Proposed focused test modules, run from the candidate checkout with
 - `tests/test_attainability_join_context.py`
 - `tests/test_attainability_check_gate.py`
 
-Validation and actual comparison results are pending. No new performance,
-scientific support, calibration or exhaustive absence claim is made.
+The saved artifacts are identified by exact hashes in `validation.json`;
+historical reports and source bundles remain unchanged.
