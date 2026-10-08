@@ -1,0 +1,300 @@
+# Every PR runs the complete suite, including the committed corpus (#1361).
+# CI uses Python 3.12 throughout. Six PR shards shorten feedback; four on
+# main/manual leave room for PRs without removing test or schema coverage.
+---
+name: Build and test data_sheets_schema
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Only superseded runs of the same PR are cancelled. Every main commit and
+# manual run retains its own evidence, even when another run starts.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  python-tests:
+    name: Python ${{ matrix.python-version }} / shard ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+        shard: ${{ fromJSON(github.event_name == 'pull_request' && '[1, 2, 3, 4, 5, 6]' || '[1, 2, 3, 4]') }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          # Check-echo verification needs preceding agent-definition versions.
+          fetch-depth: 0
+
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Assignment uses the actual pytest collection, including new test files
+      # and both filename conventions. No maintained test allowlist or -m filter.
+      # Use the runner's logical CPUs (up to four); -n auto selected only two
+      # physical cores on the standard four-vCPU public Linux runner.
+      # Long checks start first; small scheduling chunks keep each worker
+      # available instead of leaving one with a queue of expensive tests.
+      # pytest compiles tests/conftest.py (and -p utils.pytest_shard) before
+      # the conftest can move bytecode, so the prefix is set here (#3866).
+      - name: Run the suite shard including corpus checks
+        env:
+          PYTHONPYCACHEPREFIX: ${{ runner.temp }}/d4d-tests-pycache
+        run: >-
+          poetry run python -m pytest tests -v -p no:cacheprovider
+          -p utils.native_ci_evidence
+          --native-ci-evidence-root=${{ runner.temp }}/d4d-native-cases-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}
+          -p utils.pytest_shard --ci-shard=${{ matrix.shard }}/${{ github.event_name == 'pull_request' && 6 || 4 }}
+          --ci-shard-timings=utils/ci_test_durations.json
+          --durations=25 -n logical --maxprocesses=4 --dist load --maxschedchunk=1
+          --junitxml=test-results/pytest.xml
+
+      # No test may add, change or leave an ignored path under notes/ (#3772);
+      # tests/conftest.py also checks each run. Before the notes/ jobs below,
+      # which run outside tests/ and are not covered. tests/ and utils/ hold
+      # no bytecode either, given the prefix above (#3866).
+      - name: Require the suite to leave notes/, tests/ and utils/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/ tests/ utils/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py${{ matrix.python-version }}-shard${{ matrix.shard }}
+          path: test-results/*.xml
+          retention-days: 14
+
+      - name: Preserve the two synthetic native cases when their shard runs them
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-synthetic-cases-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}
+          path: ${{ runner.temp }}/d4d-native-cases-${{ github.run_id }}-${{ github.run_attempt }}-shard${{ matrix.shard }}/
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 14
+
+  # Run these controls once with their own existing 45-minute job budget.
+  # They must not share the remainder of a full shard's budget (#4466).
+  offline-canary:
+    name: Python 3.12 / offline canary controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          # Check-echo verification needs preceding agent-definition versions.
+          fetch-depth: 0
+
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+
+      # These independent offline controls run once, outside the tests/ collection.
+      # They run without writing bytecode beside the pinned tools (#3865). Not
+      # a cache prefix: transport_probe.verify_bytecode refuses to run under one.
+      - name: Exercise experimental canary admission offline
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/test_budgeted_cborg.py
+          notes/matched_cborg_2026-09-13/test_budget_amendment.py
+          notes/matched_cborg_2026-09-13/test_second_budget_amendment.py
+          notes/matched_cborg_2026-09-13/test_budget_amendment_chain.py
+          notes/matched_cborg_2026-09-13/test_continuation_sequence.py
+          notes/matched_cborg_2026-09-13/test_sequence_claim.py
+          -q -p no:cacheprovider --junitxml=test-results/budget.xml
+
+      - name: Exercise native canary transport and shutdown offline
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
+        run: >-
+          poetry run python -m pytest
+          notes/matched_cborg_2026-09-13/native_controls/test_native_proxy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_launch.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_command_policy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_readonly.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_control.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_history_control.py
+          notes/matched_cborg_2026-09-13/native_controls/test_probe_native_history.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_file_policy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_phase_history.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_phase_control.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_stall_policy.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_stall_controls.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_thinking_display.py
+          notes/matched_cborg_2026-09-13/native_controls/test_native_response_buffer.py
+          notes/matched_cborg_2026-09-13/native_controls/test_transport_probe.py
+          notes/matched_cborg_2026-09-13/native_controls/test_audit_after_probe.py
+          notes/claudecode_direct/test_direct_arm.py
+          -q -p no:cacheprovider --junitxml=test-results/native.xml
+
+      # Any path the controls leave under notes/ fails, except bytecode written
+      # by a Python child the pinned controls start with a whitelisted
+      # environment that drops PYTHON* variables: reported, not failed (#3865).
+      - name: Require the notes/ controls to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          bytecode="$(printf '%s\n' "$changed" | grep -E '^!! .*/__pycache__/$' || true)"
+          other="$(printf '%s\n' "$changed" | grep -vE '^!! .*/__pycache__/$|^$' || true)"
+          test -z "$bytecode" || { echo "::warning::bytecode under notes/ from a child with a scrubbed environment (#3865)"; printf '%s\n' "$bytecode"; }
+          test -z "$other" || { printf '%s\n' "$other"; exit 1; }
+
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-offline-canary
+          path: test-results/*.xml
+          retention-days: 14
+
+  # These complete offline suites run alongside core shards, once per run (#2237).
+  offline-audit:
+    name: Python 3.12 / offline audit and finalization
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Exercise native audit continuation controls offline
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/audit_controls
+          notes/matched_cborg_2026-09-13/finalization_controls
+          -q -p no:cacheprovider --junitxml=test-results/audit-controls.xml
+      # As in offline-canary: scrubbed-environment bytecode is reported, not failed (#3865).
+      - name: Require the audit controls to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          bytecode="$(printf '%s\n' "$changed" | grep -E '^!! .*/__pycache__/$' || true)"
+          other="$(printf '%s\n' "$changed" | grep -vE '^!! .*/__pycache__/$|^$' || true)"
+          test -z "$bytecode" || { echo "::warning::bytecode under notes/ from a child with a scrubbed environment (#3865)"; printf '%s\n' "$bytecode"; }
+          test -z "$other" || { printf '%s\n' "$other"; exit 1; }
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-offline-audit
+          path: test-results/*.xml
+          retention-days: 14
+
+  offline-evaluation:
+    name: Python 3.12 / offline evaluation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: "3.12"
+      - name: Exercise registered evaluation controls offline
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+          PYTHONPATH: src:notes/matched_cborg_2026-09-13:notes/matched_cborg_2026-09-13/native_controls:notes/matched_cborg_2026-09-13/evaluation_controls
+        run: >-
+          poetry run python -m pytest notes/matched_cborg_2026-09-13/evaluation_controls
+          -q -p no:cacheprovider --junitxml=test-results/evaluation-controls.xml
+      - name: Require the evaluation controls to leave notes/ untouched
+        run: |
+          changed="$(git status --ignored --porcelain -- notes/)"
+          test -z "$changed" || { printf '%s\n' "$changed"; exit 1; }
+      - name: Preserve test results and per-test timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-py3.12-offline-evaluation
+          path: test-results/*.xml
+          retention-days: 14
+
+  # Builds run alongside pytest, in separate checkouts. Their generated schema
+  # cannot replace the committed schema before the corpus checks inspect it.
+  schema-examples:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12"]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Initialise the FAIRSCAPE models submodule
+        run: git submodule update --init fairscape_models
+
+      - name: Set up the cached project environment
+        uses: ./.github/actions/setup-project
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Build and validate the schema products
+        run: time make test-schema
+
+      - name: Build and validate the examples
+        run: time make test-examples
+
+  # Preserve the stable merge check. Failure, cancellation or an unexpected
+  # skip in any required test lane must make this aggregate fail (#1812, #2237).
+  test:
+    if: always()
+    needs: [python-tests, offline-canary, offline-audit, offline-evaluation, schema-examples]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every applicable job to pass
+        env:
+          PYTHON_RESULT: ${{ needs.python-tests.result }}
+          CANARY_RESULT: ${{ needs.offline-canary.result }}
+          AUDIT_RESULT: ${{ needs.offline-audit.result }}
+          EVALUATION_RESULT: ${{ needs.offline-evaluation.result }}
+          BUILD_RESULT: ${{ needs.schema-examples.result }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          test "$PYTHON_RESULT" = success
+          test "$CANARY_RESULT" = success
+          test "$AUDIT_RESULT" = success
+          test "$EVALUATION_RESULT" = success
+          if [ "$EVENT_NAME" = pull_request ]; then
+            test "$BUILD_RESULT" = skipped
+          else
+            test "$BUILD_RESULT" = success
+          fi

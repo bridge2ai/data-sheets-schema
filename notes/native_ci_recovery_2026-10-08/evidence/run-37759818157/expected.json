@@ -1,0 +1,40 @@
+{
+  "run_id": 37759818157,
+  "pr_head": "aa845f2e083185707feab0ee8b090d6d9c9f52ef",
+  "merge_sha": "cfe68ee650e3de0f775bd476f055f25c29eb7a72",
+  "tree_sha": "8bdb68b58a410756871bf5b99cba90fbc8d6581b",
+  "files": {
+    "utils/native_ci_evidence.py": {
+      "bytes": 12788,
+      "sha256": "7931517c28fcdc90d2b3ad572095c738ecad5db5c69be4fa61822cf329d62f30"
+    },
+    "utils/native_shared_acceptance.py": {
+      "bytes": 10131,
+      "sha256": "9e793fb0c9ce9b6d9bb5c9df985a653ec94a8d50692503d936c6b5061acfd9d3"
+    },
+    "tests/test_native_shared_execution.py": {
+      "bytes": 8137,
+      "sha256": "31ac17b1d66f60570ab0e26b5f96dc9170a8707a56f0798643897822383212c1"
+    },
+    "tests/test_native_shared_execution_variant.py": {
+      "bytes": 7957,
+      "sha256": "54e31f2b3740c96bc1dfefe9c377aa7525a2657fc115ef961f55cf0894a4feb5"
+    },
+    "tests/native_shared_fixture.py": {
+      "bytes": 14883,
+      "sha256": "305ccabdcdf1a511f562d842d22a1c26ca5b0857acff0b57abf6e0e94acfe582"
+    },
+    "tests/native_shared_omission_fixture.py": {
+      "bytes": 17977,
+      "sha256": "35229bcbe1be3867ad5b2a7b85023c94eac0f948ee9ed749735f36d0731c610d"
+    },
+    "tests/fixtures/native_shared_execution/fake_cli.py": {
+      "bytes": 9434,
+      "sha256": "82622dc176fff332fc2d44dcb5de2920a3e70fdc00a0605ef8b87550d47bb646"
+    },
+    ".github/workflows/main.yaml": {
+      "bytes": 13867,
+      "sha256": "7e56e902e3177a19ff36de56394510fba3a37b35872c6fdc74f77d9ef951a496"
+    }
+  }
+}
