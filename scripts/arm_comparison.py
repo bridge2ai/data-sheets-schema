@@ -1082,7 +1082,7 @@ def entry_omission_section(data) -> list[str]:
             "|---|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – | – |"]), ""]
 
 
-def nested_omission_section(data) -> list[str]:
+def nested_omission_section(data, *, ancestor_diagnostics=False) -> list[str]:
     """Receipt-backed omission candidates below the first level (#3934): the
     fields of objects and the entries of nested lists, over the groups the
     replicate-structure table compares."""
@@ -1104,32 +1104,46 @@ def nested_omission_section(data) -> list[str]:
             str(sum(counts[kind].values())),
             " / ".join(str(counts[kind][s]) for s in shown[kind]) if measured else "–")]
 
+    def ancestor_cells(counts, measured):
+        if not ancestor_diagnostics:
+            return []
+        return [f"{counts['field']} + {counts['entry']}" if measured else "–"]
+
     for key, disp, _pfx, _rt, _role in ARMS:
         if key in NOT_REPLICATES:
             continue
         tot = {kind: dict.fromkeys(shown["field"], 0) for kind in NESTED_KINDS}
         unread = {"keyless": 0, "values": 0}
+        ancestor_tot = dict.fromkeys(NESTED_KINDS, 0)
         measured_any, paths = False, {}
         for p, tags, recs in _replicate_groups(data, key):
             resolved, _basis = _replicate_resolved(tags, p, recs)
-            no = nested_omission_candidates(recs, compare_structure(recs, slots), resolved)
+            no = nested_omission_candidates(recs, compare_structure(recs, slots), resolved,
+                                           ancestor_diagnostics=ancestor_diagnostics)
             for kind in NESTED_KINDS:              # an unmeasured group adds its rows as unmeasured
                 for s, v in no["counts"][kind].items():
                     tot[kind][s] += v
             for k in unread:
                 unread[k] += no[k]
+            ancestor_counts = no.get("ancestor_only_counts")
+            if ancestor_diagnostics:
+                for kind in NESTED_KINDS:
+                    ancestor_tot[kind] += ancestor_counts[kind]
             left = f"{no['keyless']} / {no['values']}"
             if not no["measured"]:
-                rows.append("| " + " | ".join([disp, p, *cells(no["counts"], False), left, "–"]) + " |")
+                rows.append("| " + " | ".join([disp, p, *cells(no["counts"], False),
+                                             *ancestor_cells(ancestor_counts, False), left, "–"]) + " |")
                 continue
             measured_any = True
             for r in no["rows"]:
                 if r["status"] == CANDIDATE:
                     paths[r["path"]] = paths.get(r["path"], 0) + 1
             per = " · ".join(f"{t} {v['field']} + {v['entry']}" for t, v in no["per_replicate"].items())
-            rows.append("| " + " | ".join([disp, p, *cells(no["counts"], True), left, per]) + " |")
+            rows.append("| " + " | ".join([disp, p, *cells(no["counts"], True),
+                                         *ancestor_cells(ancestor_counts, True), left, per]) + " |")
         if measured_any:
-            rows.append(f"| **{disp}** | **all projects** | " + " | ".join(cells(tot, True))
+            rows.append(f"| **{disp}** | **all projects** | "
+                        + " | ".join([*cells(tot, True), *ancestor_cells(ancestor_tot, True)])
                         + f" | {unread['keyless']} / {unread['values']} | |")
             ranked = sorted(paths.items(), key=lambda x: (-x[1], x[0]))[:5]
             top.append(f"| {disp} | " + (", ".join(f"`{path}` {n}" for path, n in ranked) or "none") + " |")
@@ -1169,10 +1183,23 @@ def nested_omission_section(data) -> list[str]:
             "(#721), does not. **not**, **unmeasured** and `–` as above. **Omitted "
             "candidates per record**: the candidate fields + candidate nested entries each "
             "replicate lacks, each in an object or list that replicate holds.", "",
+            *(["**Ancestor-only diagnostics (#4397)** are a subset of the existing **not** rows: "
+               "at least one holder has a verified receipt on a proper ancestor under "
+               "`receipts._covers`, but no holder receipts the row on or below it. Each row counts "
+               "once, regardless of snippets or holders. A list receipt does not cover its entries; "
+               "paths refer to the same holder's resolved final record. Commentary is excluded, "
+               "and without an on/below receipt, any unreadable holder keeps a row unmeasured "
+               "rather than ancestor-only. "
+               "Candidate counts and omitted candidates per record are unchanged. These diagnostics "
+               "do not establish scientific support or recall. The historical 17 rows in #4397 "
+               "have not been revalidated by adding this option.", ""] if ancestor_diagnostics else []),
             "| arm | project | fields in some replicates | candidates / not / unmeasured / commentary "
-            "| nested entries in some replicates | candidates / not / unmeasured | keyless / value "
+            "| nested entries in some replicates | candidates / not / unmeasured | "
+            + ("of not: ancestor-only fields + entries | " if ancestor_diagnostics else "")
+            + "keyless / value "
             "entries | omitted candidates per record (fields + entries) |",
-            "|---|---|---|---|---|---|---|---|", *(rows or ["| – | – | – | – | – | – | – | – |"]), "",
+            "|---|---|---|---|---|---|---|---|" + ("---|" if ancestor_diagnostics else ""),
+            *(rows or ["| – | – | – | – | – | – | – | – |" + (" – |" if ancestor_diagnostics else "")]), "",
             "Paths with the most candidates, fields and nested entries together, per arm over its "
             "projects (`[*]` for each keyed-list step):", "",
             "| arm | paths |", "|---|---|", *(top or ["| – | none |"]), ""]
@@ -1490,7 +1517,7 @@ def removal_schema_section(data) -> list[str]:
     return lines + [""]
 
 
-def render_markdown(data, scores, *, attainability=None) -> str:
+def render_markdown(data, scores, *, attainability=None, ancestor_diagnostics=False) -> str:
     lines = ["# Cross-arm comparison (regenerated)", "",
              f"Generated by `scripts/arm_comparison.py` from the provenance records under "
              f"`data/d4d_concatenated/`; do not edit by hand — re-run the script.", "",
@@ -1562,7 +1589,7 @@ def render_markdown(data, scores, *, attainability=None) -> str:
     lines += nested_structure_section(data)
     lines += omission_candidate_section(data)
     lines += entry_omission_section(data)
-    lines += nested_omission_section(data)
+    lines += nested_omission_section(data, ancestor_diagnostics=ancestor_diagnostics)
     lines += receipted_where_empty_section(data)
 
     lines += ["## Per-metric caveats (attached, not footnoted elsewhere)", ""]
@@ -1790,13 +1817,18 @@ def main() -> int:
     ap.add_argument("--check", action="store_true",
                     help="check committed Markdown against current records; write no outputs")
     ap.add_argument("--attainability-selection", type=Path)
-    ap.add_argument("--output", type=Path, help="new output for explicit attainability reporting")
+    ap.add_argument("--ancestor-receipt-diagnostics", action="store_true",
+                    help="add nested ancestor-only receipt counts without changing omission candidates")
+    ap.add_argument("--output", type=Path, help="new output for explicit attainability or ancestor diagnostics")
     args = ap.parse_args()
     if args.attainability_selection is not None:
         if args.output is None or not args.no_figures or args.check:
             ap.error("attainability requires new --output, --no-figures and no --check")
-    elif args.output is not None:
-        ap.error("--output requires --attainability-selection")
+    if args.ancestor_receipt_diagnostics:
+        if args.output is None or not args.no_figures or args.check:
+            ap.error("ancestor diagnostics require new --output, --no-figures and no --check")
+    elif args.output is not None and args.attainability_selection is None:
+        ap.error("--output requires --attainability-selection or --ancestor-receipt-diagnostics")
     data = collect()
     scores = {rubric: {key: {p: rubric_scores(pfx, p, rubric, capture_raw=args.attainability_selection is not None) for p in PROJECTS}
                        for key, _d, pfx, *_ in ARMS} for rubric in EVAL_DIRS}
@@ -1805,15 +1837,18 @@ def main() -> int:
         print(f"note: no complete runs for {missing}", file=sys.stderr)
     if EXCLUDED_INVALID:
         print(f"note: excluded as invalid by their own validation block: {EXCLUDED_INVALID}", file=sys.stderr)
-    if args.attainability_selection is not None:
+    if args.attainability_selection is not None or args.ancestor_receipt_diagnostics:
         from data_sheets_schema import attainability_aggregation as aa
         try:
-            prepared = aa.prepare_report(args.attainability_selection, _attainability_evaluations(scores))
-            rendered = render_markdown(data, scores, attainability=prepared)
-            protected = aa.protected_paths(prepared)
+            prepared = (aa.prepare_report(args.attainability_selection, _attainability_evaluations(scores))
+                        if args.attainability_selection is not None else None)
+            extra = {"ancestor_diagnostics": True} if args.ancestor_receipt_diagnostics else {}
+            rendered = render_markdown(data, scores, attainability=prepared, **extra)
+            protected = aa.protected_paths(prepared) if prepared is not None else []
             if args.output.exists() or args.output.is_symlink() or args.output.resolve() in {p.resolve() for p in protected}:
-                ap.error("attainability output must be a new file outside all inputs")
-            aa.save_sidecar(args.output, prepared)
+                ap.error("explicit report output must be a new file outside all inputs")
+            if prepared is not None:
+                aa.save_sidecar(args.output, prepared)
             aa.write_new(args.output, rendered.encode("utf-8"), protected)
             return 0
         except (ValueError, OSError) as exc:

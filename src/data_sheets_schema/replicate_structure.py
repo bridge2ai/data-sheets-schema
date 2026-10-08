@@ -686,7 +686,7 @@ NESTED_KINDS = ("field", "entry")
 
 def _below(node: Mapping[str, Any], at: Mapping[str, str], path: str, chain: str, basis: str,
            resolved: Mapping[str, Mapping[str, int] | None], rows: list[dict[str, Any]], *,
-           first: bool = False) -> Counter[str]:
+           first: bool = False, ancestor_diagnostics: bool = False) -> Counter[str]:
     """`nested_omission_candidates`' walk below a node every replicate
     holds, appending its rows to `rows` and returning the `keyless` and
     `values` entries it met: `node` is replicate -> its value at the node,
@@ -703,10 +703,12 @@ def _below(node: Mapping[str, Any], at: Mapping[str, str], path: str, chain: str
             if len(held) == n:
                 if k not in COMMENTARY_KEYS:
                     met += _below({rep: v[k] for rep, v in node.items()}, held, f"{path}.{k}",
-                                  f"{chain}.{k}", basis, resolved, rows)
+                                  f"{chain}.{k}", basis, resolved, rows,
+                                  ancestor_diagnostics=ancestor_diagnostics)
             elif held:
                 rows.append(_nested_row("field", f"{path}.{k}", f"{chain}.{k}", basis, held, resolved,
-                                        commentary=k in COMMENTARY_KEYS))
+                                        commentary=k in COMMENTARY_KEYS,
+                                        ancestor_diagnostics=ancestor_diagnostics))
     elif all(isinstance(v, list) for v in node.values()):
         where, keyless, values = _keyed(node, objects_only=not first)
         if not first:
@@ -716,25 +718,44 @@ def _below(node: Mapping[str, Any], at: Mapping[str, str], path: str, chain: str
             step = f"{chain}[{_key_label(kname, kval, nth)}]"
             if len(held) == n:
                 met += _below({rep: node[rep][i] for rep, i in idx.items()}, held, f"{path}[*]", step,
-                              "key", resolved, rows)
+                              "key", resolved, rows, ancestor_diagnostics=ancestor_diagnostics)
             elif not first:
-                rows.append(_nested_row("entry", f"{path}[*]", step, "key", held, resolved))
+                rows.append(_nested_row("entry", f"{path}[*]", step, "key", held, resolved,
+                                        ancestor_diagnostics=ancestor_diagnostics))
     return met
 
 
 def _nested_row(kind: str, path: str, chain: str, basis: str, held: Mapping[str, str],
-                resolved: Mapping[str, Mapping[str, int] | None], *, commentary: bool = False) -> dict[str, Any]:
+                resolved: Mapping[str, Mapping[str, int] | None], *, commentary: bool = False,
+                ancestor_diagnostics: bool = False) -> dict[str, Any]:
     """One `nested_omission_candidates` row; `held` is holder -> its path."""
     if commentary:
         receipted, unreceipted, status = [], [rep for rep in held if resolved.get(rep) is None], COMMENTARY
     else:
         receipted, unreceipted, status = _status(held, resolved)
-    return {"kind": kind, "path": path, "chain": chain, "basis": basis, "held_by": list(held),
-            "receipted_in": receipted, "unreceipted": unreceipted, "status": status}
+    row = {"kind": kind, "path": path, "chain": chain, "basis": basis, "held_by": list(held),
+           "receipted_in": receipted, "unreceipted": unreceipted, "status": status}
+    if ancestor_diagnostics:
+        ancestors = []
+        if not commentary:
+            for rep, target in held.items():
+                paths = resolved.get(rep)
+                # A holder already receipting the node or a descendant is not
+                # ancestor-only. Other holders' paths never establish its basis.
+                if paths is None or rep in receipted:
+                    continue
+                for receipt_path, snippets in sorted(paths.items()):
+                    if snippets > 0 and receipt_path != target and _receipts._covers(receipt_path, target):
+                        ancestors.append({"holder": rep, "target_path": target,
+                                          "receipt_path": receipt_path, "snippets": snippets})
+        row["ancestor_receipts"] = ancestors
+        row["ancestor_only"] = status == NOT_CANDIDATE and bool(ancestors)
+    return row
 
 
 def nested_omission_candidates(records: Mapping[str, Mapping[str, Any]], result: Mapping[str, Any],
-                               resolved: Mapping[str, Mapping[str, int] | None]) -> dict[str, Any]:
+                               resolved: Mapping[str, Mapping[str, int] | None], *,
+                               ancestor_diagnostics: bool = False) -> dict[str, Any]:
     """Receipt-backed omission candidates below the entries
     `entry_omission_candidates` reads (#3934): the fields of objects and the
     entries of nested lists that some replicates carry and others do not.
@@ -798,22 +819,39 @@ def nested_omission_candidates(records: Mapping[str, Mapping[str, Any]], result:
     `measured` and `per_replicate` (replicate -> kind -> the candidate rows
     it lacks, or None when no replicate has a readable receipt). Every
     row's parent is held by every replicate, so a replicate missing from
-    `held_by` holds the parent and lacks that field or entry."""
+    `held_by` holds the parent and lacks that field or entry.
+
+    Opt-in `ancestor_diagnostics` (#4397) adds `ancestor_receipts` and
+    `ancestor_only` to each row, and `ancestor_only_counts` by kind. Evidence
+    rows name the holder, its resolved final `target_path`, `receipt_path`
+    and verified `snippets`. Only a holder without an on/below receipt is
+    listed; the proper ancestor must satisfy `receipts._covers`, which does
+    not extend a list receipt to its entries. Commentary has no diagnostic
+    evidence. `ancestor_only` is a subset of **not_candidate**, never of
+    unmeasured or candidate; multiple holders/snippets count the row once.
+    All original fields and counts remain unchanged. These are receipt-path
+    diagnostics, not scientific support or recall measurements. Omitting the
+    option preserves the original result shape."""
     reps = list(result["replicates"])
     rows: list[dict[str, Any]] = []
     met: Counter[str] = Counter()
     for name in _held_in_all(result):
         met += _below({rep: records[rep][name] for rep in reps}, {rep: name for rep in reps}, name, name,
-                      "single", resolved, rows, first=True)
+                      "single", resolved, rows, first=True, ancestor_diagnostics=ancestor_diagnostics)
     measured = any(resolved.get(rep) is not None for rep in reps)
     per_replicate = {rep: ({kind: sum(1 for e in rows if e["kind"] == kind and e["status"] == CANDIDATE
                                       and rep not in e["held_by"]) for kind in NESTED_KINDS}
                            if measured else None) for rep in reps}
     statuses = (CANDIDATE, NOT_CANDIDATE, UNMEASURED, COMMENTARY)
     counts = Counter((e["kind"], e["status"]) for e in rows)
-    return {"rows": rows, "keyless": met["keyless"], "values": met["values"], "measured": measured,
-            "per_replicate": per_replicate,
-            "counts": {kind: {s: counts.get((kind, s), 0) for s in statuses} for kind in NESTED_KINDS}}
+    out = {"rows": rows, "keyless": met["keyless"], "values": met["values"], "measured": measured,
+           "per_replicate": per_replicate,
+           "counts": {kind: {s: counts.get((kind, s), 0) for s in statuses} for kind in NESTED_KINDS}}
+    if ancestor_diagnostics:
+        out["ancestor_only_counts"] = {
+            kind: sum(1 for row in rows if row["kind"] == kind and row["ancestor_only"])
+            for kind in NESTED_KINDS}
+    return out
 
 
 def receipted_where_empty(result: Mapping[str, Any],
