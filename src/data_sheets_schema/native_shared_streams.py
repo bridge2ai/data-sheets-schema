@@ -13,6 +13,27 @@ from . import native_shared_contract as c
 from . import native_shared_evidence as evidence
 
 ROLES = ('transcript', 'control')
+MAX_DIAGNOSTIC_BYTES = 16 * 1024
+
+
+class _LiveStreamRefusal(ValueError):
+    """The original refusal arguments plus immutable, bounded diagnostic bytes."""
+
+    def __init__(self, original, diagnostic_json):
+        super().__init__(*original.args)
+        self._diagnostic_json = diagnostic_json
+
+    @property
+    def diagnostic_json(self):
+        return self._diagnostic_json
+
+
+def diagnostic_document(raw):
+    """Decode a detached diagnostic; its contents never grant stream admission."""
+    value = c.strict_json(raw, 'native live-stream diagnostic', MAX_DIAGNOSTIC_BYTES)
+    if c.canonical(value) != raw:
+        raise ValueError('native live-stream diagnostic is not canonical')
+    return value
 
 
 def _identity(value):
@@ -41,14 +62,28 @@ def stream_files(members):
     return identities(found)
 
 
-def _progress(earlier, later, maximum):
-    evidence._metadata(later, later['size'])
-    if any(later[k] != earlier[k] for k in ('device', 'inode', 'regular', 'symlink', 'links')):
-        raise ValueError('live native stream physical identity changed')
-    if later['size'] < earlier['size'] or later['size'] > maximum:
-        raise ValueError('live native stream shrank or exceeded its byte bound')
-    if later['size'] == earlier['size'] and later['mtime_ns'] != earlier['mtime_ns']:
-        raise ValueError('live native stream changed without appending bytes')
+def _progress(earlier, later, maximum, *, diagnostic=None):
+    try:
+        evidence._metadata(later, later['size'])
+        if any(later[k] != earlier[k] for k in ('device', 'inode', 'regular', 'symlink', 'links')):
+            raise ValueError('live native stream physical identity changed')
+        if later['size'] < earlier['size'] or later['size'] > maximum:
+            raise ValueError('live native stream shrank or exceeded its byte bound')
+        if later['size'] == earlier['size'] and later['mtime_ns'] != earlier['mtime_ns']:
+            raise ValueError('live native stream changed without appending bytes')
+    except ValueError as original:
+        # Diagnostic work is best effort and happens only after the unchanged
+        # refusal. Never acquire more metadata or bytes to explain a failure.
+        if diagnostic is not None:
+            try:
+                raw = c.canonical({'kind': 'native_live_stream_refusal', 'version': 1,
+                    **diagnostic, 'max_bytes': maximum, 'earlier': earlier, 'later': later})
+                diagnostic_document(raw)
+                enriched = _LiveStreamRefusal(original, raw)
+            except Exception:
+                raise original
+            raise enriched from original
+        raise
     return later
 
 
@@ -79,7 +114,14 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
         raise ValueError('live native stream differs from its observed file identity')
     fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
     try:
-        opened = _progress(before, evidence._stat(os.fstat(fd)), max_bytes)
+        def progress(earlier, later, stage, *, pass_number=None, offset=0, opened_extent=None):
+            return _progress(earlier, later, max_bytes, diagnostic={
+                'role': role, 'path': path, 'stage': stage,
+                'pass_number': pass_number, 'offset': offset, 'opened_extent': opened_extent,
+                'previous_prefix': None if previous is None else {
+                    'bytes': previous.bytes, 'sha256': previous.sha256}})
+
+        opened = progress(before, evidence._stat(os.fstat(fd)), 'opened')
         size = opened['size']
         if previous is not None and previous.bytes > size:
             raise ValueError('live native stream lost an observed prefix')
@@ -87,27 +129,33 @@ def read_live_stream(path, role, *, max_bytes, previous=None, identity=None):
         pieces = []
         offset = 0
         while offset < size:
-            last = _progress(last, evidence._stat(os.fstat(fd)), max_bytes)
+            last = progress(last, evidence._stat(os.fstat(fd)), 'before_read',
+                            pass_number=1, offset=offset, opened_extent=size)
             count = min(65536, size - offset)
             part = os.pread(fd, count, offset)
             if not part or len(part) > count:
                 raise ValueError('live native stream ended inside its opened extent')
             pieces.append(part)
             offset += len(part)
-            last = _progress(last, evidence._stat(os.fstat(fd)), max_bytes)
+            last = progress(last, evidence._stat(os.fstat(fd)), 'after_read',
+                            pass_number=1, offset=offset, opened_extent=size)
         raw = b''.join(pieces)
         del pieces
         offset = 0
         while offset < size:
-            last = _progress(last, evidence._stat(os.fstat(fd)), max_bytes)
+            last = progress(last, evidence._stat(os.fstat(fd)), 'before_read',
+                            pass_number=2, offset=offset, opened_extent=size)
             count = min(65536, size - offset)
             part = os.pread(fd, count, offset)
             if not part or len(part) > count or part != raw[offset:offset + len(part)]:
                 raise ValueError('live native stream prefix changed during capture')
             offset += len(part)
-            last = _progress(last, evidence._stat(os.fstat(fd)), max_bytes)
-        last = _progress(last, evidence._stat(os.fstat(fd)), max_bytes)
-        _progress(last, evidence._stat(target.lstat()), max_bytes)
+            last = progress(last, evidence._stat(os.fstat(fd)), 'after_read',
+                            pass_number=2, offset=offset, opened_extent=size)
+        last = progress(last, evidence._stat(os.fstat(fd)), 'final_fd',
+                        offset=offset, opened_extent=size)
+        progress(last, evidence._stat(target.lstat()), 'final_path',
+                 offset=offset, opened_extent=size)
         if str(target.resolve(strict=True)) != path:
             raise ValueError('live native stream path changed during capture')
         if previous is not None and raw[:previous.bytes] != previous.raw:

@@ -127,6 +127,7 @@ class CallbackAdapter:
             report_path=paths['report'], receipt_path=paths['receipt'], working_directory=self.value['working_directory'])
         self.state = attribution.live(self.selection, execution_raw=registration_raw, spec=self.spec, composition_raw=composition_raw)
         self.failure = self.final_evidence = self.recorder_identity = None
+        self._stream_diagnostic_json = None
         self.recorder_call = None
         self.recorder_done = False
         self._activated = self._initialized = False
@@ -151,6 +152,20 @@ class CallbackAdapter:
         if self.failure is None:
             self.failure = str(reason)
         raise self.controls['budgeted_cborg'].BudgetStop(self.failure)
+
+    def _failure_detail(self, exc):
+        # Preserve the historical first-stop text, not the private subclass
+        # name. The first failure alone may contribute optional diagnostics.
+        is_stream = isinstance(exc, live_streams._LiveStreamRefusal)
+        if self.failure is None and is_stream:
+            try:
+                raw = exc.diagnostic_json
+                live_streams.diagnostic_document(raw)
+                if getattr(self, '_stream_diagnostic_json', None) is None:
+                    self._stream_diagnostic_json = raw
+            except Exception:
+                pass  # Diagnostic failure must never replace the refusal.
+        return ('ValueError' if is_stream else type(exc).__name__) + ': ' + str(exc)
 
     def _observed_endpoint(self, event):
         members, prefixes = [], {}
@@ -346,7 +361,7 @@ class CallbackAdapter:
                 raise ValueError('native attribution: ' + '; '.join(problems))
             self._final_unchanged(run)
         except Exception as exc:
-            self._stop('native shared observation failed: ' + type(exc).__name__ + ': ' + str(exc))
+            self._stop('native shared observation failed: ' + self._failure_detail(exc))
 
     def classify(self, command, python, programs, selected_policy):
         if self.failure is not None:
@@ -364,13 +379,19 @@ class CallbackAdapter:
                     raise ValueError('; '.join(phase['problems']))
                 self._final_unchanged(run)
             except Exception as exc:
-                self.failure = 'completed native shared history cannot be verified: ' + type(exc).__name__ + ': ' + str(exc)
+                self.failure = 'completed native shared history cannot be verified: ' + self._failure_detail(exc)
         out = self.state.report(complete=complete)
+        diagnostic = {}
+        if self.failure is not None and getattr(self, '_stream_diagnostic_json', None) is not None:
+            try:
+                diagnostic['stream_diagnostic'] = live_streams.diagnostic_document(self._stream_diagnostic_json)
+            except Exception:
+                pass  # Existing failed reports remain available without it.
         return {**out, 'execution': EXECUTION, 'composition_sha256': c.sha(self.raw),
             'controller_stop': self.failure, 'final_evidence': deepcopy(self.final_evidence),
             'recorder_completed': self.recorder_done, 'recorder_identity': deepcopy(self.recorder_identity),
             'phase_history': self.phase.report(complete=complete),
-            'draft_gate_passed': out['draft_gate_passed'] and self.failure is None}
+            'draft_gate_passed': out['draft_gate_passed'] and self.failure is None, **diagnostic}
 
 
 def capture_phase(run, *, complete):
