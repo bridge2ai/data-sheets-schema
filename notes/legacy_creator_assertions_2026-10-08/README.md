@@ -1,6 +1,6 @@
 # Legacy Creator assertion preservation
 
-Issues [#4685](https://github.com/bridge2ai/data-sheets-schema/issues/4685), [#4684](https://github.com/bridge2ai/data-sheets-schema/issues/4684) and [#4686](https://github.com/bridge2ai/data-sheets-schema/issues/4686). Implementation baseline: `bd64f1cd3e5646206da43453e862d8aa0a68f93a`, the reviewed UpdatePlan successor subsequently merged by PR #4681. Parent #4594, #2915 and the separate PI-role decision #4449 remain open.
+Issues [#4685](https://github.com/bridge2ai/data-sheets-schema/issues/4685), [#4684](https://github.com/bridge2ai/data-sheets-schema/issues/4684), [#4686](https://github.com/bridge2ai/data-sheets-schema/issues/4686) and [#4688](https://github.com/bridge2ai/data-sheets-schema/issues/4688). Implementation baseline: `bd64f1cd3e5646206da43453e862d8aa0a68f93a`, the reviewed UpdatePlan successor subsequently merged by PR #4681. Parent #4594, #2915 and the separate PI-role decision #4449 remain open.
 
 The default legacy TSV now explicitly marks its one `creators <- author` route with `creator_author_literals_v1`. Both real builders wrap each complete string as `Creator.description`; other values are deep-copied intact. The same selected root is used for construction and source evidence. This introduces no people, IDs, affiliations, PI roles, remote reference resolution, name splitting, or semantic-label upgrade.
 
@@ -45,6 +45,8 @@ The five retained input records are expected to remove only literal Creator type
 ## Validation status
 
 Implementation and tests are prepared for coordinator-controlled execution. No application, pytest suite or retained-input replay has been run by the implementation author. Static syntax inspection imports no project code. Independent review and serialized test/replay evidence will be recorded separately before merge.
+
+Independent static review also corrected a CLI test fixture before execution (#4688): the real merge command requires at least two sources. Its control now passes two actual crates and checks both disclosed raw-source rows and the absence of an invented merged percentage. This was a fixture correction, not a production change or an observed test run failure.
 
 Proposed focused test modules:
 

@@ -321,9 +321,10 @@ def test_real_api_legacy_cli_summaries_name_the_measurement(legacy, tmp_path, ca
                         lambda **kwargs: original_config(preserve_provenance=False, **kwargs))
     inputs = tmp_path / 'inputs'; inputs.mkdir()
     source = input_file(inputs / 'a.json', TEXT)
+    second = input_file(inputs / 'b.json', ['Other', 'Other']) if command == 'merge' else None
     output = tmp_path / ('outputs' if command == 'batch' else 'dataset.yaml')
     args = {'transform': [str(source), str(output)], 'batch': [str(inputs), str(output)],
-            'merge': [str(output), str(source)]}[command]
+            'merge': [str(output), str(source), str(second)]}[command]
     capsys.readouterr()
     api.main([command, *args, '--mapping', str(table(tmp_path))])
     text = capsys.readouterr().out
@@ -331,3 +332,12 @@ def test_real_api_legacy_cli_summaries_name_the_measurement(legacy, tmp_path, ca
     if command != 'merge':
         assert VALUE_BASIS_LABEL in text
         assert 'Construction counts are not source coverage or validation success.' in text
+    else:
+        rows = [json.loads(line) for line in text.splitlines() if line.startswith('{')]
+        assert len(rows) == 2
+        assert {row['source_name'] for row in rows} == {'a', 'b'}
+        assert sorted(row['immediate_assertion_units'] for row in rows) == [1, 2]
+        assert [row['processing_index'] for row in rows] == [0, 1]
+        assert sum(row['selected_primary'] for row in rows) == 1
+        assert VALUE_BASIS_LABEL not in text and 'Construction percentage:' not in text
+        assert 'coverage_percentage' not in text
