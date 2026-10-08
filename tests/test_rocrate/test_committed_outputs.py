@@ -314,7 +314,8 @@ class TestTheGuardReadsWhatTheMapperWrites(unittest.TestCase):
 
     def test_a_declared_row_is_told_from_an_undecided_merge_in_the_same_words(self):
         protocol = "rai:dataPreprocessingProtocol"
-        graph = [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork"},
+        graph = [{"@id": "ro-crate-metadata.json", "@type": "CreativeWork",
+                  "about": {"@id": "./"}},
                  {"@id": "./", "@type": ["https://w3id.org/EVI#Dataset",
                                          "https://w3id.org/EVI#ROCrate"],
                   protocol: ["Resampled."], "rai:dataBiases": "Clinic cohort."}]

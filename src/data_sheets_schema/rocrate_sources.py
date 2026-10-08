@@ -9,13 +9,19 @@ from __future__ import annotations
 from copy import deepcopy
 import re
 from typing import Any
-from urllib.parse import urlsplit
 
 GRAPH_RE = re.compile(
     r"^@graph\[\?@type='(?P<type>[^']+)'\]\['(?P<prop>[^']+)'\]"
     r"(?:\[\?name='(?P<name>[^']+)'\]\['(?P<prop2>[^']+)'\])?$"
 )
 NOT_A_PATH = re.compile(r"^(N/A|\s*|.*\s+MIME\s+parameter|d4d:.*)$", re.IGNORECASE)
+
+# Crate-level descriptor names, including RO-Crate 1.0 and explicit relative
+# aliases. A nested or absolute metadata-looking path is not this descriptor
+# merely because its basename matches; resolving a base URI is outside this
+# compacted-graph reader's contract.
+DESCRIPTOR_IDS = ("ro-crate-metadata.json", "./ro-crate-metadata.json",
+                  "ro-crate-metadata.jsonld", "./ro-crate-metadata.jsonld")
 
 # Each adapter declares every root key it may read. Referenced IRB records
 # are included separately; no other graph entity supplies a missing key.
@@ -32,7 +38,8 @@ def _types_of(entity: dict) -> list:
 
 
 def _type_matches(entity: dict, wanted: str) -> bool:
-    return any(t == wanted or re.search(rf"[#/:]{re.escape(wanted)}$", str(t))
+    return any(isinstance(t, str) and
+               (t == wanted or re.search(rf"[#/:]{re.escape(wanted)}$", t))
                for t in _types_of(entity))
 
 
@@ -42,28 +49,31 @@ def present(value: Any) -> bool:
 
 
 def select_root(graph: list[dict]) -> tuple[dict | None, str]:
+    """Select one root without guessing from graph order (#4586, #4587).
+
+    Explicit crate descriptors are authoritative, including when invalid.
+    Without one, use a conventional root or a unique typed candidate. A
+    unique anonymous node is permitted for callers that use its separate
+    identifier; a present malformed ID is not an anonymous node.
+    """
+    if not isinstance(graph, list):
+        return None, "@graph must be a list of entities"
     entities = [e for e in graph if isinstance(e, dict)]
-    descriptors = []
-    for entity in entities:
-        identifier = entity.get("@id")
-        if not isinstance(identifier, str):
-            continue
-        try:
-            basename = urlsplit(identifier).path.rsplit("/", 1)[-1]
-        except ValueError:
-            continue
-        if basename == "ro-crate-metadata.json":
-            descriptors.append(entity)
-    about = [e["about"] for e in descriptors if "about" in e]
-    if about:
+    descriptors = [e for e in entities if e.get("@id") in DESCRIPTOR_IDS]
+    if descriptors:
+        if len({e["@id"] for e in descriptors}) != len(descriptors):
+            return None, "metadata descriptor has duplicate entity IDs"
         refs = []
-        for value in about:
+        for descriptor in descriptors:
+            if "about" not in descriptor:
+                return None, "metadata descriptor is missing its about reference"
+            value = descriptor["about"]
             items = value if isinstance(value, list) else [value]
             if not items:
                 return None, "metadata descriptor has an empty about reference"
             for item in items:
                 ref = item.get("@id") if isinstance(item, dict) else item
-                if not isinstance(ref, str) or not ref:
+                if not isinstance(ref, str) or not ref.strip():
                     return None, "metadata descriptor has an invalid about reference"
                 if ref not in refs:
                     refs.append(ref)
@@ -73,20 +83,23 @@ def select_root(graph: list[dict]) -> tuple[dict | None, str]:
         if len(targets) != 1:
             return None, "metadata about reference is unresolved or has duplicate entity IDs"
         root = targets[0]
+        if any(root is descriptor for descriptor in descriptors):
+            return None, "metadata descriptor cannot select itself or another descriptor as root"
         if not (_type_matches(root, "Dataset") or _type_matches(root, "ROCrate")):
             return None, "metadata about target is not typed Dataset or ROCrate"
         return root, "metadata descriptor about reference"
 
     # Conventional './' is explicit identity, not graph position. Duplicate
     # identities or two conventional roots are ambiguous even if values agree.
-    conventional = [e for e in entities if e.get("@id") in ("./", ".")
-                    and (_type_matches(e, "Dataset") or _type_matches(e, "ROCrate"))]
+    conventional = [e for e in entities if e.get("@id") in ("./", ".")]
     if conventional:
         if len(conventional) != 1:
             return None, "multiple conventional crate roots"
         candidate = conventional[0]
         if sum(e.get("@id") == candidate["@id"] for e in entities) != 1:
             return None, "conventional root has duplicate entity IDs"
+        if not (_type_matches(candidate, "Dataset") or _type_matches(candidate, "ROCrate")):
+            return None, "conventional root is not typed Dataset or ROCrate"
         return candidate, "conventional root identifier"
     for kind in ("ROCrate", "Dataset"):
         candidates = [e for e in entities if _type_matches(e, kind)]
@@ -94,9 +107,12 @@ def select_root(graph: list[dict]) -> tuple[dict | None, str]:
             return None, f"multiple {kind} entities without an explicit root reference"
         if candidates:
             candidate = candidates[0]
-            if candidate.get("@id") is not None and sum(
-                    e.get("@id") == candidate["@id"] for e in entities) != 1:
-                return None, "candidate root has duplicate entity IDs"
+            if "@id" in candidate:
+                identifier = candidate["@id"]
+                if not isinstance(identifier, str) or not identifier.strip():
+                    return None, "candidate root has an invalid @id"
+                if sum(e.get("@id") == identifier for e in entities) != 1:
+                    return None, "candidate root has duplicate entity IDs"
             return candidate, f"unique {kind} entity"
     return None, "no identifiable crate root"
 

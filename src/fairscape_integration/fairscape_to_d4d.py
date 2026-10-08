@@ -62,6 +62,7 @@ from data_sheets_schema.rocrate_map import (
     read_crate_json,
 )
 from data_sheets_schema.schema_view import shared_view
+from data_sheets_schema.rocrate_sources import select_root
 from data_sheets_schema.scope import _norm, bare_doi
 
 # Add fairscape_models to path
@@ -123,10 +124,6 @@ FILE_COLLECTION_SLOTS = {
     'd4d:collectionType': 'collection_type',
     'd4d:fileCount': 'file_count',
 }
-
-#: The `@id` RO-Crate gives the metadata descriptor: `ro-crate-metadata.json`
-#: from 1.1, `ro-crate-metadata.jsonld` in 1.0.
-DESCRIPTOR_IDS = ("ro-crate-metadata.json", "ro-crate-metadata.jsonld")
 
 #: What JSON calls each value `json.loads` returns other than an object,
 #: by its Python type, for `convert` to say what a file holds instead of
@@ -304,37 +301,13 @@ def is_dataset(entity: Dict[str, Any]) -> bool:
 
 
 def root_data_entity(graph: List[Any]) -> Optional[Dict[str, Any]]:
-    """The crate's root data entity under this converter's policy (#4072).
+    """The shared, unambiguous crate root, or None (#4586).
 
-    1. The entity the metadata descriptor (`ro-crate-metadata.json`) names
-       in `about`. That is how RO-Crate defines the root.
-    2. Otherwise the entity whose `@id` is `./`.
-    3. Otherwise the first ROCrate-typed entity.
-
-    The static mapper now refuses ambiguous roots and unresolved descriptor
-    references. This converter retains its historical fallback pending
-    #4586; its result can still depend on graph order in ambiguous crates.
-
-    A FAIRSCAPE release crate lists its sub-crates in the same `@graph`,
-    each typed ROCrate like the release itself. Taking the last such
-    entity, as this converter did, described a sub-crate as the release.
+    Crate-level descriptor references are authoritative. A missing or
+    ambiguous root is never supplied by an arbitrary child Dataset.
+    ``convert`` reports the selector's reason when selection is refused.
     """
-    entities = [entity for entity in graph if isinstance(entity, dict)]
-    by_id: Dict[str, Dict[str, Any]] = {}
-    for entity in entities:
-        if isinstance(entity.get('@id'), str):
-            by_id.setdefault(entity['@id'], entity)
-    # The `@id` itself, not its last path segment: a release crate can list
-    # a sub-crate's `<dir>/ro-crate-metadata.json` as a file of its own.
-    descriptor = next((by_id[name] for name in DESCRIPTOR_IDS if name in by_id),
-                      None)
-    if descriptor is not None:
-        root = by_id.get(_ref_id(descriptor.get('about')))
-        if root is not None and root is not descriptor:
-            return root
-    if './' in by_id:
-        return by_id['./']
-    return next((entity for entity in entities if is_rocrate(entity)), None)
+    return select_root(graph)[0]
 
 
 def exact_bytes(value: Any) -> Tuple[Optional[int], str]:
@@ -630,7 +603,8 @@ class FairscapeToD4DConverter:
                 integer; its JSON is not one object, as an RO-Crate's
                 metadata is, but an array, a string, a number, a boolean
                 or null, which the message names (#4192); the crate has no
-                root data entity; or the record has an error no value left
+                unambiguous root data entity (the selection reason is
+                included); or the record has an error no value left
                 out can fix, such as a missing `id` (`_settle`). A byte
                 count written as text, however long, is recorded in
                 `dropped` instead (#4159).
@@ -676,21 +650,15 @@ class FairscapeToD4DConverter:
         # The crate's root data entity, and the datasets its hasPart names
         dataset, nested_datasets = self._extract_datasets(rocrate_data)
 
-        if not dataset:
-            raise ValueError(
-                "No root data entity in the RO-Crate `@graph`: the metadata "
-                "descriptor's `about` names no entity in it, no entity has "
-                "`@id` './', and none is typed ROCrate")
-
         # Convert to D4D
         d4d_dict = self._build_d4d(dataset, nested_datasets, rocrate_data)
 
         return d4d_dict
 
-    def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Optional[Dict], List[Dict]]:
+    def _extract_datasets(self, rocrate_data: Dict) -> Tuple[Dict, List[Dict]]:
         """The crate's root data entity and the datasets its `hasPart` names.
 
-        The root is the one the RO-Crate rule picks (`root_data_entity`),
+        The root is the one the shared selector picks (`root_data_entity`),
         and every value in the record is read from it (#4072). It used to
         be the last entity typed `Dataset` whose `@id` was `./` or that was
         typed EVI#ROCrate. In a FAIRSCAPE release crate, which lists its
@@ -710,18 +678,18 @@ class FairscapeToD4DConverter:
         Returns:
             Tuple of (root, nested_datasets_list)
         """
-        graph = [entity for entity in rocrate_data.get('@graph', [])
-                 if isinstance(entity, dict)]
-        root = root_data_entity(graph)
+        graph = rocrate_data.get('@graph', [])
+        root, reason = select_root(graph)
         if root is None:
-            return None, []
+            raise ValueError(f"No unambiguous root data entity in the RO-Crate `@graph`: {reason}")
+        graph = [entity for entity in graph if isinstance(entity, dict)]
 
         part_ids = {_ref_id(part) for part in _as_list(root.get('hasPart'))}
         part_ids.discard(None)
         nested_datasets, seen = [], set()
         for entity in graph:
             entity_id = entity.get('@id')
-            if (entity is not root and entity_id in part_ids
+            if (entity is not root and isinstance(entity_id, str) and entity_id in part_ids
                     and entity_id != root.get('@id') and entity_id not in seen
                     and is_dataset(entity)):
                 nested_datasets.append(entity)
