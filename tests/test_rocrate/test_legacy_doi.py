@@ -90,9 +90,39 @@ def test_schema_valid_bare_values_are_not_narrowed_or_trimmed(implementation, tm
     assert yaml.safe_load(publication.prepare_dataset(record))['doi'] == value
 
 
+@pytest.mark.parametrize('prefix', ['doi:', 'DOI:', 'http://doi.org/',
+    'https://doi.org/', 'http://dx.doi.org/', 'https://dx.doi.org/', 'HTTPS://DOI.ORG/'])
+@pytest.mark.parametrize('suffix', ['Record/', 'MiXeD/Part///'])
+def test_prefixed_suffix_slashes_survive_real_construction_and_publication(
+        implementation, tmp_path, prefix, suffix):
+    """#4671: recognition must not delete the source DOI's suffix ending."""
+    expected = '10.1234/' + suffix
+    source, table = crate(tmp_path, prefix + expected), mapping(tmp_path)
+    before = {path: path.read_bytes() for path in (source, table)}
+    record = build(implementation, source, table)
+    assert record['doi'] == expected
+    raw = publication.prepare_dataset(record)
+    output = tmp_path / 'record.yaml'
+    publication.publish([(output, raw)], protected=[source, table])
+    assert output.read_bytes() == raw
+    assert yaml.safe_load(output.read_bytes())['doi'] == expected
+    assert {path: path.read_bytes() for path in before} == before
+
+
+@pytest.mark.parametrize('prefix', ['DOI:', 'https://dx.doi.org/'])
+def test_outer_whitespace_does_not_remove_suffix_slashes(implementation, tmp_path, prefix):
+    expected = '10.1234/MiXeD/Part///'
+    record = build(implementation, crate(tmp_path, ' \t' + prefix + expected + '\t\n'),
+                   mapping(tmp_path))
+    assert record['doi'] == expected
+    assert yaml.safe_load(publication.prepare_dataset(record))['doi'] == expected
+
+
 INVALID = ['', '10.', '10.123/x', 'not a DOI', 'ark:12345/record',
     'https://example.org/?persistentId=doi:10.1234/Example',
-    'https://doi.org/10.1234/two words', {'@id': 'doi:' + BARE}, False, 0,
+    'https://doi.org/10.1234/two words', 'doi:10.1234///',
+    'https://example.org/10.1234/Record///', ' 10.1234/NoPrefix/ ',
+    {'@id': 'doi:' + BARE}, False, 0,
     [], [BARE], [BARE, BARE], [BARE, '10.5678/Conflicting'], [BARE, None],
     ['not DOI', 'doi:' + BARE]]
 

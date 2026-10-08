@@ -9,12 +9,14 @@ became `https://doi.org/10.1234/MixedCase`, contradicting the Dataset schema's
 bare-DOI requirement. Generic URI targets keep their existing behavior.
 
 Recognized scalar `doi:`, HTTP(S) `doi.org`, and HTTP(S) `dx.doi.org` forms use
-the existing `scope.bare_doi` repair parser. Prefix matching is case insensitive;
-suffix case is retained. That parser removes surrounding whitespace and trailing
-slashes from a prefixed value. Strings already starting with `10.` stay exactly
-as supplied, including schema-valid bare forms outside the repair parser's
-narrower grammar. The mandatory final Dataset validator still decides whether
-a retained value is valid.
+the existing `scope.bare_doi` parser only to recognize an eligible repair.
+Prefix matching is case insensitive; the entire suffix, including its case and
+one or more trailing slashes, is taken from the source string. After the existing
+outer-whitespace trim, only the known representation prefix is removed. The
+parser's slash-stripped return value is never used as the constructed DOI.
+Strings already starting with `10.` stay exactly as supplied, including
+schema-valid bare forms outside the repair parser's narrower grammar. The
+mandatory final Dataset validator still decides whether a retained value is valid.
 
 Malformed strings, objects, booleans, numbers and lists stay intact in drafts.
 A singleton, repeated, mixed or conflicting list never contributes just its
@@ -41,7 +43,20 @@ Neither source coverage nor semantic equivalence follows from this correction;
 row retirement is not a coverage gain, and intact text does not establish
 `exactMatch`/`none`.
 
-## Validation results
+## Pending suffix-preservation correction
+
+The second review round found [#4671](https://github.com/bridge2ai/data-sheets-schema/issues/4671)
+before publication: the first implementation used the recognizer's return value,
+which silently removed trailing slashes from prefixed DOI suffixes. The earlier
+suite covered this ending only for bare inputs. The correction now removes only
+the known prefix and adds both-builder controls for all accepted prefix forms,
+mixed case, internal slashes and one/multiple trailing slashes, through actual
+Dataset validation and file publication. Unrecognized forms remain intact for
+refusal. Production code and tests changed; independent review and a fresh
+focused run are pending. The 318-pass evidence below belongs to the earlier
+implementation and does not validate this correction.
+
+## Earlier validation results
 
 The serialized eight-module run passed **318 tests**, with zero failures,
 errors or skips, at commit
@@ -61,21 +76,24 @@ seconds; its XML does not encode the warning count or attest the tested commit.
 | `tests/test_cli/test_rocrate_transform_mapping.py` | 17 |
 | `tests/test_cli/test_rocrate_transform_mapping_adversarial.py` | 10 |
 
-The 117 new cases exercise both real builders and the current closed Dataset
+The earlier 117 new cases exercised both real builders and the current closed Dataset
 validator, packaged/hidden publishers, the real API batch path with an explicit
 valid-ID mapping, and direct hidden-script use from another working directory.
-They cover the accepted forms and preservation/refusal boundaries above,
+They covered the then-tested accepted forms and preservation/refusal boundaries,
 including a later invalid batch DOI preventing every destination replacement.
 Existing publication, result-contract and wrapper controls also passed.
-Independent adversarial source review found no material issues before execution.
+Initial independent source review found no issues before that execution; the
+later review found the missing prefixed-suffix case documented above.
 
 [validation.json](validation.json) records the command with symbolic paths,
 the eight module counts, and 26 selected production/test/resource/dependency
-pins. Each selected working file was compared byte-for-byte with the tested Git
-blob. These pins cover the named files, not a complete installed environment.
+pins for that earlier commit. Each selected working file then matched the tested
+Git blob; the current correction intentionally changes the DOI helper and tests.
+These pins cover the named files, not a complete installed environment.
 The retained external JUnit artifact `legacy-doi-tests-01.xml` is 51,571 bytes,
 SHA-256 `30c50542813c258f877d4631d55341ab69cbe564b0afb2de163465a4d6ce3905`.
-Only these evidence notes changed after the run; source and tests are unchanged.
+The earlier artifact and its source pins are retained without relabeling them
+as evidence for the pending correction.
 
 No real-project replay, provider call, scientific rating or new historical label
 was produced. All five retained-input legacy replays and the remaining default

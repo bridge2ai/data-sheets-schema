@@ -1,7 +1,11 @@
 """DOI-only construction for the legacy TSV builders; never a validation gate."""
 from copy import deepcopy
+import re
 
 from data_sheets_schema.scope import bare_doi
+
+
+_PREFIX = re.compile(r'^(?:doi:|https?://(?:dx\.)?doi\.org/)', re.IGNORECASE)
 
 
 def doi_value(value):
@@ -13,9 +17,13 @@ def doi_value(value):
     particular, a list never contributes only its first or recognisable DOI.
     """
     if isinstance(value, str) and not value.startswith('10.'):
-        repaired = bare_doi(value)
-        if repaired is not None:
-            return repaired
+        source = value.strip()
+        prefix = _PREFIX.match(source)
+        if prefix is not None and bare_doi(source) is not None:
+            # The recognizer strips trailing '/' for its comparison policy.
+            # It admits the repair, but only the representation prefix may be
+            # removed here: every suffix character remains source evidence.
+            return source[prefix.end():]
     return deepcopy(value)
 
 
