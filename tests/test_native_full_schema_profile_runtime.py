@@ -29,6 +29,25 @@ def profile():
     return module
 
 
+def synthetic_pair(profile, operation="_load_live"):
+    """Complete fictional measurement rows; no recovered operation runs."""
+    status = dict(profile.OPERATIONS)[operation]
+    refusal = ({"node": 0, "type": "builtins.ValueError",
+        "arguments": ["tuple", [["str", "synthetic refusal control"]]],
+        "cause": None, "context": None, "suppress_context": False, "notes": ["none"]}
+        if status == "refused" else None)
+    semantics = None if refusal is not None else ["str", "synthetic return"]
+    digest = profile.sha(profile.canonical(refusal if refusal is not None else semantics))
+    arm = {"status": status, "semantic_sha256": digest, "refusal": refusal,
+        "semantics": semantics,
+        "process_cpu_ns": 10, "wall_ns": 20, "reconstruction_counts": {},
+        "setup": {"process_cpu_ns": 3, "wall_ns": 5},
+        "fingerprint": {"process_cpu_ns": 2, "wall_ns": 4}}
+    measured = deepcopy(arm)
+    measured["reconstruction_counts"] = {"_load_live": 1}
+    return {"operation": operation, "plain": arm, "instrumented": measured, "parity": True}
+
+
 @pytest.fixture
 def parent_case(profile, tmp_path, monkeypatch):
     tools = profile.utility()
@@ -82,15 +101,26 @@ def parent_case(profile, tmp_path, monkeypatch):
         "flags": {"isolated": 1, "no_site": 1, "dont_write_bytecode": True},
         "environment": {"python": "invented", "platform": "invented", "machine": "invented"},
         "recovered_provenance": provenance,
+        "phase_overhead": {"preflight": {"process_cpu_ns": 1, "wall_ns": 2},
+                           "final_verification": {"process_cpu_ns": 1, "wall_ns": 2}},
     }
     preparation = {"format": profile.FORMAT, "mode": "prepare", "status": "completed",
+        "scope": profile.SCOPE, "diagnostic_wall_bound_seconds": 900,
+        "declared_acceptance_deadline_seconds": 900, "parent_wall_seconds": 0.125,
+        "child_exit_code": 0, "stdout_bytes": len(profile.canonical(result)),
+        "stdout_sha256": profile.sha(profile.canonical(result)),
+        "stderr_bytes": 0, "stderr_sha256": profile.sha(b""), "limitations": list(profile.LIMITATIONS),
+        "report_role": "checkpoint_preparation", "operation": None,
+        "operation_catalog": profile.operation_catalog(), "measurement_binding": None,
+        "operation_set": profile.operation_set({}),
         "scientific_eligibility": False, "execution_authorized": False,
         "native_acceptance_evaluated": False, "historical_capture_complete": False,
         "utility_sha256": profile.UTILITY_SHA256, "driver_sha256": profile.sha(driver.read_bytes()),
         "python_identity": selected, "result": deepcopy(result)}
     (checkpoint / "report.json").write_bytes(profile.canonical(preparation))
     args = SimpleNamespace(command="prepare", source=source, recovery=recovery,
-        dependencies=dependencies, checkpoint=checkpoint, output=tmp_path / "new-output")
+        dependencies=dependencies, checkpoint=checkpoint, output=tmp_path / "new-output",
+        operation="_load_live")
     kills, invocations, communications = [], [], []
     monkeypatch.setattr(profile.os, "killpg", lambda pid, sig: kills.append((pid, sig)))
 
@@ -100,7 +130,9 @@ def parent_case(profile, tmp_path, monkeypatch):
             for key in ("selection_relative", "declared_deadline_seconds", "preparation_stages",
                         "checkpoint", "synthetic_parameters"):
                 selected_result.pop(key)
-            selected_result.update(mode="measure", operations=[], projection={})
+            selected_result.update(mode="measure", operation=args.operation,
+                operations=[synthetic_pair(profile, args.operation)], projection=profile.projection_contract(),
+                checkpoint_verification={"process_cpu_ns": 1, "wall_ns": 2})
         raw = profile.canonical(selected_result) if body is None else body
         class Child:
             pid = 71999
@@ -174,6 +206,18 @@ def test_dispatch_uses_fixed_resolved_child_and_separate_phase_bound(profile, pa
     assert value["declared_acceptance_deadline_seconds"] == 900
     assert all(value[field] is False for field in ("scientific_eligibility", "execution_authorized",
                 "native_acceptance_evaluated", "historical_capture_complete"))
+    assert value["operation_catalog"] == profile.operation_catalog()
+    if phase == "measure":
+        assert config["operation"] == value["operation"] == case.args.operation
+        assert value["report_role"] == "measured_operation_pair"
+        assert value["operation_set"] == profile.operation_set({case.args.operation: "completed"})
+        assert value["measurement_binding"] == config["measurement_binding"]
+        assert value["measurement_binding"]["preparation_report"] == {
+            "sha256": profile.sha((case.checkpoint / "report.json").read_bytes()),
+            "bytes": (case.checkpoint / "report.json").stat().st_size}
+    else:
+        assert value["report_role"] == "checkpoint_preparation" and value["operation"] is None
+        assert value["measurement_binding"] is None and value["operation_set"] == profile.operation_set({})
     assert profile.tree_manifest(case.case) == case.original_case
 
 
@@ -203,6 +247,9 @@ def test_timeout_always_reaps_and_retains_partial_new_case(profile, parent_case,
     assert value["status"] == "diagnostic_timeout" and value["result"] is None
     assert value["historical_capture_complete"] is False
     assert value["scientific_eligibility"] is False and value["execution_authorized"] is False
+    if phase == "measure":
+        assert value["operation_set"] == profile.operation_set({case.args.operation: "diagnostic_timeout"})
+        assert value["measurement_binding"]["diagnostic_wall_bound_seconds"] == 600
     assert b"unaccepted_partial" not in (case.args.output / "report.json").read_bytes()
     assert (case.args.output / "refusal.stderr").read_bytes() == b"invented diagnostic"
     if phase == "prepare":
@@ -232,10 +279,31 @@ def test_invalid_or_oversize_success_does_not_publish_partial_report(profile, pa
     elif fault == "child_size":
         monkeypatch.setattr(profile, "MAX_REPORT_BYTES", len(raw) - 1)
     else:
+        # The child fits, but its complete parent wrapper does not. Leave
+        # enough room for the truthful null-result failure envelope.
+        changed = deepcopy(case.result)
+        changed["environment"]["python"] = "fictional interpreter disclosure " + "x" * 16384
+        raw = profile.canonical(changed)
         monkeypatch.setattr(profile, "MAX_REPORT_BYTES", len(raw) + 1)
     case.install(body=raw)
+    if fault == "wrapped_report_size":
+        assert profile.dispatch(case.args) == 1
+        value = report(case)
+        assert value["status"] == "diagnostic_publication_refused" and value["result"] is None
+        assert value["child_exit_code"] == 0
+        assert value["stdout_bytes"] == len(raw) and value["stdout_sha256"] == profile.sha(raw)
+        assert value["operation_set"] == profile.operation_set({})
+        assert all(value[field] is False for field in ("scientific_eligibility", "execution_authorized",
+                    "native_acceptance_evaluated", "historical_capture_complete"))
+        with pytest.raises(ValueError, match="completed offline preparation"):
+            profile.checkpoint_declaration(value, driver_sha256=value["driver_sha256"],
+                python_identity=case.selected, git_identity=case.result["git"]["identity"],
+                recovered_provenance=case.result["recovered_provenance"])
+        assert profile.tree_manifest(case.case) == case.original_case
+        assert len(case.invocations) == 1
+        return
     expected = {"invalid_json": None, "child_size": "child result exceeds report bound",
-                "wrapped_report_size": "publication exceeds complete report bound"}[fault]
+                }[fault]
     with pytest.raises(ValueError, match=expected):
         profile.dispatch(case.args)
     assert not (case.args.output / "report.json").exists()

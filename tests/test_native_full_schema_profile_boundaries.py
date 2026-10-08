@@ -156,8 +156,18 @@ def preparation(profile):
         "git": {"identity": identities["git_identity"], "calls": {}},
         "python_identity": identities["python_identity"], "recovered_provenance": identities["recovered_provenance"],
         "flags": {"isolated": 1, "no_site": 1, "dont_write_bytecode": True},
-        "environment": {"python": "invented", "platform": "invented", "machine": "invented"}}
+        "environment": {"python": "invented", "platform": "invented", "machine": "invented"},
+        "phase_overhead": {"preflight": {"process_cpu_ns": 1, "wall_ns": 2},
+                           "final_verification": {"process_cpu_ns": 1, "wall_ns": 2}}}
     report = {"format": profile.FORMAT, "mode": "prepare", "status": "completed",
+        "scope": profile.SCOPE, "diagnostic_wall_bound_seconds": 900,
+        "declared_acceptance_deadline_seconds": 900, "parent_wall_seconds": 0.125,
+        "child_exit_code": 0, "stdout_bytes": len(profile.canonical(child)),
+        "stdout_sha256": profile.sha(profile.canonical(child)),
+        "stderr_bytes": 0, "stderr_sha256": profile.sha(b""), "limitations": list(profile.LIMITATIONS),
+        "report_role": "checkpoint_preparation", "operation": None,
+        "operation_catalog": profile.operation_catalog(), "measurement_binding": None,
+        "operation_set": profile.operation_set({}), "historical_capture_complete": False,
         "scientific_eligibility": False, "execution_authorized": False, "native_acceptance_evaluated": False,
         "utility_sha256": profile.UTILITY_SHA256, "driver_sha256": identities["driver_sha256"],
         "python_identity": identities["python_identity"], "result": child}
@@ -171,6 +181,8 @@ def test_checkpoint_only_accepts_exact_retained_selection_role(profile, preparat
     assert profile.checkpoint_declaration(report, **identities) == report["result"]
     changed = deepcopy(report)
     changed["result"]["selection_relative"] = path
+    changed["stdout_sha256"] = profile.sha(profile.canonical(changed["result"]))
+    changed["stdout_bytes"] = len(profile.canonical(changed["result"]))
     with pytest.raises(profile.BoundaryError, match="role or deadline"):
         profile.checkpoint_declaration(changed, **identities)
 
@@ -181,6 +193,8 @@ def test_checkpoint_only_accepts_exact_retained_selection_role(profile, preparat
 def test_checkpoint_cannot_claim_tiny_or_completed_work(profile, preparation, field, value):
     report, identities = preparation
     report["result"]["checkpoint"][field] = value
+    report["stdout_sha256"] = profile.sha(profile.canonical(report["result"]))
+    report["stdout_bytes"] = len(profile.canonical(report["result"]))
     with pytest.raises(profile.BoundaryError, match="incomplete prefix"):
         profile.checkpoint_declaration(report, **identities)
 
@@ -263,7 +277,7 @@ def test_declared_import_closure_binds_exact_bytes_and_rejects_escape(profile, i
     row = {"origin": "recovered/example.py", "sha256": profile.sha(raw), "bytes": len(raw)}
     profile.verify_declared_closure([row], owner)
     for origin in ("recovered/../example.py", "recovered//outside.py", "foreign/example.py"):
-        with pytest.raises(profile.BoundaryError, match="escapes"):
+        with pytest.raises(profile.BoundaryError, match="canonical role-relative"):
             profile.verify_declared_closure([{**row, "origin": origin}], owner)
     with pytest.raises(profile.BoundaryError, match="repeats"):
         profile.verify_declared_closure([row, row], owner)

@@ -20,6 +20,7 @@ import importlib.util
 import io
 import json
 import marshal
+import math
 import os
 from pathlib import Path
 import shlex
@@ -35,8 +36,20 @@ from types import ModuleType
 UTILITY_RELATIVE = "notes/native_profile_recovery_2026-10-07/trace_prefix_profile.py"
 UTILITY_SHA256 = "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf"
 SOURCE_COMMIT = "0125eebbc214d0907c3b69d23758cd9441911a78"
-FORMAT = "native_full_schema_checkpoint_v1"
-CHILD_FORMAT = "native_full_schema_checkpoint_child_v1"
+FORMAT = "native_full_schema_checkpoint_v2"
+CHILD_FORMAT = "native_full_schema_checkpoint_child_v2"
+CATALOG_FORMAT = "native_full_schema_operations_v1"
+COLLECTION_FORMAT = "native_full_schema_operation_collection_v1"
+BINDING_FORMAT = "native_full_schema_measurement_binding_v1"
+OPERATIONS = (
+    ("_load_live", "returned"),
+    ("CallbackAdapter._run_fresh_owner", "returned"),
+    ("decision_fresh_loaded_run", "returned"),
+    ("current_effect_view_fresh_loaded_run", "returned"),
+    ("refusal_stale_worker_read_in_memory", "refused"),
+    ("refusal_changed_selected_authority_in_memory", "refused"),
+)
+COUNTERS = ("_load_live", "_decision_at", "_checked_observations", "_Replay.run", "_Replay._packet", "Trace.__init__")
 LABEL = "offline-full-schema-4618-v1"
 ATTEMPT_ID = "synthetic-full-schema-4618-v1"
 PREPARE_WALL_SECONDS = 900
@@ -54,6 +67,7 @@ LIMITATIONS = [
     "#4537 and #4576 already cover known parsing work; deferred #4577/#4581 optimizations are not revived here.",
     "Before/after pins and local audit restrictions are checked local evidence, not authenticated execution or complete ABA protection.",
     "loaded_closure pins imported Python/extension bytes, not the complete installed environment or every dependency-resource/OS read; selected schema/policy/runtime/case inputs have separate complete pins.",
+    "Each selected pair has its own 600-second diagnostic bound; all four positive and both refusal pairs are required. Missing or failed pairs are never omitted from the denominator.",
 ]
 
 
@@ -83,6 +97,154 @@ def canonical(value):
 
 def sha(raw):
     return hashlib.sha256(raw).hexdigest()
+
+
+def operation_catalog():
+    return {"format": CATALOG_FORMAT,
+            "operations": [{"operation": name, "expected_status": status} for name, status in OPERATIONS]}
+
+
+def operation_set(statuses):
+    """Parent diagnostic completion is distinct from an expected refusal control."""
+    require(set(statuses) <= {name for name, _ in OPERATIONS}, "operation set contains another identity")
+    completed = [name for name, _ in OPERATIONS if statuses.get(name) == "completed"]
+    failed = [name for name, _ in OPERATIONS if name in statuses and statuses[name] != "completed"]
+    missing = [name for name, _ in OPERATIONS if name not in statuses]
+    return {"required": len(OPERATIONS), "completed": completed, "failed": failed,
+            "missing": missing, "complete": not failed and not missing}
+
+
+def projection_contract():
+    return {"scope": "all exposed captured evidence, complete reader state, rendered spec",
+            "excluded": ["RunSpec implementation caches", "_CapturedRun._catalogs implementation cache"],
+            "decision_and_effect_view": "complete typed return", "refusals": "complete bounded exception graph"}
+
+
+def ns_clock():
+    return time.process_time_ns(), time.perf_counter_ns()
+
+
+def elapsed_ns(start):
+    return {"process_cpu_ns": time.process_time_ns() - start[0],
+            "wall_ns": time.perf_counter_ns() - start[1]}
+
+
+def is_digest(value):
+    return type(value) is str and len(value) == 64 and all(ch in '0123456789abcdef' for ch in value)
+
+
+def validate_timing(value):
+    require(type(value) is dict and set(value) == {"process_cpu_ns", "wall_ns"}
+            and all(type(item) is int and item >= 0 for item in value.values()), "timing shape or value differs")
+
+
+def _typed_value_validator():
+    """One complete bounded typed-value traversal, shared across an exception graph."""
+    typed_nodes = 0
+    def typed(item, depth=0):
+        nonlocal typed_nodes
+        typed_nodes += 1
+        require(typed_nodes <= 100000 and depth <= 128, "typed values exceed bound")
+        require(type(item) is list and item and type(item[0]) is str, "typed value differs")
+        kind = item[0]
+        if kind == "none":
+            require(len(item) == 1, "none typed value differs")
+        elif kind in {"str", "int", "float", "bool"}:
+            wanted = {"str": str, "int": int, "float": float, "bool": bool}[kind]
+            require(len(item) == 2 and type(item[1]) is wanted, "scalar typed value differs")
+            require(kind != "float" or math.isfinite(item[1]), "nonfinite typed float differs")
+        elif kind == "bytes":
+            require(len(item) == 3 and type(item[1]) is int and item[1] >= 0 and is_digest(item[2]), "byte typed value differs")
+        elif kind in {"list", "tuple"}:
+            require(len(item) == 2 and type(item[1]) is list, "sequence typed value differs")
+            for child in item[1]:
+                typed(child, depth + 1)
+        elif kind in {"dict", "dataclass"}:
+            require(len(item) == (2 if kind == "dict" else 3), "mapping typed value differs")
+            if kind == "dataclass":
+                require(type(item[1]) is str and item[1], "dataclass identity differs")
+            require(type(item[-1]) is list, "mapping entries differ")
+            keys = set()
+            for pair in item[-1]:
+                require(type(pair) is list and len(pair) == 2, "mapping pair differs")
+                if kind == "dict":
+                    typed(pair[0], depth + 1)
+                    key = canonical(pair[0])
+                else:
+                    require(type(pair[0]) is str, "dataclass field differs")
+                    key = pair[0]
+                require(key not in keys, "typed mapping key or dataclass field repeats")
+                keys.add(key)
+                typed(pair[1], depth + 1)
+        else:
+            raise BoundaryError("unknown typed value")
+    return typed
+
+
+def validate_typed_value(value):
+    """Validate every tag produced by the pinned utility, without decoding objects."""
+    _typed_value_validator()(value)
+
+
+def validate_exception(value):
+    """Validate the utility's complete graph representation, without importing exception classes."""
+    seen = set()
+    typed = _typed_value_validator()
+    def node(item):
+        if item is None:
+            return
+        require(type(item) is dict, "exception node differs")
+        if set(item) == {"reference"}:
+            require(type(item["reference"]) is int and item["reference"] in seen, "exception reference is unresolved")
+            return
+        require(set(item) == {"node", "type", "arguments", "cause", "context", "suppress_context", "notes"},
+                "exception graph omits or adds state")
+        require(type(item["node"]) is int and item["node"] == len(seen) and len(seen) < 32,
+                "exception node order or bound differs")
+        require(type(item["type"]) is str and item["type"] and type(item["suppress_context"]) is bool,
+                "exception identity or suppression differs")
+        seen.add(item["node"])
+        typed(item["arguments"])
+        require(item["arguments"][0] == "tuple", "exception arguments are not a tuple")
+        typed(item["notes"])
+        node(item["cause"])
+        node(item["context"])
+    require(type(value) is dict and "node" in value, "exception root is missing")
+    node(value)
+    canonical(value)  # Non-finite typed floats are refused as well.
+
+
+def validate_pair(row, expected_operation):
+    """Recompute agreement; a saved parity flag alone is never sufficient."""
+    require(type(expected_operation) is str and expected_operation in dict(OPERATIONS), "unknown selected operation")
+    require(type(row) is dict and set(row) == {"operation", "plain", "instrumented", "parity"}
+            and row["operation"] == expected_operation, "pair operation or shape differs")
+    for arm in ("plain", "instrumented"):
+        value = row[arm]
+        require(type(value) is dict and set(value) == {"status", "semantic_sha256", "semantics", "refusal", "process_cpu_ns", "wall_ns",
+                                                     "reconstruction_counts", "setup", "fingerprint"}, "pair arm shape differs")
+        require(value["status"] == dict(OPERATIONS)[expected_operation] and is_digest(value["semantic_sha256"]),
+                "operation outcome or semantic digest differs")
+        validate_timing({name: value[name] for name in ("process_cpu_ns", "wall_ns")})
+        validate_timing(value["setup"]); validate_timing(value["fingerprint"])
+        counts = value["reconstruction_counts"]
+        require(type(counts) is dict and set(counts) <= set(COUNTERS)
+                and all(type(count) is int and count >= 0 for count in counts.values()), "reconstruction counts differ")
+        require(arm != "plain" or counts == {}, "plain arm claims instrumentation")
+        if value["status"] == "refused":
+            require(value["semantics"] is None, "refused operation carries returned semantics")
+            validate_exception(value["refusal"])
+            require(sha(canonical(value["refusal"])) == value["semantic_sha256"], "refusal graph digest differs")
+        else:
+            require(value["refusal"] is None, "returned operation carries a refusal")
+            validate_typed_value(value["semantics"])
+            require(sha(canonical(value["semantics"])) == value["semantic_sha256"], "returned semantics digest differs")
+    left, right = row["plain"], row["instrumented"]
+    require(left["semantic_sha256"] == right["semantic_sha256"]
+            and canonical(left["semantics"]) == canonical(right["semantics"])
+            and canonical(left["refusal"]) == canonical(right["refusal"]), "plain/instrumented complete evidence or refusal differs")
+    require(row["parity"] is True, "saved pair parity differs from recomputed agreement")
+    return True
 
 
 def utility():
@@ -631,24 +793,35 @@ def measured(call, project, *, instrumented, tools, counters):
         if event == "call" and frame.f_code in counters:
             observed[counters[frame.f_code]] += 1
     cpu, wall = time.process_time_ns(), time.perf_counter_ns()
+    failure = None
     if instrumented:
         sys.setprofile(profile)
     try:
         try:
             value = call()
-            status, refusal = "returned", None
+            status = "returned"
         except ValueError as exc:
-            value, status, refusal = None, "refused", tools.exception_value(exc)
+            value, status, failure = None, "refused", exc
     finally:
         if instrumented:
             sys.setprofile(None)
         cpu, wall = time.process_time_ns() - cpu, time.perf_counter_ns() - wall
-    semantics = tools.typed_value(project(value)) if status == "returned" else refusal
-    return {"status": status, "semantic_sha256": sha(canonical(semantics)), "refusal": refusal,
-            "process_cpu_ns": cpu, "wall_ns": wall, "reconstruction_counts": dict(observed)}
+    fingerprint_start = ns_clock()
+    refusal = tools.exception_value(failure) if failure is not None else None
+    semantics = tools.typed_value(project(value)) if status == "returned" else None
+    if status == "returned":
+        validate_typed_value(semantics)
+    else:
+        validate_exception(refusal)
+    digest = sha(canonical(semantics if status == "returned" else refusal))
+    return {"status": status, "semantic_sha256": digest, "semantics": semantics, "refusal": refusal,
+            "process_cpu_ns": cpu, "wall_ns": wall, "reconstruction_counts": dict(observed),
+            "fingerprint": elapsed_ns(fingerprint_start)}
 
 
-def measure_checkpoint(case, declaration, tools):
+def measure_checkpoint(case, declaration, tools, operation):
+    require(type(operation) is str and operation in dict(OPERATIONS), "unknown selected operation")
+    verification_start = ns_clock()
     from data_sheets_schema import native_shared_capture as capture, native_shared_stage as stage
     from data_sheets_schema import native_shared_controller as controller, native_shared_contract as c
     from data_sheets_schema import native_shared_observations as observed, native_shared_evidence as evidence
@@ -658,16 +831,17 @@ def measure_checkpoint(case, declaration, tools):
     counters = {capture._load_live.__code__: "_load_live", capture._decision_at.__code__: "_decision_at",
         capture._checked_observations.__code__: "_checked_observations", stage._Replay.run.__code__: "_Replay.run",
         stage._Replay._packet.__code__: "_Replay._packet", observed.Trace.__init__.__code__: "Trace.__init__"}
-    rows = []
-    def pair(name, setup, project=lambda x: x):
-        results = []
-        for instrumented in (False, True):
-            call = setup()  # Reconstruct fresh owners outside this operation's timing.
-            results.append(measured(call, project, instrumented=instrumented, tools=tools, counters=counters))
-        match = [(row["status"], row["semantic_sha256"]) for row in results]
-        require(match[0] == match[1], "plain/instrumented complete evidence or refusal differs")
-        rows.append({"operation": name, "plain": results[0], "instrumented": results[1], "parity": True})
-    pair("_load_live", lambda: lambda: capture._load_live(path), run_projection)
+    checked = capture._load_live(path)
+    replay = stage._Replay(checked.selection, checked.binding, checked.phase1, checked.history).run()
+    phase, _ = capture.phase_replay(checked)
+    require(checkpoint_summary(checked, replay, phase) == declaration["checkpoint"],
+            "checkpoint declaration differs from actual reconstruction")
+    require(checked.value["runtime"]["deadline_seconds"] == 900 and
+            checked.selection.document()["run"]["label"] == LABEL,
+            "checkpoint uses another synthetic identity or deadline")
+    checkpoint_verification = elapsed_ns(verification_start)
+    del checked, replay, phase
+
     def adapter_call():
         run = capture._load_live(path)
         adapter = controller.CallbackAdapter(c.canonical(run.composition), execution=run.value,
@@ -677,62 +851,70 @@ def measure_checkpoint(case, declaration, tools):
         adapter._stream_prefixes = dict(zip(("transcript", "control"), prefixes))
         endpoints = tuple(prefix.bytes for prefix in prefixes)
         return lambda: adapter._run(endpoints)
-    pair("CallbackAdapter._run_fresh_owner", adapter_call, run_projection)
-    pair("decision_fresh_loaded_run", lambda: capture._load_live(path).decision)
     def effect_call():
         run = capture._load_live(path)
         return lambda: capture.current_effect_view(run)
-    pair("current_effect_view_fresh_loaded_run", effect_call)
-    run = capture._load_live(path)
-    replay = stage._Replay(run.selection, run.binding, run.phase1, run.history).run()
-    phase, _ = capture.phase_replay(run)
-    require(checkpoint_summary(run, replay, phase) == declaration["checkpoint"],
-            "checkpoint declaration differs from actual reconstruction")
-    require(run.value["runtime"]["deadline_seconds"] == 900 and
-            run.selection.document()["run"]["label"] == LABEL,
-            "checkpoint uses another synthetic identity or deadline")
-    reads = [(index, c.strict_json(item.raw)) for index, item in enumerate(run.observations)
-             if c.strict_json(item.raw)["observation_type"] == "request_read"]
-    require(len(reads) == 2, "refusal fixture requires distinct receipt and worker reads")
-    index, document = reads[-1]
-    document["payload"]["history_sha256"] = reads[0][1]["payload"]["history_sha256"]
-    original = run.observations[index]; raw = c.canonical(document)
-    replacement = c.CapturedArtifact(replace(original.pin, bytes=len(raw), sha256=c.sha(raw)), raw)
-    observations = tuple(replacement if item == original else item for item in run.observations)
-    members = []
-    for member in run.pool.members:
-        if member.captured == original:
-            metadata = c.strict_json(member.metadata_json); metadata["size"] = len(raw)
-            member = evidence.PoolMember(replacement, c.canonical(metadata))
-        members.append(member)
-    pool = evidence.CapturePool(tuple(members), run.pool.stream_bindings)
-    stale = replace(run, observations=observations, pool=pool, history=replace(run.history, observations=observations),
-                    reader=capture._Reader(run.selection, pool=pool))
+
     def stale_call():
-        fresh = replace(stale, reader=capture._Reader(stale.selection, pool=stale.pool))
+        # Each arm gets a real fresh owner; mutations never touch case files.
+        run = capture._load_live(path)
+        reads = [(index, c.strict_json(item.raw)) for index, item in enumerate(run.observations)
+                 if c.strict_json(item.raw)["observation_type"] == "request_read"]
+        require(len(reads) == 2, "refusal fixture requires distinct receipt and worker reads")
+        index, document = reads[-1]
+        document["payload"]["history_sha256"] = reads[0][1]["payload"]["history_sha256"]
+        original = run.observations[index]; raw = c.canonical(document)
+        replacement = c.CapturedArtifact(replace(original.pin, bytes=len(raw), sha256=c.sha(raw)), raw)
+        observations = tuple(replacement if item == original else item for item in run.observations)
+        members = []
+        for member in run.pool.members:
+            if member.captured == original:
+                metadata = c.strict_json(member.metadata_json); metadata["size"] = len(raw)
+                member = evidence.PoolMember(replacement, c.canonical(metadata))
+            members.append(member)
+        pool = evidence.CapturePool(tuple(members), run.pool.stream_bindings)
+        fresh = replace(run, observations=observations, pool=pool, history=replace(run.history, observations=observations),
+                        reader=capture._Reader(run.selection, pool=pool))
         return lambda: capture._checked_observations(fresh)
-    pair("refusal_stale_worker_read_in_memory", stale_call)
-    doc = run.selection.document(); doc["run"]["label"] = "foreign-synthetic-authority"
-    raw = c.canonical(doc)
-    selected = replace(run.selection, registration=c.CapturedArtifact(
-        replace(run.selection.registration.pin, bytes=len(raw), sha256=c.sha(raw)), raw))
-    changed = replace(run, selection=selected)
+
     def changed_call():
-        fresh = replace(changed, reader=capture._Reader(changed.selection, pool=changed.pool))
+        run = capture._load_live(path)
+        doc = run.selection.document(); doc["run"]["label"] = "foreign-synthetic-authority"
+        raw = c.canonical(doc)
+        selected = replace(run.selection, registration=c.CapturedArtifact(
+            replace(run.selection.registration.pin, bytes=len(raw), sha256=c.sha(raw)), raw))
+        fresh = replace(run, selection=selected, reader=capture._Reader(selected, pool=run.pool))
         return lambda: capture._checked_observations(fresh)
-    pair("refusal_changed_selected_authority_in_memory", changed_call)
-    require(all(row["plain"]["status"] == "returned" for row in rows[:4])
-            and all(row["plain"]["status"] == "refused" for row in rows[4:]), "checkpoint controls have unexpected outcomes")
-    return {"operations": rows, "projection": {"scope": "all exposed captured evidence, complete reader state, rendered spec",
-        "excluded": ["RunSpec implementation caches", "_CapturedRun._catalogs implementation cache"],
-        "decision_and_effect_view": "complete typed return", "refusals": "complete bounded exception graph"}}
+
+    setups = {"_load_live": lambda: lambda: capture._load_live(path),
+              "CallbackAdapter._run_fresh_owner": adapter_call,
+              "decision_fresh_loaded_run": lambda: capture._load_live(path).decision,
+              "current_effect_view_fresh_loaded_run": effect_call,
+              "refusal_stale_worker_read_in_memory": stale_call,
+              "refusal_changed_selected_authority_in_memory": changed_call}
+    project = run_projection if operation in {"_load_live", "CallbackAdapter._run_fresh_owner"} else lambda x: x
+    arms = []
+    for instrumented in (False, True):
+        started = ns_clock()
+        call = setups[operation]()
+        setup_time = elapsed_ns(started)
+        value = measured(call, project, instrumented=instrumented, tools=tools, counters=counters)
+        value["setup"] = setup_time
+        arms.append(value)
+    row = {"operation": operation, "plain": arms[0], "instrumented": arms[1], "parity": True}
+    validate_pair(row, operation)
+    return {"operation": operation, "operations": [row], "checkpoint_verification": checkpoint_verification,
+            "projection": projection_contract()}
 
 
 def child(config):
+    preflight_start = ns_clock()
     require_isolation()
+    require(config.get("mode") in {"prepare", "measure"}, "unknown diagnostic phase")
+    if config["mode"] == "measure":
+        require(type(config.get("operation")) is str and config["operation"] in dict(OPERATIONS), "unknown selected operation")
     tools = utility()
     source, recovery, dependencies = (Path(config[k]).resolve(strict=True) for k in ("source", "recovery", "dependencies"))
-    require(config.get("mode") in {"prepare", "measure"}, "unknown diagnostic phase")
     case = Path(config["case"])
     require(case.is_absolute() and case.resolve() == case, "checkpoint path is not physical and absolute")
     if config["mode"] == "prepare":
@@ -752,51 +934,85 @@ def child(config):
     policy.install()
     imports = SourceImports(source, dependencies, source_pins, tools)
     imports.install()
-    if config["mode"] == "prepare":
-        result = prepare_checkpoint(case, tools, imports)
-    else:
+    if config["mode"] == "measure":
         verify_declared_closure(config["declaration"]["loaded_closure"], imports)
         require(tree_manifest(case, read=tools.read_file) == config["declaration"]["case_inventory"],
                 "checkpoint bytes changed before measurement")
-        result = measure_checkpoint(case, config["declaration"], tools)
+    preflight = elapsed_ns(preflight_start)
+    if config["mode"] == "prepare":
+        result = prepare_checkpoint(case, tools, imports)
+    else:
+        result = measure_checkpoint(case, config["declaration"], tools, config["operation"])
+    final_start = ns_clock()
     closure = imports.verify()
     inventory = tree_manifest(case, read=tools.read_file)
     if config["mode"] == "measure":
         require(inventory == config["declaration"]["case_inventory"], "measurement changed checkpoint bytes")
     tools.verify_inputs(source, recovery)
     require(tools.executable_identity(Path(sys.executable)) == python_pin, "child interpreter changed")
+    git_state, environment = policy.verify(), environment_disclosure()
     return {"format": CHILD_FORMAT, "mode": config["mode"], **result,
-        "case_inventory": inventory, "loaded_closure": closure, "git": policy.verify(),
+        "case_inventory": inventory, "loaded_closure": closure, "git": git_state,
+        "phase_overhead": {"preflight": preflight, "final_verification": elapsed_ns(final_start)},
         "python_identity": python_pin, "flags": {"isolated": sys.flags.isolated, "no_site": sys.flags.no_site,
                                                 "dont_write_bytecode": sys.dont_write_bytecode},
-        "environment": environment_disclosure(),
+        "environment": environment,
         "recovered_provenance": verified["provenance"]}
 
 
-def verify_declared_closure(rows, imports):
-    require(type(rows) is list and rows, "prepared import closure is missing")
-    seen = set()
+def validate_loaded_closure(rows):
+    """Check captured import declarations without reopening their original paths."""
+    require(type(rows) is list and rows, "import closure is missing")
+    by_origin = {}
     for row in rows:
-        require(type(row) is dict and set(row) == {"origin", "sha256", "bytes"}, "prepared import pin shape differs")
+        require(type(row) is dict and set(row) == {"origin", "sha256", "bytes"}, "import pin shape differs")
         origin = row["origin"]
-        require(type(origin) is str and "/" in origin and origin not in seen, "prepared import identity repeats")
-        seen.add(origin)
+        require(type(origin) is str and "/" in origin and origin not in by_origin, "import identity differs or repeats")
+        role, relative = origin.split("/", 1)
+        require(role in {"recovered", "dependency", "interpreter"}
+                and all(part not in {"", ".", ".."} for part in relative.split("/"))
+                and "\\" not in relative and "\x00" not in relative, "import origin is not canonical role-relative identity")
+        require(is_digest(row["sha256"]) and type(row["bytes"]) is int and row["bytes"] >= 0,
+                "import digest or byte count differs")
+        by_origin[origin] = row
+    return by_origin
+
+
+def verify_declared_closure(rows, imports):
+    for origin, row in validate_loaded_closure(rows).items():
         role, relative = origin.split("/", 1)
         roots = {"recovered": imports.source, "dependency": imports.dependencies, "interpreter": imports.stdlib}
-        require(role in roots and relative and not Path(relative).is_absolute()
-                and ".." not in Path(relative).parts and "\\" not in relative, "prepared import escapes its root")
         path = roots[role] / relative
-        require(type(row["bytes"]) is int and row["bytes"] >= 0, "prepared import byte count differs")
         require(len(imports.tools.read_file(path, row["sha256"])) == row["bytes"], "prepared dependency changed")
 
 
 def checkpoint_declaration(report, *, driver_sha256, python_identity, git_identity, recovered_provenance):
-    require(type(report) is dict and report.get("format") == FORMAT and report.get("mode") == "prepare"
-            and report.get("status") == "completed" and report.get("scientific_eligibility") is False
-            and report.get("execution_authorized") is False and report.get("native_acceptance_evaluated") is False
+    require(type(report) is dict and set(report) == PARENT_REPORT_FIELDS, "preparation parent report shape differs")
+    require(report.get("format") == FORMAT and report.get("mode") == "prepare"
+            and report.get("report_role") == "checkpoint_preparation" and report.get("operation") is None
+            and canonical(report.get("operation_catalog")) == canonical(operation_catalog())
+            and report.get("measurement_binding") is None and report.get("status") == "completed"
             and report.get("utility_sha256") == UTILITY_SHA256,
             "input is not a completed offline preparation report")
-    require(report.get("driver_sha256") == driver_sha256 and report.get("python_identity") == python_identity,
+    require(all(report[key] is False for key in ("scientific_eligibility", "execution_authorized",
+                "native_acceptance_evaluated", "historical_capture_complete")), "preparation report changes eligibility")
+    require(report["scope"] == SCOPE and canonical(report["limitations"]) == canonical(LIMITATIONS),
+            "preparation scope or limitations differ")
+    require(canonical(report["operation_set"]) == canonical(operation_set({})), "preparation operation denominator differs")
+    require(type(report["diagnostic_wall_bound_seconds"]) is int
+            and report["diagnostic_wall_bound_seconds"] == PREPARE_WALL_SECONDS
+            and type(report["declared_acceptance_deadline_seconds"]) is int
+            and report["declared_acceptance_deadline_seconds"] == 900, "preparation report changes limits")
+    require(type(report["parent_wall_seconds"]) in (int, float) and report["parent_wall_seconds"] >= 0
+            and (type(report["parent_wall_seconds"]) is int or math.isfinite(report["parent_wall_seconds"])),
+            "preparation parent duration differs")
+    require(type(report["child_exit_code"]) is int and report["child_exit_code"] == 0,
+            "completed preparation lacks successful child")
+    for name in ("stdout", "stderr"):
+        require(type(report[name + "_bytes"]) is int and report[name + "_bytes"] >= 0
+                and is_digest(report[name + "_sha256"]), "preparation child stream identity differs")
+    require(report.get("driver_sha256") == driver_sha256
+            and canonical(report.get("python_identity")) == canonical(python_identity),
             "preparation driver or parent interpreter differs")
     result = report.get("result")
     require(type(result) is dict and result.get("selection_relative") == "authority/profile-selection.json"
@@ -809,14 +1025,18 @@ def checkpoint_declaration(report, *, driver_sha256, python_identity, git_identi
             and checkpoint.get("receipt_consumed") is True, "prepared checkpoint is not the selected incomplete prefix")
     validate_child_report(result, {"mode": "prepare", "python_identity": python_identity,
                                   "git_identity": git_identity, "recovered_provenance": recovered_provenance})
+    stdout = canonical(result)
+    require(report["stdout_sha256"] == sha(stdout) and report["stdout_bytes"] == len(stdout),
+            "completed preparation child output pin differs")
     return result
 
 
 def validate_child_report(result, selected):
     common = {"format", "mode", "case_inventory", "loaded_closure", "git", "python_identity", "flags",
-              "environment", "recovered_provenance"}
+              "environment", "recovered_provenance", "phase_overhead"}
     specific = ({"selection_relative", "preparation_stages", "checkpoint", "synthetic_parameters",
-                 "declared_deadline_seconds"} if selected["mode"] == "prepare" else {"operations", "projection"})
+                 "declared_deadline_seconds"} if selected["mode"] == "prepare" else
+                {"operation", "operations", "projection", "checkpoint_verification"})
     require(type(result) is dict and set(result) == common | specific
             and result["format"] == CHILD_FORMAT and result["mode"] == selected["mode"],
             "child returned another report shape or phase")
@@ -835,13 +1055,63 @@ def validate_child_report(result, selected):
             and type(inventory["entries"]) is dict and type(inventory["files"]) is int
             and type(inventory["bytes"]) is int and inventory["files"] == len(inventory["entries"]),
             "child checkpoint inventory shape differs")
-    require(type(result["loaded_closure"]) is list and result["loaded_closure"], "child imported closure is missing")
+    loaded = validate_loaded_closure(result["loaded_closure"])
     require(type(result["environment"]) is dict and set(result["environment"]) == {"python", "platform", "machine"},
             "child environment disclosure shape differs")
+    require(all(type(value) is str for value in result["environment"].values()), "child environment value differs")
+    require(type(result["phase_overhead"]) is dict and set(result["phase_overhead"]) == {"preflight", "final_verification"},
+            "child phase overhead differs")
+    for value in result["phase_overhead"].values():
+        validate_timing(value)
+    if selected["mode"] == "measure":
+        prepared = validate_loaded_closure(selected["declaration"]["loaded_closure"])
+        require(all(canonical(loaded[origin]) == canonical(prepared[origin]) for origin in loaded.keys() & prepared.keys()),
+                "child import pin differs from prepared origin")
+        require(result["operation"] == selected["operation"] and type(result["operations"]) is list
+                and len(result["operations"]) == 1, "child returned another operation or pair denominator")
+        validate_pair(result["operations"][0], selected["operation"])
+        validate_timing(result["checkpoint_verification"])
+        require(canonical(result["projection"]) == canonical(projection_contract()), "child evidence projection contract differs")
+
+
+def measurement_binding(prepared_raw, declaration, selected):
+    inventory, closure = declaration["case_inventory"], declaration["loaded_closure"]
+    return {"format": BINDING_FORMAT, "preparation_report": {"sha256": sha(prepared_raw), "bytes": len(prepared_raw)},
+        "case_inventory": {"sha256": sha(canonical(inventory)), "files": inventory["files"], "bytes": inventory["bytes"]},
+        "checkpoint": deepcopy(declaration["checkpoint"]), "selection_relative": declaration["selection_relative"],
+        "prepared_loaded_closure": {"sha256": sha(canonical(closure)), "entries": len(closure)},
+        **{key: deepcopy(selected[key]) for key in ("driver_sha256", "python_identity", "git_identity", "recovered_provenance")},
+        "utility_sha256": UTILITY_SHA256, "operation_catalog": operation_catalog(),
+        "diagnostic_wall_bound_seconds": MEASURE_WALL_SECONDS, "declared_acceptance_deadline_seconds": 900}
+
+
+def read_report(path, tools):
+    path = Path(path).absolute()
+    require(path.stat().st_size <= MAX_REPORT_BYTES, "report exceeds complete report bound")
+    raw = tools.read_file(path)
+    require(len(raw) <= MAX_REPORT_BYTES, "report exceeds complete report bound")
+    try:
+        document = tools.strict_json(raw)
+    except (ValueError, RecursionError) as exc:
+        raise BoundaryError("report is not bounded strict JSON") from exc
+    require(type(document) is dict, "report root is not an object")
+    return raw, document
+
+
+PARENT_REPORT_FIELDS = frozenset({
+    "format", "mode", "scope", "status", "scientific_eligibility", "execution_authorized",
+    "historical_capture_complete", "native_acceptance_evaluated", "declared_acceptance_deadline_seconds",
+    "diagnostic_wall_bound_seconds", "parent_wall_seconds", "child_exit_code", "driver_sha256", "utility_sha256",
+    "python_identity", "stderr_bytes", "stderr_sha256", "stdout_bytes", "stdout_sha256", "result", "limitations",
+    "report_role", "operation", "operation_catalog", "measurement_binding", "operation_set",
+})
 
 
 def dispatch(args):
     require_isolation()
+    require(args.command in {"prepare", "measure"}, "unknown dispatch phase")
+    if args.command == "measure":
+        require(type(args.operation) is str and args.operation in dict(OPERATIONS), "unknown selected operation")
     tools = utility()
     source, recovery, dependencies = (Path(getattr(args, k)).resolve(strict=True) for k in ("source", "recovery", "dependencies"))
     output = Path(args.output).absolute()
@@ -861,9 +1131,11 @@ def dispatch(args):
     if args.command == "measure":
         checkpoint = Path(args.checkpoint).resolve(strict=True)
         require(not output.is_relative_to(checkpoint) and not checkpoint.is_relative_to(output), "output overlaps checkpoint")
-        prepared_raw = tools.read_file(checkpoint / "report.json")
-        config["declaration"] = checkpoint_declaration(tools.strict_json(prepared_raw),
+        prepared_raw, prepared = read_report(checkpoint / "report.json", tools)
+        config["declaration"] = checkpoint_declaration(prepared,
             **{key: config[key] for key in ("driver_sha256", "python_identity", "git_identity", "recovered_provenance")})
+        config["operation"] = args.operation
+        config["measurement_binding"] = measurement_binding(prepared_raw, config["declaration"], config)
         config["case"] = str(checkpoint / "case")
         case_before = tree_manifest(Path(config["case"]), read=tools.read_file)
         require(case_before == config["declaration"]["case_inventory"], "checkpoint changed before dispatch")
@@ -920,7 +1192,18 @@ def dispatch(args):
         "driver_sha256": sha(driver_raw), "utility_sha256": UTILITY_SHA256,
         "python_identity": config["python_identity"], "stderr_bytes": len(stderr), "stderr_sha256": sha(stderr),
         "stdout_bytes": len(stdout), "stdout_sha256": sha(stdout), "result": result, "limitations": list(LIMITATIONS)}
+    report.update(report_role="checkpoint_preparation" if args.command == "prepare" else "measured_operation_pair",
+                  operation=config.get("operation"), operation_catalog=operation_catalog(),
+                  measurement_binding=config.get("measurement_binding"),
+                  operation_set=operation_set({args.operation: report["status"]} if args.command == "measure" else {}))
     raw = canonical(report) + b"\n"
+    if len(raw) > MAX_REPORT_BYTES and result is not None:
+        # Keep the verified child's exact stream identities and successful exit,
+        # but do not publish an incomplete/truncated evidence projection.
+        result = None
+        report.update(status="diagnostic_publication_refused", result=None)
+        report["operation_set"] = operation_set({args.operation: report["status"]} if args.command == "measure" else {})
+        raw = canonical(report) + b"\n"
     require(len(raw) <= MAX_REPORT_BYTES, "publication exceeds complete report bound")
     save_new(output / "report.json", raw)
     if result is None:
@@ -929,11 +1212,116 @@ def dispatch(args):
     return 0 if result is not None else 1
 
 
+def collect_reports(checkpoint, reports, output):
+    """Read selected local artifacts only; never load/re-execute their original paths."""
+    require_isolation()
+    tools = utility()
+    checkpoint, output = Path(checkpoint).absolute(), Path(output).absolute()
+    require(checkpoint.resolve(strict=True) == checkpoint, "checkpoint path contains a symlink")
+    require(output.resolve() == output and not output.exists() and output.parent.is_dir(),
+            "output must be a new physical directory below an existing parent")
+    paths = [Path(path).absolute() for path in reports]
+    require(len(paths) <= len(OPERATIONS), "too many selected operation reports")
+    for protected in (checkpoint, Path(__file__).resolve(), *paths):
+        require(not output.is_relative_to(protected) and not protected.is_relative_to(output), "collection output overlaps input")
+    driver_raw = tools.read_file(Path(__file__).resolve())
+    prepared_raw, prepared = read_report(checkpoint / "report.json", tools)
+    result = prepared.get("result")
+    require(type(result) is dict and type(result.get("git")) is dict, "preparation result identity is missing")
+    selected = {"driver_sha256": sha(driver_raw), "python_identity": prepared.get("python_identity"),
+                "git_identity": result["git"].get("identity"), "recovered_provenance": result.get("recovered_provenance")}
+    declaration = checkpoint_declaration(prepared, **selected)
+    require(type(selected["recovered_provenance"]) is dict
+            and selected["recovered_provenance"].get("source_commit") == SOURCE_COMMIT, "prepared recovered source differs")
+    inventory = tree_manifest(checkpoint / "case", read=tools.read_file)
+    require(canonical(inventory) == canonical(declaration["case_inventory"]), "current checkpoint differs from preparation")
+    binding = measurement_binding(prepared_raw, declaration, selected)
+    rows, statuses, retained = [], {}, []
+    for path in paths:
+        raw, report = read_report(path, tools)
+        require(set(report) == PARENT_REPORT_FIELDS, "operation parent report shape differs")
+        require(report.get("format") == FORMAT and report.get("mode") == "measure"
+                and report.get("report_role") == "measured_operation_pair", "input is not an operation report")
+        operation = report.get("operation")
+        require(type(operation) is str and operation in dict(OPERATIONS), "report selects another operation")
+        require(operation not in statuses, "duplicate selected operation report")
+        require(canonical(report.get("measurement_binding")) == canonical(binding), "operation report has another measurement binding")
+        require(canonical(report.get("operation_catalog")) == canonical(operation_catalog()), "operation catalog differs")
+        require(report.get("driver_sha256") == binding["driver_sha256"]
+                and report.get("utility_sha256") == UTILITY_SHA256
+                and canonical(report.get("python_identity")) == canonical(binding["python_identity"]), "operation report identity differs")
+        require(all(report.get(key) is False for key in ("scientific_eligibility", "execution_authorized",
+                    "native_acceptance_evaluated", "historical_capture_complete")), "operation report changes eligibility")
+        require(type(report.get("diagnostic_wall_bound_seconds")) is int and report["diagnostic_wall_bound_seconds"] == 600
+                and type(report.get("declared_acceptance_deadline_seconds")) is int
+                and report["declared_acceptance_deadline_seconds"] == 900, "operation report changes limits")
+        require(type(report.get("parent_wall_seconds")) in (int, float) and report["parent_wall_seconds"] >= 0,
+                "parent duration differs")
+        for name in ("stdout", "stderr"):
+            require(type(report.get(name + "_bytes")) is int and report[name + "_bytes"] >= 0
+                    and is_digest(report.get(name + "_sha256")), "child stream identity differs")
+        require(type(report.get("child_exit_code")) is int, "child exit code differs")
+        status, child_result = report.get("status"), report.get("result")
+        require(status in {"completed", "diagnostic_timeout", "diagnostic_refused", "diagnostic_publication_refused"},
+                "unknown diagnostic status")
+        pair = None
+        if status == "completed":
+            require(report["child_exit_code"] == 0 and type(child_result) is dict, "completed report lacks successful child")
+            validate_child_report(child_result, {"mode": "measure", "operation": operation,
+                                                 "declaration": declaration, **selected})
+            require(canonical(child_result["case_inventory"]) == canonical(inventory), "operation child captured another case")
+            stdout = canonical(child_result)
+            require(report["stdout_sha256"] == sha(stdout) and report["stdout_bytes"] == len(stdout),
+                    "completed child output pin differs")
+            pair = deepcopy(child_result["operations"][0])
+            validate_pair(pair, operation)
+        else:
+            require(child_result is None, "failed diagnostic claims completed results")
+            if status == "diagnostic_refused":
+                require(report["child_exit_code"] != 0, "refused diagnostic has successful child")
+            if status == "diagnostic_publication_refused":
+                require(report["child_exit_code"] == 0, "publication refusal lacks successful child")
+        statuses[operation] = status
+        require(canonical(report.get("operation_set")) == canonical(operation_set({operation: status})),
+                "saved operation denominator differs")
+        rows.append({"operation": operation, "report": {"sha256": sha(raw), "bytes": len(raw)}, "status": status,
+                     "pair": pair, "parent_wall_seconds": report["parent_wall_seconds"],
+                     "loaded_closure": {"sha256": sha(canonical(child_result["loaded_closure"])),
+                                        "entries": len(child_result["loaded_closure"])} if pair else None,
+                     "checkpoint_verification": deepcopy(child_result["checkpoint_verification"]) if pair else None,
+                     "phase_overhead": deepcopy(child_result["phase_overhead"]) if pair else None})
+        retained.append((path, raw))
+    denominator = operation_set(statuses)
+    rows.sort(key=lambda row: [name for name, _ in OPERATIONS].index(row["operation"]))
+    collected = {"format": COLLECTION_FORMAT, "report_role": "operation_collection", "scope": SCOPE,
+        "status": "complete" if denominator["complete"] else "incomplete", "operation_catalog": operation_catalog(),
+        "measurement_binding": binding, "operation_set": denominator, "reports": rows,
+        "scientific_eligibility": False, "execution_authorized": False, "native_acceptance_evaluated": False,
+        "historical_capture_complete": False, "limitations": list(LIMITATIONS) +
+        ["Collection verifies current selected case/report bytes and their declarations; it does not authenticate past execution or reopen historical source/runtime paths."]}
+    raw = canonical(collected) + b"\n"
+    require(len(raw) <= MAX_REPORT_BYTES, "publication exceeds complete report bound")
+    require(tools.read_file(Path(__file__).resolve()) == driver_raw, "collector driver changed")
+    require(tools.read_file(checkpoint / "report.json") == prepared_raw, "preparation report changed during collection")
+    require(canonical(tree_manifest(checkpoint / "case", read=tools.read_file)) == canonical(inventory),
+            "checkpoint changed during collection")
+    for path, before in retained:
+        require(tools.read_file(path) == before, "operation report changed during collection")
+    output.mkdir()
+    save_new(output / "report.json", raw)
+    return collected
+
+
 def main(argv=None):
     if (sys.argv[1:] if argv is None else argv) == ["_child"]:
-        config = json.loads(sys.stdin.buffer.read(MAX_REPORT_BYTES + 1))
+        require_isolation()
+        raw = sys.stdin.buffer.read(MAX_REPORT_BYTES + 1)
+        require(len(raw) <= MAX_REPORT_BYTES, "child configuration exceeds report bound")
+        config = utility().strict_json(raw)
         result = child(config)
-        sys.stdout.buffer.write(canonical(result))
+        encoded = canonical(result)
+        require(len(encoded) <= MAX_REPORT_BYTES, "child publication exceeds complete report bound")
+        sys.stdout.buffer.write(encoded)
         return 0
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
@@ -943,7 +1331,16 @@ def main(argv=None):
             command.add_argument("--" + key, required=True)
         if name == "measure":
             command.add_argument("--checkpoint", required=True)
-    return dispatch(parser.parse_args(argv))
+            command.add_argument("--operation", choices=[name for name, _ in OPERATIONS], required=True)
+    collect = commands.add_parser("collect")
+    collect.add_argument("--checkpoint", required=True)
+    collect.add_argument("--reports", nargs="*", default=[])
+    collect.add_argument("--output", required=True)
+    args = parser.parse_args(argv)
+    if args.command == "collect":
+        result = collect_reports(args.checkpoint, args.reports, args.output)
+        return 0 if result["operation_set"]["complete"] else 1
+    return dispatch(args)
 
 
 if __name__ == "__main__":

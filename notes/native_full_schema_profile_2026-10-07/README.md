@@ -6,10 +6,19 @@ operations. It does not replay the incomplete historical capture, launch a
 native/provider/helper process, score a dataset, or evaluate the 900-second
 acceptance requirement. It does not reconstruct unavailable source `4366dc…`.
 
-The implementation and independent boundary tests must be reviewed before the
-first fixture construction or measurement. This document currently describes
-the unexecuted driver. Results and measured stage costs will be recorded only
-after the serialized, independently reviewed run.
+The implementation and independent boundary tests must be reviewed before
+fixture construction or measurement. The original v1 preparation04 completed
+in 514.869 seconds, retaining 68 case files and 1,194 imported-code pins. The
+subsequent monolithic measurement01 reached its 600-second bound (parent wall
+600.046644 seconds, child exit -9, no stdout or stderr, `result=null`). Parent
+checks confirmed unchanged checkpoint, preparation report and original inputs.
+Those artifacts remain untouched; the empty output cannot identify the stalled
+operation or establish that any individual pair completed.
+
+The v2 protocol below addresses [#4636](https://github.com/bridge2ai/data-sheets-schema/issues/4636)
+with six independently selected pairs and offline collection. This source
+revision has not yet been executed. It requires fresh preparation because the
+same-driver identity rule is retained; preparation04 cannot be silently reused.
 
 The driver imports the committed [retained-prefix utility](../native_profile_recovery_2026-10-07/trace_prefix_profile.py)
 from this repository, requiring SHA256
@@ -115,7 +124,8 @@ pinned local Git executable, at the recovered source directory, with exactly
 the pinned commit. Git configuration/environment overrides are removed. Its
 anonymous query stdin pipe is allowed; native/helper/provider commands are not.
 
-The preparation resource ceiling is 900 wall seconds; measurement's is 600.
+The preparation resource ceiling is 900 wall seconds; **each explicitly selected
+operation pair** has a 600-second ceiling.
 Both are independent kill-and-reap bounds on diagnostic children. Preparation
 performs repeated actual stage reconstructions and records each stage's CPU and
 wall cost separately. These initial conservative ceilings will be assessed
@@ -127,20 +137,38 @@ If the child exits between timeout detection and group termination, the parent
 still reaps it, verifies input preservation and publishes `diagnostic_timeout`
 ([#4625](https://github.com/bridge2ai/data-sheets-schema/issues/4625)).
 
-Measurement performs an ordered plain/instrumented pair for:
+Measurement selects exactly one ordered plain/instrumented pair per invocation:
 
 - Actual `_load_live` on the frozen checkpoint.
 - Actual `CallbackAdapter._run(endpoints)` with a fresh adapter and exact frozen
   stream identities/prefixes.
 - Actual `decision()` on a newly reconstructed owner.
 - Actual `current_effect_view()` on a newly reconstructed owner.
+- Stale-worker-read refusal on independently reconstructed, in-memory mutants.
+- Changed-selected-authority refusal on independently reconstructed, in-memory
+  mutants.
+
+The fixed catalog is `native_full_schema_operations_v1`; it retains all six
+operations, including both negative controls. The driver never loops through
+the catalog, automatically retries a pair, or extends its bound. A pair that
+exceeds 600 seconds remains a timeout. Already completed operation reports are
+immutable separate artifacts, so a later failure does not discard them.
 
 Setup/reconstruction needed to obtain an operation's owner is outside that
-operation's timer. `_load_live` is measured separately. Instrumentation counts
+operation's timer and is reported in that arm's `setup` CPU/wall nanoseconds.
+Complete state/exception encoding is outside the operation timer and reported
+as `fingerprint`. Each child separately reports `checkpoint_verification`
+(real reconstruction and comparison with the prepared declaration), plus
+`phase_overhead.preflight` and `phase_overhead.final_verification` for source,
+runtime, import and file checks. Parent wall time includes dispatch, encoding
+and other orchestration; these sub-timers are not claimed to partition every
+instruction. All this work shares the selected pair's 600-second bound.
+`_load_live` is measured separately. Instrumentation counts
 actual calls to `_load_live`, `_decision_at`, `_checked_observations`,
 `_Replay.run`, `_Replay._packet` and `Trace.__init__`; it does not replace their
 implementations. Plain/instrumented timings share process caches in a fixed
-order and must never be described as a speed improvement.
+order and must never be described as a speed improvement. Different selected
+operations use separate children; their process caches are not shared.
 
 The `_CapturedRun` fingerprint includes all exposed captured evidence, exact
 bytes through typed hashes, complete reader member/pool/total state, and the
@@ -160,6 +188,92 @@ inventory and reconstructed summary must agree. Projection uses declared datacla
 order, so process hash randomization cannot reorder the evidence fingerprint
 ([#4623](https://github.com/bridge2ai/data-sheets-schema/issues/4623)).
 
+Both measurement and offline collection require the complete preparation parent
+envelope: exact fields, scope, limitations, false eligibility flags, empty
+operation denominator, fixed limits, successful child exit, nonnegative timing
+and stream counts. They recompute the canonical child stdout digest and size
+from the retained result. A partially reconstructed preparation envelope or a
+rehashed operation binding cannot substitute for these checks
+([#4640](https://github.com/bridge2ai/data-sheets-schema/issues/4640)).
+
+Parent reports use `native_full_schema_checkpoint_v2`, with role
+`checkpoint_preparation` or `measured_operation_pair`. Child reports use
+`native_full_schema_checkpoint_child_v2`. An operation report binds its exact
+selected operation to the raw preparation report SHA256/byte count, complete
+case-inventory hash/counts, checkpoint summary, prepared import-closure digest,
+driver/utility/source-provenance/Python/Git identities, fixed catalog and both
+limits. This binding is retained on timeout or refusal as well as completion.
+Each report explicitly lists the six-operation `completed`, `failed` and
+`missing` denominator. A completed refusal control has parent status
+`completed` and two matching `refused` arm outcomes; a parent
+`diagnostic_refused` is a failed diagnostic, never a passing negative control.
+
+## Offline collection
+
+`collect` reads only the caller-selected preparation report, its current case
+files and the explicitly supplied operation reports. It does not reload
+recovered modules, run operations, invoke Git, inspect historical origin paths,
+or infer missing measurements. It checks bounded strict JSON, report roles,
+current case bytes and common identity bindings. Duplicate operation IDs and
+mixed preparation/driver/runtime/source/case identities are refused.
+
+Every completed child import closure must contain unique canonical
+`recovered/`, `dependency/` or `interpreter/` relative origins, lowercase SHA256
+digests and exact nonnegative integer byte counts. These checks do not reopen
+historical paths. Origins shared with preparation must retain identical pins;
+operation-specific imports may add entries, and preparation-only imports need
+not occur during measurement. Each collected completed operation retains its
+own final closure digest and entry count; failed diagnostics have no final
+closure claim ([#4641](https://github.com/bridge2ai/data-sheets-schema/issues/4641)).
+
+The collector recomputes pair agreement rather than accepting a saved parity
+flag alone. Positive operations need two `returned` outcomes and matching
+complete inline typed `semantics` payloads. Their complete-state digests are
+recomputed from those payloads, and canonical payloads must also agree. Bare
+matching hashes are insufficient. Refused arms have `semantics=null` and
+returned arms have `refusal=null`. Refusal operations need two `refused` outcomes,
+independently verified graph digests and identical complete bounded exception
+graphs, including cause, context, suppression, typed arguments and notes. The
+graph bound is 32 exception nodes, with valid references/cycles; typed values
+are limited to 100,000 nodes and depth 128. Numeric counts and nanosecond timings
+must be nonnegative integers, not booleans. No graph truncation substitutes for
+equality. Typed values cover all tags emitted by the pinned utility, including
+exact scalar types, bytes represented by size and digest, ordered lists/tuples,
+dictionary pairs and named dataclass fields; nonfinite floats are refused.
+Repeated canonical dictionary keys or repeated dataclass field names are also
+refused; the saved ordering is preserved.
+
+The complete report ceiling remains 4 MiB. A child checks its full encoded result
+before writing any stdout. An oversized result becomes a retained parent
+`diagnostic_refused` with no completed result; state is never truncated or moved
+to an unreviewed side artifact. Parent and collection publications retain their
+existing complete-report bound. Actual reconstructed payloads have not yet
+been measured against this ceiling
+([#4642](https://github.com/bridge2ai/data-sheets-schema/issues/4642)).
+
+If a completed child fits its limit but the enclosing parent report does not,
+the parent retains a bounded `diagnostic_publication_refused` report with
+`result=null`, the exact child stdout/stderr sizes and digests, child exit 0,
+and the selected operation and binding. That operation remains failed in the
+fixed denominator, and dispatch returns nonzero. The collector requires this
+status to have a null result and successful child exit; it cannot count as a
+completed pair or claim a final import closure. An oversized preparation is
+likewise unusable for measurement. If even the failure envelope exceeds the
+same ceiling, publication refuses before writing a report. No cap is raised,
+state truncated, or earlier artifact replaced
+([#4644](https://github.com/bridge2ai/data-sheets-schema/issues/4644)).
+
+Collection publishes a new `native_full_schema_operation_collection_v1` report.
+The operation denominator is recomputed in catalog order. Missing or failed
+reports remain visible and produce `status="incomplete"` and exit 1. Only four
+returned pairs plus both refused pairs, with every binding and preservation
+check intact, produce `status="complete"` and exit 0. This is completion of the
+diagnostic set, never scientific eligibility, execution authorization or native
+acceptance. Collection verifies local artifacts and declarations; it does not
+authenticate past execution. A caller must explicitly select which immutable
+report to collect after any separately reviewed retry; duplicates never choose
+a winning result automatically.
+
 ## Reviewed invocation shape
 
 Select a Python installation with the recovered source's dependencies already
@@ -174,8 +288,28 @@ PYTHON -I -B -S notes/native_full_schema_profile_2026-10-07/profile_checkpoint.p
   --output NEW_PREPARATION
 PYTHON -I -B -S notes/native_full_schema_profile_2026-10-07/profile_checkpoint.py measure \
   --source RECOVERY/source --recovery RECOVERY --dependencies SITE_PACKAGES \
-  --checkpoint NEW_PREPARATION --output NEW_MEASUREMENT
+  --checkpoint NEW_PREPARATION --operation _load_live --output NEW_LOAD_MEASUREMENT
+PYTHON -I -B -S notes/native_full_schema_profile_2026-10-07/profile_checkpoint.py collect \
+  --checkpoint NEW_PREPARATION --reports NEW_LOAD_MEASUREMENT/report.json \
+  --output NEW_PARTIAL_COLLECTION
 ```
+
+Select the remaining five pairs in separate reviewed `measure` invocations using
+these exact IDs, each with a new output directory:
+
+| Operation ID | Required arm outcome |
+| --- | --- |
+| `_load_live` | returned |
+| `CallbackAdapter._run_fresh_owner` | returned |
+| `decision_fresh_loaded_run` | returned |
+| `current_effect_view_fresh_loaded_run` | returned |
+| `refusal_stale_worker_read_in_memory` | refused |
+| `refusal_changed_selected_authority_in_memory` | refused |
+
+Supply all six report paths to a subsequent explicit `collect` command for a
+complete-set result. The one-report example above deliberately produces an
+incomplete collection while retaining the completed pair. Empty report lists
+likewise retain all six missing IDs. No command launches missing operations.
 
 Keep the external reports and case intact. A committed result should contain
 compact hashes, counts, timings, interpretation and bounded diagnostics—not the
