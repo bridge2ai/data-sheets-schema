@@ -16,6 +16,7 @@ import sys
 from data_sheets_schema import native_attribution_controller as composition
 from data_sheets_schema import native_attribution_registration as draft
 from data_sheets_schema import native_execution_authority as authority
+from data_sheets_schema import native_receipt_origin as receipt_origin
 from data_sheets_schema.native_attempt_supervisor import _file
 
 KIND = 'd4d_native_attribution_execution_registration'
@@ -220,8 +221,10 @@ def _paths(value, selected, *, fresh, extra_protected=()):
 
 
 def registration(composition_path, system_path, *, permission_probe_path, attempt_id,
-                 attempt_directory, evidence_directory, runtime):
+                 attempt_directory, evidence_directory, runtime, receipt_origin_version=0):
     """Capture an offline proposal, not permission to invoke any native command."""
+    if type(receipt_origin_version) is not int or receipt_origin_version not in (0, 1):
+        raise ValueError('receipt_origin_version must be exactly integer 0 or 1')
     if not isinstance(attempt_id, str) or re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', attempt_id) is None:
         raise ValueError('attempt_id must be an explicit safe single path component')
     runtime = validate_runtime(runtime)
@@ -262,6 +265,9 @@ def registration(composition_path, system_path, *, permission_probe_path, attemp
         'selection': {'project': spec.project, 'method': spec.method, 'label': spec.label,
                       'render_spec': original['render_spec']},
         'scope': 'Offline proposal only. Separate exact review, CI, permission observations and owner launch evidence are required; no scientific acceptance or provider billing assertion.'}
+    if receipt_origin_version:
+        value[receipt_origin.KEY] = receipt_origin.declaration(
+            paths['attempt_directory'], spec._agentic_artifact_paths)
     _paths(value, selected, fresh=False)
     # These resources are read by reconstructed selection, so capture drift is
     # a refusal rather than an unnoticed mixed registration.
@@ -284,7 +290,7 @@ def verified(raw):
         expected = registration(value['composition'], value['system_path'],
             permission_probe_path=value['permission_probe'], attempt_id=value['attempt_id'],
             attempt_directory=value['attempt_directory'], evidence_directory=value['evidence_directory'],
-            runtime=value['runtime'])
+            runtime=value['runtime'], receipt_origin_version=receipt_origin.version(value))
     except (KeyError, TypeError) as exc:
         raise ValueError('incomplete native execution registration') from exc
     if draft._encoded(value) != draft._encoded(expected):
