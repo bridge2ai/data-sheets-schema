@@ -9,7 +9,7 @@ from pathlib import Path
 from src.transformation.transform_api import SemanticTransformer, TransformationConfig
 
 transformer = SemanticTransformer(TransformationConfig(
-    mapping_file=Path("data/ro-crate_mapping/d4d_rocrate_mapping_v2_semantic.tsv"),
+    mapping_file=Path("path/to/reviewed-mapping.tsv"),
     result_contract="dataset_v1",
 ))
 result = transformer.rocrate_to_d4d("input.json", output_path="dataset.yaml")
@@ -18,7 +18,12 @@ metadata = result.transformation_metadata
 published_sha256 = metadata["publication"]["sha256"]
 ```
 
-The current legacy TSV mappings can still produce invalid Dataset candidates.
+`path/to/reviewed-mapping.tsv` stands for an explicitly selected table that maps
+the given source to valid Dataset fields, including its required `id`. The
+current default `d4d_rocrate_mapping_v2_semantic.tsv` does not map `Dataset.id`;
+it remains unchanged and cannot publish a Dataset through this API. There is no
+automatic switch to another table or mapper. Other legacy TSV mappings can also
+produce invalid Dataset candidates.
 The publication gate refuses those candidates and retains the original files.
 This contract does not repair mappings, select scientific criteria, reclassify
 SKOS relationships, or count retired rows as increased coverage. Issues
@@ -38,6 +43,24 @@ SKOS relationships, or count retired rows as increased coverage. Issues
 configuration. `transform_rocrate_file` and `batch_transform_rocrates` accept the
 same keyword-only selector. Unsupported selectors fail before source parsing or
 publication.
+
+The convenience and batch helpers additionally accept a keyword-only
+`mapping_file=Path(...)` (or string path). Omitting it preserves the existing
+default table. For example:
+
+```python
+from src.transformation.transform_api import transform_rocrate_file, batch_transform_rocrates
+
+result = transform_rocrate_file("input.json", "dataset.yaml",
+    result_contract="dataset_v1", mapping_file="path/to/reviewed-mapping.tsv")
+results = batch_transform_rocrates("inputs", "outputs",
+    result_contract="dataset_v1", mapping_file="path/to/reviewed-mapping.tsv")
+```
+
+The selected table is the table read by the existing loader, pinned in the
+returned metadata, and protected from replacement by any output. This closes the
+wrapper selection gap in [#4635](https://github.com/bridge2ai/data-sheets-schema/issues/4635)
+without repairing the default table under #4594.
 
 No-output calls remain drafts: they do not acquire the required file-publication
 schema check. Their separate metadata has `"publication": null`, so a draft does
@@ -102,15 +125,18 @@ protection and optional-validation refusals remain in force.
 
 ## CLI result output
 
-The API script accepts the selector after `transform`, `batch` or `merge`:
+The API script accepts the selector and `--mapping` after `transform`, `batch`
+or `merge`. Replace the example input and mapping paths with a compatible source
+and a reviewed table that produces a valid Dataset; these are caller-selected
+paths, not replacement mappings distributed by this change:
 
 ```bash
 uv run python src/transformation/transform_api.py transform input.json dataset.yaml \
-  --result-contract dataset_v1 > result.json
+  --result-contract dataset_v1 --mapping path/to/reviewed-mapping.tsv > result.json
 uv run python src/transformation/transform_api.py batch inputs outputs \
-  --result-contract dataset_v1 > batch-results.json
+  --result-contract dataset_v1 --mapping path/to/reviewed-mapping.tsv > batch-results.json
 uv run python src/transformation/transform_api.py merge merged.yaml first.json second.json \
-  --result-contract dataset_v1 > merge-result.json
+  --result-contract dataset_v1 --mapping path/to/reviewed-mapping.tsv > merge-result.json
 ```
 
 The requested output files remain Dataset YAML. Only opted-in CLI stdout becomes
@@ -126,7 +152,9 @@ transaction is implied. Other RO-Crate CLI wrappers keep their existing formats.
 Focused tests cover real mapped records, single/merge/batch entry points, retained
 legacy draft shapes, explicit provenance disabling, exact UTF-8/UTF-16 publication
 hashes, mapping drift, invalid mapped fields, late batch refusals and parseable
-CLI JSON. The existing required publication tests continue to exercise closed
+CLI JSON with explicitly selected mappings and actual configuration. Default
+table/legacy contract refusals and selected-mapping output protection are also
+covered. The existing required publication tests continue to exercise closed
 Dataset validation and protected artifacts. Source and test execution are
 serialized by the session coordinator; this note does not itself assert a test
 or replay result.

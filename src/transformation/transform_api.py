@@ -9,16 +9,19 @@ Provides clean programmatic interface for:
 - Provenance tracking
 
 Usage:
+    from pathlib import Path
     from src.transformation.transform_api import SemanticTransformer, TransformationConfig
 
     # Explicit Dataset publication; provenance stays on the result object.
-    transformer = SemanticTransformer(TransformationConfig(result_contract="dataset_v1"))
+    transformer = SemanticTransformer(TransformationConfig(
+        mapping_file=Path("path/to/reviewed-mapping.tsv"), result_contract="dataset_v1"))
     result = transformer.rocrate_to_d4d("input.json", output_path="output.yaml")
     dataset = result.data
     metadata = result.transformation_metadata
 
     # With custom config
     config = TransformationConfig(
+        mapping_file=Path("path/to/reviewed-mapping.tsv"),
         profile_level="complete",
         preserve_provenance=True,
         merge_strategy="merge",
@@ -641,7 +644,8 @@ def transform_rocrate_file(
     validate: bool = True,
     profile_level: str = "basic",
     *,
-    result_contract: str = "legacy"
+    result_contract: str = "legacy",
+    mapping_file: Optional[Union[Path, str]] = None
 ) -> TransformationResult:
     """
     Convenience function to transform a single RO-Crate file to D4D YAML.
@@ -652,15 +656,18 @@ def transform_rocrate_file(
         validate: Run validation on output
         profile_level: RO-Crate profile level
         result_contract: legacy or the explicit dataset_v1 metadata separation
+        mapping_file: Explicit TSV path; None retains the existing default table
 
     Returns:
         TransformationResult
     """
     _result_contract(result_contract)
+    mapping_options = {} if mapping_file is None else {'mapping_file': Path(mapping_file)}
     config = TransformationConfig(
         validate_output=validate,
         profile_level=profile_level,
-        result_contract=result_contract
+        result_contract=result_contract,
+        **mapping_options
     )
     transformer = SemanticTransformer(config)
     return transformer.rocrate_to_d4d(
@@ -676,7 +683,8 @@ def batch_transform_rocrates(
     pattern: str = "*.json",
     validate: bool = True,
     *,
-    result_contract: str = "legacy"
+    result_contract: str = "legacy",
+    mapping_file: Optional[Union[Path, str]] = None
 ) -> List[TransformationResult]:
     """
     Batch transform all RO-Crate files in a directory.
@@ -687,6 +695,7 @@ def batch_transform_rocrates(
         pattern: File pattern to match (default: "*.json")
         validate: Run validation on outputs
         result_contract: legacy or the explicit dataset_v1 metadata separation
+        mapping_file: Explicit TSV path; None retains the existing default table
 
     Returns:
         List of TransformationResults
@@ -702,7 +711,8 @@ def batch_transform_rocrates(
     for rocrate_file in rocrate_files:
         _parse_rocrate(rocrate_file).require_root_dataset()
 
-    config = TransformationConfig(validate_output=validate, result_contract=contract)
+    mapping_options = {} if mapping_file is None else {'mapping_file': Path(mapping_file)}
+    config = TransformationConfig(validate_output=validate, result_contract=contract, **mapping_options)
     transformer = SemanticTransformer(config)
     prepared = []
     results = []
@@ -745,6 +755,8 @@ def main(argv=None):
     for name in ('transform', 'batch', 'merge'):
         command = commands.add_parser(name)
         command.add_argument('--result-contract', choices=sorted(RESULT_CONTRACTS), default='legacy')
+        command.add_argument('--mapping', type=Path,
+                             help='Explicit mapping TSV (default table remains unchanged)')
         if name == 'merge':
             command.add_argument('output')
             command.add_argument('inputs', nargs='+')
@@ -759,10 +771,14 @@ def main(argv=None):
 
     def perform():
         if args.command == 'transform':
-            return transform_rocrate_file(args.input, args.output, result_contract=contract)
+            return transform_rocrate_file(args.input, args.output, result_contract=contract,
+                                          mapping_file=args.mapping)
         if args.command == 'batch':
-            return batch_transform_rocrates(args.input, args.output, result_contract=contract)
-        transformer = SemanticTransformer(TransformationConfig(result_contract=contract))
+            return batch_transform_rocrates(args.input, args.output, result_contract=contract,
+                                           mapping_file=args.mapping)
+        mapping = getattr(args, 'mapping', None)
+        mapping_options = {} if mapping is None else {'mapping_file': mapping}
+        transformer = SemanticTransformer(TransformationConfig(result_contract=contract, **mapping_options))
         if args.command == 'merge':
             return transformer.merge_rocrates(
                 [Path(item) for item in args.inputs], output_path=Path(args.output),

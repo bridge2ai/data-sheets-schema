@@ -10,7 +10,7 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from .test_legacy_publication import legacy, mapping, crate, ID, SOURCE_TEXT
+from .test_legacy_publication import legacy, mapping, crate, ID, SOURCE_TEXT, REPO, SENTINEL
 
 
 def configured(api, mapping, **kwargs):
@@ -117,25 +117,15 @@ def test_explicit_no_provenance_stays_disabled(legacy, mapping, tmp_path):
     assert result.mapping_version == 'sha256:' + sha256(mapping.read_bytes()).hexdigest()
 
 
-def helper_mapping(monkeypatch, api, mapping):
-    original = api.TransformationConfig
-
-    def config(**kwargs):
-        kwargs.update(mapping_file=mapping, validate_input=False, validate_output=False)
-        return original(**kwargs)
-
-    monkeypatch.setattr(api, 'TransformationConfig', config)
-
-
-def test_batch_binds_each_published_record_and_preserves_inputs(legacy, mapping, tmp_path, monkeypatch):
+def test_batch_binds_each_published_record_and_preserves_inputs(legacy, mapping, tmp_path):
     _, _, api = legacy
-    helper_mapping(monkeypatch, api, mapping)
     inputs = tmp_path / 'inputs'
     inputs.mkdir()
     sources = [crate(inputs / 'b.json', title='second'), crate(inputs / 'a.json', title='first')]
     before = {path: path.read_bytes() for path in sources}
     output = tmp_path / 'outputs'
-    results = api.batch_transform_rocrates(inputs, output, result_contract='dataset_v1')
+    results = api.batch_transform_rocrates(inputs, output, result_contract='dataset_v1',
+                                         mapping_file=str(mapping))
     assert [item.data['title'] for item in results] == ['first', 'second']
     for result, name in zip(results, ['a_d4d.yaml', 'b_d4d.yaml']):
         assert yaml.safe_load((output / name).read_bytes()) == result.data
@@ -145,9 +135,8 @@ def test_batch_binds_each_published_record_and_preserves_inputs(legacy, mapping,
 
 @pytest.mark.parametrize('command', ['transform', 'batch', 'merge'])
 def test_opted_in_cli_emits_parseable_results_without_switching_yaml_file_format(
-        legacy, mapping, tmp_path, monkeypatch, capsys, command):
+        legacy, mapping, tmp_path, capsys, command):
     _, _, api = legacy
-    helper_mapping(monkeypatch, api, mapping)
     inputs = tmp_path / 'inputs'
     inputs.mkdir()
     first = crate(inputs / 'a.json')
@@ -157,14 +146,81 @@ def test_opted_in_cli_emits_parseable_results_without_switching_yaml_file_format
             'batch': [str(inputs), str(output)],
             'merge': [str(output), str(first), str(second)]}[command]
     capsys.readouterr()
-    api.main([command, *args, '--result-contract', 'dataset_v1'])
+    api.main([command, *args, '--result-contract', 'dataset_v1', '--mapping', str(mapping)])
     captured = capsys.readouterr()
     document = json.loads(captured.out)
     assert document['format'] == 'd4d_transformation_result_v1'
     rows = document['results'] if command == 'batch' else [document]
     for row in rows:
         assert row['transformation_metadata']['publication']['root_class'] == 'Dataset'
+        assert row['transformation_metadata']['mapping']['sha256'] == sha256(mapping.read_bytes()).hexdigest()
         assert 'transformation_metadata' not in row['data']
         published = row['transformation_metadata']['publication']['path']
         assert yaml.safe_load(Path(published).read_bytes()) == row['data']
     assert captured.err  # Legacy progress is retained away from JSON stdout.
+
+
+def test_convenience_accepts_explicit_mapping_without_changing_default_provenance(legacy, mapping, tmp_path):
+    _, _, api = legacy
+    source = crate(tmp_path / 'input.json')
+    output = tmp_path / 'dataset.yaml'
+    result = api.transform_rocrate_file(source, output, mapping_file=mapping,
+                                        result_contract='dataset_v1')
+    assert result.data['id'] == ID
+    assert result.transformation_metadata is not None
+    assert result.transformation_metadata['mapping']['path'] == str(mapping.resolve())
+    assert_publication(result.transformation_metadata, output, 'utf-8')
+
+
+@pytest.mark.parametrize('operation', ['convenience', 'batch'])
+def test_explicit_helper_mapping_is_protected_from_output_replacement(legacy, mapping, tmp_path, operation):
+    _, _, api = legacy
+    inputs = tmp_path / 'inputs'
+    inputs.mkdir()
+    source = crate(inputs / 'source.json')
+    if operation == 'batch':
+        destination = tmp_path / 'source_d4d.yaml'
+        mapping.rename(destination)
+        mapping = destination  # Selection uses content, not the TSV suffix.
+    before = mapping.read_bytes()
+    with pytest.raises(api.PublicationError, match='overlap'):
+        if operation == 'convenience':
+            api.transform_rocrate_file(source, mapping, mapping_file=mapping,
+                                       result_contract='dataset_v1', validate=False)
+        else:
+            api.batch_transform_rocrates(inputs, tmp_path, mapping_file=mapping,
+                                        result_contract='dataset_v1', validate=False)
+    assert mapping.read_bytes() == before
+
+
+@pytest.mark.parametrize('command', ['transform', 'batch', 'merge'])
+@pytest.mark.parametrize('selection', ['default_table', 'legacy_contract'])
+def test_cli_does_not_silently_replace_default_table_or_legacy_contract(
+        legacy, mapping, tmp_path, monkeypatch, capsys, command, selection):
+    _, _, api = legacy
+    # Resolve the real unchanged default exactly as documented, without any
+    # substituted TransformationConfig or validator.
+    monkeypatch.chdir(REPO)
+    inputs = tmp_path / 'inputs'
+    inputs.mkdir()
+    first = crate(inputs / 'a.json')
+    second = crate(inputs / 'b.json')
+    output = tmp_path / ('outputs' if command == 'batch' else 'output.yaml')
+    if command == 'batch':
+        output.mkdir()
+        destinations = [output / 'a_d4d.yaml', output / 'b_d4d.yaml']
+    else:
+        destinations = [output]
+    for destination in destinations:
+        destination.write_bytes(SENTINEL)
+    args = {'transform': [str(first), str(output)],
+            'batch': [str(inputs), str(output)],
+            'merge': [str(output), str(first), str(second)]}[command]
+    options = (['--result-contract', 'dataset_v1'] if selection == 'default_table'
+               else ['--mapping', str(mapping)])
+    capsys.readouterr()
+    with pytest.raises(api.PublicationError):
+        api.main([command, *args, *options])
+    assert {path: path.read_bytes() for path in destinations} == {
+        path: SENTINEL for path in destinations}
+    assert '"format": "d4d_transformation_result_v1"' not in capsys.readouterr().out
