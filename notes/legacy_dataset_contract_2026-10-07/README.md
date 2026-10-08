@@ -155,6 +155,48 @@ hashes, mapping drift, invalid mapped fields, late batch refusals and parseable
 CLI JSON with explicitly selected mappings and actual configuration. Default
 table/legacy contract refusals and selected-mapping output protection are also
 covered. The existing required publication tests continue to exercise closed
-Dataset validation and protected artifacts. Source and test execution are
-serialized by the session coordinator; this note does not itself assert a test
-or replay result.
+Dataset validation and protected artifacts.
+
+## Recorded validation result
+
+The coordinator's serialized nine-module run passed **319 tests**, with zero
+failures, errors or skips. The terminal summary reported 58.14 seconds and 14
+dependency deprecation warnings; JUnit records 58.107 seconds and does not encode
+the warning count. No applications or tests were rerun to prepare this evidence.
+
+- Tested commit: `2cfbfa016291b5f80be28abef1faed8fb4af693e`.
+- Tested tree: `dc405c72723c8da5f5d868e6161e272cc723687d`.
+- JUnit: `legacy-envelope-tests-01.xml`, 52,182 bytes, SHA-256
+  `cec2c725a1f8f1c06c69c9cd16d50fe575bf5450ca52e31ae0362e996edb09f8`.
+- [validation.json](validation.json) pins nine production/dependency files, two
+  resources and all nine test modules. Each hash was checked against both the
+  tested commit blob and the working file bytes during evidence preparation.
+
+| Test module | Passed |
+| --- | ---: |
+| `tests.test_rocrate.test_legacy_result_contract` | 19 |
+| `tests.test_rocrate.test_legacy_envelope_adversarial` | 28 |
+| `tests.test_rocrate.test_legacy_publication` | 51 |
+| `tests.test_rocrate.test_legacy_publication_adversarial` | 39 |
+| `tests.test_rocrate.test_legacy_root_gates` | 30 |
+| `tests.test_rocrate.test_production_root_gates` | 104 |
+| `tests.test_rocrate.test_transform_api` | 3 |
+| `tests.test_cli.test_rocrate_cli` | 27 |
+| `tests.test_fairscape_integration.test_rocrate_merger` | 18 |
+| Total | 319 |
+
+These results exercise synthetic mapped records and existing software regression
+fixtures with the real packaged closed Dataset schema. The positive publication
+controls use explicit compatible mappings. They do not establish that the unchanged
+default TSV, a real project's mapping interpretation, or a current generation is
+valid. The default table still lacks required `Dataset.id`, and default legacy
+publication with embedded metadata still refuses; migration is explicit.
+
+The tested tree includes required publication gate commit
+`9c8b73ee7d0be062aff2532b2a9bd64ba73702e5` from
+[PR #4634](https://github.com/bridge2ai/data-sheets-schema/pull/4634), which was
+still open when this evidence was captured. The result-contract PR depends on
+that change and addresses only #4630/#4635. Parents #4594/#2915 remain open.
+No real-project replay, fresh comparison publication, provider run or scientific
+score was produced. Human review, paid-run authorization, audit28 and held figure
+decisions remain unchanged; moving metadata is not increased source coverage.
