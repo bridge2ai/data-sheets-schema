@@ -79,7 +79,10 @@ class ValidationReport:
     metadata: Dict[str, Any] = field(default_factory=dict)
 
     def __str__(self) -> str:
-        status = "✓ PASS" if self.passed else "✗ FAIL"
+        if self.metadata.get("status") == "unavailable":
+            status = "UNAVAILABLE"
+        else:
+            status = "✓ PASS" if self.passed else "✗ FAIL"
         lines = [f"{status} - {self.level.value.upper()} Validation"]
 
         if self.errors:
@@ -130,8 +133,8 @@ LEVEL_REQUIREMENTS = {
         ]
     },
     "complete": {
-        "required_count": 100,
-        "required_fields": []  # All D4D sections populated
+        "required_count": None,  # No implemented denominator; not a target of 100 fields.
+        "required_fields": []  # Complete-profile criteria have not been defined.
     }
 }
 
@@ -517,7 +520,9 @@ class UnifiedValidator:
             level: Profile level ("minimal", "basic", "complete")
 
         Returns:
-            ValidationReport with profile conformance details
+            ValidationReport with profile conformance details. A profile with
+            no defined requirements is unavailable, with no coverage value;
+            its report does not pass or assert that the input is incomplete.
         """
         report = ValidationReport(level=ValidationLevel.PROFILE, passed=True)
 
@@ -568,6 +573,18 @@ class UnifiedValidator:
         # Check required fields
         requirements = LEVEL_REQUIREMENTS[level]
         required_fields = requirements["required_fields"]
+        if not required_fields:
+            # An empty implementation is not a vacuously complete dataset.
+            # Preserve load/root errors above and do not invent criteria or
+            # turn an undefined denominator into either zero or 100 percent.
+            report.passed = False
+            report.metadata.update(level=level, status="unavailable",
+                                   reason="required_fields_not_defined",
+                                   required_count=None, found_count=None)
+            report.errors.append(
+                f"Profile '{level}' validation is unavailable: required fields have not been defined."
+            )
+            return report
         missing_fields = []
 
         for field in required_fields:
@@ -576,7 +593,7 @@ class UnifiedValidator:
 
         # Calculate coverage
         found_count = len(required_fields) - len(missing_fields)
-        coverage = (found_count / len(required_fields) * 100) if required_fields else 100.0
+        coverage = found_count / len(required_fields) * 100
 
         report.coverage_percentage = coverage
         report.missing_fields = missing_fields
