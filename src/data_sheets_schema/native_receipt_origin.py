@@ -158,3 +158,13 @@ def check_saved(value, gate, *, raw, aliases, metadata):
     encoded = lambda obj: json.dumps(obj, sort_keys=True, separators=(',', ':'), allow_nan=False)
     if encoded(gate.get(REPORT_KEY)) != encoded(expected):
         raise ValueError('saved receipt-origin report differs from its registered captured basis')
+
+
+def check_final_bytes(value, raw, *, max_bytes):
+    """Refuse an opted-in publication that its unchanged saved reader cannot open."""
+    if not version(value):
+        return
+    if type(raw) is not bytes or type(max_bytes) is not int or max_bytes < 0:
+        raise ValueError('receipt-origin final preflight requires exact bytes and an integer reader bound')
+    if len(raw) > max_bytes:
+        raise ValueError(f'receipt-origin final result exceeds {max_bytes} bytes')

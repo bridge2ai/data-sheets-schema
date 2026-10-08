@@ -455,3 +455,101 @@ def test_auth_refused_native_outcome_keeps_stop_and_rechecks_unknown(tmp_path, m
     finally:
         _rewrite_final(case, result)
     assert native.read_final(case['raw']) == result
+
+
+def test_actual_reader_cap_is_exceeded_by_one_admitted_origin_identity(tmp_path):
+    """An 8 MiB identity fits the frozen 16 MiB frame limit but not final.json."""
+    def expand_full_write_identity(run):
+        identity = None
+        for event in run.events:
+            for item in event.get('message', {}).get('content', []):
+                if item.get('name') == 'Write' and item.get('input', {}).get('file_path') == str(run.full):
+                    identity = item['id']
+        assert identity is not None
+        expanded = 'x' * neutral.MAX_BYTES
+        for event in run.events:
+            for item in event.get('message', {}).get('content', []):
+                if item.get('id') == identity:
+                    item['id'] = expanded
+                if item.get('tool_use_id') == identity:
+                    item['tool_use_id'] = expanded
+
+    value, gate, snapshot, _ = _captured(tmp_path / 'actual-size', mutate_run=expand_full_write_identity)
+    transcript = snapshot.raw[value[reporting.KEY]['transcript_path']]
+    # NativeControl admits each frame at this bound; this is not an oversized
+    # frame that the controller would refuse before recording the history.
+    assert max(map(len, transcript.splitlines())) < 16 * 1024 * 1024
+    attached = reporting.attach(value, gate, **_basis(snapshot))
+    origin = attached[reporting.REPORT_KEY]['original_receipt']
+    assert origin['status'] == 'checked'
+    assert len(origin['boundaries']['full_record_write']['tool_use_id']) == neutral.MAX_BYTES
+    final_raw = draft._encoded({'gates': {'receipts': attached}})
+    assert len(draft._encoded({'gates': {'receipts': gate}})) < neutral.MAX_BYTES
+    assert len(final_raw) > neutral.MAX_BYTES
+    with pytest.raises(ValueError, match='receipt-origin final result exceeds'):
+        reporting.check_final_bytes(value, final_raw, max_bytes=neutral.MAX_BYTES)
+
+
+def test_final_preflight_accepts_exact_bound_and_preserves_version_zero(tmp_path):
+    value, gate, snapshot, _ = _captured(tmp_path / 'size-boundary')
+    raw = draft._encoded({'gates': {'receipts': reporting.attach(value, gate, **_basis(snapshot))}})
+    assert reporting.check_final_bytes(value, raw, max_bytes=len(raw)) is None
+    with pytest.raises(ValueError, match='receipt-origin final result exceeds'):
+        reporting.check_final_bytes(value, raw, max_bytes=len(raw) - 1)
+    # Default/explicit selector 0 omits the registration declaration. Legacy
+    # final publication behavior is outside this opt-in size-hardening slice.
+    assert reporting.check_final_bytes({}, raw, max_bytes=1) is None
+
+
+@pytest.mark.parametrize('family', ['neutral_supervisor', 'native_attribution'])
+def test_both_publishers_refuse_before_final_marker_and_keep_attempt_evidence(tmp_path, monkeypatch, family):
+    root = tmp_path / family
+    case = make_case(root) if family == 'neutral_supervisor' else make_native_case(root)
+    case = _opt_in(case, family)
+    original_files = {path: path.read_bytes() for path in root.rglob('*') if path.is_file()}
+    observed = []
+    check = reporting.check_final_bytes
+
+    def small_final_only(value, raw, *, max_bytes):
+        assert max_bytes == neutral.MAX_BYTES
+        final = draft._json(raw)
+        observed.append(final)
+        # Change only this publication bound, after genuine registration and
+        # authority admission; no input limit or committed-source check is
+        # bypassed to reach the intended writer boundary.
+        check(value, raw, max_bytes=len(raw) - 1)
+
+    def refused(*args, **kwargs):
+        raise RuntimeError('synthetic no-child publication probe')
+
+    monkeypatch.setattr(reporting, 'check_final_bytes', small_final_only)
+    monkeypatch.setattr(native, '_probe_runtime', refused)
+    consumer = neutral if family == 'neutral_supervisor' else native
+    with consumer.authority.loaded_dependencies(case['value']['dependencies']) as modules:
+        monkeypatch.setattr(modules['run_native_canary'], 'execute_child', refused)
+        if family == 'neutral_supervisor':
+            with pytest.raises(ValueError, match='receipt-origin final result exceeds'):
+                neutral.supervise(case['raw'])
+        else:
+            # Native failure handling preserves the first runtime exception,
+            # chaining the later publication refusal instead of replacing it.
+            with pytest.raises(RuntimeError, match='synthetic no-child publication probe') as caught:
+                native.launch(case['raw'], **case['kwargs'])
+            assert isinstance(caught.value.__cause__, ValueError)
+            assert 'receipt-origin final result exceeds' in str(caught.value.__cause__)
+    assert len(observed) == 1
+    final = observed[0]
+    expected_stop = ('RuntimeError: synthetic no-child publication probe' if family == 'neutral_supervisor'
+                     else 'launch or runtime failed: RuntimeError')
+    assert final['first_stop'] == expected_stop
+    assert final['gates']['first_stop']['reason'] == expected_stop
+    assert final['gates']['receipts'][reporting.REPORT_KEY]['original_receipt']['status'] == 'unknown'
+    attempt = Path(case['value']['attempt_directory'])
+    evidence = Path(case['value']['evidence_directory'])
+    assert (attempt / 'registration.json').read_bytes() == case['raw']
+    assert (attempt / 'started.json').is_file()
+    assert evidence.is_dir()
+    assert not (evidence / 'final.json').exists()
+    assert not (evidence / 'published.json').exists()
+    for path, raw in original_files.items():
+        assert path.read_bytes() == raw

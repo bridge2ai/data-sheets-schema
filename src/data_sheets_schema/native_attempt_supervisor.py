@@ -342,6 +342,7 @@ def supervise(registration_raw):
                 if additional_path.exists() else None,
             'scope': 'Explicitly synthetic local engineering evidence. No paid generation, native permission, model truth or scientific acceptance.'}
         final_raw = draft._encoded(final)
+        receipt_origin.check_final_bytes(value, final_raw, max_bytes=MAX_BYTES)
         durable_new(evidence/'final.json', final_raw)
         durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
             'started_sha256': draft._sha(started_raw), 'registration_sha256': draft._sha(registration_raw)}))

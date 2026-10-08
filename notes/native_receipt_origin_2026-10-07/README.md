@@ -7,8 +7,11 @@ remains open for the other integrations.
 
 The registration APIs accept `receipt_origin_version=1`. The selector must be
 an exact integer: booleans, strings and floating-point aliases are refused.
-Omitting the selector or selecting `0` preserves the existing registration
-bytes and report shape. Version 1 derives the transcript, full-record and
+Omitting the selector and selecting `0` produce identical registration bytes
+under the same source version, without adding a selector or origin-report
+field. Source dependency pins necessarily change when the source changes;
+this does not promise identical historical registrations across commits.
+Version 1 derives the transcript, full-record and
 receipt identities from the selected registration, rather than accepting
 caller-provided artifact identities.
 
@@ -32,6 +35,16 @@ requires `snapshot.sealed is True` before using its bytes. Other seal states
 now produce the same explicit unknown report as unavailable capture. Both
 released production acquisition paths already sealed their snapshots; the
 regression protects the helper boundary.
+
+[#4613](https://github.com/bridge2ai/data-sheets-schema/issues/4613) addresses
+another reachable boundary: an 8 MiB full-record Write identity fits the
+controller's 16 MiB frame limit, but retaining it in the origin detail makes
+the serialized final report exceed its reader's 8 MiB cap. Both version 1
+publishers now check the exact serialized final bytes before writing
+`final.json` or its publication marker. Oversized output is refused with
+earlier attempt evidence retained; no report detail is silently dropped.
+Registration and input limits remain unchanged. The pre-existing version 0
+publication behavior is outside this opt-in change.
 
 The origin report is attached after the existing gate results. It does not
 change a gate, a receipt floor, completion status or the first stop reason.

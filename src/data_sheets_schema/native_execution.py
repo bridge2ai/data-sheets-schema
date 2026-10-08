@@ -19,6 +19,7 @@ import threading
 from data_sheets_schema import native_attribution_controller as composition
 from data_sheets_schema import native_attribution_registration as draft
 from data_sheets_schema import native_attribution_results as replay
+from data_sheets_schema import native_attempt_supervisor as supervisor
 from data_sheets_schema import native_execution_authority as authority
 from data_sheets_schema import native_execution_registration as registration
 from data_sheets_schema import native_execution_gates as gates
@@ -373,6 +374,7 @@ def launch(registration_raw, *, review_path, ci_path, launch_word_path):
                     if additional_path.exists() else None,
                 'scope': 'Controller/runtime completion only. Saved authority is not authenticated; native permission observations do not prove production helpers, future permissions, billing or scientific support.'}
             final_raw = draft._encoded(final)
+            receipt_origin.check_final_bytes(value, final_raw, max_bytes=supervisor.MAX_BYTES)
             durable_new(evidence/'final.json', final_raw)
             durable_new(evidence/'published.json', draft._encoded({'final_sha256': draft._sha(final_raw),
                 'started_sha256': draft._sha(started_raw), 'registration_sha256': draft._sha(registration_raw)}))
