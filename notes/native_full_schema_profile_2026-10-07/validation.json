@@ -1,0 +1,1309 @@
+{
+  "artifacts": [
+    {
+      "artifact": "full-schema-preparation-05/report.json",
+      "bytes": 193281,
+      "role": "checkpoint_preparation",
+      "sha256": "b72bcea58c3a64be466b642fd6493a1da51865f7f8afd730d8816f9c01756f15"
+    },
+    {
+      "artifact": "full-schema-operation-load-live-01/report.json",
+      "bytes": 1593393,
+      "role": "measured_operation_pair",
+      "sha256": "f59dca0addc61681276f2315f7de25da8bfa0eddc26018bf710147fe0d2c4004"
+    },
+    {
+      "artifact": "full-schema-operation-callback-01/report.json",
+      "bytes": 1593651,
+      "role": "measured_operation_pair",
+      "sha256": "aee8bf3b3700ed47b03985e3b5e3bcd86a46a451cc755909a855860d33aac887"
+    },
+    {
+      "artifact": "full-schema-operation-decision-01/report.json",
+      "bytes": 206787,
+      "role": "measured_operation_pair",
+      "sha256": "2561455ce9bea0495d260281076920ed12878f8142755eb205bda80b6f96567e"
+    },
+    {
+      "artifact": "full-schema-operation-effect-view-01/report.json",
+      "bytes": 224990,
+      "role": "measured_operation_pair",
+      "sha256": "b72708779907291366a3620144954b6c5a6fcbe5db64b8b3983ba6a83ce862f6"
+    },
+    {
+      "artifact": "full-schema-operation-stale-worker-01/report.json",
+      "bytes": 194644,
+      "role": "measured_operation_pair",
+      "sha256": "e06db15ae8031ab66742f0bae348fa142db36237b55eb158913c2cd0f7011ce7"
+    },
+    {
+      "artifact": "full-schema-operation-changed-authority-01/report.json",
+      "bytes": 194596,
+      "role": "measured_operation_pair",
+      "sha256": "f85faf2fa67a6a40bf4483bf926cd5f260a2411a716d2c060c1377fed86cb381"
+    },
+    {
+      "artifact": "full-schema-collection-01/report.json",
+      "bytes": 2857741,
+      "role": "complete_operation_collection",
+      "sha256": "f684bfb1420d023293611d8f5f7880d5513d6f82332556ef6549c0450e294eed"
+    },
+    {
+      "artifact": "native-attempt-history.json",
+      "bytes": 23542,
+      "role": "retained_v1_history_summary",
+      "sha256": "6b6b9d840a4b68041195422cc5d950c3972990aab736eda46231573b96d5455d"
+    },
+    {
+      "artifact": "full-schema-tests-06.xml",
+      "bytes": 64375,
+      "role": "focused_test_junit",
+      "sha256": "b4e645075330916b147d424a4d313246ddd5cb20eb111021de5bcf192ca63af0"
+    },
+    {
+      "artifact": "native-plugin-review-01.txt",
+      "bytes": 4976,
+      "role": "static_plugin_review",
+      "sha256": "f328f0020e92f4d4afe66bf3096388c94de35fa49b5d5da88ad5a193e8a9c431"
+    },
+    {
+      "artifact": "native-plugin-review-02.txt",
+      "bytes": 4700,
+      "role": "static_plugin_review",
+      "sha256": "acb910b9e69759f4fbb827684e5a56254e25c86b1768a4f4d46698ac20952c4e"
+    },
+    {
+      "artifact": "native-plugin-review-03.txt",
+      "bytes": 1071,
+      "role": "static_plugin_review",
+      "sha256": "205c391d0b502503aa5a1fd7fd5274c0b669174bbdbe8c6e7c2759c1be83249a"
+    }
+  ],
+  "collection": {
+    "artifact": "full-schema-collection-01/report.json",
+    "complete_pairs_rechecked": 6,
+    "coordinator_reported_exit_code": 0,
+    "measurement_binding_sha256": "8784a75901eba271d6ab2b1c58caf473dc172712097f2319d7de166f77a0cfb1",
+    "operation_set": {
+      "complete": true,
+      "completed": [
+        "_load_live",
+        "CallbackAdapter._run_fresh_owner",
+        "decision_fresh_loaded_run",
+        "current_effect_view_fresh_loaded_run",
+        "refusal_stale_worker_read_in_memory",
+        "refusal_changed_selected_authority_in_memory"
+      ],
+      "failed": [],
+      "missing": [],
+      "required": 6
+    },
+    "raw_pair_payloads_copied_to_note": false,
+    "report_bytes": 2857741,
+    "report_cap_bytes": 4194304,
+    "status": "complete"
+  },
+  "completed_operations": [
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 699607,
+          "fingerprint": {
+            "process_cpu_ns": 48516000,
+            "wall_ns": 52668958
+          },
+          "operation": {
+            "process_cpu_ns": 132332448000,
+            "wall_ns": 149360559333
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {
+            "Trace.__init__": 18,
+            "_Replay._packet": 2,
+            "_Replay.run": 4,
+            "_checked_observations": 1,
+            "_decision_at": 4,
+            "_load_live": 1
+          },
+          "semantic_sha256": "ef5d28a0ed1ca94a1825978658cab1c0aff1d8e5a860aad643b92b52bfbb79b6",
+          "setup": {
+            "process_cpu_ns": 6000,
+            "wall_ns": 2875
+          },
+          "status": "returned"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 699607,
+          "fingerprint": {
+            "process_cpu_ns": 45036000,
+            "wall_ns": 45147000
+          },
+          "operation": {
+            "process_cpu_ns": 20746936000,
+            "wall_ns": 23463393792
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {},
+          "semantic_sha256": "ef5d28a0ed1ca94a1825978658cab1c0aff1d8e5a860aad643b92b52bfbb79b6",
+          "setup": {
+            "process_cpu_ns": 9000,
+            "wall_ns": 4083
+          },
+          "status": "returned"
+        }
+      },
+      "artifact": "full-schema-operation-load-live-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 60195316000,
+        "wall_ns": 72077605000
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "returned",
+      "git_call_counts": {
+        "rev-parse HEAD": 18
+      },
+      "loaded_closure": {
+        "entries": 1181,
+        "sha256": "5c5e349f622132aaf973482b68065c497a4af207990a7240e37697993e999f7c"
+      },
+      "operation": "_load_live",
+      "parent_status": "completed",
+      "parent_wall_seconds": 261.42139962500005,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 1585869,
+        "parent_report": 1593393
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 4785683000,
+          "wall_ns": 9350037041
+        },
+        "preflight": {
+          "process_cpu_ns": 3553095000,
+          "wall_ns": 6636594792
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    },
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 699607,
+          "fingerprint": {
+            "process_cpu_ns": 45836000,
+            "wall_ns": 46085042
+          },
+          "operation": {
+            "process_cpu_ns": 128721123000,
+            "wall_ns": 134383767166
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {
+            "Trace.__init__": 18,
+            "_Replay._packet": 2,
+            "_Replay.run": 4,
+            "_checked_observations": 1,
+            "_decision_at": 4,
+            "_load_live": 1
+          },
+          "semantic_sha256": "ef5d28a0ed1ca94a1825978658cab1c0aff1d8e5a860aad643b92b52bfbb79b6",
+          "setup": {
+            "process_cpu_ns": 25491635000,
+            "wall_ns": 28507646417
+          },
+          "status": "returned"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 699607,
+          "fingerprint": {
+            "process_cpu_ns": 45481000,
+            "wall_ns": 47346625
+          },
+          "operation": {
+            "process_cpu_ns": 21146762000,
+            "wall_ns": 24438760291
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {},
+          "semantic_sha256": "ef5d28a0ed1ca94a1825978658cab1c0aff1d8e5a860aad643b92b52bfbb79b6",
+          "setup": {
+            "process_cpu_ns": 25596102000,
+            "wall_ns": 30890768125
+          },
+          "status": "returned"
+        }
+      },
+      "artifact": "full-schema-operation-callback-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 58095973000,
+        "wall_ns": 67138652083
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "returned",
+      "git_call_counts": {
+        "rev-parse HEAD": 30
+      },
+      "loaded_closure": {
+        "entries": 1182,
+        "sha256": "3673db622e3160980948e4c6f34fc786d51999f485fe34f41fda831f75de05bc"
+      },
+      "operation": "CallbackAdapter._run_fresh_owner",
+      "parent_status": "completed",
+      "parent_wall_seconds": 294.1480218330016,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 1586106,
+        "parent_report": 1593651
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 3217039000,
+          "wall_ns": 4769159417
+        },
+        "preflight": {
+          "process_cpu_ns": 2519305000,
+          "wall_ns": 3566046250
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    },
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 6311,
+          "fingerprint": {
+            "process_cpu_ns": 2508000,
+            "wall_ns": 2509917
+          },
+          "operation": {
+            "process_cpu_ns": 31999281000,
+            "wall_ns": 33521812125
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {
+            "_Replay._packet": 1,
+            "_Replay.run": 1
+          },
+          "semantic_sha256": "a96c8c0c443b6c24967ae565a36bdde03f92915069a0ff0a6dc585825af4240d",
+          "setup": {
+            "process_cpu_ns": 20319210000,
+            "wall_ns": 21407279458
+          },
+          "status": "returned"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 6311,
+          "fingerprint": {
+            "process_cpu_ns": 2481000,
+            "wall_ns": 2481875
+          },
+          "operation": {
+            "process_cpu_ns": 4571364000,
+            "wall_ns": 4638037250
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {},
+          "semantic_sha256": "a96c8c0c443b6c24967ae565a36bdde03f92915069a0ff0a6dc585825af4240d",
+          "setup": {
+            "process_cpu_ns": 20236604000,
+            "wall_ns": 21011171125
+          },
+          "status": "returned"
+        }
+      },
+      "artifact": "full-schema-operation-decision-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 56116185000,
+        "wall_ns": 58634337375
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "returned",
+      "git_call_counts": {
+        "rev-parse HEAD": 18
+      },
+      "loaded_closure": {
+        "entries": 1181,
+        "sha256": "5c5e349f622132aaf973482b68065c497a4af207990a7240e37697993e999f7c"
+      },
+      "operation": "decision_fresh_loaded_run",
+      "parent_status": "completed",
+      "parent_wall_seconds": 144.99565812499714,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 199249,
+        "parent_report": 206787
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 2868570000,
+          "wall_ns": 3149213375
+        },
+        "preflight": {
+          "process_cpu_ns": 2201884000,
+          "wall_ns": 2399519042
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    },
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 15389,
+          "fingerprint": {
+            "process_cpu_ns": 475000,
+            "wall_ns": 494584
+          },
+          "operation": {
+            "process_cpu_ns": 33186378000,
+            "wall_ns": 38476293000
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {
+            "Trace.__init__": 2,
+            "_Replay._packet": 1,
+            "_Replay.run": 1
+          },
+          "semantic_sha256": "3b9515b59ea603f7099b8549173516a873358a54fa0d688a835b6d3a2c852610",
+          "setup": {
+            "process_cpu_ns": 20372645000,
+            "wall_ns": 20890778250
+          },
+          "status": "returned"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 15389,
+          "fingerprint": {
+            "process_cpu_ns": 475000,
+            "wall_ns": 477166
+          },
+          "operation": {
+            "process_cpu_ns": 5338831000,
+            "wall_ns": 5402149541
+          },
+          "payload_kind": "complete_typed_return",
+          "reconstruction_counts": {},
+          "semantic_sha256": "3b9515b59ea603f7099b8549173516a873358a54fa0d688a835b6d3a2c852610",
+          "setup": {
+            "process_cpu_ns": 20199729000,
+            "wall_ns": 20670380541
+          },
+          "status": "returned"
+        }
+      },
+      "artifact": "full-schema-operation-effect-view-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 56131741000,
+        "wall_ns": 58077650000
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "returned",
+      "git_call_counts": {
+        "rev-parse HEAD": 18
+      },
+      "loaded_closure": {
+        "entries": 1181,
+        "sha256": "5c5e349f622132aaf973482b68065c497a4af207990a7240e37697993e999f7c"
+      },
+      "operation": "current_effect_view_fresh_loaded_run",
+      "parent_status": "completed",
+      "parent_wall_seconds": 152.8545875839991,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 217442,
+        "parent_report": 224990
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 4128639000,
+          "wall_ns": 6721522375
+        },
+        "preflight": {
+          "process_cpu_ns": 2214509000,
+          "wall_ns": 2346257333
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    },
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 197,
+          "exception_summary": {
+            "cause_present": false,
+            "context_present": false,
+            "message": "Read observation names a stale or unpublished request",
+            "nodes": 1,
+            "notes_present": false,
+            "suppressed_context": false,
+            "type": "builtins.ValueError"
+          },
+          "fingerprint": {
+            "process_cpu_ns": 83000,
+            "wall_ns": 84250
+          },
+          "operation": {
+            "process_cpu_ns": 69068590000,
+            "wall_ns": 75057448542
+          },
+          "payload_kind": "complete_exception_graph",
+          "reconstruction_counts": {
+            "Trace.__init__": 13,
+            "_Replay._packet": 1,
+            "_Replay.run": 4,
+            "_checked_observations": 1,
+            "_decision_at": 4
+          },
+          "semantic_sha256": "0d722e66d7834ece9ceb898f310e9b1b00b7dab2b8a52033103b6c76c57c455b",
+          "setup": {
+            "process_cpu_ns": 20597523000,
+            "wall_ns": 23323048959
+          },
+          "status": "refused"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 197,
+          "exception_summary": {
+            "cause_present": false,
+            "context_present": false,
+            "message": "Read observation names a stale or unpublished request",
+            "nodes": 1,
+            "notes_present": false,
+            "suppressed_context": false,
+            "type": "builtins.ValueError"
+          },
+          "fingerprint": {
+            "process_cpu_ns": 97000,
+            "wall_ns": 97792
+          },
+          "operation": {
+            "process_cpu_ns": 10636162000,
+            "wall_ns": 10931243833
+          },
+          "payload_kind": "complete_exception_graph",
+          "reconstruction_counts": {},
+          "semantic_sha256": "0d722e66d7834ece9ceb898f310e9b1b00b7dab2b8a52033103b6c76c57c455b",
+          "setup": {
+            "process_cpu_ns": 21243633000,
+            "wall_ns": 30099978292
+          },
+          "status": "refused"
+        }
+      },
+      "artifact": "full-schema-operation-stale-worker-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 57387183000,
+        "wall_ns": 68104430416
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "refused",
+      "git_call_counts": {
+        "rev-parse HEAD": 18
+      },
+      "loaded_closure": {
+        "entries": 1181,
+        "sha256": "5c5e349f622132aaf973482b68065c497a4af207990a7240e37697993e999f7c"
+      },
+      "operation": "refusal_stale_worker_read_in_memory",
+      "parent_status": "completed",
+      "parent_wall_seconds": 215.33152283299933,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 187096,
+        "parent_report": 194644
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 3081273000,
+          "wall_ns": 4493840625
+        },
+        "preflight": {
+          "process_cpu_ns": 2590616000,
+          "wall_ns": 3105949208
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    },
+    {
+      "arms": {
+        "instrumented": {
+          "canonical_semantic_bytes": 205,
+          "exception_summary": {
+            "cause_present": false,
+            "context_present": false,
+            "message": "native observation belongs to another exact execution/session",
+            "nodes": 1,
+            "notes_present": false,
+            "suppressed_context": false,
+            "type": "builtins.ValueError"
+          },
+          "fingerprint": {
+            "process_cpu_ns": 50000,
+            "wall_ns": 51291
+          },
+          "operation": {
+            "process_cpu_ns": 1213000,
+            "wall_ns": 1214125
+          },
+          "payload_kind": "complete_exception_graph",
+          "reconstruction_counts": {
+            "_checked_observations": 1
+          },
+          "semantic_sha256": "b0ad7199bc328382ae147baebcb43f4cbef8a30da5b684e620e8ced97a418606",
+          "setup": {
+            "process_cpu_ns": 20002787000,
+            "wall_ns": 20462990000
+          },
+          "status": "refused"
+        },
+        "plain": {
+          "canonical_semantic_bytes": 205,
+          "exception_summary": {
+            "cause_present": false,
+            "context_present": false,
+            "message": "native observation belongs to another exact execution/session",
+            "nodes": 1,
+            "notes_present": false,
+            "suppressed_context": false,
+            "type": "builtins.ValueError"
+          },
+          "fingerprint": {
+            "process_cpu_ns": 52000,
+            "wall_ns": 52083
+          },
+          "operation": {
+            "process_cpu_ns": 240000,
+            "wall_ns": 239500
+          },
+          "payload_kind": "complete_exception_graph",
+          "reconstruction_counts": {},
+          "semantic_sha256": "b0ad7199bc328382ae147baebcb43f4cbef8a30da5b684e620e8ced97a418606",
+          "setup": {
+            "process_cpu_ns": 19988143000,
+            "wall_ns": 20651061417
+          },
+          "status": "refused"
+        }
+      },
+      "artifact": "full-schema-operation-changed-authority-01/report.json",
+      "checkpoint_verification": {
+        "process_cpu_ns": 55199366000,
+        "wall_ns": 59398362792
+      },
+      "child_exit_code": 0,
+      "coordinator_reported_exit_code": 0,
+      "diagnostic_wall_bound_seconds": 600,
+      "expected_status": "refused",
+      "git_call_counts": {
+        "rev-parse HEAD": 18
+      },
+      "loaded_closure": {
+        "entries": 1181,
+        "sha256": "5c5e349f622132aaf973482b68065c497a4af207990a7240e37697993e999f7c"
+      },
+      "operation": "refusal_changed_selected_authority_in_memory",
+      "parent_status": "completed",
+      "parent_wall_seconds": 107.18807766700047,
+      "parity": {
+        "both_semantic_hashes_recomputed": true,
+        "canonical_child_result_matches_declared_stdout": true,
+        "complete_payloads_equal": true,
+        "expected_statuses_match": true,
+        "reported": true
+      },
+      "payload_bytes": {
+        "child_stdout": 187039,
+        "parent_report": 194596
+      },
+      "phase_overhead": {
+        "final_verification": {
+          "process_cpu_ns": 3004773000,
+          "wall_ns": 4357562583
+        },
+        "preflight": {
+          "process_cpu_ns": 2023984000,
+          "wall_ns": 2070494917
+        }
+      },
+      "projection": {
+        "decision_and_effect_view": "complete typed return",
+        "excluded": [
+          "RunSpec implementation caches",
+          "_CapturedRun._catalogs implementation cache"
+        ],
+        "refusals": "complete bounded exception graph",
+        "scope": "all exposed captured evidence, complete reader state, rendered spec"
+      }
+    }
+  ],
+  "declared_shared_identities": {
+    "case_inventory": {
+      "bytes": 25352291,
+      "files": 68,
+      "sha256": "8e5ce647053ca0be4e1e010af8307098a06227a36aefd6a1ae69b66472c038cc"
+    },
+    "driver_sha256": "08ceb79c7af95bb9623d9abe8c91a74a284e739c1fc79a8b766a80ad31326be4",
+    "git_identity": {
+      "bytes": 118928,
+      "metadata_sha256": "ba7c0b60732a95d0e50ac9d7f811eb07e3a48807e8d473e1477c7bad0299e3b8",
+      "path_sha256": "106aa88494971ea56c867f371d12746ef6ce5f5bd4f73b857235642caeb88363",
+      "sha256": "179301dcb41ea78accc3fa0048a7e6f6710d891945a751a34addd622020c1818"
+    },
+    "identity_basis": "Copied from completed reports, cross-checked among them and matched to current manifest-listed source, case, imported-code and selected executable pins by independent read-only hashing.",
+    "measurement_binding_sha256": "8784a75901eba271d6ab2b1c58caf473dc172712097f2319d7de166f77a0cfb1",
+    "prepared_loaded_closure": {
+      "entries": 1194,
+      "sha256": "ab250899ed56e5d412a9129ee9a151f63fdaebdd6b129de15396b930b698037a"
+    },
+    "python_identity": {
+      "bytes": 5777152,
+      "metadata_sha256": "6191e4dd999526163482fd1788ac6a9449bdd825fb8504033400a64c625e9716",
+      "path_sha256": "6f01460c77db8b01e64fb2841cf63aea7b554d8d7a9142921f88faefbc0f0c9c",
+      "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+    },
+    "recovered_provenance": {
+      "artifact_id": 11408295434,
+      "artifact_zip_sha256": "0ec5378065601dae7d81801a6ad051dd9cb07b82c6b99cf0b4ea4d8e4cbc0dae",
+      "case_manifest_sha256": "1fc631110a8dc7d1db8ff28af35243e6edfddb8737d70aad32928410794d0de4",
+      "composition_sha256": "30187b96f56d4e0a6f04f20d41f09fa53f38bd4dc53c95de2691f6c7afb35c8f",
+      "execution_sha256": "0b5cdda0347263a5e6029de36e97d88b3a6c262845b62447a3fba495502d2616",
+      "labels": {
+        "arm": "BASELINE (input documents only)",
+        "label": "offline-neutral",
+        "method": "claudecode_direct",
+        "project": "SYNTHETIC"
+      },
+      "modules": {
+        "native_shared_contract": "76664d4d9023a9a3a1975ca66f82bee0a4ce4b789c99c19606987ab2e50e65b9",
+        "native_shared_evidence": "a50b042d1825456d70571dbf5e314ea5204f9d1451319e1c8353462852e294e5",
+        "native_shared_observations": "3bc93c2d1720d4e41ee83e7be7d8758a56836062c316f75ecc4b505e80b6d3ab"
+      },
+      "opaque_gitlinks_not_imported": {
+        "aurelian": "05741290eb26e88e40dc43440940b228db8741cd",
+        "fairscape_models": "8c80311d7d8b0fadac07dca9567d632103691f48"
+      },
+      "original_path_identities_preserved": true,
+      "policy_sha256": "6758ecc011438e38e18a59653ffd7158de92f6738eee5f646cc29fbad55372dc",
+      "registered_acceptance_deadline_seconds": 900,
+      "regular_case_files_verified": 83,
+      "run_id": 37451274006,
+      "runtime_sha256": "4a7c64dcf73288cdb59e1672c64d9dacaa82f846b8e172f217e5cfb923add205",
+      "selection_sha256": "e1b6b1c4982751de1d7c15f3eecee5c91c98ba2300d2cdcac444e5e8140331da",
+      "source_commit": "0125eebbc214d0907c3b69d23758cd9441911a78",
+      "source_files_verified": 9214,
+      "source_manifest_sha256": "53f8a7378e8babf3c746fef6c2e54c27d9bbba1c0bcd621cb91ee86c004a4798",
+      "source_tree": "142af4bfd8f32bd6b37d61434cfb30e8bfac5bf1",
+      "streams": {
+        "control": {
+          "bytes": 26135,
+          "lines": 24,
+          "sha256": "e9860e4eef293f29a12925415435178f9863e0ba428f92062373052554f489e2"
+        },
+        "transcript": {
+          "bytes": 11453343,
+          "lines": 67,
+          "sha256": "9a50dd49e758a5fbf54d4e961ac4ac90dd3248b7fb4e67d8423f173a04f61faf"
+        }
+      }
+    },
+    "utility_sha256": "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf"
+  },
+  "denominator": {
+    "complete": true,
+    "completed_count": 6,
+    "completed_operations": [
+      "_load_live",
+      "CallbackAdapter._run_fresh_owner",
+      "decision_fresh_loaded_run",
+      "current_effect_view_fresh_loaded_run",
+      "refusal_stale_worker_read_in_memory",
+      "refusal_changed_selected_authority_in_memory"
+    ],
+    "failed_operations": [],
+    "interpretation": "Completion of the six-operation synthetic diagnostic only; not native runtime acceptance.",
+    "missing_operations": [],
+    "required_operations": 6,
+    "required_refusal_pairs": 2,
+    "required_return_pairs": 4
+  },
+  "execution_authorized": false,
+  "focused_tests": {
+    "artifact": "full-schema-tests-06.xml",
+    "by_module": {
+      "tests.test_native_full_schema_profile_boundaries": 132,
+      "tests.test_native_full_schema_profile_evidence": 106,
+      "tests.test_native_full_schema_profile_operations": 87,
+      "tests.test_native_full_schema_profile_runtime": 46
+    },
+    "coordinator_run_provenance": {
+      "argv": [
+        "{primary_venv_python}",
+        "-B",
+        "-m",
+        "pytest",
+        "tests/test_native_full_schema_profile_boundaries.py",
+        "tests/test_native_full_schema_profile_runtime.py",
+        "tests/test_native_full_schema_profile_operations.py",
+        "tests/test_native_full_schema_profile_evidence.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp={external_basetemp_not_retained_in_command_record}",
+        "--junitxml={external_workspace}/full-schema-tests-06.xml"
+      ],
+      "argv_note": "Module selection, interpreter/environment and options are coordinator-supplied; this normalized list is not an independently captured shell transcript. Exact basetemp spelling was not retained.",
+      "basis": "Coordinator recorded the 371-test run at this committed revision after #4646\u2013#4648 corrections, with no later code edits before preparation05. Source was independently observed clean at the same head before measurement and after collection.",
+      "commit": "9b5bfdaf27bfb0509dbffa2b470d9fb712fd223e",
+      "console_seconds": 11.4,
+      "environment": {
+        "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "PYTHONPATH": "{native_checkout}/src:{native_checkout}"
+      },
+      "exit_code": 0,
+      "warnings_reported": false
+    },
+    "errors": 0,
+    "failures": 0,
+    "installed_environment_snapshot": false,
+    "junit_seconds": 11.273,
+    "observed_testcases": 371,
+    "passed": 371,
+    "skipped": 0,
+    "source_commit_binding_in_xml": null,
+    "warning_count_in_xml": null
+  },
+  "format": "native_full_schema_validation_v2",
+  "historical_capture_complete": false,
+  "limitations": [
+    "All source data, native frames, permissions and supported/unsupported answers are fictional software declarations.",
+    "Helpers and native/provider executables never run; helper success frames are synthetic, while capture, seals, core derivation and typed stage checks are real.",
+    "Only the receipt and first of three workers are consumed; the next advance is admitted, not published. This is not completed execution.",
+    "Plain then instrumented calls share process caches; ordered timings are not a speed comparison or whole-path fraction.",
+    "The unavailable 4366 source and historical 900-second acceptance are not reproduced. #4354, #4400 and #4576 remain open.",
+    "#4537 and #4576 already cover known parsing work; deferred #4577/#4581 optimizations are not revived here.",
+    "Before/after pins and local audit restrictions are checked local evidence, not authenticated execution or complete ABA protection.",
+    "loaded_closure pins imported Python/extension bytes, not the complete installed environment or every dependency-resource/OS read; selected schema/policy/runtime/case inputs have separate complete pins.",
+    "Each selected pair has its own 600-second diagnostic bound; all four positive and both refusal pairs are required. Missing or failed pairs are never omitted from the denominator.",
+    "All four returned pairs and both full-graph refusal pairs completed under their separate 600-second diagnostic bounds. This does not measure one complete native execution against the unchanged 900-second acceptance limit.",
+    "Instrumentation and fixed plain-then-instrumented cache order affect timings; no optimization candidate, speed benefit or whole-path fraction is established.",
+    "The preparation checkpoint remains partial: one of three workers is consumed, with the next advance admitted but not published.",
+    "Current manifest-listed source, case, imported-code and selected executable bytes were independently rehashed for this note. This does not authenticate past execution, snapshot every installed dependency/resource, or recover unavailable later4366 source.",
+    "Full report semantics and original evidence remain in external pinned artifacts. Published notes contain compact hashes/counts/timings only; no machine-private paths or raw input packet.",
+    "#4354, #4400 and #4576 remain open; this does not revive deferred #4577/#4581 or resolve scientific review holds."
+  ],
+  "native_acceptance_evaluated": false,
+  "operation_catalog": {
+    "format": "native_full_schema_operations_v1",
+    "operations": [
+      {
+        "expected_status": "returned",
+        "operation": "_load_live"
+      },
+      {
+        "expected_status": "returned",
+        "operation": "CallbackAdapter._run_fresh_owner"
+      },
+      {
+        "expected_status": "returned",
+        "operation": "decision_fresh_loaded_run"
+      },
+      {
+        "expected_status": "returned",
+        "operation": "current_effect_view_fresh_loaded_run"
+      },
+      {
+        "expected_status": "refused",
+        "operation": "refusal_stale_worker_read_in_memory"
+      },
+      {
+        "expected_status": "refused",
+        "operation": "refusal_changed_selected_authority_in_memory"
+      }
+    ]
+  },
+  "optimization_benefit_established": false,
+  "payload_bounds": {
+    "all_parent_and_child_reports_within_cap": true,
+    "collection_bytes": 2857741,
+    "complete_report_cap_bytes": 4194304,
+    "largest_child_stdout_bytes": 1586106,
+    "largest_operation_parent_report_bytes": 1593651,
+    "no_payloads_truncated": true
+  },
+  "preparation": {
+    "artifact": "full-schema-preparation-05/report.json",
+    "canonical_child_result_matches_declared_stdout": true,
+    "case_files_independently_rehashed_for_note": true,
+    "checkpoint": {
+      "complete": false,
+      "control_lines": 22,
+      "core_sealed": true,
+      "history_records": 10,
+      "journal_sha256": "8974476805257820ebd969c2865bf82dc7753d3e8e9378200de19d7e2ae6f622",
+      "label": "offline-full-schema-4618-v1",
+      "next_state": "request_ready",
+      "observations": 18,
+      "packet_sha256": "97aa3f00afaea26275d719845d7e8625ddff6a081cdf95a0c30df639cbd9e4de",
+      "pending_calls": 1,
+      "receipt_consumed": true,
+      "selection_sha256": "70c89bc67274e2ff9006c40365f62879e020dc903c23edad3f09e13fe790d6b6",
+      "transcript_lines": 61,
+      "workers_consumed": 1,
+      "workers_declared": 3
+    },
+    "child_exit_code": 0,
+    "coordinator_reported_exit_code": 0,
+    "declared_acceptance_deadline_seconds": 900,
+    "declared_case_counts_internally_consistent": true,
+    "diagnostic_wall_bound_seconds": 900,
+    "environment": {
+      "machine": "arm64",
+      "platform": "darwin",
+      "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 06:11:05) [Clang 19.1.7 ]"
+    },
+    "flags": {
+      "dont_write_bytecode": true,
+      "isolated": 1,
+      "no_site": 1
+    },
+    "parent_wall_seconds": 648.0468905409998,
+    "payload_bytes": {
+      "child_stdout": 189947,
+      "parent_report": 193281
+    },
+    "phase_overhead": {
+      "final_verification": {
+        "process_cpu_ns": 4655654000,
+        "wall_ns": 7716071708
+      },
+      "preflight": {
+        "process_cpu_ns": 2035923000,
+        "wall_ns": 2268752458
+      }
+    },
+    "stages": [
+      {
+        "process_cpu_seconds": 9.65156,
+        "stage": "full_schema_and_fresh_authority",
+        "wall_seconds": 11.09811420799997
+      },
+      {
+        "process_cpu_seconds": 7.5842030000000005,
+        "stage": "fabricated_permission_registration",
+        "wall_seconds": 8.919848707999336
+      },
+      {
+        "process_cpu_seconds": 3.2492599999999996,
+        "stage": "initialize",
+        "wall_seconds": 3.8827111250011512
+      },
+      {
+        "process_cpu_seconds": 3.2770580000000002,
+        "stage": "phase1_seal",
+        "wall_seconds": 3.8724824159999116
+      },
+      {
+        "process_cpu_seconds": 31.879669,
+        "stage": "admit_receipt",
+        "wall_seconds": 37.615548125000714
+      },
+      {
+        "process_cpu_seconds": 29.872569,
+        "stage": "receipt_read_intent_write",
+        "wall_seconds": 35.63677437499973
+      },
+      {
+        "process_cpu_seconds": 39.97377399999999,
+        "stage": "consume_receipt",
+        "wall_seconds": 46.54167737499847
+      },
+      {
+        "process_cpu_seconds": 9.460465999999997,
+        "stage": "derived_core_seal_and_actual_inventory",
+        "wall_seconds": 11.320992458000546
+      },
+      {
+        "process_cpu_seconds": 74.015402,
+        "stage": "admit_worker_one",
+        "wall_seconds": 89.82498908300113
+      },
+      {
+        "process_cpu_seconds": 74.35490899999999,
+        "stage": "worker_read_intent_write",
+        "wall_seconds": 98.67328629199983
+      },
+      {
+        "process_cpu_seconds": 122.94582500000001,
+        "stage": "consume_worker_one",
+        "wall_seconds": 156.0813577909994
+      },
+      {
+        "process_cpu_seconds": 39.002677000000006,
+        "stage": "admit_next_advance_without_publication",
+        "wall_seconds": 51.60787545899984
+      }
+    ],
+    "status": "completed",
+    "synthetic_parameters": {
+      "bounds": {
+        "max_authority_bytes": 64000000,
+        "max_evidence_bytes": 512000000,
+        "max_history_bytes": 64000000,
+        "max_history_records": 16384,
+        "max_input_bytes": 8000000,
+        "max_inventory_bytes": 4000000,
+        "max_paths_per_worker": 3,
+        "max_populated_paths": 100000,
+        "max_request_bytes": 64000000,
+        "max_response_bytes": 8000000,
+        "max_submissions": 4099,
+        "max_workers": 16
+      },
+      "coverage_floor": {
+        "denominator": 1,
+        "numerator": 0,
+        "state": "registered"
+      },
+      "max_draft_checks": 3,
+      "purpose": "ordinary-Python software fixture; no scientific or execution acceptance",
+      "runtime_limits": {
+        "contextWindow": 900000,
+        "maxOutputTokens": 4000
+      }
+    }
+  },
+  "recorded_date": "2026-10-08",
+  "retained_v1_history": {
+    "artifact": "native-attempt-history.json",
+    "attempts": [
+      {
+        "artifact": {
+          "bytes": 2258,
+          "path": "full-schema-preparation-01/report.json",
+          "sha256": "2fd7390e5edb607c0bcf54ee947099886139009ca3d6006ca1fc7558058bef5b"
+        },
+        "child_exit_code": 1,
+        "completed_operation_pairs_established_by_saved_result": 0,
+        "declared_mode": "prepare",
+        "diagnostic_wall_bound_seconds": 900,
+        "parent_wall_seconds": 17.680530124998768,
+        "result_present": false,
+        "status": "diagnostic_refused"
+      },
+      {
+        "artifact": {
+          "bytes": 2257,
+          "path": "full-schema-preparation-02/report.json",
+          "sha256": "7b23ac7fb8777edbc599e298819fcd371eebbc8f3b2b3ee822acd520a712c660"
+        },
+        "child_exit_code": 1,
+        "completed_operation_pairs_established_by_saved_result": 0,
+        "declared_mode": "prepare",
+        "diagnostic_wall_bound_seconds": 900,
+        "parent_wall_seconds": 24.11573325000063,
+        "result_present": false,
+        "status": "diagnostic_refused"
+      },
+      {
+        "artifact": {
+          "bytes": 2257,
+          "path": "full-schema-preparation-03/report.json",
+          "sha256": "e11f591242c8a935ef31e2f13b61ea8c612419e4101ba05bd628a227796371c4"
+        },
+        "child_exit_code": 1,
+        "completed_operation_pairs_established_by_saved_result": 0,
+        "declared_mode": "prepare",
+        "diagnostic_wall_bound_seconds": 900,
+        "parent_wall_seconds": 561.1423705830002,
+        "result_present": false,
+        "status": "diagnostic_refused"
+      },
+      {
+        "artifact": {
+          "bytes": 192043,
+          "path": "full-schema-preparation-04/report.json",
+          "sha256": "79f64b6d4816f6c9fb007c1f7c71c57a6b58c75baaae4abee4b3a39f60d03d58"
+        },
+        "child_exit_code": 0,
+        "completed_operation_pairs_established_by_saved_result": 0,
+        "declared_mode": "prepare",
+        "diagnostic_wall_bound_seconds": 900,
+        "parent_wall_seconds": 514.8693289170005,
+        "result_present": true,
+        "status": "completed"
+      },
+      {
+        "artifact": {
+          "bytes": 2248,
+          "path": "full-schema-measurement-01/report.json",
+          "sha256": "ea53421a712336d1009b90d93880b0f3dabccfc9da50e009c31eeb101e259087"
+        },
+        "child_exit_code": -9,
+        "completed_operation_pairs_established_by_saved_result": 0,
+        "declared_mode": "measure",
+        "diagnostic_wall_bound_seconds": 600,
+        "parent_wall_seconds": 600.046644,
+        "result_present": false,
+        "status": "diagnostic_timeout"
+      }
+    ],
+    "basis": "The completed history summary and all five referenced original report files were read and their recorded hashes rechecked; no old attempt was rerun.",
+    "not_a_v2_substitute": true
+  },
+  "scientific_eligibility": false,
+  "scope": "New synthetic full-schema checkpoint on recovered 0125; not historical replay or native acceptance",
+  "source": {
+    "commit": "9b5bfdaf27bfb0509dbffa2b470d9fb712fd223e",
+    "pins": [
+      {
+        "bytes": 85580,
+        "git_blob": "84fb92a62aede6a2e53f4aab9d590d228e4ce8e3",
+        "path": "notes/native_full_schema_profile_2026-10-07/profile_checkpoint.py",
+        "role": "driver",
+        "sha256": "08ceb79c7af95bb9623d9abe8c91a74a284e739c1fc79a8b766a80ad31326be4",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 31508,
+        "git_blob": "6cea1ef4b6011e1800eaf27ef355aee810c6f01a",
+        "path": "notes/native_profile_recovery_2026-10-07/trace_prefix_profile.py",
+        "role": "utility",
+        "sha256": "4097c8dff6e921b146feb49854b67487adc54b5a4da7943e22c9293849df01bf",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 37662,
+        "git_blob": "3d46e07a9ae0c65144264d4463b546d5d41077e0",
+        "path": "tests/test_native_full_schema_profile_boundaries.py",
+        "role": "test",
+        "sha256": "bd6205044e99a733a21ce820ee601be800b46125901e58e8407c786c1256332d",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 18243,
+        "git_blob": "94668ead1e0aac10e74af1f9dc7c827332c0262b",
+        "path": "tests/test_native_full_schema_profile_evidence.py",
+        "role": "test",
+        "sha256": "8f95b13ee8bba05b65a3c96d81c7ea16f2e77eae81fb6d2f12b869bbc32b0154",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 22881,
+        "git_blob": "f63ab8ea79ad8dbe761deb2f433c3180675a9263",
+        "path": "tests/test_native_full_schema_profile_operations.py",
+        "role": "test",
+        "sha256": "a0d87ba51531dda1567ad3b141224948d6acbd7d081c509943a77c29dce27bfe",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 26919,
+        "git_blob": "f42cf2d291c664a36092c241fc34c6aa767567b5",
+        "path": "tests/test_native_full_schema_profile_runtime.py",
+        "role": "test",
+        "sha256": "8af3eda13829d2861d525bcc870d7cc9de8a20af6e5d94c2f8e5e1f515dddca5",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 4446,
+        "git_blob": "87a84c564d243c134fead266600e96561562a75e",
+        "path": "pyproject.toml",
+        "role": "dependency_declaration",
+        "sha256": "bac863ac39cc39d6767627e0a7d8fd085be693555e5220015afbe6aec45c0c8b",
+        "working_bytes_equal_commit": true
+      },
+      {
+        "bytes": 592155,
+        "git_blob": "cfe519359b0be36a52544377584f0217c6763fed",
+        "path": "poetry.lock",
+        "role": "dependency_declaration",
+        "sha256": "923ad962d2646e1a4be044a76ff6a66abf49c3e10ea87fc85ed3cd523a907e21",
+        "working_bytes_equal_commit": true
+      }
+    ],
+    "test_source_binding": "Coordinator identifies these reviewed bytes as the tested revision; JUnit independently establishes test outcomes but has no source-head attestation.",
+    "tree": "8e586a58a90e009719215ee7ac58d05adca2cd57"
+  },
+  "static_reviews": {
+    "basis": "Completed static-review outputs and issue associations from retained coordinator history; reviews do not attest runtime acceptance.",
+    "reviews": [
+      {
+        "artifact": "native-plugin-review-01.txt",
+        "coordinator_linked_issues": [
+          4640,
+          4641,
+          4642
+        ],
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Preparation reports are not validated as exact v2 parent reports"
+          },
+          {
+            "severity": "high",
+            "title": "Completed operation closures are accepted without shape or equality checks"
+          },
+          {
+            "severity": "medium",
+            "title": "Returned-arm typed state is discarded before offline validation"
+          }
+        ],
+        "target": "working tree diff",
+        "verdict": "needs-attention"
+      },
+      {
+        "artifact": "native-plugin-review-02.txt",
+        "coordinator_linked_issues": [
+          4646,
+          4647,
+          4648
+        ],
+        "findings": [
+          {
+            "severity": "high",
+            "title": "Preparation writes can escape the fresh case through unchecked dir_fd mutators"
+          },
+          {
+            "severity": "high",
+            "title": "ctypes can load unpinned native code outside loaded_closure"
+          },
+          {
+            "severity": "medium",
+            "title": "Operation reports can drop the required scope and limitations and still be collected as completed evidence"
+          }
+        ],
+        "target": "branch diff against 6d367c6c57fbe1bfb70d546841f152a0b6824091",
+        "verdict": "needs-attention"
+      },
+      {
+        "artifact": "native-plugin-review-03.txt",
+        "material_findings": 0,
+        "target": "branch diff against 6d367c6c57fbe1bfb70d546841f152a0b6824091",
+        "verdict": "approve"
+      }
+    ],
+    "source_head_binding_in_review_text": null
+  },
+  "status": "completed_diagnostic_evidence",
+  "verification_basis": {
+    "all_child_stdout_pins_recomputed": true,
+    "all_six_binding_documents_equal": true,
+    "apps_tests_replays_or_providers_run_for_this_record": false,
+    "collection_report_links_and_pair_payloads_rechecked": true,
+    "complete_saved_exception_graph_pairs_recompared": 2,
+    "complete_saved_typed_return_pairs_recompared": 4,
+    "current_case_extra_or_missing_files": false,
+    "current_case_files_independently_rehashed": 68,
+    "current_case_hidden_and_ignored_files_included": true,
+    "current_imported_code_by_role": {
+      "dependency": 946,
+      "interpreter": 159,
+      "recovered": 90
+    },
+    "current_imported_code_union_rehashed": 1195,
+    "current_runtime_byte_path_metadata_identities_verified": {
+      "git": {
+        "bytes": 118928,
+        "metadata_sha256": "ba7c0b60732a95d0e50ac9d7f811eb07e3a48807e8d473e1477c7bad0299e3b8",
+        "path_sha256": "106aa88494971ea56c867f371d12746ef6ce5f5bd4f73b857235642caeb88363",
+        "sha256": "179301dcb41ea78accc3fa0048a7e6f6710d891945a751a34addd622020c1818"
+      },
+      "python": {
+        "bytes": 5777152,
+        "metadata_sha256": "6191e4dd999526163482fd1788ac6a9449bdd825fb8504033400a64c625e9716",
+        "path_sha256": "6f01460c77db8b01e64fb2841cf63aea7b554d8d7a9142921f88faefbc0f0c9c",
+        "sha256": "e425798f1fd82ff2450b84a24b58150996345c0f8fb7f07aae68a5033ba8df19"
+      }
+    },
+    "live_raw_cli_source_accessed": false,
+    "manifest_listed_recovered_source_files_rehashed": 9214,
+    "method": "Independent read-only JSON/XML analysis, complete saved payload/hash comparison, current byte/mode hashing and Git-object comparison; no recovered imports, tests, operations or collector rerun.",
+    "opaque_gitlinks_are_identity_only": {
+      "aurelian": "05741290eb26e88e40dc43440940b228db8741cd",
+      "fairscape_models": "8c80311d7d8b0fadac07dca9567d632103691f48"
+    },
+    "original_artifact_zip_rehashed": true,
+    "original_retained_regular_case_files_rehashed": 83,
+    "verification_limits": "Manifest-listed source files and declared imported-code closures were hashed; untracked source files and all installed packages/resources were not inventoried. This is local present-byte consistency, not authenticated execution or proof against historical ABA changes. Fresh checkpoint modes and recovered source Git modes also match. The 83 original retained regular files were verified by byte counts and hashes only; original mode preservation is not claimed. Independent review observed 55 extraction-normalized regular-file modes differing from the historical case manifest."
+  }
+}

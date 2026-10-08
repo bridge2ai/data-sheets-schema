@@ -2,11 +2,11 @@
 
 This driver prepares a **new fictional checkpoint** on recovered source
 `0125eebbc214d0907c3b69d23758cd9441911a78`, then measures four actual reconstruction
-operations. It does not replay the incomplete historical capture, launch a
+operations plus two refusal controls. It does not replay the incomplete historical capture, launch a
 native/provider/helper process, score a dataset, or evaluate the 900-second
 acceptance requirement. It does not reconstruct unavailable source `4366dc…`.
 
-The implementation and independent boundary tests must be reviewed before
+The implementation and independent boundary tests were reviewed before
 fixture construction or measurement. The original v1 preparation04 completed
 in 514.869 seconds, retaining 68 case files and 1,194 imported-code pins. The
 subsequent monolithic measurement01 reached its 600-second bound (parent wall
@@ -16,9 +16,11 @@ Those artifacts remain untouched; the empty output cannot identify the stalled
 operation or establish that any individual pair completed.
 
 The v2 protocol below addresses [#4636](https://github.com/bridge2ai/data-sheets-schema/issues/4636)
-with six independently selected pairs and offline collection. This source
-revision has not yet been executed. It requires fresh preparation because the
-same-driver identity rule is retained; preparation04 cannot be silently reused.
+with six independently selected pairs and offline collection. Fresh v2
+preparation05 and all six selected pairs completed, followed by a complete
+offline collection. The same-driver identity rule was retained; preparation04
+was not reused. The measured source was commit
+`9b5bfdaf27bfb0509dbffa2b470d9fb712fd223e`.
 
 The driver imports the committed [retained-prefix utility](../native_profile_recovery_2026-10-07/trace_prefix_profile.py)
 from this repository, requiring SHA256
@@ -28,6 +30,69 @@ Actions archive and uploaded manifests, and all 83 retained case files. The
 historical capture remains incomplete and unchanged. The two opaque historical
 Git submodule identities are recorded; importing an unregistered source is
 refused.
+
+## Completed diagnostic results
+
+The four-module suite passed **371 tests**, with no failures, errors or skips.
+JUnit records 11.273 seconds; the coordinator reported 11.40 seconds at the
+console. The third independent Codex static review approved the corrected
+source with no material findings. The first two reviews and their findings
+remain pinned in [validation.json](validation.json), alongside the earlier
+failed preparations and monolithic timeout. JUnit establishes recorded outcomes;
+the test-to-source association is separately recorded coordinator provenance.
+
+Fresh preparation05 completed in **648.047 seconds** under its unchanged
+900-second diagnostic bound. It retained 68 case files totaling 25,352,291
+bytes and 1,194 imported-code identities. The checkpoint contains the consumed
+receipt and first worker of three, with the next advance admitted but not
+published. It remains an incomplete execution checkpoint.
+
+All six separately invoked pairs completed within their individual 600-second
+diagnostic bounds. Four pairs returned matching complete typed results; both
+negative controls refused with matching complete exception graphs. The
+collector independently reconstructed the denominator as **6/6 complete**, with
+no failed or missing operations. Saved payloads, their hashes and all six
+collection links were independently compared again while writing this note.
+
+| Operation | Plain CPU / wall (s) | Instrumented CPU / wall (s) | Parent wall (s) | Both arms |
+| --- | ---: | ---: | ---: | --- |
+| `_load_live` | 20.747 / 23.463 | 132.332 / 149.361 | 261.421 | returned |
+| `CallbackAdapter._run_fresh_owner` | 21.147 / 24.439 | 128.721 / 134.384 | 294.148 | returned |
+| `decision_fresh_loaded_run` | 4.571 / 4.638 | 31.999 / 33.522 | 144.996 | returned |
+| `current_effect_view_fresh_loaded_run` | 5.339 / 5.402 | 33.186 / 38.476 | 152.855 | returned |
+| stale-worker-read control | 10.636 / 10.931 | 69.069 / 75.057 | 215.332 | refused |
+| changed-authority control | 0.000240 / 0.000240 | 0.001213 / 0.001214 | 107.188 | refused |
+
+The operation columns exclude each arm's separately recorded setup and
+fingerprint work. Parent time also includes checkpoint reconstruction,
+preflight, final verification and dispatch. Exact nanoseconds, setup and
+verification timings, reconstruction call counts and payload sizes are in
+`validation.json`. Instrumentation overhead and fixed plain-then-instrumented
+cache order affect these measurements. This is **not a speed comparison**, an
+optimization result, a whole-path fraction or native acceptance evidence.
+
+Current byte verification found all 68 checkpoint files unchanged, including
+hidden/ignored entries and modes; all 9,214 manifest-listed recovered regular
+source files matched their bytes and Git modes. The 83 original retained regular
+files matched their byte counts and hashes only. Extraction-normalized modes are
+not claimed preserved: independent review found 55 regular-file modes differing
+from the historical case manifest.
+The union of the preparation and six operation import closures contains 1,195
+files: 946 dependency, 159 interpreter and 90 recovered-source files. Every
+declared file was rehashed, and the selected Python/Git byte, path and metadata
+identities matched. Individual operation closures have 1,181 entries, except
+the fresh callback owner with 1,182. These checks do not inventory every
+installed dependency/resource or authenticate past execution.
+
+The complete collection is 2,857,741 bytes (SHA256
+`f684bfb1420d023293611d8f5f7880d5513d6f82332556ef6549c0450e294eed`).
+All children, parents and collection fit the unchanged 4 MiB report ceiling.
+Validation records the source tree `8e586a58a90e009719215ee7ac58d05adca2cd57`,
+eight driver/utility/test/dependency-declaration pins and all report/review/XML
+identities. External full reports and fictional case bytes remain retained;
+this note publishes no raw typed payloads, source packet or machine-private
+paths. All scientific eligibility, execution authorization, historical-capture
+completion and native-acceptance flags remain **false**.
 
 ## What preparation constructs
 
@@ -144,9 +209,8 @@ The preparation resource ceiling is 900 wall seconds; **each explicitly selected
 operation pair** has a 600-second ceiling.
 Both are independent kill-and-reap bounds on diagnostic children. Preparation
 performs repeated actual stage reconstructions and records each stage's CPU and
-wall cost separately. These initial conservative ceilings will be assessed
-against those recorded costs; they are not measured performance estimates or
-permission to relax any runtime acceptance limit. A timeout retains its partial
+wall cost separately. The completed v2 preparation and pairs fit these ceilings;
+this does not grant permission to relax any runtime acceptance limit. A timeout retains its partial
 new case and reports `diagnostic_timeout`. It never retries or lengthens a bound
 automatically.
 If the child exits between timeout detection and group termination, the parent
@@ -276,8 +340,10 @@ The complete report ceiling remains 4 MiB. A child checks its full encoded resul
 before writing any stdout. An oversized result becomes a retained parent
 `diagnostic_refused` with no completed result; state is never truncated or moved
 to an unreviewed side artifact. Parent and collection publications retain their
-existing complete-report bound. Actual reconstructed payloads have not yet
-been measured against this ceiling
+existing complete-report bound. The largest measured child stdout was
+1,586,106 bytes and the largest operation parent was 1,593,651 bytes; the
+six-operation collection was 2,857,741 bytes. All fit without truncation or a
+cap increase
 ([#4642](https://github.com/bridge2ai/data-sheets-schema/issues/4642)).
 
 If a completed child fits its limit but the enclosing parent report does not,
