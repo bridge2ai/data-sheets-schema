@@ -1,0 +1,169 @@
+{
+  "format": "d4d_line_join_panel_v1",
+  "source_manifest": {
+    "path": "notes/attainability_join_context_2026-10-02.json",
+    "sha256": "1b4be55e6acf998c05349c0fb034f15ece68edcdca0a102e1664c4590e9aea09"
+  },
+  "word_list": {
+    "path": "/usr/share/dict/words",
+    "sha256": "be41ad97963bf8dabedd5871d5d691596175269d540956b0f9965a885c2bbab9",
+    "entries": 234456
+  },
+  "versions": [
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_healthsheet_only.txt",
+      "md5": "a66b16818139bca4018efe11cae5cc7a",
+      "sha256": "ef2f5a5c98c56f565728c09305ecee10f47586472533b3648c2421c637ed210a",
+      "bytes": 56453,
+      "records": 12
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "md5": "0f3abb51a333555456bedd63891fcd99",
+      "sha256": "a42eb3aacc8aed05f8a79e54e848db65cc5159425888397242677c4914bf2aca",
+      "bytes": 535189,
+      "records": 23
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "md5": "20150c107a363ff1d3b6a328288bc087",
+      "sha256": "1af8182b42175df65e3ac031741af98f002b411e7fb443c4b98008895a3e614d",
+      "bytes": 417938,
+      "records": 5
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "md5": "8aadffca28403aaa675e59b93721ea96",
+      "sha256": "71b29a488af95b2eaff29377fbd745fecbd3b7910f3932277b75dbf8461b4ee9",
+      "bytes": 420804,
+      "records": 25
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "md5": "8abd7bf5389b562b95794d656af19392",
+      "sha256": "909c0dd8a1dcade0a0af908771356d5ea13cd91849522d562e9d88107661d368",
+      "bytes": 535178,
+      "records": 3
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/AI_READI_preprocessed.txt",
+      "md5": "d22b61a9f8443545c9ae14ee941c3e88",
+      "sha256": "613f5bd62c519179d6927086faca1120f2b72808a59f3c3c37723d36426d6446",
+      "bytes": 542513,
+      "records": 4
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CHORUS_crate_only.txt",
+      "md5": "06ad867c85e1d1ba0818c34e5bbaec29",
+      "sha256": "4de5dfda961363be1a4f109933668f4abe9936514f5e990402858177660681dc",
+      "bytes": 29696,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "md5": "1ce7d891fa81ad4b1f8290ddeec33461",
+      "sha256": "6408491fe45cbee1767bd71b2b0dbe06e6fced3aaebdc0a85d423bced989f3f8",
+      "bytes": 36184,
+      "records": 28
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CHORUS_preprocessed.txt",
+      "md5": "9b2ef4b65d67957f79362266cab0bc7a",
+      "sha256": "27625709112a7b7796f4e778fcc33df9f908ba95e47dbc0b6e23a535cacc237c",
+      "bytes": 35920,
+      "records": 30
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CHORUS_preprocessed_with_crate.txt",
+      "md5": "47c3bebd0d24def76f194023c213a96a",
+      "sha256": "0b4f3aed6f1fa6d809ba62dad8a343040be897304f6614ddd32ae4dbd0f230a8",
+      "bytes": 66013,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CM4AI_crate_only.txt",
+      "md5": "965b0aa654facd9992fda14ff4535a25",
+      "sha256": "eceaa90c6d9e93afb37c9dfa91a28d23af620c4cdad7ad9d868321028820b02c",
+      "bytes": 115604,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "md5": "1dfd34e5610fed7c22bea1f09c0bc60c",
+      "sha256": "f138e6d5841609841994e0b3e91b2477c824f5675eb91c83d51db0b8d11504d2",
+      "bytes": 321056,
+      "records": 18
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "md5": "3694e188106bbf8b1871d44450925e9a",
+      "sha256": "2c071543a14978fbe2a9a595538580d062969aa72b806fe44a17513d8531ba82",
+      "bytes": 322554,
+      "records": 18
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CM4AI_preprocessed.txt",
+      "md5": "50037fc631eafda807e19f83f6579818",
+      "sha256": "5f81bb53f43f9ec6debc3ab7297bb3897d30c675888eefeaf840ebbbaca9ecc4",
+      "bytes": 320799,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/CM4AI_preprocessed_with_crate.txt",
+      "md5": "09f234f1b3596ee37d29c5adcf8c8f2b",
+      "sha256": "565a609185f0c6490db240c365e71f26285ce28c1ea4e1c755406da16745ef44",
+      "bytes": 438290,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "md5": "008212accc7ec95bf3f0121566b588c2",
+      "sha256": "d4905f0b2d52fb91097ec2f52bc6b23e56e396276146da0044be34158bc05d97",
+      "bytes": 205857,
+      "records": 3
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_PEDIATRIC_preprocessed.txt",
+      "md5": "327c2920206099ccbd6a5de7479163f6",
+      "sha256": "f4961570d2adcf822c669ca6e3dab659f8b5c566ee593e1a3c86e9b863f255d9",
+      "bytes": 206655,
+      "records": 3
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_crate_only.txt",
+      "md5": "e0da1c226b05e944a617e2b0cdf9b6a0",
+      "sha256": "da2bddfa78b1591ce695ddceae57f08d74c693b521f89bf9d8c83cf2efc37f31",
+      "bytes": 320923,
+      "records": 9
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "md5": "9193c3cbe60b62a2fc0f704a2c4d23a3",
+      "sha256": "7c4f71ab2e85d70396e479d39cb5db9454bd9f13c7274b51b4418fc2d452518c",
+      "bytes": 376446,
+      "records": 5
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "md5": "dcd717170da6762569c0b4eeafc1c3d2",
+      "sha256": "a075e1124b91c58283113f6d8d1198daee295e84d585f7e8b35a098bbdd7c7ea",
+      "bytes": 376295,
+      "records": 21
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_preprocessed.txt",
+      "md5": "e637eb752ee8cab5f9f7a52782250469",
+      "sha256": "580122afbf50190d235c91dfad2de6db36ae3af1c3b86ed58e827fe8fcc762d3",
+      "bytes": 377706,
+      "records": 18
+    },
+    {
+      "bundle": "data/preprocessed/concatenated/VOICE_preprocessed_with_crate.txt",
+      "md5": "5c47f10064daed5d314dbd302fdff979",
+      "sha256": "99c85d42e64d2980634e4c43e6fb18785d72f2c9e9ab845c46969106cce99c1f",
+      "bytes": 698761,
+      "records": 9
+    }
+  ],
+  "historical_provenance_records": 279
+}
