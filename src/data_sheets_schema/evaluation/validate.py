@@ -46,7 +46,7 @@ def load_evaluation(eval_path: Path) -> Dict:
 SUPERSEDED_SHAPE_KEYS = ("summary_scores", "element_scores")
 
 
-def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
+def classify(eval_data: Dict, schema: Dict, *, resource_reader=None) -> Tuple[str, List[str]]:
     """Validate, distinguishing a superseded shape from a wrong value.
 
     Returns `("valid" | "superseded" | "invalid", errors)`.
@@ -59,9 +59,32 @@ def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
     """
     errors = []
     try:
-        validate(instance=eval_data, schema=schema)
+        if resource_reader is None:
+            validate(instance=eval_data, schema=schema)
+        else:
+            # An explicit captured-resource caller never resolves schema URIs.
+            # Keep default callers unchanged; local fragment references work.
+            from referencing import Registry
+            from referencing.exceptions import NoSuchResource
+
+            def unavailable(uri):
+                raise NoSuchResource(ref=uri)
+
+            pending = [schema]
+            while pending:
+                node = pending.pop()
+                if isinstance(node, dict):
+                    for key in ("$ref", "$dynamicRef", "$recursiveRef"):
+                        if key in node and (not isinstance(node[key], str) or not node[key].startswith("#")):
+                            raise ValueError("captured schema contains an external reference")
+                    pending.extend(node.values())
+                elif isinstance(node, list):
+                    pending.extend(node)
+            validator = jsonschema.validators.validator_for(schema)
+            validator.check_schema(schema)
+            validator(schema, registry=Registry(retrieve=unavailable)).validate(eval_data)
         from data_sheets_schema.semantic_scope import validate_scope
-        validate_scope(eval_data)
+        validate_scope(eval_data, resource_reader=resource_reader)
         return "valid", []
     except ValidationError as e:
         errors.append(f"Validation error: {e.message}")
@@ -75,9 +98,9 @@ def classify(eval_data: Dict, schema: Dict) -> Tuple[str, List[str]]:
         return "invalid", [f"Validation error: {e}"]
 
 
-def validate_evaluation(eval_data: Dict, schema: Dict) -> Tuple[bool, List[str]]:
+def validate_evaluation(eval_data: Dict, schema: Dict, *, resource_reader=None) -> Tuple[bool, List[str]]:
     """Back-compatible wrapper: superseded records are not valid."""
-    status, errors = classify(eval_data, schema)
+    status, errors = classify(eval_data, schema, resource_reader=resource_reader)
     return status == "valid", errors
 
 

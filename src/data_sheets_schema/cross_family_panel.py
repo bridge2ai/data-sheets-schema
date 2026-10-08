@@ -402,6 +402,24 @@ def prepare_panel(declaration: Path, output: Path, *, root: Path) -> dict:
         raise PanelError(str(exc)) from exc
 
 
+def _recheck(capture, raw):
+    """Reconstruct an existing panel from a caller's captured artifact store."""
+    value = _structured(raw, "panel manifest", limit=MAX_PANEL_BYTES)
+    _need(type(value) is dict, "panel manifest must be a mapping")
+    files = value.get("captured_files")
+    _need(type(files) is dict, "panel manifest requires captured_files")
+
+    def read_path(name):
+        _need(name in files, f"captured artifact is missing: {name}")
+        return capture.get(files[name])
+
+    _need(type(value.get("declaration")) is dict, "panel declaration pin is missing")
+    declaration_raw = capture.get(value["declaration"], limit=MAX_PANEL_BYTES)
+    expected = _registration(capture, declaration_raw, read_path)
+    _need(canonical(value) == canonical(expected), "panel differs from captured reconstruction")
+    return expected
+
+
 def recheck_panel(directory: Path) -> dict:
     """Reconstruct from captured artifacts alone, including missing/pending rows."""
     try:
@@ -409,19 +427,6 @@ def recheck_panel(directory: Path) -> dict:
         # The manifest is bounded separately; it is not a referenced artifact
         # and must not consume the captured-artifact budget a second time.
         raw = saved._file(capture.root / "panel.json", MAX_PANEL_BYTES)
-        value = _structured(raw, "panel manifest", limit=MAX_PANEL_BYTES)
-        _need(type(value) is dict, "panel manifest must be a mapping")
-        files = value.get("captured_files")
-        _need(type(files) is dict, "panel manifest requires captured_files")
-
-        def read_path(name):
-            _need(name in files, f"captured artifact is missing: {name}")
-            return capture.get(files[name])
-
-        _need(type(value.get("declaration")) is dict, "panel declaration pin is missing")
-        declaration_raw = capture.get(value["declaration"], limit=MAX_PANEL_BYTES)
-        expected = _registration(capture, declaration_raw, read_path)
-        _need(canonical(value) == canonical(expected), "panel differs from captured reconstruction")
-        return expected
+        return _recheck(capture, raw)
     except saved.ResultError as exc:
         raise PanelError(str(exc)) from exc
