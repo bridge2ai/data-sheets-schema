@@ -74,7 +74,10 @@ class Trace:
             raise ValueError('observation streams have exchanged roles')
         self.transcript,self.control=transcript,control
         self.session,self.policy=session_id,policy
-        initialized,*_=initialization(transcript,control,policy=policy,runtime=runtime)
+        # Decode in initialization's original order, then reuse only this
+        # constructor's rows for indexing. No parsed state survives in a cache.
+        native=list(rows(transcript));parent=list(rows(control))
+        initialized,*_=_initialization_from_rows(transcript,control,native,parent,policy=policy,runtime=runtime)
         if initialized!=session_id:
             raise ValueError('supplied observation session differs from actual init')
         if type(session_id) is not str or not session_id:
@@ -82,7 +85,7 @@ class Trace:
         self.calls={};self.callbacks={};self.results={};self.decisions={}
         self.frames={};self.terminal=None
         callback_ids=set()
-        for number,raw,value in rows(transcript):
+        for number,raw,value in native:
             self.frames[number]=value
             kind=value.get('type')
             if value.get('parent_tool_use_id') is not None:
@@ -137,7 +140,7 @@ class Trace:
                         or not _same(data.get('tool_input'),call[2]['input'])):
                     raise ValueError('callback input differs in spelling, value or type from its observed call')
                 self.callbacks[identity]=(number,value);callback_ids.add(callback)
-        for number,raw,value in rows(control):
+        for number,raw,value in parent:
             if value.get('kind')!='decision':continue
             request=value.get('request');data=request.get('request',{}).get('input',{}) if type(request) is dict else {}
             identity=data.get('tool_use_id')
@@ -262,6 +265,11 @@ def helper_result(trace,evidence,expected):
 def initialization(transcript,control,*,policy,runtime):
     """Bind actual ordered initialization to the selected runtime and policy."""
     native=list(rows(transcript));parent=list(rows(control))
+    return _initialization_from_rows(transcript,control,native,parent,policy=policy,runtime=runtime)
+
+
+def _initialization_from_rows(transcript,control,native,parent,*,policy,runtime):
+    """Validate already decoded rows owned by this one caller."""
     sent=[row for row in parent if row[2].get('kind')=='initialize_sent']
     acknowledgements=[row for row in parent if row[2].get('kind')=='initialize_ack']
     replies=[row for row in native if row[2].get('type')=='control_response']
