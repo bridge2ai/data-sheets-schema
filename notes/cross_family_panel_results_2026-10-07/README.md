@@ -103,8 +103,24 @@ Independent review found and fixed [#4652](https://github.com/bridge2ai/data-she
 a draft resource-seam edit leaked an undefined variable into the historical
 validator CLI. Focused regression cases cover both its existing schema routes.
 
-Validation is pending the root agent's serialized test run. No tests, provider
-calls, real ratings, replay or native applications were run while writing this
-implementation. Planned checks include both new result modules, existing panel
-registration/CLI controls, and existing semantic context/evidence/v4/default
-validator tests. Exact source and JUnit evidence will be recorded after that run.
+All 310 tests passed: 49 new captured-result controls and 261 existing panel,
+semantic context/evidence, v4 and default-validator controls across 11 modules.
+There were no failures, errors or skips. JUnit records 389.495 seconds; the
+console reported 389.58 seconds and one dateutil dependency deprecation warning.
+The suite includes existing local CLI subprocess checks; it produced no
+provider calls, actual second ratings or scientific evaluation results.
+
+The tested commit was `24f3457b3909224603827e8ed9e2861a9aa43402`, tree
+`11fd3cb108711e5b0b9cd2b3c5d55c5e73dc1359`. [validation.json](validation.json)
+records per-module counts, a command with private path prefixes replaced by
+role placeholders, and 57 file pins checked against both that commit and the
+working bytes. These selected file pins include all seven changed production
+modules, all 11 tested modules, instrument/fixture bytes and declared dependency
+files; they are not a complete runtime or installed-dependency attestation.
+
+The external JUnit artifact `panel-result-tests-01.xml` is 52,981 bytes with
+SHA-256 `7b23cb5a7b7047b22a86e53b3f1d6243b514876fad39ff695dd236b38c59999e`.
+Acceptance covers role/model substitution, malformed and missing results,
+coherent conflicting caller context, captured-resource-only relocation,
+external-reference refusal, historical code/instrument compatibility and
+preservation of saved inputs and pending review decisions.
