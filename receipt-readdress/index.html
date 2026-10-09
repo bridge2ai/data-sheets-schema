@@ -8,14 +8,14 @@
       
       
       
-        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/media_type/">
+        <link rel="canonical" href="https://bridge2ai.github.io/data-sheets-schema/receipt-readdress/">
       
       <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-8.5.10">
     
     
       
-        <title>Slot: media_type - data-sheets-schema</title>
+        <title>Repair receipt addresses offline - data-sheets-schema</title>
       
     
     
@@ -64,7 +64,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#slot-media_type" class="md-skip">
+        <a href="#repair-receipt-addresses-offline" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Slot: media_type
+              Repair receipt addresses offline
             
           </span>
         </div>
@@ -309,69 +309,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#applicable-classes" class="md-nav__link">
-    Applicable Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties" class="md-nav__link">
-    Properties
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#identifier-and-mapping-information" class="md-nav__link">
-    Identifier and Mapping Information
-  </a>
-  
-    <nav class="md-nav" aria-label="Identifier and Mapping Information">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#annotations" class="md-nav__link">
-    Annotations
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#schema-source" class="md-nav__link">
-    Schema Source
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#mappings" class="md-nav__link">
-    Mappings
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#linkml-source" class="md-nav__link">
-    LinkML Source
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -384,110 +321,58 @@
                 
                   
 
-  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/media_type.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/bridge2ai/data-sheets-schema/edit/master/docs/receipt-readdress.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="slot-media_type">Slot: media_type</h1>
-<p><em>The media type of the data. This should be a MIME type.</em></p>
-<p>URI: <a href="http://www.w3.org/ns/dcat#mediaType">dcat:mediaType</a>
-Alias: media_type</p>
-<!-- no inheritance hierarchy -->
-
-<h2 id="applicable-classes">Applicable Classes</h2>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Description</th>
-<th>Modifies Slot</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><a href="../File/">File</a></td>
-<td>A single file within a dataset or file collection</td>
-<td>no</td>
-</tr>
-<tr>
-<td><a href="../DistributionFormat/">DistributionFormat</a></td>
-<td>How will the dataset be distributed (e</td>
-<td>no</td>
-</tr>
-</tbody>
-</table>
-<h2 id="properties">Properties</h2>
-<ul>
-<li>Range: <a href="../MediaTypeEnum/">MediaTypeEnum</a></li>
-</ul>
-<h2 id="identifier-and-mapping-information">Identifier and Mapping Information</h2>
-<h3 id="annotations">Annotations</h3>
-<table>
-<thead>
-<tr>
-<th>property</th>
-<th>value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>d4d:docExample</td>
-<td>text/csv</td>
-</tr>
-</tbody>
-</table>
-<h3 id="schema-source">Schema Source</h3>
-<ul>
-<li>from schema: https://w3id.org/bridge2ai/data-sheets-schema</li>
-</ul>
-<h2 id="mappings">Mappings</h2>
-<table>
-<thead>
-<tr>
-<th>Mapping Type</th>
-<th>Mapped Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>self</td>
-<td>dcat:mediaType</td>
-</tr>
-<tr>
-<td>native</td>
-<td>data_sheets_schema:media_type</td>
-</tr>
-<tr>
-<td>exact</td>
-<td>schema:encodingFormat</td>
-</tr>
-</tbody>
-</table>
-<h2 id="linkml-source">LinkML Source</h2>
-<details>
-
-<pre><code class="language-yaml">name: media_type
-annotations:
-  d4d:docExample:
-    tag: d4d:docExample
-    value: text/csv
-description: The media type of the data. This should be a MIME type.
-from_schema: https://w3id.org/bridge2ai/data-sheets-schema
-exact_mappings:
-- schema:encodingFormat
-rank: 1000
-slot_uri: dcat:mediaType
-alias: media_type
-domain_of:
-- DistributionFormat
-- File
-range: MediaTypeEnum
-
+<h1 id="repair-receipt-addresses-offline">Repair receipt addresses offline</h1>
+<p><code>d4d receipts readdress</code> lists receipt entries whose addresses do not resolve in a
+selected full record. It identifies entries by chunk ID and zero-based ordinal,
+so two entries with the same old slot remain distinct.</p>
+<pre><code class="language-bash">d4d receipts readdress --receipt receipt.yaml --full full.yaml
 </code></pre>
-
-</details>
+<p>The JSON output includes exact receipt/full SHA256 hashes, unresolved entries and
+all structurally resolvable target paths. Paths are possibilities, not suggested
+semantic matches. A resolving address does not show that its snippet supports the
+value there. No files are written in this mode.</p>
+<p>To apply repairs, save a version 1 JSON or YAML map using the displayed hashes:</p>
+<pre><code class="language-yaml">version: 1
+receipt_sha256: &lt;exact hash from the inventory&gt;
+full_sha256: &lt;exact hash from the inventory&gt;
+moves:
+  - chunk: c001
+    entry: 0
+    slot: old_address
+    new_slot: names[0]
+</code></pre>
+<pre><code class="language-bash">d4d receipts readdress --receipt receipt.yaml --full full.yaml \
+  --map moves.yaml --out repaired-receipt.yaml
+</code></pre>
+<p><code>--map</code> and <code>--out</code> must appear together. The output must be a new file; existing
+files and symlinks are refused. The entire map is checked before writing. Stale
+hashes, duplicate identities, an already resolving source slot, an unresolved
+destination, extra map keys, snippet changes and drop actions are rejected. Every
+field outside the selected slot strings must survive both the actual repair and
+serialization unchanged, including types, order, snippets and chunk metadata.
+Inputs are checked again before publication. An I/O failure can leave a partial
+new output file; the command fails and never silently retries or overwrites it.</p>
+<p>Inputs use the existing strict data-only reader: UTF-8 YAML/JSON mappings, unique
+string keys, finite values, no cycles or merge keys, at most 8,000,000 bytes each,
+64 nesting levels and 200,000 traversed values. Receipts require unique nonempty
+chunk IDs, known statuses and string slot/snippet pairs for extracted chunks.
+Dates and other supported YAML scalar types are preserved. Complete target-path
+text is bounded to 8,000,000 UTF-8 bytes and JSON reports to 32,000,000 bytes;
+overlarge inventories fail rather than omit entries.</p>
+<p>The source receipt, full record, provenance and transcripts are never written.
+A changed receipt hash does <strong>not</strong> inherit an earlier measured receipt origin.
+The existing origin checker reports the new bytes as unknown and retains any
+previous measurement under <code>prior</code> unless an applicable transcript is supplied.
+This command does not fabricate a transcript, accept semantic support, alter a
+completion gate, change the API's existing readdressing behavior, or authorize a
+new command in a registered native session. Adopting the output into a run is a
+separate operation under that run's existing rules.</p>
 
 
 
