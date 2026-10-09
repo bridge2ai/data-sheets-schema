@@ -51,6 +51,7 @@ d4d download sources --project AI_READI       # Download from Google Sheet
 d4d download preprocess --project AI_READI    # Preprocess to text
 d4d download preprocess                       # Preprocess all projects
 d4d download concatenate --project AI_READI   # Concatenate files
+d4d download release-inventory --project CHORUS  # Read-only release evidence inventory
 ```
 
 ### Evaluation
@@ -88,7 +89,7 @@ d4d render html input.yaml -o output.html             # Render to HTML
 
 ### Complete Command Reference
 - **d4d utils**: status, validate-preprocessing
-- **d4d download**: sources, preprocess, concatenate
+- **d4d download**: sources, preprocess, concatenate, release-inventory
 - **d4d evaluate**: presence, llm
 - **d4d rocrate**: parse, transform; `merge` is retained only to explain its retirement (#4593)
 - **d4d schema**: stats, validate
@@ -349,8 +350,29 @@ Declared per project in the `scope:` block of
 ```bash
 d4d download scope --project VOICE        # show the declaration
 d4d download scope --check --strict       # check every record against it
+d4d download release-inventory           # declared release evidence, all projects
+d4d download release-inventory --project AI_READI --json
 d4d download audit-bundles --strict       # are the derived bundles current?
 ```
+
+`release-inventory` is read-only: it reports tier-1 sources, licence/DUA/IRB
+sources, release records, crate presence and the crate manifest's
+`document_corpus` policy (#2914, #3284). These are manifest declarations,
+not a check of what a document says. Sources declared as belonging to a
+related-but-distinct dataset are listed separately and excluded from this
+dataset's evidence counts. `--manifest M` selects other source-manifest
+bytes; a custom manifest does not inherit the study's crate policy. Use
+`--crate-manifest C` to select that policy explicitly, or `--crate-manifest
+none` to omit it. `--json` includes the selected input hashes.
+
+In the study manifests committed at `15d053d1a`, AI_READI's document corpus
+carries its RO-Crate and licence; CHORUS has 0 tier-1 sources, no
+licence/DUA/IRB source or release record, and crate policy `exclude`.
+Cross-project differences on `doi`, `license`, `version` and `issued` must
+therefore be interpreted against the corpus, not as generation quality.
+See the [arm comparison's release inventory](notes/arm_comparison.md#release-level-corpus-inventory-2914-3282)
+for its input hashes and historical cohort/evaluator breakdown. Rerun the
+read-only inventory when manifests change; that does not rescore records.
 
 `audit-bundles` rebuilds each derived bundle into a temp file and compares
 (#446). Not mtime: `crate_only` and `healthsheet_only` are legitimately older
@@ -461,8 +483,38 @@ receipted from named chunks), `nothing_relevant` (with a reason),
 
 ```bash
 d4d receipts check --label L --project P [--write] [--strict]
+d4d receipts check --label L --project P --transcript run.jsonl
+# Moved files: name their original spellings in the transcript.
+d4d receipts check --label L --project P --transcript run.jsonl \
+  --receipt-at-run original/coverage_receipt.yaml --full-at-run original/full.yaml
 d4d receipts invert --receipt R --full F
 ```
+
+Run `receipts check` from the repository root. `--transcript` reads the run's
+stream-json tool history to measure `receipts.origin` (#2933, #4447):
+`contemporaneous` snippets were present when the full record was first
+written; `phase1_correction` and `phase3_backport` snippets were added after
+that draft. Repeat `--transcript` for a resumed run, first invocation first.
+The optional `--receipt-at-run` and `--full-at-run` require a transcript and
+name its path spellings; they do not select different current files.
+Without `--write`, this check reports without rewriting provenance. With
+`--write`, it updates the provenance receipt block and the claim-receipt
+sidecar, subject to the existing write checks.
+
+Without a supplied transcript, an existing origin measurement is kept only
+while the current receipt has the SHA-256 it was measured on. If those bytes
+change or cannot be read, origin becomes `unknown` and the old measurement
+is retained under `prior`, not shown as the new receipt's split. With no
+measurement to retain, origin is `unknown`: no snippet is classified merely
+because no transcript was read. Supplying transcripts requests a new
+measurement; an unreadable or unreplayable history can also be `unknown`.
+
+The canary rows `snippets contemporaneous` and `snippets post-draft` are
+reported only; the latter sums the correction and back-port counts. They
+are unavailable, not zero, without a checked origin for the same receipt.
+Neither row changes a gate or the `--strict` verdict. Receipt timing does
+not establish semantic support; post-draft snippets remain unaccepted for
+that purpose until independent review (#2067).
 
 The validator is deterministic and offline and reports **affirmative
 counts** — `chunks N/N reviewed · snippets M/M verified · slots S/T with a
