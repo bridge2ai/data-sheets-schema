@@ -1,0 +1,11 @@
+type,rubric,count_primary
+completeness,rubric10-semantic,113
+completeness,rubric20-semantic,76
+consistency,rubric10-semantic,79
+consistency,rubric20-semantic,115
+content_accuracy,rubric10-semantic,31
+content_accuracy,rubric20-semantic,34
+correctness,rubric10-semantic,23
+correctness,rubric20-semantic,35
+semantic_understanding,rubric10-semantic,28
+semantic_understanding,rubric20-semantic,28

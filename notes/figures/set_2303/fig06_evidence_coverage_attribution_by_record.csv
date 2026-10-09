@@ -1,0 +1,1034 @@
+label,project,cohort,rep,module,document_id,source_type,fields
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Collection,bmj_protocol_publication,publication,16
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Collection,fairhub_dataset_v3_api,structured metadata,9
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Collection,irb_protocol,IRB,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Collection,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,bmj_protocol_publication,publication,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,dataset_documentation_v3,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,fairhub_dataset_v3_api,structured metadata,22
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,nature_metabolism_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Composition,ro_crate_metadata,RO-Crate,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Data Governance,bmj_protocol_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Data Governance,dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Data Governance,dataset_license,license,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Data Governance,fairhub_dataset_v3_api,structured metadata,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Data Governance,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),fairhub_dataset_v3,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Dataset (top level),ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Distribution,fairhub_dataset_v3,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Distribution,fairhub_dataset_v3_api,structured metadata,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Ethics,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Ethics,fairhub_dataset_v3_api,structured metadata,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Ethics,irb_protocol,IRB,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Ethics,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Ethics,ro_crate_metadata,RO-Crate,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,FileCollection,fairhub_dataset_v3_api,structured metadata,19
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Human,bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Human,fairhub_dataset_v3_api,structured metadata,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Human,irb_protocol,IRB,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Human,nature_metabolism_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Maintenance,bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Maintenance,dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Maintenance,fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Maintenance,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Maintenance,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Metadata (Information),fairhub_dataset_v3,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Metadata (Information),fairhub_dataset_v3_api,structured metadata,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Motivation,bmj_protocol_publication,publication,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Motivation,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Motivation,nature_metabolism_publication,publication,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Motivation,nih_reporter_project,NIH project page,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Motivation,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Preprocessing,bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Preprocessing,fairhub_dataset_v3_api,structured metadata,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Uses,dataset_license,license,7
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Uses,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Uses,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Variables,bmj_protocol_publication,publication,17
+2026-09-01_claude-opus-5-api-generic-v7_rep1,AI_READI,v7,1,Variables,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Collection,cohort_2_webinar,tutorial,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Collection,github_organization_overview,historical documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Collection,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Composition,cohort_2_webinar,tutorial,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Composition,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Composition,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Composition,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Data Governance,cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Data Governance,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Data Governance,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Dataset (top level),cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Dataset (top level),project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Distribution,cohort_2_webinar,tutorial,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Ethics,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Ethics,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Human,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Human,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Maintenance,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Maintenance,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Metadata (Information),cohort_2_webinar,tutorial,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Metadata (Information),nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Motivation,cohort_2_webinar,tutorial,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Motivation,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Motivation,nih_reporter_project,NIH project page,9
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Motivation,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Preprocessing,github_organization_overview,historical documentation,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Preprocessing,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CHORUS,v7,1,Uses,cohort_2_webinar,tutorial,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Collection,biorxiv_preprint,preprint,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Collection,nature_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Collection,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,biorxiv_preprint,preprint,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,june_2025_dataverse_release,historical data release,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,march_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,nature_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Composition,october_2025_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Data Governance,biorxiv_preprint,preprint,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Data Governance,dataset_license,license,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Data Governance,october_2025_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),june_2026_dataverse_release,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),nature_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Dataset (top level),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Ethics,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Ethics,october_2025_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,FileCollection,june_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,FileCollection,june_2026_dataverse_release,data resource,10
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Human,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Human,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Maintenance,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Maintenance,data_release_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Maintenance,june_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Maintenance,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Maintenance,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Metadata (Information),data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Metadata (Information),dataset_license,license,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Metadata (Information),june_2026_dataverse_release,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Metadata (Information),march_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Motivation,biorxiv_preprint,preprint,6
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Motivation,june_2026_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Motivation,march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Motivation,nature_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Motivation,nih_reporter_project,NIH project page,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Preprocessing,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Preprocessing,nature_publication,publication,9
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Uses,biorxiv_preprint,preprint,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Uses,june_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,CM4AI,v7,1,Uses,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Collection,data_transfer_use_agreement,DUA,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Collection,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Collection,physionet_3_0_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Collection,physionet_pediatric_1_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Collection,project_documentation,documentation,7
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,data_transfer_use_agreement,DUA,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,documentation_repository,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,physionet_1_1,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,physionet_3_0_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,physionet_pediatric_1_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Composition,project_documentation,documentation,22
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Data Governance,data_transfer_use_agreement,DUA,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Data Governance,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Data Governance,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Data Governance,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),audiomics_white_paper,white paper,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),feasibility_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),physionet_pediatric_1_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Dataset (top level),project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Distribution,physionet_3_0_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Distribution,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Distribution,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Ethics,physionet_pediatric_1_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Ethics,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Human,feasibility_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Human,irb_protocol,IRB,8
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Human,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Human,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,physionet_1_1,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,physionet_3_0_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,physionet_pediatric_1_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Maintenance,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Metadata (Information),feasibility_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Metadata (Information),physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Metadata (Information),physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Metadata (Information),physionet_pediatric_1_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Metadata (Information),project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Motivation,audiomics_white_paper,white paper,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Motivation,feasibility_publication,publication,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Motivation,nih_reporter_project,NIH project page,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Motivation,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Motivation,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Preprocessing,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Preprocessing,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Preprocessing,physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Preprocessing,project_documentation,documentation,4
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Uses,audiomics_white_paper,white paper,1
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Uses,data_transfer_use_agreement,DUA,2
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Uses,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep1,VOICE,v7,1,Variables,physionet_3_0_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Collection,bmj_protocol_publication,publication,9
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Collection,fairhub_dataset_v3_api,structured metadata,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Collection,irb_protocol,IRB,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Collection,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,bmj_protocol_publication,publication,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,dataset_documentation_v3,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,fairhub_dataset_v3_api,structured metadata,24
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,nature_metabolism_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Composition,ro_crate_metadata,RO-Crate,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Data Governance,bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Data Governance,dataset_license,license,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Data Governance,fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Data Governance,fairhub_dataset_v3_api,structured metadata,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Data Governance,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),bmj_protocol_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),fairhub_dataset_v3_api,structured metadata,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Dataset (top level),ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Distribution,dataset_license,license,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Distribution,fairhub_dataset_v3_api,structured metadata,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Ethics,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Ethics,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Ethics,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,FileCollection,fairhub_dataset_v3_api,structured metadata,19
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,FileCollection,ro_crate_metadata,RO-Crate,10
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Human,bmj_protocol_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Human,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Human,irb_protocol,IRB,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Human,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Human,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Maintenance,dataset_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Maintenance,fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Maintenance,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Maintenance,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Metadata (Information),bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Metadata (Information),fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Metadata (Information),fairhub_dataset_v3_api,structured metadata,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Metadata (Information),nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Metadata (Information),ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Motivation,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Motivation,fairhub_dataset_v3_api,structured metadata,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Motivation,nature_metabolism_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Motivation,nih_reporter_project,NIH project page,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Preprocessing,bmj_protocol_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Preprocessing,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Uses,dataset_license,license,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Uses,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,AI_READI,v7,2,Variables,bmj_protocol_publication,publication,11
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Collection,cohort_2_webinar,tutorial,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Collection,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Collection,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Collection,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Composition,cohort_2_webinar,tutorial,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Composition,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Composition,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Composition,project_documentation,documentation,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Data Governance,cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Data Governance,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Dataset (top level),github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Dataset (top level),project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Distribution,cohort_2_webinar,tutorial,8
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Ethics,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Ethics,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Ethics,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Human,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Maintenance,github_organization_overview,historical documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Maintenance,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Metadata (Information),nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Motivation,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Motivation,nih_reporter_project,NIH project page,10
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Motivation,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Preprocessing,github_organization_overview,historical documentation,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Preprocessing,nih_reporter_project,NIH project page,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Uses,cohort_2_webinar,tutorial,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CHORUS,v7,2,Uses,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Collection,biorxiv_preprint,preprint,6
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Collection,june_2026_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Collection,march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Collection,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,biorxiv_preprint,preprint,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,june_2025_dataverse_release,historical data release,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,march_2025_dataverse_release,historical data release,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,nature_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Composition,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Data Governance,biorxiv_preprint,preprint,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Data Governance,dataset_license,license,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Data Governance,june_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Dataset (top level),biorxiv_preprint,preprint,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Dataset (top level),data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Dataset (top level),june_2026_dataverse_release,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Dataset (top level),nature_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Dataset (top level),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Distribution,october_2025_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,FileCollection,june_2026_dataverse_release,data resource,10
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,FileCollection,october_2025_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Human,june_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Maintenance,data_release_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Maintenance,june_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Maintenance,june_2026_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Maintenance,nature_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Maintenance,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Metadata (Information),data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Metadata (Information),june_2026_dataverse_release,data resource,6
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Metadata (Information),march_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,biorxiv_preprint,preprint,6
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,june_2026_dataverse_release,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,march_2025_dataverse_release,historical data release,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,nature_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,nih_reporter_project,NIH project page,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Motivation,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Preprocessing,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Preprocessing,nature_publication,publication,10
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Uses,biorxiv_preprint,preprint,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Uses,june_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Uses,june_2026_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,CM4AI,v7,2,Uses,nature_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Collection,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Collection,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Collection,project_documentation,documentation,7
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,documentation_repository,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,irb_protocol,IRB,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,physionet_1_1,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,physionet_3_0_0,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,physionet_pediatric_1_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Composition,project_documentation,documentation,22
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Data Governance,data_transfer_use_agreement,DUA,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Data Governance,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Data Governance,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Dataset (top level),physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Dataset (top level),project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Distribution,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Distribution,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Distribution,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Ethics,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Ethics,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Human,irb_protocol,IRB,6
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Human,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Human,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,data_transfer_use_agreement,DUA,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,physionet_3_0_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Maintenance,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Metadata (Information),physionet_3_1_0,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Metadata (Information),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Motivation,audiomics_white_paper,white paper,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Motivation,feasibility_publication,publication,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Motivation,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Motivation,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Motivation,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Preprocessing,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Preprocessing,physionet_3_1_0,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Preprocessing,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Uses,data_transfer_use_agreement,DUA,3
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Uses,project_documentation,documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep2,VOICE,v7,2,Variables,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Collection,bmj_protocol_publication,publication,9
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Collection,fairhub_dataset_v3_api,structured metadata,14
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Collection,irb_protocol,IRB,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Collection,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Collection,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,dataset_documentation_v3,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,fairhub_dataset,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,fairhub_dataset_v3_api,structured metadata,19
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Composition,ro_crate_metadata,RO-Crate,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,bmj_protocol_publication,publication,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,dataset_license,license,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,fairhub_dataset,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,fairhub_dataset_v3_api,structured metadata,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Data Governance,ro_crate_metadata,RO-Crate,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),dataset_documentation_v3,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Dataset (top level),ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Distribution,fairhub_dataset_v3_api,structured metadata,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Ethics,bmj_protocol_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Ethics,fairhub_dataset_v3_api,structured metadata,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Ethics,ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,FileCollection,fairhub_dataset_v3_api,structured metadata,16
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Human,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Human,fairhub_dataset_v3_api,structured metadata,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Human,irb_protocol,IRB,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Human,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Human,ro_crate_metadata,RO-Crate,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Maintenance,fairhub_dataset,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Maintenance,fairhub_dataset_v3,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Maintenance,fairhub_dataset_v3_api,structured metadata,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Metadata (Information),fairhub_dataset_v3,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Metadata (Information),fairhub_dataset_v3_api,structured metadata,9
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Metadata (Information),nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Metadata (Information),ro_crate_metadata,RO-Crate,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Motivation,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Motivation,fairhub_dataset_v3_api,structured metadata,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Motivation,nature_metabolism_publication,publication,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Motivation,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Motivation,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Preprocessing,bmj_protocol_publication,publication,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Preprocessing,fairhub_dataset_v3_api,structured metadata,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Preprocessing,nature_metabolism_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Uses,dataset_license,license,7
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Uses,fairhub_dataset_v3_api,structured metadata,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Variables,bmj_protocol_publication,publication,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Variables,fairhub_dataset_v3_api,structured metadata,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,AI_READI,v7,3,Variables,ro_crate_metadata,RO-Crate,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Collection,cohort_2_webinar,tutorial,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Collection,github_organization_overview,historical documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Collection,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Collection,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Composition,cohort_2_webinar,tutorial,15
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Composition,github_organization_overview,historical documentation,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Composition,nih_reporter_project,NIH project page,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Composition,project_documentation,documentation,7
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Data Governance,cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Data Governance,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Data Governance,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Data Governance,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Dataset (top level),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Ethics,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Ethics,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Maintenance,github_organization_overview,historical documentation,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Maintenance,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Metadata (Information),cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Metadata (Information),github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Metadata (Information),nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Metadata (Information),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Motivation,cohort_2_webinar,tutorial,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Motivation,github_organization_overview,historical documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Motivation,nih_reporter_project,NIH project page,10
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Motivation,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Preprocessing,github_organization_overview,historical documentation,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Preprocessing,nih_reporter_project,NIH project page,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Uses,cohort_2_webinar,tutorial,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Uses,github_organization_overview,historical documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CHORUS,v7,3,Uses,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Collection,biorxiv_preprint,preprint,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Collection,june_2026_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Collection,october_2025_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,june_2025_dataverse_release,historical data release,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,june_2026_dataverse_release,data resource,10
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Composition,october_2025_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Data Governance,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Data Governance,dataset_license,license,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Data Governance,june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Data Governance,march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Dataset (top level),biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Dataset (top level),data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Dataset (top level),june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Dataset (top level),march_2025_dataverse_release,historical data release,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Dataset (top level),project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Distribution,june_2026_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Ethics,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,FileCollection,june_2026_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Human,june_2026_dataverse_release,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Maintenance,data_release_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Maintenance,june_2026_dataverse_release,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Metadata (Information),biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Metadata (Information),june_2026_dataverse_release,data resource,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Motivation,biorxiv_preprint,preprint,5
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Motivation,june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Motivation,nih_reporter_project,NIH project page,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Preprocessing,biorxiv_preprint,preprint,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Uses,biorxiv_preprint,preprint,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Uses,dataset_license,license,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,CM4AI,v7,3,Uses,june_2026_dataverse_release,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Collection,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Collection,physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Collection,project_documentation,documentation,7
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,documentation_repository,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,irb_protocol,IRB,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,physionet_1_1,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,physionet_3_0_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,physionet_3_1_0,data resource,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,physionet_pediatric_1_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Composition,project_documentation,documentation,27
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Data Governance,data_transfer_use_agreement,DUA,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Data Governance,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Data Governance,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Dataset (top level),audiomics_white_paper,white paper,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Dataset (top level),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Dataset (top level),physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Dataset (top level),project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Distribution,physionet_3_0_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Distribution,physionet_3_1_0,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Distribution,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Ethics,irb_protocol,IRB,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Ethics,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Ethics,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Human,irb_protocol,IRB,7
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Human,project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,data_transfer_use_agreement,DUA,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,physionet_1_1,data resource,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,physionet_3_0_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Maintenance,project_documentation,documentation,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Metadata (Information),irb_protocol,IRB,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Metadata (Information),physionet_3_1_0,data resource,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Metadata (Information),project_documentation,documentation,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Motivation,audiomics_white_paper,white paper,3
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Motivation,feasibility_publication,publication,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Motivation,nih_reporter_project,NIH project page,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Motivation,physionet_3_1_0,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Motivation,project_documentation,documentation,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Preprocessing,physionet_1_1,data resource,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Preprocessing,physionet_3_1_0,data resource,4
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Preprocessing,project_documentation,documentation,6
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Uses,data_transfer_use_agreement,DUA,2
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Uses,feasibility_publication,publication,1
+2026-09-01_claude-opus-5-api-generic-v7_rep3,VOICE,v7,3,Uses,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Collection,cohort_2_webinar,tutorial,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Collection,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Collection,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Composition,cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Composition,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Composition,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Composition,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Data Governance,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Data Governance,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Dataset (top level),cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Dataset (top level),project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Distribution,cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Distribution,github_organization_overview,historical documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Ethics,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,FileCollection,cohort_2_webinar,tutorial,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Human,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Maintenance,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Maintenance,project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Metadata (Information),nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Motivation,cohort_2_webinar,tutorial,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Motivation,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Motivation,nih_reporter_project,NIH project page,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Motivation,project_documentation,documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Preprocessing,github_organization_overview,historical documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Preprocessing,nih_reporter_project,NIH project page,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,CHORUS,v8,1,Uses,cohort_2_webinar,tutorial,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Collection,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Collection,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Collection,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Collection,project_documentation,documentation,10
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,documentation_repository,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,physionet_3_0_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,physionet_3_1_0,data resource,11
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,physionet_pediatric_1_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Composition,project_documentation,documentation,37
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Data Governance,data_transfer_use_agreement,DUA,7
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Data Governance,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Data Governance,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Data Governance,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Dataset (top level),physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Dataset (top level),project_documentation,documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Distribution,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Distribution,project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Ethics,irb_protocol,IRB,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Ethics,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Ethics,project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,FileCollection,physionet_3_1_0,data resource,14
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Human,data_transfer_use_agreement,DUA,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Human,irb_protocol,IRB,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Human,physionet_3_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Human,project_documentation,documentation,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Maintenance,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Maintenance,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Maintenance,physionet_1_1,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Maintenance,physionet_3_1_0,data resource,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Maintenance,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Metadata (Information),physionet_3_1_0,data resource,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Metadata (Information),project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Motivation,audiomics_white_paper,white paper,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Motivation,feasibility_publication,publication,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Motivation,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Motivation,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Motivation,project_documentation,documentation,21
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Preprocessing,physionet_3_1_0,data resource,9
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Preprocessing,project_documentation,documentation,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Uses,project_documentation,documentation,10
+2026-09-04f_claude-opus-5-api-generic-v8_rep1,VOICE,v8,1,Variables,physionet_3_1_0,data resource,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Collection,cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Collection,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Collection,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Collection,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Composition,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Composition,github_organization_overview,historical documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Composition,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Composition,project_documentation,documentation,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Data Governance,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Data Governance,github_organization_overview,historical documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Dataset (top level),cohort_2_webinar,tutorial,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Dataset (top level),project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Distribution,cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Ethics,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Ethics,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Human,github_organization_overview,historical documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Human,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Maintenance,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Maintenance,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Metadata (Information),nih_reporter_project,NIH project page,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Metadata (Information),project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Motivation,cohort_2_webinar,tutorial,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Motivation,github_organization_overview,historical documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Motivation,nih_reporter_project,NIH project page,10
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Motivation,project_documentation,documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Preprocessing,github_organization_overview,historical documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Preprocessing,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Preprocessing,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Uses,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,CHORUS,v8,2,Uses,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Collection,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Collection,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Collection,project_documentation,documentation,9
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,documentation_repository,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,physionet_3_0_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,physionet_3_1_0,data resource,11
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,physionet_pediatric_1_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Composition,project_documentation,documentation,25
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Data Governance,data_transfer_use_agreement,DUA,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Data Governance,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Data Governance,project_documentation,documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Dataset (top level),audiomics_white_paper,white paper,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Dataset (top level),feasibility_publication,publication,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Dataset (top level),irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Dataset (top level),physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Dataset (top level),project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Distribution,physionet_3_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Distribution,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Ethics,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Ethics,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,FileCollection,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,FileCollection,project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Human,irb_protocol,IRB,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Human,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Human,project_documentation,documentation,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,physionet_1_1,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,physionet_3_0_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,physionet_3_1_0,data resource,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Maintenance,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Metadata (Information),irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Metadata (Information),physionet_3_1_0,data resource,9
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Metadata (Information),project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Motivation,audiomics_white_paper,white paper,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Motivation,feasibility_publication,publication,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Motivation,nih_reporter_project,NIH project page,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Motivation,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Motivation,project_documentation,documentation,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Preprocessing,physionet_1_1,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Preprocessing,physionet_3_1_0,data resource,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Preprocessing,project_documentation,documentation,7
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Uses,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Uses,project_documentation,documentation,9
+2026-09-04f_claude-opus-5-api-generic-v8_rep2,VOICE,v8,2,Variables,physionet_3_1_0,data resource,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Collection,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Collection,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Collection,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Collection,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Composition,cohort_2_webinar,tutorial,14
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Composition,github_organization_overview,historical documentation,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Composition,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Composition,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Data Governance,cohort_2_webinar,tutorial,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Data Governance,github_organization_overview,historical documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Dataset (top level),cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Dataset (top level),project_documentation,documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Distribution,cohort_2_webinar,tutorial,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Ethics,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Ethics,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Human,nih_reporter_project,NIH project page,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Maintenance,github_organization_overview,historical documentation,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Maintenance,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Metadata (Information),cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Metadata (Information),nih_reporter_project,NIH project page,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Metadata (Information),project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Motivation,cohort_2_webinar,tutorial,10
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Motivation,github_organization_overview,historical documentation,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Motivation,nih_reporter_project,NIH project page,12
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Motivation,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Preprocessing,cohort_2_webinar,tutorial,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Preprocessing,github_organization_overview,historical documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Preprocessing,nih_reporter_project,NIH project page,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Uses,cohort_2_webinar,tutorial,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Uses,nih_reporter_project,NIH project page,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,CHORUS,v8,3,Uses,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Collection,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Collection,feasibility_publication,publication,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Collection,irb_protocol,IRB,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Collection,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Collection,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,audiomics_white_paper,white paper,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,documentation_repository,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,feasibility_publication,publication,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,irb_protocol,IRB,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,physionet_3_1_0,data resource,9
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,physionet_pediatric_1_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Composition,project_documentation,documentation,26
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Data Governance,data_transfer_use_agreement,DUA,7
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Data Governance,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Data Governance,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Dataset (top level),audiomics_white_paper,white paper,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Dataset (top level),irb_protocol,IRB,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Dataset (top level),physionet_3_1_0,data resource,2
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Dataset (top level),project_documentation,documentation,8
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Distribution,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Distribution,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Distribution,physionet_3_0_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Distribution,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Ethics,irb_protocol,IRB,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Ethics,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,FileCollection,physionet_3_1_0,data resource,14
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,FileCollection,project_documentation,documentation,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Human,irb_protocol,IRB,7
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Human,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Human,project_documentation,documentation,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,data_transfer_use_agreement,DUA,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,irb_protocol,IRB,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,physionet_1_1,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,physionet_3_0_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,physionet_3_1_0,data resource,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Maintenance,project_documentation,documentation,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Metadata (Information),physionet_3_1_0,data resource,7
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Motivation,audiomics_white_paper,white paper,3
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Motivation,feasibility_publication,publication,4
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Motivation,nih_reporter_project,NIH project page,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Motivation,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Motivation,project_documentation,documentation,17
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Preprocessing,physionet_3_1_0,data resource,6
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Preprocessing,project_documentation,documentation,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Uses,project_documentation,documentation,5
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Variables,physionet_3_1_0,data resource,1
+2026-09-04f_claude-opus-5-api-generic-v8_rep3,VOICE,v8,3,Variables,project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Collection,bmj_protocol_publication,publication,13
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Collection,fairhub_dataset_v3_api,structured metadata,25
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Collection,irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Collection,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Collection,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,bmj_protocol_publication,publication,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,dataset_documentation_v3,documentation,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,fairhub_dataset_v3_api,structured metadata,34
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,nature_metabolism_publication,publication,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Composition,ro_crate_metadata,RO-Crate,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Data Governance,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Data Governance,dataset_license,license,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Data Governance,fairhub_dataset_v3_api,structured metadata,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Data Governance,ro_crate_metadata,RO-Crate,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),dataset_documentation_v3,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),fairhub_dataset_v3,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),fairhub_dataset_v3_api,structured metadata,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Dataset (top level),ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Distribution,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Distribution,fairhub_dataset_v3,data resource,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Distribution,fairhub_dataset_v3_api,structured metadata,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Ethics,bmj_protocol_publication,publication,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Ethics,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Ethics,ro_crate_metadata,RO-Crate,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,FileCollection,fairhub_dataset_v3_api,structured metadata,48
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,FileCollection,ro_crate_metadata,RO-Crate,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Human,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Human,fairhub_dataset_v3_api,structured metadata,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Human,irb_protocol,IRB,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Human,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Maintenance,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Maintenance,fairhub_dataset_v3_api,structured metadata,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Maintenance,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Metadata (Information),fairhub_dataset_v3,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Metadata (Information),fairhub_dataset_v3_api,structured metadata,10
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Metadata (Information),nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Metadata (Information),ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,dataset_documentation_v3,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,fairhub_dataset_v3_api,structured metadata,17
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,nature_metabolism_publication,publication,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,nih_reporter_project,NIH project page,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Motivation,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Preprocessing,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Preprocessing,fairhub_dataset_v3_api,structured metadata,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Uses,fairhub_dataset_v3_api,structured metadata,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Uses,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Uses,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Variables,bmj_protocol_publication,publication,19
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Variables,fairhub_dataset_v3_api,structured metadata,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,AI_READI,v8,1,Variables,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Collection,biorxiv_preprint,preprint,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Collection,june_2026_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Collection,nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Composition,biorxiv_preprint,preprint,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Composition,june_2026_dataverse_release,data resource,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Composition,october_2025_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Data Governance,biorxiv_preprint,preprint,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Data Governance,dataset_license,license,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Data Governance,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Dataset (top level),biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Dataset (top level),data_release_documentation,documentation,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Dataset (top level),june_2026_dataverse_release,data resource,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Dataset (top level),project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Distribution,june_2026_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Ethics,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,FileCollection,june_2026_dataverse_release,data resource,20
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,FileCollection,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Human,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Maintenance,data_release_documentation,documentation,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Maintenance,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Maintenance,march_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Maintenance,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Maintenance,project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Metadata (Information),biorxiv_preprint,preprint,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Metadata (Information),june_2026_dataverse_release,data resource,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Metadata (Information),march_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Motivation,biorxiv_preprint,preprint,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Motivation,june_2026_dataverse_release,data resource,48
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Motivation,march_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Motivation,nih_reporter_project,NIH project page,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Motivation,project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Preprocessing,biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Preprocessing,june_2026_dataverse_release,data resource,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep1,CM4AI,v8,1,Uses,june_2026_dataverse_release,data resource,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Collection,bmj_protocol_publication,publication,14
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Collection,fairhub_dataset_v3_api,structured metadata,18
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Collection,irb_protocol,IRB,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Collection,nature_metabolism_publication,publication,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Collection,ro_crate_metadata,RO-Crate,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,bmj_protocol_publication,publication,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,dataset_documentation_v3,documentation,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,fairhub_dataset_v3_api,structured metadata,24
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,nature_metabolism_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Composition,ro_crate_metadata,RO-Crate,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,dataset_license,license,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,fairhub_dataset,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,fairhub_dataset_v3_api,structured metadata,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Data Governance,ro_crate_metadata,RO-Crate,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),dataset_documentation_v3,documentation,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),fairhub_dataset_v3_api,structured metadata,9
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Dataset (top level),ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Distribution,dataset_documentation_v3,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Distribution,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Distribution,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Ethics,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Ethics,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Ethics,irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Ethics,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,FileCollection,fairhub_dataset_v3_api,structured metadata,34
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,FileCollection,ro_crate_metadata,RO-Crate,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,fairhub_dataset_v3_api,structured metadata,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,irb_protocol,IRB,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Human,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,fairhub_dataset,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,fairhub_dataset_v3_api,structured metadata,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Maintenance,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Metadata (Information),dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Metadata (Information),fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Metadata (Information),fairhub_dataset_v3_api,structured metadata,9
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Metadata (Information),nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Metadata (Information),ro_crate_metadata,RO-Crate,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Motivation,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Motivation,fairhub_dataset_v3_api,structured metadata,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Motivation,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Motivation,nih_reporter_project,NIH project page,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Motivation,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Preprocessing,bmj_protocol_publication,publication,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Preprocessing,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Uses,dataset_license,license,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Uses,fairhub_dataset_v3_api,structured metadata,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Uses,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Variables,bmj_protocol_publication,publication,13
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Variables,fairhub_dataset_v3_api,structured metadata,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,AI_READI,v8,2,Variables,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Collection,biorxiv_preprint,preprint,12
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,biorxiv_preprint,preprint,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,june_2025_dataverse_release,historical data release,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,march_2025_dataverse_release,historical data release,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,nature_publication,publication,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Composition,october_2025_dataverse_release,data resource,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Data Governance,biorxiv_preprint,preprint,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Data Governance,dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Data Governance,june_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),biorxiv_preprint,preprint,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),june_2026_dataverse_release,data resource,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),march_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Dataset (top level),project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Distribution,data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Distribution,june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Distribution,june_2026_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Distribution,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Ethics,june_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,FileCollection,june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,FileCollection,june_2026_dataverse_release,data resource,20
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,FileCollection,october_2025_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Human,biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Human,june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Maintenance,data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Maintenance,june_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Maintenance,project_documentation,documentation,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),june_2026_dataverse_release,data resource,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Metadata (Information),march_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Motivation,biorxiv_preprint,preprint,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Motivation,june_2025_dataverse_release,historical data release,27
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Motivation,march_2025_dataverse_release,historical data release,21
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Motivation,nature_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Motivation,nih_reporter_project,NIH project page,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep2,CM4AI,v8,2,Uses,june_2025_dataverse_release,historical data release,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Collection,bmj_protocol_publication,publication,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Collection,fairhub_dataset_v3_api,structured metadata,26
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Collection,irb_protocol,IRB,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Collection,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,bmj_protocol_publication,publication,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,dataset_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,dataset_documentation_v3,documentation,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,fairhub_dataset,data resource,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,fairhub_dataset_v3_api,structured metadata,29
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,irb_protocol,IRB,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,nature_metabolism_publication,publication,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Composition,ro_crate_metadata,RO-Crate,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,dataset_documentation_v3,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,dataset_license,license,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,fairhub_dataset_v3_api,structured metadata,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Data Governance,ro_crate_metadata,RO-Crate,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),dataset_documentation_v3,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),fairhub_dataset_v3_api,structured metadata,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),irb_protocol,IRB,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Dataset (top level),ro_crate_metadata,RO-Crate,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Distribution,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Ethics,bmj_protocol_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Ethics,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Ethics,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,FileCollection,fairhub_dataset_v3_api,structured metadata,40
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,FileCollection,ro_crate_metadata,RO-Crate,9
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Human,bmj_protocol_publication,publication,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Human,fairhub_dataset_v3_api,structured metadata,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Human,irb_protocol,IRB,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Human,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Human,ro_crate_metadata,RO-Crate,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,fairhub_dataset,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,fairhub_dataset_v3,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,fairhub_dataset_v3_api,structured metadata,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Maintenance,ro_crate_metadata,RO-Crate,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Metadata (Information),dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Metadata (Information),fairhub_dataset_v3,data resource,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Metadata (Information),fairhub_dataset_v3_api,structured metadata,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Metadata (Information),nature_metabolism_publication,publication,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Metadata (Information),ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Motivation,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Motivation,fairhub_dataset_v3_api,structured metadata,8
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Motivation,nature_metabolism_publication,publication,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Motivation,nih_reporter_project,NIH project page,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Motivation,ro_crate_metadata,RO-Crate,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Preprocessing,bmj_protocol_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Preprocessing,fairhub_dataset_v3_api,structured metadata,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Uses,dataset_license,license,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Uses,fairhub_dataset_v3_api,structured metadata,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Variables,bmj_protocol_publication,publication,14
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Variables,fairhub_dataset_v3_api,structured metadata,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,AI_READI,v8,3,Variables,irb_protocol,IRB,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Collection,biorxiv_preprint,preprint,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Collection,june_2026_dataverse_release,data resource,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Collection,march_2025_dataverse_release,historical data release,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Collection,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,biorxiv_preprint,preprint,7
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,june_2025_dataverse_release,historical data release,11
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,june_2026_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,march_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,nature_publication,publication,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Composition,october_2025_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Data Governance,biorxiv_preprint,preprint,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Data Governance,dataset_license,license,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Data Governance,june_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Dataset (top level),biorxiv_preprint,preprint,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Dataset (top level),june_2026_dataverse_release,data resource,5
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Dataset (top level),march_2025_dataverse_release,historical data release,3
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Dataset (top level),october_2025_dataverse_release,data resource,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Dataset (top level),project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Distribution,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Ethics,biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Ethics,june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,FileCollection,june_2026_dataverse_release,data resource,10
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Human,biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Human,june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Maintenance,data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Maintenance,june_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Maintenance,nih_reporter_project,NIH project page,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Maintenance,october_2025_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Maintenance,project_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Metadata (Information),biorxiv_preprint,preprint,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Metadata (Information),data_release_documentation,documentation,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Metadata (Information),june_2025_dataverse_release,historical data release,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Metadata (Information),june_2026_dataverse_release,data resource,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Metadata (Information),march_2025_dataverse_release,historical data release,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,biorxiv_preprint,preprint,6
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,june_2025_dataverse_release,historical data release,10
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,june_2026_dataverse_release,data resource,1
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,march_2025_dataverse_release,historical data release,20
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,nature_publication,publication,2
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,nih_reporter_project,NIH project page,4
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Motivation,october_2025_dataverse_release,data resource,18
+2026-09-04g_claude-opus-5-api-generic-v8_rep3,CM4AI,v8,3,Uses,june_2025_dataverse_release,historical data release,5
