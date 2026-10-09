@@ -1524,9 +1524,9 @@ def merge_cmd(method, project, labels, config, out_label, unguarded, execute):
     if result.contested:
         click.echo(f"\n{result.contested} slot(s) are held by more than one "
                    f"replicate. Without a scorer the base's value is used for "
-                   f"each, so the merge is the base record plus the slots only "
-                   f"the others had — it does not adjudicate between differing "
-                   f"values.")
+                   f"each slot it holds; otherwise the first holder in sorted "
+                   f"label order is used. This rule does not adjudicate between "
+                   f"differing values.")
     if result.guarded:
         click.echo("Referent-bearing fields taken from the base replicate only "
                    f"({result.base}); --unguarded to merge them too.")
