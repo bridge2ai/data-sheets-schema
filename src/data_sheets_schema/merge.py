@@ -221,6 +221,8 @@ class MergeResult:
     guarded: bool = False
     report: ReferentReport | None = None
     contested: int = 0
+    selection_mode: str | None = None
+    scorer_identity: str | None = None
 
     @property
     def contributions(self) -> dict[str, int]:
@@ -319,19 +321,27 @@ def union_merge(records: dict[str, dict[str, Any]], *,
                 base: str | None = None,
                 guarded: bool = True,
                 judge: ReferentJudge | None = None,
-                source_paths: dict[str, Path] | None = None) -> MergeResult:
-    """Union every replicate's slots, choosing the best-fitting contested value.
+                source_paths: dict[str, Path] | None = None,
+                scorer_identity: str | None = None) -> MergeResult:
+    """Union slots using the base/first holder or a caller-supplied score.
 
     ``guarded`` takes *all* referent-bearing fields from one base record rather
     than picking each independently. That is what keeps the subject single: the
     unguarded merge on CM4AI took its title from the programme-level replicate
     and its DOI from the release-level one, and the result described neither.
-    Non-referent fields still come from whichever replicate supplied the
-    best-fitting value, so the coverage gain survives the guard.
+    Without a scorer, contested fields use the base when present, otherwise the
+    first holder in sorted label order. With a scorer, the maximum supplied
+    numeric score wins, with ties preferring the base then the first holder.
+    ``scorer_identity`` is an optional caller-declared label, not an authenticated
+    instrument or evidence of scientific validity. A scorer is not invoked when
+    there are no contested fields outside the guard.
 
     A merge is refused when the report blocks and ``guarded`` is False, rather
     than written and left for a reader to notice.
     """
+    _validate_scorer_identity(scorer_identity)
+    if scorer_identity is not None and not callable(scorer):
+        raise ValueError("scorer_identity requires a supplied callable scorer")
     labels = sorted(records)
     if source_paths:
         check_sources(source_paths, project)
@@ -381,7 +391,39 @@ def union_merge(records: dict[str, dict[str, Any]], *,
         source_of[slot] = best[1]
 
     return MergeResult(record=merged, source_of=source_of, base=base,
-                       guarded=guarded, report=report, contested=contested)
+                       guarded=guarded, report=report, contested=contested,
+                       selection_mode=("base_or_first_holder" if scorer is None
+                                       else "maximum_supplied_score"),
+                       scorer_identity=scorer_identity)
+
+
+def _validate_scorer_identity(identity: str | None) -> None:
+    if identity is not None and (type(identity) is not str or not identity.strip()):
+        raise ValueError("scorer_identity must be a nonempty exact string or None")
+
+
+def _selection_description(result: MergeResult) -> str:
+    """Validate new metadata before publication; legacy mode remains unknown."""
+    mode = result.selection_mode
+    _validate_scorer_identity(result.scorer_identity)
+    if mode is not None and (type(mode) is not str or mode not in {
+            "base_or_first_holder", "maximum_supplied_score"}):
+        raise ValueError("unrecognized merge selection_mode")
+    if result.scorer_identity is not None and mode != "maximum_supplied_score":
+        raise ValueError("scorer_identity requires maximum_supplied_score selection_mode")
+    if mode is None:
+        return "Selection mode was not recorded; whether a scorer ran is unknown."
+    if mode == "base_or_first_holder":
+        return (f"Contested slots use base `{result.base}` when it holds the slot, "
+                "otherwise the first holder in sorted label order. No scorer was supplied.")
+    identity = ("unrecorded" if result.scorer_identity is None else
+                "caller-declared " + json.dumps(result.scorer_identity))
+    selection = (f"Contested slots use the maximum supplied numeric score; ties prefer base "
+                 f"`{result.base}`, otherwise the first holder in sorted label order.")
+    invocation = ("No contested slots; the supplied scorer was not invoked."
+                  if result.contested == 0 else "The supplied scorer was invoked for contested slots.")
+    return (f"{selection} {invocation} Scorer identity: {identity}; "
+            "this does not authenticate an instrument, model, calibration or scientific validity.")
 
 
 def _fitness(j: Any) -> float:
@@ -483,12 +525,13 @@ def write_merge(result: MergeResult, path: Path, *,
 
     ``sources`` maps each contributing replicate label to the record it supplied.
     Given it, a `record_mode: derived` provenance record is written naming every
-    contributor by md5 and stating the rule that combined them — which is what
-    makes a merged record shippable rather than an unattributed artifact.
+    contributor by md5 and stating the recorded selection rule. That disclosure
+    does not certify scientific correctness or shipping eligibility.
 
     Omitting ``sources`` still writes the record, for probes and experiments, but
     the result carries no provenance and must not be treated as a datasheet.
     """
+    selection = _selection_description(result)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         yaml.safe_dump(result.record, sort_keys=False, allow_unicode=True),
@@ -511,8 +554,8 @@ def write_merge(result: MergeResult, path: Path, *,
     guard = ("referent-bearing fields pinned to base "
              f"`{result.base}`" if result.guarded else "unguarded union")
     rule = (
-        f"Union of slots across {len(contributions)} replicates; where several "
-        f"supplied one slot, the best-fitting value was taken ({guard}). "
+        f"Union of slots across {len(contributions)} replicates. {selection} "
+        f"Referent guard: {guard}. "
         f"{result.contested} slots were contested.")
     rec = build_derived_record(
         project, method, label, sources=contributions, derivation=rule,
