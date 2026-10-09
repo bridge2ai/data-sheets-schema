@@ -4,13 +4,13 @@ Written in America/Los_Angeles on 2026-10-09, after the open-issue triage of 202
 
 **Status: a proposal.** Nothing here is authorized until the owner decides the items under [Owner decisions](#owner-decisions). Every billed step needs a reviewed registration and an owner word naming the registration's sha256 and a cap; for a roster, the word names the roster's sha256 and every registration sha256 it lists, because a roster row pins only a path (`cli/api.py:155`). No fan-out before a reviewed canary; the canary takes the same launch path as the batch.
 
-**How it was made.** Four research passes (inventory against the study design, the API route, the native routes, acceptance requirements) fed three independent plans (critical path, cost and risk, scientific validity). A synthesizer merged them; an adversarial critique found 21 problems and 11 missing items; a revision addressed all 32 and a second check found 12 new inconsistencies, which a repair pass fixed. None of these drafts is published; where a figure rests on one, the note says so. An adversarial review of PR #4787 then confirmed 49 findings, filed as #4789–#4800; this revision applies 48 of them and refreshes the time-sensitive facts as of 2026-10-09 17:08Z. The 49th, H6 in #4800, is applied only provisionally: the CBORG chain amounts are withheld until the owner decides at G3 whether they may be published. Facts were checked at `15d053d1a`, in local ledgers and records, and on GitHub; nothing was posted, launched or spent in making it.
+**How it was made.** Four research passes (inventory against the study design, the API route, the native routes, acceptance requirements) fed three independent plans (critical path, cost and risk, scientific validity). A synthesizer merged them; an adversarial critique found 21 problems and 11 missing items; a revision addressed all 32 and a second check found 12 new inconsistencies, which a repair pass fixed. None of these drafts is published; where a figure rests on one, the note says so. An adversarial review of PR #4787 then confirmed 49 findings, filed as #4789–#4800; the revision that followed applied them and refreshed the time-sensitive facts as of 2026-10-09 17:08Z. A second review round confirmed 24 more, filed as #4804–#4812 and applied here. Facts were checked at `15d053d1a`, in local ledgers and records, and on GitHub. Nothing was launched or spent in making this plan. Its only GitHub writes were this PR (opened, force-pushed and its body edited) and the review issues #4789–#4800 and #4804–#4812, including an edit to #4800's body and the deletion of that issue's first revision from its edit history (G3).
 
-Files under `notes/matched_cborg_2026-09-14_v10d/.local_drafts/` are gitignored local evidence in the primary checkout, and `d4d-executions/` is an unversioned local directory; neither is published. The CBORG chain amounts (the shared ledger's total and its split, the chain's cap and remaining headroom, the lineage totals and the per-audit costs) are recorded in the private ledger and are not given here, as the v10z public records do not give them (`notes/matched_cborg_2026-09-18_v10z/workload.public.json`: 'exact amounts and reconciled headroom remain private'). Publishing them is the owner's decision (G3), and so is the handling of the copies already public in PR #4787's first pushed commit and in the body of #4800.
+Files under `notes/matched_cborg_2026-09-14_v10d/.local_drafts/` are gitignored local evidence in the primary checkout, and `d4d-executions/` is an unversioned local directory; neither is published. The CBORG chain amounts (the shared ledger's total and its split, the chain's cap and remaining headroom, the lineage totals and the per-audit costs) are not given here. The v10z public records do not give them (`notes/matched_cborg_2026-09-18_v10z/workload.public.json`: 'exact amounts and reconciled headroom remain private'), and on 2026-10-09 the owner decided that this note keeps them out (G3). Withholding them keeps the note consistent with those records; it does not make the amounts private. Issue comments and notes on main written before this plan already give most of them; G3 records where, and what remains public from this PR.
 
-**Changed on main since the plan's basis** (`15d053d1a` → `c34d9a638`, origin/main as of 2026-10-09 17:08Z: three PRs; none touches the runner, shared-generation, typed-audit, batch or render code):
+**Changed on main since the plan's basis** (`15d053d1a` → `c34d9a638`, origin/main as of 2026-10-09 17:08Z: three PRs; none edits the runner, shared-generation, typed-audit, batch or render files):
 
-- PR #4769 (`7ff16f9bf`): offline receipt readdressing, `d4d receipts readdress`; closes #4446, #4767, #4768.
+- PR #4769 (`7ff16f9bf`): offline receipt readdressing, `d4d receipts readdress`; closes #4446, #4767, #4768. It also changes `receipts.resolve`, which the runner's full-readdress step (`unresolved_receipt_slots`, `apply_readdress`) and the receipt check call: an index spelled with more than 4,300 digits used to raise ValueError and now resolves by its value, or not at all (#4767). Every shorter spelling, leading zeros included, resolves as before.
 - PR #4771 (`a6568b4cd`): documents the release inventory and receipt origin; closes #3284, #4447.
 - PR #4772 (`c34d9a638`): records the actual merge selection rule in provenance; closes #4770 (the first merge-CLI defect in #4765).
 
@@ -20,11 +20,11 @@ Native issues filed after the triage (all open as of 2026-10-09 17:08Z): #4773�
 
 ## Summary
 
-Basis: main 15d053d1a. For what main gained after that commit, see "Changed on main since the plan's basis" above. Every fact relied on was checked on 2026-10-09 in code at 15d053d1a, in local ledgers and records, or on GitHub. As of 2026-10-09 no billed run is live; nothing was posted, launched or spent in making this plan.
+Basis: main 15d053d1a. For what main gained after that commit, see "Changed on main since the plan's basis" above. Every fact relied on was checked on 2026-10-09 in code at 15d053d1a, in local ledgers and records, or on GitHub. As of 2026-10-09 no billed run is live; nothing was launched or spent in making this plan, and its GitHub writes are listed under How it was made.
 
 **What the owner decides first (sitting 1, G3)**
 
-1. **What 'native' means now** (D09 #4758, D10 #4761). The recommended options are: the #4354 adapter's first live run goes on the claude.ai subscription and is labelled the direct arm, and audit28 is retired. **Under those options this plan contains no CBORG-native (claudecode_agent) generation at all.** All of its CBORG generation goes through the Messages API: the claudecode_api arm, the with-crate runs under #2914 B (written under claudecode_agent_crate) and, if D16 adds them, the monolithic runs (claudecode_api_monolithic). E5's rating sessions, if run like the 2026-09-11 rescore, are Claude Code CLI sessions on CBORG: agentic evaluation, not generation. That departs from the owner's 2026-09-25 instruction 'focus is native until everything is validated and working', and the owner must confirm the departure. To keep CBORG native in scope instead, build a CBORG transport for the shared protocol (N12, new engineering) and/or run audit28 once (Z3–Z5).
+1. **What 'native' means now** (D09 #4758, D10 #4761). The recommended options are: the #4354 adapter's first live run goes on the claude.ai subscription and is labelled the direct arm, and audit28 is retired. **Under those options this plan contains no CBORG-native (claudecode_agent) generation at all.** All of its CBORG generation goes through the Messages API: the claudecode_api arm, the with-crate runs under #2914 B (written under claudecode_agent_crate) and, if D16 adds them, the monolithic runs (claudecode_api_monolithic). E5's rating sessions, if run like the 2026-09-12 CBORG rescore, are Claude Code CLI sessions on CBORG: agentic evaluation, not generation. That departs from the owner's 2026-09-25 instruction 'focus is native until everything is validated and working', and the owner must confirm the departure. To keep CBORG native in scope instead, build a CBORG transport for the shared protocol (N12, new engineering) and/or run audit28 once (Z3–Z5).
 2. **API first, and its money** (D01, D07, D22, D08).
    - A new generic_v10 API allocation of $100 for the pilot phase: the CHORUS pilot ($15 cap), one CHORUS contingency ($15), the AI_READI pilot ($35 ceiling) and one AI_READI contingency (at most $35). Both AI_READI lines are provisional until sizing.
    - At most 2 billed attempts per registered cell.
@@ -121,7 +121,7 @@ Typed-audit stages and receipt completion get one delivery each, with no retry. 
 | [D08](#d08) | #1849 | Should the prepared CBORG timeout and keepalive follow-up be sent? It has been unsent since 2026-09-16, and as an outbound message Claude never sends it without the owner's explicit yes. What gates multi-row rosters? | Yes or no this week; resolved before A16 |
 | [D09](#d09) | #4758 | Which transport carries the first Claude Code shared-protocol run, and does the 2026-09-25 direct-arm pause cover #4354 runs? | G3 (this week), decided first with D10 |
 | [D10](#d10) | #4761 | audit28: run it from a compatible checkout, or retire the v10z/audit_controls lineage (#2114)? | G3 (this week), decided first with D09 |
-| [D11](#d11) | #4759 | Which runtime path do new native and direct registrations pin, now that the updater has pruned 2.1.272? Only 2.1.291 to 2.1.295 remain in `~/.local/share/claude/versions`. | N6 (second sitting); under D10 'run', its restore option at G3, for Z3 |
+| [D11](#d11) | #4759 | Which runtime path do new native and direct registrations pin, now that the updater has pruned 2.1.272? As of 2026-10-09 17:08Z only 2.1.291 to 2.1.295 were installed in `~/.local/share/claude/versions`; the updater adds and prunes versions (2.1.296 arrived at 18:38Z). | N6 (second sitting); under D10 'run', its restore option at G3, for Z3 |
 | [D12](#d12) | #4354 | Who develops, operates and reviews, now that the Codex session is developing #4354? | G3 |
 | [D13](#d13) | #4019 | Which native registration choices apply before the first #4354 registration: #4019 (toolchain exposure), #4162 (launch form), #2714 (PR #2922 as a closure version) and #4445 (receipt origin)? | #4162 at G3, before N3 is finalized; the rest at N6 |
 | [D14](#d14) | #2370 | Which launch parameters apply to subscription (direct-transport) runs: maximum starting seven-day utilization, overage handling, budget_guard_usd, deadline and effort? | N6 |
@@ -279,7 +279,7 @@ Limits of the display:
 - The probe went through the native proxy, so passthrough on `api.cborg.lbl.gov` is unverified.
 - The first `count_tokens` call carries the thinking dict and happens at receipt completion, after the full phase is billed (`receipt_completion.py:334-352`; `api_runner.py` makes no count call). So A1b checks, with the owner's consent and unbilled on the v10e precedent, that the route accepts display on `count_tokens` before A2 merges. A8 repeats the check.
 
-Decide the cache breakpoint from A1/A1b: add it only if AI_READI's worst case exceeds D07's ceiling without it. Both changes land before A4, or neither does in this condition.
+Decide the cache breakpoint from A1/A1b: add it only if AI_READI's worst case exceeds D07's ceiling without it. Each change lands before A4 or not at all in this condition.
 
 **Unblocks.** A1b, A2, A4, A6
 
@@ -294,7 +294,7 @@ Decide the cache breakpoint from A1/A1b: add it only if AI_READI's worst case ex
 - A new named generic_v10 API allocation of $100 for the pilot phase: CHORUS pilot $15 cap, one CHORUS contingency at its own $15 cap, AI_READI pilot $35 planning ceiling, one AI_READI contingency at no more than the AI_READI pilot's cap ($35). Production envelopes are set per roster from actuals
 - $65 ($15 + $15 + $35). It has no line for the AI_READI contingency that A14-acc allows, so that contingency would need an allocation amendment, an owner word naming its amount, before its registration
 - $60. It leaves $10 after the two pilots, which cannot fund a contingency at its $15 cap
-- Re-point the v10z chain's remaining headroom, or the arithmetic remainder of the September $200 API allocation (both recorded in the private ledger). They overlap: the chain's ledger already includes the CHORUS API attempts
+- Re-point the remaining headroom of the matched-sequence ledger, the v10z chain (amounts withheld here; G3). The September additional $200 allocation is not a separate source: it bounded that sequence's API and native attempts and its evaluation attempts alike, and the chain later raised its cap on the same ledger
 - Per-run approvals with no allocation
 
 **Recommendation.** Option 1. Each run still needs its own word naming its registration's sha256 (for a roster, the roster's sha256 and every registration sha256 it lists) and its cap, the contingencies included.
@@ -369,10 +369,10 @@ Keep the generic_v9 direct arm paused and superseded (R1).
 
 **Recommendation.** Retire: an accepted audit28 would yield one composite generic_v9 CHORUS record that still needs Phase 4 and cannot be compared with any generic_v10 cell, and 0 of 26 billed audits were accepted.
 
-Costs, grouped on 2026-10-09 from the private ledger (amounts withheld; see How it was made):
+Costs, grouped on 2026-10-09 from the local ledger files (amounts withheld here; G3):
 
 - the v10z lineage: generation d4810ca2 plus 26 billed audits;
-- the matched native sequence: 9 generations plus 26 audits, of which audits are 84.4%;
+- the matched native sequence: 9 generations plus 26 audits;
 - the shared ledger, which also holds the 15 CHORUS API attempts and the transport probe.
 
 Retiring together with D09(a) removes all CBORG-native generation from the plan (see D09).
@@ -383,7 +383,7 @@ Retiring together with D09(a) removes all CBORG-native generation from the plan 
 
 **Issue:** #4759 · **Needed by:** N6 (second sitting); under D10 'run', its restore option at G3, for Z3
 
-**Question.** Which runtime path do new native and direct registrations pin, now that the updater has pruned 2.1.272? Only 2.1.291 to 2.1.295 remain in `~/.local/share/claude/versions`.
+**Question.** Which runtime path do new native and direct registrations pin, now that the updater has pruned 2.1.272? As of 2026-10-09 17:08Z only 2.1.291 to 2.1.295 were installed in `~/.local/share/claude/versions`; the updater adds and prunes versions (2.1.296 arrived at 18:38Z).
 
 **Options.**
 
@@ -540,14 +540,14 @@ Also inside the freeze:
 
 The launch worktree stays at the launch base for the whole matrix. Merged data PRs make that a requirement: run outputs under `data/d4d_concatenated/claudecode_api*/` are untracked in the launch worktree and not gitignored (apart from `*_api_progress.json` and `*.log`), and git refuses to fast-forward over untracked files even when they are byte-identical ('untracked working tree files would be overwritten by merge'; reproduced on git 2.50.1 in a scratch repository).
 
-If a post-A4 change is unavoidable, the operator advances only between stages, with no run live: `d4d api status` shows no live sweep, and no `d4d api run` process is live (`ps`), because `d4d api status` sees only batch locks (`cli/api.py:1070`).
+If a post-A4 change is unavoidable, the operator advances only between stages, with no run live: `d4d api status` shows no live sweep, and `pgrep -fl "d4d api run|'api', 'run'|data_sheets_schema[.]cli api run"` prints nothing (exit status 1), because `d4d api status` sees only batch locks (`cli/api.py:1070`) and `d4d api run` takes none. The pattern covers the venv script (`…/bin/d4d api run`), a `poetry run` launch, which carries its arguments inside `python -c … sys.argv = ['…/bin/d4d', 'api', 'run', …]`, and `python -m data_sheets_schema.cli api run`. A name match such as `pgrep -f "d4d api run"` misses the last two (`cli/api.py:1061-1066`, #513). On macOS pgrep never matches itself or the shell that runs it, where a `ps | grep` pipeline matches its own grep (checked on 2026-10-09 with three harmless stand-in processes).
 
 1. For every untracked output the target commit tracks, confirm that `git hash-object` equals the tracked blob; stop on any mismatch.
 2. Move those files, never delete them, to a dated holding directory outside the worktree.
 3. `git merge --ff-only` to the target.
 4. Confirm the checked-out files hash identically to the held copies.
-5. Re-run A4's gates, and run the #795 check directly: `run_guard.runs_on_other_refs` over every label the matrix has written must return nothing. The batch's `--dry-run` returns before that guard (`cli/api.py:804, 818-819`), so it cannot stand in for it.
-6. Write a parity statement: the rendered requests are unchanged apart from label and date, or the remaining cells re-register.
+5. Re-run A4's gates, reading 'HEAD equals the base' as HEAD equal to the target commit, and run the #795 check directly: `run_guard.runs_on_other_refs` over every label the matrix has written must return nothing. The batch's `--dry-run` returns before that guard (`cli/api.py:804, 818-819`), so it cannot stand in for it.
+6. Write a parity statement naming the target commit: the rendered requests are unchanged apart from label and date, or the remaining cells re-register. From then on, A4's and A8's 'HEAD equal to the launch base' means HEAD equal to that target commit.
 7. If the advance changed any code the runner or `d4d api batch` executes, run one diagnostic single-row CHORUS roster at the advanced base through the launcher before the next multi-row roster. It gets its own prefix, registration, review and word, and is funded by an allocation line or amendment named in that word (D07). Accept it by A11–A13. It is not a replicate (D03).
 
 Keep the held copies until step 5 passes.
@@ -707,7 +707,7 @@ Schedule: each stage's acceptance review finishes before the next stage's word; 
 **Options.**
 
 - No: N9, CHORUS ×3, a canary plus 3 replicates for each of AI_READI, CM4AI and VOICE, and one run each for VOICE_PEDIATRIC (D02's ×1) and Kids First: 18 runs, or 21 with VOICE_PEDIATRIC ×3 (a canary plus 3)
-- Yes, for canaries registered under the A15 floor before launch (as the 2026-09-13 cohort note allows), when the N7 review shows by byte diff that the canary's model-facing inputs equal its replicates', apart from label and opaque ids. That includes the adapter's native receipt floor (`native_shared_contract.py:776-789` at 0125eebbc). A pending-floor N9 fails that test and never counts: 15 runs, or 17 with VOICE_PEDIATRIC ×3
+- Yes, for canaries registered under the A15 floor before launch (the 2026-09-13 cohort note allows this for a CHORUS canary; extending it to the other projects is part of this decision), when the N7 review shows by byte diff that the canary's model-facing inputs equal its replicates', apart from label and opaque ids. That includes the adapter's native receipt floor (`native_shared_contract.py:776-789` at 0125eebbc). A pending-floor N9 fails that test and never counts: 15 runs, or 17 with VOICE_PEDIATRIC ×3
 
 **Recommendation.** Decide at N6 using D03's model-facing test: option 2 only when the diff holds, otherwise option 1. Use D02's VOICE_PEDIATRIC count on both arms (×1 recommended).
 
@@ -789,7 +789,9 @@ Owner sitting 1, once the G2 table exists. Decide in this order:
 2. D01, D07, D22 (including the withdrawal of the v10z standing authorizations, whatever D10 decides) and D08.
 3. D02–D06, D12, D13 (#4162 only), D15, whether D16 is needed, D17–D21, D23 and D24. D06's cache-breakpoint half may wait for A1b. If D10 is 'run', also D11's restore option, for Z3.
 
-Also give consent for the unbilled `count_tokens` calls in A1b and A8, and decide whether this note may publish the CBORG chain amounts it withholds (How it was made). Editing this file cannot withdraw them: PR #4787's first pushed commit and the body of #4800 already carry them, and the repository is public. If they are to stay private, the owner also decides what happens to those copies, for example a rewritten branch or a fresh PR, and an edited #4800.
+Also give consent for the unbilled `count_tokens` calls in A1b and A8.
+
+The CBORG chain amounts this note withholds (How it was made) were decided on 2026-10-09: the owner keeps them out of this note, and Z1's note gives none either. Withholding them here does not make them private. Before this plan, issue comments (#1763 of 2026-09-16 and #2463 of 2026-09-26), #2468 and the later budget-chain issues that repeat the cap, and three notes on main (`notes/native_audit_continuation_plan_2026-09-18.md`, `notes/native_audit_retry_2026-09-21.md`, `notes/chorus_audit26_controller_review_2026-09-24.md`) already gave most of them, directly or by subtraction. The rest first became public in this PR's first pushed commit. The branch was rewritten on 2026-10-09 at 18:25Z, but GitHub still serves that commit by its SHA, and the PR's force-push event links to it; rewriting the branch again or opening a fresh PR withdraws nothing. #4800 carries none of them: its body was edited at 18:25Z, and its first revision was deleted from the edit history at 18:47Z. Still the owner's to decide: whether to retract the earlier copies, by editing those issue comments and bodies and asking GitHub Support to purge that commit and its cached views. The three notes on main cannot be withdrawn without rewriting main, and copies already fetched cannot be recalled.
 
 maintainer-dev records each answer on its issue, quoting the owner, as comments on those issues in this repository, with no at-mentions. No launch word is given here: each billed run later gets its own word, in answer to a question naming its registration's sha256 (for a roster, the roster's sha256 and every registration sha256 it lists) and its cap.
 
@@ -812,6 +814,7 @@ File the gaps no open issue tracks (searched 2026-10-09):
 8. For the next shared-generation version: one recorded malformed-response retry and one transport retry for single-delivery stages (today exactly `{1, 0, 0}`; `shared_generation.py:226-228`).
 9. `d4d runs select` cannot group a cell split across prefixes (D21).
 10. An offline typed-sizing mode, if A1 needs one.
+11. `d4d runs select` does not read acceptance, so canonical marks are kept to accepted replicates only by procedure (A20; risk 23).
 
 Also extend #4762 with the v6 drift for CM4AI and VOICE: rep1 bundles 1dfd34e5 and dcd71717 against today's 50037fc6 and 9193c3cb. Sanitize at-sign tokens before posting.
 
@@ -1045,11 +1048,11 @@ A read-only live dollar readout for the operator. It reads:
 - the run's usage ledger, `{metadata_dir}/{P}_api_usage_{key}.json`, written as calls settle (`usage_ledger.py:112-116`);
 - its `pending_call`, written before each request (`usage_ledger.py:306-341`).
 
-It prices settled rows at `run_telemetry.py`'s rates and adds the pending phase's worst case: its output cap at $25/M plus its input. It is kept with the caller inputs and changes no runtime code.
+It prices settled rows at `run_telemetry.py`'s rates and adds the pending phase's worst case: its output cap at $25/M plus its input. `pending_call` records only the usage id, phase, attempt and start time (`usage_ledger.py:338-339`), so the readout takes the cap and the input from elsewhere. For typed stages and receipt completion, it reads the saved request's `max_tokens` and the counted `input_tokens` saved before the call (`typed_audit_runtime.py:464-472`, `receipt_completion.py:511`). Ordinary phases (full, reconcile, report, repair) save neither, so for them it takes the phase cap, clamped to 128000, and a stated per-project input bound per phase, or, conservatively, the full phase's worst case for every pending ordinary phase: later phases carry more input than full (v9 CHORUS report 76,237 tokens against full's 41,339), but full has the largest worst case in v8 and v9. It is kept with the caller inputs and changes no runtime code.
 
 * **Depends on:** none
 * **Cost:** $0
-* **Gate:** Reproduces $3.30811950 from the v9 CHORUS ledger file `data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_api_usage_46d8033e251b3c6e.json` at 15d053d1a (re-checked on 2026-10-09)
+* **Gate:** Reproduces $3.30811950 from the v9 CHORUS ledger file `data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_api_usage_46d8033e251b3c6e.json` at 15d053d1a (re-checked on 2026-10-09), and reproduces the about $3.45 CHORUS and about $4.50 AI_READI full-phase worst cases from synthetic `pending_call` rows
 * **Issues:** #1763, #4345 (closed 2026-10-05; context)
 
 #### A4 · codex-operator · read only audit
@@ -1189,7 +1192,7 @@ The approval is written and bound to those sha256s. Every finding becomes an iss
 Pre-launch checks, all through the A4b launcher:
 
 - re-observe the CBORG catalogue: the route, 1M in / 128k out, and prices against `run_telemetry.py:41-46` (posted 2026-08-05);
-- `d4d api status` shows no live sweep, and no `d4d api run` process is live (`ps`), because `d4d api status` sees only batch locks;
+- `d4d api status` shows no live sweep, and D17's `pgrep` check for a live `d4d api run` prints nothing, because `d4d api status` sees only batch locks;
 - the import check (A4b) and HEAD;
 - `git status --porcelain --untracked-files=no` is empty, with run outputs on the allowlist;
 - `CBORG_API_KEY` present, and `ANTHROPIC_API_KEY`, `D4D_RECEIPT_FULL_MAX_TOKENS` and `D4D_PHASE_WALL_CLOCK_SECONDS` absent, in the child;
@@ -1197,7 +1200,7 @@ Pre-launch checks, all through the A4b launcher:
 - the A3b readout run against a historical ledger;
 - AC power, and the `caffeinate` form ready.
 
-Before every later API word (A10c-word, A14-word, A16-word to A22-word, M5-word, M6-word), the operator re-runs A8 and records it beside that word's registration: the catalogue and price re-observation, `d4d api status` and the `ps` check, HEAD equal to the launch base (for M5-word and M6-word, equal to the base that M5-reg or M6-reg registered, which is later than the launch base if M2 landed after the API matrix), and `git status --porcelain --untracked-files=no` with the output allowlist. The launcher enforces the key, environment and import checks at every launch, so they need no separate step.
+Before every later API word (A10c-word, A14-word, A16-word to A22-word, M5-word, M6-word), the operator re-runs A8 and records it beside that word's registration: the catalogue and price re-observation, `d4d api status` and the `pgrep` check, HEAD equal to the launch base or, after a D17 advance, to the target commit named in the most recent advance's step-6 parity statement (for M5-word and M6-word, equal to the base that M5-reg or M6-reg registered, which is later than the launch base if M2 landed after the API matrix), and `git status --porcelain --untracked-files=no` with the output allowlist. The launcher enforces the key, environment and import checks at every launch, so they need no separate step.
 
 * **Depends on:** A7
 * **Cost:** $0 (one unbilled count call)
@@ -1262,6 +1265,7 @@ Then:
 - duplicate keys: 0 in full and in core;
 - the report-totals check (#4766): compare the report's stated finding total and severity subtotals with `audit_counts` of `intermediate/CHORUS_audit.json`, the counts the report request carried, by hand or with a read-only script. Record the stated values, the computed values and any mismatch;
 - every `full` row in `api_usage`, and `model.max_tokens_by_phase.full`, read 128000;
+- the provenance `model.provider` reads 'LBL CBORG (proxy to Anthropic)' and `model.base_url` reads `https://api.cborg.lbl.gov`. `api_usage` rows record no route; these two fields describe the record-writing process's environment, and `shared_generation.require_client` enforces the registered base_url for the run's client (`shared_generation.py:535`);
 - record per-call transport and empty-answer outcomes, and the cost at that day's prices.
 
 Record #2926's items.
@@ -1594,7 +1598,7 @@ The owner's word naming the roster sha256, the registration sha256 and a cap set
 BILLED. The Kids First canary through the launcher, after A10's pre-launch hash check.
 
 * **Depends on:** A19-rev, A19-word
-* **Cost:** Unmeasured, likely near the AI_READI pilot. v10r's $15 cap predates the typed audit; four pre-v10 phases reserved $13.84; the initial request was 233,161 tokens
+* **Cost:** Unmeasured, likely near the AI_READI pilot. v10r's $15 cap predates the typed audit; four pre-v10 phases reserved $13.84 (the full-generation, audit, reconciliation and report reservations, without carried outputs, in `notes/kids_first_budget_proposal_2026-09-14/README.md`); the initial request was 233,161 tokens
 * **Gate:** Completes, or stops with outputs preserved
 * **Issues:** #1763, #1541
 
@@ -1615,7 +1619,7 @@ Canonical marks among accepted replicates only:
 d4d runs select --method claudecode_api --project P --config <prefix>
 ```
 
-The command needs at least two replicates, does not read acceptance (#931), and groups one prefix only. So candidates are restricted by procedure, and a cell that D21 split across prefixes is either marked by a recorded procedure or left unmarked (G4 gap). Pilots are never candidates. Use `--execute` only on the owner's word.
+The command needs at least two replicates, validates candidates live against the current schema (#931), does not read acceptance (no issue yet; G4 files one) and groups one prefix only. So candidates are restricted by procedure, and a cell that D21 split across prefixes is either marked by a recorded procedure or left unmarked (G4 gap). Pilots are never candidates. Use `--execute` only on the owner's word.
 
 * **Depends on:** A16-acc, A17-acc
 * **Cost:** $0
@@ -1921,7 +1925,7 @@ Only if D09 chooses (b): build the CBORG claudecode_agent transport for the shar
 It is a new registered condition with new comparability claims. Its first run would follow N7–N10 under its own registration, review and word.
 
 * **Depends on:** N3, G3
-* **Cost:** $0 to build. Runs would bill CBORG; generic_v9 native generation attempt costs are recorded in the private ledger
+* **Cost:** $0 to build. Runs would bill CBORG; the generic_v9 native generation attempts' costs are withheld here (G3)
 * **Gate:** Independent review and CI green at the exact head
 * **Issues:** #4758, #4354
 
@@ -1933,7 +1937,7 @@ Close the open-ended hold. Retiring (Z1, Z2) costs $0 and releases three PRs and
 
 If D10 is 'retire', open a dated notes PR that:
 
-- records the lineage's outcome, split three ways: the v10z lineage (generation d4810ca2 plus 26 billed audits); the matched native sequence (9 generations plus 26 audits); and the shared ledger total, which also holds the 15 CHORUS API attempts and the transport probe. It gives the amounts only if the owner approves publishing them (G3); otherwise it says 'recorded in the private ledger', as the v10z records do. No pair was accepted, and all artifacts are preserved;
+- records the lineage's outcome, split three ways: the v10z lineage (generation d4810ca2 plus 26 billed audits); the matched native sequence (9 generations plus 26 audits); and the shared ledger total, which also holds the 15 CHORUS API attempts and the transport probe. Following G3, it gives no amounts, as the v10z records give none. No pair was accepted, and all artifacts are preserved;
 - records in the new dated note that the 32-job generic_v9 v10z workload and the generic_v9/r17 direct registrations are superseded by generic_v10; it edits no existing file under `notes/matched_cborg_*`;
 - adds the missing outcome note for the third direct canary (2026-09-25: blocking_limit, seven-day utilization 0.96 to 1.0, no overage; evidence untracked in `d4d-executions/direct-canary-3`);
 - records the G3 withdrawal of the v10z standing authorizations (D22);
@@ -1986,7 +1990,7 @@ Independent review of the audit28 registration, including the versioned-file dif
 
 #### Z4 · owner · owner decision
 
-The owner's word naming the audit28 registration hash, a $60 per-job cap (audit27's), and the pre-committed rule: one attempt, and a stop or rejection retires the lineage. The v10z standing authorizations are withdrawn at G3 (D22), so this word is the only authority for the attempt; if the registration keeps `--automatic-stop-reconciliation`, the word also states that it may debit an unconfirmed charge at its full reservation for this attempt.
+The owner's word naming the audit28 registration hash, a $60 per-job cap (proposed here, the same as audit27's), and the pre-committed rule: one attempt, and a stop or rejection retires the lineage. The v10z standing authorizations are withdrawn at G3 (D22), so this word is the only authority for the attempt; if the registration keeps `--automatic-stop-reconciliation`, the word also states that it may debit an unconfirmed charge at its full reservation for this attempt.
 
 * **Depends on:** Z3-rev
 * **Cost:** Owner time
@@ -1998,7 +2002,7 @@ The owner's word naming the audit28 registration hash, a $60 per-job cap (audit2
 BILLED. Run audit28 under `caffeinate`, then run `lineage_durable.py snapshot`. The exact Phase 3 audit then needs independent acceptance.
 
 * **Depends on:** Z3-rev, Z4
-* **Cost:** Cap $60. The per-audit costs of audits 11–27 and the chain's remaining headroom are recorded in the private ledger. 0 of 26 billed audits have been accepted
+* **Cost:** Cap $60. The per-audit costs of audits 11–27 and the chain's remaining headroom are withheld here (G3). 0 of 26 billed audits have been accepted
 * **Gate:** Accepted; otherwise retire (Z1)
 * **Issues:** #2114, #4761, #1849
 
@@ -2111,7 +2115,14 @@ Engineering PR for monolithic_v1. A minimal `api_runner` path:
 - `api_usage` and provenance written by the existing record writer;
 - method directory claudecode_api_monolithic, with `_core` produced by `d4d derive core`.
 
-Commit the chosen prompt, then pin it with `d4d api prompts pin --reason`, adding a `CONDITION_PROMPTS` entry and a delimited label token. Then tests, adversarial review, CI and the owner's merge.
+Commit the chosen prompt, then pin it with `d4d api prompts pin --file <the committed prompt path> --reason '<why this is the text>'`, adding a `CONDITION_PROMPTS` entry and a delimited label token.
+
+M2 also defines what M5-reg and M6-reg write and how those runs launch. Today's API commands accept a registration only for shared generation and receipt completion (`cli/api.py:590-597, 676-683`), and the A4b-form launcher refuses `d4d api run`. M2 therefore defines:
+
+- the monolithic run registration: the prompt pin's sha256, the merged schema's sha256, the bundle md5, the model, the thinking setting, max_tokens, the label and the method directory;
+- the exact `d4d api batch` line that takes it, with whatever condition flag and arm or method selector M2 adds so that outputs land under claudecode_api_monolithic (today `--arm baseline` writes under claudecode_api), plus `--projects`, `--replicates 1`, `--label-prefix` and `--yes`.
+
+M5-rev and M6-rev review that registration, and M5-word and M6-word name its sha256 and the cap. Then tests, adversarial review, CI and the owner's merge.
 
 M2 lands before A4 (in the launch base) or after the API matrix completes. If it lands mid-matrix it is a D17 change: the launch worktree never advances over it except by D17's procedure, and the parity statement covers it.
 
@@ -2140,7 +2151,7 @@ Merge a dated monolithic addendum to the analysis plan. It states the question b
 
 #### M5-reg · codex-operator · registration offline
 
-The CHORUS monolithic registration, from a durable worktree through a launcher of A4b's form.
+The CHORUS monolithic registration M2 defines, from a durable worktree through a launcher of A4b's form.
 
 * **Depends on:** M4, A10
 * **Cost:** $0
@@ -2228,7 +2239,8 @@ Measure the v10 records and the v8 comparator with the same blinded, current ins
 Build an evaluation route that reads `shared_generation_registration_v1`; the matched evaluation controller cannot. Also write a successor to `scripts/reference_rescore.py` that:
 
 - pins contexts by hash on every job;
-- runs a rubric20 repeat panel (#2912: at least 2 extra rubric20 ratings of one fixed record per project);
+- runs a rubric20 repeat panel (#2912: at least 2 extra rubric20 ratings of one fixed record per project, CM4AI v7 rep2 among them);
+- selects CBORG explicitly, as `scripts/reference_rescore_cborg.py`'s `cborg_environment()` does, and refuses a session whose init line does not read `apiKeySource: ANTHROPIC_API_KEY`. `scripts/reference_rescore.py` alone inherits the environment's login, which is how the 2026-09-11 pass ran on a claude.ai subscription;
 - names the instrument version explicitly (3.0, or 4.0 for rubric20 per #2911);
 - uses `d4d agents preamble` and `check-echo` (#1077);
 - strips labels and provenance headers from rating copies where feasible (#3280).
@@ -2312,7 +2324,7 @@ BILLED. One evaluator canary.
 
 #### E5b-reg · codex-operator · registration offline
 
-One joint registration that rates every accepted generic_v10 API-route record (claudecode_api, and claudecode_agent_crate under #2914 B), re-rates the 12 v8 comparator records under the same instrument, with label-stripped copies, and runs E1's rubric20 repeat panel. Under #2914 B every accepted record includes the 4 with-crate records, so it also waits for A22-acc; if D04 is Defer, A21–A22 never run and that dependency does not apply.
+One joint registration that rates every accepted generic_v10 API-route record (claudecode_api, and claudecode_agent_crate under #2914 B), re-rates the 12 v8 comparator records under the same instrument, with label-stripped copies, and runs E1's rubric20 repeat panel. #2912 names CM4AI v7 rep2 among the panel's fixed records, and E5 rates no other v7 record, so the registration either adds it to its inputs or records on #2912 which CM4AI record replaces it. Under #2914 B every accepted record includes the 4 with-crate records, so it also waits for A22-acc; if D04 is Defer, A21–A22 never run and that dependency does not apply.
 
 This joint pass does not rate direct-arm records: this plan excludes them so that the API ratings do not wait for N11 to finish. Rating the direct arm would need its own registration, review and word after N11, and no step yet schedules it.
 
@@ -2341,10 +2353,10 @@ The owner's word naming the hash and a cap.
 
 #### E5 · codex-operator · full arm
 
-BILLED. The joint rating pass. Each new output must pass `validate_evaluation_schema.py --file` with exit 0. If run like the 2026-09-11 rescore, these are Claude Code CLI sessions on CBORG: agentic evaluation calls, not generation.
+BILLED. The joint rating pass. Each new output must pass `validate_evaluation_schema.py --file` with exit 0. If run like the 2026-09-12 CBORG rescore (`notes/reference_rescore_2026-09-12_cborg_runtime/`), these are Claude Code CLI sessions on CBORG: agentic evaluation calls, not generation. The 2026-09-11 rescore ran on a claude.ai subscription login, so it is not this route's precedent (E1).
 
 * **Depends on:** E5b-rev, E5b-word
-* **Cost:** About 64–68 ratings in all: 56–60 primary (24 v8 re-ratings plus 16–18 v10 API records under two rubrics) and a rubric20 repeat panel of at least 8 (#2912). Under #2914 B, the 4 with-crate records add 8 primary ratings, for 72–76 in all. At the 2026-09-11 rate of $2.54 per accepted rating ($142.25 over 64 sessions for 56 accepted ratings, 8 attempts excluded; $2.22 per session) that is about $163–173 ($183–193 under B). The $5 cap is per attempt: $320–340 ($360–380 under B) if every attempt is accepted, or about $366–389 ($411–434 under B) if the 2026-09-11 ratio of 64 attempts per 56 accepted ratings repeats. Direct-arm records are not included (E5b-reg)
+* **Cost:** About 66–70 ratings in all: 56–60 primary (24 v8 re-ratings plus 16–18 v10 API records under two rubrics) and a rubric20 repeat panel of at least 10 (two per Bridge2AI project, #2912; 12 if Kids First is included, which adds 2 ratings to every count here). Under #2914 B, the 4 with-crate records add 8 primary ratings, for 74–78 in all. At the 2026-09-12 CBORG rescore's rate of at least $2.88 per accepted rating ($161.3993945 known CLI subtotal for 56 accepted ratings from 63 sessions; 7 excluded, 2 of them interrupted and unpriced) that is about $190–202 ($213–225 under B). The $5 cap is per attempt: $330–350 ($370–390 under B) if every attempt is accepted, or about $371–394 ($416–439 under B) if that rescore's ratio of 63 sessions per 56 accepted ratings repeats. Direct-arm records are not included (E5b-reg)
 * **Gate:** The exact-file validator exits 0 for every output
 * **Issues:** #2912, #2911, #3287
 
@@ -2395,7 +2407,7 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 | API via the de_novo arm: claudecode_agent_crate (shared protocol) | CHORUS (with-crate bundle) | 1 canary + 3 replicates, only if D04 is B | generic_v10, registered floor, CHORUS context unchanged | Stale only: claudecode_agent_crate 2026-07-31 api-generic rep1–3 under the unversioned generic prompt. Inputs on main: `CHORUS_preprocessed_with_crate.txt` (65,749 bytes) and its chunk manifest; `_shared_spec` admits the arm (`cli/api.py:24-26, 85-89`) | Scheduled after A16 is accepted (A21–A22). No `--canary-baseline`: `canary.baseline_for` searches only claudecode_agent, claudecode_api and claudecode_direct (`runs.py:77`). |
 | Claude Code shared protocol via the #4354 adapter: claudecode_direct on the claude.ai subscription (the direct arm, not native) | CHORUS canary, then AI_READI, CM4AI, VOICE, VOICE_PEDIATRIC and KIDS_FIRST | With VOICE_PEDIATRIC ×1 as D02 recommends: 15 runs if each later project's canary counts as replicate 1, otherwise 18; with ×3, 17 or 21 (D25). Each count includes N9 as a diagnostic CHORUS canary: under a pending floor it never counts as a replicate (D03) | generic_v10 shared contract (adapter renderer 26; the API side is renderer 25) | None. Adapter not on main: `review/4354-offline-acceptance` (0125eebbc) is 95 ahead and 125 behind 15d053d1a (merge-base 286b88688). PR #4659 (38fb11d5d) fails shard 1, shard 3 and test (as of 2026-10-09 17:08Z). Owner-lifetime fixes are local only: terminal-source was at aa09dbbc6 at the 2026-10-09T08:58Z re-check and has moved since (f00bcb5df as of 2026-10-09 17:08Z, unpublished); #4740's last recorded result (2026-10-09T07:41Z) is at aa09dbbc6 (#4763, #4764) | Blocked on engineering: #4740 still fails at aa09dbbc6 (2026-10-09T07:41Z). Also needs D09, N3 delivery from a separate branch, #4760, #4759, N6 decisions, a fresh registration, review and word. |
 | Native on CBORG: a claudecode_agent transport for the shared protocol | Same cells | Same as above | generic_v10 | None, and no code path: `shared_generation.py:573` reads `'native_direct': 'unsupported; separate adapter required'`, and native_execution admits only claudecode_direct on a first-party login (`native_execution_registration.py:108-110, 167`) | Built only if D09 chooses (b) (N12). Under the recommended options the plan has no CBORG-native generation; the owner must confirm that departure from 2026-09-25. |
-| Native frozen v10z controller: claudecode_agent via the CBORG proxy | CHORUS | rep1 | generic_v9 renderer 14; audit protocol 7 / renderer 23 | Frozen full record, core and receipt from 2026-09-18 (generation d4810ca2); 26 billed audits plus the unbilled audit10, their costs in the private ledger; none accepted; audit28 unregistered | Cannot launch as registered: 2.1.272 pruned (#4759; only 2.1.291–2.1.295 installed); main's `schema_digest.py` (2626779774de…) differs from the pinned 980ab77322fa… (#4761); Phase 4 (#2114) unbuilt. D10 recommends retiring it (Z1). |
+| Native frozen v10z controller: claudecode_agent via the CBORG proxy | CHORUS | rep1 | generic_v9 renderer 14; audit protocol 7 / renderer 23 | Frozen full record, core and receipt from 2026-09-18 (generation d4810ca2); 26 billed audits plus the unbilled audit10, their costs withheld here (G3); none accepted; audit28 unregistered | Cannot launch as registered: 2.1.272 pruned (#4759; as of 2026-10-09 17:08Z only 2.1.291–2.1.295 were installed, and 2.1.296 arrived at 18:38Z); main's `schema_digest.py` (2626779774de…) differs from the pinned 980ab77322fa… (#4761); Phase 4 (#2114) unbuilt. D10 recommends retiring it (Z1). |
 | Rest of the v10z workload (API and agentic) | Both arms for AI_READI, CM4AI, VOICE, VOICE_PEDIATRIC and KIDS_FIRST; CHORUS API ×3; CHORUS agentic rep2–3 | 31 of the 32 registered jobs | generic_v9 renderer 14 | 0. `notes/matched_cborg_2026-09-18_v10z/workload.public.json` calls itself 'proposed_workload_inventory_not_a_launch_registration' | Superseded by generic_v10. Z1 records this in a new dated note, so no cell is filled under two conditions. |
 | Direct: claudecode_direct (claude.ai subscription, effort max) | CHORUS, then KIDS_FIRST | 1 + 1 canaries; no production matrix registered | generic_v9 renderer 17 | 4 attempts across 4 registrations, none accepted (a $60 sibling of the first v2 registration, 3ece0fe5…, was prepared and retired unlaunched): v1 disqualified (#2282); v2 stopped on ENOTFOUND during machine sleep; the v2 retry stopped at the terminal evidence check (#2427, closed); v3 stopped at blocking_limit, seven-day utilization 0.96 to 1.0, no overage. The v3 outcome note is not on main | Paused since 2026-09-25. Keep paused and superseded (R1); the next use of the subscription transport is N9. |
 | Monolithic API (prompt, full LinkML schema and documents in one call) | Owner to define. Proposal: a CHORUS canary, then AI_READI | Owner to define | Unregistered (#4013) | No current record. Legacy flat files `data/d4d_concatenated/claudecode/*_d4d.yaml` (2026-04-24) carry no provenance; the legacy prompts are not pinned in `canonical_hashes.yaml` | Depends on D16 (is it needed), then a small runner path (M2), and its own registration, review and word per run (M5, M6). |
@@ -2405,10 +2417,10 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 
 | Item | Estimate | Basis |
 |---|---|---|
-| CBORG spend to date (shared matched-sequence ledger) | Recorded in the private ledger and not given here (How it was made): 1,937 settled rows in 51 attempt groups. They are 15 CHORUS API attempts (the unsuffixed 2026-09-13 canary at $3.291465, then v10b, v10d, v10e, v10f_cap20 and v10g–v10p); 9 native generations, the v10z generation d4810ca2 among them; 26 billed native audits; and the transport probe | Grouped by attempt key on 2026-10-09 from `transport_probe_2463/billing.json`; its total equals `sequence_accounted_usd` in `budget_authorization_2026-09-26.json`. Both are gitignored local evidence under `notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/` (the second in `audit28_budget_authorization_2026-09-26/`) |
-| Lineage splits (for Z1) | Recorded in the private ledger: the v10z lineage (generation d4810ca2 plus 26 billed audits) and the matched native sequence (9 generations plus 26 audits; audits are 84.4% of it) | Same grouping |
-| Money already authorized | The shared chain's cap and remaining headroom are recorded in the private ledger. The September $200 API allocation's last published balance is $165.434368, after v10m; its arithmetic remainder after v10n–v10p is in the private ledger. The two overlap, because the chain's ledger includes the API attempts. Neither is assumed for generic_v10 (D07, D22) | `budget_authorization_2026-09-26.json` (gitignored; chain origin d4810ca2). The published balances ($196.708535 after the first canary in `notes/matched_cborg_2026-09-13_v10b/README.md`, $168.332762 after v10l in `notes/matched_cborg_2026-09-15_v10m/README.md`, $165.434368 after v10m in `notes/matched_cborg_2026-09-15_v10n/README.md`) equal $200 minus the cumulative API spend in the ledger |
-| Native audit pattern to avoid | The per-audit costs of audits 11–27 (median, range, audit27's) are recorded in the private ledger. 0 of 26 billed audits accepted | Same ledger, grouped by attempt key |
+| CBORG spend to date (shared matched-sequence ledger) | Withheld here (G3): 1,937 settled rows in 51 attempt groups. They are 15 CHORUS API attempts (the unsuffixed 2026-09-13 canary at $3.291465, then v10b, v10d, v10e, v10f_cap20 and v10g–v10p); 9 native generations, the v10z generation d4810ca2 among them; 26 billed native audits; and the transport probe | Grouped by attempt key on 2026-10-09 from `transport_probe_2463/billing.json`; its total equals `sequence_accounted_usd` in `budget_authorization_2026-09-26.json`. Both are gitignored local evidence under `notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/` (the second in `audit28_budget_authorization_2026-09-26/`) |
+| Lineage splits (for Z1) | Withheld here (G3): the v10z lineage (generation d4810ca2 plus 26 billed audits) and the matched native sequence (9 generations plus 26 audits) | Same grouping |
+| Money already authorized | The shared chain's cap and remaining headroom are withheld here (G3). The chain is the matched-sequence ledger: the September additional $200 allocation bounded that sequence's API and native attempts and its evaluation attempts alike, and was later raised on the same ledger, so it has no remainder apart from the chain's headroom. Neither is assumed for generic_v10 (D07, D22) | `budget_authorization_2026-09-26.json` (gitignored; chain origin d4810ca2). Scope: `notes/matched_cborg_2026-09-13/expansion_cost_draft.md:23`, the v10m and v10n cap tables (native agentic lines under the same allocation) and `notes/matched_cborg_2026-09-16_v10r/README.md:65-68`; the raise: `notes/native_audit_continuation_plan_2026-09-18.md` and #2468. The balances published while only API attempts had been charged ($196.708535 after the first canary in `notes/matched_cborg_2026-09-13_v10b/README.md`, $168.332762 after v10l in `notes/matched_cborg_2026-09-15_v10m/README.md`, $165.434368 after v10m in `notes/matched_cborg_2026-09-15_v10n/README.md`) equal $200 minus the cumulative API spend in the ledger; later balances are withheld here (G3) |
+| Native audit pattern to avoid | The per-audit costs of audits 11–27 (median, range, audit27's) are withheld here (G3). 0 of 26 billed audits accepted | Same ledger, grouped by attempt key |
 | v8 API production comparator (already paid; reused, not regenerated) | $93.69 for 12 records: CHORUS $14.92, VOICE $27.31, AI_READI $34.17, CM4AI $17.29; $4.37–$13.66 per run | `api_usage` rows in `claudecode_api_core/2026-09-04{f,g}_*/{P}_provenance.yaml` at the `run_telemetry.py` rates, recomputed on 2026-10-09 at 15d053d1a. Estimates, not invoices. Rows with transport errors carry partial usage (#1017) |
 | Price basis for every estimate | $5/M input, $6.25/M cache write, $0.50/M cache read, $25/M output; no premium tier above 200k | `run_telemetry.py:41-46` ('CBORG-posted opus-5 rates (2026-08-05, `/model/info`)'). They reproduce the v8 and v9 figures exactly. Re-observe the catalogue before every word (A8) |
 | v9 CHORUS API canary (reference) | $3.30811950 for 6 calls. Full phase: 501.7 s, input 41,339 tokens (9,636 uncached plus 31,703 cache write), output 46,182 | v9 provenance and its usage ledger `data/d4d_concatenated/claudecode_api_core/2026-09-12_claude-opus-5-api-generic-v9_rep1/CHORUS_api_usage_46d8033e251b3c6e.json`, both reproduced on 2026-10-09 at 15d053d1a |
@@ -2418,14 +2430,14 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 | Theoretical ceiling of one API run without an operator stop | About $100 for CHORUS (the cost-and-risk input plan's derivation, unpublished; not re-derived here) | Phase caps (full 128k; reconcile, report and repair 96k) × `MAX_ATTEMPTS` = 5 per ordinary phase (`api_runner.py:446`), plus the registered typed allowances. Neither `d4d api run` nor `d4d api batch` has a dollar cap |
 | generic_v10 AI_READI pilot (A14) | Unmeasured. Scenario $17–33 (the cost-and-risk input plan, unpublished; not re-derived here). Planning ceiling $35, provisional until A1/A1b. One in-flight full call can cost about $4.50, so the operator trigger is about $30.50 at that ceiling | v8 AI_READI runs cost $9.97–$13.66, with full-phase cache writes of 203,662 tokens and outputs of 112,321–115,616 of 128,000. Each typed worker carries at least 761,799 bytes of inputs uncached |
 | API production (A16–A18) | Not a forecast. 13 runs under the recommended options (CHORUS ×3; CM4AI, VOICE and AI_READI ×3; VOICE_PEDIATRIC ×1), or 15 with VOICE_PEDIATRIC ×3. The v8-equivalent cost of the 12 comparable cells is $93.69, plus the typed-audit and receipt increment and any D21 re-runs | v8 per-project totals. Bundle sizes: CM4AI 320,799, VOICE 376,446, AI_READI 542,513, VOICE_PEDIATRIC 206,008 bytes. Replace with pilot actuals before each roster word |
-| Kids First API canary (A19) | Unmeasured; likely near the AI_READI pilot and above v10r's $15 cap | `notes/matched_cborg_2026-09-16_v10r/README.md` sets $10 (CHORUS) and $15 (Kids First) caps, both before the typed audit. Four pre-v10 phases reserved $13.84. Initial request 233,161 tokens (`notes/matched_cborg_2026-09-13/api_initial_admission.json`). Bundle 541,184 bytes |
+| Kids First API canary (A19) | Unmeasured; likely near the AI_READI pilot and above v10r's $15 cap | `notes/matched_cborg_2026-09-16_v10r/README.md` sets $10 (CHORUS) and $15 (Kids First) caps, both before the typed audit. Four pre-v10 phases reserved $13.84 (the full-generation, audit, reconciliation and report reservations, without carried outputs, in `notes/kids_first_budget_proposal_2026-09-14/README.md`). Initial request 233,161 tokens (`notes/matched_cborg_2026-09-13/api_initial_admission.json`). Bundle 541,184 bytes |
 | #2914 path B with-crate runs (A21–A22, only if chosen) | 4 billed runs. Unmeasured; scale from the CHORUS replicate actuals | #2914 path B: one canary, then 3 replicates under the current prompt. The with-crate bundle is 65,749 bytes against CHORUS's 35,920 |
 | Keeping the pilots diagnostic (D03) | Two extra runs; scenario $22–45 | One CHORUS and one AI_READI run at the input plan's scenarios above |
 | Claude Code shared-protocol canary on the direct transport (N9) | No CBORG dollars; subscription quota. Real dollars up to the $90 guard if extra usage is enabled and no overage stop exists. Expect 2.5–3.5 h or longer | #2370. `notes/claudecode_direct/CHORUS_direct_rep1_2026-09-23_stopped.md` ($49.94 estimate, about 2 h 35 m). `notes/claudecode_direct/CHORUS_direct_v2_2026-09-24_stopped.md` ($7.76 for the first attempt's 21 m 41 s; none for the retry). v3: the terminal result in `transcript.jsonl` (`total_cost_usd` 51.8889805, `duration_ms` 12,063,037) and `result.json` (blocking_limit, 0.96 to 1.0, `overage_used` false), both untracked under `d4d-executions/direct-canary-3/notes/claudecode_direct/.local_drafts/2026-09-25_CHORUS_v3/attempts/CHORUS_direct_rep1/` |
-| audit28, only if D10 is 'run' (Z5) | $60 per-job cap. The typical audit cost and the chain's remaining headroom are recorded in the private ledger. Phase 4 not costed | The ledger's audits 11–27 (private); audit27's registered cap |
+| audit28, only if D10 is 'run' (Z5) | $60 per-job cap, proposed here (the same as audit27's). The typical audit cost and the chain's remaining headroom are withheld here (G3). Phase 4 not costed | The ledger's audits 11–27 (withheld, G3); audit27's registered cap, `limits.attempt_cap_usd` in `notes/matched_cborg_2026-09-14_v10d/.local_drafts/v10z_registration/audit_continuation_27_fresh_responsive_r2/launch_review.json` (gitignored local evidence) |
 | Retiring audit28 and the v10z lineage (Z1–Z2) | $0 | No provider calls. Releases three PRs and four issues |
 | Monolithic canaries (M5, M6) | CHORUS about $4.70–5.75 per attempt; AI_READI about $5.20–6.65 | One call: the merged 3.0.0 schema (1,442,513 bytes), plus the bundle (35,920 or 542,513 bytes), plus 2,680 bytes of legacy prompts. At 2.9–5 bytes per token and $5/M, plus a full 128k output at $25/M |
-| Evaluation (E5) | $5 cap per rating attempt. About 64–68 ratings: 56–60 primary (24 v8 re-ratings plus 16–18 v10 API records under two rubrics) and a rubric20 repeat panel of at least 8 (#2912). About $163–173 at $2.54 per accepted rating; at the cap, $320–340 if every attempt is accepted, or about $366–389 at the 2026-09-11 ratio of 64 attempts per 56 accepted ratings; plus the evaluator canary. Under #2914 B, 72–76 ratings (20–22 v10 records): about $183–193 at that rate, and $360–380 or about $411–434 at the cap. Direct-arm records are not included (E5b-reg) | `notes/reference_rescore_2026-09-11/completion_audit.json`: $142.25036250 (CLI-reported, not an invoice) for 56 accepted ratings from 64 sessions, 8 excluded: about $2.54 per accepted rating ($2.22 per session). Those were Claude Code CLI sessions on CBORG (the attempt prompts name 'LBL CBORG (proxy to Anthropic)') |
+| Evaluation (E5) | $5 cap per rating attempt. About 66–70 ratings: 56–60 primary (24 v8 re-ratings plus 16–18 v10 API records under two rubrics) and a rubric20 repeat panel of at least 10 (two per Bridge2AI project, #2912; 12 with Kids First). About $190–202 at $2.88 per accepted rating; at the cap, $330–350 if every attempt is accepted, or about $371–394 at the 2026-09-12 CBORG rescore's ratio of 63 sessions per 56 accepted ratings; plus the evaluator canary. Under #2914 B, 74–78 ratings (20–22 v10 records): about $213–225 at that rate, and $370–390 or about $416–439 at the cap. Direct-arm records are not included (E5b-reg) | `notes/reference_rescore_2026-09-12_cborg_runtime/completion_audit.json`, the CBORG rating condition: $161.3993945 known CLI subtotal (CLI-reported, not an invoice) for 56 accepted ratings from 63 sessions, 7 excluded, 2 of them interrupted and unpriced, so at least $2.88 per accepted rating, the allocation `notes/matched_cborg_2026-09-13/expansion_cost_draft.md:25` already uses. The 2026-09-11 rescore ($142.25036250 for 56 accepted ratings from 64 sessions) ran on a claude.ai subscription login (`apiKeySource: none` on every transcript's init line); its prompts name 'LBL CBORG (proxy to Anthropic)' only because they quote the rated records' provenance headers, so it is not a CBORG cost basis |
 | Offline, review, decision and preregistration steps, and unbilled count calls | $0 provider spend | No generation calls. The v10e count-only admission recorded no settled cost. Owner, maintainer, curator and reviewer time only; Claude sessions draw on the subscription's weekly window |
 
 ## Risks
@@ -2440,7 +2452,7 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 8. **Risk:** Pilot contamination: from the full phase onward, every ordinary phase's base instruction shows the model the receipt registration, floor included (`api_runner.py:1470-1472, 2784-2788`). **Mitigation:** Pilots stay diagnostic (D03). Within a roster, the receipt object is identical across rows, and a `render-prompt` diff shows any floor difference.
 9. **Risk:** Drift inside the window would make registrations refuse, or split the matrix across inputs. Sources: schema releases (#3972, #3124), draft PR #4508, #2914 path A, a manifest edit (#3414), a preprocessing change (#2934), the #4354 merge, the monolithic runner path (M2), or the #4766 and A2c code. **Mitigation:** The D17 freeze: A2c lands before A4, M2 lands in the launch base or after the matrix, and the launch worktree advances only by D17's procedure, with a parity statement or re-registration and, for a code change, its step-7 canary. Native registrations only after the final merge, since they hash all of `src/` (#4693).
 10. **Risk:** A launch could import the wrong code. The primary checkout's editable `.pth` points at its own `src`, on `feat/figure-set-2303-explore`: 1,185 commits behind 15d053d1a (as of 2026-10-09) and with no `shared_generation.py`. `data_sheets_schema` has no `__init__.py`, so a venv carrying that `.pth` merges both trees into the package's `__path__`, and a module the worktree lacked would import silently from the primary checkout. The record would still name the worktree's commit. **Mitigation:** The A4b launcher (the worktree's own venv, `PYTHONPATH`, and an import check that every `__path__` entry and five module files resolve inside the worktree's `src`), used for the dry-run, the checks and the launch alike.
-11. **Risk:** Credentials and environment: the runner reads only the process environment, with no `.env` loading, and the primary checkout has no `.env`; `ANTHROPIC_API_KEY` takes precedence over `CBORG_API_KEY`; a `nohup` child can lack the key; a leftover `D4D_RECEIPT_FULL_MAX_TOKENS` or `D4D_PHASE_WALL_CLOCK_SECONDS` would lower the full-phase cap, or change the per-call watchdog, with nothing in the registration to show it. **Mitigation:** The launcher unsets `ANTHROPIC_API_KEY` and the two D4D overrides and refuses without `CBORG_API_KEY`. The A6 dry-run runs with the key set, so preflight checks the registered provider. A11 verifies the route in the first `api_usage` row and the 128000 full-phase cap in every `full` row.
+11. **Risk:** Credentials and environment: the runner reads only the process environment, with no `.env` loading, and the primary checkout has no `.env`; `ANTHROPIC_API_KEY` takes precedence over `CBORG_API_KEY`; a `nohup` child can lack the key; a leftover `D4D_RECEIPT_FULL_MAX_TOKENS` or `D4D_PHASE_WALL_CLOCK_SECONDS` would lower the full-phase cap, or change the per-call watchdog, with nothing in the registration to show it. **Mitigation:** The launcher unsets `ANTHROPIC_API_KEY` and the two D4D overrides and refuses without `CBORG_API_KEY`. The A6 dry-run runs with the key set, so preflight checks the registered provider. A11 verifies the recorded route in the provenance `model` block (`api_usage` rows carry none) and the 128000 full-phase cap in every `full` row.
 12. **Risk:** Rosters strand. There is no bypass under a registered floor, rosters start at rep1, and a re-run re-derives a stopped run's verdict, so one stop closes the prefix. A cell continued under a new prefix cannot be grouped by `d4d runs select`. **Mitigation:** D21: absolute floors, preregistered continuation under a new prefix, every attempt counted. The `d4d runs select` gap is filed (G4).
 13. **Risk:** Gating against v8's per-project worst would stop rosters on bars that are mostly 0 (report findings: CHORUS 2, VOICE 1, AI_READI 1, CM4AI 0). **Mitigation:** D21 (b): absolute floors for production. The v8 comparison runs offline (report-only verdict, E6).
 14. **Risk:** The v10z standing authorizations could be misread as covering generic_v10. They include 'all evaluations of the CHORUS d4d' and full-reservation debits, and an accepted A13 record could be taken as their trigger. **Mitigation:** The D22 ruling and the withdrawal of those authorizations at G3, whatever D10 decides, recorded on #1763 and #4761, and Codex's acknowledgment (G6) before any registration on either arm.
@@ -2454,7 +2466,7 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 22. **Risk:** Comparator measures do not transfer, and reviewers would know the arm. The v8 ratings use older instruments, and no v8 record was source-reviewed under the #1782–#1816 protocol. **Mitigation:** E2's shuffled, label-stripped comparison batch, separate from acceptance. One joint rating pass (E5). Rubric metrics stay secondary.
 23. **Risk:** Pilot acceptance has no tool verdict. A pending floor is UNMEASURABLE by design, `d4d api verdict --execute` refuses to write it, and `d4d runs select` ignores acceptance. **Mitigation:** P2 names the rows that must be 0 and the acceptance-record format. The batch path writes the canary block. Canonical marks go only to accepted replicates, by procedure (A20).
 24. **Risk:** Survivorship and small n: 15 API and 36 native attempts so far, n=1 pilots and n=3 cells. **Mitigation:** Count every attempt. Analyse pilots separately. Never choose a replicate by score. Use descriptive n=3 rules unless a tolerance is preregistered.
-25. **Risk:** Open-ended authorizations: the v10z chain's cap was raised repeatedly while the audits kept failing (amounts in the private ledger). **Mitigation:** D07's per-cell bound and allocation, D22's withdrawal at G3, and an owner review after two attempts in a cell.
+25. **Risk:** Open-ended authorizations: the v10z chain's cap was raised repeatedly while the audits kept failing (amounts withheld here; G3). **Mitigation:** D07's per-cell bound and allocation, D22's withdrawal at G3, and an owner review after two attempts in a cell.
 26. **Risk:** Report totals are unchecked (#4766). The v10g report said 12 findings, 6 low, against 13 entries, 7 low. Five committed pairs show the same defect. **Mitigation:** A11's offline totals check. The code fix only under D17.
 27. **Risk:** Overlapping roles: one session both develops and operates the same lineage. **Mitigation:** D12. For every registration, a reviewer who is neither its author nor its operator.
 28. **Risk:** Scope contexts could import labels or diagnoses (#422), name the wrong release, or need nested scopes that cannot be declared yet. **Mitigation:** A curator writes them and an independent reviewer checks them (A5). Root scope only, unless a mapping exists. A null release means unknown.
@@ -2465,7 +2477,7 @@ Optional. #4765 Part B, after #2929's paid fitness run (which needs its own regi
 ## Open questions
 
 1. Does 'native' in the paper still mean the CBORG claudecode_agent arm, as on 2026-09-25? If so, how much engineering is N12 on top of the adapter? No estimate exists.
-2. Which allocation funds generic_v10 (D07)? The candidates are a new allocation, part of the chain's remaining headroom, or the September $200 API allocation's arithmetic remainder (both in the private ledger). The last two overlap, and whether either may fund another lineage is unverified.
+2. Which allocation funds generic_v10 (D07)? The candidates are a new allocation or part of the matched-sequence ledger's remaining headroom, the v10z chain, whose cap raised the September additional $200 allocation on the same ledger (amounts withheld here; G3). Whether that headroom may fund another lineage is unverified.
 3. Does `api.cborg.lbl.gov` accept `display: summarized` on messages and on `count_tokens`, and is `count_tokens` unbilled there, as the v10e admission suggests (A1b)? Does CBORG honour a cache breakpoint on typed calls? Is its 270 s `stream_timeout` an idle limit or a total limit?
 4. Is bare claude-opus-5 on CBORG really 1M input tokens? `context_facts` returns no limit for the bare name (`api_runner.py:4187`), while the config comment says 1M in, 128k out. The answer sets `context_limit_tokens` and decides whether AI_READI and Kids First typed workers fit.
 5. Which `audit_limits` values reach request text, beyond `max_request_bytes`, `omission_output_tokens` and the worker-partition limits? A1's differential rendering answers this.
