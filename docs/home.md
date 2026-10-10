@@ -6,12 +6,12 @@ A LinkML schema for Datasheets for Datasets model as published in [Datasheets fo
 
 ## Bridge2AI Generating Center Datasheets
 
-Curated comprehensive datasheets for each Bridge2AI data generating project:
+ChatGPT-chat comparison arm datasheets for Bridge2AI data generating projects (note: these records were generated via a ChatGPT chat interface rather than hand-curated, document superseded data releases, and there is no CHORUS record; see CLAUDE.md and issue #177):
 
-* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset
-* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset
-* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset
-* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations
+* **[AI-READI](html_output/concatenated/curated/AI_READI_human_readable.html)** - Retinal imaging and diabetes dataset (ChatGPT-chat arm, superseded v2.0.0 release)
+* **[CM4AI](html_output/concatenated/curated/CM4AI_human_readable.html)** - Cell maps for AI dataset (ChatGPT-chat arm, superseded B35XWX v1.4 release)
+* **[VOICE](html_output/concatenated/curated/VOICE_human_readable.html)** - Voice biomarker dataset (ChatGPT-chat arm, superseded v2.0 release)
+* **[CHORUS](html_output/concatenated/curated/CHORUS_human_readable.html)** - Health data for underrepresented populations (d4d-core rendering; no CHORUS ChatGPT-chat record exists)
 
 [View all D4D examples →](d4d_examples.md)
 
