@@ -252,12 +252,57 @@ def _index(rows, label):
     return result
 
 
+def _instrument(capture, manifest):
+    instrument = _mapping(manifest.get("instruments"), "plan instruments").get(targets.AXIS)
+    _require(isinstance(instrument, dict), "nested instrument is missing")
+    policy = instrument.get("policy")
+    name, system = targets.policy_instrument(policy)
+    _require(instrument.get("name") == name and capture.get(instrument["system"]) == system.encode(),
+             "nested instrument differs")
+    return policy
+
+
+def _representation_declarations(manifest, records, planned, policy):
+    """Check declared accounting, without claiming unselected record validation."""
+    counts = manifest["counts"]
+    if policy == targets.POLICY:
+        _require("representation_issues" not in manifest and "representation_issue_count" not in counts
+                 and all("representation_issues" not in r and "representation_issue_count" not in r
+                         for r in records.values()), "strict plan cannot declare scalar-policy representations")
+        return
+    issues = manifest.get("representation_issues")
+    _require(isinstance(issues, list), "representation issues must be a list")
+    _integer(counts.get("representation_issue_count"), "representation issue count")
+    _require(counts["representation_issue_count"] == len(issues), "representation issue count conflicts")
+    seen = set()
+    for issue in issues:
+        _require(isinstance(issue, dict) and set(issue) == {"record_id", "pointer", "kind", "code", "range"},
+                 "invalid representation issue")
+        rid, pointer = issue["record_id"], issue["pointer"]
+        _require(isinstance(rid, str) and rid in records, "unknown representation record")
+        targets.pointer_tokens(pointer)
+        _require(issue["kind"] == "relationship_edge" and issue["code"] == "inline_class_requires_mapping",
+                 "unknown representation issue kind/code")
+        _text(issue["range"], "representation range")
+        _require((rid, pointer) not in seen, "duplicate representation issue")
+        seen.add((rid, pointer))
+        _require(f"{rid}:{targets.AXIS}:relationship_edge:{pointer}" in planned,
+                 "representation issue lacks a relationship target")
+    for rid, record in records.items():
+        expected = [issue for issue in issues if issue["record_id"] == rid]
+        _integer(record.get("representation_issue_count"), "record representation issue count")
+        _require(record.get("representation_issues") == expected
+                 and record["representation_issue_count"] == len(expected),
+                 "record representation accounting conflicts")
+
+
 def _manifest(capture, raw):
     manifest = _mapping(_read(raw, "plan manifest", limit=MAX_MANIFEST_BYTES), "plan manifest")
     _require(manifest.get("format") == "d4d-support-plan-v2" and manifest.get("mode") == "offline_dry_run",
              "only an offline nested plan v2 is eligible")
     _require(manifest.get("value_identity_encoding") == "typed-yaml-v1", "unknown value identity encoding")
     _require(manifest.get("granularity") == "nested_support_and_top_level_fitness", "unknown plan granularity")
+    policy = _instrument(capture, manifest)
     readiness = _mapping(manifest.get("readiness"), "plan readiness")
     required = {"independent_empirical_calibration_3343", "context_projection_review_3342",
                 "instrument_review_3342", "scientific_control_acceptance",
@@ -320,6 +365,7 @@ def _manifest(capture, raw):
     _require(counts.get("blocked_by_axis") == dict(Counter(b.get("axis") for b in blocked))
              and counts.get("blocked_by_cause") == dict(Counter(b.get("code") for b in blocked)),
              "blocked-path category totals conflict")
+    _representation_declarations(manifest, records, planned, policy)
     model = _mapping(manifest.get("model"), "model selection")
     _text(model.get("name"), "model")
     if "configuration" in model:
@@ -352,15 +398,12 @@ def _bindings(capture, manifest, records, planned, selections):
         seen_targets.add(target_id)
         seen_attempts.add(attempt_id)
     schema = _schema(capture, _mapping(manifest.get("schema"), "plan schema"))
-    instrument = _mapping(manifest.get("instruments"), "plan instruments").get(targets.AXIS)
-    _require(isinstance(instrument, dict) and instrument.get("name") == targets.INSTRUMENT
-             and instrument.get("policy") == targets.POLICY
-             and capture.get(instrument["system"]) == targets.SYSTEM.encode(), "nested instrument differs")
+    policy = _instrument(capture, manifest)
     roster = capture.document(manifest["roster"], "roster")
     from data_sheets_schema.support_plan import _roster_records
     groups, pins = _roster_records(canonical(roster))
     chosen_records = {planned[t]["record_id"] for t in seen_targets}
-    derived = {}
+    derived, verified_issues = {}, []
     for rid in sorted(chosen_records):
         record = records[rid]
         kind = record.get("artifact_kind")
@@ -406,7 +449,8 @@ def _bindings(capture, manifest, records, planned, selections):
         generator = provenance.get("model", {}).get("model")
         _require(record.get("generator") == generator and record.get("same_family") ==
                  same_family_label(manifest["model"]["name"], generator), "generator/family metadata conflicts")
-        inventory = targets.inventory_targets(record_raw, schema, artifact_kind=kind)
+        inventory = targets.inventory_targets(record_raw, schema, artifact_kind=kind,
+                                              relationship_policy=policy)
         expected_inventory = inventory.to_dict()
         expected_inventory["readiness_blockers"].remove("nested_planner_integration_3342")
         _require(canonical(capture.document(record["inventory"], "target inventory")) == canonical(expected_inventory), "inventory differs from captured record/schema")
@@ -415,6 +459,11 @@ def _bindings(capture, manifest, records, planned, selections):
         _require(canonical(record.get("support_targets_by_kind")) == canonical(expected_inventory["eligible_by_kind"]), "record target counts conflict")
         expected_blocked = [{"record_id": rid, "axis": targets.AXIS, **b} for b in expected_inventory["blocked"]]
         _require([b for b in manifest["blocked_paths"] if b["record_id"] == rid and b.get("axis") == targets.AXIS] == expected_blocked, "nested blocked paths differ from reconstructed inventory")
+        if policy == targets.SCALAR_POLICY:
+            issues = [{"record_id": rid, **issue} for issue in expected_inventory["representation_issues"]]
+            _require(record["representation_issues"] == issues,
+                     "representation issues differ from reconstructed inventory")
+            verified_issues.extend(issues)
         for target in inventory.targets:
             tid = f"{rid}:{targets.AXIS}:{target.kind}:{target.pointer}"
             row = in_record[tid]
@@ -441,15 +490,35 @@ def _bindings(capture, manifest, records, planned, selections):
                 "specification_sha256": schema.digest, "value_sha256": payload["value_sha256"],
                 "context_sha256": payload["context_sha256"], "model": manifest["model"],
                 "request": capture.add(request_raw), "max_tokens": cap}
-    return [{**s, "binding": derived[s["target_id"]]} for s in selections]
+            if policy == targets.SCALAR_POLICY:
+                derived[tid].update(policy=policy, representation=payload.get("representation"))
+    bindings = [{**s, "binding": derived[s["target_id"]]} for s in selections]
+    accounting = None
+    if policy == targets.SCALAR_POLICY:
+        by_location = {(issue["record_id"], issue["pointer"]): issue for issue in verified_issues}
+        selected_issues = []
+        for selection in selections:
+            binding = derived[selection["target_id"]]
+            issue = by_location.get((binding["record_id"], binding["pointer"]))
+            if issue is not None:
+                selected_issues.append({**issue, **selection})
+        accounting = {"policy": policy, "verified_record_ids": sorted(chosen_records),
+            "verified_record_issues": verified_issues, "verified_record_issue_count": len(verified_issues),
+            "selected_target_issues": selected_issues, "selected_target_issue_count": len(selected_issues),
+            "full_plan_declared_issue_count": manifest["counts"]["representation_issue_count"],
+            "unselected_record_evidence": "not_reconstructed"}
+    return bindings, accounting
 
 
 def _descriptor(capture, manifest_raw, selections):
     manifest, records, planned = _manifest(capture, manifest_raw)
-    bindings = _bindings(capture, manifest, records, planned, selections)
-    return {"format": FORMAT, "kind": "acceptance_descriptor", "contract": CONTRACT,
+    bindings, accounting = _bindings(capture, manifest, records, planned, selections)
+    result = {"format": FORMAT, "kind": "acceptance_descriptor", "contract": CONTRACT,
             "plan": capture.add(manifest_raw), "selections": bindings,
             "readiness": manifest["readiness"], "limitations": LIMITATIONS}
+    if accounting is not None:
+        result["representation_accounting"] = accounting
+    return result
 
 
 def _load_descriptor(capture, raw):
@@ -668,7 +737,7 @@ def report(descriptor: Path, results: list[Path]) -> dict:
     all_selected = all(row["state"] == "accepted" for row in rows)
     all_planned = {s["target_id"] for s in selected["selections"]} == {
         t["id"] for t in manifest["targets"] if t["axis"] == targets.AXIS}
-    return {"format": FORMAT, "kind": "response_accounting_report", "descriptor": _pin(raw),
+    report = {"format": FORMAT, "kind": "response_accounting_report", "descriptor": _pin(raw),
         "plan": selected["plan"], "full_plan_declared_counts": manifest["counts"],
         "full_plan_count_basis": "pinned manifest lists; unselected record artifacts are not reconstructed",
         "selected_counts": counts, "rows": rows, "fitness": "separate_and_unscored",
@@ -677,3 +746,6 @@ def report(descriptor: Path, results: list[Path]) -> dict:
         "all_planned_nested_responses_accepted": all_selected and all_planned,
         "scientific_accuracy": "unverified", "full_record_schema_validation": "not_performed",
         "readiness": selected["readiness"], "limitations": LIMITATIONS}
+    if "representation_accounting" in selected:
+        report["representation_accounting"] = selected["representation_accounting"]
+    return report

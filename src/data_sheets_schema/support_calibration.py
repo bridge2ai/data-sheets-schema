@@ -195,6 +195,9 @@ def _result(capture, manifest, ledger):
                    verdict_agreement=observed == expected if scored else None,
                    defect_detected=observed != "supported" if scored and expected != "supported" else None,
                    false_positive=observed != "supported" if scored and expected == "supported" else None)
+        if "policy" in control["binding"]:
+            row.update(policy=control["binding"]["policy"],
+                       representation=control["binding"]["representation"])
         rows.append(row)
     unresolved = sum(not row["scored"] for row in rows)
     groups, verdict_groups = [], []
@@ -214,7 +217,7 @@ def _result(capture, manifest, ledger):
                                            **_metrics(subset, unresolved)})
     states = Counter(row["dispatch_status"] for row in rows)
     review = Counter(row["review_status"] for row in rows)
-    return {"format": FORMAT, "kind": "calibration_result", "calibration_id": manifest["calibration_id"],
+    result = {"format": FORMAT, "kind": "calibration_result", "calibration_id": manifest["calibration_id"],
             "registration": manifest["registration"], "purpose": manifest["purpose"],
             "evidence_scope": "declared_reviewed_labels" if any(r["metric_scope"] == "reviewed" for r in rows)
                               else "software_only",
@@ -224,6 +227,28 @@ def _result(capture, manifest, ledger):
             "execution_accounting": execution_report,
             "original_readiness": manifest["original_readiness"], "scientific_eligibility": False,
             "limitations": list(LIMITATIONS)}
+    if any("policy" in row for row in rows):
+        # These are subsets of the existing relationship controls, not new
+        # observations. Absence of this issue does not establish schema validity.
+        edges = [row for row in rows if row["kind"] == "relationship_edge"]
+        subsets = {"schema_invalid_inline_class_string": [r for r in edges if r["representation"] is not None],
+                   "other_relationship_edges": [r for r in edges if r["representation"] is None]}
+        result["representation_counts"] = {"basis": "selected_relationship_controls",
+                                            **{name: len(subset) for name, subset in subsets.items()}}
+        representation_groups = []
+        for scope in ("reviewed", "synthetic"):
+            for status, subset in subsets.items():
+                selected = [r for r in subset if r["metric_scope"] == scope]
+                if not selected:
+                    continue
+                for defect_class in [None, *sorted({r["defect_class"] for r in selected})]:
+                    members = selected if defect_class is None else [
+                        r for r in selected if r["defect_class"] == defect_class]
+                    representation_groups.append({"scope": scope, "kind": "relationship_edge",
+                        "representation_status": status, "defect_class": defect_class,
+                        **_metrics(members, unresolved)})
+        result["representation_groups"] = representation_groups
+    return result
 
 
 def report(calibrationdir: Path, run_path: Path | None = None, output: Path | None = None) -> dict:

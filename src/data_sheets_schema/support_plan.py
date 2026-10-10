@@ -23,7 +23,7 @@ from typing import Any
 
 import yaml
 
-from data_sheets_schema import evaluation_model, evidence_score, support_judge
+from data_sheets_schema import evaluation_model, evidence_score, support_judge, support_targets
 from data_sheets_schema.evaluation_model import evaluation_model_settings, same_family_label
 from data_sheets_schema.profiles import profile_named
 from data_sheets_schema.resources import git_env
@@ -337,7 +337,8 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
                profile: str, class_name: str = "Dataset", schema_path: Path | None = None,
                max_tokens: int = 8000, prices: Path | None = None,
                root: Path = ROOT, plan_version: int = 1,
-               artifact_kind: str | None = None, vocabulary_path: Path | None = None) -> dict:
+               artifact_kind: str | None = None, vocabulary_path: Path | None = None,
+               relationship_policy: str = support_targets.POLICY) -> dict:
     """Freeze a fresh offline plan. Failure never changes existing artifacts.
 
     ``root`` anchors roster paths and recovery history. Profile selection is
@@ -350,7 +351,10 @@ def build_plan(roster: Path, output: Path, *, model: str | None = None,
         from data_sheets_schema.nested_support_plan import build_nested_plan
         return build_nested_plan(roster, output, model=model, profile=profile,
             class_name=class_name, schema_path=schema_path, max_tokens=max_tokens,
-            prices=prices, root=root, artifact_kind=artifact_kind, vocabulary_path=vocabulary_path)
+            prices=prices, root=root, artifact_kind=artifact_kind, vocabulary_path=vocabulary_path,
+            relationship_policy=relationship_policy)
+    if relationship_policy != support_targets.POLICY:
+        raise PlanError("nondefault relationship_policy requires plan_version=2")
     if artifact_kind is not None or vocabulary_path is not None:
         raise PlanError("artifact_kind and vocabulary_path require plan_version=2")
     root, output = Path(root).resolve(), Path(output)
